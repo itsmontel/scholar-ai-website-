@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import DOMPurify from 'dompurify';
+import { diffWordsWithSpace } from 'diff';
 import Header from '../common/Header';
 import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
@@ -9,6 +10,15 @@ import ScholarMascot from '../common/ScholarMascot';
 import { ExportService, AnalysisData } from '../../services/exportService';
 import { trackAction, getStats } from '../../data/achievements';
 import { trackEvent } from '../../utils/analytics';
+
+/**
+ * Normalize draft text before diffing so highlights match real edits, not CRLF/Unicode drift.
+ * Character-level diffs were fragmenting mid-word; word-level diff on normalized strings is stable.
+ */
+function normalizeDraftForCompare(text: string): string {
+  if (!text) return '';
+  return text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').normalize('NFC');
+}
 
 /** Simple markdown-to-HTML for analysis result display */
 function simpleMarkdownToHtml(md: string): string {
@@ -56,6 +66,52 @@ const STANDARD_GRADE_RUBRIC_PREVIEW: { key: string; label: string; maxScore: num
 
 function formatRubricCategoryLabel(key: string): string {
   return key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+/** Same rules as on-screen italic highlights — book titles, Latin phrases, etc. */
+const ACADEMIC_ITALIC_PATTERNS: RegExp[] = [
+  /\b(Get Out|The Dark Knight|White Privilege|Black Panther|Hegemony|McIntosh)\b/g,
+  /(?:^|[.!?]\s+)([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,5})(?=\.|:|\s+Dir\.|\s+Perf\.|\s+Eds\.)/g,
+  /\b(et al\.|ibid\.|op\. cit\.|sic|circa|ca\.|vs\.|viz\.)\b/gi,
+  /(?:^|[.]\s+)([A-Z][a-z]+(?:,\s+[A-Z][a-z]+){2,})(?=\.)/g,
+];
+
+function escapeHtmlForCopy(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/** Mirrors renderTextWithItalics; HTML fragment for rich clipboard (Word, Docs). */
+function textToHtmlWithItalics(text: string): string {
+  let parts: string[] = [];
+  let lastIndex = 0;
+  let foundMatch = false;
+
+  ACADEMIC_ITALIC_PATTERNS.forEach((pattern) => {
+    pattern.lastIndex = 0;
+    let match: RegExpExecArray | null;
+    while ((match = pattern.exec(text)) !== null) {
+      if (match.index >= lastIndex) {
+        foundMatch = true;
+        if (match.index > lastIndex) {
+          parts.push(escapeHtmlForCopy(text.slice(lastIndex, match.index)));
+        }
+        parts.push(`<em>${escapeHtmlForCopy(match[0])}</em>`);
+        lastIndex = match.index + match[0].length;
+      }
+    }
+  });
+
+  if (!foundMatch || lastIndex === 0) {
+    return escapeHtmlForCopy(text);
+  }
+  if (lastIndex < text.length) {
+    parts.push(escapeHtmlForCopy(text.slice(lastIndex)));
+  }
+  return parts.join('');
 }
 
 function parseComprehensiveMarkdownSections(md: string): { title: string; body: string }[] {
@@ -269,6 +325,174 @@ interface Annotation {
   isCoverageOnly?: boolean; // Filler to avoid 200+ word gaps; not for scoring, still in export/sidebar
 }
 
+/** After inline replace [start,end) → newLen chars, remap every annotation so list length and ids stay the same. */
+function mapAnnotationsAfterInlineReplace(
+  list: Annotation[],
+  appliedId: string,
+  start: number,
+  end: number,
+  newLen: number,
+  newContent: string
+): Annotation[] {
+  const oldLen = end - start;
+  const delta = newLen - oldLen;
+  const docLen = newContent.length;
+
+  const clampRange = (ns: number, ne: number): [number, number] => {
+    let a = Math.max(0, Math.min(ns, docLen));
+    let b = Math.max(0, Math.min(ne, docLen));
+    if (b <= a) {
+      b = Math.min(a + 1, docLen);
+    }
+    return [a, b];
+  };
+
+  return list.map((ann) => {
+    if (ann.id === appliedId) {
+      const ne = start + newLen;
+      const [a, b] = clampRange(start, ne);
+      return {
+        ...ann,
+        startIndex: a,
+        endIndex: b,
+        text: newContent.slice(a, b),
+      };
+    }
+
+    if (ann.endIndex <= start) {
+      return ann;
+    }
+
+    if (ann.startIndex >= end) {
+      const ns = ann.startIndex + delta;
+      const ne = ann.endIndex + delta;
+      const [a, b] = clampRange(ns, ne);
+      return {
+        ...ann,
+        startIndex: a,
+        endIndex: b,
+        text: newContent.slice(a, b),
+      };
+    }
+
+    // Overlaps replaced span [start, end)
+    let ns = ann.startIndex;
+    let ne = ann.endIndex;
+
+    if (ann.startIndex >= start && ann.endIndex <= end) {
+      ns = start + Math.round(((ann.startIndex - start) / oldLen) * newLen);
+      ne = start + Math.round(((ann.endIndex - start) / oldLen) * newLen);
+    } else if (ann.startIndex < start && ann.endIndex > start && ann.endIndex <= end) {
+      ns = ann.startIndex;
+      ne = start + Math.round(((ann.endIndex - start) / oldLen) * newLen);
+    } else if (ann.startIndex >= start && ann.endIndex > end && ann.startIndex < end) {
+      ns = start + Math.round(((ann.startIndex - start) / oldLen) * newLen);
+      ne = ann.endIndex + delta;
+    } else if (ann.startIndex < start && ann.endIndex > end) {
+      ns = ann.startIndex;
+      ne = ann.endIndex + delta;
+    }
+
+    const [a, b] = clampRange(ns, ne);
+    return {
+      ...ann,
+      startIndex: a,
+      endIndex: b,
+      text: newContent.slice(a, b),
+    };
+  });
+}
+
+/** After replacing [repStart, repEnd) with newLen chars, shift or drop revision highlight ranges that tracked old indices. */
+function shiftRevisionRangesAfterReplace(
+  ranges: { start: number; end: number }[],
+  repStart: number,
+  repEnd: number,
+  newLen: number
+): { start: number; end: number }[] {
+  const oldLen = repEnd - repStart;
+  const delta = newLen - oldLen;
+  return ranges
+    .map((r) => {
+      if (r.end <= repStart) return r;
+      if (r.start >= repEnd) return { start: r.start + delta, end: r.end + delta };
+      if (r.start >= repStart && r.end <= repEnd) return null;
+      return null;
+    })
+    .filter((r): r is { start: number; end: number } => r != null);
+}
+
+/** Split a text chunk by any WriteScholar revision ranges (global indices). Revision segments render purple. */
+function splitSegmentByRevisionRanges(
+  text: string,
+  chunkGlobalStart: number,
+  revisedDraftRanges: { start: number; end: number }[]
+): Array<{ type: 'normal' | 'revision'; text: string }> {
+  if (!text) return [];
+  if (!revisedDraftRanges.length) {
+    return [{ type: 'normal', text }];
+  }
+  const g0 = chunkGlobalStart;
+  const g1 = g0 + text.length;
+  const ivs: [number, number][] = [];
+  for (const r of revisedDraftRanges) {
+    if (r.start >= r.end) continue;
+    const s = Math.max(g0, r.start);
+    const e = Math.min(g1, r.end);
+    if (s < e) ivs.push([s, e]);
+  }
+  if (ivs.length === 0) {
+    return [{ type: 'normal', text }];
+  }
+  ivs.sort((a, b) => a[0] - b[0]);
+  const merged: [number, number][] = [];
+  for (const [s, e] of ivs) {
+    const last = merged[merged.length - 1];
+    if (!last || s > last[1]) {
+      merged.push([s, e]);
+    } else {
+      last[1] = Math.max(last[1], e);
+    }
+  }
+  const parts: Array<{ type: 'normal' | 'revision'; text: string }> = [];
+  let cursor = g0;
+  for (const [s, e] of merged) {
+    if (cursor < s) {
+      parts.push({ type: 'normal', text: text.slice(cursor - g0, s - g0) });
+    }
+    parts.push({ type: 'revision', text: text.slice(s - g0, e - g0) });
+    cursor = e;
+  }
+  if (cursor < g1) {
+    parts.push({ type: 'normal', text: text.slice(cursor - g0) });
+  }
+  return parts.length ? parts : [{ type: 'normal', text }];
+}
+
+/** Rebuild purple highlight ranges after loading from library (cache + current indices + replacement text). */
+function buildRevisedDraftRangesFromCache(
+  content: string,
+  annList: Annotation[],
+  cache: Record<string, { sourceSpan: string; replacement: string }>
+): { start: number; end: number }[] {
+  const ranges: { start: number; end: number }[] = [];
+  for (const ann of annList) {
+    const c = cache[ann.id];
+    if (!c?.replacement) continue;
+    const s = ann.startIndex;
+    const e = ann.endIndex;
+    if (s < 0 || e > content.length || s >= e) continue;
+    const sl = content.slice(s, e);
+    if (sl === c.replacement || sl.trim() === c.replacement.trim()) {
+      ranges.push({ start: s, end: e });
+    }
+  }
+  return ranges;
+}
+
+const REVISION_MARK_CLASS =
+  'bg-violet-200/95 dark:bg-violet-900/50 text-violet-950 dark:text-violet-50 px-0.5 rounded-sm ring-2 ring-violet-500/80 dark:ring-violet-400/60 shadow-sm ring-offset-1 ring-offset-white dark:ring-offset-stone-900';
+
 interface RubricCriterion {
   criterion: string;
   status: 'met' | 'partially_met' | 'not_met';
@@ -294,7 +518,7 @@ interface AnalysisResult {
   data: {
     analysisType: string;
     result: string;
-    documentId: string;
+    documentId?: string | null;
     timestamp: string;
     annotations?: Annotation[];
     lockedFeatures?: string[];
@@ -329,11 +553,33 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
   const [error, setError] = useState<string>('');
   const [limitExceededError, setLimitExceededError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string>('');
+  const [essayCopyFeedback, setEssayCopyFeedback] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showAnalysisPopup, setShowAnalysisPopup] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
   const [currentPlan, setCurrentPlan] = useState<string>('free');
   const [isExporting, setIsExporting] = useState(false);
+  const [applyingRevisionId, setApplyingRevisionId] = useState<string | null>(null);
+  /** Snapshot before last WriteScholar apply (single-step undo). */
+  const [writeScholarUndo, setWriteScholarUndo] = useState<{
+    documentContent: string;
+    previewContent: string;
+    annotations: Annotation[];
+    revisedDraftRanges: { start: number; end: number }[];
+  } | null>(null);
+  /** Global indices of every applied WriteScholar revision still in effect (purple until reverted). */
+  const [revisedDraftRanges, setRevisedDraftRanges] = useState<{ start: number; end: number }[]>([]);
+  const [revisionNoticeMeta, setRevisionNoticeMeta] = useState<{
+    comment: string;
+    type: 'improve' | 'concern';
+  } | null>(null);
+  /** Essay text as of when analysis finished (or loaded); for compare-before-revisions. */
+  const [originalDraftBaseline, setOriginalDraftBaseline] = useState<string | null>(null);
+  const [showCompareOriginalModal, setShowCompareOriginalModal] = useState(false);
+  /** Cached OpenAI replacement per annotation (reuse after revert; avoids repeat API calls). */
+  const [cachedWsRevisionByAnnotationId, setCachedWsRevisionByAnnotationId] = useState<
+    Record<string, { sourceSpan: string; replacement: string }>
+  >({});
   const [cameFromLibrary, setCameFromLibrary] = useState(false);
   const [showRubricSection, setShowRubricSection] = useState(true);
   const [rubricContent, setRubricContent] = useState<string>('');
@@ -848,6 +1094,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
       console.log('Document content loaded, length:', content.length);
       setDocumentContent(content);
       setPreviewContent(content);
+      setOriginalDraftBaseline(null);
 
       // Get analysis data
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/document/${documentId}`, {
@@ -897,9 +1144,23 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
         if (analysisResults) {
           // Set the analysis result
           setAnalysisResult(analysisResults.result || '');
+
+          // Compare-with-first-draft: baseline must be text at analysis time (persisted as original_content), not current doc
+          const savedOriginal =
+            typeof (analysisResults as { original_content?: string }).original_content === 'string'
+              ? (analysisResults as { original_content: string }).original_content
+              : '';
+          setOriginalDraftBaseline(savedOriginal.length > 0 ? savedOriginal : content);
           
+          const wsRaw = (analysisResults as { ws_revision_cache?: unknown }).ws_revision_cache;
+          const wsRevisionCache: Record<string, { sourceSpan: string; replacement: string }> =
+            wsRaw && typeof wsRaw === 'object' && !Array.isArray(wsRaw)
+              ? (wsRaw as Record<string, { sourceSpan: string; replacement: string }>)
+              : {};
+          setCachedWsRevisionByAnnotationId(wsRevisionCache);
+
           // Create simple annotations from the analysis data
-          const annotations: Annotation[] = [];
+          let annotationsToUse: Annotation[] = [];
           
           console.log('Strong points:', analysisResults.strong_points);
           console.log('Areas to improve:', analysisResults.areas_to_improve);
@@ -909,7 +1170,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
           // Try to use the original annotations first (if they exist)
           if (analysisResults.annotations && Array.isArray(analysisResults.annotations)) {
             console.log('Using original annotations:', analysisResults.annotations.length);
-            setAnnotations(analysisResults.annotations);
+            annotationsToUse = analysisResults.annotations;
+            setAnnotations(annotationsToUse);
           } else {
             // Fallback to creating annotations from the structured data
             console.log('Creating annotations from structured data');
@@ -920,7 +1182,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                 if (point.text) {
                   const textIndex = content.toLowerCase().indexOf(point.text.toLowerCase());
                   if (textIndex !== -1) {
-                    annotations.push({
+                    annotationsToUse.push({
                       id: `strong-${index}`,
                       type: 'strong',
                       text: point.text,
@@ -943,7 +1205,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                 if (point.text) {
                   const textIndex = content.toLowerCase().indexOf(point.text.toLowerCase());
                   if (textIndex !== -1) {
-                    annotations.push({
+                    annotationsToUse.push({
                       id: `improve-${index}`,
                       type: 'improve',
                       text: point.text,
@@ -966,7 +1228,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                 if (point.text) {
                   const textIndex = content.toLowerCase().indexOf(point.text.toLowerCase());
                   if (textIndex !== -1) {
-                    annotations.push({
+                    annotationsToUse.push({
                       id: `concern-${index}`,
                       type: 'concern',
                       text: point.text,
@@ -983,9 +1245,11 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
               });
             }
             
-            console.log('Created annotations:', annotations.length);
-            setAnnotations(annotations);
+            console.log('Created annotations:', annotationsToUse.length);
+            setAnnotations(annotationsToUse);
           }
+
+          setRevisedDraftRanges(buildRevisedDraftRangesFromCache(content, annotationsToUse, wsRevisionCache));
           
           setSelectedAnalysisType(analysis.analysis_type || 'comprehensive');
           setSelectedCitationStyle(analysisResults.citation_style || 'None');
@@ -1012,10 +1276,16 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
           // Set locked features based on current user plan (free users see upgrade prompts)
           const plan = await fetchUserPlan();
           const isPaid = plan === 'pro' || plan === 'premium';
-          setLockedFeatures(isPaid ? [] : ['full_annotations', 'grade_rubric', 'specific_rewrites', 'export', 'history']);
+          setLockedFeatures(
+            !isPaid
+              ? ['full_annotations', 'grade_rubric', 'specific_rewrites', 'export', 'history']
+              : plan === 'pro'
+                ? ['apply_revisions']
+                : []
+          );
           
           console.log('=== ANALYSIS LOADED SUCCESSFULLY ===');
-          console.log('Final annotations count:', annotations.length);
+          console.log('Final annotations count:', annotationsToUse.length);
         } else {
           console.log('No analysis results found in the data');
           setError('Analysis results not found');
@@ -1107,6 +1377,12 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
     setAnnotations([]);
     setDocumentContent('');
     setRubricAlignment(null);
+    setWriteScholarUndo(null);
+    setRevisedDraftRanges([]);
+    setRevisionNoticeMeta(null);
+    setOriginalDraftBaseline(null);
+    setShowCompareOriginalModal(false);
+    setCachedWsRevisionByAnnotationId({});
     
     // If user came from Library, navigate back to Library
     if (cameFromLibrary && onNavigate) {
@@ -1218,6 +1494,11 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
     setGradeRubric(null);
     setSpecificRewrites(null);
     setAnalysisSummary({ overall_score: null, grade_estimate: null, clarity_rating: null, top_suggestions: [] });
+    setWriteScholarUndo(null);
+    setRevisedDraftRanges([]);
+    setRevisionNoticeMeta(null);
+    setOriginalDraftBaseline(null);
+    setCachedWsRevisionByAnnotationId({});
 
     try {
       const token = localStorage.getItem('authToken');
@@ -1267,6 +1548,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
       }
 
       const result: AnalysisResult = await response.json();
+      if (result.data.documentId) {
+        setSelectedDocument(result.data.documentId);
+      }
       setAnalysisResult(result.data.result);
       try { localStorage.removeItem('textAnalysisContent'); } catch (_) {}
       setRubricAlignment(result.data.rubricAlignment ?? null);
@@ -1325,6 +1609,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
         finalAnnotations = aiAnnotations;
         setAnnotations(aiAnnotations);
       }
+
+      setOriginalDraftBaseline(content);
 
       const wasFirst = (getStats().analyses_count || 0) === 0;
       trackAction('analyses_count');
@@ -1444,42 +1730,381 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
     }
   };
 
-  const scrollToAnnotation = (annotationId: string) => {
+  /** Click on highlighted text in the essay → scroll the annotation card into view in the sidebar. */
+  const scrollAnnotationPanelToCard = (annotationId: string) => {
     setSelectedAnnotation(annotationId);
-    const element = document.getElementById(`annotation-${annotationId}`);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    requestAnimationFrame(() => {
+      const el = document.getElementById(`annotation-panel-${annotationId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    });
+  };
+
+  /** Click on a sidebar card → scroll the essay text to the matching highlight. */
+  const scrollDocumentToHighlight = (annotationId: string) => {
+    setSelectedAnnotation(annotationId);
+    requestAnimationFrame(() => {
+      const safe =
+        typeof CSS !== 'undefined' && typeof CSS.escape === 'function'
+          ? CSS.escape(annotationId)
+          : annotationId.replace(/"/g, '\\"');
+      const el = document.querySelector(`[data-doc-annotation="${safe}"]`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    });
+  };
+
+  const scrollToRevisionDraft = () => {
+    const el = document.querySelector('[data-revision-draft-mark]');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
+  /** Sync revised draft + annotations + WriteScholar cache to the library (purple + no repeat OpenAI on reopen). */
+  const persistLibraryRevisionDraft = async (
+    docId: string,
+    content: string,
+    annList: Annotation[],
+    wsRevisionCache: Record<string, { sourceSpan: string; replacement: string }> = {}
+  ) => {
+    try {
+      if (lockedFeatures.includes('apply_revisions')) return;
+      const token = localStorage.getItem('authToken');
+      if (!token) return;
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      const res = await fetch(`${apiUrl}/analysis/save-revised-draft`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          documentId: docId,
+          content,
+          annotations: annList,
+          wsRevisionCache,
+        }),
+      });
+      if (!res.ok) {
+        const t = await res.text();
+        console.error('Library draft save failed:', res.status, t);
+      }
+    } catch (e) {
+      console.error('Library draft save error:', e);
+    }
+  };
+
+  const dismissRevisionHighlight = () => {
+    setRevisedDraftRanges([]);
+  };
+
+  /** True when this highlight currently shows the cached AI replacement (revision applied). */
+  const isWriteScholarRevisionAppliedOnCard = (annotation: Annotation): boolean => {
+    const cached = cachedWsRevisionByAnnotationId[annotation.id];
+    if (!cached) return false;
+    const slice = documentContent.slice(annotation.startIndex, annotation.endIndex);
+    return slice === cached.replacement || slice.trim() === cached.replacement.trim();
+  };
+
+  /** Revert one applied WriteScholar revision back to the original span (other revisions stay). */
+  const revertWriteScholarRevisionForAnnotation = (annotationId: string) => {
+    if (!canApplyWriteScholarRevisions) return;
+    const ann = annotations.find((a) => a.id === annotationId);
+    const cached = cachedWsRevisionByAnnotationId[annotationId];
+    if (!ann || ann.type === 'strong' || ann.isCoverageOnly || !cached) return;
+    const start = ann.startIndex;
+    const end = ann.endIndex;
+    if (start < 0 || end > documentContent.length || start >= end) {
+      setError('This highlight no longer matches your draft.');
+      return;
+    }
+    const slice = documentContent.slice(start, end);
+    if (slice !== cached.replacement && slice.trim() !== cached.replacement.trim()) {
+      setError('Could not revert: this passage no longer matches the applied revision.');
+      return;
+    }
+
+    const sourceSpan = cached.sourceSpan;
+    const newLen = sourceSpan.length;
+    const docBefore = documentContent;
+    const newContent = docBefore.slice(0, start) + sourceSpan + docBefore.slice(end);
+    const nextAnnotations = mapAnnotationsAfterInlineReplace(
+      [...annotations],
+      annotationId,
+      start,
+      end,
+      newLen,
+      newContent
+    );
+
+    const draftRangesBefore = [...revisedDraftRanges];
+    setRevisedDraftRanges(() =>
+      shiftRevisionRangesAfterReplace(draftRangesBefore, start, end, newLen)
+    );
+
+    setDocumentContent(newContent);
+    setPreviewContent(newContent);
+    setAnnotations(nextAnnotations);
+    setWriteScholarUndo(null);
+    setRevisionNoticeMeta(null);
+    setError('');
+
+    try {
+      if (!selectedDocument) {
+        localStorage.setItem('textAnalysisContent', newContent);
+      }
+    } catch {
+      /* ignore quota */
+    }
+
+    setSuccessMessage('Revision reverted for this sentence.');
+    window.setTimeout(() => setSuccessMessage(''), 5000);
+
+    if (selectedDocument) {
+      void persistLibraryRevisionDraft(selectedDocument, newContent, nextAnnotations, cachedWsRevisionByAnnotationId);
+    }
+  };
+
+  const revertWriteScholarRevision = () => {
+    if (!canApplyWriteScholarRevisions || !writeScholarUndo) return;
+    const snap = writeScholarUndo;
+    const docId = selectedDocument;
+    setDocumentContent(snap.documentContent);
+    setPreviewContent(snap.previewContent);
+    setAnnotations(snap.annotations);
+    try {
+      if (!selectedDocument) {
+        localStorage.setItem('textAnalysisContent', snap.documentContent);
+      }
+    } catch {
+      /* ignore quota */
+    }
+    setWriteScholarUndo(null);
+    setRevisedDraftRanges(snap.revisedDraftRanges ?? []);
+    setRevisionNoticeMeta(null);
+    setSuccessMessage('Revision reverted.');
+    window.setTimeout(() => setSuccessMessage(''), 5000);
+
+    if (docId) {
+      void persistLibraryRevisionDraft(docId, snap.documentContent, snap.annotations, cachedWsRevisionByAnnotationId);
+    }
+  };
+
+  /** Premium: replace highlighted span with WriteScholar's suggested revision (improve/concern only). Pro sees annotations but not apply. */
+  const canApplyWriteScholarRevisions = useMemo(
+    () =>
+      !lockedFeatures.includes('full_annotations') &&
+      !lockedFeatures.includes('apply_revisions'),
+    [lockedFeatures]
+  );
+
+  /** Shared apply path after we have replacement text (from API or cache). */
+  const applyWsReplacementToDraft = (
+    annotationId: string,
+    ann: Annotation,
+    start: number,
+    end: number,
+    replacement: string,
+    docBefore: string,
+    previewBefore: string,
+    annotationsBefore: Annotation[],
+    draftRangesBefore: { start: number; end: number }[],
+    wsRevisionCacheSnapshot: Record<string, { sourceSpan: string; replacement: string }>
+  ) => {
+    const newLen = replacement.length;
+    const newContent = docBefore.slice(0, start) + replacement + docBefore.slice(end);
+    const nextAnnotations = mapAnnotationsAfterInlineReplace(
+      annotationsBefore,
+      annotationId,
+      start,
+      end,
+      newLen,
+      newContent
+    );
+
+    setWriteScholarUndo({
+      documentContent: docBefore,
+      previewContent: previewBefore,
+      annotations: annotationsBefore,
+      revisedDraftRanges: [...draftRangesBefore],
+    });
+    setRevisionNoticeMeta({
+      comment: ann.comment,
+      type: ann.type as 'improve' | 'concern',
+    });
+
+    setDocumentContent(newContent);
+    setPreviewContent(newContent);
+    setRevisedDraftRanges(() => {
+      const shifted = shiftRevisionRangesAfterReplace(draftRangesBefore, start, end, newLen);
+      return [...shifted, { start, end: start + newLen }];
+    });
+
+    try {
+      if (!selectedDocument) {
+        localStorage.setItem('textAnalysisContent', newContent);
+      }
+    } catch {
+      /* ignore quota */
+    }
+
+    setAnnotations(nextAnnotations);
+
+    if (selectedAnnotation === annotationId) setSelectedAnnotation(null);
+    setHoveredAnnotation(null);
+    setSuccessMessage(
+      selectedDocument
+        ? 'Revision applied in your draft. Saved to your library.'
+        : 'Revision applied in your draft.'
+    );
+    window.setTimeout(() => setSuccessMessage(''), 5000);
+    window.setTimeout(() => scrollToRevisionDraft(), 200);
+
+    if (selectedDocument) {
+      void persistLibraryRevisionDraft(selectedDocument, newContent, nextAnnotations, wsRevisionCacheSnapshot);
+    }
+  };
+
+  const applyWriteScholarRevision = async (annotationId: string) => {
+    if (!canApplyWriteScholarRevisions) return;
+    const ann = annotations.find((a) => a.id === annotationId);
+    if (!ann || ann.type === 'strong' || ann.isCoverageOnly) return;
+    const start = ann.startIndex;
+    const end = ann.endIndex;
+    if (start < 0 || end > documentContent.length || start >= end) {
+      setError('This highlight no longer matches your draft. Re-run analysis if you edited the text elsewhere.');
+      return;
+    }
+    const slice = documentContent.slice(start, end);
+    if (slice !== ann.text && slice.trim() !== ann.text.trim()) {
+      setError('This highlight no longer matches your draft. Re-run analysis to refresh annotations.');
+      return;
+    }
+
+    const cached = cachedWsRevisionByAnnotationId[annotationId];
+    const matchesSource =
+      cached &&
+      (slice === cached.sourceSpan || slice.trim() === cached.sourceSpan.trim());
+    const matchesReplacement =
+      cached &&
+      (slice === cached.replacement || slice.trim() === cached.replacement.trim());
+
+    if (matchesReplacement && !matchesSource) {
+      setError('');
+      setRevisionNoticeMeta({
+        comment: ann.comment,
+        type: ann.type as 'improve' | 'concern',
+      });
+      const coveredByPurple = revisedDraftRanges.some(
+        (r) => r.start <= start && r.end >= end
+      );
+      if (!coveredByPurple) {
+        setRevisedDraftRanges((prev) => [...prev, { start, end }]);
+      }
+      setSuccessMessage(
+        coveredByPurple
+          ? 'This revision is already in your draft (no change).'
+          : 'Purple highlight restored for this passage.'
+      );
+      window.setTimeout(() => setSuccessMessage(''), 4000);
+      return;
+    }
+
+    if (matchesSource && cached) {
+      setError('');
+      applyWsReplacementToDraft(
+        annotationId,
+        ann,
+        start,
+        end,
+        cached.replacement,
+        documentContent,
+        previewContent,
+        [...annotations],
+        revisedDraftRanges,
+        cachedWsRevisionByAnnotationId
+      );
+      return;
+    }
+
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      setError('Please log in to apply revisions.');
+      return;
+    }
+
+    setApplyingRevisionId(annotationId);
+    setError('');
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      const response = await fetch(`${apiUrl}/analysis/inline-revision`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fullDocument: documentContent,
+          highlightedText: slice,
+          startIndex: start,
+          endIndex: end,
+          annotationType: ann.type,
+          comment: ann.comment ?? '',
+          suggestion: ann.suggestion ?? '',
+        }),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const msg =
+          (payload as { message?: string }).message ||
+          (payload as { error?: string }).error ||
+          'Could not generate revision';
+        throw new Error(msg);
+      }
+
+      const replacement = String((payload as { data?: { replacement?: string } }).data?.replacement ?? '').trim();
+      if (!replacement) {
+        setError('No revision text returned. Try again.');
+        return;
+      }
+
+      const nextCache = {
+        ...cachedWsRevisionByAnnotationId,
+        [annotationId]: { sourceSpan: slice, replacement },
+      };
+      setCachedWsRevisionByAnnotationId(nextCache);
+
+      applyWsReplacementToDraft(
+        annotationId,
+        ann,
+        start,
+        end,
+        replacement,
+        documentContent,
+        previewContent,
+        [...annotations],
+        revisedDraftRanges,
+        nextCache
+      );
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not apply revision');
+    } finally {
+      setApplyingRevisionId(null);
     }
   };
 
   // Helper function to render text with italics for common patterns
   const renderTextWithItalics = (text: string, key: string) => {
-    // Common patterns for italics in academic writing:
-    // 1. Book/movie/film titles
-    // 2. Journal/magazine names  
-    // 3. Latin phrases (et al., ibid., etc.)
-    // 4. Titles with "Dir.", "Perf.", "Eds."
-    
-    const italicPatterns = [
-      // Known work titles from the document
-      /\b(Get Out|The Dark Knight|White Privilege|Black Panther|Hegemony|McIntosh)\b/g,
-      
-      // Titles followed by periods, colons, or citations markers (Dir., Perf., Eds.)
-      /(?:^|[.!?]\s+)([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,5})(?=\.|:|\s+Dir\.|\s+Perf\.|\s+Eds\.)/g,
-      
-      // Latin phrases and abbreviations
-      /\b(et al\.|ibid\.|op\. cit\.|sic|circa|ca\.|vs\.|viz\.)\b/gi,
-      
-      // Italicized citations style (e.g., "Media, Communication, Culture")
-      /(?:^|[.]\s+)([A-Z][a-z]+(?:,\s+[A-Z][a-z]+){2,})(?=\.)/g,
-    ];
-
-    // Split text and apply italics where needed
+    // Split text and apply italics where needed (same rules as textToHtmlWithItalics / copy)
     let parts: React.ReactNode[] = [];
     let lastIndex = 0;
     let foundMatch = false;
 
-    italicPatterns.forEach(pattern => {
+    ACADEMIC_ITALIC_PATTERNS.forEach((pattern) => {
       pattern.lastIndex = 0; // Reset regex
       let match;
       
@@ -1518,12 +2143,97 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
     return documentContent || '';
   };
 
+  const copyEssayPlainText = async () => {
+    const text = getDisplayContent();
+    if (!text.trim()) {
+      setError('Nothing to copy yet.');
+      return;
+    }
+
+    const paragraphs = text.split(/\n\s*\n/).filter((p) => p.trim().length > 0);
+    /** Word / Docs often collapse bare <p> on paste; explicit margins preserve paragraph gaps. */
+    const pStyle =
+      'margin:0 0 12pt 0;margin-bottom:0.75em;mso-margin-top-alt:0;mso-margin-bottom-alt:12.0pt;line-height:1.15;';
+    const htmlBody = paragraphs
+      .map((p) => {
+        const trimmed = p.trim();
+        const inner = textToHtmlWithItalics(trimmed).replace(/\n/g, '<br />');
+        return `<p style="${pStyle}">${inner}</p>`;
+      })
+      .join('');
+    const htmlFragment = `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body style="margin:0;padding:0;">${htmlBody}</body></html>`;
+
+    const tryRichCopy = async (): Promise<boolean> => {
+      if (typeof navigator.clipboard.write !== 'function' || typeof ClipboardItem === 'undefined') {
+        return false;
+      }
+      try {
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            'text/html': new Blob([htmlFragment], { type: 'text/html' }),
+            'text/plain': new Blob([text], { type: 'text/plain' }),
+          }),
+        ]);
+        return true;
+      } catch {
+        return false;
+      }
+    };
+
+    try {
+      const ok = await tryRichCopy();
+      if (!ok) {
+        await navigator.clipboard.writeText(text);
+      }
+      setEssayCopyFeedback(true);
+      setTimeout(() => setEssayCopyFeedback(false), 2000);
+    } catch {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('aria-hidden', 'true');
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        setEssayCopyFeedback(true);
+        setTimeout(() => setEssayCopyFeedback(false), 2000);
+      } catch {
+        setError('Could not copy to clipboard. Try selecting the text in the document instead.');
+      }
+    }
+  };
+
   // Helper function to filter annotations by type (no truncation; backend limits count for free users)
   const getFilteredAnnotations = (type?: string) => {
     if (type) {
       return annotations.filter(a => a.type === type);
     }
     return annotations;
+  };
+
+  /** Plain text between annotations: purple revision takes priority over default styling. */
+  const renderParagraphChunkWithRevision = (text: string, chunkGlobalStart: number, keyPrefix: string) => {
+    if (!text) return null;
+    const segments = splitSegmentByRevisionRanges(text, chunkGlobalStart, revisedDraftRanges);
+    return (
+      <>
+        {segments.map((seg, i) =>
+          seg.type === 'revision' ? (
+            <mark
+              key={`${keyPrefix}-rev-${i}`}
+              data-revision-draft-mark
+              className={REVISION_MARK_CLASS}
+              title="WriteScholar revision (stays purple until you revert that change)"
+            >
+              {renderTextWithItalics(seg.text, `${keyPrefix}-r${i}`)}
+            </mark>
+          ) : (
+            <span key={`${keyPrefix}-n-${i}`}>{renderTextWithItalics(seg.text, `${keyPrefix}-n${i}`)}</span>
+          )
+        )}
+      </>
+    );
   };
 
   const renderHighlightedText = () => {
@@ -1543,15 +2253,18 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
       // Render content with proper paragraph spacing
       return (
         <div className="text-gray-700 leading-relaxed">
-          {paragraphs.map((paragraph, index) => (
-            <p key={index} className="mb-4 text-justify">
-              {renderTextWithItalics(paragraph.trim(), `no-anno-p-${index}`)}
-            </p>
-          ))}
+          {paragraphs.map((paragraph, index) => {
+            const paragraphStart = displayContent.indexOf(paragraph);
+            return (
+              <p key={index} className="mb-4 text-justify">
+                {renderParagraphChunkWithRevision(paragraph, paragraphStart, `no-anno-p-${index}`)}
+              </p>
+            );
+          })}
           {currentPlan === 'free' && (
-            <div className="mt-8 p-6 bg-gradient-to-r from-violet-50 to-indigo-50 border border-violet-200 rounded-lg">
+            <div className="mt-8 p-6 bg-gradient-to-r from-violet-50 to-violet-50 border border-violet-200 rounded-lg">
               <div className="flex items-center space-x-3 mb-3">
-                <div className="p-2 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-full">
+                <div className="p-2 bg-gradient-to-br from-violet-500 to-violet-600 rounded-full">
                   <svg className="w-5 h-5 text-stone-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v2m0-2h2m-2 0H9m12-9V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-9z" />
                   </svg>
@@ -1609,7 +2322,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
             // No annotations in this paragraph, render normally with italics
             return (
               <p key={paragraphIndex} className="mb-4 text-justify">
-                {renderTextWithItalics(paragraph.trim(), `p-${paragraphIndex}`)}
+                {renderParagraphChunkWithRevision(paragraph, paragraphStart, `p-${paragraphIndex}`)}
               </p>
             );
           }
@@ -1630,10 +2343,14 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
             // Add text before this annotation
             if (relativeStart > lastIndex) {
               const textBefore = paragraph.slice(lastIndex, relativeStart);
-              if (textBefore.trim()) {
+              if (textBefore.length > 0) {
                 parts.push(
                   <span key={`text-${paragraphIndex}-${lastIndex}`} className="text-stone-700">
-                    {renderTextWithItalics(textBefore, `text-${paragraphIndex}-${lastIndex}`)}
+                    {renderParagraphChunkWithRevision(
+                      textBefore,
+                      paragraphStart + lastIndex,
+                      `text-${paragraphIndex}-${lastIndex}`
+                    )}
                   </span>
                 );
               }
@@ -1649,16 +2366,18 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
               concern: 'bg-red-100 text-red-900 border-b-2 border-red-400 hover:bg-red-200'
             };
 
+            const annoSegments = splitSegmentByRevisionRanges(actualText, annotationStart, revisedDraftRanges);
+
             parts.push(
               <span
-                key={annotation.id}
-                id={`annotation-${annotation.id}`}
-                className={`${highlightClasses[annotation.type]} px-1 cursor-pointer transition-all duration-200 ${
-                  selectedAnnotation === annotation.id ? 'ring-2 ring-offset-2 ring-blue-500' : ''
+                key={`${annotation.id}-p${paragraphIndex}`}
+                data-doc-annotation={annotation.id}
+                className={`inline px-0.5 cursor-pointer transition-all duration-200 ${
+                  selectedAnnotation === annotation.id ? 'ring-2 ring-offset-2 ring-violet-500 rounded-sm' : ''
                 }`}
                 onMouseEnter={(e) => handleAnnotationHover(e, annotation.id)}
                 onMouseLeave={() => setHoveredAnnotation(null)}
-                onClick={() => scrollToAnnotation(annotation.id)}
+                onClick={() => scrollAnnotationPanelToCard(annotation.id)}
                 title={
                   lockedFeatures.includes('full_annotations')
                     ? annotation.type === 'strong'
@@ -1667,7 +2386,25 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                     : `${annotation.type.toUpperCase()}: ${annotation.comment}`
                 }
               >
-                {renderTextWithItalics(actualText, `anno-${annotation.id}`)}
+                {annoSegments.map((seg, si) =>
+                  seg.type === 'revision' ? (
+                    <mark
+                      key={`${annotation.id}-seg-${si}`}
+                      data-revision-draft-mark
+                      className={REVISION_MARK_CLASS}
+                      title="WriteScholar revision"
+                    >
+                      {renderTextWithItalics(seg.text, `anno-${annotation.id}-r${si}`)}
+                    </mark>
+                  ) : (
+                    <span
+                      key={`${annotation.id}-seg-${si}`}
+                      className={`${highlightClasses[annotation.type]} px-0.5 rounded-sm`}
+                    >
+                      {renderTextWithItalics(seg.text, `anno-${annotation.id}-n${si}`)}
+                    </span>
+                  )
+                )}
               </span>
             );
 
@@ -1677,10 +2414,14 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
           // Add remaining text after the last annotation in this paragraph
           if (lastIndex < paragraph.length) {
             const remainingText = paragraph.slice(lastIndex);
-            if (remainingText.trim()) {
+            if (remainingText.length > 0) {
               parts.push(
                 <span key={`text-${paragraphIndex}-${lastIndex}`} className="text-gray-700">
-                  {renderTextWithItalics(remainingText, `text-${paragraphIndex}-${lastIndex}`)}
+                  {renderParagraphChunkWithRevision(
+                    remainingText,
+                    paragraphStart + lastIndex,
+                    `text-${paragraphIndex}-${lastIndex}`
+                  )}
                 </span>
               );
             }
@@ -1704,6 +2445,26 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
     if (docLabel) return `Results for: ${docLabel}`;
     return 'Review annotations, scores, and suggestions below.';
   }, [analysisResult, documents, selectedDocument]);
+
+  /** Word-level diff on normalized text: purple = new/changed vs first-draft baseline (compare modal). */
+  const compareModalCurrentDraftDiff = useMemo(() => {
+    if (!showCompareOriginalModal || !originalDraftBaseline) return null;
+    const a = normalizeDraftForCompare(originalDraftBaseline);
+    const b = normalizeDraftForCompare(documentContent);
+    const parts = diffWordsWithSpace(a, b);
+    return parts.flatMap((part, i) => {
+      if (part.removed) return [];
+      if (!part.value) return [];
+      if (part.added) {
+        return [
+          <mark key={`cmp-${i}`} className={REVISION_MARK_CLASS}>
+            {part.value}
+          </mark>,
+        ];
+      }
+      return [<span key={`cmp-${i}`}>{part.value}</span>];
+    });
+  }, [showCompareOriginalModal, originalDraftBaseline, documentContent]);
 
   const getAnnotationIcon = (type: string) => {
     switch (type) {
@@ -1735,7 +2496,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
       <div className="relative min-h-screen flex items-center justify-center overflow-x-hidden">
         <WriteScholarEditorialBackgroundLayers position="fixed" />
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-600 mx-auto"></div>
           <p className="mt-4 text-stone-600">Loading analysis tools...</p>
         </div>
       </div>
@@ -2024,7 +2785,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                 </div>
               ) : selectedDocument && isLoadingPreview ? (
                 <div className="text-center py-16">
-                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto"></div>
+                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-violet-600 mx-auto"></div>
                   <p className="mt-4 text-stone-600">Loading document preview...</p>
                 </div>
               ) : previewContent || documentContent ? (
@@ -2202,7 +2963,18 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                     {analysisTypes.find(type => type.id === selectedAnalysisType)?.name} • Analyzed {formatDate(new Date().toISOString())}
                   </p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={copyEssayPlainText}
+                    className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors flex items-center space-x-2 text-sm font-medium"
+                    title="Copy the full essay — paste into Word or Google Docs; auto-italics (titles, Latin phrases, etc.) are preserved where supported"
+                  >
+                    <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                    </svg>
+                    <span>{essayCopyFeedback ? 'Copied!' : 'Copy full text'}</span>
+                  </button>
                   {!isMobileDevice() && (
                     <>
                       {currentPlan !== 'free' ? (
@@ -2364,18 +3136,48 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
             {/* Legend */}
             <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
-              <div className="flex flex-wrap items-center gap-6 text-sm">
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-                  <span className="text-gray-600">Strong sections</span>
+              <div className="flex flex-wrap items-center justify-between gap-y-2 gap-x-4 text-sm">
+                <div className="flex flex-wrap items-center gap-6">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                    <span className="text-gray-600">Strong sections</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-amber-400 rounded-full"></div>
+                    <span className="text-gray-600">Needs improvement</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-red-400 rounded-full"></div>
+                    <span className="text-gray-600">Needs revision</span>
+                  </div>
+                  {revisedDraftRanges.length > 0 && (
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 bg-violet-400 rounded-full ring-2 ring-violet-500/45 shadow-sm" />
+                      <span className="text-gray-600">WriteScholar revisions</span>
+                    </div>
+                  )}
                 </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-amber-400 rounded-full"></div>
-                  <span className="text-gray-600">Needs improvement</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-red-400 rounded-full"></div>
-                  <span className="text-gray-600">Needs revision</span>
+                <div className="flex flex-wrap items-center justify-end gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={copyEssayPlainText}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-stone-300 bg-white px-3 py-1.5 text-xs font-semibold text-stone-700 shadow-sm hover:bg-stone-50 dark:border-stone-600 dark:bg-stone-800 dark:text-stone-200 dark:hover:bg-stone-700/80"
+                    title="Copy full essay — Word/Docs keep italics for detected titles and Latin phrases"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                    </svg>
+                    {essayCopyFeedback ? 'Copied' : 'Copy full text'}
+                  </button>
+                  {originalDraftBaseline && analysisResult && (
+                    <button
+                      type="button"
+                      onClick={() => setShowCompareOriginalModal(true)}
+                      className="text-xs font-semibold text-violet-700 dark:text-violet-300 hover:underline shrink-0"
+                    >
+                      Compare with first draft
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -2399,12 +3201,92 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                     {/* Annotations — show full list only for paid users */}
                     {!lockedFeatures.includes('full_annotations') && (
                     <>
-                    <h3 className="text-lg font-bold text-gray-900 mb-5 flex items-center">
-                      <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-center">
+                      <svg className="w-5 h-5 mr-2 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                       </svg>
                       Annotations
                     </h3>
+                    {writeScholarUndo && revisionNoticeMeta && (
+                      <div className="rounded-xl border-2 border-dashed border-violet-400/75 bg-violet-50/95 dark:bg-violet-950/35 p-4 mb-5 space-y-3">
+                        <div className="flex items-start gap-3">
+                          <div
+                            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
+                              revisionNoticeMeta.type === 'concern'
+                                ? 'bg-red-100 dark:bg-red-900/40'
+                                : 'bg-amber-100 dark:bg-amber-900/40'
+                            }`}
+                          >
+                            {getAnnotationIcon(revisionNoticeMeta.type)}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-semibold text-violet-900 dark:text-violet-100">
+                              WriteScholar revision applied
+                            </p>
+                            <p className="text-xs text-stone-700 dark:text-stone-300 mt-1.5 leading-relaxed">
+                              <span className="text-stone-500 dark:text-stone-400">Feedback you addressed: </span>
+                              {revisionNoticeMeta.comment}
+                            </p>
+                            <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-2">
+                              Applied revisions stay <span className="font-medium text-violet-700 dark:text-violet-300">purple</span> (not yellow/red) until you revert that sentence from its card. The banner “Revert to original text” only undoes the most recent apply.
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            onClick={scrollToRevisionDraft}
+                            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-violet-600 hover:bg-violet-500 text-white shadow-sm"
+                          >
+                            Show in document
+                          </button>
+                          {revisedDraftRanges.length > 0 && (
+                            <button
+                              type="button"
+                              onClick={dismissRevisionHighlight}
+                              className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-xs font-medium border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800"
+                            >
+                              Hide purple highlights
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={revertWriteScholarRevision}
+                            className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-white dark:bg-stone-900 border-2 border-violet-400 dark:border-violet-600 text-violet-800 dark:text-violet-200 hover:bg-violet-50 dark:hover:bg-violet-950/60"
+                          >
+                            Revert to original text
+                          </button>
+                          {originalDraftBaseline && (
+                            <button
+                              type="button"
+                              onClick={() => setShowCompareOriginalModal(true)}
+                              className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-xs font-medium border border-stone-300 dark:border-stone-600 text-stone-800 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800"
+                            >
+                              Compare with first draft
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    {(!lockedFeatures.includes('full_annotations')) && (
+                      <p className="text-[11px] text-stone-500 dark:text-stone-400 mb-5 leading-snug">
+                        {lockedFeatures.includes('apply_revisions') ? (
+                          <>
+                            Pro includes full annotations and feedback.{' '}
+                            <span className="font-semibold text-stone-600 dark:text-stone-300">Premium</span> adds{' '}
+                            <span className="font-semibold text-stone-600 dark:text-stone-300">Apply WriteScholar revision</span>{' '}
+                            so you can insert edits into your draft in one click.
+                          </>
+                        ) : (
+                          <>
+                            <span className="font-semibold text-stone-600 dark:text-stone-300">Apply WriteScholar revision</span>{' '}
+                            runs once per sentence and saves the result—re-applying after{' '}
+                            <span className="font-semibold text-stone-600 dark:text-stone-300">Revert back to normal</span> uses the
+                            same wording (no extra AI call). Needs improvement &amp; serious concerns only.
+                          </>
+                        )}
+                      </p>
+                    )}
                     {/* Strong Points */}
                     <div>
                       <div className="flex items-center space-x-2 mb-3">
@@ -2417,10 +3299,11 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                         {getFilteredAnnotations('strong').map((annotation) => (
                           <div
                             key={annotation.id}
+                            id={`annotation-panel-${annotation.id}`}
                             className={`bg-white rounded-xl p-4 border-l-4 border-green-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
-                              selectedAnnotation === annotation.id ? 'ring-2 ring-blue-500' : ''
+                              selectedAnnotation === annotation.id ? 'ring-2 ring-violet-500' : ''
                             }`}
-                            onClick={() => scrollToAnnotation(annotation.id)}
+                            onClick={() => scrollDocumentToHighlight(annotation.id)}
                             onMouseEnter={() => setHoveredAnnotation(annotation.id)}
                             onMouseLeave={() => setHoveredAnnotation(null)}
                           >
@@ -2445,16 +3328,66 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                         {getFilteredAnnotations('improve').map((annotation) => (
                           <div
                             key={annotation.id}
+                            id={`annotation-panel-${annotation.id}`}
                             className={`bg-white rounded-xl p-4 border-l-4 border-amber-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
-                              selectedAnnotation === annotation.id ? 'ring-2 ring-blue-500' : ''
+                              selectedAnnotation === annotation.id ? 'ring-2 ring-violet-500' : ''
                             }`}
-                            onClick={() => scrollToAnnotation(annotation.id)}
+                            onClick={() => scrollDocumentToHighlight(annotation.id)}
                             onMouseEnter={() => setHoveredAnnotation(annotation.id)}
                             onMouseLeave={() => setHoveredAnnotation(null)}
                           >
                             <p className="text-sm text-gray-700 font-medium mb-1">{annotation.comment}</p>
                             {annotation.suggestion && (
                               <p className="text-xs text-gray-500 italic">{annotation.suggestion}</p>
+                            )}
+                            {canApplyWriteScholarRevisions && !annotation.isCoverageOnly && (
+                              isWriteScholarRevisionAppliedOnCard(annotation) ? (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    revertWriteScholarRevisionForAnnotation(annotation.id);
+                                  }}
+                                  className="mt-3 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold bg-red-600 hover:bg-red-700 text-white shadow-sm ring-1 ring-red-900/15 transition-colors"
+                                >
+                                  <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"
+                                    />
+                                  </svg>
+                                  Revert back to normal
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  disabled={applyingRevisionId === annotation.id}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    void applyWriteScholarRevision(annotation.id);
+                                  }}
+                                  className="mt-3 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold bg-violet-700 hover:bg-violet-800 disabled:opacity-60 disabled:pointer-events-none text-white shadow-sm ring-1 ring-violet-900/10 transition-colors"
+                                >
+                                  <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                  </svg>
+                                  {applyingRevisionId === annotation.id ? 'Generating revision…' : 'Apply WriteScholar revision'}
+                                </button>
+                              )
+                            )}
+                            {lockedFeatures.includes('apply_revisions') && !annotation.isCoverageOnly && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onNavigate?.('pricing');
+                                }}
+                                className="mt-3 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 text-stone-800 dark:text-stone-100 border border-stone-200 dark:border-stone-600"
+                              >
+                                Premium — apply revisions ($29.99 first month)
+                              </button>
                             )}
                           </div>
                         ))}
@@ -2473,16 +3406,66 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                         {getFilteredAnnotations('concern').map((annotation) => (
                           <div
                             key={annotation.id}
+                            id={`annotation-panel-${annotation.id}`}
                             className={`bg-white rounded-xl p-4 border-l-4 border-red-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
-                              selectedAnnotation === annotation.id ? 'ring-2 ring-blue-500' : ''
+                              selectedAnnotation === annotation.id ? 'ring-2 ring-violet-500' : ''
                             }`}
-                            onClick={() => scrollToAnnotation(annotation.id)}
+                            onClick={() => scrollDocumentToHighlight(annotation.id)}
                             onMouseEnter={() => setHoveredAnnotation(annotation.id)}
                             onMouseLeave={() => setHoveredAnnotation(null)}
                           >
                             <p className="text-sm text-gray-700 font-medium mb-1">{annotation.comment}</p>
                             {annotation.suggestion && (
                               <p className="text-xs text-gray-500 italic">{annotation.suggestion}</p>
+                            )}
+                            {canApplyWriteScholarRevisions && !annotation.isCoverageOnly && (
+                              isWriteScholarRevisionAppliedOnCard(annotation) ? (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    revertWriteScholarRevisionForAnnotation(annotation.id);
+                                  }}
+                                  className="mt-3 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold bg-red-600 hover:bg-red-700 text-white shadow-sm ring-1 ring-red-900/15 transition-colors"
+                                >
+                                  <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"
+                                    />
+                                  </svg>
+                                  Revert back to normal
+                                </button>
+                              ) : (
+                                <button
+                                  type="button"
+                                  disabled={applyingRevisionId === annotation.id}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    void applyWriteScholarRevision(annotation.id);
+                                  }}
+                                  className="mt-3 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold bg-violet-700 hover:bg-violet-800 disabled:opacity-60 disabled:pointer-events-none text-white shadow-sm ring-1 ring-violet-900/10 transition-colors"
+                                >
+                                  <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                  </svg>
+                                  {applyingRevisionId === annotation.id ? 'Generating revision…' : 'Apply WriteScholar revision'}
+                                </button>
+                              )
+                            )}
+                            {lockedFeatures.includes('apply_revisions') && !annotation.isCoverageOnly && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onNavigate?.('pricing');
+                                }}
+                                className="mt-3 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 text-stone-800 dark:text-stone-100 border border-stone-200 dark:border-stone-600"
+                              >
+                                Premium — apply revisions ($29.99 first month)
+                              </button>
                             )}
                           </div>
                         ))}
@@ -2496,7 +3479,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                       <div className="space-y-5">
                         <div>
                           <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1 flex items-center">
-                            <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="w-5 h-5 mr-2 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                             </svg>
                             Annotations
@@ -2613,7 +3596,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                       </div>
                     )}
                     {lockedFeatures.includes('specific_rewrites') && (!specificRewrites || specificRewrites.length === 0) && (
-                      <div className="mt-6 p-5 bg-violet-50 dark:from-violet-900/20 dark:to-purple-900/20 border-2 border-violet-200 dark:border-violet-600/40 rounded-2xl">
+                      <div className="mt-6 p-5 bg-violet-50 dark:from-violet-900/20 dark:to-violet-900/20 border-2 border-violet-200 dark:border-violet-600/40 rounded-2xl">
                         <div className="flex items-start gap-4">
                           <div className="flex-shrink-0 w-10 h-10 bg-violet-600 hover:bg-violet-500 rounded-xl flex items-center justify-center">
                             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2645,7 +3628,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
               <div className="mx-6 mt-8 mb-6 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-600 overflow-hidden">
                 <div className="bg-violet-600 hover:bg-violet-500 text-white px-6 py-4">
                   <h2 className="text-xl font-bold">Comprehensive Academic Analysis</h2>
-                  <p className="text-indigo-100 text-sm mt-0.5">
+                  <p className="text-violet-100 text-sm mt-0.5">
                     {currentPlan === 'free'
                       ? 'Preview — overall picture free; depth, strengths & concerns on Pro'
                       : 'Full analysis report'}
@@ -2795,7 +3778,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                   {/* Gradient overlay + CTA - like document preview */}
                   <div className="relative mt-6 pt-8 -mb-2">
                     <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-stone-800 via-white/90 dark:via-stone-800/90 to-transparent pointer-events-none" style={{ marginTop: '-120px', height: '140px' }} />
-                    <div className="relative p-6 bg-gradient-to-r from-violet-50 to-indigo-50 dark:from-violet-900/20 dark:to-indigo-900/20 border border-violet-200/70 dark:border-violet-700/40 rounded-2xl">
+                    <div className="relative p-6 bg-gradient-to-r from-violet-50 to-violet-50 dark:from-violet-900/20 dark:to-violet-900/20 border border-violet-200/70 dark:border-violet-700/40 rounded-2xl">
                       <div className="flex items-center space-x-3 mb-3">
                         <div className="p-2 bg-violet-600 hover:bg-violet-500 rounded-full">
                           <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2924,7 +3907,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
                   {/* Priority Improvements - dashboard card style */}
                   {rubricAlignment.priorityImprovements && rubricAlignment.priorityImprovements.length > 0 && (
-                    <div className="p-4 sm:p-5 bg-violet-50 dark:from-violet-900/20 dark:to-purple-900/20 border border-violet-200/70 dark:border-violet-700/40 rounded-2xl shadow-sm">
+                    <div className="p-4 sm:p-5 bg-violet-50 dark:from-violet-900/20 dark:to-violet-900/20 border border-violet-200/70 dark:border-violet-700/40 rounded-2xl shadow-sm">
                       <h3 className="font-semibold text-violet-700 dark:text-violet-300 mb-3">Priority Improvements</h3>
                       <ol className="space-y-2">
                         {rubricAlignment.priorityImprovements.map((improvement: string, index: number) => (
@@ -3011,6 +3994,58 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
           </div>
         )}
       </div>
+
+      {/* Compare original draft (before any WriteScholar revisions this session) */}
+      {showCompareOriginalModal && originalDraftBaseline && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-[2px]"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="compare-original-title"
+          onClick={() => setShowCompareOriginalModal(false)}
+        >
+          <div
+            className="bg-white dark:bg-stone-900 rounded-2xl max-w-5xl w-full max-h-[88vh] flex flex-col shadow-2xl border border-stone-200 dark:border-stone-700"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-stone-200 dark:border-stone-700">
+              <h2 id="compare-original-title" className="text-lg font-bold text-stone-900 dark:text-stone-100">
+                Compare with first draft
+              </h2>
+              <button
+                type="button"
+                onClick={() => setShowCompareOriginalModal(false)}
+                className="px-3 py-1.5 rounded-lg text-sm font-medium text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800"
+              >
+                Close
+              </button>
+            </div>
+            <p className="px-5 pt-3 text-xs text-stone-500 dark:text-stone-400">
+              Left: text as it was when this analysis was run. Right: your current draft;{' '}
+              <span className="font-medium text-violet-700 dark:text-violet-300">purple</span> highlights what changed
+              compared to the first draft (including WriteScholar revisions and any other edits).
+            </p>
+            <div className="grid md:grid-cols-2 gap-0 flex-1 min-h-0 border-t border-stone-200 dark:border-stone-700">
+              <div className="p-4 md:p-5 overflow-y-auto max-h-[min(65vh,560px)] border-b md:border-b-0 md:border-r border-stone-200 dark:border-stone-700">
+                <h3 className="text-[11px] font-bold uppercase tracking-wide text-stone-500 dark:text-stone-400 mb-2">
+                  First draft (analysis)
+                </h3>
+                <pre className="whitespace-pre-wrap text-sm text-stone-800 dark:text-stone-200 leading-relaxed font-sans">
+                  {normalizeDraftForCompare(originalDraftBaseline)}
+                </pre>
+              </div>
+              <div className="p-4 md:p-5 overflow-y-auto max-h-[min(65vh,560px)]">
+                <h3 className="text-[11px] font-bold uppercase tracking-wide text-stone-500 dark:text-stone-400 mb-2">
+                  Current draft
+                </h3>
+                <pre className="whitespace-pre-wrap text-sm text-stone-800 dark:text-stone-200 leading-relaxed font-sans">
+                  {compareModalCurrentDraftDiff ?? documentContent}
+                </pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Analysis Popup Animation */}
       {showAnalysisPopup && (

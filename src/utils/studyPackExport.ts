@@ -286,7 +286,7 @@ export async function exportStudyPackSegment(
       const getSlideColor = (type?: string): [number, number, number] => {
         const t = (type || '').toLowerCase();
         if (t === 'intro') return [124, 58, 237];
-        if (t === 'concept') return [59, 130, 246];
+        if (t === 'concept') return [139, 92, 246];
         if (t === 'example') return [245, 158, 11];
         if (t === 'keypoint') return [16, 185, 129];
         if (t === 'funfact') return [236, 72, 153];

@@ -434,8 +434,8 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
         );
       case 'docx':
         return (
-          <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-            <span className="text-blue-600 font-bold text-xs">DOCX</span>
+          <div className="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center">
+            <span className="text-violet-600 font-bold text-xs">DOCX</span>
           </div>
         );
       case 'doc':
@@ -729,12 +729,12 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                             {/* Smaller file icon for list view */}
                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
                               document.fileType.toLowerCase() === 'pdf' ? 'bg-red-100' :
-                              document.fileType.toLowerCase() === 'docx' ? 'bg-blue-100' :
+                              document.fileType.toLowerCase() === 'docx' ? 'bg-violet-100' :
                               document.fileType.toLowerCase() === 'doc' ? 'bg-green-100' : 'bg-gray-100'
                             }`}>
                               <span className={`font-bold text-[10px] ${
                                 document.fileType.toLowerCase() === 'pdf' ? 'text-red-600' :
-                                document.fileType.toLowerCase() === 'docx' ? 'text-blue-600' :
+                                document.fileType.toLowerCase() === 'docx' ? 'text-violet-600' :
                                 document.fileType.toLowerCase() === 'doc' ? 'text-green-600' : 'text-gray-600'
                               }`}>
                                 {document.fileType.toUpperCase().slice(0, 3)}
@@ -747,7 +747,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                                   type="text"
                                   value={editTitle}
                                   onChange={(e) => setEditTitle(e.target.value)}
-                                  className="flex-1 px-2 py-0.5 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-transparent"
+                                  className="flex-1 px-2 py-0.5 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-violet-500 focus:border-transparent"
                                   onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
                                       handleRenameDocument(document.id, editTitle);
@@ -796,7 +796,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                                       e.stopPropagation();
                                       startEditing(document);
                                     }}
-                                    className="p-0.5 text-gray-400 hover:text-blue-600 transition-colors"
+                                    className="p-0.5 text-gray-400 hover:text-violet-600 transition-colors"
                                     title="Rename"
                                   >
                                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -834,7 +834,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
             <div className="space-y-2">
               {filteredDocuments.slice(0, 3).map((doc) => (
                 <div key={doc.id} className="flex items-center text-xs text-gray-600 p-2 bg-gray-50 rounded-lg">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full mr-2 flex-shrink-0"></div>
+                  <div className="w-2 h-2 bg-violet-500 rounded-full mr-2 flex-shrink-0"></div>
                   <span className="truncate flex-1 min-w-0 font-medium text-gray-700">{doc.title}</span>
                   <span className="ml-2 text-gray-400 text-xs flex-shrink-0">
                     {new Date(doc.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
@@ -848,12 +848,12 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
         {/* Left Resize Handle */}
         <div
           ref={leftResizeRef}
-          className="hidden md:block w-1 bg-gray-100 hover:bg-blue-500 cursor-col-resize transition-colors relative group"
+          className="hidden md:block w-1 bg-gray-100 hover:bg-violet-500 cursor-col-resize transition-colors relative group"
           onMouseDown={() => handleMouseDown('left')}
         >
           <div className="absolute inset-y-0 -left-1 -right-1 bg-transparent"></div>
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <div className="w-1 h-10 bg-blue-500 rounded-full"></div>
+            <div className="w-1 h-10 bg-violet-500 rounded-full"></div>
           </div>
         </div>
 
@@ -961,12 +961,12 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
         {/* Right Resize Handle */}
         <div
           ref={rightResizeRef}
-          className="hidden md:block w-1 bg-gray-100 hover:bg-blue-500 cursor-col-resize transition-colors relative group"
+          className="hidden md:block w-1 bg-gray-100 hover:bg-violet-500 cursor-col-resize transition-colors relative group"
           onMouseDown={() => handleMouseDown('right')}
         >
           <div className="absolute inset-y-0 -left-1 -right-1 bg-transparent"></div>
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <div className="w-1 h-10 bg-blue-500 rounded-full"></div>
+            <div className="w-1 h-10 bg-violet-500 rounded-full"></div>
           </div>
         </div>
 
@@ -1049,7 +1049,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                           <div className="flex items-center justify-between mb-4">
                             <span className={`inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold ${
                               mostRecentAnalysis.analysis_type === 'citation_review' 
-                                ? 'bg-purple-100 text-purple-700' 
+                                ? 'bg-violet-100 text-violet-700' 
                                 : 'bg-violet-100 text-violet-700'
                             }`}>
                               {analysisType} Analysis

@@ -186,7 +186,7 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
             )}
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-            <div className="rounded-2xl overflow-hidden bg-violet-50 dark:from-violet-950/30 dark:to-purple-950/20 border border-violet-200/60 dark:border-violet-800/40 shadow-lg">
+            <div className="rounded-2xl overflow-hidden bg-violet-50 dark:from-violet-950/30 dark:to-violet-950/20 border border-violet-200/60 dark:border-violet-800/40 shadow-lg">
               <p className="px-4 pt-4 pb-2 text-sm font-bold text-stone-700 dark:text-stone-300">See how it works</p>
               <div className="aspect-video bg-stone-900">
                 <video autoPlay loop muted playsInline className="w-full h-full object-contain" title="WriteScholar Focus Mode">
@@ -194,7 +194,7 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
                 </video>
               </div>
             </div>
-            <div className="relative rounded-3xl overflow-hidden p-[1px] bg-gradient-to-br from-violet-400/30 via-purple-400/20 to-violet-400/20 dark:from-violet-600/30 dark:via-purple-600/20 dark:to-violet-600/20">
+            <div className="relative rounded-3xl overflow-hidden p-[1px] bg-gradient-to-br from-violet-400/30 via-violet-400/20 to-violet-400/20 dark:from-violet-600/30 dark:via-violet-600/20 dark:to-violet-600/20">
               <div className="rounded-[23px] bg-white/90 dark:bg-stone-800/95 backdrop-blur-xl border border-white/60 dark:border-stone-700/50 p-8 sm:p-10 flex flex-col justify-center">
                 <span className="inline-flex items-center px-4 py-1.5 bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 rounded-full text-sm font-bold mb-4 w-fit">Coming Soon</span>
                 <div className="w-16 h-16 rounded-2xl bg-violet-600 hover:bg-violet-500 flex items-center justify-center mb-4 text-3xl shadow-lg">🔒</div>
@@ -241,7 +241,7 @@ export default function FocusModeSettingsSection({ onBack, embedded = false, isP
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] gap-6 lg:gap-8">
           {/* Video - How Focus Mode works */}
           <div className="order-2 lg:order-1">
-            <div className="rounded-2xl overflow-hidden bg-violet-50 dark:from-violet-950/30 dark:to-purple-950/20 border border-violet-200/60 dark:border-violet-800/40 shadow-lg">
+            <div className="rounded-2xl overflow-hidden bg-violet-50 dark:from-violet-950/30 dark:to-violet-950/20 border border-violet-200/60 dark:border-violet-800/40 shadow-lg">
               <p className="px-4 pt-4 pb-2 text-sm font-bold text-stone-700 dark:text-stone-300">See how it works</p>
               <div className="aspect-video bg-stone-900 flex items-center justify-center">
                 <video

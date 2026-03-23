@@ -67,10 +67,10 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
     checkTrialEligibility();
   }, [user]);
 
-  const isProTier = currentPlan === 'pro' || currentPlan === 'premium';
   const isCurrentPlanId = (id: string) =>
     (id === 'free' && currentPlan === 'free') ||
-    (id === 'pro' && isProTier);
+    (id === 'pro' && currentPlan === 'pro') ||
+    (id === 'premium' && currentPlan === 'premium');
 
   const handlePlanAction = async (planId: string) => {
     if (!user) {
@@ -117,7 +117,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
             'Content-Type': 'application/json'
           },
             body: JSON.stringify({
-            planType: 'pro',
+            planType: planId,
             billingCycle: billingCycle as 'monthly' | 'yearly',
             successUrl: `${window.location.origin}/dashboard?payment=success`,
             cancelUrl: `${window.location.origin}/pricing?payment=cancelled`
@@ -213,8 +213,8 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
         'All citation styles, PDF/Word export',
         'Focus Mode (unlimited blocked sites)',
         'Quiz, flashcards, crossword & Crater Blast',
-        'Uploads up to 100MB per document',
-        'Paper Summarizer (long documents)'
+        '100MB total library storage; uploads up to 100MB per file',
+        'Full annotations & feedback (apply-to-draft revisions are Premium)'
       ],
       limitations: [],
       popular: true,
@@ -224,13 +224,35 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
           ? (isTrialEligible ? 'Get $10 Off' : 'Upgrade to Pro') 
           : 'Switch to Pro'),
         buttonAction: () => handlePlanAction('pro')
+    },
+    {
+      id: 'premium',
+      name: 'Premium',
+      description: 'Apply revisions + higher limits',
+      monthlyPrice: 39.99,
+      yearlyPrice: 399.99,
+      features: [
+        'Everything in Pro',
+        '299 combined analyses, study packs & citations/mo — great for heavy citation use',
+        '2,999,999 words Paper Summarizer (3× Pro)',
+        'Apply WriteScholar revisions into your essay',
+        '1GB total document library storage'
+      ],
+      limitations: [],
+      popular: false,
+      buttonText: !user
+        ? 'Get $10 Off Premium'
+        : (currentPlan === 'free'
+          ? (isTrialEligible ? 'Get $10 Off' : 'Upgrade to Premium')
+          : 'Switch to Premium'),
+      buttonAction: () => handlePlanAction('premium')
     }
   ];
 
   const faqs = [
     {
       question: "How does the $10 off work?",
-      answer: "First-time subscribers get $10 off their first month on Pro. Pro starts at $9.99 (then $19.99/mo). The discount is applied automatically at checkout. Each email address can only use the offer once."
+      answer: "First-time subscribers get $10 off their first month on Pro or Premium (e.g. Pro $9.99 then $19.99/mo; Premium $29.99 then $39.99/mo). The discount is applied automatically at checkout. Each email address can only use the offer once."
     },
     {
       question: "What's included in the free plan?",
@@ -238,7 +260,11 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
     },
     {
       question: "What does Pro include?",
-      answer: "Pro includes 99 combined actions per month (analyses, study packs & citations), 999,999 words for the Paper Summarizer, unlimited Focus Mode blocked sites, uploads up to 100MB per file, all citation styles, and full access to quizzes, flashcards, crossword & Crater Blast."
+      answer: "Pro includes 99 combined actions per month (analyses, study packs & citations), 999,999 words for the Paper Summarizer, unlimited Focus Mode blocked sites, uploads up to 100MB per file, 100MB total library storage, all citation styles, full annotations and feedback, and full access to quizzes, flashcards, crossword & Crater Blast. One-click Apply WriteScholar revisions into your draft are Premium."
+    },
+    {
+      question: "What does Premium add?",
+      answer: "Premium includes everything in Pro with 3× usage: 299 combined actions per month, 2,999,999 Paper Summarizer words, 1GB total library storage, and Apply WriteScholar revisions so you can insert suggested edits directly into your essay."
     },
     {
       question: "Can I change my plan after subscribing?",
@@ -342,13 +368,15 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-2 gap-8 mb-20 max-w-4xl mx-auto">
+        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8 mb-20 max-w-6xl mx-auto">
           {plans.map((plan) => (
             <div
               key={plan.id}
               className={`relative rounded-2xl p-8 hover:shadow-lg transition-all ${
                 plan.popular 
                   ? 'bg-white dark:bg-stone-800 border border-violet-500 ring-2 ring-violet-200 dark:ring-violet-800'
+                  : plan.id === 'premium'
+                  ? 'bg-white dark:bg-stone-800 border border-amber-400/90 dark:border-amber-600/60 ring-2 ring-amber-200/90 dark:ring-amber-800/50'
                   : 'bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700'
               }`}
             >
@@ -356,6 +384,13 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                   <span className="bg-violet-600 hover:bg-violet-500 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg shadow-violet-500/25">
                     Most Popular
+                  </span>
+                </div>
+              )}
+              {plan.id === 'premium' && (
+                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                  <span className="bg-gradient-to-r from-amber-500 to-amber-600 text-amber-950 px-4 py-1 rounded-full text-sm font-bold shadow-lg shadow-amber-500/25 ring-1 ring-amber-400/50">
+                    3× usage
                   </span>
                 </div>
               )}
@@ -368,15 +403,15 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                     <>
                       <div className="flex flex-col items-center gap-1">
                         <span className="text-2xl font-semibold text-red-600 dark:text-red-400 line-through decoration-2 decoration-red-500">
-                          $19.99
+                          ${plan.monthlyPrice.toFixed(2)}
                         </span>
                         <span className="text-4xl font-bold text-stone-800 dark:text-stone-100">
-                          $9.99
+                          ${(plan.monthlyPrice - 10).toFixed(2)}
                         </span>
                         <span className="text-stone-500 dark:text-stone-400 text-sm">
                           /month <span className="text-violet-600 dark:text-violet-400 font-semibold">first month only</span>
                         </span>
-                        <span className="text-xs text-stone-500 dark:text-stone-400">Then $19.99/mo</span>
+                        <span className="text-xs text-stone-500 dark:text-stone-400">Then ${plan.monthlyPrice.toFixed(2)}/mo</span>
                       </div>
                     </>
                   ) : (

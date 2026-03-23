@@ -503,7 +503,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                 <div>
                   <div className="font-semibold text-stone-800 dark:text-stone-100">Current Plan</div>
                   <div className="text-stone-600 dark:text-stone-400 flex items-center">
-                    <span className="capitalize">{userStats.subscriptionPlan === 'premium' ? 'Pro' : userStats.subscriptionPlan}</span>
+                    <span className="capitalize">{userStats.subscriptionPlan}</span>
                     <span className={`ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                       userStats.subscriptionStatus === 'active'
                         ? 'bg-violet-100 dark:bg-violet-900/50 text-violet-800 dark:text-violet-300'
@@ -528,8 +528,10 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                   <div className="text-stone-600 dark:text-stone-400">
                     {userStats.subscriptionPlan === 'free'
                       ? '3 documents, 2 analyses per month, 2 citation searches'
-                      : (userStats.subscriptionPlan === 'pro' || userStats.subscriptionPlan === 'premium')
+                      : userStats.subscriptionPlan === 'pro'
                       ? 'Unlimited documents, 99 combined/mo (analyses, study packs & citations)'
+                      : userStats.subscriptionPlan === 'premium'
+                      ? 'Unlimited documents, 299 combined/mo; Apply WriteScholar revisions'
                       : 'Basic features included'
                     }
                   </div>
@@ -550,14 +552,29 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                       <div className="text-stone-400 text-xs">Crossword & Crater Blast unlock with Pro</div>
                     </>
                   )}
-                  {(userStats.subscriptionPlan === 'pro' || userStats.subscriptionPlan === 'premium') && (
+                  {userStats.subscriptionPlan === 'pro' && (
                     <>
                       <div>• Unlimited document uploads</div>
                       <div>• 99 combined (analyses, study packs & citations) per month</div>
+                      <div>• 100MB total library storage</div>
                       <div>• 999,999 Paper Summarizer words per month</div>
                       <div>• Focus Mode with unlimited blocked sites</div>
                       <div>• Uploads up to 100MB per file</div>
                       <div>• Long-document summarization</div>
+                      <div>• PDF & Word export</div>
+                      <div>• All quiz types & difficulty levels</div>
+                      <div>• Full annotations (apply-to-draft revisions: Premium)</div>
+                    </>
+                  )}
+                  {userStats.subscriptionPlan === 'premium' && (
+                    <>
+                      <div>• Everything in Pro, 3× usage</div>
+                      <div>• 299 combined (analyses, study packs & citations) per month</div>
+                      <div>• 2,999,999 Paper Summarizer words per month</div>
+                      <div>• 1GB total library storage</div>
+                      <div>• Apply WriteScholar revisions into your essay</div>
+                      <div>• Focus Mode with unlimited blocked sites</div>
+                      <div>• Uploads up to 100MB per file</div>
                       <div>• PDF & Word export</div>
                       <div>• All quiz types & difficulty levels</div>
                     </>

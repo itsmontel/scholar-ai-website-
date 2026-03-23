@@ -992,7 +992,7 @@ const AcademicAIApp = () => {
 
   return (
     <ErrorBoundary>
-    <div className="relative min-h-screen overflow-x-hidden transition-colors">
+    <div className="relative min-h-screen overflow-x-clip transition-colors">
       <Suspense fallback={pageFallback}>
         <PageErrorBoundary key={currentPage} onGoBack={() => navigateTo('dashboard')}>
           {renderCurrentPage()}
@@ -1043,7 +1043,7 @@ const AdminDashboard = ({ onNavigate, user: _user }: UserProps) => (
       <div className="grid md:grid-cols-4 gap-6 mb-8">
         <div className="bg-white rounded-xl shadow-lg p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Active Users</h3>
-          <div className="text-3xl font-bold text-blue-600">1,247</div>
+          <div className="text-3xl font-bold text-violet-600">1,247</div>
           <p className="text-sm text-gray-500">+12% from last month</p>
         </div>
         <div className="bg-white rounded-xl shadow-lg p-6">
@@ -1053,7 +1053,7 @@ const AdminDashboard = ({ onNavigate, user: _user }: UserProps) => (
         </div>
         <div className="bg-white rounded-xl shadow-lg p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Average Score</h3>
-          <div className="text-3xl font-bold text-purple-600">84.2%</div>
+          <div className="text-3xl font-bold text-violet-600">84.2%</div>
           <p className="text-sm text-gray-500">Institution-wide</p>
         </div>
         <div className="bg-white rounded-xl shadow-lg p-6">
@@ -1138,7 +1138,7 @@ const CollaborationPage = ({ onNavigate, user: _user }: UserProps) => (
         <div className="space-y-4">
           <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-violet-100 rounded-lg flex items-center justify-center">
                 <span className="text-xl">📄</span>
               </div>
               <div>
@@ -1148,7 +1148,7 @@ const CollaborationPage = ({ onNavigate, user: _user }: UserProps) => (
             </div>
             <div className="flex items-center space-x-2">
               <span className="text-sm text-green-600 bg-green-100 px-2 py-1 rounded-full">Active</span>
-              <button className="text-blue-600 hover:text-blue-500">Open</button>
+              <button className="text-violet-600 hover:text-violet-500">Open</button>
             </div>
           </div>
         </div>

@@ -507,7 +507,7 @@ const FriendsPage = ({ onNavigate, user, onLogout }: FriendsPageProps) => {
       <main className="flex-1 max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 w-full">
         {/* Page Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center px-4 py-2 bg-purple-50/80 text-purple-700 rounded-full text-sm font-medium mb-6 border border-purple-200/50">
+          <div className="inline-flex items-center px-4 py-2 bg-violet-50/80 text-violet-700 rounded-full text-sm font-medium mb-6 border border-violet-200/50">
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
@@ -530,13 +530,13 @@ const FriendsPage = ({ onNavigate, user, onLogout }: FriendsPageProps) => {
             </div>
             <div className="flex items-center gap-3">
               <div className="bg-gray-50 rounded-xl px-6 py-3 border-2 border-dashed border-gray-200">
-                <span className="font-mono text-2xl font-bold text-purple-600 tracking-wider">
+                <span className="font-mono text-2xl font-bold text-violet-600 tracking-wider">
                   {friendCode || '--------'}
                 </span>
               </div>
               <button
                 onClick={copyFriendCode}
-                className="p-3 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-xl transition-colors"
+                className="p-3 bg-violet-100 hover:bg-violet-200 text-violet-700 rounded-xl transition-colors"
                 title="Copy to clipboard"
               >
                 {copied ? (
@@ -568,7 +568,7 @@ const FriendsPage = ({ onNavigate, user, onLogout }: FriendsPageProps) => {
             <button
               type="submit"
               disabled={isAdding || !addFriendCode.trim()}
-              className="px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 text-white font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
+              className="px-6 py-3 bg-violet-600 hover:bg-violet-700 disabled:bg-gray-300 text-white font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
             >
               {isAdding ? (
                 <>
@@ -626,7 +626,7 @@ const FriendsPage = ({ onNavigate, user, onLogout }: FriendsPageProps) => {
               onClick={() => setActiveTab('friends')}
               className={`flex-shrink-0 flex-1 min-w-[72px] px-3 sm:px-4 py-4 text-sm font-medium transition-colors whitespace-nowrap ${
                 activeTab === 'friends'
-                  ? 'text-purple-700 bg-purple-50 border-b-2 border-purple-600'
+                  ? 'text-violet-700 bg-violet-50 border-b-2 border-violet-600'
                   : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
               }`}
             >
@@ -641,7 +641,7 @@ const FriendsPage = ({ onNavigate, user, onLogout }: FriendsPageProps) => {
               onClick={() => setActiveTab('requests')}
               className={`flex-shrink-0 flex-1 min-w-[72px] px-3 sm:px-4 py-4 text-sm font-medium transition-colors whitespace-nowrap ${
                 activeTab === 'requests'
-                  ? 'text-purple-700 bg-purple-50 border-b-2 border-purple-600'
+                  ? 'text-violet-700 bg-violet-50 border-b-2 border-violet-600'
                   : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
               }`}
             >
@@ -661,7 +661,7 @@ const FriendsPage = ({ onNavigate, user, onLogout }: FriendsPageProps) => {
               onClick={() => setActiveTab('shares')}
               className={`flex-shrink-0 flex-1 min-w-[72px] px-3 sm:px-4 py-4 text-sm font-medium transition-colors whitespace-nowrap ${
                 activeTab === 'shares'
-                  ? 'text-purple-700 bg-purple-50 border-b-2 border-purple-600'
+                  ? 'text-violet-700 bg-violet-50 border-b-2 border-violet-600'
                   : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
               }`}
             >
@@ -681,7 +681,7 @@ const FriendsPage = ({ onNavigate, user, onLogout }: FriendsPageProps) => {
               onClick={() => setActiveTab('blocked')}
               className={`flex-shrink-0 flex-1 min-w-[72px] px-3 sm:px-4 py-4 text-sm font-medium transition-colors whitespace-nowrap ${
                 activeTab === 'blocked'
-                  ? 'text-purple-700 bg-purple-50 border-b-2 border-purple-600'
+                  ? 'text-violet-700 bg-violet-50 border-b-2 border-violet-600'
                   : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
               }`}
             >
@@ -702,7 +702,7 @@ const FriendsPage = ({ onNavigate, user, onLogout }: FriendsPageProps) => {
           <div className="p-6">
             {isLoading ? (
               <div className="flex items-center justify-center py-12">
-                <svg className="animate-spin h-8 w-8 text-purple-600" viewBox="0 0 24 24">
+                <svg className="animate-spin h-8 w-8 text-violet-600" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
@@ -726,8 +726,8 @@ const FriendsPage = ({ onNavigate, user, onLogout }: FriendsPageProps) => {
                       friends.map((friend) => (
                         <div key={friend.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
                           <div className="flex items-center gap-4">
-                            <div className="relative w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                              <span className="text-purple-600 font-semibold text-lg">
+                            <div className="relative w-12 h-12 bg-violet-100 rounded-full flex items-center justify-center">
+                              <span className="text-violet-600 font-semibold text-lg">
                                 {(friend.first_name?.[0] || friend.email?.[0] || '?').toUpperCase()}
                               </span>
                               {friend.currentStreak != null && friend.currentStreak > 0 && (
@@ -796,10 +796,10 @@ const FriendsPage = ({ onNavigate, user, onLogout }: FriendsPageProps) => {
                       ) : (
                         <div className="space-y-3">
                           {pendingRequests.map((request) => (
-                            <div key={request.id} className="p-4 bg-purple-50 rounded-xl border border-purple-100">
+                            <div key={request.id} className="p-4 bg-violet-50 rounded-xl border border-violet-100">
                               <div className="flex items-center gap-3 mb-3">
-                                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-200 rounded-full flex items-center justify-center flex-shrink-0">
-                                  <span className="text-purple-700 font-semibold text-base sm:text-lg">
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-violet-200 rounded-full flex items-center justify-center flex-shrink-0">
+                                  <span className="text-violet-700 font-semibold text-base sm:text-lg">
                                     {(request.sender?.username?.[0] || request.sender?.first_name?.[0] || '?').toUpperCase()}
                                   </span>
                                 </div>
@@ -812,7 +812,7 @@ const FriendsPage = ({ onNavigate, user, onLogout }: FriendsPageProps) => {
                                 <button
                                   onClick={() => handleAcceptFriendRequest(request.id)}
                                   disabled={actionLoading === request.id}
-                                  className="flex-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+                                  className="flex-1 px-3 py-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
                                 >
                                   Accept
                                 </button>

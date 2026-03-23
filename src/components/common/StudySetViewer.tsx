@@ -124,7 +124,7 @@ const StudySetViewer = ({ data, title, onClose, onNavigate, userPlan }: StudySet
           </svg>
         </button>
 
-        <div className="h-1.5 bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500 rounded-t-3xl" />
+        <div className="h-1.5 bg-gradient-to-r from-violet-500 via-violet-500 to-violet-500 rounded-t-3xl" />
 
         <div className="p-6">
           <div className="text-center mb-5">
@@ -139,7 +139,7 @@ const StudySetViewer = ({ data, title, onClose, onNavigate, userPlan }: StudySet
 
           {/* Free user notice */}
           {!isPaidUser && (
-            <div className="mb-4 p-3 rounded-xl bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 border border-violet-200/60 dark:border-violet-800/40">
+            <div className="mb-4 p-3 rounded-xl bg-gradient-to-r from-violet-50 to-violet-50 dark:from-violet-900/20 dark:to-violet-900/20 border border-violet-200/60 dark:border-violet-800/40">
               <p className="text-xs text-violet-700 dark:text-violet-300 text-center">
                 <span className="font-semibold">Unlock crossword & Crater Blast with Pro</span> for more ways to practice
               </p>
@@ -209,7 +209,7 @@ const StudySetViewer = ({ data, title, onClose, onNavigate, userPlan }: StudySet
         <div className="fixed inset-0 z-[80] flex items-center justify-center p-4" onClick={() => setShowUpgradePrompt(null)}>
           <div className="absolute inset-0 bg-black/30" />
           <div className="relative w-full max-w-sm rounded-2xl bg-white dark:bg-stone-800 shadow-2xl border border-stone-200/80 dark:border-stone-700/60 p-6 text-center" onClick={(e) => e.stopPropagation()}>
-            <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/40 dark:to-purple-900/40 flex items-center justify-center">
+            <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-gradient-to-br from-violet-100 to-violet-100 dark:from-violet-900/40 dark:to-violet-900/40 flex items-center justify-center">
               <svg className="w-7 h-7 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>

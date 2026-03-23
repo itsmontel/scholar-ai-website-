@@ -184,8 +184,8 @@ const QuizViewer = ({ questions, title, onEnlarge, initialQuestionIndex }: QuizV
       </div>
       <div className="flex-1 rounded-2xl p-4 sm:p-6 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 overflow-auto">
         <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold mb-3 ${
-          qType === 'multiple_choice' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300' :
-          qType === 'true_false' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300' :
+          qType === 'multiple_choice' ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300' :
+          qType === 'true_false' ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300' :
           'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'
         }`}>
           {qType === 'multiple_choice' ? 'Multiple Choice' : qType === 'true_false' ? 'True/False' : 'Fill in the Blank'}
@@ -274,9 +274,9 @@ const QuizViewer = ({ questions, title, onEnlarge, initialQuestionIndex }: QuizV
         </div>
 
         {showResult && question.explanation && (
-          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl mb-4 border border-blue-100 dark:border-blue-800">
-            <p className="text-xs font-semibold text-blue-800 dark:text-blue-200 mb-1">Explanation</p>
-            <p className="text-sm text-blue-700 dark:text-blue-300">{question.explanation}</p>
+          <div className="p-3 bg-violet-50 dark:bg-violet-900/20 rounded-xl mb-4 border border-violet-100 dark:border-violet-800">
+            <p className="text-xs font-semibold text-violet-800 dark:text-violet-200 mb-1">Explanation</p>
+            <p className="text-sm text-violet-700 dark:text-violet-300">{question.explanation}</p>
           </div>
         )}
 

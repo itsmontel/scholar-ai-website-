@@ -250,7 +250,7 @@ const UploadPage = ({ onNavigate, user, onLogout }: UploadPageProps) => {
           <div
             className={`relative border-2 border-dashed rounded-2xl p-10 sm:p-16 text-center transition-all ${
               dragActive 
-                ? 'border-blue-500 bg-blue-50'
+                ? 'border-violet-500 bg-violet-50'
                 : selectedFile
                   ? 'border-green-400 bg-green-50'
                   : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
@@ -310,7 +310,7 @@ const UploadPage = ({ onNavigate, user, onLogout }: UploadPageProps) => {
                 id="documentTitle"
                 value={documentTitle}
                 onChange={(e) => setDocumentTitle(e.target.value)}
-                className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors"
                 placeholder="Enter a title for your document"
               />
             </div>
@@ -326,7 +326,7 @@ const UploadPage = ({ onNavigate, user, onLogout }: UploadPageProps) => {
               />
               <div className="w-full bg-gray-200 rounded-full h-2 mt-4">
                 <div
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                  className="bg-violet-600 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${uploadProgress}%` }}
                 ></div>
               </div>
@@ -339,7 +339,7 @@ const UploadPage = ({ onNavigate, user, onLogout }: UploadPageProps) => {
               <>
                 <button
                   onClick={handleUpload}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3.5 px-6 rounded-xl font-semibold text-lg transition-colors"
+                  className="flex-1 bg-violet-600 hover:bg-violet-700 text-white py-3.5 px-6 rounded-xl font-semibold text-lg transition-colors"
                 >
                   Upload Document
                 </button>
@@ -377,8 +377,8 @@ const UploadPage = ({ onNavigate, user, onLogout }: UploadPageProps) => {
               </div>
             </div>
             <div className="flex items-center space-x-3 bg-white rounded-xl p-4 border border-gray-200">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <span className="text-blue-600 font-bold text-sm">DOCX</span>
+              <div className="w-10 h-10 bg-violet-100 rounded-lg flex items-center justify-center">
+                <span className="text-violet-600 font-bold text-sm">DOCX</span>
               </div>
               <div>
                 <p className="font-medium text-gray-900 text-sm">Word</p>

@@ -51,7 +51,7 @@ const LandingPage = ({ onNavigate }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-violet-50 to-violet-50">
       {/* Navigation */}
       <nav className="flex items-center justify-between px-8 py-6">
         <div className="flex items-center space-x-2">
@@ -127,14 +127,14 @@ const LandingPage = ({ onNavigate }) => {
                 </div>
               </div>
               <blockquote className="text-xl text-gray-900 mb-6 leading-relaxed">
-                "This platform has <em className="font-semibold text-blue-600">revolutionized</em> my research writing process. The AI feedback is incredibly detailed and helped me <em className="font-semibold text-purple-600">improve my argumentation</em> and academic style significantly."
+                "This platform has <em className="font-semibold text-violet-600">revolutionized</em> my research writing process. The AI feedback is incredibly detailed and helped me <em className="font-semibold text-violet-600">improve my argumentation</em> and academic style significantly."
               </blockquote>
               <cite className="text-gray-600">
                 <span className="font-semibold">Sarah Chen</span> / PhD Candidate, Stanford University
               </cite>
               <div className="flex justify-center mt-6 space-x-2">
                 <div className="w-3 h-3 bg-gray-300 rounded-full"></div>
-                <div className="w-3 h-3 bg-blue-600 rounded-full"></div>
+                <div className="w-3 h-3 bg-violet-600 rounded-full"></div>
                 <div className="w-3 h-3 bg-gray-300 rounded-full"></div>
               </div>
             </div>
@@ -148,15 +148,15 @@ const LandingPage = ({ onNavigate }) => {
           
           <div className="grid md:grid-cols-4 gap-8">
             <div className="text-center">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-blue-600 font-bold">1</span>
+              <div className="w-12 h-12 bg-violet-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-violet-600 font-bold">1</span>
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Upload Your Paper</h3>
               <p className="text-gray-600">Upload your academic document in PDF, Word, or paste your text directly.</p>
             </div>
             <div className="text-center">
-              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-purple-600 font-bold">2</span>
+              <div className="w-12 h-12 bg-violet-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-violet-600 font-bold">2</span>
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">AI Analysis</h3>
               <p className="text-gray-600">Our AI analyzes your writing for structure, clarity, grammar, and academic style.</p>
@@ -169,8 +169,8 @@ const LandingPage = ({ onNavigate }) => {
               <p className="text-gray-600">Get detailed, professor style annotations and suggestions for improvement.</p>
             </div>
             <div className="text-center">
-              <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-indigo-600 font-bold">4</span>
+              <div className="w-12 h-12 bg-violet-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-violet-600 font-bold">4</span>
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Improve & Iterate</h3>
               <p className="text-gray-600">Apply suggestions and re-analyze to continuously enhance your academic writing.</p>

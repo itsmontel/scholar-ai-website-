@@ -212,7 +212,7 @@ const StudyTimerWidget = ({ currentPage = '' }: StudyTimerWidgetProps) => {
   const formatTime = (m: number, s: number) => `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 
   return (
-    <div className="fixed bottom-4 right-4 z-[9998] hidden md:flex flex-col items-end gap-2">
+    <div className="fixed bottom-4 right-4 z-[9998] hidden md:flex lg:hidden flex-col items-end gap-2">
       {isExpanded && (
         <div className="w-64 sm:w-80 bg-white dark:bg-stone-800 rounded-xl sm:rounded-2xl shadow-xl border border-stone-200 dark:border-stone-700 overflow-hidden">
           {showCompleted ? (

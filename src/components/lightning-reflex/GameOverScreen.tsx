@@ -29,7 +29,7 @@ export default function GameOverScreen({
       </p>
       <button
         onClick={onRestart}
-        className="px-7 py-3.5 text-base font-semibold rounded-xl bg-sky-600 hover:bg-sky-500 text-white transition-all"
+        className="px-7 py-3.5 text-base font-semibold rounded-xl bg-violet-600 hover:bg-violet-500 text-white transition-all"
       >
         New Game
       </button>

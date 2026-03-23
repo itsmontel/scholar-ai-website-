@@ -19,11 +19,10 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
       });
     }
 
-    const normalizedPlan = planType === 'premium' ? 'pro' : planType;
-    if (normalizedPlan !== 'pro') {
+    if (planType !== 'pro' && planType !== 'premium') {
       return res.status(400).json({
         success: false,
-        message: 'Invalid plan type. Must be pro.'
+        message: 'Invalid plan type. Must be pro or premium.'
       });
     }
 
@@ -76,7 +75,7 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
     // Pass user email for first-time discount eligibility and custom redirect URLs
     const sessionResult = await subscriptionService.createCheckoutSession(
       customerId,
-      normalizedPlan,
+      planType,
       billingCycle,
       userId,
       effectivePromoCode,
@@ -165,11 +164,10 @@ router.put('/update', authenticateToken, async (req, res) => {
     const { newPlan } = req.body;
     const userId = req.user.id;
 
-    const normalizedNew = newPlan === 'premium' ? 'pro' : newPlan;
-    if (!normalizedNew || normalizedNew !== 'pro') {
+    if (newPlan !== 'pro' && newPlan !== 'premium') {
       return res.status(400).json({
         success: false,
-        message: 'Invalid plan. Must be pro.'
+        message: 'Invalid plan. Must be pro or premium.'
       });
     }
 
@@ -211,7 +209,7 @@ router.put('/update', authenticateToken, async (req, res) => {
     const isMonthly = currentPriceId.includes('monthly') || currentPriceId === process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || currentPriceId === process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID;
     const billingCycle = isMonthly ? 'monthly' : 'yearly';
 
-    const newPriceId = subscriptionService.getPriceId(normalizedNew, billingCycle);
+    const newPriceId = subscriptionService.getPriceId(newPlan, billingCycle);
     if (!newPriceId) {
       return res.status(400).json({
         success: false,
@@ -654,7 +652,7 @@ router.get('/usage', authenticateToken, async (req, res) => {
     const studyPacksGenerated = studyPacks ? studyPacks.length : 0;
     const storageUsed = currentDocuments ? currentDocuments.reduce((total, doc) => total + (doc.file_size || 0), 0) : 0;
 
-    const isPaid = subscriptionService.normalizePlanForLimits(subscriptionDetails.plan) === 'pro';
+    const isPaid = subscriptionService.isPaidSubscriptionTier(subscriptionDetails.plan);
 
     // Pro/Premium: combined pool (analyses + citations + study packs) and combined words (humanize + summarize)
     let combinedActionsUsed, combinedActionsRemaining, combinedWordsUsed, combinedWordsRemaining;

@@ -1,10 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
+import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { HIDE_FRIENDS } from '../../config/featureFlags';
 import PromoBanner from './PromoBanner';
 import { getResetsInText } from '../../utils/usageReset';
-import { searchSiteMultiple, SearchItem } from '../../data/searchIndex';
 
 interface HeaderProps {
   onNavigate?: (page: string, slug?: string) => void;
@@ -61,13 +59,6 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
   const [usageStats, setUsageStats] = useState<UsageStats | null>(null);
   const [loadingUsage, setLoadingUsage] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [headerSearchQuery, setHeaderSearchQuery] = useState('');
-  const [headerSearchResults, setHeaderSearchResults] = useState<SearchItem[]>([]);
-  const [headerSearchOpen, setHeaderSearchOpen] = useState(false);
-  const [searchDropdownRect, setSearchDropdownRect] = useState<{ top: number; left: number; width: number } | null>(null);
-  const desktopSearchRef = useRef<HTMLInputElement>(null);
-  const mobileSearchRef = useRef<HTMLInputElement>(null);
-
   // Track scroll for shadow effect
   useEffect(() => {
     const handleScroll = () => {
@@ -86,52 +77,11 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
       if (!target.closest('.mobile-menu-container') && !target.closest('.mobile-menu-button')) {
         setIsMobileMenuOpen(false);
       }
-      if (!target.closest('.header-search-container') && !target.closest('.header-search-dropdown')) {
-        setHeaderSearchOpen(false);
-      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  // Update search results when query changes (debounced to avoid work every keystroke)
-  useEffect(() => {
-    const q = headerSearchQuery.trim();
-    if (!q) {
-      setHeaderSearchResults([]);
-      setHeaderSearchOpen(false);
-      setSearchDropdownRect(null);
-      return;
-    }
-    const t = window.setTimeout(() => {
-      setHeaderSearchResults(searchSiteMultiple(headerSearchQuery));
-      setHeaderSearchOpen(true);
-    }, 120);
-    return () => window.clearTimeout(t);
-  }, [headerSearchQuery]);
-
-  // Position dropdown via portal - update rect when open
-  useEffect(() => {
-    if (!headerSearchOpen || !headerSearchQuery.trim()) {
-      setSearchDropdownRect(null);
-      return;
-    }
-    const updateRect = () => {
-      const input = isMobileMenuOpen ? mobileSearchRef.current : desktopSearchRef.current;
-      if (input) {
-        const r = input.getBoundingClientRect();
-        setSearchDropdownRect({ top: r.bottom + 4, left: r.left, width: r.width });
-      }
-    };
-    updateRect();
-    window.addEventListener('scroll', updateRect, true);
-    window.addEventListener('resize', updateRect);
-    return () => {
-      window.removeEventListener('scroll', updateRect, true);
-      window.removeEventListener('resize', updateRect);
-    };
-  }, [headerSearchOpen, headerSearchQuery, isMobileMenuOpen]);
 
   // Fetch usage stats when user is available
   useEffect(() => {
@@ -197,34 +147,6 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
       { id: 'blog', label: 'Blog' },
       { id: 'about', label: 'About' },
     ];
-    const handleHeaderSearchSubmit = (e: React.FormEvent) => {
-      e.preventDefault();
-      const query = headerSearchQuery.trim();
-      if (!query) return;
-      const match = headerSearchResults[0];
-      if (match) {
-        if (match.slug) {
-          onNavigate?.(match.page, match.slug);
-        } else {
-          onNavigate?.(match.page);
-        }
-      } else {
-        onNavigate?.('features');
-      }
-      setHeaderSearchQuery('');
-      setHeaderSearchOpen(false);
-    };
-
-    const handleHeaderSearchSelect = (item: SearchItem) => {
-      if (item.slug) {
-        onNavigate?.(item.page, item.slug);
-      } else {
-        onNavigate?.(item.page);
-      }
-      setHeaderSearchQuery('');
-      setHeaderSearchOpen(false);
-      setIsMobileMenuOpen(false);
-    };
     const publicNavActiveCls =
       'bg-white dark:bg-stone-800 text-violet-800 dark:text-violet-300 shadow-sm border border-stone-200/90 dark:border-stone-600/80';
     const publicNavInactiveCls =
@@ -243,7 +165,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
     return (
       <>
       <header
-        className={`${sticky ? 'sticky top-0' : ''} left-0 right-0 z-[100] transition-all duration-300 border-b ${opaqueHeader ? '' : 'backdrop-blur-md'} ${publicHeaderBg}`}
+        className={`sticky top-0 left-0 right-0 z-[100] transition-all duration-300 border-b ${opaqueHeader ? '' : 'backdrop-blur-md'} ${publicHeaderBg}`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-[3.5rem] sm:h-[4.25rem]">
@@ -265,8 +187,8 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
               </span>
             </button>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center">
+            {/* Desktop Navigation — centered (no search on logged-out bar) */}
+            <nav className="hidden lg:flex flex-1 items-center justify-center min-w-0">
               <div className="flex items-center rounded-xl border border-stone-200/85 dark:border-stone-700/90 bg-white/70 dark:bg-stone-900/45 p-1 shadow-sm">
                 {publicNavItems.map(({ id, label }) => (
                   <button
@@ -281,26 +203,6 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                 ))}
               </div>
             </nav>
-
-            {/* Desktop Search - same line */}
-            <form onSubmit={handleHeaderSearchSubmit} className="hidden md:block flex-1 min-w-0 max-w-xs mx-4">
-              <div className="header-search-container relative">
-                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 dark:text-stone-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                <input
-                  ref={desktopSearchRef}
-                  type="search"
-                  value={headerSearchQuery}
-                  onChange={(e) => setHeaderSearchQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Escape' && setHeaderSearchOpen(false)}
-                  placeholder="Search tools & pages…"
-                  className="w-full pl-9 pr-3 py-2 rounded-lg border border-stone-200/90 dark:border-stone-600/80 bg-white dark:bg-stone-900/60 text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-violet-600/25 focus:border-violet-600/50 dark:focus:border-violet-500/60 text-sm transition-all"
-                  aria-label="Search WriteScholar"
-                  autoComplete="off"
-                />
-              </div>
-            </form>
 
             {/* Right side */}
             <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 shrink-0">
@@ -334,29 +236,6 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             </div>
           </div>
         </div>
-        {/* Search dropdown portal - renders above all content */}
-        {headerSearchOpen && headerSearchQuery.trim() && searchDropdownRect && createPortal(
-          <div
-            className="header-search-dropdown fixed py-1 rounded-lg bg-white dark:bg-stone-900 border border-stone-200/95 dark:border-stone-700 shadow-[0_16px_50px_-12px_rgba(15,23,42,0.2)] dark:shadow-black/40 max-h-64 overflow-y-auto z-[99999]"
-            style={{ top: searchDropdownRect.top, left: searchDropdownRect.left, width: searchDropdownRect.width }}
-          >
-            {headerSearchResults.length > 0 ? (
-              headerSearchResults.map((item) => (
-                <button
-                  key={item.page + (item.slug || '')}
-                  type="button"
-                  onClick={() => handleHeaderSearchSelect(item)}
-                  className="w-full text-left px-3 py-2.5 text-sm text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-700/50 transition-colors flex items-center gap-2"
-                >
-                  <span className="font-medium">{item.label}</span>
-                </button>
-              ))
-            ) : (
-              <div className="px-3 py-3 text-sm text-stone-500 dark:text-stone-400">No matches</div>
-            )}
-          </div>,
-          document.body
-        )}
         {/* Mobile menu - mobile-menu-container required so click-outside doesn't close before onClick fires */}
         {isMobileMenuOpen && (
           <div
@@ -365,24 +244,6 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             }`}
           >
             <div className="px-4 py-3 max-w-7xl mx-auto">
-              <form onSubmit={handleHeaderSearchSubmit} className="mb-3">
-                <div className="header-search-container relative">
-                  <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  <input
-                    ref={mobileSearchRef}
-                    type="search"
-                    value={headerSearchQuery}
-                    onChange={(e) => setHeaderSearchQuery(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Escape' && setHeaderSearchOpen(false)}
-                    placeholder="Search tools & pages…"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-stone-200/90 dark:border-stone-600 bg-white dark:bg-stone-900/60 text-stone-800 dark:text-stone-100 placeholder-stone-400 text-sm focus:outline-none focus:ring-2 focus:ring-violet-600/25 focus:border-violet-600/50"
-                    aria-label="Search WriteScholar"
-                    autoComplete="off"
-                  />
-                </div>
-              </form>
               <div className="space-y-1">
               {publicNavItems.map(({ id, label }) => (
                 <button
@@ -441,7 +302,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
 
   return (
     <header
-      className={`sticky top-0 left-0 right-0 z-50 transition-all duration-300 border-b ${opaqueHeader ? '' : 'backdrop-blur-md'} ${loggedInHeaderBg}`}
+      className={`${sticky ? 'sticky top-0' : 'relative'} left-0 right-0 z-50 transition-all duration-300 border-b ${opaqueHeader ? '' : 'backdrop-blur-md'} ${loggedInHeaderBg}`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-[3.5rem] sm:h-[4.25rem]">

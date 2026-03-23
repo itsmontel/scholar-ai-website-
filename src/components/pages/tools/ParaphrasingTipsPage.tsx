@@ -779,7 +779,7 @@ const ParaphrasingTipsPage = ({ onNavigate, user, onLogout }: ParaphrasingTipsPa
                     {analysis.cliches.length > 0 && (
                       <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
                         <h3 className="font-semibold text-gray-900 mb-3 flex items-center space-x-2">
-                          <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
+                          <span className="w-2 h-2 bg-violet-500 rounded-full"></span>
                           <span>Clichés Found</span>
                         </h3>
                         <div className="space-y-1">
@@ -797,12 +797,12 @@ const ParaphrasingTipsPage = ({ onNavigate, user, onLogout }: ParaphrasingTipsPa
                     {analysis.hedgingLanguage.length > 0 && (
                       <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
                         <h3 className="font-semibold text-gray-900 mb-3 flex items-center space-x-2">
-                          <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                          <span className="w-2 h-2 bg-violet-500 rounded-full"></span>
                           <span>Hedging Language</span>
                         </h3>
                         <div className="space-y-1">
                           {analysis.hedgingLanguage.map((hedge, index) => (
-                            <div key={index} className="text-sm text-blue-700 bg-blue-50 px-2 py-1 rounded">
+                            <div key={index} className="text-sm text-violet-700 bg-violet-50 px-2 py-1 rounded">
                               "{hedge}"
                             </div>
                           ))}
@@ -897,8 +897,8 @@ const ParaphrasingTipsPage = ({ onNavigate, user, onLogout }: ParaphrasingTipsPa
               <p className="text-gray-600 text-sm">Always preserve the original idea. Paraphrasing changes how something is said, not what is said.</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>

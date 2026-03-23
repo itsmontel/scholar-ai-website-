@@ -59,7 +59,7 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
       title: 'Answer to Unlock',
       desc: "Try to visit a blocked site and you'll solve a puzzle (Sudoku, Memory, Pattern) or answer a quick quiz from your own study material. Pass your customized threshold to unlock.",
       icon: '📝',
-      gradient: 'from-violet-500 to-purple-600',
+      gradient: 'from-violet-500 to-violet-600',
       shadow: 'shadow-violet-500/25',
     },
     {
@@ -152,7 +152,7 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
         <>
       {/* Premium Hero — full gradient, flagship treatment */}
       <section className="relative py-20 sm:py-28 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-violet-950 via-violet-900 to-purple-950 dark:from-violet-950 dark:via-violet-950 dark:to-stone-900" />
+        <div className="absolute inset-0 bg-gradient-to-b from-violet-950 via-violet-900 to-violet-950 dark:from-violet-950 dark:via-violet-950 dark:to-stone-900" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(139,92,246,0.35),transparent_60%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_90%_90%,rgba(236,72,153,0.2),transparent_50%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_40%_30%_at_10%_80%,rgba(99,102,241,0.15),transparent_50%)]" />
@@ -261,7 +261,7 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-6 relative">
             {steps.map((step) => (
               <div key={step.num} className="group relative">
-                <div className="absolute -inset-2 bg-gradient-to-br from-violet-400/10 to-purple-400/10 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute -inset-2 bg-gradient-to-br from-violet-400/10 to-violet-400/10 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <div className="relative bg-white dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-700 rounded-3xl overflow-hidden hover:shadow-2xl hover:border-violet-300 dark:hover:border-violet-700/50 transition-all duration-300">
                   <div className="aspect-[5/4] min-h-[200px] flex items-center justify-center bg-gradient-to-b from-violet-500/10 to-transparent overflow-hidden">
                     <video
@@ -383,7 +383,7 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
 
       {/* Final CTA */}
       <section className="relative py-20 sm:py-28 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-violet-950 via-violet-900 to-purple-950 dark:from-violet-950 dark:via-violet-950 dark:to-stone-900" />
+        <div className="absolute inset-0 bg-gradient-to-b from-violet-950 via-violet-900 to-violet-950 dark:from-violet-950 dark:via-violet-950 dark:to-stone-900" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(139,92,246,0.25),transparent_60%)]" />
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <ScholarMascot size={96} animated={true} pose="celebrating" />

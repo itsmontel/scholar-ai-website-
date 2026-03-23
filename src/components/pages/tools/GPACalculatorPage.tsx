@@ -92,7 +92,7 @@ const GPACalculatorPage = ({ onNavigate, user, onLogout }: GPACalculatorPageProp
 
   const getGPAColor = (gpa: number) => {
     if (gpa >= 3.7) return 'text-green-600';
-    if (gpa >= 3.0) return 'text-blue-600';
+    if (gpa >= 3.0) return 'text-violet-600';
     if (gpa >= 2.0) return 'text-yellow-600';
     return 'text-red-600';
   };
@@ -314,8 +314,8 @@ const GPACalculatorPage = ({ onNavigate, user, onLogout }: GPACalculatorPageProp
               <p className="text-gray-600 text-sm">A good grade in a 4-credit course impacts your GPA more than in a 2-credit course.</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>

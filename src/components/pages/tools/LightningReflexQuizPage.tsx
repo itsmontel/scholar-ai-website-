@@ -729,10 +729,10 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <button
                     onClick={handleStartPlayForFun}
-                    className="p-4 rounded-xl text-left border border-stone-200/80 hover:border-blue-300 hover:bg-blue-50/50 transition-all duration-200 group"
+                    className="p-4 rounded-xl text-left border border-stone-200/80 hover:border-violet-300 hover:bg-violet-50/50 transition-all duration-200 group"
                   >
                     <span className="text-2xl mb-2 block">📚</span>
-                    <span className="font-bold text-stone-800 group-hover:text-blue-700">General Knowledge</span>
+                    <span className="font-bold text-stone-800 group-hover:text-violet-700">General Knowledge</span>
                     <span className="text-xs text-stone-500 block mt-1">Trivia questions across many topics</span>
                   </button>
                   <button
@@ -769,7 +769,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
                   onChange={e => setInputText(e.target.value)}
                   placeholder="Paste your revision notes here (min 20 words)..."
                   rows={5}
-                  className="w-full px-4 py-3.5 rounded-xl border border-stone-200 bg-stone-50/80 text-stone-800 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-blue-500/25 focus:border-blue-400 focus:bg-white transition-all text-sm resize-none"
+                  className="w-full px-4 py-3.5 rounded-xl border border-stone-200 bg-stone-50/80 text-stone-800 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-violet-500/25 focus:border-violet-400 focus:bg-white transition-all text-sm resize-none"
                 />
                 <p className={`mt-2 text-xs ${wordCount < 20 ? 'text-amber-600' : wordCount > maxWords ? 'text-red-600' : 'text-stone-400'}`}>
                   {wordCount.toLocaleString()} words / {maxWords.toLocaleString()} max
@@ -792,7 +792,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
                   className="w-full py-4 rounded-xl text-white font-bold text-base shadow-lg active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                   style={{
                     background: inputText.trim()
-                      ? 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)'
+                      ? 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)'
                       : 'linear-gradient(135deg, #94a3b8 0%, #64748b 100%)',
                     boxShadow: inputText.trim() ? '0 10px 30px -5px rgba(99, 102, 241, 0.4)' : 'none',
                   }}
@@ -809,7 +809,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
 
                 {!user && (
                   <p className="text-center text-sm text-stone-500">
-                    <button onClick={() => onNavigate('login')} className="text-blue-600 font-semibold hover:underline">Log in</button> to generate AI questions
+                    <button onClick={() => onNavigate('login')} className="text-violet-600 font-semibold hover:underline">Log in</button> to generate AI questions
                   </p>
                 )}
               </>
@@ -820,7 +820,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
         {/* How to play */}
         <div className="mt-8 bg-white/70 backdrop-blur-sm rounded-2xl border border-stone-200/60 p-6 shadow-sm">
           <h2 className="font-semibold text-stone-800 mb-4 flex items-center gap-2">
-            <span className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-sm">?</span>
+            <span className="w-8 h-8 rounded-lg bg-violet-100 text-violet-600 flex items-center justify-center text-sm">?</span>
             How to Play
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -854,14 +854,14 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
     <div className="relative flex-1 flex items-center justify-center px-4 py-20 overflow-hidden">
       <WriteScholarEditorialBackgroundLayers position="absolute" />
       <div className="relative text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-violet-600 mb-5 shadow-lg shadow-blue-600/20">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-violet-600 mb-5 shadow-lg shadow-violet-600/20">
           <span className="text-3xl animate-pulse">⚡</span>
         </div>
         <h2 className="text-lg font-bold text-stone-800 mb-1">Generating Craters...</h2>
         <p className="text-stone-500 text-sm">loading your targets</p>
         <div className="mt-5 flex justify-center gap-1.5">
           {[0, 1, 2].map(i => (
-            <div key={i} className="w-2 h-2 rounded-full bg-blue-500" style={{ animation: `lrqPulse 1s ease-in-out ${i * 0.2}s infinite` }} />
+            <div key={i} className="w-2 h-2 rounded-full bg-violet-500" style={{ animation: `lrqPulse 1s ease-in-out ${i * 0.2}s infinite` }} />
           ))}
         </div>
       </div>
@@ -1257,7 +1257,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
                 {[
                   { val: correctCount, label: 'Hits', color: 'text-green-600' },
                   { val: longestStreak, label: 'Best Streak', color: 'text-orange-500' },
-                  { val: `${accuracy}%`, label: 'Accuracy', color: 'text-blue-600' },
+                  { val: `${accuracy}%`, label: 'Accuracy', color: 'text-violet-600' },
                 ].map(s => (
                   <div key={s.label} className="text-center p-3 rounded-xl bg-stone-50 border border-stone-100">
                     <div className={`text-2xl font-bold ${s.color}`}>{s.val}</div>
@@ -1269,7 +1269,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
               <div className="flex flex-col gap-3 pt-1">
                 <div className="flex gap-3">
                   <button onClick={handlePlayAgain}
-                    className="flex-1 py-3.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold shadow-md shadow-blue-600/20 active:scale-[0.98] transition-all">
+                    className="flex-1 py-3.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold shadow-md shadow-violet-600/20 active:scale-[0.98] transition-all">
                     💥 Play Again
                   </button>
                   <button onClick={handleNewTopic}

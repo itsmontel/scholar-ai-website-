@@ -1247,7 +1247,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                 </button>
                 <button
                   onClick={exportQuizToDOCX}
-                  className="px-4 py-2.5 bg-blue-50 text-blue-700 font-medium rounded-xl hover:bg-blue-100 transition-all flex items-center justify-center gap-2 text-sm"
+                  className="px-4 py-2.5 bg-violet-50 text-violet-700 font-medium rounded-xl hover:bg-violet-100 transition-all flex items-center justify-center gap-2 text-sm"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                   Download DOCX
@@ -1316,8 +1316,8 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
               Question {currentQuestion + 1} of {displayedQuestions.length}
             </span>
             <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-              question.type === 'multiple_choice' ? 'bg-blue-100 text-blue-700' :
-              question.type === 'true_false' ? 'bg-purple-100 text-purple-700' :
+              question.type === 'multiple_choice' ? 'bg-violet-100 text-violet-700' :
+              question.type === 'true_false' ? 'bg-violet-100 text-violet-700' :
               'bg-green-100 text-green-700'
             }`}>
               {question.type === 'multiple_choice' ? 'Multiple Choice' :
@@ -1441,12 +1441,12 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
 
           {/* Explanation (shown after answering) */}
           {showResult && (
-            <div className="p-4 bg-blue-50 rounded-xl mb-6 border border-blue-100">
+            <div className="p-4 bg-violet-50 rounded-xl mb-6 border border-violet-100">
               <div className="flex items-start gap-3">
-                <span className="text-blue-600 flex-shrink-0 mt-0.5">💡</span>
+                <span className="text-violet-600 flex-shrink-0 mt-0.5">💡</span>
                 <div>
-                  <p className="text-sm font-semibold text-blue-800 mb-1">Explanation</p>
-                  <p className="text-sm text-blue-700">{question.explanation}</p>
+                  <p className="text-sm font-semibold text-violet-800 mb-1">Explanation</p>
+                  <p className="text-sm text-violet-700">{question.explanation}</p>
                 </div>
               </div>
             </div>
@@ -1536,7 +1536,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                     </button>
                     <button
                       onClick={exportQuizToDOCX}
-                      className="px-4 py-2.5 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded-xl hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all font-medium text-sm flex items-center gap-1.5"
+                      className="px-4 py-2.5 bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400 rounded-xl hover:bg-violet-100 dark:hover:bg-violet-900/50 transition-all font-medium text-sm flex items-center gap-1.5"
                       title="Download as Word"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
@@ -1579,8 +1579,8 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                   </span>
                   <div className="flex-1 min-w-0">
                     <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium mb-2 ${
-                      q.type === 'multiple_choice' ? 'bg-blue-100 text-blue-700' :
-                      q.type === 'true_false' ? 'bg-purple-100 text-purple-700' :
+                      q.type === 'multiple_choice' ? 'bg-violet-100 text-violet-700' :
+                      q.type === 'true_false' ? 'bg-violet-100 text-violet-700' :
                       'bg-green-100 text-green-700'
                     }`}>
                       {q.type.replace('_', ' ')}
@@ -1710,7 +1710,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
           {!showMinimalUI && (
             <>
               <div className="absolute top-20 left-6 w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400/12 to-orange-500/12 rotate-12 hidden lg:block pointer-events-none" />
-              <div className="absolute top-36 right-10 w-12 h-12 rounded-full bg-gradient-to-br from-violet-400/10 to-purple-500/10 hidden lg:block pointer-events-none" />
+              <div className="absolute top-36 right-10 w-12 h-12 rounded-full bg-gradient-to-br from-violet-400/10 to-violet-500/10 hidden lg:block pointer-events-none" />
               <div className="absolute bottom-1/3 left-8 w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400/10 to-orange-500/10 -rotate-12 hidden xl:block pointer-events-none" />
             </>
           )}
@@ -2116,7 +2116,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                               <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
                               PDF
                             </button>
-                            <button onClick={exportCrosswordToDOCX} className="px-3 py-1.5 bg-blue-50 text-blue-700 font-medium rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-1.5 text-xs">
+                            <button onClick={exportCrosswordToDOCX} className="px-3 py-1.5 bg-violet-50 text-violet-700 font-medium rounded-lg hover:bg-violet-100 transition-colors flex items-center gap-1.5 text-xs">
                               <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
                               DOCX
                             </button>
@@ -2137,11 +2137,11 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                           <>
                             <button
                               onClick={handleCrosswordHint}
-                              className="px-4 py-2 text-sm font-medium bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors flex items-center gap-1.5"
+                              className="px-4 py-2 text-sm font-medium bg-violet-50 text-violet-700 rounded-lg hover:bg-violet-100 transition-colors flex items-center gap-1.5"
                               title="Reveal one letter from the selected word"
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
-                              Hint {hintsUsed > 0 && <span className="text-xs bg-purple-200 text-purple-800 rounded-full px-1.5 py-0.5 font-bold">{hintsUsed}</span>}
+                              Hint {hintsUsed > 0 && <span className="text-xs bg-violet-200 text-violet-800 rounded-full px-1.5 py-0.5 font-bold">{hintsUsed}</span>}
                             </button>
                             <button onClick={() => setCrosswordChecked(true)} className="px-4 py-2 text-sm font-semibold bg-amber-600 hover:bg-amber-500 text-white rounded-lg">Check Answers</button>
                           </>

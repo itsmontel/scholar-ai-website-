@@ -158,7 +158,7 @@ const CitationsPage = ({ onNavigate, user, onLogout }: CitationsPageProps) => {
 
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="citations" />
 
-      <main className="relative max-w-7xl mx-auto px-3 sm:px-6 pt-3 sm:pt-6 pb-24 sm:pb-16 w-full min-w-0 overflow-x-hidden">
+      <main className="relative max-w-[1240px] mx-auto px-3 sm:px-6 lg:px-8 pt-3 sm:pt-6 pb-24 sm:pb-16 w-full min-w-0 overflow-x-hidden">
         <div className="w-full min-w-0 space-y-4 sm:space-y-6">
           <div className="pt-1 sm:pt-2 pb-3 sm:pb-5 overflow-visible">
             <div className="relative rounded-2xl sm:rounded-2xl overflow-hidden mb-3 sm:mb-4 border border-stone-200/90 dark:border-stone-700/90 bg-white/85 dark:bg-stone-900/55 shadow-[0_16px_50px_-16px_rgba(15,23,42,0.12)] dark:shadow-[0_16px_50px_-16px_rgba(0,0,0,0.45)] backdrop-blur-sm ring-1 ring-white/40 dark:ring-white/5 scroll-mt-8">
@@ -169,14 +169,14 @@ const CitationsPage = ({ onNavigate, user, onLogout }: CitationsPageProps) => {
                 <div className="relative lg:grid lg:grid-cols-[minmax(0,220px)_minmax(0,48rem)_minmax(0,220px)] lg:gap-8 xl:gap-10 lg:items-stretch">
                   <div className="hidden lg:block relative self-end justify-self-start w-[236px] xl:w-[248px] pointer-events-auto -rotate-[11deg] origin-bottom-left drop-shadow-lg z-[5]" aria-label="Sample sources preview">
                     <p className="text-center mb-2">
-                      <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-sky-800/95 dark:text-sky-300/95">Sources</span>
+                      <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-800/95 dark:text-blue-300/95">Sources</span>
                       <span className="block text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">Peer-reviewed picks</span>
                     </p>
                     <InteractiveCitationsDemo variant="side-left" />
                   </div>
                   <div className="min-w-0 self-start">
                     <h1 className="relative text-xl sm:text-2xl md:text-3xl font-semibold text-stone-900 dark:text-stone-50 text-center mb-1.5 tracking-tight" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
-                      Find <span className="text-sky-700 dark:text-sky-400">academic sources</span> in seconds
+                      Find <span className="text-blue-700 dark:text-blue-400">academic sources</span> in seconds
                     </h1>
                     <p className="relative text-stone-600 dark:text-stone-300 text-sm sm:text-base text-center mb-2 sm:mb-2.5 max-w-xl mx-auto leading-relaxed">
                       APA, MLA & Chicago. Peer-reviewed sources. Filter by year.
@@ -192,7 +192,7 @@ const CitationsPage = ({ onNavigate, user, onLogout }: CitationsPageProps) => {
                       </button>
                       <button
                         type="button"
-                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 bg-white dark:bg-stone-900 text-violet-800 dark:text-violet-300 shadow-sm border border-stone-200/80 dark:border-stone-600"
+                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 bg-white dark:bg-stone-900 text-blue-800 dark:text-blue-300 shadow-sm border border-stone-200/80 dark:border-stone-600"
                       >
                         <span className="text-base" aria-hidden>📚</span> Citations
                       </button>
@@ -217,7 +217,7 @@ const CitationsPage = ({ onNavigate, user, onLogout }: CitationsPageProps) => {
                   </div>
                   <div className="hidden lg:block relative self-end justify-self-end w-[236px] xl:w-[248px] pointer-events-auto rotate-[11deg] origin-bottom-right drop-shadow-lg z-[5]" aria-label="Sample citation export preview">
                     <p className="text-center mb-2">
-                      <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-violet-800/95 dark:text-violet-300/95">Export</span>
+                      <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-800/95 dark:text-blue-300/95">Export</span>
                       <span className="block text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">APA · MLA · Chicago</span>
                     </p>
                     <InteractiveCitationsDemo variant="side-right" />
@@ -234,7 +234,7 @@ const CitationsPage = ({ onNavigate, user, onLogout }: CitationsPageProps) => {
                 </div>
 
                 <div className="relative mb-2 max-w-3xl mx-auto -mt-8 sm:-mt-10 lg:-mt-14 xl:-mt-16 z-20">
-                  <div className="relative rounded-xl sm:rounded-2xl border transition-all duration-300 shadow-sm focus-within:shadow-md focus-within:ring-2 focus-within:ring-violet-500/25 border-sky-200/90 dark:border-sky-800/60 bg-white dark:bg-stone-900/40 focus-within:border-sky-400/60">
+                  <div className="relative rounded-xl sm:rounded-2xl border transition-all duration-300 shadow-sm focus-within:shadow-md focus-within:ring-2 focus-within:ring-blue-500/25 border-blue-200/90 dark:border-blue-800/60 bg-white dark:bg-stone-900/40 focus-within:border-blue-400/60">
                     <div className="relative rounded-[12px] sm:rounded-[18px] bg-white/98 dark:bg-stone-800/95 backdrop-blur-sm min-h-[120px] sm:min-h-[160px]">
                       <textarea
                         value={inputText}
@@ -279,7 +279,7 @@ const CitationsPage = ({ onNavigate, user, onLogout }: CitationsPageProps) => {
                       disabled={!isTextValid() || isSearchingCitations}
                       className={`px-8 sm:px-10 py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 font-semibold text-base ${
                         isTextValid() && !isSearchingCitations
-                          ? 'bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white shadow-md shadow-violet-900/15 ring-1 ring-violet-900/10 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer'
+                          ? 'bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500 text-white shadow-md shadow-blue-900/15 ring-1 ring-blue-900/10 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer'
                           : 'bg-stone-200 dark:bg-stone-700 text-stone-400 cursor-not-allowed'
                       }`}
                     >
@@ -300,7 +300,7 @@ const CitationsPage = ({ onNavigate, user, onLogout }: CitationsPageProps) => {
                     <select
                       value={citationStyle}
                       onChange={(e) => setCitationStyle(e.target.value)}
-                      className="px-4 py-2.5 rounded-2xl border border-stone-200/80 dark:border-stone-600/80 bg-white/90 dark:bg-stone-800/90 backdrop-blur-sm text-sm font-semibold shadow-sm focus:ring-2 focus:ring-sky-400 focus:border-sky-400 transition-all"
+                      className="px-4 py-2.5 rounded-2xl border border-stone-200/80 dark:border-stone-600/80 bg-white/90 dark:bg-stone-800/90 backdrop-blur-sm text-sm font-semibold shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all"
                     >
                       <option value="APA">APA 7th</option>
                       <option value="MLA">MLA 9th</option>
@@ -312,7 +312,7 @@ const CitationsPage = ({ onNavigate, user, onLogout }: CitationsPageProps) => {
                     <select
                       value={citationYearRange}
                       onChange={(e) => setCitationYearRange(e.target.value)}
-                      className="px-4 py-2.5 rounded-2xl border border-stone-200/80 dark:border-stone-600/80 bg-white/90 dark:bg-stone-800/90 backdrop-blur-sm text-sm font-semibold shadow-sm focus:ring-2 focus:ring-sky-400 focus:border-sky-400 transition-all"
+                      className="px-4 py-2.5 rounded-2xl border border-stone-200/80 dark:border-stone-600/80 bg-white/90 dark:bg-stone-800/90 backdrop-blur-sm text-sm font-semibold shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all"
                     >
                       <option value="all">All years</option>
                       <option value="3">Last 3 years</option>
@@ -388,13 +388,13 @@ const CitationsPage = ({ onNavigate, user, onLogout }: CitationsPageProps) => {
               </svg>
             </button>
 
-            <div className="w-20 h-20 bg-gradient-to-br from-sky-100 to-blue-100 dark:from-sky-900/40 dark:to-blue-900/40 rounded-2xl flex items-center justify-center mx-auto mb-6 overflow-hidden">
+            <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900/40 rounded-2xl flex items-center justify-center mx-auto mb-6 overflow-hidden">
               <ScholarMascot size={72} animated={false} pose="celebrating" />
             </div>
 
             <h3 className="text-2xl font-bold text-stone-800 dark:text-stone-100 mb-3">Search Complete</h3>
             <p className="text-stone-600 dark:text-stone-400 mb-4">
-              Found <span className="font-bold text-sky-600 dark:text-sky-400">10 appropriate citations</span> for your research on{' '}
+              Found <span className="font-bold text-blue-600 dark:text-blue-400">10 appropriate citations</span> for your research on{' '}
               <span className="font-medium text-stone-700 dark:text-stone-300">&quot;{teaserTopic.length > 50 ? teaserTopic.slice(0, 50) + '...' : teaserTopic}&quot;</span>
             </p>
             <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">
@@ -414,7 +414,7 @@ const CitationsPage = ({ onNavigate, user, onLogout }: CitationsPageProps) => {
                 onClick={() => { setShowSignupPrompt(false); setTeaserTopic(''); onNavigate('login'); }}
                 className="w-full px-6 py-3 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 font-medium rounded-xl transition-colors"
               >
-                Already have an account? <span className="text-violet-600 dark:text-violet-400">Log in</span>
+                Already have an account? <span className="text-blue-600 dark:text-blue-400">Log in</span>
               </button>
             </div>
           </div>

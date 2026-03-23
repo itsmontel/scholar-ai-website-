@@ -84,12 +84,12 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
             </button>
 
             {/* Citations - Flagship */}
-            <button onClick={() => onNavigate('citations')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-sky-200/80 dark:border-sky-700/50 shadow-xl shadow-sky-500/10 dark:shadow-black/20 backdrop-blur-2xl bg-white/80 dark:bg-stone-800/80 p-6 hover:shadow-2xl hover:border-sky-300 dark:hover:border-sky-500/60 transition-all duration-300 text-left">
+            <button onClick={() => onNavigate('citations')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-violet-200/80 dark:border-violet-700/50 shadow-xl shadow-violet-500/10 dark:shadow-black/20 backdrop-blur-2xl bg-white/80 dark:bg-stone-800/80 p-6 hover:shadow-2xl hover:border-violet-300 dark:hover:border-violet-500/60 transition-all duration-300 text-left">
               <div className="relative flex flex-col items-center text-center mb-4">
-                <div className="w-14 h-14 rounded-2xl bg-sky-100 dark:bg-sky-900/50 flex items-center justify-center mb-3">
+                <div className="w-14 h-14 rounded-2xl bg-violet-100 dark:bg-violet-900/50 flex items-center justify-center mb-3">
                   <ScholarMascot size={48} animated={false} pose="studying" />
                 </div>
-                <h3 className="font-bold text-sky-700 dark:text-sky-400 text-lg">Online Citations</h3>
+                <h3 className="font-bold text-violet-700 dark:text-violet-400 text-lg">Online Citations</h3>
               </div>
               <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed text-center">Find and format academic citations in APA, MLA, Chicago, Harvard, IEEE, Vancouver.</p>
             </button>

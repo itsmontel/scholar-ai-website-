@@ -56,18 +56,47 @@ const PLAN_LIMITS = {
     // Essay analysis uses OPENAI_PREMIUM_MODEL (default gpt-5-mini); same tier as former Premium
     aiModel: 'gpt-5-mini',
     maxDocumentSize: 100 * 1024 * 1024, // 100MB per file
-    maxTotalStorage: 500 * 1024 * 1024, // 500MB library total
+    maxTotalStorage: 100 * 1024 * 1024, // 100MB total library storage
     name: 'Pro',
     price: 19.99
   },
+  premium: {
+    documentsPerMonth: -1,
+    combinedActionsPerMonth: 299,
+    combinedWordsPerMonth: 2999999,
+    analysesPerMonth: 299,
+    citationSearchesPerMonth: 299,
+    humanizeWordsPerMonth: 2999999,
+    summarizeWordsPerMonth: 2999999,
+    studyPackGenerationsPerMonth: 299,
+    studyPackMaxWordsPerGeneration: 10000,
+    quizWordsPerMonth: 2999999,
+    quizGenerationsPerMonth: 299,
+    quizMaxWordsPerGeneration: 10000,
+    craterBlastMaxWordsPerGeneration: 10000,
+    lessonWordsPerMonth: 2999999,
+    lessonGenerationsPerMonth: 299,
+    lessonMaxWordsPerGeneration: 10000,
+    aiModel: 'gpt-5-mini',
+    maxDocumentSize: 100 * 1024 * 1024,
+    maxTotalStorage: 1024 * 1024 * 1024, // 1GB library total
+    name: 'Premium',
+    price: 39.99
+  },
 };
 
-/** Legacy Stripe plan "premium" maps to Pro limits (single paid tier). */
+/** Map legacy / alternate SKU names to canonical limit keys: free | pro | premium */
 function normalizePlanForLimits(plan) {
   const p = (plan || 'free').toLowerCase();
-  // Single paid tier limits: Pro features (99 combined actions/mo, etc.)
-  if (p === 'starter' || p === 'premium' || p === 'focus') return 'pro';
+  if (p === 'starter' || p === 'focus') return 'pro';
+  if (p === 'premium') return 'premium';
   return p;
+}
+
+/** True when the user should receive paid-tier limits (Pro or Premium). */
+function isPaidSubscriptionTier(plan) {
+  const n = normalizePlanForLimits(plan);
+  return n === 'pro' || n === 'premium';
 }
 
 
@@ -119,7 +148,7 @@ const getUsagePeriod = async (userId) => {
   try {
     const { plan, stripeCustomerId } = await getUserSubscriptionDetails(userId);
 
-    if (normalizePlanForLimits(plan) === 'pro') {
+    if (isPaidSubscriptionTier(plan)) {
       let periodStart = null;
       let periodEnd = null;
 
@@ -326,7 +355,7 @@ const checkCombinedActionsLimit = async (userId) => {
     const effPlan = normalizePlanForLimits(plan);
     const planLimits = PLAN_LIMITS[effPlan] || PLAN_LIMITS.free;
     const limit = planLimits.combinedActionsPerMonth;
-    if (!limit || limit === -1 || effPlan !== 'pro') {
+    if (!limit || limit === -1 || !isPaidSubscriptionTier(effPlan)) {
       return { allowed: true, limit: -1, usage: 0, remaining: -1 };
     }
     const { periodStart } = await getUsagePeriod(userId);
@@ -351,7 +380,7 @@ const checkCombinedWordsLimit = async (userId, additionalWords = 0) => {
     const effPlan = normalizePlanForLimits(plan);
     const planLimits = PLAN_LIMITS[effPlan] || PLAN_LIMITS.free;
     const limit = planLimits.combinedWordsPerMonth;
-    if (!limit || limit === -1 || effPlan !== 'pro') {
+    if (!limit || limit === -1 || !isPaidSubscriptionTier(effPlan)) {
       return { allowed: true, limit: -1, usage: 0, remaining: -1 };
     }
     const { periodStart } = await getUsagePeriod(userId);
@@ -549,12 +578,18 @@ const createCheckoutSession = async (customerId, planType, billingCycle, userId,
 
 // Get price ID based on plan and billing cycle
 const getPriceId = (planType, billingCycle) => {
-  const planKey =
-    planType === 'starter' || planType === 'premium' ? 'pro' : planType;
+  let planKey = planType === 'starter' ? 'pro' : planType;
+  if (planKey !== 'pro' && planKey !== 'premium') {
+    throw new Error(`Invalid plan type or billing cycle: ${planType}/${billingCycle}`);
+  }
   const prices = {
     pro: {
       monthly: process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || 'price_starter_monthly',
       yearly: process.env.STRIPE_STARTER_YEARLY_PRICE_ID || 'price_starter_yearly'
+    },
+    premium: {
+      monthly: process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID || 'price_premium_monthly',
+      yearly: process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID || 'price_premium_yearly'
     }
   };
 
@@ -562,7 +597,7 @@ const getPriceId = (planType, billingCycle) => {
   if (!priceId) {
     throw new Error(`Invalid plan type or billing cycle: ${planType}/${billingCycle}`);
   }
-  
+
   return priceId;
 };
 
@@ -814,6 +849,7 @@ module.exports = {
   supabase,
   PLAN_LIMITS,
   normalizePlanForLimits,
+  isPaidSubscriptionTier,
   getPriceId,
   getUserPlan,
   getUserSubscriptionDetails,

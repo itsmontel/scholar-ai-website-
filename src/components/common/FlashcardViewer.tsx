@@ -42,9 +42,9 @@ interface Theme {
 }
 
 const THEMES: Theme[] = [
-  { id: 'violet', name: 'Violet', frontBg: 'from-violet-50/80 to-purple-50/80 dark:from-violet-900/20 dark:to-purple-900/20', frontBorder: 'border-violet-200 dark:border-violet-700/50', frontText: 'text-stone-800 dark:text-stone-100', frontAccent: 'text-violet-600 dark:text-violet-400', backBg: 'from-violet-50/80 to-purple-50/80 dark:from-violet-900/20 dark:to-purple-900/20', backBorder: 'border-violet-200 dark:border-violet-700/50', backText: 'text-stone-800 dark:text-stone-100', backAccent: 'text-violet-600 dark:text-violet-400' },
+  { id: 'violet', name: 'Violet', frontBg: 'from-violet-50/80 to-violet-50/80 dark:from-violet-900/20 dark:to-violet-900/20', frontBorder: 'border-violet-200 dark:border-violet-700/50', frontText: 'text-stone-800 dark:text-stone-100', frontAccent: 'text-violet-600 dark:text-violet-400', backBg: 'from-violet-50/80 to-violet-50/80 dark:from-violet-900/20 dark:to-violet-900/20', backBorder: 'border-violet-200 dark:border-violet-700/50', backText: 'text-stone-800 dark:text-stone-100', backAccent: 'text-violet-600 dark:text-violet-400' },
   { id: 'emerald', name: 'Emerald', frontBg: 'from-emerald-50/80 to-teal-50/80 dark:from-emerald-900/20 dark:to-teal-900/20', frontBorder: 'border-emerald-200 dark:border-emerald-700/50', frontText: 'text-stone-800 dark:text-stone-100', frontAccent: 'text-emerald-600 dark:text-emerald-400', backBg: 'from-emerald-50/80 to-teal-50/80 dark:from-emerald-900/20 dark:to-teal-900/20', backBorder: 'border-emerald-200 dark:border-emerald-700/50', backText: 'text-stone-800 dark:text-stone-100', backAccent: 'text-emerald-600 dark:text-emerald-400' },
-  { id: 'blue', name: 'Blue', frontBg: 'from-blue-50/80 to-sky-50/80 dark:from-blue-900/20 dark:to-sky-900/20', frontBorder: 'border-blue-200 dark:border-blue-700/50', frontText: 'text-stone-800 dark:text-stone-100', frontAccent: 'text-blue-600 dark:text-blue-400', backBg: 'from-blue-50/80 to-sky-50/80 dark:from-blue-900/20 dark:to-sky-900/20', backBorder: 'border-blue-200 dark:border-blue-700/50', backText: 'text-stone-800 dark:text-stone-100', backAccent: 'text-blue-600 dark:text-blue-400' },
+  { id: 'blue', name: 'Blue', frontBg: 'from-violet-50/80 to-violet-50/80 dark:from-violet-900/20 dark:to-violet-900/20', frontBorder: 'border-violet-200 dark:border-violet-700/50', frontText: 'text-stone-800 dark:text-stone-100', frontAccent: 'text-violet-600 dark:text-violet-400', backBg: 'from-violet-50/80 to-violet-50/80 dark:from-violet-900/20 dark:to-violet-900/20', backBorder: 'border-violet-200 dark:border-violet-700/50', backText: 'text-stone-800 dark:text-stone-100', backAccent: 'text-violet-600 dark:text-violet-400' },
   { id: 'amber', name: 'Amber', frontBg: 'from-amber-50/80 to-orange-50/80 dark:from-amber-900/20 dark:to-orange-900/20', frontBorder: 'border-amber-200 dark:border-amber-700/50', frontText: 'text-stone-800 dark:text-stone-100', frontAccent: 'text-amber-600 dark:text-amber-400', backBg: 'from-amber-50/80 to-orange-50/80 dark:from-amber-900/20 dark:to-orange-900/20', backBorder: 'border-amber-200 dark:border-amber-700/50', backText: 'text-stone-800 dark:text-stone-100', backAccent: 'text-amber-600 dark:text-amber-400' },
   { id: 'rose', name: 'Fuchsia', frontBg: 'from-fuchsia-50/80 to-violet-50/80 dark:from-fuchsia-900/25 dark:to-violet-900/20', frontBorder: 'border-fuchsia-200 dark:border-fuchsia-700/50', frontText: 'text-stone-800 dark:text-stone-100', frontAccent: 'text-fuchsia-600 dark:text-fuchsia-400', backBg: 'from-fuchsia-50/80 to-violet-50/80 dark:from-fuchsia-900/25 dark:to-violet-900/20', backBorder: 'border-fuchsia-200 dark:border-fuchsia-700/50', backText: 'text-stone-800 dark:text-stone-100', backAccent: 'text-fuchsia-600 dark:text-fuchsia-400' },
 ];
@@ -52,7 +52,7 @@ const THEMES: Theme[] = [
 const THEME_DOTS: Record<ThemeId, string> = {
   violet: 'bg-violet-600',
   emerald: 'bg-emerald-600',
-  blue: 'bg-sky-600',
+  blue: 'bg-violet-600',
   amber: 'bg-amber-600',
   rose: 'bg-fuchsia-600',
 };
@@ -60,7 +60,7 @@ const THEME_DOTS: Record<ThemeId, string> = {
 const THEME_RINGS: Record<ThemeId, string> = {
   violet: 'ring-violet-500',
   emerald: 'ring-emerald-500',
-  blue: 'ring-blue-500',
+  blue: 'ring-violet-500',
   amber: 'ring-amber-400',
   rose: 'ring-fuchsia-500',
 };
@@ -258,8 +258,8 @@ const FlashcardViewer = ({
     return (
       <div className="relative overflow-hidden">
         {/* Background decorations */}
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:from-violet-950/30 dark:via-purple-950/30 dark:to-fuchsia-950/30 rounded-2xl sm:rounded-3xl" />
-        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-violet-200/40 to-purple-300/40 dark:from-violet-800/20 dark:to-purple-700/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
+        <div className="absolute inset-0 bg-gradient-to-br from-violet-50 via-violet-50 to-fuchsia-50 dark:from-violet-950/30 dark:via-violet-950/30 dark:to-fuchsia-950/30 rounded-2xl sm:rounded-3xl" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-violet-200/40 to-violet-300/40 dark:from-violet-800/20 dark:to-violet-700/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-fuchsia-200/40 to-fuchsia-300/40 dark:from-fuchsia-800/20 dark:to-fuchsia-700/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4" />
         
         {/* Floating card decorations */}
@@ -332,7 +332,7 @@ const FlashcardViewer = ({
             </div>
             
             {/* Tips section */}
-            <div className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 rounded-xl p-4 sm:p-5 border border-violet-100 dark:border-violet-800/50">
+            <div className="bg-gradient-to-r from-violet-50 to-violet-50 dark:from-violet-900/20 dark:to-violet-900/20 rounded-xl p-4 sm:p-5 border border-violet-100 dark:border-violet-800/50">
               <h4 className="text-sm font-semibold text-violet-800 dark:text-violet-300 mb-3 flex items-center justify-center gap-2">
                 <span>💡</span> Quick Tips
               </h4>
@@ -394,7 +394,7 @@ const FlashcardViewer = ({
                 </div>
                 <div>
                   <label className="flex items-center gap-2 text-sm font-semibold text-stone-700 dark:text-stone-300 mb-2">
-                    <span className="w-6 h-6 bg-blue-100 dark:bg-blue-900/40 rounded-lg flex items-center justify-center text-blue-600 dark:text-blue-400 text-xs font-bold">A</span>
+                    <span className="w-6 h-6 bg-violet-100 dark:bg-violet-900/40 rounded-lg flex items-center justify-center text-violet-600 dark:text-violet-400 text-xs font-bold">A</span>
                     Back Side (Answer/Definition)
                   </label>
                   <textarea
@@ -471,7 +471,7 @@ const FlashcardViewer = ({
             </button>
           )}
           {canExport && onExportDOCX && (
-            <button onClick={onExportDOCX} className="px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors flex items-center gap-1.5 text-xs">
+            <button onClick={onExportDOCX} className="px-3 py-1.5 bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400 font-medium rounded-lg hover:bg-violet-100 dark:hover:bg-violet-900/50 transition-colors flex items-center gap-1.5 text-xs">
               <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
               DOCX
             </button>
@@ -496,7 +496,7 @@ const FlashcardViewer = ({
             </button>
           )}
           {onEnlarge && (
-            <button onClick={onEnlarge} className="px-3 py-1.5 text-sky-700 dark:text-sky-400 bg-sky-50 dark:bg-sky-900/30 rounded-lg hover:bg-sky-100 dark:hover:bg-sky-900/50 font-medium transition-colors text-xs flex items-center gap-1.5" title="Open in full page">
+            <button onClick={onEnlarge} className="px-3 py-1.5 text-violet-700 dark:text-violet-400 bg-violet-50 dark:bg-violet-900/30 rounded-lg hover:bg-violet-100 dark:hover:bg-violet-900/50 font-medium transition-colors text-xs flex items-center gap-1.5" title="Open in full page">
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
               Enlarge
             </button>
@@ -625,7 +625,7 @@ const FlashcardViewer = ({
 
       {/* Card List Panel */}
       {showCardList && (
-        <div className="bg-gradient-to-br from-violet-50/50 to-purple-50/50 dark:from-violet-900/10 dark:to-purple-900/10 rounded-2xl p-4 border border-violet-200/60 dark:border-violet-700/40 animate-in slide-in-from-top-2 duration-200">
+        <div className="bg-gradient-to-br from-violet-50/50 to-violet-50/50 dark:from-violet-900/10 dark:to-violet-900/10 rounded-2xl p-4 border border-violet-200/60 dark:border-violet-700/40 animate-in slide-in-from-top-2 duration-200">
           <div className="flex items-center justify-between mb-3">
             <h4 className="font-semibold text-stone-800 dark:text-stone-100 text-sm flex items-center gap-2">
               <span className="w-6 h-6 bg-violet-100 dark:bg-violet-900/40 rounded-lg flex items-center justify-center text-violet-600 dark:text-violet-400 text-xs">📚</span>
@@ -841,7 +841,7 @@ const FlashcardViewer = ({
               </div>
               <div>
                 <label className="flex items-center gap-2 text-sm font-semibold text-stone-700 dark:text-stone-300 mb-2">
-                  <span className="w-6 h-6 bg-blue-100 dark:bg-blue-900/40 rounded-lg flex items-center justify-center text-blue-600 dark:text-blue-400 text-xs font-bold">A</span>
+                  <span className="w-6 h-6 bg-violet-100 dark:bg-violet-900/40 rounded-lg flex items-center justify-center text-violet-600 dark:text-violet-400 text-xs font-bold">A</span>
                   Back Side (Answer/Definition)
                 </label>
                 <textarea

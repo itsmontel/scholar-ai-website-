@@ -62,7 +62,7 @@ const UnsubscribePage = ({ onNavigate }: UnsubscribePageProps) => {
       {/* Navigation */}
       <nav className="relative z-10 flex items-center justify-between px-2 sm:px-8 md:px-16 py-4 sm:py-6 backdrop-blur-sm bg-white/80 border-b border-white/20">
         <div className="flex items-center space-x-2 sm:space-x-3">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center shadow-lg">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-violet-500 to-violet-500 rounded-xl flex items-center justify-center shadow-lg">
             <span className="text-white font-bold text-xl sm:text-2xl">W</span>
           </div>
           <span className="text-lg sm:text-2xl font-bold text-gray-900">WriteScholar</span>
@@ -80,7 +80,7 @@ const UnsubscribePage = ({ onNavigate }: UnsubscribePageProps) => {
         <div className="max-w-md w-full">
           <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-100">
             <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 rounded-2xl flex items-center justify-center shadow-lg mx-auto mb-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-violet-600 via-violet-600 to-violet-700 rounded-2xl flex items-center justify-center shadow-lg mx-auto mb-4">
                 <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
@@ -109,7 +109,7 @@ const UnsubscribePage = ({ onNavigate }: UnsubscribePageProps) => {
                     setSuccess(false);
                     setEmail('');
                   }}
-                  className="text-blue-600 hover:text-blue-700 font-medium"
+                  className="text-violet-600 hover:text-violet-700 font-medium"
                 >
                   Unsubscribe another email
                 </button>
@@ -132,7 +132,7 @@ const UnsubscribePage = ({ onNavigate }: UnsubscribePageProps) => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="your.email@example.com"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-all"
                     required
                     disabled={isLoading}
                   />

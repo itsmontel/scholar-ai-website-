@@ -87,7 +87,7 @@ const StudyToolsComparisonPage: React.FC<StudyToolsComparisonPageProps> = ({ onN
             <p className="mt-3 text-sm text-stone-500 dark:text-stone-400">
               <button
                 onClick={() => onNavigate('why-students-choose')}
-                className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold underline underline-offset-2"
+                className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-semibold underline underline-offset-2"
               >
                 Compare writing tools: vs Grammarly & QuillBot ←
               </button>
@@ -151,7 +151,7 @@ const StudyToolsComparisonPage: React.FC<StudyToolsComparisonPageProps> = ({ onN
 
           {/* Summary */}
           <div className="mt-12 grid sm:grid-cols-3 gap-6 text-left">
-            <div className="bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-900/20 dark:to-violet-900/20 rounded-2xl border border-indigo-200/70 dark:border-indigo-700/40 p-6 shadow-sm">
+            <div className="bg-gradient-to-br from-violet-50 to-violet-50 dark:from-violet-900/20 dark:to-violet-900/20 rounded-2xl border border-violet-200/70 dark:border-violet-700/40 p-6 shadow-sm">
               <h3 className="font-semibold text-stone-900 dark:text-stone-100 mb-2">WriteScholar</h3>
               <p className="text-stone-600 dark:text-stone-400 text-sm">
                 The only AI study tool that combines quizzes, flashcards, and crosswords with academic writing: essay analysis, citation finder, and Focus Mode. Best for students who need both study and writing support.
@@ -163,7 +163,7 @@ const StudyToolsComparisonPage: React.FC<StudyToolsComparisonPageProps> = ({ onN
                 The classic study platform with Magic Notes (AI from notes), Brain Beats, and millions of community sets. Strong for memorization and shared content. Free tier is limited; Learn mode largely requires Plus.
               </p>
             </div>
-            <div className="bg-gradient-to-br from-sky-50 to-cyan-50 dark:from-sky-900/20 dark:to-cyan-900/20 rounded-2xl border border-sky-200/70 dark:border-sky-700/40 p-6 shadow-sm">
+            <div className="bg-gradient-to-br from-violet-50 to-cyan-50 dark:from-violet-900/20 dark:to-cyan-900/20 rounded-2xl border border-violet-200/70 dark:border-violet-700/40 p-6 shadow-sm">
               <h3 className="font-semibold text-stone-900 dark:text-stone-100 mb-2">Knowt</h3>
               <p className="text-stone-600 dark:text-stone-400 text-sm">
                 The top Quizlet alternative with free Learn mode, AI lecture notetaker, PDF summarizer, and voice tutoring. Great for students who want to import Quizlet sets and study without paying. No writing tools.

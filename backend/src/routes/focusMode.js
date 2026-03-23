@@ -49,7 +49,7 @@ const UNLOCK_DURATION_OPTIONS = [
 
 // Free: 3 sites. Any paid SKU (pro, premium, focus, starter, …): unlimited blocked sites.
 function getMaxSites(plan) {
-  return subscriptionService.normalizePlanForLimits(plan) === 'pro' ? 99999 : 3;
+  return subscriptionService.isPaidSubscriptionTier(plan) ? 99999 : 3;
 }
 
 function clampSettings(settings) {

@@ -906,7 +906,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
     const getSlideColor = (type?: string): [number, number, number] => {
       const t = (type || '').toLowerCase();
       if (t === 'intro') return [124, 58, 237];
-      if (t === 'concept') return [59, 130, 246];
+      if (t === 'concept') return [139, 92, 246];
       if (t === 'example') return [245, 158, 11];
       if (t === 'keypoint') return [16, 185, 129];
       if (t === 'funfact') return [236, 72, 153];
@@ -1533,11 +1533,11 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                   case 'study_pack':
                     return {
                       border: 'border-l-4 border-l-violet-500',
-                      iconBg: 'bg-gradient-to-br from-violet-100 to-purple-100',
+                      iconBg: 'bg-gradient-to-br from-violet-100 to-violet-100',
                       iconText: 'text-violet-600',
                       badge: 'bg-violet-100 text-violet-700',
                       preview: 'bg-violet-50 text-violet-700',
-                      button: 'from-violet-500 to-purple-500 shadow-violet-500/25',
+                      button: 'from-violet-500 to-violet-500 shadow-violet-500/25',
                     };
                   case 'flashcards':
                     return {
@@ -1569,20 +1569,20 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                   case 'lesson':
                     return {
                       border: 'border-l-4 border-l-violet-500',
-                      iconBg: 'bg-gradient-to-br from-violet-100 to-purple-100',
+                      iconBg: 'bg-gradient-to-br from-violet-100 to-violet-100',
                       iconText: 'text-violet-600',
                       badge: 'bg-violet-100 text-violet-700',
                       preview: 'bg-violet-50 text-violet-700',
-                      button: 'from-violet-500 to-purple-500 shadow-violet-500/25',
+                      button: 'from-violet-500 to-violet-500 shadow-violet-500/25',
                     };
                   default:
                     return {
-                      border: 'border-l-4 border-l-blue-500',
-                      iconBg: 'bg-gradient-to-br from-blue-100 to-sky-100',
-                      iconText: 'text-blue-600',
-                      badge: 'bg-blue-100 text-blue-700',
-                      preview: 'bg-blue-50 text-blue-700',
-                      button: 'from-blue-500 to-sky-500 shadow-blue-500/25',
+                      border: 'border-l-4 border-l-violet-500',
+                      iconBg: 'bg-gradient-to-br from-violet-100 to-violet-100',
+                      iconText: 'text-violet-600',
+                      badge: 'bg-violet-100 text-violet-700',
+                      preview: 'bg-violet-50 text-violet-700',
+                      button: 'from-violet-500 to-violet-500 shadow-violet-500/25',
                     };
                 }
               };
@@ -1745,7 +1745,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                                       }}
                                       className={`w-full px-4 py-2.5 text-left text-sm text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700 flex items-center gap-2 ${(tool.quiz_type === 'flashcards' || tool.quiz_type === 'study_pack') ? '' : 'rounded-b-xl'}`}
                                     >
-                                      <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                      <svg className="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                                       Word
                                     </button>
                                   </>
@@ -1785,7 +1785,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                         {!HIDE_FRIENDS && (
                         <button
                           onClick={() => openShareModal(tool.id)}
-                          className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 rounded-xl bg-purple-500 text-white hover:bg-purple-600 font-medium text-xs sm:text-sm shadow-sm hover:shadow transition-all shrink-0"
+                          className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 rounded-xl bg-violet-500 text-white hover:bg-violet-600 font-medium text-xs sm:text-sm shadow-sm hover:shadow transition-all shrink-0"
                           title="Share with friends"
                         >
                           <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2007,8 +2007,8 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
           <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 border border-stone-200/80">
             <div className="flex items-start justify-between mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 bg-purple-100 rounded-xl flex items-center justify-center">
-                  <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-11 h-11 bg-violet-100 rounded-xl flex items-center justify-center">
+                  <svg className="w-5 h-5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
                   </svg>
                 </div>
@@ -2046,7 +2046,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
 
                 {loadingFriends ? (
                   <div className="flex items-center justify-center py-8">
-                    <div className="animate-spin w-8 h-8 border-2 border-stone-300 border-t-purple-600 rounded-full"></div>
+                    <div className="animate-spin w-8 h-8 border-2 border-stone-300 border-t-violet-600 rounded-full"></div>
                   </div>
                 ) : friends.length === 0 ? (
                   <div className="text-center py-8">
@@ -2059,7 +2059,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                     <p className="text-sm text-stone-500 mb-4">Add friends to share study tools with them</p>
                     <button
                       onClick={() => { closeShareModal(); onNavigate('friends'); }}
-                      className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-lg transition-colors"
+                      className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium rounded-lg transition-colors"
                     >
                       Add Friends
                     </button>
@@ -2075,15 +2075,15 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                             onClick={() => setSelectedFriendId(friend.id)}
                             className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all ${
                               selectedFriendId === friend.id
-                                ? 'border-purple-500 bg-purple-50'
+                                ? 'border-violet-500 bg-violet-50'
                                 : 'border-stone-200 hover:border-stone-300 hover:bg-stone-50'
                             }`}
                           >
                             <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                              selectedFriendId === friend.id ? 'bg-purple-200' : 'bg-stone-200'
+                              selectedFriendId === friend.id ? 'bg-violet-200' : 'bg-stone-200'
                             }`}>
                               <span className={`font-semibold ${
-                                selectedFriendId === friend.id ? 'text-purple-700' : 'text-stone-600'
+                                selectedFriendId === friend.id ? 'text-violet-700' : 'text-stone-600'
                               }`}>
                                 {(friend.username?.[0] || friend.first_name?.[0] || friend.email?.[0] || '?').toUpperCase()}
                               </span>
@@ -2093,7 +2093,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                               <p className="text-xs text-stone-500">{friend.friend_code}</p>
                             </div>
                             {selectedFriendId === friend.id && (
-                              <svg className="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                              <svg className="w-5 h-5 text-violet-600" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                               </svg>
                             )}
@@ -2124,7 +2124,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                       <button
                         onClick={handleShare}
                         disabled={!selectedFriendId || isSharing}
-                        className="flex-1 px-4 py-2.5 text-white bg-purple-600 hover:bg-purple-700 disabled:bg-stone-300 rounded-xl font-medium text-sm transition-all flex items-center justify-center gap-2"
+                        className="flex-1 px-4 py-2.5 text-white bg-violet-600 hover:bg-violet-700 disabled:bg-stone-300 rounded-xl font-medium text-sm transition-all flex items-center justify-center gap-2"
                       >
                         {isSharing ? (
                           <>

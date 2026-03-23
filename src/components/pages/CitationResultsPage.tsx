@@ -46,7 +46,7 @@ const CitationResultsPage = ({
   const makeLinksClickable = (citationText: string | null | undefined) => {
     if (citationText == null || typeof citationText !== 'string') return '';
     const urlRegex = /(https?:\/\/[^\s<]+)/g;
-    return citationText.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline">$1</a>');
+    return citationText.replace(urlRegex, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-violet-600 hover:text-violet-800 underline">$1</a>');
   };
 
   const getTypeIcon = (type: string) => {
@@ -65,7 +65,7 @@ const CitationResultsPage = ({
     const colors: { [key: string]: string } = {
       'Open Access': 'bg-violet-50 text-violet-700 border-violet-200',
       'Subscription Required': 'bg-amber-50 text-amber-700 border-amber-200',
-      'Library Access': 'bg-blue-50 text-blue-700 border-blue-200'
+      'Library Access': 'bg-violet-50 text-violet-700 border-violet-200'
     };
     return colors[accessibility] || 'bg-gray-50 text-gray-700 border-gray-200';
   };
@@ -212,7 +212,7 @@ const CitationResultsPage = ({
         {searchResults.keywords && searchResults.keywords.length > 0 && (
           <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6 mb-6">
             <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-              <svg className="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 mr-2 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
               </svg>
               Recommended Keywords
@@ -304,7 +304,7 @@ const CitationResultsPage = ({
                 </div>
                 <button
                   onClick={() => copyCitation(citation.citation ?? '', index)}
-                  className="flex items-center px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors font-medium text-sm"
+                  className="flex items-center px-4 py-2 text-violet-600 hover:bg-violet-50 rounded-lg transition-colors font-medium text-sm"
                 >
                   {copiedIndex === index ? (
                     <>
@@ -340,20 +340,20 @@ const CitationResultsPage = ({
               {citation.ready_to_use_sentence && (
                 <div className="mb-5">
                   <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
-                    <svg className="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 mr-2 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
                     Ready-to-Use Sentence
-                    <span className="ml-2 text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-medium">
+                    <span className="ml-2 text-xs bg-violet-100 text-violet-700 px-2 py-1 rounded-full font-medium">
                       Copy & Paste
                     </span>
                   </h3>
-                  <div className="bg-purple-50 rounded-xl p-4 border border-purple-200 relative group">
+                  <div className="bg-violet-50 rounded-xl p-4 border border-violet-200 relative group">
                     <p className="text-gray-800 leading-relaxed pr-10">{citation.ready_to_use_sentence}</p>
                     {citation.in_text_citation && (
-                      <div className="mt-3 pt-3 border-t border-purple-200">
-                        <p className="text-sm text-purple-700">
-                          <strong>In-text:</strong> <code className="bg-white px-2 py-1 rounded text-purple-800 font-mono">{citation.in_text_citation}</code>
+                      <div className="mt-3 pt-3 border-t border-violet-200">
+                        <p className="text-sm text-violet-700">
+                          <strong>In-text:</strong> <code className="bg-white px-2 py-1 rounded text-violet-800 font-mono">{citation.in_text_citation}</code>
                         </p>
                       </div>
                     )}
@@ -367,7 +367,7 @@ const CitationResultsPage = ({
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                       ) : (
-                        <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                         </svg>
                       )}
@@ -391,7 +391,7 @@ const CitationResultsPage = ({
               {citation.key_points && citation.key_points.length > 0 && (
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2 flex items-center">
-                    <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 mr-2 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
                     Key Points
@@ -399,7 +399,7 @@ const CitationResultsPage = ({
                   <ul className="space-y-2">
                     {citation.key_points.map((point, pointIndex) => (
                       <li key={pointIndex} className="flex items-start">
-                        <span className="w-1.5 h-1.5 bg-blue-600 rounded-full mr-3 mt-2 flex-shrink-0"></span>
+                        <span className="w-1.5 h-1.5 bg-violet-600 rounded-full mr-3 mt-2 flex-shrink-0"></span>
                         <span className="text-gray-700">{point}</span>
                       </li>
                     ))}

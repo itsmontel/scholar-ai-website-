@@ -73,7 +73,7 @@ const TextCaseConverterPage = ({ onNavigate, user, onLogout }: TextCaseConverter
       green: 'bg-green-50 hover:bg-green-100 text-green-700 border-green-200',
       orange: 'bg-orange-50 hover:bg-orange-100 text-orange-700 border-orange-200',
       pink: 'bg-fuchsia-50 hover:bg-violet-100 text-violet-700 border-fuchsia-200',
-      indigo: 'bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-200',
+      indigo: 'bg-violet-50 hover:bg-violet-100 text-violet-700 border-violet-200',
     };
     return colors[color] || colors.rose;
   };

@@ -200,7 +200,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
         <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
           <div className="flex items-center justify-center min-h-64">
             <div className="text-center">
-              <div className="animate-spin w-12 h-12 border-4 border-sky-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+              <div className="animate-spin w-12 h-12 border-4 border-violet-500 border-t-transparent rounded-full mx-auto mb-4"></div>
               <p className="text-stone-600">Loading citation history...</p>
             </div>
           </div>
@@ -225,7 +225,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
             <p className="text-stone-600 mb-6">{error}</p>
             <button
               onClick={fetchCitationHistory}
-              className="px-6 py-3 bg-sky-600 hover:bg-sky-500 text-white rounded-xl font-medium transition-colors"
+              className="px-6 py-3 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-medium transition-colors"
             >
               Try Again
             </button>
@@ -288,7 +288,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 mb-10">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl bg-gradient-to-br from-sky-500 to-blue-600 shadow-lg shadow-sky-500/30">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl bg-gradient-to-br from-violet-500 to-violet-600 shadow-lg shadow-violet-500/30">
                 📚
               </div>
               <div>
@@ -304,7 +304,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
 
           <button
             onClick={startNewSearch}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-white bg-sky-600 hover:bg-sky-500 transition-all duration-200 hover:shadow-lg hover:shadow-sky-500/25 hover:-translate-y-0.5"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-white bg-violet-600 hover:bg-violet-500 transition-all duration-200 hover:shadow-lg hover:shadow-violet-500/25 hover:-translate-y-0.5"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -408,7 +408,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
                     key={opt.key}
                     onClick={() => setStyleFilter(opt.key)}
                     className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
-                      styleFilter === opt.key ? 'bg-sky-600 text-white' : 'bg-white border border-stone-200 text-stone-500 hover:border-stone-300 hover:text-stone-700'
+                      styleFilter === opt.key ? 'bg-violet-600 text-white' : 'bg-white border border-stone-200 text-stone-500 hover:border-stone-300 hover:text-stone-700'
                     }`}
                   >
                     {opt.label}
@@ -468,7 +468,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
             <p className="text-stone-600 mb-6">Start your first citation search to build your research library</p>
             <button
               onClick={startNewSearch}
-              className="px-6 py-3 bg-sky-600 hover:bg-sky-500 text-white font-semibold rounded-xl transition-colors"
+              className="px-6 py-3 bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-xl transition-colors"
             >
               Find Citations Now
             </button>
@@ -490,7 +490,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
             </button>
             <button
               onClick={startNewSearch}
-              className="px-6 py-3 bg-sky-600 hover:bg-sky-500 text-white font-semibold rounded-xl transition-colors"
+              className="px-6 py-3 bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-xl transition-colors"
             >
               Find Citations Now
             </button>
@@ -515,7 +515,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
                         </svg>
                         {formatDate(search.created_at)}
                       </span>
-                      <span className="px-2.5 py-1 bg-sky-50 text-sky-700 rounded-lg text-xs font-medium">
+                      <span className="px-2.5 py-1 bg-violet-50 text-violet-700 rounded-lg text-xs font-medium">
                         {search.citation_style}
                       </span>
                       {(search.year_range || search.search_results?.yearRange) && 
@@ -542,7 +542,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => viewSearchResults(search)}
-                      className="px-4 py-2.5 bg-sky-600 hover:bg-sky-500 text-white rounded-xl transition-colors font-medium text-sm"
+                      className="px-4 py-2.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl transition-colors font-medium text-sm"
                     >
                       View Results
                     </button>
@@ -602,7 +602,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
                     onClick={() => setCurrentPage(page)}
                     className={`w-10 h-10 rounded-lg font-medium transition-colors ${
                       currentPage === page
-                        ? 'bg-sky-600 hover:bg-sky-500 text-white shadow-md'
+                        ? 'bg-violet-600 hover:bg-violet-500 text-white shadow-md'
                         : 'bg-white border border-stone-200 text-stone-600 hover:bg-stone-50'
                     }`}
                   >

@@ -25,7 +25,7 @@ export const PATTERN_ELEMENTS: PatternElement[] = [
 ];
 
 export const PATTERN_COLORS: Record<PatternElement, string> = {
-  circle: '#3b82f6',
+  circle: '#8b5cf6',
   square: '#ef4444',
   triangle: '#22c55e',
   diamond: '#f97316',

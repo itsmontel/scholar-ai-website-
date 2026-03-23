@@ -29,7 +29,7 @@ const WhyStudentsChoosePage: React.FC<WhyStudentsChoosePageProps> = ({ onNavigat
             <p className="mt-3 text-sm text-stone-500 dark:text-stone-400">
               <button
                 onClick={() => onNavigate('study-tools-comparison')}
-                className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold underline underline-offset-2"
+                className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-semibold underline underline-offset-2"
               >
                 Compare study tools: WriteScholar vs Quizlet vs Knowt →
               </button>
@@ -78,7 +78,7 @@ const WhyStudentsChoosePage: React.FC<WhyStudentsChoosePageProps> = ({ onNavigat
                 { feature: 'Free Tools Available', ws: '8 Tools', grammarly: 'Limited', quillbot: 'Several', alt: true },
                 { feature: 'Starting Price', ws: 'Free / $19.99', grammarly: '$12/mo', quillbot: '$9.95/mo' },
               ].map((row, i) => (
-                <div key={i} className={`grid grid-cols-4 items-center ${row.alt ? 'bg-indigo-50/30 dark:bg-indigo-900/20' : ''}`}>
+                <div key={i} className={`grid grid-cols-4 items-center ${row.alt ? 'bg-violet-50/30 dark:bg-violet-900/20' : ''}`}>
                   <div className="p-4 sm:p-6">
                     <span className="font-medium text-stone-800 dark:text-stone-100 text-sm sm:text-base">{row.feature}</span>
                   </div>

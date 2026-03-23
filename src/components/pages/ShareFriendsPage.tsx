@@ -27,17 +27,17 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
       title: 'Get Your Unique Code',
       desc: 'Every WriteScholar account comes with a personal friend code. Share it anywhere — text, DM, or email.',
       color: 'bg-violet-600',
-      bg: 'bg-indigo-50 dark:bg-indigo-950/40',
-      border: 'border-indigo-100 dark:border-indigo-900/50',
-      accent: 'text-indigo-600 dark:text-indigo-400',
-      pill: 'bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300',
+      bg: 'bg-violet-50 dark:bg-violet-950/40',
+      border: 'border-violet-100 dark:border-violet-900/50',
+      accent: 'text-violet-600 dark:text-violet-400',
+      pill: 'bg-violet-100 dark:bg-violet-900/60 text-violet-700 dark:text-violet-300',
     },
     {
       num: '02',
       icon: '✨',
       title: 'Create & Generate',
       desc: 'Make any study tool you want — flashcard decks, AI quizzes, crosswords or notes. It takes seconds.',
-      color: 'from-violet-500 to-purple-600',
+      color: 'from-violet-500 to-violet-600',
       bg: 'bg-violet-50 dark:bg-violet-950/40',
       border: 'border-violet-100 dark:border-violet-900/50',
       accent: 'text-violet-600 dark:text-violet-400',
@@ -49,10 +49,10 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
       title: 'Share — They Accept',
       desc: 'Hit share, pick your friend, and it delivers straight to their WriteScholar. One tap to accept.',
       color: 'bg-violet-600',
-      bg: 'bg-purple-50 dark:bg-purple-950/40',
-      border: 'border-purple-100 dark:border-purple-900/50',
-      accent: 'text-purple-600 dark:text-purple-400',
-      pill: 'bg-purple-100 dark:bg-purple-900/60 text-purple-700 dark:text-purple-300',
+      bg: 'bg-violet-50 dark:bg-violet-950/40',
+      border: 'border-violet-100 dark:border-violet-900/50',
+      accent: 'text-violet-600 dark:text-violet-400',
+      pill: 'bg-violet-100 dark:bg-violet-900/60 text-violet-700 dark:text-violet-300',
     },
   ];
 
@@ -61,15 +61,15 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
       icon: '🃏',
       title: 'Flashcard Decks',
       desc: 'Share entire decks of study cards. Your friend gets them instantly in their library.',
-      gradient: 'bg-indigo-50 dark:bg-indigo-950/30',
-      border: 'border-indigo-100 dark:border-indigo-900/40',
-      accent: 'text-indigo-600 dark:text-indigo-400',
+      gradient: 'bg-violet-50 dark:bg-violet-950/30',
+      border: 'border-violet-100 dark:border-violet-900/40',
+      accent: 'text-violet-600 dark:text-violet-400',
     },
     {
       icon: '📝',
       title: 'Quizzes',
       desc: 'Built a killer quiz for a subject? Pass it on. Your friends can take it and track their score.',
-      gradient: 'from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30',
+      gradient: 'from-violet-50 to-violet-50 dark:from-violet-950/30 dark:to-violet-950/30',
       border: 'border-violet-100 dark:border-violet-900/40',
       accent: 'text-violet-600 dark:text-violet-400',
     },
@@ -77,9 +77,9 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
       icon: '🧩',
       title: 'Crossword Puzzles',
       desc: 'Crosswords are way more fun with friends. Share yours and see who finishes first.',
-      gradient: 'bg-purple-50 dark:bg-purple-950/30',
-      border: 'border-purple-100 dark:border-purple-900/40',
-      accent: 'text-purple-600 dark:text-purple-400',
+      gradient: 'bg-violet-50 dark:bg-violet-950/30',
+      border: 'border-violet-100 dark:border-violet-900/40',
+      accent: 'text-violet-600 dark:text-violet-400',
     },
     {
       icon: '📒',
@@ -107,15 +107,15 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
         {/* ══════════════════════════════════════════ */}
         <section className="relative overflow-hidden pt-16 pb-10 sm:pt-20 sm:pb-0">
           {/* Background */}
-          <div className="absolute inset-0 bg-gradient-to-b from-indigo-50/70 via-violet-50/40 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900" />
+          <div className="absolute inset-0 bg-gradient-to-b from-violet-50/70 via-violet-50/40 to-white dark:from-stone-950 dark:via-stone-900 dark:to-stone-900" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_55%_at_50%_-15%,rgba(99,102,241,0.18),transparent)] dark:bg-[radial-gradient(ellipse_80%_55%_at_50%_-15%,rgba(139,92,246,0.14),transparent)]" />
 
           {/* Floating blobs */}
           <FloatingShape className="top-[8%] left-[5%] w-14 h-14 bg-gradient-to-br from-violet-400/20 to-fuchsia-500/20 rotate-12 lg:hidden animate-float" />
-          <FloatingShape className="top-[18%] right-[7%] w-12 h-12 bg-gradient-to-br from-violet-400/20 to-purple-500/20 lg:hidden animate-float-delayed" />
-          <FloatingShape className="bottom-[30%] left-[8%] w-10 h-10 bg-gradient-to-br from-indigo-400/20 to-blue-500/20 lg:hidden animate-float" />
-          <FloatingShape className="top-[25%] left-[4%] w-16 h-16 hidden lg:block bg-gradient-to-br from-violet-400/15 to-purple-500/10 animate-float rounded-2xl" />
-          <FloatingShape className="top-[40%] right-[3%] w-20 h-20 hidden lg:block bg-gradient-to-br from-indigo-400/12 to-violet-500/8 animate-float-delayed rounded-full" />
+          <FloatingShape className="top-[18%] right-[7%] w-12 h-12 bg-gradient-to-br from-violet-400/20 to-violet-500/20 lg:hidden animate-float-delayed" />
+          <FloatingShape className="bottom-[30%] left-[8%] w-10 h-10 bg-gradient-to-br from-violet-400/20 to-violet-500/20 lg:hidden animate-float" />
+          <FloatingShape className="top-[25%] left-[4%] w-16 h-16 hidden lg:block bg-gradient-to-br from-violet-400/15 to-violet-500/10 animate-float rounded-2xl" />
+          <FloatingShape className="top-[40%] right-[3%] w-20 h-20 hidden lg:block bg-gradient-to-br from-violet-400/12 to-violet-500/8 animate-float-delayed rounded-full" />
 
           {/* Emoji accents */}
           <div className="absolute top-[14%] left-[9%] hidden lg:block text-4xl opacity-35 animate-float" style={{ animationDelay: '0.3s' }}>👫</div>
@@ -128,7 +128,7 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
               {/* Left text */}
               <div className="text-center lg:text-left order-2 lg:order-1 pb-8 lg:pb-16">
                 {/* Badge */}
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-full text-sm font-semibold mb-5">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 rounded-full text-sm font-semibold mb-5">
                   <span>👫</span>
                   <span>Social Study, Levelled Up</span>
                 </div>
@@ -176,7 +176,7 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
 
               {/* Right mascot illustration */}
               <div className="relative flex items-center justify-center order-1 lg:order-2">
-                <div className="absolute inset-0 bg-gradient-to-r from-indigo-400/10 to-violet-400/10 rounded-3xl blur-3xl" />
+                <div className="absolute inset-0 bg-gradient-to-r from-violet-400/10 to-violet-400/10 rounded-3xl blur-3xl" />
                 <DualMascot size={440} />
               </div>
             </div>
@@ -186,11 +186,11 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
         {/* ══════════════════════════════════════════ */}
         {/* YOUR UNIQUE CODE SECTION                  */}
         {/* ══════════════════════════════════════════ */}
-        <section className="relative py-16 sm:py-24 bg-gradient-to-b from-white via-indigo-50/40 to-violet-50/30 dark:from-stone-900 dark:via-stone-900 dark:to-stone-900 overflow-hidden">
+        <section className="relative py-16 sm:py-24 bg-gradient-to-b from-white via-violet-50/40 to-violet-50/30 dark:from-stone-900 dark:via-stone-900 dark:to-stone-900 overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_50%,rgba(99,102,241,0.08),transparent)] dark:bg-[radial-gradient(ellipse_60%_40%_at_50%_50%,rgba(139,92,246,0.06),transparent)]" />
 
           <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <span className="inline-block px-4 py-1.5 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-full text-sm font-semibold mb-4">
+            <span className="inline-block px-4 py-1.5 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 rounded-full text-sm font-semibold mb-4">
               Your Identity on WriteScholar
             </span>
             <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">
@@ -205,15 +205,15 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
 
             {/* Code card */}
             <div className="relative inline-block group mb-10">
-              <div className="absolute -inset-1 bg-gradient-to-r from-indigo-400 to-violet-500 rounded-3xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity duration-500" />
-              <div className="relative bg-white dark:bg-stone-800 rounded-3xl px-8 sm:px-14 py-8 shadow-2xl border border-indigo-200/60 dark:border-indigo-800/40">
+              <div className="absolute -inset-1 bg-gradient-to-r from-violet-400 to-violet-500 rounded-3xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity duration-500" />
+              <div className="relative bg-white dark:bg-stone-800 rounded-3xl px-8 sm:px-14 py-8 shadow-2xl border border-violet-200/60 dark:border-violet-800/40">
                 <p className="text-xs sm:text-sm font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-widest mb-3">Your unique friend code</p>
                 <div className="flex items-center justify-center gap-3 sm:gap-5 flex-wrap">
                   <span className="text-3xl sm:text-5xl font-black tracking-widest text-violet-600 dark:text-violet-400 font-mono">
                     {demoCode}
                   </span>
                   <button
-                    className="flex items-center gap-2 px-4 py-2 bg-indigo-100 dark:bg-indigo-900/50 hover:bg-indigo-200 dark:hover:bg-indigo-800/60 text-indigo-700 dark:text-indigo-300 font-semibold rounded-xl text-sm transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-violet-100 dark:bg-violet-900/50 hover:bg-violet-200 dark:hover:bg-violet-800/60 text-violet-700 dark:text-violet-300 font-semibold rounded-xl text-sm transition-colors"
                   >
                     {copiedCode ? (
                       <>
@@ -231,7 +231,7 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
                 <div className="flex flex-wrap items-center justify-center gap-3 mt-5">
                   {['Easy to remember', 'Shareable anywhere', 'Yours forever'].map((tag) => (
                     <span key={tag} className="flex items-center gap-1.5 text-xs sm:text-sm font-medium text-stone-500 dark:text-stone-400">
-                      <svg className="w-4 h-4 text-indigo-500 dark:text-indigo-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                      <svg className="w-4 h-4 text-violet-500 dark:text-violet-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
                       {tag}
                     </span>
                   ))}
@@ -293,11 +293,11 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
         {/* WHAT YOU CAN SHARE                        */}
         {/* ══════════════════════════════════════════ */}
         <section className="relative py-16 sm:py-28 bg-gradient-to-b from-stone-50 to-white dark:from-stone-950/60 dark:to-stone-900 overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500 opacity-20" />
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-violet-500 via-violet-500 to-violet-500 opacity-20" />
 
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12 sm:mb-16">
-              <span className="inline-block px-4 py-1.5 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded-full text-sm font-semibold mb-4">
+              <span className="inline-block px-4 py-1.5 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 rounded-full text-sm font-semibold mb-4">
                 Everything in Your Library
               </span>
               <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">
@@ -334,7 +334,7 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
 
           <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="relative group rounded-3xl overflow-hidden">
-              <div className="absolute -inset-1 bg-gradient-to-r from-indigo-400 to-violet-500 rounded-3xl blur-xl opacity-15 group-hover:opacity-25 transition-opacity duration-500" />
+              <div className="absolute -inset-1 bg-gradient-to-r from-violet-400 to-violet-500 rounded-3xl blur-xl opacity-15 group-hover:opacity-25 transition-opacity duration-500" />
               <div className="relative bg-white dark:bg-stone-800 rounded-3xl border border-stone-200/50 dark:border-stone-700 shadow-2xl overflow-hidden">
                 <div className="grid lg:grid-cols-2 gap-0">
                   {/* Left: text */}
@@ -356,8 +356,8 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
                         'Works on any device',
                       ].map((point) => (
                         <li key={point} className="flex items-center gap-3 text-stone-600 dark:text-stone-400 text-sm sm:text-base">
-                          <span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center flex-shrink-0">
-                            <svg className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" fill="currentColor" viewBox="0 0 20 20">
+                          <span className="w-6 h-6 rounded-full bg-violet-100 dark:bg-violet-900/50 flex items-center justify-center flex-shrink-0">
+                            <svg className="w-3.5 h-3.5 text-violet-600 dark:text-violet-400" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                             </svg>
                           </span>
@@ -367,7 +367,7 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
                     </ul>
                     <button
                       onClick={() => onNavigate('signup')}
-                      className="mt-8 self-start px-6 py-3 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-2xl shadow-lg shadow-indigo-500/25 hover:shadow-xl transition-all duration-200 hover:-translate-y-0.5 flex items-center gap-2"
+                      className="mt-8 self-start px-6 py-3 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-2xl shadow-lg shadow-violet-500/25 hover:shadow-xl transition-all duration-200 hover:-translate-y-0.5 flex items-center gap-2"
                     >
                       Get started free
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -377,7 +377,7 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
                   </div>
 
                   {/* Right: mock notification UI */}
-                  <div className="relative bg-gradient-to-br from-indigo-50 to-violet-50/60 dark:from-indigo-950/30 dark:to-violet-950/20 p-8 sm:p-12 flex items-center justify-center min-h-[320px]">
+                  <div className="relative bg-gradient-to-br from-violet-50 to-violet-50/60 dark:from-violet-950/30 dark:to-violet-950/20 p-8 sm:p-12 flex items-center justify-center min-h-[320px]">
                     <div className="absolute top-6 right-6 text-4xl opacity-20 animate-float">🎁</div>
                     <div className="absolute bottom-8 left-8 text-3xl opacity-20 animate-float-delayed">💌</div>
 
@@ -386,7 +386,7 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
                       <p className="text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-4 text-center">Live in their WriteScholar</p>
 
                       {/* Incoming notification */}
-                      <div className="bg-white dark:bg-stone-700 rounded-2xl p-4 shadow-lg border border-indigo-100 dark:border-indigo-900/40 animate-[card-breathe_4s_ease-in-out_infinite]">
+                      <div className="bg-white dark:bg-stone-700 rounded-2xl p-4 shadow-lg border border-violet-100 dark:border-violet-900/40 animate-[card-breathe_4s_ease-in-out_infinite]">
                         <div className="flex items-start gap-3">
                           <div className="w-10 h-10 rounded-xl bg-violet-600 flex items-center justify-center text-lg flex-shrink-0">🃏</div>
                           <div className="flex-1 min-w-0">
@@ -434,7 +434,7 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
         {/* FINAL CTA                                 */}
         {/* ══════════════════════════════════════════ */}
         <section className="relative py-20 sm:py-32 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-700" />
+          <div className="absolute inset-0 bg-gradient-to-br from-violet-600 via-violet-600 to-violet-700" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_50%,rgba(255,255,255,0.08),transparent)]" />
 
           {/* Floating emoji */}
@@ -453,13 +453,13 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
               Add your crew.<br />
               Study together.
             </h2>
-            <p className="text-indigo-100 text-base sm:text-xl leading-relaxed mb-10 max-w-xl mx-auto">
+            <p className="text-violet-100 text-base sm:text-xl leading-relaxed mb-10 max-w-xl mx-auto">
               Join thousands of students using WriteScholar to study smarter with their friends.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={() => onNavigate('signup')}
-                className="px-8 py-4 bg-white text-indigo-700 font-bold rounded-2xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-200 text-base flex items-center justify-center gap-2"
+                className="px-8 py-4 bg-white text-violet-700 font-bold rounded-2xl shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-200 text-base flex items-center justify-center gap-2"
               >
                 Create your free account
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

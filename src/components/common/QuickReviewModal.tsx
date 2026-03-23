@@ -493,7 +493,7 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
                               </div>
                             )}
                             {res.item.data.explanation && (
-                              <p className="mt-2 text-xs text-blue-700 bg-blue-50/70 border border-blue-100 rounded-lg px-2 py-1.5">
+                              <p className="mt-2 text-xs text-violet-700 bg-violet-50/70 border border-violet-100 rounded-lg px-2 py-1.5">
                                 {res.item.data.explanation}
                               </p>
                             )}
@@ -563,7 +563,7 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
             
             {/* Score display */}
             <div className="my-4 sm:my-6">
-              <div className="inline-flex flex-wrap items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-violet-50 to-purple-50 rounded-xl sm:rounded-2xl border border-violet-100">
+              <div className="inline-flex flex-wrap items-center justify-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-violet-50 to-violet-50 rounded-xl sm:rounded-2xl border border-violet-100">
                 <div className="text-center">
                   <div className="text-2xl sm:text-4xl font-bold bg-violet-600 hover:bg-violet-500 bg-clip-text text-transparent">
                     {score}/{reviewItems.length}
@@ -779,8 +779,8 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
               
               {/* Explanation after answering - scrollable if long */}
               {answered && currentItem.data.explanation && (
-                <div className="p-2.5 sm:p-3 bg-blue-50 border border-blue-200 rounded-xl max-h-24 sm:max-h-32 overflow-y-auto flex-shrink-0">
-                  <p className="text-xs sm:text-sm text-blue-800">
+                <div className="p-2.5 sm:p-3 bg-violet-50 border border-violet-200 rounded-xl max-h-24 sm:max-h-32 overflow-y-auto flex-shrink-0">
+                  <p className="text-xs sm:text-sm text-violet-800">
                     <span className="font-semibold">💡</span> {currentItem.data.explanation}
                   </p>
                 </div>
@@ -832,10 +832,10 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
                   
                   {/* Back */}
                   <div
-                    className="absolute inset-0 w-full min-h-[120px] sm:min-h-[160px] max-h-[160px] sm:max-h-[200px] bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl sm:rounded-2xl p-4 sm:p-6 flex flex-col items-center justify-center text-center shadow-lg overflow-y-auto"
+                    className="absolute inset-0 w-full min-h-[120px] sm:min-h-[160px] max-h-[160px] sm:max-h-[200px] bg-gradient-to-br from-violet-50 to-violet-50 border-2 border-violet-200 rounded-xl sm:rounded-2xl p-4 sm:p-6 flex flex-col items-center justify-center text-center shadow-lg overflow-y-auto"
                     style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
                   >
-                    <span className="text-xs font-bold text-blue-500 uppercase tracking-widest mb-2 flex-shrink-0">Answer</span>
+                    <span className="text-xs font-bold text-violet-500 uppercase tracking-widest mb-2 flex-shrink-0">Answer</span>
                     <p className="text-sm sm:text-base text-stone-700 leading-relaxed line-clamp-6 min-w-0">
                       {currentItem.data.back}
                     </p>

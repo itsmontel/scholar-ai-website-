@@ -434,8 +434,8 @@ const ReadabilityScorePage = ({ onNavigate, user, onLogout }: ReadabilityScorePa
               <p className="text-gray-600 text-sm">Uses character count and sentence length. Good for real-time text analysis.</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center mb-4">
-                <span className="text-indigo-600 font-bold">FE</span>
+              <div className="w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center mb-4">
+                <span className="text-violet-600 font-bold">FE</span>
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Flesch Reading Ease</h3>
               <p className="text-gray-600 text-sm">Scores 0-100 (higher = easier). The inverse of Flesch-Kincaid, focused on ease rather than grade.</p>

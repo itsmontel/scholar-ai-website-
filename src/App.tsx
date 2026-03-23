@@ -17,7 +17,7 @@ const LandingPage: React.FC<NavigationProps> = ({ onNavigate }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-violet-50 to-violet-50">
       {/* Navigation */}
       <nav className="flex items-center justify-between px-8 py-6">
         <div className="flex items-center space-x-2">
@@ -93,7 +93,7 @@ const LandingPage: React.FC<NavigationProps> = ({ onNavigate }) => {
                 </div>
               </div>
               <blockquote className="text-xl text-gray-900 mb-6 leading-relaxed">
-                "This platform has <em className="font-semibold text-blue-600">revolutionized</em> my research writing process. The AI feedback is incredibly detailed and helped me <em className="font-semibold text-purple-600">improve my argumentation</em> significantly."
+                "This platform has <em className="font-semibold text-violet-600">revolutionized</em> my research writing process. The AI feedback is incredibly detailed and helped me <em className="font-semibold text-violet-600">improve my argumentation</em> significantly."
               </blockquote>
               <cite className="text-gray-600">
                 <span className="font-semibold">Sarah Chen</span> / PhD Candidate, Stanford University
@@ -109,15 +109,15 @@ const LandingPage: React.FC<NavigationProps> = ({ onNavigate }) => {
           
           <div className="grid md:grid-cols-4 gap-8">
             <div className="text-center group">
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-100 to-blue-200 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                <span className="text-blue-600 font-bold text-xl">1</span>
+              <div className="w-16 h-16 bg-gradient-to-r from-violet-100 to-violet-200 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                <span className="text-violet-600 font-bold text-xl">1</span>
               </div>
               <h3 className="font-semibold text-gray-900 mb-3">Upload Your Paper</h3>
               <p className="text-gray-600">Upload your academic document in PDF, Word, or paste your text directly.</p>
             </div>
             <div className="text-center group">
-              <div className="w-16 h-16 bg-gradient-to-r from-purple-100 to-purple-200 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                <span className="text-purple-600 font-bold text-xl">2</span>
+              <div className="w-16 h-16 bg-gradient-to-r from-violet-100 to-violet-200 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                <span className="text-violet-600 font-bold text-xl">2</span>
               </div>
               <h3 className="font-semibold text-gray-900 mb-3">AI Analysis</h3>
               <p className="text-gray-600">Our advanced AI analyzes your writing for structure, clarity, and academic rigor.</p>
@@ -130,8 +130,8 @@ const LandingPage: React.FC<NavigationProps> = ({ onNavigate }) => {
               <p className="text-gray-600">Get detailed, professor-style annotations and suggestions.</p>
             </div>
             <div className="text-center group">
-              <div className="w-16 h-16 bg-gradient-to-r from-indigo-100 to-indigo-200 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                <span className="text-indigo-600 font-bold text-xl">4</span>
+              <div className="w-16 h-16 bg-gradient-to-r from-violet-100 to-violet-200 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                <span className="text-violet-600 font-bold text-xl">4</span>
               </div>
               <h3 className="font-semibold text-gray-900 mb-3">Improve & Iterate</h3>
               <p className="text-gray-600">Apply suggestions and re-analyze to continuously enhance your writing.</p>
@@ -289,7 +289,7 @@ const Dashboard: React.FC<NavigationProps> = ({ onNavigate }) => (
         </div>
         <div className="bg-white p-6 rounded-xl shadow-lg">
           <h3 className="font-semibold text-gray-900 mb-2">Writing Score</h3>
-          <p className="text-2xl font-bold text-blue-600">87%</p>
+          <p className="text-2xl font-bold text-violet-600">87%</p>
         </div>
         <div className="bg-white p-6 rounded-xl shadow-lg">
           <h3 className="font-semibold text-gray-900 mb-2">Improvements</h3>
@@ -297,7 +297,7 @@ const Dashboard: React.FC<NavigationProps> = ({ onNavigate }) => (
         </div>
       </div>
       <nav className="mt-8 flex space-x-4">
-        <button onClick={() => onNavigate('analysis')} className="text-blue-600">View Analysis</button>
+        <button onClick={() => onNavigate('analysis')} className="text-violet-600">View Analysis</button>
         <button onClick={() => onNavigate('settings')} className="text-gray-600">Settings</button>
       </nav>
     </div>
@@ -309,8 +309,8 @@ const UploadPage: React.FC<NavigationProps> = ({ onNavigate }) => (
     <div className="max-w-4xl mx-auto">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Upload Document</h1>
       <div className="bg-white rounded-xl shadow-lg p-12 text-center border-2 border-dashed border-gray-300">
-        <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="w-16 h-16 bg-violet-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg className="w-8 h-8 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
           </svg>
         </div>
@@ -323,7 +323,7 @@ const UploadPage: React.FC<NavigationProps> = ({ onNavigate }) => (
           Start Analysis
         </button>
       </div>
-      <button onClick={() => onNavigate('dashboard')} className="mt-4 text-blue-600">← Back to Dashboard</button>
+      <button onClick={() => onNavigate('dashboard')} className="mt-4 text-violet-600">← Back to Dashboard</button>
     </div>
   </div>
 );
@@ -333,7 +333,7 @@ const AnalysisPage: React.FC<NavigationProps> = ({ onNavigate }) => (
     <div className="max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Document Analysis</h1>
-        <button onClick={() => onNavigate('dashboard')} className="text-blue-600">← Back to Dashboard</button>
+        <button onClick={() => onNavigate('dashboard')} className="text-violet-600">← Back to Dashboard</button>
       </div>
       <div className="grid md:grid-cols-3 gap-8">
         <div className="md:col-span-2 bg-white rounded-xl shadow-lg p-8">
@@ -367,7 +367,7 @@ const SettingsPage: React.FC<NavigationProps> = ({ onNavigate }) => (
     <div className="max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-        <button onClick={() => onNavigate('dashboard')} className="text-blue-600">← Back to Dashboard</button>
+        <button onClick={() => onNavigate('dashboard')} className="text-violet-600">← Back to Dashboard</button>
       </div>
       <div className="bg-white rounded-xl shadow-lg p-8">
         <div className="grid md:grid-cols-2 gap-8">

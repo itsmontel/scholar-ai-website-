@@ -256,11 +256,10 @@ class AIAnalysisService {
       
       try {
         const { plan } = await subscriptionService.getUserSubscriptionDetails(userId);
-        // focus / starter / legacy premium → same limits as Pro (single paid analysis tier)
         const effPlan = subscriptionService.normalizePlanForLimits(plan);
-        userPlan = effPlan === 'pro' ? 'pro' : 'free';
+        userPlan = subscriptionService.isPaidSubscriptionTier(plan) ? effPlan : 'free';
 
-        if (effPlan === 'pro') {
+        if (subscriptionService.isPaidSubscriptionTier(plan)) {
           selectedModel = process.env.OPENAI_PREMIUM_MODEL || 'gpt-5-mini';
           maxTokens = 15000;
         } else {
@@ -361,7 +360,7 @@ class AIAnalysisService {
 
       try {
         const { plan } = await subscriptionService.getUserSubscriptionDetails(userId);
-        if (subscriptionService.normalizePlanForLimits(plan) === 'pro') {
+        if (subscriptionService.isPaidSubscriptionTier(plan)) {
           selectedModel = process.env.OPENAI_PREMIUM_MODEL || 'gpt-5-mini';
           maxTokens = 8000;
         }
@@ -896,7 +895,7 @@ CRITICAL REQUIREMENTS:
     const wordCount = content.split(/\s+/).length;
     let targetAnnotations = 12; // Default for free/short documents
     
-    if (subscriptionService.normalizePlanForLimits(userPlan || 'free') === 'pro') {
+    if (subscriptionService.isPaidSubscriptionTier(userPlan || 'free')) {
       if (wordCount > 5000) targetAnnotations = 35;
       else if (wordCount > 3000) targetAnnotations = 30;
       else if (wordCount > 1500) targetAnnotations = 25;
@@ -973,13 +972,20 @@ IMPROVEMENT & CONCERN ANNOTATIONS — MUST BE ACTIONABLE AND PAPER-SPECIFIC:
 
 ${gradingScaleInstruction}
 
+OVERALL ASSESSMENT TONE (for "overall_assessment" field):
+- Sound supportive and encouraging: like a professor who wants the student to succeed, not a harsh critic.
+- Open with genuine strengths or what is working (specific, not generic flattery).
+- Acknowledge effort and seriousness of the work where appropriate.
+- Mention areas to improve as opportunities or next steps—clear but kind, never dismissive or discouraging.
+- Avoid harsh, cold, or overly negative framing; stay honest while remaining motivating.
+
 Document Content (${wordCount} words):
 ${content}
 
 Return ONLY a valid JSON object. No preamble, no markdown, no explanation outside the JSON.
 
 {
-  "overall_assessment": "2-3 sentence professor-style summary. State what the essay does well and its primary weakness. Be direct.",
+  "overall_assessment": "2-3 sentences. Warm, encouraging professor tone: lead with what works, then one main area to strengthen framed as a constructive next step. Honest but motivating—never harsh.",
 
   "overall_score": <integer 0-100, US scale: A = 90-100, B = 80-89, C = 70-79. NOT multiples of 5>,
 
@@ -1492,7 +1498,7 @@ CRITICAL REQUIREMENTS:
     const wordCount = content.split(/\s+/).length;
     let minTotal = 12;
     
-    if (subscriptionService.normalizePlanForLimits(userPlan || 'free') === 'pro') {
+    if (subscriptionService.isPaidSubscriptionTier(userPlan || 'free')) {
       if (wordCount > 5000) minTotal = 35;
       else if (wordCount > 3000) minTotal = 30;
       else if (wordCount > 1500) minTotal = 25;
@@ -3055,7 +3061,7 @@ IMPORTANT REQUIREMENTS:
       );
 
       // Free users: expires 30 days after creation; Paid users (pro/premium): no expiration (null)
-      const isPaidUser = subscriptionService.normalizePlanForLimits(userPlan || 'free') === 'pro';
+      const isPaidUser = subscriptionService.isPaidSubscriptionTier(userPlan || 'free');
       const expiresAt = isPaidUser ? null : getExpiresAt30Days();
 
       // Note: yearRange is already included in searchResults.yearRange
@@ -3176,7 +3182,7 @@ IMPORTANT REQUIREMENTS:
       );
 
       // Free users: expires 30 days after creation; Paid users (pro/premium): no expiration (null)
-      const isPaidUser = subscriptionService.normalizePlanForLimits(userPlan || 'free') === 'pro';
+      const isPaidUser = subscriptionService.isPaidSubscriptionTier(userPlan || 'free');
       const expiresAt = isPaidUser ? null : getExpiresAt30Days();
 
       const quizData = {
@@ -3224,7 +3230,7 @@ IMPORTANT REQUIREMENTS:
       );
 
       // Free users: expires 30 days after creation; Paid users (pro/premium): no expiration (null)
-      const isPaidUser = subscriptionService.normalizePlanForLimits(userPlan || 'free') === 'pro';
+      const isPaidUser = subscriptionService.isPaidSubscriptionTier(userPlan || 'free');
       const expiresAt = isPaidUser ? null : getExpiresAt30Days();
 
       const flashcardData = {
@@ -3272,7 +3278,7 @@ IMPORTANT REQUIREMENTS:
       );
 
       // Free users: expires 30 days after creation; Paid users (pro/premium): no expiration (null)
-      const isPaidUser = subscriptionService.normalizePlanForLimits(userPlan || 'free') === 'pro';
+      const isPaidUser = subscriptionService.isPaidSubscriptionTier(userPlan || 'free');
       const expiresAt = isPaidUser ? null : getExpiresAt30Days();
 
       // Build clues object from placedWords for display in history
@@ -3334,7 +3340,7 @@ IMPORTANT REQUIREMENTS:
         process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
       );
 
-      const isPaidUser = subscriptionService.normalizePlanForLimits(userPlan || 'free') === 'pro';
+      const isPaidUser = subscriptionService.isPaidSubscriptionTier(userPlan || 'free');
       const expiresAt = isPaidUser ? null : getExpiresAt30Days();
 
       const title = (payload.title || payload.sourceText || 'Crater Blast Game').toString().slice(0, 200);
@@ -3554,7 +3560,7 @@ IMPORTANT REQUIREMENTS:
       );
 
       // Free users: expires 30 days after creation; Paid users (pro/premium): no expiration (null)
-      const isPaidUser = subscriptionService.normalizePlanForLimits(userPlan || 'free') === 'pro';
+      const isPaidUser = subscriptionService.isPaidSubscriptionTier(userPlan || 'free');
       const expiresAt = isPaidUser ? null : getExpiresAt30Days();
 
       const lessonData = {
@@ -4867,6 +4873,184 @@ Rules:
     ]);
 
     return { quiz, flashcards, crossword, lesson, craterBlast };
+  }
+
+  /**
+   * Pro: generate concrete replacement prose for a highlighted span (not advisory "suggestion" text).
+   * @param {object} params
+   * @param {string} params.fullDocument - full essay text
+   * @param {string} params.highlightedText - exact span to replace
+   * @param {number} params.startIndex
+   * @param {number} params.endIndex
+   * @param {'improve'|'concern'} params.annotationType
+   * @param {string} [params.comment] - professor-style feedback
+   * @param {string} [params.suggestion] - prior advisory note (model may ignore meta-instructions)
+   * @returns {Promise<{ replacement: string }>}
+   */
+  async generateInlineRevision({
+    fullDocument,
+    highlightedText,
+    startIndex,
+    endIndex,
+    annotationType,
+    comment = '',
+    suggestion = '',
+  }) {
+    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
+      throw new Error('OpenAI API key not configured');
+    }
+    if (!fullDocument || typeof fullDocument !== 'string') {
+      throw new Error('Document content is required');
+    }
+    if (!highlightedText || typeof highlightedText !== 'string') {
+      throw new Error('Highlighted text is required');
+    }
+
+    const model = process.env.OPENAI_STANDARD_MODEL || 'gpt-4.1-mini';
+    const ctxChars = 1400;
+    const start = Math.max(0, Number(startIndex) || 0);
+    const end = Math.min(fullDocument.length, Number(endIndex) || 0);
+    const before = fullDocument.slice(Math.max(0, start - ctxChars), start);
+    const after = fullDocument.slice(end, Math.min(fullDocument.length, end + ctxChars));
+    const issue = annotationType === 'concern' ? 'serious_concern' : 'needs_improvement';
+
+    const systemPrompt = `You are an expert academic writing editor. You must output only valid JSON.
+
+The app will replace ONE contiguous highlighted span in a student essay with your output.
+
+Rules for the replacement text:
+- It must be the actual prose that belongs in the essay at that position — not instructions, not meta-commentary ("you should add...", "consider...", "try using...").
+- It must address the problems described in the feedback by rewriting the passage correctly.
+- Match the tone and register of the surrounding context (usually formal academic English).
+- Preserve meaning where the feedback is stylistic; fix errors, weak analysis, or unclear claims as the feedback implies.
+- Do not wrap the result in quotation marks unless the original was a quotation.
+- The JSON value must contain only the replacement string, ready to splice into the document.
+
+Return exactly: {"replacement":"..."} with no other keys. Escape internal double quotes in the string properly for JSON.`;
+
+    const userPrompt = `ISSUE_CLASS: ${issue}
+
+FEEDBACK (what was wrong with the highlighted passage — use to guide the rewrite):
+${String(comment || '').trim() || '(none)'}
+
+PRIOR_MODEL_NOTE (often advisory; do NOT paste this — write real sentences that fix the issue):
+${String(suggestion || '').trim() || '(none)'}
+
+CONTEXT_BEFORE (read for flow; do not repeat verbatim):
+${before}
+
+HIGHLIGHTED_TEXT_TO_REPLACE (your "replacement" substitutes this exact span):
+${highlightedText}
+
+CONTEXT_AFTER:
+${after}
+
+Output JSON only: {"replacement":"..."}`;
+
+    const completion = await this.openai.chat.completions.create({
+      model,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
+      max_tokens: 2500,
+      temperature: 0.35,
+      response_format: { type: 'json_object' },
+    });
+
+    const raw = completion.choices[0]?.message?.content?.trim() || '{}';
+    let parsed;
+    try {
+      parsed = JSON.parse(raw);
+    } catch (e) {
+      console.error('[generateInlineRevision] JSON parse error:', raw?.slice(0, 500));
+      throw new Error('Could not parse revision from model');
+    }
+    const replacement = typeof parsed.replacement === 'string' ? parsed.replacement.trim() : '';
+    if (!replacement) {
+      throw new Error('Model returned an empty replacement');
+    }
+    return { replacement };
+  }
+
+  /**
+   * Persist revised essay + annotation positions to the library: updates documents.content_text
+   * and the latest comprehensive/general document_analyses row (so reopening from Library shows last edits).
+   * @param {Record<string, { sourceSpan: string; replacement: string }>|null|undefined} wsRevisionCache
+   *        Per-annotation WriteScholar cache so reopening the doc avoids repeat OpenAI calls and restores purple highlights.
+   */
+  async saveRevisedDraftToLibrary(documentId, userId, content, annotations, wsRevisionCache) {
+    const documentService = require('./documentService');
+    const words = (content || '').trim().split(/\s+/).filter(Boolean);
+    const wordCount = words.length;
+    const fileSize = Buffer.byteLength(content || '', 'utf8');
+    await documentService.updateDocument(documentId, userId, {
+      content_text: content,
+      word_count: wordCount,
+      page_count: Math.max(1, Math.ceil(wordCount / 250)),
+      file_size: fileSize,
+    });
+
+    const { createClient } = require('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+    );
+
+    const { data: rows, error: fetchErr } = await supabase
+      .from('document_analyses')
+      .select('id, analysis_results')
+      .eq('document_id', documentId)
+      .eq('user_id', userId)
+      .in('analysis_type', ['comprehensive', 'general'])
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (fetchErr) throw fetchErr;
+    if (!rows?.length) {
+      return { ok: true, analysisUpdated: false };
+    }
+
+    const row = rows[0];
+    const ar = row.analysis_results || {};
+    const list = annotations || [];
+    const strongPoints = list.filter((a) => a.type === 'strong').map((a) => ({
+      text: a.text,
+      explanation: a.comment,
+    }));
+    const areasToImprove = list.filter((a) => a.type === 'improve').map((a) => ({
+      text: a.text,
+      explanation: a.comment,
+    }));
+    const seriousConcerns = list.filter((a) => a.type === 'concern').map((a) => ({
+      text: a.text,
+      explanation: a.comment,
+    }));
+
+    const updatedResults = {
+      ...ar,
+      // Never overwrite original_content — it is the essay text at analysis time (compare-with-first-draft baseline).
+      // `content` is the current revised draft; spreading `ar` already keeps the saved snapshot.
+      annotations: list,
+      strong_points: strongPoints,
+      areas_to_improve: areasToImprove,
+      serious_concerns: seriousConcerns,
+      ...(wsRevisionCache !== undefined && wsRevisionCache !== null
+        ? { ws_revision_cache: typeof wsRevisionCache === 'object' ? wsRevisionCache : {} }
+        : {}),
+    };
+
+    const { error: upErr } = await supabase
+      .from('document_analyses')
+      .update({
+        analysis_results: updatedResults,
+        completed_at: new Date().toISOString(),
+      })
+      .eq('id', row.id)
+      .eq('user_id', userId);
+
+    if (upErr) throw upErr;
+    return { ok: true, analysisUpdated: true };
   }
 }
 

@@ -93,7 +93,7 @@ const CitationIllustration = () => (
 );
 
 const GrammarIllustration = () => (
-  <IllustrationWrapper bgColor="bg-purple-50">
+  <IllustrationWrapper bgColor="bg-violet-50">
     <svg viewBox="0 0 280 160" fill="none" className="w-full max-w-xs h-auto">
       {/* Document */}
       <rect x="60" y="30" width="100" height="110" rx="4" fill="white" stroke="#E5E7EB" strokeWidth="2" />
@@ -144,7 +144,7 @@ const ComparisonIllustration = () => (
 );
 
 const AIAssistantIllustration = () => (
-  <IllustrationWrapper bgColor="bg-blue-50">
+  <IllustrationWrapper bgColor="bg-violet-50">
     <svg viewBox="0 0 280 160" fill="none" className="w-full max-w-xs h-auto">
       {/* Robot/AI character */}
       <rect x="100" y="40" width="80" height="70" rx="10" fill="#E0E7FF" stroke="#6366F1" strokeWidth="2" />
@@ -318,7 +318,7 @@ const PomodoroTimerIllustration = () => (
 );
 
 const StudyEffectivelyHeroIllustration = () => (
-  <IllustrationWrapper bgColor="bg-gradient-to-r from-indigo-50 to-violet-50">
+  <IllustrationWrapper bgColor="bg-gradient-to-r from-violet-50 to-violet-50">
     <svg viewBox="0 0 320 160" fill="none" className="w-full max-w-sm h-auto">
       {/* Student at desk */}
       <rect x="60" y="100" width="120" height="8" rx="2" fill="#D1D5DB" />
@@ -347,7 +347,7 @@ const StudyEffectivelyHeroIllustration = () => (
 );
 
 const StudyToolsHeroIllustration = () => (
-  <IllustrationWrapper bgColor="bg-gradient-to-r from-indigo-50 to-purple-50">
+  <IllustrationWrapper bgColor="bg-gradient-to-r from-violet-50 to-violet-50">
     <svg viewBox="0 0 320 160" fill="none" className="w-full max-w-sm h-auto">
       {/* Central brain/learning icon */}
       <circle cx="160" cy="80" r="35" fill="#EEF2FF" stroke="#6366F1" strokeWidth="3" />
@@ -1024,7 +1024,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             It&apos;s leverage.
           </p>
 
-          <IllustrationWrapper bgColor="bg-indigo-50">
+          <IllustrationWrapper bgColor="bg-violet-50">
             <svg viewBox="0 0 320 160" fill="none" className="w-full max-w-sm h-auto">
               {/* Podium */}
               <rect x="100" y="100" width="50" height="50" rx="3" fill="#6366F1" />
@@ -1060,7 +1060,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <p className={p}>
             Take a look at this quote:
           </p>
-          <blockquote className="border-l-4 border-indigo-400 pl-4 my-6 italic text-gray-700">
+          <blockquote className="border-l-4 border-violet-400 pl-4 my-6 italic text-gray-700">
             &ldquo;Insanity is doing the same thing over and over and expecting different results.&rdquo;
             <br /><span className="text-sm font-medium text-gray-500 not-italic">Albert Einstein</span>
           </blockquote>
@@ -1079,7 +1079,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             Every lecture hall is quietly divided into three groups. Nobody talks about it, but it&apos;s there.
           </p>
 
-          <IllustrationWrapper bgColor="bg-blue-50">
+          <IllustrationWrapper bgColor="bg-violet-50">
             <svg viewBox="0 0 320 160" fill="none" className="w-full max-w-sm h-auto">
               {/* Three columns */}
               {/* Passive */}
@@ -1165,7 +1165,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <p className={p}>
             Jim Rohn once said:
           </p>
-          <blockquote className="border-l-4 border-indigo-400 pl-4 my-6 italic text-gray-700">
+          <blockquote className="border-l-4 border-violet-400 pl-4 my-6 italic text-gray-700">
             &ldquo;Success is nothing more than a few simple disciplines, practised every day.&rdquo;
             <br /><span className="text-sm font-medium text-gray-500 not-italic">Jim Rohn</span>
           </blockquote>
@@ -1219,7 +1219,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <p className={p}>
             You&apos;re waiting for better habits and better tools.
           </p>
-          <blockquote className="border-l-4 border-indigo-400 pl-4 my-6 italic text-gray-700">
+          <blockquote className="border-l-4 border-violet-400 pl-4 my-6 italic text-gray-700">
             &ldquo;We are what we repeatedly do. Excellence, then, is not an act, but a habit.&rdquo;
             <br /><span className="text-sm font-medium text-gray-500 not-italic">Aristotle</span>
           </blockquote>

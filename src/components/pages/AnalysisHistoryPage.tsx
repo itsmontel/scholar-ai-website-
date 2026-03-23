@@ -243,10 +243,10 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
 
   const getAnalysisTypeColor = (type: string): string => {
     const colors: { [key: string]: string } = {
-      general: 'bg-blue-50 text-blue-700',
+      general: 'bg-violet-50 text-violet-700',
       citation: 'bg-green-50 text-green-700',
       grammar: 'bg-amber-50 text-amber-700',
-      comprehensive: 'bg-purple-50 text-purple-700',
+      comprehensive: 'bg-violet-50 text-violet-700',
     };
     return colors[type] || 'bg-gray-50 text-gray-700';
   };
@@ -273,7 +273,7 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
       <div className="relative min-h-screen flex items-center justify-center overflow-x-hidden">
         <WriteScholarEditorialBackgroundLayers position="fixed" />
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading analysis history...</p>
         </div>
       </div>
@@ -356,7 +356,7 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
             </p>
             <button
               onClick={() => onNavigate?.('analysis')}
-              className="px-6 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors"
+              className="px-6 py-3 bg-violet-600 text-white rounded-xl font-medium hover:bg-violet-700 transition-colors"
             >
               Start Your First Analysis
             </button>
@@ -368,7 +368,7 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
               <div className="bg-white border border-gray-200 rounded-2xl p-6">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
+                    <div className="w-10 h-10 bg-violet-600 rounded-xl flex items-center justify-center">
                       <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                       </svg>
@@ -378,7 +378,7 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
                   <select
                     value={timeFilter}
                     onChange={(e) => setTimeFilter(e.target.value)}
-                    className="bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
                   >
                     <option value="last3">Last 3</option>
                     <option value="lastWeek">Last Week</option>
@@ -409,7 +409,7 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
                         key={analysis.id}
                         className={`group p-4 border-2 rounded-xl cursor-pointer transition-all ${
                           selectedAnalysis?.id === analysis.id
-                            ? 'border-blue-500 bg-blue-50'
+                            ? 'border-violet-500 bg-violet-50'
                             : 'border-gray-200 hover:border-gray-300'
                         }`}
                         onClick={() => setSelectedAnalysis(analysis)}
@@ -417,7 +417,7 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
                         <div className="flex items-start space-x-3">
                           <div className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-xl ${
                             selectedAnalysis?.id === analysis.id
-                              ? 'bg-blue-100'
+                              ? 'bg-violet-100'
                               : 'bg-gray-100 group-hover:bg-gray-200'
                           }`}>
                             {getAnalysisTypeIcon(analysis.analysis_type)}
@@ -560,7 +560,7 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
                       </button>
                       <button
                         onClick={() => generatePDF(selectedAnalysis)}
-                        className="px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors"
+                        className="px-4 py-2.5 bg-violet-600 text-white rounded-xl text-sm font-medium hover:bg-violet-700 transition-colors"
                       >
                         Download PDF
                       </button>

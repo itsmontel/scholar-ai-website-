@@ -40,7 +40,7 @@ const BadgesPage = ({ onNavigate, user, onLogout }: BadgesPageProps) => {
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="badges" />
 
-      <div className="h-1 bg-gradient-to-r from-amber-400 via-violet-500 to-purple-500 relative z-10" />
+      <div className="h-1 bg-gradient-to-r from-amber-400 via-violet-500 to-violet-500 relative z-10" />
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-8 pb-16">
         {/* Back button */}
@@ -53,10 +53,10 @@ const BadgesPage = ({ onNavigate, user, onLogout }: BadgesPageProps) => {
         </button>
 
         {/* Hero section */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 p-8 sm:p-10 mb-10 shadow-2xl shadow-violet-500/20">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-600 via-violet-600 to-violet-700 p-8 sm:p-10 mb-10 shadow-2xl shadow-violet-500/20">
           <div className="absolute inset-0 overflow-hidden">
             <div className="absolute -top-12 -right-12 w-48 h-48 bg-white/10 rounded-full blur-2xl" />
-            <div className="absolute -bottom-16 -left-16 w-56 h-56 bg-purple-400/20 rounded-full blur-3xl" />
+            <div className="absolute -bottom-16 -left-16 w-56 h-56 bg-violet-400/20 rounded-full blur-3xl" />
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-32 bg-violet-300/10 rounded-full blur-3xl rotate-12" />
           </div>
 

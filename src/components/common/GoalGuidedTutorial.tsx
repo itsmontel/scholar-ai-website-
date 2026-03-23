@@ -143,7 +143,7 @@ const GoalGuidedTutorial = ({ goal, onComplete, essayWordCount = 0, hasInput = f
 
       {/* Tooltip card — positioned near the spotlight */}
       <div className="absolute left-1/2 -translate-x-1/2 bottom-8 sm:bottom-12 w-[calc(100%-2rem)] max-w-lg mx-4 pointer-events-auto">
-        <div className="relative bg-white dark:bg-stone-800 rounded-3xl shadow-2xl border-2 border-indigo-200 dark:border-violet-700/60 overflow-hidden">
+        <div className="relative bg-white dark:bg-stone-800 rounded-3xl shadow-2xl border-2 border-violet-200 dark:border-violet-700/60 overflow-hidden">
           {/* Progress bar */}
           <div className="h-1 bg-stone-100 dark:bg-stone-700">
             <div

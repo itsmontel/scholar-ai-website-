@@ -38,11 +38,11 @@ const getSlideIcon = (type?: LessonSlide['type']) => {
 const getSlideColor = (type?: LessonSlide['type']) => {
   switch (type) {
     case 'intro': return 'bg-violet-600';
-    case 'concept': return 'bg-sky-600';
+    case 'concept': return 'bg-violet-600';
     case 'example': return 'bg-amber-600';
     case 'keypoint': return 'bg-emerald-600';
     case 'funfact': return 'bg-fuchsia-600';
-    case 'summary': return 'bg-indigo-600';
+    case 'summary': return 'bg-violet-600';
     default: return 'bg-stone-600';
   }
 };
@@ -50,11 +50,11 @@ const getSlideColor = (type?: LessonSlide['type']) => {
 const getSlideBackground = (type?: LessonSlide['type']) => {
   switch (type) {
     case 'intro': return 'bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-700/50';
-    case 'concept': return 'bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-700/50';
+    case 'concept': return 'bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-700/50';
     case 'example': return 'bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50';
     case 'keypoint': return 'bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700/50';
     case 'funfact': return 'bg-fuchsia-50 dark:bg-fuchsia-900/20 border border-fuchsia-200 dark:border-fuchsia-700/50';
-    case 'summary': return 'bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700/50';
+    case 'summary': return 'bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-700/50';
     default: return 'bg-stone-50 dark:bg-stone-800/50 border border-stone-200 dark:border-stone-600';
   }
 };

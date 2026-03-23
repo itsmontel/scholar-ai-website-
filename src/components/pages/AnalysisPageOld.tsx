@@ -807,7 +807,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                 key={annotation.id}
                 id={`annotation-${annotation.id}`}
                 className={`${highlightClasses[annotation.type]} px-1 cursor-pointer transition-all duration-200 ${
-                  selectedAnnotation === annotation.id ? 'ring-2 ring-offset-2 ring-blue-500' : ''
+                  selectedAnnotation === annotation.id ? 'ring-2 ring-offset-2 ring-violet-500' : ''
                 }`}
                 onMouseEnter={(e) => handleAnnotationHover(e, annotation.id)}
                 onMouseLeave={() => setHoveredAnnotation(null)}
@@ -872,7 +872,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading analysis tools...</p>
         </div>
       </div>
@@ -968,7 +968,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                   <select
                     value={selectedDocument}
                     onChange={(e) => handleDocumentSelection(e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
                     disabled={isAnalyzing}
                   >
                     <option value="">Choose a document...</option>
@@ -983,14 +983,14 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
               
               {/* Text Content Notice */}
               {documentContent && !selectedDocument && (
-                <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="mb-6 p-4 bg-violet-50 border border-violet-200 rounded-lg">
               <div className="flex items-center space-x-2">
-                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span className="text-sm font-medium text-blue-800">Text Analysis Mode</span>
+                    <span className="text-sm font-medium text-violet-800">Text Analysis Mode</span>
                   </div>
-                  <p className="text-sm text-blue-700 mt-1">
+                  <p className="text-sm text-violet-700 mt-1">
                     Analyzing text content from dashboard. Select citation style and run analysis.
                   </p>
                 </div>
@@ -1007,7 +1007,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                       key={type.id}
                       className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
                         selectedAnalysisType === type.id
-                          ? 'border-blue-500 bg-blue-50 shadow-md'
+                          ? 'border-violet-500 bg-violet-50 shadow-md'
                           : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'
                       }`}
                       onClick={() => setSelectedAnalysisType(type.id)}
@@ -1021,7 +1021,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                         </div>
                         <div className={`w-5 h-5 rounded-full border-2 ${
                           selectedAnalysisType === type.id
-                            ? 'border-blue-500 bg-blue-500'
+                            ? 'border-violet-500 bg-violet-500'
                             : 'border-gray-300'
                         }`}>
                           {selectedAnalysisType === type.id && (
@@ -1044,7 +1044,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                 <select
                   value={selectedCitationStyle}
                   onChange={(e) => setSelectedCitationStyle(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
                   disabled={isAnalyzing}
                 >
                   <option value="APA">APA (American Psychological Association)</option>
@@ -1063,9 +1063,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
               <button
                 onClick={handleAnalyze}
                 disabled={(!selectedDocument && !documentContent) || !selectedAnalysisType || isAnalyzing}
-                className={`w-full text-white py-3 px-4 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all transform ${
+                className={`w-full text-white py-3 px-4 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 transition-all transform ${
                   isAnalyzing 
-                    ? 'bg-gradient-to-r from-blue-500 to-purple-500 cursor-not-allowed animate-pulse' 
+                    ? 'bg-gradient-to-r from-violet-500 to-violet-500 cursor-not-allowed animate-pulse' 
                     : 'bg-violet-600 hover:bg-violet-700 hover:scale-[1.02] active:scale-[0.98]'
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
@@ -1099,7 +1099,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                 </div>
               ) : selectedDocument && isLoadingPreview ? (
                 <div className="text-center py-16">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600 mx-auto"></div>
                   <p className="mt-4 text-sm text-gray-600">Loading document preview...</p>
                 </div>
               ) : previewContent || documentContent ? (
@@ -1155,7 +1155,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                   <h2 className="text-xl font-semibold">
                     {documents.find(doc => doc.id === selectedDocument)?.title || 'Document Analysis'}
                   </h2>
-                  <p className="text-blue-100 text-sm mt-1">
+                  <p className="text-violet-100 text-sm mt-1">
                     {analysisTypes.find(type => type.id === selectedAnalysisType)?.name} • Analyzed {formatDate(new Date().toISOString())}
                   </p>
               </div>
@@ -1210,7 +1210,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
               <div className="w-96 bg-gray-50 border-l border-gray-200 overflow-y-auto">
                 <div className="p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
-                    <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-5 h-5 mr-2 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                     </svg>
                     Annotations
@@ -1230,7 +1230,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                           <div
                             key={annotation.id}
                             className={`bg-green-50 rounded-lg p-4 border-l-4 border-green-500 shadow-sm hover:shadow-md transition-all cursor-pointer ${
-                              selectedAnnotation === annotation.id ? 'ring-2 ring-blue-500' : ''
+                              selectedAnnotation === annotation.id ? 'ring-2 ring-violet-500' : ''
                             }`}
                             onClick={() => scrollToAnnotation(annotation.id)}
                             onMouseEnter={() => setHoveredAnnotation(annotation.id)}
@@ -1258,7 +1258,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                           <div
                             key={annotation.id}
                             className={`bg-amber-50 rounded-lg p-4 border-l-4 border-amber-500 shadow-sm hover:shadow-md transition-all cursor-pointer ${
-                              selectedAnnotation === annotation.id ? 'ring-2 ring-blue-500' : ''
+                              selectedAnnotation === annotation.id ? 'ring-2 ring-violet-500' : ''
                             }`}
                             onClick={() => scrollToAnnotation(annotation.id)}
                             onMouseEnter={() => setHoveredAnnotation(annotation.id)}
@@ -1286,7 +1286,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                           <div
                             key={annotation.id}
                             className={`bg-red-50 rounded-lg p-4 border-l-4 border-red-500 shadow-sm hover:shadow-md transition-all cursor-pointer ${
-                              selectedAnnotation === annotation.id ? 'ring-2 ring-blue-500' : ''
+                              selectedAnnotation === annotation.id ? 'ring-2 ring-violet-500' : ''
                             }`}
                             onClick={() => scrollToAnnotation(annotation.id)}
                             onMouseEnter={() => setHoveredAnnotation(annotation.id)}

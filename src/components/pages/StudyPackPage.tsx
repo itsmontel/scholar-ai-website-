@@ -263,7 +263,7 @@ const StudyPackPage = ({ onNavigate, user, onLogout }: StudyPackPageProps) => {
 
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="study-pack" />
 
-      <main className="relative max-w-7xl mx-auto px-3 sm:px-6 pt-3 sm:pt-6 pb-24 sm:pb-16 w-full min-w-0 overflow-x-hidden">
+      <main className="relative max-w-[1240px] mx-auto px-3 sm:px-6 lg:px-8 pt-3 sm:pt-6 pb-24 sm:pb-16 w-full min-w-0 overflow-x-hidden">
         <input
           ref={studyToolsFileInputRef}
           type="file"
@@ -351,7 +351,7 @@ const StudyPackPage = ({ onNavigate, user, onLogout }: StudyPackPageProps) => {
             <div className="relative rounded-2xl overflow-hidden mb-4 sm:mb-8 border border-stone-200/90 dark:border-stone-700/80 bg-white/95 dark:bg-stone-900/60 shadow-md">
               <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 via-amber-500 to-red-500 opacity-90" aria-hidden />
               <div className="relative rounded-[inherit] p-4 sm:p-10">
-                <div className="relative lg:grid lg:grid-cols-[minmax(0,220px)_minmax(0,48rem)_minmax(0,220px)] lg:gap-8 xl:gap-10 lg:items-stretch">
+                <div className="relative lg:grid lg:grid-cols-[minmax(0,220px)_minmax(0,1fr)_minmax(0,220px)] xl:grid-cols-[minmax(0,248px)_minmax(0,1fr)_minmax(0,248px)] lg:gap-8 xl:gap-10 lg:items-stretch">
                   <div className="hidden lg:block relative self-end justify-self-start w-[236px] xl:w-[248px] pointer-events-auto -rotate-[11deg] origin-bottom-left drop-shadow-lg z-[5]" aria-label="Sample flashcard preview">
                     <p className="text-center mb-2">
                       <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-violet-800/95 dark:text-violet-300/95">
@@ -366,7 +366,7 @@ const StudyPackPage = ({ onNavigate, user, onLogout }: StudyPackPageProps) => {
                       className="relative text-2xl sm:text-3xl md:text-[2rem] lg:text-[2.125rem] font-semibold text-stone-900 dark:text-stone-50 text-center mb-1.5 sm:mb-2 tracking-tight leading-snug px-1"
                       style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
                     >
-                      Turn your notes into <span className="text-violet-800 dark:text-violet-300">5 study tools</span>
+                      Turn your notes into <span className="text-orange-700 dark:text-orange-300">5 study tools</span>
                     </h1>
                     <p className="relative text-stone-600 dark:text-stone-300 text-sm sm:text-base text-center mb-6 sm:mb-8 max-w-xl mx-auto leading-relaxed">
                       Lesson, flashcards, quiz, crossword & Crater Blast — all from one paste
@@ -389,7 +389,7 @@ const StudyPackPage = ({ onNavigate, user, onLogout }: StudyPackPageProps) => {
                       </button>
                       <button
                         type="button"
-                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 bg-white dark:bg-stone-700 text-violet-800 dark:text-violet-200 shadow-sm ring-1 ring-stone-200/80 dark:ring-stone-600/80"
+                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 bg-white dark:bg-stone-700 text-orange-800 dark:text-orange-200 shadow-sm ring-1 ring-stone-200/80 dark:ring-stone-600/80"
                       >
                         <span className="text-lg">📦</span> Study Pack
                       </button>
@@ -412,7 +412,7 @@ const StudyPackPage = ({ onNavigate, user, onLogout }: StudyPackPageProps) => {
                         <span className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-stone-50 dark:bg-stone-800/80 border border-stone-200/90 dark:border-stone-600 text-stone-700 dark:text-stone-200 text-sm font-medium shadow-sm">
                           Start your first study pack or upload file below
                         </span>
-                        <svg className="w-6 h-6 text-violet-600 dark:text-violet-400 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                        <svg className="w-6 h-6 text-orange-600 dark:text-orange-400 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                         </svg>
                       </div>
@@ -436,7 +436,7 @@ const StudyPackPage = ({ onNavigate, user, onLogout }: StudyPackPageProps) => {
                 </div>
 
                 <div className="relative mb-2 max-w-3xl mx-auto">
-                  <div className="relative rounded-2xl border border-stone-200/90 dark:border-stone-600 bg-white dark:bg-stone-900/40 shadow-sm focus-within:ring-2 focus-within:ring-violet-500/30 focus-within:border-violet-300/50 dark:focus-within:border-violet-600/50 transition-shadow">
+                  <div className="relative rounded-2xl border border-stone-200/90 dark:border-stone-600 bg-white dark:bg-stone-900/40 shadow-sm focus-within:ring-2 focus-within:ring-orange-500/30 focus-within:border-orange-300/50 dark:focus-within:border-orange-600/50 transition-shadow">
                     <div className="relative rounded-[inherit] min-h-[140px] sm:min-h-[180px]">
                       <textarea
                         value={inputText}
@@ -469,12 +469,12 @@ const StudyPackPage = ({ onNavigate, user, onLogout }: StudyPackPageProps) => {
                         disabled={isParsingStudyDoc || isGeneratingStudyPack}
                         className={`flex items-center gap-2.5 px-5 py-3 rounded-xl font-semibold text-sm transition-all disabled:opacity-50 border ${
                           showFirstStudyPackPrompt
-                            ? 'bg-violet-50 dark:bg-violet-950/40 text-violet-900 dark:text-violet-200 border-violet-300/80 dark:border-violet-700/60 shadow-md ring-2 ring-violet-400/25'
+                            ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-900 dark:text-orange-200 border-orange-300/80 dark:border-orange-700/60 shadow-md ring-2 ring-orange-400/25'
                             : 'bg-stone-50 dark:bg-stone-800/60 text-stone-800 dark:text-stone-200 border-stone-200/90 dark:border-stone-600 hover:bg-stone-100 dark:hover:bg-stone-700/60 shadow-sm'
                         }`}
                       >
                         {isParsingStudyDoc ? (
-                          <span className="w-5 h-5 border-2 border-violet-600 border-t-transparent rounded-full animate-spin" />
+                          <span className="w-5 h-5 border-2 border-orange-600 border-t-transparent rounded-full animate-spin" />
                         ) : (
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -503,7 +503,7 @@ const StudyPackPage = ({ onNavigate, user, onLogout }: StudyPackPageProps) => {
                       type="button"
                       onClick={handleGenerateStudyPack}
                       disabled={isGeneratingStudyPack || quizExhausted || getWordCount(inputText) < 50}
-                      className="px-8 sm:px-10 py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 font-semibold text-base bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 disabled:bg-stone-400 dark:disabled:bg-stone-600 text-white shadow-md shadow-violet-900/15 ring-1 ring-violet-900/10 hover:-translate-y-0.5 active:scale-[0.98] disabled:hover:translate-y-0 disabled:cursor-not-allowed"
+                      className="px-8 sm:px-10 py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 font-semibold text-base bg-orange-600 hover:bg-orange-700 dark:bg-orange-600 disabled:bg-stone-400 dark:disabled:bg-stone-600 text-white shadow-md shadow-orange-900/15 ring-1 ring-orange-900/10 hover:-translate-y-0.5 active:scale-[0.98] disabled:hover:translate-y-0 disabled:cursor-not-allowed"
                     >
                       {isGeneratingStudyPack ? (
                         <>
@@ -522,7 +522,7 @@ const StudyPackPage = ({ onNavigate, user, onLogout }: StudyPackPageProps) => {
 
                 {isParsingStudyDoc && (
                   <div className="absolute inset-0 rounded-2xl bg-white/95 dark:bg-stone-900/90 backdrop-blur-sm flex items-center justify-center gap-3 z-20 pointer-events-auto" aria-live="polite" aria-busy="true">
-                    <span className="w-8 h-8 border-2 border-violet-600 border-t-transparent rounded-full animate-spin" />
+                    <span className="w-8 h-8 border-2 border-orange-600 border-t-transparent rounded-full animate-spin" />
                     <span className="font-semibold text-stone-700 dark:text-stone-200">Uploading...</span>
                   </div>
                 )}

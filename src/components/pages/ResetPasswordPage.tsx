@@ -129,8 +129,8 @@ const ResetPasswordPage = ({ onNavigate }: ResetPasswordPageProps) => {
             <p className="text-gray-600 mb-6">
               Your password has been successfully reset. You will be redirected to the login page shortly.
             </p>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-blue-800 text-sm">
+            <div className="bg-violet-50 border border-violet-200 rounded-lg p-4">
+              <p className="text-violet-800 text-sm">
                 Redirecting to login page in 3 seconds...
               </p>
             </div>
@@ -145,7 +145,7 @@ const ResetPasswordPage = ({ onNavigate }: ResetPasswordPageProps) => {
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <div className="max-w-md w-full">
         <div className="flex items-center space-x-2 mb-8 justify-center">
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-gradient-to-br from-violet-500 to-violet-500 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-lg">W</span>
           </div>
           <span className="text-xl font-bold text-gray-900">WriteScholar</span>
@@ -169,7 +169,7 @@ const ResetPasswordPage = ({ onNavigate }: ResetPasswordPageProps) => {
                 value={formData.newPassword}
                 onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
                 placeholder="Enter new password"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
               />
               <p className="text-xs text-gray-500 mt-1">
                 Must be at least 8 characters with uppercase, lowercase, number, and special character
@@ -183,7 +183,7 @@ const ResetPasswordPage = ({ onNavigate }: ResetPasswordPageProps) => {
                 value={formData.confirmPassword}
                 onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                 placeholder="Confirm new password"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
               />
             </div>
 
@@ -207,7 +207,7 @@ const ResetPasswordPage = ({ onNavigate }: ResetPasswordPageProps) => {
             Remember your password?{' '}
             <button
               onClick={() => onNavigate('login')}
-              className="text-blue-600 hover:text-blue-500 font-medium"
+              className="text-violet-600 hover:text-violet-500 font-medium"
             >
               Back to Login
             </button>

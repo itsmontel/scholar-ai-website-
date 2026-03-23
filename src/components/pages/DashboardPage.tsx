@@ -1861,7 +1861,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                       ) : mode === 'quiz' ? (
                         <span className="block text-[0.9375rem] sm:text-[1.0625rem] leading-snug font-bold text-amber-600 dark:text-amber-400">Quizzes, flashcards & crosswords from your notes.</span>
                       ) : mode === 'citations' ? (
-                        <span className="block text-[0.9375rem] sm:text-[1.0625rem] leading-snug font-bold text-sky-600 dark:text-sky-400">Citations via academic sources in seconds.</span>
+                        <span className="block text-[0.9375rem] sm:text-[1.0625rem] leading-snug font-bold text-violet-600 dark:text-violet-400">Citations via academic sources in seconds.</span>
                       ) : (
                         <span className="block text-[0.9375rem] sm:text-[1.0625rem] leading-snug font-bold text-rose-600 dark:text-rose-400">Professor-style feedback on every essay.</span>
                       )}
@@ -2013,7 +2013,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                         <h2 className="relative text-lg sm:text-2xl md:text-[2rem] lg:text-[2.125rem] font-semibold text-stone-900 dark:text-stone-50 text-center mb-2 sm:mb-2 tracking-tight leading-snug px-0.5 sm:px-1" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
                           <span className="text-emerald-700 dark:text-emerald-400">Paste</span>
                           {' '}or{' '}
-                          <span className="text-sky-700 dark:text-sky-400">upload</span>
+                          <span className="text-blue-700 dark:text-blue-400">upload</span>
                           {' '}your essay, get <span className="text-violet-800 dark:text-violet-300">feedback</span> in seconds
                         </h2>
                         <p className="relative text-stone-600 dark:text-stone-300 text-[13px] sm:text-base text-center mb-3 sm:mb-2.5 max-w-xl mx-auto leading-relaxed">
@@ -2213,7 +2213,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                                 <p className="text-sm sm:text-[0.9375rem] text-stone-600 dark:text-stone-300 mt-2 leading-relaxed">
                                   Or click to browse: <span className="font-semibold text-violet-700 dark:text-violet-400">PDF</span>,{' '}
                                   <span className="font-semibold text-emerald-700 dark:text-emerald-400">Word</span>, or{' '}
-                                  <span className="font-semibold text-sky-700 dark:text-sky-400">TXT</span>. We&apos;ll load the text into the box above (same as Upload file).
+                                  <span className="font-semibold text-violet-700 dark:text-violet-400">TXT</span>. We&apos;ll load the text into the box above (same as Upload file).
                                 </p>
                               </div>
                             </div>
@@ -2234,7 +2234,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                             </h2>
                             <span className="h-px flex-1 max-w-32 bg-stone-300/80 dark:bg-stone-600/60 rounded-full" />
                           </div>
-                          <InteractiveDocumentAnalysis onNavigate={onNavigate} />
+                          <InteractiveDocumentAnalysis onNavigate={onNavigate} landingHeroEmbed />
                         </div>
                       </div>
                     </div>
@@ -2243,14 +2243,14 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                       <div className="relative lg:grid lg:grid-cols-[minmax(0,220px)_minmax(0,48rem)_minmax(0,220px)] lg:gap-8 xl:gap-10 lg:items-stretch">
                         <div className="hidden lg:block relative self-end justify-self-start w-[236px] xl:w-[248px] pointer-events-auto -rotate-[11deg] origin-bottom-left drop-shadow-lg z-[5]" aria-label="Sample sources preview">
                           <p className="text-center mb-2">
-                            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-sky-800/95 dark:text-sky-300/95">Sources</span>
+                            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-violet-800/95 dark:text-violet-300/95">Sources</span>
                             <span className="block text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">Peer-reviewed picks</span>
                           </p>
                           <InteractiveCitationsDemo variant="side-left" />
                         </div>
                         <div className="min-w-0 self-start" data-tutorial="dashboard-tool-tabs-hero">
                           <h2 className="relative text-lg sm:text-2xl md:text-3xl font-semibold text-stone-900 dark:text-stone-50 text-center mb-2 tracking-tight leading-snug px-0.5" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
-                            Find <span className="text-sky-700 dark:text-sky-400">academic sources</span> in seconds
+                            Find <span className="text-violet-700 dark:text-violet-400">academic sources</span> in seconds
                           </h2>
                           <p className="relative text-stone-600 dark:text-stone-300 text-[13px] sm:text-base text-center mb-3 sm:mb-2.5 max-w-xl mx-auto leading-relaxed">
                             APA, MLA & Chicago. Peer-reviewed sources. Filter by year.
@@ -2308,7 +2308,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
 
                   {mode === 'citations' && (
                     <div className="relative mb-2 max-w-3xl mx-auto mt-2 sm:mt-0 lg:-mt-14 xl:-mt-16 z-20">
-                      <div className="relative rounded-xl sm:rounded-2xl border transition-all duration-300 shadow-sm focus-within:shadow-md focus-within:ring-2 focus-within:ring-violet-500/25 border-sky-200/90 dark:border-sky-800/60 bg-white dark:bg-stone-900/40 focus-within:border-sky-400/60">
+                      <div className="relative rounded-xl sm:rounded-2xl border transition-all duration-300 shadow-sm focus-within:shadow-md focus-within:ring-2 focus-within:ring-violet-500/25 border-violet-200/90 dark:border-violet-800/60 bg-white dark:bg-stone-900/40 focus-within:border-violet-400/60">
                         <div className="relative rounded-[12px] sm:rounded-[18px] bg-white/98 dark:bg-stone-800/95 backdrop-blur-sm min-h-[120px] sm:min-h-[160px]">
                           <textarea
                             value={inputText}
@@ -2361,12 +2361,12 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     <>
                   <div className="relative space-y-4 pt-2">
                     <div className="flex justify-center gap-3 flex-wrap">
-                      <select value={citationStyle} onChange={(e) => setCitationStyle(e.target.value)} className="px-4 py-2.5 rounded-2xl border border-stone-200/80 dark:border-stone-600/80 bg-white/90 dark:bg-stone-800/90 backdrop-blur-sm text-sm font-semibold shadow-sm focus:ring-2 focus:ring-sky-400 focus:border-sky-400 transition-all">
+                      <select value={citationStyle} onChange={(e) => setCitationStyle(e.target.value)} className="px-4 py-2.5 rounded-2xl border border-stone-200/80 dark:border-stone-600/80 bg-white/90 dark:bg-stone-800/90 backdrop-blur-sm text-sm font-semibold shadow-sm focus:ring-2 focus:ring-violet-400 focus:border-violet-400 transition-all">
                         <option value="APA">APA 7th</option>
                         <option value="MLA">MLA 9th</option>
                         <option value="Chicago">Chicago</option>
                       </select>
-                      <select value={citationYearRange} onChange={(e) => setCitationYearRange(e.target.value)} className="px-4 py-2.5 rounded-2xl border border-stone-200/80 dark:border-stone-600/80 bg-white/90 dark:bg-stone-800/90 backdrop-blur-sm text-sm font-semibold shadow-sm focus:ring-2 focus:ring-sky-400 focus:border-sky-400 transition-all">
+                      <select value={citationYearRange} onChange={(e) => setCitationYearRange(e.target.value)} className="px-4 py-2.5 rounded-2xl border border-stone-200/80 dark:border-stone-600/80 bg-white/90 dark:bg-stone-800/90 backdrop-blur-sm text-sm font-semibold shadow-sm focus:ring-2 focus:ring-violet-400 focus:border-violet-400 transition-all">
                         <option value="all">All years</option>
                         <option value="5">Last 5 years</option>
                         <option value="10">Last 10 years</option>
@@ -2641,7 +2641,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                         >
                           {summaryCopied ? '✓ Copied!' : 'Copy'}
                         </button>
-                        <button onClick={handleEnlargeSummarize} className="p-1.5 text-sky-600 dark:text-sky-400 hover:bg-sky-50 dark:hover:bg-sky-900/20 rounded-lg transition-colors" title="Open in full page">
+                        <button onClick={handleEnlargeSummarize} className="p-1.5 text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/20 rounded-lg transition-colors" title="Open in full page">
                           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
                         </button>
                       </div>
@@ -2943,7 +2943,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                 {quizResult && isQuizMode && (
                   <div className={`bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl border border-gray-100 dark:border-stone-700 overflow-hidden mb-6 ${!canUseQuiz ? 'opacity-50 pointer-events-none' : ''}`}>
                     <div className="flex justify-end p-2 sm:p-3 border-b border-stone-100 dark:border-stone-700">
-                      <button onClick={handleEnlargeQuiz} className="p-2 text-stone-500 hover:text-sky-600 dark:text-stone-400 dark:hover:text-sky-400 rounded-lg hover:bg-sky-50 dark:hover:bg-sky-900/20 transition-colors" title="Open in full page">
+                      <button onClick={handleEnlargeQuiz} className="p-2 text-stone-500 hover:text-violet-600 dark:text-stone-400 dark:hover:text-violet-400 rounded-lg hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors" title="Open in full page">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
                       </button>
                     </div>
@@ -2969,7 +2969,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                                 <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
                                 <span className="hidden sm:inline">Download </span>PDF
                               </button>
-                              <button onClick={exportQuizToDOCX} className="px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium rounded-lg active:bg-blue-100 sm:hover:bg-blue-100 dark:sm:hover:bg-blue-900/50 transition-colors flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                              <button onClick={exportQuizToDOCX} className="px-3 sm:px-4 py-1.5 sm:py-2 bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400 font-medium rounded-lg active:bg-violet-100 sm:hover:bg-violet-100 dark:sm:hover:bg-violet-900/50 transition-colors flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
                                 <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
                                 <span className="hidden sm:inline">Download </span>DOCX
                               </button>
@@ -3000,7 +3000,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                         <div className="p-4 sm:p-6">
                           <div className="flex justify-between items-center mb-3 sm:mb-4">
                             <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Q{currentQuestion + 1}/{dashboardDisplayedQuestions.length}</span>
-                            <span className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold ${dashboardDisplayedQuestions[currentQuestion]?.type === 'multiple_choice' ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300' : dashboardDisplayedQuestions[currentQuestion]?.type === 'true_false' ? 'bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300' : 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300'}`}>
+                            <span className={`px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold ${dashboardDisplayedQuestions[currentQuestion]?.type === 'multiple_choice' ? 'bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300' : dashboardDisplayedQuestions[currentQuestion]?.type === 'true_false' ? 'bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300' : 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300'}`}>
                               {dashboardDisplayedQuestions[currentQuestion]?.type === 'multiple_choice' ? 'MCQ' : dashboardDisplayedQuestions[currentQuestion]?.type === 'true_false' ? 'T/F' : 'Fill'}
                             </span>
                           </div>
@@ -3049,8 +3049,8 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                             })}
                           </div>
                           {showQuizResult && dashboardDisplayedQuestions[currentQuestion]?.explanation && (
-                            <div className="p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/30 rounded-xl mb-4 sm:mb-6 border border-blue-100 dark:border-blue-800/50">
-                              <p className="text-xs sm:text-sm text-blue-700 dark:text-blue-300">💡 {dashboardDisplayedQuestions[currentQuestion].explanation}</p>
+                            <div className="p-3 sm:p-4 bg-violet-50 dark:bg-violet-900/30 rounded-xl mb-4 sm:mb-6 border border-violet-100 dark:border-violet-800/50">
+                              <p className="text-xs sm:text-sm text-violet-700 dark:text-violet-300">💡 {dashboardDisplayedQuestions[currentQuestion].explanation}</p>
                             </div>
                           )}
                           <div className="flex justify-between items-center gap-2">
@@ -3389,7 +3389,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                       <h3 className="text-lg font-bold text-gray-900 dark:text-stone-100">{crosswordResult.title}</h3>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <button onClick={handleEnlargeCrossword} className="p-2 text-stone-500 hover:text-sky-600 dark:text-stone-400 dark:hover:text-sky-400 rounded-lg hover:bg-sky-50 dark:hover:bg-sky-900/20 transition-colors" title="Open in full page">
+                        <button onClick={handleEnlargeCrossword} className="p-2 text-stone-500 hover:text-violet-600 dark:text-stone-400 dark:hover:text-violet-400 rounded-lg hover:bg-violet-50 dark:hover:bg-violet-900/20 transition-colors" title="Open in full page">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
                         </button>
                         {isPaidUser ? (
@@ -3398,7 +3398,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                               <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
                               PDF
                             </button>
-                            <button onClick={exportCrosswordToDOCX} className="px-3 py-1.5 bg-blue-50 text-blue-700 font-medium rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-1.5 text-xs">
+                            <button onClick={exportCrosswordToDOCX} className="px-3 py-1.5 bg-violet-50 text-violet-700 font-medium rounded-lg hover:bg-violet-100 transition-colors flex items-center gap-1.5 text-xs">
                               <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
                               DOCX
                             </button>
@@ -4062,7 +4062,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-3 opacity-90">
               {[
                 { id: 'analyze' as const, title: 'Analyze', desc: 'Professor-style essay feedback', emoji: '📝', iconWrap: 'bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/50', titleClr: 'text-stone-900 dark:text-stone-50', badgeText: 'Popular', badgeClr: 'bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-200 border border-stone-200/80 dark:border-stone-600' },
-                { id: 'citations' as const, title: 'Citations', desc: 'Academic sources, formatted', emoji: '📚', iconWrap: 'bg-sky-50 dark:bg-sky-950/35 border border-sky-200/70 dark:border-sky-800/50', titleClr: 'text-stone-900 dark:text-stone-50', badgeText: undefined as string | undefined, badgeClr: '' },
+                { id: 'citations' as const, title: 'Citations', desc: 'Academic sources, formatted', emoji: '📚', iconWrap: 'bg-violet-50 dark:bg-violet-950/35 border border-violet-200/70 dark:border-violet-800/50', titleClr: 'text-stone-900 dark:text-stone-50', badgeText: undefined as string | undefined, badgeClr: '' },
                 { id: 'quiz' as const, title: 'Study Pack', desc: 'Lesson, quiz, crossword & more', emoji: '📦', iconWrap: 'bg-amber-50 dark:bg-amber-950/35 border border-amber-200/70 dark:border-amber-800/50', titleClr: 'text-stone-900 dark:text-stone-50', badgeText: '5-in-1', badgeClr: 'bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-200 border border-stone-200/80 dark:border-stone-600' },
                 { id: 'focus_mode' as const, title: 'Focus Mode', desc: 'Block sites until you study', emoji: '🔒', iconWrap: 'bg-violet-50 dark:bg-violet-950/30 border border-violet-200/70 dark:border-violet-800/50', titleClr: 'text-stone-900 dark:text-stone-50', badgeText: FOCUS_MODE_COMING_SOON ? 'Soon' : 'New', badgeClr: FOCUS_MODE_COMING_SOON ? 'bg-amber-100 text-amber-900 dark:bg-amber-950/50 dark:text-amber-200 border border-amber-200/80 dark:border-amber-800/50' : 'bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-200 border border-stone-200/80 dark:border-stone-600' },
                 { id: 'more-tools' as const, title: 'More Tools', desc: 'Summarizer, grammar & more', emoji: '🔧', iconWrap: 'bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-600/80', titleClr: 'text-stone-900 dark:text-stone-50', badgeText: undefined as string | undefined, badgeClr: '' },

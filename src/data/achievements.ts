@@ -680,8 +680,8 @@ export function getRarityColor(rarity: Badge['rarity']): { bg: string; text: str
   switch (rarity) {
     case 'common': return { bg: 'bg-stone-100 dark:bg-stone-700', text: 'text-stone-600 dark:text-stone-300', border: 'border-stone-300 dark:border-stone-600', glow: '' };
     case 'uncommon': return { bg: 'bg-emerald-100 dark:bg-emerald-900/40', text: 'text-emerald-700 dark:text-emerald-400', border: 'border-emerald-300 dark:border-emerald-700', glow: 'shadow-emerald-500/20' };
-    case 'rare': return { bg: 'bg-blue-100 dark:bg-blue-900/40', text: 'text-blue-700 dark:text-blue-400', border: 'border-blue-300 dark:border-blue-700', glow: 'shadow-blue-500/20' };
-    case 'epic': return { bg: 'bg-purple-100 dark:bg-purple-900/40', text: 'text-purple-700 dark:text-purple-400', border: 'border-purple-300 dark:border-purple-700', glow: 'shadow-purple-500/30' };
+    case 'rare': return { bg: 'bg-violet-100 dark:bg-violet-900/40', text: 'text-violet-700 dark:text-violet-400', border: 'border-violet-300 dark:border-violet-700', glow: 'shadow-violet-500/20' };
+    case 'epic': return { bg: 'bg-violet-100 dark:bg-violet-900/40', text: 'text-violet-700 dark:text-violet-400', border: 'border-violet-300 dark:border-violet-700', glow: 'shadow-violet-500/30' };
     case 'legendary': return { bg: 'bg-amber-100 dark:bg-amber-900/40', text: 'text-amber-700 dark:text-amber-400', border: 'border-amber-300 dark:border-amber-700', glow: 'shadow-amber-500/40' };
   }
 }

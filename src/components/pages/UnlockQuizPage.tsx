@@ -270,7 +270,7 @@ export default function UnlockQuizPage() {
 
     if (unlockMode === 'puzzle' && puzzleType && puzzleData) {
       return (
-        <div className="min-h-screen flex flex-col bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:from-violet-950/40 dark:via-purple-950/30 dark:to-fuchsia-950/30">
+        <div className="min-h-screen flex flex-col bg-gradient-to-br from-violet-50 via-violet-50 to-fuchsia-50 dark:from-violet-950/40 dark:via-violet-950/30 dark:to-fuchsia-950/30">
           {/* Header: top-left badge with mascot + blocked message */}
           <div className="absolute top-4 left-4 sm:top-6 sm:left-6 flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/90 dark:bg-stone-800/90 backdrop-blur-sm border border-stone-200/60 dark:border-stone-700 shadow-lg z-10">
             <ScholarMascot size={56} animated />
@@ -310,7 +310,7 @@ export default function UnlockQuizPage() {
     }
 
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:from-violet-950/40 dark:via-purple-950/30 dark:to-fuchsia-950/30 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 via-violet-50 to-fuchsia-50 dark:from-violet-950/40 dark:via-violet-950/30 dark:to-fuchsia-950/30 p-4">
         <div className="bg-white dark:bg-stone-800 rounded-2xl p-8 sm:p-10 shadow-xl border border-stone-200/60 dark:border-stone-700 max-w-md w-full text-center">
           <div className="flex justify-center mb-6">
             <ScholarMascot size={100} animated />
@@ -378,7 +378,7 @@ export default function UnlockQuizPage() {
 
   if (isLoading || phase === 'loading') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:from-violet-950/40 dark:via-purple-950/30 dark:to-fuchsia-950/30">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 via-violet-50 to-fuchsia-50 dark:from-violet-950/40 dark:via-violet-950/30 dark:to-fuchsia-950/30">
         <div className="bg-white dark:bg-stone-800 rounded-2xl p-8 shadow-xl border border-stone-200/60 dark:border-stone-700">
           <div className="w-12 h-12 border-4 border-violet-200 border-t-violet-600 rounded-full animate-spin mx-auto mb-4" />
           <p className="text-stone-600 dark:text-stone-400 font-medium">Loading your quiz...</p>
@@ -390,7 +390,7 @@ export default function UnlockQuizPage() {
   if (error || (phase === 'results' && questions.length < totalQuestions)) {
     if (needsMoreContent) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:from-violet-950/40 dark:via-purple-950/30 dark:to-fuchsia-950/30 p-4">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 via-violet-50 to-fuchsia-50 dark:from-violet-950/40 dark:via-violet-950/30 dark:to-fuchsia-950/30 p-4">
           <div className="bg-white dark:bg-stone-800 rounded-2xl p-8 sm:p-10 shadow-xl border border-stone-200/60 dark:border-stone-700 max-w-lg w-full text-center">
             <div className="flex justify-center mb-6">
               <ScholarMascot size={100} animated />
@@ -422,7 +422,7 @@ export default function UnlockQuizPage() {
       );
     }
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:from-violet-950/40 dark:via-purple-950/30 dark:to-fuchsia-950/30 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 via-violet-50 to-fuchsia-50 dark:from-violet-950/40 dark:via-violet-950/30 dark:to-fuchsia-950/30 p-4">
         <div className="bg-white dark:bg-stone-800 rounded-2xl p-8 shadow-xl border border-stone-200/60 dark:border-stone-700 max-w-md text-center">
           <ScholarMascot size={100} animated />
           <h1 className="text-2xl font-bold text-stone-800 dark:text-stone-100 mt-6 mb-2">Focus Mode Unlock</h1>
@@ -440,7 +440,7 @@ export default function UnlockQuizPage() {
 
   if (showResults) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:from-violet-950/40 dark:via-purple-950/30 dark:to-fuchsia-950/30 p-4">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 via-violet-50 to-fuchsia-50 dark:from-violet-950/40 dark:via-violet-950/30 dark:to-fuchsia-950/30 p-4">
         <div className="bg-white dark:bg-stone-800 rounded-2xl p-8 shadow-xl border border-stone-200/60 dark:border-stone-700 max-w-md text-center">
           <div className="flex justify-center mb-4">
             {isPassed ? (
@@ -511,7 +511,7 @@ export default function UnlockQuizPage() {
   const siteDisplay = site ? formatSiteName(site) : 'this site';
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:from-violet-950/40 dark:via-purple-950/30 dark:to-fuchsia-950/30">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-violet-50 via-violet-50 to-fuchsia-50 dark:from-violet-950/40 dark:via-violet-950/30 dark:to-fuchsia-950/30">
       <div className="flex items-center gap-4 px-4 py-4 sm:px-6 border-b border-violet-100/80 dark:border-violet-900/40 bg-white/60 dark:bg-stone-800/60 backdrop-blur-sm">
         <ScholarMascot size={56} animated />
         <p className="text-base sm:text-lg font-semibold text-stone-800 dark:text-stone-100">

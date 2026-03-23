@@ -48,10 +48,14 @@ const aiAnalysisService = require('../services/aiAnalysisService');
 const documentService = require('../services/documentService');
 const subscriptionService = require('../services/subscriptionService');
 
-/** Canonical plan for limits & AI: 'pro' for any paid SKU (starter, premium, focus, pro), else 'free'. */
+/** Paid analysis tier: 'pro' | 'premium'; else 'free'. */
+const isPaidAnalysisTier = (plan) => plan === 'pro' || plan === 'premium';
+
 const getEffectivePlan = (req) => {
   const p = req.user?.subscription_plan || req.user?.plan || 'free';
-  return subscriptionService.normalizePlanForLimits(p) === 'pro' ? 'pro' : 'free';
+  const n = subscriptionService.normalizePlanForLimits(p);
+  if (n === 'pro' || n === 'premium') return n;
+  return 'free';
 };
 
 // @route   GET /api/analysis/humanize-usage
@@ -148,7 +152,7 @@ router.post('/humanize', authenticateToken, async (req, res) => {
     }
 
     const wordCount = text.trim().split(/\s+/).length;
-    const maxWordsPerRequest = userPlan === 'pro' ? 15000 : 5000;
+    const maxWordsPerRequest = isPaidAnalysisTier(userPlan) ? 15000 : 5000;
 
     if (wordCount > maxWordsPerRequest) {
       return res.status(400).json({
@@ -164,7 +168,7 @@ router.post('/humanize', authenticateToken, async (req, res) => {
     );
 
     let wordsUsedThisMonth, wordLimit;
-    if (userPlan === 'pro') {
+    if (isPaidAnalysisTier(userPlan)) {
       const combinedCheck = await subscriptionService.checkCombinedWordsLimit(userId, wordCount);
       if (!combinedCheck.allowed) {
         return res.status(429).json({
@@ -307,7 +311,7 @@ router.post('/summarize', authenticateToken, async (req, res) => {
     }
 
     const wordCount = text.trim().split(/\s+/).length;
-    const maxWordsPerRequest = userPlan === 'pro' ? 15000 : 5000;
+    const maxWordsPerRequest = isPaidAnalysisTier(userPlan) ? 15000 : 5000;
 
     if (wordCount > maxWordsPerRequest) {
       return res.status(400).json({
@@ -331,7 +335,7 @@ router.post('/summarize', authenticateToken, async (req, res) => {
     );
 
     let wordsUsedThisMonth, wordLimit;
-    if (userPlan === 'pro') {
+    if (isPaidAnalysisTier(userPlan)) {
       const combinedCheck = await subscriptionService.checkCombinedWordsLimit(userId, wordCount);
       if (!combinedCheck.allowed) {
         return res.status(429).json({
@@ -830,7 +834,7 @@ router.post('/generate-quiz', authenticateToken, async (req, res) => {
       effectiveType = 'mixed';
       effectiveDifficulty = 'medium';
       effectiveCount = 10;
-    } else if (userPlan === 'pro') {
+    } else if (isPaidAnalysisTier(userPlan)) {
       effectiveType = 'mixed';
       effectiveDifficulty = 'medium';
     }
@@ -1189,13 +1193,13 @@ router.post('/citation-search', authenticateToken, async (req, res) => {
     const numCitations = numberOfCitations || 10;
 
     const userPlan = getEffectivePlan(req);
-    const limitCheck = userPlan === 'pro'
+    const limitCheck = isPaidAnalysisTier(userPlan)
       ? await subscriptionService.checkCombinedActionsLimit(userId)
       : await subscriptionService.checkLimit(userId, 'citationSearchesPerMonth');
     if (!limitCheck.allowed) {
       return res.status(429).json({
         success: false,
-        message: userPlan === 'pro'
+        message: isPaidAnalysisTier(userPlan)
           ? `You've used all ${limitCheck.limit} combined actions (analyses, study packs & citations) this period. Limit resets when your billing renews.`
           : `Citation search limit reached. You have used ${limitCheck.usage} of ${limitCheck.limit} searches this period. Upgrade to get more.`,
         limit: limitCheck.limit,
@@ -1300,7 +1304,7 @@ router.post('/citation-review', authenticateToken, validateCitationReview, async
 
     // Check user's analysis limits (citation review counts toward monthly limit)
     const userPlan = getEffectivePlan(req);
-    const limitCheck = userPlan === 'pro'
+    const limitCheck = isPaidAnalysisTier(userPlan)
       ? await subscriptionService.checkCombinedActionsLimit(userId)
       : await subscriptionService.checkLimit(userId, 'analysesPerMonth');
     if (!limitCheck.allowed) {
@@ -1443,6 +1447,117 @@ router.post('/simple-analyze', authenticateToken, async (req, res) => {
   }
 });
 
+// @route   POST /api/analysis/inline-revision
+// @desc    Premium: AI generates concrete replacement text for a highlighted span (not advisory suggestion text)
+// @access  Private (Premium)
+router.post('/inline-revision', authenticateToken, async (req, res) => {
+  try {
+    const userPlan = getEffectivePlan(req);
+    if (userPlan !== 'premium') {
+      return res.status(403).json({
+        success: false,
+        message: 'Apply WriteScholar revisions requires a Premium plan. Pro includes full annotations and feedback; upgrading unlocks one-click revisions.',
+      });
+    }
+
+    const {
+      fullDocument,
+      highlightedText,
+      startIndex,
+      endIndex,
+      annotationType,
+      comment,
+      suggestion,
+    } = req.body || {};
+
+    if (typeof fullDocument !== 'string' || fullDocument.length === 0) {
+      return res.status(400).json({ success: false, message: 'Document content is required' });
+    }
+    if (fullDocument.length > 250000) {
+      return res.status(400).json({ success: false, message: 'Document is too long for this action' });
+    }
+    if (typeof highlightedText !== 'string' || !highlightedText.trim()) {
+      return res.status(400).json({ success: false, message: 'Highlighted text is required' });
+    }
+    const start = Number(startIndex);
+    const end = Number(endIndex);
+    if (!Number.isFinite(start) || !Number.isFinite(end) || start < 0 || end > fullDocument.length || start >= end) {
+      return res.status(400).json({ success: false, message: 'Invalid highlight range' });
+    }
+    if (fullDocument.slice(start, end) !== highlightedText) {
+      return res.status(400).json({
+        success: false,
+        message: 'Highlighted text does not match the document at the given indices. Refresh or re-run analysis.',
+      });
+    }
+    if (annotationType !== 'improve' && annotationType !== 'concern') {
+      return res.status(400).json({ success: false, message: 'Invalid annotation type' });
+    }
+
+    const { replacement } = await aiAnalysisService.generateInlineRevision({
+      fullDocument,
+      highlightedText,
+      startIndex: start,
+      endIndex: end,
+      annotationType,
+      comment: typeof comment === 'string' ? comment : '',
+      suggestion: typeof suggestion === 'string' ? suggestion : '',
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: { replacement },
+    });
+  } catch (error) {
+    console.error('inline-revision error:', error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to generate revision',
+    });
+  }
+});
+
+// @route   POST /api/analysis/save-revised-draft
+// @desc    Persist revised essay + annotation positions to library (document row + latest comprehensive analysis)
+// @access  Private
+router.post('/save-revised-draft', authenticateToken, async (req, res) => {
+  try {
+    const { documentId, content, annotations, wsRevisionCache } = req.body;
+    const userId = req.user.id;
+    const { plan: subPlan } = await subscriptionService.getUserSubscriptionDetails(userId);
+    if (subscriptionService.normalizePlanForLimits(subPlan) !== 'premium') {
+      return res.status(403).json({
+        success: false,
+        message: 'Saving revised drafts with WriteScholar revisions requires a Premium plan.',
+      });
+    }
+    if (!documentId || typeof documentId !== 'string') {
+      return res.status(400).json({ success: false, message: 'documentId is required' });
+    }
+    if (typeof content !== 'string') {
+      return res.status(400).json({ success: false, message: 'content is required' });
+    }
+    const doc = await documentService.getDocumentById(documentId, userId);
+    if (!doc) {
+      return res.status(404).json({ success: false, message: 'Document not found' });
+    }
+    const result = await aiAnalysisService.saveRevisedDraftToLibrary(
+      documentId,
+      userId,
+      content,
+      Array.isArray(annotations) ? annotations : [],
+      wsRevisionCache
+    );
+    return res.status(200).json({ success: true, data: result });
+  } catch (error) {
+    console.error('save-revised-draft error:', error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to save revised draft',
+    });
+  }
+});
+
 // Note: Validation schemas are now imported from middleware/validation.js
 
 /**
@@ -1531,8 +1646,11 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
     
     // Check monthly limit: paid tier uses combined pool; free uses analysesPerMonth
     const rawPlan = (await subscriptionService.getUserSubscriptionDetails(userId)).plan;
-    const userPlan = subscriptionService.normalizePlanForLimits(rawPlan) === 'pro' ? 'pro' : 'free';
-    const useCombined = userPlan === 'pro';
+    const normalizedPaid = subscriptionService.normalizePlanForLimits(rawPlan);
+    const userPlan = subscriptionService.isPaidSubscriptionTier(rawPlan)
+      ? normalizedPaid
+      : 'free';
+    const useCombined = subscriptionService.isPaidSubscriptionTier(rawPlan);
     if (useCombined ? (planLimits.combinedActionsPerMonth != null && planLimits.combinedActionsPerMonth !== -1) : (planLimits.analysesPerMonth !== -1)) {
       try {
         const timeoutPromise = new Promise((_, reject) => {
@@ -1630,20 +1748,25 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
       // Don't fail the request if save fails, just log it
     }
 
-    const isPaidUser = userPlan === 'pro';
+    const isPaidUser = subscriptionService.isPaidSubscriptionTier(rawPlan);
+
+    const lockedFeatures = !isPaidUser
+      ? ['full_annotations', 'grade_rubric', 'specific_rewrites', 'export', 'history']
+      : normalizedPaid === 'pro'
+        ? ['apply_revisions']
+        : [];
 
     res.json({
       success: true,
       message: 'Analysis completed successfully',
       data: {
         ...analysisResult,
+        documentId: analysisDocumentId,
         grade_rubric: isPaidUser ? analysisResult.grade_rubric : null,
         specific_rewrites: isPaidUser ? analysisResult.specific_rewrites : null,
         annotations: analysisResult.annotations || [],
         isContentLimited: false,
-        lockedFeatures: !isPaidUser
-          ? ['full_annotations', 'grade_rubric', 'specific_rewrites', 'export', 'history']
-          : [],
+        lockedFeatures,
         rubricAlignment: rubricAlignment
       }
     });
@@ -1719,12 +1842,12 @@ router.get('/history', authenticateToken, validateGetAnalysisHistory, async (req
 
     const subscriptionDetails = await subscriptionService.getUserSubscriptionDetails(userId);
     const plan = (subscriptionDetails.plan || 'free').toLowerCase();
-    const isPaid = subscriptionService.normalizePlanForLimits(plan) === 'pro';
+    const isPaid = subscriptionService.isPaidSubscriptionTier(plan);
 
     if (!isPaid) {
       return res.status(403).json({
         success: false,
-        message: 'Analysis history is a Pro feature. Upgrade to access your saved analyses.',
+        message: 'Analysis history is a paid feature. Upgrade to access your saved analyses.',
         upgradeRequired: true
       });
     }
@@ -2455,8 +2578,8 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
     const { periodStart } = await subscriptionService.getUsagePeriod(userId);
 
     let generationsUsed, generationLimit;
-    // Pro (paid tier): combined actions pool; Free: study packs only
-    if (normalizedBilling === 'pro') {
+    // Pro / Premium: combined actions pool; Free: study packs only
+    if (subscriptionService.isPaidSubscriptionTier(dbPlan)) {
       const combinedCheck = await subscriptionService.checkCombinedActionsLimit(userId);
       generationsUsed = combinedCheck.usage;
       generationLimit = combinedCheck.limit;
@@ -2495,7 +2618,7 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
 
     const pack = await aiAnalysisService.generateStudyPack(
       text,
-      normalizedBilling === 'pro' ? 'pro' : 'free'
+      subscriptionService.isPaidSubscriptionTier(dbPlan) ? 'pro' : 'free'
     );
     pack.originalNotes = text.trim();
 
@@ -2506,7 +2629,7 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
       difficulty: 'mixed'
     }).then(() => {}).catch(err => console.error('Failed to record study pack usage:', err));
 
-    const isPaidUser = normalizedBilling === 'pro';
+    const isPaidUser = subscriptionService.isPaidSubscriptionTier(dbPlan);
     const expiresAt = isPaidUser ? null : (() => { const d = new Date(); d.setDate(d.getDate() + 30); return d.toISOString(); })();
 
     const packTitle = pack.quiz?.title || pack.flashcards?.title || pack.lesson?.title || 'Study Pack';
@@ -2570,8 +2693,8 @@ router.get('/study-pack-usage', authenticateToken, async (req, res) => {
 
     const maxWords = planLimits.studyPackMaxWordsPerGeneration || planLimits.quizMaxWordsPerGeneration || 5000;
 
-    // Paid (Pro) tier: same combined pool as POST /generate-study-pack (analyses + citations + study packs)
-    if (normalizedPlan === 'pro') {
+    // Paid tier: same combined pool as POST /generate-study-pack (analyses + citations + study packs)
+    if (subscriptionService.isPaidSubscriptionTier(dbPlan)) {
       const combined = await subscriptionService.checkCombinedActionsLimit(userId);
       return res.json({
         success: true,
@@ -2580,7 +2703,7 @@ router.get('/study-pack-usage', authenticateToken, async (req, res) => {
           generationLimit: combined.limit,
           generationsRemaining: combined.remaining,
           maxWordsPerGeneration: maxWords,
-          plan: normalizedPlan === 'pro' ? 'pro' : 'free',
+          plan: normalizedPlan,
           daysUntilReset,
           pool: 'combined',
         },
@@ -2603,7 +2726,7 @@ router.get('/study-pack-usage', authenticateToken, async (req, res) => {
         generationLimit,
         generationsRemaining: Math.max(0, generationLimit - generationsUsed),
         maxWordsPerGeneration: maxWords,
-        plan: normalizedPlan === 'pro' ? 'pro' : 'free',
+        plan: normalizedPlan,
         daysUntilReset,
         pool: 'study_pack',
       },
