@@ -731,7 +731,7 @@ const FriendsPage = ({ onNavigate, user, onLogout }: FriendsPageProps) => {
                                 {(friend.first_name?.[0] || friend.email?.[0] || '?').toUpperCase()}
                               </span>
                               {friend.currentStreak != null && friend.currentStreak > 0 && (
-                                <span className="absolute -bottom-1 -right-1 flex items-center gap-0.5 px-1.5 py-0.5 bg-amber-500 text-white text-[10px] font-bold rounded-full shadow-sm leading-none">
+                                <span className="absolute -bottom-1 -right-1 flex items-center gap-0.5 px-1.5 py-0.5 bg-violet-600 text-white text-[10px] font-bold rounded-full shadow-sm leading-none">
                                   <span className="text-[9px]">🔥</span>{friend.currentStreak}
                                 </span>
                               )}
@@ -740,7 +740,7 @@ const FriendsPage = ({ onNavigate, user, onLogout }: FriendsPageProps) => {
                               <div className="flex items-center gap-2">
                                 <h4 className="font-medium text-gray-900">{getName(friend)}</h4>
                                 {friend.currentStreak != null && friend.currentStreak > 0 && (
-                                  <span className="text-xs text-amber-600 font-semibold">{friend.currentStreak} day streak</span>
+                                  <span className="text-xs text-violet-600 dark:text-violet-400 font-semibold">{friend.currentStreak} day streak</span>
                                 )}
                               </div>
                               <p className="text-sm text-gray-500">

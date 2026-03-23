@@ -1,7 +1,8 @@
 import { lazy, LazyExoticComponent, ComponentType } from 'react';
 
-const MAX_RETRIES = 3;
-const RETRY_DELAY_MS = 1000;
+/** After idle tabs / flaky networks, extra attempts + longer backoff help before we surface an error. */
+const MAX_RETRIES = 5;
+const RETRY_DELAY_MS = 1400;
 
 /**
  * Wraps React.lazy() with retry logic for chunk load failures.
@@ -21,7 +22,8 @@ export function lazyWithRetry<T extends ComponentType<any>>(
       } catch (err) {
         lastError = err;
         if (attempt < retries) {
-          await new Promise((r) => setTimeout(r, delay * Math.pow(2, attempt)));
+          const jitter = Math.random() * 400;
+          await new Promise((r) => setTimeout(r, delay * Math.pow(2, attempt) + jitter));
         }
       }
     }

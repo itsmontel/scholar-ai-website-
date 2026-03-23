@@ -1,4 +1,5 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { Component, ErrorInfo, ReactNode } from 'react';
+import { isChunkLoadError } from '../../utils/chunkLoadError';
 
 interface PageErrorBoundaryProps {
   children: ReactNode;
@@ -8,12 +9,17 @@ interface PageErrorBoundaryProps {
 interface State {
   hasError: boolean;
   error?: Error;
+  chunkAutoReloadScheduled?: boolean;
 }
+
+const CHUNK_AUTO_RETRY_AT_KEY = 'writescholar_chunk_auto_retry_at';
+/** Don't loop auto-reloads if the page keeps failing — allow another after a quiet period. */
+const CHUNK_AUTO_RETRY_COOLDOWN_MS = 60_000;
 
 /**
  * Route-level error boundary. Catches errors in the current page only.
- * Shows a compact, inline recovery UI instead of full-page takeover.
- * Use key={currentPage} so navigating away mounts a fresh boundary.
+ * Chunk load failures (common after idle tabs or a new deploy) get one automatic
+ * reload before we ask the user to retry manually.
  */
 class PageErrorBoundary extends Component<PageErrorBoundaryProps, State> {
   constructor(props: PageErrorBoundaryProps) {
@@ -21,16 +27,58 @@ class PageErrorBoundary extends Component<PageErrorBoundaryProps, State> {
     this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(error: Error): State {
+  static getDerivedStateFromError(error: Error): Partial<State> {
     return { hasError: true, error };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('[PageErrorBoundary] Page failed to load:', error, errorInfo);
+
+    if (isChunkLoadError(error)) {
+      const prev = parseInt(sessionStorage.getItem(CHUNK_AUTO_RETRY_AT_KEY) || '0', 10);
+      const now = Date.now();
+      const cooledDown = !prev || now - prev > CHUNK_AUTO_RETRY_COOLDOWN_MS;
+      if (cooledDown) {
+        sessionStorage.setItem(CHUNK_AUTO_RETRY_AT_KEY, String(now));
+        this.setState({ chunkAutoReloadScheduled: true });
+        window.setTimeout(() => {
+          window.location.reload();
+        }, 600);
+      }
+    }
   }
+
+  private handleHardReload = () => {
+    try {
+      sessionStorage.removeItem(CHUNK_AUTO_RETRY_AT_KEY);
+    } catch (_) {}
+    window.location.reload();
+  };
+
+  private handleSoftRetry = () => {
+    this.setState({ hasError: false, error: undefined, chunkAutoReloadScheduled: false });
+  };
 
   render() {
     if (this.state.hasError) {
+      const err = this.state.error;
+      const chunk = err ? isChunkLoadError(err) : false;
+      const auto = this.state.chunkAutoReloadScheduled;
+
+      if (auto) {
+        return (
+          <div className="min-h-[60vh] flex items-center justify-center p-6 bg-stone-50 dark:bg-stone-900">
+            <div className="max-w-md w-full bg-white dark:bg-stone-800 rounded-2xl shadow-xl border border-stone-200 dark:border-stone-700 p-8 text-center">
+              <div className="w-12 h-12 border-2 border-violet-500 border-t-transparent rounded-full animate-spin mx-auto mb-5" aria-hidden />
+              <h2 className="text-lg font-semibold text-stone-800 dark:text-stone-100 mb-2">Reconnecting…</h2>
+              <p className="text-stone-600 dark:text-stone-400 text-sm">
+                Refreshing this page to load the latest version. This usually fixes connection hiccups after the tab has been idle.
+              </p>
+            </div>
+          </div>
+        );
+      }
+
       return (
         <div className="min-h-[60vh] flex items-center justify-center p-6 bg-stone-50 dark:bg-stone-900">
           <div className="max-w-md w-full bg-white dark:bg-stone-800 rounded-2xl shadow-xl border border-stone-200 dark:border-stone-700 p-8 text-center">
@@ -40,25 +88,45 @@ class PageErrorBoundary extends Component<PageErrorBoundaryProps, State> {
               </svg>
             </div>
             <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-2">
-              This page couldn&apos;t load
+              {chunk ? 'Could not load this screen' : "This page couldn't load"}
             </h2>
             <p className="text-stone-600 dark:text-stone-400 text-sm mb-6">
-              Something went wrong. Your data is safe. Try again or go back to your dashboard.
+              {chunk
+                ? 'After a while away, your browser sometimes needs to fetch the app again (especially if we shipped an update). Your work is safe — try a refresh.'
+                : 'Something went wrong while loading this page. Your data is safe. You can try again or head back to your dashboard.'}
             </p>
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  type="button"
+                  onClick={this.handleHardReload}
+                  className="flex-1 px-5 py-3 bg-violet-500 hover:bg-violet-600 text-white font-semibold rounded-xl transition-colors"
+                >
+                  {chunk ? 'Refresh page' : 'Reload page'}
+                </button>
+                {!chunk && (
+                  <button
+                    type="button"
+                    onClick={this.handleSoftRetry}
+                    className="flex-1 px-5 py-3 bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 text-stone-700 dark:text-stone-200 font-semibold rounded-xl transition-colors"
+                  >
+                    Try again
+                  </button>
+                )}
+              </div>
               <button
-                onClick={() => window.location.reload()}
-                className="flex-1 px-5 py-3 bg-violet-500 hover:bg-violet-600 text-white font-semibold rounded-xl transition-colors"
-              >
-                Reload page
-              </button>
-              <button
+                type="button"
                 onClick={() => this.props.onGoBack()}
-                className="flex-1 px-5 py-3 bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 text-stone-700 dark:text-stone-200 font-semibold rounded-xl transition-colors"
+                className="w-full px-5 py-3 bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 text-stone-700 dark:text-stone-200 font-semibold rounded-xl transition-colors"
               >
                 Go to Dashboard
               </button>
             </div>
+            {chunk && (
+              <p className="mt-4 text-xs text-stone-500 dark:text-stone-400">
+                Tip: If this keeps happening, try closing other tabs or checking your connection, then refresh once more.
+              </p>
+            )}
           </div>
         </div>
       );

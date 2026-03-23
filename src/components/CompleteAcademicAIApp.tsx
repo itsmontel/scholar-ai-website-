@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, Suspense } from 'react';
+import { useState, useEffect, useLayoutEffect, Suspense, useRef } from 'react';
 import { WriteScholarEditorialBackgroundLayers } from './common/WriteScholarEditorialBackground';
 import { logger } from '../utils/logger';
 import { HIDE_FRIENDS } from '../config/featureFlags';
@@ -12,7 +12,7 @@ import LandingPage from './pages/LandingPage';
 import SignUpPage from './pages/SignUpPage';
 import LoginPage from './pages/LoginPage';
 
-// Lazy with retry: recovers from chunk load failures (network/404), retries 3x before failing
+// Lazy with retry: recovers from chunk load failures (idle tab / deploy), retries with backoff before failing
 const EmailVerificationPage = lazyWithRetry(() => import('./pages/EmailVerificationPage'));
 const OnboardingPage = lazyWithRetry(() => import('./pages/OnboardingPage'));
 const AuthCallbackPage = lazyWithRetry(() => import('./pages/AuthCallbackPage'));
@@ -456,6 +456,9 @@ const AcademicAIApp = () => {
     }
   };
 
+  const validateAndRefreshTokenRef = useRef(validateAndRefreshToken);
+  validateAndRefreshTokenRef.current = validateAndRefreshToken;
+
   // Clear payment params from URL
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -565,6 +568,25 @@ const AcademicAIApp = () => {
       
       return () => clearInterval(refreshInterval);
     }
+  }, [isLoggedIn]);
+
+  // When the tab was in the background for a while, refresh the session as soon as the user returns
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    let debounce: ReturnType<typeof setTimeout>;
+    const onVisibility = () => {
+      if (document.visibilityState !== 'visible') return;
+      clearTimeout(debounce);
+      debounce = setTimeout(() => {
+        logger.log('Tab visible again — validating / refreshing session');
+        void validateAndRefreshTokenRef.current();
+      }, 1200);
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility);
+      clearTimeout(debounce);
+    };
   }, [isLoggedIn]);
 
   // Global error handler for 401 responses

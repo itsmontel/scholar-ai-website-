@@ -936,7 +936,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
             </div>
             <div className="text-2xl font-bold text-white tabular-nums">{score.toLocaleString()}</div>
             <div className="flex items-center gap-3">
-              <div className={`text-sm font-bold flex items-center gap-1 ${streakFire ? 'text-orange-400' : 'text-slate-500'}`}
+              <div className={`text-sm font-bold flex items-center gap-1 ${streakFire ? 'text-violet-400' : 'text-slate-500'}`}
                 style={streakFire ? { animation: 'lrqStreakFire 0.5s ease-in-out infinite' } : undefined}>
                 {streakFire && '🔥'}{streak}x
               </div>
@@ -1256,7 +1256,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
               <div className="grid grid-cols-3 gap-3">
                 {[
                   { val: correctCount, label: 'Hits', color: 'text-green-600' },
-                  { val: longestStreak, label: 'Best Streak', color: 'text-orange-500' },
+                  { val: longestStreak, label: 'Best Streak', color: 'text-violet-500' },
                   { val: `${accuracy}%`, label: 'Accuracy', color: 'text-violet-600' },
                 ].map(s => (
                   <div key={s.label} className="text-center p-3 rounded-xl bg-stone-50 border border-stone-100">

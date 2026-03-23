@@ -105,13 +105,13 @@ const StreakWidget = ({ compact = false }: StreakWidgetProps) => {
       onClick={onClick}
       className={`rounded-xl p-3 border border-violet-200/60 dark:border-violet-700/40 min-w-0 relative overflow-hidden ${onClick ? 'cursor-pointer hover:border-violet-300 dark:hover:border-violet-600 transition-colors' : ''}`}
       style={{
-        background: 'linear-gradient(135deg, rgba(244, 63, 94, 0.1) 0%, rgba(236, 72, 153, 0.05) 100%)'
+        background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.12) 0%, rgba(124, 58, 237, 0.06) 100%)'
       }}
     >
       <div className="absolute -top-4 -right-4 w-10 h-10 bg-violet-400/15 rounded-full blur-md" />
       <div className="flex items-center justify-center gap-1.5 mb-2 relative z-10">
         <span className="text-2xl">🔥</span>
-        <span className="text-2xl font-bold bg-violet-600 hover:bg-violet-500 bg-clip-text text-transparent">{data.currentStreak}</span>
+        <span className="text-2xl font-bold text-violet-600 dark:text-violet-400">{data.currentStreak}</span>
       </div>
       <p className="text-center text-stone-600 dark:text-stone-400 text-xs font-medium mb-3 relative z-10">
         {data.currentStreak === 0
@@ -128,7 +128,7 @@ const StreakWidget = ({ compact = false }: StreakWidgetProps) => {
                 className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 transition-all text-[10px] ${
                   day.hasActivity ? '' : 'bg-stone-100 dark:bg-stone-700'
                 } ${day.isToday && !day.hasActivity ? 'ring-2 ring-violet-400 ring-offset-0' : ''}`}
-                style={day.hasActivity ? { backgroundColor: 'rgba(244, 63, 94, 0.25)' } : undefined}
+                style={day.hasActivity ? { backgroundColor: 'rgba(139, 92, 246, 0.28)' } : undefined}
               >
                 {day.hasActivity ? '🔥' : ''}
               </div>
@@ -162,11 +162,11 @@ const StreakWidget = ({ compact = false }: StreakWidgetProps) => {
         <button
           onClick={() => setShowFullStreakModal(true)}
           className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl transition-all hover:scale-105 flex-shrink-0 self-stretch"
-          style={{ backgroundColor: 'rgba(244, 63, 94, 0.15)' }}
+          style={{ backgroundColor: 'rgba(139, 92, 246, 0.18)' }}
           title="View your streak"
         >
           <span className="text-base sm:text-lg">🔥</span>
-          <span className="font-bold text-stone-800 dark:text-stone-100 text-sm sm:text-base">{data.currentStreak}</span>
+          <span className="font-bold text-violet-700 dark:text-violet-300 text-sm sm:text-base">{data.currentStreak}</span>
         </button>
 
         {/* Full streak modal - shown when compact button is clicked on mobile */}
@@ -201,7 +201,7 @@ const StreakWidget = ({ compact = false }: StreakWidgetProps) => {
           >
             <div
               className="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative"
-              style={{ background: 'linear-gradient(180deg, #FEF9E7 0%, #FFFFFF 30%)' }}
+              style={{ background: 'linear-gradient(180deg, #f5f3ff 0%, #FFFFFF 32%)' }}
               onClick={e => e.stopPropagation()}
             >
               <button
@@ -267,7 +267,7 @@ const StreakWidget = ({ compact = false }: StreakWidgetProps) => {
         >
           <div 
             className="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative"
-            style={{ background: 'linear-gradient(180deg, #FEF9E7 0%, #FFFFFF 30%)' }}
+            style={{ background: 'linear-gradient(180deg, #f5f3ff 0%, #FFFFFF 32%)' }}
             onClick={e => e.stopPropagation()}
           >
             <button

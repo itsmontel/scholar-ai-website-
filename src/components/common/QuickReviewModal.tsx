@@ -581,7 +581,7 @@ const QuickReviewModal = ({ userName, userId, onComplete, onSkip }: QuickReviewM
                   <>
                     <div className="w-px h-8 sm:h-12 bg-violet-200 hidden sm:block" />
                     <div className="text-center">
-                      <div className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">
+                      <div className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
                         {maxStreak}
                       </div>
                       <div className="text-[10px] sm:text-xs text-stone-500 font-medium">STREAK 🔥</div>
