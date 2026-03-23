@@ -10,8 +10,8 @@ export type GeneratedPack = {
 
 const MIN_CHARS = 48;
 
-/** Demo text typed by the fake cursor (matches interactive video). Long enough for three flashcards and six lesson bullets. */
-export const STUDY_PACK_DEMO_NOTES = `Photosynthesis converts light energy into chemical energy inside chloroplasts in plant cells. Chlorophyll absorbs mostly blue and red light while reflecting green, which is why leaves look green to us. The light-dependent reactions split water, release oxygen, and produce ATP and NADPH for the next stage. The Calvin cycle then uses that ATP and NADPH to fix carbon dioxide into sugars through the enzyme RuBisCO. Stomata on leaf surfaces regulate gas exchange so CO2 can enter while water loss is managed. Together these steps link sunlight to stored chemical energy the plant uses for growth and maintenance.`;
+/** Demo text typed by the fake cursor (~400 chars): three flashcards, quiz, and lesson bullets. */
+export const STUDY_PACK_DEMO_NOTES = `Photosynthesis converts light energy into chemical energy inside chloroplasts in plant cells. Chlorophyll absorbs mostly blue and red light while reflecting green, which is why leaves look green to us. The Calvin cycle uses ATP and NADPH to fix carbon dioxide into sugars through RuBisCO. Stomata on leaf surfaces regulate gas exchange so CO2 can enter while water loss is managed.`;
 
 function shuffleWithCorrect(items: string[], correctIndex: number): { items: string[]; correctIndex: number } {
   const indexed = items.map((item, i) => ({ item, i }));
