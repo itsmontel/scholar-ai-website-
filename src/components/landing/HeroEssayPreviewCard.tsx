@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import type { DemoAnnotation, DemoPaper } from '../../data/landingPageDemoAnalysis';
 
@@ -16,6 +16,10 @@ const hoverRing = {
   improve: 'hover:ring-2 hover:ring-amber-400/60 dark:hover:ring-amber-500/50',
   concern: 'hover:ring-2 hover:ring-rose-400/60 dark:hover:ring-rose-500/50',
 } as const;
+
+/** Matches InteractiveDocumentAnalysis revision marks (purple until revert). */
+const REVISION_MARK_CLASS =
+  'bg-violet-200/95 dark:bg-violet-900/50 text-violet-950 dark:text-violet-50 px-0.5 rounded-sm ring-2 ring-violet-500/80 dark:ring-violet-400/60 shadow-sm ring-offset-1 ring-offset-white dark:ring-offset-stone-900 [box-decoration-break:clone]';
 
 function buildExcerpt(paper: DemoPaper, maxChars: number) {
   const full = paper.content;
@@ -138,9 +142,12 @@ function TooltipHeaderIcon({ type }: { type: DemoAnnotation['type'] }) {
 function AnnotationTooltipPortal({
   annotation,
   position,
+  suggestedRevisionBody,
 }: {
   annotation: DemoAnnotation;
   position: { x: number; y: number };
+  /** When set (e.g. hero live demo), shows the actual revised wording instead of the template suggestion line */
+  suggestedRevisionBody?: string;
 }) {
   if (typeof document === 'undefined' || !document.body) return null;
 
@@ -198,7 +205,9 @@ function AnnotationTooltipPortal({
             <span className="inline-flex h-0.5 w-6 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500" aria-hidden />
             Suggested revision
           </p>
-          <p className="text-[10px] leading-snug text-stone-700 dark:text-stone-300">{annotation.suggestion}</p>
+          <p className="text-[10px] leading-snug text-stone-700 dark:text-stone-300">
+            {suggestedRevisionBody ?? annotation.suggestion}
+          </p>
         </div>
       </div>
     </div>,
@@ -210,32 +219,32 @@ const variantStyles = {
   before: {
     outerShadow:
       'group-hover/preview:shadow-[0_22px_44px_-14px_rgba(124,58,237,0.26)] dark:group-hover/preview:shadow-[0_24px_48px_-12px_rgba(0,0,0,0.72)]',
-    cardRing: 'ring-stone-200 dark:ring-stone-700',
+    cardRing: 'ring-violet-200/90 dark:ring-violet-800/55',
     cardShadow:
-      'shadow-[0_14px_32px_-12px_rgba(91,33,182,0.16),0_0_0_1px_rgba(139,92,246,0.07)] dark:shadow-[0_18px_40px_-12px_rgba(0,0,0,0.55)]',
-    chromeBar: 'border-violet-200 dark:border-violet-800/60 bg-stone-100 dark:bg-stone-800',
+      'shadow-[0_14px_32px_-12px_rgba(91,33,182,0.14),0_0_0_1px_rgba(139,92,246,0.08)] dark:shadow-[0_18px_40px_-12px_rgba(0,0,0,0.55)]',
+    chromeBar: 'border-violet-200/90 dark:border-violet-800/55 bg-violet-50/90 dark:bg-violet-950/40',
     docIcon: 'text-violet-600 dark:text-violet-400',
     scoreBadge: 'bg-gradient-to-br from-violet-600 to-violet-500',
-    paperAccent: 'bg-violet-200 dark:bg-violet-700',
+    paperAccent: 'bg-violet-300/90 dark:bg-violet-600',
     legendIcon: 'text-violet-600 dark:text-violet-400',
-    ctaBar: 'text-violet-900 dark:text-violet-100 bg-violet-100 dark:bg-violet-950 border-violet-200 dark:border-violet-800 hover:bg-violet-200 dark:hover:bg-violet-900',
+    ctaBar: 'text-violet-950 dark:text-violet-100 bg-violet-100 dark:bg-violet-950 border-violet-200 dark:border-violet-800 hover:bg-violet-200/90 dark:hover:bg-violet-900',
     ctaIcon: 'text-violet-600 dark:text-violet-400',
     activeRing: 'ring-violet-500/70',
   },
   after: {
     outerShadow:
-      'group-hover/preview:shadow-[0_22px_44px_-14px_rgba(5,150,105,0.22)] dark:group-hover/preview:shadow-[0_24px_48px_-12px_rgba(0,0,0,0.72)]',
-    cardRing: 'ring-emerald-200/90 dark:ring-emerald-800/60',
+      'group-hover/preview:shadow-[0_22px_44px_-14px_rgba(109,40,217,0.28)] dark:group-hover/preview:shadow-[0_24px_48px_-12px_rgba(0,0,0,0.72)]',
+    cardRing: 'ring-violet-300/90 dark:ring-violet-700/55',
     cardShadow:
-      'shadow-[0_14px_32px_-12px_rgba(5,150,105,0.14),0_0_0_1px_rgba(16,185,129,0.08)] dark:shadow-[0_18px_40px_-12px_rgba(0,0,0,0.55)]',
-    chromeBar: 'border-emerald-200/90 dark:border-emerald-800/60 bg-emerald-50/90 dark:bg-emerald-950/35',
-    docIcon: 'text-emerald-600 dark:text-emerald-400',
-    scoreBadge: 'bg-gradient-to-br from-emerald-600 to-teal-500',
-    paperAccent: 'bg-emerald-300/90 dark:bg-emerald-600',
-    legendIcon: 'text-emerald-600 dark:text-emerald-400',
-    ctaBar: 'text-emerald-950 dark:text-emerald-100 bg-emerald-100 dark:bg-emerald-950 border-emerald-200 dark:border-emerald-800 hover:bg-emerald-200/90 dark:hover:bg-emerald-900',
-    ctaIcon: 'text-emerald-600 dark:text-emerald-400',
-    activeRing: 'ring-emerald-500/70',
+      'shadow-[0_14px_32px_-12px_rgba(91,33,182,0.2),0_0_0_1px_rgba(139,92,246,0.09)] dark:shadow-[0_18px_40px_-12px_rgba(0,0,0,0.55)]',
+    chromeBar: 'border-violet-300/85 dark:border-violet-600/50 bg-violet-50/95 dark:bg-violet-950/45',
+    docIcon: 'text-violet-700 dark:text-violet-400',
+    scoreBadge: 'bg-gradient-to-br from-violet-700 to-violet-600',
+    paperAccent: 'bg-violet-400/90 dark:bg-violet-500',
+    legendIcon: 'text-violet-700 dark:text-violet-400',
+    ctaBar: 'text-violet-950 dark:text-violet-100 bg-violet-100 dark:bg-violet-950 border-violet-200 dark:border-violet-800 hover:bg-violet-200/90 dark:hover:bg-violet-900',
+    ctaIcon: 'text-violet-600 dark:text-violet-400',
+    activeRing: 'ring-violet-500/70',
   },
 } as const;
 
@@ -246,13 +255,18 @@ interface HeroEssayPreviewCardProps {
   onOpenDemo?: () => void;
   /** Legend chips above or below the paper mock-up */
   legendPlacement?: 'top' | 'bottom';
-  /** Visual theme: violet “draft” vs emerald “revised” */
+  /** Visual theme: lighter violet “before” vs richer violet “after” */
   variant?: 'before' | 'after';
   /** Tab label in window chrome */
   chromeTitle?: string;
   maxExcerptChars?: number;
   /** Max height of the paper scroll area (taller = more visible text) */
   paperMaxHeightClass?: string;
+  /**
+   * Landing hero “before” only: show a single red (concern) span with `demoRevisedText`;
+   * cycles automatically to the purple WriteScholar revision (no click — respects reduced motion).
+   */
+  interactiveConcernRevision?: boolean;
 }
 
 export default function HeroEssayPreviewCard({
@@ -264,17 +278,75 @@ export default function HeroEssayPreviewCard({
   chromeTitle,
   maxExcerptChars = 480,
   paperMaxHeightClass = 'max-h-[200px]',
+  interactiveConcernRevision = false,
 }: HeroEssayPreviewCardProps) {
   const vs = variantStyles[variant];
   const resolvedChromeTitle = chromeTitle ?? (variant === 'after' ? 'Revised preview' : 'Essay preview');
 
+  const targetConcern = useMemo(() => {
+    if (!interactiveConcernRevision) return null;
+    return paper.annotations.find((a) => a.type === 'concern' && a.demoRevisedText) ?? null;
+  }, [paper.annotations, interactiveConcernRevision]);
+
+  const excerptPaper = useMemo((): DemoPaper => {
+    if (!targetConcern) return paper;
+    return { ...paper, annotations: [targetConcern] };
+  }, [paper, targetConcern]);
+
   const { paragraphRanges, annotationSpans } = useMemo(
-    () => buildExcerpt(paper, maxExcerptChars),
-    [paper, maxExcerptChars]
+    () => buildExcerpt(excerptPaper, maxExcerptChars),
+    [excerptPaper, maxExcerptChars]
   );
 
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null);
+  const [appliedHeroRevision, setAppliedHeroRevision] = useState(false);
+
+  const heroInteractive = Boolean(interactiveConcernRevision && targetConcern);
+
+  /** Reduced motion: show purple revision only (no cycling). */
+  useLayoutEffect(() => {
+    if (!heroInteractive || !targetConcern || typeof window === 'undefined') return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setAppliedHeroRevision(true);
+    }
+  }, [heroInteractive, targetConcern?.id, paper.id]);
+
+  /** Auto-cycle red → purple → red (live preview). */
+  useEffect(() => {
+    if (!heroInteractive || !targetConcern) return;
+    if (typeof window === 'undefined') return;
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const dwellRedMs = 2800;
+    const dwellPurpleMs = 3400;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    let cancelled = false;
+
+    const cycle = () => {
+      setAppliedHeroRevision(false);
+      timers.push(
+        setTimeout(() => {
+          if (cancelled) return;
+          setAppliedHeroRevision(true);
+          timers.push(
+            setTimeout(() => {
+              if (cancelled) return;
+              cycle();
+            }, dwellPurpleMs)
+          );
+        }, dwellRedMs)
+      );
+    };
+
+    cycle();
+
+    return () => {
+      cancelled = true;
+      timers.forEach((id) => clearTimeout(id));
+    };
+  }, [heroInteractive, targetConcern?.id, paper.id]);
 
   const hoveredAnnotation = useMemo(
     () => (hoveredId ? paper.annotations.find((a) => a.id === hoveredId) ?? null : null),
@@ -313,30 +385,63 @@ export default function HeroEssayPreviewCard({
       if (actualStart < relEnd) {
         const ann = span.annotation;
         const isActive = hoveredId === ann.id;
-        parts.push(
-          <span
-            key={ann.id}
-            className={`
+        const showPurpleRevision =
+          heroInteractive &&
+          targetConcern &&
+          ann.id === targetConcern.id &&
+          appliedHeroRevision &&
+          Boolean(ann.demoRevisedText);
+
+        const heroLive = heroInteractive && ann.id === targetConcern?.id;
+
+        if (showPurpleRevision) {
+          parts.push(
+            <mark
+              key={`${ann.id}-purple`}
+              className={`${REVISION_MARK_CLASS} font-medium cursor-help select-none motion-safe:animate-[landing-revision-fade_0.45s_ease-out] hover:ring-2 hover:ring-violet-400/55 dark:hover:ring-violet-500/45 ${
+                isActive ? `ring-2 ${vs.activeRing} ring-offset-1 ring-offset-[#fdfcfa] dark:ring-offset-stone-800` : ''
+              }`}
+              onMouseEnter={(e) => {
+                setHoveredId(ann.id);
+                setTooltipPos({ x: e.clientX, y: e.clientY });
+              }}
+              onMouseMove={(e) => {
+                setTooltipPos({ x: e.clientX, y: e.clientY });
+              }}
+              onMouseLeave={() => {
+                setHoveredId(null);
+                setTooltipPos(null);
+              }}
+            >
+              {ann.demoRevisedText}
+            </mark>
+          );
+        } else {
+          parts.push(
+            <span
+              key={`${ann.id}-rose`}
+              className={`
               ${highlightClasses[ann.type]}
               ${hoverRing[ann.type]}
-              font-medium cursor-help transition-shadow duration-150
+              font-medium ${heroLive ? 'cursor-help motion-safe:animate-[landing-revision-fade_0.45s_ease-out]' : 'cursor-help'} transition-shadow duration-150
               ${isActive ? `ring-2 ${vs.activeRing} ring-offset-1 ring-offset-[#fdfcfa] dark:ring-offset-stone-800` : ''}
             `}
-            onMouseEnter={(e) => {
-              setHoveredId(ann.id);
-              setTooltipPos({ x: e.clientX, y: e.clientY });
-            }}
-            onMouseMove={(e) => {
-              setTooltipPos({ x: e.clientX, y: e.clientY });
-            }}
-            onMouseLeave={() => {
-              setHoveredId(null);
-              setTooltipPos(null);
-            }}
-          >
-            {range.text.slice(actualStart, relEnd)}
-          </span>
-        );
+              onMouseEnter={(e) => {
+                setHoveredId(ann.id);
+                setTooltipPos({ x: e.clientX, y: e.clientY });
+              }}
+              onMouseMove={(e) => {
+                setTooltipPos({ x: e.clientX, y: e.clientY });
+              }}
+              onMouseLeave={() => {
+                setHoveredId(null);
+                setTooltipPos(null);
+              }}
+            >
+              {range.text.slice(actualStart, relEnd)}
+            </span>
+          );
+        }
       }
       last = Math.max(last, relEnd);
     }
@@ -385,27 +490,47 @@ export default function HeroEssayPreviewCard({
 
         {legendPlacement === 'top' && (
           <div className="relative px-2.5 pt-2.5 pb-1 space-y-1.5 border-b border-stone-100 dark:border-stone-800/80">
-            <p className="text-center text-[8px] font-medium text-stone-500 dark:text-stone-400 flex items-center justify-center gap-1">
-              <svg className={`w-2.5 h-2.5 ${vs.legendIcon}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
-              </svg>
-              Hover highlights for annotations
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-1">
-              {[
-                { key: 'strong', label: 'Strong', dot: 'bg-emerald-500', chip: 'border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950 text-emerald-900 dark:text-emerald-200' },
-                { key: 'improve', label: 'Improve', dot: 'bg-amber-500', chip: 'border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950 text-amber-950 dark:text-amber-200' },
-                { key: 'concern', label: 'Concern', dot: 'bg-rose-500', chip: 'border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950 text-rose-900 dark:text-rose-200' },
-              ].map((item) => (
-                <span
-                  key={item.key}
-                  className={`inline-flex items-center gap-0.5 rounded-full pl-0.5 pr-1.5 py-0.5 text-[8px] font-bold border ${item.chip}`}
-                >
-                  <span className={`w-1.5 h-1.5 rounded-full ${item.dot} ring-1 ring-black/10 dark:ring-white/15`} />
-                  {item.label}
-                </span>
-              ))}
-            </div>
+            {heroInteractive ? (
+              <>
+                <p className="text-center text-[8px] font-medium text-stone-500 dark:text-stone-400 leading-snug px-1">
+                  Live preview cycles; hover for highlighted text, feedback, and suggested revision.
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-1">
+                  <span className="inline-flex items-center gap-0.5 rounded-full pl-0.5 pr-1.5 py-0.5 text-[8px] font-bold border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950 text-rose-900 dark:text-rose-200">
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500 ring-1 ring-black/10 dark:ring-white/15" />
+                    Flagged
+                  </span>
+                  <span className="inline-flex items-center gap-0.5 rounded-full pl-0.5 pr-1.5 py-0.5 text-[8px] font-bold border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-950 text-violet-900 dark:text-violet-200">
+                    <span className="w-1.5 h-1.5 rounded-full bg-violet-500 ring-1 ring-black/10 dark:ring-white/15" />
+                    Revision
+                  </span>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="text-center text-[8px] font-medium text-stone-500 dark:text-stone-400 flex items-center justify-center gap-1">
+                  <svg className={`w-2.5 h-2.5 ${vs.legendIcon}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                  </svg>
+                  Hover highlights for annotations
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-1">
+                  {[
+                    { key: 'strong', label: 'Strong', dot: 'bg-emerald-500', chip: 'border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950 text-emerald-900 dark:text-emerald-200' },
+                    { key: 'improve', label: 'Improve', dot: 'bg-amber-500', chip: 'border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950 text-amber-950 dark:text-amber-200' },
+                    { key: 'concern', label: 'Concern', dot: 'bg-rose-500', chip: 'border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950 text-rose-900 dark:text-rose-200' },
+                  ].map((item) => (
+                    <span
+                      key={item.key}
+                      className={`inline-flex items-center gap-0.5 rounded-full pl-0.5 pr-1.5 py-0.5 text-[8px] font-bold border ${item.chip}`}
+                    >
+                      <span className={`w-1.5 h-1.5 rounded-full ${item.dot} ring-1 ring-black/10 dark:ring-white/15`} />
+                      {item.label}
+                    </span>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         )}
 
@@ -432,27 +557,47 @@ export default function HeroEssayPreviewCard({
 
         {legendPlacement === 'bottom' && (
           <div className="relative px-2.5 pb-2 -mt-4 space-y-1.5">
-            <p className="text-center text-[8px] font-medium text-stone-500 dark:text-stone-400 flex items-center justify-center gap-1">
-              <svg className={`w-2.5 h-2.5 ${vs.legendIcon}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
-              </svg>
-              Hover highlights for annotations
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-1">
-              {[
-                { key: 'strong', label: 'Strong', dot: 'bg-emerald-500', chip: 'border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950 text-emerald-900 dark:text-emerald-200' },
-                { key: 'improve', label: 'Improve', dot: 'bg-amber-500', chip: 'border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950 text-amber-950 dark:text-amber-200' },
-                { key: 'concern', label: 'Concern', dot: 'bg-rose-500', chip: 'border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950 text-rose-900 dark:text-rose-200' },
-              ].map((item) => (
-                <span
-                  key={item.key}
-                  className={`inline-flex items-center gap-0.5 rounded-full pl-0.5 pr-1.5 py-0.5 text-[8px] font-bold border ${item.chip}`}
-                >
-                  <span className={`w-1.5 h-1.5 rounded-full ${item.dot} ring-1 ring-black/10 dark:ring-white/15`} />
-                  {item.label}
-                </span>
-              ))}
-            </div>
+            {heroInteractive ? (
+              <>
+                <p className="text-center text-[8px] font-medium text-stone-500 dark:text-stone-400 leading-snug px-1">
+                  Live preview cycles; hover for highlighted text, feedback, and suggested revision.
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-1">
+                  <span className="inline-flex items-center gap-0.5 rounded-full pl-0.5 pr-1.5 py-0.5 text-[8px] font-bold border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950 text-rose-900 dark:text-rose-200">
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500 ring-1 ring-black/10 dark:ring-white/15" />
+                    Flagged
+                  </span>
+                  <span className="inline-flex items-center gap-0.5 rounded-full pl-0.5 pr-1.5 py-0.5 text-[8px] font-bold border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-950 text-violet-900 dark:text-violet-200">
+                    <span className="w-1.5 h-1.5 rounded-full bg-violet-500 ring-1 ring-black/10 dark:ring-white/15" />
+                    Revision
+                  </span>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="text-center text-[8px] font-medium text-stone-500 dark:text-stone-400 flex items-center justify-center gap-1">
+                  <svg className={`w-2.5 h-2.5 ${vs.legendIcon}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                  </svg>
+                  Hover highlights for annotations
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-1">
+                  {[
+                    { key: 'strong', label: 'Strong', dot: 'bg-emerald-500', chip: 'border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950 text-emerald-900 dark:text-emerald-200' },
+                    { key: 'improve', label: 'Improve', dot: 'bg-amber-500', chip: 'border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950 text-amber-950 dark:text-amber-200' },
+                    { key: 'concern', label: 'Concern', dot: 'bg-rose-500', chip: 'border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950 text-rose-900 dark:text-rose-200' },
+                  ].map((item) => (
+                    <span
+                      key={item.key}
+                      className={`inline-flex items-center gap-0.5 rounded-full pl-0.5 pr-1.5 py-0.5 text-[8px] font-bold border ${item.chip}`}
+                    >
+                      <span className={`w-1.5 h-1.5 rounded-full ${item.dot} ring-1 ring-black/10 dark:ring-white/15`} />
+                      {item.label}
+                    </span>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         )}
 
@@ -478,7 +623,18 @@ export default function HeroEssayPreviewCard({
       </div>
 
       {hoveredAnnotation && tooltipPos && (
-        <AnnotationTooltipPortal annotation={hoveredAnnotation} position={tooltipPos} />
+        <AnnotationTooltipPortal
+          annotation={hoveredAnnotation}
+          position={tooltipPos}
+          suggestedRevisionBody={
+            heroInteractive &&
+            targetConcern &&
+            hoveredAnnotation.id === targetConcern.id &&
+            hoveredAnnotation.demoRevisedText
+              ? hoveredAnnotation.demoRevisedText
+              : undefined
+          }
+        />
       )}
     </div>
   );

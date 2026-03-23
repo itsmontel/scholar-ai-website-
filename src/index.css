@@ -42,6 +42,57 @@
   .animate-landing-hero-blob-delayed {
     animation: none !important;
   }
+  .landing-hero-grid-animate {
+    animation: none !important;
+    opacity: 0.28 !important;
+  }
+  html.dark .landing-hero-grid-animate {
+    opacity: 0.12 !important;
+  }
+  .animate-hero-card-enter,
+  .animate-hero-line-reveal,
+  .animate-hero-aside-left,
+  .animate-hero-aside-right,
+  .animate-hero-trust-pop,
+  .animate-hero-gradient-shift,
+  .animate-hero-badge-float,
+  .animate-hero-arrow-nudge,
+  .animate-hero-top-shimmer,
+  .animate-hero-stagger-1,
+  .animate-hero-stagger-2,
+  .animate-hero-stagger-3,
+  .animate-hero-stagger-4,
+  .animate-hero-stagger-5 {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    background-position: 50% 50% !important;
+  }
+}
+
+/* Landing hero: grid pattern fades in (respects dark opacity) */
+@keyframes landingHeroGridIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.28;
+  }
+}
+@keyframes landingHeroGridInDark {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.12;
+  }
+}
+.landing-hero-grid-animate {
+  opacity: 0;
+  animation: landingHeroGridIn 1.15s ease-out forwards;
+}
+html.dark .landing-hero-grid-animate {
+  animation-name: landingHeroGridInDark;
 }
 
 /* University-specific font styles */
@@ -432,4 +483,35 @@
 }
 .animate-pattern-symbol-pop {
   animation: pattern-symbol-pop 0.4s ease-out forwards;
+}
+
+/* Landing: interactive analysis walkthrough */
+@keyframes landing-highlight-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.28);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(139, 92, 246, 0.1);
+  }
+}
+
+@keyframes revision-pop {
+  0% {
+    transform: scale(0.992);
+    opacity: 0.92;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes landing-revision-fade {
+  0% {
+    opacity: 0.88;
+  }
+  100% {
+    opacity: 1;
+  }
 }

@@ -68,6 +68,20 @@ module.exports = {
         'notes-glow-pulse': 'notesGlowPulse 4s ease-in-out infinite',
         'landing-hero-blob': 'landingHeroBlob 18s ease-in-out infinite',
         'landing-hero-blob-delayed': 'landingHeroBlob 22s ease-in-out infinite reverse',
+        'hero-card-enter': 'heroCardEnter 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards',
+        'hero-line-reveal': 'heroLineReveal 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards',
+        'hero-aside-left': 'heroAsideLeft 0.95s cubic-bezier(0.22, 1, 0.36, 1) 0.12s forwards',
+        'hero-aside-right': 'heroAsideRight 0.95s cubic-bezier(0.22, 1, 0.36, 1) 0.12s forwards',
+        'hero-gradient-shift': 'heroGradientShift 8s ease-in-out infinite',
+        'hero-badge-float': 'heroBadgeFloat 5s ease-in-out infinite',
+        'hero-arrow-nudge': 'heroArrowNudge 2.8s ease-in-out infinite',
+        'hero-trust-pop': 'heroTrustPop 0.68s cubic-bezier(0.34, 1.56, 0.64, 1) 0.48s forwards',
+        'hero-top-shimmer': 'heroTopShimmer 4s ease-in-out infinite',
+        'hero-stagger-1': 'heroLineReveal 0.72s cubic-bezier(0.22, 1, 0.36, 1) 0.05s forwards',
+        'hero-stagger-2': 'heroLineReveal 0.72s cubic-bezier(0.22, 1, 0.36, 1) 0.14s forwards',
+        'hero-stagger-3': 'heroLineReveal 0.72s cubic-bezier(0.22, 1, 0.36, 1) 0.23s forwards',
+        'hero-stagger-4': 'heroLineReveal 0.72s cubic-bezier(0.22, 1, 0.36, 1) 0.32s forwards',
+        'hero-stagger-5': 'heroLineReveal 0.72s cubic-bezier(0.22, 1, 0.36, 1) 0.41s forwards',
       },
       keyframes: {
         fadeIn: {
@@ -171,6 +185,42 @@ module.exports = {
           '0%, 100%': { transform: 'translate(0, 0) scale(1)' },
           '33%': { transform: 'translate(2%, -3%) scale(1.03)' },
           '66%': { transform: 'translate(-2%, 2%) scale(0.98)' },
+        },
+        heroCardEnter: {
+          '0%': { opacity: '0', transform: 'translateY(32px) scale(0.96)' },
+          '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+        },
+        heroLineReveal: {
+          '0%': { opacity: '0', transform: 'translateY(18px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        heroAsideLeft: {
+          '0%': { opacity: '0', transform: 'translateX(-28px) translateY(12px)' },
+          '100%': { opacity: '1', transform: 'translateX(0) translateY(0)' },
+        },
+        heroAsideRight: {
+          '0%': { opacity: '0', transform: 'translateX(28px) translateY(12px)' },
+          '100%': { opacity: '1', transform: 'translateX(0) translateY(0)' },
+        },
+        heroGradientShift: {
+          '0%, 100%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+        },
+        heroBadgeFloat: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-3px)' },
+        },
+        heroArrowNudge: {
+          '0%, 100%': { transform: 'translateX(0)', opacity: '0.85' },
+          '50%': { transform: 'translateX(3px)', opacity: '1' },
+        },
+        heroTrustPop: {
+          '0%': { opacity: '0', transform: 'translateY(12px) scale(0.96)' },
+          '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+        },
+        heroTopShimmer: {
+          '0%, 100%': { opacity: '0.35' },
+          '50%': { opacity: '0.85' },
         },
       },
       backgroundImage: {

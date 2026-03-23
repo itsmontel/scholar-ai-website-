@@ -10,6 +10,11 @@ export interface DemoAnnotation {
   text: string;
   comment: string;
   suggestion: string;
+  /**
+   * Landing / interactive demo only: replacement text when the user clicks
+   * “Apply WriteScholar revision” (matches the real analysis page behavior).
+   */
+  demoRevisedText?: string;
 }
 
 export interface DemoRubricCategory {
@@ -109,6 +114,8 @@ export const DEMO_ANNOTATIONS: DemoAnnotation[] = [
     text: 'However, this all drastically changed when the Joker kidnapped him and Rachel Dawes resulting in the Death of Rachel and Harvey barely surviving the explosion.',
     comment: 'This sentence is too long and contains grammatical errors.',
     suggestion: 'Revise to: \'However, this changed drastically when the Joker kidnapped him and Rachel Dawes. Rachel died in the explosion, but Harvey barely survived, leaving him with physical and mental scars.\'',
+    demoRevisedText:
+      'However, this changed drastically when the Joker kidnapped him and Rachel Dawes. Rachel died in the explosion, but Harvey barely survived, leaving him with physical and mental scars.',
   },
   {
     id: 'improve-9',
@@ -116,6 +123,8 @@ export const DEMO_ANNOTATIONS: DemoAnnotation[] = [
     text: 'This made one side of his face burn, leaving him with physical and mental scars all because of Joker.',
     comment: 'This section could be enhanced with more specific detail or clearer development.',
     suggestion: 'Revise to: \'This left one side of his face burned, resulting in both physical and mental scars due to the Joker\'s actions.\'',
+    demoRevisedText:
+      'This left one side of his face burned, resulting in both physical and mental scars due to the Joker\'s actions.',
   },
   {
     id: 'improve-10',
@@ -152,6 +161,8 @@ export const DEMO_ANNOTATIONS: DemoAnnotation[] = [
     text: 'In Book II of The Republic, Glaucon uses the ring of Gyges to explain his own view of justice.',
     comment: 'This section may need attention to strengthen the argument and provide clearer explanations.',
     suggestion: 'Revise to: \'Glaucon\'s ring of Gyges illustrates his view that justice is merely a social contract when consequences are removed.\'',
+    demoRevisedText:
+      'Glaucon\'s ring of Gyges illustrates his view that justice is merely a social contract when consequences are removed.',
   },
   {
     id: 'concern-2',
@@ -377,6 +388,7 @@ export const DEMO_B_ANNOTATIONS: DemoAnnotation[] = [
     text: 'In today\'s society, the problem of racism has improved (compared to the past), but it still exists.',
     comment: 'This sentence is vague and could be more assertive in its stance on racism.',
     suggestion: 'Try: \'While racism has evolved since the past, it remains a pervasive issue in contemporary society.\'',
+    demoRevisedText: 'While racism has evolved since the past, it remains a pervasive issue in contemporary society.',
   },
   {
     id: 'b-improve-6',
@@ -391,6 +403,8 @@ export const DEMO_B_ANNOTATIONS: DemoAnnotation[] = [
     text: 'In the movie Get Out, race relations are influenced heavily by hegemony.',
     comment: 'This section could be enhanced with more specific detail or clearer development.',
     suggestion: 'Add: \'The film illustrates this through the Armitage estate, where Walter and Georgina\'s labor literally serves white authority.\'',
+    demoRevisedText:
+      'In Get Out, race relations are shaped by hegemony: the Armitage estate literalizes this, as Walter and Georgina\'s labor serves white authority.',
   },
   {
     id: 'b-improve-8',
@@ -462,6 +476,8 @@ export const DEMO_B_ANNOTATIONS: DemoAnnotation[] = [
     text: 'The movie starts with Chris deciding to go with his girlfriend Rose to meet her parents for a weekend for the first time.',
     comment: 'This is plot summary rather than analysis. Focus on what the scene reveals about race.',
     suggestion: 'Revise to: \'The opening establishes racial anxiety through the couple\'s interracial relationship and the Armitage family\'s performative hospitality, which masks a far darker agenda.\'',
+    demoRevisedText:
+      'The opening establishes racial anxiety through the couple\'s interracial relationship and the Armitage family\'s performative hospitality, which masks a far darker agenda.',
   },
   {
     id: 'b-concern-2',

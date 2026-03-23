@@ -1,4 +1,5 @@
 import { DEMO_B_RUBRIC } from '../../data/landingPageDemoAnalysis';
+import LandingScrollReveal from './LandingScrollReveal';
 
 /** Slightly higher rubric lines for “after” mock (same categories as B demo) */
 const AFTER_RUBRIC_HIGHLIGHTS: { name: string; score: number; maxScore: number; feedback: string }[] = [
@@ -22,8 +23,8 @@ function AnalysisReportMock({
     <div
       className={`rounded-2xl border overflow-hidden shadow-lg ring-1 text-left ${
         isBefore
-          ? 'border-amber-200/90 dark:border-amber-900/50 bg-white dark:bg-stone-900/90 ring-amber-100/80 dark:ring-amber-950/30'
-          : 'border-emerald-200/90 dark:border-emerald-900/50 bg-white dark:bg-stone-900/90 ring-emerald-100/80 dark:ring-emerald-950/30'
+          ? 'border-violet-200/90 dark:border-violet-800/50 bg-white dark:bg-stone-900/90 ring-violet-100/80 dark:ring-violet-950/30'
+          : 'border-violet-400/75 dark:border-violet-600/45 bg-white dark:bg-stone-900/90 ring-violet-200/80 dark:ring-violet-950/30'
       }`}
     >
       <div
@@ -35,14 +36,14 @@ function AnalysisReportMock({
       >
         <span
           className={`text-xs font-bold uppercase tracking-[0.12em] ${
-            isBefore ? 'text-amber-900 dark:text-amber-200' : 'text-emerald-900 dark:text-emerald-200'
+            isBefore ? 'text-violet-900 dark:text-violet-200' : 'text-violet-900 dark:text-violet-200'
           }`}
         >
           {isBefore ? 'Before' : 'After'}
         </span>
         <span
           className={`text-sm font-semibold tabular-nums ${
-            isBefore ? 'text-amber-800 dark:text-amber-300' : 'text-emerald-800 dark:text-emerald-300'
+            isBefore ? 'text-violet-800 dark:text-violet-300' : 'text-violet-900 dark:text-violet-200'
           }`}
         >
           {isBefore ? '82/100 · Grade B' : '90/100 · Grade A'}
@@ -54,13 +55,13 @@ function AnalysisReportMock({
           <p className="text-sm leading-relaxed text-stone-800 dark:text-stone-200">
             {isBefore ? (
               <>
-                This draft shows you understand <span className="font-medium text-amber-800 dark:text-amber-300">Get Out</span> in relation to race and power, and you bring in serious sources (Bonilla-Silva, Sue et al.). The grade sits in the B range because the{' '}
-                <span className="font-medium text-amber-800 dark:text-amber-300">thesis wanders</span>, several paragraphs read as plot recap, and{' '}
-                <span className="font-medium text-amber-800 dark:text-amber-300">MLA citations are inconsistent</span>. Addressing those three areas typically moves a paper like this into the A band.
+                This draft shows you understand <span className="font-medium text-violet-800 dark:text-violet-300">Get Out</span> in relation to race and power, and you bring in serious sources (Bonilla-Silva, Sue et al.). The grade sits in the B range because the{' '}
+                <span className="font-medium text-violet-800 dark:text-violet-300">thesis wanders</span>, several paragraphs read as plot recap, and{' '}
+                <span className="font-medium text-violet-800 dark:text-violet-300">MLA citations are inconsistent</span>. Addressing those three areas typically moves a paper like this into the A band.
               </>
             ) : (
               <>
-                After revision, the essay opens with a <span className="font-medium text-emerald-800 dark:text-emerald-300">single, debatable claim</span>, keeps analysis ahead of summary, and pairs each major scene with one scholarly anchor. Citations are cleaned up, and the conclusion tightens the “so what” without repeating the introduction. This is representative of the depth you get in a full WriteScholar report, not a single paragraph of generic praise.
+                After revision, the essay opens with a <span className="font-medium text-violet-800 dark:text-violet-300">single, debatable claim</span>, keeps analysis ahead of summary, and pairs each major scene with one scholarly anchor. Citations are cleaned up, and the conclusion tightens the “so what” without repeating the introduction. This is representative of the depth you get in a full WriteScholar report, not a single paragraph of generic praise.
               </>
             )}
           </p>
@@ -98,8 +99,8 @@ function AnalysisReportMock({
           <span
             className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold border ${
               isBefore
-                ? 'bg-amber-100/90 dark:bg-amber-950/50 text-amber-950 dark:text-amber-200 border-amber-200/80 dark:border-amber-800/50'
-                : 'bg-emerald-100/90 dark:bg-emerald-950/50 text-emerald-950 dark:text-emerald-200 border-emerald-200/80 dark:border-emerald-800/50'
+                ? 'bg-violet-100/90 dark:bg-violet-950/50 text-violet-950 dark:text-violet-200 border-violet-200/80 dark:border-violet-800/50'
+                : 'bg-violet-100/90 dark:bg-violet-950/50 text-violet-950 dark:text-violet-200 border-violet-300/80 dark:border-violet-700/50'
             }`}
           >
             Clarity: {isBefore ? 'Needs work' : 'Strong'}
@@ -260,8 +261,9 @@ export default function LandingBeforeAfterSection() {
       />
 
       <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <LandingScrollReveal>
         <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
-          <div className="mx-auto mb-5 h-0.5 w-16 rounded-full bg-gradient-to-r from-amber-400 via-violet-500 to-emerald-500 opacity-90" aria-hidden />
+          <div className="mx-auto mb-5 h-0.5 w-16 rounded-full bg-gradient-to-r from-violet-400 via-violet-500 to-violet-600 opacity-90" aria-hidden />
           <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide uppercase text-violet-800 dark:text-violet-200 bg-white/90 dark:bg-violet-950/50 border border-violet-200/90 dark:border-violet-800/50 shadow-sm mb-5">
             Before &amp; after
           </span>
@@ -308,6 +310,7 @@ export default function LandingBeforeAfterSection() {
             <SupplementalTextMock kind="inline" />
           </div>
         </div>
+        </LandingScrollReveal>
       </div>
     </section>
   );
