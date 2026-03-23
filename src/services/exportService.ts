@@ -2,6 +2,21 @@ import jsPDF from 'jspdf';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx';
 import { saveAs } from 'file-saver';
 
+/** Strips characters illegal in XML 1.0 that cause docx (browser) generation to throw. */
+function sanitizeForDocxText(input: unknown): string {
+  const s = input == null ? '' : typeof input === 'string' ? input : String(input);
+  return s.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]/g, '');
+}
+
+function cleanAnalysisMarkdown(raw: string): string {
+  return sanitizeForDocxText(raw)
+    .replace(/#{1,6}\s*/g, '')
+    .replace(/\*{1,2}([^*]+)\*{1,2}/g, '$1')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .trim();
+}
+
 export interface AnalysisData {
   documentTitle: string;
   documentContent: string;
@@ -66,13 +81,7 @@ export class ExportService {
       addText('Comprehensive Analysis', 16, true);
       yPosition += 5;
       
-      // Clean the analysis text
-      const cleanAnalysis = analysisData.analysisResult
-        .replace(/#{1,6}\s*/g, '')
-        .replace(/\*{1,2}([^*]+)\*{1,2}/g, '$1')
-        .replace(/`([^`]+)`/g, '$1')
-        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-        .trim();
+      const cleanAnalysis = cleanAnalysisMarkdown(analysisData.analysisResult);
 
       addText(cleanAnalysis, 11);
 
@@ -133,94 +142,92 @@ export class ExportService {
    */
   static async exportToWord(analysisData: AnalysisData): Promise<void> {
     try {
+      const title = sanitizeForDocxText(analysisData.documentTitle);
+      const analysisType = sanitizeForDocxText(analysisData.analysisType);
+      const citationStyle = sanitizeForDocxText(analysisData.citationStyle);
+      const generated = sanitizeForDocxText(
+        new Date(analysisData.createdAt).toLocaleDateString()
+      );
+
+      const analysisBody = cleanAnalysisMarkdown(analysisData.analysisResult);
+      const analysisParagraphs =
+        analysisBody.length > 0
+          ? analysisBody.split(/\r?\n/).map(
+              (line) =>
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: line.length ? line : ' ',
+                      size: 20,
+                    }),
+                  ],
+                })
+            )
+          : [
+              new Paragraph({
+                children: [new TextRun({ text: ' ', size: 20 })],
+              }),
+            ];
+
       const doc = new Document({
-        sections: [{
-          properties: {},
-          children: [
-            // Title
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: "Analysis Report",
-                  bold: true,
-                  size: 32,
-                }),
-              ],
-              heading: HeadingLevel.TITLE,
-              alignment: AlignmentType.CENTER,
-            }),
-
-            // Document info
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: `Document: ${analysisData.documentTitle}`,
-                  bold: true,
-                  size: 24,
-                }),
-              ],
-              heading: HeadingLevel.HEADING_1,
-            }),
-
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: `Analysis Type: ${analysisData.analysisType}`,
-                  size: 20,
-                }),
-              ],
-            }),
-
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: `Citation Style: ${analysisData.citationStyle}`,
-                  size: 20,
-                }),
-              ],
-            }),
-
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: `Generated: ${new Date(analysisData.createdAt).toLocaleDateString()}`,
-                  size: 20,
-                }),
-              ],
-            }),
-
-            // Analysis Results
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: "Comprehensive Analysis",
-                  bold: true,
-                  size: 28,
-                }),
-              ],
-              heading: HeadingLevel.HEADING_1,
-            }),
-
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: analysisData.analysisResult
-                    .replace(/#{1,6}\s*/g, '')
-                    .replace(/\*{1,2}([^*]+)\*{1,2}/g, '$1')
-                    .replace(/`([^`]+)`/g, '$1')
-                    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-                    .trim(),
-                  size: 20,
-                }),
-              ],
-            }),
-
-            // Annotations
-            ...(analysisData.annotations.length > 0 ? [
+        sections: [
+          {
+            properties: {},
+            children: [
               new Paragraph({
                 children: [
                   new TextRun({
-                    text: "Annotations Summary",
+                    text: 'Analysis Report',
+                    bold: true,
+                    size: 32,
+                  }),
+                ],
+                heading: HeadingLevel.TITLE,
+                alignment: AlignmentType.CENTER,
+              }),
+
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: `Document: ${title}`,
+                    bold: true,
+                    size: 24,
+                  }),
+                ],
+                heading: HeadingLevel.HEADING_1,
+              }),
+
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: `Analysis Type: ${analysisType}`,
+                    size: 20,
+                  }),
+                ],
+              }),
+
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: `Citation Style: ${citationStyle}`,
+                    size: 20,
+                  }),
+                ],
+              }),
+
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: `Generated: ${generated}`,
+                    size: 20,
+                  }),
+                ],
+              }),
+
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: 'Comprehensive Analysis',
                     bold: true,
                     size: 28,
                   }),
@@ -228,19 +235,32 @@ export class ExportService {
                 heading: HeadingLevel.HEADING_1,
               }),
 
-              // Group annotations by type
-              ...this.createAnnotationSections(analysisData.annotations),
-            ] : []),
-          ],
-        }],
+              ...analysisParagraphs,
+
+              ...(analysisData.annotations.length > 0
+                ? [
+                    new Paragraph({
+                      children: [
+                        new TextRun({
+                          text: 'Annotations Summary',
+                          bold: true,
+                          size: 28,
+                        }),
+                      ],
+                      heading: HeadingLevel.HEADING_1,
+                    }),
+                    ...this.createAnnotationSections(analysisData.annotations),
+                  ]
+                : []),
+            ],
+          },
+        ],
       });
 
-      // Generate and save the document
-      const buffer = await Packer.toBuffer(doc);
-      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-      const fileName = `analysis-report-${analysisData.documentTitle.replace(/[^a-zA-Z0-9]/g, '-')}-${Date.now()}.docx`;
+      const blob = await Packer.toBlob(doc);
+      const safeSlug = sanitizeForDocxText(analysisData.documentTitle).replace(/[^a-zA-Z0-9]/g, '-') || 'document';
+      const fileName = `analysis-report-${safeSlug}-${Date.now()}.docx`;
       saveAs(blob, fileName);
-
     } catch (error) {
       console.error('Error generating Word document:', error);
       throw new Error('Failed to generate Word report');
@@ -276,7 +296,7 @@ export class ExportService {
           new Paragraph({
             children: [
               new TextRun({
-                text: `${index + 1}. ${annotation.text}`,
+                text: `${index + 1}. ${sanitizeForDocxText(annotation.text)}`,
                 bold: true,
                 size: 20,
               }),
@@ -285,7 +305,7 @@ export class ExportService {
           new Paragraph({
             children: [
               new TextRun({
-                text: annotation.comment,
+                text: sanitizeForDocxText(annotation.comment),
                 size: 18,
               }),
             ],
@@ -313,7 +333,7 @@ export class ExportService {
           new Paragraph({
             children: [
               new TextRun({
-                text: `${index + 1}. ${annotation.text}`,
+                text: `${index + 1}. ${sanitizeForDocxText(annotation.text)}`,
                 bold: true,
                 size: 20,
               }),
@@ -322,7 +342,7 @@ export class ExportService {
           new Paragraph({
             children: [
               new TextRun({
-                text: annotation.comment,
+                text: sanitizeForDocxText(annotation.comment),
                 size: 18,
               }),
             ],
@@ -350,7 +370,7 @@ export class ExportService {
           new Paragraph({
             children: [
               new TextRun({
-                text: `${index + 1}. ${annotation.text}`,
+                text: `${index + 1}. ${sanitizeForDocxText(annotation.text)}`,
                 bold: true,
                 size: 20,
               }),
@@ -359,7 +379,7 @@ export class ExportService {
           new Paragraph({
             children: [
               new TextRun({
-                text: annotation.comment,
+                text: sanitizeForDocxText(annotation.comment),
                 size: 18,
               }),
             ],
