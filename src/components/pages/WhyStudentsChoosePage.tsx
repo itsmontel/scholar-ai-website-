@@ -3,6 +3,7 @@ import Header from '../common/Header';
 import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
 import ScholarMascot from '../common/ScholarMascot';
+import LandingSectionLayers from '../common/LandingSectionLayers';
 
 interface WhyStudentsChoosePageProps {
   onNavigate: (page: string) => void;
@@ -16,20 +17,32 @@ const WhyStudentsChoosePage: React.FC<WhyStudentsChoosePageProps> = ({ onNavigat
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="why-students-choose" />
 
-      {/* Hero */}
-      <section className="py-16 sm:py-20 border-b border-stone-200/60 dark:border-stone-700/60">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+      <section
+        className="relative py-16 sm:py-24 overflow-hidden border-b border-stone-200/90 dark:border-stone-800"
+        aria-labelledby="why-students-heading"
+      >
+        <LandingSectionLayers />
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4 leading-tight">
-              Why Students Choose <span className="bg-violet-600 hover:bg-violet-500 bg-clip-text text-transparent">WriteScholar</span>
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">
+              Compare
+            </p>
+            <div className="mx-auto mb-4 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85" aria-hidden />
+            <h1
+              id="why-students-heading"
+              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-semibold text-stone-900 dark:text-stone-100 mb-4 tracking-tight leading-tight"
+              style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+            >
+              Why students choose WriteScholar
             </h1>
-            <p className="text-lg text-stone-500 dark:text-stone-400">
+            <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed">
               See how WriteScholar compares to other popular writing tools
             </p>
-            <p className="mt-3 text-sm text-stone-500 dark:text-stone-400">
+            <p className="mt-4 text-sm text-stone-500 dark:text-stone-400">
               <button
+                type="button"
                 onClick={() => onNavigate('study-tools-comparison')}
-                className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-semibold underline underline-offset-2"
+                className="text-violet-700 dark:text-violet-400 hover:text-violet-800 dark:hover:text-violet-300 font-semibold underline underline-offset-2"
               >
                 Compare study tools: WriteScholar vs Quizlet vs Knowt →
               </button>
@@ -38,9 +51,9 @@ const WhyStudentsChoosePage: React.FC<WhyStudentsChoosePageProps> = ({ onNavigat
         </div>
       </section>
 
-      {/* Comparison Table */}
-      <section className="py-20 sm:py-24 bg-white dark:bg-stone-900/50">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative py-16 sm:py-24 overflow-hidden border-t border-stone-200/90 dark:border-stone-800">
+        <LandingSectionLayers variant="faq" />
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative text-center mb-12">
             {/* Mascot pointing at chart */}
             <div className="hidden lg:block absolute -left-[6rem] xl:-left-[7rem] top-0 -translate-y-[80%] w-28 h-36 flex items-center justify-center">
@@ -48,7 +61,7 @@ const WhyStudentsChoosePage: React.FC<WhyStudentsChoosePageProps> = ({ onNavigat
             </div>
           </div>
 
-          <div className="bg-white dark:bg-stone-800 rounded-2xl shadow-lg border border-stone-200 dark:border-stone-700 overflow-hidden">
+          <div className="bg-white/90 dark:bg-stone-900/50 rounded-2xl shadow-[0_12px_40px_-12px_rgba(15,23,42,0.1)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.4)] border border-stone-200/90 dark:border-stone-700/90 overflow-hidden ring-1 ring-white/50 dark:ring-white/5 backdrop-blur-sm">
             <div className="grid grid-cols-4 bg-stone-50 dark:bg-stone-800/50 border-b border-stone-200 dark:border-stone-700">
               <div className="p-4 sm:p-6 font-semibold text-stone-700 dark:text-stone-300">Feature</div>
               <div className="p-4 sm:p-6 text-center">
@@ -136,17 +149,34 @@ const WhyStudentsChoosePage: React.FC<WhyStudentsChoosePageProps> = ({ onNavigat
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-16 sm:py-20">
-        <div className="max-w-2xl mx-auto px-4 text-center">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">Ready to try WriteScholar?</h2>
-          <p className="text-stone-500 dark:text-stone-400 mb-6">Join thousands of students improving their academic writing.</p>
-          <button
-            onClick={() => onNavigate('signup')}
-            className="px-8 py-4 bg-violet-600 hover:bg-violet-500 text-white font-bold rounded-2xl transition-all text-lg shadow-lg shadow-violet-500/25 hover:shadow-xl"
-          >
-            Try Free
-          </button>
+      <section className="relative py-16 sm:py-24 overflow-hidden border-t border-stone-200/90 dark:border-stone-800">
+        <LandingSectionLayers variant="cta" />
+        <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center rounded-2xl border border-stone-200/90 dark:border-stone-800/90 bg-white/75 dark:bg-stone-900/45 px-6 py-10 sm:px-10 sm:py-12 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.12)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.45)] backdrop-blur-[8px] ring-1 ring-white/50 dark:ring-white/5">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">
+              Get started
+            </p>
+            <div className="mx-auto mb-5 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85" aria-hidden />
+            <h2
+              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-semibold text-stone-900 dark:text-stone-50 mb-4 tracking-tight leading-[1.15]"
+              style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+            >
+              Ready to try WriteScholar?
+            </h2>
+            <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 mb-8 leading-relaxed">
+              Join thousands of students improving their academic writing.
+            </p>
+            <button
+              type="button"
+              onClick={() => onNavigate('signup')}
+              className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white font-semibold rounded-xl shadow-md shadow-violet-900/15 dark:shadow-violet-950/40 ring-1 ring-violet-900/10 dark:ring-white/10 transition-all duration-200 hover:shadow-lg text-base"
+            >
+              Try free
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </button>
+          </div>
         </div>
       </section>
 

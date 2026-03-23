@@ -248,7 +248,7 @@ export default function LandingBeforeAfterSection() {
   return (
     <section
       id="before-after"
-      className="relative w-full -mx-4 sm:-mx-6 lg:-mx-8 scroll-mt-24 border-t border-b border-stone-200/80 dark:border-stone-700/80 bg-gradient-to-b from-[#f8fafc] via-[#fafafa] to-[#f4f4f5] dark:from-stone-950 dark:via-stone-950 dark:to-stone-950 py-14 sm:py-24 overflow-hidden"
+      className="relative w-full min-w-0 -mx-4 sm:-mx-6 lg:-mx-8 scroll-mt-24 border-t border-b border-stone-200/80 dark:border-stone-700/80 bg-gradient-to-b from-[#f8fafc] via-[#fafafa] to-[#f4f4f5] dark:from-stone-950 dark:via-stone-950 dark:to-stone-950 py-12 sm:py-24 overflow-x-clip overflow-hidden"
       aria-labelledby="before-after-heading"
     >
       <div

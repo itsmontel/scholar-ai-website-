@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { FeatureTickRow } from '../common/FeatureTickRow';
 import InteractiveCitationsDemo from './InteractiveCitationsDemo';
 import LandingCitationResultsPreview from './LandingCitationResultsPreview';
@@ -15,11 +15,37 @@ const SUGGESTED_TOPICS = [
 
 const TYPE_MS = 20;
 const POST_TYPE_MS = 420;
-const READY_TO_SEARCH_MS = 420;
 const SEARCH_MS = 2000;
 const LOOP_PAUSE_MS = 4800;
+/** Time for the fake pointer to travel between targets (matches CSS transition). */
+const MOVE_CURSOR_MS = 540;
+const CLICK_CURSOR_MS = 200;
+/** Brief pause before the pointer moves from the corner (lets layout settle). */
+const CURSOR_INTRO_MS = 120;
 
-type DemoPhase = 'idle' | 'typing' | 'ready' | 'searching' | 'done';
+type DemoPhase =
+  | 'idle'
+  | 'cursor-to-input'
+  | 'click-input'
+  | 'typing'
+  | 'cursor-to-button'
+  | 'click-button'
+  | 'searching'
+  | 'done';
+
+type CursorPct = { x: number; y: number };
+
+const DEFAULT_ANCHORS: {
+  start: CursorPct;
+  input: CursorPct;
+  inputRest: CursorPct;
+  button: CursorPct;
+} = {
+  start: { x: 88, y: 12 },
+  input: { x: 48, y: 34 },
+  inputRest: { x: 58, y: 46 },
+  button: { x: 50, y: 88 },
+};
 
 interface LandingCitationsShowcaseProps {
   onNavigate: (page: string) => void;
@@ -27,6 +53,10 @@ interface LandingCitationsShowcaseProps {
 
 export default function LandingCitationsShowcase({ onNavigate }: LandingCitationsShowcaseProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const demoStageRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const findSourcesBtnRef = useRef<HTMLButtonElement>(null);
+  const anchorsRef = useRef(DEFAULT_ANCHORS);
   const inViewRef = useRef(false);
   const typeIntervalRef = useRef<number | null>(null);
   const timersRef = useRef<number[]>([]);
@@ -39,6 +69,39 @@ export default function LandingCitationsShowcase({ onNavigate }: LandingCitation
 
   const [phase, setPhase] = useState<DemoPhase>('idle');
   const [typed, setTyped] = useState('');
+  const [cursorPct, setCursorPct] = useState<CursorPct>(DEFAULT_ANCHORS.start);
+  const [cursorClicking, setCursorClicking] = useState(false);
+  const [showCursor, setShowCursor] = useState(false);
+
+  const measureCursorAnchors = useCallback(() => {
+    const stage = demoStageRef.current;
+    const ta = textareaRef.current;
+    const btn = findSourcesBtnRef.current;
+    if (!stage || !ta || !btn) return;
+    const s = stage.getBoundingClientRect();
+    if (s.width < 32 || s.height < 32) return;
+    const taR = ta.getBoundingClientRect();
+    const bR = btn.getBoundingClientRect();
+    const pct = (cx: number, cy: number): CursorPct => ({
+      x: ((cx - s.left) / s.width) * 100,
+      y: ((cy - s.top) / s.height) * 100,
+    });
+    anchorsRef.current = {
+      start: pct(s.right - 36, s.top + 28),
+      input: pct(taR.left + taR.width * 0.22, taR.top + taR.height * 0.32),
+      inputRest: pct(taR.left + taR.width * 0.78, taR.top + taR.height * 0.58),
+      button: pct(bR.left + bR.width / 2, bR.top + bR.height / 2),
+    };
+  }, []);
+
+  useLayoutEffect(() => {
+    measureCursorAnchors();
+    const stage = demoStageRef.current;
+    if (!stage || typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(() => measureCursorAnchors());
+    ro.observe(stage);
+    return () => ro.disconnect();
+  }, [measureCursorAnchors]);
 
   const pushTimer = (id: number) => {
     timersRef.current.push(id);
@@ -86,36 +149,80 @@ export default function LandingCitationsShowcase({ onNavigate }: LandingCitation
     pushTimer(id);
   }, [isActive]);
 
+  /** After typing finishes: pause, move pointer to Find Sources, click, then search. */
+  const beginSearchAfterTyping = useCallback(() => {
+    measureCursorAnchors();
+    pushTimer(
+      window.setTimeout(() => {
+        if (!isActive()) return;
+        setShowCursor(true);
+        setCursorPct(anchorsRef.current.inputRest);
+        setPhase('cursor-to-button');
+        phaseRef.current = 'cursor-to-button';
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            setCursorPct(anchorsRef.current.button);
+          });
+        });
+        pushTimer(
+          window.setTimeout(() => {
+            if (!isActive()) return;
+            setPhase('click-button');
+            phaseRef.current = 'click-button';
+            setCursorClicking(true);
+            pushTimer(
+              window.setTimeout(() => {
+                if (!isActive()) return;
+                setCursorClicking(false);
+                setShowCursor(false);
+                setPhase('searching');
+                phaseRef.current = 'searching';
+                searchingStartedAtRef.current = Date.now();
+                pushTimer(
+                  window.setTimeout(() => {
+                    if (!isActive()) return;
+                    searchingStartedAtRef.current = null;
+                    setPhase('done');
+                    phaseRef.current = 'done';
+                    scheduleLoopRestart();
+                  }, SEARCH_MS)
+                );
+              }, CLICK_CURSOR_MS)
+            );
+          }, MOVE_CURSOR_MS)
+        );
+      }, POST_TYPE_MS)
+    );
+  }, [isActive, measureCursorAnchors, scheduleLoopRestart]);
+
   const finishTypingAndContinue = useCallback(() => {
     clearTimers();
     clearTypeInterval();
     setTyped(DEMO_QUERY);
     typedRef.current = DEMO_QUERY;
-    pushTimer(
-      window.setTimeout(() => {
-        if (!isActive()) return;
-        setPhase('ready');
-        phaseRef.current = 'ready';
-        pushTimer(
-          window.setTimeout(() => {
-            if (!isActive()) return;
-            setPhase('searching');
-            phaseRef.current = 'searching';
-            searchingStartedAtRef.current = Date.now();
-            pushTimer(
-              window.setTimeout(() => {
-                if (!isActive()) return;
-                searchingStartedAtRef.current = null;
-                setPhase('done');
-                phaseRef.current = 'done';
-                scheduleLoopRestart();
-              }, SEARCH_MS)
-            );
-          }, READY_TO_SEARCH_MS)
-        );
-      }, POST_TYPE_MS)
-    );
-  }, [isActive, scheduleLoopRestart]);
+    if (reduceMotionRef.current) {
+      setShowCursor(false);
+      pushTimer(
+        window.setTimeout(() => {
+          if (!isActive()) return;
+          setPhase('searching');
+          phaseRef.current = 'searching';
+          searchingStartedAtRef.current = Date.now();
+          pushTimer(
+            window.setTimeout(() => {
+              if (!isActive()) return;
+              searchingStartedAtRef.current = null;
+              setPhase('done');
+              phaseRef.current = 'done';
+              scheduleLoopRestart();
+            }, SEARCH_MS)
+          );
+        }, 300)
+      );
+      return;
+    }
+    beginSearchAfterTyping();
+  }, [beginSearchAfterTyping, isActive, scheduleLoopRestart]);
 
   const runDemo = useCallback(() => {
     if (!isActive()) return;
@@ -124,14 +231,12 @@ export default function LandingCitationsShowcase({ onNavigate }: LandingCitation
     searchingStartedAtRef.current = null;
     setTyped('');
     typedRef.current = '';
-    setPhase('typing');
-    phaseRef.current = 'typing';
+    measureCursorAnchors();
 
     if (reduceMotionRef.current) {
+      setShowCursor(false);
       setTyped(DEMO_QUERY);
       typedRef.current = DEMO_QUERY;
-      setPhase('ready');
-      phaseRef.current = 'ready';
       pushTimer(
         window.setTimeout(() => {
           if (!isActive()) return;
@@ -152,43 +257,50 @@ export default function LandingCitationsShowcase({ onNavigate }: LandingCitation
       return;
     }
 
-    const chars = [...DEMO_QUERY];
-    let i = 0;
-    typeIntervalRef.current = window.setInterval(() => {
-      if (!isActive()) return;
-      i += 1;
-      const next = chars.slice(0, i).join('');
-      setTyped(next);
-      typedRef.current = next;
-      if (i >= chars.length) {
-        clearTypeInterval();
+    setShowCursor(true);
+    setCursorClicking(false);
+    setCursorPct(anchorsRef.current.start);
+    setPhase('cursor-to-input');
+    phaseRef.current = 'cursor-to-input';
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setCursorPct(anchorsRef.current.input);
+      });
+    });
+
+    pushTimer(
+      window.setTimeout(() => {
+        if (!isActive()) return;
+        setPhase('click-input');
+        phaseRef.current = 'click-input';
+        setCursorClicking(true);
         pushTimer(
           window.setTimeout(() => {
             if (!isActive()) return;
-            setPhase('ready');
-            phaseRef.current = 'ready';
-            pushTimer(
-              window.setTimeout(() => {
-                if (!isActive()) return;
-                setPhase('searching');
-                phaseRef.current = 'searching';
-                searchingStartedAtRef.current = Date.now();
-                pushTimer(
-                  window.setTimeout(() => {
-                    if (!isActive()) return;
-                    searchingStartedAtRef.current = null;
-                    setPhase('done');
-                    phaseRef.current = 'done';
-                    scheduleLoopRestart();
-                  }, SEARCH_MS)
-                );
-              }, READY_TO_SEARCH_MS)
-            );
-          }, POST_TYPE_MS)
+            setCursorClicking(false);
+            setPhase('typing');
+            phaseRef.current = 'typing';
+            setCursorPct(anchorsRef.current.inputRest);
+
+            const chars = [...DEMO_QUERY];
+            let i = 0;
+            typeIntervalRef.current = window.setInterval(() => {
+              if (!isActive()) return;
+              i += 1;
+              const next = chars.slice(0, i).join('');
+              setTyped(next);
+              typedRef.current = next;
+              if (i >= chars.length) {
+                clearTypeInterval();
+                beginSearchAfterTyping();
+              }
+            }, TYPE_MS);
+          }, CLICK_CURSOR_MS)
         );
-      }
-    }, TYPE_MS);
-  }, [isActive, scheduleLoopRestart]);
+      }, CURSOR_INTRO_MS + MOVE_CURSOR_MS)
+    );
+  }, [isActive, measureCursorAnchors, beginSearchAfterTyping, scheduleLoopRestart]);
 
   const runDemoRef = useRef(runDemo);
   runDemoRef.current = runDemo;
@@ -199,6 +311,11 @@ export default function LandingCitationsShowcase({ onNavigate }: LandingCitation
     const t = typedRef.current;
 
     if (p === 'idle') {
+      runDemo();
+      return;
+    }
+
+    if (p === 'cursor-to-input' || p === 'click-input') {
       runDemo();
       return;
     }
@@ -223,39 +340,63 @@ export default function LandingCitationsShowcase({ onNavigate }: LandingCitation
         typedRef.current = next;
         if (i >= chars.length) {
           clearTypeInterval();
-          pushTimer(
-            window.setTimeout(() => {
-              if (!isActive()) return;
-              setPhase('ready');
-              phaseRef.current = 'ready';
-              pushTimer(
-                window.setTimeout(() => {
-                  if (!isActive()) return;
-                  setPhase('searching');
-                  phaseRef.current = 'searching';
-                  searchingStartedAtRef.current = Date.now();
-                  pushTimer(
-                    window.setTimeout(() => {
-                      if (!isActive()) return;
-                      searchingStartedAtRef.current = null;
-                      setPhase('done');
-                      phaseRef.current = 'done';
-                      scheduleLoopRestart();
-                    }, SEARCH_MS)
-                  );
-                }, READY_TO_SEARCH_MS)
-              );
-            }, POST_TYPE_MS)
-          );
+          beginSearchAfterTyping();
         }
       }, TYPE_MS);
       return;
     }
 
-    if (p === 'ready') {
+    if (p === 'cursor-to-button') {
+      measureCursorAnchors();
+      setShowCursor(true);
+      setTyped(DEMO_QUERY);
+      typedRef.current = DEMO_QUERY;
+      setCursorPct(anchorsRef.current.inputRest);
+      setPhase('cursor-to-button');
+      phaseRef.current = 'cursor-to-button';
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setCursorPct(anchorsRef.current.button);
+        });
+      });
       pushTimer(
         window.setTimeout(() => {
           if (!isActive()) return;
+          setPhase('click-button');
+          phaseRef.current = 'click-button';
+          setCursorClicking(true);
+          pushTimer(
+            window.setTimeout(() => {
+              if (!isActive()) return;
+              setCursorClicking(false);
+              setShowCursor(false);
+              setPhase('searching');
+              phaseRef.current = 'searching';
+              searchingStartedAtRef.current = Date.now();
+              pushTimer(
+                window.setTimeout(() => {
+                  if (!isActive()) return;
+                  searchingStartedAtRef.current = null;
+                  setPhase('done');
+                  phaseRef.current = 'done';
+                  scheduleLoopRestart();
+                }, SEARCH_MS)
+              );
+            }, CLICK_CURSOR_MS)
+          );
+        }, MOVE_CURSOR_MS)
+      );
+      return;
+    }
+
+    if (p === 'click-button') {
+      setShowCursor(true);
+      setCursorClicking(true);
+      pushTimer(
+        window.setTimeout(() => {
+          if (!isActive()) return;
+          setCursorClicking(false);
+          setShowCursor(false);
           setPhase('searching');
           phaseRef.current = 'searching';
           searchingStartedAtRef.current = Date.now();
@@ -268,7 +409,7 @@ export default function LandingCitationsShowcase({ onNavigate }: LandingCitation
               scheduleLoopRestart();
             }, SEARCH_MS)
           );
-        }, READY_TO_SEARCH_MS)
+        }, CLICK_CURSOR_MS)
       );
       return;
     }
@@ -292,7 +433,7 @@ export default function LandingCitationsShowcase({ onNavigate }: LandingCitation
     if (p === 'done') {
       scheduleLoopRestart();
     }
-  }, [finishTypingAndContinue, isActive, runDemo, scheduleLoopRestart]);
+  }, [beginSearchAfterTyping, finishTypingAndContinue, isActive, measureCursorAnchors, runDemo, scheduleLoopRestart]);
 
   const pauseDemo = useCallback(() => {
     clearTimers();
@@ -347,14 +488,28 @@ export default function LandingCitationsShowcase({ onNavigate }: LandingCitation
     setTyped('');
     typedRef.current = '';
     searchingStartedAtRef.current = null;
+    setShowCursor(false);
+    setCursorClicking(false);
+    setCursorPct(anchorsRef.current.start);
     pushTimer(window.setTimeout(() => runDemo(), 80));
   };
 
   const showPanels = phase === 'done';
   const isSearching = phase === 'searching';
   const isTyping = phase === 'typing';
-  const buttonDisabled = isTyping || typed.trim().length === 0 || isSearching;
-  const buttonFilled = typed.trim().length > 0 && !isTyping && !isSearching;
+  const isFieldActive =
+    phase === 'cursor-to-input' || phase === 'click-input' || phase === 'typing';
+  const buttonDisabled =
+    phase === 'typing' ||
+    phase === 'cursor-to-input' ||
+    phase === 'click-input' ||
+    phase === 'cursor-to-button' ||
+    phase === 'click-button' ||
+    typed.trim().length === 0 ||
+    phase === 'searching';
+  const buttonFilled =
+    typed.trim().length > 0 &&
+    (phase === 'cursor-to-button' || phase === 'click-button' || phase === 'searching');
 
   return (
     <section
@@ -383,11 +538,14 @@ export default function LandingCitationsShowcase({ onNavigate }: LandingCitation
             Citation finder
           </p>
           <p className="text-xs text-stone-500 dark:text-stone-400 mb-1 min-h-[1.25rem]" aria-live="polite">
+            {phase === 'cursor-to-input' && 'Moving pointer to the topic field…'}
+            {phase === 'click-input' && 'Clicking in the topic field…'}
             {isTyping && 'Typing a sample topic…'}
+            {phase === 'cursor-to-button' && 'Moving pointer to Find sources…'}
+            {phase === 'click-button' && 'Clicking Find sources…'}
             {isSearching && 'Finding peer-reviewed sources…'}
             {showPanels && 'Sample sources and export — loops while you watch.'}
             {phase === 'idle' && 'Scroll here — demo runs when in view.'}
-            {phase === 'ready' && 'Ready to search.'}
           </p>
           <h2
             id="landing-citations-showcase-heading"
@@ -513,12 +671,44 @@ export default function LandingCitationsShowcase({ onNavigate }: LandingCitation
               </div>
             </div>
 
-            <div className="relative mb-2 max-w-3xl mx-auto -mt-8 sm:-mt-10 lg:-mt-14 xl:-mt-16 z-20">
+            <div
+              ref={demoStageRef}
+              className="relative mb-2 max-w-3xl mx-auto -mt-8 sm:-mt-10 lg:-mt-14 xl:-mt-16 z-20 overflow-visible"
+            >
+              {showCursor && (
+                <div
+                  className="pointer-events-none absolute z-[45] transition-[left,top,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[left,top,transform]"
+                  style={{
+                    left: `${cursorPct.x}%`,
+                    top: `${cursorPct.y}%`,
+                    transform: cursorClicking
+                      ? 'translate(-2px, -2px) scale(0.9)'
+                      : 'translate(-2px, -2px) scale(1)',
+                  }}
+                  aria-hidden
+                >
+                  <svg
+                    width="28"
+                    height="28"
+                    viewBox="0 0 24 24"
+                    className="drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)]"
+                    aria-hidden
+                  >
+                    <path
+                      d="M4.5 2.2L4.5 17.5L8.2 14.1L10.8 19.2L13.5 18.1L10.9 12.8L17.2 10.5L4.5 2.2Z"
+                      className="fill-stone-900 dark:fill-stone-50"
+                      stroke="white"
+                      strokeWidth="1.2"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+              )}
               <div
                 className={`relative rounded-2xl border transition-all duration-500 bg-white dark:bg-stone-900/50 ${
                   isSearching
                     ? 'border-violet-400/70 dark:border-violet-500/50 shadow-[0_0_0_1px_rgba(139,92,246,0.25),0_20px_50px_-20px_rgba(91,33,182,0.35)] ring-2 ring-violet-400/20'
-                    : isTyping
+                    : isFieldActive
                       ? 'border-violet-300/60 dark:border-violet-600/40 shadow-[0_12px_40px_-18px_rgba(91,33,182,0.2)]'
                       : 'border-violet-200/90 dark:border-violet-800/55 shadow-md shadow-stone-900/5'
                 }`}
@@ -536,6 +726,7 @@ export default function LandingCitationsShowcase({ onNavigate }: LandingCitation
                 )}
                 <div className="relative rounded-[14px] sm:rounded-[18px] bg-white/98 dark:bg-stone-800/95 backdrop-blur-sm min-h-[120px] sm:min-h-[160px]">
                   <textarea
+                    ref={textareaRef}
                     value={typed}
                     readOnly
                     placeholder="Enter your research topic to find academic sources..."
@@ -549,16 +740,21 @@ export default function LandingCitationsShowcase({ onNavigate }: LandingCitation
               </div>
               <div className="flex justify-center mt-7">
                 <button
+                  ref={findSourcesBtnRef}
                   type="button"
                   disabled={buttonDisabled}
                   className={`group relative px-8 sm:px-10 py-3.5 rounded-2xl flex items-center justify-center gap-2.5 transition-all duration-300 font-semibold text-base min-w-[220px] overflow-hidden ${
                     buttonFilled || isSearching
                       ? 'bg-gradient-to-b from-violet-600 to-violet-800 dark:from-violet-500 dark:to-violet-700 text-white shadow-[0_12px_32px_-8px_rgba(91,33,182,0.55)] ring-1 ring-violet-400/30 hover:brightness-105 active:scale-[0.98]'
                       : 'bg-stone-200 dark:bg-stone-700 text-stone-400 cursor-not-allowed'
-                  } ${phase === 'ready' ? 'ring-2 ring-violet-400/40 ring-offset-2 ring-offset-white dark:ring-offset-stone-900' : ''}`}
+                  } ${
+                    phase === 'cursor-to-button' || phase === 'click-button'
+                      ? 'ring-2 ring-violet-400/40 ring-offset-2 ring-offset-white dark:ring-offset-stone-900'
+                      : ''
+                  }`}
                   aria-busy={isSearching}
                 >
-                  {phase === 'ready' && (
+                  {(phase === 'cursor-to-button' || phase === 'click-button') && (
                     <span
                       className="absolute inset-0 bg-violet-400/20 animate-ping rounded-2xl opacity-40"
                       aria-hidden

@@ -2,6 +2,7 @@ import Header from '../common/Header';
 import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
 import ScholarMascot from '../common/ScholarMascot';
+import LandingSectionLayers from '../common/LandingSectionLayers';
 
 interface FeaturesPageProps {
   onNavigate: (page: string) => void;
@@ -35,41 +36,45 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
 
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="features" />
 
-      {/* Hero Section - glass card style like Landing */}
-      <section className="relative py-16 sm:py-20 overflow-hidden">
-        <div className="absolute top-[35%] left-[5%] hidden xl:block text-4xl opacity-50 animate-float">📝</div>
-        <div className="absolute top-[40%] right-[6%] hidden xl:block text-3xl opacity-45 animate-float-delayed">🃏</div>
-        <div className="absolute bottom-[35%] left-[6%] hidden xl:block text-3xl opacity-45 animate-float">✨</div>
-        <div className="absolute bottom-[30%] right-[5%] hidden xl:block text-4xl opacity-50 animate-float-delayed">📚</div>
-        <div className="hidden lg:block absolute right-4 xl:right-12 top-1/2 -translate-y-1/2 z-10 opacity-90 animate-float">
-          <ScholarMascot size={112} animated={true} pose="studying" />
-        </div>
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-10 lg:gap-12">
-            <div className="flex-1 text-center lg:text-left max-w-3xl mx-auto lg:mx-0">
-              <span className="inline-flex items-center px-4 py-1.5 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-400 rounded-full text-sm font-semibold mb-6">
-                Features
-              </span>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-6 leading-tight">
-                <span className="text-violet-500">AI essay feedback</span>, <span className="text-violet-500">study packs</span> & <span className="text-violet-500">focus mode</span>
-              </h1>
-              <p className="text-lg text-stone-600 dark:text-stone-400 leading-relaxed">
-                The all-in-one study app: professor-style essay feedback on every paper, quizzes and flashcards from your notes, and Focus Mode to block TikTok until you study.
-              </p>
-            </div>
-            <div className="hidden lg:block flex-shrink-0 w-24 h-28 xl:w-28 xl:h-32" />
+      <section
+        className="relative py-16 sm:py-24 overflow-hidden border-b border-stone-200/90 dark:border-stone-800"
+        aria-labelledby="features-page-heading"
+      >
+        <LandingSectionLayers />
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">
+              Features
+            </p>
+            <div className="mx-auto mb-4 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85" aria-hidden />
+            <h1
+              id="features-page-heading"
+              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-semibold text-stone-900 dark:text-stone-100 mb-4 tracking-tight leading-tight"
+              style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+            >
+              AI essay feedback, study packs &amp; focus mode
+            </h1>
+            <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed">
+              The all-in-one study app: professor-style essay feedback on every paper, quizzes and flashcards from your notes, and Focus Mode to block distractions until you study.
+            </p>
           </div>
         </div>
       </section>
 
-      {/* Flagship Features - Essay Analyzer, Citations, Study Packs, Focus Mode */}
-      <section className="py-16 sm:py-20">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-10">
-            <span className="inline-block px-4 py-1.5 bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 rounded-full text-sm font-semibold mb-4">
-              Flagship Features
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-800 dark:text-stone-100">Our four core tools</h2>
+      <section className="relative py-16 sm:py-24 overflow-hidden border-t border-stone-200/90 dark:border-stone-800">
+        <LandingSectionLayers />
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">
+              Flagship
+            </p>
+            <div className="mx-auto mb-4 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85" aria-hidden />
+            <h2
+              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-semibold text-stone-900 dark:text-stone-100 tracking-tight leading-tight"
+              style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+            >
+              Our four core tools
+            </h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 mb-16">
             {/* Essay Analyzer - Flagship */}
@@ -162,15 +167,21 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
         </div>
       </section>
 
-      {/* How It Works - glass cards like Landing */}
-      <section className="py-16 sm:py-20">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12">
-            <span className="inline-block px-4 py-1.5 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-400 rounded-full text-sm font-semibold mb-4">
+      <section className="relative py-16 sm:py-24 overflow-hidden border-t border-stone-200/90 dark:border-stone-800">
+        <LandingSectionLayers variant="faq" />
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">
               Simple
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">How it works</h2>
-            <p className="text-stone-600 dark:text-stone-400 max-w-xl mx-auto">
+            </p>
+            <div className="mx-auto mb-4 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85" aria-hidden />
+            <h2
+              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-semibold text-stone-900 dark:text-stone-100 mb-4 tracking-tight leading-tight"
+              style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+            >
+              How it works
+            </h2>
+            <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 max-w-xl mx-auto leading-relaxed">
               Get started in seconds with any of our AI tools
             </p>
           </div>
@@ -195,12 +206,23 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
         </div>
       </section>
 
-      {/* Benefits Section - glass cards */}
-      <section className="py-16 sm:py-20">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+      <section className="relative py-16 sm:py-24 overflow-hidden border-t border-stone-200/90 dark:border-stone-800">
+        <LandingSectionLayers />
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">
+              Why WriteScholar
+            </p>
+            <div className="mx-auto mb-4 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85" aria-hidden />
+            <h2
+              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-semibold text-stone-900 dark:text-stone-100 tracking-tight leading-tight"
+              style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+            >
+              Why choose WriteScholar?
+            </h2>
+          </div>
           <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 items-center">
-            <div className="rounded-2xl sm:rounded-3xl border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-6 sm:p-8">
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-800 dark:text-stone-100 mb-6">Why choose WriteScholar?</h2>
+            <div className="rounded-2xl border border-stone-200/90 dark:border-stone-700/90 bg-white/80 dark:bg-stone-900/50 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.1)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.4)] ring-1 ring-white/50 dark:ring-white/5 backdrop-blur-sm p-6 sm:p-8">
               <div className="space-y-4">
                 {benefits.map((benefit, index) => (
                   <div key={index} className="flex items-start space-x-3">
@@ -218,7 +240,7 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
               </div>
             </div>
             
-            <div className="rounded-2xl sm:rounded-3xl overflow-hidden border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-gradient-to-br from-violet-500/10 via-red-500/5 to-fuchsia-500/10 dark:from-violet-900/30 dark:via-red-900/20 dark:to-fuchsia-900/20 p-6 sm:p-8">
+            <div className="rounded-2xl overflow-hidden border border-violet-200/80 dark:border-violet-800/50 shadow-[0_12px_40px_-12px_rgba(91,33,182,0.12)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.45)] backdrop-blur-sm bg-gradient-to-br from-violet-500/10 via-red-500/5 to-fuchsia-500/10 dark:from-violet-900/30 dark:via-red-900/20 dark:to-fuchsia-900/20 p-6 sm:p-8 ring-1 ring-white/50 dark:ring-white/5">
               <div className="grid grid-cols-2 gap-4 sm:gap-6">
                 {[
                   { value: '5+', label: 'AI Tools' },
@@ -237,52 +259,70 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-16 sm:py-20 bg-stone-800 dark:bg-stone-900">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-4">
-            {user ? 'Start using your AI toolkit' : 'Ready to level up your studies?'}
-          </h2>
-          <p className="text-stone-400 mb-8 max-w-xl mx-auto">
-            {user 
-              ? 'Head to your dashboard for essay feedback, citations, study packs, focus mode, and more.'
-              : 'Join thousands of students using essay analysis, citations, study packs, and focus mode.'
-            }
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            {user ? (
-              <>
-                <button 
-                  onClick={() => onNavigate('dashboard')}
-                  className="px-6 py-3 bg-violet-600 hover:bg-violet-500 text-white font-bold rounded-2xl shadow-lg shadow-violet-500/25 transition-all"
-                >
-                  Go to Dashboard
-                </button>
-                {user && ['free'].includes((user.plan || user.subscription_plan || '').toLowerCase()) && (
-                  <button 
-                    onClick={() => onNavigate('billing')}
-                    className="px-6 py-3 border-2 border-stone-500 text-white font-semibold rounded-2xl hover:border-stone-400 transition-colors"
+      <section className="relative py-16 sm:py-24 overflow-hidden border-t border-stone-200/90 dark:border-stone-800">
+        <LandingSectionLayers variant="cta" />
+        <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center rounded-2xl border border-stone-200/90 dark:border-stone-800/90 bg-white/75 dark:bg-stone-900/45 px-6 py-10 sm:px-10 sm:py-12 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.12)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.45)] backdrop-blur-[8px] ring-1 ring-white/50 dark:ring-white/5">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">
+              Get started
+            </p>
+            <div className="mx-auto mb-5 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85" aria-hidden />
+            <h2
+              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-semibold text-stone-900 dark:text-stone-50 mb-4 tracking-tight leading-[1.15]"
+              style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+            >
+              {user ? 'Start using your AI toolkit' : 'Ready to level up your studies?'}
+            </h2>
+            <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 mb-8 max-w-xl mx-auto leading-relaxed">
+              {user
+                ? 'Head to your dashboard for essay feedback, citations, study packs, focus mode, and more.'
+                : 'Join thousands of students using essay analysis, citations, study packs, and focus mode.'}
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center">
+              {user ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => onNavigate('dashboard')}
+                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white font-semibold rounded-xl shadow-md shadow-violet-900/15 dark:shadow-violet-950/40 ring-1 ring-violet-900/10 dark:ring-white/10 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 text-base"
                   >
-                    Upgrade Plan
+                    Go to dashboard
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
                   </button>
-                )}
-              </>
-            ) : (
-              <>
-                <button 
-                  onClick={() => onNavigate('signup')}
-                  className="px-6 py-3 bg-violet-600 hover:bg-violet-500 text-white font-bold rounded-2xl shadow-lg shadow-violet-500/25 transition-all"
-                >
-                  Try Free
-                </button>
-                <button 
-                  onClick={() => onNavigate('pricing')}
-                  className="px-6 py-3 border-2 border-stone-500 text-white font-semibold rounded-2xl hover:border-stone-400 transition-colors"
-                >
-                  View Pricing
-                </button>
-              </>
-            )}
+                  {user && ['free'].includes((user.plan || user.subscription_plan || '').toLowerCase()) && (
+                    <button
+                      type="button"
+                      onClick={() => onNavigate('billing')}
+                      className="inline-flex items-center justify-center px-7 py-3.5 border border-stone-300/95 dark:border-stone-600 bg-white/90 dark:bg-stone-900/50 text-stone-800 dark:text-stone-200 font-medium rounded-xl hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors text-base shadow-sm"
+                    >
+                      Upgrade plan
+                    </button>
+                  )}
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => onNavigate('signup')}
+                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white font-semibold rounded-xl shadow-md shadow-violet-900/15 dark:shadow-violet-950/40 ring-1 ring-violet-900/10 dark:ring-white/10 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 text-base"
+                  >
+                    Try free
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onNavigate('pricing')}
+                    className="inline-flex items-center justify-center px-7 py-3.5 border border-stone-300/95 dark:border-stone-600 bg-white/90 dark:bg-stone-900/50 text-stone-800 dark:text-stone-200 font-medium rounded-xl hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors text-base shadow-sm"
+                  >
+                    View pricing
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </section>

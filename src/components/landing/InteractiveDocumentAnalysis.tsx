@@ -704,7 +704,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
         </div>
       )}
       {/* Demo selector + Header — dark violet chrome (brand), not blue-gray */}
-      <div className="bg-violet-950 px-4 sm:px-6 py-5">
+      <div className="bg-violet-950 px-3 sm:px-6 py-4 sm:py-5">
         {landingHeroEmbed && (
           <div className="mb-3 pb-3 border-b border-violet-500/20 space-y-2">
             <p className="text-[11px] sm:text-xs text-violet-200/95 leading-snug">
@@ -750,7 +750,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
             </div>
           </div>
         )}
-        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 mb-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-3 sm:gap-y-2 mb-4">
           <div className="flex flex-wrap gap-2">
             {DEMO_PAPERS.map((d) => (
               <button
@@ -774,25 +774,25 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
               </button>
             ))}
           </div>
-          <p className="text-[11px] sm:text-xs text-violet-300/90 text-right leading-snug ml-auto max-w-[min(100%,22rem)]">
+          <p className="text-[11px] sm:text-xs text-violet-300/90 text-left sm:text-right leading-snug sm:ml-auto max-w-none sm:max-w-[min(100%,22rem)]">
             Professor-style review · sample draft (not your work)
           </p>
         </div>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 min-w-0">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 min-w-0">
           <div className="min-w-0 flex-1">
-            <h2 className="text-base sm:text-lg lg:text-xl font-bold text-violet-50 leading-snug break-words">{demo.title}</h2>
+            <h2 className="text-[0.95rem] sm:text-base lg:text-xl font-bold text-violet-50 leading-snug break-words">{demo.title}</h2>
           </div>
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0">
-          <button type="button" className="px-3 sm:px-4 py-2 rounded-lg transition-colors flex items-center gap-2 text-xs sm:text-sm font-medium text-violet-50 shrink-0 bg-violet-900/80 hover:bg-violet-800 border border-violet-700/45">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+          <div className="flex flex-nowrap items-center gap-1.5 sm:flex-wrap sm:gap-2 md:gap-3 min-w-0 overflow-x-auto pb-0.5 sm:pb-0 sm:overflow-visible [-webkit-overflow-scrolling:touch]">
+          <button type="button" className="px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-colors flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-sm font-medium text-violet-50 shrink-0 bg-violet-900/80 hover:bg-violet-800 border border-violet-700/45">
+            <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
             PDF
           </button>
-          <button type="button" className="px-3 sm:px-4 py-2 rounded-lg transition-colors flex items-center gap-2 text-xs sm:text-sm font-medium text-violet-50 shrink-0 bg-violet-900/80 hover:bg-violet-800 border border-violet-700/45">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+          <button type="button" className="px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-colors flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-sm font-medium text-violet-50 shrink-0 bg-violet-900/80 hover:bg-violet-800 border border-violet-700/45">
+            <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
             Word
           </button>
-          <button type="button" className="px-3 sm:px-4 py-2 rounded-lg transition-colors flex items-center gap-2 text-xs sm:text-sm font-medium text-violet-50 shrink-0 bg-violet-900/80 hover:bg-violet-800 border border-violet-700/45">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+          <button type="button" className="px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-colors flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-sm font-medium text-violet-50 shrink-0 bg-violet-900/80 hover:bg-violet-800 border border-violet-700/45">
+            <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             Close
           </button>
           </div>
@@ -880,7 +880,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
         }`}
       >
         <p className="text-sm text-gray-600 dark:text-stone-400 mb-3">Click highlights to explore feedback</p>
-        <div className="flex flex-wrap items-center gap-6 text-sm">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 sm:gap-6 text-xs sm:text-sm">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 bg-green-400 rounded-full" />
             <span className="text-gray-600 dark:text-stone-400">Strong sections</span>
@@ -910,7 +910,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
         <button
           type="button"
           onClick={() => setMobileTab('document')}
-          className={`flex-1 py-3 px-2 sm:px-3 text-xs sm:text-sm font-semibold transition-colors ${
+          className={`flex-1 py-2.5 sm:py-3 px-1.5 sm:px-3 text-[11px] sm:text-sm font-semibold transition-colors leading-tight ${
             mobileTab === 'document'
               ? 'text-violet-600 dark:text-violet-400 border-b-2 border-violet-500 bg-white dark:bg-stone-900'
               : 'text-gray-600 dark:text-stone-400 hover:text-gray-900 dark:hover:text-stone-200'
@@ -921,7 +921,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
         <button
           type="button"
           onClick={() => setMobileTab('feedback')}
-          className={`flex-1 py-3 px-2 sm:px-3 text-xs sm:text-sm font-semibold transition-colors ${
+          className={`flex-1 py-2.5 sm:py-3 px-1.5 sm:px-3 text-[11px] sm:text-sm font-semibold transition-colors leading-tight ${
             mobileTab === 'feedback'
               ? 'text-violet-600 dark:text-violet-400 border-b-2 border-violet-500 bg-white dark:bg-stone-900'
               : 'text-gray-600 dark:text-stone-400 hover:text-gray-900 dark:hover:text-stone-200'
@@ -932,7 +932,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
         <button
           type="button"
           onClick={() => setMobileTab('analysis')}
-          className={`flex-1 py-3 px-2 sm:px-3 text-xs sm:text-sm font-semibold transition-colors ${
+          className={`flex-1 py-2.5 sm:py-3 px-1.5 sm:px-3 text-[11px] sm:text-sm font-semibold transition-colors leading-tight ${
             mobileTab === 'analysis'
               ? 'text-violet-600 dark:text-violet-400 border-b-2 border-violet-500 bg-white dark:bg-stone-900'
               : 'text-gray-600 dark:text-stone-400 hover:text-gray-900 dark:hover:text-stone-200'
@@ -946,7 +946,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
       <div className="flex flex-col lg:flex-row lg:min-h-[560px]">
         {/* Document panel */}
         <div
-          className={`flex-1 min-w-0 flex flex-col overflow-hidden bg-white dark:bg-stone-900 max-h-[420px] lg:max-h-[580px] ${mobileTab !== 'document' ? 'hidden lg:block' : ''}`}
+          className={`flex-1 min-w-0 flex flex-col overflow-hidden bg-white dark:bg-stone-900 max-h-[min(58dvh,460px)] sm:max-h-[420px] lg:max-h-[580px] ${mobileTab !== 'document' ? 'hidden lg:block' : ''}`}
         >
           {demoRevisionNotice && (
             <div
@@ -1002,7 +1002,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
         {/* Annotations sidebar */}
         <div
           ref={feedbackPanelScrollRef}
-          className={`w-full lg:w-[380px] lg:min-w-[340px] bg-gray-50 dark:bg-stone-800/50 border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-stone-700 overflow-y-auto overscroll-contain max-h-[420px] lg:max-h-[580px] flex-shrink-0 ${mobileTab !== 'feedback' ? 'hidden lg:block' : ''}`}
+          className={`w-full lg:w-[380px] lg:min-w-[340px] bg-gray-50 dark:bg-stone-800/50 border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-stone-700 overflow-y-auto overscroll-contain max-h-[min(58dvh,460px)] sm:max-h-[420px] lg:max-h-[580px] flex-shrink-0 ${mobileTab !== 'feedback' ? 'hidden lg:block' : ''}`}
         >
           <div className="p-5 md:p-6">
             <h3 className="text-lg font-bold text-gray-900 dark:text-stone-100 mb-5 flex items-center">
@@ -1153,7 +1153,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
 
         {/* Mobile-only: rubric + full report in Analysis tab */}
         <div
-          className={`lg:hidden w-full overflow-y-auto max-h-[min(80vh,640px)] bg-white dark:bg-stone-900 border-t border-gray-200 dark:border-stone-700 ${
+          className={`lg:hidden w-full overflow-y-auto max-h-[min(72dvh,640px)] bg-white dark:bg-stone-900 border-t border-gray-200 dark:border-stone-700 ${
             mobileTab !== 'analysis' ? 'hidden' : ''
           }`}
         >

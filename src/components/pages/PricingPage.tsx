@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import Header from '../common/Header';
 import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
-import ScholarMascot from '../common/ScholarMascot';
 
 interface PricingPageProps {
   onNavigate: (page: string) => void;
@@ -310,93 +309,107 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="pricing" />
 
-      {/* Hero Section - mascot instead of illustration */}
-      <section className="relative py-12 sm:py-16 border-b border-stone-200/60 dark:border-stone-700/60 overflow-hidden">
-        <div className="absolute top-[30%] left-[5%] hidden xl:block text-4xl opacity-50 animate-float">💰</div>
-        <div className="absolute top-[35%] right-[6%] hidden xl:block text-3xl opacity-45 animate-float-delayed">✨</div>
-        <div className="absolute bottom-[40%] left-[6%] hidden xl:block text-3xl opacity-45 animate-float">📋</div>
-        <div className="absolute bottom-[35%] right-[5%] hidden xl:block text-4xl opacity-50 animate-float-delayed">🎯</div>
-        {/* Mascot - pointing pose */}
-        <div className="hidden lg:flex absolute right-4 xl:right-12 top-1/2 -translate-y-1/2 z-10 items-center justify-center">
-          <ScholarMascot size={140} animated={true} pose="pointing" />
-        </div>
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8 lg:gap-12">
-            <div className="flex-1 text-center lg:text-left max-w-3xl mx-auto lg:mx-0">
-              <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-stone-800 dark:text-stone-100 mb-4">
-                Simple, <span className="bg-violet-600 hover:bg-violet-500 bg-clip-text text-transparent">transparent</span> pricing
-              </h1>
-              <p className="text-lg text-stone-500 dark:text-stone-400 max-w-2xl mx-auto lg:mx-0">
-                Choose the plan that fits your needs. Upgrade anytime.
-              </p>
-            </div>
-            <div className="hidden lg:block flex-shrink-0 w-24 h-28 xl:w-28 xl:h-32" />
-          </div>
-        </div>
-      </section>
+      {/* Hero + plans — same surface treatment as landing pricing section */}
+      <section
+        className="relative py-16 sm:py-24 overflow-hidden border-b border-stone-200/90 dark:border-stone-800"
+        aria-labelledby="pricing-page-heading"
+      >
+        <div className="absolute inset-0 bg-[#f8fafc] dark:bg-[#0c0a09]" aria-hidden />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#f1f5f9] via-white to-[#f8fafc] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 pointer-events-none" aria-hidden />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_85%_55%_at_50%_-12%,rgba(91,33,182,0.08),transparent_55%)] dark:bg-[radial-gradient(ellipse_85%_50%_at_50%_-8%,rgba(109,40,217,0.12),transparent_58%)] pointer-events-none" aria-hidden />
+        <div
+          className="absolute inset-0 opacity-[0.4] dark:opacity-[0.15] pointer-events-none bg-[length:32px_32px] bg-[linear-gradient(to_right,rgba(148,163,184,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.07)_1px,transparent_1px)]"
+          aria-hidden
+        />
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
-        <div className="text-center mb-10">
-          {/* Billing Toggle */}
-          <div className="flex items-center justify-center mb-12">
-            <div className="bg-stone-100 dark:bg-stone-800 rounded-full p-1.5 flex">
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">
+              Pricing
+            </p>
+            <div className="mx-auto mb-4 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85" aria-hidden />
+            <h1
+              id="pricing-page-heading"
+              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-semibold text-stone-900 dark:text-stone-100 mb-4 tracking-tight leading-tight"
+              style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+            >
+              Simple, transparent pricing
+            </h1>
+            <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed">
+              Start free, upgrade when you need more analyses, citations, and study tools.
+            </p>
+          </div>
+
+          <div className="flex flex-col items-center mb-10 sm:mb-12">
+            <div className="inline-flex rounded-xl border border-violet-200/90 dark:border-violet-700/60 bg-white/90 dark:bg-stone-800/90 backdrop-blur-sm p-1 shadow-sm ring-1 ring-violet-500/10">
               <button
+                type="button"
                 onClick={() => setBillingCycle('monthly')}
-                className={`px-6 py-2.5 rounded-full text-base font-semibold transition-all ${
+                className={`px-5 sm:px-6 py-2.5 rounded-[0.65rem] text-sm sm:text-base font-semibold transition-all ${
                   billingCycle === 'monthly'
-                    ? 'bg-white dark:bg-stone-700 text-stone-800 dark:text-stone-100 shadow-sm'
-                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-100'
+                    ? 'bg-violet-600 text-white shadow-md shadow-violet-900/20'
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'
                 }`}
               >
-                Bill Monthly
+                Bill monthly
               </button>
               <button
+                type="button"
                 onClick={() => setBillingCycle('yearly')}
-                className={`px-6 py-2.5 rounded-full text-base font-semibold transition-all ${
+                className={`px-5 sm:px-6 py-2.5 rounded-[0.65rem] text-sm sm:text-base font-semibold transition-all flex items-center gap-2 ${
                   billingCycle === 'yearly'
-                    ? 'bg-white dark:bg-stone-700 text-stone-800 dark:text-stone-100 shadow-sm'
-                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-100'
+                    ? 'bg-violet-600 text-white shadow-md shadow-violet-900/20'
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'
                 }`}
               >
-                Bill Yearly
-                <span className="ml-2 px-2 py-1 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-400 text-xs font-semibold rounded-full">
+                Bill yearly
+                <span
+                  className={`px-2 py-0.5 text-[10px] sm:text-xs font-bold rounded-full ${
+                    billingCycle === 'yearly'
+                      ? 'bg-white/20 text-white'
+                      : 'bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-400'
+                  }`}
+                >
                   Save 17%
                 </span>
               </button>
             </div>
           </div>
-        </div>
 
-        {/* Pricing Cards */}
-        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8 mb-20 max-w-6xl mx-auto">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto">
           {plans.map((plan) => (
             <div
               key={plan.id}
-              className={`relative rounded-2xl p-8 hover:shadow-lg transition-all ${
-                plan.popular 
-                  ? 'bg-white dark:bg-stone-800 border border-violet-500 ring-2 ring-violet-200 dark:ring-violet-800'
+              className={`relative rounded-2xl p-6 sm:p-8 flex flex-col transition-shadow hover:shadow-[0_20px_50px_-20px_rgba(15,23,42,0.15)] dark:hover:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.5)] ${
+                plan.popular
+                  ? 'border border-violet-500/90 dark:border-violet-500/70 bg-white/85 dark:bg-stone-900/55 shadow-[0_12px_40px_-12px_rgba(91,33,182,0.18)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.45)] ring-2 ring-violet-200/80 dark:ring-violet-800/60'
                   : plan.id === 'premium'
-                  ? 'bg-white dark:bg-stone-800 border border-amber-400/90 dark:border-amber-600/60 ring-2 ring-amber-200/90 dark:ring-amber-800/50'
-                  : 'bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700'
+                  ? 'border border-amber-400/90 dark:border-amber-500/60 bg-gradient-to-b from-amber-50/90 to-white/90 dark:from-amber-950/40 dark:to-stone-900/55 shadow-[0_12px_40px_-12px_rgba(180,83,9,0.15)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.45)] ring-2 ring-amber-200/80 dark:ring-amber-800/50 sm:col-span-2 lg:col-span-1'
+                  : 'border border-stone-200/90 dark:border-stone-700/90 bg-white/80 dark:bg-stone-900/50 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.1)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.4)] ring-1 ring-white/50 dark:ring-white/5'
               }`}
             >
               {plan.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-violet-600 hover:bg-violet-500 text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg shadow-violet-500/25">
-                    Most Popular
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                  <span className="bg-violet-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-md shadow-violet-500/25">
+                    Most popular
                   </span>
                 </div>
               )}
               {plan.id === 'premium' && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-gradient-to-r from-amber-500 to-amber-600 text-amber-950 px-4 py-1 rounded-full text-sm font-bold shadow-lg shadow-amber-500/25 ring-1 ring-amber-400/50">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                  <span className="bg-gradient-to-r from-amber-500 to-amber-600 text-amber-950 px-3 py-1 rounded-full text-xs font-bold shadow-md shadow-amber-500/30 ring-1 ring-amber-400/50">
                     3× usage
                   </span>
                 </div>
               )}
-              <div className="text-center mb-8">
-                <h3 className="font-display text-2xl mb-2 text-stone-800 dark:text-stone-100 font-semibold">{plan.name}</h3>
-                <p className="mb-6 text-stone-500 dark:text-stone-400">{plan.description}</p>
+              <div className={`text-center mb-6 ${plan.popular || plan.id === 'premium' ? 'pt-1' : ''}`}>
+                <h3
+                  className="text-xl font-semibold mb-1 text-stone-900 dark:text-stone-100"
+                  style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+                >
+                  {plan.name}
+                </h3>
+                <p className="mb-6 text-sm text-stone-500 dark:text-stone-400">{plan.description}</p>
                 
                 <div className="mb-4">
                   {plan.id !== 'free' && billingCycle === 'monthly' ? (
@@ -434,10 +447,20 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
               </div>
 
               <div className="mb-8">
-                <ul className="space-y-3">
+                <ul className="space-y-2.5">
                   {plan.features.map((feature, index) => (
-                    <li key={index} className="flex items-start">
-                      <svg className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0 text-violet-500 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <li key={index} className="flex items-start gap-2 text-sm sm:text-[0.9375rem]">
+                      <svg
+                        className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
+                          plan.id === 'premium'
+                            ? 'text-amber-600 dark:text-amber-400'
+                            : 'text-violet-500 dark:text-violet-400'
+                        }`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        aria-hidden
+                      >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                       <span className="text-stone-600 dark:text-stone-400">{feature}</span>
@@ -457,14 +480,17 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
               </div>
 
               <button
+                type="button"
                 onClick={isCurrentPlanId(plan.id) ? undefined : () => plan.buttonAction()}
                 disabled={isCurrentPlanId(plan.id) || processingPlan !== null}
                 className={`w-full py-3 px-6 rounded-xl font-semibold transition-all duration-150 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 ${
-                    isCurrentPlanId(plan.id)
+                  isCurrentPlanId(plan.id)
                     ? 'bg-stone-100 dark:bg-stone-700 text-stone-500 cursor-not-allowed'
                     : plan.popular
-                    ? 'bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white shadow-md shadow-violet-900/15 dark:shadow-violet-950/40 ring-1 ring-violet-900/10 dark:ring-white/10'
-                    : 'bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 text-stone-800 dark:text-stone-100'
+                      ? 'bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white shadow-md shadow-violet-900/15 dark:shadow-violet-950/40 ring-1 ring-violet-900/10 dark:ring-white/10'
+                      : plan.id === 'premium'
+                        ? 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-amber-950 shadow-md shadow-amber-900/15 ring-1 ring-amber-700/20'
+                        : 'bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-900 dark:text-stone-100 ring-1 ring-stone-200/80 dark:ring-stone-600/80'
                 }`}
               >
                 {isCurrentPlanId(plan.id) ? (
@@ -480,67 +506,127 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
               </button>
             </div>
           ))}
-        </div>
-
-        {/* FAQ Section */}
-        <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl p-6 sm:p-8 mb-10">
-          <h2 className="text-xl font-extrabold text-stone-800 dark:text-stone-100 mb-6 text-center">Frequently Asked Questions</h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            {faqs.map((faq, index) => (
-              <div key={index} className="space-y-2">
-                <h3 className="font-semibold text-stone-800 dark:text-stone-100 text-sm">{faq.question}</h3>
-                <p className="text-stone-500 dark:text-stone-400 text-sm leading-relaxed">{faq.answer}</p>
-              </div>
-            ))}
           </div>
         </div>
+      </section>
 
-        {/* CTA Section - Different for logged-in users */}
-        <div className="text-center bg-stone-800 dark:bg-stone-900 rounded-2xl p-8 sm:p-10">
-          <h2 className="text-2xl font-extrabold text-white mb-3">
-            {user ? 'Start writing with AI today' : 'Ready to improve your academic writing?'}
-          </h2>
-          <p className="text-stone-300 mb-6 max-w-xl mx-auto">
-            {user 
-              ? 'Head to your dashboard to start analyzing documents and finding citations.'
-              : 'Get $10 off your first month. No commitment, cancel anytime.'
-            }
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            {user ? (
-              <>
-                <button 
-                  onClick={() => onNavigate('dashboard')}
-                  className="bg-violet-600 hover:bg-violet-500 text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-violet-500/25 transition-all"
-                >
-                  Go to Dashboard
-                </button>
-                <button 
-                  onClick={() => onNavigate('contact')}
-                  className="border-2 border-stone-500 hover:border-stone-400 text-white px-6 py-3 rounded-2xl font-semibold transition-colors"
-                >
-                  Contact Support
-                </button>
-              </>
-            ) : (
-              <>
-                <button 
-                  onClick={() => onNavigate('signup')}
-                  className="bg-violet-600 hover:bg-violet-500 text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-violet-500/25 transition-all"
-                >
-                  Get $10 Off
-                </button>
-                <button 
-                  onClick={() => onNavigate('contact')}
-                  className="border-2 border-stone-500 hover:border-stone-400 text-white px-6 py-3 rounded-2xl font-semibold transition-colors"
-                >
-                  Contact Sales
-                </button>
-              </>
-            )}
+      {/* FAQ — landing FAQ / editorial theme */}
+      <section
+        className="relative py-16 sm:py-24 overflow-hidden border-t border-stone-200/90 dark:border-stone-800"
+        aria-labelledby="pricing-faq-heading"
+      >
+        <div className="absolute inset-0 bg-[#f8fafc] dark:bg-[#0c0a09]" aria-hidden />
+        <div className="absolute inset-0 bg-gradient-to-b from-white via-[#f8fafc] to-[#f1f5f9] dark:from-stone-950 dark:via-stone-950 dark:to-stone-950 pointer-events-none" aria-hidden />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_90%_60%_at_50%_-15%,rgba(91,33,182,0.07),transparent_55%)] dark:bg-[radial-gradient(ellipse_90%_55%_at_50%_-10%,rgba(109,40,217,0.12),transparent_58%)] pointer-events-none" aria-hidden />
+        <div
+          className="absolute inset-0 opacity-[0.4] dark:opacity-[0.15] pointer-events-none bg-[length:32px_32px] bg-[linear-gradient(to_right,rgba(148,163,184,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.07)_1px,transparent_1px)]"
+          aria-hidden
+        />
+
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">
+              FAQ
+            </p>
+            <div className="mx-auto mb-4 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85" aria-hidden />
+            <h2
+              id="pricing-faq-heading"
+              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-semibold text-stone-900 dark:text-stone-100 mb-4 tracking-tight leading-tight"
+              style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+            >
+              Frequently Asked Questions
+            </h2>
+            <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed">
+              Billing, plans, and what&apos;s included.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-stone-200/90 dark:border-stone-700/90 bg-white/80 dark:bg-stone-900/50 p-6 sm:p-8 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.1)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.4)] ring-1 ring-white/50 dark:ring-white/5 backdrop-blur-sm">
+            <div className="grid md:grid-cols-2 gap-6 sm:gap-8">
+              {faqs.map((faq, index) => (
+                <div key={index} className="space-y-2">
+                  <h3 className="font-semibold text-stone-900 dark:text-stone-100 text-sm leading-snug">{faq.question}</h3>
+                  <p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed">{faq.answer}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* CTA — same glass card feel as landing “Get started” */}
+      <section className="relative py-16 sm:py-24 overflow-hidden border-t border-stone-200/90 dark:border-stone-800">
+        <div className="absolute inset-0 bg-[#f8fafc] dark:bg-[#0c0a09]" aria-hidden />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#f1f5f9] via-white to-[#f8fafc] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 pointer-events-none" aria-hidden />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_20%,rgba(91,33,182,0.06),transparent_50%)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_15%,rgba(109,40,217,0.1),transparent_55%)] pointer-events-none" aria-hidden />
+        <div
+          className="absolute inset-0 opacity-[0.35] dark:opacity-[0.12] pointer-events-none bg-[length:32px_32px] bg-[linear-gradient(to_right,rgba(148,163,184,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.07)_1px,transparent_1px)]"
+          aria-hidden
+        />
+
+        <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center rounded-2xl border border-stone-200/90 dark:border-stone-800/90 bg-white/75 dark:bg-stone-900/45 px-6 py-10 sm:px-10 sm:py-12 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.12)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.45)] backdrop-blur-[8px] ring-1 ring-white/50 dark:ring-white/5">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">
+              Get started
+            </p>
+            <div className="mx-auto mb-5 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85" aria-hidden />
+            <h2
+              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-semibold text-stone-900 dark:text-stone-50 mb-4 tracking-tight leading-[1.15]"
+              style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+            >
+              {user ? 'Continue with WriteScholar' : 'Ready to improve your academic writing?'}
+            </h2>
+            <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 mb-8 max-w-xl mx-auto leading-relaxed">
+              {user
+                ? 'Go to your dashboard to analyze documents, find citations, and use study tools.'
+                : 'Get $10 off your first month on Pro or Premium. Cancel anytime.'}
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center">
+              {user ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => onNavigate('dashboard')}
+                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white font-semibold rounded-xl shadow-md shadow-violet-900/15 dark:shadow-violet-950/40 ring-1 ring-violet-900/10 dark:ring-white/10 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 text-base"
+                  >
+                    Go to dashboard
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onNavigate('contact')}
+                    className="inline-flex items-center justify-center px-7 py-3.5 border border-stone-300/95 dark:border-stone-600 bg-white/90 dark:bg-stone-900/50 text-stone-800 dark:text-stone-200 font-medium rounded-xl hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors text-base shadow-sm"
+                  >
+                    Contact support
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => onNavigate('signup')}
+                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white font-semibold rounded-xl shadow-md shadow-violet-900/15 dark:shadow-violet-950/40 ring-1 ring-violet-900/10 dark:ring-white/10 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 text-base"
+                  >
+                    Get $10 off
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onNavigate('contact')}
+                    className="inline-flex items-center justify-center px-7 py-3.5 border border-stone-300/95 dark:border-stone-600 bg-white/90 dark:bg-stone-900/50 text-stone-800 dark:text-stone-200 font-medium rounded-xl hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors text-base shadow-sm"
+                  >
+                    Contact us
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
 
       <Footer onNavigate={onNavigate} />
     </div>

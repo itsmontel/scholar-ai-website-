@@ -654,7 +654,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
       <Header onNavigate={onNavigate} user={user} sticky={true} currentPage="landing" opaqueHeader />
       <main className="min-h-screen relative transition-colors font-sans overflow-x-hidden xl:overflow-x-visible" role="main">
       {/* HERO: formal, conversion-focused */}
-      <section className="relative flex flex-col overflow-hidden border-b border-stone-200/90 dark:border-stone-800 xl:overflow-visible">
+      <section className="relative flex flex-col overflow-x-clip overflow-hidden border-b border-stone-200/90 dark:border-stone-800 xl:overflow-visible">
         <div className="absolute inset-0 bg-[#f9f9fb] dark:bg-[#0c0a09]" />
         <div className="absolute inset-0 bg-gradient-to-b from-white via-[#f7f7fa] to-[#f3f4f8] dark:from-stone-950 dark:via-stone-950 dark:to-stone-950 pointer-events-none" />
         {/* Ambient depth — single brand wash + soft lift (no competing emerald/amber) */}
@@ -676,7 +676,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           aria-hidden
         />
 
-        <div className="relative z-10 flex flex-col items-center justify-start px-4 sm:px-6 lg:px-8 pt-10 sm:pt-12 lg:pt-8 pb-0 min-w-0">
+        <div className="relative z-10 flex flex-col items-center justify-start px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12 lg:pt-8 pb-0 min-w-0">
           <div className="w-full min-w-0 max-w-[1240px] xl:mx-auto">
             {/* Hero: before (top-left) + headline + after (top-right) on lg+; mobile stack below headline */}
             <div className="flex flex-col items-stretch w-full">
@@ -702,7 +702,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               <div className="relative w-full max-w-3xl mx-auto px-1 sm:px-2 text-center pt-2 sm:pt-4 opacity-0 animate-hero-card-enter">
                 <div className="relative flex flex-col items-center text-center">
                 <h1
-                  className="text-[1.95rem] sm:text-[2.45rem] lg:text-[3.1rem] xl:text-[3.45rem] font-semibold tracking-[-0.02em] leading-[1.14] mb-6 sm:mb-7 max-w-[24rem] sm:max-w-none mx-auto text-balance opacity-0 animate-hero-stagger-1"
+                  className="text-[1.9rem] sm:text-[2.45rem] lg:text-[3.1rem] xl:text-[3.45rem] font-semibold tracking-[-0.02em] leading-[1.14] mb-6 sm:mb-7 max-w-[min(24rem,calc(100vw-2rem))] sm:max-w-none mx-auto text-balance opacity-0 animate-hero-stagger-1"
                   style={{ fontFamily: "'EB Garamond', Georgia, 'Times New Roman', serif" }}
                 >
                   <span className="inline-block bg-gradient-to-r from-violet-700 via-violet-600 to-violet-700 dark:from-violet-300 dark:via-violet-200 dark:to-violet-300 bg-[length:200%_auto] motion-safe:animate-hero-gradient-shift bg-clip-text text-transparent">WriteScholar</span>
@@ -727,7 +727,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     </span>
                   </span>
                 </h1>
-                <div className="mb-7 sm:mb-8 max-w-[22rem] sm:max-w-xl mx-auto space-y-2.5 sm:space-y-3 text-stone-600 dark:text-stone-400">
+                <div className="mb-7 sm:mb-8 max-w-[min(22rem,calc(100vw-2rem))] sm:max-w-xl mx-auto space-y-2.5 sm:space-y-3 text-stone-600 dark:text-stone-400">
                   <p className="text-[1.02rem] sm:text-lg font-semibold text-stone-800 dark:text-stone-100 leading-snug tracking-[0.01em] opacity-0 animate-hero-stagger-2">
                     AI-powered, professor-style feedback in under a minute.
                   </p>
@@ -736,7 +736,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto mb-5 sm:mb-6 opacity-0 animate-hero-stagger-4">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 w-full max-w-md sm:max-w-none mx-auto sm:mx-0 mb-5 sm:mb-6 opacity-0 animate-hero-stagger-4">
                   <button
                     type="button"
                     onClick={() => onNavigate('signup')}
@@ -799,7 +799,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               {/* Interactive analysis — high in hero; copy lives inside the mock (landingHeroEmbed) */}
               <div
                 id="landing-tools"
-                className="w-full max-w-6xl mx-auto mt-5 sm:mt-7 lg:mt-8 scroll-mt-24 px-0 sm:px-1"
+                className="w-full max-w-6xl mx-auto mt-5 sm:mt-7 lg:mt-8 scroll-mt-24 px-3 sm:px-2 lg:px-1"
               >
                 <div className="relative rounded-2xl sm:rounded-3xl border border-stone-200/70 dark:border-stone-700/60 bg-white/95 dark:bg-stone-900/80 shadow-[0_28px_72px_-28px_rgba(15,23,42,0.16)] dark:shadow-[0_36px_90px_-32px_rgba(0,0,0,0.55)]">
                   <InteractiveDocumentAnalysis onNavigate={onNavigate} landingHeroEmbed />
@@ -822,7 +822,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
                 {/* Social proof: testimonial + universities — directly under primary CTA */}
                 <div
-                  className="relative w-screen mt-8 sm:mt-10 mb-0 ml-[calc(50%-50vw)] overflow-hidden
+                  className="relative w-screen max-w-[100vw] mt-8 sm:mt-10 mb-0 ml-[calc(50%-50vw)] overflow-x-clip overflow-hidden
                     border-y border-stone-200/90 dark:border-stone-800
                     bg-[#fafafa] dark:bg-stone-950
                     shadow-[inset_0_1px_0_0_rgba(255,255,255,0.9)] dark:shadow-none"
@@ -1035,17 +1035,17 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 </LandingScrollReveal>
               </div>
             </div>
-            <div className="w-full max-w-6xl mx-auto px-2 pb-2">
+            <div className="w-full max-w-6xl mx-auto px-3 sm:px-2 lg:px-0 pb-2">
               {/* Mobile: horizontal snap carousel (like earlier landing) */}
-              <div className="sm:hidden relative -mx-4">
+              <div className="sm:hidden relative">
                 <div
-                  className="flex gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory [-webkit-overflow-scrolling:touch] py-1 pl-4 pr-4 pb-2"
+                  className="flex gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory [-webkit-overflow-scrolling:touch] py-1 pl-0.5 pr-1 pb-2"
                   aria-label="What WriteScholar focuses on"
                 >
                   {heroFeatureCards.map((card, idx) => (
                     <LandingScrollReveal
                       key={card.title}
-                      className="snap-center shrink-0 w-[min(240px,calc(100vw-3.5rem))] max-w-[240px]"
+                      className="snap-center shrink-0 w-[min(240px,calc(100vw-2rem))] max-w-[240px]"
                       delayMs={idx * 95}
                     >
                       <MobileStudyCard
@@ -2727,7 +2727,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               className="text-2xl sm:text-3xl lg:text-[2.35rem] font-semibold text-stone-900 dark:text-stone-100 mb-4 tracking-tight leading-tight"
               style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
             >
-              Simple plans for coursework
+              Simple, transparent pricing
             </h2>
             <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed">
               Start free, upgrade when you need more analyses, citations, and study tools.

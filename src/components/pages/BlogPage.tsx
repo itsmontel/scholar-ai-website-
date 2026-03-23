@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import Header from '../common/Header';
 import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
+import LandingSectionLayers from '../common/LandingSectionLayers';
 import NewsletterSubscription from '../common/NewsletterSubscription';
 import { getBlogPostsSortedDesc, BlogPostMeta } from '../../data/blogPosts';
 import { SITE_ORIGIN, injectJsonLd, removeJsonLd } from '../../utils/seo';
@@ -342,41 +343,57 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="blog" />
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
-        {/* Breadcrumbs */}
-        <nav className="flex items-center text-sm text-stone-500 dark:text-stone-400 mb-8" aria-label="Breadcrumb">
-          <a 
-            href="/" 
-            onClick={(e) => { e.preventDefault(); onNavigate('landing'); }}
-            className="hover:text-stone-900 dark:hover:text-stone-100 transition-colors"
-          >
-            Home
-          </a>
-          <svg className="w-4 h-4 mx-2 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-          <span className="text-stone-900 dark:text-stone-100 font-semibold">Blog</span>
-        </nav>
+      <main>
+        <section
+          className="relative overflow-hidden border-b border-stone-200/90 dark:border-stone-800"
+          aria-labelledby="blog-page-heading"
+        >
+          <LandingSectionLayers />
+          <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+            <nav className="flex items-center text-sm text-stone-500 dark:text-stone-400 mb-8" aria-label="Breadcrumb">
+              <a
+                href="/"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onNavigate('landing');
+                }}
+                className="hover:text-stone-900 dark:hover:text-stone-100 transition-colors"
+              >
+                Home
+              </a>
+              <svg className="w-4 h-4 mx-2 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+              <span className="text-stone-900 dark:text-stone-100 font-semibold">Blog</span>
+            </nav>
 
-        {/* Page Header */}
-        <header className="mb-12">
-          <span className="inline-block px-4 py-1.5 bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 rounded-full text-sm font-semibold mb-4">
-            Tips & Guides
-          </span>
-          <h1 className="text-4xl sm:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-3">
-            Blog
-          </h1>
-          <p className="text-lg text-stone-600 dark:text-stone-400 max-w-2xl">
-            Tips, guides, and insights for better academic writing
-          </p>
-        </header>
+            <header className="text-center max-w-2xl mx-auto">
+              <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">
+                Tips &amp; guides
+              </p>
+              <div className="mx-auto mb-4 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85" aria-hidden />
+              <h1
+                id="blog-page-heading"
+                className="text-2xl sm:text-3xl lg:text-[2.35rem] font-semibold text-stone-900 dark:text-stone-100 mb-4 tracking-tight leading-tight"
+                style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+              >
+                Blog
+              </h1>
+              <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed">
+                Tips, guides, and insights for better academic writing
+              </p>
+            </header>
+          </div>
+        </section>
 
-        {/* Blog Grid */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" aria-label="Blog posts">
+        <section className="relative overflow-hidden border-t border-stone-200/90 dark:border-stone-800 py-12 sm:py-16">
+          <LandingSectionLayers variant="faq" />
+          <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8" aria-label="Blog posts">
           {currentPosts.map((post, idx) => (
             <article
               key={post.slug}
-              className="group cursor-pointer bg-white dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg hover:border-violet-300 dark:hover:border-violet-700/50 transition-all duration-300"
+              className="group cursor-pointer rounded-2xl overflow-hidden border border-stone-200/90 dark:border-stone-700/90 bg-white/80 dark:bg-stone-900/50 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.1)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.4)] ring-1 ring-white/50 dark:ring-white/5 hover:shadow-[0_20px_50px_-20px_rgba(91,33,182,0.15)] dark:hover:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.5)] hover:border-violet-300/70 dark:hover:border-violet-600/50 transition-all duration-300"
               onClick={() => handlePostClick(post.slug)}
             >
               {/* Image Container */}
@@ -388,7 +405,10 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
               
               {/* Content */}
               <div className="p-5 sm:p-6">
-                <h2 className="text-xl font-semibold text-stone-800 dark:text-stone-100 mb-3 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors leading-snug line-clamp-2">
+                <h2
+                  className="text-lg sm:text-xl font-semibold text-stone-900 dark:text-stone-100 mb-3 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors leading-snug line-clamp-2"
+                  style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+                >
                   {post.title}
                 </h2>
                 <p className="text-stone-600 dark:text-stone-400 text-base leading-relaxed mb-4 line-clamp-2">
@@ -402,61 +422,84 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
               </div>
             </article>
           ))}
+            </div>
+
+            {renderPagination()}
+          </div>
         </section>
 
-        {/* Pagination */}
-        {renderPagination()}
+        <section className="relative overflow-hidden border-t border-stone-200/90 dark:border-stone-800 py-12 sm:py-16">
+          <LandingSectionLayers />
+          <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <NewsletterSubscription variant="blog" />
+          </div>
+        </section>
 
-        {/* Newsletter signup */}
-        <div className="mt-12 sm:mt-16">
-          <NewsletterSubscription variant="blog" />
-        </div>
-
-        {/* CTA Section - Different for logged-in users */}
-        <section className="mt-16 sm:mt-20 bg-stone-800 dark:bg-stone-900 rounded-2xl p-8 sm:p-12 text-center">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-3">
-            {user ? 'Put these tips into practice' : 'Ready to improve your academic writing?'}
-          </h2>
-          <p className="text-stone-300 mb-6 max-w-lg mx-auto">
-            {user 
-              ? 'Head to your dashboard to start writing with AI-powered feedback and citation tools.'
-              : 'Get AI-powered feedback on your essays, citations, and more. Start writing better today.'
-            }
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            {user ? (
-              <>
-                <button 
-                  onClick={() => onNavigate('dashboard')}
-                  className="w-full sm:w-auto px-6 py-3 bg-white text-violet-900 font-bold rounded-2xl hover:bg-violet-50 shadow-lg transition-all"
-                >
-                  Go to Dashboard
-                </button>
-                {user.plan === 'Free' && (
-                <button 
-                  onClick={() => onNavigate('billing')}
-                  className="w-full sm:w-auto px-6 py-3 border-2 border-white/40 hover:border-white/60 text-white font-semibold rounded-2xl transition-colors"
-                >
-                    Upgrade Plan
-                  </button>
+        <section className="relative py-16 sm:py-24 overflow-hidden border-t border-stone-200/90 dark:border-stone-800">
+          <LandingSectionLayers variant="cta" />
+          <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center rounded-2xl border border-stone-200/90 dark:border-stone-800/90 bg-white/75 dark:bg-stone-900/45 px-6 py-10 sm:px-10 sm:py-12 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.12)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.45)] backdrop-blur-[8px] ring-1 ring-white/50 dark:ring-white/5">
+              <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">
+                Get started
+              </p>
+              <div className="mx-auto mb-5 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85" aria-hidden />
+              <h2
+                className="text-2xl sm:text-3xl lg:text-[2.35rem] font-semibold text-stone-900 dark:text-stone-50 mb-4 tracking-tight leading-[1.15]"
+                style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+              >
+                {user ? 'Put these tips into practice' : 'Ready to improve your academic writing?'}
+              </h2>
+              <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 mb-8 max-w-xl mx-auto leading-relaxed">
+                {user
+                  ? 'Head to your dashboard to start writing with AI-powered feedback and citation tools.'
+                  : 'Get AI-powered feedback on your essays, citations, and more. Start writing better today.'}
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+                {user ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => onNavigate('dashboard')}
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white font-semibold rounded-xl shadow-md shadow-violet-900/15 dark:shadow-violet-950/40 ring-1 ring-violet-900/10 dark:ring-white/10 transition-all duration-200 hover:shadow-lg"
+                    >
+                      Go to dashboard
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </button>
+                    {user.plan === 'Free' && (
+                      <button
+                        type="button"
+                        onClick={() => onNavigate('billing')}
+                        className="w-full sm:w-auto inline-flex items-center justify-center px-7 py-3.5 border border-stone-300/95 dark:border-stone-600 bg-white/90 dark:bg-stone-900/50 text-stone-800 dark:text-stone-200 font-medium rounded-xl hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors shadow-sm"
+                      >
+                        Upgrade plan
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => onNavigate('signup')}
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white font-semibold rounded-xl shadow-md shadow-violet-900/15 dark:shadow-violet-950/40 ring-1 ring-violet-900/10 dark:ring-white/10 transition-all duration-200 hover:shadow-lg"
+                    >
+                      Try free
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onNavigate('features')}
+                      className="w-full sm:w-auto inline-flex items-center justify-center px-7 py-3.5 border border-stone-300/95 dark:border-stone-600 bg-white/90 dark:bg-stone-900/50 text-stone-800 dark:text-stone-200 font-medium rounded-xl hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors shadow-sm"
+                    >
+                      Learn more
+                    </button>
+                  </>
                 )}
-              </>
-            ) : (
-              <>
-                <button 
-                  onClick={() => onNavigate('signup')}
-                  className="w-full sm:w-auto px-6 py-3 bg-white text-violet-900 font-bold rounded-2xl hover:bg-violet-50 shadow-lg transition-all"
-                >
-                  Try Free
-                </button>
-                <button 
-                  onClick={() => onNavigate('features')}
-                  className="w-full sm:w-auto px-6 py-3 border-2 border-white/40 hover:border-white/60 text-white font-semibold rounded-2xl transition-colors"
-                >
-                  Learn More
-                </button>
-              </>
-            )}
+              </div>
+            </div>
           </div>
         </section>
       </main>

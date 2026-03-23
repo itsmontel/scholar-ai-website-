@@ -3,6 +3,7 @@ import Header from '../common/Header';
 import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
 import ScholarMascot from '../common/ScholarMascot';
+import LandingSectionLayers from '../common/LandingSectionLayers';
 import { FOCUS_MODE_COMING_SOON, FOCUS_MODE_CHROME_EXTENSION_URL } from '../../constants/focusMode';
 
 const FOCUS_MODE_FAQ_SCHEMA = {
@@ -118,30 +119,35 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
 
       {FOCUS_MODE_COMING_SOON ? (
         <>
-        {/* Coming Soon — Chrome extension pending approval */}
-        <section className="relative py-24 sm:py-32 px-4 sm:px-6">
-          <div className="max-w-2xl mx-auto text-center">
-            <span className="inline-flex items-center px-3 py-1 bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 rounded-full text-sm font-semibold mb-6">
-              Coming Soon
-            </span>
-            <div className="w-20 h-20 rounded-2xl bg-violet-600 hover:bg-violet-500 flex items-center justify-center mx-auto mb-8 text-4xl shadow-xl shadow-violet-500/25">
+        <section className="relative py-24 sm:py-32 overflow-hidden border-b border-stone-200/90 dark:border-stone-800">
+          <LandingSectionLayers />
+          <div className="relative z-10 max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">
+              Coming soon
+            </p>
+            <div className="mx-auto mb-4 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85" aria-hidden />
+            <div className="w-16 h-16 rounded-2xl bg-violet-600 flex items-center justify-center mx-auto mb-6 text-3xl shadow-md shadow-violet-900/20 ring-1 ring-violet-900/10">
               🔒
             </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-stone-800 dark:text-stone-100 mb-6">
+            <h1
+              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-semibold text-stone-900 dark:text-stone-100 mb-4 tracking-tight leading-tight"
+              style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+            >
               Focus Mode is on its way
             </h1>
-            <p className="text-lg text-stone-500 dark:text-stone-400 leading-relaxed mb-8">
+            <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed mb-6">
               Our Chrome extension is currently under review. Soon you&apos;ll be able to block distracting sites like YouTube, TikTok, and Reddit — and earn your screen time by answering study questions first. We&apos;ll have it ready for you as soon as it&apos;s approved.
             </p>
-            <p className="text-sm text-stone-400 dark:text-stone-500">
+            <p className="text-sm text-stone-500 dark:text-stone-500">
               Thanks for your patience — it&apos;ll be worth the wait.
             </p>
             {user && (
               <button
+                type="button"
                 onClick={() => onNavigate('dashboard')}
-                className="mt-8 px-6 py-3 border-2 border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-300 font-semibold rounded-2xl hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                className="mt-8 inline-flex items-center justify-center px-7 py-3.5 border border-stone-300/95 dark:border-stone-600 bg-white/90 dark:bg-stone-900/50 text-stone-800 dark:text-stone-200 font-semibold rounded-xl hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors shadow-sm"
               >
-                Back to Dashboard
+                Back to dashboard
               </button>
             )}
           </div>
@@ -150,76 +156,67 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
         </>
       ) : (
         <>
-      {/* Premium Hero — full gradient, flagship treatment */}
-      <section className="relative py-20 sm:py-28 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-violet-950 via-violet-900 to-violet-950 dark:from-violet-950 dark:via-violet-950 dark:to-stone-900" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(139,92,246,0.35),transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_90%_90%,rgba(236,72,153,0.2),transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_40%_30%_at_10%_80%,rgba(99,102,241,0.15),transparent_50%)]" />
-        <div className="absolute top-20 left-[8%] hidden lg:block text-4xl opacity-40 animate-float">🔒</div>
-        <div className="absolute top-32 right-[10%] hidden lg:block text-3xl opacity-35 animate-float-delayed">📵</div>
-        <div className="absolute bottom-40 left-[12%] hidden lg:block text-3xl opacity-35 animate-float">🎯</div>
-        <div className="absolute bottom-32 right-[8%] hidden lg:block text-4xl opacity-40 animate-float-delayed">✨</div>
-        <div className="absolute top-1/2 left-[5%] hidden xl:block text-2xl opacity-30 animate-float">🧠</div>
-        <div className="absolute top-1/3 right-[5%] hidden xl:block text-2xl opacity-30 animate-float-delayed">⏰</div>
-
+      <section
+        className="relative py-16 sm:py-24 overflow-hidden border-b border-stone-200/90 dark:border-stone-800"
+        aria-labelledby="focus-mode-heading"
+      >
+        <LandingSectionLayers />
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 sm:mb-16">
-            <div className="inline-flex items-center gap-3 mb-8">
-              <div className="relative">
-                <div className="absolute -inset-2 bg-violet-400/20 rounded-full blur-xl animate-pulse" />
-                <ScholarMascot size={72} animated={true} pose="pointing" />
-              </div>
-              <span className="px-5 py-2 bg-white/10 backdrop-blur-md text-violet-200 rounded-full text-sm font-bold border border-white/20 shadow-lg shadow-violet-500/10">
-                ⚡ Flagship Feature
-              </span>
+          <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">
+              Focus Mode
+            </p>
+            <div className="mx-auto mb-4 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85" aria-hidden />
+            <div className="flex justify-center mb-6">
+              <ScholarMascot size={64} animated={true} pose="pointing" />
             </div>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black text-white mb-6 tracking-tight leading-[1.1]">
-              Earn Your
-              <span className="block mt-1 bg-gradient-to-r from-violet-300 via-violet-300 to-fuchsia-300 bg-clip-text text-transparent">
-                Free Time
-              </span>
+            <h1
+              id="focus-mode-heading"
+              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-semibold text-stone-900 dark:text-stone-100 mb-4 tracking-tight leading-tight"
+              style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+            >
+              Earn your free time
             </h1>
-            <p className="text-lg sm:text-xl text-violet-200/90 max-w-2xl mx-auto leading-relaxed mb-4">
+            <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed mb-2">
               Block sites until you solve a puzzle or answer study questions. No scroll until you&apos;ve earned it.
             </p>
-            <p className="text-sm text-violet-300/70 mb-10">
-              Trusted by 50k+ students
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+            <p className="text-sm text-stone-500 dark:text-stone-500 mb-8">Trusted by 50k+ students</p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center items-center flex-wrap">
               <button
+                type="button"
                 onClick={() => onNavigate('signup')}
-                className="inline-flex items-center gap-2 px-8 py-4 bg-violet-600 text-white font-bold rounded-2xl hover:bg-violet-500 hover:scale-105 active:scale-95 shadow-2xl shadow-violet-500/30 transition-all"
+                className="inline-flex items-center gap-2 px-8 py-3.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white font-semibold rounded-xl shadow-md shadow-violet-900/15 dark:shadow-violet-950/40 ring-1 ring-violet-900/10 dark:ring-white/10 transition-all duration-200 hover:shadow-lg"
               >
-                Try Focus Mode Free
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                Try Focus Mode free
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
               </button>
               {user && ['pro', 'premium', 'focus'].includes((user.plan || user.subscription_plan || '').toLowerCase()) && (
                 <button
+                  type="button"
                   onClick={() => onNavigate('account')}
-                  className="px-6 py-3 border-2 border-white/40 text-white font-semibold rounded-2xl hover:bg-white/10 transition-colors"
+                  className="inline-flex items-center justify-center px-7 py-3.5 border border-stone-300/95 dark:border-stone-600 bg-white/90 dark:bg-stone-900/50 text-stone-800 dark:text-stone-200 font-medium rounded-xl hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors shadow-sm"
                 >
-                  Manage Blocked Sites
+                  Manage blocked sites
                 </button>
               )}
               <a
                 href={FOCUS_MODE_CHROME_EXTENSION_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur-sm text-white font-semibold rounded-2xl border border-white/20 hover:bg-white/20 transition-colors"
+                className="inline-flex items-center gap-2 px-7 py-3.5 border border-stone-300/95 dark:border-stone-600 bg-white/90 dark:bg-stone-900/50 text-stone-800 dark:text-stone-200 font-medium rounded-xl hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors shadow-sm"
               >
-                <span className="text-lg">🧩</span>
-                Install Chrome Extension
+                <span className="text-lg" aria-hidden>
+                  🧩
+                </span>
+                Install Chrome extension
               </a>
             </div>
           </div>
 
-          {/* Hero Video — always visible on flagship */}
           <div className="relative max-w-4xl mx-auto">
-            <div className="absolute -inset-4 bg-gradient-to-r from-violet-500/20 via-violet-500/20 to-fuchsia-500/20 rounded-3xl blur-2xl" />
-            <div className="relative rounded-2xl overflow-hidden ring-2 ring-white/20 shadow-2xl shadow-violet-500/20">
+            <div className="relative rounded-2xl overflow-hidden border border-stone-200/90 dark:border-stone-700/90 shadow-[0_24px_80px_-24px_rgba(15,23,42,0.18)] dark:shadow-[0_28px_90px_-28px_rgba(0,0,0,0.55)] ring-1 ring-white/50 dark:ring-white/5 bg-stone-900/5">
               <video
                 autoPlay
                 loop
@@ -242,18 +239,21 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
         </div>
       </section>
 
-      {/* How It Works — 3 Steps with videos */}
-      <section className="relative py-20 sm:py-28 bg-white dark:bg-stone-900/50 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(139,92,246,0.06),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(139,92,246,0.04),transparent)]" />
-        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-16">
-            <span className="inline-block px-4 py-1.5 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-400 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
-              Simple as 1-2-3
-            </span>
-            <h2 className="text-2xl sm:text-4xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">
+      <section className="relative py-16 sm:py-24 overflow-hidden border-t border-stone-200/90 dark:border-stone-800">
+        <LandingSectionLayers variant="faq" />
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">
+              How it works
+            </p>
+            <div className="mx-auto mb-4 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85" aria-hidden />
+            <h2
+              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-semibold text-stone-900 dark:text-stone-100 mb-4 tracking-tight leading-tight"
+              style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+            >
               Pick sites to block, answer to unlock, enjoy your break
             </h2>
-            <p className="text-stone-500 dark:text-stone-400 max-w-xl mx-auto">
+            <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 max-w-xl mx-auto leading-relaxed">
               Three simple steps to turn procrastination into productivity
             </p>
           </div>
@@ -262,7 +262,7 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
             {steps.map((step) => (
               <div key={step.num} className="group relative">
                 <div className="absolute -inset-2 bg-gradient-to-br from-violet-400/10 to-violet-400/10 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="relative bg-white dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-700 rounded-3xl overflow-hidden hover:shadow-2xl hover:border-violet-300 dark:hover:border-violet-700/50 transition-all duration-300">
+                <div className="relative bg-white/90 dark:bg-stone-900/50 border border-stone-200/90 dark:border-stone-700/90 rounded-2xl overflow-hidden hover:shadow-xl hover:border-violet-300/70 dark:hover:border-violet-600/50 transition-all duration-300 ring-1 ring-white/50 dark:ring-white/5 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.08)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.35)]">
                   <div className="aspect-[5/4] min-h-[200px] flex items-center justify-center bg-gradient-to-b from-violet-500/10 to-transparent overflow-hidden">
                     <video
                       autoPlay
@@ -292,12 +292,19 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
         </div>
       </section>
 
-      {/* Why It Works + Features Grid */}
-      <section className="py-20 sm:py-28 bg-stone-50 dark:bg-stone-900">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+      <section className="relative py-16 sm:py-24 overflow-hidden border-t border-stone-200/90 dark:border-stone-800">
+        <LandingSectionLayers />
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row gap-16 items-start mb-16">
             <div className="flex-1">
-              <h2 className="text-2xl sm:text-4xl font-extrabold text-stone-800 dark:text-stone-100 mb-6">
+              <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">
+                Why it works
+              </p>
+              <div className="mb-4 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85" aria-hidden />
+              <h2
+                className="text-2xl sm:text-3xl lg:text-[2.35rem] font-semibold text-stone-900 dark:text-stone-100 mb-6 tracking-tight leading-tight"
+                style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+              >
                 Why Focus Mode actually works
               </h2>
               <p className="text-stone-600 dark:text-stone-400 leading-relaxed mb-6">
@@ -323,7 +330,7 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
             </div>
             <div className="flex-1 grid grid-cols-2 gap-4">
               {features.map((f, i) => (
-                <div key={i} className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-2xl p-6 hover:shadow-xl hover:border-violet-200 dark:hover:border-violet-800/50 transition-all">
+                <div key={i} className="bg-white/90 dark:bg-stone-900/50 border border-stone-200/90 dark:border-stone-700/90 rounded-2xl p-6 hover:shadow-lg hover:border-violet-200/80 dark:hover:border-violet-800/50 transition-all ring-1 ring-white/50 dark:ring-white/5">
                   <div className="w-12 h-12 rounded-xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center mb-3">
                     {f.icon}
                   </div>
@@ -336,9 +343,9 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
         </div>
       </section>
 
-      {/* Testimonial */}
-      <section className="py-16 sm:py-20 bg-white dark:bg-stone-900/50">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
+      <section className="relative py-16 sm:py-24 overflow-hidden border-t border-stone-200/90 dark:border-stone-800">
+        <LandingSectionLayers variant="faq" />
+        <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="relative inline-block mb-6">
             <svg className="w-14 h-14 text-violet-300 dark:text-violet-600" fill="currentColor" viewBox="0 0 24 24">
               <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
@@ -359,12 +366,21 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
         </div>
       </section>
 
-      {/* FAQ */}
-      <section className="py-20 sm:py-28 bg-stone-50 dark:bg-stone-900" id="faq">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-stone-800 dark:text-stone-100 mb-12 text-center">
-            Frequently asked questions
-          </h2>
+      <section className="relative py-16 sm:py-24 overflow-hidden border-t border-stone-200/90 dark:border-stone-800" id="faq">
+        <LandingSectionLayers />
+        <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10 sm:mb-12">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">
+              FAQ
+            </p>
+            <div className="mx-auto mb-4 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85" aria-hidden />
+            <h2
+              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-semibold text-stone-900 dark:text-stone-100 tracking-tight leading-tight"
+              style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+            >
+              Frequently asked questions
+            </h2>
+          </div>
           <div className="space-y-8">
             {[
               { q: 'Does Focus Mode work on mobile?', a: 'Focus Mode uses a Chrome extension, so it works in Chrome on desktop. Mobile browsers don\'t support extensions yet. Many students find blocking on desktop alone significantly reduces distraction.' },
@@ -372,7 +388,7 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
               { q: 'How many questions do I need to answer to unlock?', a: 'You can customize the threshold and number of questions in your settings. By default it\'s 4 out of 5 correct. The quiz pulls questions from your own study material.' },
               { q: 'Which sites can I block?', a: 'Popular presets plus any custom domain. Free: 3 sites. Paid: unlimited.' },
             ].map((faq, i) => (
-              <div key={i} className="bg-white dark:bg-stone-800 rounded-2xl p-6 border border-stone-200 dark:border-stone-700">
+              <div key={i} className="bg-white/90 dark:bg-stone-900/50 rounded-2xl p-6 border border-stone-200/90 dark:border-stone-700/90 ring-1 ring-white/50 dark:ring-white/5 shadow-sm">
                 <h3 className="font-bold text-stone-800 dark:text-stone-100 text-lg mb-3">{faq.q}</h3>
                 <p className="text-stone-500 dark:text-stone-400 leading-relaxed">{faq.a}</p>
               </div>
@@ -381,82 +397,96 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="relative py-20 sm:py-28 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-violet-950 via-violet-900 to-violet-950 dark:from-violet-950 dark:via-violet-950 dark:to-stone-900" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(139,92,246,0.25),transparent_60%)]" />
-        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <ScholarMascot size={96} animated={true} pose="celebrating" />
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white mt-6 mb-4">
-            Ready to earn your screen time?
-          </h2>
-          <p className="text-violet-200/90 mb-10 max-w-xl mx-auto">
-            Pro includes unlimited blocked sites in Focus Mode. Install the Chrome extension, add your study material, and start blocking distractions.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            {user ? (
-              <>
-                {['pro', 'premium', 'focus'].includes((user.plan || user.subscription_plan || '').toLowerCase()) ? (
-                  <button
-                    onClick={() => onNavigate('account')}
-                    className="inline-flex items-center gap-2 px-8 py-4 bg-white text-violet-900 font-bold rounded-2xl hover:bg-violet-50 hover:scale-105 active:scale-95 shadow-2xl shadow-black/25 transition-all"
-                  >
-                    Configure Focus Mode
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                  </button>
-                ) : (
-                  <>
+      <section className="relative py-16 sm:py-24 overflow-hidden border-t border-stone-200/90 dark:border-stone-800">
+        <LandingSectionLayers variant="cta" />
+        <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center rounded-2xl border border-stone-200/90 dark:border-stone-800/90 bg-white/75 dark:bg-stone-900/45 px-6 py-10 sm:px-10 sm:py-12 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.12)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.45)] backdrop-blur-[8px] ring-1 ring-white/50 dark:ring-white/5">
+            <div className="flex justify-center">
+              <ScholarMascot size={96} animated={true} pose="celebrating" />
+            </div>
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3 mt-4">
+              Focus Mode
+            </p>
+            <div className="mx-auto mb-5 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85" aria-hidden />
+            <h2
+              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-semibold text-stone-900 dark:text-stone-50 mb-4 tracking-tight leading-[1.15]"
+              style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+            >
+              Ready to earn your screen time?
+            </h2>
+            <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 mb-8 max-w-xl mx-auto leading-relaxed">
+              Pro includes unlimited blocked sites in Focus Mode. Install the Chrome extension, add your study material, and start blocking distractions.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center flex-wrap">
+              {user ? (
+                <>
+                  {['pro', 'premium', 'focus'].includes((user.plan || user.subscription_plan || '').toLowerCase()) ? (
                     <button
+                      type="button"
                       onClick={() => onNavigate('account')}
-                      className="px-6 py-3 border-2 border-white/40 text-white font-semibold rounded-2xl hover:bg-white/10 transition-colors"
+                      className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white font-semibold rounded-xl shadow-md shadow-violet-900/15 dark:shadow-violet-950/40 ring-1 ring-violet-900/10 dark:ring-white/10 transition-all duration-200 hover:shadow-lg text-base"
                     >
-                      Try with free plan (3 sites)
-                    </button>
-                    <button
-                      onClick={() => onNavigate('pricing')}
-                      className="inline-flex items-center gap-2 px-8 py-4 bg-white text-violet-900 font-bold rounded-2xl hover:bg-violet-50 hover:scale-105 active:scale-95 shadow-2xl shadow-black/25 transition-all"
-                    >
-                      Upgrade to Pro (20 sites)
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      Configure Focus Mode
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                       </svg>
                     </button>
-                  </>
-                )}
-              </>
-            ) : (
-              <>
-                <button
-                  onClick={() => onNavigate('signup')}
-                  className="inline-flex items-center gap-2 px-8 py-4 bg-violet-600 text-white font-bold rounded-2xl hover:bg-violet-500 hover:scale-105 active:scale-95 shadow-2xl shadow-violet-500/30 transition-all"
-                >
-                  Try Focus Mode Free
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => onNavigate('pricing')}
-                  className="px-6 py-3 border-2 border-white/40 text-white font-semibold rounded-2xl hover:bg-white/10 transition-colors"
-                >
-                  View Pricing
-                </button>
-              </>
-            )}
-            <a
-              href={FOCUS_MODE_CHROME_EXTENSION_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur-sm text-white font-semibold rounded-2xl border border-white/20 hover:bg-white/20 transition-colors"
-            >
-              Install Chrome Extension →
-            </a>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => onNavigate('account')}
+                        className="px-6 py-3 border-2 border-stone-300/90 dark:border-stone-600 text-stone-800 dark:text-stone-200 font-semibold rounded-xl hover:bg-stone-100/80 dark:hover:bg-stone-800/50 transition-colors"
+                      >
+                        Try with free plan (3 sites)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onNavigate('pricing')}
+                        className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white font-semibold rounded-xl shadow-md shadow-violet-900/15 dark:shadow-violet-950/40 ring-1 ring-violet-900/10 dark:ring-white/10 transition-all duration-200 hover:shadow-lg text-base"
+                      >
+                        Upgrade to Pro (20 sites)
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                      </button>
+                    </>
+                  )}
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => onNavigate('signup')}
+                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white font-semibold rounded-xl shadow-md shadow-violet-900/15 dark:shadow-violet-950/40 ring-1 ring-violet-900/10 dark:ring-white/10 transition-all duration-200 hover:shadow-lg text-base"
+                  >
+                    Try Focus Mode Free
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onNavigate('pricing')}
+                    className="px-6 py-3 border-2 border-stone-300/90 dark:border-stone-600 text-stone-800 dark:text-stone-200 font-semibold rounded-xl hover:bg-stone-100/80 dark:hover:bg-stone-800/50 transition-colors"
+                  >
+                    View Pricing
+                  </button>
+                </>
+              )}
+              <a
+                href={FOCUS_MODE_CHROME_EXTENSION_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-stone-100/90 dark:bg-stone-800/80 text-stone-800 dark:text-stone-100 font-semibold rounded-xl border border-stone-200/90 dark:border-stone-600 hover:bg-stone-200/80 dark:hover:bg-stone-700/80 transition-colors"
+              >
+                Install Chrome Extension →
+              </a>
+            </div>
+            <p className="mt-8 text-stone-500 dark:text-stone-400 text-sm">
+              Free: 3 sites • Paid: unlimited • Chrome extension required
+            </p>
           </div>
-          <p className="mt-8 text-violet-300/80 text-sm">
-            Free: 3 sites • Paid: unlimited • Chrome extension required
-          </p>
         </div>
       </section>
 
