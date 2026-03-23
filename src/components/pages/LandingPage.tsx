@@ -9,6 +9,7 @@ import ScholarMascot from '../common/ScholarMascot';
 import DualMascot from '../common/DualMascot';
 import InteractiveDocumentAnalysis, { LANDING_DEMO_FOCUS_FEEDBACK_EVENT } from '../landing/InteractiveDocumentAnalysis';
 import LandingCitationsShowcase from '../landing/LandingCitationsShowcase';
+import LandingStudyPackSection from '../landing/LandingStudyPackSection';
 import LandingTestimonialsSection from '../landing/LandingTestimonialsSection';
 import HeroEssayPreviewCard from '../landing/HeroEssayPreviewCard';
 import LandingBeforeAfterSection from '../landing/LandingBeforeAfterSection';
@@ -2703,6 +2704,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
       </section>
 
       <LandingCitationsShowcase onNavigate={onNavigate} />
+
+      <LandingStudyPackSection onNavigate={onNavigate} />
 
       <LandingTestimonialsSection />
 

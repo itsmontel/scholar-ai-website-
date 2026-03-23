@@ -285,6 +285,27 @@ html.dark .landing-hero-grid-animate {
   100% { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes study-pack-quiz-feedback {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-study-pack-quiz-feedback {
+  animation: study-pack-quiz-feedback 0.58s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-study-pack-quiz-feedback {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* Badge creature animations */
 @keyframes creature-float {
   0%, 100% { transform: translateY(0); }

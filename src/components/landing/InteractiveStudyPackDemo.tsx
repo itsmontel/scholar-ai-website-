@@ -1,215 +1,1077 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 type Tab = 'flashcards' | 'quiz' | 'lesson';
 
-const CARD = {
-  front: 'What is active recall?',
-  back: 'Retrieving information from memory (e.g. flashcards, quizzes) instead of only re-reading — strengthens long-term retention.',
+export type GeneratedPack = {
+  flashcards: { front: string; back: string }[];
+  lesson: string[];
+  quiz: { question: string; options: string[]; correctIndex: number; correctReason: string };
 };
 
-const QUIZ = {
-  q: 'Which study strategy is most supported by research for long-term retention?',
-  options: ['Cramming the night before', 'Spaced repetition', 'Highlighting only', 'Copying notes verbatim'],
-  correct: 1,
-};
+const MIN_CHARS = 48;
 
-const LESSON = [
-  'Active recall beats passive review: test yourself instead of re-reading.',
-  'Spaced repetition: revisit material over increasing intervals.',
-  'Interleaving: mix topics so your brain distinguishes concepts.',
-];
+/** Demo text typed by the fake cursor (matches interactive video). Long enough for three flashcards and six lesson bullets. */
+export const STUDY_PACK_DEMO_NOTES = `Photosynthesis converts light energy into chemical energy inside chloroplasts in plant cells. Chlorophyll absorbs mostly blue and red light while reflecting green, which is why leaves look green to us. The light-dependent reactions split water, release oxygen, and produce ATP and NADPH for the next stage. The Calvin cycle then uses that ATP and NADPH to fix carbon dioxide into sugars through the enzyme RuBisCO. Stomata on leaf surfaces regulate gas exchange so CO2 can enter while water loss is managed. Together these steps link sunlight to stored chemical energy the plant uses for growth and maintenance.`;
+
+function shuffleWithCorrect(items: string[], correctIndex: number): { items: string[]; correctIndex: number } {
+  const indexed = items.map((item, i) => ({ item, i }));
+  for (let i = indexed.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indexed[i], indexed[j]] = [indexed[j], indexed[i]];
+  }
+  const newCorrect = indexed.findIndex((x) => x.i === correctIndex);
+  return { items: indexed.map((x) => x.item), correctIndex: newCorrect };
+}
+
+function splitIntoSegments(raw: string): string[] {
+  const cleaned = raw.replace(/\r\n/g, '\n').replace(/\s+/g, ' ').trim();
+  if (!cleaned) return [];
+
+  let parts = cleaned
+    .split(/(?<=[.!?])\s+|\n+/)
+    .map((p) => p.trim())
+    .filter((p) => p.length >= 24);
+
+  if (parts.length >= 3) return parts.slice(0, 8);
+
+  if (parts.length === 2 && cleaned.length >= MIN_CHARS) {
+    const mid = Math.floor(cleaned.length / 2);
+    const extra = cleaned.slice(mid).trim();
+    if (extra.length >= 24) parts = [parts[0], parts[1], extra];
+  }
+
+  if (parts.length < 3) {
+    const flat = cleaned;
+    const n = 3;
+    const step = Math.floor(flat.length / n);
+    parts = [];
+    for (let i = 0; i < n; i++) {
+      const chunk = flat.slice(i * step, i === n - 1 ? flat.length : (i + 1) * step).trim();
+      if (chunk.length >= 20) parts.push(chunk);
+    }
+  }
+
+  return parts.slice(0, 8).filter((p) => p.length >= 20);
+}
+
+function truncateWords(s: string, maxWords: number): string {
+  const w = s.split(/\s+/).filter(Boolean);
+  if (w.length <= maxWords) return s;
+  return `${w.slice(0, maxWords).join(' ')}…`;
+}
+
+/** Picks a concrete quiz prompt from the first segments so the question reads like a real check, not placeholder copy. */
+function quizQuestionFromSegments(primary: string[]): string {
+  const s0 = (primary[0] || '').toLowerCase();
+  if (/\bchloroplast/.test(s0) && /\bphotosynthesis/.test(s0)) {
+    return 'According to your notes, where does photosynthesis convert light energy into chemical energy in plant cells?';
+  }
+  if (/\bchlorophyll\b/.test(s0)) {
+    return 'According to your notes, why do leaves often appear green?';
+  }
+  if (/\bcalvin cycle|rubisco|fix\s+carbon|carbon dioxide\b/i.test(s0)) {
+    return 'According to your notes, what does the Calvin cycle use ATP and NADPH to do?';
+  }
+  if (/\blight-dependent|atp\b.*\bnadph|split\s+water/i.test(s0)) {
+    return 'According to your notes, what do the light-dependent reactions produce for the Calvin cycle?';
+  }
+  if (/\bstomata|gas exchange|co2\b/i.test(s0)) {
+    return 'According to your notes, what do stomata regulate on the leaf surface?';
+  }
+  return 'Which option best matches the first main idea you captured from your notes?';
+}
+
+/** Short explanation of why the keyed correct option matches the question (demo / study-pack UX). */
+function quizCorrectReasonFromSegments(primary: string[]): string {
+  const s0 = (primary[0] || '').toLowerCase();
+  if (/\bchloroplast/.test(s0) && /\bphotosynthesis/.test(s0)) {
+    return 'Your notes state that photosynthesis turns light energy into chemical energy inside chloroplasts, so that sentence answers where that conversion happens in plant cells.';
+  }
+  if (/\bchlorophyll\b/.test(s0)) {
+    return 'Your notes tie leaf colour to chlorophyll absorbing blue and red light while reflecting green, which matches this answer.';
+  }
+  if (/\bcalvin cycle|rubisco|fix\s+carbon|carbon dioxide\b/i.test(s0)) {
+    return 'Your notes describe the Calvin cycle using ATP and NADPH to fix carbon dioxide into sugars, which is what this option captures.';
+  }
+  if (/\blight-dependent|atp\b.*\bnadph|split\s+water/i.test(s0)) {
+    return 'Your notes say the light-dependent reactions supply ATP and NADPH for the Calvin cycle, which matches this choice.';
+  }
+  if (/\bstomata|gas exchange|co2\b/i.test(s0)) {
+    return 'Your notes connect stomata to gas exchange (including CO₂), which is what this answer reflects.';
+  }
+  return 'This option matches the first main idea you wrote in your notes, so it fits the question.';
+}
+
+export function buildStudyPackFromNotes(raw: string, opts?: { shuffleQuiz?: boolean }): GeneratedPack | null {
+  const segments = splitIntoSegments(raw);
+  if (segments.length < 1) return null;
+
+  const primary = segments.slice(0, 3);
+  while (primary.length < 3) {
+    primary.push(primary[0] || raw.slice(0, 120));
+  }
+
+  const flashcards = primary.map((back, i) => ({
+    front: `Recall point ${i + 1}: ${truncateWords(back, 10)}`,
+    back,
+  }));
+
+  const lesson = segments.slice(0, Math.min(6, segments.length));
+
+  const distractors = [
+    'This line did not appear in the notes you pasted.',
+    'Check the syllabus for learning outcomes.',
+    'Skim the chapter intro and try again.',
+  ];
+
+  const optionsRaw = [primary[0], ...primary.slice(1), ...distractors].slice(0, 4);
+  let options: string[];
+  let correctIndex: number;
+  if (opts?.shuffleQuiz === false) {
+    options = optionsRaw.slice(0, 4);
+    correctIndex = 0;
+  } else {
+    const shuffled = shuffleWithCorrect(optionsRaw, 0);
+    options = shuffled.items;
+    correctIndex = shuffled.correctIndex;
+  }
+
+  return {
+    flashcards,
+    lesson,
+    quiz: {
+      question: quizQuestionFromSegments(primary),
+      options,
+      correctIndex,
+      correctReason: quizCorrectReasonFromSegments(primary),
+    },
+  };
+}
 
 export type InteractiveStudyPackDemoVariant = 'full' | 'side-left' | 'side-right';
 
-export default function InteractiveStudyPackDemo({
-  variant = 'full',
-}: {
-  variant?: InteractiveStudyPackDemoVariant;
-}) {
+const defaultPackStatic = buildStudyPackFromNotes(STUDY_PACK_DEMO_NOTES)!;
+
+/* --- Automated demo timings (interactive video) --- */
+const TYPE_MS = 17;
+const MOVE_CURSOR_MS = 520;
+const CLICK_CURSOR_MS = 170;
+const CURSOR_INTRO_MS = 90;
+const POST_TYPE_MS = 380;
+const LOADING_MS = 2100;
+/** Time after lesson before full demo restarts (lets user read). */
+const LOOP_AFTER_LESSON_MS = 5500;
+const FLIP_DELAY_MS = 1050;
+/** Time each card stays on the answer side before advancing (or before quiz on the last card). */
+const FLASHCARD_READ_MS = 2650;
+const QUIZ_SHOW_DELAY_MS = 650;
+/** Fake cursor pauses on a wrong option before moving to the correct answer. */
+const QUIZ_HOVER_WRONG_MS = 520;
+const QUIZ_MOVE_TO_ANSWER_MS = 600;
+const AFTER_QUIZ_REVEAL_MS = 3200;
+
+type CursorPct = { x: number; y: number };
+
+function cursorPctFromElement(stage: HTMLElement, el: HTMLElement): CursorPct {
+  const s = stage.getBoundingClientRect();
+  const b = el.getBoundingClientRect();
+  const w = Math.max(s.width, 1);
+  const h = Math.max(s.height, 1);
+  return {
+    x: ((b.left + b.width / 2 - s.left) / w) * 100,
+    y: ((b.top + b.height / 2 - s.top) / h) * 100,
+  };
+}
+
+const DEFAULT_ANCHORS: { start: CursorPct; input: CursorPct; inputRest: CursorPct; button: CursorPct } = {
+  start: { x: 88, y: 10 },
+  input: { x: 48, y: 38 },
+  inputRest: { x: 58, y: 52 },
+  button: { x: 52, y: 88 },
+};
+
+type DemoPhase =
+  | 'idle'
+  | 'cursor-to-textarea'
+  | 'click-textarea'
+  | 'typing'
+  | 'cursor-to-button'
+  | 'click-button'
+  | 'loading'
+  | 'ready';
+
+function SideLeftFlashcard({ card }: { card: { front: string; back: string } }) {
+  const [flipped, setFlipped] = useState(false);
+  return (
+    <div className="rounded-2xl border border-amber-200/80 dark:border-amber-800/50 bg-gradient-to-b from-amber-50/90 to-white dark:from-amber-950/25 dark:to-stone-900/80 p-3 shadow-sm ring-1 ring-amber-100/80 dark:ring-amber-900/40">
+      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-violet-700 dark:text-violet-400 mb-2 text-center">Flashcards</p>
+      <button
+        type="button"
+        onClick={() => setFlipped(!flipped)}
+        className="relative w-full min-h-[120px] rounded-xl border-2 border-violet-200/90 dark:border-violet-700/50 bg-gradient-to-br from-violet-50 to-white dark:from-violet-950/40 dark:to-stone-900 p-3 shadow-md transition-transform duration-300 hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-violet-400/80"
+      >
+        <p className="text-[9px] font-bold uppercase tracking-wider text-violet-600 dark:text-violet-400 mb-1">{flipped ? 'Answer' : 'Prompt'}</p>
+        <p className="text-[11px] text-stone-800 dark:text-stone-100 leading-snug text-center line-clamp-6">{flipped ? card.back : card.front}</p>
+        <p className="text-[9px] text-violet-600/80 dark:text-violet-400/90 mt-2 text-center">Tap to flip</p>
+      </button>
+    </div>
+  );
+}
+
+function SideQuiz({ quiz }: { quiz: GeneratedPack['quiz'] }) {
+  const [selected, setSelected] = useState<number | null>(null);
+  const [showAnswer, setShowAnswer] = useState(false);
+  return (
+    <div className="rounded-2xl border border-emerald-200/80 dark:border-emerald-800/50 bg-gradient-to-b from-emerald-50/90 to-white dark:from-emerald-950/20 dark:to-stone-900/80 p-3 shadow-sm ring-1 ring-emerald-100/80 dark:ring-emerald-900/40">
+      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-700 dark:text-emerald-400 mb-2 text-center">Quiz</p>
+      <div className="rounded-lg border border-stone-200/90 dark:border-stone-600 bg-white/95 dark:bg-stone-900/50 p-2">
+        <p className="text-[11px] font-medium text-stone-900 dark:text-stone-100 mb-2 leading-snug line-clamp-4">{quiz.question}</p>
+        <div className="space-y-1.5">
+          {quiz.options.slice(0, 3).map((opt, i) => {
+            const isSel = selected === i;
+            const isCorrect = i === quiz.correctIndex;
+            const reveal = showAnswer;
+            return (
+              <button
+                key={opt}
+                type="button"
+                onClick={() => {
+                  setSelected(i);
+                  setShowAnswer(true);
+                }}
+                className={`w-full text-left text-[10px] px-2 py-1.5 rounded-md border transition-all ${
+                  reveal && isCorrect
+                    ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-100'
+                    : reveal && isSel && !isCorrect
+                      ? 'border-rose-400 bg-rose-50 dark:bg-rose-950/30 text-rose-900 dark:text-rose-100'
+                      : isSel
+                        ? 'border-violet-400 bg-violet-50 dark:bg-violet-950/30'
+                        : 'border-stone-200 dark:border-stone-600 hover:border-violet-300/70'
+                }`}
+              >
+                <span className="font-semibold text-stone-500 dark:text-stone-400 mr-1">{String.fromCharCode(65 + i)}.</span>
+                <span className="line-clamp-2">{opt}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function InteractiveStudyPackFull() {
+  const stageRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const quizStageRef = useRef<HTMLDivElement>(null);
+  const quizOptionRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const anchorsRef = useRef(DEFAULT_ANCHORS);
+  const timersRef = useRef<number[]>([]);
+  const sequenceTimersRef = useRef<number[]>([]);
+  const typeIntervalRef = useRef<number | null>(null);
+  const typedRef = useRef('');
+  const phaseRef = useRef<DemoPhase>('idle');
+  const inViewRef = useRef(false);
+  const reduceMotionRef = useRef(false);
+  const runDemoRef = useRef<() => void>(() => {});
+  const walkthroughEpochRef = useRef(0);
+
+  const [phase, setPhase] = useState<DemoPhase>('idle');
+  const [typed, setTyped] = useState('');
+  const [cursorPct, setCursorPct] = useState<CursorPct>(DEFAULT_ANCHORS.start);
+  const [cursorClicking, setCursorClicking] = useState(false);
+  const [showCursor, setShowCursor] = useState(false);
+  const [pack, setPack] = useState<GeneratedPack | null>(null);
   const [tab, setTab] = useState<Tab>('flashcards');
+  const [cardIdx, setCardIdx] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [selected, setSelected] = useState<number | null>(null);
   const [showAnswer, setShowAnswer] = useState(false);
+  const [walkthroughLock, setWalkthroughLock] = useState(false);
+  const [showQuizCursor, setShowQuizCursor] = useState(false);
 
-  if (variant === 'side-left') {
-    return (
-      <div className="rounded-2xl border border-amber-200/80 dark:border-amber-800/50 bg-gradient-to-b from-amber-50/90 to-white dark:from-amber-950/25 dark:to-stone-900/80 p-3 shadow-sm ring-1 ring-amber-100/80 dark:ring-amber-900/40">
-        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-violet-700 dark:text-violet-400 mb-2 text-center">Flashcards</p>
-        <button
-          type="button"
-          onClick={() => setFlipped(!flipped)}
-          className="relative w-full min-h-[120px] rounded-xl border-2 border-violet-200/90 dark:border-violet-700/50 bg-gradient-to-br from-violet-50 to-white dark:from-violet-950/40 dark:to-stone-900 p-3 shadow-md transition-transform duration-300 hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-violet-400/80"
-        >
-          <p className="text-[9px] font-bold uppercase tracking-wider text-violet-600 dark:text-violet-400 mb-1">
-            {flipped ? 'Back' : 'Front'}
-          </p>
-          <p className="text-[11px] text-stone-800 dark:text-stone-100 leading-snug text-center line-clamp-5">
-            {flipped ? CARD.back : CARD.front}
-          </p>
-          <p className="text-[9px] text-violet-600/80 dark:text-violet-400/90 mt-2 text-center">Tap to flip</p>
-        </button>
-      </div>
+  const pushTimer = (id: number) => {
+    timersRef.current.push(id);
+  };
+
+  const clearTimers = () => {
+    timersRef.current.forEach((id) => clearTimeout(id));
+    timersRef.current = [];
+  };
+
+  const clearTypeInterval = () => {
+    if (typeIntervalRef.current != null) {
+      clearInterval(typeIntervalRef.current);
+      typeIntervalRef.current = null;
+    }
+  };
+
+  const clearSequenceTimers = () => {
+    sequenceTimersRef.current.forEach((id) => clearTimeout(id));
+    sequenceTimersRef.current = [];
+  };
+
+  const pushSequenceTimer = (id: number) => {
+    sequenceTimersRef.current.push(id);
+  };
+
+  const clearAll = () => {
+    clearTimers();
+    clearTypeInterval();
+    clearSequenceTimers();
+  };
+
+  const isActive = useCallback(
+    () => inViewRef.current && typeof document !== 'undefined' && document.visibilityState === 'visible',
+    []
+  );
+
+  const autosizeDemoTextarea = useCallback(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    const max = Math.min(typeof window !== 'undefined' ? window.innerHeight * 0.58 : 680, 680);
+    const min = 140;
+    const h = Math.max(el.scrollHeight, min);
+    const next = Math.min(h, max);
+    el.style.height = `${next}px`;
+    el.style.overflowY = h > max ? 'auto' : 'hidden';
+  }, []);
+
+  const measureCursorAnchors = useCallback(() => {
+    const stage = stageRef.current;
+    const ta = textareaRef.current;
+    const btn = buttonRef.current;
+    if (!stage || !ta || !btn) return;
+    const s = stage.getBoundingClientRect();
+    if (s.width < 32 || s.height < 32) return;
+    const taR = ta.getBoundingClientRect();
+    const bR = btn.getBoundingClientRect();
+    const pct = (cx: number, cy: number): CursorPct => ({
+      x: ((cx - s.left) / s.width) * 100,
+      y: ((cy - s.top) / s.height) * 100,
+    });
+    anchorsRef.current = {
+      start: pct(s.right - 36, s.top + 24),
+      input: pct(taR.left + taR.width * 0.25, taR.top + taR.height * 0.35),
+      inputRest: pct(taR.left + taR.width * 0.72, taR.top + taR.height * 0.55),
+      button: pct(bR.left + bR.width / 2, bR.top + bR.height / 2),
+    };
+  }, []);
+
+  useLayoutEffect(() => {
+    if (phase === 'ready' || phase === 'loading') return;
+    autosizeDemoTextarea();
+    measureCursorAnchors();
+  }, [typed, phase, autosizeDemoTextarea, measureCursorAnchors]);
+
+  useLayoutEffect(() => {
+    if (phase === 'ready' || phase === 'loading') return;
+    measureCursorAnchors();
+    const stage = stageRef.current;
+    if (!stage || typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(() => {
+      autosizeDemoTextarea();
+      measureCursorAnchors();
+    });
+    ro.observe(stage);
+    return () => ro.disconnect();
+  }, [phase, measureCursorAnchors, autosizeDemoTextarea]);
+
+  useEffect(() => {
+    phaseRef.current = phase;
+  }, [phase]);
+
+  useEffect(() => {
+    typedRef.current = typed;
+  }, [typed]);
+
+  useEffect(() => {
+    try {
+      reduceMotionRef.current = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    } catch {
+      reduceMotionRef.current = false;
+    }
+  }, []);
+
+  const beginAfterTyping = useCallback(() => {
+    measureCursorAnchors();
+    pushTimer(
+      window.setTimeout(() => {
+        if (!isActive()) return;
+        setShowCursor(true);
+        setCursorPct(anchorsRef.current.inputRest);
+        setPhase('cursor-to-button');
+        phaseRef.current = 'cursor-to-button';
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            setCursorPct(anchorsRef.current.button);
+          });
+        });
+        pushTimer(
+          window.setTimeout(() => {
+            if (!isActive()) return;
+            setPhase('click-button');
+            phaseRef.current = 'click-button';
+            setCursorClicking(true);
+            pushTimer(
+              window.setTimeout(() => {
+                if (!isActive()) return;
+                setCursorClicking(false);
+                setShowCursor(false);
+                setPhase('loading');
+                phaseRef.current = 'loading';
+                pushTimer(
+                  window.setTimeout(() => {
+                    if (!isActive()) return;
+                    const next = buildStudyPackFromNotes(STUDY_PACK_DEMO_NOTES, { shuffleQuiz: false });
+                    if (next) {
+                      setPack(next);
+                      setCardIdx(0);
+                      setFlipped(false);
+                      setSelected(null);
+                      setShowAnswer(false);
+                      setTab('flashcards');
+                    }
+                    setPhase('ready');
+                    phaseRef.current = 'ready';
+                  }, LOADING_MS)
+                );
+              }, CLICK_CURSOR_MS)
+            );
+          }, MOVE_CURSOR_MS)
+        );
+      }, POST_TYPE_MS)
     );
-  }
+  }, [isActive, measureCursorAnchors]);
 
-  if (variant === 'side-right') {
-    return (
-      <div className="rounded-2xl border border-emerald-200/80 dark:border-emerald-800/50 bg-gradient-to-b from-emerald-50/90 to-white dark:from-emerald-950/20 dark:to-stone-900/80 p-3 shadow-sm ring-1 ring-emerald-100/80 dark:ring-emerald-900/40">
-        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-700 dark:text-emerald-400 mb-2 text-center">Quiz</p>
-        <div className="rounded-lg border border-stone-200/90 dark:border-stone-600 bg-white/95 dark:bg-stone-900/50 p-2">
-          <p className="text-[11px] font-medium text-stone-900 dark:text-stone-100 mb-2 leading-snug">{QUIZ.q}</p>
-          <div className="space-y-1.5">
-            {QUIZ.options.slice(0, 3).map((opt, i) => {
-              const isSel = selected === i;
-              const isCorrect = i === QUIZ.correct;
-              const reveal = showAnswer;
-              return (
-                <button
-                  key={opt}
-                  type="button"
-                  onClick={() => {
-                    setSelected(i);
-                    setShowAnswer(true);
-                  }}
-                  className={`w-full text-left text-[10px] px-2 py-1.5 rounded-md border transition-all ${
-                    reveal && isCorrect
-                      ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-100'
-                      : reveal && isSel && !isCorrect
-                        ? 'border-rose-400 bg-rose-50 dark:bg-rose-950/30 text-rose-900 dark:text-rose-100'
-                        : isSel
-                          ? 'border-violet-400 bg-violet-50 dark:bg-violet-950/30'
-                          : 'border-stone-200 dark:border-stone-600 hover:border-violet-300/70'
-                  }`}
-                >
-                  <span className="font-semibold text-stone-500 dark:text-stone-400 mr-1">{String.fromCharCode(65 + i)}.</span>
-                  {opt}
-                </button>
+  const runDemo = useCallback(() => {
+    if (!isActive()) return;
+    clearAll();
+    setTyped('');
+    typedRef.current = '';
+    setShowQuizCursor(false);
+    measureCursorAnchors();
+
+    if (reduceMotionRef.current) {
+      setShowCursor(false);
+      setTyped(STUDY_PACK_DEMO_NOTES);
+      typedRef.current = STUDY_PACK_DEMO_NOTES;
+      setPhase('loading');
+      phaseRef.current = 'loading';
+      pushTimer(
+        window.setTimeout(() => {
+          if (!isActive()) return;
+          const next = buildStudyPackFromNotes(STUDY_PACK_DEMO_NOTES, { shuffleQuiz: false });
+          if (next) {
+            setPack(next);
+            setTab('flashcards');
+            setPhase('ready');
+            phaseRef.current = 'ready';
+          }
+        }, 400)
+      );
+      return;
+    }
+
+    setShowCursor(true);
+    setCursorClicking(false);
+    setCursorPct(anchorsRef.current.start);
+    setPhase('cursor-to-textarea');
+    phaseRef.current = 'cursor-to-textarea';
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setCursorPct(anchorsRef.current.input);
+      });
+    });
+
+    pushTimer(
+      window.setTimeout(() => {
+        if (!isActive()) return;
+        setPhase('click-textarea');
+        phaseRef.current = 'click-textarea';
+        setCursorClicking(true);
+        pushTimer(
+          window.setTimeout(() => {
+            if (!isActive()) return;
+            setCursorClicking(false);
+            setPhase('typing');
+            phaseRef.current = 'typing';
+            setCursorPct(anchorsRef.current.inputRest);
+
+            const chars = [...STUDY_PACK_DEMO_NOTES];
+            let i = 0;
+            typeIntervalRef.current = window.setInterval(() => {
+              if (!isActive()) return;
+              i += 1;
+              const next = chars.slice(0, i).join('');
+              setTyped(next);
+              typedRef.current = next;
+              if (i >= chars.length) {
+                clearTypeInterval();
+                beginAfterTyping();
+              }
+            }, TYPE_MS);
+          }, CLICK_CURSOR_MS)
+        );
+      }, CURSOR_INTRO_MS + MOVE_CURSOR_MS)
+    );
+  }, [isActive, measureCursorAnchors, beginAfterTyping]);
+
+  runDemoRef.current = runDemo;
+
+  /** Stop timers and reset when the demo scrolls off-screen or the tab is hidden (no background playback). */
+  const pauseDemo = useCallback(() => {
+    walkthroughEpochRef.current += 1;
+    clearAll();
+    setWalkthroughLock(false);
+    setShowQuizCursor(false);
+    setShowCursor(false);
+    setCursorClicking(false);
+    setTyped('');
+    typedRef.current = '';
+    setPack(null);
+    setPhase('idle');
+    phaseRef.current = 'idle';
+    setTab('flashcards');
+    setCardIdx(0);
+    setFlipped(false);
+    setSelected(null);
+    setShowAnswer(false);
+  }, []);
+
+  /** After pack is ready: flip flashcard → quiz (auto-pick correct) → lesson → loop. */
+  useEffect(() => {
+    if (phase !== 'ready' || !pack) return;
+    const epoch = ++walkthroughEpochRef.current;
+    const q = pack.quiz;
+
+    const stale = () => walkthroughEpochRef.current !== epoch || !inViewRef.current;
+
+    setWalkthroughLock(true);
+    setShowQuizCursor(false);
+    setTab('flashcards');
+    setCardIdx(0);
+    setFlipped(false);
+    setSelected(null);
+    setShowAnswer(false);
+
+    const scheduleLoop = () => {
+      if (stale()) return;
+      setShowQuizCursor(false);
+      setWalkthroughLock(false);
+      clearAll();
+      setTyped('');
+      typedRef.current = '';
+      setPack(null);
+      setPhase('idle');
+      phaseRef.current = 'idle';
+      runDemoRef.current();
+    };
+
+    const nCards = Math.min(3, pack.flashcards.length);
+    const flashPhaseMs = nCards * FLIP_DELAY_MS + nCards * FLASHCARD_READ_MS;
+
+    if (reduceMotionRef.current) {
+      for (let i = 0; i < nCards; i++) {
+        pushSequenceTimer(
+          window.setTimeout(() => {
+            if (stale()) return;
+            setCardIdx(i);
+            setFlipped(true);
+          }, 200 * i)
+        );
+      }
+      pushSequenceTimer(
+        window.setTimeout(() => {
+          if (stale()) return;
+          setTab('quiz');
+          setSelected(q.correctIndex);
+          setShowAnswer(true);
+          pushSequenceTimer(
+            window.setTimeout(() => {
+              if (stale()) return;
+              setTab('lesson');
+              pushSequenceTimer(
+                window.setTimeout(() => {
+                  if (stale()) return;
+                  scheduleLoop();
+                }, 5000)
               );
-            })}
-          </div>
-          {showAnswer && (
-            <p className="text-[9px] text-emerald-700 dark:text-emerald-400 mt-2 font-medium leading-snug">
-              Spaced repetition wins.
-            </p>
-          )}
-        </div>
-      </div>
+            }, 500)
+          );
+        }, 200 * nCards + 150)
+      );
+      return () => {
+        walkthroughEpochRef.current += 1;
+        clearSequenceTimers();
+      };
+    }
+
+    for (let k = 0; k < nCards; k++) {
+      const tFlip = k * (FLASHCARD_READ_MS + FLIP_DELAY_MS) + FLIP_DELAY_MS;
+      pushSequenceTimer(
+        window.setTimeout(() => {
+          if (stale()) return;
+          setCardIdx(k);
+          setFlipped(true);
+        }, tFlip)
+      );
+      if (k < nCards - 1) {
+        const tNext = (k + 1) * (FLASHCARD_READ_MS + FLIP_DELAY_MS);
+        pushSequenceTimer(
+          window.setTimeout(() => {
+            if (stale()) return;
+            setCardIdx(k + 1);
+            setFlipped(false);
+          }, tNext)
+        );
+      }
+    }
+
+    const tQuizTab = flashPhaseMs;
+    const tLesson =
+      tQuizTab +
+      QUIZ_SHOW_DELAY_MS +
+      QUIZ_HOVER_WRONG_MS +
+      QUIZ_MOVE_TO_ANSWER_MS +
+      CLICK_CURSOR_MS +
+      AFTER_QUIZ_REVEAL_MS;
+    const tLoop = tLesson + LOOP_AFTER_LESSON_MS;
+    const wrongIdx = [0, 1, 2, 3].find((i) => i !== q.correctIndex) ?? 1;
+
+    pushSequenceTimer(
+      window.setTimeout(() => {
+        if (stale()) return;
+        setTab('quiz');
+        setSelected(null);
+        setShowAnswer(false);
+        pushSequenceTimer(
+          window.setTimeout(() => {
+            if (stale()) return;
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                if (stale()) return;
+                const stage = quizStageRef.current;
+                const wrongEl = quizOptionRefs.current[wrongIdx];
+                const correctEl = quizOptionRefs.current[q.correctIndex];
+                if (!stage || !wrongEl || !correctEl) {
+                  setSelected(q.correctIndex);
+                  setShowAnswer(true);
+                  return;
+                }
+                setShowQuizCursor(true);
+                setCursorClicking(false);
+                setCursorPct(cursorPctFromElement(stage, wrongEl));
+                pushSequenceTimer(
+                  window.setTimeout(() => {
+                    if (stale()) return;
+                    setCursorPct(cursorPctFromElement(stage, correctEl));
+                    pushSequenceTimer(
+                      window.setTimeout(() => {
+                        if (stale()) return;
+                        setCursorClicking(true);
+                        pushSequenceTimer(
+                          window.setTimeout(() => {
+                            if (stale()) return;
+                            setSelected(q.correctIndex);
+                            setShowAnswer(true);
+                            setCursorClicking(false);
+                          }, CLICK_CURSOR_MS)
+                        );
+                      }, QUIZ_MOVE_TO_ANSWER_MS)
+                    );
+                  }, QUIZ_HOVER_WRONG_MS)
+                );
+              });
+            });
+          }, QUIZ_SHOW_DELAY_MS)
+        );
+      }, tQuizTab)
     );
-  }
+
+    pushSequenceTimer(
+      window.setTimeout(() => {
+        if (stale()) return;
+        setTab('lesson');
+        setShowQuizCursor(false);
+      }, tLesson)
+    );
+
+    pushSequenceTimer(
+      window.setTimeout(() => {
+        if (stale()) return;
+        scheduleLoop();
+      }, tLoop)
+    );
+
+    return () => {
+      walkthroughEpochRef.current += 1;
+      clearSequenceTimers();
+    };
+  }, [phase, pack]);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') {
+      inViewRef.current = true;
+      const t = window.setTimeout(() => runDemo(), 600);
+      return () => clearTimeout(t);
+    }
+    const io = new IntersectionObserver(
+      ([e]) => {
+        const inView = e.isIntersecting && e.intersectionRatio > 0.12;
+        inViewRef.current = inView;
+        if (!inView) {
+          pauseDemo();
+          return;
+        }
+        if (phaseRef.current === 'idle' && !timersRef.current.length) {
+          runDemo();
+        }
+      },
+      { threshold: [0, 0.12, 0.25] }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [runDemo, pauseDemo]);
+
+  useEffect(() => {
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') {
+        pauseDemo();
+        return;
+      }
+      if (document.visibilityState === 'visible' && inViewRef.current && phaseRef.current === 'idle' && !timersRef.current.length) {
+        runDemo();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
+  }, [runDemo, pauseDemo]);
+
+  const replay = useCallback(() => {
+    pauseDemo();
+    setTimeout(() => runDemo(), 200);
+  }, [pauseDemo, runDemo]);
+
+  const cards = pack?.flashcards ?? [];
+  const lessonLines = pack?.lesson ?? [];
+  const quizData = pack?.quiz;
+  const currentCard = cards[Math.min(cardIdx, Math.max(cards.length - 1, 0))];
+
+  const isFieldActive = phase === 'click-textarea' || phase === 'typing';
+  const isLoadingPhase = phase === 'loading';
+  const showStage = phase !== 'ready' && phase !== 'loading';
+  const demoTyping = phase === 'typing';
 
   return (
-    <div className="rounded-2xl border border-amber-200/80 dark:border-amber-800/50 bg-gradient-to-b from-amber-50/90 to-white dark:from-amber-950/25 dark:to-stone-900/80 p-4 sm:p-6 shadow-sm ring-1 ring-amber-100/80 dark:ring-amber-900/40">
-      <div className="mb-4">
-        <h3 className="text-base sm:text-lg font-semibold text-stone-900 dark:text-stone-50" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
-          Preview your study pack
+    <div ref={containerRef} className="space-y-4">
+      <div className="mb-1">
+        <h3 className="text-lg sm:text-xl font-semibold text-stone-900 dark:text-stone-50 tracking-tight" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
+          Study pack demo
         </h3>
-        <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 mt-1">
-          Flip a card, answer a sample quiz, or skim a mini-lesson — all from one paste.
+        <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 mt-1.5 leading-relaxed">
+          Watch the cursor paste notes, then see flashcards, a quiz, and a lesson appear. Runs in your browser only.
         </p>
       </div>
 
-      <div className="flex rounded-xl border border-amber-200/90 dark:border-amber-800/60 bg-white/90 dark:bg-stone-800/80 p-1 mb-5">
-        {(
-          [
-            { id: 'flashcards' as const, label: 'Flashcards' },
-            { id: 'quiz' as const, label: 'Quiz' },
-            { id: 'lesson' as const, label: 'Lesson' },
-          ] as const
-        ).map(({ id, label }) => (
-          <button
-            key={id}
-            type="button"
-            onClick={() => {
-              setTab(id);
-              setFlipped(false);
-              setSelected(null);
-              setShowAnswer(false);
-            }}
-            className={`flex-1 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
-              tab === id
-                ? 'bg-amber-600 text-white shadow-sm'
-                : 'text-stone-600 dark:text-stone-400 hover:bg-amber-50 dark:hover:bg-amber-950/30'
-            }`}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+      <div className="rounded-2xl border border-amber-200/85 dark:border-amber-800/55 bg-gradient-to-b from-amber-50/95 via-orange-50/40 to-violet-50/50 dark:from-amber-950/30 dark:via-stone-900 dark:to-violet-950/25 p-4 sm:p-6 shadow-[0_20px_50px_-18px_rgba(245,158,11,0.25)] dark:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.55)] ring-1 ring-amber-100/90 dark:ring-amber-900/45">
+        {isLoadingPhase && (
+          <div className="flex flex-col items-center justify-center py-14 px-4 text-center">
+            <div className="relative mb-6">
+              <div className="h-14 w-14 rounded-full border-4 border-violet-200/90 dark:border-violet-800 border-t-violet-600 dark:border-t-violet-400 motion-safe:animate-spin" />
+              <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-400/20 to-violet-500/20 blur-xl motion-safe:animate-pulse" aria-hidden />
+            </div>
+            <p className="text-sm font-semibold text-stone-800 dark:text-stone-100">Building your pack</p>
+            <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">Flashcards, quiz, lesson</p>
+          </div>
+        )}
 
-      {tab === 'flashcards' && (
-        <div className="flex flex-col items-center">
-          <button
-            type="button"
-            onClick={() => setFlipped(!flipped)}
-            className="relative w-full max-w-md min-h-[160px] rounded-2xl border-2 border-violet-200/90 dark:border-violet-700/50 bg-gradient-to-br from-violet-50 to-white dark:from-violet-950/40 dark:to-stone-900 p-6 shadow-md transition-transform duration-300 hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-violet-400/80"
-            style={{ perspective: 1000 }}
-          >
-            <p className="text-[10px] font-bold uppercase tracking-wider text-violet-600 dark:text-violet-400 mb-2">
-              {flipped ? 'Back' : 'Front'}
-            </p>
-            <p className="text-sm sm:text-base text-stone-800 dark:text-stone-100 leading-relaxed text-center">
-              {flipped ? CARD.back : CARD.front}
-            </p>
-            <p className="text-xs text-violet-600/80 dark:text-violet-400/90 mt-4 text-center">Tap to flip</p>
-          </button>
-        </div>
-      )}
+        {showStage && (
+          <div ref={stageRef} className="relative overflow-visible min-h-[220px]">
+            {showCursor && (
+              <div
+                className="pointer-events-none absolute z-[45] transition-[left,top,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[left,top,transform]"
+                style={{
+                  left: `${cursorPct.x}%`,
+                  top: `${cursorPct.y}%`,
+                  transform: cursorClicking ? 'translate(-2px,-2px) scale(0.9)' : 'translate(-2px,-2px) scale(1)',
+                }}
+                aria-hidden
+              >
+                <svg width="28" height="28" viewBox="0 0 24 24" className="drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)]" aria-hidden>
+                  <path
+                    d="M4.5 2.2L4.5 17.5L8.2 14.1L10.8 19.2L13.5 18.1L10.9 12.8L17.2 10.5L4.5 2.2Z"
+                    className="fill-stone-900 dark:fill-stone-50"
+                    stroke="white"
+                    strokeWidth="1.2"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+            )}
 
-      {tab === 'quiz' && (
-        <div className="rounded-xl border border-stone-200/90 dark:border-stone-600 bg-white/95 dark:bg-stone-900/50 p-4">
-          <p className="text-sm font-medium text-stone-900 dark:text-stone-100 mb-3">{QUIZ.q}</p>
-          <div className="space-y-2">
-            {QUIZ.options.map((opt, i) => {
-              const isSel = selected === i;
-              const isCorrect = i === QUIZ.correct;
-              const reveal = showAnswer;
-              return (
+            <div
+              className={`relative rounded-2xl border transition-all duration-500 bg-white/95 dark:bg-stone-900/60 ${
+                isFieldActive
+                  ? 'border-amber-400/80 dark:border-amber-600/50 shadow-[0_12px_40px_-12px_rgba(245,158,11,0.35)] ring-2 ring-amber-300/30'
+                  : 'border-amber-200/90 dark:border-amber-800/50 shadow-inner'
+              }`}
+            >
+              <textarea
+                ref={textareaRef}
+                value={typed}
+                readOnly
+                placeholder="Your notes appear here…"
+                rows={6}
+                className="relative w-full min-h-[140px] sm:min-h-[160px] rounded-[14px] p-4 sm:p-5 text-stone-800 dark:text-stone-100 text-sm sm:text-[15px] bg-transparent border-none outline-none resize-none placeholder-stone-400 dark:placeholder-stone-500 leading-relaxed overflow-x-hidden"
+                aria-label="Demo notes (illustration)"
+              />
+              <div className="absolute bottom-3 right-4 text-[11px] font-medium tabular-nums text-amber-700/90 dark:text-amber-400/90">
+                {typed.length} chars{demoTyping ? <span className="ml-1 inline-block w-1.5 h-4 bg-amber-500 motion-safe:animate-pulse align-middle rounded-sm" aria-hidden /> : null}
+              </div>
+            </div>
+
+            <div className="flex justify-center mt-6">
+              <button
+                ref={buttonRef}
+                type="button"
+                disabled={typed.length < MIN_CHARS && phase !== 'click-button'}
+                className={`group relative px-8 sm:px-10 py-3.5 rounded-2xl flex items-center justify-center gap-2.5 font-semibold text-base min-w-[220px] overflow-hidden transition-all ${
+                  typed.length >= MIN_CHARS || phase === 'click-button' || phase === 'cursor-to-button'
+                    ? 'bg-gradient-to-b from-amber-500 via-amber-600 to-orange-600 dark:from-amber-500 dark:via-amber-600 dark:to-orange-700 text-white shadow-[0_14px_36px_-10px_rgba(234,88,12,0.55)] ring-1 ring-amber-300/40'
+                    : 'bg-stone-200 dark:bg-stone-700 text-stone-400 cursor-not-allowed'
+                } ${phase === 'cursor-to-button' || phase === 'click-button' ? 'ring-2 ring-amber-400/50 ring-offset-2 ring-offset-white dark:ring-offset-stone-900' : ''}`}
+              >
+                {(phase === 'cursor-to-button' || phase === 'click-button') && (
+                  <span className="absolute inset-0 bg-white/25 animate-ping rounded-2xl opacity-30" aria-hidden />
+                )}
+                <span className="relative">Build study pack</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {phase === 'ready' && pack && quizData && currentCard && (
+          <div ref={quizStageRef} className="relative space-y-5 pt-1">
+            {showQuizCursor && tab === 'quiz' && (
+              <div
+                className="pointer-events-none absolute z-[50] transition-[left,top,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[left,top,transform]"
+                style={{
+                  left: `${cursorPct.x}%`,
+                  top: `${cursorPct.y}%`,
+                  transform: cursorClicking ? 'translate(-2px,-2px) scale(0.9)' : 'translate(-2px,-2px) scale(1)',
+                }}
+                aria-hidden
+              >
+                <svg width="28" height="28" viewBox="0 0 24 24" className="drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)]" aria-hidden>
+                  <path
+                    d="M4.5 2.2L4.5 17.5L8.2 14.1L10.8 19.2L13.5 18.1L10.9 12.8L17.2 10.5L4.5 2.2Z"
+                    className="fill-stone-900 dark:fill-stone-50"
+                    stroke="white"
+                    strokeWidth="1.2"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between gap-2 border-b border-amber-200/60 dark:border-amber-800/40 pb-3">
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-violet-700 dark:text-violet-400">Pack ready</p>
+              <button type="button" onClick={replay} className="text-xs font-semibold text-amber-800 dark:text-amber-300 hover:underline">
+                Replay demo
+              </button>
+            </div>
+
+            <div className="flex rounded-xl border border-amber-200/90 dark:border-amber-800/60 bg-amber-100/50 dark:bg-amber-950/20 p-1">
+              {(
+                [
+                  { id: 'flashcards' as const, label: 'Flashcards' },
+                  { id: 'quiz' as const, label: 'Quiz' },
+                  { id: 'lesson' as const, label: 'Lesson' },
+                ] as const
+              ).map(({ id, label }) => (
                 <button
-                  key={opt}
+                  key={id}
                   type="button"
+                  disabled={walkthroughLock}
                   onClick={() => {
-                    setSelected(i);
-                    setShowAnswer(true);
+                    setTab(id);
+                    setFlipped(false);
+                    setSelected(null);
+                    setShowAnswer(false);
                   }}
-                  className={`w-full text-left text-sm px-3 py-2.5 rounded-lg border transition-all ${
-                    reveal && isCorrect
-                      ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-100'
-                      : reveal && isSel && !isCorrect
-                        ? 'border-rose-400 bg-rose-50 dark:bg-rose-950/30 text-rose-900 dark:text-rose-100'
-                        : isSel
-                          ? 'border-violet-400 bg-violet-50 dark:bg-violet-950/30'
-                          : 'border-stone-200 dark:border-stone-600 hover:border-violet-300/70 dark:hover:border-violet-600/50'
+                  className={`flex-1 py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all disabled:pointer-events-none disabled:opacity-50 ${
+                    tab === id
+                      ? 'bg-amber-600 text-white shadow-md'
+                      : 'text-stone-600 dark:text-stone-400 hover:bg-amber-50 dark:hover:bg-amber-950/40'
                   }`}
                 >
-                  <span className="font-semibold text-stone-500 dark:text-stone-400 mr-2">{String.fromCharCode(65 + i)}.</span>
-                  {opt}
+                  {label}
                 </button>
-              );
-            })}
-          </div>
-          {showAnswer && (
-            <p className="text-xs text-emerald-700 dark:text-emerald-400 mt-3 font-medium animate-in fade-in">
-              Spaced repetition distributes practice over time — proven to boost retention.
-            </p>
-          )}
-        </div>
-      )}
+              ))}
+            </div>
 
-      {tab === 'lesson' && (
-        <div className="rounded-xl border border-stone-200/90 dark:border-stone-600 bg-white/95 dark:bg-stone-900/50 p-4">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 mb-3">Mini-lesson</p>
-          <ul className="space-y-2.5">
-            {LESSON.map((line, i) => (
-              <li key={i} className="flex gap-2 text-sm text-stone-700 dark:text-stone-300 leading-relaxed">
-                <span className="shrink-0 w-6 h-6 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-200 text-xs font-bold flex items-center justify-center">
-                  {i + 1}
-                </span>
-                <span>{line}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+            {tab === 'flashcards' && (
+              <div className="space-y-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-violet-600 dark:text-violet-400 text-center">
+                  Card {cardIdx + 1} of {cards.length} · {flipped ? 'Answer' : 'Question'}
+                </p>
+                <button
+                  type="button"
+                  disabled={walkthroughLock}
+                  onClick={() => !walkthroughLock && setFlipped((f) => !f)}
+                  className="group relative w-full text-left focus:outline-none focus:ring-2 focus:ring-violet-400/80 rounded-2xl disabled:pointer-events-none disabled:opacity-90"
+                >
+                  <div className="[perspective:1400px] w-full min-h-[180px]">
+                    <div
+                      className="relative w-full min-h-[180px] will-change-transform transition-transform duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:duration-0"
+                      style={{
+                        transformStyle: 'preserve-3d',
+                        transform: `rotateY(${flipped ? 180 : 0}deg)`,
+                      }}
+                    >
+                      <div
+                        className="absolute inset-0 flex flex-col rounded-2xl border-2 border-violet-300/80 dark:border-violet-600/50 bg-gradient-to-br from-violet-50 via-white to-amber-50/90 dark:from-violet-950/40 dark:via-stone-900 dark:to-amber-950/20 p-6 shadow-lg [backface-visibility:hidden]"
+                        style={{ transform: 'rotateY(0deg)' }}
+                      >
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-violet-600 dark:text-violet-400 mb-2">Question</p>
+                        <p className="text-sm sm:text-[15px] text-stone-800 dark:text-stone-100 leading-relaxed flex-1">{currentCard.front}</p>
+                        <p className="text-xs text-violet-600 dark:text-violet-400 mt-4 font-medium">Tap to flip</p>
+                      </div>
+                      <div
+                        className="absolute inset-0 flex flex-col rounded-2xl border-2 border-amber-300/80 dark:border-amber-700/50 bg-gradient-to-br from-amber-50/95 via-white to-violet-50/80 dark:from-amber-950/30 dark:via-stone-900 dark:to-violet-950/30 p-6 shadow-lg [backface-visibility:hidden]"
+                        style={{ transform: 'rotateY(180deg)' }}
+                      >
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 mb-2">Answer</p>
+                        <p className="text-sm sm:text-[15px] text-stone-800 dark:text-stone-100 leading-relaxed flex-1">{currentCard.back}</p>
+                        <p className="text-xs text-amber-700/80 dark:text-amber-400/90 mt-4 font-medium">Tap to flip back</p>
+                      </div>
+                    </div>
+                  </div>
+                </button>
+                <div className="flex items-center justify-center gap-2">
+                  {cards.map((_, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      aria-label={`Card ${i + 1}`}
+                      disabled={walkthroughLock}
+                      onClick={() => {
+                        setCardIdx(i);
+                        setFlipped(false);
+                      }}
+                      className={`h-2 rounded-full transition-all disabled:pointer-events-none disabled:opacity-40 ${i === cardIdx ? 'w-8 bg-violet-600' : 'w-2 bg-amber-300 dark:bg-amber-700'}`}
+                    />
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    disabled={walkthroughLock || cardIdx <= 0}
+                    onClick={() => {
+                      setCardIdx((i) => Math.max(0, i - 1));
+                      setFlipped(false);
+                    }}
+                    className="flex-1 py-2 rounded-xl border border-amber-200 dark:border-amber-800 text-sm font-medium text-stone-700 dark:text-stone-200 disabled:opacity-35 bg-white/80 dark:bg-stone-900/40"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    type="button"
+                    disabled={walkthroughLock || cardIdx >= cards.length - 1}
+                    onClick={() => {
+                      setCardIdx((i) => Math.min(cards.length - 1, i + 1));
+                      setFlipped(false);
+                    }}
+                    className="flex-1 py-2 rounded-xl border border-amber-200 dark:border-amber-800 text-sm font-medium text-stone-700 dark:text-stone-200 disabled:opacity-35 bg-white/80 dark:bg-stone-900/40"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {tab === 'quiz' && (
+              <div className="rounded-xl border border-emerald-200/90 dark:border-emerald-800/50 bg-gradient-to-b from-emerald-50/90 to-white dark:from-emerald-950/25 dark:to-stone-900/80 p-4 sm:p-5 ring-1 ring-emerald-100/80 dark:ring-emerald-900/40 motion-safe:transition-[box-shadow,opacity] motion-safe:duration-500">
+                <p className="text-sm font-medium text-stone-900 dark:text-stone-100 mb-4 leading-snug">{quizData.question}</p>
+                <div className="space-y-2.5">
+                  {quizData.options.map((opt, i) => {
+                    const isSel = selected === i;
+                    const isCorrect = i === quizData.correctIndex;
+                    const reveal = showAnswer;
+                    return (
+                      <button
+                        key={`${i}-${opt.slice(0, 24)}`}
+                        type="button"
+                        ref={(el) => {
+                          quizOptionRefs.current[i] = el;
+                        }}
+                        disabled={walkthroughLock}
+                        onClick={() => {
+                          setSelected(i);
+                          setShowAnswer(true);
+                        }}
+                        className={`w-full text-left text-sm px-3 py-3 rounded-xl border motion-safe:transition-[transform,box-shadow,border-color,background-color,opacity] motion-safe:duration-500 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] disabled:pointer-events-none ${
+                          reveal && isCorrect
+                            ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/45 text-emerald-900 dark:text-emerald-100 shadow-[0_10px_36px_-12px_rgba(16,185,129,0.45)] scale-[1.02] ring-2 ring-emerald-400/35'
+                            : reveal && isSel && !isCorrect
+                              ? 'border-rose-400 bg-rose-50 dark:bg-rose-950/30 text-rose-900 dark:text-rose-100'
+                              : isSel
+                                ? 'border-violet-400 bg-violet-50 dark:bg-violet-950/30'
+                                : 'border-stone-200 dark:border-stone-600 hover:border-emerald-300/70'
+                        }`}
+                      >
+                        <span className="font-semibold text-stone-500 dark:text-stone-400 mr-2">{String.fromCharCode(65 + i)}.</span>
+                        {opt}
+                      </button>
+                    );
+                  })}
+                </div>
+                {showAnswer && (
+                  <div
+                    className="mt-5 overflow-hidden rounded-xl border border-emerald-200/90 bg-emerald-50/95 dark:border-emerald-800/50 dark:bg-emerald-950/40 px-4 py-3.5 shadow-sm animate-study-pack-quiz-feedback"
+                    role="status"
+                  >
+                    <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-emerald-700 dark:text-emerald-400 mb-2">Why this is correct</p>
+                    <p className="text-sm text-emerald-900 dark:text-emerald-100 leading-relaxed">{quizData.correctReason}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {tab === 'lesson' && (
+              <div className="rounded-xl border border-amber-200/90 dark:border-amber-800/50 bg-white/95 dark:bg-stone-900/50 p-4 sm:p-5">
+                <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-amber-800 dark:text-amber-400 mb-4">Lesson from your notes</p>
+                <ul className="space-y-3">
+                  {lessonLines.map((line, i) => (
+                    <li key={i} className="flex gap-3 text-sm text-stone-700 dark:text-stone-300 leading-relaxed">
+                      <span className="shrink-0 w-8 h-8 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-white text-xs font-bold flex items-center justify-center shadow-md">
+                        {i + 1}
+                      </span>
+                      <span className="pt-1">{line}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
+}
+
+export default function InteractiveStudyPackDemo({ variant = 'full' }: { variant?: InteractiveStudyPackDemoVariant }) {
+  if (variant === 'side-left') {
+    return <SideLeftFlashcard card={defaultPackStatic.flashcards[0]} />;
+  }
+  if (variant === 'side-right') {
+    return <SideQuiz quiz={defaultPackStatic.quiz} />;
+  }
+  return <InteractiveStudyPackFull />;
 }
