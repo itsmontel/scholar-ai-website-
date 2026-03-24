@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, lazy, Suspense } from 'react';
 
 function shuffleAndTake<T>(arr: T[], count: number): T[] {
   const shuffled = [...arr].sort(() => Math.random() - 0.5);
@@ -14,9 +14,6 @@ import BadgeWidget from '../common/BadgeWidget';
 import FlashcardViewer from '../common/FlashcardViewer';
 import InteractiveTutorial from '../common/InteractiveTutorial';
 import SoftPaywall from '../common/SoftPaywall';
-import { jsPDF } from 'jspdf';
-import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
-import { saveAs } from 'file-saver';
 import { trackAction, syncFromAPIData, trackExport, trackCopy, trackStudyPackGenerated, getStats } from '../../data/achievements';
 import { getResetsInText, getExpiringSoonCount, getExpiringSoonUrgencyText, getDaysUntilExpiration } from '../../utils/usageReset';
 import { persistTutorialToServer } from '../../utils/onboarding';
@@ -24,12 +21,48 @@ import { trackEvent } from '../../utils/analytics';
 import FocusModeSettingsSection from '../common/FocusModeSettingsSection';
 import { FOCUS_MODE_COMING_SOON, FOCUS_MODE_CHROME_EXTENSION_URL } from '../../constants/focusMode';
 import { HIDE_FRIENDS } from '../../config/featureFlags';
-import HeroEssayPreviewCard from '../landing/HeroEssayPreviewCard';
 import { FeatureTickRow } from '../common/FeatureTickRow';
 import { DEMO_DASHBOARD_BEFORE_PAPER, DEMO_DASHBOARD_AFTER_PAPER } from '../../data/landingPageDemoAnalysis';
-import InteractiveDocumentAnalysis from '../landing/InteractiveDocumentAnalysis';
-import InteractiveCitationsDemo from '../landing/InteractiveCitationsDemo';
-import InteractiveStudyPackDemo from '../landing/InteractiveStudyPackDemo';
+
+const LazyHeroEssayPreviewCard = lazy(() => import('../landing/HeroEssayPreviewCard'));
+const LazyInteractiveDocumentAnalysis = lazy(() => import('../landing/InteractiveDocumentAnalysis'));
+const LazyInteractiveCitationsDemo = lazy(() => import('../landing/InteractiveCitationsDemo'));
+const LazyInteractiveStudyPackDemo = lazy(() => import('../landing/InteractiveStudyPackDemo'));
+
+const dashboardDemoFallback = (
+  <div className="min-h-[200px] rounded-2xl bg-stone-100/80 dark:bg-stone-800/50 animate-pulse" aria-hidden />
+);
+
+let exportLibsPromise: Promise<{
+  jsPDF: typeof import('jspdf').jsPDF;
+  Document: typeof import('docx').Document;
+  Packer: typeof import('docx').Packer;
+  Paragraph: typeof import('docx').Paragraph;
+  TextRun: typeof import('docx').TextRun;
+  HeadingLevel: typeof import('docx').HeadingLevel;
+  saveAs: (blob: Blob, filename?: string) => void;
+}> | null = null;
+
+function loadExportLibs() {
+  if (!exportLibsPromise) {
+    exportLibsPromise = Promise.all([import('jspdf'), import('docx'), import('file-saver')]).then(([jspdf, docx, fileSaver]) => {
+      const saveAs =
+        'saveAs' in fileSaver && typeof (fileSaver as { saveAs: unknown }).saveAs === 'function'
+          ? (fileSaver as { saveAs: (blob: Blob, filename?: string) => void }).saveAs
+          : (fileSaver as { default: (blob: Blob, filename?: string) => void }).default;
+      return {
+        jsPDF: jspdf.jsPDF,
+        Document: docx.Document,
+        Packer: docx.Packer,
+        Paragraph: docx.Paragraph,
+        TextRun: docx.TextRun,
+        HeadingLevel: docx.HeadingLevel,
+        saveAs,
+      };
+    });
+  }
+  return exportLibsPromise;
+}
 
 interface DashboardProps {
   onNavigate: (page: string, slug?: string, options?: { studyPack?: { data: any; title?: string }; unlockQuizQuery?: string }) => void;
@@ -134,7 +167,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     } catch (_) {}
   }, []);
 
-  // Interactive tutorial — triggered from onboarding completion via sessionStorage flag
+  // Interactive tutorial — onboarding sessionStorage triggers full product tour
   const [showInteractiveTutorial, setShowInteractiveTutorial] = useState(false);
   useEffect(() => {
     try {
@@ -1356,8 +1389,9 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     }
   };
 
-  const exportQuizToPDF = () => {
+  const exportQuizToPDF = async () => {
     if (!quizResult) return;
+    const { jsPDF } = await loadExportLibs();
     const doc = new jsPDF();
     let yPos = 20;
     const pageHeight = doc.internal.pageSize.height;
@@ -1425,6 +1459,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
 
   const exportQuizToDOCX = async () => {
     if (!quizResult) return;
+    const { Paragraph, TextRun, HeadingLevel, Document, Packer, saveAs } = await loadExportLibs();
     const children: any[] = [];
 
     children.push(new Paragraph({ text: quizResult.title || 'Quiz', heading: HeadingLevel.HEADING_1 }));
@@ -1457,8 +1492,9 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     trackExport();
   };
 
-  const exportFlashcardsToPDF = () => {
+  const exportFlashcardsToPDF = async () => {
     if (!flashcardResult?.cards?.length) return;
+    const { jsPDF } = await loadExportLibs();
     const doc = new jsPDF();
     const margin = 20;
     const pageHeight = doc.internal.pageSize.height;
@@ -1522,6 +1558,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
 
   const exportFlashcardsToDOCX = async () => {
     if (!flashcardResult?.cards?.length) return;
+    const { Paragraph, TextRun, HeadingLevel, Document, Packer, saveAs } = await loadExportLibs();
     const children: any[] = [];
 
     children.push(new Paragraph({ text: flashcardResult.title || 'Flashcards', heading: HeadingLevel.HEADING_1 }));
@@ -1556,8 +1593,9 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     trackExport();
   };
 
-  const exportCrosswordToPDF = () => {
+  const exportCrosswordToPDF = async () => {
     if (!crosswordResult?.placedWords?.length) return;
+    const { jsPDF } = await loadExportLibs();
     const doc = new jsPDF();
     const margin = 20;
     const pageHeight = doc.internal.pageSize.height;
@@ -1653,6 +1691,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
 
   const exportCrosswordToDOCX = async () => {
     if (!crosswordResult?.placedWords?.length) return;
+    const { Paragraph, TextRun, HeadingLevel, Document, Packer, saveAs } = await loadExportLibs();
     const children: any[] = [];
 
     children.push(new Paragraph({ text: crosswordResult.title || 'Crossword', heading: HeadingLevel.HEADING_1 }));
@@ -1999,14 +2038,16 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                           <span className="block text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">Draft · improve &amp; concern</span>
                         </p>
                         <div className="rounded-2xl border border-amber-200/70 dark:border-amber-900/35 bg-white/95 dark:bg-stone-900/60 p-2 ring-1 ring-amber-200/45 dark:ring-amber-900/30">
-                          <HeroEssayPreviewCard
-                            paper={DEMO_DASHBOARD_BEFORE_PAPER}
-                            rotate="none"
-                            variant="before"
-                            legendPlacement="top"
-                            maxExcerptChars={380}
-                            paperMaxHeightClass="max-h-[272px]"
-                          />
+                          <Suspense fallback={dashboardDemoFallback}>
+                            <LazyHeroEssayPreviewCard
+                              paper={DEMO_DASHBOARD_BEFORE_PAPER}
+                              rotate="none"
+                              variant="before"
+                              legendPlacement="top"
+                              maxExcerptChars={380}
+                              paperMaxHeightClass="max-h-[272px]"
+                            />
+                          </Suspense>
                   </div>
                       </div>
                       <div className="min-w-0" data-tutorial="dashboard-tool-tabs-hero">
@@ -2064,14 +2105,16 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                           <span className="block text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">Revised · mostly strong</span>
                         </p>
                         <div className="rounded-2xl border border-emerald-200/70 dark:border-emerald-900/35 bg-white/95 dark:bg-stone-900/60 p-2 ring-1 ring-emerald-200/45 dark:ring-emerald-900/30">
-                          <HeroEssayPreviewCard
-                            paper={DEMO_DASHBOARD_AFTER_PAPER}
-                            rotate="none"
-                            variant="after"
-                            legendPlacement="top"
-                            maxExcerptChars={380}
-                            paperMaxHeightClass="max-h-[272px]"
-                          />
+                          <Suspense fallback={dashboardDemoFallback}>
+                            <LazyHeroEssayPreviewCard
+                              paper={DEMO_DASHBOARD_AFTER_PAPER}
+                              rotate="none"
+                              variant="after"
+                              legendPlacement="top"
+                              maxExcerptChars={380}
+                              paperMaxHeightClass="max-h-[272px]"
+                            />
+                          </Suspense>
                         </div>
                       </div>
                     </div>
@@ -2186,6 +2229,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                             onDragLeave={handleAnalyzeDropZoneDrag}
                             onDragOver={handleAnalyzeDropZoneDrag}
                             onDrop={handleAnalyzeDropZoneDrop}
+                            data-tutorial="essay-upload"
                             className={`group/dz rounded-2xl border-2 border-dashed p-6 sm:p-8 text-center transition-all duration-300 select-none ${
                               isParsingAnalyzeDoc
                                 ? 'border-stone-200 dark:border-stone-600 bg-stone-50/50 dark:bg-stone-800/30 opacity-70 cursor-wait'
@@ -2234,7 +2278,9 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                             </h2>
                             <span className="h-px flex-1 max-w-32 bg-stone-300/80 dark:bg-stone-600/60 rounded-full" />
                           </div>
-                          <InteractiveDocumentAnalysis onNavigate={onNavigate} landingHeroEmbed />
+                          <Suspense fallback={dashboardDemoFallback}>
+                            <LazyInteractiveDocumentAnalysis onNavigate={onNavigate} landingHeroEmbed />
+                          </Suspense>
                         </div>
                       </div>
                     </div>
@@ -2246,7 +2292,9 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                             <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-violet-800/95 dark:text-violet-300/95">Sources</span>
                             <span className="block text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">Peer-reviewed picks</span>
                           </p>
-                          <InteractiveCitationsDemo variant="side-left" />
+                          <Suspense fallback={dashboardDemoFallback}>
+                            <LazyInteractiveCitationsDemo variant="side-left" />
+                          </Suspense>
                         </div>
                         <div className="min-w-0 self-start" data-tutorial="dashboard-tool-tabs-hero">
                           <h2 className="relative text-lg sm:text-2xl md:text-3xl font-semibold text-stone-900 dark:text-stone-50 text-center mb-2 tracking-tight leading-snug px-0.5" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
@@ -2300,7 +2348,9 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                             <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-violet-800/95 dark:text-violet-300/95">Export</span>
                             <span className="block text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">APA · MLA · Chicago</span>
                           </p>
-                          <InteractiveCitationsDemo variant="side-right" />
+                          <Suspense fallback={dashboardDemoFallback}>
+                            <LazyInteractiveCitationsDemo variant="side-right" />
+                          </Suspense>
                         </div>
                       </div>
                     </>
@@ -2759,11 +2809,10 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                       <>
                         <p className="text-amber-800 dark:text-amber-200 font-medium text-xs sm:text-sm">
                           Pro:{' '}
-                          {(usageStats as { combinedActionsRemaining?: number }).combinedActionsRemaining != null
-                            ? (usageStats as { combinedActionsRemaining: number }).combinedActionsRemaining
-                            : quizUsage.generationsRemaining}
+                          {combinedActionsRemaining != null ? combinedActionsRemaining : quizUsage.generationsRemaining}
                           /
-                          {(usageStats as { planLimits?: { combinedActionsPerMonth?: number } }).planLimits?.combinedActionsPerMonth ?? quizUsage.generationLimit}{' '}
+                          {(usageStats.planLimits as { combinedActionsPerMonth?: number }).combinedActionsPerMonth ??
+                            quizUsage.generationLimit}{' '}
                           combined actions left this month
                         </p>
                         <p className="text-amber-600 dark:text-amber-400 text-[10px] sm:text-xs mt-0.5 line-clamp-2">
@@ -2799,7 +2848,9 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                         <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-violet-800/95 dark:text-violet-300/95">Flashcards</span>
                         <span className="block text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">Tap to flip</span>
                       </p>
-                      <InteractiveStudyPackDemo variant="side-left" />
+                      <Suspense fallback={dashboardDemoFallback}>
+                        <LazyInteractiveStudyPackDemo variant="side-left" />
+                      </Suspense>
                     </div>
                     <div className="min-w-0 self-start">
                       <h2 className="relative text-lg sm:text-2xl md:text-[2rem] lg:text-[2.125rem] font-semibold text-stone-900 dark:text-stone-50 text-center mb-2 sm:mb-2 tracking-tight leading-snug px-0.5 sm:px-1" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
@@ -2869,7 +2920,9 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                         <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-800/95 dark:text-emerald-300/95">Quiz</span>
                         <span className="block text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">Check understanding</span>
                       </p>
-                      <InteractiveStudyPackDemo variant="side-right" />
+                      <Suspense fallback={dashboardDemoFallback}>
+                        <LazyInteractiveStudyPackDemo variant="side-right" />
+                      </Suspense>
                     </div>
                   </div>
                   {/* Typing box - gradient border like Analyze (same width as analyze/citations) */}

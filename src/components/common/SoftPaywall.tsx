@@ -87,6 +87,9 @@ const SoftPaywall = ({ userName, onStartTrial, onDismiss, onNavigate }: SoftPayw
   };
 
   const handleStartTrial = async (promoCode?: string) => {
+    /** onClick passes a MouseEvent as first arg; only accept real promo strings */
+    const code = typeof promoCode === 'string' ? promoCode : undefined;
+
     setCheckoutError(null);
     setIsCheckoutLoading(true);
 
@@ -106,7 +109,7 @@ const SoftPaywall = ({ userName, onStartTrial, onDismiss, onNavigate }: SoftPayw
           billingCycle: 'monthly',
           successUrl,
           cancelUrl,
-          ...(promoCode && { promoCode }),
+          ...(code && { promoCode: code }),
         }),
       });
 
@@ -269,7 +272,8 @@ const SoftPaywall = ({ userName, onStartTrial, onDismiss, onNavigate }: SoftPayw
 
           {/* CTA */}
           <button
-            onClick={handleStartTrial}
+            type="button"
+            onClick={() => void handleStartTrial()}
             disabled={isCheckoutLoading}
             className="w-full py-3.5 sm:py-4 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 disabled:from-stone-400 disabled:to-stone-500 text-white rounded-xl font-semibold text-base shadow-md shadow-violet-900/20 ring-1 ring-violet-900/10 hover:shadow-lg transition-all active:scale-[0.98] disabled:active:scale-100 flex items-center justify-center gap-2 disabled:cursor-wait"
           >

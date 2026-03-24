@@ -744,25 +744,27 @@ const AcademicAIApp = () => {
     navigateTo(destination);
   };
 
-  const renderOnboarding = (destination: string) => (
-    <OnboardingPage
-      onNavigate={navigateTo}
-      user={user}
-      onLogout={handleLogout}
-      onUserUpdate={(updates) => {
-        if (user && (updates.name !== undefined || updates.username !== undefined)) {
-          const updatedUser = {
-            ...user,
-            ...(updates.name !== undefined && { name: updates.name }),
-            ...(updates.username !== undefined && { username: updates.username })
-          };
-          setUser(updatedUser);
-          localStorage.setItem('user', JSON.stringify(updatedUser));
-        }
-      }}
-      onComplete={() => handleOnboardingComplete(destination)}
-    />
-  );
+  const renderOnboarding = (destination: string) => {
+    return (
+      <OnboardingPage
+        onNavigate={navigateTo}
+        user={user}
+        onLogout={handleLogout}
+        onUserUpdate={(updates) => {
+          if (user && (updates.name !== undefined || updates.username !== undefined)) {
+            const updatedUser = {
+              ...user,
+              ...(updates.name !== undefined && { name: updates.name }),
+              ...(updates.username !== undefined && { username: updates.username })
+            };
+            setUser(updatedUser);
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+          }
+        }}
+        onComplete={() => handleOnboardingComplete(destination)}
+      />
+    );
+  };
 
   const needsOnboarding = isLoggedIn && user?.id && !user.onboardingCompleted;
 

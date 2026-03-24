@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import { useState, useMemo, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import {
   DEMO_PAPERS,
   type DemoAnnotation,
@@ -72,7 +72,8 @@ function findTextInWork(work: string, text: string, hintStart: number): number {
 function scrollChildIntoContainer(
   container: HTMLElement,
   child: HTMLElement,
-  block: 'center' | 'nearest'
+  block: 'center' | 'nearest',
+  scrollBehavior: ScrollBehavior = 'smooth'
 ) {
   const cRect = container.getBoundingClientRect();
   const eRect = child.getBoundingClientRect();
@@ -81,7 +82,7 @@ function scrollChildIntoContainer(
 
   if (block === 'center') {
     const target = childTopInContent - container.clientHeight / 2 + childH / 2;
-    container.scrollTo({ top: Math.max(0, target), behavior: 'smooth' });
+    container.scrollTo({ top: Math.max(0, target), behavior: scrollBehavior });
     return;
   }
 
@@ -90,9 +91,9 @@ function scrollChildIntoContainer(
   const childBottom = childTopInContent + childH;
 
   if (childTopInContent < scrollTop) {
-    container.scrollTo({ top: Math.max(0, childTopInContent), behavior: 'smooth' });
+    container.scrollTo({ top: Math.max(0, childTopInContent), behavior: scrollBehavior });
   } else if (childBottom > viewBottom) {
-    container.scrollTo({ top: Math.max(0, childBottom - container.clientHeight), behavior: 'smooth' });
+    container.scrollTo({ top: Math.max(0, childBottom - container.clientHeight), behavior: scrollBehavior });
   }
 }
 
@@ -257,6 +258,9 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
   const [walkthroughPlaying, setWalkthroughPlaying] = useState(true);
   const [fakeCursor, setFakeCursor] = useState<{ x: number; y: number; visible: boolean }>({ x: 0, y: 0, visible: false });
   const [walkthroughPulse, setWalkthroughPulse] = useState<string | null>(null);
+  /** Dashboard hero: pause the automated tour when scrolled off-screen or tab is hidden */
+  const [heroDemoInView, setHeroDemoInView] = useState(false);
+  const [docTabVisible, setDocTabVisible] = useState(true);
 
   const rootRef = useRef<HTMLDivElement>(null);
   /** Scrollable regions only — walkthrough must not use scrollIntoView (scrolls the whole page). */
@@ -303,16 +307,28 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
     setSelectedAnnotation(null);
   }, []);
 
-  const positionFakeCursorOnEl = useCallback((el: HTMLElement | null, offset: { x: number; y: number } = { x: 8, y: 8 }) => {
-    if (!el || !rootRef.current) return;
-    const root = rootRef.current.getBoundingClientRect();
-    const t = el.getBoundingClientRect();
-    setFakeCursor({
-      x: t.left - root.left + offset.x,
-      y: t.top - root.top + offset.y,
-      visible: true,
-    });
-  }, []);
+  /** `applyButton`: tip near center of full-width pill (stable when label wraps); `offset`: top-left + px for inline spans */
+  const positionFakeCursorOnEl = useCallback(
+    (el: HTMLElement | null, target: { type: 'offset'; x: number; y: number } | { type: 'applyButton' } = { type: 'offset', x: 8, y: 8 }) => {
+      if (!el || !rootRef.current) return;
+      const root = rootRef.current.getBoundingClientRect();
+      const t = el.getBoundingClientRect();
+      if (target.type === 'applyButton') {
+        setFakeCursor({
+          x: t.left - root.left + t.width * 0.42,
+          y: t.top - root.top + t.height * 0.48,
+          visible: true,
+        });
+        return;
+      }
+      setFakeCursor({
+        x: t.left - root.left + target.x,
+        y: t.top - root.top + target.y,
+        visible: true,
+      });
+    },
+    []
+  );
 
   const afterLayout = useCallback((fn: () => void) => {
     requestAnimationFrame(() => {
@@ -327,8 +343,31 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
     setFakeCursor((c) => ({ ...c, visible: false }));
   }, [selectedDemoId]);
 
+  useLayoutEffect(() => {
+    if (!landingHeroEmbed) return;
+    const el = rootRef.current;
+    if (!el) return;
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        setHeroDemoInView(entry.isIntersecting);
+      },
+      { root: null, threshold: 0.12, rootMargin: '0px 0px -8% 0px' }
+    );
+    io.observe(el);
+
+    const onVisibility = () => setDocTabVisible(document.visibilityState === 'visible');
+    document.addEventListener('visibilitychange', onVisibility);
+    onVisibility();
+
+    return () => {
+      io.disconnect();
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, [landingHeroEmbed]);
+
   useEffect(() => {
-    if (!landingHeroEmbed || !walkthroughPlaying) {
+    if (!landingHeroEmbed || !walkthroughPlaying || !heroDemoInView || !docTabVisible) {
       setFakeCursor((c) => ({ ...c, visible: false }));
       return;
     }
@@ -350,11 +389,12 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
         const span = rootRef.current?.querySelector<HTMLElement>(`[data-landing-doc-ann="${ann.id}"]`);
         const docScroll = documentPanelScrollRef.current;
         if (span && docScroll) {
-          scrollChildIntoContainer(docScroll, span, 'center');
+          // Instant scroll so rects match when we place the cursor (smooth scroll was still moving on later steps)
+          scrollChildIntoContainer(docScroll, span, 'center', 'auto');
           schedule(() => {
             afterLayout(() => {
               const el = rootRef.current?.querySelector<HTMLElement>(`[data-landing-doc-ann="${ann.id}"]`);
-              if (el) positionFakeCursorOnEl(el, { x: 12, y: 14 });
+              if (el) positionFakeCursorOnEl(el, { type: 'offset', x: 12, y: 14 });
               setWalkthroughPulse(ann.id);
             });
           }, 480);
@@ -369,13 +409,13 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
           const btn = rootRef.current?.querySelector<HTMLElement>(`[data-landing-apply="${ann.id}"]`);
           const fbScroll = feedbackPanelScrollRef.current;
           if (btn && fbScroll) {
-            scrollChildIntoContainer(fbScroll, btn, 'nearest');
+            scrollChildIntoContainer(fbScroll, btn, 'nearest', 'auto');
             schedule(() => {
               afterLayout(() => {
                 const b = rootRef.current?.querySelector<HTMLElement>(`[data-landing-apply="${ann.id}"]`);
-                if (b) positionFakeCursorOnEl(b, { x: 10, y: 12 });
+                if (b) positionFakeCursorOnEl(b, { type: 'applyButton' });
               });
-            }, 420);
+            }, 100);
           }
         }, deferMs);
       }, seq);
@@ -412,6 +452,8 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
   }, [
     landingHeroEmbed,
     walkthroughPlaying,
+    heroDemoInView,
+    docTabVisible,
     revisableOrdered,
     applyDemoRevision,
     clearDemoRevisions,
@@ -694,12 +736,27 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
     >
       {landingHeroEmbed && fakeCursor.visible && (
         <div
-          className="pointer-events-none absolute z-[80] motion-safe:transition-[left,top,opacity] duration-[650ms] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[left,top]"
-          style={{ left: fakeCursor.x, top: fakeCursor.y }}
+          className="pointer-events-none absolute z-[80] motion-safe:transition-[transform,opacity] duration-[920ms] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform"
+          style={{
+            transform: `translate3d(${fakeCursor.x}px, ${fakeCursor.y}px, 0)`,
+          }}
           aria-hidden
         >
-          <svg width="28" height="28" viewBox="0 0 24 24" className="drop-shadow-[0_2px_6px_rgba(0,0,0,0.35)] text-violet-700 dark:text-violet-300">
-            <path fill="currentColor" d="M4.5 3.21c-.74-.48-1.7.12-1.55 1l3.58 18.09c.13.65 1.09.89 1.58.35L12.5 17l3.87 5.64c.49.71 1.59.47 1.76-.36L21 3.9c.15-.83-.62-1.54-1.45-1.25L4.5 3.21z" />
+          {/* Classic OS-style arrow pointer (white fill + outline); tip at top-left of the box */}
+          <svg
+            width={32}
+            height={32}
+            viewBox="0 0 24 24"
+            className="text-violet-900 dark:text-violet-100 drop-shadow-[0_3px_10px_rgba(0,0,0,0.28)] dark:drop-shadow-[0_3px_12px_rgba(0,0,0,0.5)]"
+            aria-hidden
+          >
+            <path
+              fill="white"
+              stroke="currentColor"
+              strokeWidth={1.25}
+              strokeLinejoin="round"
+              d="M5 2.25L5 18.6L9.35 14.25L12.4 21.85L15.55 20.35L12.1 12.55L19.5 12.55L5 2.25z"
+            />
           </svg>
         </div>
       )}

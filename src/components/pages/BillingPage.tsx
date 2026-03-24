@@ -136,27 +136,21 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
     try {
       setLoading(true);
       const token = localStorage.getItem('authToken');
-      
-      // Fetch current subscription
-      const subscriptionResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/current`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const base = `${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}`;
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      } as const;
+
+      const [subscriptionResponse, usageResponse] = await Promise.all([
+        fetch(`${base}/subscriptions/current`, { headers }),
+        fetch(`${base}/subscriptions/usage`, { headers }),
+      ]);
 
       if (subscriptionResponse.ok) {
         const subscriptionData = await subscriptionResponse.json();
         setCurrentPlan(subscriptionData.plan || 'free');
       }
-
-      // Fetch usage stats
-      const usageResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/usage`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
 
       if (usageResponse.ok) {
         const usageData = await usageResponse.json();

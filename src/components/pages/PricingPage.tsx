@@ -16,54 +16,38 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
   const [processingPlan, setProcessingPlan] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchCurrentPlan = async () => {
-      if (!user) return;
-      
-      try {
-        const token = localStorage.getItem('authToken');
-        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/current`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
+    if (!user) {
+      setIsTrialEligible(true);
+      return;
+    }
+    const token = localStorage.getItem('authToken');
+    const base = `${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}`;
+    const headers = { Authorization: `Bearer ${token}` } as const;
+    let cancelled = false;
 
-        if (response.ok) {
-          const data = await response.json();
+    (async () => {
+      try {
+        const [planRes, trialRes] = await Promise.all([
+          fetch(`${base}/subscriptions/current`, { headers }),
+          fetch(`${base}/subscriptions/trial-eligibility`, { headers }),
+        ]);
+        if (cancelled) return;
+        if (planRes.ok) {
+          const data = await planRes.json();
           setCurrentPlan(data.plan || 'free');
         }
-      } catch (error) {
-        console.error('Error fetching current plan:', error);
-      }
-    };
-
-    fetchCurrentPlan();
-  }, [user]);
-
-  useEffect(() => {
-    const checkTrialEligibility = async () => {
-      if (!user) {
-        setIsTrialEligible(true);
-        return;
-      }
-      
-      try {
-        const token = localStorage.getItem('authToken');
-        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/trial-eligibility`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
+        if (trialRes.ok) {
+          const data = await trialRes.json();
           setIsTrialEligible(data.eligible);
         }
       } catch (error) {
-        console.error('Error checking trial eligibility:', error);
+        console.error('Error loading pricing subscription data:', error);
       }
-    };
+    })();
 
-    checkTrialEligibility();
+    return () => {
+      cancelled = true;
+    };
   }, [user]);
 
   const isCurrentPlanId = (id: string) =>
