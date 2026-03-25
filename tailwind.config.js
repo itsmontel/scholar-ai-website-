@@ -82,6 +82,11 @@ module.exports = {
         'hero-stagger-3': 'heroLineReveal 0.72s cubic-bezier(0.22, 1, 0.36, 1) 0.23s forwards',
         'hero-stagger-4': 'heroLineReveal 0.72s cubic-bezier(0.22, 1, 0.36, 1) 0.32s forwards',
         'hero-stagger-5': 'heroLineReveal 0.72s cubic-bezier(0.22, 1, 0.36, 1) 0.41s forwards',
+        'cta-sparkle-glow': 'ctaSparkleGlow 1.35s ease-in-out infinite',
+        'cta-sparkle-halo': 'ctaSparkleHalo 2s ease-in-out infinite',
+        'sparkle-pin': 'sparklePin 1.1s ease-in-out infinite',
+        'sparkle-pin-delayed': 'sparklePin 1.1s ease-in-out infinite 0.35s',
+        'sparkle-pin-slow': 'sparklePin 1.45s ease-in-out infinite 0.7s',
       },
       keyframes: {
         fadeIn: {
@@ -221,6 +226,24 @@ module.exports = {
         heroTopShimmer: {
           '0%, 100%': { opacity: '0.35' },
           '50%': { opacity: '0.85' },
+        },
+        ctaSparkleGlow: {
+          '0%, 100%': {
+            boxShadow:
+              '0 0 0 4px rgba(196, 181, 253, 0.65), 0 0 28px rgba(139, 92, 246, 0.55), 0 0 56px rgba(167, 139, 250, 0.4), 0 0 96px rgba(192, 132, 252, 0.22)',
+          },
+          '50%': {
+            boxShadow:
+              '0 0 0 5px rgba(233, 213, 255, 0.95), 0 0 44px rgba(139, 92, 246, 0.85), 0 0 88px rgba(192, 132, 252, 0.55), 0 0 120px rgba(167, 139, 250, 0.35)',
+          },
+        },
+        ctaSparkleHalo: {
+          '0%, 100%': { opacity: '0.45', transform: 'scale(1)' },
+          '50%': { opacity: '0.85', transform: 'scale(1.06)' },
+        },
+        sparklePin: {
+          '0%, 100%': { opacity: '0.2', transform: 'scale(0.72) rotate(-10deg)' },
+          '50%': { opacity: '1', transform: 'scale(1.28) rotate(2deg)' },
         },
       },
       backgroundImage: {

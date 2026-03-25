@@ -32,26 +32,26 @@ const PLAN_LIMITS = {
     lessonGenerationsPerMonth: 2,
     lessonMaxWordsPerGeneration: 5000,
     aiModel: 'gpt-4.1-nano',
-    maxDocumentSize: 1024 * 1024,
-    maxTotalStorage: 1024 * 1024,
+    maxDocumentSize: 2 * 1024 * 1024,
+    maxTotalStorage: 2 * 1024 * 1024,
     name: 'Free'
   },
   pro: {
     documentsPerMonth: -1,
-    combinedActionsPerMonth: 99, // analyses + study packs + citations share this pool
+    combinedActionsPerMonth: 49, // analyses + study packs + citations share this pool
     combinedWordsPerMonth: 999999, // Paper Summarizer word pool
-    analysesPerMonth: 99, // used for combined check
-    citationSearchesPerMonth: 99,
+    analysesPerMonth: 49, // used for combined check
+    citationSearchesPerMonth: 49,
     humanizeWordsPerMonth: 999999,
     summarizeWordsPerMonth: 999999,
-    studyPackGenerationsPerMonth: 99,
+    studyPackGenerationsPerMonth: 49,
     studyPackMaxWordsPerGeneration: 10000,
     quizWordsPerMonth: 999999,
-    quizGenerationsPerMonth: 99,
+    quizGenerationsPerMonth: 49,
     quizMaxWordsPerGeneration: 10000,
     craterBlastMaxWordsPerGeneration: 10000,
     lessonWordsPerMonth: 999999,
-    lessonGenerationsPerMonth: 99,
+    lessonGenerationsPerMonth: 49,
     lessonMaxWordsPerGeneration: 10000,
     // Essay analysis uses OPENAI_PREMIUM_MODEL (default gpt-5-mini); same tier as former Premium
     aiModel: 'gpt-5-mini',
@@ -62,20 +62,20 @@ const PLAN_LIMITS = {
   },
   premium: {
     documentsPerMonth: -1,
-    combinedActionsPerMonth: 299,
-    combinedWordsPerMonth: 2999999,
-    analysesPerMonth: 299,
-    citationSearchesPerMonth: 299,
-    humanizeWordsPerMonth: 2999999,
-    summarizeWordsPerMonth: 2999999,
-    studyPackGenerationsPerMonth: 299,
+    combinedActionsPerMonth: 199,
+    combinedWordsPerMonth: 4999999,
+    analysesPerMonth: 199,
+    citationSearchesPerMonth: 199,
+    humanizeWordsPerMonth: 4999999,
+    summarizeWordsPerMonth: 4999999,
+    studyPackGenerationsPerMonth: 199,
     studyPackMaxWordsPerGeneration: 10000,
-    quizWordsPerMonth: 2999999,
-    quizGenerationsPerMonth: 299,
+    quizWordsPerMonth: 4999999,
+    quizGenerationsPerMonth: 199,
     quizMaxWordsPerGeneration: 10000,
     craterBlastMaxWordsPerGeneration: 10000,
-    lessonWordsPerMonth: 2999999,
-    lessonGenerationsPerMonth: 299,
+    lessonWordsPerMonth: 4999999,
+    lessonGenerationsPerMonth: 199,
     lessonMaxWordsPerGeneration: 10000,
     aiModel: 'gpt-5-mini',
     maxDocumentSize: 100 * 1024 * 1024,
@@ -416,8 +416,47 @@ const getPlanLimits = async (userId) => {
   }
 };
 
-// Check if an email is eligible for the first-time $10 off (OFF10)
-// Returns true if eligible, false if they've already used the offer
+/** First-time $10 off (OFF10) on Pro/Premium: still allowed after user forfeits the 7-day trial (`trial_plan: declined`). */
+const checkOff10Eligibility = async (email) => {
+  try {
+    const normalizedEmail = email.toLowerCase().trim();
+
+    const { data: row, error } = await supabaseServiceRole
+      .from('trial_usage')
+      .select('trial_plan')
+      .ilike('email', normalizedEmail)
+      .limit(1)
+      .maybeSingle();
+
+    if (error && error.code !== 'PGRST116') {
+      console.error('Error checking OFF10 eligibility:', error);
+      return { eligible: false, reason: 'Error checking eligibility' };
+    }
+
+    if (!row) {
+      return { eligible: true };
+    }
+
+    if (row.trial_plan === 'declined') {
+      return { eligible: true };
+    }
+
+    if (row.trial_plan === 'pro' || row.trial_plan === 'premium') {
+      return {
+        eligible: false,
+        reason: 'First-time discount already used',
+      };
+    }
+
+    return { eligible: false, reason: 'Not eligible for first-time discount' };
+  } catch (err) {
+    console.error('Error in checkOff10Eligibility:', err);
+    return { eligible: false, reason: 'Error checking eligibility' };
+  }
+};
+
+// 7-day Stripe trial: not available if any trial_usage row exists (including declined/forfeited).
+// Returns true if eligible, false if they've already interacted with trial/discount tracking
 const checkTrialEligibility = async (email) => {
   try {
     const normalizedEmail = email.toLowerCase().trim();
@@ -438,10 +477,10 @@ const checkTrialEligibility = async (email) => {
     }
 
     if (existingTrial) {
-      return { 
-        eligible: false, 
-        reason: 'This email has already used a free trial',
-        previousTrialDate: existingTrial.trial_started_at
+      return {
+        eligible: false,
+        reason: 'This email is not eligible for a free trial period',
+        previousTrialDate: existingTrial.trial_started_at,
       };
     }
 
@@ -456,18 +495,44 @@ const checkTrialEligibility = async (email) => {
 const recordTrialUsage = async (email, stripeCustomerId, planType) => {
   try {
     const normalizedEmail = email.toLowerCase().trim();
-    
-    const { error } = await supabaseServiceRole
+    const now = new Date().toISOString();
+    const row = {
+      email: normalizedEmail,
+      stripe_customer_id: stripeCustomerId,
+      trial_plan: planType,
+      trial_started_at: now
+    };
+
+    const { data: existing, error: selErr } = await supabaseServiceRole
       .from('trial_usage')
-      .insert({
-        email: normalizedEmail,
-        stripe_customer_id: stripeCustomerId,
-        trial_plan: planType,
-        trial_started_at: new Date().toISOString()
-      });
+      .select('id')
+      .ilike('email', normalizedEmail)
+      .limit(1)
+      .maybeSingle();
+
+    if (selErr && selErr.code !== 'PGRST116') {
+      console.error('Error looking up trial_usage:', selErr);
+    }
+
+    if (existing?.id) {
+      const { error: upErr } = await supabaseServiceRole
+        .from('trial_usage')
+        .update({
+          stripe_customer_id: stripeCustomerId,
+          trial_plan: planType,
+          trial_started_at: now
+        })
+        .eq('id', existing.id);
+      if (upErr) {
+        console.error('Error updating trial usage:', upErr);
+        return { success: false, error: upErr.message };
+      }
+      return { success: true, updated: true };
+    }
+
+    const { error } = await supabaseServiceRole.from('trial_usage').insert(row);
 
     if (error) {
-      // If it's a duplicate key error, that's fine - trial was already recorded
       if (error.code === '23505') {
         return { success: true, alreadyRecorded: true };
       }
@@ -478,6 +543,42 @@ const recordTrialUsage = async (email, stripeCustomerId, planType) => {
     return { success: true };
   } catch (error) {
     console.error('Error in recordTrialUsage:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+/** User explicitly gave up the one-time 7-day trial (e.g. after canceling Stripe from tutorial). Blocks future trial for this email. */
+const recordTrialDecline = async (email) => {
+  try {
+    const normalizedEmail = email.toLowerCase().trim();
+    const { data: existing } = await supabaseServiceRole
+      .from('trial_usage')
+      .select('id')
+      .ilike('email', normalizedEmail)
+      .limit(1)
+      .maybeSingle();
+
+    if (existing?.id) {
+      return { success: true, alreadyRecorded: true };
+    }
+
+    const { error } = await supabaseServiceRole.from('trial_usage').insert({
+      email: normalizedEmail,
+      stripe_customer_id: null,
+      trial_plan: 'declined',
+      trial_started_at: new Date().toISOString()
+    });
+
+    if (error) {
+      if (error.code === '23505') {
+        return { success: true, alreadyRecorded: true };
+      }
+      console.error('Error recording trial decline:', error);
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (error) {
+    console.error('Error in recordTrialDecline:', error);
     return { success: false, error: error.message };
   }
 };
@@ -500,13 +601,42 @@ const createStripeCustomer = async (email, name) => {
 };
 
 // Create checkout session
-const createCheckoutSession = async (customerId, planType, billingCycle, userId, promoCode = null, userEmail = null, successUrl = null, cancelUrl = null) => {
+// options.trialPeriodDays: e.g. 7 — free trial before billing. Can be combined with promoCode:
+// a one-time coupon (e.g. OFF10) applies to the first paid invoice after the trial ends.
+const createCheckoutSession = async (
+  customerId,
+  planType,
+  billingCycle,
+  userId,
+  promoCode = null,
+  userEmail = null,
+  successUrl = null,
+  cancelUrl = null,
+  options = {}
+) => {
   try {
+    let trialPeriodDays =
+      typeof options.trialPeriodDays === 'number' && options.trialPeriodDays > 0
+        ? Math.min(30, Math.floor(options.trialPeriodDays))
+        : 0;
+
+    if (trialPeriodDays > 0 && userEmail) {
+      const eligibility = await checkTrialEligibility(userEmail);
+      if (!eligibility.eligible) {
+        trialPeriodDays = 0;
+      }
+    }
+
+    let effectivePromo = promoCode;
+    if (!effectivePromo && userEmail) {
+      const off10 = await checkOff10Eligibility(userEmail);
+      if (off10.eligible) {
+        effectivePromo = 'OFF10';
+      }
+    }
+
     // Get price ID based on plan and billing cycle
     const priceId = getPriceId(planType, billingCycle);
-    
-    // Check if user is eligible for first-time discount (OFF10) — used for UI/eligibility only.
-    // No trial period; OFF10 is auto-applied for first-time purchasers in the route.
     
     // Use provided URLs or fallback to defaults
     const finalSuccessUrl = successUrl || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/dashboard?payment=success`;
@@ -530,7 +660,8 @@ const createCheckoutSession = async (customerId, planType, billingCycle, userId,
           planType,
           billingCycle,
           source: 'writescholar'
-        }
+        },
+        ...(trialPeriodDays > 0 ? { trial_period_days: trialPeriodDays } : {})
       },
       metadata: {
         userId,
@@ -542,12 +673,12 @@ const createCheckoutSession = async (customerId, planType, billingCycle, userId,
       allow_promotion_codes: true
     };
 
-    // If a specific promo code is provided, apply it directly
-    if (promoCode) {
+    // If a specific promo code is provided (or auto OFF10 for first-time paid month), apply it directly
+    if (effectivePromo) {
       try {
         // Find the promotion code in Stripe
         const promoCodes = await stripe.promotionCodes.list({
-          code: promoCode,
+          code: effectivePromo,
           active: true,
           limit: 1
         });
@@ -559,7 +690,7 @@ const createCheckoutSession = async (customerId, planType, billingCycle, userId,
             promotion_code: promoCodes.data[0].id
           }];
         } else {
-          console.warn(`Promo code "${promoCode}" not found or inactive`);
+          console.warn(`Promo code "${effectivePromo}" not found or inactive`);
         }
       } catch (promoError) {
         console.error('Error applying promo code:', promoError);
@@ -861,7 +992,9 @@ module.exports = {
   getPlanDetails,
   getPlanLimits,
   checkTrialEligibility,
+  checkOff10Eligibility,
   recordTrialUsage,
+  recordTrialDecline,
   createStripeCustomer,
   createCheckoutSession,
   getStripeSubscription,

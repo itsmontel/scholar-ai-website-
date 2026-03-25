@@ -472,7 +472,7 @@ router.post('/generate-lesson', authenticateToken, async (req, res) => {
     if (generationsUsed >= generationLimit) {
       return res.status(429).json({
         success: false,
-        message: `You've used all ${generationLimit} lesson generation${generationLimit === 1 ? '' : 's'} this period. ${userPlan === 'free' ? 'Upgrade for 99+ generations/month.' : 'Limit resets when your billing period renews.'}`,
+        message: `You've used all ${generationLimit} lesson generation${generationLimit === 1 ? '' : 's'} this period. ${userPlan === 'free' ? 'Upgrade for Pro — 49 combined actions per month (shared).' : 'Limit resets when your billing period renews.'}`,
         generationsUsed,
         generationLimit,
         generationsRemaining: 0,
@@ -1448,15 +1448,15 @@ router.post('/simple-analyze', authenticateToken, async (req, res) => {
 });
 
 // @route   POST /api/analysis/inline-revision
-// @desc    Premium: AI generates concrete replacement text for a highlighted span (not advisory suggestion text)
-// @access  Private (Premium)
+// @desc    Pro/Premium: AI generates concrete replacement text for a highlighted span (not advisory suggestion text)
+// @access  Private (Pro, Premium)
 router.post('/inline-revision', authenticateToken, async (req, res) => {
   try {
     const userPlan = getEffectivePlan(req);
-    if (userPlan !== 'premium') {
+    if (!isPaidAnalysisTier(userPlan)) {
       return res.status(403).json({
         success: false,
-        message: 'Apply WriteScholar revisions requires a Premium plan. Pro includes full annotations and feedback; upgrading unlocks one-click revisions.',
+        message: 'Apply WriteScholar revisions requires a Pro or Premium plan. Upgrade to use one-click revisions.',
       });
     }
 
@@ -1525,10 +1525,10 @@ router.post('/save-revised-draft', authenticateToken, async (req, res) => {
     const { documentId, content, annotations, wsRevisionCache } = req.body;
     const userId = req.user.id;
     const { plan: subPlan } = await subscriptionService.getUserSubscriptionDetails(userId);
-    if (subscriptionService.normalizePlanForLimits(subPlan) !== 'premium') {
+    if (!isPaidAnalysisTier(subscriptionService.normalizePlanForLimits(subPlan))) {
       return res.status(403).json({
         success: false,
-        message: 'Saving revised drafts with WriteScholar revisions requires a Premium plan.',
+        message: 'Saving revised drafts with WriteScholar revisions requires a Pro or Premium plan.',
       });
     }
     if (!documentId || typeof documentId !== 'string') {
@@ -1668,6 +1668,7 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
             message: useCombined
               ? `Combined action limit exceeded for this period. You have used ${analysisCheck.usage}/${analysisCheck.limit} (analyses, study packs & citations). Limit resets when your billing renews.`
               : `You've exceeded your monthly analysis limit. You have used ${analysisCheck.usage} of ${analysisCheck.limit} analyses this period. Upgrade for more.`,
+            upgrade: true,
             usage: {
               limit: analysisCheck.limit,
               used: analysisCheck.usage,
@@ -1752,9 +1753,7 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
 
     const lockedFeatures = !isPaidUser
       ? ['full_annotations', 'grade_rubric', 'specific_rewrites', 'export', 'history']
-      : normalizedPaid === 'pro'
-        ? ['apply_revisions']
-        : [];
+      : [];
 
     res.json({
       success: true,
@@ -2590,7 +2589,8 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
           generationsUsed: combinedCheck.usage,
           generationLimit: combinedCheck.limit,
           generationsRemaining: 0,
-          upgrade: false
+          upgrade: false,
+          showPaywall: true
         });
       }
     } else {
@@ -2607,7 +2607,7 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
       if (generationLimit !== -1 && generationsUsed >= generationLimit) {
         return res.status(429).json({
           success: false,
-          message: `You've used all ${generationLimit} study pack generation${generationLimit === 1 ? '' : 's'} this period. Upgrade for 99+ combined/month.`,
+          message: `You've used all ${generationLimit} study pack generation${generationLimit === 1 ? '' : 's'} this period. Upgrade for Pro — 49 combined analyses, study packs & citations per month.`,
           generationsUsed,
           generationLimit,
           generationsRemaining: 0,

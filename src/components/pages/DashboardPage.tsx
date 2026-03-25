@@ -12,11 +12,10 @@ import ScholarMascot from '../common/ScholarMascot';
 import StreakWidget from '../common/StreakWidget';
 import BadgeWidget from '../common/BadgeWidget';
 import FlashcardViewer from '../common/FlashcardViewer';
-import InteractiveTutorial from '../common/InteractiveTutorial';
-import SoftPaywall from '../common/SoftPaywall';
+import ActivationDashboardCoach from '../common/ActivationDashboardCoach';
+import { ACTIVATION_MOCK_ESSAY_BODY } from '../../data/activationTutorialMock';
 import { trackAction, syncFromAPIData, trackExport, trackCopy, trackStudyPackGenerated, getStats } from '../../data/achievements';
 import { getResetsInText, getExpiringSoonCount, getExpiringSoonUrgencyText, getDaysUntilExpiration } from '../../utils/usageReset';
-import { persistTutorialToServer } from '../../utils/onboarding';
 import { trackEvent } from '../../utils/analytics';
 import FocusModeSettingsSection from '../common/FocusModeSettingsSection';
 import { FOCUS_MODE_COMING_SOON, FOCUS_MODE_CHROME_EXTENSION_URL } from '../../constants/focusMode';
@@ -133,7 +132,7 @@ const activityMeta: Record<ActivityItem['type'], { emoji: string; bg: string; la
   citation: { emoji: '📚', bg: 'bg-slate-200 dark:bg-slate-700/50', label: 'Citations', cardBg: 'from-slate-50 to-violet-50 dark:from-slate-900/40 dark:to-violet-950/30', border: 'border-slate-200/80 dark:border-slate-600/50', accent: 'text-slate-700 dark:text-slate-200', shape: 'diamond' },
 };
 
-const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'analyze' }: DashboardProps) => {
+const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: DashboardProps) => {
   const [inputText, setInputText] = useState('');
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [showWordWarning, setShowWordWarning] = useState(false);
@@ -169,6 +168,10 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
 
   // Interactive tutorial — onboarding sessionStorage triggers full product tour
   const [showInteractiveTutorial, setShowInteractiveTutorial] = useState(false);
+  /** True when opened via ?testActivationTutorial=1 — closes without persisting tutorial / paywall deferral */
+  const [testActivationTutorial, setTestActivationTutorial] = useState(false);
+  const activationTutorialTestRef = useRef(false);
+
   useEffect(() => {
     try {
       const shouldShow = sessionStorage.getItem('writescholar_show_interactive_tutorial');
@@ -178,34 +181,47 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     } catch (_) {}
   }, []);
 
-  const [showSoftPaywall, setShowSoftPaywall] = useState(false);
-  const [dismissedFirstAnalysisBanner, setDismissedFirstAnalysisBanner] = useState(false);
-  const handleInteractiveTutorialComplete = async () => {
+  /** Welcome tour finished (e.g. analysis flow): clear interactive-tour session flag so dashboard coach does not stay armed. */
+  useEffect(() => {
+    if ((user as any)?.welcomeTutorialCompleted !== true) return;
     setShowInteractiveTutorial(false);
     try {
       sessionStorage.removeItem('writescholar_show_interactive_tutorial');
-      await persistTutorialToServer();
     } catch (_) {}
-    onUserUpdate?.({ welcomeTutorialCompleted: true });
-    trackEvent('tutorial_complete');
-    try {
-      if (user?.id) {
-        localStorage.setItem(`writescholar_paywall_deferred_${user.id}`, 'true');
-      }
-    } catch (_) {}
-    setMode('analyze');
-    setTimeout(() => {
-      document.querySelector('[data-tutorial="analyze-ready"]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 150);
-  };
+  }, [(user as any)?.welcomeTutorialCompleted]);
 
-  const handlePaywallStartTrial = () => {
-    trackEvent('paywall_start_trial');
-  };
-  const handlePaywallDismiss = () => {
-    trackEvent('paywall_dismiss');
-    setShowSoftPaywall(false);
-  };
+  /** Preview: visit `/dashboard?testActivationTutorial=1` while logged in (no DB writes on exit). */
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('testActivationTutorial') !== '1') return;
+    activationTutorialTestRef.current = true;
+    setTestActivationTutorial(true);
+    try {
+      sessionStorage.setItem('writescholar_activation_test', '1');
+    } catch {
+      /* ignore */
+    }
+    params.delete('testActivationTutorial');
+    const q = params.toString();
+    const path = window.location.pathname + (q ? `?${q}` : '') + window.location.hash;
+    window.history.replaceState({}, '', path);
+  }, []);
+
+  /** Clear activation test session when returning from analysis preview flow */
+  useEffect(() => {
+    if (!user?.id) return;
+    if (localStorage.getItem('writescholar_activation_test_finish') !== '1') return;
+    localStorage.removeItem('writescholar_activation_test_finish');
+    activationTutorialTestRef.current = false;
+    setTestActivationTutorial(false);
+    try {
+      sessionStorage.removeItem('writescholar_show_interactive_tutorial');
+    } catch {
+      /* ignore */
+    }
+  }, [user?.id]);
+
+  const [dismissedFirstAnalysisBanner, setDismissedFirstAnalysisBanner] = useState(false);
 
   // Detect desktop for Focus Mode (Chrome extension only works on desktop)
   const [isDesktop, setIsDesktop] = useState(true);
@@ -328,41 +344,6 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
 
   // Badge notifications now shown globally via BadgeNotificationToast (event from achievements.ts)
 
-  // Ebook banner: show for 24 hours after first dashboard visit, or until user dismisses (per-user, never show again after X)
-  const EBOOK_BANNER_MS = 24 * 60 * 60 * 1000;
-  const [showEbookBanner, setShowEbookBanner] = useState(true);
-  const [ebookBannerDismissed, setEbookBannerDismissed] = useState(() => {
-    const uid = user?.id || 'anon';
-    return localStorage.getItem(`writescholar_ebook_banner_dismissed_${uid}`) === '1';
-  });
-  useEffect(() => {
-    const uid = user?.id || 'anon';
-    const firstSeenKey = `writescholar_ebook_banner_first_seen_${uid}`;
-    const dismissedKey = `writescholar_ebook_banner_dismissed_${uid}`;
-    const dismissed = localStorage.getItem(dismissedKey) === '1';
-    setEbookBannerDismissed(dismissed);
-    if (dismissed) {
-      setShowEbookBanner(false);
-      return;
-    }
-    const raw = localStorage.getItem(firstSeenKey);
-    const firstSeen = raw ? parseInt(raw, 10) : null;
-    const now = Date.now();
-    if (firstSeen == null) {
-      localStorage.setItem(firstSeenKey, String(now));
-      setShowEbookBanner(true);
-    } else {
-      setShowEbookBanner(now - firstSeen < EBOOK_BANNER_MS);
-    }
-  }, [user?.id]);
-  const dismissEbookBanner = () => {
-    const uid = user?.id || 'anon';
-    const dismissedKey = `writescholar_ebook_banner_dismissed_${uid}`;
-    localStorage.setItem(dismissedKey, '1');
-    setEbookBannerDismissed(true);
-    setShowEbookBanner(false);
-  };
-  
   const [quizUsage, setQuizUsage] = useState({
     generationsUsed: 0,
     generationLimit: 2,
@@ -381,27 +362,48 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     (user as any).welcomeTutorialCompleted !== true
   );
 
-  // Deferred paywall: show after first success (recentActivity) or return visit — not immediately after tutorial
+  const isActivationDashboardTutorial =
+    testActivationTutorial || showInteractiveTutorial || showWelcomeTutorial;
+  /** Welcome → sample loaded → point at Analyze Text. Main shell uses pointer-events-none while active. */
+  const [activationDashboardStep, setActivationDashboardStep] = useState<
+    'idle' | 'welcome' | 'essay' | 'analyze'
+  >('idle');
   useEffect(() => {
-    if (!user?.id || showInteractiveTutorial || showWelcomeTutorial) return;
-    try {
-      const deferred = localStorage.getItem(`writescholar_paywall_deferred_${user.id}`) === 'true';
-      const alreadyShown = localStorage.getItem(`writescholar_soft_paywall_shown_${user.id}`) === '1';
-      if (!deferred || alreadyShown) return;
-
-      const firstLoginDate = localStorage.getItem(`writescholar_first_login_${user.id}`);
-      const today = new Date().toDateString();
-      const isReturnVisit = Boolean(firstLoginDate && firstLoginDate !== today);
-      const hasActivity = !isActivityLoading && recentActivity.length > 0;
-
-      if (hasActivity || isReturnVisit) {
-        localStorage.removeItem(`writescholar_paywall_deferred_${user.id}`);
-        localStorage.setItem(`writescholar_soft_paywall_shown_${user.id}`, '1');
-        trackEvent('paywall_view', { trigger: hasActivity ? 'first_success' : 'return_visit' });
-        setShowSoftPaywall(true);
-      }
-    } catch (_) {}
-  }, [user?.id, showInteractiveTutorial, showWelcomeTutorial, isActivityLoading, recentActivity.length]);
+    if (!isActivationDashboardTutorial) {
+      setActivationDashboardStep('idle');
+      return;
+    }
+    setActivationDashboardStep('welcome');
+  }, [isActivationDashboardTutorial]);
+  const activationEssayPrefillRef = useRef(false);
+  const activationTutorialAnalyzeBtnRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!isActivationDashboardTutorial || activationDashboardStep !== 'analyze') return;
+    const scrollT = window.setTimeout(() => {
+      activationTutorialAnalyzeBtnRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'nearest',
+      });
+    }, 140);
+    return () => window.clearTimeout(scrollT);
+  }, [isActivationDashboardTutorial, activationDashboardStep]);
+  useEffect(() => {
+    if (!isActivationDashboardTutorial || activationDashboardStep !== 'essay') return;
+    const scrollT = window.setTimeout(() => {
+      document
+        .querySelector<HTMLElement>('[data-activation-essay-box]')
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+    }, 120);
+    return () => window.clearTimeout(scrollT);
+  }, [isActivationDashboardTutorial, activationDashboardStep]);
+  useEffect(() => {
+    if (!isActivationDashboardTutorial || mode !== 'analyze') return;
+    if (activationEssayPrefillRef.current) return;
+    activationEssayPrefillRef.current = true;
+    setInputText(ACTIVATION_MOCK_ESSAY_BODY);
+    setMode('analyze');
+  }, [isActivationDashboardTutorial, mode]);
 
   const [usageStats, setUsageStats] = useState({
     documentsUploaded: 0,
@@ -421,7 +423,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
       analysesPerMonth: 2,
       citationSearchesPerMonth: 2,
       studyPackGenerationsPerMonth: 2,
-      maxDocumentSize: 1024 * 1024,
+      maxDocumentSize: 2 * 1024 * 1024,
       name: 'Free'
     }
   });
@@ -433,14 +435,8 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
   const showFirstAnalysisOnboarding =
     Boolean(user) && !hasCompletedFirstAnalysis && !loadingStats && !isActivityLoading;
 
-  const showTutorialOverlay =
-    showInteractiveTutorial ||
-    showWelcomeTutorial;
-
   const showFirstAnalysisBanner =
-    (showFirstAnalysisOnboarding && !dismissedFirstAnalysisBanner) &&
-    !showSoftPaywall &&
-    !showTutorialOverlay;
+    (showFirstAnalysisOnboarding && !dismissedFirstAnalysisBanner) && !isActivationDashboardTutorial;
 
   useEffect(() => {
     if (showFirstAnalysisOnboarding) trackEvent('first_action_prompt_view');
@@ -886,13 +882,15 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
   const isPaidUser = usageStats.plan === 'pro' || usageStats.plan === 'premium' || usageStats.plan === 'focus';
   const isFreeUser = usageStats.plan === 'free';
   const combinedActionsRemaining = (usageStats as { combinedActionsRemaining?: number }).combinedActionsRemaining;
+  const combinedActionsMonthlyCap =
+    (usageStats.planLimits as { combinedActionsPerMonth?: number })?.combinedActionsPerMonth ?? 49;
   const combinedPoolExhausted =
     isPaidUser &&
     typeof combinedActionsRemaining === 'number' &&
     combinedActionsRemaining <= 0;
   const canUseQuiz = isPaidUser || (isFreeUser && (quizUsage.generationLimit === -1 || quizUsage.generationsRemaining > 0));
   const quizExhausted = isFreeUser && quizUsage.generationLimit !== -1 && quizUsage.generationsRemaining <= 0;
-  /** Free: study-pack-only quota; Pro: shared 99/mo pool (analyses + citations + study packs) */
+  /** Free: study-pack-only quota; Pro/Premium: shared combined pool (analyses + citations + study packs) */
   const studyPackSectionExhausted = quizExhausted || combinedPoolExhausted;
   
   const humanizeSummarizeMaxWords = isFreeUser ? 5000 : 15000;
@@ -980,18 +978,30 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
 
   const handleAnalyze = () => {
     const wordCount = getWordCount(inputText);
-    
+
     if (wordCount < 200) {
       setShowWordWarning(true);
       setTimeout(() => setShowWordWarning(false), 3000);
       return;
     }
-    
+
+    if (isActivationDashboardTutorial) {
+      localStorage.setItem('textAnalysisContent', inputText);
+      try {
+        sessionStorage.setItem('writescholar_activation_tutorial', '1');
+      } catch {
+        /* ignore */
+      }
+      trackEvent('activation_tutorial_nav_analysis');
+      onNavigate('analysis');
+      return;
+    }
+
     setShowAnalysisPopup(true);
     setAnalysisComplete(false);
     localStorage.setItem('textAnalysisContent', inputText);
     trackAction('analyses_count');
-    
+
     setTimeout(() => setAnalysisComplete(true), 2000);
     setTimeout(() => {
       setShowAnalysisPopup(false);
@@ -1028,7 +1038,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
     if (studyPackSectionExhausted) {
       setStudyPackError(
         combinedPoolExhausted
-          ? "You've used all 99 combined actions (analyses, study packs & citations) this billing period. Your limit resets when your plan renews."
+          ? `You've used all ${combinedActionsMonthlyCap} combined actions (analyses, study packs & citations) this billing period. Your limit resets when your plan renews.`
           : "You've used all study pack generations this period. Upgrade for more."
       );
       return;
@@ -1764,32 +1774,15 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
   return (
     <div className="min-h-screen relative transition-colors font-sans overflow-x-hidden">
       <WriteScholarEditorialBackgroundLayers position="fixed" />
-      
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="dashboard" />
 
-      {/* Interactive Tutorial - comprehensive product tour after onboarding */}
-      {showTutorialOverlay && (
-        <InteractiveTutorial
-          userName={getDisplayNameForGreeting(user) || 'there'}
-          onComplete={async () => {
-            if (showInteractiveTutorial) {
-              await handleInteractiveTutorialComplete();
-              return;
-            }
-            onUserUpdate?.({ welcomeTutorialCompleted: true });
-            trackEvent('tutorial_complete');
-            try {
-              if (user?.id) {
-                localStorage.setItem(`writescholar_paywall_deferred_${user.id}`, 'true');
-              }
-            } catch (_) {}
-            setMode('analyze');
-            setTimeout(() => {
-              document.querySelector('[data-tutorial="analyze-ready"]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 150);
-          }}
-        />
-      )}
+      <div
+        className={
+          isActivationDashboardTutorial && activationDashboardStep !== 'idle'
+            ? 'pointer-events-none'
+            : undefined
+        }
+      >
+      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="dashboard" />
 
       {/* First analysis onboarding banner — dismissible; upload/library nudges use showFirstAnalysisOnboarding only */}
       {showFirstAnalysisBanner && (
@@ -1841,16 +1834,6 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
             </div>
           </div>
         </div>
-      )}
-
-      {/* Soft Paywall - shown after first success or return visit (deferred from tutorial) */}
-      {showSoftPaywall && (
-        <SoftPaywall
-          userName={getDisplayNameForGreeting(user)}
-          onStartTrial={handlePaywallStartTrial}
-          onDismiss={handlePaywallDismiss}
-          onNavigate={onNavigate}
-        />
       )}
 
       {/* Study Pack generation animation - mascot overlay like essay analyzer */}
@@ -1943,8 +1926,20 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                       </button>
                     )}
                     <div className="flex-shrink-0"><BadgeWidget onNavigate={onNavigate} /></div>
+                    {usageStats.plan === 'free' && !loadingStats && (
+                      <button
+                        type="button"
+                        onClick={() => onNavigate('pricing')}
+                        className="dashboard-upgrade-cta flex-shrink-0 inline-flex items-center justify-center px-3 sm:px-3.5 py-2 sm:py-2.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white text-xs font-semibold rounded-xl transition-colors whitespace-nowrap"
+                      >
+                        <span className="relative z-[1] inline-flex items-center justify-center gap-1.5">
+                          <svg className="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                          <span>Upgrade</span>
+                        </span>
+                      </button>
+                    )}
                   </div>
-                  {/* Mobile: streak + friends + badges were previously inside a sm-only row and never showed */}
+                  {/* Mobile: streak + friends + badges + upgrade */}
                   <div className="flex sm:hidden items-center gap-2 w-full overflow-x-auto scrollbar-hide pb-0.5 -mx-0.5 px-0.5">
                     <div data-tutorial="streak-widget" className="flex-shrink-0">
                       <StreakWidget compact />
@@ -1965,48 +1960,20 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     <div className="flex-shrink-0 min-w-0">
                       <BadgeWidget onNavigate={onNavigate} />
                     </div>
+                    {usageStats.plan === 'free' && !loadingStats && (
+                      <button
+                        type="button"
+                        onClick={() => onNavigate('pricing')}
+                        className="dashboard-upgrade-cta flex-shrink-0 inline-flex items-center justify-center px-3 py-2 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white text-xs font-semibold rounded-xl transition-colors whitespace-nowrap"
+                      >
+                        <span className="relative z-[1] inline-flex items-center justify-center gap-1.5">
+                          <svg className="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                          <span>Upgrade</span>
+                        </span>
+                      </button>
+                    )}
                   </div>
                 </div>
-              </div>
-
-              {/* Ebook + upgrade — tight, no separator lines */}
-              <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-end gap-2 sm:gap-3 pt-1">
-                {showEbookBanner && !ebookBannerDismissed && (
-                  <div className="hidden sm:flex items-center shrink-0 gap-0">
-                    <div className="relative shrink-0">
-                      <a
-                        href="/downloads/writescholar-ultimate-study-tips-guide.pdf"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-3 py-2.5 pr-8 bg-amber-50/80 dark:bg-amber-900/20 border border-amber-200/60 dark:border-amber-700/40 rounded-xl hover:bg-amber-50 dark:hover:bg-amber-900/30 hover:border-amber-300/80 dark:hover:border-amber-600/50 transition-all shadow-sm group"
-                      >
-                        <span className="text-lg">📖</span>
-                        <div className="hidden sm:block text-left">
-                          <p className="font-semibold text-stone-700 dark:text-stone-200 text-xs leading-tight">Free Study Tips</p>
-                          <p className="text-[10px] text-amber-600 dark:text-amber-400 group-hover:underline">Get PDF →</p>
-                        </div>
-                        <span className="sm:hidden font-semibold text-stone-700 dark:text-stone-200 text-xs">Free PDF</span>
-                      </a>
-                      <button
-                        onClick={(e) => { e.preventDefault(); dismissEbookBanner(); }}
-                        className="absolute top-1 right-1 p-1 rounded-md text-stone-400 hover:text-stone-600 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors"
-                        aria-label="Dismiss"
-                      >
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                )}
-                {usageStats.plan === 'free' && !loadingStats && (
-                  <>
-                    <button onClick={() => onNavigate('pricing')} className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white text-xs font-semibold rounded-lg transition-all shadow-md shadow-violet-900/15 ring-1 ring-violet-900/10">
-                      <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                      <span>Upgrade</span>
-                    </button>
-                  </>
-                )}
               </div>
             </div>
           </div>
@@ -2024,11 +1991,13 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                       </div>
                     ) : (
             <div className="pt-1 sm:pt-2 pb-3 sm:pb-5 overflow-visible">
-              <div data-tutorial="analyze-ready" className="relative rounded-2xl sm:rounded-2xl overflow-hidden mb-3 sm:mb-4 border border-stone-200/90 dark:border-stone-700/90 bg-white/85 dark:bg-stone-900/55 shadow-[0_16px_50px_-16px_rgba(15,23,42,0.12)] dark:shadow-[0_16px_50px_-16px_rgba(0,0,0,0.45)] backdrop-blur-sm ring-1 ring-white/40 dark:ring-white/5 scroll-mt-8">
+              <div
+                data-tutorial="analyze-ready"
+                className="relative rounded-2xl sm:rounded-2xl overflow-hidden mb-3 sm:mb-4 border border-stone-200/90 dark:border-stone-700/90 bg-white/85 dark:bg-stone-900/55 shadow-[0_16px_50px_-16px_rgba(15,23,42,0.12)] dark:shadow-[0_16px_50px_-16px_rgba(0,0,0,0.45)] backdrop-blur-sm ring-1 ring-white/40 dark:ring-white/5 scroll-mt-8"
+              >
                 <div className="h-0.5 w-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-75 dark:opacity-80" aria-hidden />
                 <div className="relative rounded-b-2xl bg-white/95 dark:bg-stone-900/70 p-5 sm:p-8">
                   <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(91,33,182,0.04),transparent_55%)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-15%,rgba(109,40,217,0.08),transparent_55%)] pointer-events-none rounded-b-2xl" aria-hidden />
-
                   {mode === 'analyze' ? (
                     <div data-tutorial="analyze-essay-input-cluster" className="flex flex-col">
                     <div className="relative lg:grid lg:grid-cols-[minmax(0,220px)_minmax(0,48rem)_minmax(0,220px)] lg:gap-8 xl:gap-10 lg:items-start">
@@ -2088,16 +2057,6 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                             <span className="leading-tight"><span className="sm:hidden">Study</span><span className="hidden sm:inline">Study Pack</span></span>
                     </button>
                   </div>
-                        {showFirstAnalysisOnboarding && (
-                          <div className="flex flex-col items-center gap-1 mb-1.5 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                            <span className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-stone-50 dark:bg-stone-800/80 border border-stone-200/90 dark:border-stone-600 text-stone-800 dark:text-stone-200 text-sm font-medium shadow-sm">
-                              Start your first analysis: paste text or upload below, then run Analyze
-                      </span>
-                            <svg className="w-5 h-5 text-violet-600 dark:text-violet-400 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                      </svg>
-                    </div>
-                  )}
                       </div>
                       <div className="hidden lg:block relative self-start justify-self-end w-[236px] xl:w-[248px] pointer-events-auto rotate-[15deg] origin-bottom-right drop-shadow-lg z-[5] lg:mt-5 xl:mt-6" aria-label="Sample after feedback">
                         <p className="text-center mb-2">
@@ -2121,7 +2080,15 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                       <div className="relative w-full mb-2">
                       {/* Essay input, drop zone, and demo (same column as last release) */}
                       <div className="min-w-0 relative z-20 w-full max-w-3xl mx-auto space-y-3 sm:space-y-4 mt-0 lg:-mt-32 xl:-mt-36">
-                          <div className="relative rounded-2xl border transition-all duration-300 bg-white dark:bg-stone-900/40 border-violet-400/75 dark:border-violet-500/55 ring-2 ring-violet-500/18 shadow-sm shadow-violet-500/10 focus-within:border-violet-500 dark:focus-within:border-violet-400 focus-within:ring-4 focus-within:ring-violet-500/30 focus-within:shadow-md focus-within:shadow-violet-500/25">
+                          <div
+                            data-activation-essay-box
+                            data-tutorial-target="essay-input-wrapper"
+                            className={`relative rounded-2xl border transition-all duration-300 bg-white dark:bg-stone-900/40 ${
+                              isActivationDashboardTutorial && activationDashboardStep === 'essay'
+                                ? 'border-violet-500 dark:border-violet-400 ring-[3px] ring-violet-400/70 dark:ring-violet-300/55 shadow-[0_0_0_2px_rgba(167,139,250,0.45),0_0_36px_rgba(139,92,246,0.42),0_0_72px_rgba(167,139,250,0.18)]'
+                                : 'border-violet-400/75 dark:border-violet-500/55 ring-2 ring-violet-500/18 shadow-sm shadow-violet-500/10 focus-within:border-violet-500 dark:focus-within:border-violet-400 focus-within:ring-4 focus-within:ring-violet-500/30 focus-within:shadow-md focus-within:shadow-violet-500/25'
+                            }`}
+                          >
                             <div className="relative rounded-[14px] sm:rounded-[20px] bg-white/98 dark:bg-stone-800/95 backdrop-blur-sm min-h-[140px] sm:min-h-[200px]">
                               <textarea
                                 value={inputText}
@@ -2138,7 +2105,6 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                                   target.style.height = 'auto';
                                   target.style.height = Math.min(target.scrollHeight, 240) + 'px';
                                 }}
-                                data-tutorial-target="essay-input-wrapper"
                               />
                               <div className="absolute bottom-4 left-6 text-sm text-stone-400 dark:text-stone-500 font-medium">
                                 {getWordCount(inputText)} words
@@ -2200,19 +2166,73 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                                 </button>
                               )}
                             </div>
-                            <button
-                              type="button"
-                              data-tutorial-target="essay-analyze-btn"
-                              onClick={handleSubmit}
-                              disabled={!isTextValid()}
-                              className={`px-8 sm:px-10 py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 font-semibold text-base shrink-0 ${
-                                isTextValid()
-                                  ? 'bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white shadow-md shadow-violet-900/15 ring-1 ring-violet-900/10 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer'
-                                  : 'bg-stone-200 dark:bg-stone-700 text-stone-400 cursor-not-allowed'
-                              }`}
+                            <div
+                              className={
+                                isActivationDashboardTutorial && activationDashboardStep === 'analyze'
+                                  ? 'relative inline-flex shrink-0 isolate'
+                                  : 'inline-flex shrink-0'
+                              }
                             >
-                              Analyze Text
-                            </button>
+                              {isActivationDashboardTutorial && activationDashboardStep === 'analyze' && (
+                                <>
+                                  <span
+                                    className="pointer-events-none absolute -inset-6 rounded-[1.35rem] bg-violet-400/55 dark:bg-violet-500/45 blur-[26px] animate-cta-sparkle-halo"
+                                    aria-hidden
+                                  />
+                                  <span
+                                    className="pointer-events-none absolute -inset-1 rounded-[0.85rem] bg-gradient-to-br from-amber-200/35 via-violet-300/45 to-fuchsia-500/30 opacity-90 blur-[10px] animate-pulse"
+                                    aria-hidden
+                                  />
+                                </>
+                              )}
+                              <button
+                                ref={activationTutorialAnalyzeBtnRef}
+                                type="button"
+                                data-tutorial-target="essay-analyze-btn"
+                                onClick={handleSubmit}
+                                disabled={!isTextValid()}
+                                className={`px-8 sm:px-10 py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 font-semibold text-base shrink-0 ${
+                                  isTextValid()
+                                    ? `bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white shadow-md shadow-violet-900/15 ring-1 ring-violet-900/10 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer ${
+                                        isActivationDashboardTutorial && activationDashboardStep === 'analyze'
+                                          ? 'relative z-[133] pointer-events-auto overflow-visible animate-cta-sparkle-glow'
+                                          : ''
+                                      }`
+                                    : 'bg-stone-200 dark:bg-stone-700 text-stone-400 cursor-not-allowed'
+                                }`}
+                              >
+                                {isActivationDashboardTutorial && activationDashboardStep === 'analyze' && (
+                                  <>
+                                    <span
+                                      className="pointer-events-none absolute -top-2 left-1 h-5 w-5 -rotate-[18deg] select-none text-[15px] leading-none text-amber-100 drop-shadow-[0_0_12px_rgba(253,224,71,0.95),0_0_20px_rgba(253,230,138,0.65)] animate-sparkle-pin"
+                                      aria-hidden
+                                    >
+                                      ✦
+                                    </span>
+                                    <span
+                                      className="pointer-events-none absolute -top-1 right-1 h-5 w-5 rotate-12 select-none text-[15px] leading-none text-white drop-shadow-[0_0_14px_rgba(255,255,255,0.9),0_0_22px_rgba(196,181,253,0.85)] animate-sparkle-pin-delayed"
+                                      aria-hidden
+                                    >
+                                      ✦
+                                    </span>
+                                    <span
+                                      className="pointer-events-none absolute -bottom-1.5 left-4 h-4 w-4 rotate-[8deg] select-none text-[13px] leading-none text-violet-100 drop-shadow-[0_0_10px_rgba(196,181,253,0.95)] animate-sparkle-pin-slow"
+                                      aria-hidden
+                                    >
+                                      ✦
+                                    </span>
+                                    <span
+                                      className="pointer-events-none absolute -bottom-1 right-5 h-3.5 w-3.5 -rotate-6 select-none text-[11px] leading-none text-fuchsia-100 drop-shadow-[0_0_8px_rgba(232,121,249,0.85)] animate-sparkle-pin"
+                                      style={{ animationDelay: '0.55s' }}
+                                      aria-hidden
+                                    >
+                                      ✦
+                                    </span>
+                                  </>
+                                )}
+                                Analyze Text
+                              </button>
+                            </div>
                           </div>
 
                           <div
@@ -2437,7 +2457,7 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
             </div>
             ))}
 
-          {/* Search results & ebook - shown when typing */}
+          {/* Search results — shown when typing */}
           <div className="space-y-4">
               {/* Inline search results — shown when typing in hero search */}
               {searchQuery.trim() && (
@@ -2770,14 +2790,14 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
               className="hidden"
             />
 
-            {/* Exhausted generations banner — above hero (free: study packs only; Pro: 99 combined pool) */}
+            {/* Exhausted generations banner — above hero (free: study packs only; Pro: 49 combined pool) */}
             {studyPackSectionExhausted && (
               <div className="mb-4 sm:mb-6 bg-amber-600 dark:bg-gradient-to-r dark:from-amber-600 dark:to-orange-700 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white text-center shadow-lg shadow-amber-500/25">
                 <span className="text-3xl sm:text-4xl mb-2 sm:mb-3 block">🔒</span>
                 <h3 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2">Monthly Limit Reached</h3>
                 <p className="text-amber-100 dark:text-amber-100/90 mb-1 text-sm sm:text-base">
                   {combinedPoolExhausted
-                    ? "You've used all 99 combined actions (analyses, study packs & citations) this billing period. Your limit resets when your plan renews."
+                    ? `You've used all ${combinedActionsMonthlyCap} combined actions (analyses, study packs & citations) this billing period. Your limit resets when your plan renews.`
                     : `You've used all ${quizUsage.generationLimit} study pack generations this period. Upgrade for more!`}
                 </p>
                 <p className="text-amber-200/90 text-xs sm:text-sm mb-3 sm:mb-4">{getResetsInText(usageStats.daysUntilReset ?? quizUsage.daysUntilReset)}</p>
@@ -2808,11 +2828,10 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
                     ) : (
                       <>
                         <p className="text-amber-800 dark:text-amber-200 font-medium text-xs sm:text-sm">
-                          Pro:{' '}
+                          {usageStats.plan === 'premium' ? 'Premium' : 'Pro'}:{' '}
                           {combinedActionsRemaining != null ? combinedActionsRemaining : quizUsage.generationsRemaining}
                           /
-                          {(usageStats.planLimits as { combinedActionsPerMonth?: number }).combinedActionsPerMonth ??
-                            quizUsage.generationLimit}{' '}
+                          {combinedActionsMonthlyCap}{' '}
                           combined actions left this month
                         </p>
                         <p className="text-amber-600 dark:text-amber-400 text-[10px] sm:text-xs mt-0.5 line-clamp-2">
@@ -4226,6 +4245,22 @@ const Dashboard = ({ onNavigate, user, onLogout, onUserUpdate, initialMode = 'an
       )}
 
       <Footer onNavigate={onNavigate} />
+
+      </div>
+
+      {isActivationDashboardTutorial && activationDashboardStep !== 'idle' && (
+        <ActivationDashboardCoach
+          step={activationDashboardStep}
+          analyzeButtonRef={activationTutorialAnalyzeBtnRef}
+          onNext={() => {
+            setActivationDashboardStep((s) => {
+              if (s === 'welcome') return 'essay';
+              if (s === 'essay') return 'analyze';
+              return s;
+            });
+          }}
+        />
+      )}
 
     </div>
   );

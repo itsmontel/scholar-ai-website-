@@ -77,9 +77,9 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
               <div className="space-y-4 text-stone-600 dark:text-stone-400">
                 <p>WriteScholar offers the following plans:</p>
                 <ul className="list-disc list-inside space-y-2 ml-4">
-                  <li><strong>Free</strong> — 3 documents per month, 2 AI essay analyses per month, 5,000 words/month for the Paper Summarizer, 2 study pack generations (lesson, flashcards & quiz — crossword & Crater Blast unlock with Pro), 2 citation searches per month</li>
-                  <li><strong>Pro ($19.99/month)</strong> — unlimited documents, 99 combined actions per month (analyses, study packs & citations), 999,999 words/month for the Paper Summarizer; quiz, flashcards, crossword & Crater Blast with all types and difficulties; Focus Mode with unlimited blocked sites; document uploads up to 100MB per file; 100MB total library storage; full annotations and feedback (one-click Apply WriteScholar revisions into your draft are not included)</li>
-                  <li><strong>Premium ($39.99/month)</strong> — everything in Pro with 3× usage (299 combined actions per month, 2,999,999 Paper Summarizer words per month), 1GB total library storage, and Apply WriteScholar revisions into your essay</li>
+                  <li><strong>Free</strong> — 3 documents per month, 2 AI essay analyses per month, 5,000 words/month for the Paper Summarizer, 2 study pack generations (lesson, flashcards & quiz — crossword & Crater Blast unlock with Pro), 2 citation searches per month, 2MB total document library storage</li>
+                  <li><strong>Pro ($19.99/month)</strong> — 49 combined actions per month (analyses, study packs & citations), 999,999 words/month for the Paper Summarizer; quiz, flashcards, crossword & Crater Blast with all types and difficulties; Focus Mode with unlimited blocked sites; document uploads up to 100MB per file; 100MB total library storage; full annotations and feedback; one-click Apply WriteScholar revisions into your draft</li>
+                  <li><strong>Premium ($39.99/month)</strong> — everything in Pro with 4× usage (199 combined actions per month, unlimited research-paper summarisation) and 1GB total library storage</li>
                 </ul>
                 <p>
                   Usage limits reset based on your plan: paid subscribers' limits reset at the start of each billing period; free users' limits reset on rolling 30-day periods from signup. Unused allowances do not carry

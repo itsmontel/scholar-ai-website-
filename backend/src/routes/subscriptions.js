@@ -9,7 +9,7 @@ const { getSupabase } = require('../database/connection');
 // @access  Private
 router.post('/create-checkout-session', authenticateToken, async (req, res) => {
   try {
-    const { planType, billingCycle, successUrl, cancelUrl, promoCode } = req.body;
+    const { planType, billingCycle, successUrl, cancelUrl, promoCode, trialPeriodDays } = req.body;
     const userId = req.user.id;
 
     if (!planType || !billingCycle || !successUrl || !cancelUrl) {
@@ -58,30 +58,26 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
       }
     }
 
-    // Auto-apply OFF10 for first-time purchasers (Pro/Premium)
-    let effectivePromoCode = promoCode || null;
-    if (!effectivePromoCode) {
-      const { data: existingSubs } = await getSupabase()
-        .from('subscriptions')
-        .select('id')
-        .eq('user_id', userId)
-        .limit(1);
-      if (!existingSubs || existingSubs.length === 0) {
-        effectivePromoCode = 'OFF10';
-      }
-    }
+    const effectivePromoCode = typeof promoCode === 'string' && promoCode.trim() ? promoCode.trim() : null;
 
-    // Create checkout session with optional promo code
-    // Pass user email for first-time discount eligibility and custom redirect URLs
+    const trialDays =
+      trialPeriodDays != null &&
+      Number.isFinite(Number(trialPeriodDays)) &&
+      Number(trialPeriodDays) > 0
+        ? Number(trialPeriodDays)
+        : 0;
+
+    // Optional promo (e.g. OFF10) can be combined with trial — discount applies after trial on first invoice
     const sessionResult = await subscriptionService.createCheckoutSession(
       customerId,
       planType,
       billingCycle,
       userId,
       effectivePromoCode,
-      user.email,  // Pass email for first-time discount eligibility
-      successUrl,  // Use URL from request (e.g., from onboarding)
-      cancelUrl    // Use URL from request (redirects to dashboard on cancel)
+      user.email,
+      successUrl,
+      cancelUrl,
+      { trialPeriodDays: trialDays }
     );
 
     if (!sessionResult.success) {
@@ -106,6 +102,32 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
       success: false,
       message: 'Failed to create checkout session',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// @route   POST /api/subscriptions/decline-trial
+// @desc    User forfeits the one-time 7-day free trial (e.g. after canceling Stripe from tutorial paywall)
+// @access  Private
+router.post('/decline-trial', authenticateToken, async (req, res) => {
+  try {
+    const email = req.user.email;
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'User email not found' });
+    }
+    const result = await subscriptionService.recordTrialDecline(email);
+    if (!result.success) {
+      return res.status(500).json({
+        success: false,
+        message: result.error || 'Failed to record trial decline'
+      });
+    }
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error declining trial:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to decline trial'
     });
   }
 });
@@ -560,7 +582,7 @@ router.post('/validate-promo-code', authenticateToken, async (req, res) => {
 });
 
 // @route   GET /api/subscriptions/trial-eligibility
-// @desc    Check if user is eligible for first-time $10 off (OFF10)
+// @desc    Trial period vs first-time $10 off (OFF10). `eligible` = off10Eligible for backward compatibility.
 // @access  Private
 router.get('/trial-eligibility', authenticateToken, async (req, res) => {
   try {
@@ -573,13 +595,19 @@ router.get('/trial-eligibility', authenticateToken, async (req, res) => {
       });
     }
 
-    const eligibility = await subscriptionService.checkTrialEligibility(user.email);
+    const trialEligibility = await subscriptionService.checkTrialEligibility(user.email);
+    const off10Eligibility = await subscriptionService.checkOff10Eligibility(user.email);
 
     res.json({
       success: true,
-      eligible: eligibility.eligible,
-      reason: eligibility.reason || null,
-      previousTrialDate: eligibility.previousTrialDate || null
+      trialEligible: trialEligibility.eligible,
+      off10Eligible: off10Eligibility.eligible,
+      /** @deprecated use off10Eligible; kept for older clients that used this for $10-off UI */
+      eligible: off10Eligibility.eligible,
+      trialReason: trialEligibility.reason || null,
+      off10Reason: off10Eligibility.reason || null,
+      reason: trialEligibility.reason || null,
+      previousTrialDate: trialEligibility.previousTrialDate || null
     });
 
   } catch (error) {

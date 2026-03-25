@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useTheme } from '../../contexts/ThemeContext';
 import { HIDE_FRIENDS } from '../../config/featureFlags';
 import PromoBanner from './PromoBanner';
 import { getResetsInText } from '../../utils/usageReset';
@@ -23,7 +22,14 @@ interface HeaderProps {
   currentPage?: string;
   /** Solid background (no translucency). Use on the landing page so the bar reads crisp over the hero. */
   opaqueHeader?: boolean;
+  /** Post-signup analysis tour: highlight Library nav for the Library step. */
+  libraryActivationHighlight?: boolean;
+  /** Analysis activation tutorial: disable all nav, logo, and menu clicks (coach controls the flow). */
+  blockNavigationInteractions?: boolean;
 }
+
+/** `pointer-events: none` on a parent does not block children; this class disables hits on the bar and every descendant. */
+const blockNavPointerCls = 'pointer-events-none [&_*]:pointer-events-none';
 
 interface UsageStats {
   documentsUploaded: number;
@@ -52,8 +58,16 @@ interface UsageStats {
   daysUntilReset?: number;
 }
 
-const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage, sticky = true, opaqueHeader = false }) => {
-  const { theme, toggleTheme } = useTheme();
+const Header: React.FC<HeaderProps> = ({
+  onNavigate,
+  user,
+  onLogout,
+  currentPage,
+  sticky = true,
+  opaqueHeader = false,
+  libraryActivationHighlight = false,
+  blockNavigationInteractions = false,
+}) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [usageStats, setUsageStats] = useState<UsageStats | null>(null);
@@ -67,6 +81,21 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  /** Analysis activation tour: on small screens Library lives in the collapsible menu — open it so the coach arrow can target it. */
+  useEffect(() => {
+    if (!libraryActivationHighlight) return;
+    if (typeof window.matchMedia === 'undefined') return;
+    const mq = window.matchMedia('(max-width: 1023px)');
+    if (mq.matches) setIsMobileMenuOpen(true);
+  }, [libraryActivationHighlight]);
+
+  useEffect(() => {
+    if (blockNavigationInteractions) {
+      setIsMobileMenuOpen(false);
+      setIsDropdownOpen(false);
+    }
+  }, [blockNavigationInteractions]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -165,7 +194,9 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
     return (
       <>
       <header
-        className={`sticky top-0 left-0 right-0 z-[100] transition-all duration-300 border-b ${opaqueHeader ? '' : 'backdrop-blur-md'} ${publicHeaderBg}`}
+        className={`sticky top-0 left-0 right-0 z-[100] transition-all duration-300 border-b ${opaqueHeader ? '' : 'backdrop-blur-md'} ${publicHeaderBg} ${
+          blockNavigationInteractions ? blockNavPointerCls : ''
+        }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-[3.5rem] sm:h-[4.25rem]">
@@ -302,7 +333,9 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
 
   return (
     <header
-      className={`${sticky ? 'sticky top-0' : 'relative'} left-0 right-0 z-50 transition-all duration-300 border-b ${opaqueHeader ? '' : 'backdrop-blur-md'} ${loggedInHeaderBg}`}
+      className={`${sticky ? 'sticky top-0' : 'relative'} left-0 right-0 z-50 transition-all duration-300 border-b ${opaqueHeader ? '' : 'backdrop-blur-md'} ${loggedInHeaderBg} ${
+        blockNavigationInteractions ? blockNavPointerCls : ''
+      }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-[3.5rem] sm:h-[4.25rem]">
@@ -336,9 +369,15 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                 Dashboard
               </button>
               <button
+                type="button"
                 onClick={() => onNavigate?.('library')}
+                data-activation-library-tab
                 className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
                   currentPage === 'library' ? navActiveCls : navInactiveCls
+                } ${
+                  libraryActivationHighlight
+                    ? 'ring-2 ring-violet-500/90 ring-offset-2 ring-offset-[#f9f9fb] dark:ring-offset-stone-950 z-[210] relative'
+                    : ''
                 }`}
               >
                 Library
@@ -440,10 +479,12 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                   className="flex items-center gap-2.5 p-1 pr-2.5 rounded-lg bg-white dark:bg-stone-900/50 border border-stone-200/90 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800/80 transition-all duration-200 shadow-sm"
                 >
                   <div className="w-8 h-8 rounded-lg bg-violet-700 dark:bg-violet-600 flex items-center justify-center text-white font-semibold text-sm shadow-sm">
-                    {(user.username || user.name || user.email) ? (user.username || user.name || user.email).charAt(0).toUpperCase() : 'U'}
+                    {String(user.username || user.name || user.email || 'U').charAt(0).toUpperCase()}
                   </div>
                   <div className="hidden md:block text-left">
-                    <div className="text-sm font-semibold text-stone-800 dark:text-stone-100 leading-tight">{user.username ? `@${user.username}` : user.name || user.email?.split('@')[0] || 'User'}</div>
+                    <div className="text-sm font-semibold text-stone-800 dark:text-stone-100 leading-tight">
+                      {user.username ? `@${user.username}` : user.name || user.email?.split('@')?.[0] || 'User'}
+                    </div>
                     <div className="text-xs text-stone-500 dark:text-stone-400 capitalize">{usageStats?.plan || 'Free'}</div>
                   </div>
                   <svg 
@@ -463,7 +504,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
                     <div className="px-4 py-4 bg-stone-50/90 dark:bg-stone-800/50 border-b border-stone-200/80 dark:border-stone-700/80">
                       <div className="flex items-center gap-3">
                         <div className="w-11 h-11 rounded-lg bg-violet-700 dark:bg-violet-600 flex items-center justify-center text-white font-semibold text-base shadow-sm">
-                          {(user.username || user.name || user.email) ? (user.username || user.name || user.email).charAt(0).toUpperCase() : 'U'}
+                          {String(user.username || user.name || user.email || 'U').charAt(0).toUpperCase()}
                         </div>
                         <div>
                           <div className="text-sm font-semibold text-stone-800 dark:text-stone-100">
@@ -648,11 +689,20 @@ const Header: React.FC<HeaderProps> = ({ onNavigate, user, onLogout, currentPage
             ].map(({ id, label, page }) => (
               <button
                 key={id}
-                onClick={() => { onNavigate?.(id); setIsMobileMenuOpen(false); }}
+                type="button"
+                onClick={() => {
+                  onNavigate?.(id);
+                  setIsMobileMenuOpen(false);
+                }}
+                {...(id === 'library' ? { 'data-activation-library-tab': true } : {})}
                 className={`w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                   currentPage === (page || id)
                     ? 'bg-white dark:bg-stone-900 text-violet-800 dark:text-violet-300 border border-stone-200 dark:border-stone-700 shadow-sm'
                     : 'text-stone-600 dark:text-stone-400 hover:bg-stone-100/90 dark:hover:bg-stone-800/80'
+                } ${
+                  id === 'library' && libraryActivationHighlight
+                    ? 'ring-2 ring-violet-500/85 ring-offset-2 ring-offset-[#f9f9fb] dark:ring-offset-stone-950'
+                    : ''
                 }`}
               >
                 {label}

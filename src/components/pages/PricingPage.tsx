@@ -38,7 +38,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
         }
         if (trialRes.ok) {
           const data = await trialRes.json();
-          setIsTrialEligible(data.eligible);
+          setIsTrialEligible(data.off10Eligible ?? data.eligible ?? false);
         }
       } catch (error) {
         console.error('Error loading pricing subscription data:', error);
@@ -103,7 +103,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
             planType: planId,
             billingCycle: billingCycle as 'monthly' | 'yearly',
             successUrl: `${window.location.origin}/dashboard?payment=success`,
-            cancelUrl: `${window.location.origin}/pricing?payment=cancelled`
+            cancelUrl: `${window.location.origin}/dashboard?payment=cancelled`
           })
         });
 
@@ -170,6 +170,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
         '3 documents, 2 analyses, 2 study packs/mo',
         '5,000 words Paper Summarizer',
         '2 citation searches',
+        '2MB document library storage',
         'Basic grammar & citation styles',
         'Focus Mode (3 sites)'
       ],
@@ -190,14 +191,13 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       monthlyPrice: 19.99,
       yearlyPrice: 199.99,
       features: [
-        'Unlimited documents',
-        '99 combined analyses, study packs & citations/mo',
+        '49 combined analyses, study packs & citations/mo',
         '999,999 words Paper Summarizer',
         'All citation styles, PDF/Word export',
         'Focus Mode (unlimited blocked sites)',
         'Quiz, flashcards, crossword & Crater Blast',
         '100MB total library storage; uploads up to 100MB per file',
-        'Full annotations & feedback (apply-to-draft revisions are Premium)'
+        'Full annotations & feedback; Apply WriteScholar revisions into your draft'
       ],
       limitations: [],
       popular: true,
@@ -211,14 +211,13 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
     {
       id: 'premium',
       name: 'Premium',
-      description: 'Apply revisions + higher limits',
+      description: 'Higher limits + more storage',
       monthlyPrice: 39.99,
       yearlyPrice: 399.99,
       features: [
         'Everything in Pro',
-        '299 combined analyses, study packs & citations/mo — great for heavy citation use',
-        '2,999,999 words Paper Summarizer (3× Pro)',
-        'Apply WriteScholar revisions into your essay',
+        '199 combined analyses, study packs & citations/mo — great for heavy citation use',
+        'Summarise unlimited research papers',
         '1GB total document library storage'
       ],
       limitations: [],
@@ -239,15 +238,15 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
     },
     {
       question: "What's included in the free plan?",
-        answer: "The free plan includes 3 documents per month, 2 AI essay analyses, 2 study pack generations (lesson, flashcards & quiz included — crossword & Crater Blast unlock with Pro), 5,000 words for the Paper Summarizer, and 2 citation searches. It's perfect for students just getting started."
+        answer: "The free plan includes 3 documents per month, 2 AI essay analyses, 2 study pack generations (lesson, flashcards & quiz included — crossword & Crater Blast unlock with Pro), 5,000 words for the Paper Summarizer, 2 citation searches, and 2MB document library storage. It's perfect for students just getting started."
     },
     {
       question: "What does Pro include?",
-      answer: "Pro includes 99 combined actions per month (analyses, study packs & citations), 999,999 words for the Paper Summarizer, unlimited Focus Mode blocked sites, uploads up to 100MB per file, 100MB total library storage, all citation styles, full annotations and feedback, and full access to quizzes, flashcards, crossword & Crater Blast. One-click Apply WriteScholar revisions into your draft are Premium."
+      answer: "Pro includes 49 combined actions per month (analyses, study packs & citations), 999,999 words for the Paper Summarizer, unlimited Focus Mode blocked sites, uploads up to 100MB per file, 100MB total library storage, all citation styles, full annotations and feedback, Apply WriteScholar revisions into your draft, and full access to quizzes, flashcards, crossword & Crater Blast."
     },
     {
       question: "What does Premium add?",
-      answer: "Premium includes everything in Pro with 3× usage: 299 combined actions per month, 2,999,999 Paper Summarizer words, 1GB total library storage, and Apply WriteScholar revisions so you can insert suggested edits directly into your essay."
+      answer: "Premium includes everything in Pro with 4× usage: 199 combined actions per month, unlimited research-paper summarisation, and 1GB total library storage for your document library."
     },
     {
       question: "Can I change my plan after subscribing?",
@@ -382,7 +381,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
               {plan.id === 'premium' && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                   <span className="bg-gradient-to-r from-amber-500 to-amber-600 text-amber-950 px-3 py-1 rounded-full text-xs font-bold shadow-md shadow-amber-500/30 ring-1 ring-amber-400/50">
-                    3× usage
+                    4× usage
                   </span>
                 </div>
               )}

@@ -1,15 +1,58 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
+import { AuthMarketingSide } from '../common/AuthMarketingSide';
 
 interface ResetPasswordPageProps {
   onNavigate: (page: string) => void;
+}
+
+function ResetPasswordShell({
+  children,
+  onNavigate,
+}: {
+  children: ReactNode;
+  onNavigate: (page: string) => void;
+}) {
+  return (
+    <div className="relative min-h-screen flex overflow-x-hidden">
+      <WriteScholarEditorialBackgroundLayers position="fixed" />
+      <button
+        type="button"
+        onClick={() => onNavigate('landing')}
+        className="fixed top-4 left-4 sm:top-6 sm:left-6 z-50 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors group"
+      >
+        <div className="w-10 h-10 bg-white dark:bg-stone-800 rounded-full shadow-md flex items-center justify-center group-hover:shadow-lg transition-all border border-stone-200 dark:border-stone-700">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+        </div>
+      </button>
+
+      <div className="w-full lg:w-1/2 flex flex-col">
+        <div className="p-6 pt-20 sm:pt-6">
+          <div className="flex items-center space-x-2.5">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden shadow-lg shadow-violet-500/30">
+              <img src="/mascot.png" alt="WriteScholar" className="w-full h-full object-contain" loading="eager" width={120} height={120} />
+            </div>
+            <span className="text-xl font-extrabold tracking-tight text-violet-600 dark:text-violet-400">WriteScholar</span>
+          </div>
+        </div>
+
+        <div className="flex-1 flex items-center justify-center px-6 pb-12">
+          <div className="w-full max-w-sm">{children}</div>
+        </div>
+      </div>
+
+      <AuthMarketingSide />
+    </div>
+  );
 }
 
 const ResetPasswordPage = ({ onNavigate }: ResetPasswordPageProps) => {
   const [token, setToken] = useState('');
   const [formData, setFormData] = useState({
     newPassword: '',
-    confirmPassword: ''
+    confirmPassword: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -17,10 +60,9 @@ const ResetPasswordPage = ({ onNavigate }: ResetPasswordPageProps) => {
   const [tokenValid, setTokenValid] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // Get token from URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     const resetToken = urlParams.get('token');
-    
+
     if (resetToken) {
       setToken(resetToken);
       setTokenValid(true);
@@ -47,7 +89,9 @@ const ResetPasswordPage = ({ onNavigate }: ResetPasswordPageProps) => {
     }
 
     if (!validatePassword(formData.newPassword)) {
-      setError('Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character');
+      setError(
+        'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character'
+      );
       return;
     }
 
@@ -73,148 +117,149 @@ const ResetPasswordPage = ({ onNavigate }: ResetPasswordPageProps) => {
       }
 
       setSuccess(true);
-      
-      // Redirect to login after 3 seconds
+
       setTimeout(() => {
         onNavigate('login');
       }, 3000);
-
-    } catch (error) {
-      console.error('Reset password error:', error);
-      setError(error instanceof Error ? error.message : 'Password reset failed. Please try again.');
+    } catch (err) {
+      console.error('Reset password error:', err);
+      setError(err instanceof Error ? err.message : 'Password reset failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSubmit();
+    }
+  };
+
   if (tokenValid === false) {
     return (
-      <div className="relative min-h-screen flex items-center justify-center p-4 overflow-x-hidden">
-        <WriteScholarEditorialBackgroundLayers position="fixed" />
-        <div className="max-w-md w-full">
-          <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 text-center">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-              </svg>
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Invalid Reset Link</h1>
-            <p className="text-gray-600 mb-6">
-              This password reset link is invalid or has expired. Please request a new password reset.
-            </p>
-            <button
-              onClick={() => onNavigate('login')}
-              className="w-full bg-violet-600 hover:bg-violet-700 text-white py-3 rounded-lg font-semibold hover:shadow-lg transform hover:scale-[1.02] transition-all duration-300"
-            >
-              Back to Login
-            </button>
+      <ResetPasswordShell onNavigate={onNavigate}>
+        <div className="rounded-2xl border border-stone-200/80 dark:border-stone-700/80 bg-white/80 dark:bg-stone-900/40 backdrop-blur-sm shadow-xl shadow-stone-200/40 dark:shadow-black/20 px-6 py-8 sm:px-8 sm:py-9 text-center">
+          <div className="h-0.5 w-16 bg-gradient-to-r from-violet-600 to-red-400/80 rounded-full mx-auto mb-6" aria-hidden />
+          <div className="w-14 h-14 rounded-2xl bg-red-50 dark:bg-red-900/30 border border-red-200/80 dark:border-red-800/50 flex items-center justify-center mx-auto mb-5">
+            <svg className="w-7 h-7 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+              />
+            </svg>
           </div>
+          <h1 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight text-stone-800 dark:text-stone-100 mb-2">Invalid reset link</h1>
+          <p className="text-stone-500 dark:text-stone-400 text-sm mb-8 leading-relaxed">
+            This password reset link is invalid or has expired. Request a new one from the login page.
+          </p>
+          <button
+            type="button"
+            onClick={() => onNavigate('login')}
+            className="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white font-semibold rounded-xl shadow-md shadow-violet-900/15 dark:shadow-violet-950/40 ring-1 ring-violet-900/10 dark:ring-white/10 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
+          >
+            Back to login
+          </button>
         </div>
-      </div>
+      </ResetPasswordShell>
     );
   }
 
   if (success) {
     return (
-      <div className="relative min-h-screen flex items-center justify-center p-4 overflow-x-hidden">
-        <WriteScholarEditorialBackgroundLayers position="fixed" />
-        <div className="max-w-md w-full">
-          <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Password Reset Successful!</h1>
-            <p className="text-gray-600 mb-6">
-              Your password has been successfully reset. You will be redirected to the login page shortly.
-            </p>
-            <div className="bg-violet-50 border border-violet-200 rounded-lg p-4">
-              <p className="text-violet-800 text-sm">
-                Redirecting to login page in 3 seconds...
-              </p>
-            </div>
+      <ResetPasswordShell onNavigate={onNavigate}>
+        <div className="rounded-2xl border border-stone-200/80 dark:border-stone-700/80 bg-white/80 dark:bg-stone-900/40 backdrop-blur-sm shadow-xl shadow-stone-200/40 dark:shadow-black/20 px-6 py-8 sm:px-8 sm:py-9 text-center">
+          <div className="h-0.5 w-16 bg-gradient-to-r from-violet-600 to-red-400/80 rounded-full mx-auto mb-6" aria-hidden />
+          <div className="w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-900/25 border border-emerald-200/80 dark:border-emerald-800/50 flex items-center justify-center mx-auto mb-5">
+            <svg className="w-7 h-7 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h1 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight text-stone-800 dark:text-stone-100 mb-2">Password updated</h1>
+          <p className="text-stone-500 dark:text-stone-400 text-sm mb-6 leading-relaxed">
+            Your password has been reset. You will be redirected to sign in shortly.
+          </p>
+          <div className="rounded-xl border border-violet-200/80 dark:border-violet-800/40 bg-violet-50/80 dark:bg-violet-950/30 px-4 py-3">
+            <p className="text-violet-800 dark:text-violet-200 text-sm font-medium">Redirecting to login in 3 seconds…</p>
           </div>
         </div>
-      </div>
+      </ResetPasswordShell>
     );
   }
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-x-hidden">
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
-      <div className="max-w-md w-full">
-        <div className="flex items-center space-x-2 mb-8 justify-center">
-          <div className="w-8 h-8 bg-gradient-to-br from-violet-500 to-violet-500 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-lg">W</span>
-          </div>
-          <span className="text-xl font-bold text-gray-900">WriteScholar</span>
+    <ResetPasswordShell onNavigate={onNavigate}>
+      <div className="rounded-2xl border border-stone-200/80 dark:border-stone-700/80 bg-white/80 dark:bg-stone-900/40 backdrop-blur-sm shadow-xl shadow-stone-200/40 dark:shadow-black/20 px-6 py-8 sm:px-8 sm:py-9">
+        <div className="h-0.5 w-16 bg-gradient-to-r from-violet-600 to-red-400/80 rounded-full mb-6" aria-hidden />
+        <div className="mb-8">
+          <h1 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight text-stone-800 dark:text-stone-100 mb-2">Reset your password</h1>
+          <p className="text-stone-500 dark:text-stone-400 text-sm">Choose a new password for your account</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Reset Your Password</h1>
-          <p className="text-gray-600 mb-8">Enter your new password below</p>
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+            <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
+          </div>
+        )}
 
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-600 text-sm">{error}</p>
-            </div>
-          )}
-
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">New Password</label>
-              <input
-                type="password"
-                value={formData.newPassword}
-                onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
-                placeholder="Enter new password"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Must be at least 8 characters with uppercase, lowercase, number, and special character
-              </p>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Confirm New Password</label>
-              <input
-                type="password"
-                value={formData.confirmPassword}
-                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                placeholder="Confirm new password"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
-              />
-            </div>
-
-            <button
-              onClick={handleSubmit}
-              disabled={isLoading}
-              className="w-full bg-violet-600 hover:bg-violet-700 text-white py-3 rounded-lg font-semibold hover:shadow-lg transform hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-            >
-              {isLoading ? (
-                <div className="flex items-center justify-center">
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                  Resetting Password...
-                </div>
-              ) : (
-                'Reset Password'
-              )}
-            </button>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1.5">New password</label>
+            <input
+              type="password"
+              value={formData.newPassword}
+              onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
+              onKeyDown={handleKeyDown}
+              placeholder="••••••••"
+              className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent focus:bg-white dark:focus:bg-stone-800 transition-all text-sm text-stone-800 dark:text-stone-100"
+            />
+            <p className="text-xs text-stone-500 dark:text-stone-400 mt-1.5">
+              At least 8 characters with uppercase, lowercase, number, and special character
+            </p>
           </div>
 
-          <p className="text-center text-sm text-gray-600 mt-6">
-            Remember your password?{' '}
-            <button
-              onClick={() => onNavigate('login')}
-              className="text-violet-600 hover:text-violet-500 font-medium"
-            >
-              Back to Login
-            </button>
-          </p>
+          <div>
+            <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1.5">Confirm password</label>
+            <input
+              type="password"
+              value={formData.confirmPassword}
+              onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+              onKeyDown={handleKeyDown}
+              placeholder="••••••••"
+              className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent focus:bg-white dark:focus:bg-stone-800 transition-all text-sm text-stone-800 dark:text-stone-100"
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={isLoading}
+            className="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white font-semibold rounded-xl shadow-md shadow-violet-900/15 dark:shadow-violet-950/40 ring-1 ring-violet-900/10 dark:ring-white/10 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:shadow-md"
+          >
+            {isLoading ? (
+              <span className="flex items-center justify-center">
+                <span className="w-5 h-5 border-2 border-stone-800 border-t-transparent rounded-full animate-spin mr-2" />
+                Updating password…
+              </span>
+            ) : (
+              'Update password'
+            )}
+          </button>
         </div>
+
+        <p className="text-center text-sm text-stone-500 dark:text-stone-400 mt-6">
+          Remember your password?{' '}
+          <button
+            type="button"
+            onClick={() => onNavigate('login')}
+            className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-semibold"
+          >
+            Sign in
+          </button>
+        </p>
       </div>
-    </div>
+    </ResetPasswordShell>
   );
 };
 

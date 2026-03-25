@@ -4876,7 +4876,7 @@ Rules:
   }
 
   /**
-   * Pro: generate concrete replacement prose for a highlighted span (not advisory "suggestion" text).
+   * Generate concrete replacement prose for a highlighted span (not advisory "suggestion" text).
    * @param {object} params
    * @param {string} params.fullDocument - full essay text
    * @param {string} params.highlightedText - exact span to replace

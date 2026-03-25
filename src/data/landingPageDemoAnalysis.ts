@@ -374,6 +374,8 @@ export const DEMO_B_ANNOTATIONS: DemoAnnotation[] = [
     text: 'Her parents are unware that Chris is a black man to which Chris acknowledges their excessively friendly behavior as a defense mechanism to withhold their frustration with their daughter dating a black man.',
     comment: 'This section could be enhanced with more specific detail or clearer development.',
     suggestion: 'Revise to: \'Chris notes that their exaggerated friendliness masks discomfort with his presence, revealing how race shapes social interactions even in supposedly progressive spaces.\'',
+    demoRevisedText:
+      'Chris notes that their exaggerated friendliness masks discomfort with his presence, revealing how race shapes social interactions even in supposedly progressive spaces.',
   },
   {
     id: 'b-improve-4',

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef, useMemo } from 'react';
 import DOMPurify from 'dompurify';
 import { diffWordsWithSpace } from 'diff';
 import Header from '../common/Header';
@@ -10,6 +10,25 @@ import ScholarMascot from '../common/ScholarMascot';
 import { ExportService, AnalysisData } from '../../services/exportService';
 import { trackAction, getStats } from '../../data/achievements';
 import { trackEvent } from '../../utils/analytics';
+import ActivationAnalysisCoach from '../common/ActivationAnalysisCoach';
+import SoftPaywall from '../common/SoftPaywall';
+import {
+  ACTIVATION_MOCK_ANALYSIS_MARKDOWN,
+  ACTIVATION_OVERALL_SCORE,
+  ACTIVATION_GRADE_LABEL,
+  ACTIVATION_TUTORIAL_CONCERN_REVISION_ID,
+  ACTIVATION_TUTORIAL_IMPROVE_REVISION_ID,
+  ACTIVATION_TUTORIAL_APPLYABLE_IDS,
+  ACTIVATION_CONCERN_SPAN,
+  ACTIVATION_CONCERN_REWRITE,
+  ACTIVATION_IMPROVE_SPAN,
+  ACTIVATION_IMPROVE_REWRITE,
+  buildActivationAnnotationsForDocument,
+  buildActivationGradeRubric,
+  ACTIVATION_SPECIFIC_REWRITES,
+} from '../../data/activationTutorialMock';
+import { persistTutorialToServer } from '../../utils/onboarding';
+import { POST_ACTIVATION_PAYWALL_PENDING_KEY } from '../../constants/paywallSession';
 
 /**
  * Normalize draft text before diffing so highlights match real edits, not CRLF/Unicode drift.
@@ -288,8 +307,12 @@ interface AnalysisPageProps {
     plan: string;
     subscription_status?: string;
     email_verified?: boolean;
+    onboardingCompleted?: boolean;
+    welcomeTutorialCompleted?: boolean;
   } | null;
   onLogout?: () => void;
+  /** Sync welcome tutorial completion to app shell (same as dashboard). */
+  onUserUpdate?: (updates: { welcomeTutorialCompleted?: boolean }) => void;
 }
 
 interface Document {
@@ -533,7 +556,7 @@ interface AnalysisResult {
   };
 }
 
-const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout }) => {
+const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout, onUserUpdate }) => {
   const analyzingRef = useRef(false);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [analysisTypes, setAnalysisTypes] = useState<AnalysisType[]>([]);
@@ -596,9 +619,138 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
     clarity_rating: string | null;
     top_suggestions: string[];
   }>({ overall_score: null, grade_estimate: null, clarity_rating: null, top_suggestions: [] });
+  /** Post-signup activation tutorial: real UI, mock analysis */
+  const [activationCoachStep, setActivationCoachStep] = useState<
+    | 'off'
+    | 'mla'
+    | 'analyze'
+    | 'loading'
+    | 'doc'
+    | 'rubric'
+    | 'rewriteConcern'
+    | 'rewriteImprove'
+    | 'copyText'
+    | 'library'
+    | 'done'
+  >('off');
+  const [isActivationTutorial, setIsActivationTutorial] = useState(false);
+  /** Full-screen checkout offer after activation tour (hard paywall, not the /pricing page). */
+  const [showPostActivationPaywall, setShowPostActivationPaywall] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      if (sessionStorage.getItem(POST_ACTIVATION_PAYWALL_PENDING_KEY) !== '1') return false;
+      const raw = localStorage.getItem('user');
+      if (!raw) return false;
+      const u = JSON.parse(raw) as { plan?: string };
+      const plan = (u.plan || 'free').toLowerCase();
+      if (plan === 'pro' || plan === 'premium') return false;
+      return true;
+    } catch {
+      return false;
+    }
+  });
+  /** Tour requires both mock revisions (one concern + one improve) before advancing. */
+  const [activationConcernRevisionApplied, setActivationConcernRevisionApplied] = useState(false);
+  const [activationImproveRevisionApplied, setActivationImproveRevisionApplied] = useState(false);
+  const activationConcernDone = useMemo(() => {
+    return (
+      activationConcernRevisionApplied ||
+      documentContent.includes(ACTIVATION_CONCERN_REWRITE) ||
+      documentContent.includes(ACTIVATION_CONCERN_REWRITE.trim())
+    );
+  }, [activationConcernRevisionApplied, documentContent]);
+
+  const activationImproveDone = useMemo(() => {
+    return (
+      activationImproveRevisionApplied ||
+      documentContent.includes(ACTIVATION_IMPROVE_REWRITE) ||
+      documentContent.includes(ACTIVATION_IMPROVE_REWRITE.trim())
+    );
+  }, [activationImproveRevisionApplied, documentContent]);
+
+  const activationDualRevisionsDone = useMemo(() => {
+    return activationConcernDone && activationImproveDone;
+  }, [activationConcernDone, activationImproveDone]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    const plan = (user.plan || 'free').toLowerCase();
+    if (plan === 'pro' || plan === 'premium') {
+      try {
+        sessionStorage.removeItem(POST_ACTIVATION_PAYWALL_PENDING_KEY);
+      } catch {
+        /* ignore */
+      }
+      setShowPostActivationPaywall(false);
+    }
+  }, [user?.id, user?.plan]);
+
+  /** Red (serious concern) first, then amber (improve), while both revisions are pending. */
+  const activationRewritePhase = useMemo((): 'concern' | 'improve' => {
+    const concernDone =
+      activationConcernRevisionApplied ||
+      documentContent.includes(ACTIVATION_CONCERN_REWRITE) ||
+      documentContent.includes(ACTIVATION_CONCERN_REWRITE.trim());
+    if (!concernDone) return 'concern';
+    return 'improve';
+  }, [activationConcernRevisionApplied, documentContent]);
+
+  useEffect(() => {
+    if (!isActivationTutorial) return;
+    if (activationCoachStep !== 'rewriteConcern' && activationCoachStep !== 'rewriteImprove') return;
+    if (activationCoachStep === 'rewriteConcern' && activationConcernDone) return;
+    if (activationCoachStep === 'rewriteImprove' && activationImproveDone) return;
+    const phase = activationRewritePhase;
+    const t = window.setTimeout(() => {
+      document
+        .querySelector(`[data-activation-rewrite-focus="${phase}"]`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const docAnnoId =
+        phase === 'concern'
+          ? ACTIVATION_TUTORIAL_CONCERN_REVISION_ID
+          : ACTIVATION_TUTORIAL_IMPROVE_REVISION_ID;
+      document
+        .querySelector(`[data-doc-annotation="${docAnnoId}"]`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 220);
+    return () => window.clearTimeout(t);
+  }, [
+    isActivationTutorial,
+    activationCoachStep,
+    activationRewritePhase,
+    activationConcernDone,
+    activationImproveDone,
+  ]);
+
+  useEffect(() => {
+    if (!isActivationTutorial || activationCoachStep !== 'copyText') return;
+    const t = window.setTimeout(() => {
+      const nodes = document.querySelectorAll('[data-activation-copy-full-text]');
+      for (let i = 0; i < nodes.length; i++) {
+        const el = nodes[i] as HTMLElement;
+        const r = el.getBoundingClientRect();
+        if (r.width > 0 && r.height > 0) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          break;
+        }
+      }
+    }, 180);
+    return () => window.clearTimeout(t);
+  }, [isActivationTutorial, activationCoachStep]);
+
+  useEffect(() => {
+    if (!isActivationTutorial || activationCoachStep !== 'library') return;
+    const t = window.setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 80);
+    return () => window.clearTimeout(t);
+  }, [isActivationTutorial, activationCoachStep]);
+
   const documentRef = useRef<HTMLDivElement>(null);
   const rubricFileInputRef = useRef<HTMLInputElement>(null);
   const limitBannerRef = useRef<HTMLDivElement>(null);
+  const activationCitationSelectRef = useRef<HTMLSelectElement>(null);
+  const activationAnalyzeDocBtnRef = useRef<HTMLButtonElement>(null);
 
   // Mobile detection utility
   const isMobileDevice = () => {
@@ -638,6 +790,33 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
     }
 
   }, []);
+
+  useLayoutEffect(() => {
+    try {
+      if (user?.welcomeTutorialCompleted === true) {
+        sessionStorage.removeItem('writescholar_activation_tutorial');
+        return;
+      }
+      if (sessionStorage.getItem('writescholar_activation_tutorial') !== '1') return;
+      if (!user?.id) return;
+      setActivationCoachStep('mla');
+      setSelectedCitationStyle('None');
+    } catch {
+      /* ignore */
+    }
+  }, [user?.id, user?.welcomeTutorialCompleted]);
+
+  /** If the shell learns the user already finished the welcome tour, never keep the analysis coach open. */
+  useEffect(() => {
+    if (user?.welcomeTutorialCompleted !== true) return;
+    try {
+      sessionStorage.removeItem('writescholar_activation_tutorial');
+    } catch {
+      /* ignore */
+    }
+    setActivationCoachStep('off');
+    setIsActivationTutorial(false);
+  }, [user?.welcomeTutorialCompleted]);
 
   // When coming from Upload or Library "Analyze", pre-select the document once documents are loaded
   useEffect(() => {
@@ -761,7 +940,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
       });
       if (response.ok) {
         const data = await response.json();
-        setIsTrialEligible(data.eligible ?? false);
+        setIsTrialEligible(data.off10Eligible ?? data.eligible ?? false);
       } else {
         setIsTrialEligible(false);
       }
@@ -1279,9 +1458,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
           setLockedFeatures(
             !isPaid
               ? ['full_annotations', 'grade_rubric', 'specific_rewrites', 'export', 'history']
-              : plan === 'pro'
-                ? ['apply_revisions']
-                : []
+              : []
           );
           
           console.log('=== ANALYSIS LOADED SUCCESSFULLY ===');
@@ -1443,9 +1620,152 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
     }
   };
 
+  useEffect(() => {
+    if (activationCoachStep === 'mla' && selectedCitationStyle === 'MLA') {
+      setActivationCoachStep('analyze');
+    }
+  }, [activationCoachStep, selectedCitationStyle]);
+
+  const applyActivationMock = (content: string) => {
+    const normalized = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    const ann = buildActivationAnnotationsForDocument(normalized);
+    setAnnotations(ann);
+    setDocumentContent(normalized);
+    setPreviewContent(normalized);
+    try {
+      localStorage.setItem('textAnalysisContent', normalized);
+    } catch {
+      /* ignore */
+    }
+    setAnalysisResult(ACTIVATION_MOCK_ANALYSIS_MARKDOWN);
+    setGradeRubric(buildActivationGradeRubric());
+    setSpecificRewrites(ACTIVATION_SPECIFIC_REWRITES);
+    setAnalysisSummary({
+      overall_score: ACTIVATION_OVERALL_SCORE,
+      grade_estimate: ACTIVATION_GRADE_LABEL,
+      clarity_rating: 'Good',
+      top_suggestions: [
+        'Tighten MLA in-text citations (author-page).',
+        'Replace broad claims with cited evidence.',
+      ],
+    });
+    setLockedFeatures([]);
+    setActivationConcernRevisionApplied(false);
+    setActivationImproveRevisionApplied(false);
+    const concernAnn = ann.find((a) => a.id === ACTIVATION_TUTORIAL_CONCERN_REVISION_ID);
+    const improveAnn = ann.find((a) => a.id === ACTIVATION_TUTORIAL_IMPROVE_REVISION_ID);
+    const concernSource =
+      concernAnn != null ? normalized.slice(concernAnn.startIndex, concernAnn.endIndex) : ACTIVATION_CONCERN_SPAN;
+    const improveSource =
+      improveAnn != null ? normalized.slice(improveAnn.startIndex, improveAnn.endIndex) : ACTIVATION_IMPROVE_SPAN;
+    setCachedWsRevisionByAnnotationId({
+      [ACTIVATION_TUTORIAL_CONCERN_REVISION_ID]: { sourceSpan: concernSource, replacement: ACTIVATION_CONCERN_REWRITE },
+      [ACTIVATION_TUTORIAL_IMPROVE_REVISION_ID]: { sourceSpan: improveSource, replacement: ACTIVATION_IMPROVE_REWRITE },
+    });
+    setOriginalDraftBaseline(normalized);
+    setSelectedCitationStyle('MLA');
+    setIsActivationTutorial(true);
+    trackEvent('activation_tutorial_mock_results');
+  };
+
+  const finishActivationTutorial = async () => {
+    let isTest = false;
+    try {
+      sessionStorage.removeItem('writescholar_activation_tutorial');
+      isTest = sessionStorage.getItem('writescholar_activation_test') === '1';
+      if (isTest) {
+        localStorage.setItem('writescholar_activation_test_finish', '1');
+        sessionStorage.removeItem('writescholar_activation_test');
+      }
+    } catch {
+      /* ignore */
+    }
+    setActivationCoachStep('off');
+    setIsActivationTutorial(false);
+    setActivationConcernRevisionApplied(false);
+    setActivationImproveRevisionApplied(false);
+
+    if (isTest) {
+      onNavigate?.('dashboard');
+      return;
+    }
+
+    try {
+      sessionStorage.removeItem('writescholar_show_interactive_tutorial');
+      await persistTutorialToServer();
+      trackEvent('tutorial_complete');
+      trackEvent('paywall_view', { trigger: 'activation_tutorial' });
+    } catch {
+      /* ignore */
+    } finally {
+      onUserUpdate?.({ welcomeTutorialCompleted: true });
+    }
+    try {
+      sessionStorage.setItem(POST_ACTIVATION_PAYWALL_PENDING_KEY, '1');
+    } catch {
+      /* ignore */
+    }
+    setShowPostActivationPaywall(true);
+  };
+
+  const handleActivationCoachContinue = () => {
+    if (activationCoachStep === 'rubric') {
+      setActivationCoachStep('doc');
+      window.setTimeout(() => {
+        document.querySelector('[data-activation-target="activation-doc"]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 80);
+    } else if (activationCoachStep === 'doc') {
+      setActivationCoachStep('rewriteConcern');
+      window.setTimeout(() => {
+        document
+          .querySelector('[data-activation-target="activation-revisions"]')
+          ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 80);
+    } else if (activationCoachStep === 'rewriteConcern') {
+      if (!activationConcernDone) return;
+      setActivationCoachStep('rewriteImprove');
+      window.setTimeout(() => {
+        document
+          .querySelector('[data-activation-target="activation-revisions"]')
+          ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 80);
+    } else if (activationCoachStep === 'rewriteImprove') {
+      if (!activationImproveDone) return;
+      setActivationCoachStep('copyText');
+    } else if (activationCoachStep === 'copyText') {
+      setActivationCoachStep('library');
+    } else if (activationCoachStep === 'library') {
+      setActivationCoachStep('done');
+    } else if (activationCoachStep === 'done') {
+      void finishActivationTutorial();
+    }
+  };
+
   const handleAnalyze = async () => {
     if (!selectedAnalysisType) {
       setError('Please select an analysis type');
+      return;
+    }
+
+    if (activationCoachStep === 'analyze') {
+      const pasted = documentContent?.trim() ? documentContent : '';
+      if (!pasted) {
+        setError('Please select a document or provide text content');
+        return;
+      }
+      setError('');
+      setLimitExceededError(null);
+      setActivationCoachStep('loading');
+      setIsAnalyzing(true);
+      setShowAnalysisPopup(true);
+      setAnalysisComplete(false);
+      window.setTimeout(() => {
+        applyActivationMock(pasted);
+        setIsAnalyzing(false);
+        setShowAnalysisPopup(false);
+        setAnalysisComplete(true);
+        setActivationCoachStep('rubric');
+      }, 3000);
       return;
     }
 
@@ -1809,6 +2129,26 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
     return slice === cached.replacement || slice.trim() === cached.replacement.trim();
   };
 
+  /** Pulse + glow on the one tour card the user should click next (red first, then amber). */
+  const activationTourShouldGlowCard = (annotation: Annotation): boolean => {
+    if (!isActivationTutorial || activationDualRevisionsDone) return false;
+    if (activationCoachStep === 'rewriteConcern') {
+      return (
+        annotation.id === ACTIVATION_TUTORIAL_CONCERN_REVISION_ID &&
+        activationRewritePhase === 'concern' &&
+        !isWriteScholarRevisionAppliedOnCard(annotation)
+      );
+    }
+    if (activationCoachStep === 'rewriteImprove') {
+      return (
+        annotation.id === ACTIVATION_TUTORIAL_IMPROVE_REVISION_ID &&
+        activationRewritePhase === 'improve' &&
+        !isWriteScholarRevisionAppliedOnCard(annotation)
+      );
+    }
+    return false;
+  };
+
   /** Revert one applied WriteScholar revision back to the original span (other revisions stay). */
   const revertWriteScholarRevisionForAnnotation = (annotationId: string) => {
     if (!canApplyWriteScholarRevisions) return;
@@ -1893,12 +2233,12 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
     }
   };
 
-  /** Premium: replace highlighted span with WriteScholar's suggested revision (improve/concern only). Pro sees annotations but not apply. */
+  /** Pro/Premium: replace highlighted span with WriteScholar's suggested revision (improve/concern only). */
   const canApplyWriteScholarRevisions = useMemo(
     () =>
-      !lockedFeatures.includes('full_annotations') &&
-      !lockedFeatures.includes('apply_revisions'),
-    [lockedFeatures]
+      isActivationTutorial ||
+      (!lockedFeatures.includes('full_annotations') && !lockedFeatures.includes('apply_revisions')),
+    [lockedFeatures, isActivationTutorial]
   );
 
   /** Shared apply path after we have replacement text (from API or cache). */
@@ -1938,6 +2278,14 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
     setDocumentContent(newContent);
     setPreviewContent(newContent);
+    if (isActivationTutorial) {
+      if (annotationId === ACTIVATION_TUTORIAL_CONCERN_REVISION_ID) {
+        setActivationConcernRevisionApplied(true);
+      }
+      if (annotationId === ACTIVATION_TUTORIAL_IMPROVE_REVISION_ID) {
+        setActivationImproveRevisionApplied(true);
+      }
+    }
     setRevisedDraftRanges(() => {
       const shifted = shiftRevisionRangesAfterReplace(draftRangesBefore, start, end, newLen);
       return [...shifted, { start, end: start + newLen }];
@@ -2374,7 +2722,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                 data-doc-annotation={annotation.id}
                 className={`inline px-0.5 cursor-pointer transition-all duration-200 ${
                   selectedAnnotation === annotation.id ? 'ring-2 ring-offset-2 ring-violet-500 rounded-sm' : ''
-                }`}
+                } ${activationTourShouldGlowCard(annotation) ? 'activation-tour-doc-glow' : ''}`}
                 onMouseEnter={(e) => handleAnnotationHover(e, annotation.id)}
                 onMouseLeave={() => setHoveredAnnotation(null)}
                 onClick={() => scrollAnnotationPanelToCard(annotation.id)}
@@ -2503,10 +2851,69 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
     );
   }
 
+  const activationCoachPointerGate =
+    isActivationTutorial &&
+    (activationCoachStep === 'mla' ||
+      activationCoachStep === 'analyze' ||
+      activationCoachStep === 'rubric' ||
+      activationCoachStep === 'doc' ||
+      activationCoachStep === 'rewriteConcern' ||
+      activationCoachStep === 'rewriteImprove' ||
+      activationCoachStep === 'copyText');
+
+  /** Lets the page receive wheel scroll while inner controls stay inert except data-activation-focus. */
+  const activationScrollPassResults =
+    isActivationTutorial &&
+    (activationCoachStep === 'rubric' ||
+      activationCoachStep === 'doc' ||
+      activationCoachStep === 'rewriteConcern' ||
+      activationCoachStep === 'rewriteImprove' ||
+      activationCoachStep === 'copyText');
+
+  const activationScrollPassConfigure =
+    isActivationTutorial && (activationCoachStep === 'mla' || activationCoachStep === 'analyze');
+
+  const activationHideRevertOnTourRewrite =
+    isActivationTutorial &&
+    (activationCoachStep === 'rewriteConcern' || activationCoachStep === 'rewriteImprove');
+
+  /** Essay + annotation sidebar: restore pointer events under the tour gate so highlight hover tooltips work (CSS: .activation-analysis-pointer-gate). Not during mla/analyze — only configure controls should be interactive. */
+  const activationPaperHoverSubtree =
+    isActivationTutorial &&
+    (activationCoachStep === 'rubric' ||
+      activationCoachStep === 'doc' ||
+      activationCoachStep === 'rewriteConcern' ||
+      activationCoachStep === 'rewriteImprove' ||
+      activationCoachStep === 'copyText');
+
+  /** Full-screen dim above the nav; must be first inside the gated wrapper so z-[210] focus controls (citation, analyze) paint above it. */
+  const showMlAnalyzeActivationBackdrop =
+    isActivationTutorial && (activationCoachStep === 'mla' || activationCoachStep === 'analyze');
+
   return (
     <div className="relative min-h-screen overflow-x-hidden">
       <WriteScholarEditorialBackgroundLayers position="fixed" />
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="analysis" />
+      <div
+        className={
+          activationCoachPointerGate
+            ? 'activation-analysis-pointer-gate [&_*]:pointer-events-none [&_[data-activation-focus]]:pointer-events-auto [&_[data-activation-focus]]:relative [&_[data-activation-focus]]:z-[210] [&_[data-activation-scroll-pass]]:pointer-events-auto'
+            : undefined
+        }
+      >
+      {showMlAnalyzeActivationBackdrop && (
+        <div
+          className="fixed inset-0 z-[118] pointer-events-none bg-stone-900/[0.07] dark:bg-black/22 transition-opacity duration-300"
+          aria-hidden
+        />
+      )}
+      <Header
+        onNavigate={onNavigate}
+        user={user}
+        onLogout={onLogout}
+        currentPage="analysis"
+        libraryActivationHighlight={isActivationTutorial && activationCoachStep === 'library'}
+        blockNavigationInteractions={activationCoachPointerGate}
+      />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Header */}
@@ -2607,7 +3014,10 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
         {!analysisResult ? (
           <>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+          <div
+            className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start"
+            data-activation-scroll-pass={activationScrollPassConfigure ? true : undefined}
+          >
             {/* Analysis Configuration - left column */}
             <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8 min-h-0">
               <h2 className="text-xl font-bold text-stone-900 mb-6">Configure Analysis</h2>
@@ -2695,9 +3105,16 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                   Citation Style
                 </label>
                 <select
+                  ref={activationCitationSelectRef}
                   value={selectedCitationStyle}
                   onChange={(e) => setSelectedCitationStyle(e.target.value)}
-                  className="w-full px-4 py-3.5 text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors"
+                  data-activation-citation-select
+                  data-activation-focus={activationCoachStep === 'mla' ? true : undefined}
+                  className={`w-full px-4 py-3.5 text-base border rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all duration-300 ease-out ${
+                    activationCoachStep === 'mla'
+                      ? 'border-violet-500/90 shadow-[0_0_0_3px_rgba(167,139,250,0.35),0_0_24px_rgba(139,92,246,0.25)]'
+                      : 'border-gray-300 dark:border-stone-600'
+                  }`}
                   disabled={isAnalyzing}
                 >
                   <option value="None">None (No citations required)</option>
@@ -2751,9 +3168,22 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
 
               {/* Analyze Button */}
               <button
+                ref={activationAnalyzeDocBtnRef}
+                type="button"
+                data-activation-analyze-doc
+                data-activation-focus={activationCoachStep === 'analyze' ? true : undefined}
                 onClick={handleAnalyze}
-                disabled={(!selectedDocument && !documentContent) || !selectedAnalysisType || isAnalyzing}
-                className="w-full bg-violet-600 hover:bg-violet-500 text-white py-3.5 px-4 rounded-xl font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                disabled={
+                  (!selectedDocument && !documentContent) ||
+                  !selectedAnalysisType ||
+                  isAnalyzing ||
+                  (activationCoachStep === 'mla' && selectedCitationStyle !== 'MLA')
+                }
+                className={`w-full bg-violet-600 hover:bg-violet-500 text-white py-3.5 px-4 rounded-xl font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 ease-out ${
+                  activationCoachStep === 'analyze'
+                    ? 'shadow-[0_0_0_3px_rgba(167,139,250,0.45),0_0_32px_rgba(139,92,246,0.3)]'
+                    : ''
+                }`}
               >
                 {isAnalyzing ? (
                   <LoadingSpinner 
@@ -2951,7 +3381,10 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
         ) : (
           <>
           {/* Premium Analysis Results Display */}
-          <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+          <div
+            className="bg-white border border-gray-200 rounded-2xl overflow-hidden"
+            data-activation-scroll-pass={activationScrollPassResults ? true : undefined}
+          >
             {/* Results Header */}
             <div className="bg-gray-900 text-white px-6 py-5">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -2967,7 +3400,13 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                   <button
                     type="button"
                     onClick={copyEssayPlainText}
-                    className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors flex items-center space-x-2 text-sm font-medium"
+                    data-activation-copy-full-text
+                    data-activation-focus={isActivationTutorial && activationCoachStep === 'copyText' ? true : undefined}
+                    className={`px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors flex items-center space-x-2 text-sm font-medium ${
+                      isActivationTutorial && activationCoachStep === 'copyText'
+                        ? 'ring-2 ring-violet-300/95 ring-offset-2 ring-offset-gray-900 z-[5] relative'
+                        : ''
+                    }`}
                     title="Copy the full essay — paste into Word or Google Docs; auto-italics (titles, Latin phrases, etc.) are preserved where supported"
                   >
                     <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
@@ -3031,12 +3470,21 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
             </div>
 
             {/* Grade Breakdown — FIRST: score, grade, and all categories */}
-            <div className="mx-6 mt-6 mb-4 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-600 overflow-hidden">
+            <div
+              data-activation-target="rubric"
+              className={`mx-6 mt-6 mb-4 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-600 overflow-hidden transition-shadow duration-300 ${
+                isActivationTutorial && activationCoachStep === 'rubric'
+                  ? 'ring-4 ring-violet-500/75 ring-offset-2 ring-offset-stone-50 dark:ring-offset-stone-900 shadow-[0_0_48px_rgba(139,92,246,0.28)] z-[5] relative'
+                  : ''
+              }`}
+            >
               <div className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-6 py-5">
                 <div className="flex flex-wrap items-center gap-6">
                   <div>
                     <h2 className="text-xl font-bold">General Academic Assessment</h2>
-                    <p className="text-emerald-100 text-sm mt-0.5">Standard college rubric — thesis, evidence, structure, and clarity</p>
+                    <p className="text-emerald-100 text-sm mt-0.5">
+                      Standard college rubric: thesis, evidence, structure, and clarity
+                    </p>
                   </div>
                   {(analysisSummary.overall_score != null || analysisSummary.grade_estimate) && (
                     <div className="flex items-center gap-6 ml-auto">
@@ -3134,6 +3582,11 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
               </div>
             </div>
 
+            {/* Legend + essay + annotations — coach "annotated essay" step; paper-hover restores pointer events for highlight tooltips under the tour gate */}
+            <div
+              data-activation-target="activation-doc"
+              data-activation-paper-hover={activationPaperHoverSubtree ? true : undefined}
+            >
             {/* Legend */}
             <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
               <div className="flex flex-wrap items-center justify-between gap-y-2 gap-x-4 text-sm">
@@ -3161,7 +3614,13 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                   <button
                     type="button"
                     onClick={copyEssayPlainText}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-stone-300 bg-white px-3 py-1.5 text-xs font-semibold text-stone-700 shadow-sm hover:bg-stone-50 dark:border-stone-600 dark:bg-stone-800 dark:text-stone-200 dark:hover:bg-stone-700/80"
+                    data-activation-copy-full-text
+                    data-activation-focus={isActivationTutorial && activationCoachStep === 'copyText' ? true : undefined}
+                    className={`inline-flex items-center gap-1.5 rounded-lg border border-stone-300 bg-white px-3 py-1.5 text-xs font-semibold text-stone-700 shadow-sm hover:bg-stone-50 dark:border-stone-600 dark:bg-stone-800 dark:text-stone-200 dark:hover:bg-stone-700/80 ${
+                      isActivationTutorial && activationCoachStep === 'copyText'
+                        ? 'ring-2 ring-violet-500/85 ring-offset-2 ring-offset-gray-50 dark:ring-offset-stone-900 z-[5] relative'
+                        : ''
+                    }`}
                     title="Copy full essay — Word/Docs keep italics for detected titles and Latin phrases"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
@@ -3194,8 +3653,11 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
           </div>
         </div>
 
-              {/* Annotations Panel */}
-              <div className="w-full md:w-96 bg-gray-50 border-t md:border-t-0 md:border-l border-gray-200 overflow-y-auto max-h-[400px] md:max-h-none">
+              {/* Annotations Panel — coach "apply revisions" step scroll target */}
+              <div
+                data-activation-target="activation-revisions"
+                className="w-full md:w-96 bg-gray-50 border-t md:border-t-0 md:border-l border-gray-200 overflow-y-auto max-h-[400px] md:max-h-none"
+              >
                 <div className="p-5 md:p-6">
                   <div className="space-y-6">
                     {/* Annotations — show full list only for paid users */}
@@ -3272,15 +3734,14 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                       <p className="text-[11px] text-stone-500 dark:text-stone-400 mb-5 leading-snug">
                         {lockedFeatures.includes('apply_revisions') ? (
                           <>
-                            Pro includes full annotations and feedback.{' '}
-                            <span className="font-semibold text-stone-600 dark:text-stone-300">Premium</span> adds{' '}
+                            Upgrade to <span className="font-semibold text-stone-600 dark:text-stone-300">Pro</span> to use{' '}
                             <span className="font-semibold text-stone-600 dark:text-stone-300">Apply WriteScholar revision</span>{' '}
-                            so you can insert edits into your draft in one click.
+                            and insert edits into your draft in one click.
                           </>
                         ) : (
                           <>
                             <span className="font-semibold text-stone-600 dark:text-stone-300">Apply WriteScholar revision</span>{' '}
-                            runs once per sentence and saves the result—re-applying after{' '}
+                            runs once per sentence and saves the result; re-applying after{' '}
                             <span className="font-semibold text-stone-600 dark:text-stone-300">Revert back to normal</span> uses the
                             same wording (no extra AI call). Needs improvement &amp; serious concerns only.
                           </>
@@ -3316,8 +3777,10 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                       </div>
                     </div>
 
+                    {/* During activation tour, Serious Concerns (red) is shown above Areas to Improve (amber) so step 1 is first in the list. */}
+                    <div className="flex flex-col">
                     {/* Areas to Improve */}
-                    <div>
+                    <div className={isActivationTutorial ? 'order-2' : undefined}>
                       <div className="flex items-center space-x-2 mb-3">
                         <div className="flex items-center justify-center w-8 h-8 bg-amber-100 rounded-xl">
                           {getAnnotationIcon('improve')}
@@ -3329,9 +3792,12 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                           <div
                             key={annotation.id}
                             id={`annotation-panel-${annotation.id}`}
+                            data-activation-rewrite-focus={
+                              annotation.id === ACTIVATION_TUTORIAL_IMPROVE_REVISION_ID ? 'improve' : undefined
+                            }
                             className={`bg-white rounded-xl p-4 border-l-4 border-amber-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
                               selectedAnnotation === annotation.id ? 'ring-2 ring-violet-500' : ''
-                            }`}
+                            } ${activationTourShouldGlowCard(annotation) ? 'activation-tour-rewrite-card-glow' : ''}`}
                             onClick={() => scrollDocumentToHighlight(annotation.id)}
                             onMouseEnter={() => setHoveredAnnotation(annotation.id)}
                             onMouseLeave={() => setHoveredAnnotation(null)}
@@ -3340,30 +3806,45 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                             {annotation.suggestion && (
                               <p className="text-xs text-gray-500 italic">{annotation.suggestion}</p>
                             )}
-                            {canApplyWriteScholarRevisions && !annotation.isCoverageOnly && (
-                              isWriteScholarRevisionAppliedOnCard(annotation) ? (
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    revertWriteScholarRevisionForAnnotation(annotation.id);
-                                  }}
-                                  className="mt-3 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold bg-red-600 hover:bg-red-700 text-white shadow-sm ring-1 ring-red-900/15 transition-colors"
-                                >
-                                  <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"
-                                    />
-                                  </svg>
-                                  Revert back to normal
-                                </button>
+                            {canApplyWriteScholarRevisions &&
+                              !annotation.isCoverageOnly &&
+                              (!isActivationTutorial || ACTIVATION_TUTORIAL_APPLYABLE_IDS.includes(annotation.id)) &&
+                              (isWriteScholarRevisionAppliedOnCard(annotation) ? (
+                                !activationHideRevertOnTourRewrite ? (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      revertWriteScholarRevisionForAnnotation(annotation.id);
+                                    }}
+                                    className="mt-3 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold bg-red-600 hover:bg-red-700 text-white shadow-sm ring-1 ring-red-900/15 transition-colors"
+                                  >
+                                    <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"
+                                      />
+                                    </svg>
+                                    Revert back to normal
+                                  </button>
+                                ) : null
                               ) : (
                                 <button
                                   type="button"
                                   disabled={applyingRevisionId === annotation.id}
+                                  data-activation-rewrite-apply-target={
+                                    annotation.id === ACTIVATION_TUTORIAL_IMPROVE_REVISION_ID ? 'improve' : undefined
+                                  }
+                                  data-activation-focus={
+                                    isActivationTutorial &&
+                                    activationCoachStep === 'rewriteImprove' &&
+                                    !activationImproveDone &&
+                                    annotation.id === ACTIVATION_TUTORIAL_IMPROVE_REVISION_ID
+                                      ? true
+                                      : undefined
+                                  }
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     void applyWriteScholarRevision(annotation.id);
@@ -3375,8 +3856,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                                   </svg>
                                   {applyingRevisionId === annotation.id ? 'Generating revision…' : 'Apply WriteScholar revision'}
                                 </button>
-                              )
-                            )}
+                              ))}
                             {lockedFeatures.includes('apply_revisions') && !annotation.isCoverageOnly && (
                               <button
                                 type="button"
@@ -3386,7 +3866,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                                 }}
                                 className="mt-3 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 text-stone-800 dark:text-stone-100 border border-stone-200 dark:border-stone-600"
                               >
-                                Premium — apply revisions ($29.99 first month)
+                                Pro: apply revisions ($9.99 first month)
                               </button>
                             )}
                           </div>
@@ -3395,7 +3875,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                     </div>
 
                     {/* Serious Concerns */}
-                    <div>
+                    <div className={isActivationTutorial ? 'order-1' : undefined}>
                       <div className="flex items-center space-x-2 mb-3">
                         <div className="flex items-center justify-center w-8 h-8 bg-red-100 rounded-xl">
                           {getAnnotationIcon('concern')}
@@ -3407,9 +3887,12 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                           <div
                             key={annotation.id}
                             id={`annotation-panel-${annotation.id}`}
+                            data-activation-rewrite-focus={
+                              annotation.id === ACTIVATION_TUTORIAL_CONCERN_REVISION_ID ? 'concern' : undefined
+                            }
                             className={`bg-white rounded-xl p-4 border-l-4 border-red-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
                               selectedAnnotation === annotation.id ? 'ring-2 ring-violet-500' : ''
-                            }`}
+                            } ${activationTourShouldGlowCard(annotation) ? 'activation-tour-rewrite-card-glow' : ''}`}
                             onClick={() => scrollDocumentToHighlight(annotation.id)}
                             onMouseEnter={() => setHoveredAnnotation(annotation.id)}
                             onMouseLeave={() => setHoveredAnnotation(null)}
@@ -3418,30 +3901,45 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                             {annotation.suggestion && (
                               <p className="text-xs text-gray-500 italic">{annotation.suggestion}</p>
                             )}
-                            {canApplyWriteScholarRevisions && !annotation.isCoverageOnly && (
-                              isWriteScholarRevisionAppliedOnCard(annotation) ? (
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    revertWriteScholarRevisionForAnnotation(annotation.id);
-                                  }}
-                                  className="mt-3 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold bg-red-600 hover:bg-red-700 text-white shadow-sm ring-1 ring-red-900/15 transition-colors"
-                                >
-                                  <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"
-                                    />
-                                  </svg>
-                                  Revert back to normal
-                                </button>
+                            {canApplyWriteScholarRevisions &&
+                              !annotation.isCoverageOnly &&
+                              (!isActivationTutorial || ACTIVATION_TUTORIAL_APPLYABLE_IDS.includes(annotation.id)) &&
+                              (isWriteScholarRevisionAppliedOnCard(annotation) ? (
+                                !activationHideRevertOnTourRewrite ? (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      revertWriteScholarRevisionForAnnotation(annotation.id);
+                                    }}
+                                    className="mt-3 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold bg-red-600 hover:bg-red-700 text-white shadow-sm ring-1 ring-red-900/15 transition-colors"
+                                  >
+                                    <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"
+                                      />
+                                    </svg>
+                                    Revert back to normal
+                                  </button>
+                                ) : null
                               ) : (
                                 <button
                                   type="button"
                                   disabled={applyingRevisionId === annotation.id}
+                                  data-activation-rewrite-apply-target={
+                                    annotation.id === ACTIVATION_TUTORIAL_CONCERN_REVISION_ID ? 'concern' : undefined
+                                  }
+                                  data-activation-focus={
+                                    isActivationTutorial &&
+                                    activationCoachStep === 'rewriteConcern' &&
+                                    !activationConcernDone &&
+                                    annotation.id === ACTIVATION_TUTORIAL_CONCERN_REVISION_ID
+                                      ? true
+                                      : undefined
+                                  }
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     void applyWriteScholarRevision(annotation.id);
@@ -3453,8 +3951,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                                   </svg>
                                   {applyingRevisionId === annotation.id ? 'Generating revision…' : 'Apply WriteScholar revision'}
                                 </button>
-                              )
-                            )}
+                              ))}
                             {lockedFeatures.includes('apply_revisions') && !annotation.isCoverageOnly && (
                               <button
                                 type="button"
@@ -3464,12 +3961,13 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                                 }}
                                 className="mt-3 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 text-stone-800 dark:text-stone-100 border border-stone-200 dark:border-stone-600"
                               >
-                                Premium — apply revisions ($29.99 first month)
+                                Pro: apply revisions ($9.99 first month)
                               </button>
                             )}
                           </div>
                         ))}
                       </div>
+                    </div>
                     </div>
                     </>
                     )}
@@ -3622,6 +4120,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                 </div>
               </div>
             </div>
+            </div>
 
             {/* Full Analysis Result - Comprehensive Academic Analysis */}
             {analysisResult && (
@@ -3635,7 +4134,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
                   </p>
                 </div>
                 <div className="p-6 prose pviolet-stone dark:pviolet-invert max-w-none">
-                  {currentPlan === 'free' ? (
+                  {currentPlan === 'free' && !isActivationTutorial ? (
                     <div className="text-sm leading-relaxed">
                       {renderFreeTierComprehensiveReport(analysisResult, () => onNavigate?.('billing'))}
                     </div>
@@ -3929,7 +4428,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
         {/* Hover Tooltip - Mobile Responsive */}
         {hoveredAnnotation && analysisResult && (
           <div 
-            className="fixed z-50 pointer-events-none transition-all duration-200"
+            className={`fixed pointer-events-none transition-all duration-200 ${
+              activationPaperHoverSubtree ? 'z-[230]' : 'z-50'
+            }`}
             style={{
               left: tooltipPosition.x,
               top: tooltipPosition.y,
@@ -3995,6 +4496,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
         )}
       </div>
 
+      <Footer onNavigate={onNavigate} />
+      </div>
+
       {/* Compare original draft (before any WriteScholar revisions this session) */}
       {showCompareOriginalModal && originalDraftBaseline && (
         <div
@@ -4047,6 +4551,53 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
         </div>
       )}
 
+      {activationCoachStep !== 'off' && (
+        <ActivationAnalysisCoach
+          step={
+            activationCoachStep as
+              | 'mla'
+              | 'analyze'
+              | 'loading'
+              | 'doc'
+              | 'rubric'
+              | 'rewriteConcern'
+              | 'rewriteImprove'
+              | 'copyText'
+              | 'library'
+              | 'done'
+          }
+          concernRevisionApplied={activationConcernDone}
+          improveRevisionApplied={activationImproveDone}
+          showConfetti={activationCoachStep === 'done'}
+          onContinue={handleActivationCoachContinue}
+          citeTargetRef={activationCitationSelectRef}
+          analyzeDocTargetRef={activationAnalyzeDocBtnRef}
+        />
+      )}
+
+      {showPostActivationPaywall && (
+        <SoftPaywall
+          hard
+          variant="postTutorial"
+          userName={
+            user?.firstName?.trim() ||
+            (user?.name?.trim() && !user.name.includes('@') ? user.name.trim().split(/\s+/)[0] ?? '' : '') ||
+            ''
+          }
+          onStartTrial={() => trackEvent('paywall_start_trial')}
+          onDismiss={() => {
+            try {
+              sessionStorage.removeItem(POST_ACTIVATION_PAYWALL_PENDING_KEY);
+            } catch {
+              /* ignore */
+            }
+            setShowPostActivationPaywall(false);
+            onNavigate?.('dashboard');
+          }}
+          onNavigate={onNavigate}
+        />
+      )}
+
       {/* Analysis Popup Animation */}
       {showAnalysisPopup && (
         <AnalysisAnimation
@@ -4059,9 +4610,6 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout 
           }}
         />
       )}
-
-      {/* Footer */}
-      <Footer onNavigate={onNavigate} />
     </div>
   );
 };

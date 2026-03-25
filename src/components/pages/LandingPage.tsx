@@ -68,7 +68,7 @@ const LANDING_FAQ_ITEMS: { question: string; answer: string }[] = [
   },
   {
     question: "What's the difference between Free and Pro?",
-    answer: "Free: 3 documents, 2 analyses, 2 study packs, 5k words, 2 citations per month, Focus Mode (3 sites). Pro: 99 combined analyses, study packs and citations per month, 999,999 words for the Paper Summarizer, all citation styles, PDF/Word export, Focus Mode with unlimited blocked sites, uploads up to 100MB per file, and full quiz & study tools. Premium: 3× usage versus Pro—299 combined actions per month, 2,999,999 Paper Summarizer words, 1GB library storage, and Apply WriteScholar revisions into your draft."
+    answer: "Free: 3 documents, 2 analyses, 2 study packs, 5k words, 2 citations per month, 2MB library storage, Focus Mode (3 sites). Pro: 49 combined analyses, study packs and citations per month, 999,999 words for the Paper Summarizer, Apply WriteScholar revisions into your draft, all citation styles, PDF/Word export, Focus Mode with unlimited blocked sites, uploads up to 100MB per file, and full quiz & study tools. Premium: 4× usage versus Pro—199 combined actions per month, unlimited research-paper summarisation, and 1GB library storage."
   },
   {
     question: "How do I add friends and share my study materials?",
@@ -2801,7 +2801,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   <svg className="w-5 h-5 flex-shrink-0 text-violet-500 dark:text-violet-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>Unlimited documents; 99 combined analyses, study packs &amp; citations/mo</span>
+                  <span>49 combined analyses, study packs &amp; citations/mo</span>
                 </li>
                 <li className="flex gap-2">
                   <svg className="w-5 h-5 flex-shrink-0 text-violet-500 dark:text-violet-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
@@ -2821,6 +2821,12 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </svg>
                   <span>All citation styles, PDF/Word export, unlimited Focus Mode sites</span>
                 </li>
+                <li className="flex gap-2">
+                  <svg className="w-5 h-5 flex-shrink-0 text-violet-500 dark:text-violet-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>Apply WriteScholar revisions into your draft</span>
+                </li>
               </ul>
               <button
                 type="button"
@@ -2834,7 +2840,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             <div className="relative rounded-2xl border border-amber-400/90 dark:border-amber-500/60 bg-gradient-to-b from-amber-50/90 to-white/90 dark:from-amber-950/40 dark:to-stone-900/55 p-6 sm:p-8 shadow-[0_12px_40px_-12px_rgba(180,83,9,0.15)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.45)] ring-2 ring-amber-200/80 dark:ring-amber-800/50 flex flex-col sm:col-span-2 lg:col-span-1">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                 <span className="bg-gradient-to-r from-amber-500 to-amber-600 text-amber-950 px-3 py-1 rounded-full text-xs font-bold shadow-md shadow-amber-500/30 ring-1 ring-amber-400/50">
-                  3× usage
+                  4× usage
                 </span>
               </div>
               <h3 className="font-semibold text-xl text-stone-900 dark:text-stone-100 mb-1 pt-1">Premium</h3>
@@ -2858,19 +2864,13 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   <svg className="w-5 h-5 flex-shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>299 combined analyses, study packs &amp; citations/mo—ideal for citation-heavy work</span>
+                  <span>199 combined analyses, study packs &amp; citations/mo—ideal for citation-heavy work</span>
                 </li>
                 <li className="flex gap-2">
                   <svg className="w-5 h-5 flex-shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>2,999,999 words Paper Summarizer; 1GB library storage</span>
-                </li>
-                <li className="flex gap-2">
-                  <svg className="w-5 h-5 flex-shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>Apply WriteScholar revisions into your essay</span>
+                  <span>Summarise unlimited research papers; 1GB library storage</span>
                 </li>
               </ul>
               <button

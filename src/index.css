@@ -33,7 +33,145 @@
   animation-play-state: paused;
 }
 
+/* Activation tutorial: arrow line fades in */
+@keyframes activation-arrow-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.94;
+  }
+}
+
+.activation-tutorial-arrow-line {
+  animation: activation-arrow-in 0.5s ease-out forwards;
+}
+
+/* Activation analysis tour: pulsing ring on the card the user should click */
+@keyframes activation-tour-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 3px rgba(139, 92, 246, 0.55),
+      0 0 24px rgba(167, 139, 250, 0.35);
+  }
+  50% {
+    box-shadow:
+      0 0 0 4px rgba(139, 92, 246, 0.8),
+      0 0 34px rgba(192, 132, 252, 0.5);
+  }
+}
+
+.activation-tour-rewrite-card-glow {
+  animation: activation-tour-glow 1.8s ease-in-out infinite;
+  position: relative;
+  z-index: 1;
+}
+
+/* Same tour step: pulse the matching sentence in the essay panel */
+@keyframes activation-tour-doc-ring {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 2px rgba(139, 92, 246, 0.55),
+      0 0 16px rgba(167, 139, 250, 0.42);
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px rgba(139, 92, 246, 0.85),
+      0 0 26px rgba(192, 132, 252, 0.55);
+  }
+}
+
+.activation-tour-doc-glow {
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  border-radius: 0.125rem;
+  animation: activation-tour-doc-ring 1.6s ease-in-out infinite;
+  position: relative;
+  z-index: 1;
+}
+
+/* Analysis activation tour: the page wrapper uses Tailwind [&_*]:pointer-events-none so only focused
+   controls work. That same rule blocks hover on essay highlights and annotation cards. This selector
+   is more specific than a single utility + * so pointer-events:auto wins for the annotated-essay
+   subtree (data-activation-paper-hover). Header nav stays inert via its own pointer-events:none. */
+.activation-analysis-pointer-gate [data-activation-paper-hover],
+.activation-analysis-pointer-gate [data-activation-paper-hover] * {
+  pointer-events: auto;
+}
+
+@keyframes activation-confetti-fall {
+  0% {
+    transform: translateY(-20px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(110vh) rotate(680deg);
+    opacity: 0.92;
+  }
+}
+
+.activation-confetti-piece {
+  animation-name: activation-confetti-fall;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+/* Dashboard welcome tour (first 3 steps): coach card spotlight */
+@keyframes dashboard-coach-panel-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 2px rgba(139, 92, 246, 0.42),
+      0 0 26px rgba(167, 139, 250, 0.28),
+      0 0 48px rgba(139, 92, 246, 0.1),
+      0 24px 60px -16px rgba(91, 33, 182, 0.22);
+  }
+  50% {
+    box-shadow:
+      0 0 0 3px rgba(139, 92, 246, 0.58),
+      0 0 36px rgba(192, 132, 252, 0.34),
+      0 0 64px rgba(167, 139, 250, 0.16),
+      0 26px 64px -14px rgba(91, 33, 182, 0.28);
+  }
+}
+
+.dashboard-coach-panel-glow {
+  animation: dashboard-coach-panel-glow 2.1s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .dashboard-coach-panel-glow {
+    animation: none;
+    box-shadow:
+      0 0 0 2px rgba(139, 92, 246, 0.45),
+      0 0 28px rgba(167, 139, 250, 0.26),
+      0 24px 60px -16px rgba(91, 33, 182, 0.22);
+  }
+  .activation-tour-rewrite-card-glow {
+    animation: none;
+    box-shadow:
+      0 0 0 3px rgba(139, 92, 246, 0.55),
+      0 0 20px rgba(167, 139, 250, 0.35);
+  }
+  .activation-tour-doc-glow {
+    animation: none;
+    box-shadow:
+      0 0 0 2px rgba(139, 92, 246, 0.55),
+      0 0 14px rgba(167, 139, 250, 0.38);
+  }
+  .activation-confetti-piece {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .activation-tutorial-arrow-line {
+    animation: none;
+    opacity: 0.94;
+  }
   .animate-scroll-slow {
     animation: none;
     transform: none;
@@ -476,6 +614,73 @@ html.dark .landing-hero-grid-animate {
 }
 .group:hover .hand-glisten .hand-shine {
   animation: hand-glisten 0.6s ease-out forwards;
+}
+
+/* Dashboard header — Upgrade CTA: soft violet glow + periodic shine sweep */
+@keyframes dashboard-upgrade-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(91, 33, 182, 0.22),
+      0 4px 12px -2px rgba(109, 40, 217, 0.32);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(167, 139, 250, 0.42),
+      0 4px 20px -2px rgba(139, 92, 246, 0.48),
+      0 0 22px 3px rgba(192, 132, 252, 0.2);
+  }
+}
+@keyframes dashboard-upgrade-shine {
+  0% {
+    transform: translateX(-130%) skewX(-14deg);
+  }
+  100% {
+    transform: translateX(220%) skewX(-14deg);
+  }
+}
+.dashboard-upgrade-cta {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  animation: dashboard-upgrade-glow 2.6s ease-in-out infinite;
+}
+.dashboard-upgrade-cta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 45%;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.12) 40%,
+    rgba(255, 255, 255, 0.45) 50%,
+    rgba(255, 255, 255, 0.12) 60%,
+    transparent 100%
+  );
+  animation: dashboard-upgrade-shine 3.4s ease-in-out infinite;
+  pointer-events: none;
+  border-radius: inherit;
+}
+.dark .dashboard-upgrade-cta::before {
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.06) 40%,
+    rgba(255, 255, 255, 0.22) 50%,
+    rgba(255, 255, 255, 0.06) 60%,
+    transparent 100%
+  );
+}
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-upgrade-cta {
+    animation: none;
+    box-shadow: 0 4px 12px -2px rgba(109, 40, 217, 0.28);
+  }
+  .dashboard-upgrade-cta::before {
+    animation: none;
+    opacity: 0;
+  }
 }
 
 /* Mascot sparkle on hover - continuous loop */

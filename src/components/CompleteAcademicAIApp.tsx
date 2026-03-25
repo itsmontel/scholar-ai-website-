@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, Suspense, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, Suspense, useRef, useCallback } from 'react';
 import { WriteScholarEditorialBackgroundLayers } from './common/WriteScholarEditorialBackground';
 import { logger } from '../utils/logger';
 import { HIDE_FRIENDS } from '../config/featureFlags';
@@ -71,6 +71,19 @@ const UnlockQuizPage = lazyWithRetry(() => import('./pages/UnlockQuizPage'));
 // Import common components
 import ErrorBoundary from './common/ErrorBoundary';
 import PageErrorBoundary from './common/PageErrorBoundary';
+import SoftPaywall from './common/SoftPaywall';
+import StripeCancelTrialChoiceModal from './common/StripeCancelTrialChoiceModal';
+import {
+  CHECKOUT_FROM_TUTORIAL_PAYWALL_KEY,
+  LAST_TUTORIAL_CHECKOUT_PLAN_KEY,
+  MANDATORY_CHECKOUT_PENDING_KEY,
+  POST_ACTIVATION_PAYWALL_PENDING_KEY,
+  SOFT_PAYWALL_OPEN_KEY,
+  STRIPE_CANCEL_TRIAL_MODAL_PENDING_KEY,
+  TUTORIAL_CHECKOUT_CANCEL_MODAL_RESOLVED_KEY,
+  TUTORIAL_CHECKOUT_CANCEL_MODAL_SEEN_KEY,
+  isTutorialCheckoutCancelModalResolved,
+} from '../constants/paywallSession';
 import BadgeNotificationToast from './common/BadgeNotificationToast';
 import StudyTimerWidget from './common/StudyTimerWidget';
 import MobileGoogleSignInPopup from './common/MobileGoogleSignInPopup';
@@ -185,14 +198,78 @@ interface UserProps extends NavigationProps {
   onLogout?: () => void;
 }
 
+/** Sync session from localStorage on first paint so paywall / shell render match post-refresh state. */
+function readCachedUserForSession(): User | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem('user');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<User>;
+    if (!parsed.id || !parsed.email) return null;
+    return {
+      ...parsed,
+      plan: parsed.plan || 'free',
+      onboardingCompleted: parsed?.onboardingCompleted === true,
+      welcomeTutorialCompleted: parsed?.welcomeTutorialCompleted === true,
+    } as User;
+  } catch {
+    return null;
+  }
+}
+
+function readInitialAuthSession(): { isLoggedIn: boolean; user: User | null } {
+  if (typeof window === 'undefined') return { isLoggedIn: false, user: null };
+  const token = localStorage.getItem('authToken');
+  if (!token) return { isLoggedIn: false, user: null };
+  return { isLoggedIn: true, user: readCachedUserForSession() };
+}
+
+function readInitialSoftPaywallOpen(u: User | null): boolean {
+  if (!u) return false;
+  try {
+    if (sessionStorage.getItem(SOFT_PAYWALL_OPEN_KEY) !== '1') return false;
+    const plan = (u.plan || 'free').toLowerCase();
+    if (plan === 'pro' || plan === 'premium') return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // Main Application Component
 const AcademicAIApp = () => {
+  const initialAuth = readInitialAuthSession();
   const [currentPage, setCurrentPage] = useState(() =>
     typeof window !== 'undefined' ? getPageFromPath(window.location.pathname) : 'landing'
   );
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(initialAuth.isLoggedIn);
+  const [user, setUser] = useState<User | null>(initialAuth.user);
   const [studyPackInitialData, setStudyPackInitialData] = useState<{ data: any; title?: string } | null>(null);
+  /** Opened when API returns upgrade/limit (403/429) so user can subscribe after canceling Stripe */
+  const [apiLimitPaywallOpen, setApiLimitPaywallOpen] = useState(() => readInitialSoftPaywallOpen(initialAuth.user));
+  /** After Stripe cancel from post-tutorial checkout: choice to retry trial or forfeit (restored after refresh until resolved) */
+  const [stripeCancelTrialModalOpen, setStripeCancelTrialModalOpen] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      return (
+        sessionStorage.getItem(STRIPE_CANCEL_TRIAL_MODAL_PENDING_KEY) === '1' &&
+        !isTutorialCheckoutCancelModalResolved()
+      );
+    } catch {
+      return false;
+    }
+  });
+
+  const resolveTutorialStripeCancelModal = useCallback(() => {
+    setStripeCancelTrialModalOpen(false);
+    try {
+      sessionStorage.removeItem(STRIPE_CANCEL_TRIAL_MODAL_PENDING_KEY);
+      localStorage.setItem(TUTORIAL_CHECKOUT_CANCEL_MODAL_RESOLVED_KEY, '1');
+      localStorage.removeItem(TUTORIAL_CHECKOUT_CANCEL_MODAL_SEEN_KEY);
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   // Stale-while-revalidate: instant load from cache, then background fetch. Server overwrites when it arrives.
   useEffect(() => {
@@ -459,21 +536,81 @@ const AcademicAIApp = () => {
   const validateAndRefreshTokenRef = useRef(validateAndRefreshToken);
   validateAndRefreshTokenRef.current = validateAndRefreshToken;
 
-  // Clear payment params from URL
+  // Stripe return URLs: strip query; tutorial checkout cancel may open trial forfeit modal
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('payment') === 'success') {
+    const pay = params.get('payment');
+    if (pay === 'success' || pay === 'cancelled') {
+      if (pay === 'success') {
+        try {
+          sessionStorage.removeItem(MANDATORY_CHECKOUT_PENDING_KEY);
+          sessionStorage.removeItem(CHECKOUT_FROM_TUTORIAL_PAYWALL_KEY);
+          sessionStorage.removeItem(LAST_TUTORIAL_CHECKOUT_PLAN_KEY);
+          sessionStorage.removeItem(SOFT_PAYWALL_OPEN_KEY);
+          sessionStorage.removeItem(POST_ACTIVATION_PAYWALL_PENDING_KEY);
+          sessionStorage.removeItem(STRIPE_CANCEL_TRIAL_MODAL_PENDING_KEY);
+        } catch {
+          /* ignore */
+        }
+      }
+      if (pay === 'cancelled') {
+        try {
+          const fromTutorialPaywall = sessionStorage.getItem(CHECKOUT_FROM_TUTORIAL_PAYWALL_KEY) === '1';
+          sessionStorage.removeItem(CHECKOUT_FROM_TUTORIAL_PAYWALL_KEY);
+          sessionStorage.removeItem(LAST_TUTORIAL_CHECKOUT_PLAN_KEY);
+          if (fromTutorialPaywall && !isTutorialCheckoutCancelModalResolved()) {
+            sessionStorage.setItem(STRIPE_CANCEL_TRIAL_MODAL_PENDING_KEY, '1');
+            setStripeCancelTrialModalOpen(true);
+          }
+        } catch {
+          /* ignore */
+        }
+      }
       window.history.replaceState(null, '', window.location.pathname);
     }
   }, []);
 
-  // payment=cancelled: clear URL only; user stays on onboarding (hard paywall — must complete purchase)
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('payment') === 'cancelled') {
-      window.history.replaceState(null, '', window.location.pathname);
-    }
+    const onOpenPaywall = () => {
+      try {
+        sessionStorage.setItem(SOFT_PAYWALL_OPEN_KEY, '1');
+      } catch {
+        /* ignore */
+      }
+      setApiLimitPaywallOpen(true);
+      trackEvent('paywall_view', { trigger: 'api_limit_or_upgrade' });
+    };
+    window.addEventListener('writescholar-open-paywall', onOpenPaywall);
+    return () => window.removeEventListener('writescholar-open-paywall', onOpenPaywall);
   }, []);
+
+  /** Restore soft paywall after refresh if user is still on Free and did not dismiss */
+  useEffect(() => {
+    if (!isLoggedIn || !user) return;
+    const plan = (user.plan || 'free').toLowerCase();
+    if (plan === 'pro' || plan === 'premium') return;
+    try {
+      if (sessionStorage.getItem(SOFT_PAYWALL_OPEN_KEY) === '1') {
+        setApiLimitPaywallOpen(true);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, [isLoggedIn, user?.id, user?.plan]);
+
+  // Paid plan — close API paywall prompt
+  useEffect(() => {
+    if (!user) return;
+    const plan = (user.plan || 'free').toLowerCase();
+    if (plan === 'pro' || plan === 'premium') {
+      setApiLimitPaywallOpen(false);
+      try {
+        sessionStorage.removeItem(SOFT_PAYWALL_OPEN_KEY);
+      } catch {
+        /* ignore */
+      }
+    }
+  }, [user?.plan]);
 
   // Handle URL-based routing (sync on popstate, re-run when isLoggedIn/user changes for redirect)
   useEffect(() => {
@@ -589,12 +726,36 @@ const AcademicAIApp = () => {
     };
   }, [isLoggedIn]);
 
-  // Global error handler for 401 responses
+  // Global: 401 refresh + 403/429 → paywall when API signals upgrade / limit
   useEffect(() => {
     const originalFetch = window.fetch;
+    const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+
+    const maybeDispatchPaywall = (response: Response) => {
+      if (!isLoggedIn || (response.status !== 403 && response.status !== 429)) return;
+      void response
+        .clone()
+        .json()
+        .then((data: Record<string, unknown>) => {
+          const open =
+            data?.upgrade === true ||
+            data?.upgradeRequired === true ||
+            data?.showPaywall === true ||
+            (response.status === 403 &&
+              data?.usage &&
+              typeof (data.usage as { limit?: unknown }).limit === 'number');
+          if (open) {
+            window.dispatchEvent(new CustomEvent('writescholar-open-paywall'));
+          }
+        })
+        .catch(() => {
+          /* not JSON */
+        });
+    };
+
     window.fetch = async (...args) => {
-      const response = await originalFetch(...args);
-      
+      let response = await originalFetch(...args);
+
       // If we get a 401 and we're logged in, try to refresh token (on any page)
       if (response.status === 401 && isLoggedIn) {
         try {
@@ -610,15 +771,14 @@ const AcademicAIApp = () => {
             localStorage.setItem('authToken', refreshData.data.token);
             window.dispatchEvent(new CustomEvent('writescholar-auth-changed'));
             logger.log('Token refreshed automatically');
-            
+
             // Retry the original request with new token
-            const retryResponse = await originalFetch(...args);
-            return retryResponse;
+            response = await originalFetch(...args);
           } else {
             // Refresh failed - but DON'T clear auth state automatically
             // Let the user continue with cached data
             logger.log('Auto-refresh failed, but keeping user logged in with cached data');
-            
+
             // Only clear auth if we're on a protected route and have no cached user
             const cachedUser = localStorage.getItem('user');
             if (!cachedUser && protectedRoutes.includes(currentPage)) {
@@ -636,11 +796,16 @@ const AcademicAIApp = () => {
           logger.log('Network error during auto-refresh, keeping user logged in');
         }
       }
-      
+
+      const reqUrl =
+        typeof args[0] === 'string' ? args[0] : args[0] instanceof Request ? args[0].url : '';
+      if (reqUrl.startsWith(apiBase) && !reqUrl.includes('/auth/')) {
+        maybeDispatchPaywall(response);
+      }
+
       return response;
     };
 
-    // Cleanup
     return () => {
       window.fetch = originalFetch;
     };
@@ -725,6 +890,23 @@ const AcademicAIApp = () => {
     setIsLoggedIn(false);
     setUser(null);
     setCurrentPage('landing');
+    setApiLimitPaywallOpen(false);
+    try {
+      sessionStorage.removeItem(MANDATORY_CHECKOUT_PENDING_KEY);
+      sessionStorage.removeItem(CHECKOUT_FROM_TUTORIAL_PAYWALL_KEY);
+      sessionStorage.removeItem(LAST_TUTORIAL_CHECKOUT_PLAN_KEY);
+      sessionStorage.removeItem(SOFT_PAYWALL_OPEN_KEY);
+      sessionStorage.removeItem(POST_ACTIVATION_PAYWALL_PENDING_KEY);
+      sessionStorage.removeItem(STRIPE_CANCEL_TRIAL_MODAL_PENDING_KEY);
+    } catch {
+      /* ignore */
+    }
+    try {
+      localStorage.removeItem(TUTORIAL_CHECKOUT_CANCEL_MODAL_RESOLVED_KEY);
+      localStorage.removeItem(TUTORIAL_CHECKOUT_CANCEL_MODAL_SEEN_KEY);
+    } catch {
+      /* ignore */
+    }
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
     window.dispatchEvent(new CustomEvent('writescholar-auth-changed'));
@@ -855,7 +1037,9 @@ const AcademicAIApp = () => {
         if (needsOnboarding) return renderOnboarding('dashboard');
         return <StudyPackPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'analysis':
-        return <AnalysisPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+        return (
+          <AnalysisPage onNavigate={navigateTo} user={user} onLogout={handleLogout} onUserUpdate={handleDashboardUserUpdate} />
+        );
       case 'analysis-history':
         return <AnalysisHistoryPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'citation-results': {
@@ -1024,6 +1208,42 @@ const AcademicAIApp = () => {
       </Suspense>
       {/* Global achievement popup */}
       {user && <BadgeNotificationToast onNavigate={navigateTo} />}
+      {apiLimitPaywallOpen && isLoggedIn && user && (
+        <SoftPaywall
+          variant="postTutorial"
+          userName={
+            user.firstName?.trim() ||
+            (user.name?.trim() && !user.name.includes('@') ? user.name.trim().split(/\s+/)[0] ?? '' : '') ||
+            ''
+          }
+          onStartTrial={() => trackEvent('paywall_start_trial')}
+          onDismiss={() => {
+            setApiLimitPaywallOpen(false);
+            try {
+              sessionStorage.removeItem(SOFT_PAYWALL_OPEN_KEY);
+            } catch {
+              /* ignore */
+            }
+          }}
+          onNavigate={navigateTo}
+        />
+      )}
+      {stripeCancelTrialModalOpen && user && (
+        <StripeCancelTrialChoiceModal
+          open={stripeCancelTrialModalOpen}
+          userName={
+            user.firstName?.trim() ||
+            (user.name?.trim() && !user.name.includes('@') ? user.name.trim().split(/\s+/)[0] ?? '' : '') ||
+            ''
+          }
+          onClose={resolveTutorialStripeCancelModal}
+          onStartTrialRedirect={resolveTutorialStripeCancelModal}
+          onForfeitComplete={() => {
+            resolveTutorialStripeCancelModal();
+            void validateAndRefreshTokenRef.current();
+          }}
+        />
+      )}
       {/* Global study timer - floating in corner when logged in */}
       {user && <StudyTimerWidget currentPage={currentPage} />}
       {/* Mobile-only bottom Google sign-in popup (Quizlet-style) */}

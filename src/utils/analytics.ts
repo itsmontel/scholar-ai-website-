@@ -18,7 +18,10 @@ export type AnalyticsEvent =
   | 'onboarding_complete'
   | 'first_action_prompt_view'
   | 'first_action_prompt_dismiss'
-  | 'first_action_prompt_cta_click';
+  | 'first_action_prompt_cta_click'
+  | 'activation_tutorial_nav_analysis'
+  | 'activation_tutorial_mock_results'
+  | 'activation_tutorial_preview';
 
 function getUserId(): string | null {
   try {

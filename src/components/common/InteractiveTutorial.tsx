@@ -149,8 +149,9 @@ const STEPS: TutorialStep[] = [
   {
     id: 'done',
     immersive: 'done',
-    title: "You're set",
-    body: 'Continue to land on your dashboard with the analyze card in view: Paste or upload your essay, get feedback in seconds. Then add your draft and run Analyze when you are ready.',
+    title: 'That was easy — because it was a sample',
+    body:
+      'Now run WriteScholar on your own essay. It surfaces argument gaps, rubric breakdown, grade context, and specific rewrites—so you see the kind of feedback your professor expects. Paste your draft and tap Analyze when you are ready.',
     emoji: '🎓',
     targetSelector: null,
     mascotPose: 'celebrating',
@@ -549,7 +550,13 @@ function sleep(ms: number) {
 /** SVG path tip in 24×24 viewBox scaled to 30×30 icon (aligns pointer tip with target). */
 const APPLY_CURSOR_TIP_OFFSET = { x: (5.5 / 24) * 30, y: (3.21 / 24) * 30 };
 
-function ImmersiveApplyDemo({ stepKey }: { stepKey: number }) {
+function ImmersiveApplyDemo({
+  stepKey,
+  onBothRevisionsApplied,
+}: {
+  stepKey: number;
+  onBothRevisionsApplied?: () => void;
+}) {
   const [segment, setSegment] = useState<ApplyDemoSegment>('amber');
   const [phase, setPhase] = useState<ApplyDemoPhase>('idle');
   const [loopKey, setLoopKey] = useState(0);
@@ -588,6 +595,12 @@ function ImmersiveApplyDemo({ stepKey }: { stepKey: number }) {
   useEffect(() => {
     setHover(null);
   }, [segment, loopKey, stepKey]);
+
+  useEffect(() => {
+    if (segment === 'red' && phase === 'applied') {
+      onBothRevisionsApplied?.();
+    }
+  }, [segment, phase, onBothRevisionsApplied]);
 
   useEffect(() => {
     let cancelled = false;
@@ -934,6 +947,8 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
   const [confettiTrigger, setConfettiTrigger] = useState(-1);
   const [tooltipH, setTooltipH] = useState(280);
   const [isMobile, setIsMobile] = useState(false);
+  /** Sticky after both demo revisions (amber then red) have been applied once on the apply step. */
+  const [applyStepBothRevisionsDone, setApplyStepBothRevisionsDone] = useState(false);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const immersivePanelRef = useRef<HTMLDivElement>(null);
 
@@ -1028,6 +1043,10 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
   }, [step]);
 
   useEffect(() => {
+    if (current.id !== 'apply') setApplyStepBothRevisionsDone(false);
+  }, [step, current.id]);
+
+  useEffect(() => {
     if (current.confetti) setConfettiTrigger(step);
   }, [step, current.confetti]);
 
@@ -1044,6 +1063,10 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [step, isLast, isFirst]);
+
+  const handleApplyBothRevisionsDone = useCallback(() => {
+    setApplyStepBothRevisionsDone(true);
+  }, []);
 
   const goNext = () => {
     if (isLast) handleExit(false);
@@ -1170,7 +1193,7 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
       case 'grade':
         return <ImmersiveGradeDemo stepKey={contentKey} />;
       case 'apply':
-        return <ImmersiveApplyDemo stepKey={contentKey} />;
+        return <ImmersiveApplyDemo stepKey={contentKey} onBothRevisionsApplied={handleApplyBothRevisionsDone} />;
       case 'done':
         return (
           <div className="rounded-2xl border border-stone-200 dark:border-stone-600 bg-white/90 dark:bg-stone-800/80 p-6 text-center">
@@ -1263,7 +1286,9 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
                     <button
                       type="button"
                       onClick={goNext}
-                      className="min-h-9 shrink-0 inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-500 text-white font-semibold text-sm leading-snug shadow-md shadow-teal-900/15 transition-all active:scale-[0.98] whitespace-nowrap"
+                      className={`min-h-9 shrink-0 inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-500 text-white font-semibold text-sm leading-snug shadow-md shadow-teal-900/15 transition-all active:scale-[0.98] whitespace-nowrap relative ${
+                        current.id === 'apply' && applyStepBothRevisionsDone ? 'tut-next-after-revisions' : ''
+                      }`}
                     >
                       {isLast ? 'Go to workspace' : 'Next'}
                     </button>
@@ -1482,6 +1507,31 @@ const InteractiveTutorial = ({ userName, onComplete }: InteractiveTutorialProps)
           44%, 56% {
             border-color: rgb(45 212 191);
             box-shadow: 0 10px 28px -12px rgba(45, 212, 191, 0.25);
+          }
+        }
+
+        @keyframes tutNextAfterRevisions {
+          0%, 100% {
+            box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.35), 0 8px 24px -6px rgba(13, 148, 136, 0.45);
+          }
+          50% {
+            box-shadow: 0 0 0 10px rgba(245, 158, 11, 0.12), 0 12px 32px -4px rgba(13, 148, 136, 0.55);
+          }
+        }
+        .tut-next-after-revisions {
+          z-index: 1;
+          animation: tutNextAfterRevisions 2.1s ease-in-out infinite;
+          box-shadow: 0 8px 24px -6px rgba(13, 148, 136, 0.45);
+          outline: 2px solid rgba(251, 191, 36, 0.75);
+          outline-offset: 2px;
+        }
+        .dark .tut-next-after-revisions {
+          outline-color: rgba(250, 204, 21, 0.65);
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .tut-next-after-revisions {
+            animation: none;
+            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.45), 0 8px 24px -6px rgba(13, 148, 136, 0.45);
           }
         }
       `}</style>

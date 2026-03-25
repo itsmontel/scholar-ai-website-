@@ -45,7 +45,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
     documentsUploaded: 0,
     documentsAnalyzed: 0,
     storageUsed: 0,
-    storageLimit: 1024 * 1024, // 1MB in bytes
+    storageLimit: 2 * 1024 * 1024, // 2MB in bytes (free tier default before API load)
     uploadsRemaining: 3,
     analysesRemaining: 1
   });
@@ -77,14 +77,13 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       description: 'Most popular for students',
       icon: '🚀',
       features: [
-        'Unlimited documents',
-        '99 combined analyses, study packs & citations/mo',
+        '49 combined analyses, study packs & citations/mo',
         '999,999 words Paper Summarizer',
         'All citation styles, PDF/Word export',
         'Focus Mode (unlimited blocked sites)',
         'Quiz, flashcards, crossword & Crater Blast',
         '100MB total library storage; uploads up to 100MB per file',
-        'Full annotations (apply-to-draft revisions: Premium)'
+        'Full annotations; Apply WriteScholar revisions into your draft'
       ],
       popular: true,
       stripePriceId: billingCycle === 'monthly' ? 'price_starter_monthly' : 'price_starter_yearly'
@@ -94,13 +93,12 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       name: 'Premium',
       price: billingCycle === 'monthly' ? 39.99 : 399.99,
       interval: billingCycle === 'monthly' ? 'month' : 'year',
-      description: 'Apply revisions + higher limits',
+      description: 'Higher limits + more storage',
       icon: '✨',
       features: [
         'Everything in Pro',
-        '299 combined analyses, study packs & citations/mo',
-        '2,999,999 words Paper Summarizer (3× Pro)',
-        'Apply WriteScholar revisions into your essay',
+        '199 combined analyses, study packs & citations/mo',
+        'Summarise unlimited research papers',
         '1GB total library storage',
         'First month $10 off at checkout (like Pro)'
       ],
@@ -125,7 +123,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
 
       if (response.ok) {
         const data = await response.json();
-        setIsTrialEligible(data.eligible);
+        setIsTrialEligible(data.off10Eligible ?? data.eligible ?? false);
       }
     } catch (error) {
       console.error('Error checking trial eligibility:', error);
@@ -206,7 +204,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
             planType: planId,
             billingCycle: billingCycle,
             successUrl: `${window.location.origin}/billing?success=true`,
-            cancelUrl: `${window.location.origin}/billing?canceled=true`
+            cancelUrl: `${window.location.origin}/dashboard?payment=cancelled`
           })
         });
 
@@ -416,7 +414,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
               {plan.id === 'premium' && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                   <span className="bg-gradient-to-r from-amber-500 to-amber-600 text-amber-950 px-4 py-1 rounded-full text-xs font-semibold shadow-md shadow-amber-500/25 ring-1 ring-amber-400/50">
-                    3× usage
+                    4× usage
                   </span>
                 </div>
               )}
@@ -566,7 +564,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
                   : (usageStats.analysesRemaining === -1 ? '∞' : usageStats.analysesRemaining)}
               </div>
               <div className="text-xs text-stone-500">
-                {currentPlan === 'free' ? 'analyses remaining' : (currentPlan === 'pro' || currentPlan === 'premium') ? `${currentPlan === 'premium' ? 299 : 99} combined/month` : 'combined/month'}
+                {currentPlan === 'free' ? 'analyses remaining' : (currentPlan === 'pro' || currentPlan === 'premium') ? `${currentPlan === 'premium' ? 199 : 49} combined/month` : 'combined/month'}
               </div>
             </div>
 

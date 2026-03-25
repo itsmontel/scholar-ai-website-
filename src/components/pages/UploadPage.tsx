@@ -22,7 +22,7 @@ interface UploadedDocument {
   createdAt: string;
 }
 
-// Plan limits: Free 1MB, Pro (and legacy Premium) 100MB per file
+// Plan limits: Free 2MB, Pro (and legacy Premium) 100MB per file
 const getMaxFileSize = (plan: string) => {
   const p = (plan || 'free').toLowerCase();
   if (p === 'pro' || p === 'premium' || p === 'focus') return 100 * 1024 * 1024;
@@ -32,7 +32,7 @@ const getMaxFileSize = (plan: string) => {
 const getMaxFileSizeLabel = (plan: string) => {
   const p = (plan || 'free').toLowerCase();
   if (p === 'pro' || p === 'premium' || p === 'focus') return '100MB';
-  return '1MB';
+  return '2MB';
 };
 
 const UploadPage = ({ onNavigate, user, onLogout }: UploadPageProps) => {

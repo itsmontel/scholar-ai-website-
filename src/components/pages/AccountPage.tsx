@@ -529,9 +529,9 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                     {userStats.subscriptionPlan === 'free'
                       ? '3 documents, 2 analyses per month, 2 citation searches'
                       : userStats.subscriptionPlan === 'pro'
-                      ? 'Unlimited documents, 99 combined/mo (analyses, study packs & citations)'
+                      ? '49 combined/mo (analyses, study packs & citations)'
                       : userStats.subscriptionPlan === 'premium'
-                      ? 'Unlimited documents, 299 combined/mo; Apply WriteScholar revisions'
+                      ? '199 combined/mo; 1GB library storage'
                       : 'Basic features included'
                     }
                   </div>
@@ -549,13 +549,13 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                       <div>• 2 citation searches per month</div>
                       <div>• 5,000 Paper Summarizer words</div>
                       <div>• 2 study packs (lesson & flashcards — quiz, crossword & Crater Blast with Pro)</div>
+                      <div>• 2MB document library storage</div>
                       <div className="text-stone-400 text-xs">Crossword & Crater Blast unlock with Pro</div>
                     </>
                   )}
                   {userStats.subscriptionPlan === 'pro' && (
                     <>
-                      <div>• Unlimited document uploads</div>
-                      <div>• 99 combined (analyses, study packs & citations) per month</div>
+                      <div>• 49 combined (analyses, study packs & citations) per month</div>
                       <div>• 100MB total library storage</div>
                       <div>• 999,999 Paper Summarizer words per month</div>
                       <div>• Focus Mode with unlimited blocked sites</div>
@@ -563,16 +563,15 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                       <div>• Long-document summarization</div>
                       <div>• PDF & Word export</div>
                       <div>• All quiz types & difficulty levels</div>
-                      <div>• Full annotations (apply-to-draft revisions: Premium)</div>
+                      <div>• Apply WriteScholar revisions into your draft</div>
                     </>
                   )}
                   {userStats.subscriptionPlan === 'premium' && (
                     <>
-                      <div>• Everything in Pro, 3× usage</div>
-                      <div>• 299 combined (analyses, study packs & citations) per month</div>
-                      <div>• 2,999,999 Paper Summarizer words per month</div>
+                      <div>• Everything in Pro, 4× usage</div>
+                      <div>• 199 combined (analyses, study packs & citations) per month</div>
+                      <div>• Summarise unlimited research papers</div>
                       <div>• 1GB total library storage</div>
-                      <div>• Apply WriteScholar revisions into your essay</div>
                       <div>• Focus Mode with unlimited blocked sites</div>
                       <div>• Uploads up to 100MB per file</div>
                       <div>• PDF & Word export</div>

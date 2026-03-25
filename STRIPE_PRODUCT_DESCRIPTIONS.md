@@ -9,15 +9,14 @@ Copy these descriptions into your Stripe Dashboard (**Products** → select prod
 **Description to paste into Stripe:**
 
 ```
-AI-powered academic writing assistant for students. Includes: unlimited documents; 99 combined analyses, study packs & citations per month; 99,999 words for the Paper Summarizer; all citation styles; PDF/Word export; Focus Mode (20 sites); quiz, flashcards, crossword & Crater Blast; long-document summarization. Ideal for students who need robust writing support.
+AI-powered academic writing assistant for students. Includes: 49 combined analyses, study packs & citations per month; 999,999 words for the Paper Summarizer; all citation styles; PDF/Word export; Focus Mode (unlimited blocked sites); quiz, flashcards, crossword & Crater Blast; long-document summarization. Ideal for students who need robust writing support.
 ```
 
 **Feature list (for Stripe product metadata or marketing copy):**
-- Unlimited documents
-- 99 combined analyses, study packs & citations/mo
-- 99,999 words Paper Summarizer
+- 49 combined analyses, study packs & citations/mo
+- 999,999 words Paper Summarizer
 - All citation styles, PDF/Word export
-- Focus Mode (20 sites)
+- Focus Mode (unlimited blocked sites)
 - Quiz, flashcards, crossword & Crater Blast
 - Summarizer (all lengths & styles)
 
@@ -28,17 +27,16 @@ AI-powered academic writing assistant for students. Includes: unlimited document
 **Description to paste into Stripe:**
 
 ```
-Advanced AI-powered academic writing assistant for researchers and institutions. Everything in Pro, plus 10× usage: 999 combined analyses, study packs & citations per month; 999,999 words for the Paper Summarizer; premium AI model & advanced essay analysis; priority support; Focus Mode (unlimited sites); larger document uploads (up to 1GB). Perfect for power users who need the highest capacity.
+Advanced AI-powered academic writing assistant for researchers and institutions. Everything in Pro, plus 4× usage: 199 combined analyses, study packs & citations per month; Summarise unlimited research papers; premium AI model & advanced essay analysis; Focus Mode (unlimited sites); 1GB total library storage. Perfect for power users who need the highest capacity.
 ```
 
 **Feature list (for Stripe product metadata or marketing copy):**
-- Everything in Pro • 10× usage
-- 999 combined analyses, study packs & citations/mo
-- 999,999 words Paper Summarizer
+- Everything in Pro • 4× usage
+- 199 combined analyses, study packs & citations/mo
+- Summarise unlimited research papers
 - Premium AI model, advanced essay analysis
-- Priority support
 - Focus Mode (unlimited sites)
-- Larger document uploads (up to 1GB)
+- 1GB total library storage
 
 ---
 
