@@ -1,9 +1,10 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { vitePluginBlockUnusedPublicMedia } from './scripts/vite-plugin-block-unused-public-media.mjs'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), vitePluginBlockUnusedPublicMedia()],
   server: {
     port: 5173,
     open: true

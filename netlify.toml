@@ -203,3 +203,9 @@
   for = "/robots.txt"
   [headers.values]
     Content-Type = "text/plain"
+
+# Demo MP4s in /public — cache at the edge so repeat visits do not re-download large files
+[[headers]]
+  for = "/*.mp4"
+  [headers.values]
+    Cache-Control = "public, max-age=604800, stale-while-revalidate=86400"
