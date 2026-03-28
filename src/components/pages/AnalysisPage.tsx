@@ -167,17 +167,40 @@ function FreeAnalysisProBlur({
 }) {
   return (
     <div
-      className={`relative rounded-xl overflow-hidden border border-violet-300/80 dark:border-violet-700/50 bg-gradient-to-br from-violet-50/50 to-stone-50/40 dark:from-violet-950/30 dark:to-stone-900/40 ${
+      className={`group relative overflow-hidden rounded-2xl border border-violet-300/80 bg-gradient-to-b from-violet-100/40 via-white to-stone-50/95 shadow-[0_12px_40px_-12px_rgba(109,40,217,0.35)] ring-1 ring-violet-400/15 dark:border-violet-700/45 dark:from-violet-950/50 dark:via-stone-900 dark:to-stone-950 dark:shadow-[0_16px_48px_-12px_rgba(0,0,0,0.55)] dark:ring-violet-500/10 ${
         dense ? 'my-1' : 'my-2'
       }`}
     >
-      <div className="pointer-events-none select-none blur-[6px] opacity-[0.42] px-4 py-3" aria-hidden>
-        {children}
+      {/* Soft edge light — draws the eye */}
+      <div
+        className="pointer-events-none absolute -inset-px rounded-2xl opacity-60 dark:opacity-40"
+        style={{
+          background:
+            'linear-gradient(135deg, rgba(139,92,246,0.25) 0%, transparent 40%, transparent 60%, rgba(167,139,250,0.15) 100%)',
+        }}
+      />
+      {/* Blurred “peek” — real shapes readable enough to tease, not enough to use */}
+      <div
+        className={`pointer-events-none relative overflow-hidden ${dense ? 'min-h-[72px] max-h-[100px]' : 'min-h-[140px] max-h-[min(260px,42vh)]'}`}
+        aria-hidden
+      >
+        <div className="select-none px-4 pb-10 pt-3 blur-[11px] contrast-[0.92] sm:blur-[13px] opacity-[0.78] [transform:translateZ(0)] scale-[1.015] dark:opacity-[0.72]">
+          {children}
+        </div>
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-white/90 to-transparent dark:from-stone-950/90" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-white via-white/85 to-transparent dark:from-stone-950 dark:via-stone-950/90" />
       </div>
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-gradient-to-b from-white/35 via-white/75 to-white/95 dark:from-stone-900/25 dark:via-stone-900/72 dark:to-stone-950/95 px-3 py-4">
+      {/* CTA — centered over blur; z-index so it always wins stacking */}
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 px-3 py-4 sm:gap-2.5 sm:px-4">
+        <div className="flex items-center gap-2 rounded-full border border-violet-200/90 bg-white/75 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-violet-600 shadow-sm backdrop-blur-md dark:border-violet-600/50 dark:bg-stone-900/75 dark:text-violet-300">
+          <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+          Pro
+        </div>
         {headline ? (
           <p
-            className={`text-center font-semibold text-stone-800 dark:text-stone-100 leading-snug max-w-[18rem] ${
+            className={`max-w-[19rem] text-center font-semibold leading-snug text-stone-900 drop-shadow-sm dark:text-stone-50 ${
               dense ? 'text-xs' : 'text-sm'
             }`}
           >
@@ -188,11 +211,11 @@ function FreeAnalysisProBlur({
           type="button"
           onClick={onUpgrade}
           disabled={upgradeDisabled}
-          className="px-4 py-2.5 text-sm font-bold bg-violet-600 hover:bg-violet-500 disabled:opacity-60 disabled:cursor-wait text-white rounded-lg shadow-lg shadow-violet-600/30 hover:shadow-violet-500/40 transition-shadow"
+          className="relative px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-violet-600/35 transition-all hover:scale-[1.02] hover:shadow-violet-500/45 active:scale-[0.99] disabled:cursor-wait disabled:opacity-60 disabled:hover:scale-100 rounded-xl bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-500 hover:to-violet-600"
         >
           {primaryLabel}
         </button>
-        <span className="text-[11px] text-stone-600 dark:text-stone-300/95 text-center max-w-[17rem] leading-relaxed">
+        <span className="max-w-[18rem] text-center text-[11px] leading-relaxed text-stone-600 dark:text-stone-400">
           {sublabel}
         </span>
       </div>
@@ -582,7 +605,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
     return activationConcernDone && activationImproveDone;
   }, [activationConcernDone, activationImproveDone]);
 
-  /** Free plan: show first ~50% of essay + matching annotations; full analysis still runs server-side. */
+  /** Free plan: show first ~40% of essay + matching annotations; full analysis still runs server-side. */
   const isFreePreview = useMemo(
     () => currentPlan === 'free' && !isActivationTutorial,
     [currentPlan, isActivationTutorial]
@@ -592,8 +615,33 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
     if (!isFreePreview) return null;
     const len = (documentContent || '').length;
     if (len < 2) return null;
-    return Math.floor(len * 0.5);
+    return Math.floor(len * 0.4);
   }, [isFreePreview, documentContent]);
+
+  /** Free plan: first ~40% of comprehensive narrative — shown as readable text; remainder is gated (all free sessions). */
+  const freeComprehensiveAnalysisPreviewMd = useMemo(() => {
+    if (!analysisResult) return '';
+    if (currentPlan !== 'free') return analysisResult;
+    const len = analysisResult.length;
+    if (len < 2) return analysisResult;
+    return analysisResult.slice(0, Math.floor(len * 0.4));
+  }, [analysisResult, currentPlan]);
+
+  const freeComprehensiveAnalysisHasLockedRemainder = useMemo(() => {
+    const len = analysisResult.length;
+    if (len < 2) return false;
+    return Math.floor(len * 0.4) < len;
+  }, [analysisResult]);
+
+  /** Locked portion of the narrative — shown only inside heavy blur (full analysis already in client state from API). */
+  const freeComprehensiveLockedRemainderMd = useMemo(() => {
+    if (!analysisResult || currentPlan !== 'free') return '';
+    const len = analysisResult.length;
+    if (len < 2) return '';
+    const cut = Math.floor(len * 0.4);
+    if (cut >= len) return '';
+    return analysisResult.slice(cut);
+  }, [analysisResult, currentPlan]);
 
   const annotationsForRender = useMemo((): Annotation[] => {
     if (freePreviewCharCutoff == null) return annotations;
@@ -699,6 +747,14 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
   const isMobileDevice = () => {
     return window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   };
+
+  /** Keep paywall UI aligned with shell user before /subscriptions/current returns. */
+  useEffect(() => {
+    if (!user?.plan) return;
+    const p = user.plan.toLowerCase();
+    if (p === 'pro' || p === 'premium') setCurrentPlan(p);
+    else setCurrentPlan('free');
+  }, [user?.id, user?.plan]);
 
   useEffect(() => {
     console.log('AnalysisPage: fetchDocuments and fetchAnalysisTypes called');
@@ -2632,32 +2688,46 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
 
     const freePreviewBlurFooter =
       isFreePreview && freePreviewCharCutoff != null && freePreviewCharCutoff < displayContent.length ? (
-        <div className="relative mt-6 overflow-hidden rounded-2xl border-2 border-violet-200/90 dark:border-violet-700/50 shadow-md shadow-violet-500/10">
-          {/* Blurred “rest of essay” — clipped here only, not the CTA */}
-          <div className="pointer-events-none select-none overflow-hidden rounded-t-2xl" aria-hidden>
-            <div className="blur-md opacity-50 px-4 py-3 text-sm text-stone-600 leading-relaxed max-h-[140px] overflow-hidden">
+        <div className="relative mt-8 overflow-hidden rounded-2xl border border-violet-300/80 bg-gradient-to-b from-violet-100/35 via-white to-stone-50/95 shadow-[0_12px_40px_-12px_rgba(109,40,217,0.3)] ring-1 ring-violet-400/15 dark:border-violet-700/45 dark:from-violet-950/45 dark:via-stone-900 dark:to-stone-950 dark:shadow-[0_16px_48px_-12px_rgba(0,0,0,0.5)]">
+          <div
+            className="pointer-events-none absolute -inset-px rounded-2xl opacity-50 dark:opacity-35"
+            style={{
+              background:
+                'linear-gradient(135deg, rgba(139,92,246,0.22) 0%, transparent 45%, transparent 55%, rgba(167,139,250,0.12) 100%)',
+            }}
+          />
+          {/* Blurred real continuation — word shapes tease without readable detail */}
+          <div className="pointer-events-none relative min-h-[120px] max-h-[200px] overflow-hidden rounded-t-2xl" aria-hidden>
+            <div className="select-none px-4 pb-12 pt-3 text-sm leading-relaxed text-stone-700 blur-[12px] contrast-[0.92] sm:blur-[14px] opacity-[0.76] [transform:translateZ(0)] scale-[1.02] dark:text-stone-300 dark:opacity-[0.7]">
               {displayContent.slice(freePreviewCharCutoff)}
             </div>
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-8 bg-gradient-to-b from-white/95 to-transparent dark:from-stone-950/95" />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white via-white/90 to-transparent dark:from-stone-950 dark:via-stone-950/85" />
           </div>
-          {/* CTA: in normal flow so nothing is clipped; gradient covers blur seam */}
-          <div className="relative z-10 flex flex-col items-center gap-2.5 bg-gradient-to-b from-white/90 via-white to-white dark:from-stone-900/90 dark:via-stone-900 dark:to-stone-950 px-4 pt-4 pb-6 text-center sm:px-5">
-            <p className="text-sm font-bold text-stone-900 dark:text-stone-50 max-w-[20rem] leading-snug shrink-0">
-              The rest of your grade is hiding here
+          <div className="relative z-10 flex flex-col items-center gap-2.5 bg-gradient-to-b from-white/55 via-white/92 to-white px-4 pb-6 pt-2 text-center backdrop-blur-[2px] dark:from-stone-950/55 dark:via-stone-950/95 dark:to-stone-950 sm:px-5">
+            <div className="flex items-center gap-2 rounded-full border border-violet-200/90 bg-white/85 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-violet-600 shadow-sm dark:border-violet-600/50 dark:bg-stone-900/85 dark:text-violet-300">
+              <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              Pro
+            </div>
+            <p className="max-w-[21rem] text-sm font-bold leading-snug text-stone-900 dark:text-stone-50">
+              The rest of your paper is hiding here
             </p>
-            <p className="text-xs text-stone-600 dark:text-stone-400 max-w-[21rem] leading-relaxed">
+            <p className="max-w-[22rem] text-xs leading-relaxed text-stone-600 dark:text-stone-400">
               {canStartFreeTrial
-                ? 'Get the full essay breakdown—line by line—so you can improve your grade and get the best out of every paragraph. Eligible for one free trial.'
-                : 'Upgrade to Pro to unlock the rest of your essay, every annotation, and the full written analysis.'}
+                ? 'You can almost see it above — unlock line-by-line feedback on every paragraph. Eligible accounts: one 7-day free trial.'
+                : 'You can almost see it above — unlock the rest of your essay, every annotation, and the full written analysis.'}
             </p>
             <button
               type="button"
               onClick={startProMonthlyCheckout}
               disabled={checkoutRedirecting}
-              className="mt-0.5 w-full max-w-sm px-5 py-2.5 text-sm font-bold bg-violet-600 hover:bg-violet-500 disabled:opacity-60 disabled:cursor-wait text-white rounded-xl shadow-lg shadow-violet-600/35 transition-colors"
+              className="mt-0.5 w-full max-w-sm rounded-xl bg-gradient-to-r from-violet-600 to-violet-700 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-violet-600/35 transition-all hover:scale-[1.02] hover:from-violet-500 hover:to-violet-600 hover:shadow-violet-500/40 active:scale-[0.99] disabled:cursor-wait disabled:opacity-60 disabled:hover:scale-100"
             >
               {checkoutRedirecting ? 'Opening checkout…' : canStartFreeTrial ? 'Perfect your paper — start 7-day free trial' : 'Upgrade to Pro — unlock full paper'}
             </button>
-            <p className="text-[11px] text-stone-500 dark:text-stone-500 max-w-[20rem] leading-relaxed">
+            <p className="max-w-[20rem] text-[11px] leading-relaxed text-stone-500 dark:text-stone-500">
               {canStartFreeTrial
                 ? 'No charge during trial · Cancel anytime · One free trial per account'
                 : 'Pro unlocks full feedback — subscribe to continue'}
@@ -3610,15 +3680,17 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                               ?/{row.maxScore}
                             </span>
                           </div>
-                          <div className="relative min-h-[4.5rem] rounded-lg overflow-hidden bg-stone-100/90 dark:bg-stone-600/25 border border-stone-200/90 dark:border-stone-600/50">
+                          <div className="relative min-h-[4.5rem] rounded-lg overflow-hidden border border-stone-200/90 bg-gradient-to-b from-stone-50 to-stone-100/90 dark:border-stone-600/50 dark:from-stone-700/30 dark:to-stone-800/50 ring-1 ring-violet-400/10">
                             <div
-                              className="absolute inset-0 p-3 text-xs text-stone-600 dark:text-stone-400 select-none blur-[5px] opacity-45 leading-relaxed"
+                              className="absolute inset-0 p-3 text-xs leading-relaxed text-stone-600 opacity-[0.72] contrast-[0.92] blur-[8px] select-none dark:text-stone-400 dark:opacity-[0.65] sm:blur-[9px]"
                               aria-hidden
                             >
                               Your personalized feedback for this category—what you did well, what to fix, and how—unlocks on Pro.
                             </div>
-                            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-white/75 via-white/40 to-transparent dark:from-stone-900/80 dark:via-stone-900/35">
-                              <span className="text-[10px] font-bold uppercase tracking-wider text-violet-600 dark:text-violet-400">Pro</span>
+                            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-white/88 via-white/45 to-transparent dark:from-stone-900/88 dark:via-stone-900/40">
+                              <span className="rounded-full border border-violet-200/90 bg-white/80 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-violet-600 shadow-sm backdrop-blur-sm dark:border-violet-600/50 dark:bg-stone-900/80 dark:text-violet-300">
+                                Pro
+                              </span>
                             </div>
                           </div>
                         </div>
@@ -3725,7 +3797,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
               >
                 <div className="p-5 md:p-6">
                   <div className="space-y-6">
-                    {/* Annotations — paid users, or free 50% preview (real cards in first half of paper) */}
+                    {/* Annotations — paid users, or free ~40% preview (real cards in the early part of the paper) */}
                     {(!lockedFeatures.includes('full_annotations') || isFreePreview) && (
                     <>
                     <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-center">
@@ -3737,11 +3809,11 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                     {isFreePreview && (
                       <div className="mb-4 rounded-xl border border-violet-200/80 bg-violet-50/80 dark:bg-violet-950/25 dark:border-violet-800/50 px-3 py-2.5">
                         <p className="text-xs font-semibold text-stone-800 dark:text-stone-100 leading-snug">
-                          You&apos;re seeing real feedback on the first half of your draft
+                          You&apos;re seeing real feedback on the first ~40% of your draft
                         </p>
                         <p className="text-[11px] text-stone-600 dark:text-stone-400 mt-1.5 leading-relaxed">
                           {canStartFreeTrial
-                            ? 'Unlock Pro to catch every weak spot in the back half—same professor-level notes, rewrites, and grade-boosting fixes. Eligible accounts: one 7-day free trial.'
+                            ? 'Unlock Pro to catch every weak spot in the rest of your draft—same professor-level notes, rewrites, and grade-boosting fixes. Eligible accounts: one 7-day free trial.'
                             : 'Upgrade to Pro to unlock the rest of your essay—full annotations, rewrites, and grade-boosting fixes on the whole draft.'}
                         </p>
                       </div>
@@ -4049,7 +4121,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                     </>
                     )}
 
-                    {/* Free: fake sidebar only when we are not showing the real 50% preview */}
+                    {/* Free: fake sidebar only when we are not showing the real ~40% preview */}
                     {lockedFeatures.includes('full_annotations') && !isFreePreview && (
                       <div className="space-y-5">
                         <div>
@@ -4083,11 +4155,11 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                                   key={i}
                                   className={`relative rounded-xl p-4 border-l-4 ${group.border} bg-white dark:bg-gray-800/80 shadow-sm overflow-hidden`}
                                 >
-                                  <div className="pointer-events-none select-none blur-[5px] opacity-45 space-y-2 text-sm text-gray-700 dark:text-gray-300" aria-hidden>
+                                  <div className="pointer-events-none select-none space-y-2 text-sm text-gray-700 blur-[8px] opacity-[0.68] contrast-[0.92] dark:text-gray-300 dark:opacity-[0.62] sm:blur-[9px]" aria-hidden>
                                     <p className="font-medium">Professor-style feedback for a highlighted sentence in your draft.</p>
                                     <p className="text-xs italic text-gray-500">Specific rewrite or example would appear here on Pro.</p>
                                   </div>
-                                  <div className="absolute bottom-2 right-2 text-[10px] font-bold uppercase tracking-wide text-violet-600 dark:text-violet-400">
+                                  <div className="absolute bottom-2 right-2 rounded-full border border-violet-200/90 bg-white/85 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-violet-600 shadow-sm backdrop-blur-sm dark:border-violet-600/50 dark:bg-stone-900/85 dark:text-violet-300">
                                     Pro
                                   </div>
                                 </div>
@@ -4173,7 +4245,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                       </div>
                     )}
 
-                    {/* Specific rewrites — Pro only (not shown on free 50% preview) */}
+                    {/* Specific rewrites — Pro only (not shown on free ~40% preview) */}
                     {currentPlan !== 'free' && specificRewrites && specificRewrites.length > 0 && (
                       <div className="mt-6 p-4 bg-white dark:bg-stone-800 rounded-xl border border-stone-200 dark:border-stone-600">
                         <h4 className="font-semibold text-stone-800 dark:text-stone-200 mb-3">Rewrite Suggestions</h4>
@@ -4226,7 +4298,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
             </div>
             </div>
 
-            {/* Full Analysis Result — free users see grade/rubric above; this narrative stays fully gated */}
+            {/* Full Analysis Result — free users: readable first ~40%, then Pro gate for the rest (no backend change required). */}
             {analysisResult && (
               <div className="mx-6 mt-8 mb-6 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-600 overflow-hidden">
                 <div className="bg-violet-600 hover:bg-violet-500 text-white px-6 py-4">
@@ -4234,38 +4306,46 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                   <p className="text-violet-100 text-sm mt-0.5">
                     {currentPlan === 'free'
                       ? canStartFreeTrial
-                        ? 'The full roadmap to a stronger grade — eligible accounts get one 7-day free trial'
-                        : 'Unlock the full written analysis on Pro'
+                        ? 'Read the first ~40% below — unlock the rest on Pro (eligible: one 7-day trial)'
+                        : 'Read the first ~40% below — unlock the full written analysis on Pro'
                       : 'Full analysis report'}
                   </p>
                 </div>
                 <div className="p-6 prose pviolet-stone dark:pviolet-invert max-w-none">
-                  {currentPlan === 'free' && !isActivationTutorial ? (
-                    <div className="text-sm leading-relaxed">
-                      <FreeAnalysisProBlur
-                        onUpgrade={startProMonthlyCheckout}
-                        upgradeDisabled={checkoutRedirecting}
-                        headline="This is where papers go from 'okay' to submission-ready"
-                        primaryLabel={
-                          checkoutRedirecting
-                            ? 'Opening checkout…'
-                            : canStartFreeTrial
-                              ? 'Read the full analysis — start 7-day free trial'
-                              : 'Upgrade to Pro — read the full analysis'
-                        }
-                        sublabel={
-                          canStartFreeTrial
-                            ? 'Deep dive on strengths, risks, and what to fix. One free trial per account; cancel anytime.'
-                            : 'Upgrade to Pro for the full deep dive—strengths, risks, and what to fix before you submit.'
-                        }
-                      >
-                        <div
-                          className="prose pviolet-sm dark:pviolet-invert max-w-none"
-                          dangerouslySetInnerHTML={{
-                            __html: sanitizeAnalysisHtml(simpleMarkdownToHtml(analysisResult)),
-                          }}
-                        />
-                      </FreeAnalysisProBlur>
+                  {currentPlan === 'free' ? (
+                    <div className="text-sm leading-relaxed space-y-4">
+                      <div
+                        className="prose pviolet-sm dark:pviolet-invert max-w-none"
+                        dangerouslySetInnerHTML={{
+                          __html: sanitizeAnalysisHtml(simpleMarkdownToHtml(freeComprehensiveAnalysisPreviewMd)),
+                        }}
+                      />
+                      {freeComprehensiveAnalysisHasLockedRemainder ? (
+                        <FreeAnalysisProBlur
+                          onUpgrade={startProMonthlyCheckout}
+                          upgradeDisabled={checkoutRedirecting}
+                          headline="Your full breakdown is right behind the blur — one tap to read it all"
+                          primaryLabel={
+                            checkoutRedirecting
+                              ? 'Opening checkout…'
+                              : canStartFreeTrial
+                                ? 'Read the full analysis — start 7-day free trial'
+                                : 'Upgrade to Pro — read the full analysis'
+                          }
+                          sublabel={
+                            canStartFreeTrial
+                              ? 'Strengths, risks, and fixes for your exact draft — not generic advice. One free trial per account; cancel anytime.'
+                              : 'Strengths, risks, and fixes for your exact draft — unlock before you submit.'
+                          }
+                        >
+                          <div
+                            className="prose pviolet-sm dark:pviolet-invert max-w-none text-sm"
+                            dangerouslySetInnerHTML={{
+                              __html: sanitizeAnalysisHtml(simpleMarkdownToHtml(freeComprehensiveLockedRemainderMd)),
+                            }}
+                          />
+                        </FreeAnalysisProBlur>
+                      ) : null}
                     </div>
                   ) : (
                     <div
@@ -4348,15 +4428,15 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
               </div>
 
               {currentPlan === 'free' ? (
-                /* Free users: show 50% of rubric content + CTA to upgrade (like document preview) */
+                /* Free users: show ~40% of rubric content + CTA to upgrade (like document preview) */
                 <div className="p-6 relative">
-                  {/* Overall Assessment - truncated to 50% */}
+                  {/* Overall Assessment - truncated to ~40% */}
                   {rubricAlignment.overallAssessment && (
                     <div className="mb-6 p-4 sm:p-5 bg-violet-50 dark:bg-violet-900/20 border border-violet-200/70 dark:border-violet-700/40 rounded-2xl shadow-sm">
                       <h3 className="font-semibold text-violet-700 dark:text-violet-300 mb-2">Overall Assessment</h3>
                       <p className="text-sm text-stone-700 dark:text-stone-300 leading-relaxed">
                         {rubricAlignment.overallAssessment.length > 1
-                          ? rubricAlignment.overallAssessment.substring(0, Math.floor(rubricAlignment.overallAssessment.length / 2)) + '...'
+                          ? rubricAlignment.overallAssessment.substring(0, Math.floor(rubricAlignment.overallAssessment.length * 0.4)) + '...'
                           : rubricAlignment.overallAssessment}
                       </p>
                     </div>
@@ -4380,19 +4460,19 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                     </div>
                   )}
 
-                  {/* First 50% of criteria (show half the list) */}
+                  {/* First ~40% of criteria */}
                   {rubricAlignment.criteria && rubricAlignment.criteria.length > 0 && (
                     <div className="mb-6">
                       <h3 className="text-lg font-bold text-stone-900 dark:text-stone-100 mb-4">Criterion-by-Criterion Breakdown</h3>
                       <div className="space-y-4">
-                        {rubricAlignment.criteria.slice(0, Math.ceil(rubricAlignment.criteria.length / 2)).map((criterion: any, index: number) => {
+                        {rubricAlignment.criteria.slice(0, Math.max(1, Math.ceil(rubricAlignment.criteria.length * 0.4))).map((criterion: any, index: number) => {
                           const statusConfig: Record<string, { bg: string; border: string; icon: string; label: string; textColor: string }> = {
                             met: { bg: 'from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20', border: 'border-emerald-200/70 dark:border-emerald-700/40', icon: '✅', label: 'Met', textColor: 'text-emerald-700 dark:text-emerald-300' },
                             partially_met: { bg: 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20', border: 'border-amber-200/70 dark:border-amber-700/40', icon: '⚠️', label: 'Partially Met', textColor: 'text-amber-700 dark:text-amber-300' },
                             not_met: { bg: 'from-violet-50 to-red-50 dark:from-violet-900/20 dark:to-red-900/20', border: 'border-violet-200/70 dark:border-violet-700/40', icon: '❌', label: 'Not Met', textColor: 'text-violet-700 dark:text-violet-300' }
                           };
                           const config = statusConfig[criterion.status] || statusConfig.partially_met;
-                          const truncatedAssessment = criterion.assessment ? criterion.assessment.substring(0, Math.floor(criterion.assessment.length / 2)) + '...' : criterion.assessment;
+                          const truncatedAssessment = criterion.assessment ? criterion.assessment.substring(0, Math.floor(criterion.assessment.length * 0.4)) + '...' : criterion.assessment;
                           return (
                             <div key={index} className={`p-4 sm:p-5 bg-gradient-to-br ${config.bg} border ${config.border} rounded-2xl shadow-sm`}>
                               <div className="flex items-start justify-between mb-2">

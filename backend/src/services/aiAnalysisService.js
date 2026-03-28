@@ -1737,28 +1737,28 @@ CRITICAL REQUIREMENTS:
       }
     }
     
-    // STEP 2: Free users - ensure at least 1 concern (red) in first 50% of document for conversion
+    // STEP 2: Free users - ensure at least 1 concern (red) in first ~40% of document (matches free preview cutoff)
     if (userPlan === 'free') {
       const contentLength = content.length;
-      const firstHalfEnd = Math.floor(contentLength * 0.5);
-      const concernsInFirstHalf = finalAnnotations.filter(a => a.type === 'concern' && a.startIndex < firstHalfEnd);
+      const freePreviewEnd = Math.floor(contentLength * 0.4);
+      const concernsInPreview = finalAnnotations.filter(a => a.type === 'concern' && a.startIndex < freePreviewEnd);
 
-      if (concernsInFirstHalf.length === 0) {
-        // Try to convert an 'improve' in the first half to 'concern'
-        const improveInFirstHalf = finalAnnotations.find(a => a.type === 'improve' && a.startIndex < firstHalfEnd);
-        if (improveInFirstHalf) {
-          improveInFirstHalf.type = 'concern';
-          improveInFirstHalf.comment = improveInFirstHalf.comment || 'This section needs attention to strengthen your argument.';
-          improveInFirstHalf.suggestion = improveInFirstHalf.suggestion || 'Revise with a concrete example: e.g. "As X (Year) notes, …" or "For instance, …" to strengthen your argument.';
-          console.log(`🔄 Free user: Converted 1 improve → concern in first 50% for conversion`);
+      if (concernsInPreview.length === 0) {
+        // Try to convert an 'improve' in the preview region to 'concern'
+        const improveInPreview = finalAnnotations.find(a => a.type === 'improve' && a.startIndex < freePreviewEnd);
+        if (improveInPreview) {
+          improveInPreview.type = 'concern';
+          improveInPreview.comment = improveInPreview.comment || 'This section needs attention to strengthen your argument.';
+          improveInPreview.suggestion = improveInPreview.suggestion || 'Revise with a concrete example: e.g. "As X (Year) notes, …" or "For instance, …" to strengthen your argument.';
+          console.log(`🔄 Free user: Converted 1 improve → concern in first ~40% for conversion`);
         } else {
-          // Add a new concern from an unused sentence in the first half
-          const firstHalfContent = content.substring(0, firstHalfEnd);
-          const firstHalfSentences = firstHalfContent.split(/[.!?]+/).filter(s => s.trim().length > 20);
-          for (const sent of firstHalfSentences) {
+          // Add a new concern from an unused sentence in the preview region
+          const previewContent = content.substring(0, freePreviewEnd);
+          const previewSentences = previewContent.split(/[.!?]+/).filter(s => s.trim().length > 20);
+          for (const sent of previewSentences) {
             const trimmed = sent.trim();
             const startIndex = content.indexOf(trimmed);
-            if (startIndex !== -1 && startIndex < firstHalfEnd && !usedTexts.has(trimmed.toLowerCase())) {
+            if (startIndex !== -1 && startIndex < freePreviewEnd && !usedTexts.has(trimmed.toLowerCase())) {
               const overlap = finalAnnotations.some(a => {
                 const overlapStart = Math.max(startIndex, a.startIndex);
                 const overlapEnd = Math.min(startIndex + trimmed.length, a.endIndex);
@@ -1777,7 +1777,7 @@ CRITICAL REQUIREMENTS:
                   suggestion: 'Revise with a concrete transition: e.g. "Therefore, …" or "For instance, …" to clarify and support your point.'
                 });
                 finalAnnotations.sort((a, b) => a.startIndex - b.startIndex);
-                console.log(`🔄 Free user: Added 1 concern in first 50% for conversion`);
+                console.log(`🔄 Free user: Added 1 concern in first ~40% for conversion`);
                 break;
               }
             }
