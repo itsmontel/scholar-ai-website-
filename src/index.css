@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  .blog-section-heading {
+    font-family: 'EB Garamond', Georgia, serif;
+  }
+}
+
 @layer base {
   html {
     @apply antialiased;

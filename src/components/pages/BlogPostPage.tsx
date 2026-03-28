@@ -1,9 +1,15 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Header from '../common/Header';
 import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
-import { getPostBySlug, getBlogPostsSortedDesc } from '../../data/blogPosts';
+import NewsletterSubscription from '../common/NewsletterSubscription';
+import { BLOG_DEFAULT_AUTHOR_BIO, BLOG_DEFAULT_AUTHOR_ROLE, getPostBySlug, getBlogPostsSortedDesc } from '../../data/blogPosts';
 import BlogPostContent from './BlogPostContent';
+import BlogTocSidebar from '../blog/BlogTocSidebar';
+import BlogShareRail from '../blog/BlogShareRail';
+import BlogKeyTakeaways from '../blog/BlogKeyTakeaways';
+import BlogPostCta from '../blog/BlogPostCta';
+import { useBlogArticleToc } from '../../hooks/useBlogArticleToc';
 import {
   SITE_ORIGIN,
   absoluteCanonicalUrl,
@@ -24,11 +30,22 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
     const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
     return pathname.startsWith('/blog/') ? pathname.replace(/^\/blog\/?/, '').split('/')[0]?.trim() ?? '' : '';
   });
-  
+
   const post = currentSlug ? getPostBySlug(currentSlug) : null;
   const sortedPosts = useMemo(() => getBlogPostsSortedDesc(), []);
 
-  // Update slug when URL changes (for prev/next navigation)
+  const articleBodyRef = useRef<HTMLDivElement>(null);
+  const { items: tocItems, activeId } = useBlogArticleToc(articleBodyRef, currentSlug);
+
+  const [shareUrl, setShareUrl] = useState(() =>
+    post ? `${SITE_ORIGIN.replace(/\/$/, '')}/blog/${post.slug}` : SITE_ORIGIN
+  );
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !post) return;
+    setShareUrl(`${window.location.origin}/blog/${post.slug}`);
+  }, [post?.slug]);
+
   useEffect(() => {
     const updateSlug = () => {
       const pathname = window.location.pathname;
@@ -38,15 +55,12 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
       }
     };
 
-    // Check immediately
     updateSlug();
-    
-    // Also listen for popstate events (browser back/forward)
+
     window.addEventListener('popstate', updateSlug);
     return () => window.removeEventListener('popstate', updateSlug);
   }, [currentSlug]);
 
-  // Empty slug (e.g. /blog/) → redirect to blog listing
   useEffect(() => {
     const pathname = window.location.pathname;
     if (!currentSlug && pathname.startsWith('/blog')) {
@@ -108,7 +122,6 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
     };
   }, [post]);
 
-  // Handle navigation to a different blog post
   const handleNavigateToPost = (newSlug: string) => {
     setCurrentSlug(newSlug);
     window.history.pushState({}, '', `/blog/${newSlug}`);
@@ -116,17 +129,23 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
   };
 
   if (!post) {
-    // Redirect to blog listing if slug is empty (e.g. /blog/); otherwise show not found
     if (!currentSlug) {
-      return null; // useEffect will redirect to /blog
+      return null;
     }
     return (
-      <div className="relative min-h-screen overflow-x-hidden">
+      <div className="relative min-h-screen overflow-x-clip">
         <WriteScholarEditorialBackgroundLayers position="fixed" />
         <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="blog" />
         <main className="max-w-4xl mx-auto px-4 py-16 text-center">
           <h1 className="text-2xl font-bold text-stone-800 dark:text-stone-100 mb-4">Post not found</h1>
-          <a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate('blog'); }} className="text-violet-600 dark:text-violet-400 hover:underline font-medium">
+          <a
+            href="/blog"
+            onClick={(e) => {
+              e.preventDefault();
+              onNavigate('blog');
+            }}
+            className="text-violet-600 dark:text-violet-400 hover:underline font-medium"
+          >
             ← Back to blog
           </a>
         </main>
@@ -135,71 +154,171 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
     );
   }
 
-  const currentIndex = sortedPosts.findIndex(p => p.slug === currentSlug);
+  const currentIndex = sortedPosts.findIndex((p) => p.slug === currentSlug);
   const prevPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
   const nextPost = currentIndex >= 0 && currentIndex < sortedPosts.length - 1 ? sortedPosts[currentIndex + 1] : null;
 
+  const category = post.category ?? 'Tips';
+  const authorRole = post.authorRole ?? BLOG_DEFAULT_AUTHOR_ROLE;
+  const authorBio = post.authorBio ?? BLOG_DEFAULT_AUTHOR_BIO;
+  const updatedLabel = new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+
   return (
-    <div className="relative min-h-screen overflow-x-hidden">
+    <div className="relative min-h-screen overflow-x-clip">
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="blog" />
 
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 md:py-16">
-        <nav aria-label="Breadcrumb" className="mb-8">
-          <a
-            href="/blog"
-            onClick={(e) => { e.preventDefault(); onNavigate('blog'); }}
-            className="text-stone-500 dark:text-stone-400 hover:text-violet-600 dark:hover:text-violet-400 text-sm font-medium transition-colors inline-flex items-center gap-1"
+      <main className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-14">
+        {/* Hero */}
+        <header className="max-w-3xl mb-10 md:mb-12">
+          <nav aria-label="Breadcrumb" className="mb-4">
+            <ol className="flex flex-wrap items-center gap-1.5 text-sm text-stone-500 dark:text-stone-400">
+              <li>
+                <a
+                  href="/"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onNavigate('landing');
+                  }}
+                  className="hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
+                >
+                  Home
+                </a>
+              </li>
+              <li aria-hidden className="text-stone-300 dark:text-stone-600">
+                /
+              </li>
+              <li>
+                <a
+                  href="/blog"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onNavigate('blog');
+                  }}
+                  className="hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
+                >
+                  Blog
+                </a>
+              </li>
+            </ol>
+          </nav>
+
+          <p className="inline-flex items-center rounded-full bg-violet-100/90 dark:bg-violet-950/60 text-violet-800 dark:text-violet-200 text-[11px] font-semibold uppercase tracking-wider px-3 py-1 mb-4">
+            {category}
+          </p>
+
+          <h1
+            className="text-3xl sm:text-4xl lg:text-[2.35rem] font-bold text-stone-900 dark:text-stone-100 leading-tight mb-4"
+            style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
           >
-            ← Blog
-          </a>
-        </nav>
+            {post.title}
+          </h1>
+          <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed mb-3">{post.description}</p>
+          <p className="text-sm text-stone-500 dark:text-stone-400">
+            Updated <time dateTime={post.date}>{updatedLabel}</time>
+            <span className="mx-2 text-stone-300 dark:text-stone-600">·</span>
+            {post.readTime}
+          </p>
+        </header>
 
-        <article className="bg-white dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700 rounded-2xl p-6 sm:p-8 md:p-10 shadow-sm">
-          <header className="mb-8">
-            <time dateTime={post.date} className="text-sm text-stone-500 dark:text-stone-400 font-medium">
-              {new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-            </time>
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-stone-800 dark:text-stone-100 mt-2 mb-4 leading-tight">
-              {post.title}
-            </h1>
-            <p className="text-stone-600 dark:text-stone-400">
-              {post.author} · {post.readTime}
-            </p>
-          </header>
-
-          <div className="prose pviolet-lg max-w-none pviolet-stone dark:pviolet-invert pviolet-headings:text-stone-800 dark:pviolet-headings:text-stone-100 pviolet-a:text-violet-600 dark:pviolet-a:text-violet-400 pviolet-a:no-underline hover:pviolet-a:underline">
-            <BlogPostContent slug={post.slug} onNavigate={onNavigate} />
-          </div>
-        </article>
-
-        <nav className="mt-12 pt-8 border-t border-stone-200 dark:border-stone-700 flex flex-col sm:flex-row justify-between gap-4" aria-label="Previous and next posts">
-          {prevPost ? (
-            <button
-              onClick={() => handleNavigateToPost(prevPost.slug)}
-              className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-medium text-left transition-colors"
-            >
-              ← {prevPost.title}
-            </button>
-          ) : <span />}
-          {nextPost ? (
-            <button
-              onClick={() => handleNavigateToPost(nextPost.slug)}
-              className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-medium sm:text-right transition-colors"
-            >
-              {nextPost.title} →
-            </button>
+        {/* Three-column layout (desktop) */}
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,200px)_minmax(0,1fr)_minmax(0,56px)] xl:grid-cols-[minmax(0,220px)_minmax(0,680px)_minmax(0,64px)] gap-8 lg:gap-10 xl:gap-12 items-start">
+          {/* Mobile TOC */}
+          {tocItems.length > 0 ? (
+            <details className="lg:hidden rounded-2xl border border-stone-200/90 dark:border-stone-700 bg-white/80 dark:bg-stone-900/40 px-4 py-3">
+              <summary className="cursor-pointer text-sm font-semibold text-stone-700 dark:text-stone-200">On this page</summary>
+              <div className="mt-3 max-h-[50vh] overflow-y-auto pr-1">
+                <BlogTocSidebar items={tocItems} activeId={activeId} />
+              </div>
+            </details>
           ) : null}
-        </nav>
 
-        <div className="mt-12 text-center">
-          <a
-            href="/blog"
-            onClick={(e) => { e.preventDefault(); onNavigate('blog'); }}
-            className="inline-flex items-center px-6 py-3 bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-violet-500/20"
-          >
-            All posts
-          </a>
+          {/* Left: TOC — sticky below site header (parent uses overflow-x-clip, not hidden, so position:sticky works) */}
+          <aside className="hidden lg:block lg:sticky lg:top-28 lg:z-[5] lg:self-start w-full max-h-[calc(100vh-8rem)] overflow-y-auto overscroll-contain pr-1">
+            <BlogTocSidebar items={tocItems} activeId={activeId} />
+          </aside>
+
+          {/* Center: article */}
+          <div className="min-w-0">
+            <div className="rounded-2xl border border-stone-200/90 dark:border-stone-700/90 bg-white/90 dark:bg-stone-900/35 shadow-sm p-5 sm:p-7 md:p-9 mb-6">
+              <div className="rounded-xl border border-stone-200/80 dark:border-stone-600/70 bg-stone-50/80 dark:bg-stone-800/40 px-4 py-4 sm:px-5 sm:py-5 mb-8">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400 mb-2">Written by</p>
+                <p className="text-lg font-bold text-stone-900 dark:text-stone-100" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
+                  {post.author}
+                </p>
+                <p className="text-sm font-medium text-violet-700 dark:text-violet-300 mt-1">{authorRole}</p>
+                <p className="text-sm text-stone-600 dark:text-stone-400 mt-2 leading-relaxed">{authorBio}</p>
+              </div>
+
+              <div
+                ref={articleBodyRef}
+                id="blog-article-body"
+                className="prose prose-stone dark:prose-invert prose-lg max-w-none prose-headings:font-serif prose-a:text-violet-600 dark:prose-a:text-violet-400 prose-a:no-underline hover:prose-a:underline prose-p:text-stone-600 dark:prose-p:text-stone-400"
+              >
+                <BlogPostContent slug={post.slug} onNavigate={onNavigate} />
+                <BlogKeyTakeaways bullets={post.keyTakeaways} />
+              </div>
+            </div>
+
+            <BlogPostCta onNavigate={onNavigate} primaryPage="signup" primaryLabel="Get started free →" />
+
+            <div className="mt-10">
+              <NewsletterSubscription variant="blog" />
+            </div>
+
+            <div className="mt-10 pt-8 border-t border-stone-200 dark:border-stone-700 lg:hidden">
+              <BlogShareRail title={post.title} url={shareUrl} layout="horizontal" />
+            </div>
+
+            <nav
+              className="mt-10 pt-8 border-t border-stone-200 dark:border-stone-700 flex flex-col sm:flex-row justify-between gap-4"
+              aria-label="Previous and next posts"
+            >
+              {prevPost ? (
+                <button
+                  type="button"
+                  onClick={() => handleNavigateToPost(prevPost.slug)}
+                  className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-medium text-left transition-colors"
+                >
+                  ← {prevPost.title}
+                </button>
+              ) : (
+                <span />
+              )}
+              {nextPost ? (
+                <button
+                  type="button"
+                  onClick={() => handleNavigateToPost(nextPost.slug)}
+                  className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-medium sm:text-right transition-colors"
+                >
+                  {nextPost.title} →
+                </button>
+              ) : null}
+            </nav>
+
+            <div className="mt-10 text-center">
+              <a
+                href="/blog"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onNavigate('blog');
+                }}
+                className="inline-flex items-center px-6 py-3 bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-violet-500/20"
+              >
+                All posts
+              </a>
+            </div>
+          </div>
+
+          {/* Right: share rail */}
+          <aside className="hidden lg:flex lg:flex-col lg:items-center lg:sticky lg:top-28 lg:z-[5] lg:self-start w-full max-h-[calc(100vh-8rem)] overflow-y-auto overscroll-contain">
+            <BlogShareRail title={post.title} url={shareUrl} layout="vertical" />
+          </aside>
+        </div>
+
+        {/* Bottom share strip (desktop) */}
+        <div className="hidden lg:block max-w-3xl mx-auto mt-14 pt-10 border-t border-stone-200 dark:border-stone-700">
+          <BlogShareRail title={post.title} url={shareUrl} layout="horizontal" />
         </div>
       </main>
 

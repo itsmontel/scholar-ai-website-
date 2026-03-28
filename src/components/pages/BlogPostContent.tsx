@@ -1,5 +1,5 @@
 import React from 'react';
-import NewsletterSubscription from '../common/NewsletterSubscription';
+import BlogFaqAccordion from '../blog/BlogFaqAccordion';
 import {
   ExpandedAiStudyTools,
   ExpandedAiWritingAssistant,
@@ -23,11 +23,11 @@ interface BlogPostContentProps {
 }
 
 const p = 'mb-4 text-stone-600 dark:text-stone-400 leading-relaxed';
-const h2 = 'text-xl font-bold text-stone-800 dark:text-stone-100 mt-8 mb-3';
+const h2 =
+  'blog-section-heading text-2xl sm:text-[1.65rem] font-bold text-stone-800 dark:text-stone-100 mt-10 mb-4 pb-2 border-b border-violet-200/90 dark:border-violet-700/50 scroll-mt-28';
 const h3 = 'text-lg font-semibold text-stone-800 dark:text-stone-100 mt-6 mb-2';
 const internalLink = 'text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 underline';
 const ctaButton = 'inline-block mt-8 mb-4 px-6 py-3 bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-xl transition-colors shadow-lg shadow-violet-500/20';
-const faqQuestion = 'font-semibold text-stone-800 dark:text-stone-100 mt-4 mb-2';
 
 // Reusable illustration components for blog posts
 const IllustrationWrapper: React.FC<{ children: React.ReactNode; bgColor?: string }> = ({ children, bgColor = 'bg-stone-100 dark:bg-stone-800/50' }) => (
@@ -497,24 +497,6 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <ExpandedCheckEssayAI handleNavigate={handleNavigate} />
 
-          <h2 className={h2}>Frequently asked questions</h2>
-          <p className={faqQuestion}>How accurate is AI essay feedback?</p>
-          <p className={p}>
-            AI feedback is not infallible. It can miss nuance or occasionally misread intent. But for structure, clarity, argument flow, and common academic conventions, it is often reliable. Use it as a first pass. Incorporate what resonates. If something seems off, trust your judgment or get a second opinion from a tutor or professor.
-          </p>
-          <p className={faqQuestion}>Can I use this for research papers and theses?</p>
-          <p className={p}>
-            Yes. The same analysis works for shorter essays and longer papers. Upload or paste your draft. Add your rubric if you have one. The tool scales to different lengths and formats. Longer documents may take a bit longer to process.
-          </p>
-          <p className={faqQuestion}>What file formats are supported?</p>
-          <p className={p}>
-            Most tools accept pasted text, PDF, DOCX, and TXT. Upload or paste. The content is processed and returned with annotations and feedback. Files are handled securely and not shared or stored for training.
-          </p>
-          <p className={faqQuestion}>Is this the same as a plagiarism checker?</p>
-          <p className={p}>
-            No. Essay analysis focuses on feedback: structure, argument, clarity, style. It does not compare your text to the internet or a database. If you need plagiarism detection, use a dedicated plagiarism checker. For grammar and style specifically, a <a href="/tools/grammar-checker" onClick={handleNavigate('grammar-checker')} className={internalLink}>grammar checker for academic writing</a> can catch errors the essay analyzer may not flag. Many students use several tools: grammar pass first, then full feedback analysis to improve the draft.
-          </p>
-
           <h2 className={h2}>Try it before you submit</h2>
           <p className={p}>
             The biggest mistake students make is turning in first drafts. A single pass with an AI essay checker catches issues you would have missed. Weak thesis. Flabby transitions. Missing evidence. Citation errors. The fixes are usually quick. A stronger draft goes in. Better feedback comes back from your professor. Need to stay focused while you revise? <a href="/focus-mode" onClick={handleNavigate('focus-mode')} className={internalLink}>Focus Mode</a> blocks distracting sites until you study or solve a puzzle. Fewer tabs, fewer rabbit holes.
@@ -525,6 +507,38 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Check your essay free →
           </a>
+
+          <BlogFaqAccordion
+            items={[
+              {
+                question: 'How accurate is AI essay feedback?',
+                answer:
+                  'AI feedback is not infallible. It can miss nuance or occasionally misread intent. But for structure, clarity, argument flow, and common academic conventions, it is often reliable. Use it as a first pass. Incorporate what resonates. If something seems off, trust your judgment or get a second opinion from a tutor or professor.',
+              },
+              {
+                question: 'Can I use this for research papers and theses?',
+                answer:
+                  'Yes. The same analysis works for shorter essays and longer papers. Upload or paste your draft. Add your rubric if you have one. The tool scales to different lengths and formats. Longer documents may take a bit longer to process.',
+              },
+              {
+                question: 'What file formats are supported?',
+                answer:
+                  'Most tools accept pasted text, PDF, DOCX, and TXT. Upload or paste. The content is processed and returned with annotations and feedback. Files are handled securely and not shared or stored for training.',
+              },
+              {
+                question: 'Is this the same as a plagiarism checker?',
+                answer: (
+                  <>
+                    No. Essay analysis focuses on feedback: structure, argument, clarity, style. It does not compare your text to the internet or a database. If you need plagiarism detection, use a dedicated plagiarism checker. For grammar and style specifically, a{' '}
+                    <a href="/tools/grammar-checker" onClick={handleNavigate('grammar-checker')} className={internalLink}>
+                      grammar checker for academic writing
+                    </a>{' '}
+                    can catch errors the essay analyzer may not flag. Many students use several tools: grammar pass first, then full feedback analysis to improve the draft.
+                  </>
+                ),
+              },
+            ]}
+          />
         </>
       );
 
@@ -583,24 +597,6 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <ExpandedFocusBlocker handleNavigate={handleNavigate} />
 
-          <h2 className={h2}>Frequently asked questions</h2>
-          <p className={faqQuestion}>Does this work on mobile?</p>
-          <p className={p}>
-            Focus Mode uses a Chrome extension, so it works in Chrome on desktop. Mobile support depends on the browser. Check the extension listing for compatibility. Many students find that blocking on desktop alone significantly reduces distraction, since that is where most study sessions happen.
-          </p>
-          <p className={faqQuestion}>What if I need to use YouTube for a lecture or assignment?</p>
-          <p className={p}>
-            You can temporarily disable the block or add exceptions. Some tools let you pause Focus Mode for a set period. The goal is to reduce mindless scrolling, not to block legitimate study resources. Use the flexibility when you need it.
-          </p>
-          <p className={faqQuestion}>How many questions do I need to answer to unlock?</p>
-          <p className={p}>
-            You can customize how many questions and what pass rate you need. Many students use 4 out of 5 correct as a starting point, then adjust in settings. The idea is to make sure you actually know the material, not just guess. The quiz should take a minute or two. Quick enough that it does not feel like a punishment. Substantial enough that it reinforces learning.
-          </p>
-          <p className={faqQuestion}>Can I block sites on a schedule?</p>
-          <p className={p}>
-            Some tools support scheduled blocking. For example, block during weekday study hours and allow free access on weekends. Check the specific product for scheduling options. Many students start with always on blocking and adjust as they learn what works.
-          </p>
-
           <h2 className={h2}>Earn your screen time</h2>
           <p className={p}>
             Blocking distracting websites until you study is not about punishment. It is about making screen time something you earn. Every minute on TikTok becomes a reward for having studied first. The guilt fades. The habit sticks. And you actually learn the material because the gate forces you to practice.
@@ -611,6 +607,31 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Try WriteScholar Free →
           </a>
+
+          <BlogFaqAccordion
+            items={[
+              {
+                question: 'Does this work on mobile?',
+                answer:
+                  'Focus Mode uses a Chrome extension, so it works in Chrome on desktop. Mobile support depends on the browser. Check the extension listing for compatibility. Many students find that blocking on desktop alone significantly reduces distraction, since that is where most study sessions happen.',
+              },
+              {
+                question: 'What if I need to use YouTube for a lecture or assignment?',
+                answer:
+                  'You can temporarily disable the block or add exceptions. Some tools let you pause Focus Mode for a set period. The goal is to reduce mindless scrolling, not to block legitimate study resources. Use the flexibility when you need it.',
+              },
+              {
+                question: 'How many questions do I need to answer to unlock?',
+                answer:
+                  'You can customize how many questions and what pass rate you need. Many students use 4 out of 5 correct as a starting point, then adjust in settings. The idea is to make sure you actually know the material, not just guess. The quiz should take a minute or two. Quick enough that it does not feel like a punishment. Substantial enough that it reinforces learning.',
+              },
+              {
+                question: 'Can I block sites on a schedule?',
+                answer:
+                  'Some tools support scheduled blocking. For example, block during weekday study hours and allow free access on weekends. Check the specific product for scheduling options. Many students start with always on blocking and adjust as they learn what works.',
+              },
+            ]}
+          />
         </>
       );
 
@@ -682,24 +703,6 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <ExpandedPlagiarism handleNavigate={handleNavigate} />
 
-          <h2 className={h2}>Frequently asked questions</h2>
-          <p className={faqQuestion}>Is it plagiarism if I use a citation but copy the words exactly?</p>
-          <p className={p}>
-            If you copy words exactly, you need quotation marks around them plus the citation. A citation alone is not enough for direct quotes. Without quotation marks, it looks like you are claiming the words as your own, which is plagiarism even if you cite the source.
-          </p>
-          <p className={faqQuestion}>Can I use AI to help with my paper?</p>
-          <p className={p}>
-            It depends on your institution&apos;s policy. Using AI for brainstorming, grammar checking, or citation formatting is often allowed. Submitting AI-generated paragraphs or essays as your own writing is usually not. Check your syllabus and ask your professor if the policy is unclear. When in doubt, do the writing yourself.
-          </p>
-          <p className={faqQuestion}>What happens if I accidentally plagiarize?</p>
-          <p className={p}>
-            Accidental plagiarism can still have consequences. If you notice a mistake before submission, fix it. If your professor flags it after submission, be honest about what happened. Owning the error and correcting it is better than denying it. Many professors will work with you if it was genuine carelessness rather than intent to cheat.
-          </p>
-          <p className={faqQuestion}>How do I cite sources I found through a database or Google?</p>
-          <p className={p}>
-            Cite the original source (the article, book, or webpage), not the database or search engine. The database is just how you found it. Use the same citation format you would if you had found the source in print. A citation generator can help you format it correctly.
-          </p>
-
           <h2 className={h2}>Stay original, stay cited</h2>
           <p className={p}>
             Plagiarism is avoidable. Cite every source. Paraphrase in your own words and still cite. Use a citation checker before you submit. Give yourself enough time so you never feel tempted to cut corners. The habits you build now will serve you throughout college and beyond.
@@ -710,6 +713,31 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Try WriteScholar Free →
           </a>
+
+          <BlogFaqAccordion
+            items={[
+              {
+                question: 'Is it plagiarism if I use a citation but copy the words exactly?',
+                answer:
+                  'If you copy words exactly, you need quotation marks around them plus the citation. A citation alone is not enough for direct quotes. Without quotation marks, it looks like you are claiming the words as your own, which is plagiarism even if you cite the source.',
+              },
+              {
+                question: 'Can I use AI to help with my paper?',
+                answer:
+                  "It depends on your institution's policy. Using AI for brainstorming, grammar checking, or citation formatting is often allowed. Submitting AI-generated paragraphs or essays as your own writing is usually not. Check your syllabus and ask your professor if the policy is unclear. When in doubt, do the writing yourself.",
+              },
+              {
+                question: 'What happens if I accidentally plagiarize?',
+                answer:
+                  'Accidental plagiarism can still have consequences. If you notice a mistake before submission, fix it. If your professor flags it after submission, be honest about what happened. Owning the error and correcting it is better than denying it. Many professors will work with you if it was genuine carelessness rather than intent to cheat.',
+              },
+              {
+                question: 'How do I cite sources I found through a database or Google?',
+                answer:
+                  'Cite the original source (the article, book, or webpage), not the database or search engine. The database is just how you found it. Use the same citation format you would if you had found the source in print. A citation generator can help you format it correctly.',
+              },
+            ]}
+          />
         </>
       );
 
@@ -812,24 +840,6 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <ExpandedStudyEffectively handleNavigate={handleNavigate} />
 
-          <h2 className={h2}>Frequently asked questions</h2>
-          <p className={faqQuestion}>How many hours per day should I study?</p>
-          <p className={p}>
-            Quality matters more than quantity. Two hours of focused, active study (quizzing yourself, using flashcards) will beat six hours of passive rereading. Start with 2 to 3 hours of real focus per day and adjust based on your course load. Use the Pomodoro technique to make sure those hours are actually focused.
-          </p>
-          <p className={faqQuestion}>Is it better to study in the morning or at night?</p>
-          <p className={p}>
-            It depends on when you are most alert. Some people focus best in the morning; others hit their stride in the evening. The important thing is consistency. Pick a time that works for you and stick with it. Your brain will adapt.
-          </p>
-          <p className={faqQuestion}>Can I use AI tools to study without it being cheating?</p>
-          <p className={p}>
-            Yes. Using AI to generate practice quizzes, flashcards, or study materials is no different from using a textbook or study guide. You are still doing the learning. The AI just helps you create better practice materials faster. WriteScholar&apos;s tools are designed to help you learn, not to do your work for you.
-          </p>
-          <p className={faqQuestion}>What if I have too much material and not enough time?</p>
-          <p className={p}>
-            Prioritize. Focus on the concepts that show up most often in past exams or that your professor emphasized. Use active recall on the high-yield material first. A quiz on the most important 20 percent of the content will help more than passive reading of everything. WriteScholar can generate quizzes and flashcards quickly so you can test yourself on the material that matters most.
-          </p>
-
           <h2 className={h2}>Start studying smarter today</h2>
           <p className={p}>
             Effective studying is not about working harder. It is about working differently. Swap passive rereading for active recall. Add spaced repetition. Use a timer to protect your focus. Get enough sleep. The students who make these shifts often study less and remember more.
@@ -840,6 +850,31 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Try WriteScholar Free →
           </a>
+
+          <BlogFaqAccordion
+            items={[
+              {
+                question: 'How many hours per day should I study?',
+                answer:
+                  'Quality matters more than quantity. Two hours of focused, active study (quizzing yourself, using flashcards) will beat six hours of passive rereading. Start with 2 to 3 hours of real focus per day and adjust based on your course load. Use the Pomodoro technique to make sure those hours are actually focused.',
+              },
+              {
+                question: 'Is it better to study in the morning or at night?',
+                answer:
+                  'It depends on when you are most alert. Some people focus best in the morning; others hit their stride in the evening. The important thing is consistency. Pick a time that works for you and stick with it. Your brain will adapt.',
+              },
+              {
+                question: 'Can I use AI tools to study without it being cheating?',
+                answer:
+                  "Yes. Using AI to generate practice quizzes, flashcards, or study materials is no different from using a textbook or study guide. You are still doing the learning. The AI just helps you create better practice materials faster. WriteScholar's tools are designed to help you learn, not to do your work for you.",
+              },
+              {
+                question: 'What if I have too much material and not enough time?',
+                answer:
+                  'Prioritize. Focus on the concepts that show up most often in past exams or that your professor emphasized. Use active recall on the high-yield material first. A quiz on the most important 20 percent of the content will help more than passive reading of everything. WriteScholar can generate quizzes and flashcards quickly so you can test yourself on the material that matters most.',
+              },
+            ]}
+          />
         </>
       );
 
@@ -974,24 +1009,6 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <ExpandedAiStudyTools handleNavigate={handleNavigate} />
 
-          <h2 className={h2}>Frequently asked questions</h2>
-          <p className={faqQuestion}>How accurate are AI-generated study materials?</p>
-          <p className={p}>
-            WriteScholar&apos;s AI is highly accurate because it generates content directly from your source material rather than making things up. The flashcards, quiz questions, and crossword clues are all derived from the text you provide. However, you should always review generated materials to ensure they align with your learning goals and course requirements.
-          </p>
-          <p className={faqQuestion}>What types of content work best for generating study materials?</p>
-          <p className={p}>
-            WriteScholar works well with lecture notes, textbook chapters, study guides, Wikipedia articles, research papers, and any educational text. The AI performs best with well-structured content that contains clear concepts, definitions, and facts. Very short texts may not provide enough material for comprehensive study tools.
-          </p>
-          <p className={faqQuestion}>How many flashcards, quiz questions, or crossword words can I generate?</p>
-          <p className={p}>
-            You can customize the number of items based on your needs. Flashcard decks can range from a handful of cards to dozens. Quizzes can include anywhere from 5 to 25 questions. Crosswords typically work best with 10-20 words to maintain solvability. The AI will generate as many items as your source material can support.
-          </p>
-          <p className={faqQuestion}>Is using AI study tools considered cheating?</p>
-          <p className={p}>
-            No. Using AI to generate study materials is no different from using a textbook, study guide, or tutoring service. You&apos;re still doing the learning yourself. The AI just helps you create better practice materials more efficiently. WriteScholar&apos;s tools are designed to help you learn, not to do your work for you.
-          </p>
-
           <h2 className={h2}>Transform your studying with AI-powered tools</h2>
           <p className={p}>
             The science is clear: active recall through flashcards, quizzes, and crosswords dramatically improves learning outcomes compared to passive review. The barrier has always been the time required to create these materials. AI removes that barrier entirely. With WriteScholar, you can generate a complete study toolkit from any source material in seconds, giving you more time to actually learn.
@@ -1002,6 +1019,31 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Try WriteScholar Free →
           </a>
+
+          <BlogFaqAccordion
+            items={[
+              {
+                question: 'How accurate are AI-generated study materials?',
+                answer:
+                  "WriteScholar's AI is highly accurate because it generates content directly from your source material rather than making things up. The flashcards, quiz questions, and crossword clues are all derived from the text you provide. However, you should always review generated materials to ensure they align with your learning goals and course requirements.",
+              },
+              {
+                question: 'What types of content work best for generating study materials?',
+                answer:
+                  'WriteScholar works well with lecture notes, textbook chapters, study guides, Wikipedia articles, research papers, and any educational text. The AI performs best with well-structured content that contains clear concepts, definitions, and facts. Very short texts may not provide enough material for comprehensive study tools.',
+              },
+              {
+                question: 'How many flashcards, quiz questions, or crossword words can I generate?',
+                answer:
+                  'You can customize the number of items based on your needs. Flashcard decks can range from a handful of cards to dozens. Quizzes can include anywhere from 5 to 25 questions. Crosswords typically work best with 10-20 words to maintain solvability. The AI will generate as many items as your source material can support.',
+              },
+              {
+                question: 'Is using AI study tools considered cheating?',
+                answer:
+                  "No. Using AI to generate study materials is no different from using a textbook, study guide, or tutoring service. You're still doing the learning yourself. The AI just helps you create better practice materials more efficiently. WriteScholar's tools are designed to help you learn, not to do your work for you.",
+              },
+            ]}
+          />
         </>
       );
 
@@ -1232,23 +1274,44 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <ExpandedStraightAs handleNavigate={handleNavigate} />
 
-          <h2 className={h2}>Frequently asked questions</h2>
-          <p className={faqQuestion}>What is the testing effect?</p>
-          <p className={p}>
-            The testing effect is a well-established finding in cognitive psychology: actively retrieving information from memory strengthens that memory far more than passively reviewing it. Every time you quiz yourself, you make the information harder to forget.
-          </p>
-          <p className={faqQuestion}>How is using AI tools different from cheating?</p>
-          <p className={p}>
-            Using AI tools to create study materials, format citations, or get essay feedback is no different from using a tutor, a study guide, or a grammar handbook. The tools help you learn and communicate better. You are still doing the thinking, writing, and revising yourself.
-          </p>
-          <p className={faqQuestion}>How do I start using WriteScholar&apos;s study tools?</p>
-          <p className={p}>
-            Create a free account at <a href="/signup" onClick={handleNavigate('signup')} className={internalLink}>writescholar.com</a>, then head to the <a href="/tools/quiz-generator" onClick={handleNavigate('quiz-generator')} className={internalLink}>Quiz Generator</a>, <a href="/tools/flashcard-generator" onClick={handleNavigate('flashcard-generator')} className={internalLink}>Flashcard Generator</a>, or any other tool. Paste in your study material, choose your settings, and generate in seconds. No credit card required.
-          </p>
-
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Try WriteScholar Free →
           </a>
+
+          <BlogFaqAccordion
+            items={[
+              {
+                question: 'What is the testing effect?',
+                answer:
+                  'The testing effect is a well-established finding in cognitive psychology: actively retrieving information from memory strengthens that memory far more than passively reviewing it. Every time you quiz yourself, you make the information harder to forget.',
+              },
+              {
+                question: 'How is using AI tools different from cheating?',
+                answer:
+                  'Using AI tools to create study materials, format citations, or get essay feedback is no different from using a tutor, a study guide, or a grammar handbook. The tools help you learn and communicate better. You are still doing the thinking, writing, and revising yourself.',
+              },
+              {
+                question: "How do I start using WriteScholar's study tools?",
+                answer: (
+                  <>
+                    Create a free account at{' '}
+                    <a href="/signup" onClick={handleNavigate('signup')} className={internalLink}>
+                      writescholar.com
+                    </a>
+                    , then head to the{' '}
+                    <a href="/tools/quiz-generator" onClick={handleNavigate('quiz-generator')} className={internalLink}>
+                      Quiz Generator
+                    </a>
+                    ,{' '}
+                    <a href="/tools/flashcard-generator" onClick={handleNavigate('flashcard-generator')} className={internalLink}>
+                      Flashcard Generator
+                    </a>
+                    , or any other tool. Paste in your study material, choose your settings, and generate in seconds. No credit card required.
+                  </>
+                ),
+              },
+            ]}
+          />
         </>
       );
 
@@ -1455,28 +1518,6 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <ExpandedFreeWritingTools handleNavigate={handleNavigate} />
 
-          <h2 className={h2}>Frequently asked questions</h2>
-          <p className={faqQuestion}>Are these tools really free?</p>
-          <p className={p}>
-            Yes. The tools we&apos;ve linked work directly in your browser with no payment required for basic features. Some tools offer premium versions with additional capabilities, but the free versions handle most student needs.
-          </p>
-          <p className={faqQuestion}>Can I use these tools for any citation style?</p>
-          <p className={p}>
-            Most citation generators support APA, MLA, Chicago, and Harvard. Some also support IEEE, Vancouver, and other styles. Check that your required style is available before relying on any tool.
-          </p>
-          <p className={faqQuestion}>Will my professor know I used these tools?</p>
-          <p className={p}>
-            Using grammar checkers and citation tools is generally accepted and expected. These are learning aids, not cheating. However, always follow your institution&apos;s specific guidelines.
-          </p>
-          <p className={faqQuestion}>How accurate are readability scores?</p>
-          <p className={p}>
-            Readability formulas are approximations based on word and sentence length. They&apos;re useful indicators but don&apos;t capture everything about readability. Use them as one data point among many.
-          </p>
-          <p className={faqQuestion}>Should I use all these tools for every paper?</p>
-          <p className={p}>
-            Not necessarily. Use what&apos;s relevant. A short response paper might only need a word counter and grammar check. A research paper might need citation tools as well. Match tools to tasks.
-          </p>
-
           <h2 className={h2}>Start improving your writing today</h2>
           <p className={p}>
             Good academic writing is a skill you develop over time, and the right tools accelerate that development. The free tools we&apos;ve covered: <a href="/tools/word-counter" onClick={handleNavigate('word-counter')} className={internalLink}>word counter</a>, <a href="/tools/citation-generator" onClick={handleNavigate('citation-generator-tool')} className={internalLink}>citation generator</a>, <a href="/tools/grammar-checker" onClick={handleNavigate('grammar-checker')} className={internalLink}>grammar checker</a>, <a href="/tools/readability-score" onClick={handleNavigate('readability-score')} className={internalLink}>readability calculator</a>, <a href="/tools/thesis-generator" onClick={handleNavigate('thesis-generator')} className={internalLink}>thesis generator</a>, <a href="/tools/essay-outline" onClick={handleNavigate('essay-outline')} className={internalLink}>essay outliner</a>, <a href="/tools/text-case-converter" onClick={handleNavigate('text-case-converter')} className={internalLink}>case converter</a>, and <a href="/tools/paraphrasing-tips" onClick={handleNavigate('paraphrasing-tips')} className={internalLink}>writing analyzer</a> address the most common challenges students face.
@@ -1487,6 +1528,36 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Try WriteScholar Free →
           </a>
+
+          <BlogFaqAccordion
+            items={[
+              {
+                question: 'Are these tools really free?',
+                answer:
+                  "Yes. The tools we've linked work directly in your browser with no payment required for basic features. Some tools offer premium versions with additional capabilities, but the free versions handle most student needs.",
+              },
+              {
+                question: 'Can I use these tools for any citation style?',
+                answer:
+                  'Most citation generators support APA, MLA, Chicago, and Harvard. Some also support IEEE, Vancouver, and other styles. Check that your required style is available before relying on any tool.',
+              },
+              {
+                question: 'Will my professor know I used these tools?',
+                answer:
+                  "Using grammar checkers and citation tools is generally accepted and expected. These are learning aids, not cheating. However, always follow your institution's specific guidelines.",
+              },
+              {
+                question: 'How accurate are readability scores?',
+                answer:
+                  "Readability formulas are approximations based on word and sentence length. They're useful indicators but don't capture everything about readability. Use them as one data point among many.",
+              },
+              {
+                question: 'Should I use all these tools for every paper?',
+                answer:
+                  "Not necessarily. Use what's relevant. A short response paper might only need a word counter and grammar check. A research paper might need citation tools as well. Match tools to tasks.",
+              },
+            ]}
+          />
         </>
       );
 
@@ -1639,28 +1710,6 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <ExpandedThesisStatement handleNavigate={handleNavigate} />
 
-          <h2 className={h2}>Frequently asked questions</h2>
-          <p className={faqQuestion}>How long should a thesis statement be?</p>
-          <p className={p}>
-            Most thesis statements are one to two sentences. In rare cases (like a dissertation), you might need a full paragraph. For typical academic essays, aim for one clear, complete sentence that captures your main argument.
-          </p>
-          <p className={faqQuestion}>Where does the thesis statement go?</p>
-          <p className={p}>
-            In most academic writing, the thesis appears at the end of your introduction. This placement gives readers context before you present your main claim.
-          </p>
-          <p className={faqQuestion}>Can my thesis change as I write?</p>
-          <p className={p}>
-            Absolutely. Many writers start with a working thesis that evolves as they develop their argument. Just make sure your final thesis matches what your paper actually argues.
-          </p>
-          <p className={faqQuestion}>What if I can&apos;t think of a thesis?</p>
-          <p className={p}>
-            Start writing anyway. Sometimes you discover your thesis through the process of writing. Freewrite about your topic, then look for the main point that emerges.
-          </p>
-          <p className={faqQuestion}>Should I use &quot;I believe&quot; or &quot;In my opinion&quot;?</p>
-          <p className={p}>
-            Generally no. Academic writing assumes the thesis is your position. Phrases like &quot;I believe&quot; can weaken your claim by making it sound like mere opinion rather than a reasoned argument.
-          </p>
-
           <h2 className={h2}>Ready to strengthen your thesis?</h2>
           <p className={p}>
             A strong thesis is the foundation of a strong paper. Once you&apos;ve drafted your thesis, WriteScholar can help you evaluate whether it&apos;s clear, specific, and well-supported by your body paragraphs. Our AI analyzes your entire paper structure, not just individual sentences, so you can see how your thesis connects to your argument as a whole.
@@ -1668,6 +1717,36 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Try WriteScholar Free →
           </a>
+
+          <BlogFaqAccordion
+            items={[
+              {
+                question: 'How long should a thesis statement be?',
+                answer:
+                  'Most thesis statements are one to two sentences. In rare cases (like a dissertation), you might need a full paragraph. For typical academic essays, aim for one clear, complete sentence that captures your main argument.',
+              },
+              {
+                question: 'Where does the thesis statement go?',
+                answer:
+                  'In most academic writing, the thesis appears at the end of your introduction. This placement gives readers context before you present your main claim.',
+              },
+              {
+                question: 'Can my thesis change as I write?',
+                answer:
+                  'Absolutely. Many writers start with a working thesis that evolves as they develop their argument. Just make sure your final thesis matches what your paper actually argues.',
+              },
+              {
+                question: "What if I can't think of a thesis?",
+                answer:
+                  'Start writing anyway. Sometimes you discover your thesis through the process of writing. Freewrite about your topic, then look for the main point that emerges.',
+              },
+              {
+                question: 'Should I use "I believe" or "In my opinion"?',
+                answer:
+                  'Generally no. Academic writing assumes the thesis is your position. Phrases like "I believe" can weaken your claim by making it sound like mere opinion rather than a reasoned argument.',
+              },
+            ]}
+          />
         </>
       );
 
@@ -1821,24 +1900,6 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <ExpandedApaResearchPaper handleNavigate={handleNavigate} />
 
-          <h2 className={h2}>Frequently asked questions</h2>
-          <p className={faqQuestion}>What font should I use for APA format?</p>
-          <p className={p}>
-            APA 7 allows several fonts: 12-point Times New Roman, 11-point Arial, 11-point Calibri, or 10-point Lucida Sans Unicode. Check with your instructor for their preference.
-          </p>
-          <p className={faqQuestion}>Do I need page numbers?</p>
-          <p className={p}>
-            Yes. Include page numbers in the top right corner of every page, including the title page. Use your word processor&apos;s header function.
-          </p>
-          <p className={faqQuestion}>How do I cite something I found in another source?</p>
-          <p className={p}>
-            This is called a secondary source. Cite it as: (Original Author, year, as cited in Secondary Author, year). Only the secondary source goes in your reference list. Try to find the original source when possible.
-          </p>
-          <p className={faqQuestion}>What if there&apos;s no author?</p>
-          <p className={p}>
-            Use the title in place of the author. For in-text citations, use a shortened title in quotation marks (for articles) or italics (for books/reports).
-          </p>
-
           <h2 className={h2}>Get your APA formatting checked automatically</h2>
           <p className={p}>
             Formatting an APA paper correctly takes time, and small errors are easy to miss. WriteScholar&apos;s <a href="/features" onClick={handleNavigate('features')} className={internalLink}>citation checking feature</a> automatically validates your APA formatting, catches inconsistencies between in-text citations and your reference list, and flags common errors so you can focus on your research rather than manual formatting. Check our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing plans</a> to see which option fits your needs.
@@ -1846,6 +1907,31 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Try WriteScholar Free →
           </a>
+
+          <BlogFaqAccordion
+            items={[
+              {
+                question: 'What font should I use for APA format?',
+                answer:
+                  'APA 7 allows several fonts: 12-point Times New Roman, 11-point Arial, 11-point Calibri, or 10-point Lucida Sans Unicode. Check with your instructor for their preference.',
+              },
+              {
+                question: 'Do I need page numbers?',
+                answer:
+                  "Yes. Include page numbers in the top right corner of every page, including the title page. Use your word processor's header function.",
+              },
+              {
+                question: 'How do I cite something I found in another source?',
+                answer:
+                  'This is called a secondary source. Cite it as: (Original Author, year, as cited in Secondary Author, year). Only the secondary source goes in your reference list. Try to find the original source when possible.',
+              },
+              {
+                question: "What if there's no author?",
+                answer:
+                  'Use the title in place of the author. For in-text citations, use a shortened title in quotation marks (for articles) or italics (for books/reports).',
+              },
+            ]}
+          />
         </>
       );
 
@@ -2004,28 +2090,6 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <ExpandedCitationChecker handleNavigate={handleNavigate} />
 
-          <h2 className={h2}>Frequently asked questions</h2>
-          <p className={faqQuestion}>Can I trust citation checkers completely?</p>
-          <p className={p}>
-            No tool is perfect. Citation checkers catch most errors but may miss edge cases or unusual source types. Use them as a first pass, then review key citations manually.
-          </p>
-          <p className={faqQuestion}>Are free citation checkers good enough?</p>
-          <p className={p}>
-            Free tools can help with basic checks, but they often have limitations: fewer styles supported, no cross-referencing between in-text citations and reference lists, or outdated rules. For important papers, a more robust tool is worth it.
-          </p>
-          <p className={faqQuestion}>How often are citation styles updated?</p>
-          <p className={p}>
-            Major style guides update every several years. APA 7 was released in 2019, MLA 9 in 2021, Chicago 17 in 2017. Check which edition your instructor requires.
-          </p>
-          <p className={faqQuestion}>Should I use a citation generator or a citation checker?</p>
-          <p className={p}>
-            They do different things. Generators help you create citations; checkers verify citations you&apos;ve already written. Ideally, use both: generate your initial references, then run them through a checker to catch errors the generator might have made.
-          </p>
-          <p className={faqQuestion}>What if my checker and my professor disagree?</p>
-          <p className={p}>
-            Your professor&apos;s requirements take priority. Some instructors have specific preferences that differ from standard style guides. When in doubt, ask.
-          </p>
-
           <h2 className={h2}>Stop losing points on citations</h2>
           <p className={p}>
             Citation errors are preventable. With WriteScholar, you can check your references against APA, MLA, Chicago, Harvard, IEEE, and Vancouver style guides in seconds. Our tool catches mismatches between your in-text citations and reference list, flags formatting inconsistencies, and explains what&apos;s wrong so you can fix it quickly. See our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing options</a> to find the right plan for your needs.
@@ -2033,6 +2097,36 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Try WriteScholar Free →
           </a>
+
+          <BlogFaqAccordion
+            items={[
+              {
+                question: 'Can I trust citation checkers completely?',
+                answer:
+                  'No tool is perfect. Citation checkers catch most errors but may miss edge cases or unusual source types. Use them as a first pass, then review key citations manually.',
+              },
+              {
+                question: 'Are free citation checkers good enough?',
+                answer:
+                  'Free tools can help with basic checks, but they often have limitations: fewer styles supported, no cross-referencing between in-text citations and reference lists, or outdated rules. For important papers, a more robust tool is worth it.',
+              },
+              {
+                question: 'How often are citation styles updated?',
+                answer:
+                  'Major style guides update every several years. APA 7 was released in 2019, MLA 9 in 2021, Chicago 17 in 2017. Check which edition your instructor requires.',
+              },
+              {
+                question: 'Should I use a citation generator or a citation checker?',
+                answer:
+                  "They do different things. Generators help you create citations; checkers verify citations you've already written. Ideally, use both: generate your initial references, then run them through a checker to catch errors the generator might have made.",
+              },
+              {
+                question: 'What if my checker and my professor disagree?',
+                answer:
+                  "Your professor's requirements take priority. Some instructors have specific preferences that differ from standard style guides. When in doubt, ask.",
+              },
+            ]}
+          />
         </>
       );
 
@@ -2194,28 +2288,6 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <ExpandedBestAcademicTools handleNavigate={handleNavigate} />
 
-          <h2 className={h2}>Frequently asked questions</h2>
-          <p className={faqQuestion}>Is using a grammar checker cheating?</p>
-          <p className={p}>
-            No. Grammar checkers are tools, like spell check or a dictionary. Using them to catch errors in your own writing is universally accepted. Just make sure you understand the corrections and aren&apos;t blindly accepting every suggestion.
-          </p>
-          <p className={faqQuestion}>Can my professor tell if I used AI?</p>
-          <p className={p}>
-            AI detection tools exist, but they&apos;re not perfect. More importantly, using AI for feedback on your own writing is different from submitting AI-generated text. The former is generally allowed; the latter is not.
-          </p>
-          <p className={faqQuestion}>Do I really need a paid tool?</p>
-          <p className={p}>
-            Free tools can help with basics, but they often have limitations: fewer features, outdated style rules, or document length restrictions. For important papers (especially theses or papers for publication), a more robust tool is worth the investment.
-          </p>
-          <p className={faqQuestion}>Which citation style should I use?</p>
-          <p className={p}>
-            Use whatever your instructor or discipline requires. APA is common in social sciences, MLA in humanities, Chicago in history. When in doubt, ask your professor.
-          </p>
-          <p className={faqQuestion}>Can these tools help with ESL writing?</p>
-          <p className={p}>
-            Yes. Many tools offer specific feedback for non-native English speakers, including suggestions for more natural phrasing and common mistake patterns. Look for tools that explicitly mention ESL support.
-          </p>
-
           <h2 className={h2}>Find the right tool for your writing</h2>
           <p className={p}>
             WriteScholar combines grammar and style feedback with citation checking and structure analysis, giving you one place to improve your academic writing from draft to submission. Our tool is built specifically for students and researchers, with support for APA, MLA, Chicago, Harvard, IEEE, and Vancouver citation styles. Check our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing plans</a> to see which option fits your needs, or explore our <a href="/features" onClick={handleNavigate('features')} className={internalLink}>full feature list</a>.
@@ -2223,6 +2295,36 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Try WriteScholar Free →
           </a>
+
+          <BlogFaqAccordion
+            items={[
+              {
+                question: 'Is using a grammar checker cheating?',
+                answer:
+                  "No. Grammar checkers are tools, like spell check or a dictionary. Using them to catch errors in your own writing is universally accepted. Just make sure you understand the corrections and aren't blindly accepting every suggestion.",
+              },
+              {
+                question: 'Can my professor tell if I used AI?',
+                answer:
+                  "AI detection tools exist, but they're not perfect. More importantly, using AI for feedback on your own writing is different from submitting AI-generated text. The former is generally allowed; the latter is not.",
+              },
+              {
+                question: 'Do I really need a paid tool?',
+                answer:
+                  'Free tools can help with basics, but they often have limitations: fewer features, outdated style rules, or document length restrictions. For important papers (especially theses or papers for publication), a more robust tool is worth the investment.',
+              },
+              {
+                question: 'Which citation style should I use?',
+                answer:
+                  'Use whatever your instructor or discipline requires. APA is common in social sciences, MLA in humanities, Chicago in history. When in doubt, ask your professor.',
+              },
+              {
+                question: 'Can these tools help with ESL writing?',
+                answer:
+                  'Yes. Many tools offer specific feedback for non-native English speakers, including suggestions for more natural phrasing and common mistake patterns. Look for tools that explicitly mention ESL support.',
+              },
+            ]}
+          />
         </>
       );
 
@@ -2372,28 +2474,6 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <ExpandedGrammarAcademic handleNavigate={handleNavigate} />
 
-          <h2 className={h2}>Frequently asked questions</h2>
-          <p className={faqQuestion}>Is using a grammar checker cheating?</p>
-          <p className={p}>
-            No. Grammar checkers are universally accepted as writing tools, like spell check or a thesaurus. They help you catch errors in your own writing. They don&apos;t write for you.
-          </p>
-          <p className={faqQuestion}>Should I accept every suggestion?</p>
-          <p className={p}>
-            Definitely not. Grammar checkers make mistakes, especially with academic writing conventions. Read each suggestion critically and skip ones that don&apos;t fit your context.
-          </p>
-          <p className={faqQuestion}>Can a grammar checker improve my writing long-term?</p>
-          <p className={p}>
-            Yes, if you pay attention to the explanations. When you see the same error flagged repeatedly, you start to internalize the rule. Over time, you&apos;ll make fewer of those mistakes.
-          </p>
-          <p className={faqQuestion}>What about discipline-specific conventions?</p>
-          <p className={p}>
-            No tool knows every discipline&apos;s conventions. If your field prefers passive voice or has specific terminology, you&apos;ll need to override some suggestions. The best tools let you customize or at least minimize false positives for academic writing.
-          </p>
-          <p className={faqQuestion}>Free vs. paid grammar checkers?</p>
-          <p className={p}>
-            Free tools catch basic errors but often lack academic-specific features, detailed explanations, and long document support. For serious academic work, paid tools usually offer better value. Check our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing page</a> to compare options.
-          </p>
-
           <h2 className={h2}>Get grammar feedback built for academic writing</h2>
           <p className={p}>
             WriteScholar is built specifically for academic writing. Our grammar checker understands formal tone, respects discipline conventions, and works seamlessly with long documents. Combined with structure analysis and citation checking, it gives you one place to polish your paper from draft to submission.
@@ -2401,6 +2481,43 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Try WriteScholar Free →
           </a>
+
+          <BlogFaqAccordion
+            items={[
+              {
+                question: 'Is using a grammar checker cheating?',
+                answer:
+                  "No. Grammar checkers are universally accepted as writing tools, like spell check or a thesaurus. They help you catch errors in your own writing. They don't write for you.",
+              },
+              {
+                question: 'Should I accept every suggestion?',
+                answer:
+                  "Definitely not. Grammar checkers make mistakes, especially with academic writing conventions. Read each suggestion critically and skip ones that don't fit your context.",
+              },
+              {
+                question: 'Can a grammar checker improve my writing long-term?',
+                answer:
+                  'Yes, if you pay attention to the explanations. When you see the same error flagged repeatedly, you start to internalize the rule. Over time, you\'ll make fewer of those mistakes.',
+              },
+              {
+                question: 'What about discipline-specific conventions?',
+                answer:
+                  "No tool knows every discipline's conventions. If your field prefers passive voice or has specific terminology, you'll need to override some suggestions. The best tools let you customize or at least minimize false positives for academic writing.",
+              },
+              {
+                question: 'Free vs. paid grammar checkers?',
+                answer: (
+                  <>
+                    Free tools catch basic errors but often lack academic-specific features, detailed explanations, and long document support. For serious academic work, paid tools usually offer better value. Check our{' '}
+                    <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>
+                      pricing page
+                    </a>{' '}
+                    to compare options.
+                  </>
+                ),
+              },
+            ]}
+          />
         </>
       );
 
@@ -2589,28 +2706,6 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <ExpandedMlaApaChicago handleNavigate={handleNavigate} />
 
-          <h2 className={h2}>Frequently asked questions</h2>
-          <p className={faqQuestion}>What if I&apos;m taking classes in different departments?</p>
-          <p className={p}>
-            You&apos;ll likely need to switch between styles. A literature class will use MLA while a psychology class uses APA. Don&apos;t try to use one style for everything. Each instructor expects their discipline&apos;s conventions.
-          </p>
-          <p className={faqQuestion}>Can I use citation generators?</p>
-          <p className={p}>
-            Yes, but always double-check the output. Generators sometimes make mistakes, especially with unusual source types. Use them as a starting point, then verify against the style manual.
-          </p>
-          <p className={faqQuestion}>What if a source doesn&apos;t fit the standard categories?</p>
-          <p className={p}>
-            All three style guides have rules for unusual sources: social media posts, interviews, unpublished materials, etc. Check the official manual or a comprehensive online guide for your style.
-          </p>
-          <p className={faqQuestion}>Does capitalization really matter?</p>
-          <p className={p}>
-            Yes. APA uses sentence case for titles (only first word capitalized). MLA and Chicago use title case (most words capitalized). Mixing these up is a common error that makes your citations look inconsistent.
-          </p>
-          <p className={faqQuestion}>What about page numbers for online sources?</p>
-          <p className={p}>
-            Many online sources don&apos;t have page numbers. APA allows paragraph numbers if available (para. 4). MLA allows no page number if none exists. Chicago Notes-Bibliography can omit page numbers for online sources. Check your specific style guide for guidance.
-          </p>
-
           <h2 className={h2}>Get your citations checked automatically</h2>
           <p className={p}>
             Memorizing every rule for multiple citation styles is impractical. WriteScholar checks your citations against APA, MLA, Chicago, Harvard, IEEE, and Vancouver style guides, catching formatting errors and inconsistencies before you submit. See our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing options</a> to find the right plan for your needs.
@@ -2618,6 +2713,36 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Try WriteScholar Free →
           </a>
+
+          <BlogFaqAccordion
+            items={[
+              {
+                question: "What if I'm taking classes in different departments?",
+                answer:
+                  "You'll likely need to switch between styles. A literature class will use MLA while a psychology class uses APA. Don't try to use one style for everything. Each instructor expects their discipline's conventions.",
+              },
+              {
+                question: 'Can I use citation generators?',
+                answer:
+                  'Yes, but always double-check the output. Generators sometimes make mistakes, especially with unusual source types. Use them as a starting point, then verify against the style manual.',
+              },
+              {
+                question: "What if a source doesn't fit the standard categories?",
+                answer:
+                  'All three style guides have rules for unusual sources: social media posts, interviews, unpublished materials, etc. Check the official manual or a comprehensive online guide for your style.',
+              },
+              {
+                question: 'Does capitalization really matter?',
+                answer:
+                  'Yes. APA uses sentence case for titles (only first word capitalized). MLA and Chicago use title case (most words capitalized). Mixing these up is a common error that makes your citations look inconsistent.',
+              },
+              {
+                question: 'What about page numbers for online sources?',
+                answer:
+                  "Many online sources don't have page numbers. APA allows paragraph numbers if available (para. 4). MLA allows no page number if none exists. Chicago Notes-Bibliography can omit page numbers for online sources. Check your specific style guide for guidance.",
+              },
+            ]}
+          />
         </>
       );
 
@@ -2771,28 +2896,6 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <ExpandedAiWritingAssistant handleNavigate={handleNavigate} />
 
-          <h2 className={h2}>Frequently asked questions</h2>
-          <p className={faqQuestion}>Can my professor tell if I used AI?</p>
-          <p className={p}>
-            AI detection tools exist, but they&apos;re not perfect. They can produce false positives and false negatives. The better question is whether your use is ethical. Using AI for feedback on your own writing is generally accepted; submitting AI-generated text is not.
-          </p>
-          <p className={faqQuestion}>Is using Grammarly or similar tools cheating?</p>
-          <p className={p}>
-            Grammar checkers are universally accepted as writing tools, like spell-check. They help you catch errors in your own writing. However, always check your institution&apos;s specific policies, as some exams or assignments may prohibit all external tools.
-          </p>
-          <p className={faqQuestion}>What if my institution bans all AI use?</p>
-          <p className={p}>
-            Follow your institution&apos;s policy. If AI tools are completely prohibited, don&apos;t use them, even for grammar checking. Ask your instructor for clarification if the policy is unclear.
-          </p>
-          <p className={faqQuestion}>Should I disclose that I used AI?</p>
-          <p className={p}>
-            Check your institution&apos;s guidelines. Some require disclosure; others don&apos;t for basic grammar/citation checking. When in doubt, disclose. Transparency is never wrong.
-          </p>
-          <p className={faqQuestion}>How do I know if a tool is feedback-oriented or generative?</p>
-          <p className={p}>
-            Ask: does this tool write for me, or does it help me write better? If it produces text you could submit, it&apos;s generative. If it gives feedback you have to implement yourself, it&apos;s feedback-oriented.
-          </p>
-
           <h2 className={h2}>Choose a feedback-focused writing assistant</h2>
           <p className={p}>
             WriteScholar is designed to give professor-style feedback on your writing while you stay in control. Our tool analyzes structure, argumentation, grammar, and citations, then you make the changes yourself. We don&apos;t generate text for you because that&apos;s not how you learn. Explore our <a href="/features" onClick={handleNavigate('features')} className={internalLink}>features</a> or check our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing plans</a> to find the right option for you.
@@ -2800,6 +2903,36 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Try WriteScholar Free →
           </a>
+
+          <BlogFaqAccordion
+            items={[
+              {
+                question: 'Can my professor tell if I used AI?',
+                answer:
+                  "AI detection tools exist, but they're not perfect. They can produce false positives and false negatives. The better question is whether your use is ethical. Using AI for feedback on your own writing is generally accepted; submitting AI-generated text is not.",
+              },
+              {
+                question: 'Is using Grammarly or similar tools cheating?',
+                answer:
+                  "Grammar checkers are universally accepted as writing tools, like spell-check. They help you catch errors in your own writing. However, always check your institution's specific policies, as some exams or assignments may prohibit all external tools.",
+              },
+              {
+                question: 'What if my institution bans all AI use?',
+                answer:
+                  "Follow your institution's policy. If AI tools are completely prohibited, don't use them, even for grammar checking. Ask your instructor for clarification if the policy is unclear.",
+              },
+              {
+                question: 'Should I disclose that I used AI?',
+                answer:
+                  "Check your institution's guidelines. Some require disclosure; others don't for basic grammar/citation checking. When in doubt, disclose. Transparency is never wrong.",
+              },
+              {
+                question: 'How do I know if a tool is feedback-oriented or generative?',
+                answer:
+                  "Ask: does this tool write for me, or does it help me write better? If it produces text you could submit, it's generative. If it gives feedback you have to implement yourself, it's feedback-oriented.",
+              },
+            ]}
+          />
         </>
       );
     default:
@@ -2807,17 +2940,4 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
   }
 };
 
-const BlogPostContentWrapper: React.FC<BlogPostContentProps> = (props) => {
-  const content = BlogPostContent(props);
-  
-  if (!content) return null;
-  
-  return (
-    <>
-      {content}
-      <NewsletterSubscription variant="blog" />
-    </>
-  );
-};
-
-export default BlogPostContentWrapper;
+export default BlogPostContent;
