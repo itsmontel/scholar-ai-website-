@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback } from 'react';
 import DOMPurify from 'dompurify';
 import { diffWordsWithSpace } from 'diff';
 import Header from '../common/Header';
@@ -29,6 +29,21 @@ import {
 } from '../../data/activationTutorialMock';
 import { persistTutorialToServer } from '../../utils/onboarding';
 import { POST_ACTIVATION_PAYWALL_PENDING_KEY } from '../../constants/paywallSession';
+
+/** Supabase/JSON occasionally returns analysis_results as a string — normalize for library reloads. */
+function normalizeSavedAnalysisResults(raw: unknown): Record<string, unknown> | null {
+  if (raw == null) return null;
+  if (typeof raw === 'string') {
+    try {
+      const parsed = JSON.parse(raw) as unknown;
+      return typeof parsed === 'object' && parsed !== null ? (parsed as Record<string, unknown>) : null;
+    } catch {
+      return null;
+    }
+  }
+  if (typeof raw === 'object') return raw as Record<string, unknown>;
+  return null;
+}
 
 /**
  * Normalize draft text before diffing so highlights match real edits, not CRLF/Unicode drift.
@@ -133,166 +148,55 @@ function textToHtmlWithItalics(text: string): string {
   return parts.join('');
 }
 
-function parseComprehensiveMarkdownSections(md: string): { title: string; body: string }[] {
-  const stripped = md.replace(/^#\s[^\n]+\n+/, '').trim();
-  if (!stripped) return [];
-  return stripped.split(/\n(?=##\s)/).map((block) => {
-    const lines = block.split('\n');
-    const head = lines[0]?.match(/^##\s+(.+)$/);
-    if (!head) return { title: '', body: block.trim() };
-    return { title: head[1].trim(), body: lines.slice(1).join('\n').trim() };
-  }).filter((s) => s.title);
-}
-
-function splitOverallAssessmentBody(body: string): { main: string; topSuggestionsBlock: string } {
-  const re = /\n###\s*Top Suggestions\b/i;
-  const idx = body.search(re);
-  if (idx === -1) return { main: body.trim(), topSuggestionsBlock: '' };
-  return {
-    main: body.slice(0, idx).trim(),
-    topSuggestionsBlock: body.slice(idx).trim(),
-  };
-}
-
-function splitCategoryBody(body: string): { mainAssessment: string; subsections: string } {
-  const parts = body.split(/\n(?=###\s)/);
-  return {
-    mainAssessment: (parts[0] ?? '').trim(),
-    subsections: parts.slice(1).join('\n\n').trim(),
-  };
-}
-
-function firstLineOf(text: string): { first: string; rest: string } {
-  const t = text.trim();
-  if (!t) return { first: '', rest: '' };
-  const br = t.indexOf('\n');
-  if (br === -1) return { first: t, rest: '' };
-  return { first: t.slice(0, br).trim(), rest: t.slice(br + 1).trim() };
-}
-
 function FreeAnalysisProBlur({
   children,
   onUpgrade,
   dense,
+  headline,
+  primaryLabel = 'Upgrade to Pro',
+  sublabel = 'Unlock full feedback on your paper — annotations, grade breakdown, and exports.',
+  upgradeDisabled,
 }: {
   children: React.ReactNode;
   onUpgrade: () => void;
   dense?: boolean;
+  headline?: string;
+  primaryLabel?: string;
+  sublabel?: string;
+  upgradeDisabled?: boolean;
 }) {
   return (
     <div
-      className={`relative rounded-xl overflow-hidden border border-violet-200/70 dark:border-violet-800/50 bg-stone-50/40 dark:bg-stone-800/40 ${
+      className={`relative rounded-xl overflow-hidden border border-violet-300/80 dark:border-violet-700/50 bg-gradient-to-br from-violet-50/50 to-stone-50/40 dark:from-violet-950/30 dark:to-stone-900/40 ${
         dense ? 'my-1' : 'my-2'
       }`}
     >
       <div className="pointer-events-none select-none blur-[6px] opacity-[0.42] px-4 py-3" aria-hidden>
         {children}
       </div>
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-gradient-to-b from-white/25 via-white/65 to-white/92 dark:from-stone-900/20 dark:via-stone-900/65 dark:to-stone-900/93 px-3">
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-gradient-to-b from-white/35 via-white/75 to-white/95 dark:from-stone-900/25 dark:via-stone-900/72 dark:to-stone-950/95 px-3 py-4">
+        {headline ? (
+          <p
+            className={`text-center font-semibold text-stone-800 dark:text-stone-100 leading-snug max-w-[18rem] ${
+              dense ? 'text-xs' : 'text-sm'
+            }`}
+          >
+            {headline}
+          </p>
+        ) : null}
         <button
           type="button"
           onClick={onUpgrade}
-          className="px-4 py-2 text-sm font-semibold bg-violet-600 hover:bg-violet-500 text-white rounded-lg shadow-md hover:bg-violet-700"
+          disabled={upgradeDisabled}
+          className="px-4 py-2.5 text-sm font-bold bg-violet-600 hover:bg-violet-500 disabled:opacity-60 disabled:cursor-wait text-white rounded-lg shadow-lg shadow-violet-600/30 hover:shadow-violet-500/40 transition-shadow"
         >
-          Unlock with Pro
+          {primaryLabel}
         </button>
-        <span className="text-[11px] text-violet-700/90 dark:text-violet-300/90 text-center max-w-[14rem]">
-          Full section on Pro
+        <span className="text-[11px] text-stone-600 dark:text-stone-300/95 text-center max-w-[17rem] leading-relaxed">
+          {sublabel}
         </span>
       </div>
     </div>
-  );
-}
-
-/** Free comprehensive report: show every numbered top suggestion (sidebar may still tease extras). */
-function renderFreeComprehensiveTopSuggestions(block: string): React.ReactNode {
-  const lines = block.split('\n').map((l) => l.trim()).filter(Boolean);
-  const items = lines.filter((l) => /^\d+\.\s/.test(l));
-  if (items.length === 0) return null;
-  return (
-    <ol className="list-decimal list-inside text-sm text-stone-700 dark:text-stone-300 space-y-1.5">
-      {items.map((line, i) => (
-        <li key={i}>{line.replace(/^\d+\.\s*/, '')}</li>
-      ))}
-    </ol>
-  );
-}
-
-function renderFreeTierComprehensiveReport(markdown: string, onUpgrade: () => void): React.ReactNode {
-  const sections = parseComprehensiveMarkdownSections(markdown);
-  if (sections.length === 0) {
-    return (
-      <FreeAnalysisProBlur onUpgrade={onUpgrade}>
-        <div
-          className="prose pviolet-sm dark:pviolet-invert max-w-none"
-          dangerouslySetInnerHTML={{ __html: sanitizeAnalysisHtml(simpleMarkdownToHtml(markdown)) }}
-        />
-      </FreeAnalysisProBlur>
-    );
-  }
-
-  return (
-    <>
-      {sections.map((sec, index) => {
-        const topRule = index > 0 ? 'border-t border-stone-200 dark:border-stone-600 pt-5 mt-1' : '';
-        const titleLower = sec.title.toLowerCase();
-        if (titleLower === 'overall assessment') {
-          const { main, topSuggestionsBlock } = splitOverallAssessmentBody(sec.body);
-          return (
-            <div key="overall-assessment" className={`space-y-4 ${topRule}`}>
-              <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100">Overall Assessment</h3>
-              {main ? (
-                <div
-                  className="prose pviolet-sm dark:pviolet-invert max-w-none"
-                  dangerouslySetInnerHTML={{ __html: sanitizeAnalysisHtml(simpleMarkdownToHtml(main)) }}
-                />
-              ) : null}
-              {topSuggestionsBlock ? (
-                <div>
-                  <h4 className="text-base font-semibold text-stone-800 dark:text-stone-200 mb-2">Top suggestions</h4>
-                  {renderFreeComprehensiveTopSuggestions(topSuggestionsBlock)}
-                </div>
-              ) : null}
-            </div>
-          );
-        }
-        if (/priority/i.test(sec.title) && /recommendation/i.test(sec.title)) {
-          return (
-            <div key={`priority-${sec.title}`} className={`space-y-2 ${topRule}`}>
-              <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100">{sec.title}</h3>
-              <FreeAnalysisProBlur onUpgrade={onUpgrade}>
-                <div
-                  className="prose pviolet-sm dark:pviolet-invert max-w-none"
-                  dangerouslySetInnerHTML={{ __html: sanitizeAnalysisHtml(simpleMarkdownToHtml(sec.body)) }}
-                />
-              </FreeAnalysisProBlur>
-            </div>
-          );
-        }
-        const { mainAssessment, subsections } = splitCategoryBody(sec.body);
-        const { first, rest } = firstLineOf(mainAssessment);
-        const blurredMd = [rest, subsections].filter(Boolean).join('\n\n').trim();
-        return (
-          <div key={sec.title} className={`space-y-2 ${topRule}`}>
-            <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100">{sec.title}</h3>
-            {first ? (
-              <div
-                className="prose pviolet-sm dark:pviolet-invert max-w-none"
-                dangerouslySetInnerHTML={{ __html: sanitizeAnalysisHtml(simpleMarkdownToHtml(first)) }}
-              />
-            ) : null}
-            {blurredMd ? (
-              <FreeAnalysisProBlur onUpgrade={onUpgrade}>
-                <div
-                  className="prose pviolet-sm dark:pviolet-invert max-w-none"
-                  dangerouslySetInnerHTML={{ __html: sanitizeAnalysisHtml(simpleMarkdownToHtml(blurredMd)) }}
-                />
-              </FreeAnalysisProBlur>
-            ) : null}
-          </div>
-        );
-      })}
-    </>
   );
 }
 
@@ -609,7 +513,13 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
   const [rubricInputMode, setRubricInputMode] = useState<'paste' | 'upload'>('paste');
   const [isParsingRubric, setIsParsingRubric] = useState(false);
   const [rubricAlignment, setRubricAlignment] = useState<any>(null);
-  const [isTrialEligible, setIsTrialEligible] = useState<boolean>(true);
+  /** One-time Stripe trial — from GET /subscriptions/trial-eligibility `trialEligible` */
+  const [canStartFreeTrial, setCanStartFreeTrial] = useState(false);
+  /** First-month $10-off style pricing — from `off10Eligible` (separate from trial) */
+  const [off10Eligible, setOff10Eligible] = useState(false);
+  /** True while creating Stripe Checkout session (Pro monthly) from analysis CTAs */
+  const [checkoutRedirecting, setCheckoutRedirecting] = useState(false);
+  const checkoutInFlightRef = useRef(false);
   const [lockedFeatures, setLockedFeatures] = useState<string[]>([]);
   const [gradeRubric, setGradeRubric] = useState<Record<string, { score: number; max_score: number; feedback: string }> | null>(null);
   const [specificRewrites, setSpecificRewrites] = useState<Array<{ original: string; rewritten: string; reason: string }> | null>(null);
@@ -671,6 +581,39 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
   const activationDualRevisionsDone = useMemo(() => {
     return activationConcernDone && activationImproveDone;
   }, [activationConcernDone, activationImproveDone]);
+
+  /** Free plan: show first ~50% of essay + matching annotations; full analysis still runs server-side. */
+  const isFreePreview = useMemo(
+    () => currentPlan === 'free' && !isActivationTutorial,
+    [currentPlan, isActivationTutorial]
+  );
+
+  const freePreviewCharCutoff = useMemo(() => {
+    if (!isFreePreview) return null;
+    const len = (documentContent || '').length;
+    if (len < 2) return null;
+    return Math.floor(len * 0.5);
+  }, [isFreePreview, documentContent]);
+
+  const annotationsForRender = useMemo((): Annotation[] => {
+    if (freePreviewCharCutoff == null) return annotations;
+    return annotations
+      .filter(
+        (a) =>
+          a.startIndex >= 0 &&
+          a.endIndex > a.startIndex &&
+          a.endIndex <= documentContent.length &&
+          a.startIndex < freePreviewCharCutoff
+      )
+      .map((a) => {
+        const end = Math.min(a.endIndex, freePreviewCharCutoff);
+        return {
+          ...a,
+          endIndex: end,
+          text: documentContent.slice(a.startIndex, end),
+        };
+      });
+  }, [annotations, freePreviewCharCutoff, documentContent]);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -771,24 +714,28 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
       setDocumentContent(textContent);
     }
 
-    // Check if we need to load an existing analysis
-    const viewAnalysisDocumentId = localStorage.getItem('viewAnalysisDocumentId');
-    const viewAnalysisType = localStorage.getItem('viewAnalysisType');
     const cameFromLibraryFlag = localStorage.getItem('cameFromLibrary');
-    
-    if (viewAnalysisDocumentId) {
-      console.log('Loading existing analysis for document:', viewAnalysisDocumentId, 'type:', viewAnalysisType);
-      loadExistingAnalysisSimple(viewAnalysisDocumentId, viewAnalysisType);
-      localStorage.removeItem('viewAnalysisDocumentId');
-      localStorage.removeItem('viewAnalysisType');
-    }
-    
-    // Check if user came from Library page
     if (cameFromLibraryFlag === 'true') {
       setCameFromLibrary(true);
       localStorage.removeItem('cameFromLibrary');
     }
 
+  }, []);
+
+  /** Library → Analysis: load after mount; cleanup avoids applying state from a stale async run (React Strict Mode). Keys clear only on success. */
+  useEffect(() => {
+    let cancelled = false;
+    const docId = localStorage.getItem('viewAnalysisDocumentId');
+    const analysisType = localStorage.getItem('viewAnalysisType');
+    if (!docId) return;
+
+    void (async () => {
+      await loadExistingAnalysisSimple(docId, analysisType, () => cancelled);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useLayoutEffect(() => {
@@ -940,14 +887,60 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
       });
       if (response.ok) {
         const data = await response.json();
-        setIsTrialEligible(data.off10Eligible ?? data.eligible ?? false);
+        setCanStartFreeTrial(data.trialEligible === true);
+        setOff10Eligible(data.off10Eligible === true || data.eligible === true);
       } else {
-        setIsTrialEligible(false);
+        setCanStartFreeTrial(false);
+        setOff10Eligible(false);
       }
     } catch {
-      setIsTrialEligible(false);
+      setCanStartFreeTrial(false);
+      setOff10Eligible(false);
     }
   };
+
+  /** Skip billing page — open Stripe Checkout for Pro monthly (same as pricing upgrade). */
+  const startProMonthlyCheckout = useCallback(async () => {
+    if (checkoutInFlightRef.current) return;
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      onNavigate?.('signup');
+      return;
+    }
+    checkoutInFlightRef.current = true;
+    setCheckoutRedirecting(true);
+    setError('');
+    try {
+      trackEvent('paywall_start_trial');
+      const base = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      const res = await fetch(`${base}/subscriptions/create-checkout-session`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          planType: 'pro',
+          billingCycle: 'monthly',
+          successUrl: `${window.location.origin}/dashboard?payment=success`,
+          cancelUrl: `${window.location.origin}/dashboard?payment=cancelled`,
+          trialPeriodDays: canStartFreeTrial ? 7 : 0,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to start checkout');
+      const url = data?.data?.checkoutUrl as string | undefined;
+      if (url) {
+        window.location.href = url;
+      } else {
+        throw new Error('No checkout URL returned');
+      }
+    } catch (e) {
+      checkoutInFlightRef.current = false;
+      setCheckoutRedirecting(false);
+      setError(e instanceof Error ? e.message : 'Could not open Stripe checkout');
+    }
+  }, [canStartFreeTrial, onNavigate]);
 
   const fetchAnalysisTypes = async () => {
     try {
@@ -1235,12 +1228,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
         throw new Error('Please log in to access documents');
       }
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/documents/${documentId}/content`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const { BulletproofAPI } = await import('../../config/api');
+      const response = await BulletproofAPI.get(`/documents/${documentId}/content`, token);
 
       if (!response.ok) {
         throw new Error('Failed to fetch document content');
@@ -1255,74 +1244,106 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
     }
   };
 
-  // Simple function to load existing analysis
-  const loadExistingAnalysisSimple = async (documentId: string, analysisType?: string | null) => {
+  /** Load saved analysis from library / deep link. `isCancelled` skips state updates (React Strict Mode remount). Clears localStorage keys only on success. */
+  const loadExistingAnalysisSimple = async (
+    documentId: string,
+    analysisType?: string | null,
+    isCancelled?: () => boolean
+  ) => {
+    const clearLibraryNavKeys = () => {
+      try {
+        localStorage.removeItem('viewAnalysisDocumentId');
+        localStorage.removeItem('viewAnalysisType');
+      } catch {
+        /* ignore */
+      }
+    };
+
     try {
       console.log('=== LOADING EXISTING ANALYSIS ===');
       console.log('Document ID:', documentId);
-      setSelectedDocument(documentId);
-      
+      if (!isCancelled?.()) {
+        setSelectedDocument(documentId);
+      }
+
       const token = localStorage.getItem('authToken');
       if (!token) {
-        setError('Please log in to access analyses');
+        if (!isCancelled?.()) setError('Please log in to access analyses');
         return;
       }
 
-      // Get document content
       const content = await fetchDocumentContent(documentId);
+      if (isCancelled?.()) return;
+
       console.log('Document content loaded, length:', content.length);
       setDocumentContent(content);
       setPreviewContent(content);
       setOriginalDraftBaseline(null);
 
-      // Get analysis data
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/document/${documentId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const { BulletproofAPI } = await import('../../config/api');
+      const response = await BulletproofAPI.get(`/analysis/document/${documentId}`, token);
 
       if (!response.ok) {
-        throw new Error('Failed to fetch analysis');
+        throw new Error(response.status === 404 ? 'No saved analysis for this document' : 'Failed to fetch analysis');
       }
 
       const data = await response.json();
+      if (isCancelled?.()) return;
       console.log('Analysis response:', data);
 
-      // Handle the new structured response from backend
-      let analysis = null;
-      if (data.data) {
-        if (data.data.all && data.data.all.length > 0) {
-          // New structured format - select the appropriate analysis type
-          if (analysisType === 'citation' && data.data.citation) {
-            analysis = data.data.citation;
+      let analysis: {
+        analysis_type?: string;
+        analysis_results?: unknown;
+      } | null = null;
+
+      const payload = data.data as {
+        all?: Array<{ analysis_type?: string; analysis_results?: unknown }>;
+        comprehensive?: { analysis_type?: string; analysis_results?: unknown };
+        citation?: { analysis_type?: string; analysis_results?: unknown };
+      } | null
+        | undefined;
+
+      if (payload && !Array.isArray(payload)) {
+        const all = Array.isArray(payload.all) ? payload.all : [];
+        const hasRow = !!payload.comprehensive || !!payload.citation || all.length > 0;
+        if (hasRow) {
+          if (analysisType === 'citation' && payload.citation) {
+            analysis = payload.citation;
             console.log('Loading citation analysis:', analysis);
-          } else if (analysisType === 'comprehensive' && data.data.comprehensive) {
-            analysis = data.data.comprehensive;
+          } else if (analysisType === 'comprehensive') {
+            analysis =
+              payload.comprehensive ||
+              all.find(
+                (a) => a?.analysis_type === 'comprehensive' || a?.analysis_type === 'general'
+              ) ||
+              all[0] ||
+              null;
             console.log('Loading comprehensive analysis:', analysis);
           } else {
-            // Default to the most recent analysis if no specific type requested
-            analysis = data.data.comprehensive || data.data.citation || data.data.all[0];
+            analysis = (payload.comprehensive || payload.citation || all[0]) ?? null;
             console.log('Loading default analysis:', analysis);
           }
-        } else if (Array.isArray(data.data) && data.data.length > 0) {
-          // Legacy format - array of analyses
-          analysis = data.data[0];
-          console.log('Loading legacy format analysis:', analysis);
         }
+      } else if (Array.isArray(data.data) && data.data.length > 0) {
+        analysis = data.data[0];
+        console.log('Loading legacy format analysis:', analysis);
       }
 
       if (analysis) {
-        const analysisResults = analysis.analysis_results;
-        
+        const analysisResultsRaw = normalizeSavedAnalysisResults(analysis.analysis_results);
+        const analysisResults = analysisResultsRaw as Record<string, any> | null;
+
         console.log('Found analysis:', analysis);
         console.log('Analysis results:', analysisResults);
         console.log('Analysis results keys:', Object.keys(analysisResults || {}));
-        
+
         if (analysisResults) {
-          // Set the analysis result
-          setAnalysisResult(analysisResults.result || '');
+          if (isCancelled?.()) return;
+
+          const resultText = analysisResults.result;
+          setAnalysisResult(
+            typeof resultText === 'string' ? resultText : resultText != null ? String(resultText) : ''
+          );
 
           // Compare-with-first-draft: baseline must be text at analysis time (persisted as original_content), not current doc
           const savedOriginal =
@@ -1454,26 +1475,33 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
           
           // Set locked features based on current user plan (free users see upgrade prompts)
           const plan = await fetchUserPlan();
+          if (isCancelled?.()) return;
+
           const isPaid = plan === 'pro' || plan === 'premium';
           setLockedFeatures(
             !isPaid
               ? ['full_annotations', 'grade_rubric', 'specific_rewrites', 'export', 'history']
               : []
           );
-          
+
+          clearLibraryNavKeys();
+          setError('');
+
           console.log('=== ANALYSIS LOADED SUCCESSFULLY ===');
           console.log('Final annotations count:', annotationsToUse.length);
         } else {
           console.log('No analysis results found in the data');
-          setError('Analysis results not found');
+          if (!isCancelled?.()) setError('Analysis results not found');
         }
       } else {
         console.log('No analysis found for document');
-        setError('No analysis found for this document');
+        if (!isCancelled?.()) setError('No analysis found for this document');
       }
     } catch (error) {
       console.error('Error loading analysis:', error);
-      setError('Failed to load analysis: ' + (error instanceof Error ? error.message : String(error)));
+      if (!isCancelled?.()) {
+        setError('Failed to load analysis: ' + (error instanceof Error ? error.message : String(error)));
+      }
     }
   };
 
@@ -1680,6 +1708,11 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
     } catch {
       /* ignore */
     }
+    try {
+      localStorage.removeItem('textAnalysisContent');
+    } catch {
+      /* ignore */
+    }
     setActivationCoachStep('off');
     setIsActivationTutorial(false);
     setActivationConcernRevisionApplied(false);
@@ -1694,18 +1727,12 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
       sessionStorage.removeItem('writescholar_show_interactive_tutorial');
       await persistTutorialToServer();
       trackEvent('tutorial_complete');
-      trackEvent('paywall_view', { trigger: 'activation_tutorial' });
     } catch {
       /* ignore */
     } finally {
       onUserUpdate?.({ welcomeTutorialCompleted: true });
     }
-    try {
-      sessionStorage.setItem(POST_ACTIVATION_PAYWALL_PENDING_KEY, '1');
-    } catch {
-      /* ignore */
-    }
-    setShowPostActivationPaywall(true);
+    onNavigate?.('dashboard');
   };
 
   const handleActivationCoachContinue = () => {
@@ -2552,12 +2579,12 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
     }
   };
 
-  // Helper function to filter annotations by type (no truncation; backend limits count for free users)
   const getFilteredAnnotations = (type?: string) => {
+    const source = annotationsForRender;
     if (type) {
-      return annotations.filter(a => a.type === type);
+      return source.filter((a) => a.type === type);
     }
-    return annotations;
+    return source;
   };
 
   /** Plain text between annotations: purple revision takes priority over default styling. */
@@ -2591,57 +2618,86 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
 
     const displayContent = getDisplayContent();
 
-    console.log('Rendering text with annotations:', annotations.length);
+    console.log('Rendering text with annotations:', annotationsForRender.length);
     console.log('Document content length:', documentContent.length);
 
-    // Always split content into paragraphs first to preserve formatting
-    const paragraphs = displayContent.split(/\n\s*\n/).filter(p => p.trim().length > 0);
-    
-    if (annotations.length === 0) {
-      // Render content with proper paragraph spacing
+    const paragraphs = displayContent.split(/\n\s*\n/).filter((p) => p.trim().length > 0);
+    let searchFrom = 0;
+    const paragraphStarts = paragraphs.map((paragraph) => {
+      const idx = displayContent.indexOf(paragraph, searchFrom);
+      const start = idx >= 0 ? idx : searchFrom;
+      searchFrom = start + paragraph.length;
+      return start;
+    });
+
+    const freePreviewBlurFooter =
+      isFreePreview && freePreviewCharCutoff != null && freePreviewCharCutoff < displayContent.length ? (
+        <div className="relative mt-6 overflow-hidden rounded-2xl border-2 border-violet-200/90 dark:border-violet-700/50 shadow-md shadow-violet-500/10">
+          {/* Blurred “rest of essay” — clipped here only, not the CTA */}
+          <div className="pointer-events-none select-none overflow-hidden rounded-t-2xl" aria-hidden>
+            <div className="blur-md opacity-50 px-4 py-3 text-sm text-stone-600 leading-relaxed max-h-[140px] overflow-hidden">
+              {displayContent.slice(freePreviewCharCutoff)}
+            </div>
+          </div>
+          {/* CTA: in normal flow so nothing is clipped; gradient covers blur seam */}
+          <div className="relative z-10 flex flex-col items-center gap-2.5 bg-gradient-to-b from-white/90 via-white to-white dark:from-stone-900/90 dark:via-stone-900 dark:to-stone-950 px-4 pt-4 pb-6 text-center sm:px-5">
+            <p className="text-sm font-bold text-stone-900 dark:text-stone-50 max-w-[20rem] leading-snug shrink-0">
+              The rest of your grade is hiding here
+            </p>
+            <p className="text-xs text-stone-600 dark:text-stone-400 max-w-[21rem] leading-relaxed">
+              {canStartFreeTrial
+                ? 'Get the full essay breakdown—line by line—so you can improve your grade and get the best out of every paragraph. Eligible for one free trial.'
+                : 'Upgrade to Pro to unlock the rest of your essay, every annotation, and the full written analysis.'}
+            </p>
+            <button
+              type="button"
+              onClick={startProMonthlyCheckout}
+              disabled={checkoutRedirecting}
+              className="mt-0.5 w-full max-w-sm px-5 py-2.5 text-sm font-bold bg-violet-600 hover:bg-violet-500 disabled:opacity-60 disabled:cursor-wait text-white rounded-xl shadow-lg shadow-violet-600/35 transition-colors"
+            >
+              {checkoutRedirecting ? 'Opening checkout…' : canStartFreeTrial ? 'Perfect your paper — start 7-day free trial' : 'Upgrade to Pro — unlock full paper'}
+            </button>
+            <p className="text-[11px] text-stone-500 dark:text-stone-500 max-w-[20rem] leading-relaxed">
+              {canStartFreeTrial
+                ? 'No charge during trial · Cancel anytime · One free trial per account'
+                : 'Pro unlocks full feedback — subscribe to continue'}
+            </p>
+          </div>
+        </div>
+      ) : null;
+
+    if (annotationsForRender.length === 0) {
       return (
         <div className="text-gray-700 leading-relaxed">
           {paragraphs.map((paragraph, index) => {
-            const paragraphStart = displayContent.indexOf(paragraph);
+            const paragraphStart = paragraphStarts[index] ?? 0;
+            const paragraphEnd = paragraphStart + paragraph.length;
+            if (isFreePreview && freePreviewCharCutoff != null && paragraphStart >= freePreviewCharCutoff) {
+              return null;
+            }
+            const visibleParagraph =
+              isFreePreview && freePreviewCharCutoff != null
+                ? displayContent.slice(paragraphStart, Math.min(paragraphEnd, freePreviewCharCutoff))
+                : paragraph;
+            if (!visibleParagraph.trim()) return null;
             return (
               <p key={index} className="mb-4 text-justify">
-                {renderParagraphChunkWithRevision(paragraph, paragraphStart, `no-anno-p-${index}`)}
+                {renderParagraphChunkWithRevision(visibleParagraph, paragraphStart, `no-anno-p-${index}`)}
               </p>
             );
           })}
-          {currentPlan === 'free' && (
-            <div className="mt-8 p-6 bg-gradient-to-r from-violet-50 to-violet-50 border border-violet-200 rounded-lg">
-              <div className="flex items-center space-x-3 mb-3">
-                <div className="p-2 bg-gradient-to-br from-violet-500 to-violet-600 rounded-full">
-                  <svg className="w-5 h-5 text-stone-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v2m0-2h2m-2 0H9m12-9V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-9z" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-stone-900">Want to see the full document?</h3>
-                  <p className="text-sm text-stone-600">Upgrade to view the complete analysis with all annotations.</p>
-                </div>
-              </div>
-              <button
-                onClick={() => onNavigate?.('billing')}
-                className="px-6 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-lg transition-colors font-semibold shadow-lg shadow-violet-500/25"
-              >
-                Upgrade Now
-              </button>
-            </div>
-          )}
+          {freePreviewBlurFooter}
         </div>
       );
     }
 
-    // Sort annotations by start index and filter based on user plan
-    const sortedAnnotations = [...annotations]
-      .filter(annotation => {
-        // Basic validation
-        const isValid = annotation.startIndex >= 0 && 
-                       annotation.endIndex > annotation.startIndex && 
-                       annotation.endIndex <= documentContent.length;
-        
+    const sortedAnnotations = [...annotationsForRender]
+      .filter((annotation) => {
+        const isValid =
+          annotation.startIndex >= 0 &&
+          annotation.endIndex > annotation.startIndex &&
+          annotation.endIndex <= documentContent.length;
+
         if (!isValid) {
           console.warn('Invalid annotation filtered out during rendering:', annotation);
           return false;
@@ -2653,44 +2709,45 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
 
     console.log('Valid annotations for rendering:', sortedAnnotations.length);
 
-    // Render each paragraph separately to preserve spacing
     return (
       <div className="text-stone-700 leading-relaxed">
         {paragraphs.map((paragraph, paragraphIndex) => {
-          const paragraphStart = displayContent.indexOf(paragraph);
+          const paragraphStart = paragraphStarts[paragraphIndex] ?? 0;
           const paragraphEnd = paragraphStart + paragraph.length;
+          if (isFreePreview && freePreviewCharCutoff != null && paragraphStart >= freePreviewCharCutoff) {
+            return null;
+          }
+          const paragraphText =
+            isFreePreview && freePreviewCharCutoff != null
+              ? displayContent.slice(paragraphStart, Math.min(paragraphEnd, freePreviewCharCutoff))
+              : paragraph;
+          if (!paragraphText.length) return null;
+          const effectiveParagraphEnd = paragraphStart + paragraphText.length;
           
-          // Find annotations that overlap with this paragraph (including multi-paragraph annotations)
-          const paragraphAnnotations = sortedAnnotations.filter(annotation => {
-            // Annotation overlaps if it starts before paragraph ends AND ends after paragraph starts
-            return annotation.startIndex < paragraphEnd && annotation.endIndex > paragraphStart;
+          const paragraphAnnotations = sortedAnnotations.filter((annotation) => {
+            return annotation.startIndex < effectiveParagraphEnd && annotation.endIndex > paragraphStart;
           });
-          
+
           if (paragraphAnnotations.length === 0) {
-            // No annotations in this paragraph, render normally with italics
             return (
               <p key={paragraphIndex} className="mb-4 text-justify">
-                {renderParagraphChunkWithRevision(paragraph, paragraphStart, `p-${paragraphIndex}`)}
+                {renderParagraphChunkWithRevision(paragraphText, paragraphStart, `p-${paragraphIndex}`)}
               </p>
             );
           }
-          
-          // Render paragraph with annotations
+
           const parts = [];
           let lastIndex = 0;
-          
+
           paragraphAnnotations.forEach((annotation) => {
-            // Calculate the portion of the annotation that overlaps with this paragraph
             const annotationStart = Math.max(annotation.startIndex, paragraphStart);
-            const annotationEnd = Math.min(annotation.endIndex, paragraphEnd);
-            
-            // Adjust annotation indices relative to paragraph start
+            const annotationEnd = Math.min(annotation.endIndex, effectiveParagraphEnd);
+
             const relativeStart = Math.max(0, annotationStart - paragraphStart);
-            const relativeEnd = Math.min(paragraph.length, annotationEnd - paragraphStart);
-            
-            // Add text before this annotation
+            const relativeEnd = Math.min(paragraphText.length, annotationEnd - paragraphStart);
+
             if (relativeStart > lastIndex) {
-              const textBefore = paragraph.slice(lastIndex, relativeStart);
+              const textBefore = paragraphText.slice(lastIndex, relativeStart);
               if (textBefore.length > 0) {
                 parts.push(
                   <span key={`text-${paragraphIndex}-${lastIndex}`} className="text-stone-700">
@@ -2704,8 +2761,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
               }
             }
 
-            // Extract the portion of text that falls within this paragraph
-            const actualText = paragraph.slice(relativeStart, relativeEnd);
+            const actualText = paragraphText.slice(relativeStart, relativeEnd);
             console.log(`Annotation ${annotation.id} (${annotation.type}): "${actualText.substring(0, 50)}..." (${relativeStart}-${relativeEnd} in paragraph ${paragraphIndex})`);
 
             const highlightClasses = {
@@ -2727,7 +2783,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                 onMouseLeave={() => setHoveredAnnotation(null)}
                 onClick={() => scrollAnnotationPanelToCard(annotation.id)}
                 title={
-                  lockedFeatures.includes('full_annotations')
+                  lockedFeatures.includes('full_annotations') && !isFreePreview
                     ? annotation.type === 'strong'
                       ? 'Upgrade to Pro to see why this sentence works and what makes it effective'
                       : 'Upgrade to Pro for concrete feedback on how to improve this sentence'
@@ -2759,9 +2815,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
             lastIndex = relativeEnd;
           });
 
-          // Add remaining text after the last annotation in this paragraph
-          if (lastIndex < paragraph.length) {
-            const remainingText = paragraph.slice(lastIndex);
+          if (lastIndex < paragraphText.length) {
+            const remainingText = paragraphText.slice(lastIndex);
             if (remainingText.length > 0) {
               parts.push(
                 <span key={`text-${paragraphIndex}-${lastIndex}`} className="text-gray-700">
@@ -2781,6 +2836,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
             </p>
           );
         })}
+        {freePreviewBlurFooter}
       </div>
     );
   };
@@ -2967,10 +3023,11 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                 </div>
               </div>
               <button
-                onClick={() => onNavigate?.('billing')}
-                className="flex-shrink-0 px-5 py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-xl transition-colors shadow-md"
+                onClick={startProMonthlyCheckout}
+                disabled={checkoutRedirecting}
+                className="flex-shrink-0 px-5 py-2.5 bg-violet-600 hover:bg-violet-700 disabled:opacity-60 disabled:cursor-wait text-white font-semibold rounded-xl transition-colors shadow-md"
               >
-                Upgrade for more
+                {checkoutRedirecting ? 'Opening checkout…' : 'Upgrade for more'}
               </button>
             </div>
           </div>
@@ -3445,12 +3502,12 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                         <button 
                           onClick={() => onNavigate?.('pricing')}
                           className="px-4 py-2 bg-amber-500/20 hover:bg-amber-500/30 rounded-lg transition-colors flex items-center space-x-2 text-sm font-medium text-amber-200"
-                          title="Upgrade to export"
+                          title="Export your full report — PDF or Word (Pro)"
                         >
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                           </svg>
-                          <span>Upgrade to export</span>
+                          <span>Export full report — Pro</span>
                         </button>
                       )}
                     </>
@@ -3482,8 +3539,14 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                 <div className="flex flex-wrap items-center gap-6">
                   <div>
                     <h2 className="text-xl font-bold">General Academic Assessment</h2>
-                    <p className="text-emerald-100 text-sm mt-0.5">
-                      Standard college rubric: thesis, evidence, structure, and clarity
+                    <p className="text-emerald-100 text-sm mt-0.5 max-w-xl">
+                      {isFreePreview ? (
+                        <>
+                          Real scores above — you&apos;re seeing how professors grade you. Unlock the rest of your paper and the full write-up to squeeze out every point before you submit.
+                        </>
+                      ) : (
+                        <>Standard college rubric: thesis, evidence, structure, and clarity</>
+                      )}
                     </p>
                   </div>
                   {(analysisSummary.overall_score != null || analysisSummary.grade_estimate) && (
@@ -3505,7 +3568,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                 </div>
               </div>
               <div className="p-6">
-                {gradeRubric && Object.keys(gradeRubric).length > 0 && !lockedFeatures.includes('grade_rubric') ? (
+                {gradeRubric && Object.keys(gradeRubric).length > 0 &&
+                (!lockedFeatures.includes('grade_rubric') || isFreePreview) ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {Object.entries(gradeRubric).map(([key, val]) => (
                       <div key={key} className="p-4 rounded-xl bg-stone-50 dark:bg-stone-700/50 border border-stone-200 dark:border-stone-600">
@@ -3517,7 +3581,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                       </div>
                     ))}
                   </div>
-                ) : lockedFeatures.includes('grade_rubric') ? (
+                ) : lockedFeatures.includes('grade_rubric') && !isFreePreview ? (
                   <div className="space-y-4">
                     <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
                       Your essay is graded on six college-style categories (thesis, evidence, analysis, structure, and writing quality). Upgrade to see{' '}
@@ -3563,12 +3627,13 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                     <div className="flex flex-wrap items-center gap-3 pt-1">
                       <button
                         type="button"
-                        onClick={() => onNavigate?.('billing')}
-                        className="px-4 py-2 text-sm bg-violet-600 hover:bg-violet-700 text-white rounded-lg font-semibold transition-colors"
+                        onClick={startProMonthlyCheckout}
+                        disabled={checkoutRedirecting}
+                        className="px-4 py-2 text-sm bg-violet-600 hover:bg-violet-700 disabled:opacity-60 disabled:cursor-wait text-white rounded-lg font-semibold transition-colors"
                       >
-                        Unlock full rubric
+                        {checkoutRedirecting ? 'Opening checkout…' : 'Unlock full rubric'}
                       </button>
-                      {isTrialEligible ? (
+                      {off10Eligible ? (
                         <span className="text-sm text-violet-700 dark:text-violet-300">
                           <span className="line-through">$19.99</span>{' '}
                           <span className="font-bold text-emerald-600">$9.99</span>/mo
@@ -3603,7 +3668,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                     <div className="w-3 h-3 bg-red-400 rounded-full"></div>
                     <span className="text-gray-600">Needs revision</span>
                   </div>
-                  {revisedDraftRanges.length > 0 && (
+                  {revisedDraftRanges.length > 0 && !isFreePreview && (
                     <div className="flex items-center space-x-2">
                       <div className="w-3 h-3 bg-violet-400 rounded-full ring-2 ring-violet-500/45 shadow-sm" />
                       <span className="text-gray-600">WriteScholar revisions</span>
@@ -3628,7 +3693,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                     </svg>
                     {essayCopyFeedback ? 'Copied' : 'Copy full text'}
                   </button>
-                  {originalDraftBaseline && analysisResult && (
+                  {originalDraftBaseline && analysisResult && currentPlan !== 'free' && (
                     <button
                       type="button"
                       onClick={() => setShowCompareOriginalModal(true)}
@@ -3660,8 +3725,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
               >
                 <div className="p-5 md:p-6">
                   <div className="space-y-6">
-                    {/* Annotations — show full list only for paid users */}
-                    {!lockedFeatures.includes('full_annotations') && (
+                    {/* Annotations — paid users, or free 50% preview (real cards in first half of paper) */}
+                    {(!lockedFeatures.includes('full_annotations') || isFreePreview) && (
                     <>
                     <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-center">
                       <svg className="w-5 h-5 mr-2 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -3669,7 +3734,19 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                       </svg>
                       Annotations
                     </h3>
-                    {writeScholarUndo && revisionNoticeMeta && (
+                    {isFreePreview && (
+                      <div className="mb-4 rounded-xl border border-violet-200/80 bg-violet-50/80 dark:bg-violet-950/25 dark:border-violet-800/50 px-3 py-2.5">
+                        <p className="text-xs font-semibold text-stone-800 dark:text-stone-100 leading-snug">
+                          You&apos;re seeing real feedback on the first half of your draft
+                        </p>
+                        <p className="text-[11px] text-stone-600 dark:text-stone-400 mt-1.5 leading-relaxed">
+                          {canStartFreeTrial
+                            ? 'Unlock Pro to catch every weak spot in the back half—same professor-level notes, rewrites, and grade-boosting fixes. Eligible accounts: one 7-day free trial.'
+                            : 'Upgrade to Pro to unlock the rest of your essay—full annotations, rewrites, and grade-boosting fixes on the whole draft.'}
+                        </p>
+                      </div>
+                    )}
+                    {writeScholarUndo && revisionNoticeMeta && !isFreePreview && (
                       <div className="rounded-xl border-2 border-dashed border-violet-400/75 bg-violet-50/95 dark:bg-violet-950/35 p-4 mb-5 space-y-3">
                         <div className="flex items-start gap-3">
                           <div
@@ -3730,9 +3807,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                         </div>
                       </div>
                     )}
-                    {(!lockedFeatures.includes('full_annotations')) && (
+                    {(!lockedFeatures.includes('full_annotations') || isFreePreview) && (
                       <p className="text-[11px] text-stone-500 dark:text-stone-400 mb-5 leading-snug">
-                        {lockedFeatures.includes('apply_revisions') ? (
+                        {lockedFeatures.includes('apply_revisions') && !isFreePreview ? (
                           <>
                             Upgrade to <span className="font-semibold text-stone-600 dark:text-stone-300">Pro</span> to use{' '}
                             <span className="font-semibold text-stone-600 dark:text-stone-300">Apply WriteScholar revision</span>{' '}
@@ -3857,7 +3934,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                                   {applyingRevisionId === annotation.id ? 'Generating revision…' : 'Apply WriteScholar revision'}
                                 </button>
                               ))}
-                            {lockedFeatures.includes('apply_revisions') && !annotation.isCoverageOnly && (
+                            {lockedFeatures.includes('apply_revisions') && !isFreePreview && !annotation.isCoverageOnly && (
                               <button
                                 type="button"
                                 onClick={(e) => {
@@ -3952,7 +4029,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                                   {applyingRevisionId === annotation.id ? 'Generating revision…' : 'Apply WriteScholar revision'}
                                 </button>
                               ))}
-                            {lockedFeatures.includes('apply_revisions') && !annotation.isCoverageOnly && (
+                            {lockedFeatures.includes('apply_revisions') && !isFreePreview && !annotation.isCoverageOnly && (
                               <button
                                 type="button"
                                 onClick={(e) => {
@@ -3972,8 +4049,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                     </>
                     )}
 
-                    {/* Free: annotation sidebar preview (structure visible; real comments on Pro) */}
-                    {lockedFeatures.includes('full_annotations') && (
+                    {/* Free: fake sidebar only when we are not showing the real 50% preview */}
+                    {lockedFeatures.includes('full_annotations') && !isFreePreview && (
                       <div className="space-y-5">
                         <div>
                           <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1 flex items-center">
@@ -4021,13 +4098,14 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                         <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-1">
                           <button
                             type="button"
-                            onClick={() => onNavigate?.('billing')}
-                            className="px-5 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-semibold transition-all shadow-lg shadow-violet-500/25 text-sm"
+                            onClick={startProMonthlyCheckout}
+                            disabled={checkoutRedirecting}
+                            className="px-5 py-2.5 bg-violet-600 hover:bg-violet-700 disabled:opacity-60 disabled:cursor-wait text-white rounded-xl font-semibold transition-all shadow-lg shadow-violet-500/25 text-sm"
                           >
-                            Unlock full annotations
+                            {checkoutRedirecting ? 'Opening checkout…' : 'Unlock full annotations'}
                           </button>
                           <div className="text-sm text-violet-700 dark:text-violet-300">
-                            {isTrialEligible ? (
+                            {off10Eligible ? (
                               <>
                                 <span className="line-through text-violet-500">$19.99</span>{' '}
                                 <span className="font-bold text-emerald-600 dark:text-emerald-400">$9.99</span>/mo
@@ -4057,7 +4135,24 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                                   <li>{analysisSummary.top_suggestions[0]}</li>
                                 </ul>
                                 {analysisSummary.top_suggestions.length > 1 && (
-                                  <FreeAnalysisProBlur onUpgrade={() => onNavigate?.('billing')} dense>
+                                  <FreeAnalysisProBlur
+                                    dense
+                                    onUpgrade={startProMonthlyCheckout}
+                                    upgradeDisabled={checkoutRedirecting}
+                                    headline="Don't leave easy points on the table"
+                                    primaryLabel={
+                                      checkoutRedirecting
+                                        ? 'Opening checkout…'
+                                        : canStartFreeTrial
+                                          ? 'See every fix — start 7-day free trial'
+                                          : 'Upgrade to Pro — see every fix'
+                                    }
+                                    sublabel={
+                                      canStartFreeTrial
+                                        ? 'Full list + the rest of your analysis. One free trial per account; cancel anytime.'
+                                        : 'Upgrade to Pro for the full list and the rest of your analysis.'
+                                    }
+                                  >
                                     <ul className="list-disc list-inside text-sm text-stone-600 dark:text-stone-400 space-y-0.5">
                                       {analysisSummary.top_suggestions.slice(1).map((s, i) => (
                                         <li key={i}>{s}</li>
@@ -4078,8 +4173,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                       </div>
                     )}
 
-                    {/* Specific rewrites: show content or locked card */}
-                    {specificRewrites && specificRewrites.length > 0 && (
+                    {/* Specific rewrites — Pro only (not shown on free 50% preview) */}
+                    {currentPlan !== 'free' && specificRewrites && specificRewrites.length > 0 && (
                       <div className="mt-6 p-4 bg-white dark:bg-stone-800 rounded-xl border border-stone-200 dark:border-stone-600">
                         <h4 className="font-semibold text-stone-800 dark:text-stone-200 mb-3">Rewrite Suggestions</h4>
                         <div className="space-y-3">
@@ -4093,7 +4188,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                         </div>
                       </div>
                     )}
-                    {lockedFeatures.includes('specific_rewrites') && (!specificRewrites || specificRewrites.length === 0) && (
+                    {currentPlan !== 'free' &&
+                      lockedFeatures.includes('specific_rewrites') &&
+                      (!specificRewrites || specificRewrites.length === 0) && (
                       <div className="mt-6 p-5 bg-violet-50 dark:from-violet-900/20 dark:to-violet-900/20 border-2 border-violet-200 dark:border-violet-600/40 rounded-2xl">
                         <div className="flex items-start gap-4">
                           <div className="flex-shrink-0 w-10 h-10 bg-violet-600 hover:bg-violet-500 rounded-xl flex items-center justify-center">
@@ -4105,8 +4202,15 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                             <h4 className="font-bold text-violet-800 dark:text-violet-200">Unlock rewrite suggestions with Pro</h4>
                             <p className="text-sm text-violet-700 dark:text-violet-300 mt-0.5">Get 3-5 specific sentence rewrites that improve your grade</p>
                             <div className="mt-3 flex flex-wrap items-center gap-2">
-                              <button onClick={() => onNavigate?.('billing')} className="px-4 py-2 text-sm bg-violet-600 hover:bg-violet-700 text-white rounded-lg font-medium transition-colors">Upgrade</button>
-                              {isTrialEligible ? (
+                              <button
+                                type="button"
+                                onClick={startProMonthlyCheckout}
+                                disabled={checkoutRedirecting}
+                                className="px-4 py-2 text-sm bg-violet-600 hover:bg-violet-700 disabled:opacity-60 disabled:cursor-wait text-white rounded-lg font-medium transition-colors"
+                              >
+                                {checkoutRedirecting ? 'Opening checkout…' : 'Upgrade'}
+                              </button>
+                              {off10Eligible ? (
                                 <span className="text-sm text-violet-700 dark:text-violet-300"><span className="line-through">$19.99</span> <span className="font-bold text-emerald-600">$9.99</span>/mo</span>
                               ) : (
                                 <span className="text-sm text-violet-600">$19.99/mo</span>
@@ -4122,21 +4226,46 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
             </div>
             </div>
 
-            {/* Full Analysis Result - Comprehensive Academic Analysis */}
+            {/* Full Analysis Result — free users see grade/rubric above; this narrative stays fully gated */}
             {analysisResult && (
               <div className="mx-6 mt-8 mb-6 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-600 overflow-hidden">
                 <div className="bg-violet-600 hover:bg-violet-500 text-white px-6 py-4">
                   <h2 className="text-xl font-bold">Comprehensive Academic Analysis</h2>
                   <p className="text-violet-100 text-sm mt-0.5">
                     {currentPlan === 'free'
-                      ? 'Preview — overall picture free; depth, strengths & concerns on Pro'
+                      ? canStartFreeTrial
+                        ? 'The full roadmap to a stronger grade — eligible accounts get one 7-day free trial'
+                        : 'Unlock the full written analysis on Pro'
                       : 'Full analysis report'}
                   </p>
                 </div>
                 <div className="p-6 prose pviolet-stone dark:pviolet-invert max-w-none">
                   {currentPlan === 'free' && !isActivationTutorial ? (
                     <div className="text-sm leading-relaxed">
-                      {renderFreeTierComprehensiveReport(analysisResult, () => onNavigate?.('billing'))}
+                      <FreeAnalysisProBlur
+                        onUpgrade={startProMonthlyCheckout}
+                        upgradeDisabled={checkoutRedirecting}
+                        headline="This is where papers go from 'okay' to submission-ready"
+                        primaryLabel={
+                          checkoutRedirecting
+                            ? 'Opening checkout…'
+                            : canStartFreeTrial
+                              ? 'Read the full analysis — start 7-day free trial'
+                              : 'Upgrade to Pro — read the full analysis'
+                        }
+                        sublabel={
+                          canStartFreeTrial
+                            ? 'Deep dive on strengths, risks, and what to fix. One free trial per account; cancel anytime.'
+                            : 'Upgrade to Pro for the full deep dive—strengths, risks, and what to fix before you submit.'
+                        }
+                      >
+                        <div
+                          className="prose pviolet-sm dark:pviolet-invert max-w-none"
+                          dangerouslySetInnerHTML={{
+                            __html: sanitizeAnalysisHtml(simpleMarkdownToHtml(analysisResult)),
+                          }}
+                        />
+                      </FreeAnalysisProBlur>
                     </div>
                   ) : (
                     <div
@@ -4177,12 +4306,19 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                 ) : (
                   <div className="flex flex-wrap items-center gap-3">
                     <button 
-                      onClick={() => onNavigate?.('billing')}
-                      className="px-5 py-2.5 text-sm font-semibold text-white bg-violet-600 hover:bg-violet-500 rounded-lg hover:bg-violet-700 transition-colors"
+                      type="button"
+                      onClick={startProMonthlyCheckout}
+                      disabled={checkoutRedirecting}
+                      className="px-5 py-2.5 text-sm font-bold text-white bg-violet-600 hover:bg-violet-500 rounded-lg hover:bg-violet-700 disabled:opacity-60 disabled:cursor-wait transition-colors shadow-md shadow-violet-600/25"
+                      title="Download your full marked-up report — PDF or Word"
                     >
-                      Upgrade to export
+                      {checkoutRedirecting
+                        ? 'Opening checkout…'
+                        : canStartFreeTrial
+                          ? 'Export full report — start free trial'
+                          : 'Export full report — upgrade to Pro'}
                     </button>
-                    {isTrialEligible ? (
+                    {off10Eligible ? (
                       <span className="text-sm text-stone-600">
                         <span className="line-through">$19.99</span> <span className="font-bold text-emerald-600">$9.99</span>/mo
                       </span>
@@ -4285,18 +4421,30 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                           </svg>
                         </div>
                         <div>
-                          <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100">Want to see the full assignment rubric analysis?</h3>
-                          <p className="text-sm text-stone-600 dark:text-stone-400">Upgrade to view the complete breakdown against your rubric: evidence quotes, suggestions, missing elements, and priority improvements.</p>
+                          <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100">
+                            Don&apos;t guess what your professor wants — see the full rubric map
+                          </h3>
+                          <p className="text-sm text-stone-600 dark:text-stone-400">
+                            {canStartFreeTrial
+                              ? 'Missing quotes, weak criteria, and priority fixes—unlocked on Pro. Improve your grade with the complete breakdown; eligible accounts get one 7-day free trial.'
+                              : 'Missing quotes, weak criteria, and priority fixes—upgrade to Pro for the complete rubric breakdown.'}
+                          </p>
                         </div>
                       </div>
                       <button
-                        onClick={() => onNavigate?.('billing')}
-                        className="px-6 py-2.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-semibold transition-all shadow-lg shadow-violet-500/25 hover:shadow-violet-500/30"
+                        type="button"
+                        onClick={startProMonthlyCheckout}
+                        disabled={checkoutRedirecting}
+                        className="px-6 py-2.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-60 disabled:cursor-wait text-white rounded-xl font-bold transition-all shadow-lg shadow-violet-500/25 hover:shadow-violet-500/30"
                       >
-                        Upgrade to View Full Analysis
+                        {checkoutRedirecting
+                          ? 'Opening checkout…'
+                          : canStartFreeTrial
+                            ? 'See the full rubric analysis — start 7-day free trial'
+                            : 'Upgrade to Pro — full rubric analysis'}
                       </button>
                       <p className="text-xs text-stone-500 dark:text-stone-500 mt-2">
-                        {isTrialEligible ? (
+                        {off10Eligible ? (
                           <>Starting at <span className="line-through">$19.99</span> <span className="font-semibold text-emerald-600 dark:text-emerald-400">$9.99</span>/month · First month $10 off · Cancel anytime</>
                         ) : (
                           <>Starting at $19.99/month · Cancel anytime</>
@@ -4447,7 +4595,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                 concern: 'Serious concern'
               };
               
-              const isLimitedTooltip = lockedFeatures.includes('full_annotations');
+              const isLimitedTooltip = lockedFeatures.includes('full_annotations') && !isFreePreview;
               
               return (
                 <div className={`relative rounded-lg px-3 py-2 shadow-xl mb-2 ${
@@ -4579,6 +4727,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
         <SoftPaywall
           hard
           variant="postTutorial"
+          canStartFreeTrial={canStartFreeTrial}
           userName={
             user?.firstName?.trim() ||
             (user?.name?.trim() && !user.name.includes('@') ? user.name.trim().split(/\s+/)[0] ?? '' : '') ||

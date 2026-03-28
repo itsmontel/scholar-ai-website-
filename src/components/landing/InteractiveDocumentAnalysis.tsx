@@ -18,6 +18,22 @@ const REVISION_GUIDANCE_COPY: Record<'improve' | 'concern', string> = {
   concern: 'Purple text in the essay replaces the flagged sentence—stronger argument or clearer wording in context.',
 };
 
+/** Landing hero: below Tailwind `lg` (1024px), automated tour stays off — static preview only. */
+const LANDING_HERO_MOBILE_MQ = '(max-width: 1023px)';
+
+function useLandingHeroMobileLayout(): boolean {
+  const [matches, setMatches] = useState(() =>
+    typeof window !== 'undefined' ? window.matchMedia(LANDING_HERO_MOBILE_MQ).matches : false
+  );
+  useEffect(() => {
+    const mq = window.matchMedia(LANDING_HERO_MOBILE_MQ);
+    const fn = () => setMatches(mq.matches);
+    mq.addEventListener('change', fn);
+    return () => mq.removeEventListener('change', fn);
+  }, []);
+  return matches;
+}
+
 interface LandingDemoDisplay {
   displayContent: string;
   paragraphRanges: { start: number; end: number; text: string }[];
@@ -245,6 +261,7 @@ interface InteractiveDocumentAnalysisProps {
 }
 
 export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmbed = false }: InteractiveDocumentAnalysisProps) {
+  const isLandingMobile = useLandingHeroMobileLayout();
   const [selectedDemoId, setSelectedDemoId] = useState<string>(DEMO_PAPERS.find((p) => p.id === 'b')?.id ?? DEMO_PAPERS[0].id);
   const [selectedAnnotation, setSelectedAnnotation] = useState<string | null>(null);
   const [hoveredAnnotation, setHoveredAnnotation] = useState<string | null>(null);
@@ -255,7 +272,8 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
   /** Landing demo: inline “Apply WriteScholar revision” replacements */
   const [appliedDemoRevisions, setAppliedDemoRevisions] = useState<Set<string>>(() => new Set());
   const [demoRevisionNotice, setDemoRevisionNotice] = useState<{ comment: string; type: 'improve' | 'concern' } | null>(null);
-  const [walkthroughPlaying, setWalkthroughPlaying] = useState(true);
+  /** Landing hero: tour is opt-in only (Play tour) — never auto-starts on desktop or mobile. */
+  const [walkthroughPlaying, setWalkthroughPlaying] = useState(false);
   const [fakeCursor, setFakeCursor] = useState<{ x: number; y: number; visible: boolean }>({ x: 0, y: 0, visible: false });
   const [walkthroughPulse, setWalkthroughPulse] = useState<string | null>(null);
   /** Dashboard hero: pause the automated tour when scrolled off-screen or tab is hidden */
@@ -366,9 +384,18 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
     };
   }, [landingHeroEmbed]);
 
+  /** Mobile landing: no automated tour — keep preview static (user explores tabs manually). */
   useEffect(() => {
-    if (!landingHeroEmbed || !walkthroughPlaying || !heroDemoInView || !docTabVisible) {
+    if (!landingHeroEmbed || !isLandingMobile) return;
+    setWalkthroughPlaying(false);
+    setWalkthroughPulse(null);
+    setFakeCursor((c) => ({ ...c, visible: false }));
+  }, [landingHeroEmbed, isLandingMobile]);
+
+  useEffect(() => {
+    if (!landingHeroEmbed || !walkthroughPlaying || !heroDemoInView || !docTabVisible || isLandingMobile) {
       setFakeCursor((c) => ({ ...c, visible: false }));
+      if (isLandingMobile) setWalkthroughPulse(null);
       return;
     }
     const reduce = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -460,6 +487,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
     positionFakeCursorOnEl,
     afterLayout,
     selectedDemoId,
+    isLandingMobile,
   ]);
 
   /** Hero “Full interactive demo” CTA: open Feedback tab and select first annotation (document order). */
@@ -765,11 +793,23 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
         {landingHeroEmbed && (
           <div className="mb-3 pb-3 border-b border-violet-500/20 space-y-2">
             <p className="text-[11px] sm:text-xs text-violet-200/95 leading-snug">
-              <span className="font-semibold text-violet-50">Interactive preview</span>
-              <span className="text-violet-500/80 mx-1.5">·</span>
-              Highlights, sidebar, and <span className="text-violet-100/95">Apply revision</span> — tour or explore.
+              {isLandingMobile ? (
+                <>
+                  <span className="font-semibold text-violet-50">Static preview</span>
+                  <span className="text-violet-500/80 mx-1.5">·</span>
+                  Use the tabs below to explore highlights and{' '}
+                  <span className="text-violet-100/95">Apply revision</span>. On desktop, press Play tour for a guided walkthrough.
+                </>
+              ) : (
+                <>
+                  <span className="font-semibold text-violet-50">Interactive preview</span>
+                  <span className="text-violet-500/80 mx-1.5">·</span>
+                  Highlights, sidebar, and <span className="text-violet-100/95">Apply revision</span> — press{' '}
+                  <span className="text-violet-100/95">Play tour</span> for a guided walkthrough, or explore freely.
+                </>
+              )}
             </p>
-            <div className="flex flex-wrap items-center gap-2">
+            <div className={`flex flex-wrap items-center gap-2 ${isLandingMobile ? 'hidden' : ''}`}>
               <button
                 type="button"
                 onClick={() => setWalkthroughPlaying((p) => !p)}
@@ -797,7 +837,6 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
                   clearDemoRevisions();
                   setMobileTab('document');
                   setWalkthroughPlaying(false);
-                  window.setTimeout(() => setWalkthroughPlaying(true), 80);
                 }}
                 className="rounded-lg border border-violet-500/30 px-2.5 py-1.5 text-[11px] font-medium text-violet-300/95 hover:bg-violet-900/35 transition-colors"
               >

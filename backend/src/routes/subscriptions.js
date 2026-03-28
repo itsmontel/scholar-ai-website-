@@ -67,7 +67,7 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
         ? Number(trialPeriodDays)
         : 0;
 
-    // Optional promo (e.g. OFF10) can be combined with trial — discount applies after trial on first invoice
+    // Optional promo (e.g. OFF10). When omitted, eligible users get auto-OFF10 alongside trial (first paid month).
     const sessionResult = await subscriptionService.createCheckoutSession(
       customerId,
       planType,

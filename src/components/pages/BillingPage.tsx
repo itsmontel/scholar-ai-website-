@@ -204,7 +204,8 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
             planType: planId,
             billingCycle: billingCycle,
             successUrl: `${window.location.origin}/billing?success=true`,
-            cancelUrl: `${window.location.origin}/dashboard?payment=cancelled`
+            cancelUrl: `${window.location.origin}/dashboard?payment=cancelled`,
+            trialPeriodDays: 7,
           })
         });
 

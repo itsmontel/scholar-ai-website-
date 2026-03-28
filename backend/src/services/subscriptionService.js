@@ -601,8 +601,10 @@ const createStripeCustomer = async (email, name) => {
 };
 
 // Create checkout session
-// options.trialPeriodDays: e.g. 7 — free trial before billing. Can be combined with promoCode:
-// a one-time coupon (e.g. OFF10) applies to the first paid invoice after the trial ends.
+// options.trialPeriodDays: e.g. 7 — free trial before billing.
+// When eligible, OFF10 is applied together with trial: Stripe shows both; the $10 off applies to the
+// first paid invoice after the trial (configure the coupon in Stripe for “once” / first invoice if needed).
+// Explicit promoCode in the request overrides auto OFF10.
 const createCheckoutSession = async (
   customerId,
   planType,

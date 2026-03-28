@@ -8,6 +8,7 @@ import Header from '../common/Header';
 import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
 import AnalysisAnimation from '../common/AnalysisAnimation';
+import LoadingSpinner from '../common/LoadingSpinner';
 import ScholarMascot from '../common/ScholarMascot';
 import StreakWidget from '../common/StreakWidget';
 import BadgeWidget from '../common/BadgeWidget';
@@ -91,6 +92,16 @@ const getDisplayNameForGreeting = (u: { name?: string; firstName?: string; lastN
   if (u.lastName?.trim()) return u.lastName.trim().split(' ')[0] || '';
   return '';
 };
+
+/** Plan limits for dashboard “analyze” file upload — same as Upload page */
+const getMaxAnalyzeFileSizeBytes = (plan: string) => {
+  const p = (plan || 'free').toLowerCase();
+  if (p === 'pro' || p === 'premium' || p === 'focus') return 100 * 1024 * 1024;
+  return 2 * 1024 * 1024;
+};
+
+const getMaxAnalyzeFileSizeLabel = (plan: string) =>
+  getMaxAnalyzeFileSizeBytes(plan) >= 100 * 1024 * 1024 ? '100MB' : '2MB';
 
 const relativeTime = (date: Date): string => {
   const now = new Date();
@@ -281,9 +292,10 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
   const studyToolsFileInputRef = useRef<HTMLInputElement>(null);
   const [isParsingStudyDoc, setIsParsingStudyDoc] = useState(false);
 
-  // Inline analyze: parse file into essay textarea (same API as study pack)
+  // Inline analyze: upload file to library then open Analysis (document preview) — same as Upload page
   const analyzeFileInputRef = useRef<HTMLInputElement>(null);
   const [isParsingAnalyzeDoc, setIsParsingAnalyzeDoc] = useState(false);
+  const [analyzeUploadProgress, setAnalyzeUploadProgress] = useState(0);
   const [analyzeDropActive, setAnalyzeDropActive] = useState(false);
   const [analyzeUploadError, setAnalyzeUploadError] = useState('');
 
@@ -1117,30 +1129,86 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
   };
 
   const processAnalyzeFileForEssay = async (file: File) => {
+    const allowedTypes = [
+      'application/pdf',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/msword',
+      'text/plain',
+    ];
+    if (!allowedTypes.includes(file.type)) {
+      setAnalyzeUploadError('Please upload a PDF, DOCX, DOC, or TXT file.');
+      return;
+    }
+
+    const userPlan = (user?.plan || 'free').toString().toLowerCase();
+    const maxBytes = getMaxAnalyzeFileSizeBytes(userPlan);
+    if (file.size > maxBytes) {
+      setAnalyzeUploadError(`File size must be under ${getMaxAnalyzeFileSizeLabel(userPlan)} for your plan.`);
+      return;
+    }
+
     const token = localStorage.getItem('authToken');
     if (!token) {
       onNavigate?.('signup');
       return;
     }
+
     setIsParsingAnalyzeDoc(true);
+    setAnalyzeUploadProgress(0);
     setAnalyzeUploadError('');
+
+    let progressInterval: ReturnType<typeof setInterval> | null = null;
+    let navigated = false;
+
     try {
+      progressInterval = setInterval(() => {
+        setAnalyzeUploadProgress((prev) => {
+          if (prev >= 90) return 90;
+          return prev + 10;
+        });
+      }, 200);
+
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
       const formData = new FormData();
-      formData.append('file', file);
-      const res = await fetch(`${apiUrl}/analysis/parse-document`, {
+      formData.append('document', file);
+      formData.append('title', file.name.replace(/\.[^/.]+$/, '').trim() || 'Untitled document');
+
+      const res = await fetch(`${apiUrl}/documents/upload`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Failed to parse document');
-      setInputText(data.data.content || '');
-      setShowWordWarning(false);
-    } catch (err: any) {
-      setAnalyzeUploadError(err.message || 'Failed to parse document');
+      if (!res.ok) throw new Error(data.message || 'Upload failed');
+
+      const doc = data.data?.document;
+      if (!doc?.id) throw new Error('Invalid upload response');
+
+      if (progressInterval) {
+        clearInterval(progressInterval);
+        progressInterval = null;
+      }
+      setAnalyzeUploadProgress(100);
+
+      try {
+        localStorage.setItem('selectedDocumentId', doc.id);
+        localStorage.setItem('selectedDocumentTitle', doc.title || file.name);
+        localStorage.removeItem('selectedDocumentContent');
+      } catch {
+        /* ignore */
+      }
+
+      navigated = true;
+      onNavigate('analysis');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Upload failed';
+      setAnalyzeUploadError(msg);
     } finally {
-      setIsParsingAnalyzeDoc(false);
+      if (progressInterval) clearInterval(progressInterval);
+      if (!navigated) {
+        setIsParsingAnalyzeDoc(false);
+        setAnalyzeUploadProgress(0);
+      }
     }
   };
 
@@ -2235,60 +2303,75 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                             </div>
                           </div>
 
-                          <div
-                            role="button"
-                            tabIndex={0}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter' || e.key === ' ') {
-                                e.preventDefault();
-                                if (!isParsingAnalyzeDoc) analyzeFileInputRef.current?.click();
-                              }
-                            }}
-                            onClick={() => { if (!isParsingAnalyzeDoc) analyzeFileInputRef.current?.click(); }}
-                            onDragEnter={handleAnalyzeDropZoneDrag}
-                            onDragLeave={handleAnalyzeDropZoneDrag}
-                            onDragOver={handleAnalyzeDropZoneDrag}
-                            onDrop={handleAnalyzeDropZoneDrop}
-                            data-tutorial="essay-upload"
-                            className={`group/dz rounded-2xl border-2 border-dashed p-6 sm:p-8 text-center transition-all duration-300 select-none ${
-                              isParsingAnalyzeDoc
-                                ? 'border-stone-200 dark:border-stone-600 bg-stone-50/50 dark:bg-stone-800/30 opacity-70 cursor-wait'
-                                : analyzeDropActive
-                                  ? 'border-violet-500 bg-violet-100/90 dark:bg-violet-950/45 shadow-lg shadow-violet-500/15 ring-2 ring-violet-400/40 cursor-pointer'
-                                  : 'border-violet-300/80 dark:border-violet-600/55 bg-violet-50/90 dark:bg-violet-950/25 hover:border-violet-400 dark:hover:border-violet-500 hover:bg-violet-50 dark:hover:bg-violet-950/35 hover:shadow-md hover:shadow-violet-500/10 cursor-pointer'
-                            }`}
-                            aria-label="Drop a document to load into the essay box, or click to browse"
-                          >
-                            <div className="flex flex-col sm:flex-row items-center justify-center gap-5 sm:gap-7">
-                              <div
-                                className={`flex h-16 w-16 sm:h-[4.5rem] sm:w-[4.5rem] shrink-0 items-center justify-center rounded-2xl shadow-inner transition-transform duration-300 group-hover/dz:scale-105 bg-violet-600 text-white shadow-lg shadow-violet-600/35 ${
-                                  analyzeDropActive ? 'ring-2 ring-violet-300/80 dark:ring-violet-500/50' : ''
-                                }`}
-                                aria-hidden
-                              >
-                                <svg className="w-8 h-8 sm:w-9 sm:h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                </svg>
-                              </div>
-                              <div className="text-left sm:text-left min-w-0 max-w-md">
-                                <p className="text-lg sm:text-xl font-bold tracking-tight text-violet-800 dark:text-violet-200">
-                                  Drop your document here
-                                </p>
-                                <p className="text-sm sm:text-[0.9375rem] text-stone-600 dark:text-stone-300 mt-2 leading-relaxed">
-                                  Or click to browse: <span className="font-semibold text-violet-700 dark:text-violet-400">PDF</span>,{' '}
-                                  <span className="font-semibold text-emerald-700 dark:text-emerald-400">Word</span>, or{' '}
-                                  <span className="font-semibold text-violet-700 dark:text-violet-400">TXT</span>. We&apos;ll load the text into the box above (same as Upload file).
-                                </p>
+                          <div className="relative min-h-[200px] sm:min-h-[220px]">
+                            <div
+                              role="button"
+                              tabIndex={0}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  if (!isParsingAnalyzeDoc) analyzeFileInputRef.current?.click();
+                                }
+                              }}
+                              onClick={() => { if (!isParsingAnalyzeDoc) analyzeFileInputRef.current?.click(); }}
+                              onDragEnter={handleAnalyzeDropZoneDrag}
+                              onDragLeave={handleAnalyzeDropZoneDrag}
+                              onDragOver={handleAnalyzeDropZoneDrag}
+                              onDrop={handleAnalyzeDropZoneDrop}
+                              data-tutorial="essay-upload"
+                              className={`group/dz rounded-2xl border-2 border-dashed p-6 sm:p-8 text-center transition-all duration-300 select-none ${
+                                isParsingAnalyzeDoc
+                                  ? 'border-stone-200 dark:border-stone-600 bg-stone-50/50 dark:bg-stone-800/30 opacity-70 cursor-wait'
+                                  : analyzeDropActive
+                                    ? 'border-violet-500 bg-violet-100/90 dark:bg-violet-950/45 shadow-lg shadow-violet-500/15 ring-2 ring-violet-400/40 cursor-pointer'
+                                    : 'border-violet-300/80 dark:border-violet-600/55 bg-violet-50/90 dark:bg-violet-950/25 hover:border-violet-400 dark:hover:border-violet-500 hover:bg-violet-50 dark:hover:bg-violet-950/35 hover:shadow-md hover:shadow-violet-500/10 cursor-pointer'
+                              }`}
+                              aria-label="Drop a document to open it on the analysis page with preview, or click to browse"
+                            >
+                              <div className="flex flex-col sm:flex-row items-center justify-center gap-5 sm:gap-7">
+                                <div
+                                  className={`flex h-16 w-16 sm:h-[4.5rem] sm:w-[4.5rem] shrink-0 items-center justify-center rounded-2xl shadow-inner transition-transform duration-300 group-hover/dz:scale-105 bg-violet-600 text-white shadow-lg shadow-violet-600/35 ${
+                                    analyzeDropActive ? 'ring-2 ring-violet-300/80 dark:ring-violet-500/50' : ''
+                                  }`}
+                                  aria-hidden
+                                >
+                                  <svg className="w-8 h-8 sm:w-9 sm:h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                  </svg>
+                                </div>
+                                <div className="text-left sm:text-left min-w-0 max-w-md">
+                                  <p className="text-lg sm:text-xl font-bold tracking-tight text-violet-800 dark:text-violet-200">
+                                    Drop your document here
+                                  </p>
+                                  <p className="text-sm sm:text-[0.9375rem] text-stone-600 dark:text-stone-300 mt-2 leading-relaxed">
+                                    Or click to browse: <span className="font-semibold text-violet-700 dark:text-violet-400">PDF</span>,{' '}
+                                    <span className="font-semibold text-emerald-700 dark:text-emerald-400">Word</span>, or{' '}
+                                    <span className="font-semibold text-violet-700 dark:text-violet-400">TXT</span>. We&apos;ll upload it and open{' '}
+                                    <span className="font-semibold text-stone-800 dark:text-stone-100">analysis</span> with your document preview—no need to paste in the box.
+                                  </p>
+                                </div>
                               </div>
                             </div>
-                          </div>
 
-                          {isParsingAnalyzeDoc && (
-                            <div className="absolute inset-0 rounded-2xl bg-white/90 dark:bg-stone-900/90 backdrop-blur-sm flex items-center justify-center gap-3 z-30 pointer-events-auto" aria-live="polite" aria-busy="true">
-                              <span className="w-8 h-8 border-2 border-violet-600 border-t-transparent rounded-full animate-spin" />
-                              <span className="font-semibold text-stone-700 dark:text-stone-200">Uploading...</span>
-                            </div>
-                          )}
+                            {isParsingAnalyzeDoc && (
+                              <div
+                                className="absolute inset-0 rounded-2xl bg-white/95 dark:bg-stone-900/95 backdrop-blur-sm flex flex-col items-center justify-center gap-3 sm:gap-4 z-10 pointer-events-auto px-4 py-6 sm:px-6 sm:py-8"
+                                aria-live="polite"
+                                aria-busy="true"
+                              >
+                                <LoadingSpinner size="lg" text={`Uploading… ${analyzeUploadProgress}%`} color="blue" />
+                                <div className="w-full max-w-xs bg-stone-200 dark:bg-stone-700 rounded-full h-2 overflow-hidden">
+                                  <div
+                                    className="bg-violet-600 h-2 rounded-full transition-all duration-300"
+                                    style={{ width: `${analyzeUploadProgress}%` }}
+                                  />
+                                </div>
+                                <p className="text-xs sm:text-sm text-center text-stone-600 dark:text-stone-400 max-w-sm">
+                                  Saving to your library and opening analysis…
+                                </p>
+                              </div>
+                            )}
+                          </div>
                       </div>
 
                         <div className="hidden lg:block mt-10 sm:mt-12 pt-8 sm:pt-10 border-t border-stone-200/80 dark:border-stone-700/60">

@@ -103,7 +103,8 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
             planType: planId,
             billingCycle: billingCycle as 'monthly' | 'yearly',
             successUrl: `${window.location.origin}/dashboard?payment=success`,
-            cancelUrl: `${window.location.origin}/dashboard?payment=cancelled`
+            cancelUrl: `${window.location.origin}/dashboard?payment=cancelled`,
+            trialPeriodDays: 7,
           })
         });
 
