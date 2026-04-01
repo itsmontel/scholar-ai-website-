@@ -50,7 +50,7 @@ const BlogPostCta: React.FC<BlogPostCtaProps> = ({
   primaryLabel,
   secondaryPage = 'analysis',
   secondaryLabel = 'Open essay analyzer',
-  footnote = 'No credit card required to get started.',
+  footnote = '',
 }) => {
   const go =
     (page: string) =>

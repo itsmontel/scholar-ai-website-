@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { HIDE_FRIENDS } from '../../config/featureFlags';
-import PromoBanner from './PromoBanner';
 import { getResetsInText } from '../../utils/usageReset';
 
 interface HeaderProps {
@@ -180,9 +179,6 @@ const Header: React.FC<HeaderProps> = ({
       'bg-white dark:bg-stone-800 text-violet-800 dark:text-violet-300 shadow-sm border border-stone-200/90 dark:border-stone-600/80';
     const publicNavInactiveCls =
       'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100/80 dark:hover:bg-stone-800/70';
-    const promoBannerHiddenPages = new Set(['login', 'signup']);
-    const showPromoBanner = !promoBannerHiddenPages.has(currentPage || '');
-
     const publicHeaderBg = opaqueHeader
       ? isScrolled
         ? 'bg-white dark:bg-stone-950 shadow-[0_10px_40px_-12px_rgba(15,23,42,0.1)] dark:shadow-[0_10px_40px_-12px_rgba(0,0,0,0.4)] border-stone-200/90 dark:border-stone-800'
@@ -312,7 +308,6 @@ const Header: React.FC<HeaderProps> = ({
           aria-hidden
         />
       </header>
-      {showPromoBanner && <PromoBanner />}
       </>
     );
   }

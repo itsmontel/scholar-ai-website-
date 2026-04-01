@@ -558,12 +558,49 @@ router.post('/resend-verification', async (req, res) => {
 });
 
 // @route   POST /api/auth/refresh
-// @desc    Refresh JWT token
-// @access  Private
-router.post('/refresh', authenticateToken, async (req, res) => {
+// @desc    Issue a new JWT (accepts expired access token if signature is valid)
+// @access  Private (Bearer token required; not using authenticateToken so expiry is allowed)
+router.post('/refresh', async (req, res) => {
   try {
-    const newToken = generateToken(req.user.id);
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
 
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: 'Access token required'
+      });
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      if (err.name === 'TokenExpiredError') {
+        decoded = jwt.verify(token, process.env.JWT_SECRET, { ignoreExpiration: true });
+      } else {
+        return res.status(401).json({
+          success: false,
+          message: err.name === 'JsonWebTokenError' ? 'Invalid token' : 'Authentication error'
+        });
+      }
+    }
+
+    const user = await userService.findUserById(decoded.userId);
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid token - user not found'
+      });
+    }
+    if (!user.is_active) {
+      return res.status(401).json({
+        success: false,
+        message: 'Account is deactivated'
+      });
+    }
+
+    const newToken = generateToken(user.id);
     res.json({
       success: true,
       data: {

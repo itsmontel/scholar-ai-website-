@@ -446,7 +446,7 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
           <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 text-center">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/20 text-white rounded-full text-sm font-semibold mb-6">
               <span>🎉</span>
-              <span>Free to start · No credit card</span>
+              <span>Free to start</span>
             </div>
             <h2 className="text-3xl sm:text-5xl font-extrabold text-white mb-5 leading-tight">
               Get your code.<br />

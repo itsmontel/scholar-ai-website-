@@ -48,44 +48,9 @@ const SOCIAL_PROOF = [
   '#1 rated AI study platform by students',
 ];
 
-const TOTAL_SECONDS = 10 * 60; // 10 minutes — OFF10 discount window (sessionStorage deadline, not trial length)
-
-/** One deadline per browser tab session; refresh does not reset the clock (genuine urgency). */
-const OFF10_DEADLINE_MS_KEY = 'writescholar_off10_deadline_ms';
-
-function getOrInitOff10DeadlineMs(): number {
-  try {
-    const existing = sessionStorage.getItem(OFF10_DEADLINE_MS_KEY);
-    if (existing) {
-      const n = parseInt(existing, 10);
-      if (!Number.isNaN(n)) return n;
-    }
-    const end = Date.now() + TOTAL_SECONDS * 1000;
-    sessionStorage.setItem(OFF10_DEADLINE_MS_KEY, String(end));
-    return end;
-  } catch {
-    return Date.now() + TOTAL_SECONDS * 1000;
-  }
-}
-
-function readSecondsLeftFromDeadline(): number {
-  try {
-    const raw = sessionStorage.getItem(OFF10_DEADLINE_MS_KEY);
-    if (!raw) return 0;
-    const end = parseInt(raw, 10);
-    if (Number.isNaN(end)) return 0;
-    return Math.max(0, Math.floor((end - Date.now()) / 1000));
-  } catch {
-    return 0;
-  }
-}
-
 const TRIAL_DAYS = 7;
-/** First paid month (e.g. first-time subscriber / OFF10), then regular monthly */
-const PRO_FIRST_MONTH = '$9.99';
-const PRO_MONTHLY_AFTER_TRIAL = '$19.99';
-const PREMIUM_FIRST_MONTH = '$29.99';
-const PREMIUM_MONTHLY_AFTER = '$39.99';
+const PRO_MONTHLY = '$19.99';
+const PREMIUM_MONTHLY = '$39.99';
 
 const SoftPaywall = ({
   userName,
@@ -106,12 +71,7 @@ const SoftPaywall = ({
   const [socialIndex, setSocialIndex] = useState(0);
   const [checkedFeatures, setCheckedFeatures] = useState<number[]>([]);
   const [showLastChance, setShowLastChance] = useState(false);
-  const [secondsLeft, setSecondsLeft] = useState(() => {
-    getOrInitOff10DeadlineMs();
-    return readSecondsLeftFromDeadline();
-  });
   const intervalRef = useRef<ReturnType<typeof setInterval>>();
-  const countdownRef = useRef<ReturnType<typeof setInterval>>();
 
   useEffect(() => {
     requestAnimationFrame(() => setVisible(true));
@@ -155,17 +115,6 @@ const SoftPaywall = ({
     if (hard) setShowLastChance(false);
   }, [hard]);
 
-  /** Countdown only for OFF10 window (trial stays available after 0:00). */
-  useEffect(() => {
-    getOrInitOff10DeadlineMs();
-    countdownRef.current = setInterval(() => {
-      setSecondsLeft(readSecondsLeftFromDeadline());
-    }, 1000);
-    return () => {
-      if (countdownRef.current) clearInterval(countdownRef.current);
-    };
-  }, []);
-
   useEffect(() => {
     intervalRef.current = setInterval(() => {
       setSocialIndex(i => (i + 1) % SOCIAL_PROOF.length);
@@ -173,18 +122,7 @@ const SoftPaywall = ({
     return () => clearInterval(intervalRef.current);
   }, []);
 
-  const mins = Math.floor(secondsLeft / 60);
-  const secs = secondsLeft % 60;
-  const timeStr = `${mins}:${secs.toString().padStart(2, '0')}`;
-  /** OFF10 messaging window only — trial checkout stays available when this is false */
-  const off10Active = secondsLeft > 0;
-  const off10UrgencyShort =
-    mins >= 1
-      ? `Start in the next ${mins} minute${mins === 1 ? '' : 's'} to keep your $10 off`
-      : `Start in the next ${timeStr} to keep your $10 off`;
-
-  const firstMonthPrice = checkoutPlan === 'premium' ? PREMIUM_FIRST_MONTH : PRO_FIRST_MONTH;
-  const monthlyAfterPrice = checkoutPlan === 'premium' ? PREMIUM_MONTHLY_AFTER : PRO_MONTHLY_AFTER_TRIAL;
+  const monthlyPrice = checkoutPlan === 'premium' ? PREMIUM_MONTHLY : PRO_MONTHLY;
   const planName = checkoutPlan === 'premium' ? 'Premium' : 'Pro';
   const hardPaywallFeatures = checkoutPlan === 'premium' ? PREMIUM_FEATURES : FEATURES;
 
@@ -268,12 +206,8 @@ const SoftPaywall = ({
     }
   };
 
-  /**
-   * Primary CTA: 7-day trial + OFF10 when eligible (backend applies OFF10; during countdown we also pass
-   * OFF10 so it matches the on-screen OFF10 messaging).
-   */
   const startPrimaryCheckout = () => {
-    void handleStartTrial(off10Active ? 'OFF10' : undefined, checkoutPlan);
+    void handleStartTrial(undefined, checkoutPlan);
   };
 
   const firstName = userName?.split(' ')[0] || 'there';
@@ -337,7 +271,7 @@ const SoftPaywall = ({
                     }`}
                   >
                     <div className="text-[11px] font-bold text-stone-900 dark:text-stone-100">Pro</div>
-                    <div className="text-[9px] text-stone-500 dark:text-stone-400">{PRO_FIRST_MONTH} · {PRO_MONTHLY_AFTER_TRIAL}/mo</div>
+                    <div className="text-[9px] text-stone-500 dark:text-stone-400">{PRO_MONTHLY}/mo</div>
                   </button>
                   <button
                     type="button"
@@ -349,85 +283,42 @@ const SoftPaywall = ({
                     }`}
                   >
                     <div className="text-[11px] font-bold text-stone-900 dark:text-stone-100">Premium</div>
-                    <div className="text-[9px] text-stone-500 dark:text-stone-400">
-                      {PREMIUM_FIRST_MONTH} · {PREMIUM_MONTHLY_AFTER}/mo
-                    </div>
+                    <div className="text-[9px] text-stone-500 dark:text-stone-400">{PREMIUM_MONTHLY}/mo</div>
                   </button>
                 </div>
-                {off10Active ? (
-                  <>
-                    <h3 className="text-xl font-semibold text-stone-800 dark:text-stone-100 mb-2" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
-                      {showTrial ? 'Free trial + $10 off after' : '$10 off first month'}
-                    </h3>
-                    <p className="text-stone-500 dark:text-stone-400 text-sm mb-6 leading-relaxed">
-                      {showTrial ? (
-                        <>
-                          We&apos;ll apply{' '}
-                          <span className="font-mono font-bold bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 px-2 py-0.5 rounded">OFF10</span>{' '}
-                          at checkout: your <span className="font-semibold text-stone-700 dark:text-stone-200">{TRIAL_DAYS}-day free trial</span> first, then{' '}
-                          <span className="font-semibold text-stone-700 dark:text-stone-200">$10 off</span> your first paid month.
-                        </>
-                      ) : (
-                        <>
-                          We&apos;ll apply{' '}
-                          <span className="font-mono font-bold bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 px-2 py-0.5 rounded">OFF10</span>{' '}
-                          at checkout ($10 off your first paid month). Your account has already used its free trial—billing starts on the schedule shown in Stripe.
-                        </>
-                      )}
-                    </p>
-                    <button
-                      onClick={() => handleStartTrial('OFF10', checkoutPlan)}
-                      disabled={isCheckoutLoading}
-                      className="w-full py-4 bg-violet-700 hover:bg-violet-800 disabled:from-stone-400 disabled:to-stone-500 text-white rounded-xl font-semibold text-base shadow-md shadow-violet-900/20 ring-1 ring-violet-900/10 transition-all flex items-center justify-center gap-2 disabled:cursor-wait"
-                    >
-                      {isCheckoutLoading ? (
-                        <>
-                          <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                          </svg>
-                          Opening checkout…
-                        </>
-                      ) : (
-                        <>Continue with OFF10 →</>
-                      )}
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <h3 className="text-xl font-semibold text-stone-800 dark:text-stone-100 mb-2" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
-                      {showTrial ? `Your ${TRIAL_DAYS}-day free trial is still here` : `Upgrade to ${planName}`}
-                    </h3>
-                    <p className="text-stone-500 dark:text-stone-400 text-sm mb-6 leading-relaxed">
-                      {showTrial ? (
-                        <>
-                          The limited-time $10-off window has ended, but you can still start your {planName} trial and enter any active promo on Stripe checkout if you have one.
-                        </>
-                      ) : (
-                        <>
-                          The $10-off countdown ended, and this account isn&apos;t eligible for another free trial. Continue to checkout to subscribe—you can still enter promos on Stripe if you have one.
-                        </>
-                      )}
-                    </p>
-                    <button
-                      onClick={() => void handleStartTrial(undefined, checkoutPlan)}
-                      disabled={isCheckoutLoading}
-                      className="w-full py-4 bg-violet-700 hover:bg-violet-800 disabled:from-stone-400 disabled:to-stone-500 text-white rounded-xl font-semibold text-base shadow-md shadow-violet-900/20 ring-1 ring-violet-900/10 transition-all flex items-center justify-center gap-2 disabled:cursor-wait"
-                    >
-                      {isCheckoutLoading ? (
-                        <>
-                          <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                          </svg>
-                          Opening checkout…
-                        </>
-                      ) : (
-                        <>{showTrial ? 'Start free trial →' : `Upgrade to ${planName} →`}</>
-                      )}
-                    </button>
-                  </>
-                )}
+                <>
+                  <h3 className="text-xl font-semibold text-stone-800 dark:text-stone-100 mb-2" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
+                    {showTrial ? `Your ${TRIAL_DAYS}-day free trial is still here` : `Upgrade to ${planName}`}
+                  </h3>
+                  <p className="text-stone-500 dark:text-stone-400 text-sm mb-6 leading-relaxed">
+                    {showTrial ? (
+                      <>
+                        Start your {planName} trial, then {monthlyPrice}/mo if you continue. You can enter a promo code in Stripe checkout if you have one.
+                      </>
+                    ) : (
+                      <>
+                        Continue to checkout to subscribe. You can enter a promo code in Stripe if you have one.
+                      </>
+                    )}
+                  </p>
+                  <button
+                    onClick={() => void handleStartTrial(undefined, checkoutPlan)}
+                    disabled={isCheckoutLoading}
+                    className="w-full py-4 bg-violet-700 hover:bg-violet-800 disabled:from-stone-400 disabled:to-stone-500 text-white rounded-xl font-semibold text-base shadow-md shadow-violet-900/20 ring-1 ring-violet-900/10 transition-all flex items-center justify-center gap-2 disabled:cursor-wait"
+                  >
+                    {isCheckoutLoading ? (
+                      <>
+                        <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                        Opening checkout…
+                      </>
+                    ) : (
+                      <>{showTrial ? 'Start free trial →' : `Upgrade to ${planName} →`}</>
+                    )}
+                  </button>
+                </>
                 <button
                   onClick={handleDismiss}
                   className="mt-3 text-xs text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
@@ -442,22 +333,13 @@ const SoftPaywall = ({
             <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 sm:px-8 pt-5 pb-3 space-y-4">
               <div className="flex items-center gap-3.5">
                 <ScholarMascot size={64} animated pose="celebrating" />
-                {off10Active ? (
-                  <div className="flex-1 min-w-0 flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/60">
-                    <span className="text-[8px] font-bold uppercase tracking-wider text-red-600 dark:text-red-400 whitespace-nowrap">
-                      $10 off ends in
-                    </span>
-                    <span className="tabular-nums font-mono text-base font-bold text-red-600 dark:text-red-400">{timeStr}</span>
-                  </div>
-                ) : (
-                  <div className="flex-1 min-w-0 rounded-lg border border-emerald-200/80 dark:border-emerald-800/50 bg-emerald-50/90 dark:bg-emerald-950/30 px-2.5 py-1.5">
-                    <p className="text-[10px] font-medium text-emerald-900 dark:text-emerald-100/95 leading-snug">
-                      {showTrial
-                        ? '7-day trial — $10-off window ended; pick Pro or Premium below.'
-                        : 'Subscribe below — $10-off window ended; this account already used its free trial.'}
-                    </p>
-                  </div>
-                )}
+                <div className="flex-1 min-w-0 rounded-lg border border-emerald-200/80 dark:border-emerald-800/50 bg-emerald-50/90 dark:bg-emerald-950/30 px-2.5 py-1.5">
+                  <p className="text-[10px] font-medium text-emerald-900 dark:text-emerald-100/95 leading-snug">
+                    {showTrial
+                      ? '7-day free trial — pick Pro or Premium below.'
+                      : 'Subscribe below — this account has already used its free trial.'}
+                  </p>
+                </div>
               </div>
               <div className="text-center">
                 <h2
@@ -474,30 +356,23 @@ const SoftPaywall = ({
                   {variant === 'postTutorial' ? (
                     showTrial ? (
                       <>
-                        7-day {planName} trial, then {firstMonthPrice} first month, {monthlyAfterPrice}/mo after. Cancel anytime.
+                        7-day {planName} trial, then {monthlyPrice}/mo if you continue. Cancel anytime.
                       </>
                     ) : (
                       <>
-                        {firstMonthPrice} first month, then {monthlyAfterPrice}/mo after. One free trial per account—yours was already used. Cancel anytime.
+                        {monthlyPrice}/mo. One free trial per account—yours was already used. Cancel anytime.
                       </>
                     )
                   ) : showTrial ? (
                     <>
-                      Try {planName} free for {TRIAL_DAYS} days, then {firstMonthPrice} first month, {monthlyAfterPrice}/mo after.
-                      Cancel anytime.
+                      Try {planName} free for {TRIAL_DAYS} days, then {monthlyPrice}/mo if you continue. Cancel anytime.
                     </>
                   ) : (
                     <>
-                      Upgrade to {planName}: {firstMonthPrice} first month, then {monthlyAfterPrice}/mo after. Cancel anytime.
+                      Upgrade to {planName}: {monthlyPrice}/mo. Cancel anytime.
                     </>
                   )}
                 </p>
-                {off10Active && (
-                  <p className="text-[11px] sm:text-xs text-red-600 dark:text-red-400 font-semibold mt-2 leading-snug px-1">
-                    {off10UrgencyShort}. We&apos;ll apply <span className="font-mono">OFF10</span> at checkout (
-                    {showTrial ? '$10 off your first paid month after the trial' : '$10 off your first paid month'}).
-                  </p>
-                )}
               </div>
               <div
                 className="rounded-xl border border-stone-200/90 dark:border-stone-600/80 p-1.5 flex gap-2 bg-stone-100/70 dark:bg-stone-800/60"
@@ -514,9 +389,7 @@ const SoftPaywall = ({
                   }`}
                 >
                   <div className="text-xs font-bold text-stone-900 dark:text-stone-100">Pro</div>
-                  <div className="text-[10px] text-stone-500 dark:text-stone-400 leading-tight">
-                    {PRO_FIRST_MONTH} first mo · {PRO_MONTHLY_AFTER_TRIAL}/mo
-                  </div>
+                  <div className="text-[10px] text-stone-500 dark:text-stone-400 leading-tight">{PRO_MONTHLY}/mo</div>
                 </button>
                 <button
                   type="button"
@@ -528,9 +401,7 @@ const SoftPaywall = ({
                   }`}
                 >
                   <div className="text-xs font-bold text-stone-900 dark:text-stone-100">Premium</div>
-                  <div className="text-[10px] text-stone-500 dark:text-stone-400 leading-tight">
-                    {PREMIUM_FIRST_MONTH} first mo · {PREMIUM_MONTHLY_AFTER}/mo
-                  </div>
+                  <div className="text-[10px] text-stone-500 dark:text-stone-400 leading-tight">{PREMIUM_MONTHLY}/mo</div>
                 </button>
               </div>
               <div className="relative bg-gradient-to-br from-stone-50 via-violet-50/60 to-stone-100/80 dark:from-stone-900/80 dark:via-violet-950/40 dark:to-stone-900/60 rounded-xl p-4 sm:p-5 border border-stone-200/80 dark:border-stone-600/50 ring-1 ring-violet-500/10">
@@ -554,7 +425,7 @@ const SoftPaywall = ({
                   ) : (
                     <>
                       <span className="text-4xl sm:text-5xl font-extrabold text-violet-600 dark:text-violet-400 tabular-nums">
-                        {firstMonthPrice}
+                        {monthlyPrice}
                       </span>
                       <span className="text-base text-stone-600 dark:text-stone-300 font-semibold">first month</span>
                     </>
@@ -562,18 +433,8 @@ const SoftPaywall = ({
                 </div>
                 <p className="text-sm text-stone-700 dark:text-stone-200 font-medium mb-1">
                   {showTrial ? (
-                    off10Active ? (
-                      <>
-                        {TRIAL_DAYS}-day trial · {planName} · <span className="font-mono">OFF10</span> locked in
-                      </>
-                    ) : (
-                      <>
-                        {TRIAL_DAYS}-day free trial · {planName}
-                      </>
-                    )
-                  ) : off10Active ? (
                     <>
-                      Subscribe · {planName} · <span className="font-mono">OFF10</span> at checkout
+                      {TRIAL_DAYS}-day free trial · {planName}
                     </>
                   ) : (
                     <>Upgrade to {planName}</>
@@ -581,24 +442,13 @@ const SoftPaywall = ({
                 </p>
                 <p className="text-[11px] sm:text-xs text-stone-500 dark:text-stone-400 mb-2.5 leading-snug">
                   {showTrial ? (
-                    off10Active ? (
-                      <>
-                        After your trial: <span className="font-mono">OFF10</span> takes $10 off your first paid month, then {firstMonthPrice} / {monthlyAfterPrice} as usual. Cancel
-                        before the trial ends to pay nothing.
-                      </>
-                    ) : (
-                      <>
-                        Then {firstMonthPrice} first month, {monthlyAfterPrice}/mo after that. Cancel before the trial ends to pay nothing.
-                        Enter <span className="font-mono">OFF10</span> or another code in Stripe if you have one.
-                      </>
-                    )
-                  ) : off10Active ? (
                     <>
-                      <span className="font-mono">OFF10</span> applies at checkout ($10 off first paid month when eligible). Then {firstMonthPrice} / {monthlyAfterPrice}. No additional free trial on this account.
+                      Then {monthlyPrice}/mo if you continue. Cancel before the trial ends to pay nothing. You can enter a promo code in
+                      Stripe if you have one.
                     </>
                   ) : (
                     <>
-                      {firstMonthPrice} first month, then {monthlyAfterPrice}/mo. Cancel anytime. No free trial remaining on this account.
+                      {monthlyPrice}/mo. Cancel anytime. No free trial remaining on this account.
                     </>
                   )}
                 </p>
@@ -670,39 +520,25 @@ const SoftPaywall = ({
                 </p>
               )}
               <p className="text-[10px] text-center text-stone-500 dark:text-stone-400">
-                {off10Active
-                  ? showTrial
-                    ? 'This step can’t be skipped — $10 off your first paid month is applied at checkout when you start in time (after your free trial).'
-                    : 'This step can’t be skipped — $10 off may apply at checkout when you start in time. This account has already used its free trial.'
-                  : showTrial
-                    ? 'This step can’t be skipped — start your free trial to continue.'
-                    : 'This step can’t be skipped — subscribe to continue. No additional free trial on this account.'}
+                {showTrial
+                  ? 'This step can’t be skipped — start your free trial to continue.'
+                  : 'This step can’t be skipped — subscribe to continue. No additional free trial on this account.'}
               </p>
             </div>
           </>
         ) : (
           <div className="px-7 sm:px-10 pt-8 pb-10">
-            {/* Mascot + $10-off countdown (trial does not expire with this timer) */}
           <div className="flex items-center gap-4 mb-6">
             <div className="flex-shrink-0">
               <ScholarMascot size={80} animated pose="celebrating" />
             </div>
-            {off10Active ? (
-              <div className="flex-1 min-w-0 flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/60">
-                <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-red-600 dark:text-red-400 whitespace-nowrap">
-                  $10 off ends in
-                </span>
-                <span className="tabular-nums font-mono text-lg sm:text-xl font-bold text-red-600 dark:text-red-400">{timeStr}</span>
-              </div>
-            ) : (
-              <div className="flex-1 min-w-0 px-3 sm:px-4 py-2 rounded-xl border border-emerald-200/80 dark:border-emerald-800/50 bg-emerald-50/90 dark:bg-emerald-950/30">
-                <p className="text-[11px] sm:text-xs font-medium text-emerald-900 dark:text-emerald-100/95 leading-snug">
-                  {showTrial
-                    ? '7-day free trial still available — the limited-time $10-off callout has ended.'
-                    : 'Subscribe to continue — $10-off callout ended; this account already used its free trial.'}
-                </p>
-              </div>
-            )}
+            <div className="flex-1 min-w-0 px-3 sm:px-4 py-2 rounded-xl border border-emerald-200/80 dark:border-emerald-800/50 bg-emerald-50/90 dark:bg-emerald-950/30">
+              <p className="text-[11px] sm:text-xs font-medium text-emerald-900 dark:text-emerald-100/95 leading-snug">
+                {showTrial
+                  ? '7-day free trial available — choose Pro or Premium below.'
+                  : 'Subscribe to continue — this account has already used its free trial.'}
+              </p>
+            </div>
           </div>
 
           {/* Header */}
@@ -727,37 +563,29 @@ const SoftPaywall = ({
                   <>
                     Start a <span className="font-semibold text-stone-700 dark:text-stone-200">{TRIAL_DAYS}-day free trial</span> on {planName}.
                     Full analyses, rubric, annotations, and study tools—then{' '}
-                    <span className="font-semibold text-stone-700 dark:text-stone-200">{firstMonthPrice}</span> first month,{' '}
-                    <span className="font-semibold text-stone-700 dark:text-stone-200">{monthlyAfterPrice}/mo</span> after, if you stay
-                    subscribed. Cancel anytime.
+                    <span className="font-semibold text-stone-700 dark:text-stone-200">{monthlyPrice}/mo</span> if you stay subscribed.
+                    Cancel anytime.
                   </>
                 ) : (
                   <>
                     Upgrade to {planName} for full analyses, rubric, annotations, and study tools—{' '}
-                    <span className="font-semibold text-stone-700 dark:text-stone-200">{firstMonthPrice}</span> first month,{' '}
-                    <span className="font-semibold text-stone-700 dark:text-stone-200">{monthlyAfterPrice}/mo</span> after. One free trial per account—yours was already used. Cancel anytime.
+                    <span className="font-semibold text-stone-700 dark:text-stone-200">{monthlyPrice}/mo</span>. One free trial per
+                    account—yours was already used. Cancel anytime.
                   </>
                 )
               ) : showTrial ? (
                 <>
                   Try {planName} free for <span className="font-semibold text-stone-700 dark:text-stone-200">{TRIAL_DAYS} days</span>, then{' '}
-                  <span className="font-semibold text-stone-700 dark:text-stone-200">{firstMonthPrice}</span> first month,{' '}
-                  <span className="font-semibold text-stone-700 dark:text-stone-200">{monthlyAfterPrice}/mo</span> after, if you continue.
-                  Cancel anytime.
+                  <span className="font-semibold text-stone-700 dark:text-stone-200">{monthlyPrice}/mo</span> if you continue. Cancel
+                  anytime.
                 </>
               ) : (
                 <>
-                  Subscribe to {planName}: <span className="font-semibold text-stone-700 dark:text-stone-200">{firstMonthPrice}</span> first month,{' '}
-                  <span className="font-semibold text-stone-700 dark:text-stone-200">{monthlyAfterPrice}/mo</span> after. Cancel anytime.
+                  Subscribe to {planName}: <span className="font-semibold text-stone-700 dark:text-stone-200">{monthlyPrice}/mo</span>.
+                  Cancel anytime.
                 </>
               )}
             </p>
-            {off10Active && (
-              <p className="text-[11px] sm:text-xs text-red-600 dark:text-red-400 font-semibold mt-2 leading-snug">
-                {off10UrgencyShort}. We&apos;ll apply <span className="font-mono">OFF10</span> at checkout (
-                {showTrial ? '$10 off your first paid month after the trial' : '$10 off your first paid month'}).
-              </p>
-            )}
           </div>
 
           <div
@@ -775,9 +603,7 @@ const SoftPaywall = ({
               }`}
             >
               <div className="text-sm font-bold text-stone-900 dark:text-stone-100">Pro</div>
-              <div className="text-[10px] text-stone-500 dark:text-stone-400">
-                {PRO_FIRST_MONTH} first mo · {PRO_MONTHLY_AFTER_TRIAL}/mo after
-              </div>
+              <div className="text-[10px] text-stone-500 dark:text-stone-400">{PRO_MONTHLY}/mo</div>
             </button>
             <button
               type="button"
@@ -789,9 +615,7 @@ const SoftPaywall = ({
               }`}
             >
               <div className="text-sm font-bold text-stone-900 dark:text-stone-100">Premium</div>
-              <div className="text-[10px] text-stone-500 dark:text-stone-400">
-                {PREMIUM_FIRST_MONTH} first mo · {PREMIUM_MONTHLY_AFTER}/mo after
-              </div>
+              <div className="text-[10px] text-stone-500 dark:text-stone-400">{PREMIUM_MONTHLY}/mo</div>
             </button>
           </div>
 
@@ -820,7 +644,7 @@ const SoftPaywall = ({
               ) : (
                 <>
                   <span className="text-4xl sm:text-5xl font-extrabold text-violet-600 dark:text-violet-400 tabular-nums">
-                    {firstMonthPrice}
+                    {monthlyPrice}
                   </span>
                   <span className="text-base text-stone-600 dark:text-stone-300 font-semibold">first month</span>
                 </>
@@ -828,18 +652,8 @@ const SoftPaywall = ({
             </div>
             <p className="text-sm text-stone-700 dark:text-stone-200 font-medium mb-1">
               {showTrial ? (
-                off10Active ? (
-                  <>
-                    {TRIAL_DAYS}-day trial · {planName} · <span className="font-mono">OFF10</span> auto-applied
-                  </>
-                ) : (
-                  <>
-                    {TRIAL_DAYS}-day free trial · {planName}
-                  </>
-                )
-              ) : off10Active ? (
                 <>
-                  Subscribe · {planName} · <span className="font-mono">OFF10</span> at checkout
+                  {TRIAL_DAYS}-day free trial · {planName}
                 </>
               ) : (
                 <>Upgrade to {planName}</>
@@ -847,28 +661,13 @@ const SoftPaywall = ({
             </p>
             <p className="text-xs text-stone-500 dark:text-stone-400 mb-4 leading-snug">
               {showTrial ? (
-                off10Active ? (
-                  <>
-                    After your trial: <span className="font-mono">OFF10</span> takes $10 off your first paid month, then{' '}
-                    <span className="font-semibold text-stone-700 dark:text-stone-300">{firstMonthPrice}</span> /{' '}
-                    <span className="font-semibold text-stone-700 dark:text-stone-300">{monthlyAfterPrice}</span> as usual. Cancel before the trial
-                    ends to pay nothing.
-                  </>
-                ) : (
-                  <>
-                    After your free trial: <span className="font-semibold text-stone-700 dark:text-stone-300">{firstMonthPrice}</span> first
-                    month, then <span className="font-semibold text-stone-700 dark:text-stone-300">{monthlyAfterPrice}/mo</span>. Cancel before
-                    the trial ends and you won&apos;t be charged. Enter <span className="font-mono">OFF10</span> or another code in Stripe if you
-                    have one.
-                  </>
-                )
-              ) : off10Active ? (
                 <>
-                  <span className="font-mono">OFF10</span> applies at checkout ($10 off first paid month when eligible). Then {firstMonthPrice} / {monthlyAfterPrice}. No additional free trial on this account.
+                  After your free trial: <span className="font-semibold text-stone-700 dark:text-stone-300">{monthlyPrice}/mo</span>. Cancel
+                  before the trial ends and you won&apos;t be charged. You can enter a promo code in Stripe if you have one.
                 </>
               ) : (
                 <>
-                  {firstMonthPrice} first month, then {monthlyAfterPrice}/mo. Cancel anytime. No free trial remaining on this account.
+                  {monthlyPrice}/mo. Cancel anytime. No free trial remaining on this account.
                 </>
               )}
             </p>

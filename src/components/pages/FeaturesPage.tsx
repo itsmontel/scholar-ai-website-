@@ -3,6 +3,7 @@ import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEdi
 import Footer from '../common/Footer';
 import ScholarMascot from '../common/ScholarMascot';
 import LandingSectionLayers from '../common/LandingSectionLayers';
+import { HIDE_STREAK_AND_BADGES } from '../../config/featureFlags';
 
 interface FeaturesPageProps {
   onNavigate: (page: string) => void;
@@ -27,7 +28,9 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
     { label: "Study Packs", description: "Quizzes, flashcards, crosswords & lessons from any notes. One paste, five formats" },
     { label: "Focus Mode", description: "Block websites until you study, earn your screen time" },
     { label: "Paper Summarizer", description: "Condense articles and papers into key points" },
-    { label: "Badges & achievements", description: "Earn milestones as you study and use the app" }
+    ...(HIDE_STREAK_AND_BADGES
+      ? []
+      : [{ label: "Badges & achievements", description: "Earn milestones as you study and use the app" }]),
   ];
 
   return (

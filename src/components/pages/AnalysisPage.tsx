@@ -538,8 +538,6 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
   const [rubricAlignment, setRubricAlignment] = useState<any>(null);
   /** One-time Stripe trial — from GET /subscriptions/trial-eligibility `trialEligible` */
   const [canStartFreeTrial, setCanStartFreeTrial] = useState(false);
-  /** First-month $10-off style pricing — from `off10Eligible` (separate from trial) */
-  const [off10Eligible, setOff10Eligible] = useState(false);
   /** True while creating Stripe Checkout session (Pro monthly) from analysis CTAs */
   const [checkoutRedirecting, setCheckoutRedirecting] = useState(false);
   const checkoutInFlightRef = useRef(false);
@@ -944,14 +942,11 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
       if (response.ok) {
         const data = await response.json();
         setCanStartFreeTrial(data.trialEligible === true);
-        setOff10Eligible(data.off10Eligible === true || data.eligible === true);
       } else {
         setCanStartFreeTrial(false);
-        setOff10Eligible(false);
       }
     } catch {
       setCanStartFreeTrial(false);
-      setOff10Eligible(false);
     }
   };
 
@@ -3705,14 +3700,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                       >
                         {checkoutRedirecting ? 'Opening checkout…' : 'Unlock full rubric'}
                       </button>
-                      {off10Eligible ? (
-                        <span className="text-sm text-violet-700 dark:text-violet-300">
-                          <span className="line-through">$19.99</span>{' '}
-                          <span className="font-bold text-emerald-600">$9.99</span>/mo
-                        </span>
-                      ) : (
-                        <span className="text-sm text-violet-600 dark:text-violet-400">$19.99/mo</span>
-                      )}
+                      <span className="text-sm text-violet-600 dark:text-violet-400">$19.99/mo</span>
                     </div>
                   </div>
                 ) : null}
@@ -4015,7 +4003,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                                 }}
                                 className="mt-3 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 text-stone-800 dark:text-stone-100 border border-stone-200 dark:border-stone-600"
                               >
-                                Pro: apply revisions ($9.99 first month)
+                                Pro: apply revisions ($19.99/mo)
                               </button>
                             )}
                           </div>
@@ -4110,7 +4098,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                                 }}
                                 className="mt-3 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 text-stone-800 dark:text-stone-100 border border-stone-200 dark:border-stone-600"
                               >
-                                Pro: apply revisions ($9.99 first month)
+                                Pro: apply revisions ($19.99/mo)
                               </button>
                             )}
                           </div>
@@ -4176,16 +4164,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                           >
                             {checkoutRedirecting ? 'Opening checkout…' : 'Unlock full annotations'}
                           </button>
-                          <div className="text-sm text-violet-700 dark:text-violet-300">
-                            {off10Eligible ? (
-                              <>
-                                <span className="line-through text-violet-500">$19.99</span>{' '}
-                                <span className="font-bold text-emerald-600 dark:text-emerald-400">$9.99</span>/mo
-                              </>
-                            ) : (
-                              <span className="text-violet-600 dark:text-violet-400">$19.99/mo</span>
-                            )}
-                          </div>
+                          <div className="text-sm text-violet-600 dark:text-violet-400">$19.99/mo</div>
                         </div>
                       </div>
                     )}
@@ -4282,11 +4261,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                               >
                                 {checkoutRedirecting ? 'Opening checkout…' : 'Upgrade'}
                               </button>
-                              {off10Eligible ? (
-                                <span className="text-sm text-violet-700 dark:text-violet-300"><span className="line-through">$19.99</span> <span className="font-bold text-emerald-600">$9.99</span>/mo</span>
-                              ) : (
-                                <span className="text-sm text-violet-600">$19.99/mo</span>
-                              )}
+                              <span className="text-sm text-violet-600">$19.99/mo</span>
                             </div>
                           </div>
                         </div>
@@ -4398,13 +4373,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                           ? 'Export full report — start free trial'
                           : 'Export full report — upgrade to Pro'}
                     </button>
-                    {off10Eligible ? (
-                      <span className="text-sm text-stone-600">
-                        <span className="line-through">$19.99</span> <span className="font-bold text-emerald-600">$9.99</span>/mo
-                      </span>
-                    ) : (
-                      <span className="text-sm text-stone-500">$19.99/mo</span>
-                    )}
+                    <span className="text-sm text-stone-500">$19.99/mo</span>
                   </div>
                 )}
               </div>
@@ -4524,11 +4493,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                             : 'Upgrade to Pro — full rubric analysis'}
                       </button>
                       <p className="text-xs text-stone-500 dark:text-stone-500 mt-2">
-                        {off10Eligible ? (
-                          <>Starting at <span className="line-through">$19.99</span> <span className="font-semibold text-emerald-600 dark:text-emerald-400">$9.99</span>/month · First month $10 off · Cancel anytime</>
-                        ) : (
-                          <>Starting at $19.99/month · Cancel anytime</>
-                        )}
+                        Starting at $19.99/month · Cancel anytime
                       </p>
                     </div>
                   </div>

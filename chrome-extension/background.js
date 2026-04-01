@@ -192,7 +192,11 @@ async function refreshAuthToken() {
     const apiBase = await getApiBase();
     const res = await fetch(`${apiBase}/auth/refresh`, {
       method: 'POST',
-      headers: { Authorization: `Bearer ${authToken}` },
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: '{}',
     });
     if (res.ok) {
       const data = await res.json();

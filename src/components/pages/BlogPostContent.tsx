@@ -1306,7 +1306,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
                     <a href="/tools/flashcard-generator" onClick={handleNavigate('flashcard-generator')} className={internalLink}>
                       Flashcard Generator
                     </a>
-                    , or any other tool. Paste in your study material, choose your settings, and generate in seconds. No credit card required.
+                    , or any other tool. Paste in your study material, choose your settings, and generate in seconds.
                   </>
                 ),
               },

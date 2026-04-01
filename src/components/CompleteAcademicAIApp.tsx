@@ -1,8 +1,8 @@
 import { useState, useEffect, useLayoutEffect, Suspense, useRef, useCallback } from 'react';
 import { WriteScholarEditorialBackgroundLayers } from './common/WriteScholarEditorialBackground';
 import { logger } from '../utils/logger';
-import { HIDE_FRIENDS } from '../config/featureFlags';
-import { persistOnboardingToServer } from '../utils/onboarding';
+import { HIDE_FRIENDS, HIDE_STREAK_AND_BADGES } from '../config/featureFlags';
+import { persistOnboardingToServer, persistTutorialToServer } from '../utils/onboarding';
 import { trackEvent } from '../utils/analytics';
 import { lazyWithRetry } from '../utils/lazyWithRetry';
 import { LANDING_META_DESCRIPTION, LANDING_PAGE_TITLE } from '../constants/landingSeo';
@@ -166,7 +166,7 @@ function getPageFromPath(pathname: string): string {
   if (p === '/tools/interactive-lesson' || p === '/interactive-lesson' || p === '/lesson-generator') return 'dashboard';
   if (p === '/study-pack-viewer' || p === '/tools/study-pack-viewer') return 'study-pack-viewer';
   if (p === '/tools/more' || p === '/more-tools' || p === '/view-more-tools') return 'more-tools';
-  if (p === '/badges' || p === '/achievements') return 'badges';
+  if (p === '/badges' || p === '/achievements') return HIDE_STREAK_AND_BADGES ? 'dashboard' : 'badges';
   if (p === '/tools/analyze' || p === '/analyze') return 'analyze';
   if (p === '/tools/citations' || p === '/citations') return 'citations';
   if (p === '/tools/study-pack' || p === '/study-pack') return 'study-pack';
@@ -341,6 +341,9 @@ const AcademicAIApp = () => {
     }
     // When friends are hidden, redirect /friends and /share-friends URLs to dashboard
     if (HIDE_FRIENDS && (path === '/friends' || path === '/share-friends') && currentPage === 'dashboard') {
+      window.history.replaceState({}, '', '/dashboard');
+    }
+    if (HIDE_STREAK_AND_BADGES && (path === '/badges' || path === '/achievements') && currentPage === 'dashboard') {
       window.history.replaceState({}, '', '/dashboard');
     }
   }, [currentPage]);
@@ -762,8 +765,10 @@ const AcademicAIApp = () => {
           const refreshResponse = await originalFetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/auth/refresh`, {
             method: 'POST',
             headers: {
-              'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${localStorage.getItem('authToken')}`,
             },
+            body: JSON.stringify({}),
           });
 
           if (refreshResponse.ok) {
@@ -841,6 +846,12 @@ const AcademicAIApp = () => {
   };
 
   const navigateTo = (page: string, slug?: string, options?: { quizHistoryFilter?: 'all' | 'quiz' | 'flashcards' | 'crossword' | 'crater_blast'; studyPack?: { data: any; title?: string }; unlockQuizQuery?: string }) => {
+    if (HIDE_STREAK_AND_BADGES && page === 'badges') {
+      setCurrentPage('dashboard');
+      window.history.pushState({}, '', '/dashboard');
+      window.scrollTo(0, 0);
+      return;
+    }
     if (page !== 'study-pack-viewer') setStudyPackInitialData(null);
     if (page === 'study-pack-viewer' && options?.studyPack) setStudyPackInitialData(options.studyPack);
     setCurrentPage(page);
@@ -915,16 +926,46 @@ const AcademicAIApp = () => {
   const handleOnboardingComplete = async (destination: string) => {
     trackEvent('onboarding_complete');
     if (user?.id) {
-      await persistOnboardingToServer();
-      const updatedUser = { ...user, onboardingCompleted: true };
+      await Promise.all([persistOnboardingToServer(), persistTutorialToServer()]);
+      const updatedUser = { ...user, onboardingCompleted: true, welcomeTutorialCompleted: true };
       setUser(updatedUser);
       localStorage.setItem('user', JSON.stringify(updatedUser));
     }
-    try {
-      sessionStorage.setItem('writescholar_show_interactive_tutorial', 'true');
-    } catch (_) {}
     navigateTo(destination);
   };
+
+  const handleOnboardingUserUpdate = useCallback(
+    (updates: {
+      name?: string;
+      username?: string;
+      plan?: string;
+      subscription_status?: string;
+    }) => {
+      setUser((prev) => {
+        if (!prev) return prev;
+        if (
+          updates.name === undefined &&
+          updates.username === undefined &&
+          updates.plan === undefined &&
+          updates.subscription_status === undefined
+        ) {
+          return prev;
+        }
+        const updatedUser = {
+          ...prev,
+          ...(updates.name !== undefined && { name: updates.name }),
+          ...(updates.username !== undefined && { username: updates.username }),
+          ...(updates.plan !== undefined && { plan: updates.plan }),
+          ...(updates.subscription_status !== undefined && {
+            subscription_status: updates.subscription_status,
+          }),
+        };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        return updatedUser;
+      });
+    },
+    []
+  );
 
   const renderOnboarding = (destination: string) => {
     return (
@@ -932,17 +973,7 @@ const AcademicAIApp = () => {
         onNavigate={navigateTo}
         user={user}
         onLogout={handleLogout}
-        onUserUpdate={(updates) => {
-          if (user && (updates.name !== undefined || updates.username !== undefined)) {
-            const updatedUser = {
-              ...user,
-              ...(updates.name !== undefined && { name: updates.name }),
-              ...(updates.username !== undefined && { username: updates.username })
-            };
-            setUser(updatedUser);
-            localStorage.setItem('user', JSON.stringify(updatedUser));
-          }
-        }}
+        onUserUpdate={handleOnboardingUserUpdate}
         onComplete={() => handleOnboardingComplete(destination)}
       />
     );
@@ -1138,6 +1169,10 @@ const AcademicAIApp = () => {
       case 'more-tools':
         return <MoreToolsPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'badges':
+        if (HIDE_STREAK_AND_BADGES) {
+          if (needsOnboarding) return renderOnboarding('dashboard');
+          return <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} onUserUpdate={handleDashboardUserUpdate} />;
+        }
         return <BadgesPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'share-friends':
         if (HIDE_FRIENDS) {
@@ -1207,7 +1242,7 @@ const AcademicAIApp = () => {
         </PageErrorBoundary>
       </Suspense>
       {/* Global achievement popup */}
-      {user && <BadgeNotificationToast onNavigate={navigateTo} />}
+      {user && !HIDE_STREAK_AND_BADGES && <BadgeNotificationToast onNavigate={navigateTo} />}
       {apiLimitPaywallOpen && isLoggedIn && user && (
         <SoftPaywall
           variant="postTutorial"

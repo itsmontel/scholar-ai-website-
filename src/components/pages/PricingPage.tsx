@@ -38,7 +38,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
         }
         if (trialRes.ok) {
           const data = await trialRes.json();
-          setIsTrialEligible(data.off10Eligible ?? data.eligible ?? false);
+          setIsTrialEligible(data.trialEligible === true);
         }
       } catch (error) {
         console.error('Error loading pricing subscription data:', error);
@@ -202,12 +202,14 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       ],
       limitations: [],
       popular: true,
-      buttonText: !user 
-        ? 'Get $10 Off' 
-        : (currentPlan === 'free' 
-          ? (isTrialEligible ? 'Get $10 Off' : 'Upgrade to Pro') 
-          : 'Switch to Pro'),
-        buttonAction: () => handlePlanAction('pro')
+      buttonText: !user
+        ? 'Start with Pro'
+        : currentPlan === 'free'
+          ? isTrialEligible
+            ? 'Start 7-day free trial'
+            : 'Upgrade to Pro'
+          : 'Switch to Pro',
+      buttonAction: () => handlePlanAction('pro'),
     },
     {
       id: 'premium',
@@ -224,18 +226,21 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       limitations: [],
       popular: false,
       buttonText: !user
-        ? 'Get $10 Off Premium'
-        : (currentPlan === 'free'
-          ? (isTrialEligible ? 'Get $10 Off' : 'Upgrade to Premium')
-          : 'Switch to Premium'),
-      buttonAction: () => handlePlanAction('premium')
+        ? 'Start with Premium'
+        : currentPlan === 'free'
+          ? isTrialEligible
+            ? 'Start 7-day free trial'
+            : 'Upgrade to Premium'
+          : 'Switch to Premium',
+      buttonAction: () => handlePlanAction('premium'),
     }
   ];
 
   const faqs = [
     {
-      question: "How does the $10 off work?",
-      answer: "First-time subscribers get $10 off their first month on Pro or Premium (e.g. Pro $9.99 then $19.99/mo; Premium $29.99 then $39.99/mo). The discount is applied automatically at checkout. Each email address can only use the offer once."
+      question: 'Is there a free trial?',
+      answer:
+        'Eligible first-time subscribers get a 7-day trial on Pro or Premium. After the trial, your plan continues at the regular monthly or yearly rate shown here unless you cancel.',
     },
     {
       question: "What's included in the free plan?",
@@ -563,7 +568,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
             <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 mb-8 max-w-xl mx-auto leading-relaxed">
               {user
                 ? 'Go to your dashboard to analyze documents, find citations, and use study tools.'
-                : 'Get $10 off your first month on Pro or Premium. Cancel anytime.'}
+                : 'Start with a 7-day trial on Pro or Premium when eligible, or subscribe anytime. Cancel anytime.'}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center">
               {user ? (
@@ -593,7 +598,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                     onClick={() => onNavigate('signup')}
                     className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white font-semibold rounded-xl shadow-md shadow-violet-900/15 dark:shadow-violet-950/40 ring-1 ring-violet-900/10 dark:ring-white/10 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 text-base"
                   >
-                    Get $10 off
+                    Sign up free
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>

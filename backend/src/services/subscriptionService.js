@@ -1,4 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
+const { query } = require('../database/connection');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // Initialize Supabase client
@@ -602,9 +603,7 @@ const createStripeCustomer = async (email, name) => {
 
 // Create checkout session
 // options.trialPeriodDays: e.g. 7 — free trial before billing.
-// When eligible, OFF10 is applied together with trial: Stripe shows both; the $10 off applies to the
-// first paid invoice after the trial (configure the coupon in Stripe for “once” / first invoice if needed).
-// Explicit promoCode in the request overrides auto OFF10.
+// Optional promoCode in the request applies that Stripe promotion code at checkout.
 const createCheckoutSession = async (
   customerId,
   planType,
@@ -629,13 +628,7 @@ const createCheckoutSession = async (
       }
     }
 
-    let effectivePromo = promoCode;
-    if (!effectivePromo && userEmail) {
-      const off10 = await checkOff10Eligibility(userEmail);
-      if (off10.eligible) {
-        effectivePromo = 'OFF10';
-      }
-    }
+    const effectivePromo = promoCode;
 
     // Get price ID based on plan and billing cycle
     const priceId = getPriceId(planType, billingCycle);
@@ -644,6 +637,11 @@ const createCheckoutSession = async (
     const finalSuccessUrl = successUrl || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/dashboard?payment=success`;
     const finalCancelUrl = cancelUrl || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/dashboard?payment=cancelled`;
     
+    const embedded = options.embedded === true;
+    const embeddedReturnUrl =
+      (typeof options.returnUrl === 'string' && options.returnUrl.trim()) ||
+      `${process.env.FRONTEND_URL || 'http://localhost:5173'}/onboarding?session_id={CHECKOUT_SESSION_ID}`;
+
     const sessionConfig = {
       customer: customerId,
       payment_method_types: ['card'],
@@ -654,8 +652,6 @@ const createCheckoutSession = async (
         },
       ],
       mode: 'subscription',
-      success_url: finalSuccessUrl,
-      cancel_url: finalCancelUrl,
       subscription_data: {
         metadata: {
           userId,
@@ -666,7 +662,7 @@ const createCheckoutSession = async (
         ...(trialPeriodDays > 0 ? { trial_period_days: trialPeriodDays } : {})
       },
       metadata: {
-        userId,
+        userId: String(userId),
         planType,
         billingCycle,
         source: 'writescholar'
@@ -675,7 +671,15 @@ const createCheckoutSession = async (
       allow_promotion_codes: true
     };
 
-    // If a specific promo code is provided (or auto OFF10 for first-time paid month), apply it directly
+    if (embedded) {
+      sessionConfig.ui_mode = 'embedded';
+      sessionConfig.return_url = embeddedReturnUrl;
+    } else {
+      sessionConfig.success_url = finalSuccessUrl;
+      sessionConfig.cancel_url = finalCancelUrl;
+    }
+
+    // If a specific promo code is provided in the request, apply it directly
     if (effectivePromo) {
       try {
         // Find the promotion code in Stripe
@@ -701,8 +705,13 @@ const createCheckoutSession = async (
     }
     
     const session = await stripe.checkout.sessions.create(sessionConfig);
-    
-    return { success: true, sessionId: session.id, url: session.url };
+
+    return {
+      success: true,
+      sessionId: session.id,
+      url: embedded ? null : session.url,
+      clientSecret: embedded ? session.client_secret : null
+    };
   } catch (error) {
     console.error('Error creating checkout session:', error);
     return { success: false, error: error.message };
@@ -978,6 +987,129 @@ const cleanupOldCitations = async () => {
   }
 };
 
+/**
+ * After Embedded Checkout redirect; same DB updates as checkout.session.completed webhook.
+ * Verifies session belongs to user (metadata + stripe_customer_id).
+ */
+const syncCheckoutSessionForUser = async (sessionId, appUserId) => {
+  try {
+    if (!sessionId || !appUserId) {
+      return { success: false, error: 'Missing session or user' };
+    }
+
+    const session = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ['subscription']
+    });
+
+    if (session.status !== 'complete') {
+      return { success: false, error: 'Checkout not complete yet' };
+    }
+
+    const metaUid = session.metadata && session.metadata.userId;
+    if (metaUid && String(metaUid) !== String(appUserId)) {
+      return { success: false, error: 'Session does not match this account' };
+    }
+
+    const customerId = typeof session.customer === 'string' ? session.customer : session.customer?.id;
+    if (!customerId) {
+      return { success: false, error: 'No customer on session' };
+    }
+
+    const userResult = await query('SELECT id, email, stripe_customer_id FROM users WHERE id = $1', [
+      appUserId
+    ]);
+    if (!userResult.rows.length) {
+      return { success: false, error: 'User not found' };
+    }
+    const userRow = userResult.rows[0];
+    if (userRow.stripe_customer_id && userRow.stripe_customer_id !== customerId) {
+      return { success: false, error: 'Customer mismatch' };
+    }
+    if (!userRow.stripe_customer_id) {
+      await query('UPDATE users SET stripe_customer_id = $1 WHERE id = $2', [customerId, appUserId]);
+    }
+
+    let subscriptionId =
+      typeof session.subscription === 'string' ? session.subscription : session.subscription?.id;
+    if (!subscriptionId) {
+      return { success: false, error: 'No subscription on session' };
+    }
+
+    const stripeResult = await getStripeSubscription(subscriptionId);
+    if (!stripeResult.success) {
+      return { success: false, error: stripeResult.error || 'Failed to load subscription' };
+    }
+
+    const subscription = stripeResult.subscription;
+    const priceId = subscription.items.data[0].price.id;
+    let plan = 'free';
+
+    if (
+      priceId === process.env.STRIPE_STARTER_MONTHLY_PRICE_ID ||
+      priceId === process.env.STRIPE_STARTER_YEARLY_PRICE_ID
+    ) {
+      plan = 'pro';
+    } else if (
+      priceId === process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID ||
+      priceId === process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID
+    ) {
+      plan = 'premium';
+    } else if (
+      priceId === process.env.STRIPE_FOCUS_MONTHLY_PRICE_ID ||
+      priceId === process.env.STRIPE_FOCUS_YEARLY_PRICE_ID ||
+      priceId === 'price_focus_monthly' ||
+      priceId === 'price_focus_yearly'
+    ) {
+      plan = 'focus';
+    }
+
+    await query(
+      'UPDATE users SET subscription_plan = $1, subscription_status = $2, onboarding_completed = true WHERE id = $3',
+      [plan, subscription.status, userRow.id]
+    );
+
+    try {
+      const cancelAtPeriodEnd = Boolean(subscription.cancel_at_period_end);
+      await query(
+        `INSERT INTO subscriptions (user_id, stripe_subscription_id, stripe_customer_id, plan, status, current_period_start, current_period_end, cancel_at_period_end, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
+         ON CONFLICT (stripe_subscription_id) DO UPDATE SET
+         plan = EXCLUDED.plan,
+         status = EXCLUDED.status,
+         current_period_start = EXCLUDED.current_period_start,
+         current_period_end = EXCLUDED.current_period_end,
+         cancel_at_period_end = EXCLUDED.cancel_at_period_end,
+         updated_at = NOW()`,
+        [
+          userRow.id,
+          subscriptionId,
+          customerId,
+          plan,
+          subscription.status,
+          new Date(subscription.current_period_start * 1000),
+          new Date(subscription.current_period_end * 1000),
+          cancelAtPeriodEnd
+        ]
+      );
+    } catch (subError) {
+      console.error('syncCheckoutSessionForUser: subscription row error:', subError);
+    }
+
+    try {
+      await recordTrialUsage(userRow.email, customerId, plan);
+    } catch (discountError) {
+      if (discountError?.code !== '23505') {
+        console.error('syncCheckoutSessionForUser: recordTrialUsage:', discountError);
+      }
+    }
+
+    return { success: true, plan, subscriptionStatus: subscription.status };
+  } catch (error) {
+    console.error('syncCheckoutSessionForUser:', error);
+    return { success: false, error: error.message };
+  }
+};
+
 module.exports = {
   supabase,
   PLAN_LIMITS,
@@ -999,6 +1131,7 @@ module.exports = {
   recordTrialDecline,
   createStripeCustomer,
   createCheckoutSession,
+  syncCheckoutSessionForUser,
   getStripeSubscription,
   updateStripeSubscription,
   cancelStripeSubscription,

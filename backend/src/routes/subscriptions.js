@@ -4,25 +4,57 @@ const subscriptionService = require('../services/subscriptionService');
 const { authenticateToken } = require('../middleware/auth');
 const { getSupabase } = require('../database/connection');
 
+/** Raw Stripe/service errors are for server logs only; omit from JSON in production. */
+function devOnlyErrorDetail(detail) {
+  if (process.env.NODE_ENV !== 'development') return undefined;
+  if (detail == null) return undefined;
+  return typeof detail === 'string' ? detail : String(detail);
+}
+
+const CHECKOUT_GENERIC =
+  'We could not start checkout. Please refresh the page and try again.';
+
 // @route   POST /api/subscriptions/create-checkout-session
 // @desc    Create a Stripe checkout session for subscription
 // @access  Private
 router.post('/create-checkout-session', authenticateToken, async (req, res) => {
   try {
-    const { planType, billingCycle, successUrl, cancelUrl, promoCode, trialPeriodDays } = req.body;
+    const { planType, billingCycle, successUrl, cancelUrl, promoCode, trialPeriodDays, embedded, returnUrl } =
+      req.body;
     const userId = req.user.id;
+    const isEmbedded = embedded === true;
 
-    if (!planType || !billingCycle || !successUrl || !cancelUrl) {
+    if (!planType || !billingCycle) {
       return res.status(400).json({
         success: false,
-        message: 'Missing required fields: planType, billingCycle, successUrl, cancelUrl'
+        message: CHECKOUT_GENERIC
       });
+    }
+
+    if (!isEmbedded && (!successUrl || !cancelUrl)) {
+      return res.status(400).json({
+        success: false,
+        message: CHECKOUT_GENERIC
+      });
+    }
+
+    if (isEmbedded) {
+      const ru =
+        typeof returnUrl === 'string' && returnUrl.includes('{CHECKOUT_SESSION_ID}')
+          ? returnUrl.trim()
+          : `${process.env.FRONTEND_URL || 'http://localhost:5173'}/onboarding?session_id={CHECKOUT_SESSION_ID}`;
+      if (!ru.includes('{CHECKOUT_SESSION_ID}')) {
+        return res.status(400).json({
+          success: false,
+          message: CHECKOUT_GENERIC
+        });
+      }
     }
 
     if (planType !== 'pro' && planType !== 'premium') {
       return res.status(400).json({
         success: false,
-        message: 'Invalid plan type. Must be pro or premium.'
+        message: 'That subscription option is not available.'
       });
     }
 
@@ -38,10 +70,11 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
       );
 
       if (!customerResult.success) {
+        console.error('create-checkout-session: createStripeCustomer failed:', customerResult.error);
         return res.status(500).json({
           success: false,
-          message: 'Failed to create customer',
-          error: customerResult.error
+          message: 'We could not start checkout. Please try again in a moment.',
+          error: devOnlyErrorDetail(customerResult.error)
         });
       }
 
@@ -67,7 +100,12 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
         ? Number(trialPeriodDays)
         : 0;
 
-    // Optional promo (e.g. OFF10). When omitted, eligible users get auto-OFF10 alongside trial (first paid month).
+    // Optional promoCode in body applies that code when provided.
+    const embeddedReturnUrl =
+      typeof returnUrl === 'string' && returnUrl.includes('{CHECKOUT_SESSION_ID}')
+        ? returnUrl.trim()
+        : undefined;
+
     const sessionResult = await subscriptionService.createCheckoutSession(
       customerId,
       planType,
@@ -77,14 +115,19 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
       user.email,
       successUrl,
       cancelUrl,
-      { trialPeriodDays: trialDays }
+      {
+        trialPeriodDays: trialDays,
+        embedded: isEmbedded,
+        ...(embeddedReturnUrl ? { returnUrl: embeddedReturnUrl } : {})
+      }
     );
 
     if (!sessionResult.success) {
+      console.error('create-checkout-session: Stripe session failed:', sessionResult.error);
       return res.status(500).json({
         success: false,
-        message: 'Failed to create checkout session',
-        error: sessionResult.error
+        message: 'We could not start checkout. Please try again in a moment.',
+        error: devOnlyErrorDetail(sessionResult.error)
       });
     }
 
@@ -92,7 +135,10 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
       success: true,
       data: {
         sessionId: sessionResult.sessionId,
-        checkoutUrl: sessionResult.url
+        checkoutUrl: sessionResult.url,
+        ...(isEmbedded && sessionResult.clientSecret
+          ? { clientSecret: sessionResult.clientSecret }
+          : {})
       }
     });
 
@@ -102,6 +148,44 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
       success: false,
       message: 'Failed to create checkout session',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// @route   POST /api/subscriptions/sync-checkout-session
+// @desc    Confirm Embedded Checkout session and sync subscription to DB (webhook may lag)
+// @access  Private
+router.post('/sync-checkout-session', authenticateToken, async (req, res) => {
+  try {
+    const sessionId = typeof req.body?.sessionId === 'string' ? req.body.sessionId.trim() : '';
+    if (!sessionId) {
+      return res.status(400).json({
+        success: false,
+        message: 'We could not confirm your subscription yet. Please try again.'
+      });
+    }
+
+    const result = await subscriptionService.syncCheckoutSessionForUser(sessionId, req.user.id);
+    if (!result.success) {
+      console.warn('sync-checkout-session failed:', result.error);
+      return res.status(400).json({
+        success: false,
+        message: 'We could not confirm your subscription yet. Please try again.'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        plan: result.plan,
+        subscriptionStatus: result.subscriptionStatus
+      }
+    });
+  } catch (error) {
+    console.error('Error syncing checkout session:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to sync checkout session'
     });
   }
 });
@@ -246,10 +330,11 @@ router.put('/update', authenticateToken, async (req, res) => {
     );
 
     if (!updateResult.success) {
+      console.error('update subscription: Stripe failed:', updateResult.error);
       return res.status(500).json({
         success: false,
         message: 'Failed to update subscription',
-        error: updateResult.error
+        error: devOnlyErrorDetail(updateResult.error)
       });
     }
 
@@ -320,10 +405,11 @@ router.post('/cancel', authenticateToken, async (req, res) => {
     );
 
     if (!cancelResult.success) {
+      console.error('cancel subscription: Stripe failed:', cancelResult.error);
       return res.status(500).json({
         success: false,
         message: 'Failed to cancel subscription',
-        error: cancelResult.error
+        error: devOnlyErrorDetail(cancelResult.error)
       });
     }
 
@@ -430,10 +516,11 @@ router.get('/payment-methods', authenticateToken, async (req, res) => {
     );
 
     if (!paymentMethodsResult.success) {
+      console.error('payment-methods: Stripe failed:', paymentMethodsResult.error);
       return res.status(500).json({
         success: false,
         message: 'Failed to fetch payment methods',
-        error: paymentMethodsResult.error
+        error: devOnlyErrorDetail(paymentMethodsResult.error)
       });
     }
 
@@ -463,7 +550,7 @@ router.post('/setup-payment-method', authenticateToken, async (req, res) => {
     if (!subscriptionDetails.stripeCustomerId) {
       return res.status(400).json({
         success: false,
-        message: 'No Stripe customer found'
+        message: 'Billing is not set up for this account yet. Please try again.'
       });
     }
 
@@ -472,10 +559,11 @@ router.post('/setup-payment-method', authenticateToken, async (req, res) => {
     );
 
     if (!setupIntentResult.success) {
+      console.error('setup-payment-method: Stripe failed:', setupIntentResult.error);
       return res.status(500).json({
         success: false,
         message: 'Failed to create setup intent',
-        error: setupIntentResult.error
+        error: devOnlyErrorDetail(setupIntentResult.error)
       });
     }
 
@@ -505,7 +593,7 @@ router.post('/billing-portal', authenticateToken, async (req, res) => {
     if (!subscriptionDetails.stripeCustomerId) {
       return res.status(400).json({
         success: false,
-        message: 'No Stripe customer found'
+        message: 'Billing is not set up for this account yet. Please try again.'
       });
     }
 
@@ -517,10 +605,11 @@ router.post('/billing-portal', authenticateToken, async (req, res) => {
     );
 
     if (!portalResult.success) {
+      console.error('billing-portal: Stripe failed:', portalResult.error);
       return res.status(500).json({
         success: false,
         message: 'Failed to create billing portal session',
-        error: portalResult.error
+        error: devOnlyErrorDetail(portalResult.error)
       });
     }
 
@@ -582,7 +671,7 @@ router.post('/validate-promo-code', authenticateToken, async (req, res) => {
 });
 
 // @route   GET /api/subscriptions/trial-eligibility
-// @desc    Trial period vs first-time $10 off (OFF10). `eligible` = off10Eligible for backward compatibility.
+// @desc    One-time 7-day trial eligibility for this email.
 // @access  Private
 router.get('/trial-eligibility', authenticateToken, async (req, res) => {
   try {
@@ -596,16 +685,15 @@ router.get('/trial-eligibility', authenticateToken, async (req, res) => {
     }
 
     const trialEligibility = await subscriptionService.checkTrialEligibility(user.email);
-    const off10Eligibility = await subscriptionService.checkOff10Eligibility(user.email);
 
     res.json({
       success: true,
       trialEligible: trialEligibility.eligible,
-      off10Eligible: off10Eligibility.eligible,
-      /** @deprecated use off10Eligible; kept for older clients that used this for $10-off UI */
-      eligible: off10Eligibility.eligible,
+      off10Eligible: false,
+      /** @deprecated retained for older clients; always false */
+      eligible: false,
       trialReason: trialEligibility.reason || null,
-      off10Reason: off10Eligibility.reason || null,
+      off10Reason: null,
       reason: trialEligibility.reason || null,
       previousTrialDate: trialEligibility.previousTrialDate || null
     });

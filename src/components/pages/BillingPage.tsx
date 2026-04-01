@@ -100,7 +100,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
         '199 combined analyses, study packs & citations/mo',
         'Summarise unlimited research papers',
         '1GB total library storage',
-        'First month $10 off at checkout (like Pro)'
+        'Built for heavy essay and citation workloads'
       ],
       popular: false,
       stripePriceId: billingCycle === 'monthly' ? 'price_premium_monthly' : 'price_premium_yearly'
@@ -123,7 +123,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
 
       if (response.ok) {
         const data = await response.json();
-        setIsTrialEligible(data.off10Eligible ?? data.eligible ?? false);
+        setIsTrialEligible(data.trialEligible === true);
       }
     } catch (error) {
       console.error('Error checking trial eligibility:', error);
@@ -488,7 +488,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
                 ) : plan.id === 'free' ? (
                   'Stay Free'
                 ) : currentPlan === 'free' ? (
-                  isTrialEligible ? 'Get $10 Off' : `Upgrade to ${plan.name}`
+                  isTrialEligible ? 'Start 7-day free trial' : `Upgrade to ${plan.name}`
                 ) : (
                   `Switch to ${plan.name}`
                 )}

@@ -757,12 +757,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     Log in
                   </button>
               </div>
-                <p className="mb-6 sm:mb-7 flex flex-col sm:flex-row sm:flex-wrap items-center justify-center gap-y-1.5 sm:gap-x-3 sm:gap-y-0 text-center text-[12px] sm:text-sm text-stone-500 dark:text-stone-400 tracking-[0.03em] opacity-0 animate-hero-stagger-5">
-                  <span>About 30 seconds to get started.</span>
-                  <span className="hidden sm:inline text-stone-300 dark:text-stone-600 select-none" aria-hidden>
-                    ·
-                  </span>
-                  <span>No credit card required.</span>
+                <p className="mb-6 sm:mb-7 text-center text-[12px] sm:text-sm text-stone-500 dark:text-stone-400 tracking-[0.03em] opacity-0 animate-hero-stagger-5">
+                  About 30 seconds to get started.
                 </p>
 
                 <div className="flex justify-center w-full">
@@ -817,7 +813,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     </svg>
                   </button>
                   <p className="mt-4 text-sm text-stone-500 dark:text-stone-400">
-                    No credit card required · Free plan includes 2 analyses per month
+                    Free plan includes 2 analyses per month
                   </p>
                 </div>
 
@@ -1774,7 +1770,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
             </button>
-            <p className="mt-4 text-stone-500 dark:text-stone-400 text-sm">No credit card required</p>
           </div>
         </div>
       </section>
@@ -2789,12 +2784,11 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               <h3 className="font-semibold text-xl text-stone-900 dark:text-stone-100 mb-1 pt-1">Pro</h3>
               <p className="text-sm text-stone-500 dark:text-stone-400 mb-6">Most popular for students</p>
               <div className="mb-1 flex flex-col items-start">
-                <span className="text-lg font-semibold text-red-600 dark:text-red-400 line-through">$19.99</span>
                 <div className="flex items-baseline flex-wrap gap-x-2 gap-y-1">
-                  <span className="text-4xl font-bold text-stone-900 dark:text-stone-50">$9.99</span>
-                  <span className="text-stone-500 dark:text-stone-400 text-sm">/month <span className="text-violet-600 dark:text-violet-400 font-semibold">first month</span></span>
+                  <span className="text-4xl font-bold text-stone-900 dark:text-stone-50">$19.99</span>
+                  <span className="text-stone-500 dark:text-stone-400 text-sm">/month</span>
                 </div>
-                <span className="text-xs text-stone-500 dark:text-stone-500 mt-1">Then $19.99/mo, or $199.99/year (save 17%)</span>
+                <span className="text-xs text-stone-500 dark:text-stone-500 mt-1">or $199.99/year (save 17%)</span>
               </div>
               <ul className="space-y-2.5 mb-8 mt-5 flex-1 text-sm sm:text-[0.9375rem] text-stone-600 dark:text-stone-400">
                 <li className="flex gap-2">
@@ -2833,7 +2827,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 onClick={() => onNavigate('pricing')}
                 className="w-full py-3 px-6 rounded-xl font-semibold bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white shadow-md shadow-violet-900/15 dark:shadow-violet-950/40 ring-1 ring-violet-900/10 dark:ring-white/10 transition-colors"
               >
-                Get $10 off Pro
+                View Pro pricing
               </button>
             </div>
 
@@ -2846,12 +2840,11 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               <h3 className="font-semibold text-xl text-stone-900 dark:text-stone-100 mb-1 pt-1">Premium</h3>
               <p className="text-sm text-stone-500 dark:text-stone-400 mb-6">Heavy essays &amp; citations</p>
               <div className="mb-1 flex flex-col items-start">
-                <span className="text-lg font-semibold text-red-600 dark:text-red-400 line-through">$39.99</span>
                 <div className="flex items-baseline flex-wrap gap-x-2 gap-y-1">
-                  <span className="text-4xl font-bold text-stone-900 dark:text-stone-50">$29.99</span>
-                  <span className="text-stone-500 dark:text-stone-400 text-sm">/month <span className="text-amber-700 dark:text-amber-400 font-semibold">first month</span></span>
+                  <span className="text-4xl font-bold text-stone-900 dark:text-stone-50">$39.99</span>
+                  <span className="text-stone-500 dark:text-stone-400 text-sm">/month</span>
                 </div>
-                <span className="text-xs text-stone-500 dark:text-stone-500 mt-1">Then $39.99/mo, or $399.99/year (save 17%)</span>
+                <span className="text-xs text-stone-500 dark:text-stone-500 mt-1">or $399.99/year (save 17%)</span>
               </div>
               <ul className="space-y-2.5 mb-8 mt-5 flex-1 text-sm sm:text-[0.9375rem] text-stone-600 dark:text-stone-400">
                 <li className="flex gap-2">
@@ -2878,13 +2871,13 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 onClick={() => onNavigate('pricing')}
                 className="w-full py-3 px-6 rounded-xl font-semibold bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-amber-950 shadow-md shadow-amber-900/15 ring-1 ring-amber-700/20 transition-colors"
               >
-                Get $10 off Premium
+                View Premium pricing
               </button>
             </div>
           </div>
 
           <p className="text-center text-sm text-stone-500 dark:text-stone-500 mt-8 max-w-xl mx-auto">
-            First-time subscribers get $10 off the first month on Pro or Premium (applied at checkout).{' '}
+            Eligible accounts can start a 7-day Pro or Premium trial; monthly or yearly billing after that.{' '}
             <button
               type="button"
               onClick={() => onNavigate('pricing')}

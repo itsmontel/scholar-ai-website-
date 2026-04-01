@@ -20,7 +20,7 @@ import { getResetsInText, getExpiringSoonCount, getExpiringSoonUrgencyText, getD
 import { trackEvent } from '../../utils/analytics';
 import FocusModeSettingsSection from '../common/FocusModeSettingsSection';
 import { FOCUS_MODE_COMING_SOON, FOCUS_MODE_CHROME_EXTENSION_URL } from '../../constants/focusMode';
-import { HIDE_FRIENDS } from '../../config/featureFlags';
+import { HIDE_FRIENDS, HIDE_STREAK_AND_BADGES } from '../../config/featureFlags';
 import { FeatureTickRow } from '../common/FeatureTickRow';
 import { DEMO_DASHBOARD_BEFORE_PAPER, DEMO_DASHBOARD_AFTER_PAPER } from '../../data/landingPageDemoAnalysis';
 
@@ -177,29 +177,16 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
     } catch (_) {}
   }, []);
 
-  // Interactive tutorial — onboarding sessionStorage triggers full product tour
-  const [showInteractiveTutorial, setShowInteractiveTutorial] = useState(false);
-  /** True when opened via ?testActivationTutorial=1 — closes without persisting tutorial / paywall deferral */
+  /** True when opened via ?testActivationTutorial=1 — product-tour preview only */
   const [testActivationTutorial, setTestActivationTutorial] = useState(false);
   const activationTutorialTestRef = useRef(false);
 
+  /** Clear legacy session flag from older builds */
   useEffect(() => {
-    try {
-      const shouldShow = sessionStorage.getItem('writescholar_show_interactive_tutorial');
-      if (shouldShow === 'true') {
-        setShowInteractiveTutorial(true);
-      }
-    } catch (_) {}
-  }, []);
-
-  /** Welcome tour finished (e.g. analysis flow): clear interactive-tour session flag so dashboard coach does not stay armed. */
-  useEffect(() => {
-    if ((user as any)?.welcomeTutorialCompleted !== true) return;
-    setShowInteractiveTutorial(false);
     try {
       sessionStorage.removeItem('writescholar_show_interactive_tutorial');
     } catch (_) {}
-  }, [(user as any)?.welcomeTutorialCompleted]);
+  }, []);
 
   /** Preview: visit `/dashboard?testActivationTutorial=1` while logged in (no DB writes on exit). */
   useEffect(() => {
@@ -367,15 +354,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
     daysUntilReset: undefined as number | undefined
   });
 
-  // Welcome tutorial — Supabase is source of truth. true = never show again.
-  const showWelcomeTutorial = Boolean(
-    user?.id &&
-    (user as any).onboardingCompleted === true &&
-    (user as any).welcomeTutorialCompleted !== true
-  );
-
-  const isActivationDashboardTutorial =
-    testActivationTutorial || showInteractiveTutorial || showWelcomeTutorial;
+  const isActivationDashboardTutorial = testActivationTutorial;
   /** Welcome → sample loaded → point at Analyze Text. Main shell uses pointer-events-none while active. */
   const [activationDashboardStep, setActivationDashboardStep] = useState<
     'idle' | 'welcome' | 'essay' | 'analyze'
@@ -512,29 +491,31 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
   useEffect(() => {
     fetchDocuments();
     fetchUsageStats();
-    // Sync streak data for achievements
-    (async () => {
-      try {
-        const token = localStorage.getItem('authToken');
-        if (!token) return;
-        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/streaks`, {
-          headers: { 'Authorization': `Bearer ${token}` },
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (data.data) {
-            syncFromAPIData({
-              currentStreak: data.data.currentStreak,
-              longestStreak: data.data.longestStreak,
-            });
+    if (!HIDE_STREAK_AND_BADGES) {
+      // Sync streak data for achievements
+      (async () => {
+        try {
+          const token = localStorage.getItem('authToken');
+          if (!token) return;
+          const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/streaks`, {
+            headers: { 'Authorization': `Bearer ${token}` },
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.data) {
+              syncFromAPIData({
+                currentStreak: data.data.currentStreak,
+                longestStreak: data.data.longestStreak,
+              });
+            }
           }
-        }
-      } catch { /* ignore */ }
-    })();
-    // Check time-based achievements on dashboard load
-    const hour = new Date().getHours();
-    if (hour >= 22 || hour < 4) trackAction('used_after_10pm', true);
-    if (hour >= 4 && hour < 7) trackAction('used_before_7am', true);
+        } catch { /* ignore */ }
+      })();
+      // Check time-based achievements on dashboard load
+      const hour = new Date().getHours();
+      if (hour >= 22 || hour < 4) trackAction('used_after_10pm', true);
+      if (hour >= 4 && hour < 7) trackAction('used_before_7am', true);
+    }
   }, []);
 
   // Fetch quiz usage when switching to quiz mode
@@ -1920,7 +1901,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
           {/* Greeting strip */}
           <div className="rounded-2xl overflow-visible border border-stone-200/90 dark:border-stone-800 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.08)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.35)] backdrop-blur-md bg-white/80 dark:bg-stone-900/55 p-4 sm:p-5 md:p-6 ring-1 ring-white/50 dark:ring-white/5 animate-card-bounce-in" data-tutorial="greeting-area">
             <div className="flex flex-col gap-3 sm:gap-3 w-full">
-              {/* Greeting + tagline (left) · Search + streak/badges (right), no divider lines */}
+              {/* Greeting + tagline (left) · Search + optional streak/badges (right), no divider lines */}
               <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 sm:gap-3">
                 <div className="flex gap-3 sm:gap-4 min-w-0 flex-1 items-center sm:items-start">
                   <div className="hidden sm:block flex-shrink-0 relative group">
@@ -1977,9 +1958,11 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                     )}
                   </div>
                   <div className="hidden sm:flex flex-row flex-wrap items-center justify-center lg:justify-end gap-2 w-full">
-                    <div data-tutorial="streak-widget" className="flex-shrink-0">
-                      <StreakWidget compact />
-                    </div>
+                    {!HIDE_STREAK_AND_BADGES && (
+                      <div data-tutorial="streak-widget" className="flex-shrink-0">
+                        <StreakWidget compact />
+                      </div>
+                    )}
                     {!HIDE_FRIENDS && (
                       <button
                         onClick={() => onNavigate('friends')}
@@ -1993,7 +1976,9 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                         )}
                       </button>
                     )}
-                    <div className="flex-shrink-0"><BadgeWidget onNavigate={onNavigate} /></div>
+                    {!HIDE_STREAK_AND_BADGES && (
+                      <div className="flex-shrink-0"><BadgeWidget onNavigate={onNavigate} /></div>
+                    )}
                     {usageStats.plan === 'free' && !loadingStats && (
                       <button
                         type="button"
@@ -2007,11 +1992,13 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                       </button>
                     )}
                   </div>
-                  {/* Mobile: streak + friends + badges + upgrade */}
+                  {/* Mobile: optional streak + friends + badges + upgrade */}
                   <div className="flex sm:hidden items-center gap-2 w-full overflow-x-auto scrollbar-hide pb-0.5 -mx-0.5 px-0.5">
-                    <div data-tutorial="streak-widget" className="flex-shrink-0">
-                      <StreakWidget compact />
-                    </div>
+                    {!HIDE_STREAK_AND_BADGES && (
+                      <div data-tutorial="streak-widget" className="flex-shrink-0">
+                        <StreakWidget compact />
+                      </div>
+                    )}
                     {!HIDE_FRIENDS && (
                       <button
                         onClick={() => onNavigate('friends')}
@@ -2025,9 +2012,11 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                         )}
                       </button>
                     )}
-                    <div className="flex-shrink-0 min-w-0">
-                      <BadgeWidget onNavigate={onNavigate} />
-                    </div>
+                    {!HIDE_STREAK_AND_BADGES && (
+                      <div className="flex-shrink-0 min-w-0">
+                        <BadgeWidget onNavigate={onNavigate} />
+                      </div>
+                    )}
                     {usageStats.plan === 'free' && !loadingStats && (
                       <button
                         type="button"
@@ -2068,7 +2057,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                   <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(91,33,182,0.04),transparent_55%)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-15%,rgba(109,40,217,0.08),transparent_55%)] pointer-events-none rounded-b-2xl" aria-hidden />
                   {mode === 'analyze' ? (
                     <div data-tutorial="analyze-essay-input-cluster" className="flex flex-col">
-                    <div className="relative lg:grid lg:grid-cols-[minmax(0,220px)_minmax(0,48rem)_minmax(0,220px)] lg:gap-8 xl:gap-10 lg:items-start">
+                    <div className="relative lg:grid lg:grid-cols-[minmax(0,220px)_minmax(0,56rem)_minmax(0,220px)] lg:gap-8 xl:gap-10 lg:items-start">
                       <div className="hidden lg:block relative self-start justify-self-start w-[236px] xl:w-[248px] pointer-events-auto -rotate-[15deg] origin-bottom-left drop-shadow-lg z-[5] lg:mt-5 xl:mt-6" aria-label="Sample before feedback">
                         <p className="text-center mb-2">
                           <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-amber-800/95 dark:text-amber-300/95">Before</span>
@@ -2088,16 +2077,17 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                   </div>
                       </div>
                       <div className="min-w-0" data-tutorial="dashboard-tool-tabs-hero">
-                        <h2 className="relative text-lg sm:text-2xl md:text-[2rem] lg:text-[2.125rem] font-semibold text-stone-900 dark:text-stone-50 text-center mb-2 sm:mb-2 tracking-tight leading-snug px-0.5 sm:px-1" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
-                          <span className="text-emerald-700 dark:text-emerald-400">Paste</span>
-                          {' '}or{' '}
-                          <span className="text-blue-700 dark:text-blue-400">upload</span>
-                          {' '}your essay, get <span className="text-violet-800 dark:text-violet-300">feedback</span> in seconds
+                        <h2 className="relative text-lg sm:text-2xl md:text-[2rem] lg:text-[2.125rem] font-semibold text-stone-900 dark:text-stone-50 text-center mb-3 sm:mb-4 tracking-tight leading-snug px-0.5 sm:px-1" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
+                          <span className="text-blue-700 dark:text-blue-400">Upload</span>
+                          {' '}your paper, get <span className="text-violet-800 dark:text-violet-300">feedback</span> in seconds
                         </h2>
-                        <p className="relative text-stone-600 dark:text-stone-300 text-[13px] sm:text-base text-center mb-3 sm:mb-2.5 max-w-xl mx-auto leading-relaxed">
-                          Upload your essay, get <span className="text-red-600 dark:text-red-500">professor</span><span className="text-amber-600 dark:text-amber-500">-style</span> <span className="text-green-600 dark:text-green-500">feedback</span>
-                        </p>
-                        <div className="hidden sm:block">
+                        {((user?.plan ?? usageStats.plan) || 'free').toLowerCase() === 'free' && (
+                          <p className="relative text-stone-600 dark:text-stone-300 text-[13px] sm:text-base text-center mb-4 sm:mb-5 max-w-xl mx-auto leading-relaxed">
+                            Files get a preview on the analysis page. Upgrade to Pro for the{' '}
+                            <span className="font-semibold text-violet-700 dark:text-violet-400">full</span> annotation breakdown.
+                          </p>
+                        )}
+                        <div className="hidden sm:block mt-5 sm:mt-7">
                           <FeatureTickRow className="relative mb-1 sm:mb-1.5" items={['Structure', 'Annotations', 'Rubric', 'Suggestions']} />
                         </div>
                         <div className="relative flex rounded-xl border border-stone-200/90 dark:border-stone-700 bg-stone-100/60 dark:bg-stone-800/50 p-0.5 sm:p-1 mb-2 sm:mb-1.5 w-full max-w-lg mx-auto shadow-sm">
@@ -2146,8 +2136,112 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                       </div>
                     </div>
                       <div className="relative w-full mb-2">
-                      {/* Essay input, drop zone, and demo (same column as last release) */}
-                      <div className="min-w-0 relative z-20 w-full max-w-3xl mx-auto space-y-3 sm:space-y-4 mt-0 lg:-mt-32 xl:-mt-36">
+                      <div className="min-w-0 relative z-20 w-full max-w-4xl mx-auto space-y-3 sm:space-y-4 mt-0 lg:-mt-40 xl:-mt-44">
+                          <input
+                            ref={analyzeFileInputRef}
+                            type="file"
+                            accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                            onChange={handleAnalyzeFileUpload}
+                            className="hidden"
+                            aria-hidden
+                          />
+                          {analyzeUploadError && (
+                            <div className="px-1 text-center sm:text-left">
+                              <p className="text-sm font-medium text-red-600 dark:text-red-400">{analyzeUploadError}</p>
+                            </div>
+                          )}
+                          <div
+                            className={`relative w-full max-w-xl mx-auto aspect-square max-h-[min(calc(100vw-2rem),520px)] sm:max-h-[500px] ${
+                              showFirstAnalysisOnboarding ? 'ring-[3px] ring-violet-400/55 ring-offset-2 ring-offset-white dark:ring-offset-stone-900 rounded-[1.35rem]' : ''
+                            }`}
+                          >
+                            <div
+                              role="button"
+                              tabIndex={0}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  if (!isParsingAnalyzeDoc) analyzeFileInputRef.current?.click();
+                                }
+                              }}
+                              onClick={() => { if (!isParsingAnalyzeDoc) analyzeFileInputRef.current?.click(); }}
+                              onDragEnter={handleAnalyzeDropZoneDrag}
+                              onDragLeave={handleAnalyzeDropZoneDrag}
+                              onDragOver={handleAnalyzeDropZoneDrag}
+                              onDrop={handleAnalyzeDropZoneDrop}
+                              data-tutorial="essay-upload"
+                              className={`group/dz flex h-full w-full flex-col items-center justify-center gap-4 rounded-3xl border-2 border-dashed px-5 py-8 text-center transition-all duration-300 select-none ${
+                                isParsingAnalyzeDoc
+                                  ? 'border-stone-200 dark:border-stone-600 bg-stone-50/50 dark:bg-stone-800/30 opacity-70 cursor-wait'
+                                  : analyzeDropActive
+                                    ? 'border-violet-500 bg-violet-100/90 dark:bg-violet-950/45 shadow-xl shadow-violet-500/20 ring-2 ring-violet-400/40 cursor-pointer'
+                                    : showFirstAnalysisOnboarding
+                                      ? 'border-violet-500 dark:border-violet-400 bg-gradient-to-b from-violet-50 to-white dark:from-violet-950/50 dark:to-stone-900/80 shadow-lg shadow-violet-600/20 cursor-pointer'
+                                      : 'border-violet-300/80 dark:border-violet-600/55 bg-gradient-to-b from-violet-50/95 to-white/90 dark:from-violet-950/35 dark:to-stone-900/70 hover:border-violet-400 dark:hover:border-violet-500 hover:shadow-lg hover:shadow-violet-500/15 cursor-pointer'
+                              }`}
+                              aria-label="Upload your paper: drop a file or click to browse. Opens analysis with document preview."
+                            >
+                              <div
+                                className={`flex h-[5.25rem] w-[5.25rem] sm:h-28 sm:w-28 shrink-0 items-center justify-center rounded-3xl shadow-lg transition-transform duration-300 group-hover/dz:scale-[1.06] bg-violet-600 text-white shadow-violet-600/40 ${
+                                  analyzeDropActive ? 'ring-4 ring-violet-300/70 dark:ring-violet-500/45' : ''
+                                }`}
+                                aria-hidden
+                              >
+                                <svg className="w-12 h-12 sm:w-14 sm:h-14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                              </div>
+                              <div className="min-w-0 px-1">
+                                <p className="text-xl sm:text-2xl font-bold tracking-tight text-violet-900 dark:text-violet-100" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
+                                  Upload your paper
+                                </p>
+                                <p className="text-sm sm:text-base text-stone-600 dark:text-stone-300 mt-2 leading-relaxed">
+                                  Drop a file or tap to browse · <span className="font-semibold text-violet-700 dark:text-violet-400">PDF</span>,{' '}
+                                  <span className="font-semibold text-emerald-700 dark:text-emerald-400">Word</span>, or{' '}
+                                  <span className="font-semibold text-violet-700 dark:text-violet-400">TXT</span>
+                                  <span className="block mt-1.5 text-xs sm:text-sm text-stone-500 dark:text-stone-400">
+                                    {((user?.plan ?? usageStats.plan) || 'free').toLowerCase() === 'free' ? (
+                                      <>
+                                        Free plan: up to {getMaxAnalyzeFileSizeLabel(user?.plan ?? usageStats.plan)} ·{' '}
+                                        <span
+                                          className="font-semibold text-violet-600 dark:text-violet-400 underline decoration-violet-400/60 hover:text-violet-700 dark:hover:text-violet-300 cursor-pointer"
+                                          onClick={(e) => { e.stopPropagation(); onNavigate('pricing'); }}
+                                        >
+                                          Pro for larger files
+                                        </span>
+                                      </>
+                                    ) : (
+                                      <>Up to {getMaxAnalyzeFileSizeLabel(user?.plan ?? usageStats.plan)} per file on your plan.</>
+                                    )}
+                                  </span>
+                                </p>
+                              </div>
+                            </div>
+
+                            {isParsingAnalyzeDoc && (
+                              <div
+                                className="absolute inset-0 rounded-3xl bg-white/95 dark:bg-stone-900/95 backdrop-blur-sm flex flex-col items-center justify-center gap-3 sm:gap-4 z-10 pointer-events-auto px-4 py-6 sm:px-6 sm:py-8"
+                                aria-live="polite"
+                                aria-busy="true"
+                              >
+                                <LoadingSpinner size="lg" text={`Uploading… ${analyzeUploadProgress}%`} color="blue" />
+                                <div className="w-full max-w-xs bg-stone-200 dark:bg-stone-700 rounded-full h-2 overflow-hidden">
+                                  <div
+                                    className="bg-violet-600 h-2 rounded-full transition-all duration-300"
+                                    style={{ width: `${analyzeUploadProgress}%` }}
+                                  />
+                                </div>
+                                <p className="text-xs sm:text-sm text-center text-stone-600 dark:text-stone-400 max-w-sm">
+                                  Saving to your library and opening analysis…
+                                </p>
+                              </div>
+                            )}
+                          </div>
+
+                          <p className="text-center text-[13px] sm:text-sm font-medium text-stone-500 dark:text-stone-400 pt-1">
+                            Or paste your essay below <span className="text-amber-600 dark:text-amber-400">(min 200 words)</span>
+                          </p>
+
                           <div
                             data-activation-essay-box
                             data-tutorial-target="essay-input-wrapper"
@@ -2185,38 +2279,9 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                               )}
                             </div>
                           </div>
-                          <input
-                            ref={analyzeFileInputRef}
-                            type="file"
-                            accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
-                            onChange={handleAnalyzeFileUpload}
-                            className="hidden"
-                            aria-hidden
-                          />
-                          {analyzeUploadError && (
-                            <div className="px-1 text-center sm:text-left">
-                              <p className="text-sm font-medium text-red-600 dark:text-red-400">{analyzeUploadError}</p>
-                            </div>
-                          )}
+
                           <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 sm:gap-5">
                             <div className="flex items-center gap-3 flex-wrap justify-center sm:justify-start">
-                              <button
-                                type="button"
-                                onClick={() => analyzeFileInputRef.current?.click()}
-                                disabled={isParsingAnalyzeDoc}
-                                className={`flex items-center gap-2.5 px-6 py-3.5 rounded-xl font-semibold text-sm transition-all border shadow-md disabled:opacity-60 disabled:pointer-events-none disabled:hover:translate-y-0 ${
-                                  showFirstAnalysisOnboarding
-                                    ? 'bg-violet-600 dark:bg-violet-500 text-white border-violet-400/50 shadow-lg shadow-violet-600/30 ring-2 ring-violet-400/40 hover:bg-violet-500 dark:hover:bg-violet-400 hover:-translate-y-0.5'
-                                    : 'bg-violet-600 dark:bg-violet-500 text-white border-violet-400/40 shadow-lg shadow-violet-600/25 ring-1 ring-violet-400/30 hover:bg-violet-500 dark:hover:bg-violet-400 hover:shadow-xl hover:shadow-violet-600/20 hover:-translate-y-0.5 active:translate-y-0'
-                                }`}
-                              >
-                                {isParsingAnalyzeDoc ? (
-                                  <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                ) : (
-                                  <svg className="w-5 h-5 shrink-0 opacity-95" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
-                                )}
-                                {isParsingAnalyzeDoc ? 'Uploading...' : 'Upload file'}
-                              </button>
                               <button
                                 type="button"
                                 onClick={() => onNavigate('upload')}
@@ -2301,76 +2366,6 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                                 Analyze Text
                               </button>
                             </div>
-                          </div>
-
-                          <div className="relative min-h-[200px] sm:min-h-[220px]">
-                            <div
-                              role="button"
-                              tabIndex={0}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter' || e.key === ' ') {
-                                  e.preventDefault();
-                                  if (!isParsingAnalyzeDoc) analyzeFileInputRef.current?.click();
-                                }
-                              }}
-                              onClick={() => { if (!isParsingAnalyzeDoc) analyzeFileInputRef.current?.click(); }}
-                              onDragEnter={handleAnalyzeDropZoneDrag}
-                              onDragLeave={handleAnalyzeDropZoneDrag}
-                              onDragOver={handleAnalyzeDropZoneDrag}
-                              onDrop={handleAnalyzeDropZoneDrop}
-                              data-tutorial="essay-upload"
-                              className={`group/dz rounded-2xl border-2 border-dashed p-6 sm:p-8 text-center transition-all duration-300 select-none ${
-                                isParsingAnalyzeDoc
-                                  ? 'border-stone-200 dark:border-stone-600 bg-stone-50/50 dark:bg-stone-800/30 opacity-70 cursor-wait'
-                                  : analyzeDropActive
-                                    ? 'border-violet-500 bg-violet-100/90 dark:bg-violet-950/45 shadow-lg shadow-violet-500/15 ring-2 ring-violet-400/40 cursor-pointer'
-                                    : 'border-violet-300/80 dark:border-violet-600/55 bg-violet-50/90 dark:bg-violet-950/25 hover:border-violet-400 dark:hover:border-violet-500 hover:bg-violet-50 dark:hover:bg-violet-950/35 hover:shadow-md hover:shadow-violet-500/10 cursor-pointer'
-                              }`}
-                              aria-label="Drop a document to open it on the analysis page with preview, or click to browse"
-                            >
-                              <div className="flex flex-col sm:flex-row items-center justify-center gap-5 sm:gap-7">
-                                <div
-                                  className={`flex h-16 w-16 sm:h-[4.5rem] sm:w-[4.5rem] shrink-0 items-center justify-center rounded-2xl shadow-inner transition-transform duration-300 group-hover/dz:scale-105 bg-violet-600 text-white shadow-lg shadow-violet-600/35 ${
-                                    analyzeDropActive ? 'ring-2 ring-violet-300/80 dark:ring-violet-500/50' : ''
-                                  }`}
-                                  aria-hidden
-                                >
-                                  <svg className="w-8 h-8 sm:w-9 sm:h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                  </svg>
-                                </div>
-                                <div className="text-left sm:text-left min-w-0 max-w-md">
-                                  <p className="text-lg sm:text-xl font-bold tracking-tight text-violet-800 dark:text-violet-200">
-                                    Drop your document here
-                                  </p>
-                                  <p className="text-sm sm:text-[0.9375rem] text-stone-600 dark:text-stone-300 mt-2 leading-relaxed">
-                                    Or click to browse: <span className="font-semibold text-violet-700 dark:text-violet-400">PDF</span>,{' '}
-                                    <span className="font-semibold text-emerald-700 dark:text-emerald-400">Word</span>, or{' '}
-                                    <span className="font-semibold text-violet-700 dark:text-violet-400">TXT</span>. We&apos;ll upload it and open{' '}
-                                    <span className="font-semibold text-stone-800 dark:text-stone-100">analysis</span> with your document preview—no need to paste in the box.
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-
-                            {isParsingAnalyzeDoc && (
-                              <div
-                                className="absolute inset-0 rounded-2xl bg-white/95 dark:bg-stone-900/95 backdrop-blur-sm flex flex-col items-center justify-center gap-3 sm:gap-4 z-10 pointer-events-auto px-4 py-6 sm:px-6 sm:py-8"
-                                aria-live="polite"
-                                aria-busy="true"
-                              >
-                                <LoadingSpinner size="lg" text={`Uploading… ${analyzeUploadProgress}%`} color="blue" />
-                                <div className="w-full max-w-xs bg-stone-200 dark:bg-stone-700 rounded-full h-2 overflow-hidden">
-                                  <div
-                                    className="bg-violet-600 h-2 rounded-full transition-all duration-300"
-                                    style={{ width: `${analyzeUploadProgress}%` }}
-                                  />
-                                </div>
-                                <p className="text-xs sm:text-sm text-center text-stone-600 dark:text-stone-400 max-w-sm">
-                                  Saving to your library and opening analysis…
-                                </p>
-                              </div>
-                            )}
                           </div>
                       </div>
 
