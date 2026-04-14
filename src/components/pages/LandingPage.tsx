@@ -692,7 +692,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                       paper={DEMO_PAPERS[1]}
                       rotate="left"
                       variant="before"
-                      interactiveConcernRevision
                       maxExcerptChars={560}
                       onOpenDemo={scrollToInteractiveDemoFeedback}
                     />
@@ -793,7 +792,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 </aside>
               </div>
 
-              {/* Interactive analysis — high in hero; copy lives inside the mock (landingHeroEmbed) */}
+              {/* Analysis preview — high in hero */}
               <div
                 id="landing-tools"
                 className="w-full max-w-6xl mx-auto mt-5 sm:mt-7 lg:mt-8 scroll-mt-24 px-3 sm:px-2 lg:px-1"

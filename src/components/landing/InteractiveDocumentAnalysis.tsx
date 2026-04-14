@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import {
   DEMO_PAPERS,
   type DemoAnnotation,
@@ -12,27 +12,8 @@ const REVISION_MARK_CLASS =
 /** Landing hero: hero “Full interactive demo” CTA scrolls here and focuses the feedback column */
 export const LANDING_DEMO_FOCUS_FEEDBACK_EVENT = 'writescholar:landing-demo-focus-feedback';
 
-/** Compact guidance when a demo revision is applied (banner stays subtle). */
-const REVISION_GUIDANCE_COPY: Record<'improve' | 'concern', string> = {
-  improve: 'Purple text in the essay is the new wording—often clearer flow or a sharper thesis line from the suggestion you applied.',
-  concern: 'Purple text in the essay replaces the flagged sentence—stronger argument or clearer wording in context.',
-};
-
-/** Landing hero: below Tailwind `lg` (1024px), automated tour stays off — static preview only. */
-const LANDING_HERO_MOBILE_MQ = '(max-width: 1023px)';
-
-function useLandingHeroMobileLayout(): boolean {
-  const [matches, setMatches] = useState(() =>
-    typeof window !== 'undefined' ? window.matchMedia(LANDING_HERO_MOBILE_MQ).matches : false
-  );
-  useEffect(() => {
-    const mq = window.matchMedia(LANDING_HERO_MOBILE_MQ);
-    const fn = () => setMatches(mq.matches);
-    mq.addEventListener('change', fn);
-    return () => mq.removeEventListener('change', fn);
-  }, []);
-  return matches;
-}
+/** Demo never applies revisions in-page — keeps highlights static. */
+const EMPTY_APPLIED_IDS = new Set<string>();
 
 interface LandingDemoDisplay {
   displayContent: string;
@@ -261,234 +242,31 @@ interface InteractiveDocumentAnalysisProps {
 }
 
 export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmbed = false }: InteractiveDocumentAnalysisProps) {
-  const isLandingMobile = useLandingHeroMobileLayout();
   const [selectedDemoId, setSelectedDemoId] = useState<string>(DEMO_PAPERS.find((p) => p.id === 'b')?.id ?? DEMO_PAPERS[0].id);
   const [selectedAnnotation, setSelectedAnnotation] = useState<string | null>(null);
   const [hoveredAnnotation, setHoveredAnnotation] = useState<string | null>(null);
   const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null);
   const [mobileTab, setMobileTab] = useState<'document' | 'feedback' | 'analysis'>('document');
-  /** Rubric + category scores (default) vs full written report; only one at a time */
-  const [analysisPanel, setAnalysisPanel] = useState<'assessment' | 'comprehensive'>('assessment');
-  /** Landing demo: inline “Apply WriteScholar revision” replacements */
-  const [appliedDemoRevisions, setAppliedDemoRevisions] = useState<Set<string>>(() => new Set());
-  const [demoRevisionNotice, setDemoRevisionNotice] = useState<{ comment: string; type: 'improve' | 'concern' } | null>(null);
-  /** Landing hero: tour is opt-in only (Play tour) — never auto-starts on desktop or mobile. */
-  const [walkthroughPlaying, setWalkthroughPlaying] = useState(false);
-  const [fakeCursor, setFakeCursor] = useState<{ x: number; y: number; visible: boolean }>({ x: 0, y: 0, visible: false });
-  const [walkthroughPulse, setWalkthroughPulse] = useState<string | null>(null);
-  /** Dashboard hero: pause the automated tour when scrolled off-screen or tab is hidden */
-  const [heroDemoInView, setHeroDemoInView] = useState(false);
-  const [docTabVisible, setDocTabVisible] = useState(true);
 
-  const rootRef = useRef<HTMLDivElement>(null);
-  /** Scrollable regions only — walkthrough must not use scrollIntoView (scrolls the whole page). */
   const documentPanelScrollRef = useRef<HTMLDivElement>(null);
   const feedbackPanelScrollRef = useRef<HTMLDivElement>(null);
-  const walkthroughTimersRef = useRef<number[]>([]);
 
   const demo = DEMO_PAPERS.find((d) => d.id === selectedDemoId) ?? DEMO_PAPERS[0];
 
   const anchorMap = useMemo(() => computeAnchorMap(demo.content, demo.annotations), [demo.content, demo.annotations]);
 
   const landingDisplay = useMemo(
-    () => buildLandingDemoDisplay(demo, appliedDemoRevisions, anchorMap),
-    [demo, appliedDemoRevisions, anchorMap]
+    () => buildLandingDemoDisplay(demo, EMPTY_APPLIED_IDS, anchorMap),
+    [demo, anchorMap]
   );
 
   const { displayContent, paragraphRanges, hlSpans, revRanges } = landingDisplay;
-
-  const revisableOrdered = useMemo(() => {
-    const list = demo.annotations.filter((a) => a.demoRevisedText && a.type !== 'strong');
-    return list.sort((a, b) => {
-      const aa = anchorMap.get(a.id)?.start ?? 0;
-      const bb = anchorMap.get(b.id)?.start ?? 0;
-      return aa - bb;
-    });
-  }, [demo.annotations, anchorMap]);
-
-  const applyDemoRevision = useCallback((annotationId: string) => {
-    const ann = demo.annotations.find((a) => a.id === annotationId);
-    if (!ann?.demoRevisedText) return;
-    setAppliedDemoRevisions((prev) => {
-      if (prev.has(annotationId)) return prev;
-      return new Set(prev).add(annotationId);
-    });
-    if (ann.type === 'improve' || ann.type === 'concern') {
-      setDemoRevisionNotice({ comment: ann.comment, type: ann.type });
-    }
-    setSelectedAnnotation(annotationId);
-  }, [demo.annotations]);
-
-  const clearDemoRevisions = useCallback(() => {
-    setAppliedDemoRevisions(new Set());
-    setDemoRevisionNotice(null);
-    setSelectedAnnotation(null);
-  }, []);
-
-  /** `applyButton`: tip near center of full-width pill (stable when label wraps); `offset`: top-left + px for inline spans */
-  const positionFakeCursorOnEl = useCallback(
-    (el: HTMLElement | null, target: { type: 'offset'; x: number; y: number } | { type: 'applyButton' } = { type: 'offset', x: 8, y: 8 }) => {
-      if (!el || !rootRef.current) return;
-      const root = rootRef.current.getBoundingClientRect();
-      const t = el.getBoundingClientRect();
-      if (target.type === 'applyButton') {
-        setFakeCursor({
-          x: t.left - root.left + t.width * 0.42,
-          y: t.top - root.top + t.height * 0.48,
-          visible: true,
-        });
-        return;
-      }
-      setFakeCursor({
-        x: t.left - root.left + target.x,
-        y: t.top - root.top + target.y,
-        visible: true,
-      });
-    },
-    []
-  );
 
   const afterLayout = useCallback((fn: () => void) => {
     requestAnimationFrame(() => {
       requestAnimationFrame(fn);
     });
   }, []);
-
-  useEffect(() => {
-    setAppliedDemoRevisions(new Set());
-    setDemoRevisionNotice(null);
-    setWalkthroughPulse(null);
-    setFakeCursor((c) => ({ ...c, visible: false }));
-  }, [selectedDemoId]);
-
-  useLayoutEffect(() => {
-    if (!landingHeroEmbed) return;
-    const el = rootRef.current;
-    if (!el) return;
-
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        setHeroDemoInView(entry.isIntersecting);
-      },
-      { root: null, threshold: 0.12, rootMargin: '0px 0px -8% 0px' }
-    );
-    io.observe(el);
-
-    const onVisibility = () => setDocTabVisible(document.visibilityState === 'visible');
-    document.addEventListener('visibilitychange', onVisibility);
-    onVisibility();
-
-    return () => {
-      io.disconnect();
-      document.removeEventListener('visibilitychange', onVisibility);
-    };
-  }, [landingHeroEmbed]);
-
-  /** Mobile landing: no automated tour — keep preview static (user explores tabs manually). */
-  useEffect(() => {
-    if (!landingHeroEmbed || !isLandingMobile) return;
-    setWalkthroughPlaying(false);
-    setWalkthroughPulse(null);
-    setFakeCursor((c) => ({ ...c, visible: false }));
-  }, [landingHeroEmbed, isLandingMobile]);
-
-  useEffect(() => {
-    if (!landingHeroEmbed || !walkthroughPlaying || !heroDemoInView || !docTabVisible || isLandingMobile) {
-      setFakeCursor((c) => ({ ...c, visible: false }));
-      if (isLandingMobile) setWalkthroughPulse(null);
-      return;
-    }
-    const reduce = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce || revisableOrdered.length === 0) return;
-
-    walkthroughTimersRef.current.forEach((id) => clearTimeout(id));
-    walkthroughTimersRef.current = [];
-
-    const schedule = (fn: () => void, ms: number) => {
-      const id = window.setTimeout(fn, ms);
-      walkthroughTimersRef.current.push(id);
-    };
-
-    const runPair = (ann: DemoAnnotation, onDone: () => void) => {
-      let seq = 0;
-      schedule(() => {
-        setMobileTab('document');
-        const span = rootRef.current?.querySelector<HTMLElement>(`[data-landing-doc-ann="${ann.id}"]`);
-        const docScroll = documentPanelScrollRef.current;
-        if (span && docScroll) {
-          // Instant scroll so rects match when we place the cursor (smooth scroll was still moving on later steps)
-          scrollChildIntoContainer(docScroll, span, 'center', 'auto');
-          schedule(() => {
-            afterLayout(() => {
-              const el = rootRef.current?.querySelector<HTMLElement>(`[data-landing-doc-ann="${ann.id}"]`);
-              if (el) positionFakeCursorOnEl(el, { type: 'offset', x: 12, y: 14 });
-              setWalkthroughPulse(ann.id);
-            });
-          }, 480);
-        }
-      }, seq);
-      seq += 1580;
-
-      schedule(() => {
-        setMobileTab((prev) => (typeof window !== 'undefined' && window.innerWidth < 1024 ? 'feedback' : prev));
-        const deferMs = typeof window !== 'undefined' && window.innerWidth < 1024 ? 90 : 0;
-        schedule(() => {
-          const btn = rootRef.current?.querySelector<HTMLElement>(`[data-landing-apply="${ann.id}"]`);
-          const fbScroll = feedbackPanelScrollRef.current;
-          if (btn && fbScroll) {
-            scrollChildIntoContainer(fbScroll, btn, 'nearest', 'auto');
-            schedule(() => {
-              afterLayout(() => {
-                const b = rootRef.current?.querySelector<HTMLElement>(`[data-landing-apply="${ann.id}"]`);
-                if (b) positionFakeCursorOnEl(b, { type: 'applyButton' });
-              });
-            }, 100);
-          }
-        }, deferMs);
-      }, seq);
-      seq += 1150;
-
-      schedule(() => {
-        setWalkthroughPulse(null);
-        applyDemoRevision(ann.id);
-        setFakeCursor((c) => ({ ...c, visible: false }));
-      }, seq);
-      seq += 2700;
-
-      schedule(onDone, seq);
-    };
-
-    const loop = (idx: number) => {
-      if (idx >= revisableOrdered.length) {
-        schedule(() => {
-          clearDemoRevisions();
-          setMobileTab('document');
-          loop(0);
-        }, 3400);
-        return;
-      }
-      runPair(revisableOrdered[idx], () => loop(idx + 1));
-    };
-
-    schedule(() => loop(0), 850);
-
-    return () => {
-      walkthroughTimersRef.current.forEach((id) => clearTimeout(id));
-      walkthroughTimersRef.current = [];
-    };
-  }, [
-    landingHeroEmbed,
-    walkthroughPlaying,
-    heroDemoInView,
-    docTabVisible,
-    revisableOrdered,
-    applyDemoRevision,
-    clearDemoRevisions,
-    positionFakeCursorOnEl,
-    afterLayout,
-    selectedDemoId,
-    isLandingMobile,
-  ]);
 
   /** Hero “Full interactive demo” CTA: open Feedback tab and select first annotation (document order). */
   useEffect(() => {
@@ -565,14 +343,13 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
             }
             const ann = seg.ann;
             const isSelected = selectedAnnotation === ann.id || hoveredAnnotation === ann.id;
-            const isPulse = walkthroughPulse === ann.id;
             return (
               <span
                 key={`${ann.id}-${i}`}
                 data-landing-doc-ann={ann.id}
                 className={`relative inline ${highlightClasses[ann.type]} px-0.5 cursor-pointer transition-all duration-200 ${
                   isSelected ? 'ring-2 ring-offset-2 ring-violet-500' : ''
-                } ${isPulse ? 'motion-safe:animate-[landing-highlight-pulse_1.35s_ease-in-out_2] z-[1]' : ''}`}
+                }`}
                 onClick={() => setSelectedAnnotation(ann.id)}
                 onMouseEnter={(e) => {
                   setHoveredAnnotation(ann.id);
@@ -628,7 +405,6 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
         <div className="flex flex-wrap items-center gap-6">
           <div>
             <h2 className="text-xl font-bold">General Academic Assessment</h2>
-            <p className="text-emerald-100 text-sm mt-0.5">Standard college rubric: thesis, evidence, structure, and clarity</p>
           </div>
           <div className="flex items-center gap-6 ml-auto">
             <div className="text-right">
@@ -658,194 +434,18 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
     </div>
   );
 
-  const renderComprehensiveAnalysis = () => (
-    <div className="border-t border-gray-200 dark:border-stone-700 rounded-t-2xl overflow-hidden">
-      <div className="bg-gray-900 dark:bg-stone-950 px-4 sm:px-6 py-4 rounded-t-2xl">
-        <h3 className="text-lg font-bold text-white">Full written report</h3>
-        <p className="text-gray-400 text-sm mt-0.5">Narrative feedback, category-by-category, same data as the real export</p>
-      </div>
-      <div className="p-4 sm:p-6 space-y-8">
-        <div>
-          <p className="text-gray-700 dark:text-stone-300 text-sm leading-relaxed mb-4">
-            {demo.comprehensiveAnalysis.overallSummary}
-          </p>
-          <div className="flex flex-wrap gap-6 mb-4">
-            <div>
-              <span className="text-xs font-semibold text-gray-500 dark:text-stone-400 uppercase">Overall Score</span>
-              <p className="text-lg font-bold text-gray-900 dark:text-stone-100">{demo.overallScore}/100</p>
-            </div>
-            <div>
-              <span className="text-xs font-semibold text-gray-500 dark:text-stone-400 uppercase">Grade Estimate</span>
-              <p className="text-lg font-bold text-gray-900 dark:text-stone-100">{demo.grade}</p>
-            </div>
-            <div>
-              <span className="text-xs font-semibold text-gray-500 dark:text-stone-400 uppercase">Clarity Rating</span>
-              <p className="text-lg font-bold text-gray-900 dark:text-stone-100">{demo.comprehensiveAnalysis.clarityRating}</p>
-            </div>
-          </div>
-          <div>
-            <h4 className="font-semibold text-gray-900 dark:text-stone-100 mb-2">Top Suggestions</h4>
-            <ol className="list-decimal list-inside space-y-1 text-sm text-gray-700 dark:text-stone-300">
-              {demo.comprehensiveAnalysis.topSuggestions.map((s, i) => (
-                <li key={i}>{s}</li>
-              ))}
-            </ol>
-          </div>
-        </div>
-
-        {demo.comprehensiveAnalysis.categories.map((cat) => (
-          <div key={cat.name}>
-            <h4 className="font-bold text-gray-900 dark:text-stone-100 mb-2">{cat.name}</h4>
-            <p className="text-sm text-gray-600 dark:text-stone-400 mb-4">{cat.summary}</p>
-            {cat.strengths && cat.strengths.length > 0 && (
-              <div className="mb-4">
-                <h5 className="text-sm font-semibold text-green-700 dark:text-green-400 mb-2">Strengths</h5>
-                <ul className="space-y-2">
-                  {cat.strengths.map((s, i) => (
-                    <li key={i} className="text-sm">
-                      <span className="text-gray-700 dark:text-stone-300">"{s.quote}"</span>
-                      <p className="text-gray-600 dark:text-stone-400 mt-0.5">{s.feedback}</p>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {cat.areasForImprovement && cat.areasForImprovement.length > 0 && (
-              <div className="mb-4">
-                <h5 className="text-sm font-semibold text-amber-700 dark:text-amber-400 mb-2">Areas for Improvement</h5>
-                <ul className="space-y-2">
-                  {cat.areasForImprovement.map((a, i) => (
-                    <li key={i} className="text-sm">
-                      <span className="text-gray-700 dark:text-stone-300">"{a.quote}"</span>
-                      <p className="text-amber-700 dark:text-amber-400 italic mt-0.5">Suggestion: {a.suggestion}</p>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {cat.seriousConcerns && cat.seriousConcerns.length > 0 && (
-              <div className="mb-4">
-                <h5 className="text-sm font-semibold text-red-700 dark:text-red-400 mb-2">Serious Concerns</h5>
-                <ul className="space-y-2">
-                  {cat.seriousConcerns.map((c, i) => (
-                    <li key={i} className="text-sm">
-                      <span className="text-gray-700 dark:text-stone-300">"{c.quote}"</span>
-                      <p className="text-red-700 dark:text-red-400 italic mt-0.5">Suggestion: {c.suggestion}</p>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        ))}
-
-        <div>
-          <h4 className="font-bold text-gray-900 dark:text-stone-100 mb-3">Priority Recommendations</h4>
-          <ol className="list-decimal list-inside space-y-1 text-sm text-gray-700 dark:text-stone-300">
-            {demo.comprehensiveAnalysis.priorityRecommendations.map((r, i) => (
-              <li key={i}>{r}</li>
-            ))}
-          </ol>
-        </div>
-      </div>
-    </div>
-  );
-
   const liveWordCount = displayContent.trim() ? displayContent.trim().split(/\s+/).filter(Boolean).length : 0;
 
   return (
     <div
-      ref={rootRef}
       className={`relative overflow-hidden bg-white dark:bg-stone-900 min-w-0 max-w-full ${
         landingHeroEmbed
           ? 'rounded-2xl sm:rounded-3xl border-0 shadow-none'
           : 'rounded-2xl shadow-xl border border-gray-200 dark:border-stone-600'
       }`}
     >
-      {landingHeroEmbed && fakeCursor.visible && (
-        <div
-          className="pointer-events-none absolute z-[80] motion-safe:transition-[transform,opacity] duration-[920ms] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform"
-          style={{
-            transform: `translate3d(${fakeCursor.x}px, ${fakeCursor.y}px, 0)`,
-          }}
-          aria-hidden
-        >
-          {/* Classic OS-style arrow pointer (white fill + outline); tip at top-left of the box */}
-          <svg
-            width={32}
-            height={32}
-            viewBox="0 0 24 24"
-            className="text-violet-900 dark:text-violet-100 drop-shadow-[0_3px_10px_rgba(0,0,0,0.28)] dark:drop-shadow-[0_3px_12px_rgba(0,0,0,0.5)]"
-            aria-hidden
-          >
-            <path
-              fill="white"
-              stroke="currentColor"
-              strokeWidth={1.25}
-              strokeLinejoin="round"
-              d="M5 2.25L5 18.6L9.35 14.25L12.4 21.85L15.55 20.35L12.1 12.55L19.5 12.55L5 2.25z"
-            />
-          </svg>
-        </div>
-      )}
       {/* Demo selector + Header — dark violet chrome (brand), not blue-gray */}
       <div className="bg-violet-950 px-3 sm:px-6 py-4 sm:py-5">
-        {landingHeroEmbed && (
-          <div className="mb-3 pb-3 border-b border-violet-500/20 space-y-2">
-            <p className="text-[11px] sm:text-xs text-violet-200/95 leading-snug">
-              {isLandingMobile ? (
-                <>
-                  <span className="font-semibold text-violet-50">Static preview</span>
-                  <span className="text-violet-500/80 mx-1.5">·</span>
-                  Use the tabs below to explore highlights and{' '}
-                  <span className="text-violet-100/95">Apply revision</span>. On desktop, press Play tour for a guided walkthrough.
-                </>
-              ) : (
-                <>
-                  <span className="font-semibold text-violet-50">Interactive preview</span>
-                  <span className="text-violet-500/80 mx-1.5">·</span>
-                  Highlights, sidebar, and <span className="text-violet-100/95">Apply revision</span> — press{' '}
-                  <span className="text-violet-100/95">Play tour</span> for a guided walkthrough, or explore freely.
-                </>
-              )}
-            </p>
-            <div className={`flex flex-wrap items-center gap-2 ${isLandingMobile ? 'hidden' : ''}`}>
-              <button
-                type="button"
-                onClick={() => setWalkthroughPlaying((p) => !p)}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 hover:bg-white/12 border border-white/10 px-2.5 py-1.5 text-[11px] font-medium text-violet-100 transition-colors"
-              >
-                {walkthroughPlaying ? (
-                  <>
-                    <svg className="w-3 h-3 opacity-90" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                    </svg>
-                    Pause tour
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-3 h-3 opacity-90" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
-                    </svg>
-                    Play tour
-                  </>
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  clearDemoRevisions();
-                  setMobileTab('document');
-                  setWalkthroughPlaying(false);
-                }}
-                className="rounded-lg border border-violet-500/30 px-2.5 py-1.5 text-[11px] font-medium text-violet-300/95 hover:bg-violet-900/35 transition-colors"
-              >
-                Reset
-              </button>
-              <span className="text-[10px] text-violet-400/80 sm:ml-1">Purple in the essay = applied wording.</span>
-            </div>
-          </div>
-        )}
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-3 sm:gap-y-2 mb-4">
           <div className="flex flex-wrap gap-2">
             {DEMO_PAPERS.map((d) => (
@@ -856,9 +456,6 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
                   setSelectedAnnotation(null);
                   setHoveredAnnotation(null);
                   setMobileTab('document');
-                  setAnalysisPanel('assessment');
-                  setAppliedDemoRevisions(new Set());
-                  setDemoRevisionNotice(null);
                 }}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                   selectedDemoId === d.id
@@ -895,38 +492,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
         </div>
       </div>
 
-      {/* Toggle: rubric (default) vs full report (desktop/tablet; mobile uses same under Analysis tab) */}
-      <div className="hidden lg:block border-b border-gray-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900/80 px-4 sm:px-6 py-4">
-        <p className="text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400 mb-3">Analysis view</p>
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => setAnalysisPanel('assessment')}
-            className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ring-1 ${
-              analysisPanel === 'assessment'
-                ? 'bg-teal-600 text-white ring-teal-500 shadow-sm'
-                : 'bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 ring-stone-200 dark:ring-stone-600 hover:bg-stone-50 dark:hover:bg-stone-700/50'
-            }`}
-          >
-            General academic assessment
-          </button>
-          <button
-            type="button"
-            onClick={() => setAnalysisPanel('comprehensive')}
-            className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ring-1 ${
-              analysisPanel === 'comprehensive'
-                ? 'bg-violet-700 text-white ring-violet-600 shadow-sm'
-                : 'bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 ring-stone-200 dark:ring-stone-600 hover:bg-stone-50 dark:hover:bg-stone-700/50'
-            }`}
-          >
-            Comprehensive written analysis
-          </button>
-        </div>
-        <p className="text-xs text-stone-500 dark:text-stone-400 mt-3 leading-snug max-w-3xl">
-          Start with the rubric for a quick score breakdown. Switch to the comprehensive view for paragraph-level narrative feedback, strengths, and revision notes. That is the same depth you get on a real analysis.
-        </p>
-      </div>
-      <div className="hidden lg:block">{analysisPanel === 'assessment' ? renderGradeBreakdown() : renderComprehensiveAnalysis()}</div>
+      <div className="hidden lg:block border-b border-gray-200 dark:border-stone-700">{renderGradeBreakdown()}</div>
 
       {/* Hover tooltip for annotations */}
       {hoveredAnnotation && tooltipPos && (() => {
@@ -989,16 +555,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
             <div className="w-3 h-3 bg-red-400 rounded-full" />
             <span className="text-gray-600 dark:text-stone-400">Needs revision</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-violet-500 ring-2 ring-violet-300/80 dark:ring-violet-400/50" />
-            <span className="text-gray-600 dark:text-stone-400">WriteScholar revision</span>
-          </div>
         </div>
-        {landingHeroEmbed && (
-          <p className="mt-2 text-[10px] sm:text-[11px] text-stone-500 dark:text-stone-500 leading-snug">
-            Applied revisions appear as <span className="text-violet-600 dark:text-violet-400 font-medium">purple</span> in the essay.
-          </p>
-        )}
       </div>
 
       {/* Mobile tabs: Document | Feedback | Analysis (lg+ keeps split view + full scroll) */}
@@ -1044,45 +601,6 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
         <div
           className={`flex-1 min-w-0 flex flex-col overflow-hidden bg-white dark:bg-stone-900 max-h-[min(58dvh,460px)] sm:max-h-[420px] lg:max-h-[580px] ${mobileTab !== 'document' ? 'hidden lg:block' : ''}`}
         >
-          {demoRevisionNotice && (
-            <div
-              role="status"
-              aria-live="polite"
-              className="shrink-0 mx-3 mt-2 mb-0 sm:mx-4 sm:mt-3 rounded-lg border border-violet-200/60 bg-violet-50/40 px-2.5 py-2 sm:px-3 dark:border-violet-800/40 dark:bg-violet-950/20"
-            >
-              <div className="flex items-start gap-2">
-                <svg
-                  className="mt-0.5 h-4 w-4 shrink-0 text-violet-500 dark:text-violet-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  aria-hidden
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                </svg>
-                <div className="min-w-0 flex-1 space-y-1.5">
-                  <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                    <span className="text-[11px] font-medium text-stone-800 dark:text-stone-200">Revision applied — see purple in essay</span>
-                    <span
-                      className={`text-[9px] font-semibold uppercase tracking-wide ${
-                        demoRevisionNotice.type === 'concern' ? 'text-rose-600 dark:text-rose-400' : 'text-amber-700 dark:text-amber-400'
-                      }`}
-                    >
-                      {demoRevisionNotice.type === 'concern' ? 'Concern' : 'Improve'}
-                    </span>
-                  </div>
-                  <p className="text-[10px] sm:text-[11px] leading-snug text-stone-600 dark:text-stone-400">
-                    {REVISION_GUIDANCE_COPY[demoRevisionNotice.type]}
-                  </p>
-                  <p className="text-[10px] leading-snug text-stone-500 dark:text-stone-500 border-t border-stone-200/70 pt-1.5 dark:border-stone-600/60">
-                    <span className="font-medium text-stone-600 dark:text-stone-400">Note: </span>
-                    {demoRevisionNotice.comment}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
           <div
             ref={documentPanelScrollRef}
             className="flex-1 min-h-0 bg-white p-4 sm:p-6 overflow-y-auto overscroll-contain dark:bg-stone-900"
@@ -1158,30 +676,10 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
                       <p className="text-[12px] text-gray-500 dark:text-stone-400 italic break-words leading-snug">{ann.suggestion}</p>
                       {ann.demoRevisedText && (
                         <div className="mt-2.5 pt-2 border-t border-amber-200/60 dark:border-amber-800/50">
-                          {appliedDemoRevisions.has(ann.id) ? (
-                            <p className="text-[11px] font-semibold text-violet-700 dark:text-violet-300 flex items-center gap-1.5">
-                              <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-                                <path
-                                  fillRule="evenodd"
-                                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                              Applied in draft (purple in document)
-                            </p>
-                          ) : (
-                            <button
-                              type="button"
-                              data-landing-apply={ann.id}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                applyDemoRevision(ann.id);
-                              }}
-                              className="w-full min-w-0 rounded-lg bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-500 hover:to-violet-600 text-white text-[11px] sm:text-xs font-semibold py-2 px-2.5 shadow-sm ring-1 ring-violet-500/25 transition-colors"
-                            >
-                              Apply WriteScholar revision
-                            </button>
-                          )}
+                          <p className="text-[10px] font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-500 mb-1">
+                            Suggested revision
+                          </p>
+                          <p className="text-[12px] text-stone-700 dark:text-stone-300 leading-snug">{ann.demoRevisedText}</p>
                         </div>
                       )}
                     </div>
@@ -1213,30 +711,10 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
                       <p className="text-[12px] text-gray-500 dark:text-stone-400 italic break-words leading-snug">{ann.suggestion}</p>
                       {ann.demoRevisedText && (
                         <div className="mt-2.5 pt-2 border-t border-red-200/60 dark:border-red-800/50">
-                          {appliedDemoRevisions.has(ann.id) ? (
-                            <p className="text-[11px] font-semibold text-violet-700 dark:text-violet-300 flex items-center gap-1.5">
-                              <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-                                <path
-                                  fillRule="evenodd"
-                                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                              Applied in draft (purple in document)
-                            </p>
-                          ) : (
-                            <button
-                              type="button"
-                              data-landing-apply={ann.id}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                applyDemoRevision(ann.id);
-                              }}
-                              className="w-full min-w-0 rounded-lg bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-500 hover:to-violet-600 text-white text-[11px] sm:text-xs font-semibold py-2 px-2.5 shadow-sm ring-1 ring-violet-500/25 transition-colors"
-                            >
-                              Apply WriteScholar revision
-                            </button>
-                          )}
+                          <p className="text-[10px] font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-500 mb-1">
+                            Suggested revision
+                          </p>
+                          <p className="text-[12px] text-stone-700 dark:text-stone-300 leading-snug">{ann.demoRevisedText}</p>
                         </div>
                       )}
                     </div>
@@ -1247,41 +725,14 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
           </div>
         </div>
 
-        {/* Mobile-only: rubric + full report in Analysis tab */}
+        {/* Mobile-only: rubric in Analysis tab */}
         <div
           className={`lg:hidden w-full overflow-y-auto max-h-[min(72dvh,640px)] bg-white dark:bg-stone-900 border-t border-gray-200 dark:border-stone-700 ${
             mobileTab !== 'analysis' ? 'hidden' : ''
           }`}
         >
-          <div className="sticky top-0 z-10 border-b border-gray-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900/95 px-4 py-3 backdrop-blur-sm">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400 mb-2">Analysis view</p>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setAnalysisPanel('assessment')}
-                className={`flex-1 rounded-lg py-2 px-2 text-xs font-semibold transition-colors ${
-                  analysisPanel === 'assessment'
-                    ? 'bg-teal-600 text-white'
-                    : 'bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 ring-1 ring-stone-200 dark:ring-stone-600'
-                }`}
-              >
-                Assessment
-              </button>
-              <button
-                type="button"
-                onClick={() => setAnalysisPanel('comprehensive')}
-                className={`flex-1 rounded-lg py-2 px-2 text-xs font-semibold transition-colors ${
-                  analysisPanel === 'comprehensive'
-                    ? 'bg-violet-700 text-white'
-                    : 'bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 ring-1 ring-stone-200 dark:ring-stone-600'
-                }`}
-              >
-                Full report
-              </button>
-            </div>
-          </div>
           <div className="[&>div]:mx-0 [&>div]:mt-0 [&>div]:mb-0 [&>div]:rounded-none [&>div]:border-0">
-            {analysisPanel === 'assessment' ? renderGradeBreakdown() : renderComprehensiveAnalysis()}
+            {renderGradeBreakdown()}
           </div>
         </div>
       </div>
