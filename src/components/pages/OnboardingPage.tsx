@@ -3,6 +3,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import type { StripeEmbeddedCheckout } from '@stripe/stripe-js';
 import ScholarMascot from '../common/ScholarMascot';
 import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
+import { SKIP_ONBOARDING_STRIPE } from '../../config/featureFlags';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 const TRIAL_DAYS = 7;
@@ -55,6 +56,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
 
   const [trialEligible, setTrialEligible] = useState<boolean | null>(null);
   const [embeddedError, setEmbeddedError] = useState<string | null>(null);
+  const [profileNotice, setProfileNotice] = useState<string | null>(null);
   const [embeddedLoading, setEmbeddedLoading] = useState(true);
   const checkoutHostRef = useRef<HTMLDivElement>(null);
   const embeddedInstanceRef = useRef<StripeEmbeddedCheckout | null>(null);
@@ -107,14 +109,27 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
           });
           window.history.replaceState({}, '', '/onboarding');
           setPhase('transition');
+        } else if (SKIP_ONBOARDING_STRIPE) {
+          window.history.replaceState({}, '', '/onboarding');
+          setProfileNotice(
+            data.message ||
+              'We could not confirm that checkout. You can upgrade anytime from Billing in your account.'
+          );
+          setPhase('profile');
         } else {
           setEmbeddedError(data.message || 'We could not confirm your subscription yet. Please try again.');
           setPhase('checkout');
         }
       } catch {
         if (!cancelled) {
-          setEmbeddedError('Something went wrong confirming payment.');
-          setPhase('checkout');
+          if (SKIP_ONBOARDING_STRIPE) {
+            window.history.replaceState({}, '', '/onboarding');
+            setProfileNotice('Something went wrong confirming payment. You can try again from Billing when you are ready.');
+            setPhase('profile');
+          } else {
+            setEmbeddedError('Something went wrong confirming payment.');
+            setPhase('checkout');
+          }
         }
       }
     })();
@@ -288,8 +303,15 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
     setIsSaving(false);
     if (!ok) return;
 
+    setProfileNotice(null);
+
     const plan = (user?.plan || 'free').toLowerCase();
     if (plan === 'pro' || plan === 'premium' || plan === 'focus') {
+      setPhase('transition');
+      return;
+    }
+
+    if (SKIP_ONBOARDING_STRIPE) {
       setPhase('transition');
       return;
     }
@@ -538,6 +560,15 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
               </h1>
               <p className="text-stone-600 dark:text-stone-400 text-sm sm:text-base">Just two things and you&apos;re in</p>
             </div>
+
+            {profileNotice && (
+              <div
+                className="mb-5 rounded-xl bg-amber-50 dark:bg-amber-950/25 border border-amber-200/80 dark:border-amber-800/50 px-3 py-2.5 text-sm text-amber-900 dark:text-amber-100"
+                role="status"
+              >
+                {profileNotice}
+              </div>
+            )}
 
             <div className="space-y-4">
               <div>
