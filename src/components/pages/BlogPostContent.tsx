@@ -1337,6 +1337,13 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           <p className={p}>
             The tools we cover below work directly in your browser. There&apos;s nothing to download, no accounts required for basic features, and no hidden costs. Bookmark them, use them whenever you need them, and watch your writing improve.
           </p>
+          <p className={p}>
+            <strong>Resumes:</strong> These picks are for coursework. When you&apos;re polishing a resume for internships or jobs,{' '}
+            <a href="https://vivoresume.com" target="_blank" rel="noopener noreferrer" className={internalLink}>
+              VivoResume
+            </a>{' '}
+            offers AI feedback so you can see exactly what&apos;s holding it back.
+          </p>
 
           <h2 className={h2}>1. Word Counter: Know exactly where you stand</h2>
           <p className={p}>
@@ -2261,6 +2268,13 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
           </p>
           <p className={p}>
             For most students, an all-in-one platform makes sense. You can upload or paste your draft, get feedback on grammar and style, run a citation check, and see comments on organization and argument in one place. That reduces context-switching and helps you address issues in a logical order: structure first, then clarity, then citations and polish.
+          </p>
+          <p className={p}>
+            Coursework is only part of the picture. When you start applying for internships or your first job after graduation, your resume becomes just as important as any paper—and it follows different rules.{' '}
+            <a href="https://vivoresume.com" target="_blank" rel="noopener noreferrer" className={internalLink}>
+              VivoResume
+            </a>{' '}
+            is built for that: AI resume feedback so you can see exactly what&apos;s holding your resume back, in the same spirit as getting structured feedback on an essay.
           </p>
 
           <h2 className={h2}>How to evaluate a writing tool</h2>
