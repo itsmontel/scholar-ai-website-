@@ -16,7 +16,8 @@ import LoginPage from './pages/LoginPage';
 const EmailVerificationPage = lazyWithRetry(() => import('./pages/EmailVerificationPage'));
 const OnboardingPage = lazyWithRetry(() => import('./pages/OnboardingPage'));
 const AuthCallbackPage = lazyWithRetry(() => import('./pages/AuthCallbackPage'));
-const DashboardPage = lazyWithRetry(() => import('./pages/DashboardPage'));
+const DashboardPage = lazyWithRetry(() => import('./pages/DashboardPageNew'));
+const DashboardPageLegacy = lazyWithRetry(() => import('./pages/DashboardPage'));
 const AnalysisPage = lazyWithRetry(() => import('./pages/AnalysisPage'));
 const AnalysisHistoryPage = lazyWithRetry(() => import('./pages/AnalysisHistoryPage'));
 const CitationResultsPage = lazyWithRetry(() => import('./pages/CitationResultsPage'));
@@ -1029,7 +1030,7 @@ const AcademicAIApp = () => {
         const plan = (user?.plan || user?.subscription_plan || 'free').toLowerCase();
         const isPaidFocus = plan === 'pro' || plan === 'premium';
         if (isLoggedIn && user && isPaidFocus) {
-          return <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} onUserUpdate={handleDashboardUserUpdate} initialMode="focus_mode" />;
+          return <DashboardPageLegacy onNavigate={navigateTo} user={user} onLogout={handleLogout} onUserUpdate={handleDashboardUserUpdate} initialMode="focus_mode" />;
         }
         return <FocusModePage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       }
