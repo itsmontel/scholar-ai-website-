@@ -284,6 +284,50 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             </ul>
           </div>
         </div>
+
+        {/* VivoResume — sister product (logo: public/Vivoresumemeta.png) */}
+        <div className="mb-10 rounded-2xl border border-white/10 bg-stone-900/70 px-5 py-5 sm:px-6 sm:py-6 flex flex-col sm:flex-row items-center gap-5 sm:gap-8 ring-1 ring-white/5">
+          <a
+            href="https://vivoresume.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 rounded-xl bg-white p-2.5 shadow-sm ring-1 ring-stone-200/20 transition-transform hover:scale-[1.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/80"
+          >
+            <img
+              src="/Vivoresumemeta.png"
+              alt="VivoResume — AI resume feedback"
+              className="h-11 w-auto max-h-12 max-w-[160px] object-contain object-left"
+              width={160}
+              height={48}
+              loading="lazy"
+              decoding="async"
+            />
+          </a>
+          <div className="flex-1 text-center sm:text-left min-w-0">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500 mb-1.5">
+              From the makers of WriteScholar
+            </p>
+            <a
+              href="https://vivoresume.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block text-lg font-semibold text-white hover:text-emerald-300 transition-colors"
+            >
+              VivoResume
+            </a>
+            <p className="text-stone-400 text-sm mt-1.5 leading-relaxed max-w-md mx-auto sm:mx-0">
+              AI resume feedback. See exactly what&apos;s holding your resume back.
+            </p>
+          </div>
+          <a
+            href="https://vivoresume.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 inline-flex items-center justify-center rounded-xl bg-emerald-600 hover:bg-emerald-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors shadow-lg shadow-emerald-900/20"
+          >
+            Try VivoResume
+          </a>
+        </div>
         
         {/* Bottom Bar */}
         <div
