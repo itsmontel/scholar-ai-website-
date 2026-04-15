@@ -8,10 +8,16 @@ import { FeatureTickRow } from '../common/FeatureTickRow';
 import InteractiveCitationsDemo from '../landing/InteractiveCitationsDemo';
 import { trackAction } from '../../data/achievements';
 
+export type EmbeddedDashboardTool = 'analyze' | 'citations' | 'study_pack';
+
 interface CitationsPageProps {
   onNavigate: (page: string, slug?: string, options?: { studyPack?: { data: unknown; title?: string } }) => void;
   user?: any;
   onLogout: () => void;
+  /** Render without page chrome — for embedding in the new dashboard */
+  embedded?: boolean;
+  /** When embedded, switch dashboard tool instead of navigating full-page routes */
+  onEmbeddedToolSwitch?: (tool: EmbeddedDashboardTool) => void;
 }
 
 const placeholders = [
@@ -27,7 +33,7 @@ const suggestedTopics: string[] = [
   "Remote work productivity research"
 ];
 
-const CitationsPage = ({ onNavigate, user, onLogout }: CitationsPageProps) => {
+const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbeddedToolSwitch }: CitationsPageProps) => {
   const [inputText, setInputText] = useState(() => {
     try { return sessionStorage.getItem('writescholar_citations_draft') || ''; } catch { return ''; }
   });
@@ -43,8 +49,9 @@ const CitationsPage = ({ onNavigate, user, onLogout }: CitationsPageProps) => {
   const [citationCheckLoaded, setCitationCheckLoaded] = useState(false);
 
   useEffect(() => {
+    if (embedded) return;
     document.title = 'Citation Finder for College Papers — APA, MLA, Chicago | WriteScholar';
-  }, []);
+  }, [embedded]);
 
   useEffect(() => {
     if (!user) {
@@ -152,13 +159,30 @@ const CitationsPage = ({ onNavigate, user, onLogout }: CitationsPageProps) => {
     }
   };
 
+  const goAnalyze = () =>
+    embedded && onEmbeddedToolSwitch ? onEmbeddedToolSwitch('analyze') : onNavigate('analyze');
+  const goStudyPack = () =>
+    embedded && onEmbeddedToolSwitch ? onEmbeddedToolSwitch('study_pack') : onNavigate('study-pack');
+
   return (
-    <div className="min-h-screen relative transition-colors font-sans overflow-x-hidden">
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
+    <div
+      className={
+        embedded
+          ? 'relative w-full min-w-0'
+          : 'min-h-screen relative transition-colors font-sans overflow-x-hidden'
+      }
+    >
+      {!embedded && <WriteScholarEditorialBackgroundLayers position="fixed" />}
 
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="citations" />
+      {!embedded && <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="citations" />}
 
-      <main className="relative max-w-[1240px] mx-auto px-3 sm:px-6 lg:px-8 pt-3 sm:pt-6 pb-24 sm:pb-16 w-full min-w-0 overflow-x-hidden">
+      <main
+        className={
+          embedded
+            ? 'relative max-w-none mx-auto px-0 pt-0 pb-2 w-full min-w-0 overflow-x-hidden'
+            : 'relative max-w-[1240px] mx-auto px-3 sm:px-6 lg:px-8 pt-3 sm:pt-6 pb-24 sm:pb-16 w-full min-w-0 overflow-x-hidden'
+        }
+      >
         <div className="w-full min-w-0 space-y-4 sm:space-y-6">
           <div className="pt-1 sm:pt-2 pb-3 sm:pb-5 overflow-visible">
             <div className="relative rounded-2xl sm:rounded-2xl overflow-hidden mb-3 sm:mb-4 border border-stone-200/90 dark:border-stone-700/90 bg-white/85 dark:bg-stone-900/55 shadow-[0_16px_50px_-16px_rgba(15,23,42,0.12)] dark:shadow-[0_16px_50px_-16px_rgba(0,0,0,0.45)] backdrop-blur-sm ring-1 ring-white/40 dark:ring-white/5 scroll-mt-8">
@@ -182,37 +206,41 @@ const CitationsPage = ({ onNavigate, user, onLogout }: CitationsPageProps) => {
                       APA, MLA & Chicago. Peer-reviewed sources. Filter by year.
                     </p>
                     <FeatureTickRow className="relative mb-1 sm:mb-1.5" items={['APA', 'MLA', 'Chicago', 'Peer-reviewed', 'Export-ready']} />
-                    <div className="relative flex rounded-xl border border-stone-200/90 dark:border-stone-700 bg-stone-100/60 dark:bg-stone-800/50 p-1 mb-1 sm:mb-1.5 max-w-lg mx-auto shadow-sm">
-                      <button
-                        type="button"
-                        onClick={() => onNavigate('analyze')}
-                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200"
-                      >
-                        <span className="text-base" aria-hidden>📝</span> Analyze
-                      </button>
-                      <button
-                        type="button"
-                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 bg-white dark:bg-stone-900 text-blue-800 dark:text-blue-300 shadow-sm border border-stone-200/80 dark:border-stone-600"
-                      >
-                        <span className="text-base" aria-hidden>📚</span> Citations
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => onNavigate('study-pack')}
-                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200"
-                      >
-                        <span className="text-base" aria-hidden>📦</span> Study Pack
-                      </button>
-                    </div>
-                    {user && citationCheckLoaded && !hasDoneCitation && (
-                      <div className="flex flex-col items-center gap-1 mb-1.5 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                        <span className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-stone-50 dark:bg-stone-800/80 border border-stone-200/90 dark:border-stone-600 text-stone-800 dark:text-stone-200 text-sm font-medium shadow-sm">
-                          Start your first citation
-                        </span>
-                        <svg className="w-5 h-5 text-violet-600 dark:text-violet-400 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                        </svg>
-                      </div>
+                    {!embedded && (
+                      <>
+                        <div className="relative flex rounded-xl border border-stone-200/90 dark:border-stone-700 bg-stone-100/60 dark:bg-stone-800/50 p-1 mb-1 sm:mb-1.5 max-w-lg mx-auto shadow-sm">
+                          <button
+                            type="button"
+                            onClick={goAnalyze}
+                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200"
+                          >
+                            <span className="text-base" aria-hidden>📝</span> Analyze
+                          </button>
+                          <button
+                            type="button"
+                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 bg-white dark:bg-stone-900 text-blue-800 dark:text-blue-300 shadow-sm border border-stone-200/80 dark:border-stone-600"
+                          >
+                            <span className="text-base" aria-hidden>📚</span> Citations
+                          </button>
+                          <button
+                            type="button"
+                            onClick={goStudyPack}
+                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200"
+                          >
+                            <span className="text-base" aria-hidden>📦</span> Study Pack
+                          </button>
+                        </div>
+                        {user && citationCheckLoaded && !hasDoneCitation && (
+                          <div className="flex flex-col items-center gap-1 mb-1.5 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                            <span className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-stone-50 dark:bg-stone-800/80 border border-stone-200/90 dark:border-stone-600 text-stone-800 dark:text-stone-200 text-sm font-medium shadow-sm">
+                              Start your first citation
+                            </span>
+                            <svg className="w-5 h-5 text-violet-600 dark:text-violet-400 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                            </svg>
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                   <div className="hidden lg:block relative self-end justify-self-end w-[236px] xl:w-[248px] pointer-events-auto rotate-[11deg] origin-bottom-right drop-shadow-lg z-[5]" aria-label="Sample citation export preview">
@@ -337,6 +365,7 @@ const CitationsPage = ({ onNavigate, user, onLogout }: CitationsPageProps) => {
             </div>
           </div>
 
+          {!embedded && (
           <div className="relative rounded-2xl border border-stone-200/90 dark:border-stone-700/90 bg-white/80 dark:bg-stone-900/50 backdrop-blur-sm p-4 sm:p-6 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.08)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.35)] ring-1 ring-white/40 dark:ring-white/5">
             <div className="flex items-center gap-2 mb-4">
               <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-50" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>See how it works</h2>
@@ -362,6 +391,7 @@ const CitationsPage = ({ onNavigate, user, onLogout }: CitationsPageProps) => {
               </div>
             </div>
           </div>
+          )}
         </div>
       </main>
 
@@ -421,7 +451,7 @@ const CitationsPage = ({ onNavigate, user, onLogout }: CitationsPageProps) => {
         </div>
       )}
 
-      <Footer onNavigate={onNavigate} />
+      {!embedded && <Footer onNavigate={onNavigate} />}
     </div>
   );
 };

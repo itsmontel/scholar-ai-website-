@@ -9,6 +9,7 @@ import { trackEvent } from '../../utils/analytics';
 import { applyPageSeoTags, absoluteCanonicalUrl, injectJsonLd, removeJsonLd } from '../../utils/seo';
 import { ogImageUrlForPage } from '../../utils/ogImageUrls';
 import { getResetsInText } from '../../utils/usageReset';
+import type { EmbeddedDashboardTool } from './CitationsPage';
 
 const STUDY_PACK_PAGE_SEO = {
   title: 'AI Study Pack — Lesson, Flashcards, Quiz, Crossword & More | WriteScholar',
@@ -26,12 +27,14 @@ interface StudyPackPageProps {
   onNavigate: NavigateFn;
   user?: { plan?: string; subscription_plan?: string } | null;
   onLogout: () => void;
+  embedded?: boolean;
+  onEmbeddedToolSwitch?: (tool: EmbeddedDashboardTool) => void;
 }
 
 const getWordCount = (text: string) =>
   text.trim().split(/\s+/).filter((word) => word.length > 0).length;
 
-const StudyPackPage = ({ onNavigate, user, onLogout }: StudyPackPageProps) => {
+const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbeddedToolSwitch }: StudyPackPageProps) => {
   const [inputText, setInputText] = useState(() => {
     try {
       return sessionStorage.getItem('writescholar_dashboard_draft') || '';
@@ -64,6 +67,7 @@ const StudyPackPage = ({ onNavigate, user, onLogout }: StudyPackPageProps) => {
   });
 
   useEffect(() => {
+    if (embedded) return;
     const canonicalUrl = absoluteCanonicalUrl('/tools/study-pack');
     applyPageSeoTags({
       title: STUDY_PACK_PAGE_SEO.title,
@@ -81,7 +85,7 @@ const StudyPackPage = ({ onNavigate, user, onLogout }: StudyPackPageProps) => {
       isPartOf: { '@type': 'WebSite', name: 'WriteScholar', url: 'https://writescholar.com/' },
     });
     return () => removeJsonLd('study-pack-page');
-  }, []);
+  }, [embedded]);
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
@@ -257,13 +261,30 @@ const StudyPackPage = ({ onNavigate, user, onLogout }: StudyPackPageProps) => {
     }
   };
 
+  const goAnalyze = () =>
+    embedded && onEmbeddedToolSwitch ? onEmbeddedToolSwitch('analyze') : onNavigate('analyze');
+  const goCitations = () =>
+    embedded && onEmbeddedToolSwitch ? onEmbeddedToolSwitch('citations') : onNavigate('citations');
+
   return (
-    <div className="min-h-screen relative transition-colors font-sans overflow-x-hidden">
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
+    <div
+      className={
+        embedded
+          ? 'relative w-full min-w-0'
+          : 'min-h-screen relative transition-colors font-sans overflow-x-hidden'
+      }
+    >
+      {!embedded && <WriteScholarEditorialBackgroundLayers position="fixed" />}
 
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="study-pack" />
+      {!embedded && <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="study-pack" />}
 
-      <main className="relative max-w-[1240px] mx-auto px-3 sm:px-6 lg:px-8 pt-3 sm:pt-6 pb-24 sm:pb-16 w-full min-w-0 overflow-x-hidden">
+      <main
+        className={
+          embedded
+            ? 'relative max-w-none mx-auto px-0 pt-0 pb-2 w-full min-w-0 overflow-x-hidden'
+            : 'relative max-w-[1240px] mx-auto px-3 sm:px-6 lg:px-8 pt-3 sm:pt-6 pb-24 sm:pb-16 w-full min-w-0 overflow-x-hidden'
+        }
+      >
         <input
           ref={studyToolsFileInputRef}
           type="file"
@@ -372,29 +393,56 @@ const StudyPackPage = ({ onNavigate, user, onLogout }: StudyPackPageProps) => {
                       Lesson, flashcards, quiz, crossword & Crater Blast — all from one paste
                     </p>
                     <FeatureTickRow variant="prominent" className="relative" items={['Lesson', 'Flashcards', 'Quiz', 'Crossword', 'Crater Blast']} />
-                    <div className="relative flex rounded-xl bg-stone-100/90 dark:bg-stone-800/80 p-1 mb-2 sm:mb-3 max-w-lg mx-auto border border-stone-200/80 dark:border-stone-700/60">
-                      <button
-                        type="button"
-                        onClick={() => onNavigate('analyze')}
-                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200"
-                      >
-                        <span className="text-lg">📝</span> Analyze Text
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => onNavigate('citations')}
-                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200"
-                      >
-                        <span className="text-lg">📚</span> Citations
-                      </button>
-                      <button
-                        type="button"
-                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 bg-white dark:bg-stone-700 text-orange-800 dark:text-orange-200 shadow-sm ring-1 ring-stone-200/80 dark:ring-stone-600/80"
-                      >
-                        <span className="text-lg">📦</span> Study Pack
-                      </button>
-                    </div>
-                    {!loadingStats && (
+                    {!embedded && (
+                      <>
+                        <div className="relative flex rounded-xl bg-stone-100/90 dark:bg-stone-800/80 p-1 mb-2 sm:mb-3 max-w-lg mx-auto border border-stone-200/80 dark:border-stone-700/60">
+                          <button
+                            type="button"
+                            onClick={goAnalyze}
+                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200"
+                          >
+                            <span className="text-lg">📝</span> Analyze Text
+                          </button>
+                          <button
+                            type="button"
+                            onClick={goCitations}
+                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200"
+                          >
+                            <span className="text-lg">📚</span> Citations
+                          </button>
+                          <button
+                            type="button"
+                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 bg-white dark:bg-stone-700 text-orange-800 dark:text-orange-200 shadow-sm ring-1 ring-stone-200/80 dark:ring-stone-600/80"
+                          >
+                            <span className="text-lg">📦</span> Study Pack
+                          </button>
+                        </div>
+                        {!loadingStats && (
+                          <div className="flex justify-center mb-4 sm:mb-5">
+                            <button
+                              type="button"
+                              onClick={() => onNavigate('create-flashcards')}
+                              data-tutorial="create-cards-card"
+                              className="inline-flex items-center gap-2 px-4 py-2 bg-stone-100 dark:bg-stone-700/50 hover:bg-stone-200 dark:hover:bg-stone-600/50 rounded-xl text-stone-700 dark:text-stone-200 text-xs sm:text-sm font-semibold transition-all"
+                            >
+                              <span className="text-base">🃏</span>
+                              Create Cards from scratch
+                            </button>
+                          </div>
+                        )}
+                        {showFirstStudyPackPrompt && (
+                          <div className="flex flex-col items-center gap-1 mb-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-stone-50 dark:bg-stone-800/80 border border-stone-200/90 dark:border-stone-600 text-stone-700 dark:text-stone-200 text-sm font-medium shadow-sm">
+                              Start your first study pack or upload file below
+                            </span>
+                            <svg className="w-6 h-6 text-orange-600 dark:text-orange-400 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                            </svg>
+                          </div>
+                        )}
+                      </>
+                    )}
+                    {embedded && !loadingStats && (
                       <div className="flex justify-center mb-4 sm:mb-5">
                         <button
                           type="button"
@@ -405,16 +453,6 @@ const StudyPackPage = ({ onNavigate, user, onLogout }: StudyPackPageProps) => {
                           <span className="text-base">🃏</span>
                           Create Cards from scratch
                         </button>
-                      </div>
-                    )}
-                    {showFirstStudyPackPrompt && (
-                      <div className="flex flex-col items-center gap-1 mb-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                        <span className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-stone-50 dark:bg-stone-800/80 border border-stone-200/90 dark:border-stone-600 text-stone-700 dark:text-stone-200 text-sm font-medium shadow-sm">
-                          Start your first study pack or upload file below
-                        </span>
-                        <svg className="w-6 h-6 text-orange-600 dark:text-orange-400 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                        </svg>
                       </div>
                     )}
                   </div>
@@ -532,7 +570,7 @@ const StudyPackPage = ({ onNavigate, user, onLogout }: StudyPackPageProps) => {
         )}
       </main>
 
-      <Footer onNavigate={onNavigate} />
+      {!embedded && <Footer onNavigate={onNavigate} />}
     </div>
   );
 };
