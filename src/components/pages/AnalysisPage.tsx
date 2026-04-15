@@ -661,6 +661,18 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
       });
   }, [annotations, freePreviewCharCutoff, documentContent]);
 
+  /** Locked annotations for free users — those beyond the 40% cutoff (teaser preview in sidebar) */
+  const lockedAnnotationsForTeaser = useMemo((): Annotation[] => {
+    if (!isFreePreview || freePreviewCharCutoff == null) return [];
+    return annotations.filter(
+      (a) =>
+        a.startIndex >= 0 &&
+        a.endIndex > a.startIndex &&
+        a.endIndex <= documentContent.length &&
+        a.startIndex >= freePreviewCharCutoff
+    );
+  }, [annotations, freePreviewCharCutoff, documentContent, isFreePreview]);
+
   useEffect(() => {
     if (!user?.id) return;
     const plan = (user.plan || 'free').toLowerCase();
@@ -964,6 +976,18 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
     try {
       trackEvent('paywall_start_trial');
       const base = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      /** After Stripe success/cancel, return to Library with this document selected (not dashboard). */
+      try {
+        if (selectedDocument) {
+          sessionStorage.setItem('librarySelectDocumentAfterCheckout', selectedDocument);
+          sessionStorage.setItem('librarySelectAnalysisTypeAfterCheckout', selectedAnalysisType || 'comprehensive');
+        } else {
+          sessionStorage.removeItem('librarySelectDocumentAfterCheckout');
+          sessionStorage.removeItem('librarySelectAnalysisTypeAfterCheckout');
+        }
+      } catch {
+        /* ignore */
+      }
       const res = await fetch(`${base}/subscriptions/create-checkout-session`, {
         method: 'POST',
         headers: {
@@ -973,8 +997,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
         body: JSON.stringify({
           planType: 'pro',
           billingCycle: 'monthly',
-          successUrl: `${window.location.origin}/dashboard?payment=success`,
-          cancelUrl: `${window.location.origin}/dashboard?payment=cancelled`,
+          successUrl: `${window.location.origin}/library?payment=success`,
+          cancelUrl: `${window.location.origin}/library?payment=cancelled`,
           trialPeriodDays: canStartFreeTrial ? 7 : 0,
         }),
       });
@@ -991,7 +1015,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
       setCheckoutRedirecting(false);
       setError(e instanceof Error ? e.message : 'Could not open Stripe checkout');
     }
-  }, [canStartFreeTrial, onNavigate]);
+  }, [canStartFreeTrial, onNavigate, selectedDocument, selectedAnalysisType]);
 
   const fetchAnalysisTypes = async () => {
     try {
@@ -2681,77 +2705,61 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
       return start;
     });
 
-    const freePreviewBlurFooter =
+    /** Inline banner shown at the 40% mark where annotations stop (free users see full paper, annotations only on first 40%) */
+    const freeAnnotationCutoffBanner =
       isFreePreview && freePreviewCharCutoff != null && freePreviewCharCutoff < displayContent.length ? (
-        <div className="relative mt-8 overflow-hidden rounded-2xl border border-violet-300/80 bg-gradient-to-b from-violet-100/35 via-white to-stone-50/95 shadow-[0_12px_40px_-12px_rgba(109,40,217,0.3)] ring-1 ring-violet-400/15 dark:border-violet-700/45 dark:from-violet-950/45 dark:via-stone-900 dark:to-stone-950 dark:shadow-[0_16px_48px_-12px_rgba(0,0,0,0.5)]">
-          <div
-            className="pointer-events-none absolute -inset-px rounded-2xl opacity-50 dark:opacity-35"
-            style={{
-              background:
-                'linear-gradient(135deg, rgba(139,92,246,0.22) 0%, transparent 45%, transparent 55%, rgba(167,139,250,0.12) 100%)',
-            }}
-          />
-          {/* Blurred real continuation — word shapes tease without readable detail */}
-          <div className="pointer-events-none relative min-h-[120px] max-h-[200px] overflow-hidden rounded-t-2xl" aria-hidden>
-            <div className="select-none px-4 pb-12 pt-3 text-sm leading-relaxed text-stone-700 blur-[12px] contrast-[0.92] sm:blur-[14px] opacity-[0.76] [transform:translateZ(0)] scale-[1.02] dark:text-stone-300 dark:opacity-[0.7]">
-              {displayContent.slice(freePreviewCharCutoff)}
-            </div>
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-8 bg-gradient-to-b from-white/95 to-transparent dark:from-stone-950/95" />
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white via-white/90 to-transparent dark:from-stone-950 dark:via-stone-950/85" />
-          </div>
-          <div className="relative z-10 flex flex-col items-center gap-2.5 bg-gradient-to-b from-white/55 via-white/92 to-white px-4 pb-6 pt-2 text-center backdrop-blur-[2px] dark:from-stone-950/55 dark:via-stone-950/95 dark:to-stone-950 sm:px-5">
-            <div className="flex items-center gap-2 rounded-full border border-violet-200/90 bg-white/85 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-violet-600 shadow-sm dark:border-violet-600/50 dark:bg-stone-900/85 dark:text-violet-300">
-              <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
+        <div className="my-6 relative overflow-hidden rounded-2xl border-2 border-dashed border-violet-300/80 bg-gradient-to-r from-violet-50/80 via-white to-violet-50/80 dark:border-violet-600/50 dark:from-violet-950/30 dark:via-stone-900 dark:to-violet-950/30">
+          <div className="relative z-10 flex flex-col sm:flex-row items-center gap-4 px-5 py-5 sm:py-4">
+            {/* Left: Visual indicator showing annotation colors */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              <div className="w-3 h-3 rounded-full bg-green-400 ring-2 ring-green-200 dark:ring-green-800" title="Strengths" />
+              <div className="w-3 h-3 rounded-full bg-amber-400 ring-2 ring-amber-200 dark:ring-amber-800" title="Improvements" />
+              <div className="w-3 h-3 rounded-full bg-red-400 ring-2 ring-red-200 dark:ring-red-800" title="Concerns" />
+              <svg className="w-5 h-5 text-violet-400 ml-1" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
-              Pro
             </div>
-            <p className="max-w-[21rem] text-sm font-bold leading-snug text-stone-900 dark:text-stone-50">
-              The rest of your paper is hiding here
-            </p>
-            <p className="max-w-[22rem] text-xs leading-relaxed text-stone-600 dark:text-stone-400">
-              {canStartFreeTrial
-                ? 'You can almost see it above — unlock line-by-line feedback on every paragraph. Eligible accounts: one 7-day free trial.'
-                : 'You can almost see it above — unlock the rest of your essay, every annotation, and the full written analysis.'}
-            </p>
+            {/* Middle: Message */}
+            <div className="flex-1 text-center sm:text-left">
+              <p className="text-sm font-semibold text-stone-800 dark:text-stone-100">
+                Annotations continue on {Math.round((1 - (freePreviewCharCutoff / displayContent.length)) * 100)}% of your paper
+              </p>
+              <p className="text-xs text-stone-600 dark:text-stone-400 mt-0.5">
+                You can read the rest below — {annotations.filter(a => a.startIndex >= freePreviewCharCutoff).length} more feedback points are waiting for you
+              </p>
+            </div>
+            {/* Right: CTA */}
             <button
               type="button"
               onClick={startProMonthlyCheckout}
               disabled={checkoutRedirecting}
-              className="mt-0.5 w-full max-w-sm rounded-xl bg-gradient-to-r from-violet-600 to-violet-700 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-violet-600/35 transition-all hover:scale-[1.02] hover:from-violet-500 hover:to-violet-600 hover:shadow-violet-500/40 active:scale-[0.99] disabled:cursor-wait disabled:opacity-60 disabled:hover:scale-100"
+              className="shrink-0 rounded-xl bg-gradient-to-r from-violet-600 to-violet-700 px-4 py-2 text-sm font-bold text-white shadow-lg shadow-violet-600/25 transition-all hover:scale-[1.02] hover:from-violet-500 hover:to-violet-600 hover:shadow-violet-500/35 active:scale-[0.99] disabled:cursor-wait disabled:opacity-60"
             >
-              {checkoutRedirecting ? 'Opening checkout…' : canStartFreeTrial ? 'Perfect your paper — start 7-day free trial' : 'Upgrade to Pro — unlock full paper'}
+              {checkoutRedirecting ? 'Opening…' : canStartFreeTrial ? 'Unlock all — free trial' : 'Unlock all annotations'}
             </button>
-            <p className="max-w-[20rem] text-[11px] leading-relaxed text-stone-500 dark:text-stone-500">
-              {canStartFreeTrial
-                ? 'No charge during trial · Cancel anytime · One free trial per account'
-                : 'Pro unlocks full feedback — subscribe to continue'}
-            </p>
           </div>
         </div>
       ) : null;
 
     if (annotationsForRender.length === 0) {
+      let bannerInserted = false;
       return (
         <div className="text-gray-700 leading-relaxed">
           {paragraphs.map((paragraph, index) => {
             const paragraphStart = paragraphStarts[index] ?? 0;
-            const paragraphEnd = paragraphStart + paragraph.length;
-            if (isFreePreview && freePreviewCharCutoff != null && paragraphStart >= freePreviewCharCutoff) {
-              return null;
-            }
-            const visibleParagraph =
-              isFreePreview && freePreviewCharCutoff != null
-                ? displayContent.slice(paragraphStart, Math.min(paragraphEnd, freePreviewCharCutoff))
-                : paragraph;
-            if (!visibleParagraph.trim()) return null;
+            const isPastCutoff = isFreePreview && freePreviewCharCutoff != null && paragraphStart >= freePreviewCharCutoff;
+            const shouldShowBanner = !bannerInserted && isFreePreview && freePreviewCharCutoff != null && paragraphStart >= freePreviewCharCutoff;
+            if (shouldShowBanner) bannerInserted = true;
+            if (!paragraph.trim()) return null;
             return (
-              <p key={index} className="mb-4 text-justify">
-                {renderParagraphChunkWithRevision(visibleParagraph, paragraphStart, `no-anno-p-${index}`)}
-              </p>
+              <React.Fragment key={index}>
+                {shouldShowBanner && freeAnnotationCutoffBanner}
+                <p className={`mb-4 text-justify ${isPastCutoff ? 'text-stone-500 dark:text-stone-400' : ''}`}>
+                  {renderParagraphChunkWithRevision(paragraph, paragraphStart, `no-anno-p-${index}`)}
+                </p>
+              </React.Fragment>
             );
           })}
-          {freePreviewBlurFooter}
         </div>
       );
     }
@@ -2774,20 +2782,30 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
 
     console.log('Valid annotations for rendering:', sortedAnnotations.length);
 
+    let bannerInserted = false;
     return (
       <div className="text-stone-700 leading-relaxed">
         {paragraphs.map((paragraph, paragraphIndex) => {
           const paragraphStart = paragraphStarts[paragraphIndex] ?? 0;
           const paragraphEnd = paragraphStart + paragraph.length;
-          if (isFreePreview && freePreviewCharCutoff != null && paragraphStart >= freePreviewCharCutoff) {
-            return null;
+          const isPastCutoff = isFreePreview && freePreviewCharCutoff != null && paragraphStart >= freePreviewCharCutoff;
+          const shouldShowBanner = !bannerInserted && isFreePreview && freePreviewCharCutoff != null && paragraphStart >= freePreviewCharCutoff;
+          if (shouldShowBanner) bannerInserted = true;
+          
+          if (!paragraph.length) return null;
+          const effectiveParagraphEnd = paragraphEnd;
+          
+          // For paragraphs past the cutoff, render as plain text with faded styling
+          if (isPastCutoff) {
+            return (
+              <React.Fragment key={paragraphIndex}>
+                {shouldShowBanner && freeAnnotationCutoffBanner}
+                <p className="mb-4 text-justify text-stone-500 dark:text-stone-400">
+                  {renderParagraphChunkWithRevision(paragraph, paragraphStart, `p-${paragraphIndex}`)}
+                </p>
+              </React.Fragment>
+            );
           }
-          const paragraphText =
-            isFreePreview && freePreviewCharCutoff != null
-              ? displayContent.slice(paragraphStart, Math.min(paragraphEnd, freePreviewCharCutoff))
-              : paragraph;
-          if (!paragraphText.length) return null;
-          const effectiveParagraphEnd = paragraphStart + paragraphText.length;
           
           const paragraphAnnotations = sortedAnnotations.filter((annotation) => {
             return annotation.startIndex < effectiveParagraphEnd && annotation.endIndex > paragraphStart;
@@ -2795,9 +2813,12 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
 
           if (paragraphAnnotations.length === 0) {
             return (
-              <p key={paragraphIndex} className="mb-4 text-justify">
-                {renderParagraphChunkWithRevision(paragraphText, paragraphStart, `p-${paragraphIndex}`)}
-              </p>
+              <React.Fragment key={paragraphIndex}>
+                {shouldShowBanner && freeAnnotationCutoffBanner}
+                <p className="mb-4 text-justify">
+                  {renderParagraphChunkWithRevision(paragraph, paragraphStart, `p-${paragraphIndex}`)}
+                </p>
+              </React.Fragment>
             );
           }
 
@@ -2809,10 +2830,10 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
             const annotationEnd = Math.min(annotation.endIndex, effectiveParagraphEnd);
 
             const relativeStart = Math.max(0, annotationStart - paragraphStart);
-            const relativeEnd = Math.min(paragraphText.length, annotationEnd - paragraphStart);
+            const relativeEnd = Math.min(paragraph.length, annotationEnd - paragraphStart);
 
             if (relativeStart > lastIndex) {
-              const textBefore = paragraphText.slice(lastIndex, relativeStart);
+              const textBefore = paragraph.slice(lastIndex, relativeStart);
               if (textBefore.length > 0) {
                 parts.push(
                   <span key={`text-${paragraphIndex}-${lastIndex}`} className="text-stone-700">
@@ -2826,7 +2847,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
               }
             }
 
-            const actualText = paragraphText.slice(relativeStart, relativeEnd);
+            const actualText = paragraph.slice(relativeStart, relativeEnd);
             console.log(`Annotation ${annotation.id} (${annotation.type}): "${actualText.substring(0, 50)}..." (${relativeStart}-${relativeEnd} in paragraph ${paragraphIndex})`);
 
             const highlightClasses = {
@@ -2880,8 +2901,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
             lastIndex = relativeEnd;
           });
 
-          if (lastIndex < paragraphText.length) {
-            const remainingText = paragraphText.slice(lastIndex);
+          if (lastIndex < paragraph.length) {
+            const remainingText = paragraph.slice(lastIndex);
             if (remainingText.length > 0) {
               parts.push(
                 <span key={`text-${paragraphIndex}-${lastIndex}`} className="text-gray-700">
@@ -2896,12 +2917,14 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
           }
 
           return (
-            <p key={paragraphIndex} className="mb-4 text-justify">
-              {parts}
-            </p>
+            <React.Fragment key={paragraphIndex}>
+              {shouldShowBanner && freeAnnotationCutoffBanner}
+              <p className="mb-4 text-justify">
+                {parts}
+              </p>
+            </React.Fragment>
           );
         })}
-        {freePreviewBlurFooter}
       </div>
     );
   };
@@ -3797,12 +3820,12 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                     {isFreePreview && (
                       <div className="mb-4 rounded-xl border border-violet-200/80 bg-violet-50/80 dark:bg-violet-950/25 dark:border-violet-800/50 px-3 py-2.5">
                         <p className="text-xs font-semibold text-stone-800 dark:text-stone-100 leading-snug">
-                          You&apos;re seeing real feedback on the first ~40% of your draft
+                          Full paper shown · Annotations on first ~40%
                         </p>
                         <p className="text-[11px] text-stone-600 dark:text-stone-400 mt-1.5 leading-relaxed">
                           {canStartFreeTrial
-                            ? 'Unlock Pro to catch every weak spot in the rest of your draft—same professor-level notes, rewrites, and grade-boosting fixes. Eligible accounts: one 7-day free trial.'
-                            : 'Upgrade to Pro to unlock the rest of your essay—full annotations, rewrites, and grade-boosting fixes on the whole draft.'}
+                            ? `You can read your entire paper. Unlock Pro to see ${lockedAnnotationsForTeaser.length} more feedback points on the rest—same professor-level notes, rewrites, and grade-boosting fixes. Eligible: one 7-day free trial.`
+                            : `You can read your entire paper. Upgrade to Pro to unlock ${lockedAnnotationsForTeaser.length} more annotations—full feedback, rewrites, and grade-boosting fixes on the whole draft.`}
                         </p>
                       </div>
                     )}
@@ -4109,6 +4132,72 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                     </>
                     )}
 
+                    {/* Locked annotations teaser — show free users what they're missing (annotations beyond 40%) */}
+                    {isFreePreview && lockedAnnotationsForTeaser.length > 0 && (
+                      <div className="mt-6 pt-5 border-t-2 border-dashed border-violet-200/80 dark:border-violet-700/50">
+                        <div className="flex items-center gap-2 mb-4">
+                          <svg className="w-5 h-5 text-violet-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                          </svg>
+                          <h4 className="font-bold text-stone-900 dark:text-stone-100">
+                            +{lockedAnnotationsForTeaser.length} more annotations locked
+                          </h4>
+                        </div>
+                        <p className="text-xs text-stone-600 dark:text-stone-400 mb-4 leading-relaxed">
+                          Your paper has more feedback waiting. Here&apos;s a preview of what you&apos;ll unlock:
+                        </p>
+                        <div className="space-y-2">
+                          {lockedAnnotationsForTeaser.slice(0, 4).map((annotation) => {
+                            const borderColor = {
+                              strong: 'border-green-400',
+                              improve: 'border-amber-400',
+                              concern: 'border-red-400',
+                            }[annotation.type];
+                            const iconBg = {
+                              strong: 'bg-green-100 dark:bg-green-900/40',
+                              improve: 'bg-amber-100 dark:bg-amber-900/40',
+                              concern: 'bg-red-100 dark:bg-red-900/40',
+                            }[annotation.type];
+                            return (
+                              <div
+                                key={annotation.id}
+                                className={`relative rounded-xl p-3 border-l-4 ${borderColor} bg-white/80 dark:bg-stone-800/60 shadow-sm overflow-hidden`}
+                              >
+                                <div className="flex items-start gap-2">
+                                  <div className={`flex shrink-0 items-center justify-center w-6 h-6 rounded-lg ${iconBg}`}>
+                                    {getAnnotationIcon(annotation.type)}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs font-medium text-stone-700 dark:text-stone-300 blur-[5px] select-none pointer-events-none" aria-hidden>
+                                      {annotation.comment.slice(0, 60)}...
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-white/60 dark:via-stone-900/20 dark:to-stone-900/60" />
+                              </div>
+                            );
+                          })}
+                          {lockedAnnotationsForTeaser.length > 4 && (
+                            <p className="text-xs text-center text-stone-500 dark:text-stone-400 py-2">
+                              +{lockedAnnotationsForTeaser.length - 4} more feedback points…
+                            </p>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={startProMonthlyCheckout}
+                          disabled={checkoutRedirecting}
+                          className="mt-4 w-full rounded-xl bg-gradient-to-r from-violet-600 to-violet-700 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-violet-600/25 transition-all hover:scale-[1.01] hover:from-violet-500 hover:to-violet-600 hover:shadow-violet-500/35 active:scale-[0.99] disabled:cursor-wait disabled:opacity-60"
+                        >
+                          {checkoutRedirecting
+                            ? 'Opening checkout…'
+                            : canStartFreeTrial
+                              ? `Unlock all ${lockedAnnotationsForTeaser.length} — start free trial`
+                              : `Unlock all ${lockedAnnotationsForTeaser.length} annotations`}
+                        </button>
+                      </div>
+                    )}
+
                     {/* Free: fake sidebar only when we are not showing the real ~40% preview */}
                     {lockedFeatures.includes('full_annotations') && !isFreePreview && (
                       <div className="space-y-5">
@@ -4273,54 +4362,96 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
             </div>
             </div>
 
-            {/* Full Analysis Result — free users: readable first ~40%, then Pro gate for the rest (no backend change required). */}
+            {/* Full Analysis Result — free users: full content visible, but text beyond 40% is blurred inline */}
             {analysisResult && (
               <div className="mx-6 mt-8 mb-6 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-600 overflow-hidden">
                 <div className="bg-violet-600 hover:bg-violet-500 text-white px-6 py-4">
                   <h2 className="text-xl font-bold">Comprehensive Academic Analysis</h2>
                   <p className="text-violet-100 text-sm mt-0.5">
                     {currentPlan === 'free'
-                      ? canStartFreeTrial
-                        ? 'Read the first ~40% below — unlock the rest on Pro (eligible: one 7-day trial)'
-                        : 'Read the first ~40% below — unlock the full written analysis on Pro'
+                      ? 'Full analysis structure shown below — unlock all text to read every insight'
                       : 'Full analysis report'}
                   </p>
                 </div>
                 <div className="p-6 prose pviolet-stone dark:pviolet-invert max-w-none">
                   {currentPlan === 'free' ? (
-                    <div className="text-sm leading-relaxed space-y-4">
+                    <div className="text-sm leading-relaxed">
+                      {/* Readable portion (first 40%) */}
                       <div
                         className="prose pviolet-sm dark:pviolet-invert max-w-none"
                         dangerouslySetInnerHTML={{
                           __html: sanitizeAnalysisHtml(simpleMarkdownToHtml(freeComprehensiveAnalysisPreviewMd)),
                         }}
                       />
-                      {freeComprehensiveAnalysisHasLockedRemainder ? (
-                        <FreeAnalysisProBlur
-                          onUpgrade={startProMonthlyCheckout}
-                          upgradeDisabled={checkoutRedirecting}
-                          headline="Your full breakdown is right behind the blur — one tap to read it all"
-                          primaryLabel={
-                            checkoutRedirecting
-                              ? 'Opening checkout…'
-                              : canStartFreeTrial
-                                ? 'Read the full analysis — start 7-day free trial'
-                                : 'Upgrade to Pro — read the full analysis'
-                          }
-                          sublabel={
-                            canStartFreeTrial
-                              ? 'Strengths, risks, and fixes for your exact draft — not generic advice. One free trial per account; cancel anytime.'
-                              : 'Strengths, risks, and fixes for your exact draft — unlock before you submit.'
-                          }
-                        >
-                          <div
-                            className="prose pviolet-sm dark:pviolet-invert max-w-none text-sm"
-                            dangerouslySetInnerHTML={{
-                              __html: sanitizeAnalysisHtml(simpleMarkdownToHtml(freeComprehensiveLockedRemainderMd)),
-                            }}
-                          />
-                        </FreeAnalysisProBlur>
-                      ) : null}
+                      {freeComprehensiveAnalysisHasLockedRemainder && (
+                        <>
+                          {/* Inline upgrade banner */}
+                          <div className="my-6 relative overflow-hidden rounded-xl border-2 border-dashed border-violet-300/80 bg-gradient-to-r from-violet-50/80 via-white to-violet-50/80 dark:border-violet-600/50 dark:from-violet-950/30 dark:via-stone-900 dark:to-violet-950/30">
+                            <div className="relative z-10 flex flex-col sm:flex-row items-center gap-3 px-4 py-4">
+                              <svg className="w-5 h-5 text-violet-500 shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                              </svg>
+                              <div className="flex-1 text-center sm:text-left">
+                                <p className="text-sm font-semibold text-stone-800 dark:text-stone-100">
+                                  {Math.round((1 - (freeComprehensiveAnalysisPreviewMd.length / analysisResult.length)) * 100)}% more analysis below
+                                </p>
+                                <p className="text-xs text-stone-600 dark:text-stone-400 mt-0.5">
+                                  The structure is visible — unlock to read the full breakdown
+                                </p>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={startProMonthlyCheckout}
+                                disabled={checkoutRedirecting}
+                                className="shrink-0 rounded-lg bg-gradient-to-r from-violet-600 to-violet-700 px-4 py-2 text-sm font-bold text-white shadow-md shadow-violet-600/25 transition-all hover:scale-[1.02] hover:from-violet-500 hover:to-violet-600 active:scale-[0.99] disabled:cursor-wait disabled:opacity-60"
+                              >
+                                {checkoutRedirecting ? 'Opening…' : canStartFreeTrial ? 'Unlock — free trial' : 'Unlock full analysis'}
+                              </button>
+                            </div>
+                          </div>
+                          {/* Blurred remainder (full text visible but unreadable) */}
+                          <div className="relative select-none">
+                            <div
+                              className="prose pviolet-sm dark:pviolet-invert max-w-none text-sm blur-[6px] opacity-70 [transform:translateZ(0)] pointer-events-none"
+                              aria-hidden="true"
+                              dangerouslySetInnerHTML={{
+                                __html: sanitizeAnalysisHtml(simpleMarkdownToHtml(freeComprehensiveLockedRemainderMd)),
+                              }}
+                            />
+                            {/* Floating CTA overlay */}
+                            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-white/20 via-white/60 to-white/90 dark:from-stone-800/20 dark:via-stone-800/60 dark:to-stone-800/90">
+                              <div className="text-center px-4 py-6">
+                                <div className="inline-flex items-center gap-2 rounded-full border border-violet-200/90 bg-white/90 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-violet-600 shadow-sm backdrop-blur-sm dark:border-violet-600/50 dark:bg-stone-900/90 dark:text-violet-300 mb-3">
+                                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                  </svg>
+                                  Pro
+                                </div>
+                                <p className="text-base font-bold text-stone-900 dark:text-stone-50 mb-2">
+                                  Your complete analysis is right here
+                                </p>
+                                <p className="text-sm text-stone-600 dark:text-stone-400 mb-4 max-w-sm mx-auto">
+                                  {canStartFreeTrial
+                                    ? 'Specific feedback on your thesis, evidence, and writing style. Start your free trial to read it all.'
+                                    : 'Specific feedback on your thesis, evidence, and writing style awaits you.'}
+                                </p>
+                                <button
+                                  type="button"
+                                  onClick={startProMonthlyCheckout}
+                                  disabled={checkoutRedirecting}
+                                  className="rounded-xl bg-gradient-to-r from-violet-600 to-violet-700 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-violet-600/30 transition-all hover:scale-[1.02] hover:from-violet-500 hover:to-violet-600 hover:shadow-violet-500/40 active:scale-[0.99] disabled:cursor-wait disabled:opacity-60"
+                                >
+                                  {checkoutRedirecting
+                                    ? 'Opening checkout…'
+                                    : canStartFreeTrial
+                                      ? 'Read the full analysis — start free trial'
+                                      : 'Upgrade to Pro — read full analysis'}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      )}
                     </div>
                   ) : (
                     <div

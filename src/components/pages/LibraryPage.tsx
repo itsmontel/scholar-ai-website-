@@ -222,15 +222,34 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
         setDocuments(docs);
         setError(''); // Clear any previous errors
         
-        // Auto-select the most recent document (first in the list since they're sorted by date)
+        // Prefer document to restore after Stripe checkout (Analysis page upgrade flow)
+        let restoreDocId: string | null = null;
+        try {
+          restoreDocId = sessionStorage.getItem('librarySelectDocumentAfterCheckout');
+          if (restoreDocId) {
+            sessionStorage.removeItem('librarySelectDocumentAfterCheckout');
+            sessionStorage.removeItem('librarySelectAnalysisTypeAfterCheckout');
+          }
+        } catch {
+          restoreDocId = null;
+        }
+
         if (docs.length > 0) {
-          const mostRecentDocument = docs[0];
-          console.log('Auto-selecting most recent document:', mostRecentDocument.title);
-          setSelectedDocument(mostRecentDocument);
-          
-          // Automatically load content and analysis for the most recent document
-          fetchDocumentContent(mostRecentDocument.id);
-          fetchDocumentAnalysis(mostRecentDocument.id);
+          const fromCheckout = restoreDocId ? docs.find((d) => d.id === restoreDocId) : null;
+          const docToShow = fromCheckout || docs[0];
+          console.log(
+            fromCheckout
+              ? 'Restoring document after checkout return:'
+              : 'Auto-selecting most recent document:',
+            docToShow.title
+          );
+          setSelectedDocument(docToShow);
+          fetchDocumentContent(docToShow.id);
+          fetchDocumentAnalysis(docToShow.id);
+          // After returning from checkout, surface the analysis panel on small screens
+          if (fromCheckout && window.innerWidth < 768) {
+            setMobileView('analysis');
+          }
         }
       } else {
         console.error('📚 Library documents fetch failed:', result.error);
