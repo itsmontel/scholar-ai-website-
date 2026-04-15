@@ -971,3 +971,55 @@ export const ExpandedAiWritingAssistant: React.FC<{ handleNavigate: NavigateHand
     </p>
   </>
 );
+
+/** essay-checker-plagiarism-research-paper-help-google-searches */
+export const ExpandedEssayStudentGoogleSearchGuide: React.FC<{ handleNavigate: NavigateHandler }> = ({ handleNavigate }) => (
+  <>
+    <h2 className={h2}>When people search “essay checker,” they usually want three different things</h2>
+    <p className={p}>
+      First, a fast sanity check: spelling, grammar, and whether sentences are readable. Second, argument-level feedback: thesis clarity, evidence, and whether each paragraph advances the claim. Third, integrity comfort: reassurance that paraphrases are not too close to sources and that citations are complete. One search phrase hides a bundle of needs. Tools that only fix commas cannot replace a pass that checks whether your conclusion answers the prompt. Conversely, running a deep structure review before you have complete sentences wastes time. Sequence matters: outline and draft, then structure and citations, then line-level polish with a <a href="/tools/grammar-checker" onClick={handleNavigate('grammar-checker')} className={internalLink}>grammar checker for students</a> and a <a href="/tools/readability-score" onClick={handleNavigate('readability-score')} className={internalLink}>readability check</a>.
+    </p>
+    <p className={p}>
+      If your query is closer to “grade my essay” or “paper rater,” you are really asking for rubric-aligned judgment: what would a grader notice first? That is where professor-style feedback on your own draft helps more than a numeric score with no explanation. Look for tools that tie comments to exact sentences and criteria, not a single opaque number at the end.
+    </p>
+
+    <h2 className={h2}>“Plagiarism checker,” “Turnitin,” and “is this paraphrasing okay?”</h2>
+    <p className={p}>
+      Students search plagiarism-related phrases when they are anxious about accidental copying, patchwriting, or forgotten quotation marks. Automated originality tools can flag overlap, but they do not replace understanding citation rules. The sustainable fix is systematic: every idea that is not common knowledge needs a path back to a source; every direct quote needs quotation marks or block format; every paraphrase still needs a citation when the idea is not yours. Pair habits with a <a href="/tools/citation-generator" onClick={handleNavigate('citation-generator-tool')} className={internalLink}>citation generator</a> so APA or MLA formatting does not break under deadline stress.
+    </p>
+    <p className={p}>
+      When people look for a “paraphrasing tool” or “rewrite my sentence,” the ethical line is whether you are learning to express an idea in your own words or laundering someone else&apos;s prose. Rewriting to understand, then closing the source and drafting fresh, is legitimate study. Pasting text into a rewriter and submitting the output usually violates course policies. If you need phrasing help, use <a href="/tools/paraphrasing-tips" onClick={handleNavigate('paraphrasing-tips')} className={internalLink}>paraphrasing guidance</a> and your own sentences, not auto-generated paragraphs.
+    </p>
+
+    <h2 className={h2}>“Research paper help,” “thesis statement,” and “how long should my paper be?”</h2>
+    <p className={p}>
+      Research paper searches often mix structure questions with anxiety about scope. A strong thesis is specific and contestable; it previews the why, not just the topic. An outline prevents the classic failure mode: beautiful paragraphs that do not add up to an argument. Use an <a href="/tools/essay-outline" onClick={handleNavigate('essay-outline')} className={internalLink}>essay outline</a> to align sections with your prompt before you chase sources. Length questions are usually proxy worries about depth: match page count to the number of claims you can support with evidence, not padding.
+    </p>
+    <p className={p}>
+      For literature reviews and methods-heavy courses, students also search “how to cite multiple authors,” “DOI,” or “APA 7 title page.” Those are style-guide questions; keep the official manual or your department&apos;s template open beside a consistent citation workflow. Tools reduce mechanical errors; they do not read the syllabus for you.
+    </p>
+
+    <h2 className={h2}>“Homework help,” “study app,” “flashcards,” and “quizlet alternative”</h2>
+    <p className={p}>
+      Writing searches spike before due dates; study searches spike before exams. The same student often needs both: retrieval practice with <a href="/tools/quiz-generator" onClick={handleNavigate('quiz-generator')} className={internalLink}>quizzes</a> and <a href="/tools/create-flashcards" onClick={handleNavigate('create-flashcards')} className={internalLink}>flashcards</a> built from lecture notes, plus <a href="/tools/study-pack" onClick={handleNavigate('study-pack')} className={internalLink}>study packs</a> when you want structured review. If distraction is the real bottleneck, pair sessions with <a href="/focus-mode" onClick={handleNavigate('focus-mode')} className={internalLink}>Focus Mode</a> so unlock rules match your actual goals.
+    </p>
+    <p className={p}>
+      Searching “GPA calculator” or “what do I need on the final?” reflects anxiety about weighting, not writing skill. Answer those questions with your syllabus math, then return to preparation: spaced review beats cramming for durable memory.
+    </p>
+
+    <h2 className={h2}>“Proofread my paper,” “word counter,” and “English grammar check”</h2>
+    <p className={p}>
+      These queries are often the last step before upload. That is fine if higher-order issues are already settled. Otherwise you risk “correcting” language in paragraphs your instructor will still mark for missing evidence. Use a <a href="/tools/word-counter" onClick={handleNavigate('word-counter')} className={internalLink}>word counter</a> early to stay inside limits, then proofread late. If you are not a native English speaker, separate global clarity edits from nitpicks so you are not oscillating between two standards in the same sentence.
+    </p>
+
+    <h2 className={h2}>“AI homework helper” and “AI essay writer”: read the syllabus twice</h2>
+    <p className={p}>
+      Institutions distinguish between assistance that strengthens your skills and submission of machine-generated work. Feedback on a draft you wrote (structure, rubric alignment, missing citations) is widely accepted when policies allow tools at all. Submitting text a model composed for you usually is not. When in doubt, ask your instructor before the deadline. WriteScholar is built around <a href="/analysis" onClick={handleNavigate('analysis')} className={internalLink}>feedback on your draft</a> and <a href="/features" onClick={handleNavigate('features')} className={internalLink}>academic workflows</a>, not ghostwriting; see <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for plans that match how many papers you run per month.
+    </p>
+
+    <h2 className={h2}>Turn searches into a repeatable workflow</h2>
+    <p className={p}>
+      Monday: prompt and rubric in your own words. Tuesday–Wednesday: draft body sections. Midweek: run essay-level feedback; revise thesis and evidence. Later: citations and reference list. End: grammar, readability, and a slow read aloud. Searching Google for shortcuts is normal; turning those shortcuts into an ordered pipeline is what protects both grades and integrity.
+    </p>
+  </>
+);
