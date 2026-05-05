@@ -89,17 +89,6 @@ const DASHBOARD_TOOL_ITEMS = [
     accent: 'rose',
   },
   {
-    id: 'citations' as const,
-    title: 'Citations',
-    desc: 'Find & format sources',
-    emoji: '📚',
-    iconClass: 'bg-gradient-to-br from-sky-400 to-blue-600',
-    activeBar: 'border-l-sky-500',
-    titleClass: 'text-sky-900 dark:text-sky-100',
-    activeBg: 'bg-gradient-to-r from-sky-50/95 via-white to-blue-50/35 dark:from-sky-950/30 dark:via-stone-900/90 dark:to-blue-950/20',
-    accent: 'sky',
-  },
-  {
     id: 'study_pack' as const,
     title: 'Study Pack',
     desc: 'Quiz, flashcards, lessons',
@@ -109,6 +98,17 @@ const DASHBOARD_TOOL_ITEMS = [
     titleClass: 'text-amber-950 dark:text-amber-100',
     activeBg: 'bg-gradient-to-r from-amber-50/95 via-white to-orange-50/35 dark:from-amber-950/25 dark:via-stone-900/90 dark:to-orange-950/20',
     accent: 'amber',
+  },
+  {
+    id: 'citations' as const,
+    title: 'Citations',
+    desc: 'Find & format sources',
+    emoji: '📚',
+    iconClass: 'bg-gradient-to-br from-sky-400 to-blue-600',
+    activeBar: 'border-l-sky-500',
+    titleClass: 'text-sky-900 dark:text-sky-100',
+    activeBg: 'bg-gradient-to-r from-sky-50/95 via-white to-blue-50/35 dark:from-sky-950/30 dark:via-stone-900/90 dark:to-blue-950/20',
+    accent: 'sky',
   },
   {
     id: 'more_tools' as const,
@@ -132,7 +132,7 @@ const WORKSPACE_SHORTCUTS = [
   { id: 'help', label: 'Help center', hint: 'Guides & FAQs', page: 'help' as const, emoji: '💡' },
 ] as const;
 
-/** Dashboard hero subtitle: essay line only on Analyze; Citations & Study Pack get tailored copy; More tools differs. */
+/** Dashboard hero subtitle: essay line only on Analyze; Study Pack & Citations get tailored copy; More tools differs. */
 const getWorkspaceSubtitle = (isNew: boolean, tool: DashboardTool): string => {
   if (!isNew) return 'Pick up where you left off.';
   switch (tool) {
@@ -417,6 +417,32 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
     <div className="min-h-screen relative font-sans overflow-x-hidden bg-stone-50 dark:bg-stone-950">
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="dashboard" />
+
+      {isFree && (
+        <div
+          role="region"
+          aria-label="Limited time promotion"
+          className="relative overflow-hidden border-b border-violet-200/70 dark:border-violet-900/60 bg-gradient-to-r from-violet-50 via-white to-violet-50 dark:from-stone-950 dark:via-stone-900 dark:to-stone-950"
+        >
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_120%_at_50%_50%,rgba(124,58,237,0.10),transparent_70%)] dark:bg-[radial-gradient(ellipse_60%_120%_at_50%_50%,rgba(139,92,246,0.18),transparent_70%)]" aria-hidden />
+          <div className="relative mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3">
+            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-center">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-600 px-2.5 py-0.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white shadow-sm">
+                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+                  <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H7a1 1 0 110-2h2V6.477L6.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 015 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L9 4.323V3a1 1 0 011-1z" clipRule="evenodd" />
+                </svg>
+                Limited Time
+              </span>
+              <p className="text-sm sm:text-base font-medium text-stone-800 dark:text-stone-100">
+                <span className="font-bold text-violet-700 dark:text-violet-300">50% off</span> your first month on monthly plans · use code{' '}
+                <span className="inline-flex items-center rounded-md border border-violet-300 dark:border-violet-700 bg-white dark:bg-stone-900 px-2 py-0.5 font-mono font-bold text-violet-700 dark:text-violet-300 tracking-wide">
+                  MAY2026
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {isAnalyzing && (
         <AnalysisAnimation isPopup={true} text="Analyzing your essay" isComplete={false} />
@@ -1101,20 +1127,20 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                             accent: 'rose' as const,
                           },
                           {
-                            key: 'citations',
-                            label: 'Citations',
-                            emoji: '📚',
-                            remaining: usageStats.citationsRemaining,
-                            total: freeMonthlyCaps.citations,
-                            accent: 'sky' as const,
-                          },
-                          {
                             key: 'study',
                             label: 'Study packs',
                             emoji: '📦',
                             remaining: usageStats.studyPacksRemaining,
                             total: freeMonthlyCaps.studyPacks,
                             accent: 'amber' as const,
+                          },
+                          {
+                            key: 'citations',
+                            label: 'Citations',
+                            emoji: '📚',
+                            remaining: usageStats.citationsRemaining,
+                            total: freeMonthlyCaps.citations,
+                            accent: 'sky' as const,
                           },
                           {
                             key: 'uploads',
@@ -1302,9 +1328,9 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
               </>
             )}
 
-            {/* === CITATIONS === */}
-            {dashboardTool === 'citations' && (
-              <CitationsPage
+            {/* === STUDY PACK === */}
+            {dashboardTool === 'study_pack' && (
+              <StudyPackPage
                 embedded
                 onEmbeddedToolSwitch={switchEmbeddedTool}
                 onNavigate={onNavigate}
@@ -1313,9 +1339,9 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
               />
             )}
 
-            {/* === STUDY PACK === */}
-            {dashboardTool === 'study_pack' && (
-              <StudyPackPage
+            {/* === CITATIONS === */}
+            {dashboardTool === 'citations' && (
+              <CitationsPage
                 embedded
                 onEmbeddedToolSwitch={switchEmbeddedTool}
                 onNavigate={onNavigate}

@@ -484,16 +484,16 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                           </button>
                           <button
                             type="button"
+                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 bg-white dark:bg-stone-700 text-orange-800 dark:text-orange-200 shadow-sm ring-1 ring-stone-200/80 dark:ring-stone-600/80"
+                          >
+                            <span className="text-lg">📦</span> Study Pack
+                          </button>
+                          <button
+                            type="button"
                             onClick={goCitations}
                             className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200"
                           >
                             <span className="text-lg">📚</span> Citations
-                          </button>
-                          <button
-                            type="button"
-                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 bg-white dark:bg-stone-700 text-orange-800 dark:text-orange-200 shadow-sm ring-1 ring-stone-200/80 dark:ring-stone-600/80"
-                          >
-                            <span className="text-lg">📦</span> Study Pack
                           </button>
                         </div>
                         {!loadingStats && (

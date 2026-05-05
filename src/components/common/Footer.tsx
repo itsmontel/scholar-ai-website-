@@ -203,17 +203,17 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                   <span className="text-xs opacity-75">📊</span>
                 </a>
               </li>
-              {/* Teal/Blues */}
-              <li>
-                <a href="/tools/citations" onClick={(e) => { e.preventDefault(); onNavigate?.('citations'); }} className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors flex items-center gap-1.5">
-                  Citations Finder
-                  <span className="text-xs opacity-75">📚</span>
-                </a>
-              </li>
+              {/* Study Pack / Citations */}
               <li>
                 <a href="/tools/study-pack" onClick={(e) => { e.preventDefault(); onNavigate?.('study-pack'); }} className="text-orange-400 hover:text-orange-300 text-sm font-medium transition-colors flex items-center gap-1.5">
                   Study Pack
                   <span className="text-xs opacity-75">📦</span>
+                </a>
+              </li>
+              <li>
+                <a href="/tools/citations" onClick={(e) => { e.preventDefault(); onNavigate?.('citations'); }} className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors flex items-center gap-1.5">
+                  Citations Finder
+                  <span className="text-xs opacity-75">📚</span>
                 </a>
               </li>
               <li>

@@ -280,16 +280,16 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                           </button>
                           <button
                             type="button"
-                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 bg-white dark:bg-stone-900 text-blue-800 dark:text-blue-300 shadow-sm border border-stone-200/80 dark:border-stone-600"
-                          >
-                            <span className="text-base" aria-hidden>📚</span> Citations
-                          </button>
-                          <button
-                            type="button"
                             onClick={goStudyPack}
                             className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200"
                           >
                             <span className="text-base" aria-hidden>📦</span> Study Pack
+                          </button>
+                          <button
+                            type="button"
+                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 bg-white dark:bg-stone-900 text-blue-800 dark:text-blue-300 shadow-sm border border-stone-200/80 dark:border-stone-600"
+                          >
+                            <span className="text-base" aria-hidden>📚</span> Citations
                           </button>
                         </div>
                         {user && citationCheckLoaded && !hasDoneCitation && (

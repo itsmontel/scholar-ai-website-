@@ -654,6 +654,30 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
     <>
       <Header onNavigate={onNavigate} user={user} sticky={true} currentPage="landing" opaqueHeader />
       <main className="min-h-screen relative transition-colors font-sans overflow-x-hidden xl:overflow-x-visible" role="main">
+      {/* Promo Banner */}
+      <div
+        role="region"
+        aria-label="Limited time promotion"
+        className="relative overflow-hidden border-b border-violet-200/70 dark:border-violet-900/60 bg-gradient-to-r from-violet-50 via-white to-violet-50 dark:from-stone-950 dark:via-stone-900 dark:to-stone-950"
+      >
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_120%_at_50%_50%,rgba(124,58,237,0.10),transparent_70%)] dark:bg-[radial-gradient(ellipse_60%_120%_at_50%_50%,rgba(139,92,246,0.18),transparent_70%)]" aria-hidden />
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3">
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-center">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-600 px-2.5 py-0.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white shadow-sm">
+              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+                <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H7a1 1 0 110-2h2V6.477L6.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 015 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L9 4.323V3a1 1 0 011-1z" clipRule="evenodd" />
+              </svg>
+              Limited Time
+            </span>
+            <p className="text-sm sm:text-base font-medium text-stone-800 dark:text-stone-100">
+              <span className="font-bold text-violet-700 dark:text-violet-300">50% off</span> your first month on monthly plans · use code{' '}
+              <span className="inline-flex items-center rounded-md border border-violet-300 dark:border-violet-700 bg-white dark:bg-stone-900 px-2 py-0.5 font-mono font-bold text-violet-700 dark:text-violet-300 tracking-wide">
+                MAY2026
+              </span>
+            </p>
+          </div>
+        </div>
+      </div>
       {/* HERO: formal, conversion-focused */}
       <section className="relative flex flex-col overflow-x-clip overflow-hidden border-b border-stone-200/90 dark:border-stone-800 xl:overflow-visible">
         <div className="absolute inset-0 bg-[#f9f9fb] dark:bg-[#0c0a09]" />

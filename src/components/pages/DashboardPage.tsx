@@ -2022,22 +2022,6 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                     proOnly: false,
                   },
                   {
-                    id: 'citations',
-                    title: 'Citations',
-                    desc: 'Find academic sources, formatted',
-                    emoji: '📚',
-                    iconGrad: 'from-blue-400 to-indigo-500',
-                    titleClr: 'text-blue-600 dark:text-blue-400',
-                    activeRing: 'ring-blue-400 dark:ring-blue-500',
-                    blob1: 'bg-blue-200/60 dark:bg-blue-500/20',
-                    blob2: 'bg-indigo-200/50 dark:bg-indigo-500/15',
-                    badge: undefined as string | undefined,
-                    badgeBg: '',
-                    onClick: () => setMode('citations'),
-                    isActive: mode === 'citations',
-                    proOnly: false,
-                  },
-                  {
                     id: 'quiz',
                     title: 'Study Pack',
                     desc: 'Lesson, quiz, flashcards, crossword',
@@ -2059,6 +2043,22 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                       setStudyPackResult(null);
                     },
                     isActive: mode === 'quiz',
+                    proOnly: false,
+                  },
+                  {
+                    id: 'citations',
+                    title: 'Citations',
+                    desc: 'Find academic sources, formatted',
+                    emoji: '📚',
+                    iconGrad: 'from-blue-400 to-indigo-500',
+                    titleClr: 'text-blue-600 dark:text-blue-400',
+                    activeRing: 'ring-blue-400 dark:ring-blue-500',
+                    blob1: 'bg-blue-200/60 dark:bg-blue-500/20',
+                    blob2: 'bg-indigo-200/50 dark:bg-indigo-500/15',
+                    badge: undefined as string | undefined,
+                    badgeBg: '',
+                    onClick: () => setMode('citations'),
+                    isActive: mode === 'citations',
                     proOnly: false,
                   },
                   {
@@ -2287,18 +2287,18 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                             <span className="leading-tight">Analyze</span>
                     </button>
                     <button
-                      onClick={() => { setMode('citations'); setShowWordWarning(false); setAnalyzeUploadError(''); setSummaryResult(null); }}
-                            className="flex-1 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 py-2 sm:py-2.5 rounded-lg font-medium text-[11px] sm:text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 min-h-[2.75rem] sm:min-h-0"
-                    >
-                            <span className="text-sm sm:text-base leading-none" aria-hidden>📚</span>
-                            <span className="leading-tight">Citations</span>
-                    </button>
-                    <button
                       onClick={() => { setMode('quiz'); setShowWordWarning(false); setAnalyzeUploadError(''); setSummaryResult(null); setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); setStudyPackResult(null); }}
                             className="flex-1 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 py-2 sm:py-2.5 rounded-lg font-medium text-[11px] sm:text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 min-h-[2.75rem] sm:min-h-0"
                     >
                             <span className="text-sm sm:text-base leading-none" aria-hidden>📦</span>
                             <span className="leading-tight"><span className="sm:hidden">Study</span><span className="hidden sm:inline">Study Pack</span></span>
+                    </button>
+                    <button
+                      onClick={() => { setMode('citations'); setShowWordWarning(false); setAnalyzeUploadError(''); setSummaryResult(null); }}
+                            className="flex-1 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 py-2 sm:py-2.5 rounded-lg font-medium text-[11px] sm:text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 min-h-[2.75rem] sm:min-h-0"
+                    >
+                            <span className="text-sm sm:text-base leading-none" aria-hidden>📚</span>
+                            <span className="leading-tight">Citations</span>
                     </button>
                   </div>
                       </div>
@@ -2602,18 +2602,18 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                               <span className="leading-tight">Analyze</span>
                             </button>
                             <button
-                              onClick={() => { setMode('citations'); setShowWordWarning(false); setAnalyzeUploadError(''); setSummaryResult(null); }}
-                              className={`flex-1 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 py-2 sm:py-2.5 rounded-lg font-medium text-[11px] sm:text-sm transition-all duration-200 min-h-[2.75rem] sm:min-h-0 ${mode === 'citations' ? 'bg-white dark:bg-stone-900 text-violet-800 dark:text-violet-300 shadow-sm border border-stone-200/80 dark:border-stone-600' : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'}`}
-                            >
-                              <span className="text-sm sm:text-base leading-none" aria-hidden>📚</span>
-                              <span className="leading-tight">Citations</span>
-                            </button>
-                            <button
                               onClick={() => { setMode('quiz'); setShowWordWarning(false); setAnalyzeUploadError(''); setSummaryResult(null); setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); setStudyPackResult(null); }}
                               className="flex-1 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 py-2 sm:py-2.5 rounded-lg font-medium text-[11px] sm:text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 min-h-[2.75rem] sm:min-h-0"
                             >
                               <span className="text-sm sm:text-base leading-none" aria-hidden>📦</span>
                               <span className="leading-tight"><span className="sm:hidden">Study</span><span className="hidden sm:inline">Study Pack</span></span>
+                            </button>
+                            <button
+                              onClick={() => { setMode('citations'); setShowWordWarning(false); setAnalyzeUploadError(''); setSummaryResult(null); }}
+                              className={`flex-1 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 py-2 sm:py-2.5 rounded-lg font-medium text-[11px] sm:text-sm transition-all duration-200 min-h-[2.75rem] sm:min-h-0 ${mode === 'citations' ? 'bg-white dark:bg-stone-900 text-violet-800 dark:text-violet-300 shadow-sm border border-stone-200/80 dark:border-stone-600' : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'}`}
+                            >
+                              <span className="text-sm sm:text-base leading-none" aria-hidden>📚</span>
+                              <span className="leading-tight">Citations</span>
                             </button>
                           </div>
                   {showFirstCitationPrompt && mode === 'citations' && (
@@ -3159,18 +3159,18 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                       <span className="leading-tight text-center"><span className="sm:hidden">Analyze</span><span className="hidden sm:inline">Analyze Text</span></span>
                     </button>
                     <button
-                      onClick={() => { setMode('citations'); setShowWordWarning(false); setAnalyzeUploadError(''); setSummaryResult(null); }}
-                          className="flex-1 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 py-2 sm:py-2.5 rounded-lg font-medium text-[11px] sm:text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 min-h-[2.75rem] sm:min-h-0"
-                    >
-                      <span className="text-sm sm:text-lg leading-none">📚</span>
-                      <span className="leading-tight">Citations</span>
-                    </button>
-                    <button
                       onClick={() => { setMode('quiz'); setShowWordWarning(false); setAnalyzeUploadError(''); setSummaryResult(null); setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); setStudyPackResult(null); }}
                           className="flex-1 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 py-2 sm:py-2.5 rounded-lg font-medium text-[11px] sm:text-sm transition-all duration-200 bg-white dark:bg-stone-700 text-violet-800 dark:text-violet-200 shadow-sm ring-1 ring-stone-200/80 dark:ring-stone-600/80 min-h-[2.75rem] sm:min-h-0"
                     >
                       <span className="text-sm sm:text-lg leading-none">📦</span>
                       <span className="leading-tight"><span className="sm:hidden">Study</span><span className="hidden sm:inline">Study Pack</span></span>
+                    </button>
+                    <button
+                      onClick={() => { setMode('citations'); setShowWordWarning(false); setAnalyzeUploadError(''); setSummaryResult(null); }}
+                          className="flex-1 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 py-2 sm:py-2.5 rounded-lg font-medium text-[11px] sm:text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 min-h-[2.75rem] sm:min-h-0"
+                    >
+                      <span className="text-sm sm:text-lg leading-none">📚</span>
+                      <span className="leading-tight">Citations</span>
                     </button>
                   </div>
                   {/* Create Cards button - inline */}
