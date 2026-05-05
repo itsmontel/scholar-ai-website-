@@ -14,7 +14,7 @@ import type { EmbeddedDashboardTool } from './CitationsPage';
 const STUDY_PACK_PAGE_SEO = {
   title: 'AI Study Pack — Lesson, Flashcards, Quiz, Crossword & More | WriteScholar',
   description:
-    'Turn notes into a lesson, flashcards, quiz, crossword, and Crater Blast from one paste. Same study pack flow as the dashboard.',
+    'Turn notes into a lesson, flashcards, quiz, crossword, Crater Blast, and Word Tower from one paste. Same study pack flow as the dashboard.',
 };
 
 type NavigateFn = (
@@ -33,6 +33,57 @@ interface StudyPackPageProps {
 
 const getWordCount = (text: string) =>
   text.trim().split(/\s+/).filter((word) => word.length > 0).length;
+
+/** Dashboard embedded row — one preview per study tool type (videos where we ship demos). */
+const EMBEDDED_STUDY_PACK_PREVIEWS: {
+  label: string;
+  video?: { src: string; alt: string };
+  /** Used only when no product video exists yet (e.g. Word Tower). */
+  fallbackImage?: { src: string; alt: string };
+}[] = [
+  {
+    label: 'Lesson',
+    fallbackImage: {
+      src: '/study-pack-previews/lesson-plan.png',
+      alt: 'Preview of AI lesson plan layout from pasted study notes',
+    },
+  },
+  {
+    label: 'Flashcards',
+    video: {
+      src: '/writescholar-flashcards-demo.mp4',
+      alt: 'Preview of flip flashcards generated from notes',
+    },
+  },
+  {
+    label: 'Quiz',
+    video: {
+      src: '/writescholar-quiz-generator-demo.mp4',
+      alt: 'Preview of multiple-choice quiz from study notes',
+    },
+  },
+  {
+    label: 'Crossword',
+    video: {
+      src: '/writescholar-crossword-demo.mp4',
+      alt: 'Preview of crossword puzzle from vocabulary',
+    },
+  },
+  {
+    label: 'Crater Blast',
+    video: {
+      src: '/writescholar-crater-blast-demo.mp4',
+      alt: 'Preview of Crater Blast quiz game built from quiz content',
+    },
+  },
+  {
+    label: 'Word Tower',
+    fallbackImage: {
+      src: '/study-pack-previews/word-tower.png',
+      alt: 'Word Tower stacking quiz game catching correct falling answers',
+    },
+  },
+];
 
 const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbeddedToolSwitch }: StudyPackPageProps) => {
   const [inputText, setInputText] = useState(() => {
@@ -313,7 +364,7 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
           </div>
         )}
 
-        {!quizExhausted && user && (
+        {!quizExhausted && user && !embedded && (
           <div className="mb-4 sm:mb-6 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-800/50 rounded-xl sm:rounded-2xl p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3">
             <div className="flex items-start sm:items-center gap-2 sm:gap-3">
               <span className="text-xl sm:text-2xl">🧠</span>
@@ -326,7 +377,7 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                       {getResetsInText(usageStats.daysUntilReset ?? quizUsage.daysUntilReset)}
                     </p>
                     <p className="text-amber-600 dark:text-amber-400 text-[10px] sm:text-xs mt-0.5 line-clamp-2">
-                      Lesson, flashcards & quiz included • Crossword & Crater Blast unlock with Pro
+                      Lesson, flashcards & quiz included • Crossword, Crater Blast & Word Tower unlock with Pro
                     </p>
                   </>
                 ) : (
@@ -355,8 +406,8 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
         )}
 
         {loadingStats ? (
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-8 pt-2 sm:pt-4 pb-2 sm:pb-4">
-            {Array.from({ length: 6 }).map((_, i) => (
+          <div className={`${embedded ? 'grid grid-cols-2 gap-3 mb-4' : 'grid grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-8 pt-2 sm:pt-4 pb-2 sm:pb-4'}`}>
+            {Array.from({ length: embedded ? 2 : 6 }).map((_, i) => (
               <div
                 key={i}
                 className="p-3 sm:p-4 rounded-2xl border border-stone-200/50 dark:border-stone-700/30 bg-stone-50 dark:bg-stone-800/50 animate-pulse"
@@ -368,12 +419,12 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
             ))}
           </div>
         ) : (
-          <div className="pt-2 sm:pt-4 pb-4 sm:pb-6 overflow-visible" data-tutorial="study-pack-input">
-            <div className="relative rounded-2xl overflow-hidden mb-4 sm:mb-8 border border-stone-200/90 dark:border-stone-700/80 bg-white/95 dark:bg-stone-900/60 shadow-md">
+          <div className={embedded ? 'pb-2 overflow-visible' : 'pt-2 sm:pt-4 pb-4 sm:pb-6 overflow-visible'} data-tutorial="study-pack-input">
+            <div className={`relative rounded-2xl overflow-hidden border border-stone-200/90 dark:border-stone-700/80 bg-white/95 dark:bg-stone-900/60 shadow-md ${embedded ? 'mb-3 shadow-lg' : 'mb-4 sm:mb-8'}`}>
               <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 via-amber-500 to-red-500 opacity-90" aria-hidden />
-              <div className="relative rounded-[inherit] p-4 sm:p-10">
-                <div className="relative lg:grid lg:grid-cols-[minmax(0,220px)_minmax(0,1fr)_minmax(0,220px)] xl:grid-cols-[minmax(0,248px)_minmax(0,1fr)_minmax(0,248px)] lg:gap-8 xl:gap-10 lg:items-stretch">
-                  <div className="hidden lg:block relative self-end justify-self-start w-[236px] xl:w-[248px] pointer-events-auto -rotate-[11deg] origin-bottom-left drop-shadow-lg z-[5]" aria-label="Sample flashcard preview">
+              <div className={`relative rounded-[inherit] ${embedded ? 'p-4 sm:p-6 lg:p-7' : 'p-4 sm:p-10'}`}>
+                <div className={embedded ? 'relative' : 'relative lg:grid lg:grid-cols-[minmax(0,220px)_minmax(0,1fr)_minmax(0,220px)] xl:grid-cols-[minmax(0,248px)_minmax(0,1fr)_minmax(0,248px)] lg:gap-8 xl:gap-10 lg:items-stretch'}>
+                  <div className={embedded ? 'hidden' : 'hidden lg:block relative self-end justify-self-start w-[236px] xl:w-[248px] pointer-events-auto -rotate-[11deg] origin-bottom-left drop-shadow-lg z-[5]'} aria-label="Sample flashcard preview">
                     <p className="text-center mb-2">
                       <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-violet-800/95 dark:text-violet-300/95">
                         Flashcards
@@ -384,15 +435,15 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                   </div>
                   <div className="min-w-0 self-start">
                     <h1
-                      className="relative text-2xl sm:text-3xl md:text-[2rem] lg:text-[2.125rem] font-semibold text-stone-900 dark:text-stone-50 text-center mb-1.5 sm:mb-2 tracking-tight leading-snug px-1"
+                      className={`relative font-semibold text-stone-900 dark:text-stone-50 text-center tracking-tight leading-snug px-1 ${embedded ? 'text-2xl sm:text-3xl mb-2' : 'text-2xl sm:text-3xl md:text-[2rem] lg:text-[2.125rem] mb-1.5 sm:mb-2'}`}
                       style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
                     >
-                      Turn your notes into <span className="text-orange-700 dark:text-orange-300">5 study tools</span>
+                      Turn your notes into <span className="text-orange-700 dark:text-orange-300">6 study tools</span>
                     </h1>
-                    <p className="relative text-stone-600 dark:text-stone-300 text-sm sm:text-base text-center mb-6 sm:mb-8 max-w-xl mx-auto leading-relaxed">
-                      Lesson, flashcards, quiz, crossword & Crater Blast — all from one paste
+                    <p className={`relative text-stone-600 dark:text-stone-300 text-sm sm:text-base text-center max-w-xl mx-auto leading-relaxed ${embedded ? 'mb-5' : 'mb-6 sm:mb-8'}`}>
+                      Lesson, flashcards, quiz, crossword, Crater Blast & Word Tower — all from one paste
                     </p>
-                    <FeatureTickRow variant="prominent" className="relative" items={['Lesson', 'Flashcards', 'Quiz', 'Crossword', 'Crater Blast']} />
+                    {!embedded && <FeatureTickRow variant="prominent" className="relative" items={['Lesson', 'Flashcards', 'Quiz', 'Crossword', 'Crater Blast', 'Word Tower']} />}
                     {!embedded && (
                       <>
                         <div className="relative flex rounded-xl bg-stone-100/90 dark:bg-stone-800/80 p-1 mb-2 sm:mb-3 max-w-lg mx-auto border border-stone-200/80 dark:border-stone-700/60">
@@ -442,21 +493,8 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                         )}
                       </>
                     )}
-                    {embedded && !loadingStats && (
-                      <div className="flex justify-center mb-4 sm:mb-5">
-                        <button
-                          type="button"
-                          onClick={() => onNavigate('create-flashcards')}
-                          data-tutorial="create-cards-card"
-                          className="inline-flex items-center gap-2 px-4 py-2 bg-stone-100 dark:bg-stone-700/50 hover:bg-stone-200 dark:hover:bg-stone-600/50 rounded-xl text-stone-700 dark:text-stone-200 text-xs sm:text-sm font-semibold transition-all"
-                        >
-                          <span className="text-base">🃏</span>
-                          Create Cards from scratch
-                        </button>
-                      </div>
-                    )}
                   </div>
-                  <div className="hidden lg:block relative self-end justify-self-end w-[236px] xl:w-[248px] pointer-events-auto rotate-[11deg] origin-bottom-right drop-shadow-lg z-[5]" aria-label="Sample quiz preview">
+                  <div className={embedded ? 'hidden' : 'hidden lg:block relative self-end justify-self-end w-[236px] xl:w-[248px] pointer-events-auto rotate-[11deg] origin-bottom-right drop-shadow-lg z-[5]'} aria-label="Sample quiz preview">
                     <p className="text-center mb-2">
                       <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-800/95 dark:text-emerald-300/95">Quiz</span>
                       <span className="block text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">Check understanding</span>
@@ -464,7 +502,7 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                     <InteractiveStudyPackDemo variant="side-right" />
                   </div>
                 </div>
-                <div className="lg:hidden mt-8 sm:mt-10 mb-3 flex flex-row justify-between items-end gap-3 sm:gap-4 px-1">
+                <div className={embedded ? 'hidden' : 'lg:hidden mt-8 sm:mt-10 mb-3 flex flex-row justify-between items-end gap-3 sm:gap-4 px-1'}>
                   <div className="w-[min(46%,220px)] shrink-0 -rotate-[8deg] origin-bottom-left drop-shadow-lg transition-transform hover:scale-[1.02]">
                     <InteractiveStudyPackDemo variant="side-left" />
                   </div>
@@ -473,9 +511,9 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                   </div>
                 </div>
 
-                <div className="relative mb-2 max-w-3xl mx-auto">
+                <div className={`relative mb-2 max-w-3xl mx-auto ${embedded ? 'mt-0' : ''}`}>
                   <div className="relative rounded-2xl border border-stone-200/90 dark:border-stone-600 bg-white dark:bg-stone-900/40 shadow-sm focus-within:ring-2 focus-within:ring-orange-500/30 focus-within:border-orange-300/50 dark:focus-within:border-orange-600/50 transition-shadow">
-                    <div className="relative rounded-[inherit] min-h-[140px] sm:min-h-[180px]">
+                    <div className={`relative rounded-[inherit] ${embedded ? 'min-h-[132px] sm:min-h-[150px]' : 'min-h-[140px] sm:min-h-[180px]'}`}>
                       <textarea
                         value={inputText}
                         onChange={(e) => {
@@ -488,7 +526,7 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                           }
                         }}
                         placeholder="Paste your study notes, textbook chapter, article, or any learning material here... (minimum 50 words)"
-                        className="relative w-full min-h-[140px] sm:min-h-[180px] p-5 sm:p-6 text-stone-800 dark:text-stone-100 text-[15px] sm:text-lg bg-transparent border-none outline-none resize-none placeholder-stone-400 dark:placeholder-stone-500 leading-[1.65]"
+                        className={`relative w-full p-5 sm:p-6 text-stone-800 dark:text-stone-100 text-[15px] sm:text-lg bg-transparent border-none outline-none resize-none placeholder-stone-400 dark:placeholder-stone-500 leading-[1.65] ${embedded ? 'min-h-[132px] sm:min-h-[150px]' : 'min-h-[140px] sm:min-h-[180px]'}`}
                         disabled={isGeneratingStudyPack}
                       />
                       <div className="absolute bottom-4 left-5 text-sm text-stone-400 dark:text-stone-500 font-medium">
@@ -557,6 +595,55 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                     </button>
                   </div>
                 </div>
+
+                {embedded && (
+                  <section
+                    className="mt-8 border-t border-stone-200/85 dark:border-stone-700/70 pt-6"
+                    aria-labelledby="embedded-study-pack-previews-heading"
+                  >
+                    <h2 id="embedded-study-pack-previews-heading" className="text-center dash-serif text-sm sm:text-base font-semibold text-stone-800 dark:text-stone-100">
+                      What&apos;s included in your pack
+                    </h2>
+                    <p className="mt-1 text-center text-[11px] sm:text-xs text-stone-500 dark:text-stone-400">
+                      Quick previews for each study activity.
+                    </p>
+                    <div className="mt-4 flex flex-nowrap gap-2 sm:gap-3 justify-between overflow-x-auto pb-3 snap-x snap-mandatory [scrollbar-width:thin]">
+                      {EMBEDDED_STUDY_PACK_PREVIEWS.map((slot) => (
+                        <figure
+                          key={slot.label}
+                          className="snap-center shrink-0 w-[min(46vw,200px)] sm:w-[min(22vw,200px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-950 ring-1 ring-stone-200/90 dark:ring-stone-700/80 shadow-sm flex flex-col"
+                        >
+                          <div className="relative aspect-[4/5] w-full bg-stone-950/5 dark:bg-black/40">
+                            {slot.video ? (
+                              <video
+                                className="absolute inset-0 h-full w-full object-cover object-center"
+                                src={slot.video.src}
+                                title={slot.video.alt}
+                                aria-label={slot.video.alt}
+                                muted
+                                loop
+                                playsInline
+                                autoPlay
+                                preload="metadata"
+                              />
+                            ) : slot.fallbackImage ? (
+                              <img
+                                src={slot.fallbackImage.src}
+                                alt={slot.fallbackImage.alt}
+                                className="absolute inset-0 h-full w-full object-cover object-top"
+                                loading="lazy"
+                                decoding="async"
+                              />
+                            ) : null}
+                          </div>
+                          <figcaption className="px-2 py-1.5 text-center text-[10px] sm:text-[11px] font-semibold text-stone-600 dark:text-stone-400 border-t border-stone-200/70 dark:border-stone-700/70 bg-white/95 dark:bg-stone-900/95">
+                            {slot.label}
+                          </figcaption>
+                        </figure>
+                      ))}
+                    </div>
+                  </section>
+                )}
 
                 {isParsingStudyDoc && (
                   <div className="absolute inset-0 rounded-2xl bg-white/95 dark:bg-stone-900/90 backdrop-blur-sm flex items-center justify-center gap-3 z-20 pointer-events-auto" aria-live="polite" aria-busy="true">

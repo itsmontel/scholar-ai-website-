@@ -4468,7 +4468,8 @@ DO NOT include any text outside the JSON object.`;
           { role: 'user', content: userPrompt }
         ],
         max_tokens: 3000,
-        temperature: 0.8,
+        temperature: 0.6,
+        response_format: { type: 'json_object' },
       });
 
       const responseText = completion.choices[0]?.message?.content;
@@ -4476,10 +4477,9 @@ DO NOT include any text outside the JSON object.`;
 
       let parsed;
       try {
-        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-        parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : JSON.parse(responseText);
+        parsed = JSON.parse(responseText);
       } catch (parseError) {
-        console.error('Failed to parse reflex questions JSON:', parseError);
+        console.error('Failed to parse reflex questions JSON:', parseError, 'Raw:', responseText?.slice(0, 500));
         throw new Error('Failed to parse questions response');
       }
 
@@ -4495,6 +4495,145 @@ DO NOT include any text outside the JSON object.`;
     } catch (error) {
       console.error('OpenAI reflex question generation error:', error);
       throw new Error('Failed to generate questions: ' + error.message);
+    }
+  }
+
+  async generateWordTowerQuestions(inputType, content, userPlan = 'free') {
+    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
+      throw new Error('OpenAI API key not configured');
+    }
+
+    const selectedModel = 'gpt-4.1-nano';
+
+    const systemPrompt = `You are generating questions for a falling-block study game called Word Tower. The player must catch correct answers and dodge wrong ones.
+
+Generate exactly 15 questions. Each question MUST:
+
+1. Have a CLEAR yes/no criterion in the prompt (e.g. "Which of these are X?", "Which belong to category Y?", "Which are true statements about Z?")
+2. Contain 6 items total
+3. Have AT LEAST 2 correct AND AT LEAST 2 incorrect items per question
+4. Use SHORT item text (1-3 words ideal, never more than 5 words — they must fit on falling blocks)
+5. Be unambiguous — items must clearly be correct or incorrect, not "kind of"
+6. Vary the criterion across questions — also use "which are NOT X?", "which are true about X?", etc.
+
+CRITICAL: Items must be unambiguous. If an item could plausibly belong to either category, exclude it.
+
+Return ONLY valid JSON in this exact format:
+{
+  "questions": [
+    {
+      "id": "q1",
+      "prompt": "Short question text?",
+      "items": [
+        { "text": "Word", "isCorrect": true },
+        { "text": "Word", "isCorrect": false }
+      ]
+    }
+  ]
+}
+
+DO NOT include any text outside the JSON object.`;
+
+    const userPrompt = inputType === 'topic'
+      ? `Generate 15 Word Tower questions about: ${content}`
+      : `Generate 15 Word Tower questions from these study notes. Use only the content below (first 10,000 words):\n\n${content.trim().split(/\s+/).slice(0, 10000).join(' ')}`;
+
+    try {
+      const completion = await this.openai.chat.completions.create({
+        model: selectedModel,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
+        max_tokens: 3000,
+        temperature: 0.5,
+        response_format: { type: 'json_object' },
+      });
+
+      const responseText = completion.choices[0]?.message?.content;
+      if (!responseText) throw new Error('No response from AI');
+
+      let parsed;
+      try {
+        parsed = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('Failed to parse word tower questions JSON:', parseError, 'Raw:', responseText?.slice(0, 500));
+        throw new Error('Failed to parse questions response');
+      }
+
+      if (!parsed.questions || !Array.isArray(parsed.questions) || parsed.questions.length === 0) {
+        throw new Error('No questions generated');
+      }
+
+      parsed.questions = parsed.questions
+        .filter(q => q.prompt && Array.isArray(q.items) && q.items.length >= 4)
+        .map(q => {
+          const items = q.items.filter(it =>
+            it && typeof it.text === 'string' && it.text.trim().length > 0 && typeof it.isCorrect === 'boolean'
+          );
+          return { ...q, items };
+        })
+        .filter(q => {
+          const correct = q.items.filter(it => it.isCorrect).length;
+          const incorrect = q.items.length - correct;
+          return correct >= 2 && incorrect >= 2;
+        });
+
+      if (parsed.questions.length === 0) {
+        throw new Error('No valid questions after filtering');
+      }
+
+      return parsed;
+    } catch (error) {
+      console.error('OpenAI word tower question generation error:', error);
+      throw new Error('Failed to generate questions: ' + error.message);
+    }
+  }
+
+  async saveWordTowerGame(userId, payload, userPlan = 'free') {
+    try {
+      const { createClient } = require('@supabase/supabase-js');
+      const supabase = createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+      );
+
+      const isPaidUser = subscriptionService.isPaidSubscriptionTier(userPlan || 'free');
+      const expiresAt = isPaidUser ? null : getExpiresAt30Days();
+
+      const title = (payload.title || payload.sourceText || 'Word Tower Game').toString().slice(0, 200);
+      const wordCount = (payload.sourceText || '').toString().trim().split(/\s+/).length;
+
+      const gameData = {
+        user_id: userId,
+        title,
+        quiz_type: 'word_tower',
+        difficulty: 'mixed',
+        question_count: (payload.questions || []).length,
+        questions: {
+          questions: payload.questions || [],
+          inputType: payload.inputType || 'topic',
+          sourceText: (payload.sourceText || '').toString().slice(0, 10000)
+        },
+        source_word_count: wordCount,
+        created_at: new Date().toISOString(),
+        expires_at: expiresAt
+      };
+
+      const { data, error } = await supabase
+        .from('quizzes')
+        .insert([gameData])
+        .select();
+
+      if (error) {
+        console.error('Error saving Word Tower game:', error);
+        return null;
+      }
+
+      return data[0];
+    } catch (error) {
+      console.error('Database error in saveWordTowerGame:', error);
+      return null;
     }
   }
 
@@ -4864,15 +5003,33 @@ Rules:
     const flashcardCount = userPlan === 'free' ? 15 : 20;
     const crosswordWordCount = userPlan === 'free' ? Math.min(10, Math.max(6, Math.ceil(wordCount / 500))) : Math.min(15, Math.max(8, Math.ceil(wordCount / 400)));
 
-    const [quiz, flashcards, crossword, lesson, craterBlast] = await Promise.all([
+    const results = await Promise.allSettled([
       this.generateQuiz(text, 'mixed', 'medium', quizCount, quizCount, userPlan),
       this.generateFlashcards(text, flashcardCount, userPlan),
       this.generateCrossword(text, crosswordWordCount, userPlan),
       this.generateVisualLesson(text, userPlan),
       this.generateReflexQuestions('notes', text, userPlan),
+      this.generateWordTowerQuestions('notes', text, userPlan),
     ]);
 
-    return { quiz, flashcards, crossword, lesson, craterBlast };
+    const [quizR, flashR, crossR, lessonR, craterR, towerR] = results;
+    const labels = ['quiz', 'flashcards', 'crossword', 'lesson', 'craterBlast', 'wordTower'];
+    results.forEach((r, i) => {
+      if (r.status === 'rejected') console.error(`Study pack: ${labels[i]} generation failed:`, r.reason?.message || r.reason);
+    });
+
+    if (quizR.status === 'rejected' && flashR.status === 'rejected' && lessonR.status === 'rejected') {
+      throw new Error('Study pack generation failed: core components could not be generated');
+    }
+
+    return {
+      quiz: quizR.status === 'fulfilled' ? quizR.value : null,
+      flashcards: flashR.status === 'fulfilled' ? flashR.value : null,
+      crossword: crossR.status === 'fulfilled' ? crossR.value : null,
+      lesson: lessonR.status === 'fulfilled' ? lessonR.value : null,
+      craterBlast: craterR.status === 'fulfilled' ? craterR.value : null,
+      wordTower: towerR.status === 'fulfilled' ? towerR.value : null,
+    };
   }
 
   /**

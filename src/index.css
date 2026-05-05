@@ -419,6 +419,50 @@ html.dark .landing-hero-grid-animate {
   50%       { transform: rotate(1.5deg)  translateY(2px); }
 }
 
+/* Word Tower animations */
+@keyframes wtFall {
+  from { top: -44px; }
+  to   { top: 100%; }
+}
+@keyframes wtBlockSettle {
+  0%   { transform: translateY(-18px) scale(1.04); opacity: 0; }
+  60%  { transform: translateY(2px)   scale(0.98); opacity: 1; }
+  100% { transform: translateY(0)     scale(1);    opacity: 1; }
+}
+@keyframes wtCatchFlash {
+  0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  100% { box-shadow: 0 0 0 18px rgba(16, 185, 129, 0); }
+}
+@keyframes wtBadFlash {
+  0%, 100% { background-color: transparent; }
+  50%      { background-color: rgba(239, 68, 68, 0.16); }
+}
+@keyframes wtScreenShake {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-4px, 2px); }
+  40% { transform: translate(4px, -2px); }
+  60% { transform: translate(-3px, 1px); }
+  80% { transform: translate(3px, -1px); }
+}
+@keyframes wtBlockFallOff {
+  0%   { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  100% { transform: translate(var(--fx, 80px), 480px) rotate(var(--fr, 90deg)); opacity: 0; }
+}
+@keyframes wtCollapseTilt {
+  0%   { transform: rotate(var(--start-rot, 0deg)); }
+  60%  { transform: rotate(55deg); }
+  100% { transform: rotate(82deg); }
+}
+@keyframes wtScoreFloat {
+  0%   { opacity: 1; transform: translate(-50%, 0)   scale(1); }
+  40%  { opacity: 1; transform: translate(-50%, -28px) scale(1.2); }
+  100% { opacity: 0; transform: translate(-50%, -56px) scale(0.85); }
+}
+@keyframes wtPaddleGlow {
+  0%, 100% { box-shadow: 0 0 14px rgba(139, 92, 246, 0.45), 0 4px 14px rgba(0,0,0,0.5); }
+  50%      { box-shadow: 0 0 22px rgba(139, 92, 246, 0.7),  0 4px 14px rgba(0,0,0,0.5); }
+}
+
 /* Turn Your Notes section - glow pulse */
 @keyframes notesGlowPulse {
   0%, 100% { opacity: 0.25; transform: scale(1); }
@@ -746,4 +790,164 @@ html.dark .landing-hero-grid-animate {
   100% {
     opacity: 1;
   }
+}
+
+/* ─────────────────────── Dashboard premium polish ─────────────────────── */
+
+/* Slow aurora gradient drift — used on premium card backgrounds */
+@keyframes dash-aurora-drift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.dash-aurora {
+  background-size: 220% 220%;
+  animation: dash-aurora-drift 14s ease-in-out infinite;
+}
+
+/* Magnetic lift — used on tool cards on hover */
+.dash-magnetic {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 0.25s ease;
+  will-change: transform;
+}
+.dash-magnetic:hover {
+  transform: translateY(-3px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .dash-magnetic { transition: box-shadow 0.25s ease, border-color 0.25s ease; }
+  .dash-magnetic:hover { transform: none; }
+}
+
+/* Sweeping shine across cards on hover (light pass) */
+.dash-shine-card {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.dash-shine-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 70%;
+  height: 100%;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.0) 35%,
+    rgba(255, 255, 255, 0.55) 50%,
+    rgba(255, 255, 255, 0.0) 65%,
+    transparent 100%
+  );
+  transform: skewX(-18deg);
+  pointer-events: none;
+  transition: left 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  border-radius: inherit;
+  z-index: 2;
+}
+.dark .dash-shine-card::after {
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.0) 35%,
+    rgba(255, 255, 255, 0.18) 50%,
+    rgba(255, 255, 255, 0.0) 65%,
+    transparent 100%
+  );
+}
+.dash-shine-card:hover::after { left: 130%; }
+@media (prefers-reduced-motion: reduce) {
+  .dash-shine-card::after { display: none; }
+}
+
+/* Progress bar fill — used in Monthly Usage */
+@keyframes dash-progress-shine {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(220%); }
+}
+.dash-progress-fill {
+  position: relative;
+  overflow: hidden;
+}
+.dash-progress-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 35%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.55) 50%,
+    transparent 100%
+  );
+  animation: dash-progress-shine 2.6s ease-in-out infinite;
+  pointer-events: none;
+}
+.dark .dash-progress-fill::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.22) 50%,
+    transparent 100%
+  );
+}
+@media (prefers-reduced-motion: reduce) {
+  .dash-progress-fill::after { display: none; }
+}
+
+/* Pro chip — gentle pulsing ring */
+@keyframes dash-pro-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 0 rgba(217, 119, 6, 0.45),
+      inset 0 0 0 1px rgba(245, 158, 11, 0.55);
+  }
+  50% {
+    box-shadow:
+      0 0 0 4px rgba(217, 119, 6, 0),
+      inset 0 0 0 1px rgba(251, 191, 36, 0.85);
+  }
+}
+.dash-pro-chip {
+  animation: dash-pro-pulse 2.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dash-pro-chip { animation: none; }
+}
+
+/* Subtle floating orb for hero/empty-state ambience */
+@keyframes dash-orb-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.55; }
+  50% { transform: translate(14px, -10px) scale(1.06); opacity: 0.8; }
+}
+.dash-orb { animation: dash-orb-drift 9s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .dash-orb { animation: none; }
+}
+
+/* Premium gold accent for upgrade panel */
+@keyframes dash-gold-glow {
+  0%, 100% {
+    box-shadow:
+      0 10px 30px -8px rgba(124, 58, 237, 0.18),
+      0 4px 12px -4px rgba(217, 119, 6, 0.12),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.7);
+  }
+  50% {
+    box-shadow:
+      0 16px 44px -10px rgba(124, 58, 237, 0.32),
+      0 6px 18px -4px rgba(245, 158, 11, 0.22),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.85);
+  }
+}
+.dash-gold-glow { animation: dash-gold-glow 3.8s ease-in-out infinite; }
+.dark .dash-gold-glow {
+  animation: none;
+  box-shadow:
+    0 12px 36px -10px rgba(124, 58, 237, 0.4),
+    0 4px 14px -4px rgba(245, 158, 11, 0.18);
+}
+@media (prefers-reduced-motion: reduce) {
+  .dash-gold-glow { animation: none; }
 }

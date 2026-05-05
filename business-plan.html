@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="WriteScholar — business plan (internal)" />
+  <title>WriteScholar — Business Plan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #0f172a;
+      --muted: #475569;
+      --line: #e2e8f0;
+      --surface: #f8fafc;
+      --accent: #5b21b6;
+      --accent-soft: #ede9fe;
+      --ok: #047857;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, sans-serif;
+      font-size: 15px;
+      line-height: 1.65;
+      color: var(--ink);
+      background: #fff;
+    }
+    .wrap {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 2.5rem 1.25rem 4rem;
+    }
+    header.doc {
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 1.75rem;
+      margin-bottom: 2rem;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: "EB Garamond", Georgia, serif;
+      font-size: clamp(1.85rem, 4vw, 2.35rem);
+      font-weight: 600;
+      margin: 0 0 0.35rem;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin: 0;
+    }
+    .meta {
+      margin-top: 1.25rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+      display: grid;
+      gap: 0.35rem;
+    }
+    nav.toc {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+    nav.toc h2 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin: 0 0 0.75rem;
+      color: var(--muted);
+    }
+    nav.toc ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 0.35rem;
+    }
+    nav.toc a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    nav.toc a:hover { text-decoration: underline; }
+    section {
+      margin-bottom: 2.75rem;
+    }
+    section > h2 {
+      font-family: "EB Garamond", Georgia, serif;
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--accent-soft);
+    }
+    h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin: 1.5rem 0 0.5rem;
+    }
+    p { margin: 0 0 0.85rem; }
+    ul, ol { margin: 0 0 1rem; padding-left: 1.35rem; }
+    li { margin-bottom: 0.35rem; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      margin: 1rem 0;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 0.6rem 0.75rem;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: var(--surface);
+      font-weight: 600;
+    }
+    .note {
+      font-size: 0.85rem;
+      color: var(--muted);
+      border-left: 3px solid var(--accent);
+      padding: 0.5rem 0 0.5rem 1rem;
+      margin: 1rem 0;
+      background: linear-gradient(90deg, var(--accent-soft), transparent);
+    }
+    .placeholder {
+      color: var(--muted);
+      font-style: italic;
+    }
+    footer.doc {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--line);
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    @media print {
+      body { font-size: 11pt; }
+      .wrap { padding: 0; max-width: 100%; }
+      nav.toc { break-inside: avoid; }
+      a[href^="#"] { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="doc">
+      <span class="badge">Confidential — Internal use</span>
+      <h1>WriteScholar Business Plan</h1>
+      <p class="subtitle">AI-powered academic writing feedback, citations, and study tools for students.</p>
+      <div class="meta">
+        <span><strong>Legal / brand name:</strong> WriteScholar</span>
+        <span><strong>Primary domain:</strong> writescholar.com</span>
+        <span><strong>Document version:</strong> 1.0</span>
+        <span><strong>Last updated:</strong> April 15, 2026</span>
+      </div>
+    </header>
+
+    <nav class="toc" aria-label="Table of contents">
+      <h2>Contents</h2>
+      <ul>
+        <li><a href="#executive-summary">1. Executive summary</a></li>
+        <li><a href="#company">2. Company overview</a></li>
+        <li><a href="#products">3. Products and services</a></li>
+        <li><a href="#market">4. Market analysis</a></li>
+        <li><a href="#competition">5. Competitive landscape</a></li>
+        <li><a href="#marketing">6. Marketing and growth</a></li>
+        <li><a href="#operations">7. Operations and technology</a></li>
+        <li><a href="#financial">8. Financial plan</a></li>
+        <li><a href="#milestones">9. Milestones</a></li>
+        <li><a href="#risks">10. Risks and mitigation</a></li>
+      </ul>
+    </nav>
+
+    <section id="executive-summary">
+      <h2>1. Executive summary</h2>
+      <p>
+        WriteScholar is a web-based platform that helps college and university students improve essays, manage citations, and study more effectively using AI. The product combines
+        <strong>professor-style essay analysis</strong> (with education-level awareness), <strong>multi-style citation tools</strong>, and <strong>study packs</strong> (quizzes, flashcards, crosswords, lessons) with optional <strong>focus mode</strong> to reduce distraction during study sessions.
+      </p>
+      <p>
+        The business model is <strong>freemium plus subscription</strong>: free tiers drive acquisition and SEO; paid plans unlock higher usage limits and premium features. Growth leans on organic search (tool and blog pages), community presence, and the Chrome extension as additional distribution.
+      </p>
+      <p class="note">
+        Replace the bracketed figures in Section 8 with your actual targets and, when appropriate, share a separate detailed financial model spreadsheet.
+      </p>
+    </section>
+
+    <section id="company">
+      <h2>2. Company overview</h2>
+      <h3>2.1 Mission</h3>
+      <p>
+        Democratize access to high-quality academic feedback and study tooling so students can improve faster, cite correctly, and build sustainable study habits—whether they are writing a first-year essay or preparing for exams.
+      </p>
+      <h3>2.2 Vision (3–5 years)</h3>
+      <ul>
+        <li>Become a recognized brand for “AI study and writing tools” among English-speaking higher-ed students.</li>
+        <li>Expand depth in essay feedback, integrity-aware guidance, and institution-friendly offerings where appropriate.</li>
+      </ul>
+      <h3>2.3 Values</h3>
+      <ul>
+        <li><strong>Academic integrity:</strong> Support learning and originality; position tools as feedback and study aids, not shortcuts that violate institutional rules.</li>
+        <li><strong>Clarity:</strong> Feedback and UI that reduce anxiety, not add noise.</li>
+        <li><strong>Accessibility:</strong> Free tiers and simple flows for students with uneven budgets or tech literacy.</li>
+      </ul>
+    </section>
+
+    <section id="products">
+      <h2>3. Products and services</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Offering</th>
+            <th>Description</th>
+            <th>Role in the business</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Essay analyzer / AI feedback</td>
+            <td>Structured, rubric-style feedback on essays; tailored to education level where applicable.</td>
+            <td>Core differentiator; primary conversion path to paid.</td>
+          </tr>
+          <tr>
+            <td>Citations</td>
+            <td>Find and format sources (e.g. APA, MLA, Chicago, Harvard, IEEE, Vancouver).</td>
+            <td>High-intent SEO; retention and daily utility.</td>
+          </tr>
+          <tr>
+            <td>Study packs</td>
+            <td>Quizzes, flashcards, crosswords, lessons generated from notes.</td>
+            <td>Broad use cases; viral study-session loops.</td>
+          </tr>
+          <tr>
+            <td>Focus mode</td>
+            <td>Distraction control tied to study progress (e.g. quizzes from notes).</td>
+            <td>Retention and differentiation vs. generic AI chat.</td>
+          </tr>
+          <tr>
+            <td>Free tools</td>
+            <td>GPA calculator, Pomodoro, grammar checker, summarizer, humanizer, and similar.</td>
+            <td>Top-of-funnel SEO and brand discovery.</td>
+          </tr>
+          <tr>
+            <td>Chrome extension</td>
+            <td>Browser-side companion (where deployed).</td>
+            <td>Distribution and habit formation.</td>
+          </tr>
+        </tbody>
+      </table>
+      <h3>3.1 Pricing (conceptual)</h3>
+      <p>
+        Maintain a usable free tier; price subscriptions for higher analysis limits, batch usage, and premium features. Offer annual billing at a discount to improve LTV and cash flow. <span class="placeholder">[Insert actual tier names and price points from your Stripe catalog.]</span>
+      </p>
+    </section>
+
+    <section id="market">
+      <h2>4. Market analysis</h2>
+      <h3>4.1 Target customers</h3>
+      <ul>
+        <li><strong>Primary:</strong> Undergraduate and graduate students in North America, UK, Australia, and other English-speaking markets who write essays and use the web for research.</li>
+        <li><strong>Secondary:</strong> ESL students, returning adult learners, and advanced high school students in college-prep tracks.</li>
+      </ul>
+      <h3>4.2 Market drivers</h3>
+      <ul>
+        <li>Widespread adoption of AI in education with uneven institutional policies—students seek trustworthy, study-aligned tools.</li>
+        <li>High search volume for citation, grammar, GPA, and “essay checker” queries.</li>
+        <li>Pressure on grades and time; demand for faster feedback loops than instructor office hours alone.</li>
+      </ul>
+      <h3>4.3 Sizing (qualitative)</h3>
+      <p>
+        The addressable audience is in the tens of millions of students globally in higher ed; the serviceable segment is defined by English-language essay workflows and willingness to pay for productivity software. <span class="placeholder">[Optional: add TAM/SAM/SOM with sources.]</span>
+      </p>
+    </section>
+
+    <section id="competition">
+      <h2>5. Competitive landscape</h2>
+      <p>
+        Competitors include general-purpose AI chat apps, dedicated grammar tools, citation managers, plagiarism/AI detectors, and other “student AI” suites. WriteScholar’s positioning combines <strong>essay-specific feedback</strong>, <strong>citations</strong>, and <strong>study workflows</strong> in one product, with <strong>focus mode</strong> as a habit-based differentiator.
+      </p>
+      <ul>
+        <li><strong>Vs. generic LLMs:</strong> Structured pedagogy, student-specific UX, and tools (citations, packs) in one place.</li>
+        <li><strong>Vs. single-purpose tools:</strong> Cross-linking features increases retention and SEO surface area.</li>
+      </ul>
+    </section>
+
+    <section id="marketing">
+      <h2>6. Marketing and growth</h2>
+      <h3>6.1 Channels</h3>
+      <ul>
+        <li><strong>SEO:</strong> Tool pages and blog content targeting high-intent student keywords; technical SEO (sitemap, structured data, prerendering for crawlers).</li>
+        <li><strong>Community:</strong> Authentic participation in student forums and Q&amp;A (help-first, sparse linking).</li>
+        <li><strong>Extension store:</strong> Chrome Web Store listing aligned with site messaging.</li>
+        <li><strong>Partnerships:</strong> Campus orgs, newsletters, and edu-adjacent creators—often anchored on one free tool.</li>
+        <li><strong>Paid (optional):</strong> Search and social tests for validation; retargeting for signup and trial.</li>
+      </ul>
+      <h3>6.2 Metrics</h3>
+      <p>
+        Track Google Search Console impressions and clicks by URL, activation (first successful analysis or study pack), free-to-paid conversion, churn, and CAC for paid channels. <span class="placeholder">[Insert target KPI table.]</span>
+      </p>
+    </section>
+
+    <section id="operations">
+      <h2>7. Operations and technology</h2>
+      <ul>
+        <li><strong>Stack:</strong> Modern web app (e.g. React/Vite-style SPA) with backend services for auth, payments, and AI workloads <span class="placeholder">[adjust to your repo].</span></li>
+        <li><strong>Payments:</strong> Stripe for subscriptions and trials; promo codes as needed.</li>
+        <li><strong>Compliance:</strong> Privacy policy and terms; age and regional requirements as you scale <span class="placeholder">[legal review].</span></li>
+        <li><strong>Security:</strong> Protect user content; minimize data retention where possible; monitor for abuse.</li>
+        <li><strong>Uptime:</strong> Hosting and API reliability appropriate for a paid product; status communication for incidents.</li>
+      </ul>
+    </section>
+
+    <section id="financial">
+      <h2>8. Financial plan</h2>
+      <p>
+        This section should mirror your internal model. Below is a <strong>template</strong> only.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Line item</th>
+            <th>Year 1 (illustrative)</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Revenue (subscription)</td>
+            <td class="placeholder">[$]</td>
+            <td>Net of refunds; separate trials if material.</td>
+          </tr>
+          <tr>
+            <td>Cost of revenue</td>
+            <td class="placeholder">[$]</td>
+            <td>AI inference, hosting, payment fees.</td>
+          </tr>
+          <tr>
+            <td>Gross margin</td>
+            <td class="placeholder">[%]</td>
+            <td>Target healthy software margins after variable costs.</td>
+          </tr>
+          <tr>
+            <td>Marketing</td>
+            <td class="placeholder">[$]</td>
+            <td>Blend of content, paid tests, tools.</td>
+          </tr>
+          <tr>
+            <td>People</td>
+            <td class="placeholder">[$]</td>
+            <td>Founders, contractors, future hires.</td>
+          </tr>
+          <tr>
+            <td>Net income / runway</td>
+            <td class="placeholder">[$]</td>
+            <td>Cash months at current burn.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="note">
+        Replace placeholders with your forecasts. Keep a versioned spreadsheet as the source of truth; update this HTML when you publish externally.
+      </p>
+    </section>
+
+    <section id="milestones">
+      <h2>9. Milestones (12 months)</h2>
+      <ol>
+        <li><strong>Q1:</strong> Solidify indexing and on-page SEO for priority tool URLs; steady blog cadence; baseline GSC trends established.</li>
+        <li><strong>Q2:</strong> Improve activation (first “aha” analysis or study pack); reduce time-to-value in onboarding.</li>
+        <li><strong>Q3:</strong> Expand topical clusters (blog + internal links); test one partnership or campus pilot.</li>
+        <li><strong>Q4:</strong> Review pricing and packaging; evaluate one new distribution channel (e.g. affiliate, creator, or B2B light).</li>
+      </ol>
+      <p class="placeholder">[Customize dates and outcomes to your roadmap.]</p>
+    </section>
+
+    <section id="risks">
+      <h2>10. Risks and mitigation</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Risk</th>
+            <th>Mitigation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Policy changes at schools re: AI writing tools</td>
+            <td>Clear positioning as feedback and learning aid; resources on integrity; monitor sector news.</td>
+          </tr>
+          <tr>
+            <td>Rising AI inference costs</td>
+            <td>Usage limits, caching, model selection, annual plans, and margin monitoring.</td>
+          </tr>
+          <tr>
+            <td>SEO volatility</td>
+            <td>Diversify channels (extension, community, email); build brand and direct traffic.</td>
+          </tr>
+          <tr>
+            <td>Competitive pressure from big tech</td>
+            <td>Depth in student workflows, speed, and trust; niche features like focus mode and study packs.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <footer class="doc">
+      <p>WriteScholar — Business Plan v1.0. For questions or updates, maintain a change log when this document is shared with advisors or investors.</p>
+    </footer>
+  </div>
+</body>
+</html>

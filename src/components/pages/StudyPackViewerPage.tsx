@@ -16,6 +16,7 @@ const TABS = [
   { key: 'quiz', label: 'Quiz', icon: '📝', proOnly: false },
   { key: 'crossword', label: 'Crossword', icon: '🧩', proOnly: true },
   { key: 'craterBlast', label: 'Crater Blast', icon: '💥', proOnly: true },
+  { key: 'wordTower', label: 'Word Tower', icon: '🗼', proOnly: true },
 ] as const;
 
 type TabKey = typeof TABS[number]['key'];
@@ -91,7 +92,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
 
   const plan = (user?.plan || 'free').toLowerCase();
   const isPaidUser = plan === 'pro' || plan === 'premium';
-  const isLocked = (key: TabKey) => !isPaidUser && ['crossword', 'craterBlast'].includes(key);
+  const isLocked = (key: TabKey) => !isPaidUser && ['crossword', 'craterBlast', 'wordTower'].includes(key);
 
   const handleOpenFull = (tab: TabKey, state?: { questionIndex?: number; slideIndex?: number }) => {
     const d = pack?.data?.[tab];
@@ -147,6 +148,14 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
           quiz_type: 'crater_blast',
         }));
         onNavigate('crater-blast');
+        break;
+      case 'wordTower':
+        localStorage.setItem('savedWordTower', JSON.stringify({
+          title: title,
+          questions: { questions: d.questions, inputType: 'notes' },
+          quiz_type: 'word_tower',
+        }));
+        onNavigate('word-tower');
         break;
     }
   };
@@ -365,12 +374,37 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
               </div>
             </div>
           )}
+          {activeTab === 'wordTower' && hasData('wordTower') && !isLocked('wordTower') && (
+            <div className="p-6 flex flex-col items-center justify-center min-h-[400px]">
+              <div className="w-full max-w-sm text-center">
+                <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl mb-6 shadow-xl" style={{ background: 'linear-gradient(145deg, #059669 0%, #10b981 50%, #34d399 100%)' }}>
+                  <span className="text-4xl">🗼</span>
+                </div>
+                <h2 className="text-2xl font-extrabold text-stone-900 dark:text-stone-100 tracking-tight mb-2">Word Tower</h2>
+                <p className="text-stone-500 dark:text-stone-400 text-sm mb-8">{(Array.isArray(pack.data.wordTower?.questions) ? pack.data.wordTower.questions : pack.data.wordTower?.questions?.questions ?? []).length} questions ready</p>
+                <button
+                  onClick={() => handleOpenFull('wordTower')}
+                  className="inline-block px-12 py-3.5 rounded-xl text-white font-bold text-base shadow-lg active:scale-[0.99] transition-all mb-6"
+                  style={{ background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)', boxShadow: '0 10px 30px -5px rgba(16, 185, 129, 0.4)' }}
+                >
+                  🗼 Start Game
+                </button>
+                <button
+                  onClick={() => setActiveTab('notes')}
+                  className="block w-full max-w-xs mx-auto px-6 py-3 rounded-xl bg-stone-200 dark:bg-stone-600 text-stone-700 dark:text-stone-200 font-semibold hover:bg-stone-300 dark:hover:bg-stone-500 transition-colors"
+                >
+                  ← Back to menu
+                </button>
+              </div>
+            </div>
+          )}
           {(activeTab !== 'notes' || !hasData('notes')) &&
            (activeTab !== 'lesson' || isLocked('lesson') || !hasData('lesson')) &&
            (activeTab !== 'flashcards' || isLocked('flashcards') || !hasData('flashcards')) &&
            (activeTab !== 'quiz' || isLocked('quiz') || !hasData('quiz')) &&
            (activeTab !== 'crossword' || isLocked('crossword') || !hasData('crossword')) &&
-           (activeTab !== 'craterBlast' || isLocked('craterBlast') || !hasData('craterBlast')) && (
+           (activeTab !== 'craterBlast' || isLocked('craterBlast') || !hasData('craterBlast')) &&
+           (activeTab !== 'wordTower' || isLocked('wordTower') || !hasData('wordTower')) && (
             <div className="p-8 sm:p-12 flex flex-col items-center justify-center min-h-[400px] text-center">
               {isLocked(activeTab) ? (
                 <>
@@ -378,7 +412,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
                     {TABS.find(t => t.key === activeTab)?.icon}
                   </div>
                   <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 mb-2">{TABS.find(t => t.key === activeTab)?.label} is a Pro feature</h3>
-                  <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">Upgrade to unlock crosswords and Crater Blast.</p>
+                  <p className="text-stone-500 dark:text-stone-400 text-sm mb-6">Upgrade to unlock Crossword, Crater Blast, and Word Tower.</p>
                   <button
                     onClick={() => onNavigate('pricing')}
                     className="px-6 py-3 bg-amber-600 text-white font-semibold rounded-xl transition-all shadow-lg shadow-amber-500/25"
@@ -416,7 +450,8 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
                     {activeTab === 'quiz' && `${pack.data.quiz?.questions?.length || 0} questions`}
                     {activeTab === 'crossword' && `${pack.data.crossword?.placedWords?.length || 0} words`}
                     {activeTab === 'craterBlast' && `${pack.data.craterBlast?.questions?.length || 0} questions`}
-                    {!['lesson','quiz','crossword','craterBlast'].includes(activeTab) && 'Ready to study'}
+                    {activeTab === 'wordTower' && `${pack.data.wordTower?.questions?.length || 0} questions`}
+                    {!['lesson','quiz','crossword','craterBlast','wordTower'].includes(activeTab) && 'Ready to study'}
                   </p>
                   <button
                     onClick={() => handleOpenFull(activeTab)}

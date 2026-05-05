@@ -14,6 +14,14 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 type DashboardTool = 'analyze' | 'citations' | 'study_pack' | 'more_tools';
 
+interface PlanLimitsSubset {
+  analysesPerMonth?: number;
+  citationSearchesPerMonth?: number;
+  studyPackGenerationsPerMonth?: number;
+  documentsPerMonth?: number;
+  combinedActionsPerMonth?: number;
+}
+
 interface UsageStatsShape {
   plan: string;
   analysesRemaining: number;
@@ -22,6 +30,8 @@ interface UsageStatsShape {
   uploadsRemaining: number;
   daysUntilReset?: number | null;
   combinedActionsRemaining?: number;
+  /** From GET /subscriptions/usage — drives correct monthly caps (esp. pooled Pro/Premium vs free caps). */
+  planLimits?: PlanLimitsSubset | null;
 }
 
 interface DashboardProps {
@@ -70,42 +80,46 @@ const DASHBOARD_TOOL_ITEMS = [
   {
     id: 'analyze' as const,
     title: 'Analyze',
-    desc: 'Professor-style feedback on your essays',
+    desc: 'Professor-style essay feedback',
     emoji: '📝',
     iconClass: 'bg-gradient-to-br from-rose-400 to-violet-600',
     activeBar: 'border-l-rose-500',
     titleClass: 'text-rose-950 dark:text-rose-100',
     activeBg: 'bg-gradient-to-r from-rose-50/95 via-white to-violet-50/40 dark:from-rose-950/35 dark:via-stone-900/90 dark:to-violet-950/25',
+    accent: 'rose',
   },
   {
     id: 'citations' as const,
     title: 'Citations',
-    desc: 'Find and format academic sources',
+    desc: 'Find & format sources',
     emoji: '📚',
     iconClass: 'bg-gradient-to-br from-sky-400 to-blue-600',
     activeBar: 'border-l-sky-500',
     titleClass: 'text-sky-900 dark:text-sky-100',
     activeBg: 'bg-gradient-to-r from-sky-50/95 via-white to-blue-50/35 dark:from-sky-950/30 dark:via-stone-900/90 dark:to-blue-950/20',
+    accent: 'sky',
   },
   {
     id: 'study_pack' as const,
     title: 'Study Pack',
-    desc: 'Quiz, flashcards & lesson from notes',
+    desc: 'Quiz, flashcards, lessons',
     emoji: '📦',
     iconClass: 'bg-gradient-to-br from-amber-400 to-orange-500',
     activeBar: 'border-l-amber-500',
     titleClass: 'text-amber-950 dark:text-amber-100',
     activeBg: 'bg-gradient-to-r from-amber-50/95 via-white to-orange-50/35 dark:from-amber-950/25 dark:via-stone-900/90 dark:to-orange-950/20',
+    accent: 'amber',
   },
   {
     id: 'more_tools' as const,
     title: 'More tools',
-    desc: 'Summarizer, flashcards & free utilities',
+    desc: 'Summarizer, grammar & more',
     emoji: '✨',
     iconClass: 'bg-gradient-to-br from-indigo-500 to-violet-600',
     activeBar: 'border-l-violet-500',
     titleClass: 'text-violet-950 dark:text-violet-100',
     activeBg: 'bg-gradient-to-r from-violet-50/95 via-white to-fuchsia-50/35 dark:from-violet-950/30 dark:via-stone-900/90 dark:to-fuchsia-950/20',
+    accent: 'violet',
   },
 ] as const;
 
@@ -117,6 +131,23 @@ const WORKSPACE_SHORTCUTS = [
   { id: 'focus-mode', label: 'Focus mode', hint: 'Distraction-free writing', page: 'focus-mode' as const, emoji: '🎯' },
   { id: 'help', label: 'Help center', hint: 'Guides & FAQs', page: 'help' as const, emoji: '💡' },
 ] as const;
+
+/** Dashboard hero subtitle: essay line only on Analyze; Citations & Study Pack get tailored copy; More tools differs. */
+const getWorkspaceSubtitle = (isNew: boolean, tool: DashboardTool): string => {
+  if (!isNew) return 'Pick up where you left off.';
+  switch (tool) {
+    case 'analyze':
+      return 'Your workspace is ready — drop in an essay to get started.';
+    case 'citations':
+      return 'Your workspace is ready — search sources and nail your citations.';
+    case 'study_pack':
+      return 'Your workspace is ready — build quizzes, flashcards, and lessons from your notes.';
+    case 'more_tools':
+      return 'Your workspace is ready — open a calculator, checker, or generator below.';
+    default:
+      return 'Pick up where you left off.';
+  }
+};
 
 const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
   const [inputText, setInputText] = useState('');
@@ -141,6 +172,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
     studyPacksRemaining: 0,
     uploadsRemaining: 0,
     daysUntilReset: null,
+    planLimits: null,
   });
   const [loadingUsage, setLoadingUsage] = useState(true);
 
@@ -153,9 +185,10 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
   const greeting = getTimeGreeting();
 
   const isNewUser = analysisCount === 0 && !isLoading;
-  /** Pro/Premium use combined monthly bucket; Focus uses per-feature counts like free */
+  /** Pro / Premium / Focus: analyses + citations + study packs share one monthly pool (backend). */
   const showCombinedUsage =
-    (usageStats.plan === 'pro' || usageStats.plan === 'premium') &&
+    (plan === 'pro' || plan === 'premium' || plan === 'focus') &&
+    typeof usageStats.planLimits?.combinedActionsPerMonth === 'number' &&
     typeof usageStats.combinedActionsRemaining === 'number';
 
   useEffect(() => {
@@ -212,6 +245,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
             uploadsRemaining: typeof data.uploadsRemaining === 'number' ? data.uploadsRemaining : 0,
             daysUntilReset: data.daysUntilReset ?? null,
             combinedActionsRemaining: data.combinedActionsRemaining,
+            planLimits: data.planLimits ?? null,
           });
         }
       } catch (e) {
@@ -349,8 +383,38 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
     );
   }
 
+  const usagePct = (remaining: number, monthlyLimit: number): number => {
+    if (remaining === -1) return 100;
+    if (monthlyLimit <= 0) return 0;
+    return Math.max(0, Math.min(100, Math.round((remaining / monthlyLimit) * 100)));
+  };
+
+  const freeLimitsFromApi = usageStats.planLimits ?? {};
+  /** Per-feature denominators align with `/subscriptions/usage` (free tier = small separate buckets). */
+  const freeMonthlyCaps = {
+    analyses: freeLimitsFromApi.analysesPerMonth ?? 2,
+    citations: freeLimitsFromApi.citationSearchesPerMonth ?? 2,
+    studyPacks: freeLimitsFromApi.studyPackGenerationsPerMonth ?? 2,
+    uploads: freeLimitsFromApi.documentsPerMonth ?? 3,
+  };
+  const combinedLimit =
+    usageStats.planLimits?.combinedActionsPerMonth ??
+    (usageStats.plan === 'premium' ? 199 : 49);
+
+  const todayLabel = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+  const greetingEmoji = greeting === 'Good morning' ? '☀️' : greeting === 'Good afternoon' ? '👋' : '🌙';
+
+  const QUICK_ACCESS_TINTS = [
+    { grad: 'from-violet-400 to-purple-500', tint: 'from-violet-50/80 to-white dark:from-violet-950/30 dark:to-stone-900/80', clr: 'text-violet-700 dark:text-violet-300' },
+    { grad: 'from-sky-400 to-blue-500', tint: 'from-sky-50/80 to-white dark:from-sky-950/30 dark:to-stone-900/80', clr: 'text-sky-700 dark:text-sky-300' },
+    { grad: 'from-amber-400 to-orange-500', tint: 'from-amber-50/80 to-white dark:from-amber-950/30 dark:to-stone-900/80', clr: 'text-amber-700 dark:text-amber-300' },
+    { grad: 'from-emerald-400 to-teal-500', tint: 'from-emerald-50/80 to-white dark:from-emerald-950/30 dark:to-stone-900/80', clr: 'text-emerald-700 dark:text-emerald-300' },
+    { grad: 'from-rose-400 to-pink-500', tint: 'from-rose-50/80 to-white dark:from-rose-950/30 dark:to-stone-900/80', clr: 'text-rose-700 dark:text-rose-300' },
+    { grad: 'from-fuchsia-400 to-purple-500', tint: 'from-fuchsia-50/80 to-white dark:from-fuchsia-950/30 dark:to-stone-900/80', clr: 'text-fuchsia-700 dark:text-fuchsia-300' },
+  ];
+
   return (
-    <div className="min-h-screen relative font-sans overflow-x-hidden bg-gradient-to-b from-stone-50 via-white to-stone-100 dark:from-stone-950 dark:via-stone-900 dark:to-stone-950">
+    <div className="min-h-screen relative font-sans overflow-x-hidden bg-stone-50 dark:bg-stone-950">
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="dashboard" />
 
@@ -358,710 +422,943 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
         <AnalysisAnimation isPopup={true} text="Analyzing your essay" isComplete={false} />
       )}
 
-      <main className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-14">
-        {/* Greeting — full width above sidebar + content */}
-        <header className="mb-5 lg:mb-7">
-          <h1
-            className="text-xl sm:text-2xl lg:text-3xl font-semibold text-stone-900 dark:text-stone-50 tracking-tight"
-            style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
-          >
-            {greeting}
-            {firstName ? `, ${firstName}` : ''}
-          </h1>
-          {isFree && (
-            <p className="mt-1 text-xs sm:text-sm text-stone-500 dark:text-stone-400">
-              Free plan ·{' '}
-              <button
-                type="button"
-                onClick={() => onNavigate('pricing')}
-                className="text-violet-600 dark:text-violet-400 font-medium hover:underline"
-              >
-                Upgrade for unlimited
-              </button>
+      <style>{`
+        @keyframes dashFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes dashOrb { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(10px,-8px) scale(1.05); } }
+        @keyframes dashFire { 0%,100% { transform: rotate(-3deg) scale(1); } 50% { transform: rotate(3deg) scale(1.12); } }
+        @keyframes dashPulseRing { 0% { box-shadow: 0 0 0 0 rgba(139,92,246,0.35); } 70% { box-shadow: 0 0 0 14px rgba(139,92,246,0); } 100% { box-shadow: 0 0 0 0 rgba(139,92,246,0); } }
+        @keyframes dashShine { 0% { background-position: -150% center; } 100% { background-position: 250% center; } }
+        .dash-fade { animation: dashFadeUp 0.5s ease-out both; }
+        .dash-orb { animation: dashOrb 14s ease-in-out infinite; }
+        .dash-fire { animation: dashFire 1.6s ease-in-out infinite; display: inline-block; }
+        .dash-pulse { animation: dashPulseRing 2.4s ease-out infinite; }
+        .dash-stagger > * { opacity: 0; animation: dashFadeUp 0.45s ease-out forwards; }
+        .dash-stagger > *:nth-child(1) { animation-delay: 0.04s; }
+        .dash-stagger > *:nth-child(2) { animation-delay: 0.10s; }
+        .dash-stagger > *:nth-child(3) { animation-delay: 0.16s; }
+        .dash-stagger > *:nth-child(4) { animation-delay: 0.22s; }
+        .dash-stagger > *:nth-child(5) { animation-delay: 0.28s; }
+        .dash-stagger > *:nth-child(6) { animation-delay: 0.34s; }
+        .dash-serif { font-family: 'EB Garamond', Georgia, serif; }
+        .dash-shine {
+          background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.45) 50%, transparent 100%);
+          background-size: 200% 100%;
+          animation: dashShine 3.4s ease-in-out infinite;
+        }
+      `}</style>
+
+      <main className="relative mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8 pt-5 sm:pt-7 pb-16">
+        {/* ═══════════════════════════════════════════════════════════════════
+            TOP GREETING BAR
+           ═══════════════════════════════════════════════════════════════════ */}
+        <header className="dash-fade mb-6 lg:mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-violet-500/95 dark:text-violet-400/95">
+              {todayLabel}
             </p>
-          )}
-        </header>
-
-        <div className="flex flex-col lg:flex-row lg:items-start gap-5 lg:gap-8 xl:gap-10">
-          {/* Left rail: vertical toolbar on desktop; 2×2 grid on small screens */}
-          <aside className="w-full shrink-0 lg:w-[17rem] xl:w-[17.5rem] lg:sticky lg:top-24 xl:top-[5.5rem] lg:z-[5] flex flex-col gap-3">
-            <div className="rounded-2xl border border-stone-200/90 dark:border-stone-700/80 bg-white/85 dark:bg-stone-900/75 backdrop-blur-md shadow-[0_20px_50px_-28px_rgba(15,23,42,0.2)] dark:shadow-[0_24px_60px_-20px_rgba(0,0,0,0.55)] ring-1 ring-stone-200/40 dark:ring-white/[0.06] overflow-hidden">
-              <div className="px-3.5 pt-3 pb-2 border-b border-stone-100/90 dark:border-stone-800/80">
-                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-400 dark:text-stone-500">
-                  Workspace
-                </p>
-                <p className="mt-1 hidden lg:block text-[11px] text-stone-500 dark:text-stone-400 leading-snug">
-                  Switch tools or open your saved work — everything in one column.
+            {/* Greeting + workspace subtitle + trust — harmonious jewel tones */}
+            <div className="mt-2 flex flex-wrap items-baseline gap-x-4 gap-y-3">
+              <h1 className="dash-serif shrink-0 text-[2rem] sm:text-4xl lg:text-[2.85rem] font-semibold leading-[1.08] tracking-tight text-stone-900 dark:text-stone-50">
+                {greeting}
+                {firstName ? (
+                  <>
+                    ,{' '}
+                    <span className="bg-gradient-to-r from-violet-600 via-fuchsia-500 to-rose-500 dark:from-violet-300 dark:via-fuchsia-300 dark:to-rose-300 bg-clip-text text-transparent">
+                      {firstName}
+                    </span>
+                  </>
+                ) : (
+                  ''
+                )}
+                <span className="ml-2 inline-block text-[1em] align-middle drop-shadow-sm" aria-hidden>
+                  {greetingEmoji}
+                </span>
+              </h1>
+              <span className="hidden md:inline shrink-0 h-px w-8 rounded-full bg-gradient-to-r from-violet-200 to-teal-200 dark:from-violet-700/70 dark:to-teal-600/70 select-none opacity-70" aria-hidden />
+              <p className="text-sm sm:text-base leading-snug min-w-[10rem] max-w-xl text-stone-600 dark:text-indigo-100/76 font-medium">
+                {getWorkspaceSubtitle(isNewUser, dashboardTool)}
+              </p>
+              <span className="hidden lg:inline shrink-0 h-px w-8 rounded-full bg-gradient-to-r from-teal-200 to-fuchsia-200 dark:from-teal-700/70 dark:to-fuchsia-600/70 select-none opacity-70" aria-hidden />
+              <div
+                className="inline-flex shrink-0 items-center gap-2.5 px-3 py-2 sm:gap-3 sm:px-4 sm:py-2.5 rounded-[1.375rem] bg-gradient-to-br from-teal-50/98 via-emerald-50/95 to-violet-50/98 dark:from-teal-950/50 dark:via-emerald-950/35 dark:to-violet-950/48 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.65)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] ring-1 ring-teal-200/65 dark:ring-teal-700/40 backdrop-blur-md"
+              >
+                <div className="flex -space-x-2.5" aria-hidden>
+                  {[
+                    { emoji: '👩‍🎓', light: 'from-teal-200 via-emerald-100 to-teal-200', dark: 'dark:from-teal-950/85 dark:via-emerald-900/65 dark:to-teal-900/85' },
+                    { emoji: '👨‍🎓', light: 'from-sky-200 via-cyan-100 to-sky-200', dark: 'dark:from-sky-950/80 dark:via-cyan-950/55 dark:to-sky-900/85' },
+                    { emoji: '👩‍💻', light: 'from-violet-200 via-fuchsia-100 to-violet-200', dark: 'dark:from-violet-950/80 dark:via-fuchsia-950/50 dark:to-purple-950/85' },
+                  ].map((row, i) => (
+                    <div
+                      key={i}
+                      className={`w-8 h-8 rounded-full bg-gradient-to-br ${row.light} ${row.dark} flex items-center justify-center text-[14px] border-[2.5px] border-white/95 shadow-sm dark:border-stone-900/95`}
+                    >
+                      {row.emoji}
+                    </div>
+                  ))}
+                </div>
+                <p className="text-[11px] sm:text-xs leading-snug max-w-[14rem] sm:max-w-none">
+                  <span className="font-bold bg-gradient-to-r from-teal-700 via-emerald-600 to-violet-700 dark:from-teal-300 dark:via-emerald-300 dark:to-violet-300 bg-clip-text text-transparent drop-shadow-[0_0_24px_rgba(16,185,129,0.1)] dark:drop-shadow-none">
+                    50,000+
+                  </span>{' '}
+                  <span className="text-teal-900/90 dark:text-emerald-100/90 font-semibold tracking-tight">
+                    students trust WriteScholar
+                  </span>
                 </p>
               </div>
-              <nav
-                className="grid grid-cols-2 lg:grid-cols-1 gap-2 p-2 sm:p-2.5 lg:p-2"
-                aria-label="Dashboard tools"
-              >
-                {DASHBOARD_TOOL_ITEMS.map((item) => {
-                  const active = dashboardTool === item.id;
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => {
-                        setDashboardTool(item.id);
-                        trackEvent('dashboard_tool_tab', { tool: item.id });
-                      }}
-                      className={`group relative flex w-full flex-col lg:flex-row lg:items-center gap-2 rounded-xl border-l-[3px] px-2.5 py-2.5 sm:px-3 sm:py-3 text-left transition-all duration-200 ${
-                        active
-                          ? `${item.activeBar} ${item.activeBg} shadow-md ring-1 ring-black/[0.04] dark:ring-white/10`
-                          : 'border-l-transparent bg-stone-50/50 dark:bg-stone-950/20 hover:bg-stone-100/90 dark:hover:bg-stone-800/70 border border-stone-200/60 dark:border-stone-700/50 lg:border-transparent lg:hover:border-stone-200/80 dark:lg:hover:border-stone-600/60'
-                      }`}
-                    >
-                      <span
-                        className={`pointer-events-none absolute inset-0 rounded-xl opacity-0 transition-opacity duration-200 ${
-                          active ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-                        } bg-gradient-to-br from-white/40 to-transparent dark:from-white/[0.03] dark:to-transparent`}
-                        aria-hidden
-                      />
-                      <div
-                        className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-lg shadow-md ${item.iconClass}`}
-                      >
-                        <span aria-hidden>{item.emoji}</span>
-                      </div>
-                      <div className="relative min-w-0 flex-1">
-                        <p className={`text-sm font-bold leading-tight ${item.titleClass}`}>{item.title}</p>
-                        <p className="mt-0.5 hidden lg:line-clamp-2 text-[11px] leading-snug text-stone-500 dark:text-stone-400">
-                          {item.desc}
-                        </p>
-                        <p className="mt-0.5 lg:hidden text-[10px] leading-snug text-stone-500 dark:text-stone-400 line-clamp-2">
-                          {item.desc}
-                        </p>
-                      </div>
-                    </button>
-                  );
-                })}
-              </nav>
-
-              <div className="border-t border-stone-100/90 dark:border-stone-800/80 px-3.5 pt-2.5 pb-1">
-                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-stone-400 dark:text-stone-500">
-                  Shortcuts
-                </p>
-              </div>
-              <nav
-                className="flex flex-col gap-0.5 px-2 pb-2.5 pt-0"
-                aria-label="Workspace shortcuts"
-              >
-                {WORKSPACE_SHORTCUTS.map((link) => (
-                  <button
-                    key={link.id}
-                    type="button"
-                    onClick={() => {
-                      onNavigate(link.page);
-                      trackEvent('dashboard_workspace_shortcut', { page: link.page });
-                    }}
-                    className="group flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left text-stone-700 dark:text-stone-200 transition-colors hover:bg-violet-50/90 dark:hover:bg-violet-950/35 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/60"
-                  >
-                    <span
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-stone-100/90 text-base shadow-sm ring-1 ring-stone-200/70 dark:bg-stone-800/80 dark:ring-stone-600/50 group-hover:bg-white dark:group-hover:bg-stone-800"
-                      aria-hidden
-                    >
-                      {link.emoji}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-xs font-semibold leading-tight">{link.label}</span>
-                      <span className="mt-0.5 block text-[10px] leading-snug text-stone-500 dark:text-stone-400 line-clamp-1">
-                        {link.hint}
-                      </span>
-                    </span>
-                    <svg
-                      className="h-4 w-4 shrink-0 text-stone-300 opacity-0 transition-opacity group-hover:opacity-100 dark:text-stone-500"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      aria-hidden
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </button>
-                ))}
-              </nav>
             </div>
+          </div>
 
-            {/* Secondary card: plan CTA on free */}
-            {isFree && (
-              <div className="hidden lg:block rounded-2xl border border-violet-200/70 dark:border-violet-800/40 bg-gradient-to-br from-violet-50/90 to-fuchsia-50/50 dark:from-violet-950/40 dark:to-fuchsia-950/20 p-3.5 shadow-md ring-1 ring-violet-200/30 dark:ring-violet-900/30">
-                <p className="text-xs font-semibold text-violet-950 dark:text-violet-100" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
-                  Unlock unlimited analyses
-                </p>
-                <p className="mt-1 text-[11px] leading-snug text-violet-800/90 dark:text-violet-200/90">
-                  Higher limits, larger uploads, and every study tool.
-                </p>
+          <div className="flex items-center gap-2.5 flex-wrap sm:justify-end sm:shrink-0">
+            {analysisCount > 0 && (
+              <div className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-gradient-to-r from-amber-50 to-rose-50 dark:from-amber-950/40 dark:to-rose-950/40 ring-1 ring-amber-200/70 dark:ring-amber-800/40 shadow-sm">
+                <span className="dash-fire text-base" aria-hidden>🔥</span>
+                <span className="text-xs font-semibold text-amber-900 dark:text-amber-200">
+                  {analysisCount} {analysisCount === 1 ? 'essay' : 'essays'} analyzed
+                </span>
+              </div>
+            )}
+            {isFree ? (
+              <>
+                <div className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-white/85 dark:bg-stone-900/70 ring-1 ring-stone-200 dark:ring-stone-700 shadow-sm backdrop-blur-sm">
+                  <span className="text-sm" aria-hidden>✨</span>
+                  <span className="text-xs font-semibold text-stone-700 dark:text-stone-200">Free plan</span>
+                </div>
                 <button
                   type="button"
                   onClick={() => onNavigate('pricing')}
-                  className="mt-2.5 w-full rounded-xl bg-violet-600 px-3 py-2 text-xs font-semibold text-white shadow-md shadow-violet-900/20 transition hover:bg-violet-500 active:scale-[0.99]"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 hover:from-violet-500 hover:via-fuchsia-500 hover:to-rose-400 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-violet-500/30 hover:shadow-xl hover:shadow-fuchsia-500/30 hover:-translate-y-0.5 active:translate-y-0 transition-all"
                 >
-                  View plans
+                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                  Upgrade
                 </button>
+              </>
+            ) : (
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-md shadow-amber-500/30">
+                <span className="text-sm" aria-hidden>⭐</span>
+                <span className="text-xs font-bold uppercase tracking-wider">{plan}</span>
               </div>
             )}
-          </aside>
+          </div>
+        </header>
 
-          {/* Main column — analyze, citations, study pack, more tools, usage */}
-          <div className="min-w-0 flex-1 space-y-6 lg:space-y-8">
-        {/* === ANALYZE: HERO UPLOAD === */}
-        {dashboardTool === 'analyze' && (
-        <div className="relative">
-          {/* Main upload card */}
-          <div
-            className={`relative rounded-3xl border-2 transition-all duration-300 overflow-hidden ${
-              dropActive
-                ? 'border-violet-500 bg-violet-50 dark:bg-violet-950/40 shadow-2xl shadow-violet-500/25'
-                : 'border-stone-200/90 dark:border-stone-700 bg-gradient-to-br from-white via-violet-50/40 to-fuchsia-50/30 dark:from-stone-900 dark:via-violet-950/25 dark:to-stone-900 shadow-xl shadow-violet-900/[0.06] dark:shadow-black/30'
-            }`}
-          >
-            {/* Gradient accent bar */}
-            <div className="h-1.5 w-full bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-400" />
-
-            {/* Soft background orbs */}
-            <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-b-[1.4rem]" aria-hidden>
-              <div className="absolute -right-12 top-20 h-56 w-56 rounded-full bg-violet-400/15 blur-3xl dark:bg-violet-600/10" />
-              <div className="absolute -left-8 bottom-32 h-44 w-44 rounded-full bg-fuchsia-400/10 blur-3xl dark:bg-fuchsia-600/5" />
-              <div className="absolute right-1/4 top-1/2 h-32 w-32 rounded-full bg-pink-300/10 blur-2xl" />
-            </div>
-
-            <div className="relative p-5 sm:p-8 lg:p-10">
-              {/* Headline */}
-              <div className="mb-6 text-center sm:mb-8 lg:mb-8">
-                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-violet-200/80 bg-white/80 px-3 py-1.5 text-xs font-medium text-violet-800 shadow-sm backdrop-blur-sm dark:border-violet-800/60 dark:bg-violet-950/50 dark:text-violet-200 sm:text-sm">
-                  <span aria-hidden className="text-base">
-                    ✨
-                  </span>
-                  {isNewUser ? 'Get started in under a minute' : 'Ready for your next analysis'}
-                </div>
-
-                <h2
-                  className="text-2xl font-semibold tracking-tight text-stone-900 dark:text-stone-50 sm:text-3xl lg:text-4xl"
-                  style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
-                >
-                  {isNewUser ? (
-                    <>
-                      Get <span className="bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent dark:from-violet-400 dark:to-fuchsia-400">professor-style feedback</span> on your essay
-                    </>
-                  ) : (
-                    <>
-                      Upload your <span className="bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent dark:from-violet-400 dark:to-fuchsia-400">next essay</span>
-                    </>
-                  )}
-                </h2>
-
-                <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-stone-600 dark:text-stone-400 sm:text-lg">
-                  {isNewUser
-                    ? 'Drop in your paper and see exactly what to improve — structure, arguments, clarity, and more.'
-                    : 'Get detailed feedback on structure, arguments, and writing quality.'}
-                </p>
-              </div>
-
-              {/* Upload drop zone */}
-              <div
-                role="button"
-                tabIndex={0}
-                onClick={() => !isUploading && fileInputRef.current?.click()}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    if (!isUploading) fileInputRef.current?.click();
-                  }
-                }}
-                onDrop={handleDrop}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                className={`relative group cursor-pointer rounded-2xl border-2 border-dashed p-6 text-center transition-all duration-300 sm:p-10 ${
-                  dropActive
-                    ? 'scale-[1.01] border-violet-500 bg-violet-100/90 shadow-inner dark:bg-violet-900/35'
-                    : 'border-violet-300/90 bg-gradient-to-b from-violet-50/80 via-white to-white shadow-inner shadow-violet-100/40 dark:border-violet-600/50 dark:from-violet-950/30 dark:via-stone-900/90 dark:to-stone-900/80 dark:shadow-none hover:border-violet-400 hover:from-violet-50 hover:to-white dark:hover:from-violet-950/40'
-                }`}
-              >
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".pdf,.doc,.docx,.txt"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleFileUpload(file);
-                    e.target.value = '';
-                  }}
-                  className="hidden"
-                />
-
-                {isUploading ? (
-                  <div className="flex flex-col items-center gap-4">
-                    <LoadingSpinner size="lg" text={`Uploading... ${uploadProgress}%`} color="blue" />
-                    <div className="w-full max-w-xs bg-stone-200 dark:bg-stone-700 rounded-full h-2 overflow-hidden">
-                      <div
-                        className="bg-violet-600 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${uploadProgress}%` }}
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <div className="flex justify-center mb-4">
-                      <div className="w-[4.5rem] h-[4.5rem] sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl bg-violet-600 text-white flex items-center justify-center shadow-lg shadow-violet-600/30 group-hover:scale-105 transition-transform">
-                        <svg className="w-9 h-9 sm:w-10 sm:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                        </svg>
-                      </div>
-                    </div>
-
-                    <p
-                      className="text-xl sm:text-2xl font-semibold text-stone-900 dark:text-stone-100 mb-2"
-                      style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
-                    >
-                      Drop your essay here
-                    </p>
-
-                    <p className="text-stone-600 dark:text-stone-400 mb-4">
-                      or <span className="text-violet-600 dark:text-violet-400 font-medium">click to browse</span>
-                    </p>
-
-                    <div className="flex flex-wrap justify-center gap-2 text-sm">
-                      <span className="px-3 py-1 rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 font-medium">PDF</span>
-                      <span className="px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-medium">Word</span>
-                      <span className="px-3 py-1 rounded-full bg-stone-100 dark:bg-stone-700 text-stone-700 dark:text-stone-300 font-medium">TXT</span>
-                    </div>
-
-                    <p className="mt-4 text-xs text-stone-500 dark:text-stone-500">
-                      Up to {getMaxFileSizeLabel(plan)} · {isFree && <span className="text-violet-600 dark:text-violet-400">Pro unlocks larger files</span>}
-                    </p>
-                  </>
-                )}
-              </div>
-
-              {uploadError && (
-                <div className="mt-4 p-4 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm">
-                  {uploadError}
-                </div>
-              )}
-
-              {/* Divider */}
-              <div className="my-8 flex items-center gap-4">
-                <div className="h-px flex-1 bg-gradient-to-r from-transparent via-stone-300 to-stone-200 dark:via-stone-600 dark:to-stone-700" />
-                <span className="whitespace-nowrap rounded-full border border-stone-200/80 bg-stone-50/90 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-stone-500 dark:border-stone-600 dark:bg-stone-800/80 dark:text-stone-400">
-                  Or paste below
-                </span>
-                <div className="h-px flex-1 bg-gradient-to-l from-transparent via-stone-300 to-stone-200 dark:via-stone-600 dark:to-stone-700" />
-              </div>
-
-              {/* Text input */}
-              <div className="relative">
-                <textarea
-                  ref={textareaRef}
-                  value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
-                  placeholder="Paste your essay here (minimum 200 words)..."
-                  className="w-full min-h-[180px] rounded-xl border border-stone-200/90 bg-white/90 p-5 text-stone-800 shadow-inner outline-none ring-0 transition-all placeholder:text-stone-400 focus:border-violet-400 focus:ring-4 focus:ring-violet-500/20 dark:border-stone-600 dark:bg-stone-800/60 dark:text-stone-100 dark:placeholder-stone-500 dark:focus:border-violet-500 resize-none text-base leading-relaxed"
-                />
-
-                <div className="absolute bottom-4 left-5 text-sm text-stone-400 dark:text-stone-500">
-                  {getWordCount(inputText)} words
-                  {getWordCount(inputText) > 0 && getWordCount(inputText) < 200 && (
-                    <span className="text-amber-600 dark:text-amber-400"> · {200 - getWordCount(inputText)} more needed</span>
-                  )}
-                </div>
-              </div>
-
-              {/* Analyze button */}
-              <div className="mt-5 flex flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-start">
-                  {inputText.trim() && (
-                    <button
-                      type="button"
-                      onClick={() => setInputText('')}
-                      className="text-sm font-medium text-stone-500 transition-colors hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-200"
-                    >
-                      Clear text
-                    </button>
-                  )}
-                  {!isTextValid && (
-                    <p className="max-w-md text-center text-xs text-stone-500 dark:text-stone-400 sm:text-left">
-                      {getWordCount(inputText) === 0
-                        ? 'Paste at least 200 words for full feedback on structure and argument.'
-                        : `${200 - getWordCount(inputText)} more words needed.`}
-                    </p>
-                  )}
-                  {isTextValid && (
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200/80 bg-emerald-50/90 px-3 py-1.5 text-xs font-semibold text-emerald-800 dark:border-emerald-800/50 dark:bg-emerald-950/40 dark:text-emerald-200">
-                      <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      Ready to analyze
-                    </span>
-                  )}
-                </div>
-
+        {/* ═══════════════════════════════════════════════════════════════════
+            MOBILE TAB BAR (lg- only)
+           ═══════════════════════════════════════════════════════════════════ */}
+        <div className="lg:hidden mb-5 -mx-4 sm:-mx-6 px-4 sm:px-6 overflow-x-auto">
+          <div className="inline-flex gap-1.5 p-1.5 bg-white/80 dark:bg-stone-900/70 rounded-2xl ring-1 ring-stone-200/80 dark:ring-stone-700/60 shadow-sm backdrop-blur-md">
+            {DASHBOARD_TOOL_ITEMS.map((item) => {
+              const active = dashboardTool === item.id;
+              return (
                 <button
+                  key={item.id}
                   type="button"
-                  onClick={handleAnalyzeText}
-                  disabled={!isTextValid}
-                  className={`inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-base font-semibold shadow-lg transition-all sm:min-w-[14rem] sm:px-8 sm:text-lg ${
-                    isTextValid
-                      ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-violet-500/30 hover:from-violet-500 hover:to-fuchsia-500 hover:shadow-xl hover:shadow-fuchsia-500/25 hover:-translate-y-0.5 active:translate-y-0'
-                      : 'cursor-not-allowed bg-stone-200 text-stone-400 dark:bg-stone-700 dark:text-stone-500'
+                  onClick={() => {
+                    setDashboardTool(item.id);
+                    trackEvent('dashboard_tool_tab', { tool: item.id });
+                  }}
+                  className={`relative flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all ${
+                    active
+                      ? `${item.activeBg} text-stone-900 dark:text-white shadow-sm ring-1 ring-black/[0.04] dark:ring-white/10`
+                      : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'
                   }`}
                 >
-                  {isTextValid ? (
-                    <>
-                      Let&apos;s analyze my essay
-                      <span aria-hidden>✨</span>
-                    </>
-                  ) : (
-                    'Analyze my essay'
-                  )}
+                  <span aria-hidden>{item.emoji}</span>
+                  <span className="dash-serif">{item.title}</span>
                 </button>
-              </div>
-            </div>
+              );
+            })}
           </div>
-
-          {/* What you'll get — mini previews so each benefit reads instantly */}
-          {isNewUser && (
-            <div className="mt-6 sm:mt-8 grid sm:grid-cols-3 gap-3 sm:gap-4">
-              <div className="relative overflow-hidden rounded-2xl border border-emerald-200/80 dark:border-emerald-800/50 bg-gradient-to-b from-emerald-50/80 to-white dark:from-emerald-950/25 dark:to-stone-900/80 p-4 shadow-md ring-1 ring-emerald-100/60 dark:ring-emerald-900/30">
-                <div className="flex items-start justify-between gap-2 mb-3">
-                  <div>
-                    <h3 className="font-semibold text-stone-900 dark:text-stone-50 text-sm">Rubric scoring</h3>
-                    <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">Category scores + estimated grade</p>
-                  </div>
-                  <div className="shrink-0 rounded-lg bg-emerald-600 text-white text-[10px] font-bold px-2 py-1 shadow-sm">B+</div>
-                </div>
-                <div className="space-y-2 rounded-xl bg-white/90 dark:bg-stone-950/40 border border-emerald-100/80 dark:border-emerald-900/40 p-2.5">
-                  {[
-                    { label: 'Thesis & focus', w: '78%', tone: 'bg-emerald-500' },
-                    { label: 'Evidence & support', w: '65%', tone: 'bg-amber-500' },
-                    { label: 'Organization', w: '82%', tone: 'bg-emerald-500' },
-                    { label: 'Clarity & style', w: '71%', tone: 'bg-sky-500' },
-                  ].map((row) => (
-                    <div key={row.label} className="flex items-center gap-2">
-                      <span className="w-[38%] text-[9px] font-medium text-stone-600 dark:text-stone-400 truncate">{row.label}</span>
-                      <div className="flex-1 h-1.5 rounded-full bg-stone-200/90 dark:bg-stone-700/80 overflow-hidden">
-                        <div className={`h-full rounded-full ${row.tone}`} style={{ width: row.w }} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="relative overflow-hidden rounded-2xl border border-amber-200/80 dark:border-amber-800/50 bg-gradient-to-b from-amber-50/80 to-white dark:from-amber-950/25 dark:to-stone-900/80 p-4 shadow-md ring-1 ring-amber-100/60 dark:ring-amber-900/30">
-                <div className="mb-3">
-                  <h3 className="font-semibold text-stone-900 dark:text-stone-50 text-sm">Line-by-line notes</h3>
-                  <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">Inline highlights on your own sentences</p>
-                </div>
-                <div className="rounded-xl bg-white/90 dark:bg-stone-950/40 border border-amber-100/80 dark:border-amber-900/40 p-2.5 space-y-2">
-                  <div className="flex gap-2">
-                    <span className="w-1 rounded-full bg-emerald-500 shrink-0" aria-hidden />
-                    <p className="text-[9px] leading-relaxed text-stone-600 dark:text-stone-300">
-                      <span className="bg-emerald-100/90 dark:bg-emerald-900/40 text-emerald-900 dark:text-emerald-100 rounded px-0.5">Strong thesis</span> — clearly states your position early.
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <span className="w-1 rounded-full bg-amber-500 shrink-0" aria-hidden />
-                    <p className="text-[9px] leading-relaxed text-stone-600 dark:text-stone-300">
-                      This paragraph jumps topics — <span className="bg-amber-100/90 dark:bg-amber-900/40 text-amber-900 dark:text-amber-100 rounded px-0.5">add a bridge sentence</span>.
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <span className="w-1 rounded-full bg-red-500 shrink-0" aria-hidden />
-                    <p className="text-[9px] leading-relaxed text-stone-600 dark:text-stone-300">
-                      Citation needed here for the statistic on{' '}
-                      <span className="bg-red-100/95 dark:bg-red-950/50 text-red-900 dark:text-red-100 rounded px-0.5 ring-1 ring-red-200/80 dark:ring-red-800/60">
-                        climate data
-                      </span>
-                      .
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="relative overflow-hidden rounded-2xl border border-violet-200/80 dark:border-violet-800/50 bg-gradient-to-b from-violet-50/80 to-white dark:from-violet-950/25 dark:to-stone-900/80 p-4 shadow-md ring-1 ring-violet-100/60 dark:ring-violet-900/30">
-                <div className="mb-3">
-                  <h3 className="font-semibold text-stone-900 dark:text-stone-50 text-sm">Revision suggestions</h3>
-                  <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">Actionable fixes, not vague advice</p>
-                </div>
-                <ul className="rounded-xl bg-white/90 dark:bg-stone-950/40 border border-violet-100/80 dark:border-violet-900/40 p-2.5 space-y-2">
-                  {[
-                    'Tighten intro: move the roadmap sentence up',
-                    'Swap passive voice in paragraph 2 → active verbs',
-                    'Add one counterargument + rebuttal in section 3',
-                  ].map((line) => (
-                    <li key={line} className="flex items-start gap-2 text-[9px] text-stone-700 dark:text-stone-200 leading-snug">
-                      <span className="mt-0.5 inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full bg-violet-600 text-white">
-                        <svg className="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </span>
-                      <span>{line}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          )}
         </div>
-        )}
 
-        {dashboardTool === 'citations' && (
-          <div className="mb-5 sm:mb-6">
-            <CitationsPage
-              embedded
-              onEmbeddedToolSwitch={switchEmbeddedTool}
-              onNavigate={onNavigate}
-              user={user}
-              onLogout={onLogout}
-            />
-          </div>
-        )}
+        {/* ═══════════════════════════════════════════════════════════════════
+            MAIN GRID — Sidebar + Main column
+           ═══════════════════════════════════════════════════════════════════ */}
+        <div className="grid lg:grid-cols-[270px,1fr] gap-6 lg:gap-8">
+          {/* ─── SIDEBAR (lg+) ─── */}
+          <aside className="hidden lg:block">
+            <div className="sticky top-6 space-y-4">
+              {/* Workspace card */}
+              <div className="rounded-2xl bg-white/90 dark:bg-stone-900/75 ring-1 ring-stone-200/80 dark:ring-stone-700/60 shadow-md shadow-stone-900/[0.04] dark:shadow-black/30 backdrop-blur-md overflow-hidden">
+                <div className="px-4 pt-3.5 pb-2.5 border-b border-stone-100 dark:border-stone-800">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-400 dark:text-stone-500">Workspace</p>
+                  <p className="mt-1 text-[11px] text-stone-500 dark:text-stone-400 leading-snug">
+                    Switch tools or open your saved work.
+                  </p>
+                </div>
+                <nav className="p-2 flex flex-col gap-1" aria-label="Dashboard tools">
+                  {DASHBOARD_TOOL_ITEMS.map((item) => {
+                    const active = dashboardTool === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => {
+                          setDashboardTool(item.id);
+                          trackEvent('dashboard_tool_tab', { tool: item.id });
+                        }}
+                        className={`group relative flex items-center gap-3 rounded-xl border-l-[3px] pl-2.5 pr-2.5 py-2.5 text-left transition-all duration-200 ${
+                          active
+                            ? `${item.activeBar} ${item.activeBg} shadow-sm ring-1 ring-black/[0.03] dark:ring-white/10`
+                            : 'border-l-transparent hover:bg-stone-50/80 dark:hover:bg-stone-800/60'
+                        }`}
+                      >
+                        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-base ${item.iconClass} text-white shadow-md ${active ? 'rotate-[-3deg] scale-105' : 'group-hover:rotate-[-3deg] group-hover:scale-105'} transition-transform duration-200`}>
+                          <span aria-hidden>{item.emoji}</span>
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className={`dash-serif text-[15px] font-bold leading-tight ${active ? item.titleClass : 'text-stone-800 dark:text-stone-100'}`}>
+                            {item.title}
+                          </p>
+                          <p className="mt-0.5 text-[10.5px] leading-snug text-stone-500 dark:text-stone-400 line-clamp-1">
+                            {item.desc}
+                          </p>
+                        </div>
+                        {active && (
+                          <svg className="h-3.5 w-3.5 shrink-0 text-stone-400 dark:text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                          </svg>
+                        )}
+                      </button>
+                    );
+                  })}
+                </nav>
 
-        {dashboardTool === 'study_pack' && (
-          <div className="mb-5 sm:mb-6">
-            <StudyPackPage
-              embedded
-              onEmbeddedToolSwitch={switchEmbeddedTool}
-              onNavigate={onNavigate}
-              user={user}
-              onLogout={onLogout}
-            />
-          </div>
-        )}
-
-        {dashboardTool === 'more_tools' && (
-          <div className="mb-5 sm:mb-6 rounded-2xl border border-stone-200/80 dark:border-stone-700/50 bg-stone-50/50 dark:bg-stone-950/25 p-4 sm:p-5 shadow-sm">
-            <div className="mb-3 sm:mb-4 text-center sm:text-left">
-              <h2
-                className="text-lg sm:text-xl font-semibold text-stone-900 dark:text-stone-50"
-                style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
-              >
-                More tools
-              </h2>
-              <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 mt-0.5 max-w-2xl mx-auto sm:mx-0">
-                Free utilities — each card opens a dedicated tool (summarizer, calculators, grammar, and more).
-              </p>
-            </div>
-            <MoreToolsGrid compact onNavigate={onNavigate} />
-          </div>
-        )}
-
-        {/* Recent analyses - shown for returning users */}
-        {!isNewUser && recentAnalyses.length > 0 && dashboardTool === 'analyze' && (
-          <div className="mt-8 sm:mt-10">
-            <div className="flex items-center justify-between mb-5">
-              <h2
-                className="text-xl font-semibold text-stone-900 dark:text-stone-100"
-                style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
-              >
-                Recent Analyses
-              </h2>
-              <button
-                onClick={() => onNavigate('library')}
-                className="text-sm text-violet-600 dark:text-violet-400 font-medium hover:underline"
-              >
-                View all →
-              </button>
-            </div>
-
-            <div className="grid gap-3">
-              {recentAnalyses.map((analysis) => (
-                <button
-                  key={analysis.id}
-                  onClick={() => onNavigate('analysis', analysis.id)}
-                  className="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-stone-900/60 border border-stone-200 dark:border-stone-700 hover:border-violet-300 dark:hover:border-violet-600 hover:shadow-md transition-all text-left group"
-                >
-                  <div className="w-12 h-12 rounded-xl bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400 flex items-center justify-center flex-shrink-0">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-stone-900 dark:text-stone-100 truncate group-hover:text-violet-700 dark:group-hover:text-violet-300 transition-colors">
-                      {analysis.title}
-                    </p>
-                    <p className="text-sm text-stone-500 dark:text-stone-400">
-                      {relativeTime(analysis.createdAt)}
-                    </p>
-                  </div>
-
-                  {analysis.grade && (
-                    <div className="flex items-center gap-3">
-                      <div className="px-3 py-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 font-bold text-sm">
-                        {analysis.grade}
-                      </div>
-                      <svg className="w-5 h-5 text-stone-400 group-hover:text-violet-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {/* Shortcuts */}
+                <div className="px-4 pt-2.5 pb-1.5 border-t border-stone-100 dark:border-stone-800">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-400 dark:text-stone-500">Shortcuts</p>
+                </div>
+                <nav className="px-2 pb-2.5 flex flex-col gap-0.5" aria-label="Workspace shortcuts">
+                  {WORKSPACE_SHORTCUTS.map((link) => (
+                    <button
+                      key={link.id}
+                      type="button"
+                      onClick={() => {
+                        onNavigate(link.page);
+                        trackEvent('dashboard_workspace_shortcut', { page: link.page });
+                      }}
+                      className="group flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-all hover:bg-violet-50/80 dark:hover:bg-violet-950/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/60"
+                    >
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-stone-100 dark:bg-stone-800 text-sm shadow-sm ring-1 ring-stone-200/80 dark:ring-stone-700/60 group-hover:bg-white dark:group-hover:bg-stone-700 group-hover:scale-105 transition-all" aria-hidden>
+                        {link.emoji}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-[12.5px] font-semibold leading-tight text-stone-700 dark:text-stone-200 group-hover:text-violet-700 dark:group-hover:text-violet-300 transition-colors">
+                          {link.label}
+                        </span>
+                        <span className="block text-[10px] leading-snug text-stone-500 dark:text-stone-400 line-clamp-1">
+                          {link.hint}
+                        </span>
+                      </span>
+                      <svg className="h-3.5 w-3.5 shrink-0 text-stone-300 dark:text-stone-600 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
-                    </div>
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+                    </button>
+                  ))}
+                </nav>
+              </div>
 
-        {/* Social proof for new users */}
-        {isNewUser && dashboardTool === 'analyze' && (
-          <div className="mt-8 sm:mt-10 text-center">
-            <div className="inline-flex items-center gap-3 px-5 py-3 rounded-full bg-white dark:bg-stone-900/60 border border-stone-200 dark:border-stone-700 shadow-sm">
-              <div className="flex -space-x-2">
-                {['👩‍🎓', '👨‍🎓', '👩‍💻'].map((emoji, i) => (
-                  <div
-                    key={i}
-                    className="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center text-lg border-2 border-white dark:border-stone-800"
-                  >
-                    {emoji}
+              {/* Sidebar Pro card (free users) */}
+              {isFree && (
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 via-fuchsia-600 to-rose-500 shadow-xl shadow-violet-500/25">
+                  <div className="absolute inset-0 pointer-events-none opacity-60" aria-hidden>
+                    <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-amber-300/30 blur-2xl dash-orb" />
+                    <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-pink-300/30 blur-2xl dash-orb" style={{ animationDelay: '3s' }} />
                   </div>
-                ))}
-              </div>
-              <p className="text-sm text-stone-600 dark:text-stone-400">
-                <span className="font-semibold text-stone-900 dark:text-stone-100">50,000+</span> students trust WriteScholar
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Monthly usage — same data as legacy dashboard */}
-        <div className="mt-6 sm:mt-8 pt-5 sm:pt-6 border-t border-stone-200/40 dark:border-stone-700/30">
-          {loadingUsage ? (
-            <div className="p-5 rounded-2xl border border-stone-200/80 dark:border-stone-700/60 bg-stone-100/80 dark:bg-stone-800/40 animate-pulse h-28" aria-hidden />
-          ) : (
-            <div className="p-5 rounded-2xl bg-white/95 dark:bg-stone-900/50 backdrop-blur-sm border border-stone-200/90 dark:border-stone-700/60 shadow-md">
-              <div className="flex items-center justify-between mb-3 gap-2">
-                <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-200 flex items-center gap-2">
-                  <svg className="w-4 h-4 text-violet-700 dark:text-violet-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                  Monthly usage
-                </h3>
-                <span className="text-xs text-stone-500 dark:text-stone-400 text-right">
-                  {getResetsInText(usageStats.daysUntilReset)}
-                </span>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {showCombinedUsage ? (
-                  <div className="bg-white dark:bg-stone-700/50 rounded-lg p-2.5 border border-stone-200/50 dark:border-stone-600/30 sm:col-span-2">
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <span className="text-sm">⚡</span>
-                      <span className="text-xs text-stone-500 dark:text-stone-400">Combined (analyses, study packs, citations)</span>
-                    </div>
-                    <div
-                      className={`text-lg font-bold ${
-                        usageStats.combinedActionsRemaining === -1
-                          ? 'text-lime-600 dark:text-lime-400'
-                          : usageStats.combinedActionsRemaining <= 0
-                            ? 'text-red-500'
-                            : usageStats.combinedActionsRemaining <= 10
-                              ? 'text-amber-500'
-                              : 'text-stone-800 dark:text-stone-100'
-                      }`}
+                  <div className="relative p-4">
+                    <p className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 text-white text-[9px] font-bold uppercase tracking-wider backdrop-blur-sm">
+                      <span aria-hidden>⭐</span> Pro
+                    </p>
+                    <p className="dash-serif mt-2 text-[17px] font-bold text-white leading-tight">
+                      Unlock unlimited essays
+                    </p>
+                    <p className="mt-1 text-[11px] text-white/90 leading-snug">
+                      Higher limits, larger uploads, every Pro tool.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => onNavigate('pricing')}
+                      className="mt-3 w-full rounded-xl bg-white text-violet-700 hover:bg-amber-50 active:scale-[0.98] py-2 text-[12px] font-bold shadow-md transition-all"
                     >
-                      {usageStats.combinedActionsRemaining === -1 ? '∞' : usageStats.combinedActionsRemaining}
-                      <span className="text-xs font-normal text-stone-400 ml-0.5">left</span>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <div className="bg-white dark:bg-stone-700/50 rounded-lg p-2.5 border border-stone-200/50 dark:border-stone-600/30">
-                      <div className="flex items-center gap-1.5 mb-1">
-                        <span className="text-sm">📝</span>
-                        <span className="text-xs text-stone-500 dark:text-stone-400">Essay analyses</span>
-                      </div>
-                      <div
-                        className={`text-lg font-bold ${
-                          usageStats.analysesRemaining === -1
-                            ? 'text-lime-600 dark:text-lime-400'
-                            : usageStats.analysesRemaining <= 0
-                              ? 'text-red-500'
-                              : usageStats.analysesRemaining <= 1
-                                ? 'text-amber-500'
-                                : 'text-stone-800 dark:text-stone-100'
-                        }`}
-                      >
-                        {usageStats.analysesRemaining === -1 ? '∞' : usageStats.analysesRemaining}
-                        <span className="text-xs font-normal text-stone-400 ml-0.5">left</span>
-                      </div>
-                    </div>
-                    <div className="bg-white dark:bg-stone-700/50 rounded-lg p-2.5 border border-stone-200/50 dark:border-stone-600/30">
-                      <div className="flex items-center gap-1.5 mb-1">
-                        <span className="text-sm">📚</span>
-                        <span className="text-xs text-stone-500 dark:text-stone-400">Citations</span>
-                      </div>
-                      <div
-                        className={`text-lg font-bold ${
-                          usageStats.citationsRemaining === -1
-                            ? 'text-lime-600 dark:text-lime-400'
-                            : usageStats.citationsRemaining <= 0
-                              ? 'text-red-500'
-                              : usageStats.citationsRemaining <= 1
-                                ? 'text-amber-500'
-                                : 'text-stone-800 dark:text-stone-100'
-                        }`}
-                      >
-                        {usageStats.citationsRemaining === -1 ? '∞' : usageStats.citationsRemaining}
-                        <span className="text-xs font-normal text-stone-400 ml-0.5">left</span>
-                      </div>
-                    </div>
-                    <div className="bg-white dark:bg-stone-700/50 rounded-lg p-2.5 border border-stone-200/50 dark:border-stone-600/30">
-                      <div className="flex items-center gap-1.5 mb-1">
-                        <span className="text-sm">📦</span>
-                        <span className="text-xs text-stone-500 dark:text-stone-400">Study packs</span>
-                      </div>
-                      <div
-                        className={`text-lg font-bold ${
-                          usageStats.studyPacksRemaining === -1
-                            ? 'text-lime-600 dark:text-lime-400'
-                            : usageStats.studyPacksRemaining <= 0
-                              ? 'text-red-500'
-                              : usageStats.studyPacksRemaining <= 1
-                                ? 'text-amber-500'
-                                : 'text-stone-800 dark:text-stone-100'
-                        }`}
-                      >
-                        {usageStats.studyPacksRemaining === -1 ? '∞' : usageStats.studyPacksRemaining}
-                        <span className="text-xs font-normal text-stone-400 ml-0.5">left</span>
-                      </div>
-                    </div>
-                  </>
-                )}
-                <div className="bg-white dark:bg-stone-700/50 rounded-lg p-2.5 border border-stone-200/50 dark:border-stone-600/30">
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <span className="text-sm">📄</span>
-                    <span className="text-xs text-stone-500 dark:text-stone-400">Uploads</span>
-                  </div>
-                  <div
-                    className={`text-lg font-bold ${
-                      usageStats.uploadsRemaining === -1
-                        ? 'text-lime-600 dark:text-lime-400'
-                        : usageStats.uploadsRemaining <= 0
-                          ? 'text-red-500'
-                          : usageStats.uploadsRemaining <= 1
-                            ? 'text-amber-500'
-                            : 'text-stone-800 dark:text-stone-100'
-                    }`}
-                  >
-                    {usageStats.uploadsRemaining === -1 ? '∞' : usageStats.uploadsRemaining}
-                    <span className="text-xs font-normal text-stone-400 ml-0.5">left</span>
+                      See plans →
+                    </button>
                   </div>
                 </div>
+              )}
+            </div>
+          </aside>
+
+          {/* ─── MAIN COLUMN ─── */}
+          <div className="min-w-0 dash-fade space-y-7 lg:space-y-9">
+            {/* === ANALYZE TOOL === */}
+            {dashboardTool === 'analyze' && (
+              <>
+                {/* Hero upload card */}
+                <section className="relative rounded-3xl overflow-hidden bg-white dark:bg-stone-900/80 ring-1 ring-stone-200/80 dark:ring-stone-700/60 shadow-xl shadow-stone-900/[0.05] dark:shadow-black/40">
+                  {/* Top accent strip */}
+                  <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-rose-400" />
+                  {/* Soft ambient glow */}
+                  <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+                    <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-violet-300/15 dark:bg-violet-500/10 blur-3xl dash-orb" />
+                    <div className="absolute -bottom-24 -left-24 w-64 h-64 rounded-full bg-fuchsia-300/15 dark:bg-fuchsia-500/10 blur-3xl dash-orb" style={{ animationDelay: '5s' }} />
+                  </div>
+
+                  <div className="relative p-6 sm:p-8 lg:p-10">
+                    {/* Pill badge */}
+                    <div className="text-center mb-5">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-violet-300 ring-1 ring-violet-200/80 dark:ring-violet-800/50 text-xs font-medium">
+                        <span aria-hidden>✨</span>
+                        {isNewUser ? 'Get started in under a minute' : 'Ready for your next analysis'}
+                      </span>
+                    </div>
+
+                    {/* Headline */}
+                    <h2 className="dash-serif text-center text-2xl sm:text-3xl lg:text-[2.4rem] font-semibold leading-[1.1] tracking-tight text-stone-900 dark:text-stone-50">
+                      {isNewUser ? (
+                        <>
+                          Get <span className="bg-gradient-to-r from-violet-700 via-fuchsia-600 to-rose-500 dark:from-violet-300 dark:via-fuchsia-300 dark:to-rose-300 bg-clip-text text-transparent">professor-style feedback</span> on your essay
+                        </>
+                      ) : (
+                        <>
+                          Drop in your <span className="bg-gradient-to-r from-violet-700 via-fuchsia-600 to-rose-500 dark:from-violet-300 dark:via-fuchsia-300 dark:to-rose-300 bg-clip-text text-transparent">next essay</span>
+                        </>
+                      )}
+                    </h2>
+                    <p className="mt-3 text-center text-sm sm:text-base text-stone-500 dark:text-stone-400 max-w-2xl mx-auto leading-relaxed">
+                      {isNewUser
+                        ? 'Drop in your paper and see exactly what to improve — structure, arguments, clarity, and more.'
+                        : 'Detailed feedback on structure, arguments, and writing quality.'}
+                    </p>
+
+                    {/* Analysis previews — above upload / paste; same compact strip as citations / study pack */}
+                    <section
+                      aria-labelledby="analyze-output-examples-heading"
+                      className="mt-6 sm:mt-7 rounded-2xl border border-stone-200/85 dark:border-stone-700/75 bg-white/75 dark:bg-stone-900/45 p-4 sm:p-6 ring-1 ring-stone-200/35 dark:ring-white/5 shadow-inner"
+                    >
+                      <h3
+                        id="analyze-output-examples-heading"
+                        className="text-center dash-serif text-sm sm:text-base font-semibold text-stone-800 dark:text-stone-100"
+                      >
+                        See what your analysis looks like
+                      </h3>
+                      <p className="mt-1 text-center text-[11px] sm:text-xs text-stone-500 dark:text-stone-400 mx-auto px-2 sm:px-0 text-balance max-w-[min(100%,36rem)]">
+                        Muted previews for your draft—not canned advice.
+                      </p>
+
+                      <div className="mt-4 flex flex-nowrap gap-3 lg:gap-4 justify-between overflow-x-auto pb-3 snap-x snap-mandatory [scrollbar-width:thin]">
+                        <figure className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,260px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-violet-500 dark:border-violet-400 shadow-sm flex flex-col">
+                          <div className="relative aspect-[16/11] w-full bg-black/80">
+                            <video
+                              className="absolute inset-0 h-full w-full object-cover object-center"
+                              aria-label="Short preview of essay analysis and professor-style feedback"
+                              title="Essay analyzer preview"
+                              muted
+                              loop
+                              playsInline
+                              autoPlay
+                              preload="metadata"
+                            >
+                              <source src="/writescholar-essay-checker-demo.mp4" type="video/mp4" />
+                            </video>
+                          </div>
+                          <figcaption className="px-2 py-1.5 text-center text-[10px] sm:text-[11px] font-semibold text-stone-600 dark:text-stone-400 border-t border-stone-200/70 dark:border-stone-700/70 bg-white/95 dark:bg-stone-900/95">
+                            Quick walkthrough
+                          </figcaption>
+                        </figure>
+                        <figure className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,260px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-violet-500 dark:border-violet-400 shadow-sm flex flex-col">
+                          <div className="relative aspect-[16/11] w-full bg-stone-900">
+                            <img
+                              src="/analyseimage1.png"
+                              alt="Sample rubric and feedback overview from an analyzed essay"
+                              className="absolute inset-0 h-full w-full object-cover object-top"
+                              loading="lazy"
+                              decoding="async"
+                            />
+                          </div>
+                          <figcaption className="px-2 py-1.5 text-center text-[10px] sm:text-[11px] font-semibold text-stone-600 dark:text-stone-400 border-t border-stone-200/70 dark:border-stone-700/70 bg-white/95 dark:bg-stone-900/95">
+                            Rubric & notes
+                          </figcaption>
+                        </figure>
+                        <figure className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,260px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-violet-500 dark:border-violet-400 shadow-sm flex flex-col">
+                          <div className="relative aspect-[16/11] w-full bg-stone-900">
+                            <img
+                              src="/analyseimage2.png"
+                              alt="Sample full written breakdown from an analyzed essay"
+                              className="absolute inset-0 h-full w-full object-cover object-top"
+                              loading="lazy"
+                              decoding="async"
+                            />
+                          </div>
+                          <figcaption className="px-2 py-1.5 text-center text-[10px] sm:text-[11px] font-semibold text-stone-600 dark:text-stone-400 border-t border-stone-200/70 dark:border-stone-700/70 bg-white/95 dark:bg-stone-900/95">
+                            Full report
+                          </figcaption>
+                        </figure>
+                      </div>
+                    </section>
+
+                    {/* Upload drop zone */}
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => !isUploading && fileInputRef.current?.click()}
+                      onKeyDown={(e) => {
+                        if ((e.key === 'Enter' || e.key === ' ') && !isUploading) {
+                          e.preventDefault();
+                          fileInputRef.current?.click();
+                        }
+                      }}
+                      onDrop={handleDrop}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      className={`group relative mt-6 cursor-pointer rounded-2xl border-2 border-dashed transition-all duration-300 ${
+                        dropActive
+                          ? 'scale-[1.005] border-violet-500 bg-violet-50/80 dark:bg-violet-900/30 shadow-inner'
+                          : 'border-violet-300/70 dark:border-violet-700/50 bg-gradient-to-b from-violet-50/40 via-white to-white dark:from-violet-950/30 dark:via-stone-900/70 dark:to-stone-900/70 hover:border-violet-400 hover:from-violet-50/80 hover:to-white dark:hover:from-violet-950/40'
+                      }`}
+                    >
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".pdf,.doc,.docx,.txt"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleFileUpload(file);
+                          e.target.value = '';
+                        }}
+                        className="hidden"
+                      />
+                      <div className="px-6 py-10 sm:py-14 text-center">
+                        {isUploading ? (
+                          <div className="flex flex-col items-center gap-4">
+                            <LoadingSpinner size="lg" text={`Uploading... ${uploadProgress}%`} color="blue" />
+                            <div className="w-full max-w-xs h-2 rounded-full bg-stone-200 dark:bg-stone-700 overflow-hidden">
+                              <div className="h-full rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 transition-all" style={{ width: `${uploadProgress}%` }} />
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="relative mx-auto mb-5 w-16 h-16 sm:w-20 sm:h-20">
+                              <span className="absolute inset-0 rounded-2xl dash-pulse" aria-hidden />
+                              <div className="relative w-full h-full rounded-2xl bg-gradient-to-br from-violet-600 via-fuchsia-600 to-rose-500 text-white flex items-center justify-center shadow-xl shadow-violet-600/35 group-hover:scale-105 group-hover:rotate-[-3deg] transition-all duration-300">
+                                <svg className="w-9 h-9 sm:w-10 sm:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                              </div>
+                            </div>
+                            <p className="dash-serif text-xl sm:text-2xl font-semibold text-stone-900 dark:text-stone-100">
+                              Drop your essay here
+                            </p>
+                            <p className="mt-1 text-sm sm:text-base text-stone-500 dark:text-stone-400">
+                              or <span className="text-violet-700 dark:text-violet-300 font-semibold underline-offset-4 group-hover:underline">click to browse</span>
+                            </p>
+                            <div className="mt-4 flex flex-wrap justify-center gap-2">
+                              <span className="px-2.5 py-1 rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 text-[11px] font-semibold ring-1 ring-rose-200/70 dark:ring-rose-800/40">PDF</span>
+                              <span className="px-2.5 py-1 rounded-full bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 text-[11px] font-semibold ring-1 ring-sky-200/70 dark:ring-sky-800/40">Word</span>
+                              <span className="px-2.5 py-1 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-[11px] font-semibold ring-1 ring-stone-200/70 dark:ring-stone-700/60">TXT</span>
+                            </div>
+                            <p className="mt-3 text-[11px] text-stone-400 dark:text-stone-500">
+                              Up to {getMaxFileSizeLabel(plan)}
+                              {isFree && (
+                                <>
+                                  {' · '}
+                                  <button
+                                    type="button"
+                                    onClick={(e) => { e.stopPropagation(); onNavigate('pricing'); }}
+                                    className="text-violet-600 dark:text-violet-400 font-semibold hover:underline"
+                                  >
+                                    Pro unlocks larger files
+                                  </button>
+                                </>
+                              )}
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {uploadError && (
+                      <div className="mt-4 p-3 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm">
+                        {uploadError}
+                      </div>
+                    )}
+
+                    {/* Divider */}
+                    <div className="my-7 flex items-center gap-4">
+                      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-stone-200 to-transparent dark:via-stone-700" />
+                      <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-400 dark:text-stone-500">Or paste below</span>
+                      <div className="h-px flex-1 bg-gradient-to-l from-transparent via-stone-200 to-transparent dark:via-stone-700" />
+                    </div>
+
+                    {/* Textarea */}
+                    <div className="relative">
+                      <textarea
+                        ref={textareaRef}
+                        value={inputText}
+                        onChange={(e) => setInputText(e.target.value)}
+                        placeholder="Paste your essay here (minimum 200 words)..."
+                        className="w-full min-h-[180px] rounded-2xl border border-stone-200/90 dark:border-stone-700 bg-stone-50/80 dark:bg-stone-800/40 p-5 text-[15px] leading-relaxed text-stone-800 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 resize-none focus:outline-none focus:ring-4 focus:ring-violet-500/15 focus:border-violet-400 dark:focus:border-violet-600 transition-all"
+                      />
+                      <div className="absolute bottom-4 left-5 text-xs">
+                        <span className={isTextValid ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-stone-400 dark:text-stone-500'}>
+                          {getWordCount(inputText)} words
+                        </span>
+                        {getWordCount(inputText) > 0 && getWordCount(inputText) < 200 && (
+                          <span className="text-amber-600 dark:text-amber-400"> · {200 - getWordCount(inputText)} more needed</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="mt-4 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        {inputText.trim() && (
+                          <button
+                            type="button"
+                            onClick={() => setInputText('')}
+                            className="text-xs font-medium text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 transition-colors"
+                          >
+                            Clear
+                          </button>
+                        )}
+                        {isTextValid && (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 ring-1 ring-emerald-200/70 dark:ring-emerald-800/50 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
+                            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                            Ready to analyze
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleAnalyzeText}
+                        disabled={!isTextValid}
+                        className={`inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm sm:text-base font-semibold transition-all ${
+                          isTextValid
+                            ? 'bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 text-white shadow-lg shadow-violet-500/30 hover:shadow-xl hover:shadow-fuchsia-500/35 hover:-translate-y-0.5 active:translate-y-0'
+                            : 'cursor-not-allowed bg-stone-100 dark:bg-stone-800 text-stone-400 dark:text-stone-500 ring-1 ring-stone-200/70 dark:ring-stone-700/60'
+                        }`}
+                      >
+                        {isTextValid ? (
+                          <>
+                            Analyze my essay <span aria-hidden>✨</span>
+                          </>
+                        ) : (
+                          'Analyze my essay'
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </section>
+
+                {/* Stats row — compact, refined */}
+                {!loadingUsage && (
+                  <section>
+                    <div className="flex items-end justify-between mb-3 gap-3">
+                      <div>
+                        <h3 className="dash-serif text-base sm:text-lg font-semibold text-stone-700 dark:text-stone-200">
+                          {showCombinedUsage ? 'This month' : 'Monthly usage'}
+                        </h3>
+                        <p className="text-[11px] text-stone-400 dark:text-stone-500 mt-0.5">
+                          {getResetsInText(usageStats.daysUntilReset)}
+                        </p>
+                      </div>
+                      {isFree && (
+                        <button
+                          type="button"
+                          onClick={() => onNavigate('pricing')}
+                          className="text-[11px] font-semibold text-violet-700 dark:text-violet-400 hover:underline"
+                        >
+                          Higher limits →
+                        </button>
+                      )}
+                    </div>
+                    {showCombinedUsage ? (
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 dash-stagger">
+                        <div className="lg:col-span-2 relative overflow-hidden rounded-2xl bg-white/95 dark:bg-stone-900/70 ring-1 ring-violet-200/80 dark:ring-violet-800/50 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 group backdrop-blur-sm">
+                          <div className="pointer-events-none absolute -top-12 -right-12 w-32 h-32 rounded-full blur-2xl bg-violet-400/15" aria-hidden />
+                          <div className="relative p-4">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-400 dark:text-stone-500 truncate">
+                                  Combined actions
+                                </p>
+                                <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">Analyses · Citations · Study packs · one monthly pool</p>
+                              </div>
+                              <span className="text-2xl" aria-hidden>⚡</span>
+                            </div>
+                            <p className={`dash-serif mt-2 text-3xl font-bold leading-none tabular-nums ${
+                              (usageStats.combinedActionsRemaining ?? 0) <= 0
+                                ? 'text-red-600 dark:text-red-400'
+                                : (usageStats.combinedActionsRemaining ?? 0) <= Math.max(1, Math.floor(combinedLimit * 0.2))
+                                  ? 'text-amber-600 dark:text-amber-400'
+                                  : 'text-violet-700 dark:text-violet-300'
+                            }`}>
+                              {usageStats.combinedActionsRemaining ?? 0}
+                              <span className="ml-1.5 text-xs font-normal text-stone-400 dark:text-stone-500">left</span>
+                            </p>
+                            <p className="text-[11px] text-stone-400 dark:text-stone-500 mt-1">of {combinedLimit} this period</p>
+                            <div className="mt-3 h-1 rounded-full bg-stone-100 dark:bg-stone-800 overflow-hidden">
+                              <div
+                                className="h-full rounded-full bg-gradient-to-r from-violet-500 via-fuchsia-500 to-purple-500 transition-all duration-700"
+                                style={{
+                                  width: `${Math.min(
+                                    100,
+                                    Math.max(2, Math.round(((usageStats.combinedActionsRemaining ?? 0) / Math.max(1, combinedLimit)) * 100))
+                                  )}%`,
+                                }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        {(() => {
+                          const rem = usageStats.uploadsRemaining;
+                          const cap = freeLimitsFromApi.documentsPerMonth ?? -1;
+                          const pct = cap === -1 ? 100 : usagePct(rem, cap);
+                          const display = rem === -1 ? '∞' : `${rem}`;
+                          const isUnlimited = rem === -1;
+                          return (
+                            <div className="relative overflow-hidden rounded-2xl bg-white/95 dark:bg-stone-900/70 ring-1 ring-stone-200/80 dark:ring-stone-700/60 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 group backdrop-blur-sm">
+                              <div className="pointer-events-none absolute -top-12 -right-12 w-32 h-32 rounded-full blur-2xl bg-emerald-400/15" aria-hidden />
+                              <div className="relative p-4">
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="min-w-0">
+                                    <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-400 dark:text-stone-500 truncate">Uploads</p>
+                                    <p className={`dash-serif mt-1 text-3xl font-bold text-emerald-700 dark:text-emerald-300 leading-none`}>
+                                      {display}
+                                      {!isUnlimited && (
+                                        <span className="ml-1.5 text-xs font-normal text-stone-400 dark:text-stone-500">left</span>
+                                      )}
+                                      {isUnlimited && (
+                                        <span className="ml-1.5 text-xs font-normal text-stone-400 dark:text-stone-500">library</span>
+                                      )}
+                                    </p>
+                                  </div>
+                                  <span className="text-2xl group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-300" aria-hidden>📄</span>
+                                </div>
+                                <div className="mt-3 h-1 rounded-full bg-stone-100 dark:bg-stone-800 overflow-hidden">
+                                  <div
+                                    className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-teal-500 transition-all duration-700"
+                                    style={{ width: `${pct}%` }}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 dash-stagger">
+                        {[
+                          {
+                            key: 'analyses',
+                            label: 'Essay analyses',
+                            emoji: '📝',
+                            remaining: usageStats.analysesRemaining,
+                            total: freeMonthlyCaps.analyses,
+                            accent: 'rose' as const,
+                          },
+                          {
+                            key: 'citations',
+                            label: 'Citations',
+                            emoji: '📚',
+                            remaining: usageStats.citationsRemaining,
+                            total: freeMonthlyCaps.citations,
+                            accent: 'sky' as const,
+                          },
+                          {
+                            key: 'study',
+                            label: 'Study packs',
+                            emoji: '📦',
+                            remaining: usageStats.studyPacksRemaining,
+                            total: freeMonthlyCaps.studyPacks,
+                            accent: 'amber' as const,
+                          },
+                          {
+                            key: 'uploads',
+                            label: 'Uploads',
+                            emoji: '📄',
+                            remaining: usageStats.uploadsRemaining,
+                            total: freeMonthlyCaps.uploads,
+                            accent: 'emerald' as const,
+                          },
+                        ].map((card) => {
+                          const pct = usagePct(card.remaining, card.total);
+                          const display = card.remaining === -1 ? '∞' : `${card.remaining}`;
+                          const isUnlimited = card.remaining === -1;
+                          const accentMap = {
+                            rose: { bar: 'from-rose-400 to-pink-500', text: 'text-rose-700 dark:text-rose-300', glow: 'bg-rose-400/15' },
+                            sky: { bar: 'from-sky-400 to-blue-500', text: 'text-sky-700 dark:text-sky-300', glow: 'bg-sky-400/15' },
+                            amber: { bar: 'from-amber-400 to-orange-500', text: 'text-amber-700 dark:text-amber-300', glow: 'bg-amber-400/15' },
+                            emerald: { bar: 'from-emerald-400 to-teal-500', text: 'text-emerald-700 dark:text-emerald-300', glow: 'bg-emerald-400/15' },
+                          };
+                          const a = accentMap[card.accent];
+                          return (
+                            <div key={card.key} className="relative overflow-hidden rounded-2xl bg-white/95 dark:bg-stone-900/70 ring-1 ring-stone-200/80 dark:ring-stone-700/60 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 group backdrop-blur-sm">
+                              <div className={`pointer-events-none absolute -top-12 -right-12 w-32 h-32 rounded-full blur-2xl ${a.glow}`} aria-hidden />
+                              <div className="relative p-4">
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="min-w-0">
+                                    <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-400 dark:text-stone-500 truncate">{card.label}</p>
+                                    <p className={`dash-serif mt-1 text-3xl font-bold ${a.text} leading-none`}>
+                                      {display}
+                                      {!isUnlimited && <span className="ml-1.5 text-xs font-normal text-stone-400 dark:text-stone-500">left</span>}
+                                    </p>
+                                  </div>
+                                  <span className="text-2xl group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-300" aria-hidden>{card.emoji}</span>
+                                </div>
+                                <div className="mt-3 h-1 rounded-full bg-stone-100 dark:bg-stone-800 overflow-hidden">
+                                  <div className={`h-full rounded-full bg-gradient-to-r ${a.bar} transition-all duration-700`} style={{ width: `${pct}%` }} />
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </section>
+                )}
+
+                {/* What you'll get — new users */}
+                {isNewUser && (
+                  <section>
+                    <div className="mb-3">
+                      <h2 className="dash-serif text-xl sm:text-2xl font-semibold text-stone-900 dark:text-stone-50">What you'll get</h2>
+                      <p className="mt-0.5 text-xs sm:text-sm text-stone-500 dark:text-stone-400">A quick taste of what your analysis includes</p>
+                    </div>
+                    <div className="grid sm:grid-cols-3 gap-3 sm:gap-4 dash-stagger">
+                      {/* Rubric scoring */}
+                      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-emerald-50/80 to-white dark:from-emerald-950/30 dark:to-stone-900/80 ring-1 ring-emerald-200/70 dark:ring-emerald-800/40 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 p-4">
+                        <div className="flex items-start justify-between gap-2 mb-3">
+                          <div>
+                            <h3 className="dash-serif font-bold text-stone-900 dark:text-stone-50 text-[14.5px]">Rubric scoring</h3>
+                            <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">Category scores + estimated grade</p>
+                          </div>
+                          <div className="shrink-0 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 text-white text-[10px] font-bold px-2 py-1 shadow-sm">B+</div>
+                        </div>
+                        <div className="space-y-2 rounded-xl bg-white/90 dark:bg-stone-950/40 ring-1 ring-emerald-100 dark:ring-emerald-900/40 p-2.5">
+                          {[
+                            { label: 'Thesis & focus', w: '78%', tone: 'bg-emerald-500' },
+                            { label: 'Evidence', w: '65%', tone: 'bg-amber-500' },
+                            { label: 'Organization', w: '82%', tone: 'bg-emerald-500' },
+                            { label: 'Clarity & style', w: '71%', tone: 'bg-sky-500' },
+                          ].map((row) => (
+                            <div key={row.label} className="flex items-center gap-2">
+                              <span className="w-[40%] text-[10px] font-medium text-stone-600 dark:text-stone-400 truncate">{row.label}</span>
+                              <div className="flex-1 h-1.5 rounded-full bg-stone-200/90 dark:bg-stone-700/80 overflow-hidden">
+                                <div className={`h-full rounded-full ${row.tone}`} style={{ width: row.w }} />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Line-by-line notes */}
+                      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-amber-50/80 to-white dark:from-amber-950/30 dark:to-stone-900/80 ring-1 ring-amber-200/70 dark:ring-amber-800/40 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 p-4">
+                        <div className="mb-3">
+                          <h3 className="dash-serif font-bold text-stone-900 dark:text-stone-50 text-[14.5px]">Line-by-line notes</h3>
+                          <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">Inline highlights on your sentences</p>
+                        </div>
+                        <div className="rounded-xl bg-white/90 dark:bg-stone-950/40 ring-1 ring-amber-100 dark:ring-amber-900/40 p-2.5 space-y-2">
+                          <div className="flex gap-2">
+                            <span className="w-1 rounded-full bg-emerald-500 shrink-0" aria-hidden />
+                            <p className="text-[10px] leading-relaxed text-stone-600 dark:text-stone-300">
+                              <span className="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-900 dark:text-emerald-100 rounded px-0.5">Strong thesis</span> — clearly states your position early.
+                            </p>
+                          </div>
+                          <div className="flex gap-2">
+                            <span className="w-1 rounded-full bg-amber-500 shrink-0" aria-hidden />
+                            <p className="text-[10px] leading-relaxed text-stone-600 dark:text-stone-300">
+                              This paragraph jumps topics — <span className="bg-amber-100 dark:bg-amber-900/40 text-amber-900 dark:text-amber-100 rounded px-0.5">add a bridge</span>.
+                            </p>
+                          </div>
+                          <div className="flex gap-2">
+                            <span className="w-1 rounded-full bg-red-500 shrink-0" aria-hidden />
+                            <p className="text-[10px] leading-relaxed text-stone-600 dark:text-stone-300">
+                              Citation needed for{' '}
+                              <span className="bg-red-100 dark:bg-red-950/50 text-red-900 dark:text-red-100 rounded px-0.5 ring-1 ring-red-200 dark:ring-red-800/60">climate data</span>.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Revision suggestions */}
+                      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-violet-50/80 to-white dark:from-violet-950/30 dark:to-stone-900/80 ring-1 ring-violet-200/70 dark:ring-violet-800/40 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 p-4">
+                        <div className="mb-3">
+                          <h3 className="dash-serif font-bold text-stone-900 dark:text-stone-50 text-[14.5px]">Revision suggestions</h3>
+                          <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">Actionable fixes, not vague advice</p>
+                        </div>
+                        <ul className="rounded-xl bg-white/90 dark:bg-stone-950/40 ring-1 ring-violet-100 dark:ring-violet-900/40 p-2.5 space-y-2">
+                          {[
+                            'Tighten intro: move roadmap up',
+                            'Swap passive → active in para 2',
+                            'Add counterargument in section 3',
+                          ].map((line) => (
+                            <li key={line} className="flex items-start gap-2 text-[10px] text-stone-700 dark:text-stone-200 leading-snug">
+                              <span className="mt-0.5 inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white">
+                                <svg className="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                </svg>
+                              </span>
+                              <span>{line}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </section>
+                )}
+
+                {/* Recent analyses — returning users */}
+                {!isNewUser && recentAnalyses.length > 0 && (
+                  <section>
+                    <div className="flex items-end justify-between mb-3">
+                      <div>
+                        <h2 className="dash-serif text-xl sm:text-2xl font-semibold text-stone-900 dark:text-stone-50">Recent analyses</h2>
+                        <p className="mt-0.5 text-xs sm:text-sm text-stone-500 dark:text-stone-400">Continue where you left off</p>
+                      </div>
+                      <button
+                        onClick={() => onNavigate('library')}
+                        className="text-xs sm:text-sm font-semibold text-violet-700 dark:text-violet-400 hover:underline whitespace-nowrap"
+                      >
+                        View all →
+                      </button>
+                    </div>
+                    <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3 dash-stagger">
+                      {recentAnalyses.slice(0, 6).map((a, idx) => {
+                        const palettes = ['from-rose-400 to-pink-500', 'from-violet-400 to-fuchsia-500', 'from-sky-400 to-blue-500', 'from-amber-400 to-orange-500', 'from-emerald-400 to-teal-500', 'from-fuchsia-400 to-purple-500'];
+                        const pal = palettes[idx % palettes.length];
+                        return (
+                          <button
+                            key={a.id}
+                            onClick={() => onNavigate('analysis', a.id)}
+                            className="group relative overflow-hidden rounded-2xl bg-white/95 dark:bg-stone-900/70 ring-1 ring-stone-200/80 dark:ring-stone-700/60 shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 text-left backdrop-blur-sm"
+                          >
+                            <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${pal}`} />
+                            <div className="relative p-4">
+                              <div className="flex items-start gap-3">
+                                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${pal} text-white shadow-md group-hover:scale-105 group-hover:rotate-[-3deg] transition-all duration-300`}>
+                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                  </svg>
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <p className="dash-serif text-[15px] font-bold text-stone-900 dark:text-stone-50 truncate group-hover:text-violet-700 dark:group-hover:text-violet-300 transition-colors">{a.title}</p>
+                                  <p className="mt-0.5 text-[11px] text-stone-500 dark:text-stone-400">{relativeTime(a.createdAt)}</p>
+                                </div>
+                                {a.grade && (
+                                  <span className="px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-xs font-bold ring-1 ring-emerald-200/60 dark:ring-emerald-800/50">{a.grade}</span>
+                                )}
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </section>
+                )}
+              </>
+            )}
+
+            {/* === CITATIONS === */}
+            {dashboardTool === 'citations' && (
+              <CitationsPage
+                embedded
+                onEmbeddedToolSwitch={switchEmbeddedTool}
+                onNavigate={onNavigate}
+                user={user}
+                onLogout={onLogout}
+              />
+            )}
+
+            {/* === STUDY PACK === */}
+            {dashboardTool === 'study_pack' && (
+              <StudyPackPage
+                embedded
+                onEmbeddedToolSwitch={switchEmbeddedTool}
+                onNavigate={onNavigate}
+                user={user}
+                onLogout={onLogout}
+              />
+            )}
+
+            {/* === MORE TOOLS === */}
+            {dashboardTool === 'more_tools' && (
+              <section className="rounded-3xl bg-white/85 dark:bg-stone-900/70 ring-1 ring-stone-200/80 dark:ring-stone-700/60 shadow-md backdrop-blur-md p-5 sm:p-7">
+                <div className="mb-5">
+                  <h2 className="dash-serif text-xl sm:text-2xl font-semibold text-stone-900 dark:text-stone-50">More tools</h2>
+                  <p className="mt-1 text-xs sm:text-sm text-stone-500 dark:text-stone-400">Free utilities — summarizer, calculators, grammar, and more.</p>
+                </div>
+                <MoreToolsGrid compact onNavigate={onNavigate} />
+              </section>
+            )}
+
+            {/* === QUICK ACCESS — always visible === */}
+            <section>
+              <div className="mb-3">
+                <h2 className="dash-serif text-xl sm:text-2xl font-semibold text-stone-900 dark:text-stone-50">Quick access</h2>
+                <p className="mt-0.5 text-xs sm:text-sm text-stone-500 dark:text-stone-400">Jump straight into your saved work</p>
               </div>
-              {usageStats.plan === 'free' && (
-                <div className="mt-3 text-center">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3 dash-stagger">
+                {WORKSPACE_SHORTCUTS.map((link, i) => {
+                  const tint = QUICK_ACCESS_TINTS[i % QUICK_ACCESS_TINTS.length];
+                  return (
+                    <button
+                      key={link.id}
+                      type="button"
+                      onClick={() => {
+                        onNavigate(link.page);
+                        trackEvent('dashboard_workspace_shortcut', { page: link.page });
+                      }}
+                      className={`group relative overflow-hidden rounded-2xl bg-gradient-to-br ${tint.tint} ring-1 ring-stone-200/80 dark:ring-stone-700/60 p-3.5 text-left shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300`}
+                    >
+                      <div className={`relative w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br ${tint.grad} text-white flex items-center justify-center text-lg sm:text-xl shadow-md mb-2.5 group-hover:scale-110 group-hover:rotate-[-6deg] transition-transform duration-300`}>
+                        <span aria-hidden>{link.emoji}</span>
+                      </div>
+                      <p className={`dash-serif text-sm font-bold leading-tight ${tint.clr}`}>{link.label}</p>
+                      <p className="mt-0.5 text-[10.5px] leading-snug text-stone-500 dark:text-stone-400 line-clamp-1">{link.hint}</p>
+                      <svg className={`absolute right-3 top-3 w-3.5 h-3.5 ${tint.clr} opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-200`} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
+            {/* === PRO UPGRADE BANNER === */}
+            {isFree && (
+              <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-600 via-fuchsia-600 to-rose-500 shadow-2xl shadow-fuchsia-500/30">
+                <div className="absolute inset-0 pointer-events-none" aria-hidden>
+                  <div className="absolute -top-12 -right-12 w-64 h-64 rounded-full bg-white/15 blur-3xl dash-orb" />
+                  <div className="absolute top-1/2 -left-16 w-48 h-48 rounded-full bg-amber-300/20 blur-3xl dash-orb" style={{ animationDelay: '2s' }} />
+                  <div className="absolute -bottom-8 right-1/3 w-40 h-40 rounded-full bg-pink-300/20 blur-3xl dash-orb" style={{ animationDelay: '4s' }} />
+                </div>
+                <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-5 p-6 sm:p-8">
+                  <div className="flex items-start gap-4">
+                    <div className="hidden sm:flex h-14 w-14 lg:h-16 lg:w-16 shrink-0 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-md ring-2 ring-white/30 text-2xl lg:text-3xl shadow-lg">
+                      <span aria-hidden>⭐</span>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-bold uppercase tracking-wider mb-1.5 backdrop-blur-sm">
+                        <span aria-hidden>✨</span> Limited offer
+                      </p>
+                      <h3 className="dash-serif text-2xl sm:text-3xl font-bold text-white leading-tight">
+                        Unlock <span className="bg-gradient-to-r from-amber-200 to-yellow-100 bg-clip-text text-transparent">unlimited</span> essays
+                      </h3>
+                      <p className="mt-1.5 text-sm sm:text-base text-white/90">Higher limits · 100 MB uploads · Every Pro tool</p>
+                    </div>
+                  </div>
                   <button
                     type="button"
                     onClick={() => onNavigate('pricing')}
-                    className="text-xs font-medium text-violet-800 dark:text-violet-300 hover:underline"
+                    className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-white hover:bg-amber-50 text-violet-700 font-bold rounded-xl shadow-xl shadow-black/15 hover:-translate-y-0.5 active:scale-95 transition-all whitespace-nowrap"
                   >
-                    Upgrade for higher limits →
+                    See Pro plans →
                   </button>
                 </div>
-              )}
-            </div>
-          )}
-        </div>
+              </section>
+            )}
           </div>
         </div>
       </main>

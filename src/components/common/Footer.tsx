@@ -229,6 +229,12 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                   <span className="text-xs opacity-75">💥</span>
                 </a>
               </li>
+              <li>
+                <a href="/tools/word-tower" onClick={(e) => { e.preventDefault(); onNavigate?.('word-tower'); }} className="text-emerald-400 hover:text-emerald-300 text-sm font-medium transition-colors flex items-center gap-1.5">
+                  Word Tower
+                  <span className="text-xs opacity-75">🗼</span>
+                </a>
+              </li>
               {/* Ambers/Oranges */}
               <li>
                 <a href="/tools/quiz-generator" onClick={(e) => { e.preventDefault(); onNavigate?.('quiz-generator'); }} className="text-amber-400 hover:text-amber-300 text-sm font-medium transition-colors flex items-center gap-1.5">

@@ -2392,6 +2392,83 @@ router.post('/generate-reflex-questions', authenticateToken, async (req, res) =>
   }
 });
 
+// @route   POST /api/analysis/generate-tower-questions
+// @desc    Generate questions for Word Tower from a topic or notes
+// @access  Private
+router.post('/generate-tower-questions', authenticateToken, async (req, res) => {
+  try {
+    const { inputType, content } = req.body;
+    const userPlan = getEffectivePlan(req);
+    const planLimits = subscriptionService.PLAN_LIMITS[subscriptionService.normalizePlanForLimits(userPlan)] || subscriptionService.PLAN_LIMITS.free;
+
+    if (!content || content.trim().length === 0) {
+      return res.status(400).json({ success: false, message: 'Content is required' });
+    }
+
+    if (!['topic', 'notes'].includes(inputType)) {
+      return res.status(400).json({ success: false, message: 'inputType must be "topic" or "notes"' });
+    }
+
+    if (inputType === 'topic' && content.trim().length < 2) {
+      return res.status(400).json({ success: false, message: 'Topic must be at least 2 characters' });
+    }
+
+    if (inputType === 'notes') {
+      const wordCount = content.trim().split(/\s+/).length;
+      if (wordCount < 20) {
+        return res.status(400).json({ success: false, message: 'Notes must be at least 20 words' });
+      }
+      const maxWords = planLimits.craterBlastMaxWordsPerGeneration || 5000;
+      if (wordCount > maxWords) {
+        return res.status(400).json({
+          success: false,
+          message: `Notes exceed maximum of ${maxWords.toLocaleString()} words. ${userPlan === 'free' ? 'Upgrade for up to 10,000 words.' : ''}`
+        });
+      }
+    }
+
+    const result = await aiAnalysisService.generateWordTowerQuestions(inputType, content, userPlan);
+    res.json({ success: true, data: result });
+  } catch (error) {
+    console.error('Generate word tower questions error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to generate questions'
+    });
+  }
+});
+
+// @route   POST /api/analysis/save-word-tower
+// @desc    Save a Word Tower game to history for replay
+// @access  Private
+router.post('/save-word-tower', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const userPlan = getEffectivePlan(req);
+    const { questions, title, inputType, sourceText } = req.body;
+
+    if (!questions || !Array.isArray(questions) || questions.length === 0) {
+      return res.status(400).json({ success: false, message: 'Questions are required' });
+    }
+
+    const saved = await aiAnalysisService.saveWordTowerGame(userId, {
+      questions,
+      title: title || sourceText?.slice(0, 80) || 'Word Tower Game',
+      inputType: inputType || 'topic',
+      sourceText: sourceText || ''
+    }, userPlan);
+
+    if (!saved) {
+      return res.status(500).json({ success: false, message: 'Failed to save game' });
+    }
+
+    res.json({ success: true, data: saved });
+  } catch (error) {
+    console.error('Save Word Tower error:', error);
+    res.status(500).json({ success: false, message: error.message || 'Failed to save game' });
+  }
+});
+
 // ==================== STUDY EVENTS (Calendar) ====================
 
 // @route   GET /api/analysis/study-events
@@ -2646,6 +2723,7 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
         crossword: pack.crossword,
         lesson: pack.lesson,
         craterBlast: pack.craterBlast,
+        wordTower: pack.wordTower,
         originalNotes: pack.originalNotes,
       },
       source_word_count: wordCount,

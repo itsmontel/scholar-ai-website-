@@ -1898,142 +1898,328 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
       {/* Main Content */}
       <main className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6 pb-28 sm:pb-16 w-full min-w-0 overflow-x-hidden lg:ml-24 lg:mr-auto">
         <div className="w-full min-w-0 space-y-5 sm:space-y-6">
-          {/* Greeting strip */}
-          <div className="rounded-2xl overflow-visible border border-stone-200/90 dark:border-stone-800 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.08)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.35)] backdrop-blur-md bg-white/80 dark:bg-stone-900/55 p-4 sm:p-5 md:p-6 ring-1 ring-white/50 dark:ring-white/5 animate-card-bounce-in" data-tutorial="greeting-area">
-            <div className="flex flex-col gap-3 sm:gap-3 w-full">
-              {/* Greeting + tagline (left) · Search + optional streak/badges (right), no divider lines */}
-              <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3 sm:gap-3">
-                <div className="flex gap-3 sm:gap-4 min-w-0 flex-1 items-center sm:items-start">
-                  <div className="hidden sm:block flex-shrink-0 relative group">
-                    <div className="absolute -inset-2 rounded-2xl bg-violet-500/10 dark:bg-violet-500/15 blur-xl group-hover:opacity-100 transition-opacity" />
-                    <div className="relative rounded-2xl border border-stone-200/90 dark:border-stone-700 bg-white dark:bg-stone-900/50 p-1 shadow-sm overflow-hidden">
-                      <ScholarMascot size={88} animated={false} pose="default" />
-                    </div>
-                  </div>
-                  <div className="flex sm:hidden flex-shrink-0 items-start pt-0.5">
-                    <div className="rounded-xl border border-stone-200/90 dark:border-stone-700 bg-white dark:bg-stone-900/50 p-0.5 shadow-sm overflow-hidden">
-                      <ScholarMascot size={52} animated={false} pose="default" />
-                    </div>
-                  </div>
-                  <div className="min-w-0 flex-1 flex flex-col gap-1 sm:gap-1.5">
-                    <h1 className="text-xl sm:text-3xl md:text-[2.15rem] font-semibold text-stone-900 dark:text-stone-50 leading-[1.2] sm:leading-[1.15] tracking-tight text-left" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
-                      {greeting.greeting}
-                      {getDisplayNameForGreeting(user)
-                        ? (() => {
-                            const first = getDisplayNameForGreeting(user);
-                            return `, ${first.length > 12 ? first.slice(0, 12) + '…' : first}`;
-                          })()
-                        : ''}
-                      ! <span className="inline-block text-lg sm:text-xl align-middle opacity-90" aria-hidden>{greeting.emoji}</span>
-                    </h1>
-                    <div className="max-w-xl text-left">
-                      {mode === 'focus_mode' ? (
-                        <span className="block text-[0.9375rem] sm:text-[1.0625rem] leading-snug font-bold text-rose-600 dark:text-rose-400">Solve a puzzle or answer study questions to unlock.</span>
-                      ) : mode === 'quiz' ? (
-                        <span className="block text-[0.9375rem] sm:text-[1.0625rem] leading-snug font-bold text-amber-600 dark:text-amber-400">Quizzes, flashcards & crosswords from your notes.</span>
-                      ) : mode === 'citations' ? (
-                        <span className="block text-[0.9375rem] sm:text-[1.0625rem] leading-snug font-bold text-violet-600 dark:text-violet-400">Citations via academic sources in seconds.</span>
-                      ) : (
-                        <span className="block text-[0.9375rem] sm:text-[1.0625rem] leading-snug font-bold text-rose-600 dark:text-rose-400">Professor-style feedback on every essay.</span>
-                      )}
-                    </div>
+          {/* ═══════════════════════════════════════════════════════════════════
+              GREETING HERO — massive, deluxe, screenshot-style
+             ═══════════════════════════════════════════════════════════════════ */}
+          <section className="relative pt-1 sm:pt-2 pb-1 animate-card-bounce-in" data-tutorial="greeting-area">
+            {/* Floating ambient orbs — set the wow tone instantly */}
+            <div className="absolute inset-0 -z-0 pointer-events-none overflow-hidden" aria-hidden>
+              <div className="absolute -top-8 -left-12 w-56 h-56 sm:w-72 sm:h-72 rounded-full bg-violet-300/30 dark:bg-violet-500/20 blur-3xl dash-orb" />
+              <div className="absolute -top-4 right-1/4 w-48 h-48 sm:w-64 sm:h-64 rounded-full bg-amber-200/30 dark:bg-amber-500/15 blur-3xl dash-orb" style={{ animationDelay: '2.4s' }} />
+              <div className="absolute top-12 -right-8 w-52 h-52 sm:w-72 sm:h-72 rounded-full bg-fuchsia-200/30 dark:bg-fuchsia-500/15 blur-3xl dash-orb" style={{ animationDelay: '4.2s' }} />
+            </div>
+
+            <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 sm:gap-6">
+              {/* Left: mascot + headline */}
+              <div className="flex items-center gap-3 sm:gap-5 min-w-0 flex-1">
+                <div className="flex-shrink-0 relative group">
+                  <div className="absolute -inset-2 sm:-inset-3 rounded-3xl bg-gradient-to-br from-violet-400/30 via-fuchsia-400/20 to-amber-300/25 blur-xl dash-orb" aria-hidden />
+                  <div className="relative rounded-3xl bg-gradient-to-br from-white to-violet-50 dark:from-stone-900 dark:to-violet-950/40 border-2 border-white dark:border-stone-700 shadow-lg shadow-violet-900/10 p-1 sm:p-1.5 ring-1 ring-stone-200/60 dark:ring-stone-700/50 transition-transform group-hover:scale-105">
+                    <div className="hidden sm:block"><ScholarMascot size={92} animated={false} pose="default" /></div>
+                    <div className="sm:hidden"><ScholarMascot size={56} animated={false} pose="default" /></div>
                   </div>
                 </div>
-                <div className="flex flex-col gap-2.5 w-full lg:w-auto lg:min-w-[280px] lg:max-w-lg flex-shrink-0 lg:items-end relative z-20">
-                  <div className="relative w-full">
-                    <svg className="absolute left-3.5 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-violet-500/80 dark:text-violet-400/90 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search activity…"
-                      className="w-full pl-10 sm:pl-11 pr-10 sm:pr-11 py-2.5 sm:py-3 bg-white dark:bg-stone-900/50 rounded-xl sm:rounded-lg text-sm text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 outline-none border border-stone-200/90 dark:border-stone-600/75 shadow-sm transition-all focus:border-violet-500 dark:focus:border-violet-400 focus:ring-4 focus:ring-violet-500/25 focus:shadow-md focus:shadow-violet-500/15 focus-visible:outline-none"
-                    />
-                    {searchQuery && (
-                      <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-600/50 transition-colors">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                      </button>
-                    )}
-                  </div>
-                  <div className="hidden sm:flex flex-row flex-wrap items-center justify-center lg:justify-end gap-2 w-full">
-                    {!HIDE_STREAK_AND_BADGES && (
-                      <div data-tutorial="streak-widget" className="flex-shrink-0">
-                        <StreakWidget compact />
-                      </div>
-                    )}
-                    {!HIDE_FRIENDS && (
-                      <button
-                        onClick={() => onNavigate('friends')}
-                        data-tutorial="friends-btn"
-                        className="relative flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-2 sm:py-2.5 bg-white/80 dark:bg-stone-700/60 border border-stone-200/70 dark:border-stone-600/50 rounded-xl hover:border-emerald-300/80 dark:hover:border-emerald-600/50 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/20 transition-all shadow-sm flex-shrink-0"
-                      >
-                        <span className="text-base">👥</span>
-                        <span className="font-semibold text-stone-700 dark:text-stone-200 text-xs sm:text-sm">Friends</span>
-                        {friendNotificationCount > 0 && (
-                          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">{friendNotificationCount > 9 ? '9+' : friendNotificationCount}</span>
-                        )}
-                      </button>
-                    )}
-                    {!HIDE_STREAK_AND_BADGES && (
-                      <div className="flex-shrink-0"><BadgeWidget onNavigate={onNavigate} /></div>
-                    )}
-                    {usageStats.plan === 'free' && !loadingStats && (
-                      <button
-                        type="button"
-                        onClick={() => onNavigate('pricing')}
-                        className="dashboard-upgrade-cta flex-shrink-0 inline-flex items-center justify-center px-3 sm:px-3.5 py-2 sm:py-2.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white text-xs font-semibold rounded-xl transition-colors whitespace-nowrap"
-                      >
-                        <span className="relative z-[1] inline-flex items-center justify-center gap-1.5">
-                          <svg className="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                          <span>Upgrade</span>
-                        </span>
-                      </button>
-                    )}
-                  </div>
-                  {/* Mobile: optional streak + friends + badges + upgrade */}
-                  <div className="flex sm:hidden items-center gap-2 w-full overflow-x-auto scrollbar-hide pb-0.5 -mx-0.5 px-0.5">
-                    {!HIDE_STREAK_AND_BADGES && (
-                      <div data-tutorial="streak-widget" className="flex-shrink-0">
-                        <StreakWidget compact />
-                      </div>
-                    )}
-                    {!HIDE_FRIENDS && (
-                      <button
-                        onClick={() => onNavigate('friends')}
-                        data-tutorial="friends-btn"
-                        className="relative flex items-center gap-1.5 px-2.5 py-2 bg-white/80 dark:bg-stone-700/60 border border-stone-200/70 dark:border-stone-600/50 rounded-xl active:bg-emerald-50/80 dark:active:bg-emerald-900/20 transition-all shadow-sm flex-shrink-0"
-                      >
-                        <span className="text-base">👥</span>
-                        <span className="font-semibold text-stone-700 dark:text-stone-200 text-xs whitespace-nowrap">Friends</span>
-                        {friendNotificationCount > 0 && (
-                          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">{friendNotificationCount > 9 ? '9+' : friendNotificationCount}</span>
-                        )}
-                      </button>
-                    )}
-                    {!HIDE_STREAK_AND_BADGES && (
-                      <div className="flex-shrink-0 min-w-0">
-                        <BadgeWidget onNavigate={onNavigate} />
-                      </div>
-                    )}
-                    {usageStats.plan === 'free' && !loadingStats && (
-                      <button
-                        type="button"
-                        onClick={() => onNavigate('pricing')}
-                        className="dashboard-upgrade-cta flex-shrink-0 inline-flex items-center justify-center px-3 py-2 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white text-xs font-semibold rounded-xl transition-colors whitespace-nowrap"
-                      >
-                        <span className="relative z-[1] inline-flex items-center justify-center gap-1.5">
-                          <svg className="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                          <span>Upgrade</span>
-                        </span>
-                      </button>
-                    )}
-                  </div>
+                <div className="min-w-0 flex-1">
+                  <h1 className="text-[1.75rem] sm:text-4xl md:text-5xl lg:text-[3.4rem] font-bold text-stone-900 dark:text-stone-50 leading-[1.02] tracking-tight" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
+                    {greeting.greeting}
+                    {getDisplayNameForGreeting(user)
+                      ? (() => {
+                          const first = getDisplayNameForGreeting(user);
+                          return `, ${first.length > 14 ? first.slice(0, 14) + '…' : first}`;
+                        })()
+                      : ''}
+                    ! <span className="inline-block align-middle text-2xl sm:text-3xl md:text-4xl lg:text-5xl ml-0.5" aria-hidden>{greeting.emoji}</span>
+                  </h1>
+                  <p className="mt-1.5 sm:mt-2 text-sm sm:text-base lg:text-lg text-stone-600 dark:text-stone-300 leading-snug">
+                    Everything you need to{' '}
+                    <span className="font-semibold bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 dark:from-violet-400 dark:via-fuchsia-400 dark:to-rose-400 bg-clip-text text-transparent">
+                      ace school
+                    </span>
+                    .
+                  </p>
                 </div>
               </div>
+
+              {/* Right: streak / friends / badges / upgrade */}
+              <div className="flex items-center justify-start lg:justify-end gap-2 flex-shrink-0 flex-wrap overflow-x-auto scrollbar-hide -mx-1 px-1 lg:overflow-visible">
+                {!HIDE_STREAK_AND_BADGES && (
+                  <div data-tutorial="streak-widget" className="flex-shrink-0">
+                    <StreakWidget compact />
+                  </div>
+                )}
+                {!HIDE_FRIENDS && (
+                  <button
+                    onClick={() => onNavigate('friends')}
+                    data-tutorial="friends-btn"
+                    className="relative inline-flex items-center gap-1.5 px-3 py-2 sm:py-2.5 bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-500 hover:to-teal-600 text-white border border-emerald-500/30 rounded-xl shadow-md shadow-emerald-500/20 hover:shadow-lg hover:shadow-emerald-500/30 transition-all flex-shrink-0 active:scale-95"
+                  >
+                    <span className="text-base">👥</span>
+                    <span className="font-semibold text-xs sm:text-sm">Friends</span>
+                    {friendNotificationCount > 0 && (
+                      <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-white dark:ring-stone-900">{friendNotificationCount > 9 ? '9+' : friendNotificationCount}</span>
+                    )}
+                  </button>
+                )}
+                {!HIDE_STREAK_AND_BADGES && (
+                  <div className="flex-shrink-0"><BadgeWidget onNavigate={onNavigate} /></div>
+                )}
+                {usageStats.plan === 'free' && !loadingStats && (
+                  <button
+                    type="button"
+                    onClick={() => onNavigate('pricing')}
+                    className="dashboard-upgrade-cta flex-shrink-0 inline-flex items-center justify-center gap-1.5 px-3.5 py-2 sm:py-2.5 bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 hover:from-violet-700 hover:via-purple-700 hover:to-fuchsia-700 text-white text-xs sm:text-sm font-semibold rounded-xl whitespace-nowrap"
+                  >
+                    <span className="relative z-[1] inline-flex items-center justify-center gap-1.5">
+                      <svg className="w-3.5 h-3.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                      <span>Upgrade</span>
+                    </span>
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
+
+            {/* Search bar — slim, full width, tucked underneath */}
+            <div className="relative mt-4 sm:mt-5 max-w-2xl">
+              <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-violet-500/80 dark:text-violet-400/90 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search your essays, study packs, citations…"
+                className="w-full pl-11 pr-10 py-3 bg-white/95 dark:bg-stone-900/70 rounded-2xl text-sm text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 outline-none border border-stone-200/80 dark:border-stone-700/60 shadow-sm transition-all focus:border-violet-500 dark:focus:border-violet-400 focus:ring-4 focus:ring-violet-500/20 focus:shadow-md focus-visible:outline-none backdrop-blur-sm"
+              />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 rounded-lg hover:bg-stone-200/60 dark:hover:bg-stone-700/50 transition-colors">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              )}
+            </div>
+          </section>
+
+          {/* ═══════════════════════════════════════════════════════════════════
+              TOOL GALLERY — the colorful WOW grid (8 tools)
+             ═══════════════════════════════════════════════════════════════════ */}
+          <section id="dashboard-all-tools" className="relative scroll-mt-8">
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+              {(() => {
+                const tools = [
+                  {
+                    id: 'analyze',
+                    title: 'Analyze',
+                    desc: 'Professor-style essay feedback',
+                    emoji: '📝',
+                    iconGrad: 'from-rose-400 to-pink-500',
+                    titleClr: 'text-rose-600 dark:text-rose-400',
+                    activeRing: 'ring-rose-400 dark:ring-rose-500',
+                    blob1: 'bg-rose-200/60 dark:bg-rose-500/20',
+                    blob2: 'bg-pink-200/50 dark:bg-pink-500/15',
+                    badge: 'Popular',
+                    badgeBg: 'bg-rose-500 text-white',
+                    onClick: () => setMode('analyze'),
+                    isActive: mode === 'analyze',
+                    proOnly: false,
+                  },
+                  {
+                    id: 'citations',
+                    title: 'Citations',
+                    desc: 'Find academic sources, formatted',
+                    emoji: '📚',
+                    iconGrad: 'from-blue-400 to-indigo-500',
+                    titleClr: 'text-blue-600 dark:text-blue-400',
+                    activeRing: 'ring-blue-400 dark:ring-blue-500',
+                    blob1: 'bg-blue-200/60 dark:bg-blue-500/20',
+                    blob2: 'bg-indigo-200/50 dark:bg-indigo-500/15',
+                    badge: undefined as string | undefined,
+                    badgeBg: '',
+                    onClick: () => setMode('citations'),
+                    isActive: mode === 'citations',
+                    proOnly: false,
+                  },
+                  {
+                    id: 'quiz',
+                    title: 'Study Pack',
+                    desc: 'Lesson, quiz, flashcards, crossword',
+                    emoji: '📦',
+                    iconGrad: 'from-amber-400 to-orange-500',
+                    titleClr: 'text-orange-600 dark:text-orange-400',
+                    activeRing: 'ring-amber-400 dark:ring-amber-500',
+                    blob1: 'bg-amber-200/60 dark:bg-amber-500/20',
+                    blob2: 'bg-orange-200/50 dark:bg-orange-500/15',
+                    badge: '6-in-1',
+                    badgeBg: 'bg-amber-500 text-white',
+                    onClick: () => {
+                      setMode('quiz');
+                      setShowWordWarning(false);
+                      setSummaryResult(null);
+                      setQuizResult(null);
+                      setFlashcardResult(null);
+                      setCrosswordResult(null);
+                      setStudyPackResult(null);
+                    },
+                    isActive: mode === 'quiz',
+                    proOnly: false,
+                  },
+                  {
+                    id: 'library',
+                    title: 'Library',
+                    desc: 'All your saved work in one place',
+                    emoji: '🗂️',
+                    iconGrad: 'from-emerald-400 to-teal-500',
+                    titleClr: 'text-emerald-600 dark:text-emerald-400',
+                    activeRing: 'ring-emerald-400 dark:ring-emerald-500',
+                    blob1: 'bg-emerald-200/60 dark:bg-emerald-500/20',
+                    blob2: 'bg-teal-200/50 dark:bg-teal-500/15',
+                    badge: undefined as string | undefined,
+                    badgeBg: '',
+                    onClick: () => onNavigate('library'),
+                    isActive: false,
+                    proOnly: false,
+                  },
+                  {
+                    id: 'focus_mode',
+                    title: 'Focus Mode',
+                    desc: 'Block sites until you study',
+                    emoji: '🔒',
+                    iconGrad: 'from-violet-500 to-purple-600',
+                    titleClr: 'text-violet-600 dark:text-violet-400',
+                    activeRing: 'ring-violet-400 dark:ring-violet-500',
+                    blob1: 'bg-violet-200/60 dark:bg-violet-500/20',
+                    blob2: 'bg-purple-200/50 dark:bg-purple-500/15',
+                    badge: FOCUS_MODE_COMING_SOON ? 'Soon' : 'Pro',
+                    badgeBg: FOCUS_MODE_COMING_SOON
+                      ? 'bg-amber-500 text-white'
+                      : 'bg-gradient-to-r from-amber-400 to-orange-500 text-white',
+                    onClick: () => setMode('focus_mode'),
+                    isActive: mode === 'focus_mode',
+                    proOnly: !FOCUS_MODE_COMING_SOON,
+                  },
+                  {
+                    id: 'word-tower',
+                    title: 'Word Tower',
+                    desc: 'Stack blocks of knowledge',
+                    emoji: '🗼',
+                    iconGrad: 'from-cyan-400 to-sky-500',
+                    titleClr: 'text-sky-600 dark:text-sky-400',
+                    activeRing: 'ring-sky-400 dark:ring-sky-500',
+                    blob1: 'bg-cyan-200/60 dark:bg-cyan-500/20',
+                    blob2: 'bg-sky-200/50 dark:bg-sky-500/15',
+                    badge: 'New',
+                    badgeBg: 'bg-emerald-500 text-white',
+                    onClick: () => onNavigate('word-tower'),
+                    isActive: false,
+                    proOnly: false,
+                  },
+                  {
+                    id: 'crater-blast',
+                    title: 'Crater Blast',
+                    desc: 'Blast asteroids with answers',
+                    emoji: '🚀',
+                    iconGrad: 'from-fuchsia-500 to-pink-600',
+                    titleClr: 'text-fuchsia-600 dark:text-fuchsia-400',
+                    activeRing: 'ring-fuchsia-400 dark:ring-fuchsia-500',
+                    blob1: 'bg-fuchsia-200/60 dark:bg-fuchsia-500/20',
+                    blob2: 'bg-pink-200/50 dark:bg-pink-500/15',
+                    badge: 'New',
+                    badgeBg: 'bg-emerald-500 text-white',
+                    onClick: () => onNavigate('crater-blast'),
+                    isActive: false,
+                    proOnly: false,
+                  },
+                  {
+                    id: 'more-tools',
+                    title: 'More Tools',
+                    desc: 'Summarizer, grammar & more',
+                    emoji: '🧰',
+                    iconGrad: 'from-slate-500 to-stone-700',
+                    titleClr: 'text-stone-700 dark:text-stone-200',
+                    activeRing: 'ring-stone-400 dark:ring-stone-500',
+                    blob1: 'bg-stone-200/60 dark:bg-stone-700/40',
+                    blob2: 'bg-slate-200/50 dark:bg-slate-700/30',
+                    badge: undefined as string | undefined,
+                    badgeBg: '',
+                    onClick: () => onNavigate('more-tools'),
+                    isActive: false,
+                    proOnly: false,
+                  },
+                ];
+
+                return tools.map((t, i) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={t.onClick}
+                    style={{ animationDelay: `${0.04 * i}s` }}
+                    className={`dash-magnetic group relative overflow-hidden rounded-3xl bg-white dark:bg-stone-900/70 border border-stone-200/80 dark:border-stone-700/70 p-5 sm:p-6 text-left shadow-[0_4px_18px_-4px_rgba(15,23,42,0.06)] dark:shadow-[0_4px_18px_-4px_rgba(0,0,0,0.4)] hover:shadow-[0_18px_50px_-12px_rgba(15,23,42,0.18)] dark:hover:shadow-[0_18px_50px_-12px_rgba(0,0,0,0.55)] hover:border-stone-300 dark:hover:border-stone-600 animate-card-bounce-in ${t.isActive ? `ring-2 ${t.activeRing} ring-offset-0 border-transparent` : ''}`}
+                  >
+                    {/* Decorative pastel orbs in corners */}
+                    <div className={`absolute -top-8 -right-8 w-28 h-28 rounded-full ${t.blob1} blur-xl pointer-events-none transition-transform duration-500 group-hover:scale-110`} aria-hidden />
+                    <div className={`absolute -bottom-10 -left-6 w-24 h-24 rounded-full ${t.blob2} blur-xl pointer-events-none transition-transform duration-500 group-hover:scale-110`} aria-hidden />
+
+                    {/* Badge */}
+                    {t.badge && (
+                      <span className={`absolute top-3 right-3 inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider shadow-sm ${t.badgeBg}`}>
+                        {t.proOnly && (
+                          <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                        )}
+                        {t.badge}
+                      </span>
+                    )}
+
+                    {/* Icon tile — the showpiece */}
+                    <div className="relative mb-4">
+                      <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br ${t.iconGrad} shadow-lg shadow-stone-900/15 flex items-center justify-center text-2xl sm:text-3xl transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 ring-1 ring-white/40 dark:ring-white/10`}>
+                        <span className="drop-shadow-sm" aria-hidden>{t.emoji}</span>
+                      </div>
+                    </div>
+
+                    {/* Title — color-matched, bold serif */}
+                    <h3 className={`font-bold text-lg sm:text-xl ${t.titleClr} mb-1 tracking-tight relative`} style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
+                      {t.title}
+                    </h3>
+                    <p className="text-stone-600 dark:text-stone-400 text-xs sm:text-sm leading-snug relative">
+                      {t.desc}
+                    </p>
+
+                    {/* Slide-in arrow on hover */}
+                    <div className="absolute bottom-4 right-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
+                      <div className={`w-7 h-7 rounded-full bg-gradient-to-br ${t.iconGrad} shadow-md flex items-center justify-center`}>
+                        <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" strokeWidth={2.8} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                      </div>
+                    </div>
+                  </button>
+                ));
+              })()}
+            </div>
+          </section>
+
+          {/* Pro upgrade promo banner — only for free users */}
+          {usageStats.plan === 'free' && !loadingStats && (
+            <section className="relative overflow-hidden rounded-3xl border border-amber-200/70 dark:border-amber-800/40 bg-gradient-to-r from-amber-50 via-orange-50 to-rose-50 dark:from-amber-950/30 dark:via-orange-950/25 dark:to-rose-950/25 shadow-sm">
+              <div className="absolute -top-10 -right-10 text-9xl opacity-10 select-none pointer-events-none rotate-12" aria-hidden>✨</div>
+              <div className="relative flex items-center gap-3 sm:gap-4 p-4 sm:p-5">
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-2xl shadow-md flex-shrink-0">
+                  📖
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base sm:text-lg font-bold text-stone-900 dark:text-stone-50 leading-tight" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
+                    Free Study Tips Guide
+                  </h3>
+                  <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-300 mt-0.5">
+                    Unlock 49 actions/mo, every Pro tool, larger uploads — students get 50% off.
+                  </p>
+                </div>
+                <button
+                  onClick={() => onNavigate('pricing')}
+                  className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-stone-900 hover:bg-amber-50 dark:hover:bg-stone-800 text-amber-700 dark:text-amber-300 font-semibold rounded-xl border border-amber-200/80 dark:border-amber-800/40 shadow-sm hover:shadow-md transition-all flex-shrink-0"
+                >
+                  See Pro
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                </button>
+              </div>
+            </section>
+          )}
 
             {/* Hero + More tools - only for Analyze & Citations modes (high on page) */}
             {(mode === 'analyze' || mode === 'citations') && (loadingStats ? (
@@ -2951,16 +3137,16 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                     </div>
                     <div className="min-w-0 self-start">
                       <h2 className="relative text-lg sm:text-2xl md:text-[2rem] lg:text-[2.125rem] font-semibold text-stone-900 dark:text-stone-50 text-center mb-2 sm:mb-2 tracking-tight leading-snug px-0.5 sm:px-1" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
-                        Turn your notes into <span className="text-violet-800 dark:text-violet-300">5 study tools</span>
+                        Turn your notes into <span className="text-violet-800 dark:text-violet-300">6 study tools</span>
                   </h2>
                   <p className="relative text-stone-600 dark:text-stone-300 text-[13px] sm:text-base text-center mb-4 sm:mb-8 max-w-xl mx-auto leading-relaxed">
-                    Lesson, flashcards, quiz, crossword & Crater Blast — all from one paste
+                    Lesson, flashcards, quiz, crossword, Crater Blast & Word Tower — all from one paste
                   </p>
                       <div className="hidden sm:block">
                         <FeatureTickRow
                           variant="prominent"
                           className="relative"
-                          items={['Lesson', 'Flashcards', 'Quiz', 'Crossword', 'Crater Blast']}
+                          items={['Lesson', 'Flashcards', 'Quiz', 'Crossword', 'Crater Blast', 'Word Tower']}
                         />
                       </div>
                   {/* Tab switcher - same as Analyze/Citations (Study Pack section: Analyze/Citations inactive, Study Pack active) */}
@@ -4052,47 +4238,67 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
               <p className="text-stone-400 dark:text-stone-500 text-xs sm:text-sm">Try a different search term</p>
             </div>
           ) : (
-            <div className="text-center py-8 sm:py-12 bg-white/90 dark:bg-stone-800/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl border border-white/50 dark:border-stone-600/50 shadow-xl">
-              {/* Actionable empty state with clear first steps */}
-              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-violet-100 to-stone-100 dark:from-violet-950/50 dark:to-stone-900/60 rounded-2xl border border-violet-200/60 dark:border-violet-800/40 flex items-center justify-center mx-auto mb-4 shadow-sm">
-                <span className="text-3xl sm:text-4xl">📚</span>
-              </div>
-              <p className="text-stone-800 dark:text-stone-200 font-semibold text-base sm:text-lg mb-1">No recent activity yet</p>
-              <p className="text-stone-500 dark:text-stone-400 text-xs sm:text-sm mb-5 sm:mb-6 max-w-[280px] sm:max-w-sm mx-auto px-4">Try one of these to get started: upload an essay for feedback, generate a study pack from notes, or find citations for your topic.</p>
-              <div className="flex flex-col sm:flex-row gap-2 justify-center items-center flex-wrap">
-                <button
-                  onClick={() => {
-                    setMode('analyze');
-                    setTimeout(() => document.querySelector('[data-tutorial="essay-upload"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
-                  }}
-                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 text-white font-semibold rounded-xl transition-all shadow-md shadow-violet-900/15 ring-1 ring-violet-900/10 hover:shadow-lg text-sm"
-                >
-                  <span>📝</span>
-                  Analyze an Essay
-                </button>
-                <button
-                  onClick={() => {
-                    setMode('quiz');
-                    setTimeout(() => document.querySelector('[data-tutorial="study-pack-input"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
-                  }}
-                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-stone-800 hover:bg-stone-900 dark:bg-stone-600 dark:hover:bg-stone-500 text-white font-semibold rounded-xl transition-all shadow-md ring-1 ring-stone-900/10 hover:shadow-lg text-sm"
-                >
-                  <span>📦</span>
-                  Generate Study Pack
-                </button>
-                <button
-                  onClick={() => setMode('citations')}
-                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 text-stone-800 dark:text-stone-100 font-semibold rounded-xl transition-all shadow-sm hover:border-violet-300 dark:hover:border-violet-600 hover:shadow-md text-sm"
-                >
-                  <span>📚</span>
-                  Find Citations
-                </button>
+            <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-stone-200/80 dark:border-stone-700/60 bg-white/95 dark:bg-stone-900/65 backdrop-blur-xl shadow-[0_18px_50px_-18px_rgba(15,23,42,0.18)] dark:shadow-[0_18px_50px_-18px_rgba(0,0,0,0.55)]">
+              {/* Aurora ambience */}
+              <div
+                className="absolute inset-0 opacity-60 dark:opacity-30 dash-aurora pointer-events-none"
+                style={{
+                  background:
+                    'radial-gradient(60% 80% at 0% 0%, rgba(167,139,250,0.22) 0%, transparent 60%), radial-gradient(60% 80% at 100% 100%, rgba(245,158,11,0.18) 0%, transparent 60%), radial-gradient(50% 60% at 100% 0%, rgba(244,114,182,0.14) 0%, transparent 55%)',
+                }}
+                aria-hidden
+              />
+              <div className="absolute -top-10 -left-8 w-40 h-40 rounded-full bg-violet-300/30 dark:bg-violet-500/20 blur-3xl dash-orb pointer-events-none" aria-hidden />
+              <div className="absolute -bottom-10 -right-8 w-40 h-40 rounded-full bg-amber-300/25 dark:bg-amber-500/15 blur-3xl dash-orb pointer-events-none" style={{ animationDelay: '1.5s' }} aria-hidden />
+
+              <div className="relative text-center py-10 sm:py-14 px-5">
+                <div className="inline-flex w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 dark:from-violet-600 dark:via-purple-600 dark:to-fuchsia-600 rounded-3xl items-center justify-center mb-5 shadow-lg shadow-violet-600/30 ring-4 ring-white/70 dark:ring-stone-900/70 rotate-[-4deg] hover:rotate-0 transition-transform">
+                  <span className="text-4xl sm:text-5xl drop-shadow-sm">📚</span>
+                </div>
+                <h3 className="text-stone-900 dark:text-stone-50 font-semibold text-xl sm:text-2xl md:text-3xl mb-2 tracking-tight" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
+                  Let's get you started.
+                </h3>
+                <p className="text-stone-600 dark:text-stone-300 text-sm sm:text-base mb-7 sm:mb-8 max-w-md mx-auto leading-relaxed">
+                  Pick a path. We'll do the heavy lifting — most students see results in under 60 seconds.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl mx-auto px-2">
+                  <button
+                    onClick={() => {
+                      setMode('analyze');
+                      setTimeout(() => document.querySelector('[data-tutorial="essay-upload"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
+                    }}
+                    className="dash-magnetic dash-shine-card group relative overflow-hidden rounded-2xl p-4 text-left bg-gradient-to-br from-emerald-50 via-white to-teal-50 dark:from-emerald-950/40 dark:via-stone-900/70 dark:to-teal-950/30 border border-emerald-200/80 dark:border-emerald-800/40 hover:border-emerald-400 dark:hover:border-emerald-600 shadow-sm hover:shadow-lg hover:shadow-emerald-500/10"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-lg shadow-md mb-2.5 ring-1 ring-emerald-300/40 dark:ring-emerald-700/30 group-hover:scale-110 transition-transform">📝</div>
+                    <h4 className="font-semibold text-stone-900 dark:text-stone-50 text-sm mb-0.5">Analyze an essay</h4>
+                    <p className="text-stone-600 dark:text-stone-400 text-xs leading-snug">Upload or paste — get professor-style feedback.</p>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMode('quiz');
+                      setTimeout(() => document.querySelector('[data-tutorial="study-pack-input"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
+                    }}
+                    className="dash-magnetic dash-shine-card group relative overflow-hidden rounded-2xl p-4 text-left bg-gradient-to-br from-amber-50 via-white to-orange-50 dark:from-amber-950/40 dark:via-stone-900/70 dark:to-orange-950/30 border border-amber-200/80 dark:border-amber-800/40 hover:border-amber-400 dark:hover:border-amber-600 shadow-sm hover:shadow-lg hover:shadow-amber-500/10"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-lg shadow-md mb-2.5 ring-1 ring-amber-300/40 dark:ring-amber-700/30 group-hover:scale-110 transition-transform">📦</div>
+                    <h4 className="font-semibold text-stone-900 dark:text-stone-50 text-sm mb-0.5">Generate a study pack</h4>
+                    <p className="text-stone-600 dark:text-stone-400 text-xs leading-snug">Lesson, quiz, flashcards, crossword — all from your notes.</p>
+                  </button>
+                  <button
+                    onClick={() => setMode('citations')}
+                    className="dash-magnetic dash-shine-card group relative overflow-hidden rounded-2xl p-4 text-left bg-gradient-to-br from-violet-50 via-white to-purple-50 dark:from-violet-950/40 dark:via-stone-900/70 dark:to-purple-950/30 border border-violet-200/80 dark:border-violet-800/40 hover:border-violet-400 dark:hover:border-violet-600 shadow-sm hover:shadow-lg hover:shadow-violet-500/10"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-lg shadow-md mb-2.5 ring-1 ring-violet-300/40 dark:ring-violet-700/30 group-hover:scale-110 transition-transform">📚</div>
+                    <h4 className="font-semibold text-stone-900 dark:text-stone-50 text-sm mb-0.5">Find citations</h4>
+                    <p className="text-stone-600 dark:text-stone-400 text-xs leading-snug">Real academic sources, formatted in your style.</p>
+                  </button>
+                </div>
                 <button
                   onClick={() => onNavigate('upload')}
-                  className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-stone-200 dark:bg-stone-600 hover:bg-stone-300 dark:hover:bg-stone-500 text-stone-800 dark:text-stone-100 font-semibold rounded-xl transition-all text-sm"
+                  className="mt-6 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-stone-600 dark:text-stone-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors group"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                  Upload Document
+                  <svg className="w-4 h-4 transition-transform group-hover:-translate-y-0.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
+                  Or upload a document to your library
                 </button>
               </div>
             </div>
@@ -4100,144 +4306,230 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
         </div>
         </div>
 
-        {/* Monthly Usage */}
-        {!loadingStats && (
-          <div className="mt-8 sm:mt-10 pt-6 sm:pt-8 border-t border-stone-200/40 dark:border-stone-700/30">
-            <div className="p-5 rounded-2xl bg-white/95 dark:bg-stone-900/50 backdrop-blur-sm border border-stone-200/90 dark:border-stone-700/60 shadow-md">
-            <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-200 flex items-center gap-2">
-                  <svg className="w-4 h-4 text-violet-700 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                  Monthly Usage
-              </h3>
-                <span className="text-xs text-stone-500 dark:text-stone-400">
-                  {getResetsInText(usageStats.daysUntilReset)}
-                </span>
-            </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {(usageStats.plan === 'pro' || usageStats.plan === 'premium') && (usageStats as any).combinedActionsRemaining != null ? (
-                  <div className="bg-white dark:bg-stone-700/50 rounded-lg p-2.5 border border-stone-200/50 dark:border-stone-600/30 sm:col-span-2">
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <span className="text-sm">⚡</span>
-                      <span className="text-xs text-stone-500 dark:text-stone-400">Combined (analyses, study packs, citations)</span>
-              </div>
-                    <div className={`text-lg font-bold ${
-                      (usageStats as any).combinedActionsRemaining === -1 ? 'text-lime-600 dark:text-lime-400' :
-                      (usageStats as any).combinedActionsRemaining <= 0 ? 'text-red-500' :
-                      (usageStats as any).combinedActionsRemaining <= 10 ? 'text-amber-500' : 'text-stone-800 dark:text-stone-100'
-                    }`}>
-                      {(usageStats as any).combinedActionsRemaining === -1 ? '∞' : (usageStats as any).combinedActionsRemaining}
-                      <span className="text-xs font-normal text-stone-400 ml-0.5">left</span>
-              </div>
+        {/* Monthly Usage — premium conversion-focused panel */}
+        {!loadingStats && (() => {
+          const isPro = usageStats.plan === 'pro' || usageStats.plan === 'premium';
+          const isFree = usageStats.plan === 'free';
+          const planLimits = usageStats.planLimits as {
+            analysesPerMonth?: number;
+            citationSearchesPerMonth?: number;
+            studyPackGenerationsPerMonth?: number;
+            documentsPerMonth?: number;
+            combinedActionsPerMonth?: number;
+          };
+          const combinedRemaining = (usageStats as { combinedActionsRemaining?: number }).combinedActionsRemaining;
+          const combinedLimit = planLimits?.combinedActionsPerMonth ?? 49;
+
+          type Bar = {
+            key: string;
+            label: string;
+            emoji: string;
+            remaining: number;
+            limit: number;
+            tone: 'violet' | 'rose' | 'amber' | 'emerald';
+          };
+
+          const freeBars: Bar[] = [
+            { key: 'analyses', label: 'Essay analyses', emoji: '📝', remaining: usageStats.analysesRemaining, limit: planLimits?.analysesPerMonth ?? 2, tone: 'rose' },
+            { key: 'citations', label: 'Citations', emoji: '📚', remaining: usageStats.citationsRemaining, limit: planLimits?.citationSearchesPerMonth ?? 2, tone: 'violet' },
+            { key: 'studyPacks', label: 'Study packs', emoji: '📦', remaining: usageStats.studyPacksRemaining, limit: planLimits?.studyPackGenerationsPerMonth ?? 2, tone: 'amber' },
+            { key: 'uploads', label: 'Uploads', emoji: '📄', remaining: usageStats.uploadsRemaining, limit: planLimits?.documentsPerMonth ?? 3, tone: 'emerald' },
+          ];
+
+          const renderBar = (bar: Bar) => {
+            const remaining = bar.remaining === -1 ? Infinity : Math.max(0, bar.remaining);
+            const limit = bar.limit > 0 ? bar.limit : 1;
+            const used = remaining === Infinity ? 0 : Math.max(0, limit - remaining);
+            const pctUsed = remaining === Infinity ? 0 : Math.min(100, Math.round((used / limit) * 100));
+            const isUnlimited = remaining === Infinity;
+            const isOut = !isUnlimited && remaining <= 0;
+            const isLow = !isUnlimited && !isOut && remaining <= Math.max(1, Math.floor(limit * 0.34));
+
+            const fillClasses = isOut
+              ? 'bg-gradient-to-r from-red-500 via-rose-500 to-red-600'
+              : isLow
+              ? 'bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500'
+              : bar.tone === 'rose'
+              ? 'bg-gradient-to-r from-rose-400 via-rose-500 to-pink-500'
+              : bar.tone === 'violet'
+              ? 'bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500'
+              : bar.tone === 'amber'
+              ? 'bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500'
+              : 'bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-500';
+
+            const numColor = isUnlimited
+              ? 'text-emerald-600 dark:text-emerald-400'
+              : isOut
+              ? 'text-red-600 dark:text-red-400'
+              : isLow
+              ? 'text-amber-600 dark:text-amber-400'
+              : 'text-stone-900 dark:text-stone-50';
+
+            return (
+              <div key={bar.key} className="group relative rounded-xl bg-white/95 dark:bg-stone-900/70 border border-stone-200/80 dark:border-stone-700/60 px-3.5 py-3 shadow-sm hover:shadow-md hover:border-stone-300 dark:hover:border-stone-600 transition-all">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="text-base flex-shrink-0" aria-hidden>{bar.emoji}</span>
+                    <span className="text-[11px] sm:text-xs font-medium text-stone-600 dark:text-stone-400 truncate">{bar.label}</span>
                   </div>
-                      ) : (
-                        <>
-                    <div className="bg-white dark:bg-stone-700/50 rounded-lg p-2.5 border border-stone-200/50 dark:border-stone-600/30">
-                      <div className="flex items-center gap-1.5 mb-1">
-                        <span className="text-sm">📝</span>
-                        <span className="text-xs text-stone-500 dark:text-stone-400">Essay analyses</span>
-                    </div>
-                      <div className={`text-lg font-bold ${
-                        usageStats.analysesRemaining === -1 ? 'text-lime-600 dark:text-lime-400' :
-                        usageStats.analysesRemaining <= 0 ? 'text-red-500' :
-                        usageStats.analysesRemaining <= 1 ? 'text-amber-500' : 'text-stone-800 dark:text-stone-100'
-                      }`}>
-                        {usageStats.analysesRemaining === -1 ? '∞' : usageStats.analysesRemaining}
-                        <span className="text-xs font-normal text-stone-400 ml-0.5">left</span>
-              </div>
-            </div>
-                    <div className="bg-white dark:bg-stone-700/50 rounded-lg p-2.5 border border-stone-200/50 dark:border-stone-600/30">
-                      <div className="flex items-center gap-1.5 mb-1">
-                        <span className="text-sm">📚</span>
-                        <span className="text-xs text-stone-500 dark:text-stone-400">Citations</span>
-                    </div>
-                      <div className={`text-lg font-bold ${
-                        usageStats.citationsRemaining === -1 ? 'text-lime-600 dark:text-lime-400' :
-                        usageStats.citationsRemaining <= 0 ? 'text-red-500' :
-                        usageStats.citationsRemaining <= 1 ? 'text-amber-500' : 'text-stone-800 dark:text-stone-100'
-                      }`}>
-                        {usageStats.citationsRemaining === -1 ? '∞' : usageStats.citationsRemaining}
-                        <span className="text-xs font-normal text-stone-400 ml-0.5">left</span>
-                    </div>
-                  </div>
-                    <div className="bg-white dark:bg-stone-700/50 rounded-lg p-2.5 border border-stone-200/50 dark:border-stone-600/30">
-                      <div className="flex items-center gap-1.5 mb-1">
-                        <span className="text-sm">📦</span>
-                        <span className="text-xs text-stone-500 dark:text-stone-400">Study Packs</span>
-            </div>
-                      <div className={`text-lg font-bold ${
-                        usageStats.studyPacksRemaining === -1 ? 'text-lime-600 dark:text-lime-400' :
-                        usageStats.studyPacksRemaining <= 0 ? 'text-red-500' :
-                        usageStats.studyPacksRemaining <= 1 ? 'text-amber-500' : 'text-stone-800 dark:text-stone-100'
-                      }`}>
-                        {usageStats.studyPacksRemaining === -1 ? '∞' : usageStats.studyPacksRemaining}
-                        <span className="text-xs font-normal text-stone-400 ml-0.5">left</span>
-                      </div>
-                    </div>
-                  </>
-                )}
-                <div className="bg-white dark:bg-stone-700/50 rounded-lg p-2.5 border border-stone-200/50 dark:border-stone-600/30">
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <span className="text-sm">📄</span>
-                    <span className="text-xs text-stone-500 dark:text-stone-400">Uploads</span>
-                  </div>
-                  <div className={`text-lg font-bold ${
-                    usageStats.uploadsRemaining === -1 ? 'text-lime-600 dark:text-lime-400' :
-                    usageStats.uploadsRemaining <= 0 ? 'text-red-500' :
-                    usageStats.uploadsRemaining <= 1 ? 'text-amber-500' : 'text-stone-800 dark:text-stone-100'
-                  }`}>
-                    {usageStats.uploadsRemaining === -1 ? '∞' : usageStats.uploadsRemaining}
-                    <span className="text-xs font-normal text-stone-400 ml-0.5">left</span>
-                  </div>
+                  {isOut && (
+                    <span className="text-[9px] font-bold uppercase tracking-wide text-red-600 dark:text-red-400 px-1.5 py-0.5 rounded bg-red-50 dark:bg-red-950/40 border border-red-200/60 dark:border-red-800/40">Out</span>
+                  )}
+                  {isLow && !isOut && (
+                    <span className="text-[9px] font-bold uppercase tracking-wide text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-950/40 border border-amber-200/60 dark:border-amber-800/40">Low</span>
+                  )}
+                </div>
+                <div className="flex items-baseline gap-1.5 mb-2">
+                  <span className={`text-2xl font-bold leading-none tabular-nums ${numColor}`} style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
+                    {isUnlimited ? '∞' : remaining}
+                  </span>
+                  {!isUnlimited && (
+                    <span className="text-[11px] text-stone-400 dark:text-stone-500 font-medium">
+                      / {limit} left
+                    </span>
+                  )}
+                </div>
+                <div className="h-1.5 rounded-full bg-stone-100 dark:bg-stone-800 overflow-hidden ring-1 ring-stone-200/60 dark:ring-stone-700/60">
+                  <div
+                    className={`h-full rounded-full ${fillClasses} dash-progress-fill transition-all duration-700 ease-out`}
+                    style={{ width: isUnlimited ? '100%' : `${100 - pctUsed}%` }}
+                    aria-hidden
+                  />
                 </div>
               </div>
-              {usageStats.plan === 'free' && (
-                <div className="mt-3 text-center">
-                  <button
-                    onClick={() => onNavigate('pricing')}
-                    className="text-xs font-medium text-violet-800 dark:text-violet-300 hover:underline"
-                  >
-                    Upgrade for more limits →
-            </button>
-          </div>
-              )}
-        </div>
-          </div>
-        )}
+            );
+          };
 
-          {/* Full tool cards — moved below main flows so the hero stays prominent */}
-          <div id="dashboard-all-tools" className="mt-8 pt-6 border-t border-stone-200/60 dark:border-stone-700/50 scroll-mt-8">
-            <p className="text-xs sm:text-xs font-medium text-stone-600 dark:text-stone-400 mb-3.5">All tools</p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-3 opacity-90">
-              {[
-                { id: 'analyze' as const, title: 'Analyze', desc: 'Professor-style essay feedback', emoji: '📝', iconWrap: 'bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/50', titleClr: 'text-stone-900 dark:text-stone-50', badgeText: 'Popular', badgeClr: 'bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-200 border border-stone-200/80 dark:border-stone-600' },
-                { id: 'citations' as const, title: 'Citations', desc: 'Academic sources, formatted', emoji: '📚', iconWrap: 'bg-violet-50 dark:bg-violet-950/35 border border-violet-200/70 dark:border-violet-800/50', titleClr: 'text-stone-900 dark:text-stone-50', badgeText: undefined as string | undefined, badgeClr: '' },
-                { id: 'quiz' as const, title: 'Study Pack', desc: 'Lesson, quiz, crossword & more', emoji: '📦', iconWrap: 'bg-amber-50 dark:bg-amber-950/35 border border-amber-200/70 dark:border-amber-800/50', titleClr: 'text-stone-900 dark:text-stone-50', badgeText: '5-in-1', badgeClr: 'bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-200 border border-stone-200/80 dark:border-stone-600' },
-                { id: 'focus_mode' as const, title: 'Focus Mode', desc: 'Block sites until you study', emoji: '🔒', iconWrap: 'bg-violet-50 dark:bg-violet-950/30 border border-violet-200/70 dark:border-violet-800/50', titleClr: 'text-stone-900 dark:text-stone-50', badgeText: FOCUS_MODE_COMING_SOON ? 'Soon' : 'New', badgeClr: FOCUS_MODE_COMING_SOON ? 'bg-amber-100 text-amber-900 dark:bg-amber-950/50 dark:text-amber-200 border border-amber-200/80 dark:border-amber-800/50' : 'bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-200 border border-stone-200/80 dark:border-stone-600' },
-                { id: 'more-tools' as const, title: 'More Tools', desc: 'Summarizer, grammar & more', emoji: '🔧', iconWrap: 'bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-600/80', titleClr: 'text-stone-900 dark:text-stone-50', badgeText: undefined as string | undefined, badgeClr: '' },
-              ].map((card) => {
-                const isActive = (card.id === 'analyze' && mode === 'analyze') || (card.id === 'citations' && mode === 'citations') || (card.id === 'quiz' && mode === 'quiz') || (card.id === 'focus_mode' && mode === 'focus_mode');
-                return (
-                  <button
-                    key={card.id}
-                    type="button"
-                    onClick={() => card.id === 'more-tools' ? onNavigate('more-tools') : (card.id === 'quiz' ? (() => { setMode('quiz'); setShowWordWarning(false); setSummaryResult(null); setQuizResult(null); setFlashcardResult(null); setCrosswordResult(null); setStudyPackResult(null); })() : setMode(card.id))}
-                    className={`relative overflow-hidden rounded-xl p-3.5 sm:p-4 text-left transition-all duration-200 hover:shadow-md bg-white dark:bg-stone-900/60 border border-stone-200/90 dark:border-stone-700/90 shadow-sm dark:shadow-black/20 min-h-[5.5rem] sm:min-h-0 ${isActive ? 'ring-2 ring-violet-600 dark:ring-violet-500 ring-offset-1 ring-offset-stone-50 dark:ring-offset-stone-950' : ''}`}
-                  >
-                    {card.badgeText && (
-                      <span className={`absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded text-[8px] font-semibold uppercase tracking-wide ${card.badgeClr}`}>
-                        {card.badgeText}
-                      </span>
-                    )}
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-base mb-2 shadow-sm ${card.iconWrap}`}>{card.emoji}</div>
-                    <h3 className={`font-semibold text-xs sm:text-sm ${card.titleClr} mb-0.5`}>{card.title}</h3>
-                    <p className="text-stone-500 dark:text-stone-400 text-[10px] sm:text-xs leading-snug line-clamp-2">{card.desc}</p>
-                  </button>
-                );
-              })}
+          return (
+            <div className="mt-8 sm:mt-10 pt-6 sm:pt-8 border-t border-stone-200/40 dark:border-stone-700/30">
+              <div className={`relative overflow-hidden rounded-2xl border ${isFree ? 'border-violet-200/70 dark:border-violet-800/40' : 'border-stone-200/90 dark:border-stone-700/60'} bg-white/95 dark:bg-stone-900/55 backdrop-blur-md shadow-[0_14px_44px_-14px_rgba(15,23,42,0.16)] dark:shadow-[0_14px_44px_-14px_rgba(0,0,0,0.5)] ${isFree ? 'dash-gold-glow' : ''}`}>
+                {/* Aurora background veil — only for free users to feel premium */}
+                {isFree && (
+                  <>
+                    <div
+                      className="absolute inset-0 opacity-[0.45] dark:opacity-[0.22] dash-aurora pointer-events-none"
+                      style={{
+                        background:
+                          'radial-gradient(60% 80% at 0% 0%, rgba(167,139,250,0.32) 0%, transparent 60%), radial-gradient(60% 80% at 100% 100%, rgba(245,158,11,0.20) 0%, transparent 60%), radial-gradient(50% 60% at 100% 0%, rgba(244,114,182,0.18) 0%, transparent 55%)',
+                      }}
+                      aria-hidden
+                    />
+                    <div className="absolute -top-12 -right-10 w-44 h-44 rounded-full bg-violet-300/30 dark:bg-violet-500/20 blur-3xl dash-orb pointer-events-none" aria-hidden />
+                    <div className="absolute -bottom-12 -left-8 w-44 h-44 rounded-full bg-amber-300/25 dark:bg-amber-500/15 blur-3xl dash-orb pointer-events-none" style={{ animationDelay: '2s' }} aria-hidden />
+                  </>
+                )}
+
+                <div className="relative p-5 sm:p-6">
+                  {/* Header */}
+                  <div className="flex items-center justify-between mb-4 sm:mb-5">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-sm flex-shrink-0 ${isFree ? 'bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white' : isPro ? 'bg-gradient-to-br from-amber-400 via-orange-500 to-rose-500 text-white' : 'bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-200'}`}>
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l3-3 3 3 4-5 5 5 3-2" />
+                        </svg>
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="text-base sm:text-lg font-semibold text-stone-900 dark:text-stone-50 leading-tight tracking-tight" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
+                          Monthly Usage
+                        </h3>
+                        <p className="text-[11px] sm:text-xs text-stone-500 dark:text-stone-400 leading-tight mt-0.5">
+                          {getResetsInText(usageStats.daysUntilReset)}
+                        </p>
+                      </div>
+                    </div>
+                    <span className={`hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide ${
+                      isPro
+                        ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-sm dash-pro-chip'
+                        : isFree
+                        ? 'bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-violet-300 border border-violet-200/70 dark:border-violet-800/40'
+                        : 'bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300'
+                    }`}>
+                      {isPro ? '✨ Pro' : isFree ? 'Free' : (planLimits as { name?: string })?.name || 'Plan'}
+                    </span>
+                  </div>
+
+                  {/* Pro: combined hero meter + uploads */}
+                  {isPro && combinedRemaining != null ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                      <div className="sm:col-span-2 relative rounded-xl bg-gradient-to-br from-violet-50 via-white to-amber-50 dark:from-violet-950/40 dark:via-stone-900/60 dark:to-amber-950/30 border border-violet-200/70 dark:border-violet-800/40 p-4 sm:p-5 shadow-sm">
+                        <div className="flex items-start justify-between mb-3">
+                          <div>
+                            <div className="flex items-center gap-1.5 mb-1">
+                              <span className="text-base">⚡</span>
+                              <span className="text-xs font-medium text-stone-600 dark:text-stone-300">Combined actions</span>
+                            </div>
+                            <p className="text-[10px] text-stone-500 dark:text-stone-400">Analyses · Study Packs · Citations</p>
+                          </div>
+                          <div className="text-right">
+                            <div className={`text-3xl sm:text-4xl font-bold leading-none tabular-nums ${
+                              combinedRemaining === -1 ? 'text-emerald-600 dark:text-emerald-400' :
+                              combinedRemaining <= 0 ? 'text-red-600 dark:text-red-400' :
+                              combinedRemaining <= 10 ? 'text-amber-600 dark:text-amber-400' :
+                              'text-stone-900 dark:text-stone-50'
+                            }`} style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
+                              {combinedRemaining === -1 ? '∞' : combinedRemaining}
+                            </div>
+                            {combinedRemaining !== -1 && (
+                              <p className="text-[10px] text-stone-400 dark:text-stone-500 mt-0.5">of {combinedLimit} left</p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="h-2 rounded-full bg-stone-100 dark:bg-stone-800 overflow-hidden ring-1 ring-stone-200/60 dark:ring-stone-700/60">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 dash-progress-fill transition-all duration-700 ease-out"
+                            style={{ width: combinedRemaining === -1 ? '100%' : `${Math.min(100, Math.max(2, Math.round((Math.max(0, combinedRemaining) / combinedLimit) * 100)))}%` }}
+                            aria-hidden
+                          />
+                        </div>
+                      </div>
+                      {renderBar({ key: 'uploads', label: 'Uploads', emoji: '📄', remaining: usageStats.uploadsRemaining, limit: planLimits?.documentsPerMonth ?? 50, tone: 'emerald' })}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      {freeBars.map(renderBar)}
+                    </div>
+                  )}
+
+                  {/* Free-tier upgrade banner — the conversion driver */}
+                  {isFree && (
+                    <div className="mt-5 sm:mt-6 relative overflow-hidden rounded-xl border border-violet-300/70 dark:border-violet-700/50 bg-gradient-to-br from-violet-700 via-purple-700 to-fuchsia-700 dark:from-violet-800 dark:via-purple-800 dark:to-fuchsia-800 shadow-lg shadow-violet-900/20">
+                      <div className="absolute inset-0 opacity-30 pointer-events-none dash-aurora" style={{ background: 'radial-gradient(60% 80% at 20% 0%, rgba(255,255,255,0.35) 0%, transparent 60%), radial-gradient(40% 60% at 100% 100%, rgba(252,211,77,0.45) 0%, transparent 55%)' }} aria-hidden />
+                      <div className="absolute -top-6 -right-4 text-7xl opacity-15 select-none pointer-events-none rotate-12" aria-hidden>✨</div>
+                      <div className="relative p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1.5">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-400/95 text-amber-950 text-[10px] font-bold uppercase tracking-wide shadow-sm">
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                              Pro
+                            </span>
+                            <span className="text-[10px] sm:text-xs text-violet-100 font-medium">Save 20+ hours / month</span>
+                          </div>
+                          <h4 className="text-base sm:text-lg font-bold text-white leading-tight mb-1" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
+                            Unlock 49 actions / month + every Pro tool
+                          </h4>
+                          <p className="text-violet-100/95 text-[12px] sm:text-sm leading-snug">
+                            Crater Blast · Word Tower · Crosswords · Focus Mode · Larger uploads · Priority feedback.
+                          </p>
+                        </div>
+                        <div className="flex flex-col items-stretch sm:items-end gap-2 flex-shrink-0">
+                          <button
+                            onClick={() => onNavigate('pricing')}
+                            className="dashboard-upgrade-cta inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white hover:bg-amber-50 text-violet-800 hover:text-violet-900 font-bold rounded-xl shadow-md text-sm whitespace-nowrap transition-colors"
+                          >
+                            <span className="relative z-[1]">Upgrade to Pro</span>
+                            <svg className="relative z-[1] w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                          </button>
+                          <p className="text-[10px] text-violet-200/90 text-center sm:text-right">Cancel anytime · Students 50% off</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
+          );
+        })()}
+
 
       </main>
 

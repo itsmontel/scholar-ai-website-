@@ -62,6 +62,7 @@ const PomodoroTimerPage = lazyWithRetry(() => import('./pages/tools/PomodoroTime
 const CalculatorPage = lazyWithRetry(() => import('./pages/tools/CalculatorPage'));
 const ConverterPage = lazyWithRetry(() => import('./pages/tools/ConverterPage'));
 const LightningReflexQuizPage = lazyWithRetry(() => import('./pages/tools/LightningReflexQuizPage'));
+const WordTowerPage = lazyWithRetry(() => import('./pages/tools/WordTowerPage'));
 const CreateFlashcardsPage = lazyWithRetry(() => import('./pages/tools/CreateFlashcardsPage'));
 const StudyPackViewerPage = lazyWithRetry(() => import('./pages/StudyPackViewerPage'));
 const AnalyzeEssayPage = lazyWithRetry(() => import('./pages/AnalyzeEssayPage'));
@@ -164,6 +165,7 @@ function getPageFromPath(pathname: string): string {
   if (p === '/tools/calculator' || p === '/calculator') return 'calculator';
   if (p === '/tools/converter' || p === '/converter') return 'converter';
   if (p === '/tools/crater-blast' || p === '/crater-blast' || p === '/tools/lightning-reflex-quiz' || p === '/lightning-reflex-quiz') return 'crater-blast';
+  if (p === '/tools/word-tower' || p === '/word-tower' || p === '/games/word-tower') return 'word-tower';
   if (p === '/tools/interactive-lesson' || p === '/interactive-lesson' || p === '/lesson-generator') return 'dashboard';
   if (p === '/study-pack-viewer' || p === '/tools/study-pack-viewer') return 'study-pack-viewer';
   if (p === '/tools/more' || p === '/more-tools' || p === '/view-more-tools') return 'more-tools';
@@ -393,6 +395,7 @@ const AcademicAIApp = () => {
     'calculator': { title: 'Free Scientific Calculator — STEM Homework | WriteScholar', description: 'Trig, logs, and powers for calculus, physics, and chemistry homework—free online scientific calculator.' },
     'converter': { title: 'Free Unit Converter — STEM & Lab Units | WriteScholar', description: 'Convert SI and imperial units for problem sets and labs—length, temperature, speed, and more.' },
     'crater-blast': { title: 'Crater Blast — AI Quiz Game | WriteScholar', description: 'Blast the correct answer before it lands! AI-powered quiz game to reinforce what you studied.' },
+    'word-tower': { title: 'Word Tower — AI Stacking Study Game | WriteScholar', description: 'Word Tower — the AI-powered stacking study game. Catch correct answers, dodge wrong ones, and build the tallest tower before it falls.' },
     'more-tools': { title: 'More Free Tools for College Students | WriteScholar', description: 'Summarizer, word counter, citation generator, GPA calculator, essay outline, thesis helper, grammar check, and more—all in one place.' },
     'badges': { title: 'Achievements & Badges | WriteScholar', description: 'Collect badges, earn XP, and level up your scholar journey. Unlock cute monster companions by using WriteScholar tools.' },
     'friends': { title: 'Friends | WriteScholar', description: 'Connect with friends to share quizzes, flashcards, and crosswords. Add friends by code and collaborate on studying.' },
@@ -836,6 +839,7 @@ const AcademicAIApp = () => {
     'gpa-calculator': '/tools/gpa-calculator',
     'pomodoro-timer': '/tools/pomodoro-timer',
     'crater-blast': '/tools/crater-blast',
+    'word-tower': '/tools/word-tower',
     'study-pack-viewer': '/study-pack-viewer',
     'analyze': '/tools/analyze',
     'citations': '/tools/citations',
@@ -1216,6 +1220,8 @@ const AcademicAIApp = () => {
         return <ConverterPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'crater-blast':
         return <LightningReflexQuizPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'word-tower':
+        return <WordTowerPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'study-pack-viewer':
         return <StudyPackViewerPage onNavigate={navigateTo} user={user} onLogout={handleLogout} initialData={studyPackInitialData || undefined} />;
       case 'admin':
