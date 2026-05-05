@@ -420,9 +420,24 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
           </div>
         ) : (
           <div className={embedded ? 'pb-2 overflow-visible' : 'pt-2 sm:pt-4 pb-4 sm:pb-6 overflow-visible'} data-tutorial="study-pack-input">
-            <div className={`relative rounded-2xl overflow-hidden border border-stone-200/90 dark:border-stone-700/80 bg-white/95 dark:bg-stone-900/60 shadow-md ${embedded ? 'mb-3 shadow-lg' : 'mb-4 sm:mb-8'}`}>
-              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 via-amber-500 to-red-500 opacity-90" aria-hidden />
-              <div className={`relative rounded-[inherit] ${embedded ? 'p-4 sm:p-6 lg:p-7' : 'p-4 sm:p-10'}`}>
+            <div
+              className={`relative overflow-hidden scroll-mt-8 ${
+                embedded
+                  ? 'rounded-3xl mb-3 sm:mb-4 bg-white dark:bg-stone-900/85 ring-1 ring-orange-200/85 dark:ring-orange-900/35 shadow-[0_20px_50px_-18px_rgba(234,88,12,0.12),0_8px_30px_-12px_rgba(15,23,42,0.08)] dark:shadow-[0_24px_60px_-20px_rgba(0,0,0,0.55)]'
+                  : 'rounded-2xl mb-4 sm:mb-8 border border-stone-200/90 dark:border-stone-700/80 bg-white/95 dark:bg-stone-900/60 shadow-md'
+              }`}
+            >
+              <div
+                className={`absolute inset-x-0 top-0 h-1 ${embedded ? 'h-[3px] bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 opacity-[0.95]' : 'h-1 bg-gradient-to-r from-emerald-500 via-amber-500 to-red-500 opacity-90'}`}
+                aria-hidden
+              />
+              {embedded && (
+                <>
+                  <div className="pointer-events-none absolute -top-24 -right-20 w-[19rem] h-[19rem] rounded-full bg-orange-400/12 dark:bg-orange-500/12 blur-3xl" aria-hidden />
+                  <div className="pointer-events-none absolute -bottom-20 -left-16 w-64 h-64 rounded-full bg-amber-300/14 dark:bg-amber-600/14 blur-[2.75rem]" aria-hidden />
+                </>
+              )}
+              <div className={`relative ${embedded ? 'p-4 sm:p-6 lg:p-8' : 'p-4 sm:p-10'}`}>
                 <div className={embedded ? 'relative' : 'relative lg:grid lg:grid-cols-[minmax(0,220px)_minmax(0,1fr)_minmax(0,220px)] xl:grid-cols-[minmax(0,248px)_minmax(0,1fr)_minmax(0,248px)] lg:gap-8 xl:gap-10 lg:items-stretch'}>
                   <div className={embedded ? 'hidden' : 'hidden lg:block relative self-end justify-self-start w-[236px] xl:w-[248px] pointer-events-auto -rotate-[11deg] origin-bottom-left drop-shadow-lg z-[5]'} aria-label="Sample flashcard preview">
                     <p className="text-center mb-2">
@@ -434,11 +449,24 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                     <InteractiveStudyPackDemo variant="side-left" />
                   </div>
                   <div className="min-w-0 self-start">
+                    {embedded && (
+                      <div className="text-center mb-3 sm:mb-4">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50 dark:bg-orange-950/45 text-orange-900 dark:text-orange-200 ring-1 ring-orange-200/90 dark:ring-orange-800/55 text-[11px] sm:text-xs font-semibold tracking-wide uppercase">
+                          <span className="text-sm normal-case opacity-95" aria-hidden>
+                            📦
+                          </span>
+                          Six tools, one paste
+                        </span>
+                      </div>
+                    )}
                     <h1
-                      className={`relative font-semibold text-stone-900 dark:text-stone-50 text-center tracking-tight leading-snug px-1 ${embedded ? 'text-2xl sm:text-3xl mb-2' : 'text-2xl sm:text-3xl md:text-[2rem] lg:text-[2.125rem] mb-1.5 sm:mb-2'}`}
+                      className={`relative dash-serif font-semibold text-stone-900 dark:text-stone-50 text-center tracking-tight text-2xl sm:text-3xl lg:text-[2.4rem] leading-[1.1] px-1 ${embedded ? 'mb-2' : 'mb-1.5 sm:mb-2'}`}
                       style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
                     >
-                      Turn your notes into <span className="text-orange-700 dark:text-orange-300">6 study tools</span>
+                      Turn your notes into{' '}
+                      <span className="bg-gradient-to-r from-orange-700 via-amber-600 to-rose-600 dark:from-orange-300 dark:via-amber-300 dark:to-rose-300 bg-clip-text text-transparent">
+                        6 study tools
+                      </span>
                     </h1>
                     <p className={`relative text-stone-600 dark:text-stone-300 text-sm sm:text-base text-center max-w-xl mx-auto leading-relaxed ${embedded ? 'mb-5' : 'mb-6 sm:mb-8'}`}>
                       Lesson, flashcards, quiz, crossword, Crater Blast & Word Tower — all from one paste
@@ -512,7 +540,13 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                 </div>
 
                 <div className={`relative mb-2 max-w-3xl mx-auto ${embedded ? 'mt-0' : ''}`}>
-                  <div className="relative rounded-2xl border border-stone-200/90 dark:border-stone-600 bg-white dark:bg-stone-900/40 shadow-sm focus-within:ring-2 focus-within:ring-orange-500/30 focus-within:border-orange-300/50 dark:focus-within:border-orange-600/50 transition-shadow">
+                  <div
+                    className={
+                      embedded
+                        ? 'relative rounded-2xl border transition-all duration-300 shadow-sm focus-within:shadow-md focus-within:ring-2 focus-within:ring-orange-500/35 border-orange-200/80 dark:border-orange-800/45 bg-white dark:bg-stone-900/40 focus-within:border-orange-400/70 dark:focus-within:border-orange-600/55'
+                        : 'relative rounded-2xl border border-stone-200/90 dark:border-stone-600 bg-white dark:bg-stone-900/40 shadow-sm focus-within:ring-2 focus-within:ring-orange-500/30 focus-within:border-orange-300/50 dark:focus-within:border-orange-600/50 transition-shadow'
+                    }
+                  >
                     <div className={`relative rounded-[inherit] ${embedded ? 'min-h-[132px] sm:min-h-[150px]' : 'min-h-[140px] sm:min-h-[180px]'}`}>
                       <textarea
                         value={inputText}
@@ -598,7 +632,7 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
 
                 {embedded && (
                   <section
-                    className="mt-8 border-t border-stone-200/85 dark:border-stone-700/70 pt-6"
+                    className="mt-7 sm:mt-8 rounded-2xl border border-orange-200/80 dark:border-orange-900/40 bg-gradient-to-b from-white/95 to-orange-50/45 dark:from-stone-900/55 dark:to-orange-950/20 p-4 sm:p-6 ring-1 ring-orange-100/90 dark:ring-orange-950/40 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.65)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]"
                     aria-labelledby="embedded-study-pack-previews-heading"
                   >
                     <h2 id="embedded-study-pack-previews-heading" className="text-center dash-serif text-sm sm:text-base font-semibold text-stone-800 dark:text-stone-100">
@@ -611,7 +645,7 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                       {EMBEDDED_STUDY_PACK_PREVIEWS.map((slot) => (
                         <figure
                           key={slot.label}
-                          className="snap-center shrink-0 w-[min(46vw,200px)] sm:w-[min(22vw,200px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-950 ring-1 ring-stone-200/90 dark:ring-stone-700/80 shadow-sm flex flex-col"
+                          className="snap-center shrink-0 w-[min(46vw,200px)] sm:w-[min(22vw,200px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-950 border-2 border-orange-500 dark:border-orange-400 ring-2 ring-orange-200/60 dark:ring-orange-950/55 shadow-md shadow-orange-900/12 flex flex-col"
                         >
                           <div className="relative aspect-[4/5] w-full bg-stone-950/5 dark:bg-black/40">
                             {slot.video ? (

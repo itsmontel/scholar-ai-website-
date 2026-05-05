@@ -547,7 +547,8 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
             MOBILE TAB BAR (lg- only)
            ═══════════════════════════════════════════════════════════════════ */}
         <div className="lg:hidden mb-5 -mx-4 sm:-mx-6 px-4 sm:px-6 overflow-x-auto">
-          <div className="inline-flex gap-1.5 p-1.5 bg-white/80 dark:bg-stone-900/70 rounded-2xl ring-1 ring-stone-200/80 dark:ring-stone-700/60 shadow-sm backdrop-blur-md">
+          <div className="relative inline-flex gap-1 p-2 rounded-[1.125rem] bg-white/98 dark:bg-stone-900/94 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.85)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] shadow-lg shadow-teal-900/[0.08] dark:shadow-black/45 border border-teal-200/55 dark:border-violet-800/45 backdrop-blur-xl">
+            <div aria-hidden className="pointer-events-none absolute inset-0 rounded-[1.125rem] bg-gradient-to-br from-teal-50/40 via-transparent to-violet-50/35 dark:from-teal-950/20 dark:via-transparent dark:to-violet-950/25" />
             {DASHBOARD_TOOL_ITEMS.map((item) => {
               const active = dashboardTool === item.id;
               return (
@@ -558,14 +559,16 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                     setDashboardTool(item.id);
                     trackEvent('dashboard_tool_tab', { tool: item.id });
                   }}
-                  className={`relative flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all ${
+                  className={`relative z-[1] flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-200 ${
                     active
-                      ? `${item.activeBg} text-stone-900 dark:text-white shadow-sm ring-1 ring-black/[0.04] dark:ring-white/10`
-                      : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'
+                      ? `${item.activeBg} text-stone-900 dark:text-stone-50 shadow-[0_8px_20px_-6px_rgba(91,33,182,0.18)] dark:shadow-black/35 ring-1 ring-white/80 dark:ring-white/10 scale-[1.02]`
+                      : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-white/70 dark:hover:bg-stone-800/50 hover:shadow-sm active:scale-[0.98]'
                   }`}
                 >
-                  <span aria-hidden>{item.emoji}</span>
-                  <span className="dash-serif">{item.title}</span>
+                  <span className={`text-base transition-transform ${active ? 'scale-110' : ''}`} aria-hidden>
+                    {item.emoji}
+                  </span>
+                  <span className="dash-serif tracking-tight">{item.title}</span>
                 </button>
               );
             })}
@@ -579,15 +582,31 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
           {/* ─── SIDEBAR (lg+) ─── */}
           <aside className="hidden lg:block">
             <div className="sticky top-6 space-y-4">
-              {/* Workspace card */}
-              <div className="rounded-2xl bg-white/90 dark:bg-stone-900/75 ring-1 ring-stone-200/80 dark:ring-stone-700/60 shadow-md shadow-stone-900/[0.04] dark:shadow-black/30 backdrop-blur-md overflow-hidden">
-                <div className="px-4 pt-3.5 pb-2.5 border-b border-stone-100 dark:border-stone-800">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-400 dark:text-stone-500">Workspace</p>
-                  <p className="mt-1 text-[11px] text-stone-500 dark:text-stone-400 leading-snug">
+              {/* Workspace — airy glass + soft glow */}
+              <div className="relative rounded-2xl overflow-hidden bg-white/[0.97] dark:bg-stone-900/94 border border-white/90 dark:border-stone-700/90 shadow-[0_20px_50px_-20px_rgba(79,70,229,0.18),0_8px_24px_-12px_rgba(15,118,110,0.12)] dark:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.75)] backdrop-blur-[18px]">
+                {/* Ambient washes */}
+                <div aria-hidden className="pointer-events-none absolute -top-20 -right-16 h-44 w-44 rounded-full bg-gradient-to-br from-violet-400/22 to-fuchsia-400/14 blur-[48px] dark:from-violet-500/20 dark:to-fuchsia-600/14" />
+                <div aria-hidden className="pointer-events-none absolute -bottom-16 -left-12 h-40 w-40 rounded-full bg-gradient-to-tr from-teal-300/22 to-emerald-300/12 blur-[44px] dark:from-teal-600/16 dark:to-emerald-700/14" />
+
+                {/* Top accent */}
+                <div aria-hidden className="absolute inset-x-4 top-0 h-[3px] rounded-b-lg bg-gradient-to-r from-teal-400 via-violet-500 to-fuchsia-500 opacity-[0.95] shadow-[0_0_28px_-4px_rgba(139,92,246,0.42)] dark:opacity-100" />
+
+                {/* Header */}
+                <div className="relative px-4 pt-[1.125rem] pb-3 border-b border-stone-200/65 dark:border-stone-700/65 bg-[linear-gradient(165deg,rgba(250,251,253,0.98)_0%,rgba(240,251,246,0.55)_52%,rgba(245,243,255,0.45)_100%)] dark:bg-[linear-gradient(170deg,rgba(15,23,42,0.97)_0%,rgba(30,41,59,0.75)_58%,rgba(49,46,129,0.22)_100%)]">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-gradient-to-br from-teal-500/15 to-violet-600/25 dark:from-teal-400/25 dark:to-violet-600/35 text-[13px]" aria-hidden>
+                      ✳︎
+                    </span>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-transparent bg-gradient-to-r from-teal-700 via-violet-600 to-indigo-600 dark:from-teal-300 dark:via-violet-300 dark:to-indigo-300 bg-clip-text">
+                      Workspace
+                    </p>
+                  </div>
+                  <p className="text-[12px] leading-relaxed text-stone-600/95 dark:text-stone-300/92 pl-0.5">
                     Switch tools or open your saved work.
                   </p>
                 </div>
-                <nav className="p-2 flex flex-col gap-1" aria-label="Dashboard tools">
+
+                <nav className="relative p-2.5 pt-3.5 flex flex-col gap-1.5" aria-label="Dashboard tools">
                   {DASHBOARD_TOOL_ITEMS.map((item) => {
                     const active = dashboardTool === item.id;
                     return (
@@ -598,25 +617,29 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                           setDashboardTool(item.id);
                           trackEvent('dashboard_tool_tab', { tool: item.id });
                         }}
-                        className={`group relative flex items-center gap-3 rounded-xl border-l-[3px] pl-2.5 pr-2.5 py-2.5 text-left transition-all duration-200 ${
+                        className={`group relative flex items-center gap-3 rounded-[0.875rem] border-l-[3px] pl-2.5 pr-2.5 py-2.5 text-left transition-all duration-300 ease-out will-change-transform ${
                           active
-                            ? `${item.activeBar} ${item.activeBg} shadow-sm ring-1 ring-black/[0.03] dark:ring-white/10`
-                            : 'border-l-transparent hover:bg-stone-50/80 dark:hover:bg-stone-800/60'
+                            ? `${item.activeBar} ${item.activeBg} shadow-[0_6px_20px_-8px_rgba(15,23,42,0.12)] dark:shadow-[0_8px_28px_-10px_rgba(0,0,0,0.55)]`
+                            : 'border-l-transparent hover:border-l-stone-200/80 dark:hover:border-l-stone-600/60 hover:bg-white/75 dark:hover:bg-stone-800/45 hover:shadow-sm hover:-translate-y-px'
                         }`}
                       >
-                        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-base ${item.iconClass} text-white shadow-md ${active ? 'rotate-[-3deg] scale-105' : 'group-hover:rotate-[-3deg] group-hover:scale-105'} transition-transform duration-200`}>
+                        <div
+                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[0.65rem] text-base text-white shadow-[0_6px_16px_-4px_rgba(0,0,0,0.25)] ring-1 ring-white/35 dark:ring-white/10 ${item.iconClass} ${
+                            active ? 'scale-105 -rotate-[2deg] shadow-lg' : 'group-hover:scale-105 group-hover:-rotate-[2deg] group-hover:shadow-md'
+                          } transition-all duration-300`}
+                        >
                           <span aria-hidden>{item.emoji}</span>
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className={`dash-serif text-[15px] font-bold leading-tight ${active ? item.titleClass : 'text-stone-800 dark:text-stone-100'}`}>
+                          <p className={`dash-serif text-[15px] font-bold leading-tight tracking-tight ${active ? item.titleClass : 'text-stone-800 dark:text-stone-50'}`}>
                             {item.title}
                           </p>
-                          <p className="mt-0.5 text-[10.5px] leading-snug text-stone-500 dark:text-stone-400 line-clamp-1">
+                          <p className={`mt-0.5 text-[10.5px] leading-snug line-clamp-1 ${active ? 'text-stone-600/90 dark:text-stone-400' : 'text-stone-500 dark:text-stone-400 group-hover:text-stone-700 dark:group-hover:text-stone-300'}`}>
                             {item.desc}
                           </p>
                         </div>
                         {active && (
-                          <svg className="h-3.5 w-3.5 shrink-0 text-stone-400 dark:text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                          <svg className="h-3.5 w-3.5 shrink-0 text-violet-500/95 dark:text-emerald-400/95" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
                           </svg>
                         )}
@@ -626,10 +649,20 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                 </nav>
 
                 {/* Shortcuts */}
-                <div className="px-4 pt-2.5 pb-1.5 border-t border-stone-100 dark:border-stone-800">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-400 dark:text-stone-500">Shortcuts</p>
+                <div className="relative px-4 pt-3.5 pb-2 border-t border-stone-200/65 dark:border-stone-700/65 bg-white/40 dark:bg-stone-950/25 backdrop-blur-sm">
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <div className="flex items-center gap-2">
+                      <span aria-hidden className="text-[11px] opacity-85">
+                        ⚡
+                      </span>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-stone-500 dark:text-violet-300/90">
+                        Shortcuts
+                      </p>
+                    </div>
+                    <span className="h-px flex-1 max-w-[3.5rem] ml-auto bg-gradient-to-r from-transparent to-violet-200/85 dark:to-violet-600/35 rounded-full opacity-75" aria-hidden />
+                  </div>
                 </div>
-                <nav className="px-2 pb-2.5 flex flex-col gap-0.5" aria-label="Workspace shortcuts">
+                <nav className="relative px-2.5 pb-3 pt-1 flex flex-col gap-px" aria-label="Workspace shortcuts">
                   {WORKSPACE_SHORTCUTS.map((link) => (
                     <button
                       key={link.id}
@@ -638,20 +671,29 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                         onNavigate(link.page);
                         trackEvent('dashboard_workspace_shortcut', { page: link.page });
                       }}
-                      className="group flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-all hover:bg-violet-50/80 dark:hover:bg-violet-950/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/60"
+                      className="group flex items-center gap-2.5 rounded-[0.6875rem] px-2 py-2 text-left transition-all duration-200 hover:bg-white/90 dark:hover:bg-stone-800/55 hover:shadow-[0_4px_14px_-6px_rgba(79,70,229,0.15)] focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/50 dark:focus-visible:ring-violet-500/35"
                     >
-                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-stone-100 dark:bg-stone-800 text-sm shadow-sm ring-1 ring-stone-200/80 dark:ring-stone-700/60 group-hover:bg-white dark:group-hover:bg-stone-700 group-hover:scale-105 transition-all" aria-hidden>
+                      <span
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[0.5rem] text-sm shadow-sm bg-white/95 dark:bg-stone-900/95 border border-teal-200/55 dark:border-stone-600/85 text-stone-800 dark:text-stone-100 group-hover:border-violet-300/85 dark:group-hover:border-violet-600/50 group-hover:bg-gradient-to-br group-hover:from-white group-hover:to-teal-50/90 dark:group-hover:from-stone-900 dark:group-hover:to-violet-950/60 group-hover:-translate-y-px transition-all"
+                        aria-hidden
+                      >
                         {link.emoji}
                       </span>
                       <span className="min-w-0 flex-1">
-                        <span className="block text-[12.5px] font-semibold leading-tight text-stone-700 dark:text-stone-200 group-hover:text-violet-700 dark:group-hover:text-violet-300 transition-colors">
+                        <span className="block text-[12.5px] font-semibold leading-tight text-stone-800 dark:text-stone-50 group-hover:text-violet-900 dark:group-hover:text-violet-200 transition-colors duration-200">
                           {link.label}
                         </span>
-                        <span className="block text-[10px] leading-snug text-stone-500 dark:text-stone-400 line-clamp-1">
+                        <span className="block text-[10px] mt-px leading-snug text-stone-500 dark:text-stone-400 line-clamp-1 group-hover:text-stone-600 dark:group-hover:text-stone-300 transition-colors">
                           {link.hint}
                         </span>
                       </span>
-                      <svg className="h-3.5 w-3.5 shrink-0 text-stone-300 dark:text-stone-600 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                      <svg
+                        className="h-3.5 w-3.5 shrink-0 translate-x-[-2px] text-stone-300 dark:text-violet-700/85 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 text-violet-400 dark:group-hover:text-emerald-300 transition-all duration-200"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        aria-hidden
+                      >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
                     </button>
