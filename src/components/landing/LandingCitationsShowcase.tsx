@@ -523,7 +523,7 @@ export default function LandingCitationsShowcase({ onNavigate }: LandingCitation
         aria-hidden
       />
       <div
-        className="absolute inset-0 bg-[radial-gradient(ellipse_80%_55%_at_50%_-18%,rgba(91,33,182,0.028),transparent_58%)] dark:bg-[radial-gradient(ellipse_80%_55%_at_50%_-12%,rgba(109,40,217,0.055),transparent_58%)] pointer-events-none"
+        className="absolute inset-0 bg-[radial-gradient(ellipse_80%_55%_at_50%_-18%,rgba(37,99,235,0.028),transparent_58%)] dark:bg-[radial-gradient(ellipse_80%_55%_at_50%_-12%,rgba(29,78,216,0.055),transparent_58%)] pointer-events-none"
         aria-hidden
       />
       <div
@@ -533,11 +533,46 @@ export default function LandingCitationsShowcase({ onNavigate }: LandingCitation
 
       <div ref={containerRef} className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <LandingScrollReveal>
-        <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
-          <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">
-            Citation finder
+        <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14 lg:mb-16">
+          <div className="inline-flex items-center gap-2 mb-5 rounded-full border border-blue-200/80 dark:border-blue-800/60 bg-white/80 dark:bg-stone-900/70 backdrop-blur px-3.5 py-1.5 shadow-sm">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600" />
+            </span>
+            <span className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.18em] text-blue-700 dark:text-blue-300">
+              Citations · live in dashboard
+            </span>
+          </div>
+          <h2
+            id="landing-citations-showcase-heading"
+            className="text-3xl sm:text-5xl lg:text-6xl font-semibold text-stone-900 dark:text-stone-100 tracking-tight leading-[1.1] mb-5"
+            style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+          >
+            <span className="block">Find academic sources</span>
+            <span className="relative inline-block mt-1 sm:mt-1.5 text-blue-700 dark:text-blue-400">
+              in seconds
+              <svg
+                className="absolute -bottom-1.5 left-0 w-full h-2 text-blue-400/80 dark:text-blue-500/70"
+                viewBox="0 0 200 8"
+                preserveAspectRatio="none"
+                aria-hidden
+              >
+                <path
+                  d="M2 6 Q50 1 100 5 T198 4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </span>
+          </h2>
+          <p className="text-base sm:text-xl text-stone-600 dark:text-stone-300 leading-relaxed max-w-2xl mx-auto font-sans font-normal mb-4">
+            Not just feedback on drafts — search real literature, then copy APA, MLA, or Chicago in one tap. Peer-reviewed
+            picks, filter by year, export-ready references.
           </p>
-          <p className="text-xs text-stone-500 dark:text-stone-400 mb-1 min-h-[1.25rem]" aria-live="polite">
+          <FeatureTickRow items={['APA', 'MLA', 'Chicago', 'Peer-reviewed', 'Export-ready']} />
+          <p className="text-xs text-stone-500 dark:text-stone-400 mt-3 min-h-[1.25rem]" aria-live="polite">
             {phase === 'cursor-to-input' && 'Moving pointer to the topic field…'}
             {phase === 'click-input' && 'Clicking in the topic field…'}
             {isTyping && 'Typing a sample topic…'}
@@ -547,32 +582,16 @@ export default function LandingCitationsShowcase({ onNavigate }: LandingCitation
             {showPanels && 'Sample sources and export — loops while you watch.'}
             {phase === 'idle' && 'Scroll here — demo runs when in view.'}
           </p>
-          <h2
-            id="landing-citations-showcase-heading"
-            className="text-2xl sm:text-3xl lg:text-[2.15rem] font-semibold text-stone-900 dark:text-stone-100 mb-3 tracking-tight leading-tight"
-            style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
-          >
-            Find{' '}
-            <span className="text-blue-700 dark:text-blue-400">
-              academic sources
-            </span>{' '}
-            in seconds
-          </h2>
-          <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed mb-4">
-            Not just feedback on drafts — search real literature, then copy APA, MLA, or Chicago in one tap. Peer-reviewed
-            picks, filter by year, export-ready references.
-          </p>
-          <FeatureTickRow items={['APA', 'MLA', 'Chicago', 'Peer-reviewed', 'Export-ready']} />
         </div>
 
         <div className="relative rounded-[1.35rem] sm:rounded-2xl overflow-hidden border border-stone-200/80 dark:border-stone-700/90 bg-white/90 dark:bg-stone-900/60 shadow-[0_24px_80px_-24px_rgba(15,23,42,0.18),0_0_0_1px_rgba(255,255,255,0.6)_inset] dark:shadow-[0_28px_90px_-28px_rgba(0,0,0,0.55),0_0_0_1px_rgba(255,255,255,0.04)_inset] backdrop-blur-md ring-1 ring-white/50 dark:ring-white/5">
           <div
-            className="h-1 w-full bg-gradient-to-r from-emerald-500 via-amber-400 to-violet-600 opacity-90 dark:opacity-95"
+            className="h-1 w-full bg-gradient-to-r from-emerald-500 via-amber-400 to-blue-600 opacity-90 dark:opacity-95"
             aria-hidden
           />
           <div className="relative rounded-b-2xl bg-gradient-to-b from-white/98 to-stone-50/90 dark:from-stone-900/85 dark:to-stone-950/90 p-4 sm:p-10">
             <div
-              className="absolute inset-0 bg-[radial-gradient(ellipse_90%_60%_at_50%_-25%,rgba(91,33,182,0.025),transparent_55%)] dark:bg-[radial-gradient(ellipse_90%_60%_at_50%_-20%,rgba(109,40,217,0.05),transparent_55%)] pointer-events-none rounded-b-2xl"
+              className="absolute inset-0 bg-[radial-gradient(ellipse_90%_60%_at_50%_-25%,rgba(37,99,235,0.025),transparent_55%)] dark:bg-[radial-gradient(ellipse_90%_60%_at_50%_-20%,rgba(29,78,216,0.05),transparent_55%)] pointer-events-none rounded-b-2xl"
               aria-hidden
             />
 
@@ -583,11 +602,11 @@ export default function LandingCitationsShowcase({ onNavigate }: LandingCitation
                     ? 'opacity-100 translate-y-0 translate-x-0 scale-100 -rotate-[11deg] blur-0'
                     : 'opacity-0 translate-y-8 translate-x-[-12px] scale-[0.94] -rotate-[14deg] blur-[1px] pointer-events-none'
                 }`}
-                style={{ filter: showPanels ? 'drop-shadow(0 22px 40px rgba(91,33,182,0.18))' : undefined }}
+                style={{ filter: showPanels ? 'drop-shadow(0 22px 40px rgba(37,99,235,0.18))' : undefined }}
                 aria-hidden={!showPanels}
               >
                 <p className="text-center mb-2">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-violet-800/95 dark:text-violet-300/95">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-800/95 dark:text-blue-300/95">
                     Sources
                   </span>
                   <span className="block text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">Peer-reviewed picks</span>
@@ -609,7 +628,7 @@ export default function LandingCitationsShowcase({ onNavigate }: LandingCitation
                   </button>
                   <button
                     type="button"
-                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[0.65rem] font-medium text-sm transition-all duration-200 bg-white dark:bg-stone-900 text-violet-800 dark:text-violet-300 shadow-[0_4px_14px_-4px_rgba(91,33,182,0.35)] border border-violet-200/70 dark:border-violet-800/50 ring-1 ring-violet-500/10"
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[0.65rem] font-medium text-sm transition-all duration-200 bg-white dark:bg-stone-900 text-blue-800 dark:text-blue-300 shadow-[0_4px_14px_-4px_rgba(37,99,235,0.35)] border border-blue-200/70 dark:border-blue-800/50 ring-1 ring-blue-500/10"
                     tabIndex={-1}
                   >
                     <span className="text-base" aria-hidden>
@@ -638,12 +657,12 @@ export default function LandingCitationsShowcase({ onNavigate }: LandingCitation
                 }`}
                 style={{
                   transitionDelay: showPanels ? '90ms' : '0ms',
-                  filter: showPanels ? 'drop-shadow(0 22px 40px rgba(91,33,182,0.16))' : undefined,
+                  filter: showPanels ? 'drop-shadow(0 22px 40px rgba(37,99,235,0.16))' : undefined,
                 }}
                 aria-hidden={!showPanels}
               >
                 <p className="text-center mb-2">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-violet-800/95 dark:text-violet-300/95">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-800/95 dark:text-blue-300/95">
                     Export
                   </span>
                   <span className="block text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">APA · MLA · Chicago</span>
@@ -657,7 +676,7 @@ export default function LandingCitationsShowcase({ onNavigate }: LandingCitation
                 className={`w-[min(46%,220px)] shrink-0 origin-bottom-left transition-all duration-[850ms] [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] -rotate-[8deg] ${
                   showPanels ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-5 scale-95 pointer-events-none'
                 }`}
-                style={{ filter: showPanels ? 'drop-shadow(0 16px 28px rgba(91,33,182,0.15))' : undefined }}
+                style={{ filter: showPanels ? 'drop-shadow(0 16px 28px rgba(37,99,235,0.15))' : undefined }}
               >
                 <InteractiveCitationsDemo variant="side-left" topicLabel={DEMO_QUERY} />
               </div>
@@ -665,7 +684,7 @@ export default function LandingCitationsShowcase({ onNavigate }: LandingCitation
                 className={`w-[min(46%,220px)] shrink-0 origin-bottom-right transition-all duration-[850ms] [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] rotate-[8deg] ${
                   showPanels ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-5 scale-95 pointer-events-none'
                 }`}
-                style={{ transitionDelay: showPanels ? '90ms' : '0ms', filter: showPanels ? 'drop-shadow(0 16px 28px rgba(91,33,182,0.14))' : undefined }}
+                style={{ transitionDelay: showPanels ? '90ms' : '0ms', filter: showPanels ? 'drop-shadow(0 16px 28px rgba(37,99,235,0.14))' : undefined }}
               >
                 <InteractiveCitationsDemo variant="side-right" />
               </div>
@@ -707,16 +726,16 @@ export default function LandingCitationsShowcase({ onNavigate }: LandingCitation
               <div
                 className={`relative rounded-2xl border transition-all duration-500 bg-white dark:bg-stone-900/50 ${
                   isSearching
-                    ? 'border-violet-400/70 dark:border-violet-500/50 shadow-[0_0_0_1px_rgba(139,92,246,0.25),0_20px_50px_-20px_rgba(91,33,182,0.35)] ring-2 ring-violet-400/20'
+                    ? 'border-blue-400/70 dark:border-blue-500/50 shadow-[0_0_0_1px_rgba(59,130,246,0.25),0_20px_50px_-20px_rgba(37,99,235,0.35)] ring-2 ring-blue-400/20'
                     : isFieldActive
-                      ? 'border-violet-300/60 dark:border-violet-600/40 shadow-[0_12px_40px_-18px_rgba(91,33,182,0.2)]'
-                      : 'border-violet-200/90 dark:border-violet-800/55 shadow-md shadow-stone-900/5'
+                      ? 'border-blue-300/60 dark:border-blue-600/40 shadow-[0_12px_40px_-18px_rgba(37,99,235,0.2)]'
+                      : 'border-blue-200/90 dark:border-blue-800/55 shadow-md shadow-stone-900/5'
                 }`}
               >
                 {isSearching && (
                   <div className="pointer-events-none absolute inset-0 rounded-2xl overflow-hidden" aria-hidden>
                     <div
-                      className="absolute inset-y-0 w-[55%] bg-gradient-to-r from-transparent via-violet-400/25 to-transparent motion-reduce:hidden"
+                      className="absolute inset-y-0 w-[55%] bg-gradient-to-r from-transparent via-blue-400/25 to-transparent motion-reduce:hidden"
                       style={{
                         left: '-55%',
                         animation: 'landingCiteShimmer 1.85s ease-in-out infinite',
@@ -745,18 +764,18 @@ export default function LandingCitationsShowcase({ onNavigate }: LandingCitation
                   disabled={buttonDisabled}
                   className={`group relative px-8 sm:px-10 py-3.5 rounded-2xl flex items-center justify-center gap-2.5 transition-all duration-300 font-semibold text-base min-w-[220px] overflow-hidden ${
                     buttonFilled || isSearching
-                      ? 'bg-gradient-to-b from-violet-600 to-violet-800 dark:from-violet-500 dark:to-violet-700 text-white shadow-[0_12px_32px_-8px_rgba(91,33,182,0.55)] ring-1 ring-violet-400/30 hover:brightness-105 active:scale-[0.98]'
+                      ? 'bg-gradient-to-b from-blue-600 to-blue-800 dark:from-blue-500 dark:to-blue-700 text-white shadow-[0_12px_32px_-8px_rgba(37,99,235,0.55)] ring-1 ring-blue-400/30 hover:brightness-105 active:scale-[0.98]'
                       : 'bg-stone-200 dark:bg-stone-700 text-stone-400 cursor-not-allowed'
                   } ${
                     phase === 'cursor-to-button' || phase === 'click-button'
-                      ? 'ring-2 ring-violet-400/40 ring-offset-2 ring-offset-white dark:ring-offset-stone-900'
+                      ? 'ring-2 ring-blue-400/40 ring-offset-2 ring-offset-white dark:ring-offset-stone-900'
                       : ''
                   }`}
                   aria-busy={isSearching}
                 >
                   {(phase === 'cursor-to-button' || phase === 'click-button') && (
                     <span
-                      className="absolute inset-0 bg-violet-400/20 animate-ping rounded-2xl opacity-40"
+                      className="absolute inset-0 bg-blue-400/20 animate-ping rounded-2xl opacity-40"
                       aria-hidden
                     />
                   )}
@@ -808,7 +827,7 @@ export default function LandingCitationsShowcase({ onNavigate }: LandingCitation
                       key={topic}
                       className={`px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors duration-500 ${
                         isDemo && showPanels
-                          ? 'border-violet-400/90 bg-gradient-to-b from-violet-50 to-violet-100/80 dark:from-violet-950/50 dark:to-violet-900/30 text-violet-900 dark:text-violet-100 shadow-sm'
+                          ? 'border-blue-400/90 bg-gradient-to-b from-blue-50 to-blue-100/80 dark:from-blue-950/50 dark:to-blue-900/30 text-blue-900 dark:text-blue-100 shadow-sm'
                           : 'border-stone-200/90 dark:border-stone-600 text-stone-500 dark:text-stone-400'
                       }`}
                     >
@@ -827,14 +846,14 @@ export default function LandingCitationsShowcase({ onNavigate }: LandingCitation
           <button
             type="button"
             onClick={() => onNavigate('citations')}
-            className="inline-flex items-center justify-center px-7 py-3.5 rounded-2xl font-semibold text-white bg-gradient-to-b from-violet-600 to-violet-800 dark:from-violet-500 dark:to-violet-700 shadow-[0_14px_36px_-10px_rgba(91,33,182,0.55)] hover:brightness-105 active:scale-[0.98] transition-all ring-1 ring-violet-400/25"
+            className="inline-flex items-center justify-center px-7 py-3.5 rounded-2xl font-semibold text-white bg-gradient-to-b from-blue-600 to-blue-800 dark:from-blue-500 dark:to-blue-700 shadow-[0_14px_36px_-10px_rgba(37,99,235,0.55)] hover:brightness-105 active:scale-[0.98] transition-all ring-1 ring-blue-400/25"
           >
             Open citation finder
           </button>
           <button
             type="button"
             onClick={replay}
-            className="text-sm font-semibold text-violet-700 dark:text-violet-400 hover:underline underline-offset-4"
+            className="text-sm font-semibold text-blue-700 dark:text-blue-400 hover:underline underline-offset-4"
           >
             Restart demo
           </button>

@@ -53,7 +53,7 @@ function typeIcon(t: string) {
 function accessibilityClass(a: string) {
   const map: Record<string, string> = {
     'Open Access':
-      'bg-violet-50 text-violet-800 border-violet-200/90 dark:bg-violet-950/50 dark:text-violet-200 dark:border-violet-800/60',
+      'bg-blue-50 text-blue-800 border-blue-200/90 dark:bg-blue-950/50 dark:text-blue-200 dark:border-blue-800/60',
     'Subscription Required':
       'bg-amber-50 text-amber-800 border-amber-200/90 dark:bg-amber-950/40 dark:text-amber-200 dark:border-amber-800/50',
     'Library Access':
@@ -66,7 +66,7 @@ export default function LandingCitationResultsPreview() {
   return (
     <div className="mt-12 sm:mt-16">
       <div className="text-center max-w-2xl mx-auto mb-8">
-        <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-violet-800/90 dark:text-violet-300/95 mb-2">
+        <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-blue-800/90 dark:text-blue-300/95 mb-2">
           After you search
         </p>
         <h3
@@ -88,7 +88,7 @@ export default function LandingCitationResultsPreview() {
             <span className="text-stone-300 dark:text-stone-600" aria-hidden>
               ·
             </span>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-violet-100 text-violet-800 dark:bg-violet-950/60 dark:text-violet-200 border border-violet-200/80 dark:border-violet-800/50">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-200 border border-blue-200/80 dark:border-blue-800/50">
               APA 7th
             </span>
             <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-stone-200/90 text-stone-800 dark:bg-stone-800 dark:text-stone-200">
@@ -123,7 +123,7 @@ export default function LandingCitationResultsPreview() {
                     <p className="text-xs text-stone-500 dark:text-stone-400 capitalize">{c.type.replace(/_/g, ' ')}</p>
                   </div>
                 </div>
-                <span className="text-xs font-semibold text-violet-700 dark:text-violet-400 sm:text-right shrink-0">
+                <span className="text-xs font-semibold text-blue-700 dark:text-blue-400 sm:text-right shrink-0">
                   Sample layout
                 </span>
               </div>
@@ -138,21 +138,21 @@ export default function LandingCitationResultsPreview() {
               <div className="mb-4">
                 <h4 className="font-semibold text-stone-900 dark:text-stone-100 mb-2 flex flex-wrap items-center gap-2 text-sm">
                   <span className="inline-flex items-center gap-1.5">
-                    <svg className="w-4 h-4 text-violet-600 dark:text-violet-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
                     Ready-to-use sentence
                   </span>
-                  <span className="text-[10px] uppercase tracking-wide bg-violet-100 dark:bg-violet-950/50 text-violet-800 dark:text-violet-300 px-2 py-0.5 rounded-full font-bold">
+                  <span className="text-[10px] uppercase tracking-wide bg-blue-100 dark:bg-blue-950/50 text-blue-800 dark:text-blue-300 px-2 py-0.5 rounded-full font-bold">
                     In your paper
                   </span>
                 </h4>
-                <div className="rounded-xl p-4 border border-violet-200/90 dark:border-violet-800/50 bg-violet-50/90 dark:bg-violet-950/25">
+                <div className="rounded-xl p-4 border border-blue-200/90 dark:border-blue-800/50 bg-blue-50/90 dark:bg-blue-950/25">
                   <p className="text-sm text-stone-800 dark:text-stone-200 leading-relaxed">{c.ready_to_use_sentence}</p>
-                  <div className="mt-3 pt-3 border-t border-violet-200/80 dark:border-violet-800/40">
-                    <p className="text-xs text-violet-800 dark:text-violet-300">
+                  <div className="mt-3 pt-3 border-t border-blue-200/80 dark:border-blue-800/40">
+                    <p className="text-xs text-blue-800 dark:text-blue-300">
                       <strong className="font-semibold">In-text:</strong>{' '}
-                      <code className="bg-white/90 dark:bg-stone-900 px-2 py-0.5 rounded text-[13px] font-mono text-violet-900 dark:text-violet-200">
+                      <code className="bg-white/90 dark:bg-stone-900 px-2 py-0.5 rounded text-[13px] font-mono text-blue-900 dark:text-blue-200">
                         {c.in_text_citation}
                       </code>
                     </p>
@@ -162,7 +162,7 @@ export default function LandingCitationResultsPreview() {
 
               <div className="mb-4">
                 <h4 className="font-semibold text-stone-900 dark:text-stone-100 mb-2 flex items-center gap-2 text-sm">
-                  <svg className="w-4 h-4 text-violet-600 dark:text-violet-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   Why this source is relevant
@@ -172,7 +172,7 @@ export default function LandingCitationResultsPreview() {
 
               <div>
                 <h4 className="font-semibold text-stone-900 dark:text-stone-100 mb-2 flex items-center gap-2 text-sm">
-                  <svg className="w-4 h-4 text-violet-600 dark:text-violet-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                   </svg>
                   Key points
@@ -180,7 +180,7 @@ export default function LandingCitationResultsPreview() {
                 <ul className="space-y-2">
                   {c.key_points.map((point, i) => (
                     <li key={i} className="flex items-start gap-2.5 text-sm text-stone-700 dark:text-stone-300">
-                      <span className="w-1.5 h-1.5 rounded-full bg-violet-600 dark:bg-violet-500 mt-2 shrink-0" aria-hidden />
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-500 mt-2 shrink-0" aria-hidden />
                       <span>{point}</span>
                     </li>
                   ))}

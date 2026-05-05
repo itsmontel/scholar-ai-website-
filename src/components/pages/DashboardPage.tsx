@@ -3211,12 +3211,12 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                   {/* Typing box - gradient border like Analyze (same width as analyze/citations) */}
                   <div className="relative mb-2 max-w-3xl mx-auto">
                     <div className="relative rounded-2xl border border-stone-200/90 dark:border-stone-600 bg-white dark:bg-stone-900/40 shadow-sm focus-within:ring-2 focus-within:ring-violet-500/30 focus-within:border-violet-300/50 dark:focus-within:border-violet-600/50 transition-shadow">
-                      <div className="relative rounded-[inherit] min-h-[140px] sm:min-h-[180px]">
+                      <div className="relative rounded-[inherit] min-h-[172px] sm:min-h-[220px]">
                         <textarea
                           value={inputText}
                           onChange={(e) => setInputText(e.target.value)}
                           placeholder="Paste your study notes, textbook chapter, article, or any learning material here... (minimum 50 words)"
-                          className="relative w-full min-h-[140px] sm:min-h-[180px] p-5 sm:p-6 text-stone-800 dark:text-stone-100 text-[15px] sm:text-lg bg-transparent border-none outline-none resize-none placeholder-stone-400 dark:placeholder-stone-500 leading-[1.65]"
+                          className="relative w-full min-h-[172px] sm:min-h-[220px] p-5 sm:p-6 text-stone-800 dark:text-stone-100 text-[15px] sm:text-lg bg-transparent border-none outline-none resize-none placeholder-stone-400 dark:placeholder-stone-500 leading-[1.65]"
                           disabled={isGeneratingStudyPack}
                         />
                         <div className="absolute bottom-4 left-5 text-sm text-stone-400 dark:text-stone-500 font-medium">

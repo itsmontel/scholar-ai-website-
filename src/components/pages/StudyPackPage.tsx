@@ -2,8 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import Header from '../common/Header';
 import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
-import { FeatureTickRow } from '../common/FeatureTickRow';
-import InteractiveStudyPackDemo from '../landing/InteractiveStudyPackDemo';
 import { trackStudyPackGenerated, getStats } from '../../data/achievements';
 import { trackEvent } from '../../utils/analytics';
 import { applyPageSeoTags, absoluteCanonicalUrl, injectJsonLd, removeJsonLd } from '../../utils/seo';
@@ -333,7 +331,7 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
         className={
           embedded
             ? 'relative max-w-none mx-auto px-0 pt-0 pb-2 w-full min-w-0 overflow-x-hidden'
-            : 'relative max-w-[1240px] mx-auto px-3 sm:px-6 lg:px-8 pt-3 sm:pt-6 pb-24 sm:pb-16 w-full min-w-0 overflow-x-hidden'
+            : 'relative max-w-[1360px] mx-auto px-3 sm:px-6 lg:px-8 pt-3 sm:pt-6 pb-24 sm:pb-16 w-full min-w-0 overflow-x-hidden'
         }
       >
         <input
@@ -406,92 +404,91 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
         )}
 
         {loadingStats ? (
-          <div className={`${embedded ? 'grid grid-cols-2 gap-3 mb-4' : 'grid grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-8 pt-2 sm:pt-4 pb-2 sm:pb-4'}`}>
-            {Array.from({ length: embedded ? 2 : 6 }).map((_, i) => (
-              <div
-                key={i}
-                className="p-3 sm:p-4 rounded-2xl border border-stone-200/50 dark:border-stone-700/30 bg-stone-50 dark:bg-stone-800/50 animate-pulse"
-              >
-                <div className="w-9 h-9 sm:w-10 sm:h-10 bg-stone-200 dark:bg-stone-700 rounded-xl mb-2.5 sm:mb-3" />
-                <div className="h-3.5 sm:h-4 bg-stone-200 dark:bg-stone-700 rounded-lg w-3/4 mb-1.5 sm:mb-2" />
-                <div className="h-2.5 sm:h-3 bg-stone-100 dark:bg-stone-700/60 rounded-lg w-full" />
+          embedded ? (
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              {Array.from({ length: 2 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="p-3 sm:p-4 rounded-2xl border border-stone-200/50 dark:border-stone-700/30 bg-stone-50 dark:bg-stone-800/50 animate-pulse"
+                >
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 bg-stone-200 dark:bg-stone-700 rounded-xl mb-2.5 sm:mb-3" />
+                  <div className="h-3.5 sm:h-4 bg-stone-200 dark:bg-stone-700 rounded-lg w-3/4 mb-1.5 sm:mb-2" />
+                  <div className="h-2.5 sm:h-3 bg-stone-100 dark:bg-stone-700/60 rounded-lg w-full" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="max-w-6xl mx-auto mb-8 sm:mb-10 animate-pulse">
+              <div className="rounded-[1.75rem] border border-orange-200/40 dark:border-orange-900/30 bg-orange-50/30 dark:bg-stone-900/50 p-6 sm:p-10">
+                <div className="h-10 bg-stone-200/70 dark:bg-stone-700/50 rounded-xl w-56 mx-auto mb-6" />
+                <div className="h-[200px] sm:h-[248px] rounded-2xl bg-stone-200/60 dark:bg-stone-700/40 mb-4" />
+                <div className="flex justify-between gap-3">
+                  <div className="h-12 w-36 rounded-xl bg-stone-200/60 dark:bg-stone-700/40" />
+                  <div className="h-12 flex-1 max-w-xs rounded-xl bg-stone-200/60 dark:bg-stone-700/40" />
+                </div>
               </div>
-            ))}
-          </div>
+            </div>
+          )
         ) : (
           <div className={embedded ? 'pb-2 overflow-visible' : 'pt-2 sm:pt-4 pb-4 sm:pb-6 overflow-visible'} data-tutorial="study-pack-input">
             <div
               className={`relative overflow-hidden scroll-mt-8 ${
                 embedded
                   ? 'rounded-3xl mb-3 sm:mb-4 bg-white dark:bg-stone-900/85 ring-1 ring-orange-200/85 dark:ring-orange-900/35 shadow-[0_20px_50px_-18px_rgba(234,88,12,0.12),0_8px_30px_-12px_rgba(15,23,42,0.08)] dark:shadow-[0_24px_60px_-20px_rgba(0,0,0,0.55)]'
-                  : 'rounded-2xl mb-4 sm:mb-8 border border-stone-200/90 dark:border-stone-700/80 bg-white/95 dark:bg-stone-900/60 shadow-md'
+                  : 'rounded-[1.75rem] mb-6 sm:mb-10 max-w-6xl mx-auto border border-orange-200/90 dark:border-orange-900/40 bg-[#fffdfb] dark:bg-stone-900/85 shadow-[0_20px_60px_-28px_rgba(234,88,12,0.14),0_8px_32px_-14px_rgba(15,23,42,0.07)] ring-1 ring-orange-100/80 dark:ring-orange-950/35'
               }`}
             >
               <div
-                className={`absolute inset-x-0 top-0 h-1 ${embedded ? 'h-[3px] bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 opacity-[0.95]' : 'h-1 bg-gradient-to-r from-emerald-500 via-amber-500 to-red-500 opacity-90'}`}
+                className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-amber-400 via-orange-400 to-rose-500 opacity-[0.95]"
                 aria-hidden
               />
-              {embedded && (
-                <>
-                  <div className="pointer-events-none absolute -top-24 -right-20 w-[19rem] h-[19rem] rounded-full bg-orange-400/12 dark:bg-orange-500/12 blur-3xl" aria-hidden />
-                  <div className="pointer-events-none absolute -bottom-20 -left-16 w-64 h-64 rounded-full bg-amber-300/14 dark:bg-amber-600/14 blur-[2.75rem]" aria-hidden />
-                </>
-              )}
-              <div className={`relative ${embedded ? 'p-4 sm:p-6 lg:p-8' : 'p-4 sm:p-10'}`}>
-                <div className={embedded ? 'relative' : 'relative lg:grid lg:grid-cols-[minmax(0,220px)_minmax(0,1fr)_minmax(0,220px)] xl:grid-cols-[minmax(0,248px)_minmax(0,1fr)_minmax(0,248px)] lg:gap-8 xl:gap-10 lg:items-stretch'}>
-                  <div className={embedded ? 'hidden' : 'hidden lg:block relative self-end justify-self-start w-[236px] xl:w-[248px] pointer-events-auto -rotate-[11deg] origin-bottom-left drop-shadow-lg z-[5]'} aria-label="Sample flashcard preview">
-                    <p className="text-center mb-2">
-                      <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-violet-800/95 dark:text-violet-300/95">
-                        Flashcards
-                      </span>
-                      <span className="block text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">Tap to flip</span>
-                    </p>
-                    <InteractiveStudyPackDemo variant="side-left" />
+              <>
+                <div className="pointer-events-none absolute -top-24 -right-20 w-[19rem] h-[19rem] rounded-full bg-orange-400/12 dark:bg-orange-500/12 blur-3xl" aria-hidden />
+                <div className="pointer-events-none absolute -bottom-20 -left-16 w-64 h-64 rounded-full bg-amber-300/14 dark:bg-amber-600/14 blur-[2.75rem]" aria-hidden />
+              </>
+              <div className={`relative ${embedded ? 'p-4 sm:p-6 lg:p-8' : 'p-4 sm:p-8 lg:p-10'}`}>
+                <div className="relative min-w-0">
+                  <div className="text-center mb-3 sm:mb-4">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50 dark:bg-orange-950/45 text-orange-950 dark:text-orange-200 ring-1 ring-orange-200/90 dark:ring-orange-800/55 text-[10px] sm:text-[11px] font-semibold tracking-[0.12em] uppercase">
+                      <svg className="w-3.5 h-3.5 opacity-90 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                      </svg>
+                      Six tools, one paste
+                    </span>
                   </div>
                   <div className="min-w-0 self-start">
-                    {embedded && (
-                      <div className="text-center mb-3 sm:mb-4">
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50 dark:bg-orange-950/45 text-orange-900 dark:text-orange-200 ring-1 ring-orange-200/90 dark:ring-orange-800/55 text-[11px] sm:text-xs font-semibold tracking-wide uppercase">
-                          <span className="text-sm normal-case opacity-95" aria-hidden>
-                            📦
-                          </span>
-                          Six tools, one paste
-                        </span>
-                      </div>
-                    )}
                     <h1
                       className={`relative dash-serif font-semibold text-stone-900 dark:text-stone-50 text-center tracking-tight text-2xl sm:text-3xl lg:text-[2.4rem] leading-[1.1] px-1 ${embedded ? 'mb-2' : 'mb-1.5 sm:mb-2'}`}
                       style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
                     >
                       Turn your notes into{' '}
-                      <span className="bg-gradient-to-r from-orange-700 via-amber-600 to-rose-600 dark:from-orange-300 dark:via-amber-300 dark:to-rose-300 bg-clip-text text-transparent">
+                      <span className="bg-gradient-to-r from-orange-600 via-orange-500 to-rose-600 dark:from-orange-400 dark:via-amber-400 dark:to-rose-400 bg-clip-text text-transparent">
                         6 study tools
                       </span>
                     </h1>
-                    <p className={`relative text-stone-600 dark:text-stone-300 text-sm sm:text-base text-center max-w-xl mx-auto leading-relaxed ${embedded ? 'mb-5' : 'mb-6 sm:mb-8'}`}>
+                    <p className={`relative text-stone-500 dark:text-stone-400 text-sm sm:text-base text-center max-w-xl mx-auto leading-relaxed ${embedded ? 'mb-5' : 'mb-5 sm:mb-6'}`}>
                       Lesson, flashcards, quiz, crossword, Crater Blast & Word Tower — all from one paste
                     </p>
-                    {!embedded && <FeatureTickRow variant="prominent" className="relative" items={['Lesson', 'Flashcards', 'Quiz', 'Crossword', 'Crater Blast', 'Word Tower']} />}
                     {!embedded && (
                       <>
-                        <div className="relative flex rounded-xl bg-stone-100/90 dark:bg-stone-800/80 p-1 mb-2 sm:mb-3 max-w-lg mx-auto border border-stone-200/80 dark:border-stone-700/60">
+                        <div className="relative flex rounded-2xl bg-orange-50/70 dark:bg-orange-950/25 p-1 mb-2 sm:mb-4 max-w-lg mx-auto border border-orange-200/80 dark:border-orange-800/50 shadow-sm shadow-orange-900/5">
                           <button
                             type="button"
                             onClick={goAnalyze}
-                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200"
+                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[0.65rem] font-medium text-sm transition-all duration-200 text-stone-600 dark:text-stone-400 hover:text-orange-950 dark:hover:text-stone-200 hover:bg-white/70 dark:hover:bg-stone-800/50"
                           >
                             <span className="text-lg">📝</span> Analyze Text
                           </button>
                           <button
                             type="button"
-                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 bg-white dark:bg-stone-700 text-orange-800 dark:text-orange-200 shadow-sm ring-1 ring-stone-200/80 dark:ring-stone-600/80"
+                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[0.65rem] font-medium text-sm transition-all duration-200 bg-white dark:bg-stone-800 text-orange-900 dark:text-orange-200 shadow-sm ring-1 ring-orange-200/85 dark:ring-orange-800/55"
                           >
                             <span className="text-lg">📦</span> Study Pack
                           </button>
                           <button
                             type="button"
                             onClick={goCitations}
-                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200"
+                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[0.65rem] font-medium text-sm transition-all duration-200 text-stone-600 dark:text-stone-400 hover:text-orange-950 dark:hover:text-stone-200 hover:bg-white/70 dark:hover:bg-stone-800/50"
                           >
                             <span className="text-lg">📚</span> Citations
                           </button>
@@ -522,32 +519,17 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                       </>
                     )}
                   </div>
-                  <div className={embedded ? 'hidden' : 'hidden lg:block relative self-end justify-self-end w-[236px] xl:w-[248px] pointer-events-auto rotate-[11deg] origin-bottom-right drop-shadow-lg z-[5]'} aria-label="Sample quiz preview">
-                    <p className="text-center mb-2">
-                      <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-800/95 dark:text-emerald-300/95">Quiz</span>
-                      <span className="block text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">Check understanding</span>
-                    </p>
-                    <InteractiveStudyPackDemo variant="side-right" />
-                  </div>
-                </div>
-                <div className={embedded ? 'hidden' : 'lg:hidden mt-8 sm:mt-10 mb-3 flex flex-row justify-between items-end gap-3 sm:gap-4 px-1'}>
-                  <div className="w-[min(46%,220px)] shrink-0 -rotate-[8deg] origin-bottom-left drop-shadow-lg transition-transform hover:scale-[1.02]">
-                    <InteractiveStudyPackDemo variant="side-left" />
-                  </div>
-                  <div className="w-[min(46%,220px)] shrink-0 rotate-[8deg] origin-bottom-right drop-shadow-lg transition-transform hover:scale-[1.02]">
-                    <InteractiveStudyPackDemo variant="side-right" />
-                  </div>
                 </div>
 
-                <div className={`relative mb-2 max-w-3xl mx-auto ${embedded ? 'mt-0' : ''}`}>
+                <div className={`relative mb-2 max-w-5xl mx-auto ${embedded ? 'mt-0' : 'mt-1'}`}>
                   <div
                     className={
                       embedded
-                        ? 'relative rounded-2xl border transition-all duration-300 shadow-sm focus-within:shadow-md focus-within:ring-2 focus-within:ring-orange-500/35 border-orange-200/80 dark:border-orange-800/45 bg-white dark:bg-stone-900/40 focus-within:border-orange-400/70 dark:focus-within:border-orange-600/55'
-                        : 'relative rounded-2xl border border-stone-200/90 dark:border-stone-600 bg-white dark:bg-stone-900/40 shadow-sm focus-within:ring-2 focus-within:ring-orange-500/30 focus-within:border-orange-300/50 dark:focus-within:border-orange-600/50 transition-shadow'
+                        ? 'relative rounded-[1.25rem] border transition-all duration-300 shadow-sm focus-within:shadow-md focus-within:ring-2 focus-within:ring-orange-500/35 border-orange-200/80 dark:border-orange-800/45 bg-white dark:bg-stone-900/40 focus-within:border-orange-400/70 dark:focus-within:border-orange-600/55'
+                        : 'relative rounded-[1.25rem] border transition-all duration-300 shadow-sm focus-within:shadow-md focus-within:ring-2 focus-within:ring-orange-500/30 border-orange-200/90 dark:border-orange-800/45 bg-white/90 dark:bg-stone-950/50 focus-within:border-orange-400/65 dark:focus-within:border-orange-600/50'
                     }
                   >
-                    <div className={`relative rounded-[inherit] ${embedded ? 'min-h-[132px] sm:min-h-[150px]' : 'min-h-[140px] sm:min-h-[180px]'}`}>
+                    <div className={`relative rounded-[inherit] ${embedded ? 'min-h-[156px] sm:min-h-[176px]' : 'min-h-[172px] sm:min-h-[220px]'}`}>
                       <textarea
                         value={inputText}
                         onChange={(e) => {
@@ -560,7 +542,7 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                           }
                         }}
                         placeholder="Paste your study notes, textbook chapter, article, or any learning material here... (minimum 50 words)"
-                        className={`relative w-full p-5 sm:p-6 text-stone-800 dark:text-stone-100 text-[15px] sm:text-lg bg-transparent border-none outline-none resize-none placeholder-stone-400 dark:placeholder-stone-500 leading-[1.65] ${embedded ? 'min-h-[132px] sm:min-h-[150px]' : 'min-h-[140px] sm:min-h-[180px]'}`}
+                        className={`relative w-full p-5 sm:p-6 text-stone-800 dark:text-stone-100 text-[15px] sm:text-lg bg-transparent border-none outline-none resize-none placeholder-stone-400 dark:placeholder-stone-500 leading-[1.65] ${embedded ? 'min-h-[156px] sm:min-h-[176px]' : 'min-h-[172px] sm:min-h-[220px]'}`}
                         disabled={isGeneratingStudyPack}
                       />
                       <div className="absolute bottom-4 left-5 text-sm text-stone-400 dark:text-stone-500 font-medium">
@@ -578,9 +560,13 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                         onClick={() => studyToolsFileInputRef.current?.click()}
                         disabled={isParsingStudyDoc || isGeneratingStudyPack}
                         className={`flex items-center gap-2.5 px-5 py-3 rounded-xl font-semibold text-sm transition-all disabled:opacity-50 border ${
-                          showFirstStudyPackPrompt
-                            ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-900 dark:text-orange-200 border-orange-300/80 dark:border-orange-700/60 shadow-md ring-2 ring-orange-400/25'
-                            : 'bg-stone-50 dark:bg-stone-800/60 text-stone-800 dark:text-stone-200 border-stone-200/90 dark:border-stone-600 hover:bg-stone-100 dark:hover:bg-stone-700/60 shadow-sm'
+                          embedded
+                            ? showFirstStudyPackPrompt
+                              ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-900 dark:text-orange-200 border-orange-300/80 dark:border-orange-700/60 shadow-md ring-2 ring-orange-400/25'
+                              : 'bg-stone-50 dark:bg-stone-800/60 text-stone-800 dark:text-stone-200 border-stone-200/90 dark:border-stone-600 hover:bg-stone-100 dark:hover:bg-stone-700/60 shadow-sm'
+                            : showFirstStudyPackPrompt
+                              ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-900 dark:text-orange-200 border-orange-300/80 dark:border-orange-700/60 shadow-md ring-2 ring-orange-400/25'
+                              : 'bg-white dark:bg-stone-900/70 text-stone-800 dark:text-stone-200 border-stone-300/90 dark:border-stone-600 hover:bg-orange-50/50 dark:hover:bg-stone-800 shadow-sm'
                         }`}
                       >
                         {isParsingStudyDoc ? (
@@ -613,7 +599,7 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                       type="button"
                       onClick={handleGenerateStudyPack}
                       disabled={isGeneratingStudyPack || quizExhausted || getWordCount(inputText) < 50}
-                      className="px-8 sm:px-10 py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 font-semibold text-base bg-orange-600 hover:bg-orange-700 dark:bg-orange-600 disabled:bg-stone-400 dark:disabled:bg-stone-600 text-white shadow-md shadow-orange-900/15 ring-1 ring-orange-900/10 hover:-translate-y-0.5 active:scale-[0.98] disabled:hover:translate-y-0 disabled:cursor-not-allowed"
+                      className="px-8 sm:px-10 py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 font-semibold text-base bg-orange-600 hover:bg-orange-700 dark:bg-orange-600 disabled:bg-stone-300 dark:disabled:bg-stone-600 text-white shadow-md shadow-orange-900/15 ring-1 ring-orange-900/10 hover:-translate-y-0.5 active:scale-[0.98] disabled:shadow-none disabled:ring-0 disabled:hover:translate-y-0 disabled:cursor-not-allowed"
                     >
                       {isGeneratingStudyPack ? (
                         <>
@@ -630,54 +616,58 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                   </div>
                 </div>
 
-                {embedded && (
-                  <section
-                    className="mt-7 sm:mt-8 rounded-2xl border border-orange-200/80 dark:border-orange-900/40 bg-gradient-to-b from-white/95 to-orange-50/45 dark:from-stone-900/55 dark:to-orange-950/20 p-4 sm:p-6 ring-1 ring-orange-100/90 dark:ring-orange-950/40 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.65)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]"
-                    aria-labelledby="embedded-study-pack-previews-heading"
+                <section
+                  className={`rounded-2xl border border-orange-200/80 dark:border-orange-900/40 bg-gradient-to-b from-white/95 to-orange-50/45 dark:from-stone-900/55 dark:to-orange-950/20 p-4 sm:p-6 ring-1 ring-orange-100/90 dark:ring-orange-950/40 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.65)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] ${
+                    embedded ? 'mt-7 sm:mt-8' : 'mt-8 sm:mt-10 pt-6 sm:pt-8 border-t border-orange-200/55 dark:border-orange-900/40'
+                  }`}
+                  aria-labelledby="study-pack-previews-heading"
+                >
+                  <h2
+                    id="study-pack-previews-heading"
+                    className="text-center dash-serif text-base sm:text-lg font-semibold text-stone-900 dark:text-stone-100"
+                    style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
                   >
-                    <h2 id="embedded-study-pack-previews-heading" className="text-center dash-serif text-sm sm:text-base font-semibold text-stone-800 dark:text-stone-100">
-                      What&apos;s included in your pack
-                    </h2>
-                    <p className="mt-1 text-center text-[11px] sm:text-xs text-stone-500 dark:text-stone-400">
-                      Quick previews for each study activity.
-                    </p>
-                    <div className="mt-4 flex flex-nowrap gap-2 sm:gap-3 justify-between overflow-x-auto pb-3 snap-x snap-mandatory [scrollbar-width:thin]">
-                      {EMBEDDED_STUDY_PACK_PREVIEWS.map((slot) => (
-                        <figure
-                          key={slot.label}
-                          className="snap-center shrink-0 w-[min(46vw,200px)] sm:w-[min(22vw,200px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-950 border-2 border-orange-500 dark:border-orange-400 ring-2 ring-orange-200/60 dark:ring-orange-950/55 shadow-md shadow-orange-900/12 flex flex-col"
-                        >
-                          <div className="relative aspect-[4/5] w-full bg-stone-950/5 dark:bg-black/40">
-                            {slot.video ? (
-                              <video
-                                className="absolute inset-0 h-full w-full object-cover object-center"
-                                src={slot.video.src}
-                                title={slot.video.alt}
-                                aria-label={slot.video.alt}
-                                muted
-                                loop
-                                playsInline
-                                autoPlay
-                                preload="metadata"
-                              />
-                            ) : slot.fallbackImage ? (
-                              <img
-                                src={slot.fallbackImage.src}
-                                alt={slot.fallbackImage.alt}
-                                className="absolute inset-0 h-full w-full object-cover object-top"
-                                loading="lazy"
-                                decoding="async"
-                              />
-                            ) : null}
-                          </div>
-                          <figcaption className="px-2 py-1.5 text-center text-[10px] sm:text-[11px] font-semibold text-stone-600 dark:text-stone-400 border-t border-stone-200/70 dark:border-stone-700/70 bg-white/95 dark:bg-stone-900/95">
-                            {slot.label}
-                          </figcaption>
-                        </figure>
-                      ))}
-                    </div>
-                  </section>
-                )}
+                    What&apos;s included in your pack
+                  </h2>
+                  <p className="mt-1 text-center text-xs sm:text-sm text-stone-500 dark:text-stone-400">
+                    Quick previews for each study activity.
+                  </p>
+                  <div className="mt-4 flex flex-nowrap gap-2 sm:gap-3 justify-between overflow-x-auto pb-3 snap-x snap-mandatory [scrollbar-width:thin] max-w-5xl mx-auto">
+                    {EMBEDDED_STUDY_PACK_PREVIEWS.map((slot) => (
+                      <figure
+                        key={slot.label}
+                        className="snap-center shrink-0 w-[min(46vw,220px)] sm:w-[min(20vw,220px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-950 border-2 border-orange-500 dark:border-orange-400 ring-2 ring-orange-200/60 dark:ring-orange-950/55 shadow-md shadow-orange-900/12 flex flex-col"
+                      >
+                        <div className="relative aspect-[4/5] w-full bg-stone-950/5 dark:bg-black/40">
+                          {slot.video ? (
+                            <video
+                              className="absolute inset-0 h-full w-full object-cover object-center"
+                              src={slot.video.src}
+                              title={slot.video.alt}
+                              aria-label={slot.video.alt}
+                              muted
+                              loop
+                              playsInline
+                              autoPlay
+                              preload="metadata"
+                            />
+                          ) : slot.fallbackImage ? (
+                            <img
+                              src={slot.fallbackImage.src}
+                              alt={slot.fallbackImage.alt}
+                              className="absolute inset-0 h-full w-full object-cover object-top"
+                              loading="lazy"
+                              decoding="async"
+                            />
+                          ) : null}
+                        </div>
+                        <figcaption className="px-2 py-1.5 text-center text-[10px] sm:text-[11px] font-semibold text-stone-600 dark:text-stone-400 border-t border-stone-200/70 dark:border-stone-700/70 bg-white/95 dark:bg-stone-900/95">
+                          {slot.label}
+                        </figcaption>
+                      </figure>
+                    ))}
+                  </div>
+                </section>
 
                 {isParsingStudyDoc && (
                   <div className="absolute inset-0 rounded-2xl bg-white/95 dark:bg-stone-900/90 backdrop-blur-sm flex items-center justify-center gap-3 z-20 pointer-events-auto" aria-live="polite" aria-busy="true">

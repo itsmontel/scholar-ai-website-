@@ -13,7 +13,7 @@ export function WriteScholarEditorialBackgroundLayers({
   const pos = position === 'fixed' ? 'fixed' : 'absolute';
   return (
     <>
-      <div className={`${pos} inset-0 -z-10 bg-[#f8fafc] dark:bg-[#0c0a09] ${className}`} aria-hidden />
+      <div className={`${pos} inset-0 -z-10 bg-[#f8fafc] dark:bg-[#0c0a09] pointer-events-none ${className}`} aria-hidden />
       <div
         className={`${pos} inset-0 -z-10 bg-gradient-to-b from-white via-[#f8fafc] to-[#f1f5f9] dark:from-stone-950 dark:via-stone-950 dark:to-stone-950 pointer-events-none`}
         aria-hidden

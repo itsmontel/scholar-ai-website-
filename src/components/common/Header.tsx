@@ -186,29 +186,25 @@ const Header: React.FC<HeaderProps> = ({
       { id: 'about', label: 'About' },
     ];
     const publicNavActiveCls =
-      'bg-white dark:bg-stone-800 text-violet-800 dark:text-violet-300 shadow-[0_8px_20px_-6px_rgba(91,33,182,0.18)] dark:shadow-black/35 ring-1 ring-white/90 dark:ring-white/10 scale-[1.02]';
+      'bg-white dark:bg-stone-800 text-violet-800 dark:text-violet-300 shadow-sm border border-stone-200/90 dark:border-stone-600/80';
     const publicNavInactiveCls =
-      'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-white/70 dark:hover:bg-stone-800/50 hover:shadow-sm active:scale-[0.98]';
+      'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100/80 dark:hover:bg-stone-800/70';
     const publicHeaderBg = opaqueHeader
       ? isScrolled
-        ? 'bg-white dark:bg-stone-950 shadow-[0_16px_48px_-18px_rgba(79,70,229,0.14),0_8px_28px_-12px_rgba(15,118,110,0.10)] dark:shadow-[0_24px_60px_-22px_rgba(0,0,0,0.55)] border-teal-200/55 dark:border-violet-900/50'
-        : 'bg-[#fafaf9] dark:bg-stone-950 border-teal-200/45 dark:border-violet-900/45'
+        ? 'bg-white dark:bg-stone-950 shadow-[0_10px_40px_-12px_rgba(15,23,42,0.1)] dark:shadow-[0_10px_40px_-12px_rgba(0,0,0,0.4)] border-stone-200/90 dark:border-stone-800'
+        : 'bg-[#f9f9fb] dark:bg-stone-950 border-stone-200/80 dark:border-stone-800/90'
       : isScrolled
-        ? 'bg-white dark:bg-stone-950 shadow-[0_16px_48px_-18px_rgba(79,70,229,0.12),0_8px_28px_-12px_rgba(15,118,110,0.08)] dark:shadow-[0_24px_60px_-22px_rgba(0,0,0,0.55)] border-teal-200/50 dark:border-violet-800/45'
-        : 'bg-[#fafaf9] dark:bg-stone-950 border-teal-200/42 dark:border-violet-800/38';
+        ? 'bg-white/93 dark:bg-stone-950/93 shadow-[0_10px_40px_-12px_rgba(15,23,42,0.1)] dark:shadow-[0_10px_40px_-12px_rgba(0,0,0,0.4)] border-stone-200/90 dark:border-stone-800'
+        : 'bg-[#f9f9fb]/92 dark:bg-stone-950/90 border-stone-200/80 dark:border-stone-800/90';
 
     return (
       <>
       <header
-        className={`sticky top-0 left-0 right-0 z-[100] transition-all duration-300 border-b ${publicHeaderBg} ${
+        className={`sticky top-0 left-0 right-0 z-[100] transition-all duration-300 border-b ${opaqueHeader ? '' : 'backdrop-blur-md'} ${publicHeaderBg} ${
           blockNavigationInteractions ? blockNavPointerCls : ''
         }`}
       >
-        <div
-          aria-hidden
-          className="absolute inset-x-0 top-0 h-[2px] sm:h-[3px] bg-gradient-to-r from-teal-400 via-violet-500 to-fuchsia-500 opacity-[0.92] shadow-[0_0_24px_-2px_rgba(139,92,246,0.35)]"
-        />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-[3.5rem] sm:h-[4.25rem]">
             {/* Logo */}
             <button
@@ -217,13 +213,11 @@ const Header: React.FC<HeaderProps> = ({
               className="flex items-center gap-2.5 sm:gap-3 group min-w-0 shrink"
               aria-label="WriteScholar home"
             >
-              <div
-                className={`${dashboardLogoTileCls} w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center group-hover:shadow-md transition-all duration-200 shrink-0 overflow-hidden`}
-              >
+              <div className="relative w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-xl border border-stone-200/80 dark:border-stone-700 bg-white/90 dark:bg-stone-900/50 shadow-sm group-hover:shadow transition-all duration-200 shrink-0 overflow-hidden">
                 <img src="/mascot.png" alt="" className="w-[85%] h-[85%] object-contain" fetchPriority="high" width="40" height="40" />
               </div>
               <span
-                className="text-[1.05rem] sm:text-lg font-semibold tracking-tight text-stone-900 dark:text-stone-50 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-violet-700 group-hover:via-fuchsia-600 group-hover:to-teal-600 dark:group-hover:from-violet-300 dark:group-hover:via-fuchsia-300 dark:group-hover:to-teal-300 group-hover:bg-clip-text transition-all duration-200 truncate max-w-[130px] sm:max-w-none"
+                className="text-[1.05rem] sm:text-lg font-semibold tracking-tight text-stone-900 dark:text-stone-50 group-hover:text-violet-800 dark:group-hover:text-violet-300 transition-colors duration-200 truncate max-w-[130px] sm:max-w-none"
                 style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
               >
                 WriteScholar
@@ -232,13 +226,12 @@ const Header: React.FC<HeaderProps> = ({
 
             {/* Desktop Navigation — centered (no search on logged-out bar) */}
             <nav className="hidden lg:flex flex-1 items-center justify-center min-w-0">
-              <div className={dashboardNavRailOuterCls}>
-                <div aria-hidden className={dashboardNavRailWashCls} />
+              <div className="flex items-center rounded-xl border border-stone-200/85 dark:border-stone-700/90 bg-white/70 dark:bg-stone-900/45 p-1 shadow-sm">
                 {publicNavItems.map(({ id, label }) => (
                   <button
                     key={id}
                     onClick={() => onNavigate?.(id)}
-                    className={`relative z-[1] px-3.5 py-2 text-sm font-semibold rounded-xl transition-all duration-200 tracking-tight ${
+                    className={`px-3.5 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
                       currentPage === id ? publicNavActiveCls : publicNavInactiveCls
                     }`}
                   >
@@ -252,20 +245,20 @@ const Header: React.FC<HeaderProps> = ({
             <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 shrink-0">
               <button
                 onClick={() => onNavigate?.('login')}
-                className="hidden sm:inline-flex px-4 py-2 text-sm font-semibold text-stone-700 dark:text-stone-200 rounded-xl border border-teal-200/70 dark:border-violet-800/50 bg-white/90 dark:bg-stone-900/50 hover:bg-teal-50/80 dark:hover:bg-violet-950/30 transition-all shrink-0 shadow-sm shadow-teal-900/[0.04] dark:shadow-black/30"
+                className="hidden sm:inline-flex px-4 py-2 text-sm font-medium text-stone-700 dark:text-stone-300 rounded-lg border border-stone-300/90 dark:border-stone-600 bg-white/90 dark:bg-stone-900/40 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors shrink-0 shadow-sm"
               >
                 Log in
               </button>
               <button
                 onClick={() => onNavigate?.('signup')}
-                className="inline-flex items-center justify-center px-4 py-2 sm:px-5 text-sm font-semibold text-white rounded-xl bg-gradient-to-r from-violet-600 via-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 dark:from-violet-500 dark:to-fuchsia-500 transition-all shadow-lg shadow-violet-900/20 dark:shadow-black/40 whitespace-nowrap shrink-0 ring-1 ring-violet-900/15 dark:ring-white/10"
+                className="inline-flex items-center justify-center px-4 py-2 sm:px-5 text-sm font-semibold text-white rounded-lg bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 transition-colors shadow-md shadow-violet-900/12 dark:shadow-violet-950/30 whitespace-nowrap shrink-0 ring-1 ring-violet-900/10 dark:ring-white/10"
               >
                 Sign up free
               </button>
               <button
                 type="button"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="mobile-menu-button lg:hidden relative p-2 rounded-xl border border-teal-200/65 dark:border-violet-800/45 bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-200 hover:bg-teal-50 dark:hover:bg-violet-950/35 transition-colors shrink-0 shadow-md shadow-teal-900/[0.06] dark:shadow-black/40"
+                className="mobile-menu-button lg:hidden p-2 rounded-lg border border-stone-300/90 dark:border-stone-600 bg-white dark:bg-stone-900/50 text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors shrink-0 shadow-sm"
                 aria-label="Toggle menu"
                 aria-expanded={isMobileMenuOpen}
               >
@@ -283,7 +276,9 @@ const Header: React.FC<HeaderProps> = ({
         {/* Mobile menu - mobile-menu-container required so click-outside doesn't close before onClick fires */}
         {isMobileMenuOpen && (
           <div
-            className={`lg:hidden mobile-menu-container border-t border-teal-200/50 dark:border-violet-900/40 bg-[#fafaf9] dark:bg-stone-950`}
+            className={`lg:hidden mobile-menu-container border-t border-stone-200/80 dark:border-stone-800 ${
+              opaqueHeader ? 'bg-[#f9f9fb] dark:bg-stone-950' : 'bg-[#f9f9fb] dark:bg-stone-950/98 backdrop-blur-md'
+            }`}
           >
             <div className="px-4 py-3 max-w-7xl mx-auto">
               <div className="space-y-1">
@@ -291,10 +286,10 @@ const Header: React.FC<HeaderProps> = ({
                 <button
                   key={id}
                   onClick={() => { onNavigate?.(id); setIsMobileMenuOpen(false); }}
-                  className={`block w-full text-left px-4 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 ${
+                  className={`block w-full text-left px-4 py-2.5 text-sm font-medium rounded-lg transition-all ${
                     currentPage === id
-                      ? 'text-violet-800 dark:text-violet-300 bg-white dark:bg-stone-900 border border-teal-200/70 dark:border-violet-800/55 shadow-[0_8px_20px_-8px_rgba(91,33,182,0.14)] dark:shadow-black/30'
-                      : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-teal-50/70 dark:hover:bg-violet-950/30'
+                      ? 'text-violet-800 dark:text-violet-300 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 shadow-sm'
+                      : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100/80 dark:hover:bg-stone-800/80'
                   }`}
                 >
                   {label}
@@ -303,13 +298,13 @@ const Header: React.FC<HeaderProps> = ({
               <div className="pt-2 pb-1 flex flex-col gap-2">
                 <button
                   onClick={() => { onNavigate?.('login'); setIsMobileMenuOpen(false); }}
-                  className="block text-center px-4 py-2.5 text-sm font-semibold text-stone-700 dark:text-stone-200 rounded-xl border border-teal-200/70 dark:border-violet-800/50 bg-white/90 dark:bg-stone-900/50 hover:bg-teal-50/80 dark:hover:bg-violet-950/30 transition-all shadow-md shadow-teal-900/[0.04]"
+                  className="block text-center px-4 py-2.5 text-sm font-medium text-stone-700 dark:text-stone-300 rounded-lg border border-stone-300/90 dark:border-stone-600 bg-white dark:bg-stone-900/40 hover:bg-stone-50 dark:hover:bg-stone-800 transition-all shadow-sm"
                 >
                   Log in
                 </button>
                 <button
                   onClick={() => { onNavigate?.('signup'); setIsMobileMenuOpen(false); }}
-                  className="block text-center px-4 py-2.5 text-white text-sm font-semibold rounded-xl bg-gradient-to-r from-violet-600 via-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 dark:from-violet-500 dark:to-fuchsia-500 transition-all shadow-lg shadow-violet-900/20 dark:shadow-black/40 ring-1 ring-violet-900/12 dark:ring-white/10"
+                  className="block text-center px-4 py-2.5 text-white text-sm font-semibold rounded-lg bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 transition-colors shadow-md shadow-violet-900/15"
                 >
                   Sign up free
                 </button>
@@ -319,7 +314,7 @@ const Header: React.FC<HeaderProps> = ({
           </div>
         )}
         <div
-          className="h-[2px] bg-[linear-gradient(90deg,transparent_0%,rgba(45,212,171,0.32)_42%,rgba(139,92,246,0.4)_52%,transparent_100%)] dark:opacity-95"
+          className="h-px bg-gradient-to-r from-transparent via-violet-400/25 to-transparent dark:via-violet-500/18"
           aria-hidden
         />
       </header>

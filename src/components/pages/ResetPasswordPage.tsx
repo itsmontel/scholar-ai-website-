@@ -14,8 +14,9 @@ function ResetPasswordShell({
   onNavigate: (page: string) => void;
 }) {
   return (
-    <div className="relative min-h-screen flex overflow-x-hidden">
+    <div className="relative isolate min-h-screen min-h-[100dvh] overflow-x-hidden">
       <WriteScholarEditorialBackgroundLayers position="fixed" />
+      <div className="relative z-10 flex min-h-screen min-h-[100dvh] w-full flex-col lg:flex-row">
       <button
         type="button"
         onClick={() => onNavigate('landing')}
@@ -28,7 +29,7 @@ function ResetPasswordShell({
         </div>
       </button>
 
-      <div className="w-full lg:w-1/2 flex flex-col">
+      <div className="w-full min-w-0 lg:w-1/2 flex flex-col">
         <div className="p-6 pt-20 sm:pt-6">
           <div className="flex items-center space-x-2.5">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden shadow-lg shadow-violet-500/30">
@@ -44,6 +45,7 @@ function ResetPasswordShell({
       </div>
 
       <AuthMarketingSide />
+      </div>
     </div>
   );
 }

@@ -3,10 +3,6 @@ import Header from '../common/Header';
 import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
 import AnalysisAnimation from '../common/AnalysisAnimation';
-import { FeatureTickRow } from '../common/FeatureTickRow';
-import InteractiveDocumentAnalysis from '../landing/InteractiveDocumentAnalysis';
-import HeroEssayPreviewCard from '../landing/HeroEssayPreviewCard';
-import { DEMO_DASHBOARD_BEFORE_PAPER, DEMO_DASHBOARD_AFTER_PAPER } from '../../data/landingPageDemoAnalysis';
 import { trackAction } from '../../data/achievements';
 
 interface AnalyzeEssayPageProps {
@@ -158,346 +154,354 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
 
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="analyze" />
 
-      <main className="relative max-w-[1240px] mx-auto px-3 sm:px-6 lg:px-8 pt-3 sm:pt-6 pb-24 sm:pb-16 w-full min-w-0 overflow-x-hidden">
-        <div className="w-full min-w-0 space-y-4 sm:space-y-6">
+      <main className="relative max-w-[1360px] mx-auto px-3 sm:px-6 lg:px-8 pt-3 sm:pt-6 pb-24 sm:pb-16 w-full min-w-0 overflow-x-hidden">
+        <div className="w-full min-w-0">
           <div className="pt-1 sm:pt-2 pb-3 sm:pb-5 overflow-visible">
-            <div
+            <section
               data-tutorial="analyze-ready"
-              className="relative rounded-2xl sm:rounded-2xl overflow-hidden mb-3 sm:mb-4 border border-stone-200/90 dark:border-stone-700/90 bg-white/85 dark:bg-stone-900/55 shadow-[0_16px_50px_-16px_rgba(15,23,42,0.12)] dark:shadow-[0_16px_50px_-16px_rgba(0,0,0,0.45)] backdrop-blur-sm ring-1 ring-white/40 dark:ring-white/5 scroll-mt-8"
+              className="relative rounded-3xl overflow-hidden mb-6 sm:mb-8 max-w-6xl mx-auto scroll-mt-8 bg-white dark:bg-stone-900/80 ring-1 ring-stone-200/80 dark:ring-stone-700/60 shadow-xl shadow-stone-900/[0.05] dark:shadow-black/40"
             >
-              <div className="h-0.5 w-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-75 dark:opacity-80" aria-hidden />
-              <div className="relative rounded-b-2xl bg-white/95 dark:bg-stone-900/70 p-4 sm:p-8">
-                <div
-                  className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(91,33,182,0.04),transparent_55%)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-15%,rgba(109,40,217,0.08),transparent_55%)] pointer-events-none rounded-b-2xl"
+              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-rose-400" aria-hidden />
+              <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+                <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-violet-300/15 dark:bg-violet-500/10 blur-3xl" />
+                <div className="absolute -bottom-24 -left-24 w-64 h-64 rounded-full bg-fuchsia-300/15 dark:bg-fuchsia-500/10 blur-3xl" />
+              </div>
+
+              <div className="relative p-6 sm:p-8 lg:p-10">
+                <input
+                  ref={analyzeFileInputRef}
+                  type="file"
+                  accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                  onChange={handleAnalyzeFileChange}
+                  className="hidden"
                   aria-hidden
                 />
 
-                <div className="relative lg:grid lg:grid-cols-[minmax(0,220px)_minmax(0,1fr)_minmax(0,220px)] xl:grid-cols-[minmax(0,248px)_minmax(0,1fr)_minmax(0,248px)] lg:gap-8 xl:gap-10 lg:items-start">
-                  <div className="hidden lg:block relative self-start justify-self-start w-[236px] xl:w-[248px] pointer-events-auto -rotate-[15deg] origin-bottom-left drop-shadow-lg z-[5] lg:mt-5 xl:mt-6" aria-label="Sample before feedback">
-                    <p className="text-center mb-2">
-                      <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-amber-800/95 dark:text-amber-300/95">Before</span>
-                      <span className="block text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">Draft · improve &amp; concern</span>
-                    </p>
-                    <div className="rounded-2xl border border-amber-200/70 dark:border-amber-900/35 bg-white/95 dark:bg-stone-900/60 p-2 ring-1 ring-amber-200/45 dark:ring-amber-900/30">
-                      <HeroEssayPreviewCard
-                        paper={DEMO_DASHBOARD_BEFORE_PAPER}
-                        rotate="none"
-                        variant="before"
-                        legendPlacement="top"
-                        maxExcerptChars={380}
-                        paperMaxHeightClass="max-h-[272px]"
-                      />
-                    </div>
-                  </div>
-                  <div className="min-w-0">
-                    <h1
-                      className="relative text-2xl sm:text-3xl md:text-[2rem] lg:text-[2.125rem] font-semibold text-stone-900 dark:text-stone-50 text-center mb-1.5 sm:mb-2 tracking-tight leading-snug px-1"
-                      style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
-                    >
-                      <span className="text-emerald-700 dark:text-emerald-400">Paste</span> or <span className="text-blue-700 dark:text-blue-400">upload</span> your essay, get{' '}
-                      <span className="text-violet-800 dark:text-violet-300">feedback</span> in seconds
-                    </h1>
-                    <p className="relative text-stone-600 dark:text-stone-300 text-sm sm:text-base text-center mb-2 sm:mb-2.5 max-w-xl mx-auto leading-relaxed">
-                      Upload your essay, get <span className="text-red-600 dark:text-red-500">professor</span>
-                      <span className="text-amber-600 dark:text-amber-500">-style</span> <span className="text-green-600 dark:text-green-500">feedback</span>
-                    </p>
-                    <FeatureTickRow className="relative mb-1 sm:mb-1.5" items={['Structure', 'Annotations', 'Rubric', 'Suggestions']} />
-                    <div className="relative flex rounded-xl border border-stone-200/90 dark:border-stone-700 bg-stone-100/60 dark:bg-stone-800/50 p-1 mb-1 sm:mb-1.5 max-w-lg mx-auto shadow-sm">
-                      <button
-                        type="button"
-                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 bg-white dark:bg-stone-900 text-blue-800 dark:text-blue-300 shadow-sm border border-stone-200/80 dark:border-stone-600"
-                      >
-                        <span className="text-base" aria-hidden>
-                          📝
-                        </span>{' '}
-                        Analyze
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => onNavigate('citations')}
-                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200"
-                      >
-                        <span className="text-base" aria-hidden>
-                          📚
-                        </span>{' '}
-                        Citations
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => onNavigate('study-pack')}
-                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200"
-                      >
-                        <span className="text-base" aria-hidden>
-                          📦
-                        </span>{' '}
-                        Study Pack
-                      </button>
-                    </div>
-                  </div>
-                  <div className="hidden lg:block relative self-start justify-self-end w-[236px] xl:w-[248px] pointer-events-auto rotate-[15deg] origin-bottom-right drop-shadow-lg z-[5] lg:mt-5 xl:mt-6" aria-label="Sample after feedback">
-                    <p className="text-center mb-2">
-                      <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-800/95 dark:text-emerald-300/95">After</span>
-                      <span className="block text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">Revised · mostly strong</span>
-                    </p>
-                    <div className="rounded-2xl border border-emerald-200/70 dark:border-emerald-900/35 bg-white/95 dark:bg-stone-900/60 p-2 ring-1 ring-emerald-200/45 dark:ring-emerald-900/30">
-                      <HeroEssayPreviewCard
-                        paper={DEMO_DASHBOARD_AFTER_PAPER}
-                        rotate="none"
-                        variant="after"
-                        legendPlacement="top"
-                        maxExcerptChars={380}
-                        paperMaxHeightClass="max-h-[272px]"
-                      />
-                    </div>
-                  </div>
+                <div className="text-center mb-5">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-violet-300 ring-1 ring-violet-200/80 dark:ring-violet-800/50 text-xs font-medium">
+                    <span aria-hidden>✨</span>
+                    Professor-style feedback in seconds
+                  </span>
                 </div>
 
-                <div className="relative w-full mb-2">
-                  <div className="lg:hidden mb-4 sm:mb-5 mt-3 sm:mt-4" aria-label="Sample before and after essay feedback">
-                    <div className="flex flex-row justify-between items-start gap-3 sm:gap-4">
-                      <div className="w-[min(46%,220px)] shrink-0 -rotate-[11deg] origin-bottom-left drop-shadow-lg transition-transform hover:scale-[1.02]">
-                        <p className="text-center mb-1.5">
-                          <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.12em] text-amber-800/95 dark:text-amber-300/95">Before</span>
-                        </p>
-                        <div className="rounded-xl border border-amber-200/70 dark:border-amber-900/35 bg-white/95 dark:bg-stone-900/60 p-1.5 sm:p-2 ring-1 ring-amber-200/45 dark:ring-amber-900/30">
-                          <HeroEssayPreviewCard
-                            paper={DEMO_DASHBOARD_BEFORE_PAPER}
-                            rotate="none"
-                            variant="before"
-                            legendPlacement="top"
-                            maxExcerptChars={240}
-                            paperMaxHeightClass="max-h-[220px]"
-                          />
-                        </div>
-                      </div>
-                      <div className="w-[min(46%,220px)] shrink-0 rotate-[11deg] origin-bottom-right drop-shadow-lg transition-transform hover:scale-[1.02]">
-                        <p className="text-center mb-1.5">
-                          <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-800/95 dark:text-emerald-300/95">After</span>
-                        </p>
-                        <div className="rounded-xl border border-emerald-200/70 dark:border-emerald-900/35 bg-white/95 dark:bg-stone-900/60 p-1.5 sm:p-2 ring-1 ring-emerald-200/45 dark:ring-emerald-900/30">
-                          <HeroEssayPreviewCard
-                            paper={DEMO_DASHBOARD_AFTER_PAPER}
-                            rotate="none"
-                            variant="after"
-                            legendPlacement="top"
-                            maxExcerptChars={240}
-                            paperMaxHeightClass="max-h-[220px]"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <p className="text-center text-xs text-stone-500 dark:text-stone-400 mt-4 max-w-md mx-auto leading-relaxed">
-                      Sample draft vs revised — hover highlights for detail.
+                <h1
+                  className="relative text-center text-2xl sm:text-3xl lg:text-[2.4rem] font-semibold leading-[1.1] tracking-tight text-stone-900 dark:text-stone-50 mb-3"
+                  style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+                >
+                  Get{' '}
+                  <span className="bg-gradient-to-r from-violet-700 via-fuchsia-600 to-rose-500 dark:from-violet-300 dark:via-fuchsia-300 dark:to-rose-300 bg-clip-text text-transparent">
+                    professor-style feedback
+                  </span>{' '}
+                  on your essay
+                </h1>
+                <p className="text-center text-sm sm:text-base text-stone-500 dark:text-stone-400 max-w-2xl mx-auto leading-relaxed mb-6">
+                  Drop in your paper and see what to improve — structure, arguments, clarity, citations, and more.
+                </p>
+
+                <div className="relative flex rounded-2xl bg-violet-50/70 dark:bg-violet-950/25 p-1 mb-6 max-w-lg mx-auto border border-violet-200/80 dark:border-violet-800/50 shadow-sm shadow-violet-900/5">
+                  <button
+                    type="button"
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[0.65rem] font-medium text-sm transition-all duration-200 bg-white dark:bg-stone-800 text-violet-900 dark:text-violet-200 shadow-sm ring-1 ring-violet-200/85 dark:ring-violet-800/55"
+                  >
+                    <span className="text-base" aria-hidden>
+                      📝
+                    </span>
+                    Analyze Text
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onNavigate('citations')}
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[0.65rem] font-medium text-sm transition-all duration-200 text-stone-600 dark:text-stone-400 hover:text-violet-950 dark:hover:text-stone-200 hover:bg-white/80 dark:hover:bg-stone-800/50"
+                  >
+                    <span className="text-base" aria-hidden>
+                      📚
+                    </span>
+                    Citations
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onNavigate('study-pack')}
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[0.65rem] font-medium text-sm transition-all duration-200 text-stone-600 dark:text-stone-400 hover:text-violet-950 dark:hover:text-stone-200 hover:bg-white/80 dark:hover:bg-stone-800/50"
+                  >
+                    <span className="text-base" aria-hidden>
+                      📦
+                    </span>
+                    Study Pack
+                  </button>
+                </div>
+
+                {!user && uploadedFileName && (
+                  <div className="relative mb-6 rounded-xl border border-violet-200/90 dark:border-violet-800/50 bg-violet-50/50 dark:bg-violet-950/25 px-4 py-3 flex flex-col sm:flex-row items-center justify-center gap-3 text-sm">
+                    <p className="text-stone-700 dark:text-stone-200 font-medium">
+                      <span className="text-stone-500 dark:text-stone-400 font-normal">Selected:</span> {uploadedFileName}
                     </p>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => analyzeFileInputRef.current?.click()}
+                        className="text-violet-700 dark:text-violet-400 font-semibold hover:underline"
+                      >
+                        Change file
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setUploadedFileName(null)}
+                        className="text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 text-xs font-medium"
+                      >
+                        Remove
+                      </button>
+                    </div>
                   </div>
+                )}
 
-                  <div className="min-w-0 relative z-20 w-full max-w-3xl mx-auto space-y-3 sm:space-y-4 -mt-16 sm:-mt-20 lg:-mt-32 xl:-mt-36">
-                    <input
-                      ref={analyzeFileInputRef}
-                      type="file"
-                      accept=".pdf,.doc,.docx,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
-                      onChange={handleAnalyzeFileChange}
-                      className="hidden"
-                      aria-hidden
-                    />
-
-                    {!user && uploadedFileName && (
-                      <div className="relative max-w-3xl mx-auto mb-4 rounded-xl border border-stone-200/90 dark:border-stone-600 bg-stone-50/90 dark:bg-stone-800/50 px-4 py-3 flex flex-col sm:flex-row items-center justify-center gap-3 text-sm">
-                        <p className="text-stone-700 dark:text-stone-200 font-medium">
-                          <span className="text-stone-500 dark:text-stone-400 font-normal">Selected:</span> {uploadedFileName}
-                        </p>
-                        <div className="flex items-center gap-2">
-                          <button type="button" onClick={() => analyzeFileInputRef.current?.click()} className="text-blue-600 dark:text-blue-400 font-semibold hover:underline">
-                            Change file
-                          </button>
-                          <button type="button" onClick={() => setUploadedFileName(null)} className="text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 text-xs font-medium">
-                            Remove
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {!(!user && uploadedFileName) && (
-                      <>
-                        <div className="relative rounded-2xl border transition-all duration-300 bg-white dark:bg-stone-900/40 border-blue-400/75 dark:border-blue-500/55 ring-2 ring-blue-500/18 shadow-sm shadow-blue-500/10 focus-within:border-blue-500 dark:focus-within:border-blue-400 focus-within:ring-4 focus-within:ring-blue-500/30 focus-within:shadow-md focus-within:shadow-blue-500/25">
-                          <div className="relative rounded-[14px] sm:rounded-[20px] bg-white/98 dark:bg-stone-800/95 backdrop-blur-sm min-h-[140px] sm:min-h-[200px]">
-                            <textarea
-                              value={inputText}
-                              onChange={(e) => {
-                                setInputText(e.target.value);
-                                setShowWordWarning(false);
-                                if (user) setAnalyzeUploadError('');
-                              }}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter' && !e.shiftKey && isTextValid()) {
-                                  e.preventDefault();
-                                  handleSubmit();
-                                }
-                              }}
-                              placeholder={placeholders[placeholderIndex]}
-                              className="relative w-full min-h-[140px] sm:min-h-[200px] max-h-[240px] overflow-y-auto p-5 sm:p-7 text-stone-800 dark:text-stone-100 text-[15px] sm:text-lg bg-transparent border-none outline-none resize-none placeholder-stone-400 dark:placeholder-stone-500 leading-[1.65]"
-                              onInput={(e) => {
-                                const target = e.target as HTMLTextAreaElement;
-                                target.style.height = 'auto';
-                                target.style.height = `${Math.min(target.scrollHeight, 240)}px`;
-                              }}
-                              data-tutorial-target="essay-input-wrapper"
-                            />
-                            <div className="absolute bottom-4 left-6 text-sm text-stone-400 dark:text-stone-500 font-medium">
-                              {getWordCount(inputText)} words
-                              {getWordCount(inputText) < 200 && <span className="text-amber-500"> (min 200)</span>}
-                            </div>
-                            {showWordWarning && (
-                              <div className="absolute -bottom-6 left-0 right-0 text-center">
-                                <span className="text-sm font-medium text-red-500">Minimum 200 words required for analysis</span>
-                              </div>
-                            )}
+                {!(!user && uploadedFileName) && (
+                  <div className="relative space-y-6">
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => !isParsingAnalyzeDoc && analyzeFileInputRef.current?.click()}
+                      onKeyDown={(e) => {
+                        if ((e.key === 'Enter' || e.key === ' ') && !isParsingAnalyzeDoc) {
+                          e.preventDefault();
+                          analyzeFileInputRef.current?.click();
+                        }
+                      }}
+                      onDrop={handleAnalyzeDropZoneDrop}
+                      onDragEnter={handleAnalyzeDropZoneDrag}
+                      onDragOver={handleAnalyzeDropZoneDrag}
+                      onDragLeave={handleAnalyzeDropZoneDrag}
+                      className={`group relative cursor-pointer rounded-2xl border-2 border-dashed transition-all duration-300 ${
+                        isParsingAnalyzeDoc ? 'opacity-70 cursor-wait pointer-events-none' : ''
+                      } ${
+                        analyzeDropActive
+                          ? 'scale-[1.005] border-violet-500 bg-violet-50/80 dark:bg-violet-900/30 shadow-inner'
+                          : 'border-violet-300/70 dark:border-violet-700/50 bg-gradient-to-b from-violet-50/40 via-white to-white dark:from-violet-950/30 dark:via-stone-900/70 dark:to-stone-900/70 hover:border-violet-400 hover:from-violet-50/80 hover:to-white dark:hover:from-violet-950/40'
+                      }`}
+                    >
+                      <div className="px-6 py-10 sm:py-12 text-center">
+                        {isParsingAnalyzeDoc ? (
+                          <div className="flex flex-col items-center gap-4 py-4">
+                            <span className="w-10 h-10 border-2 border-violet-600 border-t-transparent rounded-full animate-spin" />
+                            <span className="font-semibold text-stone-700 dark:text-stone-200">Parsing your document...</span>
                           </div>
-                        </div>
-                        {analyzeUploadError && (
-                          <div className="px-1 text-center sm:text-left">
-                            <p className="text-sm font-medium text-red-600 dark:text-red-400">{analyzeUploadError}</p>
-                          </div>
-                        )}
-                        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 sm:gap-5">
-                          <div className="flex items-center gap-3 flex-wrap justify-center sm:justify-start">
-                            <button
-                              type="button"
-                              onClick={() => analyzeFileInputRef.current?.click()}
-                              disabled={isParsingAnalyzeDoc}
-                              className="flex items-center gap-2.5 px-6 py-3.5 rounded-xl font-semibold text-sm transition-all border shadow-md disabled:opacity-60 disabled:pointer-events-none disabled:hover:translate-y-0 bg-blue-600 dark:bg-blue-500 text-white border-blue-400/40 shadow-lg shadow-blue-600/25 ring-1 ring-blue-400/30 hover:bg-blue-500 dark:hover:bg-blue-400 hover:shadow-xl hover:shadow-blue-600/20 hover:-translate-y-0.5 active:translate-y-0"
-                            >
-                              {isParsingAnalyzeDoc ? (
-                                <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                              ) : (
-                                <svg className="w-5 h-5 shrink-0 opacity-95" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                        ) : (
+                          <>
+                            <div className="relative mx-auto mb-5 w-16 h-16 sm:w-20 sm:h-20">
+                              <div className="relative w-full h-full rounded-2xl bg-gradient-to-br from-violet-600 via-fuchsia-600 to-rose-500 text-white flex items-center justify-center shadow-xl shadow-violet-600/35 group-hover:scale-105 group-hover:rotate-[-3deg] transition-all duration-300">
+                                <svg className="w-9 h-9 sm:w-10 sm:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                 </svg>
-                              )}
-                              {isParsingAnalyzeDoc ? 'Uploading...' : 'Upload file'}
-                            </button>
-                            {user && (
-                              <button type="button" onClick={() => onNavigate('upload')} className="text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline px-1">
-                                Library upload →
-                              </button>
-                            )}
-                            {(inputText.trim() || uploadedFileName) && (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setInputText('');
-                                  setUploadedFileName(null);
-                                  setAnalyzeUploadError('');
-                                }}
-                                className="px-3 py-2 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-700/50 text-xs font-medium transition-colors"
-                              >
-                                Clear
-                              </button>
-                            )}
-                          </div>
-                          <button
-                            type="button"
-                            data-tutorial-target="essay-analyze-btn"
-                            onClick={handleSubmit}
-                            disabled={!isTextValid()}
-                            className={`px-8 sm:px-10 py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 font-semibold text-base shrink-0 ${
-                              isTextValid()
-                                ? 'bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500 text-white shadow-md shadow-blue-900/15 ring-1 ring-blue-900/10 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer'
-                                : 'bg-stone-200 dark:bg-stone-700 text-stone-400 cursor-not-allowed'
-                            }`}
-                          >
-                            Analyze Text
-                          </button>
-                        </div>
-
-                        <div
-                          role="button"
-                          tabIndex={0}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                              e.preventDefault();
-                              if (!isParsingAnalyzeDoc) analyzeFileInputRef.current?.click();
-                            }
-                          }}
-                          onClick={() => {
-                            if (!isParsingAnalyzeDoc) analyzeFileInputRef.current?.click();
-                          }}
-                          onDragEnter={handleAnalyzeDropZoneDrag}
-                          onDragLeave={handleAnalyzeDropZoneDrag}
-                          onDragOver={handleAnalyzeDropZoneDrag}
-                          onDrop={handleAnalyzeDropZoneDrop}
-                          className={`group/dz rounded-2xl border-2 border-dashed p-6 sm:p-8 text-center transition-all duration-300 select-none ${
-                            isParsingAnalyzeDoc
-                              ? 'border-stone-200 dark:border-stone-600 bg-stone-50/50 dark:bg-stone-800/30 opacity-70 cursor-wait'
-                              : analyzeDropActive
-                                ? 'border-blue-500 bg-blue-100/90 dark:bg-blue-950/45 shadow-lg shadow-blue-500/15 ring-2 ring-blue-400/40 cursor-pointer'
-                                : 'border-blue-300/80 dark:border-blue-600/55 bg-blue-50/90 dark:bg-blue-950/25 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/35 hover:shadow-md hover:shadow-blue-500/10 cursor-pointer'
-                          }`}
-                          aria-label="Drop a document to load into the essay box, or click to browse"
-                        >
-                          <div className="flex flex-col sm:flex-row items-center justify-center gap-5 sm:gap-7">
-                            <div
-                              className={`flex h-16 w-16 sm:h-[4.5rem] sm:w-[4.5rem] shrink-0 items-center justify-center rounded-2xl shadow-inner transition-transform duration-300 group-hover/dz:scale-105 bg-blue-600 text-white shadow-lg shadow-blue-600/35 ${
-                                analyzeDropActive ? 'ring-2 ring-blue-300/80 dark:ring-blue-500/50' : ''
-                              }`}
-                              aria-hidden
-                            >
-                              <svg className="w-8 h-8 sm:w-9 sm:h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                              </svg>
+                              </div>
                             </div>
-                            <div className="text-left sm:text-left min-w-0 max-w-md">
-                              <p className="text-lg sm:text-xl font-bold tracking-tight text-blue-800 dark:text-blue-200">Drop your document here</p>
-                              <p className="text-sm sm:text-[0.9375rem] text-stone-600 dark:text-stone-300 mt-2 leading-relaxed">
-                                Or click to browse — <span className="font-semibold text-blue-700 dark:text-blue-400">PDF</span>,{' '}
-                                <span className="font-semibold text-emerald-700 dark:text-emerald-400">Word</span>, or{' '}
-                                <span className="font-semibold text-blue-700 dark:text-blue-400">TXT</span>. We&apos;ll load the text into the box above (same as Upload file).
-                              </p>
+                            <p className="text-xl sm:text-2xl font-semibold text-stone-900 dark:text-stone-100" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
+                              Drop your essay here
+                            </p>
+                            <p className="mt-1 text-sm sm:text-base text-stone-500 dark:text-stone-400">
+                              or <span className="text-violet-700 dark:text-violet-300 font-semibold underline-offset-4 group-hover:underline">click to browse</span>
+                            </p>
+                            <div className="mt-4 flex flex-wrap justify-center gap-2">
+                              <span className="px-2.5 py-1 rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 text-[11px] font-semibold ring-1 ring-rose-200/70 dark:ring-rose-800/40">PDF</span>
+                              <span className="px-2.5 py-1 rounded-full bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 text-[11px] font-semibold ring-1 ring-sky-200/70 dark:ring-sky-800/40">Word</span>
+                              <span className="px-2.5 py-1 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-[11px] font-semibold ring-1 ring-stone-200/70 dark:ring-stone-700/60">TXT</span>
                             </div>
-                          </div>
-                        </div>
-
-                        {isParsingAnalyzeDoc && (
-                          <div className="absolute inset-0 rounded-2xl bg-white/90 dark:bg-stone-900/90 backdrop-blur-sm flex items-center justify-center gap-3 z-30 pointer-events-auto" aria-live="polite" aria-busy="true">
-                            <span className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-                            <span className="font-semibold text-stone-700 dark:text-stone-200">Uploading...</span>
-                          </div>
+                          </>
                         )}
-                      </>
-                    )}
-
-                    {!user && uploadedFileName && (
-                      <div className="mt-4 flex justify-center">
-                        <button
-                          type="button"
-                          onClick={handleSubmit}
-                          disabled={!isTextValid()}
-                          className={`px-8 py-3.5 rounded-xl font-semibold text-base ${
-                            isTextValid() ? 'bg-blue-700 hover:bg-blue-800 text-white shadow-md shadow-blue-900/15 ring-1 ring-blue-900/10' : 'bg-stone-200 text-stone-400 cursor-not-allowed'
-                          }`}
-                        >
-                          Analyze Text
-                        </button>
-                      </div>
-                    )}
-
-                    <div className="mt-10 sm:mt-12 pt-8 sm:pt-10 border-t border-stone-200/80 dark:border-stone-700/60">
-                      <div className="w-full max-w-6xl mx-auto px-0 sm:px-1">
-                        <div className="flex items-center gap-2 mb-4">
-                          <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-50" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
-                            See a real analysis in action
-                          </h2>
-                          <span className="h-px flex-1 max-w-32 bg-stone-300/80 dark:bg-stone-600/60 rounded-full" />
-                        </div>
-                        <div className="relative rounded-2xl sm:rounded-3xl border border-stone-200/70 dark:border-stone-700/60 bg-white/95 dark:bg-stone-900/80 shadow-[0_28px_72px_-28px_rgba(15,23,42,0.16)] dark:shadow-[0_36px_90px_-32px_rgba(0,0,0,0.55)]">
-                          <InteractiveDocumentAnalysis onNavigate={onNavigate} landingHeroEmbed />
-                        </div>
                       </div>
                     </div>
+
+                    <section
+                      aria-labelledby="analyze-output-examples-heading"
+                      className="rounded-2xl border border-stone-200/85 dark:border-stone-700/75 bg-white/75 dark:bg-stone-900/45 p-4 sm:p-6 ring-1 ring-stone-200/35 dark:ring-white/5 shadow-inner mt-6 sm:mt-7"
+                    >
+                      <h2
+                        id="analyze-output-examples-heading"
+                        className="text-center text-sm sm:text-base font-semibold text-stone-800 dark:text-stone-100"
+                        style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+                      >
+                        See what your analysis looks like
+                      </h2>
+                      <p className="mt-1 text-center text-[11px] sm:text-xs text-stone-500 dark:text-stone-400 mx-auto px-2 sm:px-0 text-balance max-w-[min(100%,36rem)]">
+                        Muted previews for your draft—not canned advice.
+                      </p>
+
+                      <div className="mt-4 flex flex-nowrap gap-3 lg:gap-4 justify-between overflow-x-auto pb-3 snap-x snap-mandatory [scrollbar-width:thin] max-w-5xl mx-auto">
+                        <figure className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,260px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-violet-500 dark:border-violet-400 shadow-sm flex flex-col">
+                          <div className="relative aspect-[16/11] w-full bg-black/80">
+                            <video
+                              className="absolute inset-0 h-full w-full object-cover object-center"
+                              aria-label="Short preview of essay analysis and professor-style feedback"
+                              title="Essay analyzer preview"
+                              muted
+                              loop
+                              playsInline
+                              autoPlay
+                              preload="metadata"
+                            >
+                              <source src="/writescholar-essay-checker-demo.mp4" type="video/mp4" />
+                            </video>
+                          </div>
+                          <figcaption className="px-2 py-1.5 text-center text-[10px] sm:text-[11px] font-semibold text-stone-600 dark:text-stone-400 border-t border-stone-200/70 dark:border-stone-700/70 bg-white/95 dark:bg-stone-900/95">
+                            Quick walkthrough
+                          </figcaption>
+                        </figure>
+                        <figure className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,260px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-violet-500 dark:border-violet-400 shadow-sm flex flex-col">
+                          <div className="relative aspect-[16/11] w-full bg-stone-900">
+                            <img
+                              src="/analyseimage1.png"
+                              alt="Sample rubric and feedback overview from an analyzed essay"
+                              className="absolute inset-0 h-full w-full object-cover object-top"
+                              loading="lazy"
+                              decoding="async"
+                            />
+                          </div>
+                          <figcaption className="px-2 py-1.5 text-center text-[10px] sm:text-[11px] font-semibold text-stone-600 dark:text-stone-400 border-t border-stone-200/70 dark:border-stone-700/70 bg-white/95 dark:bg-stone-900/95">
+                            Rubric & notes
+                          </figcaption>
+                        </figure>
+                        <figure className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,260px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-violet-500 dark:border-violet-400 shadow-sm flex flex-col">
+                          <div className="relative aspect-[16/11] w-full bg-stone-900">
+                            <img
+                              src="/analyseimage2.png"
+                              alt="Sample full written breakdown from an analyzed essay"
+                              className="absolute inset-0 h-full w-full object-cover object-top"
+                              loading="lazy"
+                              decoding="async"
+                            />
+                          </div>
+                          <figcaption className="px-2 py-1.5 text-center text-[10px] sm:text-[11px] font-semibold text-stone-600 dark:text-stone-400 border-t border-stone-200/70 dark:border-stone-700/70 bg-white/95 dark:bg-stone-900/95">
+                            Full report
+                          </figcaption>
+                        </figure>
+                      </div>
+                    </section>
+
+                    {analyzeUploadError && (
+                      <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm">
+                        {analyzeUploadError}
+                      </div>
+                    )}
+
+                    {user && (
+                      <p className="text-center text-xs text-stone-500 dark:text-stone-400">
+                        <button type="button" onClick={() => onNavigate('upload')} className="font-semibold text-violet-700 dark:text-violet-400 hover:underline">
+                          Library upload →
+                        </button>
+                      </p>
+                    )}
+
+                    <div className="my-2 flex items-center gap-4">
+                      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-stone-200 to-transparent dark:via-stone-700" />
+                      <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-400 dark:text-stone-500">Or paste below</span>
+                      <div className="h-px flex-1 bg-gradient-to-l from-transparent via-stone-200 to-transparent dark:via-stone-700" />
+                    </div>
+
+                    <div className="relative max-w-4xl mx-auto">
+                      <textarea
+                        value={inputText}
+                        onChange={(e) => {
+                          setInputText(e.target.value);
+                          setShowWordWarning(false);
+                          if (user) setAnalyzeUploadError('');
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey && isTextValid()) {
+                            e.preventDefault();
+                            handleSubmit();
+                          }
+                        }}
+                        placeholder={
+                          user
+                            ? 'Paste your essay here (minimum 200 words)...'
+                            : placeholders[placeholderIndex]
+                        }
+                        className="w-full min-h-[180px] pb-10 rounded-2xl border border-stone-200/90 dark:border-stone-700 bg-stone-50/80 dark:bg-stone-800/40 p-5 text-[15px] leading-relaxed text-stone-800 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 resize-none focus:outline-none focus:ring-4 focus:ring-violet-500/15 focus:border-violet-400 dark:focus:border-violet-600 transition-all"
+                        data-tutorial-target="essay-input-wrapper"
+                        onInput={(e) => {
+                          const target = e.target as HTMLTextAreaElement;
+                          target.style.height = 'auto';
+                          target.style.height = `${Math.min(target.scrollHeight, 280)}px`;
+                        }}
+                      />
+                      <div className="absolute bottom-4 left-5 text-xs">
+                        <span className={isTextValid() ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-stone-400 dark:text-stone-500'}>
+                          {getWordCount(inputText)} words
+                        </span>
+                        {getWordCount(inputText) > 0 && getWordCount(inputText) < 200 && (
+                          <span className="text-amber-600 dark:text-amber-400"> · {200 - getWordCount(inputText)} more needed</span>
+                        )}
+                      </div>
+                      {showWordWarning && (
+                        <div className="absolute -bottom-6 left-0 right-0 text-center">
+                          <span className="text-sm font-medium text-red-500">Minimum 200 words required for analysis</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="max-w-4xl mx-auto flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 pt-2">
+                      <div className="flex items-center gap-3 flex-wrap justify-center sm:justify-start">
+                        {(inputText.trim() || uploadedFileName) && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setInputText('');
+                              setUploadedFileName(null);
+                              setAnalyzeUploadError('');
+                            }}
+                            className="text-xs font-medium text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 transition-colors"
+                          >
+                            Clear
+                          </button>
+                        )}
+                        {isTextValid() && (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 ring-1 ring-emerald-200/70 dark:ring-emerald-800/50 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
+                            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                            Ready to analyze
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        data-tutorial-target="essay-analyze-btn"
+                        onClick={handleSubmit}
+                        disabled={!isTextValid()}
+                        className={`inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm sm:text-base font-semibold transition-all ${
+                          isTextValid()
+                            ? 'bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 text-white shadow-lg shadow-violet-500/30 hover:shadow-xl hover:shadow-fuchsia-500/35 hover:-translate-y-0.5 active:translate-y-0'
+                            : 'cursor-not-allowed bg-stone-100 dark:bg-stone-800 text-stone-400 dark:text-stone-500 ring-1 ring-stone-200/70 dark:ring-stone-700/60'
+                        }`}
+                      >
+                        {isTextValid() ? (
+                          <>
+                            Analyze my essay <span aria-hidden>✨</span>
+                          </>
+                        ) : (
+                          <>Analyze my essay</>
+                        )}
+                      </button>
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {!user && uploadedFileName && (
+                  <div className="mt-6 flex justify-center">
+                    <button
+                      type="button"
+                      onClick={handleSubmit}
+                      disabled={!isTextValid()}
+                      className={`inline-flex items-center justify-center gap-2 rounded-xl px-8 py-3.5 text-base font-semibold transition-all ${
+                        isTextValid()
+                          ? 'bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 text-white shadow-lg shadow-violet-500/25'
+                          : 'bg-stone-200 dark:bg-stone-700 text-stone-400 cursor-not-allowed'
+                      }`}
+                    >
+                      Analyze my essay
+                    </button>
+                  </div>
+                )}
               </div>
-            </div>
+            </section>
           </div>
         </div>
       </main>

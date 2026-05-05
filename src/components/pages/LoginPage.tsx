@@ -136,8 +136,9 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
   };
 
   return (
-    <div className="relative min-h-screen flex overflow-x-hidden">
+    <div className="relative isolate min-h-screen min-h-[100dvh] overflow-x-hidden">
       <WriteScholarEditorialBackgroundLayers position="fixed" />
+      <div className="relative z-10 flex min-h-screen min-h-[100dvh] w-full flex-col lg:flex-row">
       {/* Back Button */}
       <button
         onClick={() => onNavigate('landing')}
@@ -151,7 +152,7 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
       </button>
 
       {/* Left Side - Login Form */}
-      <div className="w-full lg:w-1/2 flex flex-col">
+      <div className="w-full min-w-0 lg:w-1/2 flex flex-col">
         {/* Header */}
         <div className="p-6 pt-20 sm:pt-6">
           <div className="flex items-center space-x-2.5">
@@ -177,7 +178,7 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1.5">Email</label>
+                <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1.5">Email</label>
                 <input
                   type="email"
                   value={formData.email}
@@ -350,6 +351,7 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

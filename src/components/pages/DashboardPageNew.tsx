@@ -799,72 +799,6 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                         : 'Detailed feedback on structure, arguments, and writing quality.'}
                     </p>
 
-                    {/* Analysis previews — above upload / paste; same compact strip as citations / study pack */}
-                    <section
-                      aria-labelledby="analyze-output-examples-heading"
-                      className="mt-6 sm:mt-7 rounded-2xl border border-stone-200/85 dark:border-stone-700/75 bg-white/75 dark:bg-stone-900/45 p-4 sm:p-6 ring-1 ring-stone-200/35 dark:ring-white/5 shadow-inner"
-                    >
-                      <h3
-                        id="analyze-output-examples-heading"
-                        className="text-center dash-serif text-sm sm:text-base font-semibold text-stone-800 dark:text-stone-100"
-                      >
-                        See what your analysis looks like
-                      </h3>
-                      <p className="mt-1 text-center text-[11px] sm:text-xs text-stone-500 dark:text-stone-400 mx-auto px-2 sm:px-0 text-balance max-w-[min(100%,36rem)]">
-                        Muted previews for your draft—not canned advice.
-                      </p>
-
-                      <div className="mt-4 flex flex-nowrap gap-3 lg:gap-4 justify-between overflow-x-auto pb-3 snap-x snap-mandatory [scrollbar-width:thin]">
-                        <figure className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,260px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-violet-500 dark:border-violet-400 shadow-sm flex flex-col">
-                          <div className="relative aspect-[16/11] w-full bg-black/80">
-                            <video
-                              className="absolute inset-0 h-full w-full object-cover object-center"
-                              aria-label="Short preview of essay analysis and professor-style feedback"
-                              title="Essay analyzer preview"
-                              muted
-                              loop
-                              playsInline
-                              autoPlay
-                              preload="metadata"
-                            >
-                              <source src="/writescholar-essay-checker-demo.mp4" type="video/mp4" />
-                            </video>
-                          </div>
-                          <figcaption className="px-2 py-1.5 text-center text-[10px] sm:text-[11px] font-semibold text-stone-600 dark:text-stone-400 border-t border-stone-200/70 dark:border-stone-700/70 bg-white/95 dark:bg-stone-900/95">
-                            Quick walkthrough
-                          </figcaption>
-                        </figure>
-                        <figure className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,260px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-violet-500 dark:border-violet-400 shadow-sm flex flex-col">
-                          <div className="relative aspect-[16/11] w-full bg-stone-900">
-                            <img
-                              src="/analyseimage1.png"
-                              alt="Sample rubric and feedback overview from an analyzed essay"
-                              className="absolute inset-0 h-full w-full object-cover object-top"
-                              loading="lazy"
-                              decoding="async"
-                            />
-                          </div>
-                          <figcaption className="px-2 py-1.5 text-center text-[10px] sm:text-[11px] font-semibold text-stone-600 dark:text-stone-400 border-t border-stone-200/70 dark:border-stone-700/70 bg-white/95 dark:bg-stone-900/95">
-                            Rubric & notes
-                          </figcaption>
-                        </figure>
-                        <figure className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,260px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-violet-500 dark:border-violet-400 shadow-sm flex flex-col">
-                          <div className="relative aspect-[16/11] w-full bg-stone-900">
-                            <img
-                              src="/analyseimage2.png"
-                              alt="Sample full written breakdown from an analyzed essay"
-                              className="absolute inset-0 h-full w-full object-cover object-top"
-                              loading="lazy"
-                              decoding="async"
-                            />
-                          </div>
-                          <figcaption className="px-2 py-1.5 text-center text-[10px] sm:text-[11px] font-semibold text-stone-600 dark:text-stone-400 border-t border-stone-200/70 dark:border-stone-700/70 bg-white/95 dark:bg-stone-900/95">
-                            Full report
-                          </figcaption>
-                        </figure>
-                      </div>
-                    </section>
-
                     {/* Upload drop zone */}
                     <div
                       role="button"
@@ -944,6 +878,72 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                         )}
                       </div>
                     </div>
+
+                    {/* Analysis previews — below drop zone */}
+                    <section
+                      aria-labelledby="analyze-output-examples-heading"
+                      className="mt-6 sm:mt-7 rounded-2xl border border-stone-200/85 dark:border-stone-700/75 bg-white/75 dark:bg-stone-900/45 p-4 sm:p-6 ring-1 ring-stone-200/35 dark:ring-white/5 shadow-inner"
+                    >
+                      <h3
+                        id="analyze-output-examples-heading"
+                        className="text-center dash-serif text-sm sm:text-base font-semibold text-stone-800 dark:text-stone-100"
+                      >
+                        See what your analysis looks like
+                      </h3>
+                      <p className="mt-1 text-center text-[11px] sm:text-xs text-stone-500 dark:text-stone-400 mx-auto px-2 sm:px-0 text-balance max-w-[min(100%,36rem)]">
+                        Muted previews for your draft—not canned advice.
+                      </p>
+
+                      <div className="mt-4 flex flex-nowrap gap-3 lg:gap-4 justify-between overflow-x-auto pb-3 snap-x snap-mandatory [scrollbar-width:thin]">
+                        <figure className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,260px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-violet-500 dark:border-violet-400 shadow-sm flex flex-col">
+                          <div className="relative aspect-[16/11] w-full bg-black/80">
+                            <video
+                              className="absolute inset-0 h-full w-full object-cover object-center"
+                              aria-label="Short preview of essay analysis and professor-style feedback"
+                              title="Essay analyzer preview"
+                              muted
+                              loop
+                              playsInline
+                              autoPlay
+                              preload="metadata"
+                            >
+                              <source src="/writescholar-essay-checker-demo.mp4" type="video/mp4" />
+                            </video>
+                          </div>
+                          <figcaption className="px-2 py-1.5 text-center text-[10px] sm:text-[11px] font-semibold text-stone-600 dark:text-stone-400 border-t border-stone-200/70 dark:border-stone-700/70 bg-white/95 dark:bg-stone-900/95">
+                            Quick walkthrough
+                          </figcaption>
+                        </figure>
+                        <figure className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,260px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-violet-500 dark:border-violet-400 shadow-sm flex flex-col">
+                          <div className="relative aspect-[16/11] w-full bg-stone-900">
+                            <img
+                              src="/analyseimage1.png"
+                              alt="Sample rubric and feedback overview from an analyzed essay"
+                              className="absolute inset-0 h-full w-full object-cover object-top"
+                              loading="lazy"
+                              decoding="async"
+                            />
+                          </div>
+                          <figcaption className="px-2 py-1.5 text-center text-[10px] sm:text-[11px] font-semibold text-stone-600 dark:text-stone-400 border-t border-stone-200/70 dark:border-stone-700/70 bg-white/95 dark:bg-stone-900/95">
+                            Rubric & notes
+                          </figcaption>
+                        </figure>
+                        <figure className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,260px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-violet-500 dark:border-violet-400 shadow-sm flex flex-col">
+                          <div className="relative aspect-[16/11] w-full bg-stone-900">
+                            <img
+                              src="/analyseimage2.png"
+                              alt="Sample full written breakdown from an analyzed essay"
+                              className="absolute inset-0 h-full w-full object-cover object-top"
+                              loading="lazy"
+                              decoding="async"
+                            />
+                          </div>
+                          <figcaption className="px-2 py-1.5 text-center text-[10px] sm:text-[11px] font-semibold text-stone-600 dark:text-stone-400 border-t border-stone-200/70 dark:border-stone-700/70 bg-white/95 dark:bg-stone-900/95">
+                            Full report
+                          </figcaption>
+                        </figure>
+                      </div>
+                    </section>
 
                     {uploadError && (
                       <div className="mt-4 p-3 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm">

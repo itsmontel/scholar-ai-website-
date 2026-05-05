@@ -4,8 +4,6 @@ import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEdi
 import Footer from '../common/Footer';
 import ScholarMascot from '../common/ScholarMascot';
 import AnalysisAnimation from '../common/AnalysisAnimation';
-import { FeatureTickRow } from '../common/FeatureTickRow';
-import InteractiveCitationsDemo from '../landing/InteractiveCitationsDemo';
 import { trackAction } from '../../data/achievements';
 
 export type EmbeddedDashboardTool = 'analyze' | 'citations' | 'study_pack';
@@ -201,7 +199,7 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
         className={
           embedded
             ? 'relative max-w-none mx-auto px-0 pt-0 pb-2 w-full min-w-0 overflow-x-hidden'
-            : 'relative max-w-[1240px] mx-auto px-3 sm:px-6 lg:px-8 pt-3 sm:pt-6 pb-24 sm:pb-16 w-full min-w-0 overflow-x-hidden'
+            : 'relative max-w-[1360px] mx-auto px-3 sm:px-6 lg:px-8 pt-3 sm:pt-6 pb-24 sm:pb-16 w-full min-w-0 overflow-x-hidden'
         }
       >
         <div className="w-full min-w-0 space-y-4 sm:space-y-6">
@@ -210,94 +208,82 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
               className={
                 embedded
                   ? 'relative rounded-3xl overflow-hidden mb-3 sm:mb-4 scroll-mt-8 bg-white dark:bg-stone-900/85 ring-1 ring-sky-200/80 dark:ring-sky-800/40 shadow-[0_20px_50px_-18px_rgba(14,116,184,0.14),0_8px_30px_-12px_rgba(15,23,42,0.08)] dark:shadow-[0_24px_60px_-20px_rgba(0,0,0,0.55)]'
-                  : 'relative rounded-2xl overflow-hidden mb-3 sm:mb-4 border border-stone-200/90 dark:border-stone-700/90 bg-white/85 dark:bg-stone-900/55 shadow-[0_16px_50px_-16px_rgba(15,23,42,0.12)] dark:shadow-[0_16px_50px_-16px_rgba(0,0,0,0.45)] backdrop-blur-sm ring-1 ring-white/40 dark:ring-white/5 scroll-mt-8'
+                  : 'relative rounded-[1.75rem] overflow-hidden mb-6 sm:mb-10 scroll-mt-8 max-w-6xl mx-auto border border-sky-200/90 dark:border-sky-900/40 bg-[#fafcff] dark:bg-stone-900/85 ring-1 ring-sky-100/85 dark:ring-sky-950/35 shadow-[0_20px_60px_-28px_rgba(14,116,184,0.16),0_8px_32px_-14px_rgba(15,23,42,0.07)] dark:shadow-[0_24px_60px_-20px_rgba(0,0,0,0.55)]'
               }
             >
               <div
-                className={`h-0.5 w-full ${embedded ? 'bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-600 opacity-95 dark:opacity-95' : 'bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-75 dark:opacity-80'}`}
+                className="h-[3px] w-full bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-600 opacity-95 dark:opacity-95"
                 aria-hidden
               />
-              {embedded && (
-                <>
-                  <div className="pointer-events-none absolute -top-24 -right-20 w-[19rem] h-[19rem] rounded-full bg-sky-400/14 dark:bg-sky-500/12 blur-3xl" aria-hidden />
-                  <div className="pointer-events-none absolute -bottom-20 -left-16 w-64 h-64 rounded-full bg-indigo-400/11 dark:bg-indigo-500/14 blur-[2.75rem]" aria-hidden />
-                </>
-              )}
+              <>
+                <div className="pointer-events-none absolute -top-24 -right-20 w-[19rem] h-[19rem] rounded-full bg-sky-400/14 dark:bg-sky-500/12 blur-3xl" aria-hidden />
+                <div className="pointer-events-none absolute -bottom-20 -left-16 w-64 h-64 rounded-full bg-indigo-400/11 dark:bg-indigo-500/14 blur-[2.75rem]" aria-hidden />
+              </>
               <div
-                className={`relative rounded-b-2xl bg-white/95 dark:bg-stone-900/70 ${embedded ? 'rounded-b-[1.375rem]' : ''} ${embedded ? 'p-4 sm:p-6 lg:p-8' : 'p-4 sm:p-8'}`}
+                className={`relative bg-white/95 dark:bg-stone-900/70 ${embedded ? 'rounded-b-[1.375rem]' : 'rounded-b-[1.75rem]'} ${embedded ? 'p-4 sm:p-6 lg:p-8' : 'p-4 sm:p-8 lg:p-10'}`}
               >
                 <div
-                  className={`pointer-events-none rounded-b-2xl ${embedded ? 'rounded-b-[1.375rem]' : ''} ${
+                  className={`pointer-events-none absolute inset-0 ${embedded ? 'rounded-b-[1.375rem]' : 'rounded-b-[1.75rem]'} ${
                     embedded
-                      ? 'absolute inset-0 bg-[radial-gradient(ellipse_85%_55%_at_50%_-18%,rgba(14,165,233,0.09),transparent_58%)] dark:bg-[radial-gradient(ellipse_85%_55%_at_50%_-15%,rgba(56,189,248,0.11),transparent_58%)]'
-                      : 'absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(91,33,182,0.04),transparent_55%)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-15%,rgba(109,40,217,0.08),transparent_55%)]'
+                      ? 'bg-[radial-gradient(ellipse_85%_55%_at_50%_-18%,rgba(14,165,233,0.09),transparent_58%)] dark:bg-[radial-gradient(ellipse_85%_55%_at_50%_-15%,rgba(56,189,248,0.11),transparent_58%)]'
+                      : 'bg-[radial-gradient(ellipse_90%_52%_at_50%_-16%,rgba(14,165,233,0.08),transparent_55%)] dark:bg-[radial-gradient(ellipse_85%_52%_at_50%_-14%,rgba(56,189,248,0.1),transparent_55%)]'
                   }`}
                   aria-hidden
                 />
 
-                <div className={embedded ? 'relative' : 'relative lg:grid lg:grid-cols-[minmax(0,220px)_minmax(0,48rem)_minmax(0,220px)] lg:gap-8 xl:gap-10 lg:items-stretch'}>
-                  <div className={embedded ? 'hidden' : 'hidden lg:block relative self-end justify-self-start w-[236px] xl:w-[248px] pointer-events-auto -rotate-[11deg] origin-bottom-left drop-shadow-lg z-[5]'} aria-label="Sample sources preview">
-                    <p className="text-center mb-2">
-                      <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-800/95 dark:text-blue-300/95">Sources</span>
-                      <span className="block text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">Peer-reviewed picks</span>
-                    </p>
-                    <InteractiveCitationsDemo variant="side-left" />
+                <div className="relative min-w-0">
+                  <div className="text-center mb-3 sm:mb-4">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-sky-50 dark:bg-sky-950/50 text-sky-950 dark:text-sky-200 ring-1 ring-sky-200/90 dark:ring-sky-800/55 text-[10px] sm:text-[11px] font-semibold tracking-[0.1em] uppercase">
+                      <svg className="w-3.5 h-3.5 opacity-90 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                      </svg>
+                      APA, MLA, Chicago & more
+                    </span>
                   </div>
                   <div className="min-w-0 self-start">
-                    {embedded && (
-                      <div className="text-center mb-3 sm:mb-4">
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-sky-50 dark:bg-sky-950/50 text-sky-900 dark:text-sky-200 ring-1 ring-sky-200/90 dark:ring-sky-800/55 text-[11px] sm:text-xs font-semibold tracking-wide uppercase">
-                          <span className="text-sm normal-case opacity-95" aria-hidden>
-                            📚
-                          </span>
-                          APA, MLA, Chicago & more
-                        </span>
-                      </div>
-                    )}
                     <h1
-                      className={`relative dash-serif font-semibold text-stone-900 dark:text-stone-50 text-center tracking-tight text-2xl sm:text-3xl lg:text-[2.4rem] leading-[1.1] ${embedded ? 'mb-2' : 'mb-1.5 sm:mb-2'}`}
+                      className={`relative dash-serif font-semibold text-stone-900 dark:text-stone-50 text-center tracking-tight text-2xl sm:text-3xl lg:text-[2.45rem] leading-[1.08] ${embedded ? 'mb-2' : 'mb-1.5 sm:mb-2'}`}
                       style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
                     >
                       Find{' '}
-                      <span className="bg-gradient-to-r from-sky-700 via-blue-600 to-indigo-600 dark:from-sky-300 dark:via-blue-300 dark:to-indigo-300 bg-clip-text text-transparent">
+                      <span className="bg-gradient-to-r from-sky-600 via-blue-600 to-violet-600 dark:from-sky-300 dark:via-blue-300 dark:to-violet-300 bg-clip-text text-transparent">
                         academic sources
                       </span>{' '}
                       in seconds
                     </h1>
-                    <p className={`relative text-stone-600 dark:text-stone-300 text-sm sm:text-base text-center max-w-xl mx-auto leading-relaxed ${embedded ? 'mb-4' : 'mb-2 sm:mb-2.5'}`}>
+                    <p className={`relative text-stone-500 dark:text-stone-400 text-sm sm:text-base text-center max-w-xl mx-auto leading-relaxed ${embedded ? 'mb-4' : 'mb-5 sm:mb-6'}`}>
                       APA, MLA & Chicago. Peer-reviewed sources. Filter by year.
                     </p>
-                    {!embedded && <FeatureTickRow className="relative mb-1 sm:mb-1.5" items={['APA', 'MLA', 'Chicago', 'Peer-reviewed', 'Export-ready']} />}
                     {!embedded && (
                       <>
-                        <div className="relative flex rounded-xl border border-stone-200/90 dark:border-stone-700 bg-stone-100/60 dark:bg-stone-800/50 p-1 mb-1 sm:mb-1.5 max-w-lg mx-auto shadow-sm">
+                        <div className="relative flex rounded-2xl bg-sky-50/70 dark:bg-sky-950/30 p-1 mb-3 sm:mb-4 max-w-lg mx-auto border border-sky-200/80 dark:border-sky-800/50 shadow-sm shadow-sky-900/5">
                           <button
                             type="button"
                             onClick={goAnalyze}
-                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200"
+                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[0.65rem] font-medium text-sm transition-all duration-200 text-stone-600 dark:text-stone-400 hover:text-sky-950 dark:hover:text-stone-200 hover:bg-white/80 dark:hover:bg-stone-800/50"
                           >
-                            <span className="text-base" aria-hidden>📝</span> Analyze
+                            <span className="text-base" aria-hidden>📝</span> Analyze Text
                           </button>
                           <button
                             type="button"
                             onClick={goStudyPack}
-                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200"
+                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[0.65rem] font-medium text-sm transition-all duration-200 text-stone-600 dark:text-stone-400 hover:text-sky-950 dark:hover:text-stone-200 hover:bg-white/80 dark:hover:bg-stone-800/50"
                           >
-                            <span className="text-base" aria-hidden>📦</span> Study Pack
+                            <span className="text-base" aria-hidden>📦</span> Study Tools
                           </button>
                           <button
                             type="button"
-                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 bg-white dark:bg-stone-900 text-blue-800 dark:text-blue-300 shadow-sm border border-stone-200/80 dark:border-stone-600"
+                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[0.65rem] font-medium text-sm transition-all duration-200 bg-white dark:bg-stone-800 text-blue-900 dark:text-sky-200 shadow-sm ring-1 ring-sky-200/90 dark:ring-sky-800/55"
                           >
                             <span className="text-base" aria-hidden>📚</span> Citations
                           </button>
                         </div>
                         {user && citationCheckLoaded && !hasDoneCitation && (
-                          <div className="flex flex-col items-center gap-1 mb-1.5 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                          <div className="flex flex-col items-center gap-1 mb-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
                             <span className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-stone-50 dark:bg-stone-800/80 border border-stone-200/90 dark:border-stone-600 text-stone-800 dark:text-stone-200 text-sm font-medium shadow-sm">
                               Start your first citation
                             </span>
-                            <svg className="w-5 h-5 text-violet-600 dark:text-violet-400 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                            <svg className="w-5 h-5 text-sky-600 dark:text-sky-400 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                             </svg>
                           </div>
@@ -305,33 +291,13 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                       </>
                     )}
                   </div>
-                  <div className={embedded ? 'hidden' : 'hidden lg:block relative self-end justify-self-end w-[236px] xl:w-[248px] pointer-events-auto rotate-[11deg] origin-bottom-right drop-shadow-lg z-[5]'} aria-label="Sample citation export preview">
-                    <p className="text-center mb-2">
-                      <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-800/95 dark:text-blue-300/95">Export</span>
-                      <span className="block text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">APA · MLA · Chicago</span>
-                    </p>
-                    <InteractiveCitationsDemo variant="side-right" />
-                  </div>
                 </div>
 
-                <div className={embedded ? 'hidden' : 'lg:hidden -mb-2 sm:-mb-3 mt-6 sm:mt-8 flex flex-row justify-between items-end gap-3 sm:gap-4 px-1'}>
-                  <div className="w-[min(46%,220px)] shrink-0 -rotate-[8deg] origin-bottom-left drop-shadow-lg transition-transform hover:scale-[1.02]">
-                    <InteractiveCitationsDemo variant="side-left" />
-                  </div>
-                  <div className="w-[min(46%,220px)] shrink-0 rotate-[8deg] origin-bottom-right drop-shadow-lg transition-transform hover:scale-[1.02]">
-                    <InteractiveCitationsDemo variant="side-right" />
-                  </div>
-                </div>
-
-                <div className={`relative mb-2 max-w-3xl mx-auto z-20 ${embedded ? 'mt-0' : '-mt-8 sm:-mt-10 lg:-mt-14 xl:-mt-16'}`}>
+                <div className={`relative mb-2 max-w-4xl mx-auto z-20 ${embedded ? 'mt-0' : 'mt-1'}`}>
                   <div
-                    className={`relative rounded-xl sm:rounded-2xl border transition-all duration-300 shadow-sm focus-within:shadow-md ${
-                      embedded
-                        ? 'focus-within:ring-2 focus-within:ring-sky-500/30 border-sky-200/90 dark:border-sky-800/55 bg-white/92 dark:bg-stone-900/45 focus-within:border-sky-400/70'
-                        : 'focus-within:ring-2 focus-within:ring-blue-500/25 border-blue-200/90 dark:border-blue-800/60 bg-white dark:bg-stone-900/40 focus-within:border-blue-400/60'
-                    }`}
+                    className={`relative rounded-[1.25rem] border transition-all duration-300 shadow-sm focus-within:shadow-md focus-within:ring-2 focus-within:ring-sky-500/35 border-sky-200/85 dark:border-sky-800/50 bg-white/95 dark:bg-stone-950/50 focus-within:border-sky-400/70 dark:focus-within:border-sky-500/55`}
                   >
-                    <div className={`relative rounded-[12px] sm:rounded-[18px] bg-white/98 dark:bg-stone-800/95 backdrop-blur-sm ${embedded ? 'min-h-[132px] sm:min-h-[150px]' : 'min-h-[120px] sm:min-h-[160px]'}`}>
+                    <div className={`relative rounded-[inherit] bg-white/98 dark:bg-stone-800/95 backdrop-blur-sm ${embedded ? 'min-h-[132px] sm:min-h-[150px]' : 'min-h-[140px] sm:min-h-[180px]'}`}>
                       <textarea
                         value={inputText}
                         onChange={(e) => {
@@ -351,7 +317,7 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                           }
                         }}
                         placeholder={placeholders[placeholderIndex]}
-                        className={`relative w-full max-h-[220px] overflow-y-auto p-4 sm:p-6 text-stone-800 dark:text-stone-100 text-[15px] sm:text-lg bg-transparent border-none outline-none resize-none placeholder-stone-400 dark:placeholder-stone-500 leading-relaxed ${embedded ? 'min-h-[132px] sm:min-h-[150px]' : 'min-h-[120px] sm:min-h-[160px]'}`}
+                        className={`relative w-full max-h-[220px] overflow-y-auto p-5 sm:p-6 text-stone-800 dark:text-stone-100 text-[15px] sm:text-lg bg-transparent border-none outline-none resize-none placeholder-stone-400 dark:placeholder-stone-500 leading-relaxed ${embedded ? 'min-h-[132px] sm:min-h-[150px]' : 'min-h-[140px] sm:min-h-[180px]'}`}
                         onInput={(e) => {
                           const target = e.target as HTMLTextAreaElement;
                           target.style.height = 'auto';
@@ -368,17 +334,15 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                       )}
                     </div>
                   </div>
-                  <div className={embedded ? 'flex justify-center mt-4' : 'flex justify-center mt-6'}>
+                  <div className="flex justify-center mt-4 sm:mt-5">
                     <button
                       type="button"
                       onClick={handleSubmit}
                       disabled={!isTextValid() || isSearchingCitations}
-                      className={`px-8 sm:px-10 py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 font-semibold text-base ${
+                      className={`min-w-[200px] px-8 sm:px-12 py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 font-semibold text-base ${
                         isTextValid() && !isSearchingCitations
-                          ? embedded
-                            ? 'bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:via-blue-500 hover:to-indigo-500 dark:from-sky-500 dark:via-blue-600 dark:to-indigo-600 dark:hover:from-sky-400 dark:hover:via-blue-500 dark:hover:to-indigo-500 text-white shadow-lg shadow-sky-900/18 dark:shadow-black/35 ring-1 ring-sky-950/15 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer'
-                            : 'bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500 text-white shadow-md shadow-blue-900/15 ring-1 ring-blue-900/10 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer'
-                          : 'bg-stone-200 dark:bg-stone-700 text-stone-400 cursor-not-allowed'
+                          ? 'bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:via-blue-500 hover:to-indigo-500 dark:from-sky-500 dark:via-blue-600 dark:to-indigo-600 dark:hover:from-sky-400 dark:hover:via-blue-500 dark:hover:to-indigo-500 text-white shadow-lg shadow-sky-900/18 dark:shadow-black/35 ring-1 ring-sky-950/15 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer'
+                          : 'bg-stone-300 dark:bg-stone-600 text-white dark:text-stone-200 cursor-not-allowed shadow-inner'
                       }`}
                     >
                       {isSearchingCitations ? (
@@ -393,12 +357,12 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                   </div>
                 </div>
 
-                <div className={embedded ? 'relative space-y-3 pt-4' : 'relative space-y-4 pt-2'}>
-                  <div className={embedded ? 'flex justify-center gap-2 flex-wrap' : 'flex justify-center gap-3 flex-wrap'}>
+                <div className={`relative space-y-3 ${embedded ? 'pt-4' : 'pt-5 sm:pt-6'}`}>
+                  <div className={`flex justify-center gap-2 sm:gap-3 flex-wrap ${embedded ? '' : 'max-w-4xl mx-auto'}`}>
                     <select
                       value={citationStyle}
                       onChange={(e) => setCitationStyle(e.target.value)}
-                      className={`${embedded ? 'px-3.5 py-2 rounded-xl ring-1 ring-sky-100/90 dark:ring-sky-900/40 focus:ring-2 focus:ring-sky-500/40 focus:border-sky-400/70' : 'px-4 py-2.5 rounded-2xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400'} border border-stone-200/80 dark:border-stone-600/80 bg-white/90 dark:bg-stone-800/90 backdrop-blur-sm text-sm font-semibold shadow-sm transition-all`}
+                      className="px-4 py-2.5 rounded-xl border border-stone-300/90 dark:border-stone-600/80 bg-white dark:bg-stone-800/90 backdrop-blur-sm text-sm font-semibold shadow-sm transition-all ring-1 ring-sky-100/70 dark:ring-sky-950/40 focus:ring-2 focus:ring-sky-500/40 focus:border-sky-400/70"
                     >
                       <option value="APA">APA 7th</option>
                       <option value="MLA">MLA 9th</option>
@@ -410,7 +374,7 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                     <select
                       value={citationYearRange}
                       onChange={(e) => setCitationYearRange(e.target.value)}
-                      className={`${embedded ? 'px-3.5 py-2 rounded-xl ring-1 ring-sky-100/90 dark:ring-sky-900/40 focus:ring-2 focus:ring-sky-500/40 focus:border-sky-400/70' : 'px-4 py-2.5 rounded-2xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400'} border border-stone-200/80 dark:border-stone-600/80 bg-white/90 dark:bg-stone-800/90 backdrop-blur-sm text-sm font-semibold shadow-sm transition-all`}
+                      className="px-4 py-2.5 rounded-xl border border-stone-300/90 dark:border-stone-600/80 bg-white dark:bg-stone-800/90 backdrop-blur-sm text-sm font-semibold shadow-sm transition-all ring-1 ring-sky-100/70 dark:ring-sky-950/40 focus:ring-2 focus:ring-sky-500/40 focus:border-sky-400/70"
                     >
                       <option value="all">All years</option>
                       <option value="3">Last 3 years</option>
@@ -418,13 +382,13 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                       <option value="10">Last 10 years</option>
                     </select>
                   </div>
-                  <div className={embedded ? 'flex flex-wrap justify-center gap-1.5' : 'flex flex-wrap justify-center gap-2'}>
+                  <div className={`flex flex-wrap justify-center gap-2 ${embedded ? '' : 'max-w-4xl mx-auto'}`}>
                     {suggestedTopics.map((topic, idx) => (
                       <button
                         key={idx}
                         type="button"
                         onClick={() => setInputText(topic)}
-                        className={`${embedded ? 'px-3 py-1.5 text-xs hover:border-sky-300/80 dark:hover:border-sky-600/50 hover:bg-sky-50/90 dark:hover:bg-sky-950/35' : 'px-4 py-2.5 text-sm hover:border-violet-300/70 dark:hover:border-violet-600/50 hover:bg-violet-50/80 dark:hover:bg-violet-950/30'} rounded-xl bg-stone-50 dark:bg-stone-800/80 border border-stone-200/90 dark:border-stone-600 text-stone-700 dark:text-stone-200 font-medium transition-all duration-200`}
+                        className="px-3.5 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm rounded-xl bg-white dark:bg-stone-800/90 border border-stone-300/90 dark:border-stone-600 text-stone-700 dark:text-stone-200 font-medium transition-all duration-200 hover:border-sky-300/90 dark:hover:border-sky-600/50 hover:bg-sky-50/90 dark:hover:bg-sky-950/35"
                       >
                         {topic}
                       </button>
@@ -432,86 +396,63 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                   </div>
                 </div>
 
-                {embedded && (
-                  <section
-                    className="mt-7 sm:mt-8 rounded-2xl border border-sky-200/75 dark:border-sky-800/45 bg-gradient-to-b from-white/90 to-sky-50/40 dark:from-stone-900/55 dark:to-sky-950/20 p-4 sm:p-6 ring-1 ring-sky-100/80 dark:ring-sky-950/35 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.65)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)]"
-                    aria-labelledby="embedded-citation-previews-heading"
+                <section
+                  className={`rounded-2xl border border-sky-200/75 dark:border-sky-800/45 bg-gradient-to-b from-white/95 to-sky-50/40 dark:from-stone-900/55 dark:to-sky-950/20 p-4 sm:p-6 ring-1 ring-sky-100/80 dark:ring-sky-950/35 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.65)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] ${
+                    embedded ? 'mt-7 sm:mt-8' : 'mt-8 sm:mt-10 pt-6 sm:pt-8 border-t border-sky-200/50 dark:border-sky-900/40'
+                  }`}
+                  aria-labelledby="citation-previews-heading"
+                >
+                  <h2
+                    id="citation-previews-heading"
+                    className="text-center dash-serif text-base sm:text-lg font-semibold text-stone-900 dark:text-stone-100"
+                    style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
                   >
-                    <h2 id="embedded-citation-previews-heading" className="text-center dash-serif text-sm sm:text-base font-semibold text-stone-800 dark:text-stone-100">
-                      What your sources can look like
-                    </h2>
-                    <p className="mt-1 text-center text-[11px] sm:text-xs text-stone-500 dark:text-stone-400 max-w-xl mx-auto">
-                      Muted demo and a static preview — your results follow your topic and style.
-                    </p>
-                    <div className="mt-4 flex flex-nowrap gap-3 lg:gap-4 justify-between overflow-x-auto pb-3 snap-x snap-mandatory [scrollbar-width:thin]">
-                      {EMBEDDED_CITATION_PREVIEWS.map((item) => (
-                        <figure
-                          key={item.id}
-                          className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,280px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-sky-500 dark:border-sky-400 shadow-md shadow-sky-900/15 flex flex-col"
-                        >
-                          <div className="relative aspect-[16/11] w-full bg-black/80">
-                            {item.kind === 'image' ? (
-                              <img
-                                src={item.src}
-                                alt={item.alt}
-                                className="absolute inset-0 h-full w-full object-cover object-top"
-                                loading="lazy"
-                                decoding="async"
-                              />
-                            ) : (
-                              <video
-                                className="absolute inset-0 h-full w-full object-cover object-center"
-                                aria-label={item.description}
-                                title={item.description}
-                                muted
-                                loop
-                                playsInline
-                                autoPlay
-                                preload="metadata"
-                              >
-                                <source src={item.src} type="video/mp4" />
-                              </video>
-                            )}
-                          </div>
-                          <figcaption className="px-2 py-1.5 text-center text-[10px] sm:text-[11px] font-semibold text-stone-600 dark:text-stone-400 border-t border-stone-200/70 dark:border-stone-700/70 bg-white/95 dark:bg-stone-900/95">
-                            {item.label}
-                          </figcaption>
-                        </figure>
-                      ))}
-                    </div>
-                  </section>
-                )}
+                    What your sources can look like
+                  </h2>
+                  <p className="mt-1 text-center text-xs sm:text-sm text-stone-500 dark:text-stone-400 max-w-xl mx-auto">
+                    Muted demo and a static preview — your results follow your topic and style.
+                  </p>
+                  <div className="mt-4 flex flex-nowrap gap-3 sm:gap-4 justify-between overflow-x-auto pb-3 snap-x snap-mandatory [scrollbar-width:thin] max-w-5xl mx-auto">
+                    {EMBEDDED_CITATION_PREVIEWS.map((item) => (
+                      <figure
+                        key={item.id}
+                        className="snap-center shrink-0 w-[min(72vw,280px)] sm:w-[min(40vw,340px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-sky-500 dark:border-sky-400 shadow-md shadow-sky-900/15 flex flex-col"
+                      >
+                        <div className="relative aspect-[16/11] w-full bg-black/80">
+                          {item.kind === 'image' ? (
+                            <img
+                              src={item.src}
+                              alt={item.alt}
+                              className="absolute inset-0 h-full w-full object-cover object-top"
+                              loading="lazy"
+                              decoding="async"
+                            />
+                          ) : (
+                            <video
+                              className="absolute inset-0 h-full w-full object-cover object-center"
+                              aria-label={item.description}
+                              title={item.description}
+                              muted
+                              loop
+                              playsInline
+                              autoPlay
+                              preload="metadata"
+                            >
+                              <source src={item.src} type="video/mp4" />
+                            </video>
+                          )}
+                        </div>
+                        <figcaption className="px-2 py-1.5 text-center text-[10px] sm:text-[11px] font-semibold text-stone-600 dark:text-stone-400 border-t border-stone-200/70 dark:border-stone-700/70 bg-white/95 dark:bg-stone-900/95">
+                          {item.label}
+                        </figcaption>
+                      </figure>
+                    ))}
+                  </div>
+                </section>
               </div>
             </div>
           </div>
 
-          {!embedded && (
-          <div className="relative rounded-2xl border border-stone-200/90 dark:border-stone-700/90 bg-white/80 dark:bg-stone-900/50 backdrop-blur-sm p-4 sm:p-6 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.08)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.35)] ring-1 ring-white/40 dark:ring-white/5">
-            <div className="flex items-center gap-2 mb-4">
-              <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-50" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>See how it works</h2>
-              <span className="h-px flex-1 max-w-32 bg-stone-300/80 dark:bg-stone-600/60 rounded-full" />
-            </div>
-            <div className="relative rounded-xl overflow-hidden border border-stone-200/90 dark:border-stone-600/50 max-w-3xl mx-auto shadow-md">
-              <div className="bg-stone-100/80 dark:bg-stone-800/50 flex items-center justify-center aspect-video min-h-[200px] sm:min-h-[320px]">
-                <video
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  className="w-full h-full object-contain"
-                  title="WriteScholar Citation Finder — APA, MLA, Chicago sources"
-                  aria-label="WriteScholar Citation Finder — Find and format APA, MLA, Chicago sources"
-                >
-                  <source src="/writescholar-citation-finder-demo.mp4" type="video/mp4" />
-                </video>
-              </div>
-              <div className="px-4 py-3.5 border-t border-stone-200/60 dark:border-stone-700/80 bg-white/90 dark:bg-stone-900/40">
-                <p className="text-sm font-semibold text-stone-800 dark:text-stone-100">How it works</p>
-                <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">Find & format academic sources in APA, MLA, Chicago & more</p>
-              </div>
-            </div>
-          </div>
-          )}
         </div>
       </main>
 

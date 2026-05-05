@@ -1001,7 +1001,7 @@ const AcademicAIApp = () => {
     // No cache + fetch in progress: brief loading (cache usually exists for instant render)
     if (isLoggedIn && !user && protectedRoutes.includes(currentPage)) {
       return (
-        <div className="relative min-h-screen flex items-center justify-center overflow-x-hidden">
+        <div className="relative isolate min-h-screen min-h-[100dvh] flex items-center justify-center overflow-x-hidden">
           <WriteScholarEditorialBackgroundLayers position="fixed" />
           <div className="animate-pulse text-stone-500 relative z-10">Loading...</div>
         </div>
@@ -1234,7 +1234,7 @@ const AcademicAIApp = () => {
   };
 
   const pageFallback = (
-    <div className="relative min-h-screen flex items-center justify-center overflow-x-hidden">
+    <div className="relative isolate min-h-screen min-h-[100dvh] flex items-center justify-center overflow-x-hidden">
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <div className="animate-pulse text-stone-500 text-sm relative z-10">Loading...</div>
     </div>
@@ -1242,7 +1242,7 @@ const AcademicAIApp = () => {
 
   return (
     <ErrorBoundary>
-    <div className="relative min-h-screen overflow-x-clip transition-colors">
+    <div className="relative min-h-screen overflow-x-hidden transition-colors">
       <Suspense fallback={pageFallback}>
         <PageErrorBoundary key={currentPage} onGoBack={() => navigateTo('dashboard')}>
           {renderCurrentPage()}

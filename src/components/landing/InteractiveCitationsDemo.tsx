@@ -69,8 +69,8 @@ export default function InteractiveCitationsDemo({
 
   if (variant === 'side-left') {
     return (
-      <div className="rounded-2xl border border-violet-200/80 dark:border-violet-800/50 bg-gradient-to-b from-violet-50/90 to-white dark:from-violet-950/30 dark:to-stone-900/80 p-3 shadow-sm ring-1 ring-violet-100/80 dark:ring-violet-900/40">
-        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-violet-700 dark:text-violet-400 mb-2 text-center">Peer-reviewed</p>
+      <div className="rounded-2xl border border-blue-200/80 dark:border-blue-800/50 bg-gradient-to-b from-blue-50/90 to-white dark:from-blue-950/30 dark:to-stone-900/80 p-3 shadow-sm ring-1 ring-blue-100/80 dark:ring-blue-900/40">
+        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-blue-700 dark:text-blue-400 mb-2 text-center">Peer-reviewed</p>
         <div className="rounded-lg border border-stone-200/90 dark:border-stone-600 bg-white/95 dark:bg-stone-900/60 p-2 mb-2 shadow-inner">
           <p className="text-[9px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-0.5">Topic</p>
           <p className="text-[11px] text-stone-800 dark:text-stone-100 font-medium leading-snug line-clamp-3">
@@ -88,8 +88,8 @@ export default function InteractiveCitationsDemo({
                   onMouseEnter={() => setExpandedId(src.id)}
                   className={`w-full text-left rounded-lg border transition-all duration-200 p-2 ${
                     isOpen
-                      ? 'border-violet-400/80 bg-violet-50/90 dark:bg-violet-950/40 ring-1 ring-violet-300/50 dark:ring-violet-700/50'
-                      : 'border-stone-200/90 dark:border-stone-600 bg-white/80 dark:bg-stone-800/50 hover:border-violet-300/70'
+                      ? 'border-blue-400/80 bg-blue-50/90 dark:bg-blue-950/40 ring-1 ring-blue-300/50 dark:ring-blue-700/50'
+                      : 'border-stone-200/90 dark:border-stone-600 bg-white/80 dark:bg-stone-800/50 hover:border-blue-300/70'
                   }`}
                 >
                   <p className="text-[11px] font-semibold text-stone-900 dark:text-stone-50 leading-snug line-clamp-2">{src.title}</p>
@@ -106,16 +106,16 @@ export default function InteractiveCitationsDemo({
   if (variant === 'side-right') {
     const t = formatCitation(style, focusSource);
     return (
-      <div className="rounded-2xl border border-violet-200/80 dark:border-violet-800/50 bg-gradient-to-b from-violet-50/90 to-white dark:from-violet-950/25 dark:to-stone-900/80 p-3 shadow-sm ring-1 ring-violet-100/80 dark:ring-violet-900/40">
-        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-violet-700 dark:text-violet-400 mb-2 text-center">Copy & export</p>
-        <div className="flex rounded-lg border border-violet-200/90 dark:border-violet-700/60 bg-white/90 dark:bg-stone-800/80 p-0.5 mb-2">
+      <div className="rounded-2xl border border-blue-200/80 dark:border-blue-800/50 bg-gradient-to-b from-blue-50/90 to-white dark:from-blue-950/25 dark:to-stone-900/80 p-3 shadow-sm ring-1 ring-blue-100/80 dark:ring-blue-900/40">
+        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-blue-700 dark:text-blue-400 mb-2 text-center">Copy & export</p>
+        <div className="flex rounded-lg border border-blue-200/90 dark:border-blue-700/60 bg-white/90 dark:bg-stone-800/80 p-0.5 mb-2">
           {(['APA', 'MLA', 'Chicago'] as const).map((s) => (
             <button
               key={s}
               type="button"
               onClick={() => setStyle(s)}
               className={`flex-1 px-1.5 py-1 rounded-md text-[10px] font-semibold transition-all ${
-                style === s ? 'bg-violet-600 text-white shadow-sm' : 'text-stone-600 dark:text-stone-300 hover:bg-violet-50 dark:hover:bg-violet-900/40'
+                style === s ? 'bg-blue-600 text-white shadow-sm' : 'text-stone-600 dark:text-stone-300 hover:bg-blue-50 dark:hover:bg-blue-900/40'
               }`}
             >
               {s}
@@ -129,7 +129,7 @@ export default function InteractiveCitationsDemo({
         <button
           type="button"
           onClick={() => copy(focusSource.id, t)}
-          className="mt-2 w-full text-center text-[11px] font-semibold text-violet-700 dark:text-violet-400 hover:underline"
+          className="mt-2 w-full text-center text-[11px] font-semibold text-blue-700 dark:text-blue-400 hover:underline"
         >
           {copiedId === focusSource.id ? 'Copied!' : 'Copy citation'}
         </button>
@@ -138,7 +138,7 @@ export default function InteractiveCitationsDemo({
   }
 
   return (
-    <div className="rounded-2xl border border-violet-200/80 dark:border-violet-800/50 bg-gradient-to-b from-violet-50/90 to-white dark:from-violet-950/30 dark:to-stone-900/80 p-4 sm:p-6 shadow-sm ring-1 ring-violet-100/80 dark:ring-violet-900/40">
+    <div className="rounded-2xl border border-blue-200/80 dark:border-blue-800/50 bg-gradient-to-b from-blue-50/90 to-white dark:from-blue-950/30 dark:to-stone-900/80 p-4 sm:p-6 shadow-sm ring-1 ring-blue-100/80 dark:ring-blue-900/40">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-4">
         <div>
           <h3 className="text-base sm:text-lg font-semibold text-stone-900 dark:text-stone-50" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
@@ -148,7 +148,7 @@ export default function InteractiveCitationsDemo({
             Hover a result, then copy a real-style reference — peer-reviewed sources only.
           </p>
         </div>
-        <div className="flex rounded-lg border border-violet-200/90 dark:border-violet-700/60 bg-white/90 dark:bg-stone-800/80 p-0.5 shrink-0">
+        <div className="flex rounded-lg border border-blue-200/90 dark:border-blue-700/60 bg-white/90 dark:bg-stone-800/80 p-0.5 shrink-0">
           {(['APA', 'MLA', 'Chicago'] as const).map((s) => (
             <button
               key={s}
@@ -156,8 +156,8 @@ export default function InteractiveCitationsDemo({
               onClick={() => setStyle(s)}
               className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
                 style === s
-                  ? 'bg-violet-600 text-white shadow-sm'
-                  : 'text-stone-600 dark:text-stone-300 hover:bg-violet-50 dark:hover:bg-violet-900/40'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-stone-600 dark:text-stone-300 hover:bg-blue-50 dark:hover:bg-blue-900/40'
               }`}
             >
               {s}
@@ -182,8 +182,8 @@ export default function InteractiveCitationsDemo({
                 onMouseEnter={() => setExpandedId(src.id)}
                 className={`w-full text-left rounded-xl border transition-all duration-200 p-3 sm:p-4 ${
                   isOpen
-                    ? 'border-violet-400/80 bg-violet-50/90 dark:bg-violet-950/40 shadow-md ring-1 ring-violet-300/50 dark:ring-violet-700/50'
-                    : 'border-stone-200/90 dark:border-stone-600 bg-white/80 dark:bg-stone-800/50 hover:border-violet-300/70 dark:hover:border-violet-600/50'
+                    ? 'border-blue-400/80 bg-blue-50/90 dark:bg-blue-950/40 shadow-md ring-1 ring-blue-300/50 dark:ring-blue-700/50'
+                    : 'border-stone-200/90 dark:border-stone-600 bg-white/80 dark:bg-stone-800/50 hover:border-blue-300/70 dark:hover:border-blue-600/50'
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">
@@ -211,7 +211,7 @@ export default function InteractiveCitationsDemo({
                         e.stopPropagation();
                         copy(src.id, formatCitation(style, src));
                       }}
-                      className="mt-2 text-xs font-semibold text-violet-700 dark:text-violet-400 hover:underline"
+                      className="mt-2 text-xs font-semibold text-blue-700 dark:text-blue-400 hover:underline"
                     >
                       {copiedId === src.id ? 'Copied!' : 'Copy citation'}
                     </button>

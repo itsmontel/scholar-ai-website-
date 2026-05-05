@@ -70,10 +70,12 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
   };
 
   return (
-    <div className="relative min-h-screen flex overflow-x-hidden">
+    <div className="relative isolate min-h-screen min-h-[100dvh] overflow-x-hidden">
       <WriteScholarEditorialBackgroundLayers position="fixed" />
+      <div className="relative z-10 flex min-h-screen min-h-[100dvh] w-full flex-col lg:flex-row">
       {/* Back Button */}
       <button
+        type="button"
         onClick={() => onNavigate('landing')}
         className="fixed top-4 left-4 sm:top-6 sm:left-6 z-50 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors group"
       >
@@ -85,7 +87,7 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
       </button>
 
       {/* Left Side - Signup Form */}
-      <div className="w-full lg:w-1/2 flex flex-col">
+      <div className="w-full min-w-0 lg:w-1/2 flex flex-col">
         {/* Header */}
         <div className="px-4 pt-16 pb-2 sm:p-6 sm:pt-6 sm:pb-0">
           <div className="flex items-center space-x-2.5">
@@ -245,6 +247,7 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
       </div>
 
       <AuthMarketingSide />
+      </div>
     </div>
   );
 };
