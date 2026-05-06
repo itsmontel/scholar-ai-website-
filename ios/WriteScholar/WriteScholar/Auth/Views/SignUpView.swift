@@ -42,6 +42,26 @@ struct SignUpView: View {
         }
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    Haptics.light()
+                    guard !path.isEmpty else { return }
+                    path.removeLast()
+                } label: {
+                    HStack(spacing: 5) {
+                        Image(systemName: "chevron.backward")
+                            .font(.system(size: 14, weight: .semibold))
+                        Text("Skip")
+                            .wsBody(.small, weight: .bold)
+                    }
+                    .foregroundStyle(WSColor.brandPrimary)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Skip sign up and go back")
+            }
+        }
         .onSubmit { advanceField() }
     }
 
@@ -137,15 +157,23 @@ struct SignUpView: View {
     // MARK: - Footer
 
     private var footerBlock: some View {
-        HStack(spacing: 4) {
-            Text("Already have an account?")
-                .foregroundStyle(WSColor.foregroundMuted)
-            Button("Sign in") {
-                path.append(AuthRoute.signIn)
+        VStack(spacing: 14) {
+            HStack(spacing: 4) {
+                Text("Already have an account?")
+                    .foregroundStyle(WSColor.foregroundMuted)
+                Button("Sign in") {
+                    guard !path.isEmpty else { return }
+                    path.removeLast()
+                    if path.isEmpty {
+                        path.append(AuthRoute.signIn)
+                    }
+                }
+                .buttonStyle(WSTertiaryButtonStyle())
             }
-            .buttonStyle(WSTertiaryButtonStyle())
+            .wsBody(.small)
+
+            ExploreWithoutSigningInButton()
         }
-        .wsBody(.small)
     }
 
     // MARK: - Submission

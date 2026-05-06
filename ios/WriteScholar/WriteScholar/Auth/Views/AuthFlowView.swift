@@ -41,6 +41,8 @@ struct AuthFlowView: View {
 
                     legalFooter
                         .padding(.horizontal, 32)
+
+                    ExploreWithoutSigningInButton()
                         .padding(.bottom, 16)
                 }
             }
@@ -235,6 +237,25 @@ enum AuthRoute: Hashable {
     case signIn
     case signUp
     case signUpSuccess(email: String)
+}
+
+/// Opens the main tab shell without a JWT (backend features may not work until you sign in).
+struct ExploreWithoutSigningInButton: View {
+    @EnvironmentObject private var session: AuthSession
+
+    var body: some View {
+        Button {
+            Haptics.light()
+            session.continueWithoutSigningIn()
+        } label: {
+            Text("Explore without signing in")
+                .wsBody(.small, weight: .semibold)
+                .foregroundStyle(WSColor.brandPrimary)
+                .underline()
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Continue to the app without an account")
+    }
 }
 
 #Preview {

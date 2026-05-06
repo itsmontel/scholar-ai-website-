@@ -10,6 +10,9 @@
 import Foundation
 
 struct WSUser: Codable, Identifiable, Equatable {
+    /// Offline-only placeholder used when the user opens the app shell without signing in.
+    static let localGuestId = "__local_guest__"
+
     let id: String
     let email: String
     let username: String?
@@ -20,6 +23,22 @@ struct WSUser: Codable, Identifiable, Equatable {
     let emailVerified: Bool?
     let onboardingCompleted: Bool?
     let welcomeTutorialCompleted: Bool?
+
+    /// Browsing without an account (no JWT; backend calls may fail until you sign in).
+    static let localGuest = WSUser(
+        id: localGuestId,
+        email: "guest@local.writescholar",
+        username: nil,
+        firstName: "Guest",
+        lastName: nil,
+        subscriptionPlan: "free",
+        subscriptionStatus: "local",
+        emailVerified: false,
+        onboardingCompleted: true,
+        welcomeTutorialCompleted: nil
+    )
+
+    var isLocalGuestAccount: Bool { id == Self.localGuestId }
 
     var displayName: String {
         if let f = firstName, !f.isEmpty { return f }

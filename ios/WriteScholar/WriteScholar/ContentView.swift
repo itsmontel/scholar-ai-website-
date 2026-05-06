@@ -17,7 +17,7 @@ struct ContentView: View {
     var body: some View {
         ZStack {
             if !onboardingComplete {
-                OnboardingFlow(onboardingComplete: $onboardingComplete)
+                OnboardingFlow(onboardingComplete: $onboardingComplete, session: session)
                     .transition(.opacity)
             } else {
                 switch session.state {

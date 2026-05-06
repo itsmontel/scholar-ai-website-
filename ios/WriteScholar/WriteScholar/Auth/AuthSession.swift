@@ -100,6 +100,12 @@ final class AuthSession: ObservableObject {
         }
     }
 
+    /// Enters the main app tabs without storing credentials — for previews or until auth is wired.
+    func continueWithoutSigningIn() {
+        lastError = nil
+        state = .authenticated(.localGuest)
+    }
+
     // MARK: Sign out
 
     func signOut() {

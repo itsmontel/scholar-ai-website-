@@ -864,9 +864,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   <p className="text-[1.02rem] sm:text-lg font-semibold text-stone-800 dark:text-stone-100 leading-snug tracking-[0.01em] opacity-0 animate-hero-stagger-2">
                     Professor-style feedback on your writing — and AI study tools (flashcards, quizzes, crosswords, games) from any notes you paste in.
                   </p>
-                  <p className="text-[0.95rem] sm:text-[1.0625rem] leading-relaxed tracking-[0.015em] text-stone-600 dark:text-stone-400 opacity-0 animate-hero-stagger-3">
-                    8 tools. 7-day free trial. No payment today.
-                  </p>
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 w-full max-w-md sm:max-w-none mx-auto sm:mx-0 mb-5 sm:mb-6 opacity-0 animate-hero-stagger-4">
@@ -890,7 +887,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </button>
               </div>
                 <p className="mb-6 sm:mb-7 text-center text-[12px] sm:text-sm text-stone-500 dark:text-stone-400 tracking-[0.03em] opacity-0 animate-hero-stagger-5">
-                  About 30 seconds to get started.
+                  Now about 30 seconds to get started. No payment today.
                 </p>
 
                 <div className="flex justify-center w-full">

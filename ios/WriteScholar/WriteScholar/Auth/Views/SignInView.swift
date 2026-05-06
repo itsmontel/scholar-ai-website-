@@ -118,7 +118,7 @@ struct SignInView: View {
     // MARK: - Footer
 
     private var footerBlock: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 14) {
             Button("Forgot your password?") {
                 // Not yet implemented — links to website for now
                 if let url = URL(string: "https://writescholar.com/reset-password") {
@@ -136,6 +136,8 @@ struct SignInView: View {
                 .buttonStyle(WSTertiaryButtonStyle())
             }
             .wsBody(.small)
+
+            ExploreWithoutSigningInButton()
         }
     }
 

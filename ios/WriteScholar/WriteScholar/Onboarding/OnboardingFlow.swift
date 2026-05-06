@@ -11,6 +11,7 @@ import SwiftUI
 
 struct OnboardingFlow: View {
     @Binding var onboardingComplete: Bool
+    @ObservedObject var session: AuthSession
     @State private var pageIndex: Int = 0
 
     private let pages = OnboardingPage.all
@@ -70,13 +71,13 @@ struct OnboardingFlow: View {
                 .wsBody(.small, weight: .bold)
                 .foregroundStyle(WSColor.foreground)
             Spacer()
-            if pageIndex < pages.count - 1 {
+            if showsSkipControl {
                 Button {
                     Haptics.light()
-                    finishOnboarding()
+                    skipOnboardingToHome()
                 } label: {
                     HStack(spacing: 5) {
-                        Text("Skip")
+                        Text(skipControlTitle)
                             .wsBody(.caption, weight: .bold)
                         Image(systemName: "arrow.forward")
                             .font(.system(size: 11, weight: .bold))
@@ -91,6 +92,7 @@ struct OnboardingFlow: View {
                     )
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Skip onboarding and open the app")
             }
         }
     }
@@ -102,16 +104,14 @@ struct OnboardingFlow: View {
             pageIndicator
             primaryCTA
 
-            // Welcome-page only: tertiary "I've used this — skip to app".
-            // Gives existing/return users a clean escape hatch without
-            // making everyone scan the top-right Skip chip.
+            // Welcome-page only: tertiary escape straight into the tab shell (guest).
             if pageIndex == 0 {
                 Button {
                     Haptics.light()
-                    finishOnboarding()
+                    skipOnboardingToHome()
                 } label: {
                     HStack(spacing: 6) {
-                        Text("I've used this — skip onboarding")
+                        Text("I've used this — open the app")
                         Image(systemName: "arrow.forward")
                             .font(.system(size: 11, weight: .bold))
                     }
@@ -165,14 +165,33 @@ struct OnboardingFlow: View {
             Haptics.medium()
         } else {
             Haptics.success()
-            finishOnboarding()
+            finishOnboardingToAuth()
         }
     }
 
-    private func finishOnboarding() {
+    /// Normal funnel: show sign-in / sign-up after the final onboarding step.
+    private func finishOnboardingToAuth() {
         withAnimation(.easeInOut(duration: 0.35)) {
             onboardingComplete = true
         }
+    }
+
+    /// Skip carousel: jump into the main tabs without signing in (local guest — no JWT).
+    private func skipOnboardingToHome() {
+        session.continueWithoutSigningIn()
+        withAnimation(.easeInOut(duration: 0.35)) {
+            onboardingComplete = true
+        }
+    }
+
+    /// Hide skip only on the final onboarding step when there is a distinct last page.
+    private var showsSkipControl: Bool {
+        if pages.count <= 1 { return true }
+        return pageIndex < pages.count - 1
+    }
+
+    private var skipControlTitle: String {
+        pageIndex == 0 ? "Skip to app" : "Skip"
     }
 
     /// 1.0 when this index is the active page, 0 otherwise. Used by hero
@@ -259,5 +278,5 @@ struct OnboardingPageView: View {
 }
 
 #Preview {
-    OnboardingFlow(onboardingComplete: .constant(false))
+    OnboardingFlow(onboardingComplete: .constant(false), session: AuthSession())
 }
