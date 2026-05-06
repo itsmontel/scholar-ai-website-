@@ -595,7 +595,6 @@ struct WordTowerView: View {
         blocksResolvedThisRound = 0
 
         let lanes = laneCenters.shuffled()
-        var newBlocks: [FallingBlock] = []
 
         for (i, item) in items.enumerated() {
             let lane = lanes[i % lanes.count]

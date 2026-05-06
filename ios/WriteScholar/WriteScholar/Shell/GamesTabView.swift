@@ -2,20 +2,62 @@
 //  GamesTabView.swift
 //  WriteScholar
 //
-//  Lightweight games hub. Library + recent-pack picker land in Chapter 6;
-//  for now we ship two evergreen demo packs so the user can try Crater
-//  Blast and Word Tower without first generating a study pack.
+//  Games hub with a per-game mode picker that mirrors desktop:
+//    Crater Blast   → Play / Mental Math / Capitals / Flags
+//    Word Tower     → Play / Mental Math
+//
+//  Each launch builds a fresh question pool from the ported desktop
+//  word banks (CraterBlastBank, CraterBlastMentalMathBank,
+//  CraterBlastCapitalsBank, CraterBlastFlagsBank, WordTowerBank).
 //
 
 import SwiftUI
 
 struct GamesTabView: View {
-    @State private var presented: GameKind? = nil
+    @State private var presented: PresentedGame? = nil
+    @State private var craterMode: CraterMode = .playForFun
+    @State private var towerMode: TowerMode  = .playForFun
 
-    enum GameKind: Identifiable, Hashable {
-        case craterBlast
-        case wordTower
+    enum CraterMode: String, CaseIterable, Identifiable {
+        case playForFun  = "Play for Fun"
+        case mentalMath  = "Mental Math"
+        case capitals    = "Capitals"
+        case flags       = "Flags"
         var id: Self { self }
+        var icon: String {
+            switch self {
+            case .playForFun: return "sparkles"
+            case .mentalMath: return "function"
+            case .capitals:   return "building.columns.fill"
+            case .flags:      return "flag.fill"
+            }
+        }
+    }
+
+    enum TowerMode: String, CaseIterable, Identifiable {
+        case playForFun  = "Play for Fun"
+        case mentalMath  = "Mental Math"
+        var id: Self { self }
+        var icon: String {
+            switch self {
+            case .playForFun: return "sparkles"
+            case .mentalMath: return "function"
+            }
+        }
+    }
+
+    /// Wraps the chosen game + freshly-built bank so the fullScreenCover
+    /// can hand the pre-built questions to the game view.
+    enum PresentedGame: Identifiable {
+        case craterBlast(CraterBlast)
+        case wordTower(WordTower)
+
+        var id: String {
+            switch self {
+            case .craterBlast: return "crater"
+            case .wordTower:   return "tower"
+            }
+        }
     }
 
     var body: some View {
@@ -39,33 +81,44 @@ struct GamesTabView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
                     headerBlock
-                    gameCard(
-                        kind: .craterBlast,
+
+                    gameSection(
                         title: "Crater Blast",
-                        subtitle: "Boss-battle quiz arcade. Hit the boss with the right answer before your hearts run out.",
+                        subtitle: "Boss-battle reflex quiz. Hit the falling answers before they land — 3 lives, react fast.",
                         gradient: [Color(hex: 0xEF4444), Color(hex: 0xB91C1C), Color(hex: 0x4C1D95)],
                         icon: "burst.fill",
                         accent: Color(hex: 0xFBBF24)
-                    )
-                    gameCard(
-                        kind: .wordTower,
+                    ) {
+                        modePicker(modes: CraterMode.allCases, selected: $craterMode, tint: Color(hex: 0xFBBF24))
+                        playButton(label: "Play \(craterMode.rawValue)") {
+                            launchCrater(mode: craterMode)
+                        }
+                    }
+
+                    gameSection(
                         title: "Word Tower",
-                        subtitle: "Stack the right words. Tap correct items only — wrong taps cost a heart.",
-                        gradient: [Color(hex: 0x10B981), Color(hex: 0x059669), Color(hex: 0x312E81)],
+                        subtitle: "Catch the correct answers, dodge the wrong ones — build your tower across 7 lives.",
+                        gradient: [Color(hex: 0x8B5CF6), Color(hex: 0x6D28D9), Color(hex: 0x1E1B4B)],
                         icon: "building.2.fill",
-                        accent: Color(hex: 0xFBBF24)
-                    )
+                        accent: Color(hex: 0xFDE68A)
+                    ) {
+                        modePicker(modes: TowerMode.allCases, selected: $towerMode, tint: Color(hex: 0xFDE68A))
+                        playButton(label: "Play \(towerMode.rawValue)") {
+                            launchTower(mode: towerMode)
+                        }
+                    }
+
                     libraryHint
                 }
                 .padding(.horizontal, 20)
                 .padding(.vertical, 18)
             }
         }
-        .fullScreenCover(item: $presented) { kind in
+        .fullScreenCover(item: $presented) { game in
             ZStack(alignment: .topLeading) {
-                switch kind {
-                case .craterBlast: CraterBlastView(craterBlast: GamesDemoData.craterBlast)
-                case .wordTower:   WordTowerView(wordTower: GamesDemoData.wordTower)
+                switch game {
+                case .craterBlast(let pack): CraterBlastView(craterBlast: pack)
+                case .wordTower(let pack):   WordTowerView(wordTower: pack)
                 }
 
                 Button {
@@ -104,25 +157,29 @@ struct GamesTabView: View {
             Text("Beat the boss. Build the tower.")
                 .wsHeadline(.large, weight: .semibold)
                 .foregroundStyle(WSColor.foreground)
-            Text("Quick demos to try the games. Play your own subject on a real pack from the Study tab.")
+            Text("Same physics, scoring, and full word bank as desktop — over 750 questions across both games.")
                 .wsBody(.medium)
                 .foregroundStyle(WSColor.foregroundMuted)
         }
     }
 
-    // MARK: - Game card
+    // MARK: - Game section card (gradient banner + body)
 
-    private func gameCard(kind: GameKind, title: String, subtitle: String, gradient: [Color], icon: String, accent: Color) -> some View {
-        Button {
-            Haptics.medium()
-            presented = kind
-        } label: {
+    private func gameSection<Content: View>(
+        title: String,
+        subtitle: String,
+        gradient: [Color],
+        icon: String,
+        accent: Color,
+        @ViewBuilder body: () -> Content
+    ) -> some View {
+        VStack(spacing: 0) {
+            // Banner — top half
             ZStack(alignment: .topLeading) {
                 LinearGradient(colors: gradient, startPoint: .topLeading, endPoint: .bottomTrailing)
-                    .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
 
                 Canvas { ctx, size in
-                    for i in 0..<16 {
+                    for i in 0..<14 {
                         let x = (sin(Double(i) * 6.31) + 1) / 2 * size.width
                         let y = (cos(Double(i) * 4.21) + 1) / 2 * size.height
                         ctx.fill(
@@ -133,38 +190,107 @@ struct GamesTabView: View {
                 }
                 .allowsHitTesting(false)
 
-                VStack(alignment: .leading, spacing: 14) {
+                VStack(alignment: .leading, spacing: 8) {
                     HStack {
                         ZStack {
                             Circle()
                                 .fill(Color.white.opacity(0.18))
-                                .frame(width: 56, height: 56)
+                                .frame(width: 48, height: 48)
                             Image(systemName: icon)
-                                .font(.system(size: 26, weight: .bold))
+                                .font(.system(size: 22, weight: .bold))
                                 .foregroundStyle(accent)
                         }
                         Spacer()
-                        Image(systemName: "play.fill")
-                            .foregroundStyle(.white)
-                            .padding(10)
-                            .background(Circle().fill(Color.white.opacity(0.18)))
                     }
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(title)
-                            .wsHeadline(.medium, weight: .bold)
-                            .foregroundStyle(.white)
-                        Text(subtitle)
-                            .wsBody(.small)
-                            .foregroundStyle(.white.opacity(0.85))
-                    }
+                    Text(title)
+                        .wsHeadline(.medium, weight: .bold)
+                        .foregroundStyle(.white)
+                    Text(subtitle)
+                        .wsBody(.small)
+                        .foregroundStyle(.white.opacity(0.85))
                 }
-                .padding(20)
+                .padding(18)
             }
-            .frame(height: 180)
-            .shadow(color: gradient.first?.opacity(0.30) ?? .clear, radius: 16, y: 8)
+            .frame(height: 170)
+
+            // Body (mode picker + play button) — bottom half
+            VStack(spacing: 12) {
+                body()
+            }
+            .frame(maxWidth: .infinity)
+            .padding(16)
+            .background(WSColor.backgroundElevated)
         }
-        .buttonStyle(.plain)
+        // Single rounded clip + border around the whole card
+        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .stroke(WSColor.hairline, lineWidth: 1)
+        )
+        .shadow(color: gradient.first?.opacity(0.30) ?? .clear, radius: 16, y: 8)
+    }
+
+    // MARK: - Mode picker (segmented, scrolls if it overflows)
+
+    private func modePicker<M: Identifiable & CaseIterable & Hashable>(
+        modes: M.AllCases,
+        selected: Binding<M>,
+        tint: Color
+    ) -> some View where M: RawRepresentable, M.RawValue == String, M.AllCases: RandomAccessCollection {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(Array(modes), id: \.self) { mode in
+                    let active = (selected.wrappedValue == mode)
+                    Button {
+                        Haptics.selection()
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                            selected.wrappedValue = mode
+                        }
+                    } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: modeIcon(mode))
+                                .font(.system(size: 12, weight: .bold))
+                            Text(mode.rawValue)
+                                .wsBody(.small, weight: .bold)
+                        }
+                        .foregroundStyle(active ? .white : WSColor.foreground)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 7)
+                        .background(
+                            Capsule()
+                                .fill(active ? AnyShapeStyle(tint) : AnyShapeStyle(WSColor.surface))
+                                .overlay(
+                                    Capsule().stroke(active ? .clear : WSColor.hairline, lineWidth: 1)
+                                )
+                                .shadow(color: active ? tint.opacity(0.5) : .clear, radius: 8, y: 3)
+                        )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+
+    /// SF Symbol per mode using each enum's own icon helper.
+    private func modeIcon<M: Hashable>(_ mode: M) -> String {
+        if let m = mode as? CraterMode { return m.icon }
+        if let m = mode as? TowerMode  { return m.icon }
+        return "circle"
+    }
+
+    // MARK: - Play button
+
+    private func playButton(label: String, action: @escaping () -> Void) -> some View {
+        Button {
+            Haptics.medium()
+            action()
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "play.fill")
+                Text(label)
+            }
+        }
+        .buttonStyle(WSPrimaryButtonStyle())
     }
 
     // MARK: - Library hint (Chapter 6)
@@ -175,10 +301,10 @@ struct GamesTabView: View {
                 .font(.system(size: 22, weight: .bold))
                 .foregroundStyle(Color(hex: 0x6366F1))
             VStack(alignment: .leading, spacing: 2) {
-                Text("Play your own packs")
+                Text("Play with your own subjects")
                     .wsBody(.small, weight: .bold)
                     .foregroundStyle(WSColor.foreground)
-                Text("Generate a study pack on the Study tab to play with your own subjects. Library lands in Chapter 6.")
+                Text("Generate a study pack on the Study tab to get personalised questions on your notes. Saved-pack library lands in Chapter 6.")
                     .wsBody(.caption)
                     .foregroundStyle(WSColor.foregroundMuted)
             }
@@ -194,79 +320,29 @@ struct GamesTabView: View {
                 )
         )
     }
-}
 
-// MARK: - Demo data for the Games tab
+    // MARK: - Launchers
 
-private enum GamesDemoData {
-    static let craterBlast: CraterBlast = {
-        let qs: [CraterBlastQuestion] = [
-            decode(CraterBlastQuestion.self, """
-            {"id":"d1","prompt":"Which organelle is the powerhouse of the cell?",
-             "answers":["Mitochondria","Ribosome","Nucleus","Lysosome"],"correctIndex":0}
-            """),
-            decode(CraterBlastQuestion.self, """
-            {"id":"d2","prompt":"What pigment makes blood red?",
-             "answers":["Hemoglobin","Keratin","Insulin","Collagen"],"correctIndex":0}
-            """),
-            decode(CraterBlastQuestion.self, """
-            {"id":"d3","prompt":"What does ATP stand for?",
-             "answers":["Adenosine TP","Active TP","Acid TP","ATP molecule"],"correctIndex":0}
-            """),
-            decode(CraterBlastQuestion.self, """
-            {"id":"d4","prompt":"DNA pairs with which molecule?",
-             "answers":["RNA","ATP","Sugar","Lipid"],"correctIndex":0}
-            """),
-            decode(CraterBlastQuestion.self, """
-            {"id":"d5","prompt":"Which is the smallest particle of an element?",
-             "answers":["Atom","Cell","Quark","Photon"],"correctIndex":0}
-            """),
-            decode(CraterBlastQuestion.self, """
-            {"id":"d6","prompt":"Pythagoras' theorem applies to which shape?",
-             "answers":["Right triangle","Square","Circle","Pentagon"],"correctIndex":0}
-            """),
-        ]
-        return CraterBlast(title: "Demo · Mixed", questions: qs)
-    }()
+    private func launchCrater(mode: CraterMode) {
+        let questions: [CraterBlastQuestion] = {
+            switch mode {
+            case .playForFun: return CraterBlastBank.shuffledPool()
+            case .mentalMath: return CraterBlastMentalMathBank.shuffledPool()
+            case .capitals:   return CraterBlastCapitalsBank.allQuestions()
+            case .flags:      return CraterBlastFlagsBank.allQuestions()
+            }
+        }()
+        presented = .craterBlast(CraterBlast(title: "Crater Blast · \(mode.rawValue)", questions: questions))
+    }
 
-    static let wordTower: WordTower = {
-        let qs: [WordTowerQuestion] = [
-            decode(WordTowerQuestion.self, """
-            {"id":"d1","prompt":"Which are organelles?","items":[
-              {"text":"Nucleus","isCorrect":true},
-              {"text":"Mitochondria","isCorrect":true},
-              {"text":"Polygon","isCorrect":false},
-              {"text":"Lysosome","isCorrect":true},
-              {"text":"Velocity","isCorrect":false},
-              {"text":"Cosine","isCorrect":false}
-            ]}
-            """),
-            decode(WordTowerQuestion.self, """
-            {"id":"d2","prompt":"Which are noble gases?","items":[
-              {"text":"Helium","isCorrect":true},
-              {"text":"Argon","isCorrect":true},
-              {"text":"Sodium","isCorrect":false},
-              {"text":"Neon","isCorrect":true},
-              {"text":"Carbon","isCorrect":false},
-              {"text":"Iron","isCorrect":false}
-            ]}
-            """),
-            decode(WordTowerQuestion.self, """
-            {"id":"d3","prompt":"Which are prime numbers?","items":[
-              {"text":"2","isCorrect":true},
-              {"text":"3","isCorrect":true},
-              {"text":"4","isCorrect":false},
-              {"text":"7","isCorrect":true},
-              {"text":"9","isCorrect":false},
-              {"text":"15","isCorrect":false}
-            ]}
-            """),
-        ]
-        return WordTower(title: "Demo · Mixed", questions: qs)
-    }()
-
-    private static func decode<T: Decodable>(_ type: T.Type, _ json: String) -> T {
-        try! JSONDecoder().decode(T.self, from: Data(json.utf8))
+    private func launchTower(mode: TowerMode) {
+        let questions: [WordTowerQuestion] = {
+            switch mode {
+            case .playForFun: return WordTowerBank.playForFun.shuffled()
+            case .mentalMath: return WordTowerBank.mentalMath().shuffled()
+            }
+        }()
+        presented = .wordTower(WordTower(title: "Word Tower · \(mode.rawValue)", questions: questions))
     }
 }
 
