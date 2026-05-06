@@ -1,0 +1,30 @@
+# XcodeGen-generated artifacts (regenerate from project.yml)
+*.xcodeproj/
+*.xcworkspace/
+
+# Xcode user state
+xcuserdata/
+*.xcuserstate
+*.swiftpm/
+DerivedData/
+
+# Build products
+build/
+*.dSYM/
+*.ipa
+
+# CocoaPods (not used yet, but pre-empt)
+Pods/
+
+# Swift Package Manager
+.build/
+Package.resolved
+
+# macOS junk
+.DS_Store
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
