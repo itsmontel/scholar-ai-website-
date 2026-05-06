@@ -5,10 +5,13 @@ at `https://writescholar.com/api` (same endpoints as the web app).
 
 ## Status
 
-**Chapter 2 / 7 — scaffold + design system + onboarding + auth.**
-Email sign-in/sign-up are fully wired against the existing Node backend.
-Apple Sign-In captures the identity token; Google Sign-In is a placeholder
-until the backend endpoints below ship.
+**Chapter 3 / 7 — scaffold + onboarding + auth + Study Pack flagship.**
+The Study tab is fully wired against the existing
+`POST /api/analysis/generate-study-pack` endpoint. Native iOS renderers
+for Lesson (paginated slides), Flashcards (swipe deck with 3D flip),
+and Quiz (MC/TF/fill-blank with haptics + score screen). Crossword,
+Crater Blast, and Word Tower show "Chapter 5" placeholders that link
+out to the web for now.
 
 ### Backend additions needed (small, Chapter 2.5)
 
@@ -117,10 +120,9 @@ WriteScholar/
 ## Next chapters (planned)
 
 - **Chapter 2.5** — Backend `/auth/apple` + `/auth/google/native` handlers (small)
-- **Chapter 3** — Study Pack (paste notes → flashcards/quiz/lesson)
-- **Chapter 4** — Analyze Paper
-- **Chapter 5** — Crater Blast + Word Tower (WebView wrappers first)
-- **Chapter 6** — Library + Settings + RevenueCat IAP
+- **Chapter 4** — Analyze Paper (essay feedback flow)
+- **Chapter 5** — Crater Blast + Word Tower native renderers (replace placeholders)
+- **Chapter 6** — Library + RevenueCat IAP (saved packs + subscription)
 - **Chapter 7** — TestFlight build + polish
 
 ## Fonts (TODO)

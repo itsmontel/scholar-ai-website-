@@ -31,7 +31,7 @@ struct ContentView: View {
                         .transition(.opacity)
 
                 case .authenticated(let user):
-                    PlaceholderHomeView(
+                    MainTabView(
                         user: user,
                         onboardingComplete: $onboardingComplete,
                         onSignOut: { session.signOut() }
@@ -56,60 +56,6 @@ private struct LoadingShell: View {
                     .frame(width: 120, height: 120)
                 ProgressView()
                     .tint(WSColor.brandPrimary)
-            }
-        }
-    }
-}
-
-// MARK: - Placeholder home (Chapter 3 will replace with real tabs)
-
-struct PlaceholderHomeView: View {
-    let user: WSUser
-    @Binding var onboardingComplete: Bool
-    var onSignOut: () -> Void
-
-    var body: some View {
-        ZStack {
-            WSGradient.heroBackdrop.ignoresSafeArea()
-
-            ScrollView {
-                VStack(spacing: 28) {
-                    VStack(spacing: 12) {
-                        WSAnimatedImage(name: "mascot-dance", ext: "webp")
-                            .frame(width: 140, height: 140)
-
-                        Text("Hey, \(user.displayName)")
-                            .wsHeadline(.large, weight: .semibold)
-                            .foregroundStyle(WSColor.foreground)
-
-                        Text(user.email)
-                            .wsBody(.small, weight: .semibold)
-                            .foregroundStyle(WSColor.foregroundMuted)
-                    }
-                    .padding(.top, 60)
-
-                    VStack(spacing: 6) {
-                        Text("You're signed in.")
-                            .wsBody(.medium, weight: .bold)
-                            .foregroundStyle(WSColor.foreground)
-                        Text("Tabs + tools land in Chapter 3.")
-                            .wsBody(.small)
-                            .foregroundStyle(WSColor.foregroundMuted)
-                    }
-                    .padding(.horizontal, 32)
-                    .multilineTextAlignment(.center)
-
-                    VStack(spacing: 10) {
-                        Button("Sign out", action: onSignOut)
-                            .buttonStyle(WSSecondaryButtonStyle(fullWidth: true))
-                        Button("Reset onboarding") {
-                            onboardingComplete = false
-                        }
-                        .buttonStyle(WSTertiaryButtonStyle())
-                    }
-                    .padding(.horizontal, 24)
-                }
-                .padding(.bottom, 40)
             }
         }
     }
