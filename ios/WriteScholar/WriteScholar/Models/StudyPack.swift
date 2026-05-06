@@ -129,18 +129,84 @@ struct CrosswordWord: Decodable {
     let column: Int?
 }
 
-// MARK: - Crater Blast & Word Tower (full games ship in Chapter 5)
+// MARK: - Crater Blast (fast-paced quiz arcade)
 
 struct CraterBlast: Decodable {
     let title: String?
-    let questions: [JSONNullable]?  // Opaque for now
+    let questions: [CraterBlastQuestion]
 }
+
+struct CraterBlastQuestion: Decodable, Identifiable {
+    let id: String
+    let prompt: String
+    let answers: [String]
+    /// Backend always emits the correct answer at index 0 so the client
+    /// can shuffle for display. We keep the original correct text on
+    /// hand so we can score regardless of post-shuffle position.
+    let correctIndex: Int
+
+    enum CodingKeys: String, CodingKey {
+        case id, prompt, answers, correctIndex
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id           = (try? c.decode(String.self, forKey: .id)) ?? UUID().uuidString
+        prompt       = try c.decode(String.self, forKey: .prompt)
+        answers      = (try? c.decode([String].self, forKey: .answers)) ?? []
+        correctIndex = (try? c.decode(Int.self, forKey: .correctIndex)) ?? 0
+    }
+
+    /// The text of the correct answer (resilient to bad indices).
+    var correctText: String {
+        guard answers.indices.contains(correctIndex) else { return answers.first ?? "" }
+        return answers[correctIndex]
+    }
+}
+
+// MARK: - Word Tower (stack the correct items)
 
 struct WordTower: Decodable {
     let title: String?
-    let questions: [JSONNullable]?
+    let questions: [WordTowerQuestion]
 }
 
-/// JSON value passthrough so the WebView can hand the raw blob to the
-/// existing web game without us having to re-model it on Swift.
-struct JSONNullable: Decodable {}
+struct WordTowerQuestion: Decodable, Identifiable {
+    let id: String
+    let prompt: String
+    let items: [WordTowerItem]
+
+    enum CodingKeys: String, CodingKey {
+        case id, prompt, items
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id     = (try? c.decode(String.self, forKey: .id)) ?? UUID().uuidString
+        prompt = try c.decode(String.self, forKey: .prompt)
+        items  = (try? c.decode([WordTowerItem].self, forKey: .items)) ?? []
+    }
+}
+
+struct WordTowerItem: Decodable, Identifiable, Equatable {
+    let id: String
+    let text: String
+    let isCorrect: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case text, isCorrect
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        text      = try c.decode(String.self, forKey: .text)
+        isCorrect = try c.decode(Bool.self,   forKey: .isCorrect)
+        id = UUID().uuidString
+    }
+
+    init(id: String = UUID().uuidString, text: String, isCorrect: Bool) {
+        self.id = id
+        self.text = text
+        self.isCorrect = isCorrect
+    }
+}

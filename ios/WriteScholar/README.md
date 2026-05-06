@@ -5,15 +5,21 @@ at `https://writescholar.com/api` (same endpoints as the web app).
 
 ## Status
 
-**Chapter 4 / 7 — onboarding + auth + Study Pack + Analyze.**
+**Chapter 5 / 7 — onboarding + auth + Study Pack + Analyze + native games.**
 - **Study tab** — wired to `POST /api/analysis/generate-study-pack`.
-  Native iOS Lesson / Flashcards / Quiz renderers; Crossword, Crater
-  Blast, and Word Tower show Chapter-5 placeholders that link out to
-  the web for now.
-- **Analyze tab** — wired to `POST /api/analysis/analyze`. Three-phase
-  flow (paste essay → animated mascot loader → results view with score
-  ring, inline-underlined annotations, expandable annotation cards,
-  per-criterion rubric (Pro only), and numbered tip list).
+  Native Lesson / Flashcards / Quiz / Crater Blast / Word Tower
+  renderers. Crossword still links to the web (grids need a wider canvas).
+- **Analyze tab** — wired to `POST /api/analysis/analyze`. Score ring,
+  inline-underlined annotations, expandable annotation cards, per-
+  criterion rubric (Pro only), numbered tip list.
+- **Games tab** — standalone hub with two demo packs so users can try
+  Crater Blast (boss-battle quiz arcade with HP, hearts, streak combos)
+  and Word Tower (stack correct items, dodge wrong) without first
+  generating a study pack. Plays in a full-screen cover.
+
+The onboarding's Welcome page now shows a "I've used this — skip
+onboarding" tertiary button + a brand-tinted Skip chip in the top-right
+on every page so return users can jump to the app immediately.
 
 ### Backend additions needed (small, Chapter 2.5)
 
@@ -122,7 +128,6 @@ WriteScholar/
 ## Next chapters (planned)
 
 - **Chapter 2.5** — Backend `/auth/apple` + `/auth/google/native` handlers (small)
-- **Chapter 5** — Crater Blast + Word Tower native renderers (replace placeholders)
 - **Chapter 6** — Library + RevenueCat IAP (saved packs + subscription)
 - **Chapter 7** — TestFlight build + polish
 

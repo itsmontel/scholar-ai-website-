@@ -205,8 +205,22 @@ struct StudyPackHomeView: View {
             if let quiz = pack.quiz { QuizView(quiz: quiz) }
             else { lockedPane(tab: .quiz) }
 
-        case .crossword, .crater, .wordTower:
-            chapter5Placeholder(tab: selectedTab)
+        case .crater:
+            if let cb = pack.craterBlast, !cb.questions.isEmpty {
+                CraterBlastView(craterBlast: cb)
+            } else {
+                lockedPane(tab: .crater)
+            }
+
+        case .wordTower:
+            if let wt = pack.wordTower, !wt.questions.isEmpty {
+                WordTowerView(wordTower: wt)
+            } else {
+                lockedPane(tab: .wordTower)
+            }
+
+        case .crossword:
+            crosswordWebPlaceholder()
         }
     }
 
@@ -247,8 +261,9 @@ struct StudyPackHomeView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    private func chapter5Placeholder(tab: PackTab) -> some View {
-        VStack(spacing: 18) {
+    private func crosswordWebPlaceholder() -> some View {
+        let tab = PackTab.crossword
+        return VStack(spacing: 18) {
             ZStack {
                 Circle()
                     .fill(tab.tint.opacity(0.15))
@@ -258,11 +273,11 @@ struct StudyPackHomeView: View {
                     .foregroundStyle(tab.tint)
             }
 
-            Text(tab.rawValue)
+            Text("Crossword")
                 .wsHeadline(.medium, weight: .semibold)
                 .foregroundStyle(WSColor.foreground)
 
-            Text("Native game ships in Chapter 5.\nFor now, play it on writescholar.com.")
+            Text("Crossword grid is best on a wider canvas — open it on writescholar.com to play.")
                 .wsBody(.medium)
                 .foregroundStyle(WSColor.foregroundMuted)
                 .multilineTextAlignment(.center)

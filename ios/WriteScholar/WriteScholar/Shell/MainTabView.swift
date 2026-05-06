@@ -27,16 +27,10 @@ struct MainTabView: View {
                     Label("Analyze", systemImage: "doc.text.magnifyingglass")
                 }
 
-            ComingSoonTab(
-                title: "Games",
-                subtitle: "Crater Blast and Word Tower turn revision into a streak.",
-                systemIcon: "gamecontroller.fill",
-                tint: Color(hex: 0xEF4444),
-                chapterLabel: "Chapter 5"
-            )
-            .tabItem {
-                Label("Games", systemImage: "gamecontroller.fill")
-            }
+            GamesTabView()
+                .tabItem {
+                    Label("Games", systemImage: "gamecontroller.fill")
+                }
 
             ComingSoonTab(
                 title: "Library",

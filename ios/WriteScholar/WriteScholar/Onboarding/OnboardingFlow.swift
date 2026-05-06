@@ -71,11 +71,26 @@ struct OnboardingFlow: View {
                 .foregroundStyle(WSColor.foreground)
             Spacer()
             if pageIndex < pages.count - 1 {
-                Button("Skip") {
+                Button {
                     Haptics.light()
                     finishOnboarding()
+                } label: {
+                    HStack(spacing: 5) {
+                        Text("Skip")
+                            .wsBody(.caption, weight: .bold)
+                        Image(systemName: "arrow.forward")
+                            .font(.system(size: 11, weight: .bold))
+                    }
+                    .foregroundStyle(WSColor.brandPrimary)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 7)
+                    .background(
+                        Capsule()
+                            .fill(WSColor.brandSoft)
+                            .overlay(Capsule().stroke(WSColor.brandPrimary.opacity(0.30), lineWidth: 1))
+                    )
                 }
-                .buttonStyle(WSTertiaryButtonStyle())
+                .buttonStyle(.plain)
             }
         }
     }
@@ -83,9 +98,29 @@ struct OnboardingFlow: View {
     // MARK: - Bottom bar (page indicator + CTA)
 
     private var bottomBar: some View {
-        VStack(spacing: 18) {
+        VStack(spacing: 14) {
             pageIndicator
             primaryCTA
+
+            // Welcome-page only: tertiary "I've used this — skip to app".
+            // Gives existing/return users a clean escape hatch without
+            // making everyone scan the top-right Skip chip.
+            if pageIndex == 0 {
+                Button {
+                    Haptics.light()
+                    finishOnboarding()
+                } label: {
+                    HStack(spacing: 6) {
+                        Text("I've used this — skip onboarding")
+                        Image(systemName: "arrow.forward")
+                            .font(.system(size: 11, weight: .bold))
+                    }
+                    .wsBody(.caption, weight: .bold)
+                    .foregroundStyle(WSColor.foregroundMuted)
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 2)
+            }
         }
     }
 
