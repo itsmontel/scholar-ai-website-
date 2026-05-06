@@ -44,6 +44,15 @@ enum AuthAPI {
 
     struct MeResponse: Decodable {
         let user: WSUser
+        /// Optional achievements payload — present when /me is hit on a
+        /// signed-in user. Null/absent for guests or older builds.
+        let achievements: AchievementsPayload?
+
+        struct AchievementsPayload: Decodable {
+            let stats: AchievementStats?
+            /// Map of badge_id → ISO8601 unlock timestamp.
+            let unlockedBadges: [String: String]?
+        }
     }
 
     // MARK: Calls

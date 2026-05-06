@@ -82,6 +82,44 @@ final class APIClient: @unchecked Sendable {
         return try await perform(request)
     }
 
+    /// GET an endpoint that returns its payload at the **top level** of the
+    /// JSON object rather than nested under `data` (e.g. /subscriptions/usage).
+    /// The response must still include `success: true` for non-2xx error
+    /// detection.
+    func getRaw<T: Decodable>(path: String, requiresAuth: Bool = false) async throws -> T {
+        let request = try makeRequest(path: path, method: "GET", body: Optional<Empty>.none, requiresAuth: requiresAuth)
+        return try await performRaw(request)
+    }
+
+    private func performRaw<T: Decodable>(_ request: URLRequest) async throws -> T {
+        let data: Data
+        let response: URLResponse
+        do {
+            (data, response) = try await session.data(for: request)
+        } catch {
+            throw APIError.transport(error)
+        }
+        guard let http = response as? HTTPURLResponse else { throw APIError.noData }
+        if http.statusCode == 401 { throw APIError.unauthorized }
+
+        if !(200...299).contains(http.statusCode) {
+            // Surface the server-provided message if the body decodes as one
+            let serverMsg = (try? decoder.decode(ServerMessageOnly.self, from: data))?.message
+                ?? "Request failed (HTTP \(http.statusCode))."
+            throw APIError.badStatus(code: http.statusCode, message: serverMsg)
+        }
+
+        do {
+            return try decoder.decode(T.self, from: data)
+        } catch {
+            throw APIError.decodingFailed(error)
+        }
+    }
+
+    private struct ServerMessageOnly: Decodable {
+        let message: String?
+    }
+
     // MARK: Internal helpers
 
     private struct Empty: Encodable {}

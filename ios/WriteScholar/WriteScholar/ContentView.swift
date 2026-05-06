@@ -36,6 +36,7 @@ struct ContentView: View {
                         onboardingComplete: $onboardingComplete,
                         onSignOut: { session.signOut() }
                     )
+                    .environmentObject(session)
                     .transition(.opacity.combined(with: .scale(scale: 1.01)))
                 }
             }
