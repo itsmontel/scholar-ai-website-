@@ -177,6 +177,17 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
       <div className="pointer-events-none absolute bottom-24 right-[6%] h-56 w-56 rounded-full bg-fuchsia-400/15 dark:bg-fuchsia-500/15 blur-3xl lsth-orb-delay" aria-hidden />
       <div className="pointer-events-none absolute top-1/2 left-[40%] h-72 w-72 rounded-full bg-violet-300/10 dark:bg-violet-400/10 blur-3xl lsth-orb" style={{ animationDelay: '1.4s' }} aria-hidden />
 
+      {/* Studying mascot — large, positioned in the top-right of the section
+          so it draws the eye while the headline reads. */}
+      <img
+        src="/mascot-study.webp"
+        alt=""
+        aria-hidden
+        loading="lazy"
+        decoding="async"
+        className="hidden lg:block pointer-events-none absolute top-12 right-6 xl:right-12 w-44 xl:w-56 h-auto z-10 drop-shadow-[0_22px_36px_rgba(124,58,237,0.30)]"
+      />
+
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* ─── Headline ─── */}
         <LandingScrollReveal>

@@ -311,6 +311,17 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
           aria-hidden
         />
 
+        {/* Mascot working on a laptop — top-right of the pricing hero. Tells
+            users "this is what you'll be doing on Pro". Hidden on small screens. */}
+        <img
+          src="/mascot-laptop.webp"
+          alt=""
+          aria-hidden
+          loading="lazy"
+          decoding="async"
+          className="hidden lg:block pointer-events-none absolute top-10 right-6 xl:right-12 w-44 xl:w-52 h-auto z-10 drop-shadow-[0_22px_36px_rgba(124,58,237,0.30)]"
+        />
+
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
             <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">

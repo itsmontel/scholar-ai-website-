@@ -773,6 +773,24 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                   </div>
 
                   <div className="relative p-6 sm:p-8 lg:p-10">
+                    {/* Studying mascot — top left, always playing */}
+                    <img
+                      src="/mascot-study.webp"
+                      alt=""
+                      aria-hidden
+                      loading="lazy"
+                      decoding="async"
+                      className="hidden sm:block pointer-events-none absolute top-3 left-3 sm:top-4 sm:left-4 w-20 sm:w-24 lg:w-28 h-auto z-10 drop-shadow-[0_12px_22px_rgba(124,58,237,0.25)]"
+                    />
+                    {/* Dancing mascot — top right, always playing */}
+                    <img
+                      src="/mascot-dance.webp"
+                      alt=""
+                      aria-hidden
+                      loading="lazy"
+                      decoding="async"
+                      className="hidden sm:block pointer-events-none absolute top-3 right-3 sm:top-4 sm:right-4 w-20 sm:w-24 lg:w-28 h-auto z-10 drop-shadow-[0_12px_22px_rgba(124,58,237,0.25)]"
+                    />
                     {/* Pill badge */}
                     <div className="text-center mb-5">
                       <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-violet-300 ring-1 ring-violet-200/80 dark:ring-violet-800/50 text-xs font-medium">

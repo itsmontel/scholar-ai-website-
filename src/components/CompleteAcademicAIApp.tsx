@@ -895,16 +895,23 @@ const AcademicAIApp = () => {
   const handleSignUp = (userData: User) => {
     setIsLoggedIn(true);
     setUser(userData);
+    void import('../utils/analytics').then((m) =>
+      m.identifyUser(userData.id, { email: userData.email, signup: true })
+    );
   };
 
   const handleLogin = (userData: User) => {
     setIsLoggedIn(true);
     setUser(userData);
+    void import('../utils/analytics').then((m) =>
+      m.identifyUser(userData.id, { email: userData.email })
+    );
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
     setUser(null);
+    void import('../utils/analytics').then((m) => m.resetAnalytics());
     setCurrentPage('landing');
     setApiLimitPaywallOpen(false);
     try {

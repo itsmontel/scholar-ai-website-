@@ -177,6 +177,25 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
                   aria-hidden
                 />
 
+                {/* Mascot reading a paper — top-left, top-right of the analyze
+                    hero. Thematic match: paper = essay, laptop = working on it. */}
+                <img
+                  src="/mascot-paper.webp"
+                  alt=""
+                  aria-hidden
+                  loading="lazy"
+                  decoding="async"
+                  className="hidden sm:block pointer-events-none absolute top-3 left-3 sm:top-4 sm:left-4 w-24 sm:w-28 lg:w-32 h-auto z-10 drop-shadow-[0_12px_22px_rgba(124,58,237,0.25)]"
+                />
+                <img
+                  src="/mascot-laptop.webp"
+                  alt=""
+                  aria-hidden
+                  loading="lazy"
+                  decoding="async"
+                  className="hidden sm:block pointer-events-none absolute top-3 right-3 sm:top-4 sm:right-4 w-24 sm:w-28 lg:w-32 h-auto z-10 drop-shadow-[0_12px_22px_rgba(124,58,237,0.25)]"
+                />
+
                 <div className="text-center mb-5">
                   <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-violet-300 ring-1 ring-violet-200/80 dark:ring-violet-800/50 text-xs font-medium">
                     <span aria-hidden>✨</span>

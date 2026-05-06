@@ -231,6 +231,25 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                   aria-hidden
                 />
 
+                {/* Studying mascot — top left, always playing */}
+                <img
+                  src="/mascot-study.webp"
+                  alt=""
+                  aria-hidden
+                  loading="lazy"
+                  decoding="async"
+                  className="hidden sm:block pointer-events-none absolute top-3 left-3 sm:top-4 sm:left-4 w-20 sm:w-24 lg:w-28 h-auto z-10 drop-shadow-[0_12px_22px_rgba(14,165,233,0.30)]"
+                />
+                {/* Dancing mascot — top right, always playing */}
+                <img
+                  src="/mascot-dance.webp"
+                  alt=""
+                  aria-hidden
+                  loading="lazy"
+                  decoding="async"
+                  className="hidden sm:block pointer-events-none absolute top-3 right-3 sm:top-4 sm:right-4 w-20 sm:w-24 lg:w-28 h-auto z-10 drop-shadow-[0_12px_22px_rgba(14,165,233,0.30)]"
+                />
+
                 <div className="relative min-w-0">
                   <div className="text-center mb-3 sm:mb-4">
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-sky-50 dark:bg-sky-950/50 text-sky-950 dark:text-sky-200 ring-1 ring-sky-200/90 dark:ring-sky-800/55 text-[10px] sm:text-[11px] font-semibold tracking-[0.1em] uppercase">

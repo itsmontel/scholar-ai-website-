@@ -1,7 +1,10 @@
 /**
  * Product analytics — event tracking for funnel and engagement.
- * Wire to PostHog, Mixpanel, Amplitude, etc. when ready.
+ * Wires to PostHog when VITE_POSTHOG_KEY is set; otherwise no-ops in prod
+ * and console-logs in dev so the funnel is still visible during development.
  */
+
+import posthog from 'posthog-js';
 
 export type AnalyticsEvent =
   | 'tutorial_start'
@@ -21,7 +24,40 @@ export type AnalyticsEvent =
   | 'first_action_prompt_cta_click'
   | 'activation_tutorial_nav_analysis'
   | 'activation_tutorial_mock_results'
-  | 'activation_tutorial_preview';
+  | 'activation_tutorial_preview'
+  // — Aha-moment onboarding funnel —
+  | 'onboarding_profile_view'
+  | 'onboarding_profile_complete'
+  | 'onboarding_aha_view'
+  | 'onboarding_aha_generate'
+  | 'onboarding_aha_complete'
+  | 'onboarding_choose_trial'
+  | 'onboarding_choose_free';
+
+let initialized = false;
+
+function initIfNeeded(): boolean {
+  if (initialized) return true;
+  const key = import.meta.env?.VITE_POSTHOG_KEY as string | undefined;
+  if (!key) return false;
+  try {
+    const apiHost = (import.meta.env?.VITE_POSTHOG_HOST as string | undefined) || 'https://us.i.posthog.com';
+    posthog.init(key, {
+      api_host: apiHost,
+      // Capture pageviews + clicks automatically. Disable session recording by
+      // default to keep cost down — flip on per-environment if you want it.
+      capture_pageview: true,
+      autocapture: true,
+      disable_session_recording: true,
+      persistence: 'localStorage+cookie',
+    });
+    initialized = true;
+    return true;
+  } catch (e) {
+    if (import.meta.env?.DEV) console.warn('[analytics] PostHog init failed:', e);
+    return false;
+  }
+}
 
 function getUserId(): string | null {
   try {
@@ -35,22 +71,46 @@ function getUserId(): string | null {
 }
 
 /**
+ * Identify the current user to PostHog. Call on login + signup.
+ * Safe to call multiple times — PostHog dedupes.
+ */
+export function identifyUser(
+  userId: string,
+  properties?: Record<string, unknown>
+): void {
+  if (!initIfNeeded()) return;
+  try {
+    posthog.identify(userId, properties);
+  } catch (_) {}
+}
+
+/**
+ * Reset PostHog identity on logout so the next user starts fresh.
+ */
+export function resetAnalytics(): void {
+  if (!initialized) return;
+  try {
+    posthog.reset();
+  } catch (_) {}
+}
+
+/**
  * Track a product analytics event. Safe to call anywhere.
- * Extend with backend/third-party when analytics is set up.
+ * Sends to PostHog if configured; otherwise logs to console in dev.
  */
 export function trackEvent(event: AnalyticsEvent, properties?: Record<string, unknown>): void {
   try {
+    const userId = getUserId();
     const payload = {
-      event,
-      userId: getUserId(),
+      userId,
       timestamp: new Date().toISOString(),
       ...properties,
     };
-    // Console in dev for debugging
     if (import.meta.env?.DEV) {
-      console.log('[analytics]', payload);
+      console.log('[analytics]', event, payload);
     }
-    // Future: send to PostHog/Mixpanel/Amplitude
-    // e.g. posthog.capture(event, payload);
+    if (initIfNeeded()) {
+      posthog.capture(event, payload);
+    }
   } catch (_) {}
 }

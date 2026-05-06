@@ -447,6 +447,24 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                 <div className="pointer-events-none absolute -bottom-20 -left-16 w-64 h-64 rounded-full bg-amber-300/14 dark:bg-amber-600/14 blur-[2.75rem]" aria-hidden />
               </>
               <div className={`relative ${embedded ? 'p-4 sm:p-6 lg:p-8' : 'p-4 sm:p-8 lg:p-10'}`}>
+                {/* Studying mascot — top left, always playing */}
+                <img
+                  src="/mascot-study.webp"
+                  alt=""
+                  aria-hidden
+                  loading="lazy"
+                  decoding="async"
+                  className="hidden sm:block pointer-events-none absolute top-3 left-3 sm:top-4 sm:left-4 w-20 sm:w-24 lg:w-28 h-auto z-10 drop-shadow-[0_12px_22px_rgba(217,119,6,0.30)]"
+                />
+                {/* Dancing mascot — top right, always playing */}
+                <img
+                  src="/mascot-dance.webp"
+                  alt=""
+                  aria-hidden
+                  loading="lazy"
+                  decoding="async"
+                  className="hidden sm:block pointer-events-none absolute top-3 right-3 sm:top-4 sm:right-4 w-20 sm:w-24 lg:w-28 h-auto z-10 drop-shadow-[0_12px_22px_rgba(217,119,6,0.30)]"
+                />
                 <div className="relative min-w-0">
                   <div className="text-center mb-3 sm:mb-4">
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-50 dark:bg-orange-950/45 text-orange-950 dark:text-orange-200 ring-1 ring-orange-200/90 dark:ring-orange-800/55 text-[10px] sm:text-[11px] font-semibold tracking-[0.12em] uppercase">

@@ -227,15 +227,16 @@ router.get('/current', authenticateToken, async (req, res) => {
     // If user has a paid plan, get details from Stripe
     let stripeSubscription = null;
     if (subscriptionDetails.plan !== 'free' && subscriptionDetails.stripeCustomerId) {
-      // Get the most recent active subscription (service role required - subscriptions table has RLS)
+      // Get the most recent live subscription (active, trialing, or past_due).
+      // Trialing users were previously excluded by the strict status='active' filter.
       const { data: subscription, error } = await getSupabase()
         .from('subscriptions')
         .select('stripe_subscription_id, status, current_period_start, current_period_end')
         .eq('user_id', userId)
-        .eq('status', 'active')
+        .in('status', ['active', 'trialing', 'past_due'])
         .order('created_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (!error && subscription) {
         const stripeResult = await subscriptionService.getStripeSubscription(subscription.stripe_subscription_id);
