@@ -214,7 +214,7 @@ const Header: React.FC<HeaderProps> = ({
               aria-label="WriteScholar home"
             >
               <div className="relative w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-xl border border-stone-200/80 dark:border-stone-700 bg-white/90 dark:bg-stone-900/50 shadow-sm group-hover:shadow transition-all duration-200 shrink-0 overflow-hidden">
-                <img src="/mascot.png" alt="" className="w-[85%] h-[85%] object-contain" fetchPriority="high" width="40" height="40" />
+                <img src="/main-logo.png" alt="" className="w-[85%] h-[85%] object-contain" fetchPriority="high" width="40" height="40" />
               </div>
               <span
                 className="text-[1.05rem] sm:text-lg font-semibold tracking-tight text-stone-900 dark:text-stone-50 group-hover:text-violet-800 dark:group-hover:text-violet-300 transition-colors duration-200 truncate max-w-[130px] sm:max-w-none"
@@ -360,7 +360,7 @@ const Header: React.FC<HeaderProps> = ({
             <div
               className={`${dashboardLogoTileCls} w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center group-hover:shadow-md transition-all duration-200 overflow-hidden shrink-0`}
             >
-              <img src="/mascot.png" alt="" className="w-[85%] h-[85%] object-contain" fetchPriority="high" width="40" height="40" />
+              <img src="/main-logo.png" alt="" className="w-[85%] h-[85%] object-contain" fetchPriority="high" width="40" height="40" />
             </div>
             <span
               className="text-[1.05rem] sm:text-lg font-semibold tracking-tight text-stone-900 dark:text-stone-50 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-violet-700 group-hover:via-fuchsia-600 group-hover:to-teal-600 dark:group-hover:from-violet-300 dark:group-hover:via-fuchsia-300 dark:group-hover:to-teal-300 group-hover:bg-clip-text transition-all duration-200 truncate max-w-[120px] sm:max-w-none"

@@ -157,7 +157,7 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
         <div className="p-6 pt-20 sm:pt-6">
           <div className="flex items-center space-x-2.5">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden shadow-lg shadow-violet-500/30">
-              <img src="/mascot.png" alt="WriteScholar" className="w-full h-full object-contain" loading="eager" width="120" height="120" />
+              <img src="/main-logo.png" alt="WriteScholar" className="w-full h-full object-contain" loading="eager" width="120" height="120" />
             </div>
             <span className="text-xl font-extrabold tracking-tight text-violet-600 dark:text-violet-400">WriteScholar</span>
           </div>
@@ -165,7 +165,16 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
 
         {/* Form Container */}
         <div className="flex-1 flex items-center justify-center px-6 pb-12">
-          <div className="w-full max-w-sm rounded-2xl border border-stone-200/80 dark:border-stone-700/80 bg-white/80 dark:bg-stone-900/40 backdrop-blur-sm shadow-xl shadow-stone-200/40 dark:shadow-black/20 px-6 py-8 sm:px-8 sm:py-9">
+          <div className="relative w-full max-w-sm rounded-2xl border border-stone-200/80 dark:border-stone-700/80 bg-white/80 dark:bg-stone-900/40 backdrop-blur-sm shadow-xl shadow-stone-200/40 dark:shadow-black/20 px-6 py-8 sm:px-8 sm:py-9">
+            {/* Dancing mascot — top-right of the form card, welcoming you back */}
+            <img
+              src="/mascot-dance.webp"
+              alt=""
+              aria-hidden
+              loading="lazy"
+              decoding="async"
+              className="pointer-events-none absolute -top-10 -right-3 sm:-top-12 sm:-right-4 w-20 sm:w-24 h-auto z-10 drop-shadow-[0_14px_24px_rgba(124,58,237,0.32)]"
+            />
             <div className="h-0.5 w-16 bg-gradient-to-r from-violet-600 to-red-400/80 rounded-full mb-6" aria-hidden />
             <div className="mb-8">
               <h1 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight text-stone-800 dark:text-stone-100 mb-2">Welcome back</h1>

@@ -240,26 +240,6 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
               <NotesPanel onNavigate={onNavigate} />
             </div>
 
-            {/* "Becomes" connector */}
-            <div className="my-8 sm:my-10 flex flex-col items-center gap-2 text-stone-500 dark:text-stone-400">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-200/70 dark:border-violet-700/50 bg-white/80 dark:bg-stone-900/70 backdrop-blur px-3 py-1 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.2em] text-violet-700 dark:text-violet-300 shadow-sm">
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-                  <path d="M10 2l1.8 5.4L17 9l-5.2 1.6L10 16l-1.8-5.4L3 9l5.2-1.6L10 2z" />
-                </svg>
-                Becomes
-              </span>
-              <svg className="w-5 h-5 text-violet-400 dark:text-violet-500 lsth-bounce" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-                <path fillRule="evenodd" d="M10 3a1 1 0 011 1v9.586l3.293-3.293a1 1 0 111.414 1.414l-5 5a1 1 0 01-1.414 0l-5-5a1 1 0 111.414-1.414L9 13.586V4a1 1 0 011-1z" clipRule="evenodd" />
-              </svg>
-            </div>
-
-            {/* The 6 outputs grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 max-w-6xl mx-auto">
-              {OUTPUT_ITEMS.map((item, i) => (
-                <OutputTile key={item.label} item={item} delayMs={i * 70} />
-              ))}
-            </div>
-
             {/* Cue arrow into the bento grid below */}
             <div className="mt-8 sm:mt-12 flex flex-col items-center gap-2 text-stone-500 dark:text-stone-400">
               <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.2em]">Each tool, in detail</span>
@@ -284,9 +264,6 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
           </Sticker>
           <Sticker className="hidden xl:flex top-1/3 -right-8 rotate-[5deg]" tone="fuchsia" emoji="🎮">
             <span className="font-semibold">Boss-battle</span> revision
-          </Sticker>
-          <Sticker className="hidden lg:flex -bottom-3 left-1/4 rotate-[-3deg]" tone="rose" emoji="🔥">
-            <span className="font-semibold">12-day</span> streaks
           </Sticker>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 lg:gap-6 auto-rows-min">
@@ -494,7 +471,7 @@ function BentoCard({ tool, onNavigate }: { tool: ToolCard; onNavigate: (page: st
           <span className="h-2 w-2 rounded-full bg-amber-400/80" />
           <span className="h-2 w-2 rounded-full bg-emerald-400/80" />
           <span className="ml-2 text-[10px] text-stone-400 dark:text-stone-500 font-medium truncate">
-            writescholar.app · {tool.title.toLowerCase()}
+            writescholar.com · {tool.title.toLowerCase()}
           </span>
           {tool.video && (
             <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-red-500/15 dark:bg-red-500/25 px-1.5 py-0.5 text-[9px] font-bold text-red-600 dark:text-red-300 uppercase tracking-wider">
@@ -973,105 +950,6 @@ function NotesPanel({ onNavigate }: LandingStudyToolsHeroProps) {
           )}
         </button>
       </div>
-    </div>
-  );
-}
-
-const OUTPUT_TONES: Record<string, string> = {
-  violet: 'bg-gradient-to-br from-violet-500 to-fuchsia-600',
-  emerald: 'bg-gradient-to-br from-emerald-500 to-teal-600',
-  amber: 'bg-gradient-to-br from-amber-500 to-orange-600',
-  sky: 'bg-gradient-to-br from-sky-500 to-blue-600',
-  fuchsia: 'bg-gradient-to-br from-fuchsia-500 to-violet-600',
-  rose: 'bg-gradient-to-br from-rose-500 to-pink-600',
-};
-
-type OutputItem = {
-  icon: React.ReactNode;
-  label: string;
-  sub: string;
-  tone: keyof typeof OUTPUT_TONES;
-};
-
-const OUTPUT_ITEMS: OutputItem[] = [
-  {
-    icon: (
-      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-        <path d="M3 5a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5zm2 0v10h10V5H5z" />
-        <path d="M7 8h6v1H7V8zm0 2.5h6v1H7v-1z" />
-      </svg>
-    ),
-    label: 'Flashcards',
-    sub: 'Adaptive recall',
-    tone: 'violet',
-  },
-  {
-    icon: (
-      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.7-9.3a1 1 0 00-1.4-1.4L9 10.6 7.7 9.3a1 1 0 00-1.4 1.4l2 2a1 1 0 001.4 0l4-4z" clipRule="evenodd" />
-      </svg>
-    ),
-    label: 'Quizzes',
-    sub: 'Auto-graded',
-    tone: 'emerald',
-  },
-  {
-    icon: (
-      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-        <path d="M3 4h6v6H3V4zm8 0h6v3h-6V4zm0 5h6v6h-6V9zm-8 3h6v3H3v-3z" />
-      </svg>
-    ),
-    label: 'Crosswords',
-    sub: 'Vocab puzzles',
-    tone: 'amber',
-  },
-  {
-    icon: (
-      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-        <path d="M10 1l2.39 6.66H19l-5.31 4.07L15.78 19 10 14.93 4.22 19l2.09-7.27L1 7.66h6.61L10 1z" />
-      </svg>
-    ),
-    label: 'Crater Blast',
-    sub: 'Arcade quiz',
-    tone: 'sky',
-  },
-  {
-    icon: (
-      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-        <path d="M5 14h10v3H5v-3zm-1-4h12v3H4v-3zm1-4h10v3H5V6zm1-4h8v3H6V2z" />
-      </svg>
-    ),
-    label: 'Word Tower',
-    sub: 'Vocab game',
-    tone: 'fuchsia',
-  },
-  {
-    icon: (
-      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-        <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm1 4h10v2H5V7zm0 4h10v2H5v-2z" />
-      </svg>
-    ),
-    label: 'Lessons',
-    sub: 'Walk-throughs',
-    tone: 'rose',
-  },
-];
-
-function OutputTile({ item, delayMs = 0 }: { item: OutputItem; delayMs?: number }) {
-  return (
-    <div
-      className="relative rounded-2xl border border-stone-200/90 dark:border-stone-700/70 bg-white dark:bg-stone-900 p-3.5 sm:p-4 shadow-[0_8px_24px_-12px_rgba(15,23,42,0.10)] hover:shadow-[0_18px_40px_-15px_rgba(91,33,182,0.30)] hover:border-violet-300 dark:hover:border-violet-600 hover:-translate-y-0.5 transition-all duration-300 lsth-tile-pop"
-      style={{ animationDelay: `${delayMs}ms` }}
-    >
-      <div className={`mb-2.5 inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl text-white shadow-md ${OUTPUT_TONES[item.tone]}`}>
-        {item.icon}
-      </div>
-      <p className="text-[13px] sm:text-sm font-bold text-stone-900 dark:text-stone-100 leading-tight">
-        {item.label}
-      </p>
-      <p className="mt-0.5 text-[10px] sm:text-[11px] text-stone-500 dark:text-stone-400 leading-tight">
-        {item.sub}
-      </p>
     </div>
   );
 }
