@@ -887,7 +887,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </button>
               </div>
                 <p className="mb-6 sm:mb-7 text-center text-[12px] sm:text-sm text-stone-500 dark:text-stone-400 tracking-[0.03em] opacity-0 animate-hero-stagger-5">
-                  Now about 30 seconds to get started. No payment today.
+                  About 30 seconds to get started. No payment today.
                 </p>
 
                 <div className="flex justify-center w-full">
