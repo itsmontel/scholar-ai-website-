@@ -314,6 +314,13 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
       if (docId) {
         setUploadProgress(100);
         trackEvent('dashboard_file_upload_success');
+        // AnalysisPage reads this key on mount and pre-loads the doc content
+        // into the preview so the user doesn't have to re-paste/re-pick.
+        try {
+          localStorage.setItem('freshUploadDocumentId', String(docId));
+        } catch {
+          /* ignore storage quota / privacy mode */
+        }
         onNavigate('analysis', docId);
       } else {
         throw new Error('No document ID returned');
@@ -501,12 +508,12 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                 </span>
               </h1>
               <span className="hidden md:inline shrink-0 h-px w-8 rounded-full bg-gradient-to-r from-violet-200 to-teal-200 dark:from-violet-700/70 dark:to-teal-600/70 select-none opacity-70" aria-hidden />
-              <p className="text-sm sm:text-base leading-snug min-w-[10rem] max-w-xl text-stone-600 dark:text-indigo-100/76 font-medium">
+              <p className="hidden md:block text-sm sm:text-base leading-snug min-w-[10rem] max-w-xl text-stone-600 dark:text-indigo-100/76 font-medium">
                 {getWorkspaceSubtitle(isNewUser, dashboardTool)}
               </p>
               <span className="hidden lg:inline shrink-0 h-px w-8 rounded-full bg-gradient-to-r from-teal-200 to-fuchsia-200 dark:from-teal-700/70 dark:to-fuchsia-600/70 select-none opacity-70" aria-hidden />
               <div
-                className="inline-flex shrink-0 items-center gap-2.5 px-3 py-2 sm:gap-3 sm:px-4 sm:py-2.5 rounded-[1.375rem] bg-gradient-to-br from-teal-50/98 via-emerald-50/95 to-violet-50/98 dark:from-teal-950/50 dark:via-emerald-950/35 dark:to-violet-950/48 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.65)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] ring-1 ring-teal-200/65 dark:ring-teal-700/40 backdrop-blur-md"
+                className="hidden md:inline-flex shrink-0 items-center gap-2.5 px-3 py-2 sm:gap-3 sm:px-4 sm:py-2.5 rounded-[1.375rem] bg-gradient-to-br from-teal-50/98 via-emerald-50/95 to-violet-50/98 dark:from-teal-950/50 dark:via-emerald-950/35 dark:to-violet-950/48 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.65)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] ring-1 ring-teal-200/65 dark:ring-teal-700/40 backdrop-blur-md"
               >
                 <div className="flex -space-x-2.5" aria-hidden>
                   {[

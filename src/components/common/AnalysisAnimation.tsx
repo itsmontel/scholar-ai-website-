@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import ScholarMascot from './ScholarMascot';
 
 interface AnalysisAnimationProps {
   size?: 'sm' | 'md' | 'lg';
@@ -145,12 +144,15 @@ const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
       <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-8 sm:p-10 max-w-md w-full mx-4">
           <div className="flex flex-col items-center justify-center">
-            {/* Scholar mascot — analyzing pose for paper/lesson, studying pose for citations */}
+            {/* Animated study-mascot WebP (replaces SVG mascot for a livelier loading state) */}
             <div className="relative mb-6 flex justify-center">
-              <ScholarMascot
-                size={140}
-                animated={true}
-                pose={variant === 'citations' ? 'studying' : variant === 'studyPack' ? 'studying' : 'analyzing'}
+              <img
+                src="/mascot-study.webp"
+                alt=""
+                aria-hidden
+                width={140}
+                height={140}
+                className="w-[140px] h-auto drop-shadow-[0_18px_36px_rgba(124,58,237,0.35)]"
               />
             </div>
 

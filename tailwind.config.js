@@ -87,6 +87,10 @@ module.exports = {
         'sparkle-pin': 'sparklePin 1.1s ease-in-out infinite',
         'sparkle-pin-delayed': 'sparklePin 1.1s ease-in-out infinite 0.35s',
         'sparkle-pin-slow': 'sparklePin 1.45s ease-in-out infinite 0.7s',
+        'mobile-mascot-bob': 'mobileMascotBob 4.5s ease-in-out infinite',
+        'mobile-mascot-peek': 'mobileMascotPeek 5.5s ease-in-out infinite 0.4s',
+        'mobile-orb-drift': 'mobileOrbDrift 12s ease-in-out infinite',
+        'mobile-gradient-breathe': 'mobileGradientBreathe 7s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
@@ -244,6 +248,22 @@ module.exports = {
         sparklePin: {
           '0%, 100%': { opacity: '0.2', transform: 'scale(0.72) rotate(-10deg)' },
           '50%': { opacity: '1', transform: 'scale(1.28) rotate(2deg)' },
+        },
+        mobileMascotBob: {
+          '0%, 100%': { transform: 'translateY(0) rotate(-2deg)' },
+          '50%': { transform: 'translateY(-8px) rotate(3deg)' },
+        },
+        mobileMascotPeek: {
+          '0%, 100%': { transform: 'translateY(0) rotate(-6deg)' },
+          '50%': { transform: 'translateY(-5px) rotate(2deg)' },
+        },
+        mobileOrbDrift: {
+          '0%, 100%': { transform: 'translate(0,0) scale(1)', opacity: '0.55' },
+          '50%': { transform: 'translate(12px,-10px) scale(1.08)', opacity: '0.85' },
+        },
+        mobileGradientBreathe: {
+          '0%, 100%': { opacity: '0.6' },
+          '50%': { opacity: '1' },
         },
       },
       backgroundImage: {

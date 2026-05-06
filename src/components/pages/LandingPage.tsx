@@ -701,6 +701,27 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           aria-hidden
         />
 
+        {/* MOBILE-ONLY ambient flourishes — extra animated orbs + breathing
+            gradient sheen so the phone hero feels lively without the desktop
+            side cards. Hidden at md+ where the desktop layout takes over. */}
+        <div
+          className="md:hidden pointer-events-none absolute top-[18%] left-[8%] h-24 w-24 rounded-full bg-fuchsia-400/30 dark:bg-fuchsia-500/25 blur-2xl motion-safe:animate-mobile-orb-drift"
+          aria-hidden
+        />
+        <div
+          className="md:hidden pointer-events-none absolute top-[42%] right-[10%] h-28 w-28 rounded-full bg-violet-400/30 dark:bg-violet-500/25 blur-3xl motion-safe:animate-mobile-orb-drift"
+          style={{ animationDelay: '1.6s' }}
+          aria-hidden
+        />
+        <div
+          className="md:hidden pointer-events-none absolute top-[68%] left-[18%] h-20 w-20 rounded-full bg-indigo-400/25 dark:bg-indigo-500/22 blur-2xl motion-safe:animate-mobile-orb-drift"
+          style={{ animationDelay: '3.2s' }}
+          aria-hidden
+        />
+        <div
+          className="md:hidden pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_45%_at_50%_5%,rgba(217,70,239,0.10),transparent_55%)] dark:bg-[radial-gradient(ellipse_80%_45%_at_50%_5%,rgba(217,70,239,0.16),transparent_55%)] motion-safe:animate-mobile-gradient-breathe"
+          aria-hidden
+        />
 
         <div className="relative z-10 flex flex-col items-center justify-start px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12 lg:pt-8 pb-0 min-w-0">
           <div className="w-full min-w-0 max-w-[1240px] xl:mx-auto">
@@ -744,10 +765,32 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   className="hidden lg:block pointer-events-none absolute top-14 right-2 xl:right-6 w-20 xl:w-24 h-auto z-10 drop-shadow-[0_14px_24px_rgba(124,58,237,0.32)] motion-safe:animate-hero-aside-right"
                 />
                 <div className="relative flex flex-col items-center text-center">
+                {/* MOBILE-ONLY: floating dancing mascot in the top-right of
+                    the hero — replaces the dense pill row and adds movement. */}
+                <img
+                  src="/mascot-dance.webp"
+                  alt=""
+                  aria-hidden
+                  loading="lazy"
+                  decoding="async"
+                  className="md:hidden pointer-events-none absolute -top-2 right-1 w-20 sm:w-24 h-auto z-20 drop-shadow-[0_14px_28px_rgba(124,58,237,0.35)] motion-safe:animate-mobile-mascot-bob"
+                />
+                {/* MOBILE-ONLY: smaller paper mascot peeking on the left so the
+                    top of the hero feels alive on phones. */}
+                <img
+                  src="/mascot-paper.webp"
+                  alt=""
+                  aria-hidden
+                  loading="lazy"
+                  decoding="async"
+                  className="md:hidden pointer-events-none absolute top-2 left-0 w-12 h-auto z-20 opacity-90 drop-shadow-[0_10px_20px_rgba(124,58,237,0.30)] motion-safe:animate-mobile-mascot-peek"
+                />
+
                 {/* Two-product banner — single rounded card with two halves
                     divided by a center plus badge. Anchors the dual framing
-                    before the H1 lands and looks polished, not like simple text pills. */}
-                <div className="mx-auto mb-5 sm:mb-6 max-w-md sm:max-w-lg opacity-0 animate-hero-stagger-1">
+                    before the H1 lands and looks polished, not like simple text pills.
+                    Hidden on mobile (replaced by floating mascot above). */}
+                <div className="hidden md:block mx-auto mb-5 sm:mb-6 max-w-md sm:max-w-lg opacity-0 animate-hero-stagger-1">
                   <div className="relative rounded-2xl border border-stone-200/95 dark:border-stone-700/70 bg-white/95 dark:bg-stone-900/80 backdrop-blur-md p-1 shadow-sm overflow-hidden">
                     <div className="grid grid-cols-[1fr_auto_1fr] items-stretch gap-1">
                       <a
@@ -1202,7 +1245,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 className="lg:hidden w-full mt-8 sm:mt-10 pb-2 px-1"
                 aria-label="Before and after essay preview mock-ups"
               >
-                <p className="text-center text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-500 mb-6">
+                <p className="hidden sm:block text-center text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-500 mb-6">
                   Same topic: professor-style annotations
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-10 items-start justify-items-center max-w-4xl mx-auto">
@@ -1240,10 +1283,11 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
               {/* ─── How your draft is reviewed — modernized to match the
                   new landing theme. Combined the legend + 5 focus-area cards
-                  into one cohesive section. ─── */}
+                  into one cohesive section. Hidden on mobile (too dense for
+                  phones — desktop keeps the full 5-card grid). ─── */}
               <section
                 id="hero-feedback-details"
-                className="relative w-full max-w-7xl mx-auto mt-14 sm:mt-20 lg:mt-24 px-1 sm:px-2 lg:px-4 scroll-mt-24"
+                className="hidden md:block relative w-full max-w-7xl mx-auto mt-14 sm:mt-20 lg:mt-24 px-1 sm:px-2 lg:px-4 scroll-mt-24"
                 aria-labelledby="hero-feedback-details-heading"
               >
                 <div className="pointer-events-none absolute -top-8 left-[8%] w-32 h-32 rounded-full bg-violet-300/15 dark:bg-violet-500/12 blur-3xl" aria-hidden />

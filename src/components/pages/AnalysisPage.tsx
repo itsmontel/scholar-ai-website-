@@ -6,7 +6,6 @@ import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEdi
 import Footer from '../common/Footer';
 import LoadingSpinner from '../common/LoadingSpinner';
 import AnalysisAnimation from '../common/AnalysisAnimation';
-import ScholarMascot from '../common/ScholarMascot';
 import { ExportService, AnalysisData } from '../../services/exportService';
 import { trackAction, getStats } from '../../data/achievements';
 import { trackEvent } from '../../utils/analytics';
@@ -797,6 +796,40 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
 
     void (async () => {
       await loadExistingAnalysisSimple(docId, analysisType, () => cancelled);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  /** Dashboard upload → Analysis: pre-load the freshly uploaded doc's text into
+   *  the preview so the user can hit "Analyze" immediately. Does NOT attempt to
+   *  fetch a saved analysis (the doc has none yet). */
+  useEffect(() => {
+    let cancelled = false;
+    const docId = localStorage.getItem('freshUploadDocumentId');
+    if (!docId) return;
+
+    // Skip if the Library-load path already claimed this mount.
+    if (localStorage.getItem('viewAnalysisDocumentId')) {
+      try { localStorage.removeItem('freshUploadDocumentId'); } catch { /* ignore */ }
+      return;
+    }
+
+    void (async () => {
+      try {
+        const content = await fetchDocumentContent(docId);
+        if (cancelled) return;
+        setSelectedDocument(docId);
+        setDocumentContent(content);
+        setPreviewContent(content);
+        setOriginalDraftBaseline(null);
+      } catch (err) {
+        console.error('Failed to pre-load freshly uploaded document:', err);
+      } finally {
+        try { localStorage.removeItem('freshUploadDocumentId'); } catch { /* ignore */ }
+      }
     })();
 
     return () => {
@@ -3064,12 +3097,19 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
         <div className="mb-10">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-4">
-              {/* Mascot with analytical pose - glasses, clipboard, magnifying glass */}
-              <div className="relative p-2 sm:p-3 bg-violet-50 rounded-2xl border border-violet-100 shadow-sm">
-                <div className="absolute -top-1 -right-1 w-6 h-6 bg-violet-500 rounded-full flex items-center justify-center">
+              {/* Animated study-mascot WebP — replaces the SVG mascot for a more lively page header. */}
+              <div className="relative p-2 sm:p-3 bg-violet-50 dark:bg-violet-950/40 rounded-2xl border border-violet-100 dark:border-violet-800/40 shadow-sm">
+                <div className="absolute -top-1 -right-1 w-6 h-6 bg-violet-500 rounded-full flex items-center justify-center z-10">
                   <span className="text-white text-xs">🔍</span>
                 </div>
-                <ScholarMascot size={100} animated={true} pose="analyzing" />
+                <img
+                  src="/mascot-study.webp"
+                  alt=""
+                  aria-hidden
+                  width={100}
+                  height={100}
+                  className="w-[100px] h-[100px] object-contain drop-shadow-[0_8px_20px_rgba(124,58,237,0.30)]"
+                />
               </div>
               <div>
                 <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-stone-900 dark:text-stone-50">
