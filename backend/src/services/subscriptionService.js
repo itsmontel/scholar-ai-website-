@@ -1033,6 +1033,7 @@ function resolveEffectivePlan(subscription) {
 const reconcileSubscriptions = async () => {
   let reconciled = 0;
   let errors = 0;
+  let skippedEmptyCustomer = 0;
 
   try {
     // Skip rows with manual_grant = true (comped accounts, partner deals,
@@ -1048,8 +1049,21 @@ const reconcileSubscriptions = async () => {
           AND manual_grant = false`
     );
 
-    const users = result.rows || [];
-    console.log(`🔄 Reconcile: checking ${users.length} paid users against Stripe`);
+    const allUsers = result.rows || [];
+    // Some legacy rows have stripe_customer_id = '' (empty string), which
+    // passes the IS NOT NULL filter but breaks Stripe's API. Drop them here.
+    const users = allUsers.filter((u) => {
+      if (!u.stripe_customer_id || String(u.stripe_customer_id).trim() === '') {
+        skippedEmptyCustomer++;
+        return false;
+      }
+      return true;
+    });
+    console.log(
+      `🔄 Reconcile: checking ${users.length} paid users against Stripe (skipped ${skippedEmptyCustomer} with empty stripe_customer_id)`
+    );
+
+    const supabaseAdmin = supabaseServiceRole;
 
     for (const user of users) {
       try {
@@ -1068,25 +1082,31 @@ const reconcileSubscriptions = async () => {
         // Stripe says no access, but our DB has them on a paid tier — downgrade.
         const newestSub = stripeSubs.data[0];
         const dbStatus = newestSub?.status || 'canceled';
+        const nowIso = new Date().toISOString();
 
-        await query(
-          `UPDATE users
-              SET subscription_plan = 'free',
-                  subscription_status = $1,
-                  updated_at = NOW()
-            WHERE id = $2`,
-          [dbStatus, user.id]
-        );
+        // Use the Supabase client directly. The custom SQL parser in
+        // databaseService.js can't handle COALESCE() or NOT IN, so raw SQL
+        // updates fail — going through the builder is safer and simpler.
+        const { error: userErr } = await supabaseAdmin
+          .from('users')
+          .update({
+            subscription_plan: 'free',
+            subscription_status: dbStatus,
+            updated_at: nowIso,
+          })
+          .eq('id', user.id);
+        if (userErr) throw userErr;
 
-        await query(
-          `UPDATE subscriptions
-              SET status = $1,
-                  canceled_at = COALESCE(canceled_at, NOW()),
-                  updated_at = NOW()
-            WHERE user_id = $2
-              AND status NOT IN ('canceled')`,
-          [dbStatus, user.id]
-        );
+        const { error: subErr } = await supabaseAdmin
+          .from('subscriptions')
+          .update({
+            status: dbStatus,
+            canceled_at: nowIso,
+            updated_at: nowIso,
+          })
+          .eq('user_id', user.id)
+          .neq('status', 'canceled');
+        if (subErr) throw subErr;
 
         console.log(
           `🔄 Reconcile: downgraded user ${user.id} (${user.email}) from ${user.subscription_plan} → free (Stripe status: ${dbStatus})`
@@ -1099,12 +1119,12 @@ const reconcileSubscriptions = async () => {
     }
 
     console.log(
-      `✅ Reconcile complete: ${reconciled} downgraded, ${errors} errors, ${users.length} checked`
+      `✅ Reconcile complete: ${reconciled} downgraded, ${errors} errors, ${users.length} checked, ${skippedEmptyCustomer} skipped (empty customer id)`
     );
-    return { reconciled, errors, total: users.length };
+    return { reconciled, errors, total: users.length, skippedEmptyCustomer };
   } catch (error) {
     console.error('🔄 Reconcile: fatal error:', error);
-    return { reconciled, errors: errors + 1, total: 0 };
+    return { reconciled, errors: errors + 1, total: 0, skippedEmptyCustomer };
   }
 };
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import LandingScrollReveal from './LandingScrollReveal';
 
 interface LandingStudyToolsHeroProps {
@@ -347,6 +347,7 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
         .lsth-caret { animation: lsthCaret 1.05s steps(1) infinite; }
         .lsth-bounce { animation: lsthBounce 1.6s ease-in-out infinite; }
         .lsth-tile-pop { animation: lsthTilePop 0.5s cubic-bezier(.22,1.2,.36,1) backwards; }
+        .lsth-no-cursor { caret-color: transparent; }
         @media (prefers-reduced-motion: reduce) {
           .lsth-orb, .lsth-orb-delay, .lsth-shine-text, .lsth-shimmer, .lsth-floatcard, .lsth-caret,
           .lsth-bounce, .lsth-tile-pop { animation: none; }
@@ -581,13 +582,21 @@ function Sticker({
 
 /* ─────────────────── Pipeline pieces ─────────────────── */
 
-const DEMO_NOTES_TEXT = `Cell Biology · Lecture 4 — Mitochondria
+const DEMO_NOTES_TEXT = `Cell Biology · Lecture 4 — Mitochondria & Cellular Respiration
 
-The mitochondrion generates ATP through oxidative phosphorylation. Electrons pass down the electron transport chain, pumping H⁺ across the inner membrane.
+The mitochondrion is the cell's primary site of ATP synthesis, generating roughly 30–32 ATP molecules per glucose molecule via oxidative phosphorylation. This double-membraned organelle originated through endosymbiosis: an α-proteobacterium engulfed by an ancestral eukaryotic cell roughly 1.5 billion years ago.
 
-Key terms: ATP synthase, cristae, matrix, proton gradient, chemiosmosis
+The outer membrane is permeable to small molecules through porin channels, while the inner membrane is highly impermeable and folded into structures called cristae. These folds dramatically increase surface area, providing more space for the protein complexes of the electron transport chain.
 
-Cristae fold the inner membrane to pack in more respiratory machinery for exam-heavy courses.`;
+Key terms: ATP synthase, cristae, matrix, proton gradient, chemiosmosis, electron transport chain, NADH, FADH₂, cytochrome c, ubiquinone, oxidative phosphorylation.
+
+The electron transport chain consists of four complexes (I–IV) plus ATP synthase. Electrons from NADH enter at Complex I, while electrons from FADH₂ enter at Complex II. As electrons move through the complexes, protons are pumped from the matrix into the intermembrane space, creating an electrochemical gradient.
+
+This proton motive force drives ATP synthesis through ATP synthase — a remarkable molecular machine that rotates as protons flow back into the matrix. Each rotation generates three ATP molecules, one of biology's most elegant examples of mechanical-chemical energy coupling.
+
+Mitochondrial dysfunction is implicated in numerous diseases including diabetes, Parkinson's, Alzheimer's, and several cancers. Mutations in mitochondrial DNA can cause inherited disorders, and the organelle's central role in apoptosis (programmed cell death) makes it a key regulator of cellular fate.
+
+For the exam: distinguish substrate-level phosphorylation (glycolysis, Krebs cycle) from oxidative phosphorylation (electron transport chain), understand how uncouplers like DNP affect ATP production, and review why brown adipose tissue uses controlled uncoupling to generate heat.`;
 
 function landingStudyWordCount(text: string): number {
   return text.trim().split(/\s+/).filter((w) => w.length > 0).length;
@@ -602,18 +611,194 @@ const INPUT_TABS: { id: NotesInputTab; label: string }[] = [
   { id: 'docx', label: 'DOCX' },
 ];
 
-function NotesPanel({ onNavigate }: LandingStudyToolsHeroProps) {
-  const [tab, setTab] = useState<NotesInputTab>('paste');
-  const [pasteText, setPasteText] = useState('');
-  const uploadRef = useRef<HTMLInputElement>(null);
+type DemoPhase = 'idle' | 'typing' | 'pulsing' | 'generating' | 'done';
 
+const TYPING_SPEED_MS = 14;
+const PULSE_MS = 700;
+const GENERATING_MS = 1500;
+const DONE_MS = 2200;
+const RESTART_DELAY_MS = 900;
+
+function NotesPanel({ onNavigate }: LandingStudyToolsHeroProps) {
+  const [tab, setTab] = useState<NotesInputTab>('notes');
+  const [pasteText, setPasteText] = useState('');
+  const [demoText, setDemoText] = useState('');
+  const [phase, setPhase] = useState<DemoPhase>('idle');
+  const [userInteracted, setUserInteracted] = useState(false);
+
+  const uploadRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const inViewRef = useRef(false);
+  const typingIntervalRef = useRef<number | null>(null);
+  const timersRef = useRef<number[]>([]);
+  const phaseRef = useRef<DemoPhase>('idle');
+  const userInteractedRef = useRef(false);
+  const reduceMotionRef = useRef(false);
+
+  useEffect(() => {
+    phaseRef.current = phase;
+  }, [phase]);
+
+  useEffect(() => {
+    userInteractedRef.current = userInteracted;
+  }, [userInteracted]);
+
+  useEffect(() => {
+    try {
+      reduceMotionRef.current = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    } catch {
+      reduceMotionRef.current = false;
+    }
+  }, []);
+
+  const pushTimer = (id: number) => {
+    timersRef.current.push(id);
+  };
+
+  const clearAllTimers = () => {
+    timersRef.current.forEach((id) => clearTimeout(id));
+    timersRef.current = [];
+  };
+
+  const clearTypingInterval = () => {
+    if (typingIntervalRef.current != null) {
+      clearInterval(typingIntervalRef.current);
+      typingIntervalRef.current = null;
+    }
+  };
+
+  const stopDemo = () => {
+    clearAllTimers();
+    clearTypingInterval();
+  };
+
+  const runDemo = useCallback(() => {
+    if (userInteractedRef.current || !inViewRef.current) return;
+    stopDemo();
+    setDemoText('');
+    setPhase('typing');
+    phaseRef.current = 'typing';
+
+    if (reduceMotionRef.current) {
+      // Skip animation, jump straight to filled
+      setDemoText(DEMO_NOTES_TEXT);
+      setPhase('done');
+      phaseRef.current = 'done';
+      pushTimer(
+        window.setTimeout(() => {
+          if (userInteractedRef.current || !inViewRef.current) return;
+          runDemo();
+        }, DONE_MS + RESTART_DELAY_MS)
+      );
+      return;
+    }
+
+    const chars = [...DEMO_NOTES_TEXT];
+    let i = 0;
+    typingIntervalRef.current = window.setInterval(() => {
+      if (userInteractedRef.current || !inViewRef.current) {
+        clearTypingInterval();
+        return;
+      }
+      // Type 2 characters per tick to keep ~350-word demo within ~5s
+      i = Math.min(i + 2, chars.length);
+      setDemoText(chars.slice(0, i).join(''));
+      if (i >= chars.length) {
+        clearTypingInterval();
+        pushTimer(
+          window.setTimeout(() => {
+            if (userInteractedRef.current || !inViewRef.current) return;
+            setPhase('pulsing');
+            phaseRef.current = 'pulsing';
+            pushTimer(
+              window.setTimeout(() => {
+                if (userInteractedRef.current || !inViewRef.current) return;
+                setPhase('generating');
+                phaseRef.current = 'generating';
+                pushTimer(
+                  window.setTimeout(() => {
+                    if (userInteractedRef.current || !inViewRef.current) return;
+                    setPhase('done');
+                    phaseRef.current = 'done';
+                    pushTimer(
+                      window.setTimeout(() => {
+                        if (userInteractedRef.current || !inViewRef.current) return;
+                        // Loop after a short pause
+                        pushTimer(
+                          window.setTimeout(() => {
+                            if (userInteractedRef.current || !inViewRef.current) return;
+                            runDemo();
+                          }, RESTART_DELAY_MS)
+                        );
+                      }, DONE_MS)
+                    );
+                  }, GENERATING_MS)
+                );
+              }, PULSE_MS)
+            );
+          }, 450)
+        );
+      }
+    }, TYPING_SPEED_MS);
+  }, []);
+
+  // Intersection observer — start demo when in view, halt when out of view
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        const wasIn = inViewRef.current;
+        inViewRef.current = entry.isIntersecting;
+        if (entry.isIntersecting && !wasIn && !userInteractedRef.current && phaseRef.current === 'idle') {
+          runDemo();
+        } else if (!entry.isIntersecting && wasIn) {
+          stopDemo();
+          if (!userInteractedRef.current) {
+            setPhase('idle');
+            phaseRef.current = 'idle';
+          }
+        }
+      },
+      { threshold: 0.25 }
+    );
+    obs.observe(el);
+    return () => {
+      obs.disconnect();
+      stopDemo();
+    };
+  }, [runDemo]);
+
+  const markInteracted = () => {
+    if (userInteractedRef.current) return;
+    userInteractedRef.current = true;
+    setUserInteracted(true);
+    stopDemo();
+    setPhase('idle');
+    phaseRef.current = 'idle';
+  };
+
+  const handleTabClick = (id: NotesInputTab) => {
+    markInteracted();
+    setTab(id);
+  };
+
+  const handlePasteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    markInteracted();
+    setPasteText(e.target.value);
+  };
+
+  // What text the user sees in the textarea
+  const liveNotesText = userInteracted ? DEMO_NOTES_TEXT : demoText;
   const textForCount =
-    tab === 'paste' ? pasteText : tab === 'notes' ? DEMO_NOTES_TEXT : '';
+    tab === 'paste' ? pasteText : tab === 'notes' ? liveNotesText : '';
   const wc = landingStudyWordCount(textForCount);
   const MIN_WORDS = 50;
   const canGenerate = (tab === 'paste' || tab === 'notes') && wc >= MIN_WORDS;
 
   const stashDraftAndGo = () => {
+    markInteracted();
     const payload = tab === 'paste' ? pasteText : DEMO_NOTES_TEXT;
     if (landingStudyWordCount(payload) < MIN_WORDS) return;
     try {
@@ -624,8 +809,14 @@ function NotesPanel({ onNavigate }: LandingStudyToolsHeroProps) {
     onNavigate('study-pack');
   };
 
+  // Demo-controlled button visuals (only when not user-interacted and on notes tab)
+  const inDemoMode = !userInteracted && tab === 'notes' && phase !== 'idle';
+  const demoPulsing = inDemoMode && phase === 'pulsing';
+  const demoGenerating = inDemoMode && phase === 'generating';
+  const demoDone = inDemoMode && phase === 'done';
+
   return (
-    <div className="w-full">
+    <div ref={containerRef} className="w-full">
       {/* Segmented tabs — reference: calm, light chrome */}
       <div
         className="mb-4 flex flex-wrap items-center gap-1 rounded-2xl border border-amber-100/90 dark:border-stone-700/80 bg-[#faf8f5] dark:bg-stone-900/80 p-1.5 shadow-sm"
@@ -640,7 +831,7 @@ function NotesPanel({ onNavigate }: LandingStudyToolsHeroProps) {
               type="button"
               role="tab"
               aria-selected={active}
-              onClick={() => setTab(id)}
+              onClick={() => handleTabClick(id)}
               className={`relative flex-1 min-w-[4.5rem] sm:min-w-0 rounded-xl px-3 py-2 text-center text-[13px] font-semibold transition-colors ${
                 active
                   ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 shadow-sm ring-1 ring-amber-200/80 dark:ring-stone-600'
@@ -680,12 +871,24 @@ function NotesPanel({ onNavigate }: LandingStudyToolsHeroProps) {
               <textarea
                 id="landing-study-pack-textarea"
                 readOnly={tab === 'notes'}
-                value={tab === 'notes' ? DEMO_NOTES_TEXT : pasteText}
-                onChange={tab === 'paste' ? (e) => setPasteText(e.target.value) : undefined}
+                value={tab === 'notes' ? liveNotesText : pasteText}
+                onChange={tab === 'paste' ? handlePasteChange : undefined}
                 placeholder="Paste your study notes, textbook chapter, article, or any learning material here... (minimum 50 words)"
-                rows={tab === 'notes' ? 8 : 9}
-                className="block w-full min-h-[220px] resize-y rounded-[1.65rem] border-0 bg-transparent px-5 pt-5 pb-12 text-[15px] sm:text-[15px] leading-relaxed text-stone-800 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-0"
+                rows={tab === 'notes' ? 9 : 9}
+                className={`block w-full min-h-[260px] resize-y rounded-[1.65rem] border-0 bg-transparent px-5 pt-5 pb-12 text-[15px] sm:text-[15px] leading-relaxed text-stone-800 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-0 ${
+                  inDemoMode && phase === 'typing' ? 'lsth-no-cursor' : ''
+                }`}
               />
+              {/* Live "is typing" indicator while demo is animating */}
+              {inDemoMode && phase === 'typing' && (
+                <div className="pointer-events-none absolute top-4 right-5 inline-flex items-center gap-1.5 rounded-full bg-violet-50 dark:bg-violet-950/60 border border-violet-200/80 dark:border-violet-800/60 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-violet-700 dark:text-violet-300">
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-violet-600" />
+                  </span>
+                  Typing...
+                </div>
+              )}
               <div className="pointer-events-none absolute bottom-4 left-5 text-[13px] text-stone-400 dark:text-stone-500 tabular-nums">
                 {wc.toLocaleString()} {wc === 1 ? 'word' : 'words'}
               </div>
@@ -716,15 +919,47 @@ function NotesPanel({ onNavigate }: LandingStudyToolsHeroProps) {
         </button>
         <button
           type="button"
-          disabled={!canGenerate}
+          disabled={!canGenerate && !inDemoMode}
           onClick={stashDraftAndGo}
-          className={`inline-flex flex-1 items-center justify-center rounded-2xl px-6 py-3.5 text-sm font-semibold transition-colors shadow-sm ${
-            canGenerate
-              ? 'bg-neutral-700 hover:bg-neutral-800 dark:bg-neutral-600 dark:hover:bg-neutral-500 text-white'
-              : 'bg-stone-400/85 dark:bg-stone-700 text-white/90 cursor-not-allowed'
+          className={`relative inline-flex flex-1 items-center justify-center gap-2 rounded-2xl px-6 py-3.5 text-sm font-semibold transition-all duration-300 shadow-sm overflow-hidden ${
+            demoGenerating
+              ? 'bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-[0_12px_32px_-8px_rgba(124,58,237,0.55)] ring-1 ring-violet-400/30'
+              : demoDone
+                ? 'bg-gradient-to-br from-emerald-600 to-emerald-700 text-white shadow-[0_12px_32px_-8px_rgba(16,185,129,0.45)] ring-1 ring-emerald-400/30'
+                : canGenerate || demoPulsing
+                  ? 'bg-neutral-700 hover:bg-neutral-800 dark:bg-neutral-600 dark:hover:bg-neutral-500 text-white'
+                  : 'bg-stone-400/85 dark:bg-stone-700 text-white/90 cursor-not-allowed'
+          } ${
+            demoPulsing
+              ? 'ring-2 ring-violet-400/60 ring-offset-2 ring-offset-white dark:ring-offset-stone-900'
+              : ''
           }`}
         >
-          Generate Study Pack
+          {demoPulsing && (
+            <span className="absolute inset-0 bg-violet-400/20 motion-safe:animate-ping rounded-2xl opacity-50" aria-hidden />
+          )}
+          {demoGenerating ? (
+            <>
+              <svg className="relative w-4 h-4 motion-safe:animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden>
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-25" />
+                <path
+                  fill="currentColor"
+                  className="opacity-90"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
+              </svg>
+              <span className="relative">Generating study pack...</span>
+            </>
+          ) : demoDone ? (
+            <>
+              <svg className="relative w-4 h-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.7-9.3a1 1 0 00-1.4-1.4L9 10.6 7.7 9.3a1 1 0 00-1.4 1.4l2 2a1 1 0 001.4 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <span className="relative">6 study tools ready</span>
+            </>
+          ) : (
+            <span className="relative">Generate Study Pack</span>
+          )}
         </button>
       </div>
     </div>
