@@ -22,16 +22,10 @@ struct MainTabView: View {
                     Label("Study", systemImage: "graduationcap.fill")
                 }
 
-            ComingSoonTab(
-                title: "Analyze",
-                subtitle: "Paste an essay and get professor-style feedback in seconds.",
-                systemIcon: "doc.text.magnifyingglass",
-                tint: WSColor.brandPrimary,
-                chapterLabel: "Chapter 4"
-            )
-            .tabItem {
-                Label("Analyze", systemImage: "doc.text.magnifyingglass")
-            }
+            AnalyzeTabContainer()
+                .tabItem {
+                    Label("Analyze", systemImage: "doc.text.magnifyingglass")
+                }
 
             ComingSoonTab(
                 title: "Games",

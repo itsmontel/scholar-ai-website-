@@ -5,13 +5,15 @@ at `https://writescholar.com/api` (same endpoints as the web app).
 
 ## Status
 
-**Chapter 3 / 7 — scaffold + onboarding + auth + Study Pack flagship.**
-The Study tab is fully wired against the existing
-`POST /api/analysis/generate-study-pack` endpoint. Native iOS renderers
-for Lesson (paginated slides), Flashcards (swipe deck with 3D flip),
-and Quiz (MC/TF/fill-blank with haptics + score screen). Crossword,
-Crater Blast, and Word Tower show "Chapter 5" placeholders that link
-out to the web for now.
+**Chapter 4 / 7 — onboarding + auth + Study Pack + Analyze.**
+- **Study tab** — wired to `POST /api/analysis/generate-study-pack`.
+  Native iOS Lesson / Flashcards / Quiz renderers; Crossword, Crater
+  Blast, and Word Tower show Chapter-5 placeholders that link out to
+  the web for now.
+- **Analyze tab** — wired to `POST /api/analysis/analyze`. Three-phase
+  flow (paste essay → animated mascot loader → results view with score
+  ring, inline-underlined annotations, expandable annotation cards,
+  per-criterion rubric (Pro only), and numbered tip list).
 
 ### Backend additions needed (small, Chapter 2.5)
 
@@ -120,7 +122,6 @@ WriteScholar/
 ## Next chapters (planned)
 
 - **Chapter 2.5** — Backend `/auth/apple` + `/auth/google/native` handlers (small)
-- **Chapter 4** — Analyze Paper (essay feedback flow)
 - **Chapter 5** — Crater Blast + Word Tower native renderers (replace placeholders)
 - **Chapter 6** — Library + RevenueCat IAP (saved packs + subscription)
 - **Chapter 7** — TestFlight build + polish
