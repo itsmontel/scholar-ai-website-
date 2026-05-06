@@ -286,13 +286,16 @@ router.put('/update', authenticateToken, async (req, res) => {
       });
     }
 
-    // Get current subscription (service role required - RLS on subscriptions)
+    // Get the user's current Stripe subscription. Includes `trialing` and
+    // `past_due` so users in trial or in payment-retry can also switch plans.
     const { data: subscription, error: subError } = await getSupabase()
       .from('subscriptions')
       .select('stripe_subscription_id')
       .eq('user_id', userId)
-      .eq('status', 'active')
-      .single();
+      .in('status', ['active', 'trialing', 'past_due'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
     if (subError || !subscription) {
       return res.status(404).json({
@@ -338,10 +341,13 @@ router.put('/update', authenticateToken, async (req, res) => {
       });
     }
 
-    // Update user's plan in database (service role required - RLS on users)
+    // Update user's plan in database (service role required - RLS on users).
+    // Webhook will also fire `subscription.updated` and converge on the same
+    // value via resolveEffectivePlan(); this immediate write just gives the UI
+    // faster feedback.
     const { error: updateError } = await getSupabase()
       .from('users')
-      .update({ subscription_plan: normalizedNew })
+      .update({ subscription_plan: newPlan })
       .eq('id', userId);
 
     if (updateError) {
@@ -355,8 +361,8 @@ router.put('/update', authenticateToken, async (req, res) => {
     res.json({
       success: true,
       message: 'Subscription updated successfully',
-      newPlan: normalizedNew,
-      planLimits: subscriptionService.PLAN_LIMITS[subscriptionService.normalizePlanForLimits(normalizedNew)] || subscriptionService.PLAN_LIMITS.free
+      newPlan,
+      planLimits: subscriptionService.PLAN_LIMITS[subscriptionService.normalizePlanForLimits(newPlan)] || subscriptionService.PLAN_LIMITS.free
     });
 
   } catch (error) {
@@ -384,13 +390,16 @@ router.post('/cancel', authenticateToken, async (req, res) => {
       });
     }
 
-    // Get current subscription (service role required - RLS on subscriptions)
+    // Get the user's current Stripe subscription. Includes `trialing` and
+    // `past_due` so users in trial or in payment-retry can also cancel.
     const { data: subscription, error: subError } = await getSupabase()
       .from('subscriptions')
       .select('stripe_subscription_id')
       .eq('user_id', userId)
-      .eq('status', 'active')
-      .single();
+      .in('status', ['active', 'trialing', 'past_due'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
     if (subError || !subscription) {
       return res.status(404).json({
@@ -399,7 +408,10 @@ router.post('/cancel', authenticateToken, async (req, res) => {
       });
     }
 
-    // Cancel subscription in Stripe
+    // Schedule cancellation at the end of the current billing period.
+    // The user keeps paid access until current_period_end. The actual downgrade
+    // to 'free' is performed by the `customer.subscription.deleted` webhook
+    // when Stripe finalizes the cancellation.
     const cancelResult = await subscriptionService.cancelStripeSubscription(
       subscription.stripe_subscription_id
     );
@@ -413,77 +425,33 @@ router.post('/cancel', authenticateToken, async (req, res) => {
       });
     }
 
-    // Update subscription status in database (service role required - RLS)
+    const stripeSub = cancelResult.subscription;
+    const periodEnd = stripeSub?.current_period_end
+      ? new Date(stripeSub.current_period_end * 1000)
+      : null;
+
+    // Mark the subscription row as scheduled-to-cancel. Status stays as-is
+    // (active/trialing) because the user still has access. The webhook will
+    // flip status to 'canceled' and clear the user's plan when the period ends.
     const { error: updateError } = await getSupabase()
       .from('subscriptions')
-      .update({ 
-        status: 'canceled',
-        canceled_at: new Date().toISOString()
+      .update({
+        cancel_at_period_end: true,
+        current_period_end: periodEnd ? periodEnd.toISOString() : undefined,
       })
       .eq('user_id', userId)
       .eq('stripe_subscription_id', subscription.stripe_subscription_id);
 
     if (updateError) {
-      console.error('Error updating subscription status:', updateError);
-    }
-
-    // Get user email before downgrading (service role required - RLS on users)
-    const { data: userData, error: userFetchError } = await getSupabase()
-      .from('users')
-      .select('email')
-      .eq('id', userId)
-      .single();
-
-    // Downgrade user to free plan (service role required - RLS on users)
-    const { error: userUpdateError } = await getSupabase()
-      .from('users')
-      .update({ subscription_plan: 'free' })
-      .eq('id', userId);
-
-    if (userUpdateError) {
-      console.error('Error downgrading user:', userUpdateError);
-    }
-
-    // Add user to email subscription list if they haven't unsubscribed
-    if (userData && userData.email) {
-      try {
-        const { query } = require('../database/connection');
-        const normalizedEmail = userData.email.toLowerCase().trim();
-        
-        // Check if email is already unsubscribed
-        const unsubscribeCheck = await query(
-          'SELECT id, is_subscribed FROM email_subscriptions WHERE email = $1',
-          [normalizedEmail]
-        );
-
-        if (unsubscribeCheck.rows.length === 0) {
-          // Email not in list, add it
-          await query(
-            `INSERT INTO email_subscriptions (email, user_id, is_subscribed, subscription_type, created_at, updated_at)
-             VALUES ($1, $2, true, 'marketing', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-             ON CONFLICT (email) DO UPDATE SET user_id = $2, is_subscribed = true, updated_at = CURRENT_TIMESTAMP`,
-            [normalizedEmail, userId]
-          );
-        } else if (unsubscribeCheck.rows[0].is_subscribed === false) {
-          // Email exists but is unsubscribed - don't add them back
-        } else {
-          // Email exists and is subscribed, update user_id if needed
-          await query(
-            'UPDATE email_subscriptions SET user_id = $1, updated_at = CURRENT_TIMESTAMP WHERE email = $2',
-            [userId, normalizedEmail]
-          );
-        }
-      } catch (emailSubError) {
-        console.error('Error adding user to email subscription list after downgrade:', emailSubError);
-        // Don't fail the cancellation if email subscription fails
-      }
+      console.error('Error marking subscription as cancel-at-period-end:', updateError);
     }
 
     res.json({
       success: true,
-      message: 'Subscription canceled successfully',
-      newPlan: 'free',
-      planLimits: subscriptionService.PLAN_LIMITS.free
+      message: 'Subscription will cancel at the end of the current billing period',
+      cancelAtPeriodEnd: true,
+      currentPeriodEnd: periodEnd ? periodEnd.toISOString() : null,
+      currentPlan: subscriptionDetails.plan,
     });
 
   } catch (error) {

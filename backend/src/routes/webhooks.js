@@ -3,6 +3,11 @@ const router = express.Router();
 const subscriptionService = require('../services/subscriptionService');
 const { query } = require('../database/connection');
 
+// Single source of truth for status-aware plan resolution lives in
+// subscriptionService — same helper is used by syncCheckoutSessionForUser and
+// reconcileSubscriptions, so all paths converge on identical logic.
+const { resolveEffectivePlan } = subscriptionService;
+
 // @route   GET /api/webhooks/test
 // @desc    Test webhook endpoint
 // @access  Public
@@ -119,18 +124,9 @@ async function handleCheckoutSessionCompleted(session) {
     }
 
     const subscription = stripeResult.subscription;
-    
-    // Determine plan based on price ID
-    const priceId = subscription.items.data[0].price.id;
-    let plan = 'free';
-    
-    if (priceId === process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_STARTER_YEARLY_PRICE_ID) {
-      plan = 'pro';
-    } else if (priceId === process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID) {
-      plan = 'premium';
-    } else if (priceId === process.env.STRIPE_FOCUS_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_FOCUS_YEARLY_PRICE_ID || priceId === 'price_focus_monthly' || priceId === 'price_focus_yearly') {
-      plan = 'focus';
-    }
+
+    // Determine plan based on Stripe status + price ID
+    const plan = resolveEffectivePlan(subscription);
 
     // Update user's subscription plan and mark onboarding complete (they subscribed = past onboarding)
     await query(
@@ -197,17 +193,8 @@ async function handleSubscriptionCreated(subscription) {
 
     const user = userResult.rows[0];
 
-    // Determine plan based on price ID
-    const priceId = subscription.items.data[0].price.id;
-    let plan = 'free';
-    
-    if (priceId === process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_STARTER_YEARLY_PRICE_ID) {
-      plan = 'pro';
-    } else if (priceId === process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID) {
-      plan = 'premium';
-    } else if (priceId === process.env.STRIPE_FOCUS_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_FOCUS_YEARLY_PRICE_ID || priceId === 'price_focus_monthly' || priceId === 'price_focus_yearly') {
-      plan = 'focus';
-    }
+    // Determine plan based on Stripe status + price ID
+    const plan = resolveEffectivePlan(subscription);
 
     // Update user's subscription plan using PostgreSQL
     await query(
@@ -236,17 +223,10 @@ async function handleSubscriptionUpdated(subscription) {
 
     const user = userResult.rows[0];
 
-    // Determine plan based on price ID
-    const priceId = subscription.items.data[0].price.id;
-    let plan = 'free';
-    
-    if (priceId === process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_STARTER_YEARLY_PRICE_ID) {
-      plan = 'pro';
-    } else if (priceId === process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID) {
-      plan = 'premium';
-    } else if (priceId === process.env.STRIPE_FOCUS_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_FOCUS_YEARLY_PRICE_ID || priceId === 'price_focus_monthly' || priceId === 'price_focus_yearly') {
-      plan = 'focus';
-    }
+    // Determine plan based on Stripe status + price ID. If the subscription has
+    // dropped into a non-access state (canceled, unpaid, incomplete_expired)
+    // this returns 'free' even though the price ID is still on a paid tier.
+    const plan = resolveEffectivePlan(subscription);
 
     // Update subscription in database using PostgreSQL
     const cancelAtPeriodEnd = Boolean(subscription.cancel_at_period_end);
@@ -458,10 +438,12 @@ async function handleInvoicePaymentFailed(invoice) {
   }
 }
 
-// Handle trial will end
+// Handle trial will end (fires ~3 days before trial expires).
+// We don't downgrade here — the actual downgrade happens via subsequent
+// `customer.subscription.updated` (status flip) or `customer.subscription.deleted`,
+// and the daily reconciliation cron is the safety net if those are missed.
 async function handleTrialWillEnd(subscription) {
   try {
-    // Find user by customer ID using PostgreSQL
     const userResult = await query(
       'SELECT id, email FROM users WHERE stripe_customer_id = $1',
       [subscription.customer]
@@ -473,6 +455,8 @@ async function handleTrialWillEnd(subscription) {
     }
 
     const user = userResult.rows[0];
+    const trialEnd = subscription.trial_end ? new Date(subscription.trial_end * 1000) : null;
+    console.log(`Trial ending soon for user ${user.id} (${user.email}) at ${trialEnd?.toISOString()}`);
 
     // TODO: Send notification email about trial ending
 

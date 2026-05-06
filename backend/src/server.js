@@ -179,11 +179,22 @@ const startServer = async () => {
       subscriptionService.cleanupOldCitations()
         .then(() => console.log('✅ Initial citation cleanup completed'))
         .catch(error => console.error('❌ Initial citation cleanup failed:', error));
-      
+
       // Schedule citation cleanup to run daily (every 24 hours)
       setInterval(async () => {
         console.log('🧹 Running scheduled citation cleanup...');
         await subscriptionService.cleanupOldCitations();
+      }, 24 * 60 * 60 * 1000); // 24 hours in milliseconds
+
+      // Reconcile paid users with Stripe state on startup, then daily.
+      // Safety net for missed webhooks and silent trial expiry.
+      subscriptionService.reconcileSubscriptions()
+        .then((result) => console.log('✅ Initial subscription reconciliation completed:', result))
+        .catch((error) => console.error('❌ Initial subscription reconciliation failed:', error));
+
+      setInterval(async () => {
+        console.log('🔄 Running scheduled subscription reconciliation...');
+        await subscriptionService.reconcileSubscriptions();
       }, 24 * 60 * 60 * 1000); // 24 hours in milliseconds
     });
   } catch (error) {

@@ -16,6 +16,9 @@ CREATE TABLE IF NOT EXISTS users (
     subscription_plan VARCHAR(50) DEFAULT 'free',
     subscription_status VARCHAR(50) DEFAULT 'active',
     stripe_customer_id VARCHAR(255),
+    -- See add_manual_grant_column.sql migration. When true, reconcileSubscriptions()
+    -- leaves this user alone — used for comped accounts, partner deals, refunds.
+    manual_grant BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     last_login TIMESTAMP WITH TIME ZONE,
@@ -27,15 +30,20 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 -- Subscriptions table
+-- NOTE: column is `plan` (not `plan_type`); see fix_subscriptions_table.sql
+-- migration. `stripe_customer_id` and `canceled_at` were added by that
+-- migration as well.
 CREATE TABLE IF NOT EXISTS subscriptions (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-    stripe_subscription_id VARCHAR(255) UNIQUE,
-    plan_type VARCHAR(50) NOT NULL, -- 'basic', 'premium'
-    status VARCHAR(50) NOT NULL, -- 'active', 'canceled', 'past_due', 'unpaid'
+    stripe_subscription_id VARCHAR(255) UNIQUE NOT NULL,
+    stripe_customer_id VARCHAR(255),
+    plan VARCHAR(50) NOT NULL, -- 'pro', 'premium', 'focus', 'free'
+    status VARCHAR(50) NOT NULL, -- 'active', 'trialing', 'past_due', 'canceled', 'unpaid', 'incomplete', 'incomplete_expired'
     current_period_start TIMESTAMP WITH TIME ZONE,
     current_period_end TIMESTAMP WITH TIME ZONE,
     cancel_at_period_end BOOLEAN DEFAULT false,
+    canceled_at TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );

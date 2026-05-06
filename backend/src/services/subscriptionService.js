@@ -798,9 +798,15 @@ const updateStripeSubscription = async (subscriptionId, newPriceId) => {
 };
 
 // Cancel subscription in Stripe
+// Schedule cancellation at the end of the current billing period.
+// The subscription stays `active` (with cancel_at_period_end: true) so the user
+// keeps access until current_period_end, at which point Stripe fires
+// `customer.subscription.deleted` and the webhook downgrades them to free.
 const cancelStripeSubscription = async (subscriptionId) => {
   try {
-    const subscription = await stripe.subscriptions.cancel(subscriptionId);
+    const subscription = await stripe.subscriptions.update(subscriptionId, {
+      cancel_at_period_end: true,
+    });
     return { success: true, subscription };
   } catch (error) {
     console.error('Error canceling Stripe subscription:', error);
@@ -987,6 +993,121 @@ const cleanupOldCitations = async () => {
   }
 };
 
+// Stripe statuses that grant access to a paid tier. Anything outside this
+// set means the user should be on the free plan.
+const STRIPE_ACCESS_STATUSES = new Set(['active', 'trialing', 'past_due']);
+
+// Map a Stripe price ID to our internal plan key.
+function mapPriceIdToPlan(priceId) {
+  if (!priceId) return 'free';
+  if (priceId === process.env.STRIPE_STARTER_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_STARTER_YEARLY_PRICE_ID) {
+    return 'pro';
+  }
+  if (priceId === process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID) {
+    return 'premium';
+  }
+  if (priceId === process.env.STRIPE_FOCUS_MONTHLY_PRICE_ID || priceId === process.env.STRIPE_FOCUS_YEARLY_PRICE_ID || priceId === 'price_focus_monthly' || priceId === 'price_focus_yearly') {
+    return 'focus';
+  }
+  return 'free';
+}
+
+// Resolve the effective user plan given a Stripe subscription object.
+// Forces 'free' if the subscription is no longer in an access state — protects
+// against stale price IDs on canceled / unpaid / expired subs.
+function resolveEffectivePlan(subscription) {
+  if (!subscription || !STRIPE_ACCESS_STATUSES.has(subscription.status)) {
+    return 'free';
+  }
+  const priceId = subscription.items?.data?.[0]?.price?.id;
+  return mapPriceIdToPlan(priceId);
+}
+
+/**
+ * Daily reconciliation: walk every paid user in our DB, compare against
+ * Stripe, and downgrade anyone whose Stripe subscription is no longer in an
+ * access state. Safety net for missed/failed webhooks and silent trial expiry.
+ *
+ * Returns { reconciled, errors, total }.
+ */
+const reconcileSubscriptions = async () => {
+  let reconciled = 0;
+  let errors = 0;
+
+  try {
+    // Skip rows with manual_grant = true (comped accounts, partner deals,
+    // refunded users we want to keep on Pro). The cron will not touch them
+    // even if their Stripe subscription is canceled or absent.
+    // See add_manual_grant_column.sql migration.
+    const result = await query(
+      `SELECT id, email, stripe_customer_id, subscription_plan
+         FROM users
+        WHERE subscription_plan IS NOT NULL
+          AND subscription_plan != 'free'
+          AND stripe_customer_id IS NOT NULL
+          AND manual_grant = false`
+    );
+
+    const users = result.rows || [];
+    console.log(`🔄 Reconcile: checking ${users.length} paid users against Stripe`);
+
+    for (const user of users) {
+      try {
+        const stripeSubs = await stripe.subscriptions.list({
+          customer: user.stripe_customer_id,
+          status: 'all',
+          limit: 10,
+        });
+
+        const hasAccess = stripeSubs.data.some((sub) =>
+          STRIPE_ACCESS_STATUSES.has(sub.status)
+        );
+
+        if (hasAccess) continue;
+
+        // Stripe says no access, but our DB has them on a paid tier — downgrade.
+        const newestSub = stripeSubs.data[0];
+        const dbStatus = newestSub?.status || 'canceled';
+
+        await query(
+          `UPDATE users
+              SET subscription_plan = 'free',
+                  subscription_status = $1,
+                  updated_at = NOW()
+            WHERE id = $2`,
+          [dbStatus, user.id]
+        );
+
+        await query(
+          `UPDATE subscriptions
+              SET status = $1,
+                  canceled_at = COALESCE(canceled_at, NOW()),
+                  updated_at = NOW()
+            WHERE user_id = $2
+              AND status NOT IN ('canceled')`,
+          [dbStatus, user.id]
+        );
+
+        console.log(
+          `🔄 Reconcile: downgraded user ${user.id} (${user.email}) from ${user.subscription_plan} → free (Stripe status: ${dbStatus})`
+        );
+        reconciled++;
+      } catch (userErr) {
+        console.error(`🔄 Reconcile: error for user ${user.id}:`, userErr.message);
+        errors++;
+      }
+    }
+
+    console.log(
+      `✅ Reconcile complete: ${reconciled} downgraded, ${errors} errors, ${users.length} checked`
+    );
+    return { reconciled, errors, total: users.length };
+  } catch (error) {
+    console.error('🔄 Reconcile: fatal error:', error);
+    return { reconciled, errors: errors + 1, total: 0 };
+  }
+};
+
 /**
  * After Embedded Checkout redirect; same DB updates as checkout.session.completed webhook.
  * Verifies session belongs to user (metadata + stripe_customer_id).
@@ -1041,27 +1162,7 @@ const syncCheckoutSessionForUser = async (sessionId, appUserId) => {
     }
 
     const subscription = stripeResult.subscription;
-    const priceId = subscription.items.data[0].price.id;
-    let plan = 'free';
-
-    if (
-      priceId === process.env.STRIPE_STARTER_MONTHLY_PRICE_ID ||
-      priceId === process.env.STRIPE_STARTER_YEARLY_PRICE_ID
-    ) {
-      plan = 'pro';
-    } else if (
-      priceId === process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID ||
-      priceId === process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID
-    ) {
-      plan = 'premium';
-    } else if (
-      priceId === process.env.STRIPE_FOCUS_MONTHLY_PRICE_ID ||
-      priceId === process.env.STRIPE_FOCUS_YEARLY_PRICE_ID ||
-      priceId === 'price_focus_monthly' ||
-      priceId === 'price_focus_yearly'
-    ) {
-      plan = 'focus';
-    }
+    const plan = resolveEffectivePlan(subscription);
 
     await query(
       'UPDATE users SET subscription_plan = $1, subscription_status = $2, onboarding_completed = true WHERE id = $3',
@@ -1140,6 +1241,10 @@ module.exports = {
   createBillingPortalSession,
   verifyWebhookSignature,
   validatePromoCode,
-  cleanupOldCitations
+  cleanupOldCitations,
+  reconcileSubscriptions,
+  STRIPE_ACCESS_STATUSES,
+  mapPriceIdToPlan,
+  resolveEffectivePlan,
 };
 
