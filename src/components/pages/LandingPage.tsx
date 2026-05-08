@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, type ReactNode } from 'react';
+import { useState, useEffect, useMemo, lazy, Suspense, type ReactNode } from 'react';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -15,6 +15,8 @@ import HeroEssayPreviewCard from '../landing/HeroEssayPreviewCard';
 import LandingBeforeAfterSection from '../landing/LandingBeforeAfterSection';
 import LandingScrollReveal from '../landing/LandingScrollReveal';
 import { DEMO_HERO_AFTER_PAPER, DEMO_PAPERS } from '../../data/landingPageDemoAnalysis';
+
+const BadgeCreature = lazy(() => import('../common/BadgeCreature'));
 
 /** Hide study packs, Focus Mode, and friends blocks on landing (papers + citations first). */
 const LANDING_HIDE_SECONDARY_SECTIONS = true;
@@ -754,15 +756,16 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
               <div className="min-w-0 flex flex-col items-center w-full max-w-2xl lg:max-w-none mx-auto">
               <div className="relative w-full max-w-3xl mx-auto px-1 sm:px-2 text-center pt-2 sm:pt-4 opacity-0 animate-hero-card-enter">
-                {/* Hero mascots — flank the H1 close in. Sit just outside the
-                    H1 box, slightly down so they line up with the headline. */}
+                {/* Hero mascots — pinned to the bottom corners of the hero
+                    card, sitting below the trial/login buttons so they flank
+                    the trust badge. */}
                 <img
                   src="/mascot-paper.webp"
                   alt=""
                   aria-hidden
                   loading="lazy"
                   decoding="async"
-                  className="hidden lg:block pointer-events-none absolute top-14 left-2 xl:left-6 w-20 xl:w-24 h-auto z-10 drop-shadow-[0_14px_24px_rgba(124,58,237,0.32)] motion-safe:animate-hero-aside-left"
+                  className="hidden lg:block pointer-events-none absolute bottom-0 left-0 xl:left-2 w-24 xl:w-28 h-auto z-10 drop-shadow-[0_14px_24px_rgba(124,58,237,0.32)] motion-safe:animate-hero-aside-left"
                 />
                 <img
                   src="/mascot-laptop.webp"
@@ -770,7 +773,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   aria-hidden
                   loading="lazy"
                   decoding="async"
-                  className="hidden lg:block pointer-events-none absolute top-14 right-2 xl:right-6 w-20 xl:w-24 h-auto z-10 drop-shadow-[0_14px_24px_rgba(124,58,237,0.32)] motion-safe:animate-hero-aside-right"
+                  className="hidden lg:block pointer-events-none absolute bottom-0 right-0 xl:right-2 w-24 xl:w-28 h-auto z-10 drop-shadow-[0_14px_24px_rgba(124,58,237,0.32)] motion-safe:animate-hero-aside-right"
                 />
                 <div className="relative flex flex-col items-center text-center">
                 {/* MOBILE-ONLY: floating dancing mascot in the top-right of
@@ -798,13 +801,13 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     Shows visitors the full product scope at a glance.
                     Hidden on mobile (replaced by floating mascot above). */}
                 <div className="hidden md:block mx-auto mb-5 sm:mb-6 max-w-lg sm:max-w-2xl opacity-0 animate-hero-stagger-1">
-                  <div className="relative rounded-2xl border border-stone-200/95 dark:border-stone-700/70 bg-white/95 dark:bg-stone-900/80 backdrop-blur-md p-1 shadow-sm overflow-hidden">
+                  <div className="relative rounded-2xl border border-stone-200/60 dark:border-stone-700/60 bg-transparent p-1 overflow-hidden">
                     <div className="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-stretch gap-1">
                       <a
                         href="#landing-tools"
-                        className="group relative rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 flex items-center gap-2 hover:bg-[#DDF4FF] dark:hover:bg-[#1CB0F6]/10 transition-colors"
+                        className="group relative rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 flex items-center gap-2 bg-[#DDF4FF] dark:bg-[#1CB0F6]/15 hover:bg-[#9CDAFC] dark:hover:bg-[#1CB0F6]/30 transition-colors"
                       >
-                        <span className="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-lg bg-[#DDF4FF] dark:bg-[#1CB0F6]/20 text-base sm:text-[17px] ring-1 ring-[#1CB0F6]/40 dark:ring-[#1899D6]/40" aria-hidden>📝</span>
+                        <span className="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-lg bg-white dark:bg-[#1CB0F6]/30 text-base sm:text-[17px] ring-1 ring-[#1CB0F6]/40 dark:ring-[#1899D6]/40" aria-hidden>📝</span>
                         <div className="min-w-0 leading-tight text-left">
                           <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#1CB0F6] dark:text-[#1CB0F6]">
                             Essays
@@ -824,9 +827,9 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
                       <a
                         href="#study-tools"
-                        className="group relative rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 flex items-center gap-2 hover:bg-[#F3EAFF] dark:hover:bg-[#A560E8]/10 transition-colors"
+                        className="group relative rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 flex items-center gap-2 bg-[#F3EAFF] dark:bg-[#A560E8]/15 hover:bg-[#DEC4F5] dark:hover:bg-[#A560E8]/30 transition-colors"
                       >
-                        <span className="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-lg bg-[#F3EAFF] dark:bg-[#A560E8]/20 text-base sm:text-[17px] ring-1 ring-[#A560E8]/40 dark:ring-[#8A48C7]/40" aria-hidden>📦</span>
+                        <span className="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-lg bg-white dark:bg-[#A560E8]/30 text-base sm:text-[17px] ring-1 ring-[#A560E8]/40 dark:ring-[#8A48C7]/40" aria-hidden>📦</span>
                         <div className="min-w-0 leading-tight text-left">
                           <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#A560E8] dark:text-[#A560E8]">
                             Studying
@@ -846,9 +849,9 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
                       <a
                         href="#motivation"
-                        className="group relative rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 flex items-center gap-2 hover:bg-[#FFF4E0] dark:hover:bg-[#FF9600]/10 transition-colors"
+                        className="group relative rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 flex items-center gap-2 bg-[#FFF4E0] dark:bg-[#FF9600]/15 hover:bg-[#FFD898] dark:hover:bg-[#FF9600]/30 transition-colors"
                       >
-                        <span className="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-lg bg-[#FFF4E0] dark:bg-[#FF9600]/20 text-base sm:text-[17px] ring-1 ring-[#FF9600]/40 dark:ring-[#D97F00]/40" aria-hidden>🔥</span>
+                        <span className="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-lg bg-white dark:bg-[#FF9600]/30 text-base sm:text-[17px] ring-1 ring-[#FF9600]/40 dark:ring-[#D97F00]/40" aria-hidden>🔥</span>
                         <div className="min-w-0 leading-tight text-left">
                           <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#FF9600] dark:text-[#FF9600]">
                             Motivation
@@ -869,10 +872,10 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   <span className="text-stone-900 dark:text-stone-50">Better essays.</span>{' '}
                   <span className="text-stone-900 dark:text-stone-50">Smarter studying.</span>
                   <br className="hidden sm:block" />
-                  <span className="relative inline-block text-[#58CC02] dark:text-[#58CC02]">
+                  <span className="relative inline-block text-[#A560E8] dark:text-[#A560E8]">
                     WriteScholar does both.
                     <svg
-                      className="absolute -bottom-1.5 left-0 w-full h-2 text-[#58CC02]/80 dark:text-[#58CC02]/70"
+                      className="absolute -bottom-1.5 left-0 w-full h-2 text-[#A560E8]/80 dark:text-[#A560E8]/70"
                       viewBox="0 0 200 8"
                       preserveAspectRatio="none"
                       aria-hidden
@@ -897,7 +900,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   <button
                     type="button"
                     onClick={() => onNavigate('signup')}
-                    className="group/btn relative inline-flex items-center justify-center gap-2 overflow-hidden px-8 py-3.5 sm:px-9 sm:py-4 bg-[#58CC02] hover:bg-[#61E002] dark:bg-[#58CC02] dark:hover:bg-[#61E002] text-white font-extrabold rounded-2xl border-2 border-b-4 border-[#46A302] dark:border-[#46A302] transition-all duration-200 hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 text-[0.97rem] sm:text-[1.02rem] tracking-wide"
+                    className="group/btn relative inline-flex w-full sm:w-auto items-center justify-center gap-2 overflow-hidden px-8 py-3.5 sm:px-9 sm:py-4 bg-[#A560E8] hover:bg-[#B274EC] dark:bg-[#A560E8] dark:hover:bg-[#B274EC] text-white font-extrabold rounded-2xl border-2 border-b-4 border-[#8A48C7] dark:border-[#8A48C7] transition-all duration-200 hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 text-[0.97rem] sm:text-[1.02rem] tracking-wide"
                   >
                     <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 opacity-0 transition-opacity duration-300 group-hover/btn:opacity-100 pointer-events-none" aria-hidden />
                     <span className="relative">Start my 7-day free trial</span>
@@ -1593,28 +1596,30 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed mb-4">
                     Unlock achievements for writing, studying, streaks, and more. Collect them all and show off your progress.
                   </p>
-                  {/* Mini visual — badge grid */}
+                  {/* Mini visual — badge grid (real BadgeCreature SVGs) */}
                   <div className="rounded-xl bg-[#F3EAFF]/60 dark:bg-[#A560E8]/10 border border-[#A560E8]/30 p-3">
                     <div className="grid grid-cols-4 gap-1.5">
                       {[
-                        { emoji: '✍️', unlocked: true },
-                        { emoji: '🔥', unlocked: true },
-                        { emoji: '📊', unlocked: true },
-                        { emoji: '🧠', unlocked: false },
-                        { emoji: '📚', unlocked: true },
-                        { emoji: '🏆', unlocked: false },
-                        { emoji: '💎', unlocked: true },
-                        { emoji: '👑', unlocked: false },
-                      ].map((b, i) => (
+                        { badgeId: 'first_login', unlocked: true },
+                        { badgeId: 'brain_spark', unlocked: true },
+                        { badgeId: 'citation_hunter', unlocked: true },
+                        { badgeId: 'streak_starter', unlocked: false },
+                        { badgeId: 'premium_pioneer', unlocked: true },
+                        { badgeId: 'streak_legend', unlocked: false },
+                        { badgeId: 'monthly_master', unlocked: true },
+                        { badgeId: 'night_owl', unlocked: false },
+                      ].map((b) => (
                         <div
-                          key={i}
-                          className={`w-full aspect-square rounded-lg flex items-center justify-center text-sm ${
+                          key={b.badgeId}
+                          className={`w-full aspect-square rounded-lg flex items-center justify-center ${
                             b.unlocked
                               ? 'bg-[#A560E8]/20 dark:bg-[#A560E8]/25'
                               : 'bg-stone-200/60 dark:bg-stone-700/40 opacity-40'
                           }`}
                         >
-                          {b.emoji}
+                          <Suspense fallback={<span className="text-sm">🏅</span>}>
+                            <BadgeCreature badgeId={b.badgeId} unlocked={b.unlocked} size={36} />
+                          </Suspense>
                         </div>
                       ))}
                     </div>
