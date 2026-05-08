@@ -192,7 +192,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           {/* AI Tools Links */}
           <div>
             <h4 className="font-extrabold text-white mb-4 text-sm uppercase tracking-wide flex items-center gap-2">
-              <ScholarMascot size={24} animated={false} pose="default" />
+              <img src="/main-logo.png" alt="" width={24} height={24} className="w-6 h-6 object-contain" loading="lazy" />
               AI Tools
             </h4>
             <ul className="space-y-3">
