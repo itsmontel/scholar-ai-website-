@@ -14,7 +14,7 @@ function ResetPasswordShell({
   onNavigate: (page: string) => void;
 }) {
   return (
-    <div className="relative isolate min-h-screen min-h-[100dvh] overflow-x-hidden">
+    <div className="relative isolate min-h-screen min-h-[100dvh] overflow-x-hidden bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <div className="relative z-10 flex min-h-screen min-h-[100dvh] w-full flex-col lg:flex-row">
       <button
@@ -22,7 +22,7 @@ function ResetPasswordShell({
         onClick={() => onNavigate('landing')}
         className="fixed top-4 left-4 sm:top-6 sm:left-6 z-50 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors group"
       >
-        <div className="w-10 h-10 bg-white dark:bg-stone-800 rounded-full shadow-md flex items-center justify-center group-hover:shadow-lg transition-all border border-stone-200 dark:border-stone-700">
+        <div className="w-10 h-10 bg-white dark:bg-stone-800 rounded-xl border-2 border-b-4 border-stone-200 dark:border-stone-700 flex items-center justify-center group-hover:border-[#58CC02]/40 transition-all">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
@@ -32,10 +32,10 @@ function ResetPasswordShell({
       <div className="w-full min-w-0 lg:w-1/2 flex flex-col">
         <div className="p-6 pt-20 sm:pt-6">
           <div className="flex items-center space-x-2.5">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden shadow-lg shadow-violet-500/30">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden border-2 border-b-4 border-stone-200 dark:border-stone-700">
               <img src="/main-logo.png" alt="WriteScholar" className="w-full h-full object-contain" loading="eager" width={120} height={120} />
             </div>
-            <span className="text-xl font-extrabold tracking-tight text-violet-600 dark:text-violet-400">WriteScholar</span>
+            <span className="text-xl font-extrabold tracking-tight text-[#A560E8]">WriteScholar</span>
           </div>
         </div>
 
@@ -140,10 +140,10 @@ const ResetPasswordPage = ({ onNavigate }: ResetPasswordPageProps) => {
   if (tokenValid === false) {
     return (
       <ResetPasswordShell onNavigate={onNavigate}>
-        <div className="rounded-2xl border border-stone-200/80 dark:border-stone-700/80 bg-white/80 dark:bg-stone-900/40 backdrop-blur-sm shadow-xl shadow-stone-200/40 dark:shadow-black/20 px-6 py-8 sm:px-8 sm:py-9 text-center">
-          <div className="h-0.5 w-16 bg-gradient-to-r from-violet-600 to-red-400/80 rounded-full mx-auto mb-6" aria-hidden />
-          <div className="w-14 h-14 rounded-2xl bg-red-50 dark:bg-red-900/30 border border-red-200/80 dark:border-red-800/50 flex items-center justify-center mx-auto mb-5">
-            <svg className="w-7 h-7 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 px-6 py-8 sm:px-8 sm:py-9 text-center">
+          <div className="h-1 w-16 bg-[#58CC02] rounded-full mx-auto mb-6" aria-hidden />
+          <div className="w-14 h-14 rounded-2xl bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-2 border-b-4 border-[#FF4B4B]/40 flex items-center justify-center mx-auto mb-5">
+            <svg className="w-7 h-7 text-[#FF4B4B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -152,14 +152,14 @@ const ResetPasswordPage = ({ onNavigate }: ResetPasswordPageProps) => {
               />
             </svg>
           </div>
-          <h1 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight text-stone-800 dark:text-stone-100 mb-2">Invalid reset link</h1>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-800 dark:text-stone-100 mb-2">Invalid reset link</h1>
           <p className="text-stone-500 dark:text-stone-400 text-sm mb-8 leading-relaxed">
             This password reset link is invalid or has expired. Request a new one from the login page.
           </p>
           <button
             type="button"
             onClick={() => onNavigate('login')}
-            className="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white font-semibold rounded-xl shadow-md shadow-violet-900/15 dark:shadow-violet-950/40 ring-1 ring-violet-900/10 dark:ring-white/10 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
+            className="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 bg-[#A560E8] hover:bg-[#9450D8] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all duration-200"
           >
             Back to login
           </button>
@@ -171,19 +171,19 @@ const ResetPasswordPage = ({ onNavigate }: ResetPasswordPageProps) => {
   if (success) {
     return (
       <ResetPasswordShell onNavigate={onNavigate}>
-        <div className="rounded-2xl border border-stone-200/80 dark:border-stone-700/80 bg-white/80 dark:bg-stone-900/40 backdrop-blur-sm shadow-xl shadow-stone-200/40 dark:shadow-black/20 px-6 py-8 sm:px-8 sm:py-9 text-center">
-          <div className="h-0.5 w-16 bg-gradient-to-r from-violet-600 to-red-400/80 rounded-full mx-auto mb-6" aria-hidden />
-          <div className="w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-900/25 border border-emerald-200/80 dark:border-emerald-800/50 flex items-center justify-center mx-auto mb-5">
-            <svg className="w-7 h-7 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 px-6 py-8 sm:px-8 sm:py-9 text-center">
+          <div className="h-1 w-16 bg-[#58CC02] rounded-full mx-auto mb-6" aria-hidden />
+          <div className="w-14 h-14 rounded-2xl bg-[#EAFFD6] dark:bg-[#58CC02]/10 border-2 border-b-4 border-[#58CC02]/40 flex items-center justify-center mx-auto mb-5">
+            <svg className="w-7 h-7 text-[#58CC02]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h1 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight text-stone-800 dark:text-stone-100 mb-2">Password updated</h1>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-800 dark:text-stone-100 mb-2">Password updated</h1>
           <p className="text-stone-500 dark:text-stone-400 text-sm mb-6 leading-relaxed">
             Your password has been reset. You will be redirected to sign in shortly.
           </p>
-          <div className="rounded-xl border border-violet-200/80 dark:border-violet-800/40 bg-violet-50/80 dark:bg-violet-950/30 px-4 py-3">
-            <p className="text-violet-800 dark:text-violet-200 text-sm font-medium">Redirecting to login in 3 seconds…</p>
+          <div className="rounded-xl border-2 border-[#1CB0F6]/30 bg-[#DDF4FF] dark:bg-[#1CB0F6]/10 px-4 py-3">
+            <p className="text-[#1CB0F6] text-sm font-bold">Redirecting to login in 3 seconds…</p>
           </div>
         </div>
       </ResetPasswordShell>
@@ -192,29 +192,29 @@ const ResetPasswordPage = ({ onNavigate }: ResetPasswordPageProps) => {
 
   return (
     <ResetPasswordShell onNavigate={onNavigate}>
-      <div className="rounded-2xl border border-stone-200/80 dark:border-stone-700/80 bg-white/80 dark:bg-stone-900/40 backdrop-blur-sm shadow-xl shadow-stone-200/40 dark:shadow-black/20 px-6 py-8 sm:px-8 sm:py-9">
-        <div className="h-0.5 w-16 bg-gradient-to-r from-violet-600 to-red-400/80 rounded-full mb-6" aria-hidden />
+      <div className="rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 px-6 py-8 sm:px-8 sm:py-9">
+        <div className="h-1 w-16 bg-[#58CC02] rounded-full mb-6" aria-hidden />
         <div className="mb-8">
-          <h1 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight text-stone-800 dark:text-stone-100 mb-2">Reset your password</h1>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-800 dark:text-stone-100 mb-2">Reset your password</h1>
           <p className="text-stone-500 dark:text-stone-400 text-sm">Choose a new password for your account</p>
         </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
-            <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
+          <div className="mb-4 p-3 bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-2 border-b-4 border-[#FF4B4B]/40 rounded-xl">
+            <p className="text-[#FF4B4B] text-sm font-bold">{error}</p>
           </div>
         )}
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1.5">New password</label>
+            <label className="block text-sm font-bold text-stone-700 dark:text-stone-300 mb-1.5">New password</label>
             <input
               type="password"
               value={formData.newPassword}
               onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
               onKeyDown={handleKeyDown}
               placeholder="••••••••"
-              className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent focus:bg-white dark:focus:bg-stone-800 transition-all text-sm text-stone-800 dark:text-stone-100"
+              className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 focus:bg-white dark:focus:bg-stone-800 transition-all text-sm text-stone-800 dark:text-stone-100"
             />
             <p className="text-xs text-stone-500 dark:text-stone-400 mt-1.5">
               At least 8 characters with uppercase, lowercase, number, and special character
@@ -222,14 +222,14 @@ const ResetPasswordPage = ({ onNavigate }: ResetPasswordPageProps) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1.5">Confirm password</label>
+            <label className="block text-sm font-bold text-stone-700 dark:text-stone-300 mb-1.5">Confirm password</label>
             <input
               type="password"
               value={formData.confirmPassword}
               onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
               onKeyDown={handleKeyDown}
               placeholder="••••••••"
-              className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent focus:bg-white dark:focus:bg-stone-800 transition-all text-sm text-stone-800 dark:text-stone-100"
+              className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 focus:bg-white dark:focus:bg-stone-800 transition-all text-sm text-stone-800 dark:text-stone-100"
             />
           </div>
 
@@ -237,11 +237,11 @@ const ResetPasswordPage = ({ onNavigate }: ResetPasswordPageProps) => {
             type="button"
             onClick={handleSubmit}
             disabled={isLoading}
-            className="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white font-semibold rounded-xl shadow-md shadow-violet-900/15 dark:shadow-violet-950/40 ring-1 ring-violet-900/10 dark:ring-white/10 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:shadow-md"
+            className="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 bg-[#A560E8] hover:bg-[#9450D8] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:shadow-md"
           >
             {isLoading ? (
               <span className="flex items-center justify-center">
-                <span className="w-5 h-5 border-2 border-stone-800 border-t-transparent rounded-full animate-spin mr-2" />
+                <span className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin mr-2" />
                 Updating password…
               </span>
             ) : (
@@ -255,7 +255,7 @@ const ResetPasswordPage = ({ onNavigate }: ResetPasswordPageProps) => {
           <button
             type="button"
             onClick={() => onNavigate('login')}
-            className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-semibold"
+            className="text-[#1CB0F6] hover:text-[#1899D6] font-bold"
           >
             Sign in
           </button>

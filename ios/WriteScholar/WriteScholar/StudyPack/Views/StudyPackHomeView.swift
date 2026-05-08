@@ -53,70 +53,101 @@ struct StudyPackHomeView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            packHeader
-                .padding(.horizontal, 16)
-                .padding(.bottom, 10)
+        ZStack {
+            // Subtle brand backdrop matching the rest of the app
+            WSGradient.heroBackdrop.ignoresSafeArea()
+            Circle()
+                .fill(selectedTab.tint.opacity(0.10))
+                .frame(width: 320, height: 320)
+                .blur(radius: 80)
+                .offset(x: -180, y: -260)
+                .ignoresSafeArea()
 
-            tabStrip
-                .padding(.bottom, 4)
+            VStack(spacing: 0) {
+                packHeader
+                    .padding(.horizontal, 16)
+                    .padding(.top, 6)
+                    .padding(.bottom, 12)
 
-            Divider()
+                tabStrip
+                    .padding(.bottom, 8)
 
-            tabContent
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                tabContent
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
         }
-        .background(WSColor.background.ignoresSafeArea())
     }
 
     // MARK: - Header
 
     private var packHeader: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 10) {
-                Text(pack.displayTitle)
-                    .wsHeadline(.medium, weight: .semibold)
-                    .foregroundStyle(WSColor.foreground)
-                    .lineLimit(2)
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top, spacing: 10) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("STUDY PACK")
+                        .font(.system(size: 10, weight: .black, design: .rounded))
+                        .tracking(0.7)
+                        .foregroundStyle(WSColor.brandPrimary)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(Capsule().fill(WSColor.brandSoft))
+
+                    Text(pack.displayTitle)
+                        .font(.system(size: 24, weight: .black, design: .rounded))
+                        .foregroundStyle(WSColor.foreground)
+                        .lineLimit(2)
+                }
                 Spacer()
                 Button {
+                    Haptics.medium()
                     coordinator.reset()
                 } label: {
-                    Label("New", systemImage: "plus")
-                        .wsBody(.small, weight: .bold)
-                        .foregroundStyle(WSColor.brandPrimary)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .background(
-                            Capsule().fill(WSColor.brandSoft)
-                        )
+                    HStack(spacing: 5) {
+                        Image(systemName: "plus")
+                        Text("New")
+                    }
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(WSDuoPillButtonStyle(palette: .secondary))
             }
 
-            HStack(spacing: 10) {
-                if let lesson = pack.lesson {
-                    countChip(icon: "book.pages.fill",         label: "\(lesson.slides.count) slides", color: PackTab.lesson.tint)
-                }
-                if let flash = pack.flashcards {
-                    countChip(icon: "square.stack.3d.up.fill", label: "\(flash.cards.count) cards",    color: PackTab.flashcards.tint)
-                }
-                if let quiz = pack.quiz {
-                    countChip(icon: "checkmark.bubble.fill",   label: "\(quiz.questions.count) q's",   color: PackTab.quiz.tint)
+            // Inventory chip row — quick glance at what the pack contains
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    if let lesson = pack.lesson {
+                        countChip(icon: "book.pages.fill",         label: "\(lesson.slides.count) slides", color: PackTab.lesson.tint)
+                    }
+                    if let flash = pack.flashcards {
+                        countChip(icon: "rectangle.on.rectangle.angled.fill", label: "\(flash.cards.count) cards",    color: PackTab.flashcards.tint)
+                    }
+                    if let quiz = pack.quiz {
+                        countChip(icon: "checkmark.bubble.fill",   label: "\(quiz.questions.count) questions", color: PackTab.quiz.tint)
+                    }
+                    if let cw = pack.crossword, let words = cw.words {
+                        countChip(icon: "grid",                    label: "\(words.count)-word crossword", color: PackTab.crossword.tint)
+                    }
+                    if let cb = pack.craterBlast {
+                        countChip(icon: "burst.fill",              label: "\(cb.questions.count) Crater q's", color: PackTab.crater.tint)
+                    }
+                    if let wt = pack.wordTower {
+                        countChip(icon: "building.2.fill",         label: "\(wt.questions.count) Tower q's", color: PackTab.wordTower.tint)
+                    }
                 }
             }
         }
-        .padding(.top, 6)
     }
 
     private func countChip(icon: String, label: String, color: Color) -> some View {
         HStack(spacing: 5) {
-            Image(systemName: icon).foregroundStyle(color)
-            Text(label).wsBody(.caption, weight: .bold).foregroundStyle(WSColor.foreground)
+            Image(systemName: icon).foregroundStyle(color).font(.system(size: 11, weight: .heavy))
+            Text(label).font(.system(size: 11, weight: .black, design: .rounded)).foregroundStyle(WSColor.foreground)
         }
         .padding(.horizontal, 10)
-        .padding(.vertical, 5)
-        .background(Capsule().fill(color.opacity(0.12)))
+        .padding(.vertical, 6)
+        .background(
+            Capsule()
+                .fill(color.opacity(0.13))
+                .overlay(Capsule().stroke(color.opacity(0.30), lineWidth: 0.5))
+        )
     }
 
     // MARK: - Tab strip (horizontally scrollable, web-style)
@@ -149,28 +180,44 @@ struct StudyPackHomeView: View {
         let active = (selectedTab == tab)
         let isAvailable = tabIsAvailable(tab)
 
-        HStack(spacing: 6) {
-            Image(systemName: tab.icon)
-                .font(.system(size: 13, weight: .bold))
-            Text(tab.rawValue)
-                .wsBody(.small, weight: .bold)
-            if !isAvailable && tab != .notes {
-                Image(systemName: "lock.fill")
-                    .font(.system(size: 9, weight: .bold))
-                    .opacity(0.6)
+        ZStack(alignment: .top) {
+            // 3D base lip — only when active to keep the row visually calm
+            if active {
+                Capsule()
+                    .fill(tab.tint.opacity(0.55))
+                    .padding(.top, 3)
+                    .blendMode(.multiply)
             }
+
+            HStack(spacing: 6) {
+                Image(systemName: tab.icon)
+                    .font(.system(size: 12, weight: .heavy))
+                Text(tab.rawValue)
+                    .font(.system(size: 12, weight: .black, design: .rounded))
+                if !isAvailable && tab != .notes {
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 9, weight: .heavy))
+                        .opacity(0.7)
+                }
+            }
+            .foregroundStyle(active ? .white : tab.tint)
+            .padding(.horizontal, 13)
+            .padding(.vertical, 9)
+            .background(
+                Capsule()
+                    .fill(
+                        active
+                            ? AnyShapeStyle(LinearGradient(colors: [tab.tint, tab.tint.opacity(0.78)],
+                                                           startPoint: .topLeading, endPoint: .bottomTrailing))
+                            : AnyShapeStyle(WSColor.backgroundElevated)
+                    )
+                    .overlay(
+                        Capsule().stroke(active ? .white.opacity(0.25) : tab.tint.opacity(0.30), lineWidth: 1)
+                    )
+                    .shadow(color: active ? tab.tint.opacity(0.40) : .clear, radius: active ? 8 : 0, y: 3)
+            )
         }
-        .foregroundStyle(active ? .white : tab.tint)
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(
-            Capsule()
-                .fill(active ? AnyShapeStyle(tab.tint) : AnyShapeStyle(tab.tint.opacity(0.12)))
-                .overlay(
-                    Capsule().stroke(tab.tint.opacity(active ? 0 : 0.30), lineWidth: 1)
-                )
-                .shadow(color: active ? tab.tint.opacity(0.3) : .clear, radius: active ? 8 : 0, y: 3)
-        )
+        .compositingGroup()
     }
 
     private func tabIsAvailable(_ tab: PackTab) -> Bool {
@@ -245,20 +292,37 @@ struct StudyPackHomeView: View {
     }
 
     private func lockedPane(tab: PackTab) -> some View {
-        VStack(spacing: 14) {
-            Image(systemName: "lock.fill")
-                .font(.system(size: 36, weight: .semibold))
-                .foregroundStyle(WSColor.foregroundMuted)
-            Text("\(tab.rawValue) is a Pro feature")
-                .wsHeadline(.small, weight: .semibold)
-                .foregroundStyle(WSColor.foreground)
-            Text("Upgrade in Settings to unlock the full study pack.")
-                .wsBody(.small)
-                .foregroundStyle(WSColor.foregroundMuted)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
+        VStack(spacing: 18) {
+            ZStack {
+                Circle()
+                    .fill(WSColor.surface)
+                    .frame(width: 130, height: 130)
+                Image(systemName: "lock.fill")
+                    .font(.system(size: 48, weight: .heavy))
+                    .foregroundStyle(WSColor.foregroundMuted)
+            }
+            VStack(spacing: 4) {
+                Text("\(tab.rawValue) is a Pro feature")
+                    .font(.system(size: 22, weight: .black, design: .rounded))
+                    .foregroundStyle(WSColor.foreground)
+                Text("Upgrade in Settings to unlock the full study pack.")
+                    .wsBody(.small)
+                    .foregroundStyle(WSColor.foregroundMuted)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+            }
+            Button {
+                if let url = URL(string: "https://writescholar.com/upgrade") {
+                    UIApplication.shared.open(url)
+                }
+            } label: {
+                Label("Upgrade to Pro", systemImage: "crown.fill")
+            }
+            .buttonStyle(WSDuoWarnButtonStyle(fullWidth: false))
+            .padding(.top, 4)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding()
     }
 
     private func crosswordWebPlaceholder() -> some View {
@@ -266,34 +330,43 @@ struct StudyPackHomeView: View {
         return VStack(spacing: 18) {
             ZStack {
                 Circle()
-                    .fill(tab.tint.opacity(0.15))
+                    .fill(
+                        RadialGradient(colors: [tab.tint.opacity(0.30), .clear],
+                                       center: .center, startRadius: 6, endRadius: 100)
+                    )
+                    .frame(width: 200, height: 200)
+                    .blur(radius: 8)
+                Circle()
+                    .fill(LinearGradient(colors: [tab.tint, tab.tint.opacity(0.78)],
+                                         startPoint: .topLeading, endPoint: .bottomTrailing))
                     .frame(width: 130, height: 130)
+                    .overlay(Circle().stroke(.white.opacity(0.30), lineWidth: 2))
+                    .shadow(color: tab.tint.opacity(0.45), radius: 14, y: 6)
                 Image(systemName: tab.icon)
-                    .font(.system(size: 48, weight: .semibold))
-                    .foregroundStyle(tab.tint)
+                    .font(.system(size: 48, weight: .heavy))
+                    .foregroundStyle(.white)
             }
 
-            Text("Crossword")
-                .wsHeadline(.medium, weight: .semibold)
-                .foregroundStyle(WSColor.foreground)
+            VStack(spacing: 4) {
+                Text("Crossword")
+                    .font(.system(size: 24, weight: .black, design: .rounded))
+                    .foregroundStyle(WSColor.foreground)
 
-            Text("Crossword grid is best on a wider canvas — open it on writescholar.com to play.")
-                .wsBody(.medium)
-                .foregroundStyle(WSColor.foregroundMuted)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
+                Text("Crossword grids are best on a wider canvas — pop it open on writescholar.com to play.")
+                    .wsBody(.medium)
+                    .foregroundStyle(WSColor.foregroundMuted)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+            }
 
             Button {
                 if let url = URL(string: "https://writescholar.com/study-pack") {
                     UIApplication.shared.open(url)
                 }
             } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: "safari")
-                    Text("Open on web")
-                }
+                Label("Open on web", systemImage: "safari")
             }
-            .buttonStyle(WSSecondaryButtonStyle(fullWidth: false))
+            .buttonStyle(WSDuoInfoButtonStyle(fullWidth: false))
             .padding(.top, 6)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

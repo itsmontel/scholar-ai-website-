@@ -22,6 +22,19 @@ struct WriteScholarApp: App {
             ContentView(onboardingComplete: $onboardingComplete)
                 .preferredColorScheme(parseScheme(colorSchemeOverride))
                 .tint(WSColor.brandPrimary)
+                .task {
+                    // Ask for notification permission on first launch.
+                    // After the prompt has fired once, this is a no-op
+                    // and the user manages permissions in iOS Settings.
+                    await NotificationService.shared.requestAuthorizationIfNeeded()
+                    NotificationService.shared.refreshAll()
+
+                    // Daily check-in: count today's first open as a
+                    // small XP nudge so the goal ring isn't blank.
+                    if DailyGoalStore.shared.todayXP == 0 {
+                        DailyGoalStore.shared.record(.dailyOpen)
+                    }
+                }
         }
     }
 

@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import Header from '../../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../../common/WriteScholarEditorialBackground';
 import Footer from '../../common/Footer';
 
 interface CalculatorPageProps {
@@ -135,95 +134,107 @@ const CalculatorPage = ({ onNavigate, user, onLogout }: CalculatorPageProps) => 
     }
   }, [display]);
 
+  /* ── Duolingo-style button classes ── */
+  const numBtn = 'bg-white dark:bg-stone-800 border-2 border-b-4 border-stone-200 dark:border-stone-700 active:border-b-2 active:translate-y-0.5 transition-all text-stone-800 dark:text-stone-100 font-extrabold rounded-xl hover:bg-stone-50 dark:hover:bg-stone-750';
+  const opBtn = 'bg-[#DDF4FF] dark:bg-[#1CB0F6]/20 border-2 border-b-4 border-[#1899D6] active:border-b-2 active:translate-y-0.5 transition-all text-[#1CB0F6] font-extrabold rounded-xl hover:bg-[#1CB0F6]/20';
+  const clearBtn = 'bg-[#FFE8E8] dark:bg-[#FF4B4B]/20 border-2 border-b-4 border-[#E04343] active:border-b-2 active:translate-y-0.5 transition-all text-[#FF4B4B] font-extrabold rounded-xl hover:bg-[#FF4B4B]/20';
+  const backBtn = 'bg-stone-100 dark:bg-stone-800 border-2 border-b-4 border-stone-300 dark:border-stone-600 active:border-b-2 active:translate-y-0.5 transition-all text-stone-600 dark:text-stone-300 font-extrabold rounded-xl hover:bg-stone-200 dark:hover:bg-stone-700';
+  const equalsBtn = 'bg-[#58CC02] border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all text-white font-extrabold rounded-xl hover:bg-[#46A302]';
+  const trigBtn = 'bg-[#F3EAFF] dark:bg-[#A560E8]/20 border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all text-[#A560E8] font-extrabold rounded-xl text-sm hover:bg-[#A560E8]/20';
+  const powerBtn = 'bg-[#FFF4E0] dark:bg-[#FF9600]/20 border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all text-[#FF9600] font-extrabold rounded-xl hover:bg-[#FF9600]/20';
+  const logBtn = 'bg-[#FFE8E8] dark:bg-[#FF4B4B]/20 border-2 border-b-4 border-[#E04343] active:border-b-2 active:translate-y-0.5 transition-all text-[#FF4B4B] font-extrabold rounded-xl hover:bg-[#FF4B4B]/20';
+  const parenBtn = 'bg-stone-100 dark:bg-stone-800 border-2 border-b-4 border-stone-300 dark:border-stone-600 active:border-b-2 active:translate-y-0.5 transition-all text-stone-600 dark:text-stone-300 font-extrabold rounded-xl hover:bg-stone-200 dark:hover:bg-stone-700';
+
   const basicButtons = [
-    { label: 'C', onClick: handleClear, className: 'bg-red-500 hover:bg-red-600 text-white' },
-    { label: '⌫', onClick: handleBackspace, className: 'bg-stone-400 hover:bg-stone-500 text-white' },
-    { label: '%', onClick: () => handleInput('%'), className: 'bg-stone-300 hover:bg-stone-400 dark:bg-stone-600 dark:hover:bg-stone-500' },
-    { label: '÷', onClick: () => handleInput('/'), className: 'bg-violet-500 hover:bg-violet-600 text-white' },
-    { label: '7', onClick: () => handleInput('7'), className: 'bg-white dark:bg-stone-700 hover:bg-stone-100 dark:hover:bg-stone-600 border border-stone-200 dark:border-stone-600' },
-    { label: '8', onClick: () => handleInput('8'), className: 'bg-white dark:bg-stone-700 hover:bg-stone-100 dark:hover:bg-stone-600 border border-stone-200 dark:border-stone-600' },
-    { label: '9', onClick: () => handleInput('9'), className: 'bg-white dark:bg-stone-700 hover:bg-stone-100 dark:hover:bg-stone-600 border border-stone-200 dark:border-stone-600' },
-    { label: '×', onClick: () => handleInput('*'), className: 'bg-violet-500 hover:bg-violet-600 text-white' },
-    { label: '4', onClick: () => handleInput('4'), className: 'bg-white dark:bg-stone-700 hover:bg-stone-100 dark:hover:bg-stone-600 border border-stone-200 dark:border-stone-600' },
-    { label: '5', onClick: () => handleInput('5'), className: 'bg-white dark:bg-stone-700 hover:bg-stone-100 dark:hover:bg-stone-600 border border-stone-200 dark:border-stone-600' },
-    { label: '6', onClick: () => handleInput('6'), className: 'bg-white dark:bg-stone-700 hover:bg-stone-100 dark:hover:bg-stone-600 border border-stone-200 dark:border-stone-600' },
-    { label: '−', onClick: () => handleInput('-'), className: 'bg-violet-500 hover:bg-violet-600 text-white' },
-    { label: '1', onClick: () => handleInput('1'), className: 'bg-white dark:bg-stone-700 hover:bg-stone-100 dark:hover:bg-stone-600 border border-stone-200 dark:border-stone-600' },
-    { label: '2', onClick: () => handleInput('2'), className: 'bg-white dark:bg-stone-700 hover:bg-stone-100 dark:hover:bg-stone-600 border border-stone-200 dark:border-stone-600' },
-    { label: '3', onClick: () => handleInput('3'), className: 'bg-white dark:bg-stone-700 hover:bg-stone-100 dark:hover:bg-stone-600 border border-stone-200 dark:border-stone-600' },
-    { label: '+', onClick: () => handleInput('+'), className: 'bg-violet-500 hover:bg-violet-600 text-white' },
-    { label: '0', onClick: () => handleInput('0'), className: 'bg-white dark:bg-stone-700 hover:bg-stone-100 dark:hover:bg-stone-600 border border-stone-200 dark:border-stone-600 col-span-2' },
-    { label: '.', onClick: () => handleInput('.'), className: 'bg-white dark:bg-stone-700 hover:bg-stone-100 dark:hover:bg-stone-600 border border-stone-200 dark:border-stone-600' },
-    { label: '=', onClick: handleEquals, className: 'bg-emerald-500 hover:bg-emerald-600 text-white' },
+    { label: 'C', onClick: handleClear, className: clearBtn },
+    { label: '⌫', onClick: handleBackspace, className: backBtn },
+    { label: '%', onClick: () => handleInput('%'), className: backBtn },
+    { label: '÷', onClick: () => handleInput('/'), className: opBtn },
+    { label: '7', onClick: () => handleInput('7'), className: numBtn },
+    { label: '8', onClick: () => handleInput('8'), className: numBtn },
+    { label: '9', onClick: () => handleInput('9'), className: numBtn },
+    { label: '×', onClick: () => handleInput('*'), className: opBtn },
+    { label: '4', onClick: () => handleInput('4'), className: numBtn },
+    { label: '5', onClick: () => handleInput('5'), className: numBtn },
+    { label: '6', onClick: () => handleInput('6'), className: numBtn },
+    { label: '−', onClick: () => handleInput('-'), className: opBtn },
+    { label: '1', onClick: () => handleInput('1'), className: numBtn },
+    { label: '2', onClick: () => handleInput('2'), className: numBtn },
+    { label: '3', onClick: () => handleInput('3'), className: numBtn },
+    { label: '+', onClick: () => handleInput('+'), className: opBtn },
+    { label: '0', onClick: () => handleInput('0'), className: `${numBtn} col-span-2` },
+    { label: '.', onClick: () => handleInput('.'), className: numBtn },
+    { label: '=', onClick: handleEquals, className: equalsBtn },
   ];
 
   const scientificButtons = [
-    { label: 'sin', onClick: () => handleFunction('sin'), className: 'bg-violet-100 dark:bg-violet-900/50 hover:bg-violet-200 dark:hover:bg-violet-800 text-violet-800 dark:text-violet-200 text-sm' },
-    { label: 'cos', onClick: () => handleFunction('cos'), className: 'bg-violet-100 dark:bg-violet-900/50 hover:bg-violet-200 dark:hover:bg-violet-800 text-violet-800 dark:text-violet-200 text-sm' },
-    { label: 'tan', onClick: () => handleFunction('tan'), className: 'bg-violet-100 dark:bg-violet-900/50 hover:bg-violet-200 dark:hover:bg-violet-800 text-violet-800 dark:text-violet-200 text-sm' },
-    { label: '(', onClick: () => handleInput('('), className: 'bg-stone-200 dark:bg-stone-600 hover:bg-stone-300 dark:hover:bg-stone-500' },
-    { label: ')', onClick: () => handleInput(')'), className: 'bg-stone-200 dark:bg-stone-600 hover:bg-stone-300 dark:hover:bg-stone-500' },
-    { label: 'asin', onClick: () => handleFunction('asin'), className: 'bg-violet-100 dark:bg-violet-900/50 hover:bg-violet-200 dark:hover:bg-violet-800 text-violet-800 dark:text-violet-200 text-xs' },
-    { label: 'acos', onClick: () => handleFunction('acos'), className: 'bg-violet-100 dark:bg-violet-900/50 hover:bg-violet-200 dark:hover:bg-violet-800 text-violet-800 dark:text-violet-200 text-xs' },
-    { label: 'atan', onClick: () => handleFunction('atan'), className: 'bg-violet-100 dark:bg-violet-900/50 hover:bg-violet-200 dark:hover:bg-violet-800 text-violet-800 dark:text-violet-200 text-xs' },
-    { label: 'x²', onClick: () => handleInput('^2'), className: 'bg-amber-100 dark:bg-amber-900/50 hover:bg-amber-200 dark:hover:bg-amber-800 text-amber-800 dark:text-amber-200' },
-    { label: 'xʸ', onClick: () => handleInput('^'), className: 'bg-amber-100 dark:bg-amber-900/50 hover:bg-amber-200 dark:hover:bg-amber-800 text-amber-800 dark:text-amber-200' },
-    { label: 'ln', onClick: () => handleFunction('ln'), className: 'bg-red-100 dark:bg-red-900/50 hover:bg-red-200 dark:hover:bg-red-800 text-red-800 dark:text-red-200' },
-    { label: 'log', onClick: () => handleFunction('log'), className: 'bg-red-100 dark:bg-red-900/50 hover:bg-red-200 dark:hover:bg-red-800 text-red-800 dark:text-red-200' },
-    { label: '√', onClick: () => handleFunction('sqrt', '√('), className: 'bg-red-100 dark:bg-red-900/50 hover:bg-red-200 dark:hover:bg-red-800 text-red-800 dark:text-red-200' },
-    { label: 'n!', onClick: handleFactorial, className: 'bg-violet-100 dark:bg-violet-900/50 hover:bg-violet-200 dark:hover:bg-violet-800 text-violet-800 dark:text-violet-200' },
-    { label: 'π', onClick: () => handleConstant('π', 'π'), className: 'bg-violet-100 dark:bg-violet-900/50 hover:bg-violet-200 dark:hover:bg-violet-800 text-violet-800 dark:text-violet-200' },
-    { label: 'e', onClick: () => handleConstant('e', 'e'), className: 'bg-violet-100 dark:bg-violet-900/50 hover:bg-violet-200 dark:hover:bg-violet-800 text-violet-800 dark:text-violet-200' },
+    { label: 'sin', onClick: () => handleFunction('sin'), className: trigBtn },
+    { label: 'cos', onClick: () => handleFunction('cos'), className: trigBtn },
+    { label: 'tan', onClick: () => handleFunction('tan'), className: trigBtn },
+    { label: '(', onClick: () => handleInput('('), className: parenBtn },
+    { label: ')', onClick: () => handleInput(')'), className: parenBtn },
+    { label: 'asin', onClick: () => handleFunction('asin'), className: `${trigBtn} text-xs` },
+    { label: 'acos', onClick: () => handleFunction('acos'), className: `${trigBtn} text-xs` },
+    { label: 'atan', onClick: () => handleFunction('atan'), className: `${trigBtn} text-xs` },
+    { label: 'x²', onClick: () => handleInput('^2'), className: powerBtn },
+    { label: 'xʸ', onClick: () => handleInput('^'), className: powerBtn },
+    { label: 'ln', onClick: () => handleFunction('ln'), className: logBtn },
+    { label: 'log', onClick: () => handleFunction('log'), className: logBtn },
+    { label: '√', onClick: () => handleFunction('sqrt', '√('), className: logBtn },
+    { label: 'n!', onClick: handleFactorial, className: trigBtn },
+    { label: 'π', onClick: () => handleConstant('π', 'π'), className: trigBtn },
+    { label: 'e', onClick: () => handleConstant('e', 'e'), className: trigBtn },
   ];
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden">
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
+    <div className="min-h-screen bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="calculator" />
 
       <section className="py-12 sm:py-16">
         <div className="max-w-2xl mx-auto px-4 sm:px-6">
+          {/* Page heading */}
           <div className="text-center mb-8">
-            <span className="inline-flex items-center px-4 py-1.5 bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 rounded-full text-sm font-semibold mb-4">
+            <span className="inline-flex items-center px-4 py-1.5 bg-[#EAFFD6] dark:bg-[#58CC02]/20 text-[#58CC02] border-2 border-[#46A302] rounded-full text-sm font-extrabold uppercase tracking-wide mb-4">
               Free Tool
             </span>
-            <h1 className="text-3xl sm:text-4xl font-bold text-stone-800 dark:text-stone-100 mb-2">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-stone-800 dark:text-stone-100 mb-2 tracking-tight">
               Scientific Calculator
             </h1>
-            <p className="text-stone-500 dark:text-stone-400">
+            <p className="text-stone-500 dark:text-stone-400 font-semibold">
               Trigonometry, logarithms, powers & more. Perfect for math, physics & chemistry.
             </p>
           </div>
 
-          <div className="bg-white dark:bg-stone-800 rounded-3xl shadow-xl border border-stone-200 dark:border-stone-700 overflow-hidden">
+          {/* Calculator card */}
+          <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl overflow-hidden">
             {/* Display */}
-            <div className="p-4 sm:p-6 bg-gradient-to-b from-stone-100 to-stone-50 dark:from-stone-800 dark:to-stone-900 border-b border-stone-200 dark:border-stone-700">
+            <div className="p-4 sm:p-6 border-b-2 border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-medium text-stone-500 dark:text-stone-400">
+                <span className="text-xs font-extrabold uppercase tracking-wide text-stone-400 dark:text-stone-500">
                   {useDegrees ? 'DEG' : 'RAD'}
                 </span>
                 <button
                   onClick={() => setUseDegrees(!useDegrees)}
-                  className="text-xs font-medium px-2 py-1 rounded-lg bg-stone-200 dark:bg-stone-600 hover:bg-stone-300 dark:hover:bg-stone-500 text-stone-700 dark:text-stone-300 transition-colors"
+                  className="text-xs font-extrabold uppercase tracking-wide px-3 py-1.5 rounded-xl border-2 border-b-4 border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 hover:bg-stone-50 dark:hover:bg-stone-700 text-stone-600 dark:text-stone-300 active:border-b-2 active:translate-y-0.5 transition-all"
                 >
                   {useDegrees ? 'Degrees' : 'Radians'}
                 </button>
               </div>
-              <div className="text-right font-mono text-2xl sm:text-3xl min-h-[2.5rem] break-all text-stone-800 dark:text-stone-100">
+              <div className="text-right font-mono text-2xl sm:text-3xl min-h-[2.5rem] break-all text-stone-800 dark:text-stone-100 font-extrabold">
                 {display}
               </div>
               {expression && expression !== display && (
-                <div className="text-right text-sm text-stone-500 dark:text-stone-400 font-mono truncate mt-1">
+                <div className="text-right text-sm text-stone-400 dark:text-stone-500 font-mono truncate mt-1 font-semibold">
                   {expression}
                 </div>
               )}
             </div>
 
             {/* Scientific toggle - mobile */}
-            <div className="sm:hidden px-4 py-2 border-b border-stone-200 dark:border-stone-700">
+            <div className="sm:hidden px-4 py-2 border-b-2 border-stone-200 dark:border-stone-700">
               <button
                 onClick={() => setShowScientific(!showScientific)}
-                className="w-full py-2 text-sm font-medium text-violet-600 dark:text-violet-400"
+                className="w-full py-2 text-sm font-extrabold uppercase tracking-wide text-[#A560E8]"
               >
                 {showScientific ? 'Hide scientific' : 'Show scientific'} ⌄
               </button>
@@ -237,7 +248,7 @@ const CalculatorPage = ({ onNavigate, user, onLogout }: CalculatorPageProps) => 
                     <button
                       key={btn.label}
                       onClick={btn.onClick}
-                      className={`py-3 sm:py-2.5 rounded-xl font-semibold transition-all active:scale-95 ${btn.className}`}
+                      className={`py-3 sm:py-2.5 ${btn.className}`}
                     >
                       {btn.label}
                     </button>
@@ -249,7 +260,7 @@ const CalculatorPage = ({ onNavigate, user, onLogout }: CalculatorPageProps) => 
                   <button
                     key={btn.label}
                     onClick={btn.onClick}
-                    className={`py-4 sm:py-5 rounded-xl font-semibold text-lg transition-all active:scale-95 ${btn.className}`}
+                    className={`py-4 sm:py-5 text-lg ${btn.className}`}
                   >
                     {btn.label}
                   </button>
@@ -258,7 +269,7 @@ const CalculatorPage = ({ onNavigate, user, onLogout }: CalculatorPageProps) => 
             </div>
           </div>
 
-          <p className="text-center text-sm text-stone-500 dark:text-stone-400 mt-6">
+          <p className="text-center text-sm text-stone-400 dark:text-stone-500 mt-6 font-semibold">
             No signup required. Use for homework, exams & study sessions.
           </p>
         </div>

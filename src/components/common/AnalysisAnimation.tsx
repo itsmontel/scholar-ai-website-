@@ -202,7 +202,7 @@ const AnalysisAnimation: React.FC<AnalysisAnimationProps> = ({
                   : variant === 'lesson'
                     ? '💡 Tip: One click = 3 unique lessons! Visual Cards, Step-by-Step, and Story Mode.'
                     : variant === 'studyPack'
-                      ? '💡 Tip: One generation = lesson, flashcards, quiz, crossword & Crater Blast!'
+                      ? '💡 Tip: One generation = lesson, flashcards, quiz, crossword, Crater Blast & Word Tower!'
                       : '💡 Tip: Our AI analyzes structure, grammar, citations, and more!'}
               </p>
             </div>

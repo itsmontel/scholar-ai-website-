@@ -13,13 +13,9 @@ interface LessonSlide {
 interface LessonViewerProps {
   slides: LessonSlide[];
   title?: string;
-  /** When provided, shows an enlarge button to open in full-screen view (e.g. study pack viewer) */
   onEnlarge?: (state?: { slideIndex?: number }) => void;
-  /** Restore position when returning from full screen */
   initialSlideIndex?: number;
-  /** When true and on last slide, shows Try Quiz button to switch to quiz section */
   hasQuiz?: boolean;
-  /** Called when user clicks Try Quiz (e.g. to switch to quiz tab in study pack) */
   onTryQuiz?: () => void;
 }
 
@@ -37,25 +33,34 @@ const getSlideIcon = (type?: LessonSlide['type']) => {
 
 const getSlideColor = (type?: LessonSlide['type']) => {
   switch (type) {
-    case 'intro': return 'bg-violet-600';
-    case 'concept': return 'bg-violet-600';
-    case 'example': return 'bg-amber-600';
-    case 'keypoint': return 'bg-emerald-600';
-    case 'funfact': return 'bg-fuchsia-600';
-    case 'summary': return 'bg-violet-600';
-    default: return 'bg-stone-600';
+    case 'intro': case 'summary': return 'bg-[#A560E8]';
+    case 'concept': return 'bg-[#1CB0F6]';
+    case 'example': return 'bg-[#FF9600]';
+    case 'keypoint': return 'bg-[#58CC02]';
+    case 'funfact': return 'bg-[#FF4B4B]';
+    default: return 'bg-stone-500';
+  }
+};
+
+const getSlideBorderColor = (type?: LessonSlide['type']) => {
+  switch (type) {
+    case 'intro': case 'summary': return 'border-[#8A48C7]';
+    case 'concept': return 'border-[#1899D6]';
+    case 'example': return 'border-[#D97F00]';
+    case 'keypoint': return 'border-[#46A302]';
+    case 'funfact': return 'border-[#E04343]';
+    default: return 'border-stone-400';
   }
 };
 
 const getSlideBackground = (type?: LessonSlide['type']) => {
   switch (type) {
-    case 'intro': return 'bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-700/50';
-    case 'concept': return 'bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-700/50';
-    case 'example': return 'bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50';
-    case 'keypoint': return 'bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700/50';
-    case 'funfact': return 'bg-fuchsia-50 dark:bg-fuchsia-900/20 border border-fuchsia-200 dark:border-fuchsia-700/50';
-    case 'summary': return 'bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-700/50';
-    default: return 'bg-stone-50 dark:bg-stone-800/50 border border-stone-200 dark:border-stone-600';
+    case 'intro': case 'summary': return 'bg-[#F3EAFF] dark:bg-purple-900/10 border-[#A560E8]/25 dark:border-[#A560E8]/30';
+    case 'concept': return 'bg-[#E8F6FF] dark:bg-blue-900/10 border-[#1CB0F6]/25 dark:border-[#1CB0F6]/30';
+    case 'example': return 'bg-[#FFF4E0] dark:bg-orange-900/10 border-[#FF9600]/25 dark:border-[#FF9600]/30';
+    case 'keypoint': return 'bg-[#EAFFD6] dark:bg-green-900/10 border-[#58CC02]/25 dark:border-[#58CC02]/30';
+    case 'funfact': return 'bg-[#FFE8E8] dark:bg-red-900/10 border-[#FF4B4B]/25 dark:border-[#FF4B4B]/30';
+    default: return 'bg-stone-50 dark:bg-stone-800/50 border-stone-200 dark:border-stone-600';
   }
 };
 
@@ -84,20 +89,20 @@ const LessonViewer = ({ slides, title, onEnlarge, initialSlideIndex, hasQuiz, on
   const slide = slides[currentSlide];
 
   return (
-    <div className="p-4 flex flex-col min-h-0">
-      {/* Header with title and enlarge */}
+    <div className="p-4 flex flex-col min-h-0" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+      {/* Header */}
       <div className="flex items-center justify-between mb-4 flex-shrink-0">
-        <span className="text-sm font-medium text-stone-500 dark:text-stone-400">
+        <span className="text-sm font-extrabold text-stone-500 dark:text-stone-400 uppercase tracking-wide">
           {currentSlide + 1} / {slides.length}
         </span>
         {onEnlarge && (
           <button
             onClick={() => onEnlarge?.({ slideIndex: currentSlide })}
-            className="text-xs px-3 py-1.5 rounded-lg bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400 hover:bg-violet-200 dark:hover:bg-violet-800/60 transition-colors flex items-center gap-1.5"
+            className="text-xs px-3.5 py-2 rounded-xl bg-[#1CB0F6] text-white font-bold uppercase tracking-wide border-2 border-b-4 border-[#1899D6] active:border-b-2 active:translate-y-0.5 transition-all flex items-center gap-1.5"
           >
-            <span>Open full screen</span>
+            <span>Full Screen</span>
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
             </svg>
           </button>
         )}
@@ -105,9 +110,9 @@ const LessonViewer = ({ slides, title, onEnlarge, initialSlideIndex, hasQuiz, on
 
       {/* Progress bar */}
       <div className="mb-4">
-        <div className="h-2 bg-stone-200 dark:bg-stone-700 rounded-full overflow-hidden">
+        <div className="h-3 bg-stone-200 dark:bg-stone-700 rounded-full overflow-hidden">
           <div
-            className="h-full bg-violet-600 hover:bg-violet-500 rounded-full transition-all duration-300"
+            className="h-full bg-[#58CC02] rounded-r-full transition-all duration-300"
             style={{ width: `${((currentSlide + 1) / slides.length) * 100}%` }}
           />
         </div>
@@ -121,9 +126,9 @@ const LessonViewer = ({ slides, title, onEnlarge, initialSlideIndex, hasQuiz, on
             onClick={() => setCurrentSlide(index)}
             className={`w-3 h-3 rounded-full transition-all ${
               index === currentSlide
-                ? `${getSlideColor(s.type)} scale-125 shadow-lg`
+                ? `${getSlideColor(s.type)} scale-125 shadow-md`
                 : index < currentSlide
-                  ? 'bg-violet-300 dark:bg-violet-600'
+                  ? 'bg-[#58CC02]'
                   : 'bg-stone-300 dark:bg-stone-600 hover:bg-stone-400 dark:hover:bg-stone-500'
             }`}
             title={`Slide ${index + 1}: ${s.title}`}
@@ -131,17 +136,17 @@ const LessonViewer = ({ slides, title, onEnlarge, initialSlideIndex, hasQuiz, on
         ))}
       </div>
 
-      {/* Current slide content */}
-      <div className={`flex-1 rounded-2xl p-4 sm:p-6 shadow-lg border min-w-0 overflow-auto bg-gradient-to-br ${getSlideBackground(slide.type)} border`}>
+      {/* Slide content */}
+      <div className={`flex-1 rounded-2xl p-4 sm:p-6 min-w-0 overflow-auto border-2 border-b-4 ${getSlideBackground(slide.type)}`}>
         <div className="flex items-start gap-4 mb-4">
-          <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${getSlideColor(slide.type)} flex items-center justify-center shadow-lg text-xl flex-shrink-0`}>
+          <div className={`w-12 h-12 rounded-xl ${getSlideColor(slide.type)} border-2 border-b-4 ${getSlideBorderColor(slide.type)} flex items-center justify-center text-xl flex-shrink-0`}>
             {slide.emoji || getSlideIcon(slide.type)}
           </div>
           <div className="flex-1 min-w-0">
-            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${getSlideColor(slide.type)} text-white`}>
+            <span className={`inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider text-white ${getSlideColor(slide.type)} border-b-2 ${getSlideBorderColor(slide.type)}`}>
               {slide.type || 'slide'}
             </span>
-            <h3 className="text-lg sm:text-xl font-bold text-stone-800 dark:text-stone-100 mt-2">
+            <h3 className="text-lg sm:text-xl font-extrabold text-stone-800 dark:text-stone-100 mt-2">
               {slide.title}
             </h3>
           </div>
@@ -152,12 +157,12 @@ const LessonViewer = ({ slides, title, onEnlarge, initialSlideIndex, hasQuiz, on
         </p>
 
         {slide.highlightedTerm && (
-          <div className="mb-4 p-3 rounded-xl border bg-white/50 dark:bg-stone-800/50 border-stone-200 dark:border-stone-600">
+          <div className="mb-4 p-3 rounded-xl border-2 border-b-4 border-[#FF9600]/30 bg-[#FFF4E0] dark:bg-orange-900/10">
             <div className="flex items-center gap-2 mb-1">
               <span className="text-sm">🔑</span>
-              <span className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400">Key Term</span>
+              <span className="text-xs font-extrabold uppercase tracking-wider text-[#FF9600]">Key Term</span>
             </div>
-            <p className="text-stone-800 dark:text-stone-200 font-semibold">{slide.highlightedTerm}</p>
+            <p className="text-stone-800 dark:text-stone-200 font-bold">{slide.highlightedTerm}</p>
           </div>
         )}
 
@@ -170,23 +175,23 @@ const LessonViewer = ({ slides, title, onEnlarge, initialSlideIndex, hasQuiz, on
                 <button
                   key={idx}
                   onClick={() => toggleReveal(itemId)}
-                  className={`w-full text-left p-3 rounded-xl border transition-all ${
+                  className={`w-full text-left p-3 rounded-xl border-2 border-b-4 transition-all active:border-b-2 active:translate-y-0.5 ${
                     isRevealed
-                      ? 'bg-white dark:bg-stone-800 border-violet-300 dark:border-violet-600 shadow'
-                      : 'bg-stone-100/50 dark:bg-stone-700/50 border-stone-200 dark:border-stone-600 hover:bg-stone-100 dark:hover:bg-stone-700'
+                      ? 'bg-[#EAFFD6] dark:bg-green-900/10 border-[#58CC02]/40'
+                      : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-600 hover:border-stone-300 dark:hover:border-stone-500'
                   }`}
                 >
                   <div className="flex items-start gap-2">
-                    <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-xs ${
-                      isRevealed ? 'bg-violet-500 text-white' : 'bg-stone-300 dark:bg-stone-600 text-stone-600 dark:text-stone-300'
+                    <div className={`w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-bold ${
+                      isRevealed ? 'bg-[#58CC02] text-white' : 'bg-stone-200 dark:bg-stone-600 text-stone-600 dark:text-stone-300'
                     }`}>
                       {isRevealed ? '✓' : idx + 1}
                     </div>
                     <div className="flex-1">
                       {isRevealed ? (
-                        <p className="text-stone-700 dark:text-stone-300 text-sm">{point}</p>
+                        <p className="text-stone-700 dark:text-stone-300 text-sm font-medium">{point}</p>
                       ) : (
-                        <p className="text-stone-400 dark:text-stone-500 italic text-sm">Click to reveal...</p>
+                        <p className="text-stone-400 dark:text-stone-500 italic text-sm">Tap to reveal...</p>
                       )}
                     </div>
                   </div>
@@ -202,10 +207,10 @@ const LessonViewer = ({ slides, title, onEnlarge, initialSlideIndex, hasQuiz, on
         <button
           onClick={() => setCurrentSlide(Math.max(0, currentSlide - 1))}
           disabled={currentSlide === 0}
-          className={`px-4 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 ${
+          className={`px-5 py-2.5 rounded-xl font-bold text-sm uppercase tracking-wide transition-all flex items-center gap-2 ${
             currentSlide === 0
-              ? 'bg-stone-100 dark:bg-stone-800 text-stone-400 cursor-not-allowed'
-              : 'bg-white dark:bg-stone-700 text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-600 border border-stone-200 dark:border-stone-600'
+              ? 'bg-stone-100 dark:bg-stone-800 text-stone-400 border-2 border-stone-200 dark:border-stone-700 cursor-not-allowed'
+              : 'bg-white dark:bg-stone-700 text-stone-700 dark:text-stone-200 border-2 border-b-4 border-stone-300 dark:border-stone-500 hover:bg-stone-50 dark:hover:bg-stone-600 active:border-b-2 active:translate-y-0.5'
           }`}
         >
           <span>←</span> Previous
@@ -213,7 +218,7 @@ const LessonViewer = ({ slides, title, onEnlarge, initialSlideIndex, hasQuiz, on
         {currentSlide === slides.length - 1 && hasQuiz && onTryQuiz ? (
           <button
             onClick={onTryQuiz}
-            className="px-4 py-2.5 rounded-xl font-semibold text-sm bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-500/25 transition-all flex items-center gap-2"
+            className="px-5 py-2.5 rounded-xl font-bold text-sm uppercase tracking-wide bg-[#1CB0F6] text-white border-2 border-b-4 border-[#1899D6] active:border-b-2 active:translate-y-0.5 transition-all flex items-center gap-2"
           >
             <span>Try Quiz</span>
             <span>🎯</span>
@@ -222,10 +227,10 @@ const LessonViewer = ({ slides, title, onEnlarge, initialSlideIndex, hasQuiz, on
           <button
             onClick={() => setCurrentSlide(Math.min(slides.length - 1, currentSlide + 1))}
             disabled={currentSlide === slides.length - 1}
-            className={`px-4 py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center gap-2 ${
+            className={`px-5 py-2.5 rounded-xl font-bold text-sm uppercase tracking-wide transition-all flex items-center gap-2 ${
               currentSlide === slides.length - 1
-                ? 'bg-stone-100 dark:bg-stone-800 text-stone-400 cursor-not-allowed'
-                : 'bg-amber-600 hover:bg-amber-500 text-white shadow-lg shadow-amber-500/25'
+                ? 'bg-stone-100 dark:bg-stone-800 text-stone-400 border-2 border-stone-200 dark:border-stone-700 cursor-not-allowed'
+                : 'bg-[#58CC02] text-white border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5'
             }`}
           >
             Next <span>→</span>

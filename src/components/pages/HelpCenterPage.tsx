@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Header from '../common/Header';
 import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
-import ScholarMascot from '../common/ScholarMascot';
+
 
 interface FAQPageProps {
   onNavigate?: (page: string) => void;
@@ -178,28 +178,28 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
       description: 'Upload a document or paste text to get AI-powered feedback',
       action: () => onNavigate?.('dashboard'),
       color: 'lime',
-      icon: <ScholarMascot size={56} animated={false} pose="pointing" />
+      icon: <img src="/mascot-paper.gif" alt="" className="w-14 h-14 object-contain" />
     },
     {
       title: 'View Analysis History',
       description: 'Access all your saved analyses and results',
       action: () => onNavigate?.('analysis-history'),
       color: 'lime',
-      icon: <ScholarMascot size={56} animated={false} pose="studying" />
+      icon: <img src="/mascot-study.gif" alt="" className="w-14 h-14 object-contain" />
     },
     {
       title: 'Upload Documents',
       description: 'Upload PDF, DOC, DOCX, or TXT files for analysis',
       action: () => onNavigate?.('dashboard'),
       color: 'lime',
-      icon: <ScholarMascot size={56} animated={false} pose="celebrating" />
+      icon: <img src="/mascot-laptop.gif" alt="" className="w-14 h-14 object-contain" />
     },
     {
       title: 'Contact Support',
       description: 'Get help from our expert team',
       action: () => onNavigate?.('contact'),
       color: 'lime',
-      icon: <ScholarMascot size={56} animated={false} pose="waving" />
+      icon: <img src="/mascot-celebrating.gif" alt="" className="w-14 h-14 object-contain" />
     }
   ];
 
@@ -273,18 +273,18 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden">
+    <div className="relative min-h-screen overflow-x-hidden" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="help" />
 
       {/* Hero Section */}
-      <section className="py-16 sm:py-20 border-b border-stone-100 dark:border-stone-800 bg-gradient-to-br from-violet-50/50 via-white dark:via-stone-900 to-stone-50 dark:to-stone-900 relative z-10">
+      <section className="py-16 sm:py-20 bg-stone-50 dark:bg-stone-950 relative z-10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto">
-            <span className="inline-flex items-center px-3 py-1 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 rounded-full text-sm font-medium mb-6">
+            <span className="inline-flex items-center px-3 py-1.5 bg-[#DDF4FF] text-[#1CB0F6] rounded-xl text-xs font-extrabold uppercase tracking-wider mb-6 border-2 border-b-4 border-[#1CB0F6]/30">
               Help Center
             </span>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl text-stone-800 dark:text-stone-100 mb-6 leading-tight" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-6 leading-tight">
               How can we help you?
             </h1>
             <p className="text-lg text-stone-500 dark:text-stone-400 leading-relaxed mb-8">
@@ -302,7 +302,7 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
                   placeholder="Search help topics..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-6 py-4 text-base border border-stone-200 dark:border-stone-600 rounded-2xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white dark:bg-stone-800 shadow-sm transition-all text-stone-800 dark:text-stone-100"
+                  className="w-full pl-12 pr-6 py-4 text-base border-2 border-b-4 border-stone-200 dark:border-stone-700 rounded-2xl focus:border-[#1CB0F6] dark:focus:border-[#1CB0F6] bg-white dark:bg-stone-800 transition-all text-stone-800 dark:text-stone-100 outline-none font-bold"
                 />
               </div>
             </div>
@@ -311,20 +311,20 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
       </section>
 
       {/* Quick Actions */}
-      <section className="py-12 sm:py-16 bg-stone-50 dark:bg-stone-900/50 relative z-10">
+      <section className="py-12 sm:py-16 bg-white dark:bg-stone-900 relative z-10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-6 text-center">Quick Actions</h2>
+          <h2 className="text-xl font-extrabold text-stone-800 dark:text-stone-100 mb-6 text-center">Quick Actions</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {quickActions.map((action, index) => (
               <button
                 key={index}
                 onClick={action.action}
-                className="p-6 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl hover:shadow-lg hover:border-violet-300 dark:hover:border-violet-700 transition-all text-left group"
+                className="p-6 bg-white dark:bg-stone-800 border-2 border-b-4 border-stone-200 dark:border-stone-700 rounded-2xl hover:border-stone-300 dark:hover:border-stone-600 active:border-b-2 active:translate-y-0.5 transition-all text-left group"
               >
-                <div className="w-14 h-14 rounded-2xl mb-4 flex items-center justify-center overflow-hidden bg-violet-50/50 dark:bg-violet-900/20">
+                <div className="w-14 h-14 rounded-xl mb-4 flex items-center justify-center overflow-hidden bg-[#DDF4FF] dark:bg-blue-900/20">
                   {action.icon}
                 </div>
-                <h4 className="font-semibold text-stone-800 dark:text-stone-100 mb-1 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">{action.title}</h4>
+                <h4 className="font-extrabold text-stone-800 dark:text-stone-100 mb-1 group-hover:text-[#1CB0F6] transition-colors">{action.title}</h4>
                 <p className="text-stone-500 dark:text-stone-400 text-sm">{action.description}</p>
               </button>
             ))}
@@ -338,8 +338,8 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
           <div className="grid lg:grid-cols-4 gap-8">
             {/* Categories Sidebar */}
             <div className="lg:col-span-1">
-              <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-5 sticky top-24">
-                <h3 className="font-semibold text-stone-900 dark:text-stone-100 mb-4">Browse by Category</h3>
+              <div className="bg-white dark:bg-stone-800 border-2 border-b-4 border-stone-200 dark:border-stone-700 rounded-2xl p-5 sticky top-24">
+                <h3 className="font-extrabold text-stone-900 dark:text-stone-100 mb-4">Browse by Category</h3>
                 <div className="space-y-1">
                   {categories.map((category) => (
                     <button
@@ -347,7 +347,7 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
                       onClick={() => setSelectedCategory(category.id)}
                       className={`w-full flex items-center justify-between p-3 rounded-xl text-left transition-all ${
                         selectedCategory === category.id
-                          ? 'bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400'
+                          ? 'bg-[#DDF4FF] dark:bg-blue-900/20 text-[#1CB0F6]'
                           : 'hover:bg-stone-50 dark:hover:bg-stone-700/50 text-stone-600 dark:text-stone-400'
                       }`}
                     >
@@ -357,7 +357,7 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
                       </div>
                       <span className={`text-xs px-2 py-0.5 rounded-full ${
                         selectedCategory === category.id
-                          ? 'bg-violet-100 dark:bg-violet-900/50 text-violet-600 dark:text-violet-400'
+                          ? 'bg-[#1CB0F6]/20 text-[#1CB0F6]'
                           : 'bg-stone-100 dark:bg-stone-700 text-stone-400 dark:text-stone-500'
                       }`}>
                         {category.count}
@@ -367,7 +367,7 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
                 </div>
 
                 {/* Contact Support Card */}
-                <div className="mt-6 p-5 bg-violet-600 hover:bg-violet-500 rounded-xl">
+                <div className="mt-6 p-5 bg-[#1CB0F6] rounded-xl border-2 border-b-4 border-[#1899D6]">
                   <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-3">
                     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -377,7 +377,7 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
                   <p className="text-white/90 text-sm mb-4">Our support team is here to assist you.</p>
                   <button 
                     onClick={() => onNavigate?.('contact')}
-                    className="w-full bg-white text-violet-600 dark:text-violet-400 py-2.5 rounded-xl text-sm font-medium hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                    className="w-full bg-white text-[#1CB0F6] py-2.5 rounded-xl text-sm font-extrabold border-2 border-b-4 border-stone-200 active:border-b-2 active:translate-y-0.5 transition-all"
                   >
                     Contact Support
                   </button>
@@ -389,7 +389,7 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
             <div className="lg:col-span-3">
               {/* Results Header */}
               <div className="mb-6">
-                <h2 className="text-2xl font-bold text-stone-900 mb-2">
+                <h2 className="text-2xl font-extrabold text-stone-900 dark:text-stone-100 mb-2">
                   {selectedCategory === 'all' ? 'Frequently Asked Questions' : categories.find(c => c.id === selectedCategory)?.name}
                 </h2>
                 <p className="text-stone-500">
@@ -400,9 +400,9 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
 
               {/* FAQ List */}
               {filteredFAQs.length === 0 ? (
-                <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-12 text-center">
-                  <div className="w-16 h-16 bg-violet-100 dark:bg-violet-900/50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="bg-white dark:bg-stone-800 border-2 border-b-4 border-stone-200 dark:border-stone-700 rounded-2xl p-12 text-center">
+                  <div className="w-16 h-16 bg-[#DDF4FF] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-[#1CB0F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                   </div>
@@ -410,7 +410,7 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
                   <p className="text-stone-500 dark:text-stone-400 mb-6">Try adjusting your search terms or browse a different category</p>
                   <button 
                     onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}
-                    className="bg-violet-600 hover:bg-violet-500 text-white px-6 py-3 rounded-xl font-medium hover:bg-violet-500 transition-colors"
+                    className="bg-[#1CB0F6] text-white px-6 py-3 rounded-xl font-extrabold border-2 border-b-4 border-[#1899D6] active:border-b-2 active:translate-y-0.5 transition-all uppercase tracking-wide"
                   >
                     Clear Filters
                   </button>
@@ -418,14 +418,14 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
               ) : (
                 <div className="space-y-3">
                   {filteredFAQs.map((faq) => (
-                    <div key={faq.id} className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl overflow-hidden hover:border-violet-300 dark:hover:border-violet-700 transition-all">
+                    <div key={faq.id} className="bg-white dark:bg-stone-800 border-2 border-b-4 border-stone-200 dark:border-stone-700 rounded-2xl overflow-hidden hover:border-stone-300 dark:hover:border-stone-600 transition-all">
                       <button
                         onClick={() => toggleFAQ(faq.id)}
                         className="w-full p-6 text-left hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors"
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex-1 pr-4">
-                            <h3 className="font-semibold text-stone-900 text-base mb-2">{faq.question}</h3>
+                            <h3 className="font-extrabold text-stone-900 dark:text-stone-100 text-base mb-2">{faq.question}</h3>
                             {/* Tags */}
                             <div className="flex flex-wrap gap-2">
                               {faq.tags.map((tag, index) => (
@@ -435,8 +435,8 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
                               ))}
                             </div>
                           </div>
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${
-                            openFAQ === faq.id ? 'bg-violet-100 dark:bg-violet-900/50 text-violet-600 dark:text-violet-400' : 'bg-stone-100 dark:bg-stone-700 text-stone-400 dark:text-stone-500'
+                          <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 transition-all ${
+                            openFAQ === faq.id ? 'bg-[#1CB0F6]/20 text-[#1CB0F6]' : 'bg-stone-100 dark:bg-stone-700 text-stone-400 dark:text-stone-500'
                           }`}>
                             <svg 
                               className={`w-4 h-4 transform transition-transform ${
@@ -469,19 +469,19 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 sm:py-20 bg-stone-800">
+      <section className="py-16 sm:py-20 bg-stone-50 dark:bg-stone-950 relative z-10">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <h2 className="text-2xl sm:text-3xl text-white mb-4" style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 400 }}>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">
             Ready to improve your writing?
           </h2>
-          <p className="text-stone-400 mb-8 max-w-xl mx-auto">
+          <p className="text-stone-500 dark:text-stone-400 mb-8 max-w-xl mx-auto">
             Join thousands of students and researchers who trust WriteScholar for academic excellence.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             {user ? (
               <button 
                 onClick={() => onNavigate?.('dashboard')}
-                className="px-6 py-3 bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-full hover:bg-violet-500 transition-colors"
+                className="px-6 py-3 bg-[#58CC02] text-white font-extrabold rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all uppercase tracking-wide"
               >
                 Go to Dashboard
               </button>
@@ -489,13 +489,13 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
               <>
                 <button 
                   onClick={() => onNavigate?.('signup')}
-                  className="px-6 py-3 bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-full hover:bg-violet-500 transition-colors"
+                  className="px-6 py-3 bg-[#58CC02] text-white font-extrabold rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all uppercase tracking-wide"
                 >
                   Try Free
                 </button>
                 <button 
                   onClick={() => onNavigate?.('pricing')}
-                  className="px-6 py-3 border border-stone-600 text-white font-medium rounded-full hover:border-stone-500 transition-colors"
+                  className="px-6 py-3 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-200 font-extrabold rounded-xl border-2 border-b-4 border-stone-200 dark:border-stone-700 active:border-b-2 active:translate-y-0.5 transition-all"
                 >
                   View Pricing
                 </button>

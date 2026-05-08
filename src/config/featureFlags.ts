@@ -5,5 +5,5 @@
  * SKIP_ONBOARDING_STRIPE: After profile setup, finish onboarding without embedded Stripe (upgrade via billing / paywall)
  */
 export const HIDE_FRIENDS = true;
-export const HIDE_STREAK_AND_BADGES = true;
+export const HIDE_STREAK_AND_BADGES = false;
 export const SKIP_ONBOARDING_STRIPE = true;

@@ -4,22 +4,22 @@ import type { DemoAnnotation, DemoPaper } from '../../data/landingPageDemoAnalys
 
 const highlightClasses = {
   strong:
-    'bg-emerald-100 dark:bg-emerald-950 text-emerald-950 dark:text-emerald-100 rounded px-0.5 py-px shadow-[inset_0_-1px_0_0_rgba(5,150,105,0.25)] dark:shadow-[inset_0_-1px_0_0_rgba(52,211,153,0.2)] ring-1 ring-emerald-500/25 dark:ring-emerald-400/25',
+    'bg-[#E5F8D0] dark:bg-[#58CC02]/20 text-[#3C3C3C] dark:text-white rounded px-0.5 py-px border-b-2 border-[#58CC02]',
   improve:
-    'bg-amber-100 dark:bg-amber-950 text-amber-950 dark:text-amber-100 rounded px-0.5 py-px shadow-[inset_0_-1px_0_0_rgba(217,119,6,0.22)] dark:shadow-[inset_0_-1px_0_0_rgba(251,191,36,0.15)] ring-1 ring-amber-500/30 dark:ring-amber-400/25',
+    'bg-[#FFF4E0] dark:bg-[#FF9600]/20 text-[#3C3C3C] dark:text-white rounded px-0.5 py-px border-b-2 border-[#FF9600]',
   concern:
-    'bg-rose-100 dark:bg-rose-950 text-rose-950 dark:text-rose-100 rounded px-0.5 py-px shadow-[inset_0_-1px_0_0_rgba(225,29,72,0.2)] dark:shadow-[inset_0_-1px_0_0_rgba(251,113,133,0.15)] ring-1 ring-rose-500/30 dark:ring-rose-400/25',
+    'bg-[#FFE8E8] dark:bg-[#FF4B4B]/20 text-[#3C3C3C] dark:text-white rounded px-0.5 py-px border-b-2 border-[#FF4B4B]',
 } as const;
 
 const hoverRing = {
-  strong: 'hover:ring-2 hover:ring-emerald-400/60 dark:hover:ring-emerald-500/50',
-  improve: 'hover:ring-2 hover:ring-amber-400/60 dark:hover:ring-amber-500/50',
-  concern: 'hover:ring-2 hover:ring-rose-400/60 dark:hover:ring-rose-500/50',
+  strong: 'hover:ring-2 hover:ring-[#58CC02]/60',
+  improve: 'hover:ring-2 hover:ring-[#FF9600]/60',
+  concern: 'hover:ring-2 hover:ring-[#FF4B4B]/60',
 } as const;
 
 /** Matches InteractiveDocumentAnalysis revision marks (purple until revert). */
 const REVISION_MARK_CLASS =
-  'bg-violet-200/95 dark:bg-violet-900/50 text-violet-950 dark:text-violet-50 px-0.5 rounded-sm ring-2 ring-violet-500/80 dark:ring-violet-400/60 shadow-sm ring-offset-1 ring-offset-white dark:ring-offset-stone-900 [box-decoration-break:clone]';
+  'bg-[#F3EAFF] dark:bg-[#A560E8]/30 text-[#3C3C3C] dark:text-white px-0.5 rounded-sm ring-2 ring-[#A560E8] dark:ring-[#A560E8]/60 ring-offset-1 ring-offset-white dark:ring-offset-[#3C3C3C] [box-decoration-break:clone]';
 
 function buildExcerpt(paper: DemoPaper, maxChars: number) {
   const full = paper.content;
@@ -72,36 +72,36 @@ const TOOLTIP_VARIANT: Record<
 > = {
   strong: {
     label: 'Strong point',
-    accent: 'border-l-emerald-500',
+    accent: 'border-l-[#58CC02]',
     header:
-      'bg-gradient-to-r from-emerald-600 via-emerald-600 to-teal-600 text-white border-b border-emerald-700/30',
-    quote: 'bg-emerald-50 dark:bg-emerald-950 text-emerald-950 dark:text-emerald-100 border border-emerald-200 dark:border-emerald-800',
-    sectionLabel: 'text-emerald-800 dark:text-emerald-400',
+      'bg-[#58CC02] text-white border-b-2 border-[#46A302]',
+    quote: 'bg-[#E5F8D0] dark:bg-[#58CC02]/15 text-[#3C3C3C] dark:text-white border-2 border-[#58CC02]/30 dark:border-[#46A302]',
+    sectionLabel: 'text-[#58CC02] dark:text-[#58CC02]',
     suggestionBox:
-      'bg-stone-50 dark:bg-stone-900 border border-emerald-200 dark:border-emerald-800 shadow-sm',
-    suggestionLabel: 'text-emerald-700 dark:text-emerald-400',
+      'bg-white dark:bg-stone-900 border-2 border-[#58CC02]/30 dark:border-[#46A302]',
+    suggestionLabel: 'text-[#58CC02] dark:text-[#58CC02]',
   },
   improve: {
     label: 'Area to improve',
-    accent: 'border-l-amber-500',
+    accent: 'border-l-[#FF9600]',
     header:
-      'bg-gradient-to-r from-amber-600 via-amber-600 to-orange-600 text-white border-b border-amber-900/20',
-    quote: 'bg-amber-50 dark:bg-amber-950 text-amber-950 dark:text-amber-50 border border-amber-200 dark:border-amber-800',
-    sectionLabel: 'text-amber-900 dark:text-amber-400',
+      'bg-[#FF9600] text-white border-b-2 border-[#D97F00]',
+    quote: 'bg-[#FFF4E0] dark:bg-[#FF9600]/15 text-[#3C3C3C] dark:text-white border-2 border-[#FF9600]/30 dark:border-[#D97F00]',
+    sectionLabel: 'text-[#FF9600] dark:text-[#FF9600]',
     suggestionBox:
-      'bg-stone-50 dark:bg-stone-900 border border-amber-200 dark:border-amber-800 shadow-sm',
-    suggestionLabel: 'text-amber-800 dark:text-amber-400',
+      'bg-white dark:bg-stone-900 border-2 border-[#FF9600]/30 dark:border-[#D97F00]',
+    suggestionLabel: 'text-[#FF9600] dark:text-[#FF9600]',
   },
   concern: {
     label: 'Needs attention',
-    accent: 'border-l-rose-500',
+    accent: 'border-l-[#FF4B4B]',
     header:
-      'bg-gradient-to-r from-rose-600 via-rose-600 to-red-600 text-white border-b border-rose-900/25',
-    quote: 'bg-rose-50 dark:bg-rose-950 text-rose-950 dark:text-rose-50 border border-rose-200 dark:border-rose-800',
-    sectionLabel: 'text-rose-900 dark:text-rose-400',
+      'bg-[#FF4B4B] text-white border-b-2 border-[#E04343]',
+    quote: 'bg-[#FFE8E8] dark:bg-[#FF4B4B]/15 text-[#3C3C3C] dark:text-white border-2 border-[#FF4B4B]/30 dark:border-[#E04343]',
+    sectionLabel: 'text-[#FF4B4B] dark:text-[#FF4B4B]',
     suggestionBox:
-      'bg-stone-50 dark:bg-stone-900 border border-rose-200 dark:border-rose-800 shadow-sm',
-    suggestionLabel: 'text-rose-800 dark:text-rose-400',
+      'bg-white dark:bg-stone-900 border-2 border-[#FF4B4B]/30 dark:border-[#E04343]',
+    suggestionLabel: 'text-[#FF4B4B] dark:text-[#FF4B4B]',
   },
 };
 
@@ -162,12 +162,10 @@ function AnnotationTooltipPortal({
     <div
       role="tooltip"
       className={`
-        fixed z-[300] w-[min(300px,calc(100vw-1.25rem))] overflow-hidden rounded-xl pointer-events-none
-        border-y border-r border-stone-200 dark:border-stone-600 border-l-[4px]
-        bg-white dark:bg-stone-950
-        text-stone-900 dark:text-stone-100
-        shadow-[0_18px_40px_-10px_rgba(91,33,182,0.2),0_8px_16px_-6px_rgba(0,0,0,0.12)]
-        dark:shadow-[0_22px_44px_-10px_rgba(0,0,0,0.7)]
+        fixed z-[300] w-[min(300px,calc(100vw-1.25rem))] overflow-hidden rounded-2xl pointer-events-none
+        border-2 border-b-4 border-[#E5E5E5] dark:border-stone-600 border-l-[4px]
+        bg-white dark:bg-[#3C3C3C]
+        text-[#3C3C3C] dark:text-stone-100
         animate-in fade-in zoom-in-95 duration-150
         ${v.accent}
       `}
@@ -177,17 +175,17 @@ function AnnotationTooltipPortal({
         transform: 'translateY(calc(-100% - 10px))',
       }}
     >
-      <div className={`flex items-center gap-2 px-2.5 py-2 ${v.header}`}>
+      <div className={`flex items-center gap-2 px-2.5 py-2 rounded-t-xl ${v.header}`}>
         <TooltipHeaderIcon type={annotation.type} />
-        <span className="text-[11px] font-bold tracking-tight">{v.label}</span>
-        <span className="ml-auto rounded-full bg-white/25 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-white">
+        <span className="text-[11px] font-extrabold tracking-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>{v.label}</span>
+        <span className="ml-auto rounded-full bg-white/25 px-1.5 py-0.5 text-[8px] font-extrabold uppercase tracking-wider text-white">
           Live
         </span>
       </div>
 
       <div className="p-2.5 space-y-2">
         <div>
-          <p className={`text-[8px] font-bold uppercase tracking-widest mb-1 ${v.sectionLabel}`}>Highlighted text</p>
+          <p className={`text-[8px] font-extrabold uppercase tracking-widest mb-1 ${v.sectionLabel}`}>Highlighted text</p>
           <p
             className={`text-[10px] leading-snug italic rounded-md px-2 py-2 line-clamp-4 ${v.quote}`}
           >
@@ -196,13 +194,13 @@ function AnnotationTooltipPortal({
         </div>
 
         <div>
-          <p className={`text-[8px] font-bold uppercase tracking-widest mb-0.5 ${v.sectionLabel}`}>Feedback</p>
-          <p className="text-[11px] font-medium leading-snug text-stone-800 dark:text-stone-200">{annotation.comment}</p>
+          <p className={`text-[8px] font-extrabold uppercase tracking-widest mb-0.5 ${v.sectionLabel}`}>Feedback</p>
+          <p className="text-[11px] font-extrabold leading-snug text-[#3C3C3C] dark:text-stone-200">{annotation.comment}</p>
         </div>
 
-        <div className={`rounded-lg px-2 py-2 ${v.suggestionBox}`}>
-          <p className={`text-[8px] font-bold uppercase tracking-widest mb-0.5 flex items-center gap-1.5 ${v.suggestionLabel}`}>
-            <span className="inline-flex h-0.5 w-6 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500" aria-hidden />
+        <div className={`rounded-xl px-2 py-2 ${v.suggestionBox}`}>
+          <p className={`text-[8px] font-extrabold uppercase tracking-widest mb-0.5 flex items-center gap-1.5 ${v.suggestionLabel}`}>
+            <span className="inline-flex h-0.5 w-6 rounded-full bg-[#A560E8]" aria-hidden />
             Suggested revision
           </p>
           <p className="text-[10px] leading-snug text-stone-700 dark:text-stone-300">
@@ -217,34 +215,30 @@ function AnnotationTooltipPortal({
 
 const variantStyles = {
   before: {
-    outerShadow:
-      'group-hover/preview:shadow-[0_22px_44px_-14px_rgba(124,58,237,0.26)] dark:group-hover/preview:shadow-[0_24px_48px_-12px_rgba(0,0,0,0.72)]',
-    cardRing: 'ring-violet-200/90 dark:ring-violet-800/55',
-    cardShadow:
-      'shadow-[0_14px_32px_-12px_rgba(91,33,182,0.14),0_0_0_1px_rgba(139,92,246,0.08)] dark:shadow-[0_18px_40px_-12px_rgba(0,0,0,0.55)]',
-    chromeBar: 'border-violet-200/90 dark:border-violet-800/55 bg-violet-50/90 dark:bg-violet-950/40',
-    docIcon: 'text-violet-600 dark:text-violet-400',
-    scoreBadge: 'bg-gradient-to-br from-violet-600 to-violet-500',
-    paperAccent: 'bg-violet-300/90 dark:bg-violet-600',
-    legendIcon: 'text-violet-600 dark:text-violet-400',
-    ctaBar: 'text-violet-950 dark:text-violet-100 bg-violet-100 dark:bg-violet-950 border-violet-200 dark:border-violet-800 hover:bg-violet-200/90 dark:hover:bg-violet-900',
-    ctaIcon: 'text-violet-600 dark:text-violet-400',
-    activeRing: 'ring-violet-500/70',
+    outerShadow: '',
+    cardRing: 'ring-[#E5E5E5] dark:ring-stone-700',
+    cardShadow: '',
+    chromeBar: 'border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-[#3C3C3C]',
+    docIcon: 'text-[#1CB0F6] dark:text-[#1CB0F6]',
+    scoreBadge: 'bg-[#A560E8]',
+    paperAccent: 'bg-[#1CB0F6]/60 dark:bg-[#1CB0F6]',
+    legendIcon: 'text-[#1CB0F6] dark:text-[#1CB0F6]',
+    ctaBar: 'text-[#3C3C3C] dark:text-white bg-[#DDF4FF] dark:bg-[#1CB0F6]/20 border-[#E5E5E5] dark:border-stone-700 hover:bg-[#c8edff] dark:hover:bg-[#1CB0F6]/30',
+    ctaIcon: 'text-[#1CB0F6] dark:text-[#1CB0F6]',
+    activeRing: 'ring-[#1CB0F6]/70',
   },
   after: {
-    outerShadow:
-      'group-hover/preview:shadow-[0_22px_44px_-14px_rgba(109,40,217,0.28)] dark:group-hover/preview:shadow-[0_24px_48px_-12px_rgba(0,0,0,0.72)]',
-    cardRing: 'ring-violet-300/90 dark:ring-violet-700/55',
-    cardShadow:
-      'shadow-[0_14px_32px_-12px_rgba(91,33,182,0.2),0_0_0_1px_rgba(139,92,246,0.09)] dark:shadow-[0_18px_40px_-12px_rgba(0,0,0,0.55)]',
-    chromeBar: 'border-violet-300/85 dark:border-violet-600/50 bg-violet-50/95 dark:bg-violet-950/45',
-    docIcon: 'text-violet-700 dark:text-violet-400',
-    scoreBadge: 'bg-gradient-to-br from-violet-700 to-violet-600',
-    paperAccent: 'bg-violet-400/90 dark:bg-violet-500',
-    legendIcon: 'text-violet-700 dark:text-violet-400',
-    ctaBar: 'text-violet-950 dark:text-violet-100 bg-violet-100 dark:bg-violet-950 border-violet-200 dark:border-violet-800 hover:bg-violet-200/90 dark:hover:bg-violet-900',
-    ctaIcon: 'text-violet-600 dark:text-violet-400',
-    activeRing: 'ring-violet-500/70',
+    outerShadow: '',
+    cardRing: 'ring-[#E5E5E5] dark:ring-stone-700',
+    cardShadow: '',
+    chromeBar: 'border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-[#3C3C3C]',
+    docIcon: 'text-[#58CC02] dark:text-[#58CC02]',
+    scoreBadge: 'bg-[#58CC02]',
+    paperAccent: 'bg-[#58CC02]/60 dark:bg-[#58CC02]',
+    legendIcon: 'text-[#58CC02] dark:text-[#58CC02]',
+    ctaBar: 'text-[#3C3C3C] dark:text-white bg-[#E5F8D0] dark:bg-[#58CC02]/20 border-[#E5E5E5] dark:border-stone-700 hover:bg-[#d4f4b8] dark:hover:bg-[#58CC02]/30',
+    ctaIcon: 'text-[#58CC02] dark:text-[#58CC02]',
+    activeRing: 'ring-[#1CB0F6]/70',
   },
 } as const;
 
@@ -367,7 +361,8 @@ export default function HeroEssayPreviewCard({
       return (
         <p
           key={paraIdx}
-          className={`mb-1.5 text-stone-600 dark:text-stone-400 leading-snug ${isTitle ? 'text-[10px] font-semibold tracking-tight text-stone-900 dark:text-stone-50' : 'text-[10px] text-justify'}`}
+          className={`mb-1.5 text-[#3C3C3C] dark:text-stone-400 leading-snug ${isTitle ? 'text-[10px] font-extrabold tracking-tight text-[#3C3C3C] dark:text-stone-50' : 'text-[10px] text-justify'}`}
+          style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
         >
           {range.text}
         </p>
@@ -398,8 +393,8 @@ export default function HeroEssayPreviewCard({
           parts.push(
             <mark
               key={`${ann.id}-purple`}
-              className={`${REVISION_MARK_CLASS} font-medium cursor-help select-none motion-safe:animate-[landing-revision-fade_0.45s_ease-out] hover:ring-2 hover:ring-violet-400/55 dark:hover:ring-violet-500/45 ${
-                isActive ? `ring-2 ${vs.activeRing} ring-offset-1 ring-offset-[#fdfcfa] dark:ring-offset-stone-800` : ''
+              className={`${REVISION_MARK_CLASS} font-extrabold cursor-help select-none motion-safe:animate-[landing-revision-fade_0.45s_ease-out] hover:ring-2 hover:ring-[#A560E8]/55 ${
+                isActive ? `ring-2 ${vs.activeRing} ring-offset-1 ring-offset-white dark:ring-offset-stone-800` : ''
               }`}
               onMouseEnter={(e) => {
                 setHoveredId(ann.id);
@@ -423,8 +418,8 @@ export default function HeroEssayPreviewCard({
               className={`
               ${highlightClasses[ann.type]}
               ${hoverRing[ann.type]}
-              font-medium ${heroLive ? 'cursor-help motion-safe:animate-[landing-revision-fade_0.45s_ease-out]' : 'cursor-help'} transition-shadow duration-150
-              ${isActive ? `ring-2 ${vs.activeRing} ring-offset-1 ring-offset-[#fdfcfa] dark:ring-offset-stone-800` : ''}
+              font-extrabold ${heroLive ? 'cursor-help motion-safe:animate-[landing-revision-fade_0.45s_ease-out]' : 'cursor-help'} transition-shadow duration-150
+              ${isActive ? `ring-2 ${vs.activeRing} ring-offset-1 ring-offset-white dark:ring-offset-stone-800` : ''}
             `}
               onMouseEnter={(e) => {
                 setHoveredId(ann.id);
@@ -451,7 +446,8 @@ export default function HeroEssayPreviewCard({
     return (
       <p
         key={paraIdx}
-        className={`mb-1.5 text-stone-600 dark:text-stone-400 leading-snug break-words ${isTitle ? 'text-[10px] font-semibold tracking-tight text-stone-900 dark:text-stone-50' : 'text-[10px] text-justify'}`}
+        className={`mb-1.5 text-[#3C3C3C] dark:text-stone-400 leading-snug break-words ${isTitle ? 'text-[10px] font-extrabold tracking-tight text-[#3C3C3C] dark:text-stone-50' : 'text-[10px] text-justify'}`}
+        style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
       >
         {parts}
       </p>
@@ -463,52 +459,51 @@ export default function HeroEssayPreviewCard({
       className={`group/preview pointer-events-auto w-full max-w-[252px] ${rotation} transition-transform duration-500 ease-out hover:rotate-0 hover:scale-[1.02]`}
     >
       <div
-        className={`relative rounded-2xl overflow-hidden transition-shadow duration-500 ${vs.outerShadow}
+        className={`relative rounded-2xl overflow-hidden transition-all duration-500
           bg-white dark:bg-stone-900
-          ring-1 ${vs.cardRing}
-          ${vs.cardShadow}`}
+          border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700`}
       >
         {/* Window chrome */}
-        <div className={`relative flex items-center gap-2 px-2.5 py-2 border-b ${vs.chromeBar}`}>
+        <div className={`relative flex items-center gap-2 px-2.5 py-2 border-b-2 ${vs.chromeBar}`}>
           <div className="flex gap-1 shrink-0" aria-hidden>
-            <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f57] shadow-[inset_0_-1px_2px_rgba(0,0,0,0.15)] ring-1 ring-black/5" />
-            <span className="w-2.5 h-2.5 rounded-full bg-[#febc2e] shadow-[inset_0_-1px_2px_rgba(0,0,0,0.12)] ring-1 ring-black/5" />
-            <span className="w-2.5 h-2.5 rounded-full bg-[#28c840] shadow-[inset_0_-1px_2px_rgba(0,0,0,0.12)] ring-1 ring-black/5" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#FF4B4B] border border-[#E04343]" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#FF9600] border border-[#D97F00]" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#58CC02] border border-[#46A302]" />
           </div>
-          <div className="flex-1 min-w-0 flex items-center gap-1.5 rounded-md bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-600 px-2 py-0.5 shadow-sm">
+          <div className="flex-1 min-w-0 flex items-center gap-1.5 rounded-xl bg-white dark:bg-stone-950 border-2 border-[#E5E5E5] dark:border-stone-600 px-2 py-0.5">
             <svg className={`w-3 h-3 shrink-0 ${vs.docIcon}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <span className="text-[10px] font-medium text-stone-600 dark:text-stone-300 truncate">
+            <span className="text-[10px] font-extrabold text-[#3C3C3C] dark:text-stone-300 truncate" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
               {resolvedChromeTitle}
             </span>
           </div>
-          <span className={`text-[9px] font-bold tabular-nums px-2 py-1 rounded-md ${vs.scoreBadge} text-white shadow-sm shrink-0`}>
+          <span className={`text-[9px] font-extrabold tabular-nums px-2 py-1 rounded-xl ${vs.scoreBadge} text-white border-2 border-b-4 border-black/10 shrink-0`}>
             {paper.grade.split(' ')[0]} · {paper.overallScore}/100
           </span>
         </div>
 
         {legendPlacement === 'top' && (
-          <div className="relative px-2.5 pt-2.5 pb-1 space-y-1.5 border-b border-stone-100 dark:border-stone-800/80">
+          <div className="relative px-2.5 pt-2.5 pb-1 space-y-1.5 border-b-2 border-[#E5E5E5] dark:border-stone-800/80">
             {heroInteractive ? (
               <>
-                <p className="text-center text-[8px] font-medium text-stone-500 dark:text-stone-400 leading-snug px-1">
+                <p className="text-center text-[8px] font-extrabold text-[#AFAFAF] dark:text-stone-400 leading-snug px-1">
                   Live preview cycles; hover for highlighted text, feedback, and suggested revision.
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-1">
-                  <span className="inline-flex items-center gap-0.5 rounded-full pl-0.5 pr-1.5 py-0.5 text-[8px] font-bold border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950 text-rose-900 dark:text-rose-200">
-                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500 ring-1 ring-black/10 dark:ring-white/15" />
+                  <span className="inline-flex items-center gap-0.5 rounded-full pl-0.5 pr-1.5 py-0.5 text-[8px] font-extrabold border-2 border-[#FF4B4B]/30 bg-[#FFE8E8] dark:bg-[#FF4B4B]/15 text-[#FF4B4B] dark:text-[#FF4B4B]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#FF4B4B]" />
                     Flagged
                   </span>
-                  <span className="inline-flex items-center gap-0.5 rounded-full pl-0.5 pr-1.5 py-0.5 text-[8px] font-bold border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-950 text-violet-900 dark:text-violet-200">
-                    <span className="w-1.5 h-1.5 rounded-full bg-violet-500 ring-1 ring-black/10 dark:ring-white/15" />
+                  <span className="inline-flex items-center gap-0.5 rounded-full pl-0.5 pr-1.5 py-0.5 text-[8px] font-extrabold border-2 border-[#A560E8]/30 bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#A560E8] dark:text-[#A560E8]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#A560E8]" />
                     Revision
                   </span>
                 </div>
               </>
             ) : (
               <>
-                <p className="text-center text-[8px] font-medium text-stone-500 dark:text-stone-400 flex items-center justify-center gap-1">
+                <p className="text-center text-[8px] font-extrabold text-[#AFAFAF] dark:text-stone-400 flex items-center justify-center gap-1">
                   <svg className={`w-2.5 h-2.5 ${vs.legendIcon}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
                   </svg>
@@ -516,15 +511,15 @@ export default function HeroEssayPreviewCard({
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-1">
                   {[
-                    { key: 'strong', label: 'Strong', dot: 'bg-emerald-500', chip: 'border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950 text-emerald-900 dark:text-emerald-200' },
-                    { key: 'improve', label: 'Improve', dot: 'bg-amber-500', chip: 'border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950 text-amber-950 dark:text-amber-200' },
-                    { key: 'concern', label: 'Concern', dot: 'bg-rose-500', chip: 'border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950 text-rose-900 dark:text-rose-200' },
+                    { key: 'strong', label: 'Strong', dot: 'bg-[#58CC02]', chip: 'border-2 border-[#58CC02]/30 bg-[#E5F8D0] dark:bg-[#58CC02]/15 text-[#58CC02] dark:text-[#58CC02]' },
+                    { key: 'improve', label: 'Improve', dot: 'bg-[#FF9600]', chip: 'border-2 border-[#FF9600]/30 bg-[#FFF4E0] dark:bg-[#FF9600]/15 text-[#FF9600] dark:text-[#FF9600]' },
+                    { key: 'concern', label: 'Concern', dot: 'bg-[#FF4B4B]', chip: 'border-2 border-[#FF4B4B]/30 bg-[#FFE8E8] dark:bg-[#FF4B4B]/15 text-[#FF4B4B] dark:text-[#FF4B4B]' },
                   ].map((item) => (
                     <span
                       key={item.key}
-                      className={`inline-flex items-center gap-0.5 rounded-full pl-0.5 pr-1.5 py-0.5 text-[8px] font-bold border ${item.chip}`}
+                      className={`inline-flex items-center gap-0.5 rounded-full pl-0.5 pr-1.5 py-0.5 text-[8px] font-extrabold ${item.chip}`}
                     >
-                      <span className={`w-1.5 h-1.5 rounded-full ${item.dot} ring-1 ring-black/10 dark:ring-white/15`} />
+                      <span className={`w-1.5 h-1.5 rounded-full ${item.dot}`} />
                       {item.label}
                     </span>
                   ))}
@@ -537,10 +532,8 @@ export default function HeroEssayPreviewCard({
         {/* Paper */}
         <div className={`relative px-2.5 ${legendPlacement === 'top' ? 'pt-2.5' : 'pt-2.5'} pb-9`}>
           <div
-            className="relative rounded-lg border border-stone-200 dark:border-stone-600
-              bg-[#fdfcfa] dark:bg-stone-800
-              shadow-[inset_0_1px_0_0_rgba(255,255,255,0.95),0_1px_2px_rgba(0,0,0,0.05)]
-              dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),0_2px_6px_rgba(0,0,0,0.28)]"
+            className="relative rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-600
+              bg-white dark:bg-stone-800"
           >
             <div className={`absolute left-2.5 top-2.5 bottom-2.5 w-px rounded-full ${vs.paperAccent}`} aria-hidden />
             <div className={`pl-4 pr-2.5 py-2.5 overflow-hidden ${paperMaxHeightClass}`}>
@@ -550,7 +543,7 @@ export default function HeroEssayPreviewCard({
             </div>
           </div>
           <div
-            className="pointer-events-none absolute inset-x-2.5 bottom-2.5 h-14 rounded-b-lg bg-gradient-to-t from-[#fdfcfa] via-[#fdfcfa] dark:from-stone-800 dark:via-stone-800 to-transparent"
+            className="pointer-events-none absolute inset-x-2.5 bottom-2.5 h-14 rounded-b-xl bg-gradient-to-t from-white via-white dark:from-stone-800 dark:via-stone-800 to-transparent"
             aria-hidden
           />
         </div>
@@ -559,23 +552,23 @@ export default function HeroEssayPreviewCard({
           <div className="relative px-2.5 pb-2 -mt-4 space-y-1.5">
             {heroInteractive ? (
               <>
-                <p className="text-center text-[8px] font-medium text-stone-500 dark:text-stone-400 leading-snug px-1">
+                <p className="text-center text-[8px] font-extrabold text-[#AFAFAF] dark:text-stone-400 leading-snug px-1">
                   Live preview cycles; hover for highlighted text, feedback, and suggested revision.
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-1">
-                  <span className="inline-flex items-center gap-0.5 rounded-full pl-0.5 pr-1.5 py-0.5 text-[8px] font-bold border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950 text-rose-900 dark:text-rose-200">
-                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500 ring-1 ring-black/10 dark:ring-white/15" />
+                  <span className="inline-flex items-center gap-0.5 rounded-full pl-0.5 pr-1.5 py-0.5 text-[8px] font-extrabold border-2 border-[#FF4B4B]/30 bg-[#FFE8E8] dark:bg-[#FF4B4B]/15 text-[#FF4B4B] dark:text-[#FF4B4B]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#FF4B4B]" />
                     Flagged
                   </span>
-                  <span className="inline-flex items-center gap-0.5 rounded-full pl-0.5 pr-1.5 py-0.5 text-[8px] font-bold border border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-950 text-violet-900 dark:text-violet-200">
-                    <span className="w-1.5 h-1.5 rounded-full bg-violet-500 ring-1 ring-black/10 dark:ring-white/15" />
+                  <span className="inline-flex items-center gap-0.5 rounded-full pl-0.5 pr-1.5 py-0.5 text-[8px] font-extrabold border-2 border-[#A560E8]/30 bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#A560E8] dark:text-[#A560E8]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#A560E8]" />
                     Revision
                   </span>
                 </div>
               </>
             ) : (
               <>
-                <p className="text-center text-[8px] font-medium text-stone-500 dark:text-stone-400 flex items-center justify-center gap-1">
+                <p className="text-center text-[8px] font-extrabold text-[#AFAFAF] dark:text-stone-400 flex items-center justify-center gap-1">
                   <svg className={`w-2.5 h-2.5 ${vs.legendIcon}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
                   </svg>
@@ -583,15 +576,15 @@ export default function HeroEssayPreviewCard({
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-1">
                   {[
-                    { key: 'strong', label: 'Strong', dot: 'bg-emerald-500', chip: 'border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950 text-emerald-900 dark:text-emerald-200' },
-                    { key: 'improve', label: 'Improve', dot: 'bg-amber-500', chip: 'border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950 text-amber-950 dark:text-amber-200' },
-                    { key: 'concern', label: 'Concern', dot: 'bg-rose-500', chip: 'border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950 text-rose-900 dark:text-rose-200' },
+                    { key: 'strong', label: 'Strong', dot: 'bg-[#58CC02]', chip: 'border-2 border-[#58CC02]/30 bg-[#E5F8D0] dark:bg-[#58CC02]/15 text-[#58CC02] dark:text-[#58CC02]' },
+                    { key: 'improve', label: 'Improve', dot: 'bg-[#FF9600]', chip: 'border-2 border-[#FF9600]/30 bg-[#FFF4E0] dark:bg-[#FF9600]/15 text-[#FF9600] dark:text-[#FF9600]' },
+                    { key: 'concern', label: 'Concern', dot: 'bg-[#FF4B4B]', chip: 'border-2 border-[#FF4B4B]/30 bg-[#FFE8E8] dark:bg-[#FF4B4B]/15 text-[#FF4B4B] dark:text-[#FF4B4B]' },
                   ].map((item) => (
                     <span
                       key={item.key}
-                      className={`inline-flex items-center gap-0.5 rounded-full pl-0.5 pr-1.5 py-0.5 text-[8px] font-bold border ${item.chip}`}
+                      className={`inline-flex items-center gap-0.5 rounded-full pl-0.5 pr-1.5 py-0.5 text-[8px] font-extrabold ${item.chip}`}
                     >
-                      <span className={`w-1.5 h-1.5 rounded-full ${item.dot} ring-1 ring-black/10 dark:ring-white/15`} />
+                      <span className={`w-1.5 h-1.5 rounded-full ${item.dot}`} />
                       {item.label}
                     </span>
                   ))}
@@ -605,7 +598,8 @@ export default function HeroEssayPreviewCard({
           <button
             type="button"
             onClick={onOpenDemo}
-            className={`relative w-full flex items-center justify-center gap-1.5 py-2 px-3 text-[10px] font-semibold border-t transition-colors duration-200 group/btn ${vs.ctaBar}`}
+            className={`relative w-full flex items-center justify-center gap-1.5 py-2 px-3 text-[10px] font-extrabold border-t-2 transition-all duration-200 active:translate-y-0.5 group/btn ${vs.ctaBar}`}
+            style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
           >
             <span>Full interactive demo</span>
             <svg

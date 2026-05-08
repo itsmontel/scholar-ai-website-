@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import Header from '../../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../../common/WriteScholarEditorialBackground';
 import Footer from '../../common/Footer';
 import ScholarMascot from '../../common/ScholarMascot';
 
@@ -327,7 +326,7 @@ const ParaphrasingTipsPage = ({ onNavigate, user, onLogout }: ParaphrasingTipsPa
   };
 
   const weakVerbs = ['is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'get', 'got', 'make', 'made'];
-  
+
   const clichePatterns = [
     'at the end of the day',
     'thinking outside the box',
@@ -496,7 +495,7 @@ const ParaphrasingTipsPage = ({ onNavigate, user, onLogout }: ParaphrasingTipsPa
       medium: sentenceLengths.filter(l => l > 10 && l <= 20).length,
       long: sentenceLengths.filter(l => l > 20).length
     };
-    const avgSentenceLength = sentenceLengths.length > 0 
+    const avgSentenceLength = sentenceLengths.length > 0
       ? Math.round(sentenceLengths.reduce((a, b) => a + b, 0) / sentenceLengths.length * 10) / 10
       : 0;
 
@@ -525,7 +524,7 @@ const ParaphrasingTipsPage = ({ onNavigate, user, onLogout }: ParaphrasingTipsPa
       { pattern: /\b(has been|have been|had been)\s+(\w+ed)\b/gi, suggestion: 'Consider active voice' },
       { pattern: /\b(will be|would be|could be|should be)\s+(\w+ed)\b/gi, suggestion: 'Consider active voice' },
     ];
-    
+
     const passiveVoiceMatches: { phrase: string; suggestion: string }[] = [];
     passivePatterns.forEach(({ pattern, suggestion }) => {
       let match: RegExpExecArray | null;
@@ -552,7 +551,7 @@ const ParaphrasingTipsPage = ({ onNavigate, user, onLogout }: ParaphrasingTipsPa
         weakVerbCounts[word] = (weakVerbCounts[word] || 0) + 1;
       }
     });
-    
+
     const foundWeakVerbs = Object.entries(weakVerbCounts)
       .filter(([_, count]) => count >= 5)
       .sort((a, b) => b[1] - a[1])
@@ -560,18 +559,18 @@ const ParaphrasingTipsPage = ({ onNavigate, user, onLogout }: ParaphrasingTipsPa
       .map(([verb, count]) => ({
         verb,
         count,
-        alternatives: verb === 'is' || verb === 'are' || verb === 'was' || verb === 'were' 
+        alternatives: verb === 'is' || verb === 'are' || verb === 'was' || verb === 'were'
           ? ['Use action verbs', 'Restructure sentence']
           : ['Consider stronger verbs']
       }));
 
     // Find cliches
-    const foundCliches = clichePatterns.filter(cliche => 
+    const foundCliches = clichePatterns.filter(cliche =>
       text.toLowerCase().includes(cliche.toLowerCase())
     ).slice(0, 5);
 
     // Find hedging language
-    const foundHedging = hedgingPatterns.filter(hedge => 
+    const foundHedging = hedgingPatterns.filter(hedge =>
       text.toLowerCase().includes(hedge.toLowerCase())
     ).slice(0, 5);
 
@@ -591,25 +590,24 @@ const ParaphrasingTipsPage = ({ onNavigate, user, onLogout }: ParaphrasingTipsPa
   }, [text]);
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden">
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
+    <div className="relative min-h-screen overflow-x-hidden bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="paraphrasing-tips" />
 
       {/* Hero Section */}
-      <section className="py-16 sm:py-20 bg-gradient-to-b from-orange-50/50 to-white">
+      <section className="py-16 sm:py-20 bg-[#FFF4E0]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto">
             <div className="inline-flex items-center justify-center mb-6">
               <ScholarMascot size={80} animated={false} pose="default" />
             </div>
-            <span className="inline-flex items-center px-4 py-1.5 bg-orange-100 text-orange-700 rounded-full text-sm font-semibold mb-5">
+            <span className="inline-flex items-center px-4 py-1.5 bg-[#FF9600] text-white rounded-full text-sm font-extrabold uppercase tracking-wide mb-5">
               Free Tool
             </span>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-5 leading-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-900 dark:text-stone-100 mb-5 leading-tight">
               Writing Improvement Analyzer
             </h1>
-            <p className="text-lg text-gray-500 leading-relaxed max-w-2xl mx-auto">
-              Identify overused words, passive voice, wordy phrases, clichés, and weak verbs. Get 140+ synonym suggestions and 120+ wordy phrase alternatives to strengthen your writing.
+            <p className="text-lg text-stone-500 dark:text-stone-400 leading-relaxed max-w-2xl mx-auto">
+              Identify overused words, passive voice, wordy phrases, cliches, and weak verbs. Get 140+ synonym suggestions and 120+ wordy phrase alternatives to strengthen your writing.
             </p>
           </div>
         </div>
@@ -621,12 +619,12 @@ const ParaphrasingTipsPage = ({ onNavigate, user, onLogout }: ParaphrasingTipsPa
           <div className="grid lg:grid-cols-5 gap-8">
             {/* Text Input Area */}
             <div className="lg:col-span-3">
-              <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-gray-900">Your Text</h2>
+                  <h2 className="text-lg font-extrabold text-stone-900 dark:text-stone-100">Your Text</h2>
                   <button
                     onClick={() => setText('')}
-                    className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-all font-medium"
+                    className="px-4 py-2 text-sm text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 border-2 border-b-4 border-stone-200 dark:border-stone-700 active:border-b-2 active:translate-y-0.5 transition-all font-extrabold uppercase tracking-wide rounded-xl"
                   >
                     Clear
                   </button>
@@ -634,29 +632,29 @@ const ParaphrasingTipsPage = ({ onNavigate, user, onLogout }: ParaphrasingTipsPa
                 <textarea
                   value={text}
                   onChange={(e) => setText(e.target.value)}
-                  placeholder="Paste your text here to analyze vocabulary diversity, find overused words, passive voice, wordy phrases, clichés, and more..."
-                  className="w-full h-80 p-4 text-gray-700 bg-gray-50 border-0 rounded-xl outline-none resize-none placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:bg-white transition-all"
+                  placeholder="Paste your text here to analyze vocabulary diversity, find overused words, passive voice, wordy phrases, cliches, and more..."
+                  className="w-full h-80 p-4 text-stone-700 dark:text-stone-300 bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 rounded-xl outline-none resize-none placeholder-stone-400 dark:placeholder-stone-500 focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 transition-all"
                 />
-                
+
                 {analysis && (
                   <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div className="bg-gray-50 rounded-xl p-3 text-center">
-                      <div className="text-xl font-bold text-gray-900">{analysis.totalWords}</div>
-                      <div className="text-xs text-gray-500">Words</div>
+                    <div className="bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-700 rounded-xl p-3 text-center">
+                      <div className="text-xl font-extrabold text-stone-900 dark:text-stone-100">{analysis.totalWords}</div>
+                      <div className="text-xs font-extrabold text-stone-500 dark:text-stone-400 uppercase tracking-wide">Words</div>
                     </div>
-                    <div className="bg-gray-50 rounded-xl p-3 text-center">
-                      <div className="text-xl font-bold text-gray-900">{analysis.uniqueWords}</div>
-                      <div className="text-xs text-gray-500">Unique</div>
+                    <div className="bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-700 rounded-xl p-3 text-center">
+                      <div className="text-xl font-extrabold text-stone-900 dark:text-stone-100">{analysis.uniqueWords}</div>
+                      <div className="text-xs font-extrabold text-stone-500 dark:text-stone-400 uppercase tracking-wide">Unique</div>
                     </div>
-                    <div className="bg-gray-50 rounded-xl p-3 text-center">
-                      <div className={`text-xl font-bold ${analysis.vocabularyDiversity >= 60 ? 'text-green-600' : analysis.vocabularyDiversity >= 40 ? 'text-yellow-600' : 'text-red-600'}`}>
+                    <div className="bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-700 rounded-xl p-3 text-center">
+                      <div className={`text-xl font-extrabold ${analysis.vocabularyDiversity >= 60 ? 'text-[#58CC02]' : analysis.vocabularyDiversity >= 40 ? 'text-[#FF9600]' : 'text-[#FF4B4B]'}`}>
                         {analysis.vocabularyDiversity}%
                       </div>
-                      <div className="text-xs text-gray-500">Diversity</div>
+                      <div className="text-xs font-extrabold text-stone-500 dark:text-stone-400 uppercase tracking-wide">Diversity</div>
                     </div>
-                    <div className="bg-gray-50 rounded-xl p-3 text-center">
-                      <div className="text-xl font-bold text-gray-900">{analysis.avgSentenceLength}</div>
-                      <div className="text-xs text-gray-500">Avg Length</div>
+                    <div className="bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-700 rounded-xl p-3 text-center">
+                      <div className="text-xl font-extrabold text-stone-900 dark:text-stone-100">{analysis.avgSentenceLength}</div>
+                      <div className="text-xs font-extrabold text-stone-500 dark:text-stone-400 uppercase tracking-wide">Avg Length</div>
                     </div>
                   </div>
                 )}
@@ -668,47 +666,47 @@ const ParaphrasingTipsPage = ({ onNavigate, user, onLogout }: ParaphrasingTipsPa
               {analysis ? (
                 <>
                   {/* Vocabulary Diversity Score */}
-                  <div className="bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl p-6 text-white">
-                    <h3 className="text-lg font-semibold mb-2 opacity-90">Vocabulary Diversity</h3>
-                    <div className="text-5xl font-bold mb-2">{analysis.vocabularyDiversity}%</div>
-                    <p className="text-sm opacity-80">
-                      {analysis.vocabularyDiversity >= 70 ? 'Excellent word variety!' : 
-                       analysis.vocabularyDiversity >= 50 ? 'Good, but could improve' : 
+                  <div className="border-2 border-b-4 border-[#46A302] bg-[#58CC02] rounded-2xl p-6 text-white">
+                    <h3 className="text-lg font-extrabold mb-2 opacity-90">Vocabulary Diversity</h3>
+                    <div className="text-5xl font-extrabold mb-2">{analysis.vocabularyDiversity}%</div>
+                    <p className="text-sm opacity-80 font-extrabold">
+                      {analysis.vocabularyDiversity >= 70 ? 'Excellent word variety!' :
+                       analysis.vocabularyDiversity >= 50 ? 'Good, but could improve' :
                        analysis.vocabularyDiversity >= 35 ? 'Consider varying vocabulary' :
                        'Try using more varied vocabulary'}
                     </p>
                     <div className="mt-4 bg-white/20 rounded-full h-3 overflow-hidden">
-                      <div 
-                        className="h-full bg-white transition-all duration-500"
+                      <div
+                        className="h-full bg-white transition-all duration-500 rounded-full"
                         style={{ width: `${analysis.vocabularyDiversity}%` }}
                       />
                     </div>
                   </div>
 
                   {/* Sentence Variety */}
-                  <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
-                    <h3 className="font-semibold text-gray-900 mb-3">Sentence Variety</h3>
+                  <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl p-5">
+                    <h3 className="font-extrabold text-stone-900 dark:text-stone-100 mb-3">Sentence Variety</h3>
                     <div className="flex items-center space-x-2 text-sm">
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-1">
-                          <span className="text-gray-600">Short (≤10)</span>
-                          <span className="font-medium">{analysis.sentenceVariety.short}</span>
+                          <span className="text-stone-600 dark:text-stone-400 font-extrabold">Short (10 or less)</span>
+                          <span className="font-extrabold text-stone-900 dark:text-stone-100">{analysis.sentenceVariety.short}</span>
                         </div>
-                        <div className="bg-gray-100 rounded-full h-2"><div className="bg-green-500 h-full rounded-full" style={{ width: `${Math.min(100, (analysis.sentenceVariety.short / (analysis.sentenceVariety.short + analysis.sentenceVariety.medium + analysis.sentenceVariety.long)) * 100)}%` }} /></div>
+                        <div className="bg-stone-100 dark:bg-stone-800 rounded-full h-2"><div className="bg-[#58CC02] h-full rounded-full" style={{ width: `${Math.min(100, (analysis.sentenceVariety.short / (analysis.sentenceVariety.short + analysis.sentenceVariety.medium + analysis.sentenceVariety.long)) * 100)}%` }} /></div>
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-1">
-                          <span className="text-gray-600">Medium</span>
-                          <span className="font-medium">{analysis.sentenceVariety.medium}</span>
+                          <span className="text-stone-600 dark:text-stone-400 font-extrabold">Medium</span>
+                          <span className="font-extrabold text-stone-900 dark:text-stone-100">{analysis.sentenceVariety.medium}</span>
                         </div>
-                        <div className="bg-gray-100 rounded-full h-2"><div className="bg-violet-500 h-full rounded-full" style={{ width: `${Math.min(100, (analysis.sentenceVariety.medium / (analysis.sentenceVariety.short + analysis.sentenceVariety.medium + analysis.sentenceVariety.long)) * 100)}%` }} /></div>
+                        <div className="bg-stone-100 dark:bg-stone-800 rounded-full h-2"><div className="bg-[#1CB0F6] h-full rounded-full" style={{ width: `${Math.min(100, (analysis.sentenceVariety.medium / (analysis.sentenceVariety.short + analysis.sentenceVariety.medium + analysis.sentenceVariety.long)) * 100)}%` }} /></div>
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-1">
-                          <span className="text-gray-600">Long (20+)</span>
-                          <span className="font-medium">{analysis.sentenceVariety.long}</span>
+                          <span className="text-stone-600 dark:text-stone-400 font-extrabold">Long (20+)</span>
+                          <span className="font-extrabold text-stone-900 dark:text-stone-100">{analysis.sentenceVariety.long}</span>
                         </div>
-                        <div className="bg-gray-100 rounded-full h-2"><div className="bg-orange-500 h-full rounded-full" style={{ width: `${Math.min(100, (analysis.sentenceVariety.long / (analysis.sentenceVariety.short + analysis.sentenceVariety.medium + analysis.sentenceVariety.long)) * 100)}%` }} /></div>
+                        <div className="bg-stone-100 dark:bg-stone-800 rounded-full h-2"><div className="bg-[#FF9600] h-full rounded-full" style={{ width: `${Math.min(100, (analysis.sentenceVariety.long / (analysis.sentenceVariety.short + analysis.sentenceVariety.medium + analysis.sentenceVariety.long)) * 100)}%` }} /></div>
                       </div>
                     </div>
                   </div>
@@ -717,20 +715,20 @@ const ParaphrasingTipsPage = ({ onNavigate, user, onLogout }: ParaphrasingTipsPa
                   <div className="max-h-[600px] overflow-y-auto space-y-4 pr-1">
                     {/* Overused Words */}
                     {analysis.overusedWords.length > 0 && (
-                      <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
-                        <h3 className="font-semibold text-gray-900 mb-3 flex items-center space-x-2">
-                          <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+                      <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl p-5">
+                        <h3 className="font-extrabold text-stone-900 dark:text-stone-100 mb-3 flex items-center space-x-2">
+                          <span className="w-3 h-3 bg-[#FF9600] rounded-full"></span>
                           <span>Overused Words</span>
                         </h3>
                         <div className="space-y-3">
                           {analysis.overusedWords.map((item, index) => (
-                            <div key={index} className="border-b border-gray-100 pb-2 last:border-0 last:pb-0">
+                            <div key={index} className="border-b border-stone-100 dark:border-stone-800 pb-2 last:border-0 last:pb-0">
                               <div className="flex items-center justify-between mb-1">
-                                <span className="font-medium text-gray-900">"{item.word}"</span>
-                                <span className="text-sm text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full">{item.count}×</span>
+                                <span className="font-extrabold text-stone-900 dark:text-stone-100">"{item.word}"</span>
+                                <span className="text-sm font-extrabold text-[#D97F00] bg-[#FFF4E0] px-2 py-0.5 rounded-full">{item.count}x</span>
                               </div>
                               {item.suggestions.length > 0 && (
-                                <p className="text-xs text-gray-500">→ {item.suggestions.slice(0, 4).join(', ')}</p>
+                                <p className="text-xs text-stone-500 dark:text-stone-400">Try: {item.suggestions.slice(0, 4).join(', ')}</p>
                               )}
                             </div>
                           ))}
@@ -740,123 +738,123 @@ const ParaphrasingTipsPage = ({ onNavigate, user, onLogout }: ParaphrasingTipsPa
 
                     {/* Passive Voice */}
                     {analysis.passiveVoice.length > 0 && (
-                      <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
-                        <h3 className="font-semibold text-gray-900 mb-3 flex items-center space-x-2">
-                          <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
+                      <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl p-5">
+                        <h3 className="font-extrabold text-stone-900 dark:text-stone-100 mb-3 flex items-center space-x-2">
+                          <span className="w-3 h-3 bg-[#FF9600] rounded-full"></span>
                           <span>Passive Voice ({analysis.passiveVoice.length})</span>
                         </h3>
                         <div className="space-y-2">
                           {analysis.passiveVoice.map((item, index) => (
-                            <div key={index} className="flex items-start space-x-2 text-sm">
-                              <span className="text-yellow-500">⚠</span>
-                              <span className="text-gray-700">"{item.phrase}"</span>
+                            <div key={index} className="flex items-start space-x-2 text-sm bg-[#FFF4E0] dark:bg-stone-800 rounded-xl px-3 py-2">
+                              <span className="text-[#FF9600] font-extrabold mt-0.5">!</span>
+                              <span className="text-stone-700 dark:text-stone-300 font-extrabold">"{item.phrase}"</span>
                             </div>
                           ))}
                         </div>
-                        <p className="text-xs text-gray-500 mt-2">Consider rewriting in active voice for clarity</p>
+                        <p className="text-xs text-stone-500 dark:text-stone-400 mt-2 font-extrabold">Consider rewriting in active voice for clarity</p>
                       </div>
                     )}
 
                     {/* Wordy Phrases */}
                     {analysis.wordyPhrases.length > 0 && (
-                      <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
-                        <h3 className="font-semibold text-gray-900 mb-3 flex items-center space-x-2">
-                          <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                      <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl p-5">
+                        <h3 className="font-extrabold text-stone-900 dark:text-stone-100 mb-3 flex items-center space-x-2">
+                          <span className="w-3 h-3 bg-[#FF4B4B] rounded-full"></span>
                           <span>Wordy Phrases</span>
                         </h3>
                         <div className="space-y-2">
                           {analysis.wordyPhrases.map((item, index) => (
-                            <div key={index} className="text-sm">
-                              <div className="text-red-600 line-through">"{item.original}"</div>
-                              <div className="text-green-600">→ {item.suggestion}</div>
+                            <div key={index} className="text-sm bg-stone-50 dark:bg-stone-800 rounded-xl px-3 py-2">
+                              <div className="text-[#FF4B4B] line-through font-extrabold">"{item.original}"</div>
+                              <div className="text-[#58CC02] font-extrabold">Try: {item.suggestion}</div>
                             </div>
                           ))}
                         </div>
                       </div>
                     )}
 
-                    {/* Clichés */}
+                    {/* Cliches */}
                     {analysis.cliches.length > 0 && (
-                      <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
-                        <h3 className="font-semibold text-gray-900 mb-3 flex items-center space-x-2">
-                          <span className="w-2 h-2 bg-violet-500 rounded-full"></span>
-                          <span>Clichés Found</span>
+                      <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl p-5">
+                        <h3 className="font-extrabold text-stone-900 dark:text-stone-100 mb-3 flex items-center space-x-2">
+                          <span className="w-3 h-3 bg-[#A560E8] rounded-full"></span>
+                          <span>Cliches Found</span>
                         </h3>
                         <div className="space-y-1">
                           {analysis.cliches.map((cliche, index) => (
-                            <div key={index} className="text-sm text-violet-700 bg-violet-50 px-2 py-1 rounded">
+                            <div key={index} className="text-sm font-extrabold text-[#8A48C7] bg-[#F3EAFF] dark:bg-stone-800 px-3 py-2 rounded-xl">
                               "{cliche}"
                             </div>
                           ))}
                         </div>
-                        <p className="text-xs text-gray-500 mt-2">Consider more original phrasing</p>
+                        <p className="text-xs text-stone-500 dark:text-stone-400 mt-2 font-extrabold">Consider more original phrasing</p>
                       </div>
                     )}
 
                     {/* Hedging Language */}
                     {analysis.hedgingLanguage.length > 0 && (
-                      <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
-                        <h3 className="font-semibold text-gray-900 mb-3 flex items-center space-x-2">
-                          <span className="w-2 h-2 bg-violet-500 rounded-full"></span>
+                      <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl p-5">
+                        <h3 className="font-extrabold text-stone-900 dark:text-stone-100 mb-3 flex items-center space-x-2">
+                          <span className="w-3 h-3 bg-[#A560E8] rounded-full"></span>
                           <span>Hedging Language</span>
                         </h3>
                         <div className="space-y-1">
                           {analysis.hedgingLanguage.map((hedge, index) => (
-                            <div key={index} className="text-sm text-violet-700 bg-violet-50 px-2 py-1 rounded">
+                            <div key={index} className="text-sm font-extrabold text-[#8A48C7] bg-[#F3EAFF] dark:bg-stone-800 px-3 py-2 rounded-xl">
                               "{hedge}"
                             </div>
                           ))}
                         </div>
-                        <p className="text-xs text-gray-500 mt-2">Use sparingly in academic writing</p>
+                        <p className="text-xs text-stone-500 dark:text-stone-400 mt-2 font-extrabold">Use sparingly in academic writing</p>
                       </div>
                     )}
 
                     {/* Weak Verbs */}
                     {analysis.weakVerbs.length > 0 && (
-                      <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
-                        <h3 className="font-semibold text-gray-900 mb-3 flex items-center space-x-2">
-                          <span className="w-2 h-2 bg-gray-500 rounded-full"></span>
+                      <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl p-5">
+                        <h3 className="font-extrabold text-stone-900 dark:text-stone-100 mb-3 flex items-center space-x-2">
+                          <span className="w-3 h-3 bg-stone-400 dark:bg-stone-500 rounded-full"></span>
                           <span>Weak Verbs</span>
                         </h3>
                         <div className="space-y-2">
                           {analysis.weakVerbs.map((item, index) => (
-                            <div key={index} className="flex items-center justify-between text-sm">
-                              <span className="text-gray-700">"{item.verb}"</span>
-                              <span className="text-gray-500">{item.count}× used</span>
+                            <div key={index} className="flex items-center justify-between text-sm bg-stone-50 dark:bg-stone-800 rounded-xl px-3 py-2">
+                              <span className="text-stone-700 dark:text-stone-300 font-extrabold">"{item.verb}"</span>
+                              <span className="text-stone-500 dark:text-stone-400 font-extrabold">{item.count}x used</span>
                             </div>
                           ))}
                         </div>
-                        <p className="text-xs text-gray-500 mt-2">Consider stronger action verbs</p>
+                        <p className="text-xs text-stone-500 dark:text-stone-400 mt-2 font-extrabold">Consider stronger action verbs</p>
                       </div>
                     )}
                   </div>
 
                   {/* All Clear */}
-                  {analysis.overusedWords.length === 0 && 
-                   analysis.passiveVoice.length === 0 && 
+                  {analysis.overusedWords.length === 0 &&
+                   analysis.passiveVoice.length === 0 &&
                    analysis.wordyPhrases.length === 0 &&
                    analysis.cliches.length === 0 &&
                    analysis.hedgingLanguage.length === 0 && (
-                    <div className="bg-green-50 border border-green-200 rounded-2xl p-6 text-center">
-                      <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    <div className="border-2 border-b-4 border-[#46A302] bg-[#EAFFD6] rounded-2xl p-6 text-center">
+                      <div className="w-12 h-12 bg-[#58CC02] rounded-full flex items-center justify-center mx-auto mb-3">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                         </svg>
                       </div>
-                      <h3 className="font-semibold text-green-800 mb-1">Looking Good!</h3>
-                      <p className="text-sm text-green-600">No major issues detected</p>
+                      <h3 className="font-extrabold text-[#46A302] mb-1">Looking Good!</h3>
+                      <p className="text-sm text-[#58CC02] font-extrabold">No major issues detected</p>
                     </div>
                   )}
                 </>
               ) : (
-                <div className="bg-gray-50 border border-gray-200 rounded-2xl p-8 text-center">
-                  <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl p-8 text-center">
+                  <div className="w-16 h-16 bg-[#FFF4E0] rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-[#FF9600]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Enter Your Text</h3>
-                  <p className="text-gray-500 text-sm">Paste text to analyze vocabulary, find overused words, passive voice, and more</p>
+                  <h3 className="text-lg font-extrabold text-stone-900 dark:text-stone-100 mb-2">Enter Your Text</h3>
+                  <p className="text-stone-500 dark:text-stone-400 text-sm font-extrabold">Paste text to analyze vocabulary, find overused words, passive voice, and more</p>
                 </div>
               )}
             </div>
@@ -865,96 +863,96 @@ const ParaphrasingTipsPage = ({ onNavigate, user, onLogout }: ParaphrasingTipsPa
       </section>
 
       {/* Tips Section */}
-      <section className="py-12 sm:py-16 bg-gray-50">
+      <section className="py-12 sm:py-16 bg-stone-100 dark:bg-stone-900">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">Effective Paraphrasing Techniques</h2>
+          <h2 className="text-2xl font-extrabold text-stone-900 dark:text-stone-100 mb-8 text-center">Effective Paraphrasing Techniques</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl p-6">
+              <div className="w-12 h-12 bg-[#FFF4E0] rounded-xl flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-[#FF9600]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                 </svg>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Change Sentence Structure</h3>
-              <p className="text-gray-600 text-sm">Rearrange clauses, switch from active to passive (or vice versa), or combine/split sentences.</p>
+              <h3 className="font-extrabold text-stone-900 dark:text-stone-100 mb-2">Change Sentence Structure</h3>
+              <p className="text-stone-600 dark:text-stone-400 text-sm">Rearrange clauses, switch from active to passive (or vice versa), or combine/split sentences.</p>
             </div>
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl p-6">
+              <div className="w-12 h-12 bg-[#DDF4FF] rounded-xl flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-[#1CB0F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                 </svg>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Use Synonyms Carefully</h3>
-              <p className="text-gray-600 text-sm">Replace words with synonyms, but ensure the new words fit the context and maintain the original meaning.</p>
+              <h3 className="font-extrabold text-stone-900 dark:text-stone-100 mb-2">Use Synonyms Carefully</h3>
+              <p className="text-stone-600 dark:text-stone-400 text-sm">Replace words with synonyms, but ensure the new words fit the context and maintain the original meaning.</p>
             </div>
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl p-6">
+              <div className="w-12 h-12 bg-[#EAFFD6] rounded-xl flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-[#58CC02]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Keep the Meaning</h3>
-              <p className="text-gray-600 text-sm">Always preserve the original idea. Paraphrasing changes how something is said, not what is said.</p>
+              <h3 className="font-extrabold text-stone-900 dark:text-stone-100 mb-2">Keep the Meaning</h3>
+              <p className="text-stone-600 dark:text-stone-400 text-sm">Always preserve the original idea. Paraphrasing changes how something is said, not what is said.</p>
             </div>
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl p-6">
+              <div className="w-12 h-12 bg-[#DDF4FF] rounded-xl flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-[#1CB0F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Understand First</h3>
-              <p className="text-gray-600 text-sm">Read and understand the original text fully before attempting to paraphrase it in your own words.</p>
+              <h3 className="font-extrabold text-stone-900 dark:text-stone-100 mb-2">Understand First</h3>
+              <p className="text-stone-600 dark:text-stone-400 text-sm">Read and understand the original text fully before attempting to paraphrase it in your own words.</p>
             </div>
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-fuchsia-50 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-fuchsia-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl p-6">
+              <div className="w-12 h-12 bg-[#F3EAFF] rounded-xl flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-[#A560E8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Still Cite Sources</h3>
-              <p className="text-gray-600 text-sm">Paraphrased content still requires citation. The ideas belong to the original author.</p>
+              <h3 className="font-extrabold text-stone-900 dark:text-stone-100 mb-2">Still Cite Sources</h3>
+              <p className="text-stone-600 dark:text-stone-400 text-sm">Paraphrased content still requires citation. The ideas belong to the original author.</p>
             </div>
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl p-6">
+              <div className="w-12 h-12 bg-[#FFE8E8] rounded-xl flex items-center justify-center mb-4">
+                <svg className="w-6 h-6 text-[#FF4B4B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Compare & Revise</h3>
-              <p className="text-gray-600 text-sm">Compare your paraphrase to the original. If they're too similar, revise further.</p>
+              <h3 className="font-extrabold text-stone-900 dark:text-stone-100 mb-2">Compare & Revise</h3>
+              <p className="text-stone-600 dark:text-stone-400 text-sm">Compare your paraphrase to the original. If they're too similar, revise further.</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-12 sm:py-16 bg-gray-900">
+      <section className="py-12 sm:py-16 bg-[#1CB0F6]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-4">
             Want comprehensive writing feedback?
           </h2>
-          <p className="text-gray-400 mb-8 max-w-xl mx-auto">
+          <p className="text-white/80 mb-8 max-w-xl mx-auto font-extrabold">
             WriteScholar uses AI to provide detailed analysis of your academic writing, including grammar, structure, clarity, and more.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             {user ? (
-              <button 
+              <button
                 onClick={() => onNavigate('dashboard')}
-                className="px-6 py-3 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors"
+                className="px-6 py-3 bg-white text-[#1899D6] border-2 border-b-4 border-stone-200 active:border-b-2 active:translate-y-0.5 transition-all font-extrabold uppercase tracking-wide rounded-xl hover:bg-stone-50"
               >
                 Go to Dashboard
               </button>
             ) : (
               <>
-                <button 
+                <button
                   onClick={() => onNavigate('signup')}
-                  className="px-6 py-3 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors"
+                  className="px-6 py-3 bg-white text-[#1899D6] border-2 border-b-4 border-stone-200 active:border-b-2 active:translate-y-0.5 transition-all font-extrabold uppercase tracking-wide rounded-xl hover:bg-stone-50"
                 >
                   Try WriteScholar Free
                 </button>
-                <button 
+                <button
                   onClick={() => onNavigate('features')}
-                  className="px-6 py-3 border border-gray-600 text-white font-medium rounded-xl hover:border-gray-500 transition-colors"
+                  className="px-6 py-3 border-2 border-b-4 border-white/40 active:border-b-2 active:translate-y-0.5 transition-all text-white font-extrabold uppercase tracking-wide rounded-xl hover:bg-white/10"
                 >
                   Learn More
                 </button>

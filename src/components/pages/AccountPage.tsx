@@ -410,13 +410,13 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="account" />
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-14 relative z-10">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-14 relative z-10" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
         {/* Page Header */}
         <div className="text-center mb-10">
-          <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-stone-800 dark:text-stone-100 mb-4">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">
             Account Settings
           </h1>
-          <p className="text-lg text-stone-600 dark:text-stone-400">
+          <p className="text-lg font-bold text-stone-600 dark:text-stone-400">
             Manage your profile, subscription, and security settings.
           </p>
         </div>
@@ -424,16 +424,16 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
         {/* Settings List */}
         <div className="space-y-6">
           {/* Profile Information */}
-          <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-6 sm:p-8">
-            <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-6">Profile Information</h2>
+          <div className="bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 rounded-2xl p-6 sm:p-8">
+            <h2 className="text-xl font-extrabold text-stone-800 dark:text-stone-100 mb-6">Profile Information</h2>
             <div className="space-y-4">
-              <div className="flex items-center justify-between py-3 border-b border-stone-200 dark:border-stone-600">
+              <div className="flex items-center justify-between py-3 border-b-2 border-stone-200 dark:border-stone-600">
                 <div>
-                  <div className="font-semibold text-stone-800 dark:text-stone-100">Email</div>
+                  <div className="font-extrabold text-stone-800 dark:text-stone-100">Email</div>
                   <div className="text-stone-600 dark:text-stone-400 flex items-center">
                     {displayUser?.email ? displayUser.email : (displayUser ? 'Email not available' : 'Loading...')}
                     {userStats.emailVerified && (
-                      <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-violet-100 dark:bg-violet-900/50 text-violet-800 dark:text-violet-300">
+                      <span className="ml-2 inline-flex items-center px-2 py-1 rounded-xl text-xs font-extrabold bg-[#EAFFD6] text-[#58CC02] border border-[#58CC02]/30">
                         <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
@@ -443,51 +443,51 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-3 border-b border-stone-200 dark:border-stone-600">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-3 border-b-2 border-stone-200 dark:border-stone-600">
                 <div className="flex-1">
-                  <div className="font-semibold text-stone-800 dark:text-stone-100 mb-1">Name</div>
+                  <div className="font-extrabold text-stone-800 dark:text-stone-100 mb-1">Name</div>
                   <input
                     type="text"
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
                     placeholder="Your display name"
-                    className="w-full sm:max-w-xs px-4 py-2.5 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all text-stone-800 dark:text-stone-100 bg-white dark:bg-stone-700/50"
+                    className="w-full sm:max-w-xs px-4 py-2.5 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:border-[#1CB0F6] transition-all text-stone-800 dark:text-stone-100 bg-white dark:bg-stone-700/50 outline-none"
                   />
                   {nameError && <p className="text-red-600 text-sm mt-1">{nameError}</p>}
-                  {nameSuccess && <p className="text-violet-600 dark:text-violet-400 text-sm mt-1">{nameSuccess}</p>}
+                  {nameSuccess && <p className="text-[#58CC02] text-sm mt-1">{nameSuccess}</p>}
                 </div>
                 <button
                   onClick={handleSaveName}
                   disabled={nameLoading || !displayName.trim()}
-                  className="bg-violet-600 hover:bg-violet-500 disabled:bg-stone-300 dark:disabled:bg-stone-600 text-white px-5 py-2.5 rounded-full font-medium transition-colors shrink-0"
+                  className="bg-[#1CB0F6] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#1899D6] active:border-b-2 active:translate-y-0.5 transition-all disabled:bg-stone-300 dark:disabled:bg-stone-600 px-5 py-2.5 shrink-0"
                 >
                   {nameLoading ? 'Saving...' : 'Save'}
                 </button>
               </div>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-3 border-b border-stone-200 dark:border-stone-600">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-3 border-b-2 border-stone-200 dark:border-stone-600">
                 <div className="flex-1">
-                  <div className="font-semibold text-stone-800 dark:text-stone-100 mb-1">Username</div>
+                  <div className="font-extrabold text-stone-800 dark:text-stone-100 mb-1">Username</div>
                   <input
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="Enter username"
-                    className="w-full sm:max-w-xs px-4 py-2.5 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all text-stone-800 dark:text-stone-100 bg-white dark:bg-stone-700/50"
+                    className="w-full sm:max-w-xs px-4 py-2.5 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:border-[#1CB0F6] transition-all text-stone-800 dark:text-stone-100 bg-white dark:bg-stone-700/50 outline-none"
                   />
                   {usernameError && <p className="text-red-600 text-sm mt-1">{usernameError}</p>}
-                  {usernameSuccess && <p className="text-violet-600 dark:text-violet-400 text-sm mt-1">{usernameSuccess}</p>}
+                  {usernameSuccess && <p className="text-[#58CC02] text-sm mt-1">{usernameSuccess}</p>}
                 </div>
                 <button
                   onClick={handleSaveUsername}
                   disabled={usernameLoading || !username.trim()}
-                  className="bg-violet-600 hover:bg-violet-500 disabled:bg-stone-300 dark:disabled:bg-stone-600 text-white px-5 py-2.5 rounded-full font-medium transition-colors shrink-0"
+                  className="bg-[#1CB0F6] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#1899D6] active:border-b-2 active:translate-y-0.5 transition-all disabled:bg-stone-300 dark:disabled:bg-stone-600 px-5 py-2.5 shrink-0"
                 >
                   {usernameLoading ? 'Saving...' : 'Save'}
                 </button>
               </div>
               <div className="flex items-center justify-between py-3">
                 <div>
-                  <div className="font-semibold text-stone-800 dark:text-stone-100">Member Since</div>
+                  <div className="font-extrabold text-stone-800 dark:text-stone-100">Member Since</div>
                   <div className="text-stone-600 dark:text-stone-400">{loading ? 'Loading...' : userStats.memberSince}</div>
                 </div>
               </div>
@@ -496,27 +496,27 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
 
 
           {/* Subscription */}
-          <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-6 sm:p-8">
-            <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-6">Subscription</h2>
+          <div className="bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 rounded-2xl p-6 sm:p-8">
+            <h2 className="text-xl font-extrabold text-stone-800 dark:text-stone-100 mb-6">Subscription</h2>
             <div className="space-y-4">
-              <div className="flex items-center justify-between py-3 border-b border-stone-200 dark:border-stone-600">
+              <div className="flex items-center justify-between py-3 border-b-2 border-stone-200 dark:border-stone-600">
                 <div>
-                  <div className="font-semibold text-stone-800 dark:text-stone-100">Current Plan</div>
+                  <div className="font-extrabold text-stone-800 dark:text-stone-100">Current Plan</div>
                   <div className="text-stone-600 dark:text-stone-400 flex items-center">
                     <span className="capitalize">{userStats.subscriptionPlan}</span>
-                    <span className={`ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                    <span className={`ml-2 inline-flex items-center px-2 py-1 rounded-xl text-xs font-extrabold ${
                       userStats.subscriptionStatus === 'active'
-                        ? 'bg-violet-100 dark:bg-violet-900/50 text-violet-800 dark:text-violet-300'
-                        : 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300'
+                        ? 'bg-[#EAFFD6] text-[#58CC02] border border-[#58CC02]/30'
+                        : 'bg-[#FFF4E0] text-[#FF9600] border border-[#FF9600]/30'
                     }`}>
                       {userStats.subscriptionStatus}
                     </span>
                   </div>
                 </div>
                 {userStats.subscriptionPlan === 'free' && (
-                  <button 
+                  <button
                     onClick={() => onNavigate('pricing')}
-                    className="bg-violet-600 hover:bg-violet-500 text-white px-5 py-2.5 rounded-full font-medium transition-colors"
+                    className="bg-[#58CC02] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all px-5 py-2.5"
                   >
                     Upgrade
                   </button>
@@ -524,14 +524,14 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
               </div>
               <div className="flex items-center justify-between py-3">
                 <div>
-                  <div className="font-semibold text-stone-800 dark:text-stone-100">Plan Features</div>
+                  <div className="font-extrabold text-stone-800 dark:text-stone-100">Plan Features</div>
                   <div className="text-stone-600 dark:text-stone-400">
                     {userStats.subscriptionPlan === 'free'
                       ? '3 documents, 2 analyses per month, 2 citation searches'
                       : userStats.subscriptionPlan === 'pro'
-                      ? '49 combined/mo (analyses, study packs & citations)'
+                      ? '99 combined/mo (analyses, study packs & citations)'
                       : userStats.subscriptionPlan === 'premium'
-                      ? '199 combined/mo; 1GB library storage'
+                      ? '499 combined/mo; 1GB library storage'
                       : 'Basic features included'
                     }
                   </div>
@@ -539,8 +539,8 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
               </div>
               
               {/* Plan Details */}
-              <div className="mt-4 p-4 bg-stone-50 dark:bg-stone-700/50 rounded-xl border border-stone-200 dark:border-stone-600">
-                <div className="text-sm font-semibold text-stone-800 dark:text-stone-100 mb-3">What's included:</div>
+              <div className="mt-4 p-4 bg-[#DDF4FF] dark:bg-[#1CB0F6]/10 border-2 border-[#1CB0F6]/30 rounded-xl">
+                <div className="text-sm font-extrabold text-stone-800 dark:text-stone-100 mb-3">What's included:</div>
                 <div className="space-y-2 text-sm text-stone-600 dark:text-stone-400">
                   {userStats.subscriptionPlan === 'free' && (
                     <>
@@ -555,7 +555,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                   )}
                   {userStats.subscriptionPlan === 'pro' && (
                     <>
-                      <div>• 49 combined (analyses, study packs & citations) per month</div>
+                      <div>• 99 combined (analyses, study packs & citations) per month</div>
                       <div>• 100MB total library storage</div>
                       <div>• 999,999 Paper Summarizer words per month</div>
                       <div>• Focus Mode with unlimited blocked sites</div>
@@ -568,8 +568,8 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                   )}
                   {userStats.subscriptionPlan === 'premium' && (
                     <>
-                      <div>• Everything in Pro, 4× usage</div>
-                      <div>• 199 combined (analyses, study packs & citations) per month</div>
+                      <div>• Everything in Pro, 5× usage</div>
+                      <div>• 499 combined (analyses, study packs & citations) per month</div>
                       <div>• Summarise unlimited research papers</div>
                       <div>• 1GB total library storage</div>
                       <div>• Focus Mode with unlimited blocked sites</div>
@@ -585,11 +585,11 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
 
           {/* Focus Mode - Block websites (paid only) */}
           {isPaidUser && (
-            <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8">
-              <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-2">Focus Mode</h2>
+            <div className="bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 rounded-2xl p-6 sm:p-8">
+              <h2 className="text-xl font-extrabold text-stone-800 dark:text-stone-100 mb-2">Focus Mode</h2>
               {FOCUS_MODE_COMING_SOON ? (
                 <>
-                  <span className="inline-flex items-center px-3 py-1 bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 rounded-full text-sm font-semibold mb-4">Coming Soon</span>
+                  <span className="inline-flex items-center px-3 py-1 bg-[#FFF4E0] text-[#FF9600] border-2 border-[#FF9600]/30 rounded-xl text-sm font-extrabold mb-4">Coming Soon</span>
                   <p className="text-stone-600 text-sm mb-4">
                     Our Chrome extension is currently under review. Soon you&apos;ll be able to block distracting sites and earn your screen time by studying first. Thanks for your patience.
                   </p>
@@ -611,10 +611,10 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                               key={p.domain}
                               onClick={() => toggleBlockedSite(p.domain)}
                               disabled={focusModeSaving}
-                              className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+                              className={`px-4 py-2 rounded-xl text-sm transition-all ${
                                 active
-                                  ? 'bg-violet-600 text-white'
-                                  : 'bg-stone-100 dark:bg-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-600'
+                                  ? 'bg-[#A560E8] text-white font-extrabold border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5'
+                                  : 'bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 font-bold border-2 border-b-4 border-stone-200 dark:border-stone-600'
                               }`}
                             >
                               {p.label}
@@ -631,13 +631,13 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                         href={FOCUS_MODE_CHROME_EXTENSION_URL}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 mt-4 text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-medium text-sm"
+                        className="inline-flex items-center gap-2 mt-4 text-[#1CB0F6] hover:text-[#1899D6] font-extrabold text-sm"
                       >
                         Get Chrome Extension →
                       </a>
                       <button
                         onClick={() => onNavigate('focus-mode')}
-                        className="block mt-2 text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-medium text-sm"
+                        className="block mt-2 text-[#1CB0F6] hover:text-[#1899D6] font-extrabold text-sm"
                       >
                         Configure quiz rules on Dashboard →
                       </button>
@@ -649,16 +649,16 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
           )}
 
           {/* Security */}
-          <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-6 sm:p-8">
-            <h2 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-6">Security</h2>
+          <div className="bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 rounded-2xl p-6 sm:p-8">
+            <h2 className="text-xl font-extrabold text-stone-800 dark:text-stone-100 mb-6">Security</h2>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 py-3">
               <div>
-                <div className="font-semibold text-stone-800 dark:text-stone-100">Password</div>
-                <div className="text-stone-500 dark:text-stone-400 text-sm">Last changed: Recently</div>
+                <div className="font-extrabold text-stone-800 dark:text-stone-100">Password</div>
+                <div className="text-stone-500 dark:text-stone-400 text-sm font-bold">Last changed: Recently</div>
               </div>
-              <button 
+              <button
                 onClick={() => setShowPasswordModal(true)}
-                className="bg-violet-600 hover:bg-violet-500 text-white px-5 py-2.5 rounded-full font-medium transition-colors"
+                className="bg-[#1CB0F6] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#1899D6] active:border-b-2 active:translate-y-0.5 transition-all px-5 py-2.5"
               >
                 Change Password
               </button>
@@ -666,16 +666,16 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
           </div>
 
           {/* Danger Zone */}
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 rounded-2xl p-6 sm:p-8">
-            <h2 className="text-xl font-bold text-red-900 mb-6">Danger Zone</h2>
+          <div className="bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-2 border-b-4 border-[#FF4B4B]/30 rounded-2xl p-6 sm:p-8">
+            <h2 className="text-xl text-[#FF4B4B] font-extrabold mb-6">Danger Zone</h2>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 py-3">
               <div>
-                <div className="font-semibold text-red-900">Delete Account</div>
-                <div className="text-red-600 text-sm">Permanently delete your account and all data</div>
+                <div className="font-extrabold text-[#FF4B4B]">Delete Account</div>
+                <div className="text-[#FF4B4B]/70 text-sm font-bold">Permanently delete your account and all data</div>
               </div>
-              <button 
+              <button
                 onClick={() => setShowDeleteModal(true)}
-                className="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-xl font-medium transition-colors"
+                className="bg-[#FF4B4B] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#E04343] active:border-b-2 active:translate-y-0.5 transition-all px-5 py-2.5"
               >
                 Delete Account
               </button>
@@ -687,58 +687,58 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
       {/* Password Change Modal */}
       {showPasswordModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl">
-            <h3 className="text-xl font-bold text-stone-800 mb-6">Change Password</h3>
+          <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full border-2 border-b-4 border-stone-200 dark:border-stone-700" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+            <h3 className="text-xl font-extrabold text-stone-800 mb-6">Change Password</h3>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-2">
+                <label className="block text-sm font-extrabold text-stone-700 mb-2">
                   Current Password
                 </label>
                 <input
                   type="password"
                   value={passwordData.currentPassword}
                   onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
-                  className="w-full px-4 py-3 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all bg-white dark:bg-stone-700/50 text-stone-800 dark:text-stone-100"
+                  className="w-full px-4 py-3 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:border-[#1CB0F6] transition-all bg-white dark:bg-stone-700/50 text-stone-800 dark:text-stone-100 outline-none"
                   placeholder="Enter current password"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-2">
+                <label className="block text-sm font-extrabold text-stone-700 mb-2">
                   New Password
                 </label>
                 <input
                   type="password"
                   value={passwordData.newPassword}
                   onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
-                  className="w-full px-4 py-3 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all bg-white dark:bg-stone-700/50 text-stone-800 dark:text-stone-100"
+                  className="w-full px-4 py-3 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:border-[#1CB0F6] transition-all bg-white dark:bg-stone-700/50 text-stone-800 dark:text-stone-100 outline-none"
                   placeholder="Enter new password"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-2">
+                <label className="block text-sm font-extrabold text-stone-700 mb-2">
                   Confirm New Password
                 </label>
                 <input
                   type="password"
                   value={passwordData.confirmPassword}
                   onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                  className="w-full px-4 py-3 border border-stone-200 dark:border-stone-600 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all bg-white dark:bg-stone-700/50 text-stone-800 dark:text-stone-100"
+                  className="w-full px-4 py-3 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:border-[#1CB0F6] transition-all bg-white dark:bg-stone-700/50 text-stone-800 dark:text-stone-100 outline-none"
                   placeholder="Confirm new password"
                 />
               </div>
             </div>
 
             {passwordError && (
-              <div className="mt-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">
+              <div className="mt-4 p-4 bg-[#FFE8E8] border-2 border-[#FF4B4B]/30 text-[#FF4B4B] rounded-xl text-sm font-bold">
                 {passwordError}
               </div>
             )}
 
             {passwordSuccess && (
-              <div className="mt-4 p-4 bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800/50 text-violet-700 dark:text-violet-300 rounded-xl text-sm">
+              <div className="mt-4 p-4 bg-[#EAFFD6] border-2 border-[#58CC02]/30 text-[#58CC02] rounded-xl text-sm font-bold">
                 {passwordSuccess}
               </div>
             )}
@@ -751,14 +751,14 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                   setPasswordError('');
                   setPasswordSuccess('');
                 }}
-                className="px-5 py-2.5 text-stone-600 hover:text-stone-800 font-medium rounded-full hover:bg-stone-100 transition-colors"
+                className="bg-white text-stone-600 border-2 border-b-4 border-stone-200 active:border-b-2 active:translate-y-0.5 rounded-xl font-extrabold transition-all px-5 py-2.5"
               >
                 Cancel
               </button>
               <button
                 onClick={handlePasswordChange}
                 disabled={passwordLoading || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
-                className="bg-violet-600 hover:bg-violet-500 disabled:bg-stone-300 dark:disabled:bg-stone-600 text-white px-5 py-2.5 rounded-full font-medium transition-colors"
+                className="bg-[#1CB0F6] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#1899D6] active:border-b-2 active:translate-y-0.5 transition-all disabled:bg-stone-300 dark:disabled:bg-stone-600 px-5 py-2.5"
               >
                 {passwordLoading ? 'Changing...' : 'Change Password'}
               </button>
@@ -770,20 +770,20 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
       {/* Delete Account Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-lg w-full shadow-2xl">
+          <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-lg w-full border-2 border-b-4 border-stone-200 dark:border-stone-700" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
             <div className="text-center mb-6">
-              <div className="mx-auto flex items-center justify-center h-14 w-14 rounded-2xl bg-red-100 mb-4">
+              <div className="mx-auto flex items-center justify-center h-14 w-14 rounded-2xl bg-[#FFE8E8] border-2 border-[#FF4B4B]/30 mb-4">
                 <svg className="h-7 w-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-stone-800 mb-2">Delete Account</h3>
+              <h3 className="text-xl font-extrabold text-stone-800 mb-2">Delete Account</h3>
               <p className="text-stone-600 text-sm">
                 This action is <strong>permanent and irreversible</strong>. You will lose:
               </p>
             </div>
             
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+            <div className="bg-[#FFE8E8] border-2 border-[#FF4B4B]/30 rounded-xl p-4 mb-6">
               <ul className="text-sm text-red-800 space-y-2">
                 <li className="flex items-center">
                   <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -807,14 +807,14 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
             </div>
 
             <div className="mb-6">
-              <label className="block text-sm font-medium text-stone-700 mb-2">
+              <label className="block text-sm font-extrabold text-stone-700 mb-2">
                 To confirm, type <strong>DELETE</strong> in the box below:
               </label>
               <input
                 type="text"
                 value={deleteConfirmation}
                 onChange={(e) => setDeleteConfirmation(e.target.value)}
-                className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all"
+                className="w-full px-4 py-3 border-2 border-stone-200 rounded-xl focus:border-[#FF4B4B] transition-all outline-none"
                 placeholder="Type DELETE to confirm"
               />
             </div>
@@ -825,14 +825,14 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                   setShowDeleteModal(false);
                   setDeleteConfirmation('');
                 }}
-                className="px-5 py-2.5 text-stone-600 hover:text-stone-800 font-medium rounded-full hover:bg-stone-100 transition-colors"
+                className="bg-white text-stone-600 border-2 border-b-4 border-stone-200 active:border-b-2 active:translate-y-0.5 rounded-xl font-extrabold transition-all px-5 py-2.5"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteAccount}
                 disabled={deleteLoading || deleteConfirmation !== 'DELETE'}
-                className="bg-red-600 hover:bg-red-700 disabled:bg-stone-300 text-white px-5 py-2.5 rounded-full font-medium transition-colors"
+                className="bg-[#FF4B4B] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#E04343] active:border-b-2 active:translate-y-0.5 transition-all disabled:bg-stone-300 px-5 py-2.5"
               >
                 {deleteLoading ? 'Deleting...' : 'Delete Account'}
               </button>

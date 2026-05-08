@@ -69,11 +69,11 @@ export default function InteractiveCitationsDemo({
 
   if (variant === 'side-left') {
     return (
-      <div className="rounded-2xl border border-blue-200/80 dark:border-blue-800/50 bg-gradient-to-b from-blue-50/90 to-white dark:from-blue-950/30 dark:to-stone-900/80 p-3 shadow-sm ring-1 ring-blue-100/80 dark:ring-blue-900/40">
-        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-blue-700 dark:text-blue-400 mb-2 text-center">Peer-reviewed</p>
-        <div className="rounded-lg border border-stone-200/90 dark:border-stone-600 bg-white/95 dark:bg-stone-900/60 p-2 mb-2 shadow-inner">
-          <p className="text-[9px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-0.5">Topic</p>
-          <p className="text-[11px] text-stone-800 dark:text-stone-100 font-medium leading-snug line-clamp-3">
+      <div className="rounded-2xl border-2 border-b-4 border-[#E5E5E5] bg-white p-3" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+        <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#1CB0F6] mb-2 text-center">Peer-reviewed</p>
+        <div className="rounded-xl border-2 border-[#E5E5E5] bg-white p-2 mb-2">
+          <p className="text-[9px] font-extrabold uppercase tracking-wider text-[#AFAFAF] mb-0.5">Topic</p>
+          <p className="text-[11px] text-[#3C3C3C] font-extrabold leading-snug line-clamp-3">
             {topicLabel}
           </p>
         </div>
@@ -86,14 +86,14 @@ export default function InteractiveCitationsDemo({
                   type="button"
                   onClick={() => setExpandedId(isOpen ? null : src.id)}
                   onMouseEnter={() => setExpandedId(src.id)}
-                  className={`w-full text-left rounded-lg border transition-all duration-200 p-2 ${
+                  className={`w-full text-left rounded-xl border-2 transition-all duration-200 p-2 ${
                     isOpen
-                      ? 'border-blue-400/80 bg-blue-50/90 dark:bg-blue-950/40 ring-1 ring-blue-300/50 dark:ring-blue-700/50'
-                      : 'border-stone-200/90 dark:border-stone-600 bg-white/80 dark:bg-stone-800/50 hover:border-blue-300/70'
+                      ? 'border-[#1CB0F6] bg-[#DDF4FF] border-b-4'
+                      : 'border-[#E5E5E5] bg-white hover:border-[#1899D6]'
                   }`}
                 >
-                  <p className="text-[11px] font-semibold text-stone-900 dark:text-stone-50 leading-snug line-clamp-2">{src.title}</p>
-                  <p className="text-[9px] text-stone-500 dark:text-stone-400 mt-0.5">{src.year} · {src.journal}</p>
+                  <p className="text-[11px] font-extrabold text-[#3C3C3C] leading-snug line-clamp-2">{src.title}</p>
+                  <p className="text-[9px] text-[#AFAFAF] mt-0.5">{src.year} · {src.journal}</p>
                 </button>
               </li>
             );
@@ -106,30 +106,30 @@ export default function InteractiveCitationsDemo({
   if (variant === 'side-right') {
     const t = formatCitation(style, focusSource);
     return (
-      <div className="rounded-2xl border border-blue-200/80 dark:border-blue-800/50 bg-gradient-to-b from-blue-50/90 to-white dark:from-blue-950/25 dark:to-stone-900/80 p-3 shadow-sm ring-1 ring-blue-100/80 dark:ring-blue-900/40">
-        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-blue-700 dark:text-blue-400 mb-2 text-center">Copy & export</p>
-        <div className="flex rounded-lg border border-blue-200/90 dark:border-blue-700/60 bg-white/90 dark:bg-stone-800/80 p-0.5 mb-2">
+      <div className="rounded-2xl border-2 border-b-4 border-[#E5E5E5] bg-white p-3" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+        <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-[#1CB0F6] mb-2 text-center">Copy & export</p>
+        <div className="flex rounded-xl border-2 border-[#E5E5E5] bg-white p-0.5 mb-2">
           {(['APA', 'MLA', 'Chicago'] as const).map((s) => (
             <button
               key={s}
               type="button"
               onClick={() => setStyle(s)}
-              className={`flex-1 px-1.5 py-1 rounded-md text-[10px] font-semibold transition-all ${
-                style === s ? 'bg-blue-600 text-white shadow-sm' : 'text-stone-600 dark:text-stone-300 hover:bg-blue-50 dark:hover:bg-blue-900/40'
+              className={`flex-1 px-1.5 py-1 rounded-lg text-[10px] font-extrabold transition-all ${
+                style === s ? 'bg-[#1CB0F6] text-white border-2 border-b-4 border-[#1899D6]' : 'text-[#AFAFAF] hover:bg-[#DDF4FF]'
               }`}
             >
               {s}
             </button>
           ))}
         </div>
-        <p className="text-[9px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-1">Citation</p>
-        <p className="text-[10px] text-stone-700 dark:text-stone-300 leading-relaxed font-mono bg-stone-50 dark:bg-stone-950/50 rounded-lg p-2 border border-stone-100 dark:border-stone-700 line-clamp-6">
+        <p className="text-[9px] font-extrabold uppercase tracking-wider text-[#AFAFAF] mb-1">Citation</p>
+        <p className="text-[10px] text-[#3C3C3C] leading-relaxed font-mono bg-[#F7F7F7] rounded-xl p-2 border-2 border-[#E5E5E5] line-clamp-6">
           {t}
         </p>
         <button
           type="button"
           onClick={() => copy(focusSource.id, t)}
-          className="mt-2 w-full text-center text-[11px] font-semibold text-blue-700 dark:text-blue-400 hover:underline"
+          className="mt-2 w-full text-center text-[11px] font-extrabold text-[#1CB0F6] hover:underline"
         >
           {copiedId === focusSource.id ? 'Copied!' : 'Copy citation'}
         </button>
@@ -138,26 +138,26 @@ export default function InteractiveCitationsDemo({
   }
 
   return (
-    <div className="rounded-2xl border border-blue-200/80 dark:border-blue-800/50 bg-gradient-to-b from-blue-50/90 to-white dark:from-blue-950/30 dark:to-stone-900/80 p-4 sm:p-6 shadow-sm ring-1 ring-blue-100/80 dark:ring-blue-900/40">
+    <div className="rounded-2xl border-2 border-b-4 border-[#E5E5E5] bg-white p-4 sm:p-6" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-4">
         <div>
-          <h3 className="text-base sm:text-lg font-semibold text-stone-900 dark:text-stone-50" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
+          <h3 className="text-base sm:text-lg font-extrabold text-[#3C3C3C]" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
             Try the citation finder
           </h3>
-          <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 mt-1">
+          <p className="text-xs sm:text-sm text-[#AFAFAF] mt-1">
             Hover a result, then copy a real-style reference — peer-reviewed sources only.
           </p>
         </div>
-        <div className="flex rounded-lg border border-blue-200/90 dark:border-blue-700/60 bg-white/90 dark:bg-stone-800/80 p-0.5 shrink-0">
+        <div className="flex rounded-xl border-2 border-[#E5E5E5] bg-white p-0.5 shrink-0">
           {(['APA', 'MLA', 'Chicago'] as const).map((s) => (
             <button
               key={s}
               type="button"
               onClick={() => setStyle(s)}
-              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all ${
                 style === s
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-stone-600 dark:text-stone-300 hover:bg-blue-50 dark:hover:bg-blue-900/40'
+                  ? 'bg-[#1CB0F6] text-white border-2 border-b-4 border-[#1899D6]'
+                  : 'text-[#AFAFAF] hover:bg-[#DDF4FF]'
               }`}
             >
               {s}
@@ -166,9 +166,9 @@ export default function InteractiveCitationsDemo({
         </div>
       </div>
 
-      <div className="rounded-xl border border-stone-200/90 dark:border-stone-600 bg-white/95 dark:bg-stone-900/60 p-3 mb-4 shadow-inner">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-1">Your topic</p>
-        <p className="text-sm text-stone-800 dark:text-stone-100 font-medium">{topicLabel}</p>
+      <div className="rounded-2xl border-2 border-[#E5E5E5] bg-white p-3 mb-4">
+        <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#AFAFAF] mb-1">Your topic</p>
+        <p className="text-sm text-[#3C3C3C] font-extrabold">{topicLabel}</p>
       </div>
 
       <ul className="space-y-3" role="list">
@@ -180,29 +180,29 @@ export default function InteractiveCitationsDemo({
                 type="button"
                 onClick={() => setExpandedId(isOpen ? null : src.id)}
                 onMouseEnter={() => setExpandedId(src.id)}
-                className={`w-full text-left rounded-xl border transition-all duration-200 p-3 sm:p-4 ${
+                className={`w-full text-left rounded-2xl border-2 transition-all duration-200 p-3 sm:p-4 ${
                   isOpen
-                    ? 'border-blue-400/80 bg-blue-50/90 dark:bg-blue-950/40 shadow-md ring-1 ring-blue-300/50 dark:ring-blue-700/50'
-                    : 'border-stone-200/90 dark:border-stone-600 bg-white/80 dark:bg-stone-800/50 hover:border-blue-300/70 dark:hover:border-blue-600/50'
+                    ? 'border-[#1CB0F6] bg-[#DDF4FF] border-b-4'
+                    : 'border-[#E5E5E5] bg-white hover:border-[#1899D6]'
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-stone-900 dark:text-stone-50 leading-snug">{src.title}</p>
-                    <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">
+                    <p className="text-sm font-extrabold text-[#3C3C3C] leading-snug">{src.title}</p>
+                    <p className="text-xs text-[#AFAFAF] mt-1">
                       {src.authors} · {src.year} · {src.journal}
                     </p>
                   </div>
                   {src.peerReviewed && (
-                    <span className="shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/60">
+                    <span className="shrink-0 text-[10px] font-extrabold uppercase tracking-wide px-2 py-0.5 rounded-full bg-[#E5F8D0] text-[#58CC02] border-2 border-[#58CC02]">
                       Peer-reviewed
                     </span>
                   )}
                 </div>
                 {isOpen && (
-                  <div className="mt-3 pt-3 border-t border-stone-200/80 dark:border-stone-600/80 animate-in fade-in slide-in-from-top-1 duration-200">
-                    <p className="text-[10px] font-semibold text-stone-500 dark:text-stone-400 mb-1.5">{style} (sample)</p>
-                    <p className="text-xs text-stone-700 dark:text-stone-300 leading-relaxed font-mono bg-stone-50 dark:bg-stone-950/50 rounded-lg p-2.5 border border-stone-100 dark:border-stone-700">
+                  <div className="mt-3 pt-3 border-t-2 border-[#E5E5E5] animate-in fade-in slide-in-from-top-1 duration-200">
+                    <p className="text-[10px] font-extrabold text-[#AFAFAF] mb-1.5">{style} (sample)</p>
+                    <p className="text-xs text-[#3C3C3C] leading-relaxed font-mono bg-[#F7F7F7] rounded-xl p-2.5 border-2 border-[#E5E5E5]">
                       {formatCitation(style, src)}
                     </p>
                     <button
@@ -211,7 +211,7 @@ export default function InteractiveCitationsDemo({
                         e.stopPropagation();
                         copy(src.id, formatCitation(style, src));
                       }}
-                      className="mt-2 text-xs font-semibold text-blue-700 dark:text-blue-400 hover:underline"
+                      className="mt-2 text-xs font-extrabold text-[#1CB0F6] hover:underline"
                     >
                       {copiedId === src.id ? 'Copied!' : 'Copy citation'}
                     </button>

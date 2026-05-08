@@ -207,29 +207,15 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
             <div
               className={
                 embedded
-                  ? 'relative rounded-3xl overflow-hidden mb-3 sm:mb-4 scroll-mt-8 bg-white dark:bg-stone-900/85 ring-1 ring-sky-200/80 dark:ring-sky-800/40 shadow-[0_20px_50px_-18px_rgba(14,116,184,0.14),0_8px_30px_-12px_rgba(15,23,42,0.08)] dark:shadow-[0_24px_60px_-20px_rgba(0,0,0,0.55)]'
-                  : 'relative rounded-[1.75rem] overflow-hidden mb-6 sm:mb-10 scroll-mt-8 max-w-6xl mx-auto border border-sky-200/90 dark:border-sky-900/40 bg-[#fafcff] dark:bg-stone-900/85 ring-1 ring-sky-100/85 dark:ring-sky-950/35 shadow-[0_20px_60px_-28px_rgba(14,116,184,0.16),0_8px_32px_-14px_rgba(15,23,42,0.07)] dark:shadow-[0_24px_60px_-20px_rgba(0,0,0,0.55)]'
+                  ? 'relative rounded-2xl overflow-hidden mb-3 sm:mb-4 scroll-mt-8 bg-white dark:bg-stone-900 border-2 border-b-4 border-[#1CB0F6]/30 dark:border-[#1CB0F6]/40'
+                  : 'relative rounded-2xl overflow-hidden mb-6 sm:mb-10 scroll-mt-8 max-w-6xl mx-auto bg-white dark:bg-stone-900 border-2 border-b-4 border-[#1CB0F6]/30 dark:border-[#1CB0F6]/40'
               }
             >
+              {/* accent strip removed for Duolingo style */}
+              {/* blur blobs removed for Duolingo style */}
               <div
-                className="h-[3px] w-full bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-600 opacity-95 dark:opacity-95"
-                aria-hidden
-              />
-              <>
-                <div className="pointer-events-none absolute -top-24 -right-20 w-[19rem] h-[19rem] rounded-full bg-sky-400/14 dark:bg-sky-500/12 blur-3xl" aria-hidden />
-                <div className="pointer-events-none absolute -bottom-20 -left-16 w-64 h-64 rounded-full bg-indigo-400/11 dark:bg-indigo-500/14 blur-[2.75rem]" aria-hidden />
-              </>
-              <div
-                className={`relative bg-white/95 dark:bg-stone-900/70 ${embedded ? 'rounded-b-[1.375rem]' : 'rounded-b-[1.75rem]'} ${embedded ? 'p-4 sm:p-6 lg:p-8' : 'p-4 sm:p-8 lg:p-10'}`}
+                className={`relative bg-white dark:bg-stone-900 rounded-b-2xl ${embedded ? 'p-4 sm:p-6 lg:p-8' : 'p-4 sm:p-8 lg:p-10'}`}
               >
-                <div
-                  className={`pointer-events-none absolute inset-0 ${embedded ? 'rounded-b-[1.375rem]' : 'rounded-b-[1.75rem]'} ${
-                    embedded
-                      ? 'bg-[radial-gradient(ellipse_85%_55%_at_50%_-18%,rgba(14,165,233,0.09),transparent_58%)] dark:bg-[radial-gradient(ellipse_85%_55%_at_50%_-15%,rgba(56,189,248,0.11),transparent_58%)]'
-                      : 'bg-[radial-gradient(ellipse_90%_52%_at_50%_-16%,rgba(14,165,233,0.08),transparent_55%)] dark:bg-[radial-gradient(ellipse_85%_52%_at_50%_-14%,rgba(56,189,248,0.1),transparent_55%)]'
-                  }`}
-                  aria-hidden
-                />
 
                 {/* Studying mascot — top left, always playing */}
                 <img
@@ -238,7 +224,7 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                   aria-hidden
                   loading="lazy"
                   decoding="async"
-                  className="hidden sm:block pointer-events-none absolute top-3 left-3 sm:top-4 sm:left-4 w-20 sm:w-24 lg:w-28 h-auto z-10 drop-shadow-[0_12px_22px_rgba(14,165,233,0.30)]"
+                  className="hidden sm:block pointer-events-none absolute top-3 left-3 sm:top-4 sm:left-4 w-20 sm:w-24 lg:w-28 h-auto z-10"
                 />
                 {/* Dancing mascot — top right, always playing */}
                 <img
@@ -247,12 +233,12 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                   aria-hidden
                   loading="lazy"
                   decoding="async"
-                  className="hidden sm:block pointer-events-none absolute top-3 right-3 sm:top-4 sm:right-4 w-20 sm:w-24 lg:w-28 h-auto z-10 drop-shadow-[0_12px_22px_rgba(14,165,233,0.30)]"
+                  className="hidden sm:block pointer-events-none absolute top-3 right-3 sm:top-4 sm:right-4 w-20 sm:w-24 lg:w-28 h-auto z-10"
                 />
 
                 <div className="relative min-w-0">
                   <div className="text-center mb-3 sm:mb-4">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-sky-50 dark:bg-sky-950/50 text-sky-950 dark:text-sky-200 ring-1 ring-sky-200/90 dark:ring-sky-800/55 text-[10px] sm:text-[11px] font-semibold tracking-[0.1em] uppercase">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#DDF4FF] dark:bg-[#1CB0F6]/10 border-2 border-[#1CB0F6]/30 text-[#1CB0F6] text-[10px] sm:text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                       <svg className="w-3.5 h-3.5 opacity-90 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                       </svg>
@@ -261,11 +247,11 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                   </div>
                   <div className="min-w-0 self-start">
                     <h1
-                      className={`relative dash-serif font-semibold text-stone-900 dark:text-stone-50 text-center tracking-tight text-2xl sm:text-3xl lg:text-[2.45rem] leading-[1.08] ${embedded ? 'mb-2' : 'mb-1.5 sm:mb-2'}`}
-                      style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+                      className={`relative font-extrabold text-stone-900 dark:text-stone-50 text-center tracking-tight text-2xl sm:text-3xl lg:text-[2.45rem] leading-[1.08] ${embedded ? 'mb-2' : 'mb-1.5 sm:mb-2'}`}
+                      style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                     >
                       Find{' '}
-                      <span className="bg-gradient-to-r from-sky-600 via-blue-600 to-violet-600 dark:from-sky-300 dark:via-blue-300 dark:to-violet-300 bg-clip-text text-transparent">
+                      <span className="text-[#1CB0F6]">
                         academic sources
                       </span>{' '}
                       in seconds
@@ -275,31 +261,31 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                     </p>
                     {!embedded && (
                       <>
-                        <div className="relative flex rounded-2xl bg-sky-50/70 dark:bg-sky-950/30 p-1 mb-3 sm:mb-4 max-w-lg mx-auto border border-sky-200/80 dark:border-sky-800/50 shadow-sm shadow-sky-900/5">
+                        <div className="flex gap-2 mb-3 sm:mb-4 max-w-lg mx-auto" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                           <button
                             type="button"
                             onClick={goAnalyze}
-                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[0.65rem] font-medium text-sm transition-all duration-200 text-stone-600 dark:text-stone-400 hover:text-sky-950 dark:hover:text-stone-200 hover:bg-white/80 dark:hover:bg-stone-800/50"
+                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-extrabold text-sm transition-all duration-200 bg-white dark:bg-stone-800 border-2 border-b-4 border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 active:border-b-2 active:translate-y-0.5"
                           >
                             <span className="text-base" aria-hidden>📝</span> Analyze Text
                           </button>
                           <button
                             type="button"
                             onClick={goStudyPack}
-                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[0.65rem] font-medium text-sm transition-all duration-200 text-stone-600 dark:text-stone-400 hover:text-sky-950 dark:hover:text-stone-200 hover:bg-white/80 dark:hover:bg-stone-800/50"
+                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-extrabold text-sm transition-all duration-200 bg-white dark:bg-stone-800 border-2 border-b-4 border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 active:border-b-2 active:translate-y-0.5"
                           >
                             <span className="text-base" aria-hidden>📦</span> Study Tools
                           </button>
                           <button
                             type="button"
-                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[0.65rem] font-medium text-sm transition-all duration-200 bg-white dark:bg-stone-800 text-blue-900 dark:text-sky-200 shadow-sm ring-1 ring-sky-200/90 dark:ring-sky-800/55"
+                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-extrabold text-sm transition-all duration-200 bg-[#DDF4FF] dark:bg-[#1CB0F6]/10 text-[#1CB0F6] border-2 border-b-4 border-[#1CB0F6]"
                           >
                             <span className="text-base" aria-hidden>📚</span> Citations
                           </button>
                         </div>
                         {user && citationCheckLoaded && !hasDoneCitation && (
                           <div className="flex flex-col items-center gap-1 mb-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                            <span className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-stone-50 dark:bg-stone-800/80 border border-stone-200/90 dark:border-stone-600 text-stone-800 dark:text-stone-200 text-sm font-medium shadow-sm">
+                            <span className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-stone-800 border-2 border-b-4 border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-200 text-sm font-extrabold" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                               Start your first citation
                             </span>
                             <svg className="w-5 h-5 text-sky-600 dark:text-sky-400 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
@@ -314,9 +300,9 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
 
                 <div className={`relative mb-2 max-w-4xl mx-auto z-20 ${embedded ? 'mt-0' : 'mt-1'}`}>
                   <div
-                    className={`relative rounded-[1.25rem] border transition-all duration-300 shadow-sm focus-within:shadow-md focus-within:ring-2 focus-within:ring-sky-500/35 border-sky-200/85 dark:border-sky-800/50 bg-white/95 dark:bg-stone-950/50 focus-within:border-sky-400/70 dark:focus-within:border-sky-500/55`}
+                    className={`relative rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 transition-all duration-300 focus-within:border-[#1CB0F6]`}
                   >
-                    <div className={`relative rounded-[inherit] bg-white/98 dark:bg-stone-800/95 backdrop-blur-sm ${embedded ? 'min-h-[132px] sm:min-h-[150px]' : 'min-h-[140px] sm:min-h-[180px]'}`}>
+                    <div className={`relative rounded-[inherit] ${embedded ? 'min-h-[132px] sm:min-h-[150px]' : 'min-h-[140px] sm:min-h-[180px]'}`}>
                       <textarea
                         value={inputText}
                         onChange={(e) => {
@@ -358,11 +344,12 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                       type="button"
                       onClick={handleSubmit}
                       disabled={!isTextValid() || isSearchingCitations}
-                      className={`min-w-[200px] px-8 sm:px-12 py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 font-semibold text-base ${
+                      className={`min-w-[200px] px-8 sm:px-12 py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 font-extrabold uppercase tracking-wide text-base ${
                         isTextValid() && !isSearchingCitations
-                          ? 'bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:via-blue-500 hover:to-indigo-500 dark:from-sky-500 dark:via-blue-600 dark:to-indigo-600 dark:hover:from-sky-400 dark:hover:via-blue-500 dark:hover:to-indigo-500 text-white shadow-lg shadow-sky-900/18 dark:shadow-black/35 ring-1 ring-sky-950/15 hover:-translate-y-0.5 active:scale-[0.98] cursor-pointer'
-                          : 'bg-stone-300 dark:bg-stone-600 text-white dark:text-stone-200 cursor-not-allowed shadow-inner'
+                          ? 'bg-[#58CC02] text-white border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 cursor-pointer'
+                          : 'bg-stone-200 dark:bg-stone-700 text-white dark:text-stone-200 border-2 border-b-4 border-stone-300 dark:border-stone-600 cursor-not-allowed'
                       }`}
+                      style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                     >
                       {isSearchingCitations ? (
                         <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
@@ -381,7 +368,8 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                     <select
                       value={citationStyle}
                       onChange={(e) => setCitationStyle(e.target.value)}
-                      className="px-4 py-2.5 rounded-xl border border-stone-300/90 dark:border-stone-600/80 bg-white dark:bg-stone-800/90 backdrop-blur-sm text-sm font-semibold shadow-sm transition-all ring-1 ring-sky-100/70 dark:ring-sky-950/40 focus:ring-2 focus:ring-sky-500/40 focus:border-sky-400/70"
+                      className="px-4 py-2.5 rounded-xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-sm font-extrabold transition-all focus:border-[#1CB0F6]"
+                      style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                     >
                       <option value="APA">APA 7th</option>
                       <option value="MLA">MLA 9th</option>
@@ -393,7 +381,8 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                     <select
                       value={citationYearRange}
                       onChange={(e) => setCitationYearRange(e.target.value)}
-                      className="px-4 py-2.5 rounded-xl border border-stone-300/90 dark:border-stone-600/80 bg-white dark:bg-stone-800/90 backdrop-blur-sm text-sm font-semibold shadow-sm transition-all ring-1 ring-sky-100/70 dark:ring-sky-950/40 focus:ring-2 focus:ring-sky-500/40 focus:border-sky-400/70"
+                      className="px-4 py-2.5 rounded-xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-sm font-extrabold transition-all focus:border-[#1CB0F6]"
+                      style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                     >
                       <option value="all">All years</option>
                       <option value="3">Last 3 years</option>
@@ -407,7 +396,8 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                         key={idx}
                         type="button"
                         onClick={() => setInputText(topic)}
-                        className="px-3.5 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm rounded-xl bg-white dark:bg-stone-800/90 border border-stone-300/90 dark:border-stone-600 text-stone-700 dark:text-stone-200 font-medium transition-all duration-200 hover:border-sky-300/90 dark:hover:border-sky-600/50 hover:bg-sky-50/90 dark:hover:bg-sky-950/35"
+                        className="px-3.5 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm rounded-xl bg-white dark:bg-stone-800 border-2 border-b-4 border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-200 font-bold transition-all duration-200 hover:border-[#1CB0F6]/40 active:border-b-2 active:translate-y-0.5"
+                        style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                       >
                         {topic}
                       </button>
@@ -416,15 +406,15 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                 </div>
 
                 <section
-                  className={`rounded-2xl border border-sky-200/75 dark:border-sky-800/45 bg-gradient-to-b from-white/95 to-sky-50/40 dark:from-stone-900/55 dark:to-sky-950/20 p-4 sm:p-6 ring-1 ring-sky-100/80 dark:ring-sky-950/35 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.65)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] ${
-                    embedded ? 'mt-7 sm:mt-8' : 'mt-8 sm:mt-10 pt-6 sm:pt-8 border-t border-sky-200/50 dark:border-sky-900/40'
+                  className={`rounded-2xl bg-[#DDF4FF] dark:bg-[#1CB0F6]/10 border-2 border-b-4 border-[#1CB0F6]/30 p-4 sm:p-6 ${
+                    embedded ? 'mt-7 sm:mt-8' : 'mt-8 sm:mt-10 pt-6 sm:pt-8'
                   }`}
                   aria-labelledby="citation-previews-heading"
                 >
                   <h2
                     id="citation-previews-heading"
-                    className="text-center dash-serif text-base sm:text-lg font-semibold text-stone-900 dark:text-stone-100"
-                    style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+                    className="text-center text-base sm:text-lg font-extrabold text-stone-900 dark:text-stone-100"
+                    style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                   >
                     What your sources can look like
                   </h2>
@@ -435,7 +425,7 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                     {EMBEDDED_CITATION_PREVIEWS.map((item) => (
                       <figure
                         key={item.id}
-                        className="snap-center shrink-0 w-[min(72vw,280px)] sm:w-[min(40vw,340px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-sky-500 dark:border-sky-400 shadow-md shadow-sky-900/15 flex flex-col"
+                        className="snap-center shrink-0 w-[min(72vw,280px)] sm:w-[min(40vw,340px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-b-4 border-[#1CB0F6] flex flex-col"
                       >
                         <div className="relative aspect-[16/11] w-full bg-black/80">
                           {item.kind === 'image' ? (
@@ -461,7 +451,7 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                             </video>
                           )}
                         </div>
-                        <figcaption className="px-2 py-1.5 text-center text-[10px] sm:text-[11px] font-semibold text-stone-600 dark:text-stone-400 border-t border-stone-200/70 dark:border-stone-700/70 bg-white/95 dark:bg-stone-900/95">
+                        <figcaption className="px-2 py-1.5 text-center text-[10px] sm:text-[11px] font-extrabold text-stone-600 dark:text-stone-400 border-t-2 border-[#1CB0F6]/30 bg-white dark:bg-stone-900" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                           {item.label}
                         </figcaption>
                       </figure>
@@ -486,8 +476,8 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
 
       {/* Signup Prompt Modal - for logged-out users after fake search */}
       {showSignupPrompt && teaserTopic && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-stone-800 rounded-3xl shadow-2xl border border-stone-200 dark:border-stone-600 max-w-md w-full p-8 text-center relative animate-in zoom-in-95 fade-in duration-300">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 max-w-md w-full p-8 text-center relative animate-in zoom-in-95 fade-in duration-300" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
             <button
               type="button"
               onClick={() => { setShowSignupPrompt(false); setTeaserTopic(''); }}
@@ -498,11 +488,11 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
               </svg>
             </button>
 
-            <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900/40 rounded-2xl flex items-center justify-center mx-auto mb-6 overflow-hidden">
+            <div className="w-20 h-20 bg-[#DDF4FF] dark:bg-[#1CB0F6]/10 border-2 border-[#1CB0F6]/30 rounded-2xl flex items-center justify-center mx-auto mb-6 overflow-hidden">
               <ScholarMascot size={72} animated={false} pose="celebrating" />
             </div>
 
-            <h3 className="text-2xl font-bold text-stone-800 dark:text-stone-100 mb-3">Search Complete</h3>
+            <h3 className="text-2xl font-extrabold text-stone-800 dark:text-stone-100 mb-3">Search Complete</h3>
             <p className="text-stone-600 dark:text-stone-400 mb-4">
               Found <span className="font-bold text-blue-600 dark:text-blue-400">10 appropriate citations</span> for your research on{' '}
               <span className="font-medium text-stone-700 dark:text-stone-300">&quot;{teaserTopic.length > 50 ? teaserTopic.slice(0, 50) + '...' : teaserTopic}&quot;</span>
@@ -515,7 +505,7 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
               <button
                 type="button"
                 onClick={() => onNavigate('signup')}
-                className="w-full px-6 py-3.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white font-semibold rounded-2xl transition-all shadow-md shadow-violet-900/15 ring-1 ring-violet-900/10"
+                className="w-full px-6 py-3.5 bg-[#58CC02] text-white font-extrabold uppercase tracking-wide rounded-xl transition-all border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5"
               >
                 Sign Up to See Full List
               </button>

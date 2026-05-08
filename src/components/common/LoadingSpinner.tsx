@@ -1,4 +1,5 @@
 import React from 'react';
+import RandomMascotLoader from './RandomMascotLoader';
 
 interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';
@@ -6,6 +7,10 @@ interface LoadingSpinnerProps {
   text?: string;
   fullScreen?: boolean;
   className?: string;
+  /** When fullScreen is true, render a Scholar mascot above the spinner.
+   *  Defaults to true so existing fullScreen call-sites get the upgrade
+   *  without a code change. Pass `mascot={false}` to opt out. */
+  mascot?: boolean;
 }
 
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
@@ -13,7 +18,8 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   color = 'blue',
   text,
   fullScreen = false,
-  className = ''
+  className = '',
+  mascot = true,
 }) => {
   const sizeClasses = {
     sm: 'w-4 h-4',
@@ -42,7 +48,8 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   if (fullScreen) {
     return (
       <div className="fixed inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50">
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 flex flex-col items-center gap-4">
+          {mascot && <RandomMascotLoader size={120} text="" />}
           {spinner}
         </div>
       </div>

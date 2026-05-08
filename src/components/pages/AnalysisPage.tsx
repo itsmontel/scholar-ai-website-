@@ -66,11 +66,11 @@ function simpleMarkdownToHtml(md: string): string {
     .map((line) => {
       const trimmed = line.trim();
       const h1 = trimmed.match(/^# (.+)$/);
-      if (h1) return `<h2 class="text-xl font-bold mt-6 mb-2 text-stone-900 dark:text-stone-100">${escape(h1[1])}</h2>`;
+      if (h1) return `<h2 class="text-xl font-extrabold mt-6 mb-2 text-stone-900 dark:text-stone-100" style="font-family:'Nunito',system-ui,sans-serif">${escape(h1[1])}</h2>`;
       const h2 = trimmed.match(/^## (.+)$/);
-      if (h2) return `<h3 class="text-lg font-semibold mt-4 mb-2 text-stone-800 dark:text-stone-200">${escape(h2[1])}</h3>`;
+      if (h2) return `<h3 class="text-lg font-extrabold mt-4 mb-2 text-stone-800 dark:text-stone-200" style="font-family:'Nunito',system-ui,sans-serif">${escape(h2[1])}</h3>`;
       const h3 = trimmed.match(/^### (.+)$/);
-      if (h3) return `<h4 class="text-base font-semibold mt-3 mb-1 text-stone-700 dark:text-stone-300">${escape(h3[1])}</h4>`;
+      if (h3) return `<h4 class="text-base font-extrabold mt-3 mb-1 text-stone-700 dark:text-stone-300" style="font-family:'Nunito',system-ui,sans-serif">${escape(h3[1])}</h4>`;
       const content = trimmed
         .replace(/\*\*([^*]+)\*\*/g, (_, m) => `<strong>${escape(m)}</strong>`)
         .replace(/\*([^*]+)\*/g, (_, m) => `<em>${escape(m)}</em>`)
@@ -166,18 +166,11 @@ function FreeAnalysisProBlur({
 }) {
   return (
     <div
-      className={`group relative overflow-hidden rounded-2xl border border-violet-300/80 bg-gradient-to-b from-violet-100/40 via-white to-stone-50/95 shadow-[0_12px_40px_-12px_rgba(109,40,217,0.35)] ring-1 ring-violet-400/15 dark:border-violet-700/45 dark:from-violet-950/50 dark:via-stone-900 dark:to-stone-950 dark:shadow-[0_16px_48px_-12px_rgba(0,0,0,0.55)] dark:ring-violet-500/10 ${
+      className={`group relative overflow-hidden rounded-2xl border-2 border-b-4 border-[#E5E5E5] bg-white dark:bg-stone-900 dark:border-stone-700 ${
         dense ? 'my-1' : 'my-2'
       }`}
+      style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
     >
-      {/* Soft edge light — draws the eye */}
-      <div
-        className="pointer-events-none absolute -inset-px rounded-2xl opacity-60 dark:opacity-40"
-        style={{
-          background:
-            'linear-gradient(135deg, rgba(139,92,246,0.25) 0%, transparent 40%, transparent 60%, rgba(167,139,250,0.15) 100%)',
-        }}
-      />
       {/* Blurred “peek” — real shapes readable enough to tease, not enough to use */}
       <div
         className={`pointer-events-none relative overflow-hidden ${dense ? 'min-h-[72px] max-h-[100px]' : 'min-h-[140px] max-h-[min(260px,42vh)]'}`}
@@ -191,7 +184,7 @@ function FreeAnalysisProBlur({
       </div>
       {/* CTA — centered over blur; z-index so it always wins stacking */}
       <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 px-3 py-4 sm:gap-2.5 sm:px-4">
-        <div className="flex items-center gap-2 rounded-full border border-violet-200/90 bg-white/75 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-violet-600 shadow-sm backdrop-blur-md dark:border-violet-600/50 dark:bg-stone-900/75 dark:text-violet-300">
+        <div className="flex items-center gap-2 rounded-full border-2 border-[#FF9600] bg-[#FFF4E0] px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#FF9600] dark:border-[#D97F00] dark:bg-[#FF9600]/20 dark:text-[#FF9600]">
           <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>
@@ -199,7 +192,7 @@ function FreeAnalysisProBlur({
         </div>
         {headline ? (
           <p
-            className={`max-w-[19rem] text-center font-semibold leading-snug text-stone-900 drop-shadow-sm dark:text-stone-50 ${
+            className={`max-w-[19rem] text-center font-extrabold leading-snug text-stone-900 dark:text-stone-50 ${
               dense ? 'text-xs' : 'text-sm'
             }`}
           >
@@ -210,7 +203,7 @@ function FreeAnalysisProBlur({
           type="button"
           onClick={onUpgrade}
           disabled={upgradeDisabled}
-          className="relative px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-violet-600/35 transition-all hover:scale-[1.02] hover:shadow-violet-500/45 active:scale-[0.99] disabled:cursor-wait disabled:opacity-60 disabled:hover:scale-100 rounded-xl bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-500 hover:to-violet-600"
+          className="relative px-5 py-2.5 text-sm font-extrabold text-white transition-all active:border-b-2 active:translate-y-0.5 disabled:cursor-wait disabled:opacity-60 rounded-xl bg-[#FF9600] border-2 border-b-4 border-[#D97F00] hover:bg-[#E08800]"
         >
           {primaryLabel}
         </button>
@@ -440,7 +433,7 @@ function buildRevisedDraftRangesFromCache(
 }
 
 const REVISION_MARK_CLASS =
-  'bg-violet-200/95 dark:bg-violet-900/50 text-violet-950 dark:text-violet-50 px-0.5 rounded-sm ring-2 ring-violet-500/80 dark:ring-violet-400/60 shadow-sm ring-offset-1 ring-offset-white dark:ring-offset-stone-900';
+  'bg-[#A560E8]/20 dark:bg-[#A560E8]/30 text-[#A560E8] dark:text-[#A560E8] px-0.5 rounded-sm ring-2 ring-[#A560E8]/80 dark:ring-[#A560E8]/60 shadow-sm ring-offset-1 ring-offset-white dark:ring-offset-stone-900';
 
 interface RubricCriterion {
   criterion: string;
@@ -2741,20 +2734,20 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
     /** Inline banner shown at the 40% mark where annotations stop (free users see full paper, annotations only on first 40%) */
     const freeAnnotationCutoffBanner =
       isFreePreview && freePreviewCharCutoff != null && freePreviewCharCutoff < displayContent.length ? (
-        <div className="my-6 relative overflow-hidden rounded-2xl border-2 border-dashed border-violet-300/80 bg-gradient-to-r from-violet-50/80 via-white to-violet-50/80 dark:border-violet-600/50 dark:from-violet-950/30 dark:via-stone-900 dark:to-violet-950/30">
+        <div className="my-6 relative overflow-hidden rounded-2xl border-2 border-dashed border-[#FF9600]/50 bg-[#FFF4E0] dark:border-[#D97F00]/50 dark:bg-[#FF9600]/10">
           <div className="relative z-10 flex flex-col sm:flex-row items-center gap-4 px-5 py-5 sm:py-4">
             {/* Left: Visual indicator showing annotation colors */}
             <div className="flex items-center gap-1.5 shrink-0">
-              <div className="w-3 h-3 rounded-full bg-green-400 ring-2 ring-green-200 dark:ring-green-800" title="Strengths" />
-              <div className="w-3 h-3 rounded-full bg-amber-400 ring-2 ring-amber-200 dark:ring-amber-800" title="Improvements" />
-              <div className="w-3 h-3 rounded-full bg-red-400 ring-2 ring-red-200 dark:ring-red-800" title="Concerns" />
-              <svg className="w-5 h-5 text-violet-400 ml-1" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <div className="w-3 h-3 rounded-full bg-[#58CC02] ring-2 ring-[#58CC02]/30" title="Strengths" />
+              <div className="w-3 h-3 rounded-full bg-[#FF9600] ring-2 ring-[#FF9600]/30" title="Improvements" />
+              <div className="w-3 h-3 rounded-full bg-[#FF4B4B] ring-2 ring-[#FF4B4B]/30" title="Concerns" />
+              <svg className="w-5 h-5 text-[#FF9600] ml-1" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
             {/* Middle: Message */}
             <div className="flex-1 text-center sm:text-left">
-              <p className="text-sm font-semibold text-stone-800 dark:text-stone-100">
+              <p className="text-sm font-extrabold text-stone-800 dark:text-stone-100">
                 Annotations continue on {Math.round((1 - (freePreviewCharCutoff / displayContent.length)) * 100)}% of your paper
               </p>
               <p className="text-xs text-stone-600 dark:text-stone-400 mt-0.5">
@@ -2766,7 +2759,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
               type="button"
               onClick={startProMonthlyCheckout}
               disabled={checkoutRedirecting}
-              className="shrink-0 rounded-xl bg-gradient-to-r from-violet-600 to-violet-700 px-4 py-2 text-sm font-bold text-white shadow-lg shadow-violet-600/25 transition-all hover:scale-[1.02] hover:from-violet-500 hover:to-violet-600 hover:shadow-violet-500/35 active:scale-[0.99] disabled:cursor-wait disabled:opacity-60"
+              className="shrink-0 rounded-xl bg-[#FF9600] px-4 py-2 text-sm font-extrabold text-white border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 hover:bg-[#E08800] disabled:cursor-wait disabled:opacity-60 transition-all"
             >
               {checkoutRedirecting ? 'Opening…' : canStartFreeTrial ? 'Unlock all — free trial' : 'Unlock all annotations'}
             </button>
@@ -2896,7 +2889,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                 key={`${annotation.id}-p${paragraphIndex}`}
                 data-doc-annotation={annotation.id}
                 className={`inline px-0.5 cursor-pointer transition-all duration-200 ${
-                  selectedAnnotation === annotation.id ? 'ring-2 ring-offset-2 ring-violet-500 rounded-sm' : ''
+                  selectedAnnotation === annotation.id ? 'ring-2 ring-offset-2 ring-[#1CB0F6] rounded-sm' : ''
                 } ${activationTourShouldGlowCard(annotation) ? 'activation-tour-doc-glow' : ''}`}
                 onMouseEnter={(e) => handleAnnotationHover(e, annotation.id)}
                 onMouseLeave={() => setHoveredAnnotation(null)}
@@ -3021,7 +3014,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
       <div className="relative min-h-screen flex items-center justify-center overflow-x-hidden">
         <WriteScholarEditorialBackgroundLayers position="fixed" />
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1CB0F6] mx-auto"></div>
           <p className="mt-4 text-stone-600">Loading analysis tools...</p>
         </div>
       </div>
@@ -3098,8 +3091,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-4">
               {/* Animated study-mascot WebP — replaces the SVG mascot for a more lively page header. */}
-              <div className="relative p-2 sm:p-3 bg-violet-50 dark:bg-violet-950/40 rounded-2xl border border-violet-100 dark:border-violet-800/40 shadow-sm">
-                <div className="absolute -top-1 -right-1 w-6 h-6 bg-violet-500 rounded-full flex items-center justify-center z-10">
+              <div className="relative p-2 sm:p-3 bg-[#DDF4FF] dark:bg-[#1CB0F6]/20 rounded-2xl border-2 border-b-4 border-[#1CB0F6]/30 dark:border-[#1899D6]/40">
+                <div className="absolute -top-1 -right-1 w-6 h-6 bg-[#1CB0F6] rounded-full flex items-center justify-center z-10">
                   <span className="text-white text-xs">🔍</span>
                 </div>
                 <img
@@ -3108,26 +3101,27 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                   aria-hidden
                   width={100}
                   height={100}
-                  className="w-[100px] h-[100px] object-contain drop-shadow-[0_8px_20px_rgba(124,58,237,0.30)]"
+                  className="w-[100px] h-[100px] object-contain"
                 />
               </div>
               <div>
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-stone-900 dark:text-stone-50">
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-900 dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                   {analysisPageTitle}
                 </h1>
-                <p className="mt-3 text-lg text-stone-600 dark:text-stone-400">
+                <p className="mt-3 text-lg font-bold text-stone-500 dark:text-stone-400" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                   {analysisPageSubtitle}
                 </p>
               </div>
             </div>
             <button
               onClick={() => onNavigate?.('analysis-history')}
-              className="flex items-center space-x-2 px-5 py-3 bg-stone-800 text-white rounded-xl hover:bg-stone-700 transition-colors"
+              className="flex items-center space-x-2 px-5 py-3 bg-[#1CB0F6] text-white rounded-xl border-2 border-b-4 border-[#1899D6] hover:bg-[#1899D6] active:border-b-2 active:translate-y-0.5 transition-all"
+              style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
-              <span className="font-medium">Analysis History</span>
+              <span className="font-extrabold">Analysis History</span>
             </button>
           </div>
         </div>
@@ -3153,7 +3147,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
               <button
                 onClick={startProMonthlyCheckout}
                 disabled={checkoutRedirecting}
-                className="flex-shrink-0 px-5 py-2.5 bg-violet-600 hover:bg-violet-700 disabled:opacity-60 disabled:cursor-wait text-white font-semibold rounded-xl transition-colors shadow-md"
+                className="flex-shrink-0 px-5 py-2.5 bg-[#FF9600] hover:bg-[#E08800] disabled:opacity-60 disabled:cursor-wait text-white font-extrabold rounded-xl border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all"
               >
                 {checkoutRedirecting ? 'Opening checkout…' : 'Upgrade for more'}
               </button>
@@ -3177,18 +3171,18 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
         )}
 
         {successMessage && (
-          <div className="mb-8 p-5 bg-violet-50 border border-violet-200 rounded-2xl">
+          <div className="mb-8 p-5 bg-[#E5F8D0] border-2 border-b-4 border-[#58CC02]/30 rounded-2xl">
             <div className="flex items-start">
-              <div className="w-10 h-10 bg-violet-500 rounded-xl flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 bg-[#58CC02] rounded-xl flex items-center justify-center flex-shrink-0">
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
               <div className="ml-4">
-                <p className="text-violet-700 font-medium">{successMessage}</p>
+                <p className="text-[#46A302] font-extrabold">{successMessage}</p>
                 <button
                   onClick={() => onNavigate?.('library')}
-                  className="mt-3 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium rounded-lg transition-colors"
+                  className="mt-3 px-4 py-2 bg-[#58CC02] hover:bg-[#46A302] text-white text-sm font-extrabold rounded-lg border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all"
                 >
                   View in Library
                 </button>
@@ -3204,8 +3198,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
             data-activation-scroll-pass={activationScrollPassConfigure ? true : undefined}
           >
             {/* Analysis Configuration - left column */}
-            <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8 min-h-0">
-              <h2 className="text-xl font-bold text-stone-900 mb-6">Configure Analysis</h2>
+            <div className="bg-white border-2 border-b-4 border-[#E5E5E5] rounded-2xl p-6 sm:p-8 min-h-0" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+              <h2 className="text-xl font-extrabold text-stone-900 mb-6">Configure Analysis</h2>
               
               {/* Document Selection */}
               {!documentContent && (
@@ -3216,7 +3210,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                   <select
                     value={selectedDocument}
                     onChange={(e) => handleDocumentSelection(e.target.value)}
-                    className="w-full px-4 py-3.5 text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors"
+                    className="w-full px-4 py-3.5 text-base border-2 border-[#E5E5E5] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1CB0F6] focus:border-[#1CB0F6] transition-colors"
                     disabled={isAnalyzing}
                   >
                     <option value="">Choose a document...</option>
@@ -3231,14 +3225,14 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
               
               {/* Text Content Notice */}
               {documentContent && !selectedDocument && (
-                <div className="mb-6 p-4 bg-violet-50 border border-violet-200 rounded-xl">
+                <div className="mb-6 p-4 bg-[#DDF4FF] border-2 border-[#1CB0F6]/30 rounded-xl">
                   <div className="flex items-center space-x-2">
-                    <svg className="w-5 h-5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-[#1CB0F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span className="font-medium text-violet-800">Text Analysis Mode</span>
+                    <span className="font-extrabold text-[#1899D6]">Text Analysis Mode</span>
                   </div>
-                  <p className="text-sm text-violet-700 mt-2">
+                  <p className="text-sm text-[#1899D6] mt-2">
                     Analyzing text content from dashboard. Select citation style and run analysis.
                   </p>
                 </div>
@@ -3253,23 +3247,23 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                   {analysisTypes.map((type) => (
                     <div
                       key={type.id}
-                      className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
+                      className={`p-4 border-2 border-b-4 rounded-xl cursor-pointer transition-all ${
                         selectedAnalysisType === type.id
-                          ? 'border-violet-500 bg-violet-50'
-                          : 'border-stone-200 hover:border-stone-300'
+                          ? 'border-[#1CB0F6] bg-[#DDF4FF]'
+                          : 'border-[#E5E5E5] hover:border-stone-300'
                       }`}
                       onClick={() => setSelectedAnalysisType(type.id)}
                     >
                       <div className="flex items-center space-x-4">
                         <span className="text-2xl">{type.icon}</span>
                         <div className="flex-1">
-                          <h3 className="font-semibold text-stone-900">{type.name}</h3>
+                          <h3 className="font-extrabold text-stone-900">{type.name}</h3>
                           <p className="text-sm text-stone-600 mt-0.5">{type.description}</p>
                           <p className="text-xs text-stone-500 mt-1">⏱️ {type.estimatedTime}</p>
                         </div>
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                           selectedAnalysisType === type.id
-                            ? 'border-violet-500 bg-violet-500'
+                            ? 'border-[#1CB0F6] bg-[#1CB0F6]'
                             : 'border-stone-300'
                         }`}>
                           {selectedAnalysisType === type.id && (
@@ -3295,10 +3289,10 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                   onChange={(e) => setSelectedCitationStyle(e.target.value)}
                   data-activation-citation-select
                   data-activation-focus={activationCoachStep === 'mla' ? true : undefined}
-                  className={`w-full px-4 py-3.5 text-base border rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all duration-300 ease-out ${
+                  className={`w-full px-4 py-3.5 text-base border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1CB0F6] focus:border-[#1CB0F6] transition-all duration-300 ease-out ${
                     activationCoachStep === 'mla'
-                      ? 'border-violet-500/90 shadow-[0_0_0_3px_rgba(167,139,250,0.35),0_0_24px_rgba(139,92,246,0.25)]'
-                      : 'border-gray-300 dark:border-stone-600'
+                      ? 'border-[#1CB0F6]/90 shadow-[0_0_0_3px_rgba(28,176,246,0.35),0_0_24px_rgba(28,176,246,0.25)]'
+                      : 'border-[#E5E5E5] dark:border-stone-600'
                   }`}
                   disabled={isAnalyzing}
                 >
@@ -3320,29 +3314,29 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                 <label className="block text-base font-medium text-stone-900 dark:text-stone-100 mb-2">
                   Grade format
                 </label>
-                <div className="inline-flex p-1 rounded-xl bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-600">
+                <div className="inline-flex p-1 rounded-xl bg-[#E5E5E5]/50 dark:bg-stone-800 border-2 border-[#E5E5E5] dark:border-stone-600">
                   <button
                     type="button"
                     onClick={() => setSelectedGradingStyle('us')}
-                    className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    className={`px-5 py-2.5 rounded-lg text-sm font-extrabold transition-all duration-200 ${
                       selectedGradingStyle === 'us'
-                        ? 'bg-white dark:bg-stone-700 text-violet-700 dark:text-violet-300 shadow-sm'
+                        ? 'bg-white dark:bg-stone-700 text-[#1CB0F6] dark:text-[#1CB0F6] shadow-sm border-2 border-[#1CB0F6]'
                         : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                     }`}
                   >
-                    <span className="font-semibold">Letter grades</span>
+                    <span className="font-extrabold">Letter grades</span>
                     <span className="ml-1.5 text-stone-400 dark:text-stone-500 font-normal">A, B+, C</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setSelectedGradingStyle('uk')}
-                    className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    className={`px-5 py-2.5 rounded-lg text-sm font-extrabold transition-all duration-200 ${
                       selectedGradingStyle === 'uk'
-                        ? 'bg-white dark:bg-stone-700 text-violet-700 dark:text-violet-300 shadow-sm'
+                        ? 'bg-white dark:bg-stone-700 text-[#1CB0F6] dark:text-[#1CB0F6] shadow-sm border-2 border-[#1CB0F6]'
                         : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                     }`}
                   >
-                    <span className="font-semibold">Classifications</span>
+                    <span className="font-extrabold">Classifications</span>
                     <span className="ml-1.5 text-stone-400 dark:text-stone-500 font-normal">1st, 2:1, 2:2</span>
                   </button>
                 </div>
@@ -3364,9 +3358,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                   isAnalyzing ||
                   (activationCoachStep === 'mla' && selectedCitationStyle !== 'MLA')
                 }
-                className={`w-full bg-violet-600 hover:bg-violet-500 text-white py-3.5 px-4 rounded-xl font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 ease-out ${
+                className={`w-full bg-[#58CC02] hover:bg-[#46A302] text-white py-3.5 px-4 rounded-xl font-extrabold text-lg border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 ease-out ${
                   activationCoachStep === 'analyze'
-                    ? 'shadow-[0_0_0_3px_rgba(167,139,250,0.45),0_0_32px_rgba(139,92,246,0.3)]'
+                    ? 'shadow-[0_0_0_3px_rgba(88,204,2,0.45),0_0_32px_rgba(88,204,2,0.3)]'
                     : ''
                 }`}
               >
@@ -3383,8 +3377,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
             </div>
 
             {/* Document Preview - right column, row 1 */}
-            <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8 min-h-[700px]">
-              <h2 className="text-xl font-bold text-stone-900 mb-6">Document Preview</h2>
+            <div className="bg-white border-2 border-b-4 border-[#E5E5E5] rounded-2xl p-6 sm:p-8 min-h-[700px]" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+              <h2 className="text-xl font-extrabold text-stone-900 mb-6">Document Preview</h2>
               
               {!selectedDocument && !documentContent ? (
                 <div className="text-center py-16">
@@ -3400,7 +3394,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                 </div>
               ) : selectedDocument && isLoadingPreview ? (
                 <div className="text-center py-16">
-                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-violet-600 mx-auto"></div>
+                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#1CB0F6] mx-auto"></div>
                   <p className="mt-4 text-stone-600">Loading document preview...</p>
                 </div>
               ) : previewContent || documentContent ? (
@@ -3461,10 +3455,10 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                           <button
                             type="button"
                             onClick={() => setRubricInputMode('paste')}
-                            className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                            className={`flex-1 px-3 py-2 text-sm font-extrabold rounded-lg transition-colors ${
                               rubricInputMode === 'paste'
-                                ? 'bg-violet-100 text-violet-700 border border-violet-300'
-                                : 'bg-white text-stone-600 border border-stone-200 hover:bg-stone-100'
+                                ? 'bg-[#DDF4FF] text-[#1CB0F6] border-2 border-[#1CB0F6]'
+                                : 'bg-white text-stone-600 border-2 border-[#E5E5E5] hover:bg-stone-50'
                             }`}
                           >
                             Paste Text
@@ -3472,10 +3466,10 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                           <button
                             type="button"
                             onClick={() => setRubricInputMode('upload')}
-                            className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                            className={`flex-1 px-3 py-2 text-sm font-extrabold rounded-lg transition-colors ${
                               rubricInputMode === 'upload'
-                                ? 'bg-violet-100 text-violet-700 border border-violet-300'
-                                : 'bg-white text-stone-600 border border-stone-200 hover:bg-stone-100'
+                                ? 'bg-[#DDF4FF] text-[#1CB0F6] border-2 border-[#1CB0F6]'
+                                : 'bg-white text-stone-600 border-2 border-[#E5E5E5] hover:bg-stone-50'
                             }`}
                           >
                             Upload File
@@ -3487,7 +3481,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                             value={rubricContent}
                             onChange={(e) => setRubricContent(e.target.value)}
                             placeholder="Paste your rubric, essay question, or assignment requirements here..."
-                            className="w-full px-4 py-3 text-sm border-2 border-stone-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500 transition-colors resize-y min-h-[120px] bg-white text-stone-900 placeholder-stone-400"
+                            className="w-full px-4 py-3 text-sm border-2 border-[#E5E5E5] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1CB0F6]/40 focus:border-[#1CB0F6] transition-colors resize-y min-h-[120px] bg-white text-stone-900 placeholder-stone-400"
                             rows={5}
                             disabled={isAnalyzing}
                           />
@@ -3505,11 +3499,11 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                               type="button"
                               onClick={() => rubricFileInputRef.current?.click()}
                               disabled={isAnalyzing || isParsingRubric}
-                              className="w-full px-4 py-6 border-2 border-dashed border-stone-300 rounded-xl text-stone-500 hover:border-violet-400 hover:text-violet-600 hover:bg-violet-50 transition-colors disabled:opacity-50"
+                              className="w-full px-4 py-6 border-2 border-dashed border-stone-300 rounded-xl text-stone-500 hover:border-[#1CB0F6] hover:text-[#1CB0F6] hover:bg-[#DDF4FF] transition-colors disabled:opacity-50"
                             >
                               {isParsingRubric ? (
                                 <div className="flex items-center justify-center space-x-2">
-                                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-violet-600"></div>
+                                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#1CB0F6]"></div>
                                   <span className="text-sm">Parsing rubric file...</span>
                                 </div>
                               ) : (
@@ -3567,11 +3561,11 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
           <>
           {/* Premium Analysis Results Display */}
           <div
-            className="bg-white border border-gray-200 rounded-2xl overflow-hidden"
+            className="bg-white border-2 border-b-4 border-[#E5E5E5] rounded-2xl overflow-hidden"
             data-activation-scroll-pass={activationScrollPassResults ? true : undefined}
           >
             {/* Results Header */}
-            <div className="bg-gray-900 text-white px-6 py-5">
+            <div className="bg-[#3C3C3C] text-white px-6 py-5" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                   <h2 className="text-xl font-bold">
@@ -3587,9 +3581,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                     onClick={copyEssayPlainText}
                     data-activation-copy-full-text
                     data-activation-focus={isActivationTutorial && activationCoachStep === 'copyText' ? true : undefined}
-                    className={`px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors flex items-center space-x-2 text-sm font-medium ${
+                    className={`px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg border border-white/20 transition-colors flex items-center space-x-2 text-sm font-extrabold ${
                       isActivationTutorial && activationCoachStep === 'copyText'
-                        ? 'ring-2 ring-violet-300/95 ring-offset-2 ring-offset-gray-900 z-[5] relative'
+                        ? 'ring-2 ring-[#1CB0F6]/95 ring-offset-2 ring-offset-[#3C3C3C] z-[5] relative'
                         : ''
                     }`}
                     title="Copy the full essay — paste into Word or Google Docs; auto-italics (titles, Latin phrases, etc.) are preserved where supported"
@@ -3606,7 +3600,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                           <button 
                             onClick={exportToPDF}
                             disabled={isExporting}
-                            className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors flex items-center space-x-2 disabled:opacity-50 text-sm font-medium"
+                            className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg border border-white/20 transition-colors flex items-center space-x-2 disabled:opacity-50 text-sm font-extrabold"
                             title="Export as PDF"
                           >
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -3617,7 +3611,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                           <button 
                             onClick={exportToWord}
                             disabled={isExporting}
-                            className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors flex items-center space-x-2 disabled:opacity-50 text-sm font-medium"
+                            className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg border border-white/20 transition-colors flex items-center space-x-2 disabled:opacity-50 text-sm font-extrabold"
                             title="Export as Word Document"
                           >
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -3629,7 +3623,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                       ) : (
                         <button 
                           onClick={() => onNavigate?.('pricing')}
-                          className="px-4 py-2 bg-amber-500/20 hover:bg-amber-500/30 rounded-lg transition-colors flex items-center space-x-2 text-sm font-medium text-amber-200"
+                          className="px-4 py-2 bg-[#FF9600]/20 hover:bg-[#FF9600]/30 rounded-lg border border-[#FF9600]/40 transition-colors flex items-center space-x-2 text-sm font-extrabold text-[#FF9600]"
                           title="Export your full report — PDF or Word (Pro)"
                         >
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -3643,7 +3637,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                   
                   <button 
                     onClick={handleCloseAnalysis}
-                    className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors flex items-center space-x-2 text-sm font-medium"
+                    className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg border border-white/20 transition-colors flex items-center space-x-2 text-sm font-extrabold"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -3657,17 +3651,17 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
             {/* Grade Breakdown — FIRST: score, grade, and all categories */}
             <div
               data-activation-target="rubric"
-              className={`mx-6 mt-6 mb-4 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-600 overflow-hidden transition-shadow duration-300 ${
+              className={`mx-6 mt-6 mb-4 bg-white dark:bg-stone-800 rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-600 overflow-hidden transition-shadow duration-300 ${
                 isActivationTutorial && activationCoachStep === 'rubric'
-                  ? 'ring-4 ring-violet-500/75 ring-offset-2 ring-offset-stone-50 dark:ring-offset-stone-900 shadow-[0_0_48px_rgba(139,92,246,0.28)] z-[5] relative'
+                  ? 'ring-4 ring-[#58CC02]/75 ring-offset-2 ring-offset-stone-50 dark:ring-offset-stone-900 shadow-[0_0_48px_rgba(88,204,2,0.28)] z-[5] relative'
                   : ''
               }`}
             >
-              <div className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white px-6 py-5">
+              <div className="bg-[#58CC02] text-white px-6 py-5" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                 <div className="flex flex-wrap items-center gap-6">
                   <div>
-                    <h2 className="text-xl font-bold">General Academic Assessment</h2>
-                    <p className="text-emerald-100 text-sm mt-0.5 max-w-xl">
+                    <h2 className="text-xl font-extrabold uppercase tracking-wide">General Academic Assessment</h2>
+                    <p className="text-white/80 text-sm mt-0.5 max-w-xl font-bold">
                       {isFreePreview ? (
                         <>
                           Real scores above — you&apos;re seeing how professors grade you. Unlock the rest of your paper and the full write-up to squeeze out every point before you submit.
@@ -3682,13 +3676,13 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                       {analysisSummary.overall_score != null && (
                         <div className="text-right">
                           <div className="text-3xl font-extrabold">{Math.round(Number(analysisSummary.overall_score))}/100</div>
-                          <div className="text-emerald-100 text-xs">Score</div>
+                          <div className="text-white/70 text-xs font-bold uppercase tracking-wide">Score</div>
                         </div>
                       )}
                       {analysisSummary.grade_estimate && (
                         <div className="text-right">
                           <div className="text-3xl font-extrabold">{analysisSummary.grade_estimate}</div>
-                          <div className="text-emerald-100 text-xs">Grade</div>
+                          <div className="text-white/70 text-xs font-bold uppercase tracking-wide">Grade</div>
                         </div>
                       )}
                     </div>
@@ -3700,9 +3694,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                 (!lockedFeatures.includes('grade_rubric') || isFreePreview) ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {Object.entries(gradeRubric).map(([key, val]) => (
-                      <div key={key} className="p-4 rounded-xl bg-stone-50 dark:bg-stone-700/50 border border-stone-200 dark:border-stone-600">
+                      <div key={key} className="p-4 rounded-xl bg-stone-50 dark:bg-stone-700/50 border-2 border-b-4 border-[#E5E5E5] dark:border-stone-600">
                         <div className="flex justify-between items-center mb-2">
-                          <span className="font-medium text-stone-800 dark:text-stone-200 capitalize">{key.replace(/_/g, ' ')}</span>
+                          <span className="font-extrabold text-stone-800 dark:text-stone-200 capitalize">{key.replace(/_/g, ' ')}</span>
                           <span className="font-bold text-stone-900 dark:text-stone-100">{Math.round(Number(val.score))}/{val.max_score}</span>
                         </div>
                         <p className="text-sm text-stone-600 dark:text-stone-400">{val.feedback}</p>
@@ -3730,15 +3724,15 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                       ).map((row) => (
                         <div
                           key={row.key}
-                          className="p-4 rounded-xl bg-stone-50 dark:bg-stone-700/50 border border-stone-200 dark:border-stone-600"
+                          className="p-4 rounded-xl bg-stone-50 dark:bg-stone-700/50 border-2 border-b-4 border-[#E5E5E5] dark:border-stone-600"
                         >
                           <div className="flex justify-between items-center gap-2 mb-2">
-                            <span className="font-medium text-stone-800 dark:text-stone-200 text-sm leading-snug">{row.label}</span>
+                            <span className="font-extrabold text-stone-800 dark:text-stone-200 text-sm leading-snug">{row.label}</span>
                             <span className="text-sm font-bold text-stone-400 dark:text-stone-500 tabular-nums flex-shrink-0">
                               ?/{row.maxScore}
                             </span>
                           </div>
-                          <div className="relative min-h-[4.5rem] rounded-lg overflow-hidden border border-stone-200/90 bg-gradient-to-b from-stone-50 to-stone-100/90 dark:border-stone-600/50 dark:from-stone-700/30 dark:to-stone-800/50 ring-1 ring-violet-400/10">
+                          <div className="relative min-h-[4.5rem] rounded-lg overflow-hidden border border-stone-200/90 bg-gradient-to-b from-stone-50 to-stone-100/90 dark:border-stone-600/50 dark:from-stone-700/30 dark:to-stone-800/50 ring-1 ring-[#FF9600]/10">
                             <div
                               className="absolute inset-0 p-3 text-xs leading-relaxed text-stone-600 opacity-[0.72] contrast-[0.92] blur-[8px] select-none dark:text-stone-400 dark:opacity-[0.65] sm:blur-[9px]"
                               aria-hidden
@@ -3746,7 +3740,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                               Your personalized feedback for this category—what you did well, what to fix, and how—unlocks on Pro.
                             </div>
                             <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-white/88 via-white/45 to-transparent dark:from-stone-900/88 dark:via-stone-900/40">
-                              <span className="rounded-full border border-violet-200/90 bg-white/80 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-violet-600 shadow-sm backdrop-blur-sm dark:border-violet-600/50 dark:bg-stone-900/80 dark:text-violet-300">
+                              <span className="rounded-full border-2 border-[#FF9600] bg-[#FFF4E0] px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-[#FF9600] dark:border-[#D97F00] dark:bg-[#FF9600]/20 dark:text-[#FF9600]">
                                 Pro
                               </span>
                             </div>
@@ -3759,11 +3753,11 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                         type="button"
                         onClick={startProMonthlyCheckout}
                         disabled={checkoutRedirecting}
-                        className="px-4 py-2 text-sm bg-violet-600 hover:bg-violet-700 disabled:opacity-60 disabled:cursor-wait text-white rounded-lg font-semibold transition-colors"
+                        className="px-4 py-2 text-sm bg-[#FF9600] hover:bg-[#E08800] disabled:opacity-60 disabled:cursor-wait text-white rounded-lg font-extrabold border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all"
                       >
                         {checkoutRedirecting ? 'Opening checkout…' : 'Unlock full rubric'}
                       </button>
-                      <span className="text-sm text-violet-600 dark:text-violet-400">$19.99/mo</span>
+                      <span className="text-sm text-[#FF9600] font-bold dark:text-[#FF9600]">$19.99/mo</span>
                     </div>
                   </div>
                 ) : null}
@@ -3776,25 +3770,25 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
               data-activation-paper-hover={activationPaperHoverSubtree ? true : undefined}
             >
             {/* Legend */}
-            <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+            <div className="bg-stone-50 px-6 py-4 border-b-2 border-[#E5E5E5]" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
               <div className="flex flex-wrap items-center justify-between gap-y-2 gap-x-4 text-sm">
                 <div className="flex flex-wrap items-center gap-6">
                   <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-                    <span className="text-gray-600">Strong sections</span>
+                    <div className="w-3 h-3 bg-[#58CC02] rounded-full"></div>
+                    <span className="text-stone-600 font-bold text-xs">Strong sections</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-amber-400 rounded-full"></div>
-                    <span className="text-gray-600">Needs improvement</span>
+                    <div className="w-3 h-3 bg-[#FF9600] rounded-full"></div>
+                    <span className="text-stone-600 font-bold text-xs">Needs improvement</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-red-400 rounded-full"></div>
-                    <span className="text-gray-600">Needs revision</span>
+                    <div className="w-3 h-3 bg-[#FF4B4B] rounded-full"></div>
+                    <span className="text-stone-600 font-bold text-xs">Needs revision</span>
                   </div>
                   {revisedDraftRanges.length > 0 && !isFreePreview && (
                     <div className="flex items-center space-x-2">
-                      <div className="w-3 h-3 bg-violet-400 rounded-full ring-2 ring-violet-500/45 shadow-sm" />
-                      <span className="text-gray-600">WriteScholar revisions</span>
+                      <div className="w-3 h-3 bg-[#A560E8] rounded-full ring-2 ring-[#A560E8]/45 shadow-sm" />
+                      <span className="text-stone-600 font-bold text-xs">WriteScholar revisions</span>
                     </div>
                   )}
                 </div>
@@ -3804,9 +3798,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                     onClick={copyEssayPlainText}
                     data-activation-copy-full-text
                     data-activation-focus={isActivationTutorial && activationCoachStep === 'copyText' ? true : undefined}
-                    className={`inline-flex items-center gap-1.5 rounded-lg border border-stone-300 bg-white px-3 py-1.5 text-xs font-semibold text-stone-700 shadow-sm hover:bg-stone-50 dark:border-stone-600 dark:bg-stone-800 dark:text-stone-200 dark:hover:bg-stone-700/80 ${
+                    className={`inline-flex items-center gap-1.5 rounded-lg border-2 border-b-4 border-[#E5E5E5] bg-white px-3 py-1.5 text-xs font-extrabold text-stone-700 hover:bg-stone-50 active:border-b-2 active:translate-y-0.5 dark:border-stone-600 dark:bg-stone-800 dark:text-stone-200 dark:hover:bg-stone-700/80 ${
                       isActivationTutorial && activationCoachStep === 'copyText'
-                        ? 'ring-2 ring-violet-500/85 ring-offset-2 ring-offset-gray-50 dark:ring-offset-stone-900 z-[5] relative'
+                        ? 'ring-2 ring-[#1CB0F6]/85 ring-offset-2 ring-offset-stone-50 dark:ring-offset-stone-900 z-[5] relative'
                         : ''
                     }`}
                     title="Copy full essay — Word/Docs keep italics for detected titles and Latin phrases"
@@ -3820,7 +3814,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                     <button
                       type="button"
                       onClick={() => setShowCompareOriginalModal(true)}
-                      className="text-xs font-semibold text-violet-700 dark:text-violet-300 hover:underline shrink-0"
+                      className="text-xs font-extrabold text-[#A560E8] dark:text-[#A560E8] hover:underline shrink-0"
                     >
                       Compare with first draft
                     </button>
@@ -3844,21 +3838,21 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
               {/* Annotations Panel — coach "apply revisions" step scroll target */}
               <div
                 data-activation-target="activation-revisions"
-                className="w-full md:w-96 bg-gray-50 border-t md:border-t-0 md:border-l border-gray-200 overflow-y-auto max-h-[400px] md:max-h-none"
+                className="w-full md:w-96 bg-stone-50 border-t-2 md:border-t-0 md:border-l-2 border-[#E5E5E5] overflow-y-auto max-h-[400px] md:max-h-none" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
               >
                 <div className="p-5 md:p-6">
                   <div className="space-y-6">
                     {/* Annotations — paid users, or free ~40% preview (real cards in the early part of the paper) */}
                     {(!lockedFeatures.includes('full_annotations') || isFreePreview) && (
                     <>
-                    <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-center">
-                      <svg className="w-5 h-5 mr-2 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <h3 className="text-lg font-extrabold text-stone-900 mb-2 flex items-center">
+                      <svg className="w-5 h-5 mr-2 text-[#1CB0F6]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                       </svg>
                       Annotations
                     </h3>
                     {isFreePreview && (
-                      <div className="mb-4 rounded-xl border border-violet-200/80 bg-violet-50/80 dark:bg-violet-950/25 dark:border-violet-800/50 px-3 py-2.5">
+                      <div className="mb-4 rounded-xl border-2 border-[#1CB0F6]/30 bg-[#DDF4FF] dark:bg-[#1CB0F6]/10 dark:border-[#1899D6]/40 px-3 py-2.5">
                         <p className="text-xs font-semibold text-stone-800 dark:text-stone-100 leading-snug">
                           Full paper shown · Annotations on first ~40%
                         </p>
@@ -3870,7 +3864,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                       </div>
                     )}
                     {writeScholarUndo && revisionNoticeMeta && !isFreePreview && (
-                      <div className="rounded-xl border-2 border-dashed border-violet-400/75 bg-violet-50/95 dark:bg-violet-950/35 p-4 mb-5 space-y-3">
+                      <div className="rounded-xl border-2 border-dashed border-[#A560E8]/50 bg-[#F3EAFF] dark:bg-[#A560E8]/10 p-4 mb-5 space-y-3">
                         <div className="flex items-start gap-3">
                           <div
                             className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
@@ -3882,7 +3876,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                             {getAnnotationIcon(revisionNoticeMeta.type)}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="text-sm font-semibold text-violet-900 dark:text-violet-100">
+                            <p className="text-sm font-extrabold text-[#8A48C7] dark:text-[#A560E8]">
                               WriteScholar revision applied
                             </p>
                             <p className="text-xs text-stone-700 dark:text-stone-300 mt-1.5 leading-relaxed">
@@ -3890,7 +3884,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                               {revisionNoticeMeta.comment}
                             </p>
                             <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-2">
-                              Applied revisions stay <span className="font-medium text-violet-700 dark:text-violet-300">purple</span> (not yellow/red) until you revert that sentence from its card. The banner “Revert to original text” only undoes the most recent apply.
+                              Applied revisions stay <span className="font-extrabold text-[#A560E8] dark:text-[#A560E8]">purple</span> (not yellow/red) until you revert that sentence from its card. The banner “Revert to original text” only undoes the most recent apply.
                             </p>
                           </div>
                         </div>
@@ -3898,7 +3892,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                           <button
                             type="button"
                             onClick={scrollToRevisionDraft}
-                            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-violet-600 hover:bg-violet-500 text-white shadow-sm"
+                            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-extrabold bg-[#A560E8] hover:bg-[#8A48C7] text-white border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all"
                           >
                             Show in document
                           </button>
@@ -3914,7 +3908,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                           <button
                             type="button"
                             onClick={revertWriteScholarRevision}
-                            className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-white dark:bg-stone-900 border-2 border-violet-400 dark:border-violet-600 text-violet-800 dark:text-violet-200 hover:bg-violet-50 dark:hover:bg-violet-950/60"
+                            className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-xs font-extrabold bg-white dark:bg-stone-900 border-2 border-b-4 border-[#A560E8] dark:border-[#8A48C7] text-[#A560E8] dark:text-[#A560E8] hover:bg-[#A560E8]/10 active:border-b-2 active:translate-y-0.5 transition-all"
                           >
                             Revert to original text
                           </button>
@@ -3954,7 +3948,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                       <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-xl">
                         {getAnnotationIcon('strong')}
                       </div>
-                      <h4 className="font-semibold text-green-800">Strong Points ({getFilteredAnnotations('strong').length})</h4>
+                      <h4 className="font-extrabold text-[#58CC02]">Strong Points ({getFilteredAnnotations('strong').length})</h4>
                       </div>
                       <div className="space-y-2">
                         {getFilteredAnnotations('strong').map((annotation) => (
@@ -3962,7 +3956,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                             key={annotation.id}
                             id={`annotation-panel-${annotation.id}`}
                             className={`bg-white rounded-xl p-4 border-l-4 border-green-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
-                              selectedAnnotation === annotation.id ? 'ring-2 ring-violet-500' : ''
+                              selectedAnnotation === annotation.id ? 'ring-2 ring-[#1CB0F6]' : ''
                             }`}
                             onClick={() => scrollDocumentToHighlight(annotation.id)}
                             onMouseEnter={() => setHoveredAnnotation(annotation.id)}
@@ -3985,7 +3979,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                         <div className="flex items-center justify-center w-8 h-8 bg-amber-100 rounded-xl">
                           {getAnnotationIcon('improve')}
                         </div>
-                        <h4 className="font-semibold text-amber-800">Areas to Improve ({getFilteredAnnotations('improve').length})</h4>
+                        <h4 className="font-extrabold text-[#FF9600]">Areas to Improve ({getFilteredAnnotations('improve').length})</h4>
                       </div>
                       <div className="space-y-2">
                         {getFilteredAnnotations('improve').map((annotation) => (
@@ -3996,7 +3990,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                               annotation.id === ACTIVATION_TUTORIAL_IMPROVE_REVISION_ID ? 'improve' : undefined
                             }
                             className={`bg-white rounded-xl p-4 border-l-4 border-amber-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
-                              selectedAnnotation === annotation.id ? 'ring-2 ring-violet-500' : ''
+                              selectedAnnotation === annotation.id ? 'ring-2 ring-[#1CB0F6]' : ''
                             } ${activationTourShouldGlowCard(annotation) ? 'activation-tour-rewrite-card-glow' : ''}`}
                             onClick={() => scrollDocumentToHighlight(annotation.id)}
                             onMouseEnter={() => setHoveredAnnotation(annotation.id)}
@@ -4017,7 +4011,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                                       e.stopPropagation();
                                       revertWriteScholarRevisionForAnnotation(annotation.id);
                                     }}
-                                    className="mt-3 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold bg-red-600 hover:bg-red-700 text-white shadow-sm ring-1 ring-red-900/15 transition-colors"
+                                    className="mt-3 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-extrabold bg-[#FF4B4B] hover:bg-[#E04343] text-white border-2 border-b-4 border-[#E04343] active:border-b-2 active:translate-y-0.5 transition-all"
                                   >
                                     <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                                       <path
@@ -4049,7 +4043,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                                     e.stopPropagation();
                                     void applyWriteScholarRevision(annotation.id);
                                   }}
-                                  className="mt-3 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold bg-violet-700 hover:bg-violet-800 disabled:opacity-60 disabled:pointer-events-none text-white shadow-sm ring-1 ring-violet-900/10 transition-colors"
+                                  className="mt-3 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-extrabold bg-[#A560E8] hover:bg-[#8A48C7] disabled:opacity-60 disabled:pointer-events-none text-white border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all"
                                 >
                                   <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -4064,7 +4058,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                                   e.stopPropagation();
                                   onNavigate?.('pricing');
                                 }}
-                                className="mt-3 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 text-stone-800 dark:text-stone-100 border border-stone-200 dark:border-stone-600"
+                                className="mt-3 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-extrabold bg-[#FFF4E0] dark:bg-[#FF9600]/20 hover:bg-[#FF9600]/20 text-[#FF9600] border-2 border-b-4 border-[#FF9600]/40 active:border-b-2 active:translate-y-0.5 dark:text-[#FF9600] dark:border-[#D97F00]/40 transition-all"
                               >
                                 Pro: apply revisions ($19.99/mo)
                               </button>
@@ -4080,7 +4074,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                         <div className="flex items-center justify-center w-8 h-8 bg-red-100 rounded-xl">
                           {getAnnotationIcon('concern')}
                         </div>
-                        <h4 className="font-semibold text-red-800">Serious Concerns ({getFilteredAnnotations('concern').length})</h4>
+                        <h4 className="font-extrabold text-[#FF4B4B]">Serious Concerns ({getFilteredAnnotations('concern').length})</h4>
                       </div>
                       <div className="space-y-2">
                         {getFilteredAnnotations('concern').map((annotation) => (
@@ -4091,7 +4085,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                               annotation.id === ACTIVATION_TUTORIAL_CONCERN_REVISION_ID ? 'concern' : undefined
                             }
                             className={`bg-white rounded-xl p-4 border-l-4 border-red-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
-                              selectedAnnotation === annotation.id ? 'ring-2 ring-violet-500' : ''
+                              selectedAnnotation === annotation.id ? 'ring-2 ring-[#1CB0F6]' : ''
                             } ${activationTourShouldGlowCard(annotation) ? 'activation-tour-rewrite-card-glow' : ''}`}
                             onClick={() => scrollDocumentToHighlight(annotation.id)}
                             onMouseEnter={() => setHoveredAnnotation(annotation.id)}
@@ -4112,7 +4106,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                                       e.stopPropagation();
                                       revertWriteScholarRevisionForAnnotation(annotation.id);
                                     }}
-                                    className="mt-3 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold bg-red-600 hover:bg-red-700 text-white shadow-sm ring-1 ring-red-900/15 transition-colors"
+                                    className="mt-3 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-extrabold bg-[#FF4B4B] hover:bg-[#E04343] text-white border-2 border-b-4 border-[#E04343] active:border-b-2 active:translate-y-0.5 transition-all"
                                   >
                                     <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                                       <path
@@ -4144,7 +4138,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                                     e.stopPropagation();
                                     void applyWriteScholarRevision(annotation.id);
                                   }}
-                                  className="mt-3 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold bg-violet-700 hover:bg-violet-800 disabled:opacity-60 disabled:pointer-events-none text-white shadow-sm ring-1 ring-violet-900/10 transition-colors"
+                                  className="mt-3 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-extrabold bg-[#A560E8] hover:bg-[#8A48C7] disabled:opacity-60 disabled:pointer-events-none text-white border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all"
                                 >
                                   <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -4159,7 +4153,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                                   e.stopPropagation();
                                   onNavigate?.('pricing');
                                 }}
-                                className="mt-3 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 text-stone-800 dark:text-stone-100 border border-stone-200 dark:border-stone-600"
+                                className="mt-3 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-extrabold bg-[#FFF4E0] dark:bg-[#FF9600]/20 hover:bg-[#FF9600]/20 text-[#FF9600] border-2 border-b-4 border-[#FF9600]/40 active:border-b-2 active:translate-y-0.5 dark:text-[#FF9600] dark:border-[#D97F00]/40 transition-all"
                               >
                                 Pro: apply revisions ($19.99/mo)
                               </button>
@@ -4174,9 +4168,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
 
                     {/* Locked annotations teaser — show free users what they're missing (annotations beyond 40%) */}
                     {isFreePreview && lockedAnnotationsForTeaser.length > 0 && (
-                      <div className="mt-6 pt-5 border-t-2 border-dashed border-violet-200/80 dark:border-violet-700/50">
+                      <div className="mt-6 pt-5 border-t-2 border-dashed border-[#FF9600]/40 dark:border-[#D97F00]/50">
                         <div className="flex items-center gap-2 mb-4">
-                          <svg className="w-5 h-5 text-violet-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                          <svg className="w-5 h-5 text-[#FF9600]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                           </svg>
                           <h4 className="font-bold text-stone-900 dark:text-stone-100">
@@ -4227,7 +4221,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                           type="button"
                           onClick={startProMonthlyCheckout}
                           disabled={checkoutRedirecting}
-                          className="mt-4 w-full rounded-xl bg-gradient-to-r from-violet-600 to-violet-700 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-violet-600/25 transition-all hover:scale-[1.01] hover:from-violet-500 hover:to-violet-600 hover:shadow-violet-500/35 active:scale-[0.99] disabled:cursor-wait disabled:opacity-60"
+                          className="mt-4 w-full rounded-xl bg-[#FF9600] px-4 py-2.5 text-sm font-extrabold text-white border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 hover:bg-[#E08800] disabled:cursor-wait disabled:opacity-60 transition-all"
                         >
                           {checkoutRedirecting
                             ? 'Opening checkout…'
@@ -4242,8 +4236,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                     {lockedFeatures.includes('full_annotations') && !isFreePreview && (
                       <div className="space-y-5">
                         <div>
-                          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1 flex items-center">
-                            <svg className="w-5 h-5 mr-2 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <h3 className="text-lg font-extrabold text-stone-900 dark:text-stone-100 mb-1 flex items-center">
+                            <svg className="w-5 h-5 mr-2 text-[#1CB0F6]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                             </svg>
                             Annotations
@@ -4264,7 +4258,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                               <div className={`flex items-center justify-center w-8 h-8 rounded-xl ${group.iconBg}`}>
                                 {getAnnotationIcon(group.type)}
                               </div>
-                              <h4 className={`font-semibold text-sm ${group.heading}`}>{group.label}</h4>
+                              <h4 className={`font-extrabold text-sm ${group.heading}`}>{group.label}</h4>
                             </div>
                             <div className="space-y-2">
                               {[0, 1].map((i) => (
@@ -4276,7 +4270,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                                     <p className="font-medium">Professor-style feedback for a highlighted sentence in your draft.</p>
                                     <p className="text-xs italic text-gray-500">Specific rewrite or example would appear here on Pro.</p>
                                   </div>
-                                  <div className="absolute bottom-2 right-2 rounded-full border border-violet-200/90 bg-white/85 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-violet-600 shadow-sm backdrop-blur-sm dark:border-violet-600/50 dark:bg-stone-900/85 dark:text-violet-300">
+                                  <div className="absolute bottom-2 right-2 rounded-full border-2 border-[#FF9600] bg-[#FFF4E0] px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-[#FF9600] dark:border-[#D97F00] dark:bg-[#FF9600]/20 dark:text-[#FF9600]">
                                     Pro
                                   </div>
                                 </div>
@@ -4289,11 +4283,11 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                             type="button"
                             onClick={startProMonthlyCheckout}
                             disabled={checkoutRedirecting}
-                            className="px-5 py-2.5 bg-violet-600 hover:bg-violet-700 disabled:opacity-60 disabled:cursor-wait text-white rounded-xl font-semibold transition-all shadow-lg shadow-violet-500/25 text-sm"
+                            className="px-5 py-2.5 bg-[#FF9600] hover:bg-[#E08800] disabled:opacity-60 disabled:cursor-wait text-white rounded-xl font-extrabold border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all text-sm"
                           >
                             {checkoutRedirecting ? 'Opening checkout…' : 'Unlock full annotations'}
                           </button>
-                          <div className="text-sm text-violet-600 dark:text-violet-400">$19.99/mo</div>
+                          <div className="text-sm text-[#FF9600] font-bold dark:text-[#FF9600]">$19.99/mo</div>
                         </div>
                       </div>
                     )}
@@ -4356,7 +4350,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                     {/* Specific rewrites — Pro only (not shown on free ~40% preview) */}
                     {currentPlan !== 'free' && specificRewrites && specificRewrites.length > 0 && (
                       <div className="mt-6 p-4 bg-white dark:bg-stone-800 rounded-xl border border-stone-200 dark:border-stone-600">
-                        <h4 className="font-semibold text-stone-800 dark:text-stone-200 mb-3">Rewrite Suggestions</h4>
+                        <h4 className="font-extrabold text-stone-800 dark:text-stone-200 mb-3">Rewrite Suggestions</h4>
                         <div className="space-y-3">
                           {specificRewrites.map((rw, i) => (
                             <div key={i} className="p-3 rounded-lg bg-stone-50 dark:bg-stone-700/50 space-y-1">
@@ -4371,26 +4365,26 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                     {currentPlan !== 'free' &&
                       lockedFeatures.includes('specific_rewrites') &&
                       (!specificRewrites || specificRewrites.length === 0) && (
-                      <div className="mt-6 p-5 bg-violet-50 dark:from-violet-900/20 dark:to-violet-900/20 border-2 border-violet-200 dark:border-violet-600/40 rounded-2xl">
+                      <div className="mt-6 p-5 bg-[#FFF4E0] dark:bg-[#FF9600]/10 border-2 border-b-4 border-[#FF9600]/30 dark:border-[#D97F00]/40 rounded-2xl">
                         <div className="flex items-start gap-4">
-                          <div className="flex-shrink-0 w-10 h-10 bg-violet-600 hover:bg-violet-500 rounded-xl flex items-center justify-center">
+                          <div className="flex-shrink-0 w-10 h-10 bg-[#FF9600] rounded-xl flex items-center justify-center">
                             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                             </svg>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-bold text-violet-800 dark:text-violet-200">Unlock rewrite suggestions with Pro</h4>
-                            <p className="text-sm text-violet-700 dark:text-violet-300 mt-0.5">Get 3-5 specific sentence rewrites that improve your grade</p>
+                            <h4 className="font-extrabold text-[#D97F00] dark:text-[#FF9600]">Unlock rewrite suggestions with Pro</h4>
+                            <p className="text-sm text-[#D97F00] dark:text-[#FF9600]/80 mt-0.5">Get 3-5 specific sentence rewrites that improve your grade</p>
                             <div className="mt-3 flex flex-wrap items-center gap-2">
                               <button
                                 type="button"
                                 onClick={startProMonthlyCheckout}
                                 disabled={checkoutRedirecting}
-                                className="px-4 py-2 text-sm bg-violet-600 hover:bg-violet-700 disabled:opacity-60 disabled:cursor-wait text-white rounded-lg font-medium transition-colors"
+                                className="px-4 py-2 text-sm bg-[#FF9600] hover:bg-[#E08800] disabled:opacity-60 disabled:cursor-wait text-white rounded-lg font-extrabold border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all"
                               >
                                 {checkoutRedirecting ? 'Opening checkout…' : 'Upgrade'}
                               </button>
-                              <span className="text-sm text-violet-600">$19.99/mo</span>
+                              <span className="text-sm text-[#FF9600] font-bold">$19.99/mo</span>
                             </div>
                           </div>
                         </div>
@@ -4404,10 +4398,10 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
 
             {/* Full Analysis Result — free users: full content visible, but text beyond 40% is blurred inline */}
             {analysisResult && (
-              <div className="mx-6 mt-8 mb-6 bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-600 overflow-hidden">
-                <div className="bg-violet-600 hover:bg-violet-500 text-white px-6 py-4">
-                  <h2 className="text-xl font-bold">Comprehensive Academic Analysis</h2>
-                  <p className="text-violet-100 text-sm mt-0.5">
+              <div className="mx-6 mt-8 mb-6 bg-white dark:bg-stone-800 rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-600 overflow-hidden">
+                <div className="bg-[#A560E8] text-white px-6 py-4" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+                  <h2 className="text-xl font-extrabold uppercase tracking-wide">Comprehensive Academic Analysis</h2>
+                  <p className="text-white/80 text-sm mt-0.5 font-bold">
                     {currentPlan === 'free'
                       ? 'Full analysis structure shown below — unlock all text to read every insight'
                       : 'Full analysis report'}
@@ -4426,9 +4420,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                       {freeComprehensiveAnalysisHasLockedRemainder && (
                         <>
                           {/* Inline upgrade banner */}
-                          <div className="my-6 relative overflow-hidden rounded-xl border-2 border-dashed border-violet-300/80 bg-gradient-to-r from-violet-50/80 via-white to-violet-50/80 dark:border-violet-600/50 dark:from-violet-950/30 dark:via-stone-900 dark:to-violet-950/30">
+                          <div className="my-6 relative overflow-hidden rounded-xl border-2 border-dashed border-[#FF9600]/50 bg-[#FFF4E0] dark:border-[#D97F00]/50 dark:bg-[#FF9600]/10">
                             <div className="relative z-10 flex flex-col sm:flex-row items-center gap-3 px-4 py-4">
-                              <svg className="w-5 h-5 text-violet-500 shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                              <svg className="w-5 h-5 text-[#FF9600] shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                               </svg>
                               <div className="flex-1 text-center sm:text-left">
@@ -4443,7 +4437,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                                 type="button"
                                 onClick={startProMonthlyCheckout}
                                 disabled={checkoutRedirecting}
-                                className="shrink-0 rounded-lg bg-gradient-to-r from-violet-600 to-violet-700 px-4 py-2 text-sm font-bold text-white shadow-md shadow-violet-600/25 transition-all hover:scale-[1.02] hover:from-violet-500 hover:to-violet-600 active:scale-[0.99] disabled:cursor-wait disabled:opacity-60"
+                                className="shrink-0 rounded-lg bg-[#FF9600] px-4 py-2 text-sm font-extrabold text-white border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 hover:bg-[#E08800] disabled:cursor-wait disabled:opacity-60 transition-all"
                               >
                                 {checkoutRedirecting ? 'Opening…' : canStartFreeTrial ? 'Unlock — free trial' : 'Unlock full analysis'}
                               </button>
@@ -4461,7 +4455,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                             {/* Floating CTA overlay */}
                             <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-white/20 via-white/60 to-white/90 dark:from-stone-800/20 dark:via-stone-800/60 dark:to-stone-800/90">
                               <div className="text-center px-4 py-6">
-                                <div className="inline-flex items-center gap-2 rounded-full border border-violet-200/90 bg-white/90 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-violet-600 shadow-sm backdrop-blur-sm dark:border-violet-600/50 dark:bg-stone-900/90 dark:text-violet-300 mb-3">
+                                <div className="inline-flex items-center gap-2 rounded-full border-2 border-[#FF9600] bg-[#FFF4E0] px-3 py-1.5 text-xs font-extrabold uppercase tracking-wider text-[#FF9600] dark:border-[#D97F00] dark:bg-[#FF9600]/20 dark:text-[#FF9600] mb-3">
                                   <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                   </svg>
@@ -4479,7 +4473,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                                   type="button"
                                   onClick={startProMonthlyCheckout}
                                   disabled={checkoutRedirecting}
-                                  className="rounded-xl bg-gradient-to-r from-violet-600 to-violet-700 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-violet-600/30 transition-all hover:scale-[1.02] hover:from-violet-500 hover:to-violet-600 hover:shadow-violet-500/40 active:scale-[0.99] disabled:cursor-wait disabled:opacity-60"
+                                  className="rounded-xl bg-[#FF9600] px-6 py-2.5 text-sm font-extrabold text-white border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 hover:bg-[#E08800] disabled:cursor-wait disabled:opacity-60 transition-all"
                                 >
                                   {checkoutRedirecting
                                     ? 'Opening checkout…'
@@ -4509,7 +4503,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
             )}
 
             {/* Summary Footer */}
-            <div className="bg-gray-50 border-t border-gray-200 px-6 py-4">
+            <div className="bg-stone-50 border-t-2 border-[#E5E5E5] px-6 py-4" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex flex-wrap items-center gap-4 sm:gap-6">
                   <div className="flex items-center gap-2">
@@ -4525,7 +4519,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                   <button 
                     onClick={exportToPDF}
                     disabled={isExporting}
-                    className="px-5 py-2.5 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
+                    className="px-5 py-2.5 text-sm font-extrabold text-white bg-[#1CB0F6] rounded-lg border-2 border-b-4 border-[#1899D6] hover:bg-[#1899D6] active:border-b-2 active:translate-y-0.5 transition-all disabled:opacity-50"
                   >
                     Export Report
                   </button>
@@ -4535,7 +4529,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                       type="button"
                       onClick={startProMonthlyCheckout}
                       disabled={checkoutRedirecting}
-                      className="px-5 py-2.5 text-sm font-bold text-white bg-violet-600 hover:bg-violet-500 rounded-lg hover:bg-violet-700 disabled:opacity-60 disabled:cursor-wait transition-colors shadow-md shadow-violet-600/25"
+                      className="px-5 py-2.5 text-sm font-extrabold text-white bg-[#FF9600] hover:bg-[#E08800] rounded-lg border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 disabled:opacity-60 disabled:cursor-wait transition-all"
                       title="Download your full marked-up report — PDF or Word"
                     >
                       {checkoutRedirecting
@@ -4553,16 +4547,16 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
 
           {/* Rubric Alignment Results */}
           {rubricAlignment && (
-            <div className="mt-8 bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl border border-stone-200/60 dark:border-stone-700/40 shadow-lg shadow-stone-200/50 dark:shadow-stone-900/50 overflow-hidden">
-              {/* Rubric Header - matches dashboard Analyze tool style */}
-              <div className="bg-violet-600 hover:bg-violet-500 text-white px-6 py-5 shadow-lg shadow-violet-500/25">
+            <div className="mt-8 bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700/40 overflow-hidden">
+              {/* Rubric Header - Duolingo style */}
+              <div className="bg-[#1CB0F6] text-white px-6 py-5" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 rounded-xl flex items-center justify-center">
                     <span className="text-xl sm:text-2xl">📋</span>
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold">Your Assignment Rubric</h2>
-                    <p className="text-violet-100 text-sm mt-0.5">Compared against the rubric you uploaded</p>
+                    <h2 className="text-xl font-extrabold uppercase tracking-wide">Your Assignment Rubric</h2>
+                    <p className="text-white/80 text-sm mt-0.5 font-bold">Compared against the rubric you uploaded</p>
                   </div>
                 </div>
               </div>
@@ -4572,8 +4566,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                 <div className="p-6 relative">
                   {/* Overall Assessment - truncated to ~40% */}
                   {rubricAlignment.overallAssessment && (
-                    <div className="mb-6 p-4 sm:p-5 bg-violet-50 dark:bg-violet-900/20 border border-violet-200/70 dark:border-violet-700/40 rounded-2xl shadow-sm">
-                      <h3 className="font-semibold text-violet-700 dark:text-violet-300 mb-2">Overall Assessment</h3>
+                    <div className="mb-6 p-4 sm:p-5 bg-[#DDF4FF] dark:bg-[#1CB0F6]/10 border-2 border-[#1CB0F6]/30 dark:border-[#1899D6]/40 rounded-2xl">
+                      <h3 className="font-extrabold text-[#1899D6] dark:text-[#1CB0F6] mb-2">Overall Assessment</h3>
                       <p className="text-sm text-stone-700 dark:text-stone-300 leading-relaxed">
                         {rubricAlignment.overallAssessment.length > 1
                           ? rubricAlignment.overallAssessment.substring(0, Math.floor(rubricAlignment.overallAssessment.length * 0.4)) + '...'
@@ -4585,17 +4579,17 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                   {/* Score Summary */}
                   {rubricAlignment.criteria && rubricAlignment.criteria.length > 0 && (
                     <div className="flex flex-wrap gap-4 mb-6">
-                      <div className="flex-1 min-w-[100px] p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200/70 dark:border-emerald-700/40 rounded-2xl text-center shadow-sm">
-                        <span className="text-xl font-bold text-emerald-700 dark:text-emerald-300">{rubricAlignment.criteria.filter((c: any) => c.status === 'met').length}</span>
-                        <p className="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-1">Criteria Met</p>
+                      <div className="flex-1 min-w-[100px] p-3 bg-[#E5F8D0] dark:bg-[#58CC02]/10 border-2 border-b-4 border-[#58CC02]/30 dark:border-[#46A302]/40 rounded-2xl text-center">
+                        <span className="text-xl font-bold text-[#58CC02] dark:text-[#58CC02]">{rubricAlignment.criteria.filter((c: any) => c.status === 'met').length}</span>
+                        <p className="text-xs text-[#46A302] dark:text-[#58CC02]/80 font-medium mt-1">Criteria Met</p>
                       </div>
-                      <div className="flex-1 min-w-[100px] p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200/70 dark:border-amber-700/40 rounded-2xl text-center shadow-sm">
-                        <span className="text-xl font-bold text-amber-700 dark:text-amber-300">{rubricAlignment.criteria.filter((c: any) => c.status === 'partially_met').length}</span>
-                        <p className="text-xs text-amber-600 dark:text-amber-400 font-medium mt-1">Partially Met</p>
+                      <div className="flex-1 min-w-[100px] p-3 bg-[#FFF4E0] dark:bg-[#FF9600]/10 border-2 border-b-4 border-[#FF9600]/30 dark:border-[#D97F00]/40 rounded-2xl text-center">
+                        <span className="text-xl font-bold text-[#FF9600] dark:text-[#FF9600]">{rubricAlignment.criteria.filter((c: any) => c.status === 'partially_met').length}</span>
+                        <p className="text-xs text-[#D97F00] dark:text-[#FF9600]/80 font-medium mt-1">Partially Met</p>
                       </div>
-                      <div className="flex-1 min-w-[100px] p-3 bg-gradient-to-br from-violet-50 to-red-50 dark:from-violet-900/20 dark:to-red-900/20 border border-violet-200/70 dark:border-violet-700/40 rounded-2xl text-center shadow-sm">
-                        <span className="text-xl font-bold text-violet-700 dark:text-violet-300">{rubricAlignment.criteria.filter((c: any) => c.status === 'not_met').length}</span>
-                        <p className="text-xs text-violet-600 dark:text-violet-400 font-medium mt-1">Not Met</p>
+                      <div className="flex-1 min-w-[100px] p-3 bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-2 border-b-4 border-[#FF4B4B]/30 dark:border-[#E04343]/40 rounded-2xl text-center">
+                        <span className="text-xl font-extrabold text-[#FF4B4B] dark:text-[#FF4B4B]">{rubricAlignment.criteria.filter((c: any) => c.status === 'not_met').length}</span>
+                        <p className="text-xs text-[#E04343] dark:text-[#FF4B4B]/80 font-extrabold mt-1">Not Met</p>
                       </div>
                     </div>
                   )}
@@ -4607,20 +4601,20 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                       <div className="space-y-4">
                         {rubricAlignment.criteria.slice(0, Math.max(1, Math.ceil(rubricAlignment.criteria.length * 0.4))).map((criterion: any, index: number) => {
                           const statusConfig: Record<string, { bg: string; border: string; icon: string; label: string; textColor: string }> = {
-                            met: { bg: 'from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20', border: 'border-emerald-200/70 dark:border-emerald-700/40', icon: '✅', label: 'Met', textColor: 'text-emerald-700 dark:text-emerald-300' },
-                            partially_met: { bg: 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20', border: 'border-amber-200/70 dark:border-amber-700/40', icon: '⚠️', label: 'Partially Met', textColor: 'text-amber-700 dark:text-amber-300' },
-                            not_met: { bg: 'from-violet-50 to-red-50 dark:from-violet-900/20 dark:to-red-900/20', border: 'border-violet-200/70 dark:border-violet-700/40', icon: '❌', label: 'Not Met', textColor: 'text-violet-700 dark:text-violet-300' }
+                            met: { bg: 'bg-[#E5F8D0] dark:bg-[#58CC02]/10', border: 'border-2 border-b-4 border-[#58CC02]/30 dark:border-[#46A302]/40', icon: '✅', label: 'Met', textColor: 'text-[#58CC02] dark:text-[#58CC02]' },
+                            partially_met: { bg: 'bg-[#FFF4E0] dark:bg-[#FF9600]/10', border: 'border-2 border-b-4 border-[#FF9600]/30 dark:border-[#D97F00]/40', icon: '⚠️', label: 'Partially Met', textColor: 'text-[#FF9600] dark:text-[#FF9600]' },
+                            not_met: { bg: 'bg-[#FFE8E8] dark:bg-[#FF4B4B]/10', border: 'border-2 border-b-4 border-[#FF4B4B]/30 dark:border-[#E04343]/40', icon: '❌', label: 'Not Met', textColor: 'text-[#FF4B4B] dark:text-[#FF4B4B]' }
                           };
                           const config = statusConfig[criterion.status] || statusConfig.partially_met;
                           const truncatedAssessment = criterion.assessment ? criterion.assessment.substring(0, Math.floor(criterion.assessment.length * 0.4)) + '...' : criterion.assessment;
                           return (
-                            <div key={index} className={`p-4 sm:p-5 bg-gradient-to-br ${config.bg} border ${config.border} rounded-2xl shadow-sm`}>
+                            <div key={index} className={`p-4 sm:p-5 ${config.bg} ${config.border} rounded-2xl`}>
                               <div className="flex items-start justify-between mb-2">
                                 <div className="flex items-center space-x-2">
                                   <span>{config.icon}</span>
-                                  <h4 className="font-semibold text-stone-900 dark:text-stone-100">{criterion.criterion}</h4>
+                                  <h4 className="font-extrabold text-stone-900 dark:text-stone-100">{criterion.criterion}</h4>
                                 </div>
-                                <span className={`px-2 py-0.5 rounded-lg text-xs font-medium ${config.textColor} bg-white/80 dark:bg-stone-800/80`}>{config.label}</span>
+                                <span className={`px-2 py-0.5 rounded-lg text-xs font-extrabold ${config.textColor} bg-white/80 dark:bg-stone-800/80`}>{config.label}</span>
                               </div>
                               <p className="text-sm text-stone-700 dark:text-stone-300">{truncatedAssessment}</p>
                             </div>
@@ -4633,15 +4627,15 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                   {/* Gradient overlay + CTA - like document preview */}
                   <div className="relative mt-6 pt-8 -mb-2">
                     <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-stone-800 via-white/90 dark:via-stone-800/90 to-transparent pointer-events-none" style={{ marginTop: '-120px', height: '140px' }} />
-                    <div className="relative p-6 bg-gradient-to-r from-violet-50 to-violet-50 dark:from-violet-900/20 dark:to-violet-900/20 border border-violet-200/70 dark:border-violet-700/40 rounded-2xl">
+                    <div className="relative p-6 bg-[#FFF4E0] dark:bg-[#FF9600]/10 border-2 border-b-4 border-[#FF9600]/30 dark:border-[#D97F00]/40 rounded-2xl">
                       <div className="flex items-center space-x-3 mb-3">
-                        <div className="p-2 bg-violet-600 hover:bg-violet-500 rounded-full">
+                        <div className="p-2 bg-[#FF9600] rounded-full">
                           <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v2m0-2h2m-2 0H9m12-9V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-9z" />
                           </svg>
                         </div>
                         <div>
-                          <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100">
+                          <h3 className="text-lg font-extrabold text-stone-900 dark:text-stone-100">
                             Don&apos;t guess what your professor wants — see the full rubric map
                           </h3>
                           <p className="text-sm text-stone-600 dark:text-stone-400">
@@ -4655,7 +4649,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                         type="button"
                         onClick={startProMonthlyCheckout}
                         disabled={checkoutRedirecting}
-                        className="px-6 py-2.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-60 disabled:cursor-wait text-white rounded-xl font-bold transition-all shadow-lg shadow-violet-500/25 hover:shadow-violet-500/30"
+                        className="px-6 py-2.5 bg-[#FF9600] hover:bg-[#E08800] disabled:opacity-60 disabled:cursor-wait text-white rounded-xl font-extrabold border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all"
                       >
                         {checkoutRedirecting
                           ? 'Opening checkout…'
@@ -4674,8 +4668,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                 <div className="p-6">
                   {/* Overall Assessment - dashboard card style */}
                   {rubricAlignment.overallAssessment && (
-                    <div className="mb-6 p-4 sm:p-5 bg-violet-50 dark:bg-violet-900/20 border border-violet-200/70 dark:border-violet-700/40 rounded-2xl shadow-sm">
-                      <h3 className="font-semibold text-violet-700 dark:text-violet-300 mb-2">Overall Assessment</h3>
+                    <div className="mb-6 p-4 sm:p-5 bg-[#DDF4FF] dark:bg-[#1CB0F6]/10 border-2 border-[#1CB0F6]/30 dark:border-[#1899D6]/40 rounded-2xl">
+                      <h3 className="font-extrabold text-[#1899D6] dark:text-[#1CB0F6] mb-2">Overall Assessment</h3>
                       <p className="text-sm text-stone-700 dark:text-stone-300 leading-relaxed">{rubricAlignment.overallAssessment}</p>
                     </div>
                   )}
@@ -4683,17 +4677,17 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                   {/* Score Summary - dashboard card style */}
                   {rubricAlignment.criteria && rubricAlignment.criteria.length > 0 && (
                     <div className="flex flex-wrap gap-4 mb-6">
-                      <div className="flex-1 min-w-[120px] p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200/70 dark:border-emerald-700/40 rounded-2xl text-center shadow-sm">
-                        <span className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">{rubricAlignment.criteria.filter((c: any) => c.status === 'met').length}</span>
-                        <p className="text-sm text-emerald-600 dark:text-emerald-400 font-medium mt-1">Criteria Met</p>
+                      <div className="flex-1 min-w-[120px] p-4 bg-[#E5F8D0] dark:bg-[#58CC02]/10 border-2 border-b-4 border-[#58CC02]/30 dark:border-[#46A302]/40 rounded-2xl text-center">
+                        <span className="text-2xl font-bold text-[#58CC02] dark:text-[#58CC02]">{rubricAlignment.criteria.filter((c: any) => c.status === 'met').length}</span>
+                        <p className="text-sm text-[#46A302] dark:text-[#58CC02]/80 font-medium mt-1">Criteria Met</p>
                       </div>
-                      <div className="flex-1 min-w-[120px] p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200/70 dark:border-amber-700/40 rounded-2xl text-center shadow-sm">
-                        <span className="text-2xl font-bold text-amber-700 dark:text-amber-300">{rubricAlignment.criteria.filter((c: any) => c.status === 'partially_met').length}</span>
-                        <p className="text-sm text-amber-600 dark:text-amber-400 font-medium mt-1">Partially Met</p>
+                      <div className="flex-1 min-w-[120px] p-4 bg-[#FFF4E0] dark:bg-[#FF9600]/10 border-2 border-b-4 border-[#FF9600]/30 dark:border-[#D97F00]/40 rounded-2xl text-center">
+                        <span className="text-2xl font-bold text-[#FF9600] dark:text-[#FF9600]">{rubricAlignment.criteria.filter((c: any) => c.status === 'partially_met').length}</span>
+                        <p className="text-sm text-[#D97F00] dark:text-[#FF9600]/80 font-medium mt-1">Partially Met</p>
                       </div>
-                      <div className="flex-1 min-w-[120px] p-4 bg-gradient-to-br from-violet-50 to-red-50 dark:from-violet-900/20 dark:to-red-900/20 border border-violet-200/70 dark:border-violet-700/40 rounded-2xl text-center shadow-sm">
-                        <span className="text-2xl font-bold text-violet-700 dark:text-violet-300">{rubricAlignment.criteria.filter((c: any) => c.status === 'not_met').length}</span>
-                        <p className="text-sm text-violet-600 dark:text-violet-400 font-medium mt-1">Not Met</p>
+                      <div className="flex-1 min-w-[120px] p-4 bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-2 border-b-4 border-[#FF4B4B]/30 dark:border-[#E04343]/40 rounded-2xl text-center">
+                        <span className="text-2xl font-extrabold text-[#FF4B4B] dark:text-[#FF4B4B]">{rubricAlignment.criteria.filter((c: any) => c.status === 'not_met').length}</span>
+                        <p className="text-sm text-[#E04343] dark:text-[#FF4B4B]/80 font-extrabold mt-1">Not Met</p>
                       </div>
                     </div>
                   )}
@@ -4705,24 +4699,24 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                       <div className="space-y-4">
                         {rubricAlignment.criteria.map((criterion: any, index: number) => {
                           const statusConfig = {
-                            met: { bg: 'from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20', border: 'border-emerald-200/70 dark:border-emerald-700/40', icon: '✅', label: 'Met', textColor: 'text-emerald-700 dark:text-emerald-300' },
-                            partially_met: { bg: 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20', border: 'border-amber-200/70 dark:border-amber-700/40', icon: '⚠️', label: 'Partially Met', textColor: 'text-amber-700 dark:text-amber-300' },
-                            not_met: { bg: 'from-violet-50 to-red-50 dark:from-violet-900/20 dark:to-red-900/20', border: 'border-violet-200/70 dark:border-violet-700/40', icon: '❌', label: 'Not Met', textColor: 'text-violet-700 dark:text-violet-300' }
+                            met: { bg: 'bg-[#E5F8D0] dark:bg-[#58CC02]/10', border: 'border-2 border-b-4 border-[#58CC02]/30 dark:border-[#46A302]/40', icon: '✅', label: 'Met', textColor: 'text-[#58CC02] dark:text-[#58CC02]' },
+                            partially_met: { bg: 'bg-[#FFF4E0] dark:bg-[#FF9600]/10', border: 'border-2 border-b-4 border-[#FF9600]/30 dark:border-[#D97F00]/40', icon: '⚠️', label: 'Partially Met', textColor: 'text-[#FF9600] dark:text-[#FF9600]' },
+                            not_met: { bg: 'bg-[#FFE8E8] dark:bg-[#FF4B4B]/10', border: 'border-2 border-b-4 border-[#FF4B4B]/30 dark:border-[#E04343]/40', icon: '❌', label: 'Not Met', textColor: 'text-[#FF4B4B] dark:text-[#FF4B4B]' }
                           };
                           const config = statusConfig[criterion.status as keyof typeof statusConfig] || statusConfig.partially_met;
 
                           return (
-                            <div key={index} className={`p-4 sm:p-5 bg-gradient-to-br ${config.bg} border ${config.border} rounded-2xl shadow-sm`}>
+                            <div key={index} className={`p-4 sm:p-5 ${config.bg} ${config.border} rounded-2xl`}>
                               <div className="flex items-start justify-between mb-2">
                                 <div className="flex items-center space-x-2">
                                   <span>{config.icon}</span>
-                                  <h4 className="font-semibold text-stone-900 dark:text-stone-100">{criterion.criterion}</h4>
+                                  <h4 className="font-extrabold text-stone-900 dark:text-stone-100">{criterion.criterion}</h4>
                                 </div>
                                 <div className="flex items-center space-x-2">
                                   {criterion.score_estimate && criterion.score_estimate !== 'N/A' && (
-                                    <span className="px-2 py-0.5 bg-white/80 dark:bg-stone-800/80 rounded-lg text-sm font-medium text-stone-700 dark:text-stone-300">{criterion.score_estimate}</span>
+                                    <span className="px-2 py-0.5 bg-white/80 dark:bg-stone-800/80 rounded-lg text-sm font-extrabold text-stone-700 dark:text-stone-300">{criterion.score_estimate}</span>
                                   )}
-                                  <span className={`px-2 py-0.5 rounded-lg text-xs font-medium ${config.textColor} bg-white/80 dark:bg-stone-800/80`}>{config.label}</span>
+                                  <span className={`px-2 py-0.5 rounded-lg text-xs font-extrabold ${config.textColor} bg-white/80 dark:bg-stone-800/80`}>{config.label}</span>
                                 </div>
                               </div>
                               <p className="text-sm text-stone-700 dark:text-stone-300 mb-2">{criterion.assessment}</p>
@@ -4738,7 +4732,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                                   <ul className="space-y-1">
                                     {criterion.suggestions.map((suggestion: string, sIdx: number) => (
                                       <li key={sIdx} className="text-sm text-stone-600 dark:text-stone-400 flex items-start space-x-2">
-                                        <span className="text-violet-500 dark:text-violet-400 mt-0.5">•</span>
+                                        <span className="text-[#1CB0F6] dark:text-[#1CB0F6] mt-0.5">•</span>
                                         <span>{suggestion}</span>
                                       </li>
                                     ))}
@@ -4754,13 +4748,13 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
 
                   {/* Missing Elements - dashboard card style */}
                   {rubricAlignment.missingElements && rubricAlignment.missingElements.length > 0 && (
-                    <div className="mb-6 p-4 sm:p-5 bg-gradient-to-br from-violet-50 to-red-50 dark:from-violet-900/20 dark:to-red-900/20 border border-violet-200/70 dark:border-violet-700/40 rounded-2xl shadow-sm">
-                      <h3 className="font-semibold text-violet-700 dark:text-violet-300 mb-3">Missing Elements</h3>
+                    <div className="mb-6 p-4 sm:p-5 bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-2 border-b-4 border-[#FF4B4B]/30 dark:border-[#E04343]/40 rounded-2xl">
+                      <h3 className="font-extrabold text-[#FF4B4B] dark:text-[#FF4B4B] mb-3">Missing Elements</h3>
                       <p className="text-sm text-stone-700 dark:text-stone-300 mb-2">The following rubric requirements are not addressed in your essay:</p>
                       <ul className="space-y-2">
                         {rubricAlignment.missingElements.map((element: string, index: number) => (
                           <li key={index} className="flex items-start space-x-2 text-sm text-stone-700 dark:text-stone-300">
-                            <span className="mt-0.5 text-violet-500">❌</span>
+                            <span className="mt-0.5 text-[#FF4B4B]">❌</span>
                             <span>{element}</span>
                           </li>
                         ))}
@@ -4770,12 +4764,12 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
 
                   {/* Priority Improvements - dashboard card style */}
                   {rubricAlignment.priorityImprovements && rubricAlignment.priorityImprovements.length > 0 && (
-                    <div className="p-4 sm:p-5 bg-violet-50 dark:from-violet-900/20 dark:to-violet-900/20 border border-violet-200/70 dark:border-violet-700/40 rounded-2xl shadow-sm">
-                      <h3 className="font-semibold text-violet-700 dark:text-violet-300 mb-3">Priority Improvements</h3>
+                    <div className="p-4 sm:p-5 bg-[#DDF4FF] dark:bg-[#1CB0F6]/10 border-2 border-b-4 border-[#1CB0F6]/30 dark:border-[#1899D6]/40 rounded-2xl">
+                      <h3 className="font-extrabold text-[#1899D6] dark:text-[#1CB0F6] mb-3">Priority Improvements</h3>
                       <ol className="space-y-2">
                         {rubricAlignment.priorityImprovements.map((improvement: string, index: number) => (
                           <li key={index} className="flex items-start space-x-3 text-sm text-stone-700 dark:text-stone-300">
-                            <span className="flex-shrink-0 w-6 h-6 bg-violet-600 hover:bg-violet-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-sm">{index + 1}</span>
+                            <span className="flex-shrink-0 w-6 h-6 bg-[#1CB0F6] text-white rounded-full flex items-center justify-center text-xs font-extrabold">{index + 1}</span>
                             <span>{improvement}</span>
                           </li>
                         ))}
@@ -4814,16 +4808,16 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
               const isLimitedTooltip = lockedFeatures.includes('full_annotations') && !isFreePreview;
               
               return (
-                <div className={`relative rounded-lg px-3 py-2 shadow-xl mb-2 ${
-                  isLimitedTooltip 
-                    ? annotation.type === 'strong' 
-                      ? 'bg-emerald-600 text-white border-2 border-emerald-400'
+                <div className={`relative rounded-xl px-3 py-2 shadow-xl mb-2 ${
+                  isLimitedTooltip
+                    ? annotation.type === 'strong'
+                      ? 'bg-[#58CC02] text-white border-2 border-b-4 border-[#46A302]'
                       : annotation.type === 'improve'
-                        ? 'bg-amber-500 text-white border-2 border-amber-300'
-                        : 'bg-red-600 text-white border-2 border-red-400'
-                    : 'bg-gray-900 text-white'
-                } ${isMobileDevice() ? 'text-sm max-w-xs w-72' : 'text-xs max-w-xs'}`}>
-                  <div className="font-semibold">
+                        ? 'bg-[#FF9600] text-white border-2 border-b-4 border-[#D97F00]'
+                        : 'bg-[#FF4B4B] text-white border-2 border-b-4 border-[#E04343]'
+                    : 'bg-[#3C3C3C] text-white border-2 border-b-4 border-[#2A2A2A]'
+                } ${isMobileDevice() ? 'text-sm max-w-xs w-72' : 'text-xs max-w-xs'}`} style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+                  <div className="font-extrabold">
                     {typeLabels[annotation.type]}
                   </div>
                   {!isLimitedTooltip && (
@@ -4850,7 +4844,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                   )}
                   {!isMobileDevice() && (
                     <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full">
-                      <div className={`border-8 border-transparent ${isLimitedTooltip ? (annotation.type === 'strong' ? 'border-t-emerald-600' : annotation.type === 'improve' ? 'border-t-amber-500' : 'border-t-red-600') : 'border-t-gray-900'}`}></div>
+                      <div className={`border-8 border-transparent ${isLimitedTooltip ? (annotation.type === 'strong' ? 'border-t-[#58CC02]' : annotation.type === 'improve' ? 'border-t-[#FF9600]' : 'border-t-[#FF4B4B]') : 'border-t-[#3C3C3C]'}`}></div>
                     </div>
                   )}
                 </div>
@@ -4873,11 +4867,12 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
           onClick={() => setShowCompareOriginalModal(false)}
         >
           <div
-            className="bg-white dark:bg-stone-900 rounded-2xl max-w-5xl w-full max-h-[88vh] flex flex-col shadow-2xl border border-stone-200 dark:border-stone-700"
+            className="bg-white dark:bg-stone-900 rounded-2xl max-w-5xl w-full max-h-[88vh] flex flex-col border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700"
             onClick={(e) => e.stopPropagation()}
+            style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
           >
-            <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-stone-200 dark:border-stone-700">
-              <h2 id="compare-original-title" className="text-lg font-bold text-stone-900 dark:text-stone-100">
+            <div className="flex items-center justify-between gap-3 px-5 py-4 border-b-2 border-[#E5E5E5] dark:border-stone-700">
+              <h2 id="compare-original-title" className="text-lg font-extrabold text-stone-900 dark:text-stone-100">
                 Compare with first draft
               </h2>
               <button
@@ -4890,7 +4885,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
             </div>
             <p className="px-5 pt-3 text-xs text-stone-500 dark:text-stone-400">
               Left: text as it was when this analysis was run. Right: your current draft;{' '}
-              <span className="font-medium text-violet-700 dark:text-violet-300">purple</span> highlights what changed
+              <span className="font-extrabold text-[#A560E8] dark:text-[#A560E8]">purple</span> highlights what changed
               compared to the first draft (including WriteScholar revisions and any other edits).
             </p>
             <div className="grid md:grid-cols-2 gap-0 flex-1 min-h-0 border-t border-stone-200 dark:border-stone-700">

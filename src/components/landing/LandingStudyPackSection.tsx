@@ -8,7 +8,7 @@ interface LandingStudyPackSectionProps {
 
 const FEATURES = [
   'Try the demo: paste notes and get three cards, a quiz, and a mini lesson',
-  'Crossword and Crater Blast on Pro for exam-style practice',
+  'Crossword, Crater Blast & Word Tower on Pro for exam-style practice',
   'Use alongside professor-style essay feedback when you revise drafts',
 ];
 
@@ -58,7 +58,7 @@ export default function LandingStudyPackSection({ onNavigate }: LandingStudyPack
                 ))}
               </ul>
               <p className="text-sm text-stone-500 dark:text-stone-400 leading-relaxed">
-                Free includes lesson and flashcards. Quiz, crossword, and Crater Blast unlock on Pro, same flow as your dashboard.
+                Free includes lesson and flashcards. Quiz, crossword, Crater Blast & Word Tower unlock on Pro, same flow as your dashboard.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 pt-1">
                 <button

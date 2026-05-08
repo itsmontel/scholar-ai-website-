@@ -95,6 +95,14 @@ struct Achievement: Identifiable, Equatable {
         case focusModeUnlocksAtLeast(Int)
         case focusModeBlocksAtLeast(Int)
 
+        // v2 — per-tool unlock rules. Server already populates the
+        // matching counters in `AchievementStats`; we just hadn't wired
+        // badges to them yet.
+        case quizzesCountAtLeast(Int)
+        case flashcardsCountAtLeast(Int)
+        case lessonsCountAtLeast(Int)
+        case crosswordsCountAtLeast(Int)
+
         case usedAfter10pm
         case usedBefore7am
         case midnightUsage
@@ -127,6 +135,10 @@ struct Achievement: Identifiable, Equatable {
         case .studyPacksAtLeast(let n):              return stats.studyPacksCount >= n
         case .focusModeUnlocksAtLeast(let n):        return stats.focusModeUnlocksCount >= n
         case .focusModeBlocksAtLeast(let n):         return stats.focusModeSitesBlocked >= n
+        case .quizzesCountAtLeast(let n):            return stats.quizzesCount >= n
+        case .flashcardsCountAtLeast(let n):         return stats.flashcardsCount >= n
+        case .lessonsCountAtLeast(let n):            return stats.lessonsCount >= n
+        case .crosswordsCountAtLeast(let n):         return stats.crosswordsCount >= n
         case .usedAfter10pm:                         return stats.usedAfter10pm
         case .usedBefore7am:                         return stats.usedBefore7am
         case .midnightUsage:                         return stats.midnightUsage
@@ -157,6 +169,10 @@ struct Achievement: Identifiable, Equatable {
         case .studyPacksAtLeast(let n):              return frac(stats.studyPacksCount, n)
         case .focusModeUnlocksAtLeast(let n):        return frac(stats.focusModeUnlocksCount, n)
         case .focusModeBlocksAtLeast(let n):         return frac(stats.focusModeSitesBlocked, n)
+        case .quizzesCountAtLeast(let n):            return frac(stats.quizzesCount, n)
+        case .flashcardsCountAtLeast(let n):         return frac(stats.flashcardsCount, n)
+        case .lessonsCountAtLeast(let n):            return frac(stats.lessonsCount, n)
+        case .crosswordsCountAtLeast(let n):         return frac(stats.crosswordsCount, n)
         case .isPaidSinceMonthsAgo(let n):           return stats.isPaidUser ? frac(stats.monthsSincePaid, n) : 0
         default:                                      return isUnlocked(stats: stats) ? 1.0 : 0.0
         }
@@ -168,6 +184,94 @@ struct Achievement: Identifiable, Equatable {
     }
 
     static func == (a: Achievement, b: Achievement) -> Bool { a.id == b.id }
+
+    // MARK: - Mobile gallery grouping
+
+    /// Coarser bucket used by the iOS Achievements gallery sheet.
+    /// We want sections that map to actual app surfaces ("Games",
+    /// "Focus", "Quizzes") rather than to the website's flat
+    /// "mastery" / "special" buckets.
+    var mobileGroup: MobileGroup {
+        switch rule {
+        case .longestStreakAtLeast,
+             .quickReviewLongestStreakAtLeast:        return .streaks
+        case .quickReviewCountAtLeast,
+             .quickReviewPerfectAtLeast,
+             .quizzesCountAtLeast:                    return .quizzes
+        case .craterBlastGamesAtLeast,
+             .craterBlastPerfectAtLeast:              return .games
+        case .focusModeUnlocksAtLeast,
+             .focusModeBlocksAtLeast:                 return .focus
+        case .studyPacksAtLeast,
+             .totalStudyToolsAtLeast,
+             .flashcardsCountAtLeast,
+             .lessonsCountAtLeast,
+             .crosswordsCountAtLeast:                 return .studyPacks
+        case .isPaidUser,
+             .isPaidSinceMonthsAgo:                   return .subscription
+        case .firstLogin,
+             .visitedBadges:                          return .gettingStarted
+        case .usedAfter10pm,
+             .usedBefore7am,
+             .midnightUsage,
+             .weekendUsage,
+             .comebackKid7Days,
+             .toolsUsedEverAtLeast:                   return .special
+        default:                                       return .special
+        }
+    }
+
+    enum MobileGroup: String, CaseIterable, Identifiable, Hashable {
+        case streaks
+        case studyPacks
+        case quizzes
+        case games
+        case focus
+        case subscription
+        case special
+        case gettingStarted
+
+        var id: String { rawValue }
+
+        var label: String {
+            switch self {
+            case .streaks:        return "Streaks"
+            case .studyPacks:     return "Study Packs"
+            case .quizzes:        return "Quizzes"
+            case .games:          return "Games"
+            case .focus:          return "Focus Mode"
+            case .subscription:   return "Pro"
+            case .special:        return "Special"
+            case .gettingStarted: return "Getting Started"
+            }
+        }
+
+        var icon: String {
+            switch self {
+            case .streaks:        return "flame.fill"
+            case .studyPacks:     return "graduationcap.fill"
+            case .quizzes:        return "checkmark.bubble.fill"
+            case .games:          return "gamecontroller.fill"
+            case .focus:          return "shield.lefthalf.filled"
+            case .subscription:   return "crown.fill"
+            case .special:        return "sparkles"
+            case .gettingStarted: return "star.fill"
+            }
+        }
+
+        var tint: Color {
+            switch self {
+            case .streaks:        return Color(hex: 0xF59E0B)
+            case .studyPacks:     return WSColor.brandPrimary
+            case .quizzes:        return Color(hex: 0xD946EF)
+            case .games:          return Color(hex: 0xEF4444)
+            case .focus:          return Color(hex: 0x10B981)
+            case .subscription:   return Color(hex: 0xEAB308)
+            case .special:        return Color(hex: 0x6366F1)
+            case .gettingStarted: return Color(hex: 0x06B6D4)
+            }
+        }
+    }
 }
 
 // MARK: - AchievementStats (matches AchievementStats interface on desktop)
@@ -317,114 +421,102 @@ struct AchievementStats: Decodable {
     }
 }
 
-// MARK: - Catalog (90 badges, identical IDs/XP to desktop BADGES array)
+// MARK: - Catalog
+//
+// Mobile-only catalog. Citation/upload/analyze/export/wordsmith badges
+// (and the matching mastery tiers) live on the desktop website where
+// those features are exposed — they aren't surfaced from this app, so
+// shipping them as locked-forever rewards would just be noise. Anything
+// the user can actually unlock on iOS is here.
 
 enum AchievementCatalog {
     typealias A = Achievement
 
     static let all: [Achievement] = [
 
-        // ── Getting Started (6) ──────────────────────────────
-        A(id: "first_login",      name: "Welcome!",        creatureName: "Greenie",  description: "Log in for the first time", xp: 5,  category: .gettingStarted, rarity: .common,   conditionText: "Log in to WriteScholar", rule: .firstLogin),
-        A(id: "first_steps",      name: "First Steps",     creatureName: "Blobby",   description: "Upload your first document", xp: 10, category: .gettingStarted, rarity: .common,   conditionText: "Upload 1 document",     rule: .uploadsAtLeast(1)),
-        A(id: "brain_spark",      name: "Brain Spark",     creatureName: "Sparky",   description: "Analyze your first paper",   xp: 15, category: .gettingStarted, rarity: .common,   conditionText: "Analyze 1 paper",        rule: .analysesAtLeast(1)),
-        A(id: "citation_hunter",  name: "Citation Hunter", creatureName: "Snoop",    description: "Find your first citation",   xp: 10, category: .gettingStarted, rarity: .common,   conditionText: "Find 1 citation",        rule: .citationsAtLeast(1)),
-        A(id: "summary_sage",     name: "Summary Sage",    creatureName: "Scrollie", description: "Summarize your first paper", xp: 10, category: .gettingStarted, rarity: .common,   conditionText: "Summarize 1 paper",      rule: .summariesAtLeast(1)),
-        A(id: "explorer",         name: "Badge Explorer",  creatureName: "Peeker",   description: "Visit the badges page",      xp: 5,  category: .gettingStarted, rarity: .common,   conditionText: "Visit the Badges page",  rule: .visitedBadges),
+        // ── Getting Started (3) ──────────────────────────────
+        A(id: "first_login",            name: "Welcome!",            creatureName: "Greenie",   description: "Log in for the first time",       xp: 5,  category: .gettingStarted, rarity: .common,    conditionText: "Log in to WriteScholar",        rule: .firstLogin),
+        A(id: "explorer",               name: "Badge Explorer",      creatureName: "Peeker",    description: "Visit the badges page",           xp: 5,  category: .gettingStarted, rarity: .common,    conditionText: "Visit the Badges page",         rule: .visitedBadges),
+        A(id: "study_pack_pioneer",     name: "Study Pack Pioneer",  creatureName: "Packly",    description: "Generate your first Study Pack",  xp: 15, category: .gettingStarted, rarity: .common,    conditionText: "Generate 1 Study Pack",         rule: .studyPacksAtLeast(1)),
 
-        // ── Streaks (10 — including 21d, 45d added later) ────
-        A(id: "streak_starter",   name: "Streak Starter",  creatureName: "Emberly",   description: "Achieve a 3-day streak",   xp: 20,  category: .streak, rarity: .uncommon,  conditionText: "3-day streak",   rule: .longestStreakAtLeast(3)),
-        A(id: "streak_warrior",   name: "Streak Warrior",  creatureName: "Blazer",    description: "Achieve a 5-day streak",   xp: 30,  category: .streak, rarity: .rare,      conditionText: "5-day streak",   rule: .longestStreakAtLeast(5)),
-        A(id: "streak_legend",    name: "Streak Legend",   creatureName: "Phoenix",   description: "Achieve a 7-day streak",   xp: 50,  category: .streak, rarity: .epic,      conditionText: "7-day streak",   rule: .longestStreakAtLeast(7)),
-        A(id: "two_week_titan",   name: "Two Week Titan",  creatureName: "Titan",     description: "Achieve a 14-day streak",  xp: 60,  category: .streak, rarity: .epic,      conditionText: "14-day streak",  rule: .longestStreakAtLeast(14)),
-        A(id: "streak_champion",  name: "Streak Champion", creatureName: "Broadcaster",description: "Achieve a 21-day streak", xp: 75,  category: .streak, rarity: .epic,      conditionText: "21-day streak",  rule: .longestStreakAtLeast(21)),
-        A(id: "monthly_master",   name: "Monthly Master",  creatureName: "Inferno",   description: "Achieve a 30-day streak",  xp: 100, category: .streak, rarity: .legendary, conditionText: "30-day streak",  rule: .longestStreakAtLeast(30)),
-        A(id: "streak_titan",     name: "Streak Titan",    creatureName: "Influex",   description: "Achieve a 45-day streak",  xp: 125, category: .streak, rarity: .legendary, conditionText: "45-day streak",  rule: .longestStreakAtLeast(45)),
-        A(id: "streak_machine",   name: "Streak Machine",  creatureName: "Mechablaze",description: "Achieve a 60-day streak", xp: 150, category: .streak, rarity: .legendary, conditionText: "60-day streak",  rule: .longestStreakAtLeast(60)),
-        A(id: "streak_immortal",  name: "Streak Immortal", creatureName: "Eternox",   description: "Achieve a 100-day streak", xp: 200, category: .streak, rarity: .legendary, conditionText: "100-day streak", rule: .longestStreakAtLeast(100)),
-        A(id: "streak_demigod",   name: "Streak Demigod",  creatureName: "Godflame",  description: "Achieve a 365-day streak", xp: 500, category: .streak, rarity: .legendary, conditionText: "365-day streak", rule: .longestStreakAtLeast(365)),
+        // ── Streaks (10) ─────────────────────────────────────
+        A(id: "streak_starter",   name: "Streak Starter",  creatureName: "Emberly",     description: "Achieve a 3-day streak",   xp: 20,  category: .streak, rarity: .uncommon,  conditionText: "3-day streak",   rule: .longestStreakAtLeast(3)),
+        A(id: "streak_warrior",   name: "Streak Warrior",  creatureName: "Blazer",      description: "Achieve a 5-day streak",   xp: 30,  category: .streak, rarity: .rare,      conditionText: "5-day streak",   rule: .longestStreakAtLeast(5)),
+        A(id: "streak_legend",    name: "Streak Legend",   creatureName: "Phoenix",     description: "Achieve a 7-day streak",   xp: 50,  category: .streak, rarity: .epic,      conditionText: "7-day streak",   rule: .longestStreakAtLeast(7)),
+        A(id: "two_week_titan",   name: "Two Week Titan",  creatureName: "Titan",       description: "Achieve a 14-day streak",  xp: 60,  category: .streak, rarity: .epic,      conditionText: "14-day streak",  rule: .longestStreakAtLeast(14)),
+        A(id: "streak_champion",  name: "Streak Champion", creatureName: "Broadcaster", description: "Achieve a 21-day streak",  xp: 75,  category: .streak, rarity: .epic,      conditionText: "21-day streak",  rule: .longestStreakAtLeast(21)),
+        A(id: "monthly_master",   name: "Monthly Master",  creatureName: "Inferno",     description: "Achieve a 30-day streak",  xp: 100, category: .streak, rarity: .legendary, conditionText: "30-day streak",  rule: .longestStreakAtLeast(30)),
+        A(id: "streak_titan",     name: "Streak Titan",    creatureName: "Influex",     description: "Achieve a 45-day streak",  xp: 125, category: .streak, rarity: .legendary, conditionText: "45-day streak",  rule: .longestStreakAtLeast(45)),
+        A(id: "streak_machine",   name: "Streak Machine",  creatureName: "Mechablaze",  description: "Achieve a 60-day streak",  xp: 150, category: .streak, rarity: .legendary, conditionText: "60-day streak",  rule: .longestStreakAtLeast(60)),
+        A(id: "streak_immortal",  name: "Streak Immortal", creatureName: "Eternox",     description: "Achieve a 100-day streak", xp: 200, category: .streak, rarity: .legendary, conditionText: "100-day streak", rule: .longestStreakAtLeast(100)),
+        A(id: "streak_demigod",   name: "Streak Demigod",  creatureName: "Godflame",    description: "Achieve a 365-day streak", xp: 500, category: .streak, rarity: .legendary, conditionText: "365-day streak", rule: .longestStreakAtLeast(365)),
 
-        // ── Mastery (analysis, citation, summary, upload) ───
-        A(id: "paper_shredder",   name: "Paper Shredder",  creatureName: "Shredz",    description: "Analyze 5 papers",   xp: 25,  category: .mastery, rarity: .rare,      conditionText: "Analyze 5 papers",   rule: .analysesAtLeast(5)),
-        A(id: "analysis_master",  name: "Analysis Master", creatureName: "Analytix",  description: "Analyze 10 papers",  xp: 40,  category: .mastery, rarity: .epic,      conditionText: "Analyze 10 papers",  rule: .analysesAtLeast(10)),
-        A(id: "analysis_legend",  name: "Analysis Legend", creatureName: "Analytor",  description: "Analyze 25 papers",  xp: 75,  category: .mastery, rarity: .legendary, conditionText: "Analyze 25 papers",  rule: .analysesAtLeast(25)),
-        A(id: "analysis_ace",     name: "Analysis Ace",    creatureName: "Giver",     description: "Analyze 50 papers",  xp: 60,  category: .mastery, rarity: .epic,      conditionText: "Analyze 50 papers",  rule: .analysesAtLeast(50)),
-        A(id: "analysis_titan",   name: "Analysis Titan",  creatureName: "Starshare", description: "Analyze 100 papers", xp: 125, category: .mastery, rarity: .legendary, conditionText: "Analyze 100 papers", rule: .analysesAtLeast(100)),
-        A(id: "citation_master",  name: "Citation Master", creatureName: "Bookwyrm",  description: "Find 10 citations",  xp: 30,  category: .mastery, rarity: .epic,      conditionText: "Find 10 citations",  rule: .citationsAtLeast(10)),
-        A(id: "citation_legend",  name: "Citation Legend", creatureName: "Librax",    description: "Find 25 citations",  xp: 50,  category: .mastery, rarity: .legendary, conditionText: "Find 25 citations",  rule: .citationsAtLeast(25)),
-        A(id: "citation_collector", name: "Citation Collector", creatureName: "Flutter", description: "Find 50 citations", xp: 60, category: .mastery, rarity: .epic,    conditionText: "Find 50 citations",   rule: .citationsAtLeast(50)),
-        A(id: "citation_archivist", name: "Citation Archivist", creatureName: "Celeb",   description: "Find 100 citations", xp: 100, category: .mastery, rarity: .legendary, conditionText: "Find 100 citations", rule: .citationsAtLeast(100)),
-        A(id: "summary_scholar",  name: "Summary Scholar", creatureName: "Sage",      description: "Summarize 5 papers",   xp: 25, category: .mastery, rarity: .rare,      conditionText: "Summarize 5 papers",   rule: .summariesAtLeast(5)),
-        A(id: "summary_master",   name: "Summary Master",  creatureName: "Condensor", description: "Summarize 10 papers",  xp: 40, category: .mastery, rarity: .epic,      conditionText: "Summarize 10 papers",  rule: .summariesAtLeast(10)),
-        A(id: "upload_champion",  name: "Upload Champion", creatureName: "Uploader",  description: "Upload 10 documents",  xp: 30, category: .mastery, rarity: .rare,      conditionText: "Upload 10 documents",  rule: .uploadsAtLeast(10)),
-        A(id: "upload_legend",    name: "Upload Legend",   creatureName: "Cloudking", description: "Upload 25 documents",  xp: 50, category: .mastery, rarity: .epic,      conditionText: "Upload 25 documents",  rule: .uploadsAtLeast(25)),
+        // ── Study Packs (8) ──────────────────────────────────
+        A(id: "study_pack_explorer",  name: "Study Pack Explorer",  creatureName: "Explorix",  description: "Generate 3 Study Packs",   xp: 25, category: .mastery, rarity: .uncommon, conditionText: "Generate 3 Study Packs",  rule: .studyPacksAtLeast(3)),
+        A(id: "study_pack_pro",       name: "Study Pack Pro",       creatureName: "Studix",    description: "Generate 5 Study Packs",   xp: 35, category: .mastery, rarity: .rare,     conditionText: "Generate 5 Study Packs",  rule: .studyPacksAtLeast(5)),
+        A(id: "study_pack_master",    name: "Study Pack Master",    creatureName: "Masterly",  description: "Generate 10 Study Packs",  xp: 50, category: .mastery, rarity: .epic,     conditionText: "Generate 10 Study Packs", rule: .studyPacksAtLeast(10)),
+        A(id: "study_pack_champion",  name: "Study Pack Champion",  creatureName: "Champton",  description: "Generate 25 Study Packs",  xp: 75, category: .mastery, rarity: .epic,     conditionText: "Generate 25 Study Packs", rule: .studyPacksAtLeast(25)),
+        A(id: "study_pack_legend",    name: "Study Pack Legend",    creatureName: "Legendix",  description: "Generate 50 Study Packs",  xp: 100,category: .mastery, rarity: .legendary,conditionText: "Generate 50 Study Packs", rule: .studyPacksAtLeast(50)),
+        A(id: "study_pack_centurion", name: "Study Pack Centurion", creatureName: "Centurion", description: "Generate 100 Study Packs", xp: 150,category: .mastery, rarity: .legendary,conditionText: "Generate 100 Study Packs",rule: .studyPacksAtLeast(100)),
+        A(id: "study_pack_god",       name: "Study Pack God",       creatureName: "Packgod",   description: "Generate 200 Study Packs", xp: 250,category: .mastery, rarity: .legendary,conditionText: "Generate 200 Study Packs",rule: .studyPacksAtLeast(200)),
+        A(id: "study_tool_centurion", name: "Study Tool Centurion", creatureName: "Centurion", description: "Create 100 total study tools", xp: 150, category: .mastery, rarity: .legendary, conditionText: "Create 100 study tools", rule: .totalStudyToolsAtLeast(100)),
 
-        // ── Subscription (4) ──────────────────────────────────
-        A(id: "premium_pioneer",  name: "Pro Pioneer",     creatureName: "Goldie",    description: "Become a Pro subscriber",        xp: 50,  category: .subscription, rarity: .epic,      conditionText: "Subscribe to Pro",            rule: .isPaidUser),
-        A(id: "loyal_learner",    name: "Loyal Learner",   creatureName: "Loyalist",  description: "3 months as a paid subscriber",  xp: 75,  category: .subscription, rarity: .epic,      conditionText: "3 months as paid subscriber", rule: .isPaidSinceMonthsAgo(3)),
-        A(id: "dedicated_scholar",name: "Dedicated Scholar",creatureName: "Devotion", description: "6 months as a paid subscriber",  xp: 100, category: .subscription, rarity: .legendary, conditionText: "6 months as paid subscriber", rule: .isPaidSinceMonthsAgo(6)),
-        A(id: "scholar_supreme",  name: "Scholar Supreme", creatureName: "Eternia",   description: "1 year as a paid subscriber",    xp: 200, category: .subscription, rarity: .legendary, conditionText: "1 year as paid subscriber",   rule: .isPaidSinceMonthsAgo(12)),
-
-        // ── Special / time-of-day / social ────────────────────
-        A(id: "night_owl",        name: "Night Owl",       creatureName: "Nyx",       description: "Use WriteScholar after 10 PM",            xp: 15, category: .special, rarity: .uncommon, conditionText: "Use app after 10 PM",        rule: .usedAfter10pm),
-        A(id: "early_bird",       name: "Early Bird",      creatureName: "Sol",       description: "Use WriteScholar before 7 AM",            xp: 15, category: .special, rarity: .uncommon, conditionText: "Use app before 7 AM",        rule: .usedBefore7am),
-        A(id: "midnight_scholar", name: "Midnight Scholar",creatureName: "Midnight",  description: "Use WriteScholar between midnight and 3 AM", xp: 25, category: .special, rarity: .rare,    conditionText: "Use app midnight–3 AM",      rule: .midnightUsage),
-        A(id: "weekend_warrior",  name: "Weekend Warrior", creatureName: "Weekender", description: "Use WriteScholar on a weekend",           xp: 10, category: .special, rarity: .common,   conditionText: "Use app on a weekend",       rule: .weekendUsage),
-        A(id: "all_rounder",      name: "All-Rounder",     creatureName: "Omni",      description: "Use every tool type at least once",       xp: 50, category: .special, rarity: .epic,     conditionText: "Use all 8 tool types",       rule: .toolsUsedEverAtLeast(8)),
-        A(id: "export_pro",       name: "Export Pro",      creatureName: "Exporto",   description: "Export a quiz or flashcard set",          xp: 15, category: .special, rarity: .uncommon, conditionText: "Export 1 study tool",        rule: .exportsAtLeast(1)),
-        A(id: "comeback_kid",     name: "Comeback Kid",    creatureName: "Boomerang", description: "Return after 7+ days away",               xp: 20, category: .special, rarity: .uncommon, conditionText: "Return after 7+ days away",  rule: .comebackKid7Days),
-        A(id: "social_scholar",   name: "Social Scholar",  creatureName: "Sharky",    description: "Copy a result to clipboard",              xp: 10, category: .special, rarity: .common,   conditionText: "Copy a result",              rule: .copiesAtLeast(1)),
-
-        // ── Tools & Library ───────────────────────────────────
-        A(id: "tool_tryer",       name: "Tool Tryer",      creatureName: "Calendex",   description: "Use 2 different tool types", xp: 10, category: .special, rarity: .common,   conditionText: "Use 2 tool types", rule: .toolsUsedEverAtLeast(2)),
-        A(id: "tool_explorer",    name: "Tool Explorer",   creatureName: "Plannerina", description: "Use 4 different tool types", xp: 25, category: .special, rarity: .uncommon, conditionText: "Use 4 tool types", rule: .toolsUsedEverAtLeast(4)),
-        A(id: "tool_adventurer",  name: "Tool Adventurer", creatureName: "Chronos",    description: "Use 6 different tool types", xp: 40, category: .special, rarity: .rare,     conditionText: "Use 6 tool types", rule: .toolsUsedEverAtLeast(6)),
-        A(id: "library_keeper",   name: "Library Keeper",  creatureName: "Tempus",     description: "Have 5 documents in your library",  xp: 15, category: .special, rarity: .common, conditionText: "5 documents in library", rule: .uploadsAtLeast(5)),
-        A(id: "library_builder",  name: "Library Builder", creatureName: "Agendor",    description: "Have 20 documents in your library", xp: 40, category: .special, rarity: .rare,   conditionText: "20 documents in library", rule: .uploadsAtLeast(20)),
-        A(id: "library_hoarder",  name: "Library Hoarder", creatureName: "Buddy",      description: "Have 50 documents in your library", xp: 75, category: .special, rarity: .epic,   conditionText: "50 documents in library", rule: .uploadsAtLeast(50)),
-
-        // ── Quick Review (8) ──────────────────────────────────
-        A(id: "quick_starter",    name: "Quick Starter",   creatureName: "Speedy",    description: "Complete your first Quick Review",  xp: 10,  category: .mastery, rarity: .common,    conditionText: "Complete 1 Quick Review",  rule: .quickReviewCountAtLeast(1)),
-        A(id: "perfect_recall",   name: "Perfect Recall",  creatureName: "Memoria",   description: "Score 100% on a Quick Review",      xp: 25,  category: .mastery, rarity: .rare,      conditionText: "Get 100% on Quick Review", rule: .quickReviewPerfectAtLeast(1)),
-        A(id: "review_regular",   name: "Review Regular",  creatureName: "Reviewer",  description: "Complete 10 Quick Reviews",         xp: 30,  category: .mastery, rarity: .uncommon,  conditionText: "Complete 10 Quick Reviews",rule: .quickReviewCountAtLeast(10)),
+        // ── Quick Review / Quiz (8) ──────────────────────────
+        A(id: "quick_starter",    name: "Quick Starter",   creatureName: "Speedy",    description: "Complete your first Quick Review",  xp: 10,  category: .mastery, rarity: .common,    conditionText: "Complete 1 Quick Review",   rule: .quickReviewCountAtLeast(1)),
+        A(id: "perfect_recall",   name: "Perfect Recall",  creatureName: "Memoria",   description: "Score 100% on a Quick Review",      xp: 25,  category: .mastery, rarity: .rare,      conditionText: "Get 100% on Quick Review",  rule: .quickReviewPerfectAtLeast(1)),
+        A(id: "review_regular",   name: "Review Regular",  creatureName: "Reviewer",  description: "Complete 10 Quick Reviews",         xp: 30,  category: .mastery, rarity: .uncommon,  conditionText: "Complete 10 Quick Reviews", rule: .quickReviewCountAtLeast(10)),
         A(id: "weekly_reviewer",  name: "Weekly Reviewer", creatureName: "Weekwise",  description: "7-day Quick Review streak",         xp: 50,  category: .streak,  rarity: .epic,      conditionText: "7-day Quick Review streak", rule: .quickReviewLongestStreakAtLeast(7)),
         A(id: "review_warrior",   name: "Review Warrior",  creatureName: "Revisor",   description: "Complete 30 Quick Reviews",         xp: 50,  category: .mastery, rarity: .rare,      conditionText: "Complete 30 Quick Reviews", rule: .quickReviewCountAtLeast(30)),
         A(id: "monthly_reviewer", name: "Monthly Reviewer",creatureName: "Consistor", description: "30-day Quick Review streak",        xp: 150, category: .streak,  rarity: .legendary, conditionText: "30-day Quick Review streak",rule: .quickReviewLongestStreakAtLeast(30)),
         A(id: "review_master",    name: "Review Master",   creatureName: "Recallion", description: "Complete 50 Quick Reviews",         xp: 75,  category: .mastery, rarity: .epic,      conditionText: "Complete 50 Quick Reviews", rule: .quickReviewCountAtLeast(50)),
         A(id: "review_legend",    name: "Review Legend",   creatureName: "Retainex",  description: "Complete 100 Quick Reviews",        xp: 150, category: .mastery, rarity: .legendary, conditionText: "Complete 100 Quick Reviews",rule: .quickReviewCountAtLeast(100)),
+        A(id: "perfectionist",    name: "Perfectionist",   creatureName: "Flawless",  description: "Get 5 perfect Quick Reviews",       xp: 60,  category: .mastery, rarity: .epic,      conditionText: "5 perfect Quick Reviews",   rule: .quickReviewPerfectAtLeast(5)),
+        A(id: "memory_machine",   name: "Memory Machine",  creatureName: "Mnemonic",  description: "Get 25 perfect Quick Reviews",      xp: 150, category: .mastery, rarity: .legendary, conditionText: "25 perfect Quick Reviews",  rule: .quickReviewPerfectAtLeast(25)),
 
-        // ── Crater Blast (5) ──────────────────────────────────
+        // ── Games (Crater Blast — 5) ─────────────────────────
         A(id: "crater_rookie",    name: "Crater Rookie",   creatureName: "Blastling",  description: "Play your first Crater Blast game", xp: 10, category: .mastery, rarity: .common,    conditionText: "Play 1 Crater Blast game",   rule: .craterBlastGamesAtLeast(1)),
         A(id: "crater_veteran",   name: "Crater Veteran",  creatureName: "Blastor",    description: "Play 10 Crater Blast games",        xp: 30, category: .mastery, rarity: .uncommon,  conditionText: "Play 10 Crater Blast games", rule: .craterBlastGamesAtLeast(10)),
-        A(id: "perfect_blaster",  name: "Perfect Blaster", creatureName: "Perfecto",   description: "Get a perfect score in Crater Blast", xp: 50, category: .mastery, rarity: .epic,     conditionText: "Perfect Crater Blast game", rule: .craterBlastPerfectAtLeast(1)),
+        A(id: "perfect_blaster",  name: "Perfect Blaster", creatureName: "Perfecto",   description: "Get a perfect Crater Blast score",  xp: 50, category: .mastery, rarity: .epic,      conditionText: "Perfect Crater Blast game",  rule: .craterBlastPerfectAtLeast(1)),
         A(id: "crater_champion",  name: "Crater Champion", creatureName: "Boomking",   description: "Play 25 Crater Blast games",        xp: 60, category: .mastery, rarity: .rare,      conditionText: "Play 25 Crater Blast games", rule: .craterBlastGamesAtLeast(25)),
         A(id: "crater_master",    name: "Crater Master",   creatureName: "Craterlord", description: "Play 50 Crater Blast games",        xp: 100,category: .mastery, rarity: .legendary, conditionText: "Play 50 Crater Blast games", rule: .craterBlastGamesAtLeast(50)),
 
-        // ── Advanced Mastery (7) ──────────────────────────────
-        A(id: "study_tool_centurion", name: "Study Tool Centurion", creatureName: "Centurion", description: "Create 100 total study tools", xp: 150, category: .mastery, rarity: .legendary, conditionText: "Create 100 study tools",  rule: .totalStudyToolsAtLeast(100)),
-        A(id: "wordsmith",        name: "Wordsmith",       creatureName: "Lexicon",   description: "Analyze 50,000 words total",   xp: 75,  category: .mastery, rarity: .epic,      conditionText: "Analyze 50,000 words",        rule: .totalWordsAnalyzedAtLeast(50_000)),
-        A(id: "word_devourer",    name: "Word Devourer",   creatureName: "Devourex",  description: "Analyze 250,000 words total",  xp: 200, category: .mastery, rarity: .legendary, conditionText: "Analyze 250,000 words",       rule: .totalWordsAnalyzedAtLeast(250_000)),
-        A(id: "daily_grinder",    name: "Daily Grinder",   creatureName: "Grindox",   description: "Analyze 10 documents in a day", xp: 75, category: .special, rarity: .epic,      conditionText: "10 documents in one day",     rule: .documentsInSingleDayAtLeast(10)),
-        A(id: "perfectionist",    name: "Perfectionist",   creatureName: "Flawless",  description: "Get 5 perfect Quick Reviews",   xp: 60, category: .mastery, rarity: .epic,      conditionText: "5 perfect Quick Reviews",     rule: .quickReviewPerfectAtLeast(5)),
-        A(id: "memory_machine",   name: "Memory Machine",  creatureName: "Mnemonic",  description: "Get 25 perfect Quick Reviews",  xp: 150,category: .mastery, rarity: .legendary, conditionText: "25 perfect Quick Reviews",    rule: .quickReviewPerfectAtLeast(25)),
-        A(id: "export_empire",    name: "Export Empire",   creatureName: "Empirex",   description: "Export 25 study tools",         xp: 75, category: .special, rarity: .epic,      conditionText: "Export 25 study tools",       rule: .exportsAtLeast(25)),
+        // ── Focus Mode (5) ───────────────────────────────────
+        A(id: "focus_mode_first_unlock", name: "Unlocked!",             creatureName: "Keyley",    description: "Complete your first Focus Mode unlock", xp: 15, category: .gettingStarted, rarity: .common,   conditionText: "Pass the unlock quiz once", rule: .focusModeUnlocksAtLeast(1)),
+        A(id: "focus_mode_first_block",  name: "Block Party",           creatureName: "Blocky",    description: "Block your first distracting app",      xp: 15, category: .gettingStarted, rarity: .common,   conditionText: "Block 1 app",                rule: .focusModeBlocksAtLeast(1)),
+        A(id: "focus_mode_unlock_5",     name: "Earned It",             creatureName: "Earnix",    description: "Unlock apps 5 times with the quiz",     xp: 30, category: .mastery,        rarity: .uncommon, conditionText: "Unlock apps 5 times",        rule: .focusModeUnlocksAtLeast(5)),
+        A(id: "focus_mode_block_5",      name: "Distraction Destroyer", creatureName: "Destroyix", description: "Block 5 distracting apps",              xp: 30, category: .mastery,        rarity: .uncommon, conditionText: "Block 5 apps",               rule: .focusModeBlocksAtLeast(5)),
+        A(id: "focus_mode_master",       name: "Focus Master",          creatureName: "Focusix",   description: "Unlock apps 10 times",                  xp: 50, category: .mastery,        rarity: .epic,     conditionText: "Unlock apps 10 times",       rule: .focusModeUnlocksAtLeast(10)),
 
-        // ── Study Packs (8) ───────────────────────────────────
-        A(id: "study_pack_pioneer",   name: "Study Pack Pioneer",   creatureName: "Packly",     description: "Generate your first Study Pack", xp: 15, category: .gettingStarted, rarity: .common,   conditionText: "Generate 1 Study Pack",  rule: .studyPacksAtLeast(1)),
-        A(id: "study_pack_explorer",  name: "Study Pack Explorer",  creatureName: "Explorix",   description: "Generate 3 Study Packs",         xp: 25, category: .mastery,        rarity: .uncommon, conditionText: "Generate 3 Study Packs", rule: .studyPacksAtLeast(3)),
-        A(id: "study_pack_pro",       name: "Study Pack Pro",       creatureName: "Studix",     description: "Generate 5 Study Packs",         xp: 35, category: .mastery,        rarity: .rare,     conditionText: "Generate 5 Study Packs", rule: .studyPacksAtLeast(5)),
-        A(id: "study_pack_master",    name: "Study Pack Master",    creatureName: "Masterly",   description: "Generate 10 Study Packs",        xp: 50, category: .mastery,        rarity: .epic,     conditionText: "Generate 10 Study Packs",rule: .studyPacksAtLeast(10)),
-        A(id: "study_pack_champion",  name: "Study Pack Champion",  creatureName: "Champton",   description: "Generate 25 Study Packs",        xp: 75, category: .mastery,        rarity: .epic,     conditionText: "Generate 25 Study Packs",rule: .studyPacksAtLeast(25)),
-        A(id: "study_pack_legend",    name: "Study Pack Legend",    creatureName: "Legendix",   description: "Generate 50 Study Packs",        xp: 100,category: .mastery,        rarity: .legendary,conditionText: "Generate 50 Study Packs",rule: .studyPacksAtLeast(50)),
-        A(id: "study_pack_centurion", name: "Study Pack Centurion", creatureName: "Centurion",  description: "Generate 100 Study Packs",       xp: 150,category: .mastery,        rarity: .legendary,conditionText: "Generate 100 Study Packs",rule: .studyPacksAtLeast(100)),
-        A(id: "study_pack_god",       name: "Study Pack God",       creatureName: "Packgod",    description: "Generate 200 Study Packs",       xp: 250,category: .mastery,        rarity: .legendary,conditionText: "Generate 200 Study Packs",rule: .studyPacksAtLeast(200)),
+        // ── Subscription (4) ─────────────────────────────────
+        A(id: "premium_pioneer",  name: "Pro Pioneer",     creatureName: "Goldie",    description: "Become a Pro subscriber",        xp: 50,  category: .subscription, rarity: .epic,      conditionText: "Subscribe to Pro",            rule: .isPaidUser),
+        A(id: "loyal_learner",    name: "Loyal Learner",   creatureName: "Loyalist",  description: "3 months as a paid subscriber",  xp: 75,  category: .subscription, rarity: .epic,      conditionText: "3 months as paid subscriber", rule: .isPaidSinceMonthsAgo(3)),
+        A(id: "dedicated_scholar",name: "Dedicated Scholar",creatureName: "Devotion", description: "6 months as a paid subscriber",  xp: 100, category: .subscription, rarity: .legendary, conditionText: "6 months as paid subscriber", rule: .isPaidSinceMonthsAgo(6)),
+        A(id: "scholar_supreme",  name: "Scholar Supreme", creatureName: "Eternia",   description: "1 year as a paid subscriber",    xp: 200, category: .subscription, rarity: .legendary, conditionText: "1 year as paid subscriber",   rule: .isPaidSinceMonthsAgo(12)),
 
-        // ── Focus Mode (5) ────────────────────────────────────
-        A(id: "focus_mode_first_unlock", name: "Unlocked!",            creatureName: "Keyley",    description: "Complete your first Focus Mode unlock", xp: 15, category: .gettingStarted, rarity: .common,   conditionText: "Pass the unlock quiz once", rule: .focusModeUnlocksAtLeast(1)),
-        A(id: "focus_mode_first_block",  name: "Block Party",          creatureName: "Blocky",    description: "Block your first distracting website",  xp: 15, category: .gettingStarted, rarity: .common,   conditionText: "Block 1 website",            rule: .focusModeBlocksAtLeast(1)),
-        A(id: "focus_mode_unlock_5",     name: "Earned It",            creatureName: "Earnix",    description: "Unlock sites 5 times with the quiz",    xp: 30, category: .mastery,        rarity: .uncommon, conditionText: "Unlock sites 5 times",       rule: .focusModeUnlocksAtLeast(5)),
-        A(id: "focus_mode_block_5",      name: "Distraction Destroyer",creatureName: "Destroyix", description: "Block 5 distracting websites",           xp: 30, category: .mastery,        rarity: .uncommon, conditionText: "Block 5 websites",           rule: .focusModeBlocksAtLeast(5)),
-        A(id: "focus_mode_master",       name: "Focus Master",         creatureName: "Focusix",   description: "Unlock sites 10 times",                  xp: 50, category: .mastery,        rarity: .epic,     conditionText: "Unlock sites 10 times",      rule: .focusModeUnlocksAtLeast(10))
+        // ── Special / time-of-day (5) ────────────────────────
+        A(id: "night_owl",        name: "Night Owl",       creatureName: "Nyx",       description: "Use WriteScholar after 10 PM",                xp: 15, category: .special, rarity: .uncommon, conditionText: "Use app after 10 PM",        rule: .usedAfter10pm),
+        A(id: "early_bird",       name: "Early Bird",      creatureName: "Sol",       description: "Use WriteScholar before 7 AM",                xp: 15, category: .special, rarity: .uncommon, conditionText: "Use app before 7 AM",        rule: .usedBefore7am),
+        A(id: "midnight_scholar", name: "Midnight Scholar",creatureName: "Midnight",  description: "Use WriteScholar between midnight and 3 AM",  xp: 25, category: .special, rarity: .rare,     conditionText: "Use app midnight–3 AM",      rule: .midnightUsage),
+        A(id: "weekend_warrior",  name: "Weekend Warrior", creatureName: "Weekender", description: "Use WriteScholar on a weekend",               xp: 10, category: .special, rarity: .common,   conditionText: "Use app on a weekend",       rule: .weekendUsage),
+        A(id: "comeback_kid",     name: "Comeback Kid",    creatureName: "Boomerang", description: "Return after 7+ days away",                   xp: 20, category: .special, rarity: .uncommon, conditionText: "Return after 7+ days away",  rule: .comebackKid7Days),
+
+        // ── Quizzes (5 — new in v2) ─────────────────────────
+        A(id: "quiz_rookie",     name: "Quiz Rookie",     creatureName: "Quizzy",     description: "Finish your first quiz",  xp: 10,  category: .gettingStarted, rarity: .common,    conditionText: "Finish 1 quiz",       rule: .quizzesCountAtLeast(1)),
+        A(id: "quiz_veteran",    name: "Quiz Veteran",    creatureName: "Querion",    description: "Finish 10 quizzes",       xp: 30,  category: .mastery,        rarity: .uncommon,  conditionText: "Finish 10 quizzes",   rule: .quizzesCountAtLeast(10)),
+        A(id: "quiz_champion",   name: "Quiz Champion",   creatureName: "Quizmaster", description: "Finish 25 quizzes",       xp: 60,  category: .mastery,        rarity: .rare,      conditionText: "Finish 25 quizzes",   rule: .quizzesCountAtLeast(25)),
+        A(id: "quiz_legend",     name: "Quiz Legend",     creatureName: "Examona",    description: "Finish 50 quizzes",       xp: 100, category: .mastery,        rarity: .epic,      conditionText: "Finish 50 quizzes",   rule: .quizzesCountAtLeast(50)),
+        A(id: "quiz_immortal",   name: "Quiz Immortal",   creatureName: "Quizion",    description: "Finish 100 quizzes",      xp: 175, category: .mastery,        rarity: .legendary, conditionText: "Finish 100 quizzes",  rule: .quizzesCountAtLeast(100)),
+
+        // ── Flashcards (4 — new in v2) ──────────────────────
+        A(id: "flash_starter",   name: "Flash Starter",   creatureName: "Sparkette",  description: "Make your first flashcard set", xp: 10,  category: .gettingStarted, rarity: .common,    conditionText: "Create 1 flashcard set",   rule: .flashcardsCountAtLeast(1)),
+        A(id: "card_counter",    name: "Card Counter",    creatureName: "Stacker",    description: "Make 25 flashcard sets",        xp: 40,  category: .mastery,        rarity: .uncommon,  conditionText: "Create 25 flashcard sets", rule: .flashcardsCountAtLeast(25)),
+        A(id: "card_master",     name: "Card Master",     creatureName: "Decksmith",  description: "Make 100 flashcard sets",       xp: 80,  category: .mastery,        rarity: .epic,      conditionText: "Create 100 flashcard sets",rule: .flashcardsCountAtLeast(100)),
+        A(id: "card_legend",     name: "Card Legend",     creatureName: "Cardex",     description: "Make 250 flashcard sets",       xp: 150, category: .mastery,        rarity: .legendary, conditionText: "Create 250 flashcard sets",rule: .flashcardsCountAtLeast(250)),
+
+        // ── Lessons + Crosswords (3 — new in v2) ────────────
+        A(id: "lesson_learner",   name: "Lesson Learner",   creatureName: "Lessonix", description: "Generate 5 AI lessons",  xp: 25, category: .mastery, rarity: .uncommon,  conditionText: "Generate 5 AI lessons",  rule: .lessonsCountAtLeast(5)),
+        A(id: "lesson_master",    name: "Lesson Master",    creatureName: "Tutorix",  description: "Generate 25 AI lessons", xp: 75, category: .mastery, rarity: .epic,      conditionText: "Generate 25 AI lessons", rule: .lessonsCountAtLeast(25)),
+        A(id: "crossword_cracker",name: "Crossword Cracker",creatureName: "Crossix",  description: "Generate 5 crosswords",  xp: 25, category: .mastery, rarity: .uncommon,  conditionText: "Generate 5 crosswords",  rule: .crosswordsCountAtLeast(5))
     ]
 
     /// XP-to-level table from desktop achievements.ts.

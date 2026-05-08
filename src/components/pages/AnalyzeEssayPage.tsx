@@ -149,7 +149,7 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
   };
 
   return (
-    <div className="min-h-screen relative transition-colors font-sans overflow-x-hidden">
+    <div className="min-h-screen relative transition-colors font-sans overflow-x-hidden" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <WriteScholarEditorialBackgroundLayers position="fixed" />
 
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="analyze" />
@@ -159,13 +159,9 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
           <div className="pt-1 sm:pt-2 pb-3 sm:pb-5 overflow-visible">
             <section
               data-tutorial="analyze-ready"
-              className="relative rounded-3xl overflow-hidden mb-6 sm:mb-8 max-w-6xl mx-auto scroll-mt-8 bg-white dark:bg-stone-900/80 ring-1 ring-stone-200/80 dark:ring-stone-700/60 shadow-xl shadow-stone-900/[0.05] dark:shadow-black/40"
+              className="relative rounded-3xl overflow-hidden mb-6 sm:mb-8 max-w-6xl mx-auto scroll-mt-8 bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 rounded-2xl"
             >
-              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-rose-400" aria-hidden />
-              <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
-                <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-violet-300/15 dark:bg-violet-500/10 blur-3xl" />
-                <div className="absolute -bottom-24 -left-24 w-64 h-64 rounded-full bg-fuchsia-300/15 dark:bg-fuchsia-500/10 blur-3xl" />
-              </div>
+              <div className="absolute inset-x-0 top-0 h-1.5 bg-[#58CC02]" aria-hidden />
 
               <div className="relative p-6 sm:p-8 lg:p-10">
                 <input
@@ -185,7 +181,7 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
                   aria-hidden
                   loading="lazy"
                   decoding="async"
-                  className="hidden sm:block pointer-events-none absolute top-3 left-3 sm:top-4 sm:left-4 w-24 sm:w-28 lg:w-32 h-auto z-10 drop-shadow-[0_12px_22px_rgba(124,58,237,0.25)]"
+                  className="hidden sm:block pointer-events-none absolute top-3 left-3 sm:top-4 sm:left-4 w-24 sm:w-28 lg:w-32 h-auto z-10 drop-shadow-[0_12px_22px_rgba(88,204,2,0.25)]"
                 />
                 <img
                   src="/mascot-laptop.webp"
@@ -193,22 +189,21 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
                   aria-hidden
                   loading="lazy"
                   decoding="async"
-                  className="hidden sm:block pointer-events-none absolute top-3 right-3 sm:top-4 sm:right-4 w-24 sm:w-28 lg:w-32 h-auto z-10 drop-shadow-[0_12px_22px_rgba(124,58,237,0.25)]"
+                  className="hidden sm:block pointer-events-none absolute top-3 right-3 sm:top-4 sm:right-4 w-24 sm:w-28 lg:w-32 h-auto z-10 drop-shadow-[0_12px_22px_rgba(88,204,2,0.25)]"
                 />
 
                 <div className="text-center mb-5">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-violet-300 ring-1 ring-violet-200/80 dark:ring-violet-800/50 text-xs font-medium">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#F3EAFF] dark:bg-[#A560E8]/20 text-[#A560E8] dark:text-[#A560E8] border-2 border-[#A560E8]/20 text-xs font-extrabold">
                     <span aria-hidden>✨</span>
                     Professor-style feedback in seconds
                   </span>
                 </div>
 
                 <h1
-                  className="relative text-center text-2xl sm:text-3xl lg:text-[2.4rem] font-semibold leading-[1.1] tracking-tight text-stone-900 dark:text-stone-50 mb-3"
-                  style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+                  className="relative text-center text-2xl sm:text-3xl lg:text-[2.4rem] font-extrabold leading-[1.1] tracking-tight text-stone-900 dark:text-stone-50 mb-3"
                 >
                   Get{' '}
-                  <span className="bg-gradient-to-r from-violet-700 via-fuchsia-600 to-rose-500 dark:from-violet-300 dark:via-fuchsia-300 dark:to-rose-300 bg-clip-text text-transparent">
+                  <span className="text-[#A560E8]">
                     professor-style feedback
                   </span>{' '}
                   on your essay
@@ -217,10 +212,10 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
                   Drop in your paper and see what to improve — structure, arguments, clarity, citations, and more.
                 </p>
 
-                <div className="relative flex rounded-2xl bg-violet-50/70 dark:bg-violet-950/25 p-1 mb-6 max-w-lg mx-auto border border-violet-200/80 dark:border-violet-800/50 shadow-sm shadow-violet-900/5">
+                <div className="relative flex rounded-2xl bg-stone-100 dark:bg-stone-800 p-1 mb-6 max-w-lg mx-auto border-2 border-stone-200 dark:border-stone-700">
                   <button
                     type="button"
-                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[0.65rem] font-medium text-sm transition-all duration-200 bg-white dark:bg-stone-800 text-violet-900 dark:text-violet-200 shadow-sm ring-1 ring-violet-200/85 dark:ring-violet-800/55"
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[0.65rem] font-extrabold text-sm transition-all duration-200 bg-white dark:bg-stone-900 text-[#1CB0F6] dark:text-[#1CB0F6] border-2 border-b-4 border-[#1CB0F6]/30 dark:border-[#1899D6]/40"
                   >
                     <span className="text-base" aria-hidden>
                       📝
@@ -230,7 +225,7 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
                   <button
                     type="button"
                     onClick={() => onNavigate('citations')}
-                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[0.65rem] font-medium text-sm transition-all duration-200 text-stone-600 dark:text-stone-400 hover:text-violet-950 dark:hover:text-stone-200 hover:bg-white/80 dark:hover:bg-stone-800/50"
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[0.65rem] font-extrabold text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 hover:bg-white/80 dark:hover:bg-stone-800/50"
                   >
                     <span className="text-base" aria-hidden>
                       📚
@@ -240,7 +235,7 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
                   <button
                     type="button"
                     onClick={() => onNavigate('study-pack')}
-                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[0.65rem] font-medium text-sm transition-all duration-200 text-stone-600 dark:text-stone-400 hover:text-violet-950 dark:hover:text-stone-200 hover:bg-white/80 dark:hover:bg-stone-800/50"
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-[0.65rem] font-extrabold text-sm transition-all duration-200 text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 hover:bg-white/80 dark:hover:bg-stone-800/50"
                   >
                     <span className="text-base" aria-hidden>
                       📦
@@ -250,7 +245,7 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
                 </div>
 
                 {!user && uploadedFileName && (
-                  <div className="relative mb-6 rounded-xl border border-violet-200/90 dark:border-violet-800/50 bg-violet-50/50 dark:bg-violet-950/25 px-4 py-3 flex flex-col sm:flex-row items-center justify-center gap-3 text-sm">
+                  <div className="relative mb-6 rounded-xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 px-4 py-3 flex flex-col sm:flex-row items-center justify-center gap-3 text-sm">
                     <p className="text-stone-700 dark:text-stone-200 font-medium">
                       <span className="text-stone-500 dark:text-stone-400 font-normal">Selected:</span> {uploadedFileName}
                     </p>
@@ -258,7 +253,7 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
                       <button
                         type="button"
                         onClick={() => analyzeFileInputRef.current?.click()}
-                        className="text-violet-700 dark:text-violet-400 font-semibold hover:underline"
+                        className="text-[#1CB0F6] dark:text-[#1CB0F6] font-extrabold hover:underline"
                       >
                         Change file
                       </button>
@@ -293,35 +288,35 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
                         isParsingAnalyzeDoc ? 'opacity-70 cursor-wait pointer-events-none' : ''
                       } ${
                         analyzeDropActive
-                          ? 'scale-[1.005] border-violet-500 bg-violet-50/80 dark:bg-violet-900/30 shadow-inner'
-                          : 'border-violet-300/70 dark:border-violet-700/50 bg-gradient-to-b from-violet-50/40 via-white to-white dark:from-violet-950/30 dark:via-stone-900/70 dark:to-stone-900/70 hover:border-violet-400 hover:from-violet-50/80 hover:to-white dark:hover:from-violet-950/40'
+                          ? 'scale-[1.005] border-[#1CB0F6] bg-[#DDF4FF] dark:bg-[#1CB0F6]/10'
+                          : 'border-stone-300 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/40 hover:border-[#1CB0F6]'
                       }`}
                     >
                       <div className="px-6 py-10 sm:py-12 text-center">
                         {isParsingAnalyzeDoc ? (
                           <div className="flex flex-col items-center gap-4 py-4">
-                            <span className="w-10 h-10 border-2 border-violet-600 border-t-transparent rounded-full animate-spin" />
+                            <span className="w-10 h-10 border-2 border-[#1CB0F6] border-t-transparent rounded-full animate-spin" />
                             <span className="font-semibold text-stone-700 dark:text-stone-200">Parsing your document...</span>
                           </div>
                         ) : (
                           <>
                             <div className="relative mx-auto mb-5 w-16 h-16 sm:w-20 sm:h-20">
-                              <div className="relative w-full h-full rounded-2xl bg-gradient-to-br from-violet-600 via-fuchsia-600 to-rose-500 text-white flex items-center justify-center shadow-xl shadow-violet-600/35 group-hover:scale-105 group-hover:rotate-[-3deg] transition-all duration-300">
+                              <div className="relative w-full h-full rounded-2xl bg-[#1CB0F6] border-2 border-b-4 border-[#1899D6] text-white flex items-center justify-center group-hover:scale-105 group-hover:rotate-[-3deg] transition-all duration-300">
                                 <svg className="w-9 h-9 sm:w-10 sm:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                 </svg>
                               </div>
                             </div>
-                            <p className="text-xl sm:text-2xl font-semibold text-stone-900 dark:text-stone-100" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
+                            <p className="text-xl sm:text-2xl font-extrabold text-stone-900 dark:text-stone-100">
                               Drop your essay here
                             </p>
                             <p className="mt-1 text-sm sm:text-base text-stone-500 dark:text-stone-400">
-                              or <span className="text-violet-700 dark:text-violet-300 font-semibold underline-offset-4 group-hover:underline">click to browse</span>
+                              or <span className="text-[#1CB0F6] dark:text-[#1CB0F6] font-extrabold underline-offset-4 group-hover:underline">click to browse</span>
                             </p>
                             <div className="mt-4 flex flex-wrap justify-center gap-2">
-                              <span className="px-2.5 py-1 rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 text-[11px] font-semibold ring-1 ring-rose-200/70 dark:ring-rose-800/40">PDF</span>
-                              <span className="px-2.5 py-1 rounded-full bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 text-[11px] font-semibold ring-1 ring-sky-200/70 dark:ring-sky-800/40">Word</span>
-                              <span className="px-2.5 py-1 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-[11px] font-semibold ring-1 ring-stone-200/70 dark:ring-stone-700/60">TXT</span>
+                              <span className="px-2.5 py-1 rounded-lg bg-[#FFE8E8] dark:bg-[#FF4B4B]/15 text-[#FF4B4B] text-[11px] font-extrabold border-2 border-[#FF4B4B]/20">PDF</span>
+                              <span className="px-2.5 py-1 rounded-lg bg-[#DDF4FF] dark:bg-[#1CB0F6]/15 text-[#1CB0F6] text-[11px] font-extrabold border-2 border-[#1CB0F6]/20">Word</span>
+                              <span className="px-2.5 py-1 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 text-[11px] font-extrabold border-2 border-stone-200 dark:border-stone-700">TXT</span>
                             </div>
                           </>
                         )}
@@ -330,12 +325,11 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
 
                     <section
                       aria-labelledby="analyze-output-examples-heading"
-                      className="rounded-2xl border border-stone-200/85 dark:border-stone-700/75 bg-white/75 dark:bg-stone-900/45 p-4 sm:p-6 ring-1 ring-stone-200/35 dark:ring-white/5 shadow-inner mt-6 sm:mt-7"
+                      className="rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-4 sm:p-6 mt-6 sm:mt-7"
                     >
                       <h2
                         id="analyze-output-examples-heading"
-                        className="text-center text-sm sm:text-base font-semibold text-stone-800 dark:text-stone-100"
-                        style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+                        className="text-center text-sm sm:text-base font-extrabold text-stone-800 dark:text-stone-100"
                       >
                         See what your analysis looks like
                       </h2>
@@ -344,30 +338,30 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
                       </p>
 
                       <div className="mt-4 flex flex-nowrap gap-3 lg:gap-4 justify-between overflow-x-auto pb-3 snap-x snap-mandatory [scrollbar-width:thin] max-w-5xl mx-auto">
-                        <figure className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,260px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-violet-500 dark:border-violet-400 shadow-sm flex flex-col">
+                        <figure className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,260px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-[#1CB0F6] dark:border-[#1899D6] shadow-sm flex flex-col">
                           <div className="relative aspect-[16/11] w-full bg-black/80">
                             <video
                               className="absolute inset-0 h-full w-full object-cover object-center"
-                              aria-label="Short preview of essay analysis and professor-style feedback"
-                              title="Essay analyzer preview"
+                              aria-label="Quick walkthrough of essay analysis"
+                              title="Essay analyzer walkthrough"
                               muted
                               loop
                               playsInline
                               autoPlay
                               preload="metadata"
                             >
-                              <source src="/writescholar-essay-checker-demo.mp4" type="video/mp4" />
+                              <source src="/quick-walkthrough.mp4" type="video/mp4" />
                             </video>
                           </div>
                           <figcaption className="px-2 py-1.5 text-center text-[10px] sm:text-[11px] font-semibold text-stone-600 dark:text-stone-400 border-t border-stone-200/70 dark:border-stone-700/70 bg-white/95 dark:bg-stone-900/95">
                             Quick walkthrough
                           </figcaption>
                         </figure>
-                        <figure className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,260px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-violet-500 dark:border-violet-400 shadow-sm flex flex-col">
+                        <figure className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,260px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-[#1CB0F6] dark:border-[#1899D6] shadow-sm flex flex-col">
                           <div className="relative aspect-[16/11] w-full bg-stone-900">
                             <img
-                              src="/analyseimage1.png"
-                              alt="Sample rubric and feedback overview from an analyzed essay"
+                              src="/rubric-and-notes.png"
+                              alt="Sample rubric and feedback notes from an analyzed essay"
                               className="absolute inset-0 h-full w-full object-cover object-top"
                               loading="lazy"
                               decoding="async"
@@ -377,10 +371,10 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
                             Rubric & notes
                           </figcaption>
                         </figure>
-                        <figure className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,260px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-violet-500 dark:border-violet-400 shadow-sm flex flex-col">
+                        <figure className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,260px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-[#1CB0F6] dark:border-[#1899D6] shadow-sm flex flex-col">
                           <div className="relative aspect-[16/11] w-full bg-stone-900">
                             <img
-                              src="/analyseimage2.png"
+                              src="/full-report.png"
                               alt="Sample full written breakdown from an analyzed essay"
                               className="absolute inset-0 h-full w-full object-cover object-top"
                               loading="lazy"
@@ -395,23 +389,23 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
                     </section>
 
                     {analyzeUploadError && (
-                      <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm">
+                      <div className="p-3 rounded-xl bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-2 border-[#FF4B4B]/30 dark:border-[#E04343]/40 text-[#FF4B4B] dark:text-[#FF4B4B] text-sm font-extrabold">
                         {analyzeUploadError}
                       </div>
                     )}
 
                     {user && (
                       <p className="text-center text-xs text-stone-500 dark:text-stone-400">
-                        <button type="button" onClick={() => onNavigate('upload')} className="font-semibold text-violet-700 dark:text-violet-400 hover:underline">
+                        <button type="button" onClick={() => onNavigate('upload')} className="font-extrabold text-[#1CB0F6] dark:text-[#1CB0F6] hover:underline">
                           Library upload →
                         </button>
                       </p>
                     )}
 
                     <div className="my-2 flex items-center gap-4">
-                      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-stone-200 to-transparent dark:via-stone-700" />
-                      <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-400 dark:text-stone-500">Or paste below</span>
-                      <div className="h-px flex-1 bg-gradient-to-l from-transparent via-stone-200 to-transparent dark:via-stone-700" />
+                      <div className="h-px flex-1 bg-stone-200 dark:bg-stone-700" />
+                      <span className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-stone-400 dark:text-stone-500">Or paste below</span>
+                      <div className="h-px flex-1 bg-stone-200 dark:bg-stone-700" />
                     </div>
 
                     <div className="relative max-w-4xl mx-auto">
@@ -433,7 +427,7 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
                             ? 'Paste your essay here (minimum 200 words)...'
                             : placeholders[placeholderIndex]
                         }
-                        className="w-full min-h-[180px] pb-10 rounded-2xl border border-stone-200/90 dark:border-stone-700 bg-stone-50/80 dark:bg-stone-800/40 p-5 text-[15px] leading-relaxed text-stone-800 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 resize-none focus:outline-none focus:ring-4 focus:ring-violet-500/15 focus:border-violet-400 dark:focus:border-violet-600 transition-all"
+                        className="w-full min-h-[180px] pb-10 rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800/40 p-5 text-[15px] leading-relaxed text-stone-800 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 resize-none focus:outline-none focus:ring-2 focus:ring-[#1CB0F6]/20 focus:border-[#1CB0F6] dark:focus:border-[#1CB0F6] transition-all"
                         data-tutorial-target="essay-input-wrapper"
                         onInput={(e) => {
                           const target = e.target as HTMLTextAreaElement;
@@ -442,11 +436,11 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
                         }}
                       />
                       <div className="absolute bottom-4 left-5 text-xs">
-                        <span className={isTextValid() ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-stone-400 dark:text-stone-500'}>
+                        <span className={isTextValid() ? 'text-[#58CC02] font-extrabold' : 'text-stone-400 dark:text-stone-500'}>
                           {getWordCount(inputText)} words
                         </span>
                         {getWordCount(inputText) > 0 && getWordCount(inputText) < 200 && (
-                          <span className="text-amber-600 dark:text-amber-400"> · {200 - getWordCount(inputText)} more needed</span>
+                          <span className="text-[#FF9600] dark:text-[#FF9600] font-extrabold"> · {200 - getWordCount(inputText)} more needed</span>
                         )}
                       </div>
                       {showWordWarning && (
@@ -472,7 +466,7 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
                           </button>
                         )}
                         {isTextValid() && (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 ring-1 ring-emerald-200/70 dark:ring-emerald-800/50 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#EAFFD6] dark:bg-[#58CC02]/15 border-2 border-[#58CC02]/30 text-[11px] font-extrabold text-[#58CC02]">
                             <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                             </svg>
@@ -485,10 +479,10 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
                         data-tutorial-target="essay-analyze-btn"
                         onClick={handleSubmit}
                         disabled={!isTextValid()}
-                        className={`inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm sm:text-base font-semibold transition-all ${
+                        className={`inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm sm:text-base font-extrabold uppercase tracking-wide transition-all ${
                           isTextValid()
-                            ? 'bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 text-white shadow-lg shadow-violet-500/30 hover:shadow-xl hover:shadow-fuchsia-500/35 hover:-translate-y-0.5 active:translate-y-0'
-                            : 'cursor-not-allowed bg-stone-100 dark:bg-stone-800 text-stone-400 dark:text-stone-500 ring-1 ring-stone-200/70 dark:ring-stone-700/60'
+                            ? 'bg-[#58CC02] text-white border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5'
+                            : 'cursor-not-allowed bg-stone-200 dark:bg-stone-800 text-stone-400 dark:text-stone-500 border-2 border-b-4 border-stone-300 dark:border-stone-700'
                         }`}
                       >
                         {isTextValid() ? (
@@ -509,10 +503,10 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
                       type="button"
                       onClick={handleSubmit}
                       disabled={!isTextValid()}
-                      className={`inline-flex items-center justify-center gap-2 rounded-xl px-8 py-3.5 text-base font-semibold transition-all ${
+                      className={`inline-flex items-center justify-center gap-2 rounded-xl px-8 py-3.5 text-base font-extrabold uppercase tracking-wide transition-all ${
                         isTextValid()
-                          ? 'bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 text-white shadow-lg shadow-violet-500/25'
-                          : 'bg-stone-200 dark:bg-stone-700 text-stone-400 cursor-not-allowed'
+                          ? 'bg-[#58CC02] text-white border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5'
+                          : 'bg-stone-200 dark:bg-stone-700 text-stone-400 cursor-not-allowed border-2 border-b-4 border-stone-300 dark:border-stone-700'
                       }`}
                     >
                       Analyze my essay
@@ -540,12 +534,12 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
       {showRevealAnimation && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
           <div className="animate-in zoom-in-95 fade-in duration-500 text-center max-w-lg">
-            <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-rose-600 shadow-2xl shadow-rose-500/40 mb-6 animate-in zoom-in duration-300" style={{ animationDelay: '100ms' }}>
+            <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-[#58CC02] border-4 border-[#46A302] mb-6 animate-in zoom-in duration-300" style={{ animationDelay: '100ms' }}>
               <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <p className="text-2xl sm:text-3xl font-bold text-white drop-shadow-lg animate-in slide-in-from-bottom-4 fade-in duration-500" style={{ animationDelay: '200ms' }}>
+            <p className="text-2xl sm:text-3xl font-extrabold text-white drop-shadow-lg animate-in slide-in-from-bottom-4 fade-in duration-500" style={{ animationDelay: '200ms' }}>
               We found several concerns and areas to improve in your paper.
             </p>
           </div>
@@ -554,7 +548,7 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
 
       {showSignupPrompt && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-stone-800 rounded-3xl shadow-2xl border border-stone-200 dark:border-stone-600 max-w-md w-full p-8 text-center relative animate-in zoom-in-95 fade-in duration-300">
+          <div className="bg-white dark:bg-stone-800 rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 max-w-md w-full p-8 text-center relative animate-in zoom-in-95 fade-in duration-300">
             <button
               type="button"
               onClick={() => setShowSignupPrompt(false)}
@@ -565,11 +559,11 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
               </svg>
             </button>
 
-            <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900/40 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-blue-200/60 dark:border-blue-800/50">
+            <div className="w-20 h-20 bg-[#DDF4FF] dark:bg-[#1CB0F6]/15 rounded-2xl flex items-center justify-center mx-auto mb-6 border-2 border-b-4 border-[#1CB0F6]/30 dark:border-[#1899D6]/30">
               <span className="text-4xl">📋</span>
             </div>
 
-            <h3 className="text-2xl font-bold text-stone-800 dark:text-stone-100 mb-3">See Your Full Report</h3>
+            <h3 className="text-2xl font-extrabold text-stone-800 dark:text-stone-100 mb-3">See Your Full Report</h3>
             <p className="text-stone-600 dark:text-stone-400 mb-6">
               Sign in or create an account to see the full analysis with detailed feedback and suggestions.
             </p>
@@ -578,7 +572,7 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
               <button
                 type="button"
                 onClick={() => onNavigate('signup')}
-                className="w-full px-6 py-3.5 bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-semibold rounded-2xl transition-all shadow-md shadow-blue-900/15 ring-1 ring-blue-900/10"
+                className="w-full px-6 py-3.5 bg-[#FF9600] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all"
               >
                 Create Account
               </button>
@@ -588,7 +582,7 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
                   setShowSignupPrompt(false);
                   onNavigate('login');
                 }}
-                className="w-full px-6 py-3 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 font-medium rounded-xl transition-colors"
+                className="w-full px-6 py-3 text-[#1CB0F6] dark:text-[#1CB0F6] hover:text-[#1899D6] font-extrabold rounded-xl border-2 border-b-4 border-stone-200 dark:border-stone-700 active:border-b-2 active:translate-y-0.5 transition-all"
               >
                 Sign In
               </button>

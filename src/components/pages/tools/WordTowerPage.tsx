@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Header from '../../common/Header';
 import { WriteScholarEditorialBackgroundLayers } from '../../common/WriteScholarEditorialBackground';
 import Footer from '../../common/Footer';
-import ScholarMascot from '../../common/ScholarMascot';
 import { WORD_TOWER_WORD_BANK, WordTowerQuestion as BankQuestion } from '../../../data/wordTowerWordBank';
 import { WORD_TOWER_MENTAL_MATH_BANK } from '../../../data/wordTowerMentalMathBank';
 
@@ -58,7 +57,7 @@ interface CollapsingBlock {
 }
 
 type GameState = 'menu' | 'loading' | 'ready' | 'playing' | 'collapsing' | 'gameover';
-type InputMode = 'topic' | 'notes' | 'play-for-fun' | 'mental-math';
+type InputMode = 'topic' | 'notes' | 'play-for-fun' | 'mental-math' | 'my-packs';
 
 /* ────────────────────── Config ────────────────────── */
 
@@ -150,6 +149,12 @@ const WordTowerPage = ({ onNavigate, user, onLogout }: WordTowerPageProps) => {
   const [isPlayForFun, setIsPlayForFun] = useState(false);
   const [showMinimalUI, setShowMinimalUI] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
+
+  // Study pack selection
+  const [studyPacks, setStudyPacks] = useState<{id:string;title:string;questions:any[];created_at:string}[]>([]);
+  const [selectedPacks, setSelectedPacks] = useState<Set<string>>(new Set());
+  const [packsLoading, setPacksLoading] = useState(false);
+  const [packsFetched, setPacksFetched] = useState(false);
 
   const wordCount = inputMode === 'notes' ? inputText.trim().split(/\s+/).filter(Boolean).length : 0;
 
@@ -245,6 +250,45 @@ const WordTowerPage = ({ onNavigate, user, onLogout }: WordTowerPageProps) => {
       return () => clearTimeout(t);
     }
   }, [gameState]);
+
+  // Fetch study packs when My Packs tab is selected
+  useEffect(() => {
+    if (inputMode !== 'my-packs' || packsFetched || packsLoading) return;
+    const fetchPacks = async () => {
+      setPacksLoading(true);
+      try {
+        const token = localStorage.getItem('authToken');
+        if (!token) { setPacksLoading(false); setPacksFetched(true); return; }
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+        const res = await fetch(`${apiUrl}/analysis/quiz-history`, {
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Failed to fetch');
+        const items = (data.data || [])
+          .map((t: any) => {
+            let gameQs: any[] = [];
+            if (t.quiz_type === 'word_tower') {
+              gameQs = Array.isArray(t.questions?.questions) ? t.questions.questions : Array.isArray(t.questions) ? t.questions : [];
+            } else if (t.quiz_type === 'study_pack') {
+              const nested = t.questions?.wordTower;
+              gameQs = Array.isArray(nested?.questions) ? nested.questions : [];
+            } else return null;
+            if (gameQs.length === 0) return null;
+            return { id: t.id, title: t.title || 'Untitled', questions: gameQs, created_at: t.created_at };
+          })
+          .filter(Boolean);
+        setStudyPacks(items);
+        setSelectedPacks(new Set(items.map((p: any) => p.id)));
+      } catch (err) {
+        console.error('Failed to fetch study packs:', err);
+      } finally {
+        setPacksLoading(false);
+        setPacksFetched(true);
+      }
+    };
+    fetchPacks();
+  }, [inputMode, packsFetched, packsLoading]);
 
   /* ── State sync helper ── */
   const sync = useCallback((field: string, v: number) => {
@@ -613,6 +657,26 @@ const WordTowerPage = ({ onNavigate, user, onLogout }: WordTowerPageProps) => {
     setTimeout(() => spawnRound(0), 500);
   };
 
+  const handleStartFromPacks = () => {
+    const combined = studyPacks
+      .filter(p => selectedPacks.has(p.id))
+      .flatMap(p => p.questions);
+    if (combined.length === 0) return;
+    setError(null);
+    questionsRef.current = shuffle(combined);
+    setQuestions([...questionsRef.current]);
+    setInputText(
+      selectedPacks.size === 1
+        ? studyPacks.find(p => selectedPacks.has(p.id))?.title || 'Study Pack'
+        : `${selectedPacks.size} Study Packs Combined`,
+    );
+    setIsPlayForFun(false);
+    setLoadedFromSavedGame(false);
+    resetGameState();
+    setGameState('ready');
+    window.scrollTo(0, 0);
+  };
+
   const handlePlayAgain = () => {
     questionsRef.current = shuffle(questionsRef.current);
     setQuestions([...questionsRef.current]);
@@ -693,7 +757,7 @@ const WordTowerPage = ({ onNavigate, user, onLogout }: WordTowerPageProps) => {
       <div className="relative max-w-2xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 mb-10 sm:mb-12">
           <div className="flex-shrink-0">
-            <ScholarMascot size={100} animated={false} pose="default" />
+            <img src="/mascot-study.gif" alt="WriteScholar mascot" className="w-[100px] h-[100px] object-contain rounded-2xl" />
           </div>
           <div className="flex-1 text-center sm:text-left">
             <h1 className="text-3xl sm:text-4xl font-extrabold text-stone-900 tracking-tight mb-3">
@@ -705,12 +769,12 @@ const WordTowerPage = ({ onNavigate, user, onLogout }: WordTowerPageProps) => {
           </div>
         </div>
 
-        <div className="bg-white rounded-3xl shadow-lg shadow-stone-200/50 border border-stone-200/60 overflow-hidden">
+        <div className="bg-white rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 overflow-hidden">
           <div className="p-6 sm:p-8 space-y-6">
             <div className="flex flex-wrap gap-2">
-              {(['notes', 'play-for-fun'] as const).map(mode => {
-                const isLocked = mode === 'notes' && !canUseStudyTools;
-                const labels = { 'notes': '📄 Study Notes', 'play-for-fun': '🎮 Play for Fun' };
+              {(['notes', 'my-packs', 'play-for-fun'] as const).map(mode => {
+                const isLocked = (mode === 'notes' && !canUseStudyTools) || (mode === 'my-packs' && !user);
+                const labels: Record<string, string> = { 'notes': '📄 Study Notes', 'my-packs': '📦 My Packs', 'play-for-fun': '🎮 Play for Fun' };
                 return (
                   <button
                     key={mode}
@@ -718,12 +782,12 @@ const WordTowerPage = ({ onNavigate, user, onLogout }: WordTowerPageProps) => {
                       if (isLocked) { onNavigate(user ? 'pricing' : 'signup'); return; }
                       setInputMode(mode);
                     }}
-                    className={`flex-1 min-w-[120px] py-3 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1 ${
+                    className={`flex-1 min-w-[120px] py-3 rounded-xl text-sm font-extrabold uppercase tracking-wide transition-all duration-200 flex items-center justify-center gap-1 ${
                       inputMode === mode
-                        ? 'bg-white text-stone-900 shadow-md border border-stone-200/80'
+                        ? 'bg-[#1CB0F6] text-white border-2 border-b-4 border-[#1899D6]'
                         : isLocked
-                          ? 'text-stone-400 hover:text-stone-600 hover:bg-stone-100/50'
-                          : 'text-stone-500 hover:text-stone-700 hover:bg-stone-100/50'
+                          ? 'bg-white text-stone-400 border-2 border-b-4 border-stone-200 active:border-b-2 active:translate-y-0.5 hover:text-stone-600'
+                          : 'bg-white text-stone-500 border-2 border-b-4 border-stone-200 active:border-b-2 active:translate-y-0.5 hover:text-stone-700'
                     }`}
                     title={isLocked ? (user ? 'Upgrade to Pro to use Study Notes' : 'Sign up and upgrade to Pro to use Study Notes') : undefined}
                   >
@@ -740,31 +804,90 @@ const WordTowerPage = ({ onNavigate, user, onLogout }: WordTowerPageProps) => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <button
                     onClick={handleStartPlayForFun}
-                    className="p-4 rounded-xl text-left border border-stone-200/80 hover:border-violet-300 hover:bg-violet-50/50 transition-all duration-200 group"
+                    className="p-4 rounded-xl text-left bg-white border-2 border-b-4 border-stone-300 hover:border-[#A560E8] active:border-b-2 active:translate-y-0.5 transition-all duration-150 group"
                   >
                     <span className="text-2xl mb-2 block">📚</span>
-                    <span className="font-bold text-stone-800 group-hover:text-violet-700">General Knowledge</span>
-                    <span className="text-xs text-stone-500 block mt-1">Mammals, planets, primes, more</span>
+                    <span className="font-extrabold text-stone-800 uppercase tracking-wide text-sm group-hover:text-[#A560E8]">General Knowledge</span>
+                    <span className="text-xs text-stone-500 font-bold block mt-1">Mammals, planets, primes, more</span>
                   </button>
                   <button
                     onClick={handleStartMentalMath}
-                    className="p-4 rounded-xl text-left border border-stone-200/80 hover:border-emerald-300 hover:bg-emerald-50/50 transition-all duration-200 group"
+                    className="p-4 rounded-xl text-left bg-white border-2 border-b-4 border-stone-300 hover:border-[#58CC02] active:border-b-2 active:translate-y-0.5 transition-all duration-150 group"
                   >
                     <span className="text-2xl mb-2 block">🔢</span>
-                    <span className="font-bold text-stone-800 group-hover:text-emerald-700">Mental Math</span>
-                    <span className="text-xs text-stone-500 block mt-1">Even, odd, prime, multiples</span>
+                    <span className="font-extrabold text-stone-800 uppercase tracking-wide text-sm group-hover:text-[#58CC02]">Mental Math</span>
+                    <span className="text-xs text-stone-500 font-bold block mt-1">Even, odd, prime, multiples</span>
                   </button>
                 </div>
               </div>
+            ) : inputMode === 'my-packs' ? (
+              <div>
+                {packsLoading ? (
+                  <div className="flex flex-col items-center py-8">
+                    <div className="w-8 h-8 border-[3px] rounded-full animate-spin mb-3" style={{ borderColor: '#58CC0220', borderTopColor: '#58CC02' }} />
+                    <p className="text-sm font-bold text-stone-400">Loading study packs…</p>
+                  </div>
+                ) : studyPacks.length === 0 ? (
+                  <div className="text-center py-6">
+                    <span className="text-3xl mb-3 block">📦</span>
+                    <p className="font-extrabold text-stone-700 mb-1">No study packs yet</p>
+                    <p className="text-sm text-stone-500 mb-4">Create a study pack from your notes first!</p>
+                    <button
+                      onClick={() => { localStorage.setItem('writescholar_dashboard_tab', 'study_pack'); onNavigate('dashboard'); }}
+                      className="px-4 py-2.5 rounded-xl text-white font-bold text-sm bg-[#1CB0F6] border-2 border-b-4 border-[#1899D6] active:border-b-2 active:translate-y-0.5 transition-all"
+                    >
+                      Create Study Pack
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-sm font-bold text-stone-600">Select study packs to play</p>
+                      <div className="flex gap-1.5">
+                        <button onClick={() => setSelectedPacks(new Set(studyPacks.map(p => p.id)))} className="px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wide rounded-lg border-2 border-stone-200 text-stone-500 hover:bg-stone-50 active:translate-y-px transition-all">All</button>
+                        <button onClick={() => setSelectedPacks(new Set())} className="px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wide rounded-lg border-2 border-stone-200 text-stone-500 hover:bg-stone-50 active:translate-y-px transition-all">None</button>
+                      </div>
+                    </div>
+                    <div className="space-y-2 max-h-[260px] overflow-y-auto">
+                      {studyPacks.map(pack => {
+                        const checked = selectedPacks.has(pack.id);
+                        return (
+                          <button
+                            key={pack.id}
+                            type="button"
+                            onClick={() => setSelectedPacks(prev => { const next = new Set(prev); next.has(pack.id) ? next.delete(pack.id) : next.add(pack.id); return next; })}
+                            className={`w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all ${checked ? 'bg-[#EAFFD6] border-2 border-[#58CC02]/30' : 'bg-stone-50 border-2 border-stone-200 opacity-60 hover:opacity-80'}`}
+                          >
+                            <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center shrink-0 transition-colors ${checked ? 'bg-[#58CC02] border-[#46A302] text-white' : 'border-stone-300 bg-white'}`}>
+                              {checked && <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-bold text-sm text-stone-800 truncate">{pack.title}</p>
+                              <p className="text-[11px] text-stone-400 font-bold mt-0.5">{pack.questions.length} question{pack.questions.length !== 1 ? 's' : ''}</p>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <button
+                      onClick={handleStartFromPacks}
+                      disabled={selectedPacks.size === 0}
+                      className="w-full mt-4 py-3.5 rounded-xl text-white font-extrabold text-sm uppercase tracking-wide border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-[#58CC02] border-[#46A302]"
+                    >
+                      🏗️ Start Stacking · {studyPacks.filter(p => selectedPacks.has(p.id)).reduce((s, p) => s + p.questions.length, 0)} questions
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
               <div>
-                <label className="block text-sm font-medium text-stone-600 mb-2">Paste your revision notes</label>
+                <label className="block text-sm font-bold text-stone-600 mb-2">Paste your revision notes</label>
                 <textarea
                   value={inputText}
                   onChange={e => setInputText(e.target.value)}
                   placeholder="Paste your revision notes here (min 20 words)..."
                   rows={5}
-                  className="w-full px-4 py-3.5 rounded-xl border border-stone-200 bg-stone-50/80 text-stone-800 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-violet-500/25 focus:border-violet-400 focus:bg-white transition-all text-sm resize-none"
+                  className="w-full px-4 py-3.5 rounded-xl border-2 border-stone-200 bg-stone-50/80 text-stone-800 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#1CB0F6]/20 focus:border-[#1CB0F6] focus:bg-white transition-all text-sm resize-none"
                 />
                 <p className={`mt-2 text-xs ${wordCount < 20 ? 'text-amber-600' : wordCount > maxWords ? 'text-red-600' : 'text-stone-400'}`}>
                   {wordCount.toLocaleString()} words / {maxWords.toLocaleString()} max
@@ -774,7 +897,7 @@ const WordTowerPage = ({ onNavigate, user, onLogout }: WordTowerPageProps) => {
             )}
 
             {error && (
-              <div className="px-4 py-3 rounded-xl bg-red-50 border border-red-100 text-red-700 text-sm flex items-center gap-2">
+              <div className="px-4 py-3 rounded-xl bg-[#FFE8E8] border-2 border-[#FF4B4B]/30 text-[#FF4B4B] font-bold text-sm flex items-center gap-2">
                 <span>⚠️</span> {error}
               </div>
             )}
@@ -784,13 +907,11 @@ const WordTowerPage = ({ onNavigate, user, onLogout }: WordTowerPageProps) => {
                 <button
                   onClick={handleStartGame}
                   disabled={isLoading || !inputText.trim() || (inputMode === 'notes' && (wordCount < 20 || wordCount > maxWords))}
-                  className="w-full py-4 rounded-xl text-white font-bold text-base shadow-lg active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                  style={{
-                    background: inputText.trim()
-                      ? 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)'
-                      : 'linear-gradient(135deg, #94a3b8 0%, #64748b 100%)',
-                    boxShadow: inputText.trim() ? '0 10px 30px -5px rgba(99, 102, 241, 0.4)' : 'none',
-                  }}
+                  className={`w-full py-4 rounded-xl text-white font-extrabold text-base uppercase tracking-wide border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed ${
+                    inputText.trim()
+                      ? 'bg-[#58CC02] border-[#46A302]'
+                      : 'bg-stone-300 border-stone-400 dark:bg-stone-600 dark:border-stone-700'
+                  }`}
                 >
                   {isLoading ? (
                     <span className="flex items-center justify-center gap-2">
@@ -804,7 +925,7 @@ const WordTowerPage = ({ onNavigate, user, onLogout }: WordTowerPageProps) => {
 
                 {!user && (
                   <p className="text-center text-sm text-stone-500">
-                    <button onClick={() => onNavigate('login')} className="text-violet-600 font-semibold hover:underline">Log in</button> to generate AI questions
+                    <button onClick={() => onNavigate('login')} className="text-[#1CB0F6] font-bold hover:underline">Log in</button> to generate AI questions
                   </p>
                 )}
               </>
@@ -812,9 +933,9 @@ const WordTowerPage = ({ onNavigate, user, onLogout }: WordTowerPageProps) => {
           </div>
         </div>
 
-        <div className="mt-8 bg-white/70 backdrop-blur-sm rounded-2xl border border-stone-200/60 p-6 shadow-sm">
-          <h2 className="font-semibold text-stone-800 mb-4 flex items-center gap-2">
-            <span className="w-8 h-8 rounded-lg bg-violet-100 text-violet-600 flex items-center justify-center text-sm">?</span>
+        <div className="mt-8 bg-white dark:bg-stone-900 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 p-6">
+          <h2 className="font-extrabold text-stone-800 mb-4 flex items-center gap-2">
+            <span className="w-8 h-8 rounded-lg bg-[#DDF4FF] text-[#1CB0F6] flex items-center justify-center text-sm">?</span>
             How to Play
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -824,9 +945,9 @@ const WordTowerPage = ({ onNavigate, user, onLogout }: WordTowerPageProps) => {
               { step: 3, text: 'Dodge wrong answers — let them fall', icon: '🚫', accent: 'red' },
               { step: 4, text: 'Mistakes wobble the tower. 7 = collapse', icon: '🏗️' },
             ].map(({ step, text, icon, accent }) => (
-              <div key={step} className={`flex items-center gap-3 p-3 rounded-xl ${accent === 'green' ? 'bg-emerald-50/80 border border-emerald-100' : accent === 'red' ? 'bg-red-50/80 border border-red-100' : 'bg-stone-50 border border-stone-100'}`}>
-                <span className="w-9 h-9 rounded-full bg-white shadow-sm border border-stone-200/80 flex items-center justify-center text-base shrink-0">{icon}</span>
-                <span className="text-sm text-stone-700 font-medium">{text}</span>
+              <div key={step} className={`flex items-center gap-3 p-3 rounded-xl ${accent === 'green' ? 'bg-[#EAFFD6] border-2 border-[#58CC02]/30' : accent === 'red' ? 'bg-[#FFE8E8] border-2 border-[#FF4B4B]/30' : 'bg-stone-50 border-2 border-stone-200'}`}>
+                <span className="w-9 h-9 rounded-full bg-white border-2 border-stone-200 flex items-center justify-center text-base shrink-0">{icon}</span>
+                <span className="text-sm text-stone-700 font-bold">{text}</span>
               </div>
             ))}
           </div>
@@ -839,14 +960,14 @@ const WordTowerPage = ({ onNavigate, user, onLogout }: WordTowerPageProps) => {
     <div className="relative flex-1 flex items-center justify-center px-4 py-20 overflow-hidden">
       <WriteScholarEditorialBackgroundLayers position="absolute" />
       <div className="relative text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-violet-600 mb-5 shadow-lg shadow-violet-600/20">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#58CC02] border-2 border-b-4 border-[#46A302] mb-5">
           <span className="text-3xl animate-pulse">🏗️</span>
         </div>
         <h2 className="text-lg font-bold text-stone-800 mb-1">Generating Tower...</h2>
         <p className="text-stone-500 text-sm">stacking your questions</p>
         <div className="mt-5 flex justify-center gap-1.5">
           {[0, 1, 2].map(i => (
-            <div key={i} className="w-2 h-2 rounded-full bg-violet-500" style={{ animation: `lrqPulse 1s ease-in-out ${i * 0.2}s infinite` }} />
+            <div key={i} className="w-2 h-2 rounded-full bg-[#58CC02]" style={{ animation: `lrqPulse 1s ease-in-out ${i * 0.2}s infinite` }} />
           ))}
         </div>
       </div>
@@ -857,8 +978,8 @@ const WordTowerPage = ({ onNavigate, user, onLogout }: WordTowerPageProps) => {
     <div className="relative flex-1 min-h-[calc(100vh-200px)] flex items-center justify-center px-4 overflow-hidden">
       <WriteScholarEditorialBackgroundLayers position="absolute" />
       <div className="relative w-full max-w-md text-center">
-        <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl mb-6 shadow-xl"
-          style={{ background: 'linear-gradient(145deg, #4f46e5 0%, #6366f1 50%, #8b5cf6 100%)' }}>
+        <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl mb-6 border-2 border-b-4 border-[#46A302]"
+          style={{ background: '#58CC02' }}>
           <span className="text-4xl">🏗️</span>
         </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight mb-2">Word Tower</h1>
@@ -868,14 +989,13 @@ const WordTowerPage = ({ onNavigate, user, onLogout }: WordTowerPageProps) => {
         <p className="text-stone-500 text-xs mb-8">{questions.length} questions ready</p>
         <button
           onClick={handleStartFromReady}
-          className="inline-block px-12 py-3.5 rounded-xl text-white font-bold text-base shadow-lg active:scale-[0.99] transition-all"
-          style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)', boxShadow: '0 10px 30px -5px rgba(99, 102, 241, 0.4)' }}
+          className="inline-block px-12 py-3.5 rounded-xl text-white font-extrabold text-base uppercase tracking-wide bg-[#58CC02] border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all duration-150"
         >
           🏗️ Start Stacking
         </button>
         <button
           onClick={() => { setGameState('menu'); setInputText(''); setQuestions([]); questionsRef.current = []; setLoadedFromSavedGame(false); }}
-          className="mt-6 block w-full max-w-xs mx-auto px-6 py-3 rounded-xl bg-stone-200 text-stone-700 font-semibold hover:bg-stone-300 transition-colors"
+          className="mt-6 block w-full max-w-xs mx-auto px-6 py-3 rounded-xl bg-white dark:bg-stone-700 text-stone-700 dark:text-stone-200 font-bold uppercase tracking-wide border-2 border-b-4 border-stone-300 dark:border-stone-500 active:border-b-2 active:translate-y-0.5 transition-all duration-150"
         >
           ← Back to menu
         </button>
@@ -1197,9 +1317,9 @@ const WordTowerPage = ({ onNavigate, user, onLogout }: WordTowerPageProps) => {
       <div className="relative flex-1 flex items-center justify-center px-4 py-12 overflow-hidden">
         <WriteScholarEditorialBackgroundLayers position="absolute" />
         <div className="relative w-full max-w-md">
-          <div className="bg-white rounded-2xl shadow-sm border border-stone-200/80 overflow-hidden">
-            <div className="px-6 py-8 text-center" style={{ background: 'linear-gradient(135deg, #1e293b, #334155)' }}>
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm mb-3">
+          <div className="bg-white rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 overflow-hidden">
+            <div className="px-6 py-8 text-center" style={{ background: '#1e293b' }}>
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white/15 border-2 border-white/20 mb-3">
                 <span className="text-3xl">🏗️</span>
               </div>
               <h2 className="text-xl font-bold text-white mb-1">Tower Fell at Floor {floor}</h2>
@@ -1211,10 +1331,10 @@ const WordTowerPage = ({ onNavigate, user, onLogout }: WordTowerPageProps) => {
               <div className="grid grid-cols-3 gap-3">
                 {[
                   { val: floor, label: 'Floor', color: 'text-emerald-600' },
-                  { val: longestStreak, label: 'Best Streak', color: 'text-violet-500' },
-                  { val: questionsAnswered, label: 'Questions', color: 'text-violet-600' },
+                  { val: longestStreak, label: 'Best Streak', color: 'text-[#A560E8]' },
+                  { val: questionsAnswered, label: 'Questions', color: 'text-[#A560E8]' },
                 ].map(s => (
-                  <div key={s.label} className="text-center p-3 rounded-xl bg-stone-50 border border-stone-100">
+                  <div key={s.label} className="text-center p-3 rounded-xl bg-stone-50 border-2 border-b-4 border-stone-200">
                     <div className={`text-2xl font-bold ${s.color}`}>{s.val}</div>
                     <div className="text-[11px] text-stone-500 mt-1">{s.label}</div>
                   </div>
@@ -1224,35 +1344,35 @@ const WordTowerPage = ({ onNavigate, user, onLogout }: WordTowerPageProps) => {
               <div className="flex flex-col gap-3 pt-1">
                 <div className="flex gap-3">
                   <button onClick={handlePlayAgain}
-                    className="flex-1 py-3.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold shadow-md shadow-violet-600/20 active:scale-[0.98] transition-all">
+                    className="flex-1 py-3.5 rounded-xl bg-[#58CC02] text-white font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all duration-150">
                     🏗️ Play Again
                   </button>
                   <button onClick={handleNewTopic}
-                    className="flex-1 py-3.5 rounded-xl bg-stone-100 text-stone-700 font-bold hover:bg-stone-200 active:scale-[0.98] transition-all border border-stone-200">
+                    className="flex-1 py-3.5 rounded-xl bg-white text-stone-700 font-bold uppercase tracking-wide border-2 border-b-4 border-stone-300 active:border-b-2 active:translate-y-0.5 transition-all duration-150">
                     {isPlayForFun ? 'Back to Menu' : 'New Topic'}
                   </button>
                 </div>
 
                 <button onClick={handleShare}
-                  className="w-full py-3 rounded-xl bg-white text-stone-700 font-semibold hover:bg-stone-50 active:scale-[0.98] transition-all border border-stone-200 shadow-sm flex items-center justify-center gap-2">
+                  className="w-full py-3 rounded-xl bg-white text-stone-700 font-bold border-2 border-b-4 border-stone-300 active:border-b-2 active:translate-y-0.5 transition-all duration-150 flex items-center justify-center gap-2">
                   {shareCopied ? '✓ Copied!' : '🔗 Share Score'}
                 </button>
 
                 {user && !isPlayForFun && (
                   <>
                     {loadedFromSavedGame ? (
-                      <div className="w-full py-3 rounded-xl font-medium border flex items-center justify-center gap-2 bg-emerald-50 border-emerald-200 text-emerald-700">
+                      <div className="w-full py-3 rounded-xl font-bold border-2 border-[#58CC02]/30 flex items-center justify-center gap-2 bg-[#EAFFD6] text-[#46A302]">
                         ✓ Already saved to Saved Materials — replay anytime
                       </div>
                     ) : (
                       <button
                         onClick={handleSaveGame}
                         disabled={isSaving || saveSuccess}
-                        className="w-full py-3 rounded-xl font-semibold transition-all border flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                        className="w-full py-3 rounded-xl font-bold transition-all border flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
                         style={{
-                          background: saveSuccess ? 'linear-gradient(135deg, #22c55e, #16a34a)' : 'white',
+                          background: saveSuccess ? '#58CC02' : 'white',
                           color: saveSuccess ? 'white' : '#64748b',
-                          borderColor: saveSuccess ? '#22c55e' : '#e2e8f0',
+                          borderColor: saveSuccess ? '#46A302' : '#e2e8f0',
                         }}
                       >
                         {isSaving ? (
@@ -1278,7 +1398,7 @@ const WordTowerPage = ({ onNavigate, user, onLogout }: WordTowerPageProps) => {
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col overflow-x-hidden">
+    <div className="relative min-h-screen flex flex-col overflow-x-hidden" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       {!showMinimalUI && <Header onNavigate={onNavigate} user={user} onLogout={onLogout || (() => {})} currentPage="word-tower" />}
       {showMinimalUI && (gameState === 'menu' || gameState === 'loading' || gameState === 'ready' || gameState === 'gameover') && (
@@ -1293,7 +1413,7 @@ const WordTowerPage = ({ onNavigate, user, onLogout }: WordTowerPageProps) => {
           }} className="p-2 -ml-2 text-stone-500 hover:text-stone-700 rounded-lg hover:bg-stone-100 transition-colors" aria-label="Back">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
           </button>
-          <span className="text-sm font-semibold text-stone-700">Word Tower</span>
+          <span className="text-sm font-extrabold text-stone-700">Word Tower</span>
           <div className="w-9" />
         </div>
       )}

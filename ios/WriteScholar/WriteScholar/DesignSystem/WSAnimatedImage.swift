@@ -41,10 +41,15 @@ struct WSAnimatedImage: View {
             }
         }
         .onAppear {
+            // Decode (idempotent) then ALWAYS (re)start playback. Without
+            // the explicit resume the view freezes on its last frame after
+            // the first onDisappear → onAppear cycle (e.g. scrolling away
+            // from the home page and back).
             driver.load(resource: name, ext: ext, speedMultiplier: speed)
+            driver.resume()
         }
         .onDisappear {
-            driver.stop()
+            driver.pause()
         }
     }
 }
@@ -63,8 +68,8 @@ final class AnimatedImageDriver: ObservableObject {
     private var speedMultiplier: Double = 1.0
 
     func load(resource: String, ext: String, speedMultiplier: Double) {
-        guard frames.isEmpty else { return }   // already loaded
         self.speedMultiplier = speedMultiplier
+        guard frames.isEmpty else { return }   // frames already decoded — playback is controlled separately
 
         guard let url = Bundle.main.url(forResource: resource, withExtension: ext),
               let data = try? Data(contentsOf: url),
@@ -91,17 +96,27 @@ final class AnimatedImageDriver: ObservableObject {
         self.delaysMs = extractedDelays
         self.totalDurationMs = extractedDelays.reduce(0, +)
         self.currentFrame = extractedFrames[0]
-
-        // Single frame? Just show the static image; no display link needed.
-        if extractedFrames.count > 1 {
-            startDisplayLink()
-        }
     }
 
-    func stop() {
+    /// (Re)start the display link if there's more than one frame. Safe to
+    /// call repeatedly — invalidates any prior link first so we don't
+    /// stack callbacks across off-screen → on-screen cycles.
+    func resume() {
+        guard frames.count > 1 else { return }
+        displayLink?.invalidate()
+        displayLink = nil
+        startDisplayLink()
+    }
+
+    /// Pause playback without releasing the decoded frames. Call from
+    /// `onDisappear` so the GIF resumes instantly when the view comes back.
+    func pause() {
         displayLink?.invalidate()
         displayLink = nil
     }
+
+    /// Backwards-compatible alias.
+    func stop() { pause() }
 
     // MARK: Internals
 

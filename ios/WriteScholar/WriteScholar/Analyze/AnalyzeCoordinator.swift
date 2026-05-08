@@ -42,6 +42,9 @@ final class AnalyzeCoordinator: ObservableObject {
         do {
             let result = try await AnalyzeAPI.analyze(text: trimmed, gradingStyle: gradingStyle)
             Haptics.success()
+            // Record into the user's Library shelf so it's reachable from
+            // the Library tab without needing the website to round-trip.
+            LibraryStore.shared.recordEssayAnalysis(result, content: trimmed)
             withAnimation(.spring(response: 0.55, dampingFraction: 0.85)) {
                 phase = .results(content: trimmed, result: result)
             }

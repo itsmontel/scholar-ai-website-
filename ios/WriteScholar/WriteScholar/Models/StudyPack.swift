@@ -11,7 +11,7 @@ import Foundation
 
 // MARK: - Top-level pack
 
-struct StudyPack: Decodable, Equatable {
+struct StudyPack: Codable, Equatable {
     let lesson: Lesson?
     let flashcards: Flashcards?
     let quiz: Quiz?
@@ -38,12 +38,12 @@ struct StudyPack: Decodable, Equatable {
 
 // MARK: - Lesson
 
-struct Lesson: Decodable {
+struct Lesson: Codable {
     let title: String?
     let slides: [LessonSlide]
 }
 
-struct LessonSlide: Decodable, Identifiable {
+struct LessonSlide: Codable, Identifiable {
     let id: Int?
     let type: SlideType?
     let title: String
@@ -55,19 +55,19 @@ struct LessonSlide: Decodable, Identifiable {
     /// Stable identity for `ForEach` even when backend omits `id`.
     var stableId: String { "\(id ?? -1)-\(title)" }
 
-    enum SlideType: String, Decodable {
+    enum SlideType: String, Codable {
         case intro, concept, example, keypoint, funfact, summary
     }
 }
 
 // MARK: - Flashcards
 
-struct Flashcards: Decodable {
+struct Flashcards: Codable {
     let title: String?
     let cards: [Flashcard]
 }
 
-struct Flashcard: Decodable, Identifiable {
+struct Flashcard: Codable, Identifiable {
     let id: String   // synthesized below
     let front: String
     let back: String
@@ -92,12 +92,12 @@ struct Flashcard: Decodable, Identifiable {
 
 // MARK: - Quiz
 
-struct Quiz: Decodable {
+struct Quiz: Codable {
     let title: String?
     let questions: [QuizQuestion]
 }
 
-struct QuizQuestion: Decodable, Identifiable {
+struct QuizQuestion: Codable, Identifiable {
     let id: Int?
     let type: QuestionType?
     let question: String
@@ -107,7 +107,7 @@ struct QuizQuestion: Decodable, Identifiable {
 
     var stableId: String { "\(id ?? -1)-\(question.prefix(40))" }
 
-    enum QuestionType: String, Decodable {
+    enum QuestionType: String, Codable {
         case multipleChoice = "multiple_choice"
         case trueFalse = "true_false"
         case fillBlank = "fill_blank"
@@ -116,12 +116,12 @@ struct QuizQuestion: Decodable, Identifiable {
 
 // MARK: - Crossword (basic shape; full game lives in Chapter 5 web view)
 
-struct Crossword: Decodable {
+struct Crossword: Codable {
     let title: String?
     let words: [CrosswordWord]?
 }
 
-struct CrosswordWord: Decodable {
+struct CrosswordWord: Codable {
     let word: String
     let clue: String
     let direction: String?       // "across" / "down"
@@ -131,12 +131,12 @@ struct CrosswordWord: Decodable {
 
 // MARK: - Crater Blast (fast-paced quiz arcade)
 
-struct CraterBlast: Decodable {
+struct CraterBlast: Codable {
     let title: String?
     let questions: [CraterBlastQuestion]
 }
 
-struct CraterBlastQuestion: Decodable, Identifiable {
+struct CraterBlastQuestion: Codable, Identifiable {
     let id: String
     let prompt: String
     let answers: [String]
@@ -166,12 +166,12 @@ struct CraterBlastQuestion: Decodable, Identifiable {
 
 // MARK: - Word Tower (stack the correct items)
 
-struct WordTower: Decodable {
+struct WordTower: Codable {
     let title: String?
     let questions: [WordTowerQuestion]
 }
 
-struct WordTowerQuestion: Decodable, Identifiable {
+struct WordTowerQuestion: Codable, Identifiable {
     let id: String
     let prompt: String
     let items: [WordTowerItem]
@@ -188,7 +188,7 @@ struct WordTowerQuestion: Decodable, Identifiable {
     }
 }
 
-struct WordTowerItem: Decodable, Identifiable, Equatable {
+struct WordTowerItem: Codable, Identifiable, Equatable {
     let id: String
     let text: String
     let isCorrect: Bool

@@ -447,32 +447,32 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
     switch (fileType.toLowerCase()) {
       case 'pdf':
         return (
-          <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center">
-            <span className="text-red-600 font-bold text-xs">PDF</span>
+          <div className="w-10 h-10 bg-[#FF4B4B] rounded-xl flex items-center justify-center border-2 border-b-4 border-[#E04343]">
+            <span className="text-white font-extrabold text-xs">PDF</span>
           </div>
         );
       case 'docx':
         return (
-          <div className="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center">
-            <span className="text-violet-600 font-bold text-xs">DOCX</span>
+          <div className="w-10 h-10 bg-[#A560E8] rounded-xl flex items-center justify-center border-2 border-b-4 border-[#8A48C7]">
+            <span className="text-white font-extrabold text-xs">DOCX</span>
           </div>
         );
       case 'doc':
         return (
-          <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-            <span className="text-green-600 font-bold text-xs">DOC</span>
+          <div className="w-10 h-10 bg-[#58CC02] rounded-xl flex items-center justify-center border-2 border-b-4 border-[#46A302]">
+            <span className="text-white font-extrabold text-xs">DOC</span>
           </div>
         );
       case 'txt':
         return (
-          <div className="w-10 h-10 bg-stone-100 rounded-xl flex items-center justify-center">
-            <span className="text-stone-600 font-bold text-xs">TXT</span>
+          <div className="w-10 h-10 bg-stone-400 rounded-xl flex items-center justify-center border-2 border-b-4 border-stone-500">
+            <span className="text-white font-extrabold text-xs">TXT</span>
           </div>
         );
       default:
         return (
-          <div className="w-10 h-10 bg-stone-100 rounded-xl flex items-center justify-center">
-            <span className="text-stone-600 font-bold text-xs">FILE</span>
+          <div className="w-10 h-10 bg-stone-400 rounded-xl flex items-center justify-center border-2 border-b-4 border-stone-500">
+            <span className="text-white font-extrabold text-xs">FILE</span>
           </div>
         );
     }
@@ -500,44 +500,44 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden">
+    <div className="relative min-h-screen overflow-x-hidden" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="library" />
 
       {/* Mobile Navigation Tabs */}
-      <div className="md:hidden bg-white border-b border-stone-100 sticky top-0 z-10">
-        <div className="flex">
+      <div className="md:hidden bg-white border-b-2 border-stone-200 sticky top-0 z-10 p-2">
+        <div className="flex gap-2">
           <button
             onClick={() => setMobileView('list')}
-            className={`flex-1 py-3.5 text-sm font-medium transition-colors ${
+            className={`flex-1 py-2.5 text-sm font-extrabold rounded-xl transition-all ${
               mobileView === 'list'
-                ? 'text-violet-600 border-b-2 border-violet-600 bg-violet-50/50'
-                : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'
+                ? 'bg-[#1CB0F6] text-white border-2 border-b-4 border-[#1899D6]'
+                : 'text-stone-500 bg-white border-2 border-b-4 border-stone-200 active:border-b-2 active:translate-y-0.5'
             }`}
           >
-            Documents
+            📁 Documents
           </button>
           <button
             onClick={() => setMobileView('document')}
-            className={`flex-1 py-3.5 text-sm font-medium transition-colors ${
+            className={`flex-1 py-2.5 text-sm font-extrabold rounded-xl transition-all ${
               mobileView === 'document'
-                ? 'text-violet-600 border-b-2 border-violet-600 bg-violet-50/50'
-                : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'
+                ? 'bg-[#1CB0F6] text-white border-2 border-b-4 border-[#1899D6]'
+                : 'text-stone-500 bg-white border-2 border-b-4 border-stone-200 active:border-b-2 active:translate-y-0.5'
             }`}
             disabled={!selectedDocument}
           >
-            Viewer
+            📄 Viewer
           </button>
           <button
             onClick={() => setMobileView('analysis')}
-            className={`flex-1 py-3.5 text-sm font-medium transition-colors ${
+            className={`flex-1 py-2.5 text-sm font-extrabold rounded-xl transition-all ${
               mobileView === 'analysis'
-                ? 'text-violet-600 border-b-2 border-violet-600 bg-violet-50/50'
-                : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'
+                ? 'bg-[#1CB0F6] text-white border-2 border-b-4 border-[#1899D6]'
+                : 'text-stone-500 bg-white border-2 border-b-4 border-stone-200 active:border-b-2 active:translate-y-0.5'
             }`}
             disabled={!selectedDocument}
           >
-            Analysis
+            📝 Analysis
           </button>
         </div>
       </div>
@@ -545,14 +545,14 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
       <div ref={containerRef} className="flex min-h-[calc(100vh-80px)] md:h-[calc(100vh-80px)]">
         {/* Left Panel - Document Library */}
         <div 
-          className={`w-full md:border-r border-stone-100 bg-stone-50/50 flex flex-col md:w-auto ${
+          className={`w-full md:border-r-2 border-stone-200 bg-stone-50 flex flex-col md:w-auto ${
             mobileView !== 'list' ? 'hidden md:flex' : ''
           }`}
           style={{ width: window.innerWidth < 768 ? '100%' : `${leftPanelWidth}%` }}
         >
-          <div className="p-4 md:p-5 border-b border-stone-100 bg-white">
-            <h2 className="text-lg md:text-xl font-bold text-stone-900 mb-4 md:mb-5">My Documents</h2>
-            
+          <div className="p-4 md:p-5 border-b-2 border-stone-200 bg-white">
+            <h2 className="text-lg md:text-xl font-extrabold text-stone-900 mb-4 md:mb-5">📁 My Documents</h2>
+
             {/* Search Bar */}
             <div className="relative mb-4">
               <input
@@ -560,7 +560,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search documents..."
-                className="w-full pl-10 pr-4 py-2.5 text-sm bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 focus:bg-white transition-all"
+                className="w-full pl-10 pr-4 py-2.5 text-sm font-bold bg-white border-2 border-stone-200 rounded-xl focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 transition-all"
               />
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <svg className="h-5 w-5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -568,35 +568,35 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                 </svg>
               </div>
             </div>
-            
+
             {/* Filters */}
             <div className="flex gap-2 mb-4 flex-wrap">
               <button
                 onClick={() => setTimeFilter('all')}
-                className={`px-3 py-1.5 text-xs md:text-sm rounded-lg font-medium transition-all ${
-                  timeFilter === 'all' 
-                    ? 'bg-violet-600 hover:bg-violet-500 text-white' 
-                    : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                className={`px-3 py-1.5 text-xs md:text-sm rounded-xl font-extrabold transition-all ${
+                  timeFilter === 'all'
+                    ? 'bg-[#1CB0F6] text-white border-2 border-b-4 border-[#1899D6]'
+                    : 'bg-white text-stone-500 border-2 border-b-4 border-stone-200 active:border-b-2 active:translate-y-0.5'
                 }`}
               >
                 All
               </button>
               <button
                 onClick={() => setTimeFilter('last7days')}
-                className={`px-3 py-1.5 text-xs md:text-sm rounded-lg font-medium transition-all ${
-                  timeFilter === 'last7days' 
-                    ? 'bg-violet-600 hover:bg-violet-500 text-white' 
-                    : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                className={`px-3 py-1.5 text-xs md:text-sm rounded-xl font-extrabold transition-all ${
+                  timeFilter === 'last7days'
+                    ? 'bg-[#1CB0F6] text-white border-2 border-b-4 border-[#1899D6]'
+                    : 'bg-white text-stone-500 border-2 border-b-4 border-stone-200 active:border-b-2 active:translate-y-0.5'
                 }`}
               >
                 Last 7 days
               </button>
               <button
                 onClick={() => setTimeFilter('lastmonth')}
-                className={`px-3 py-1.5 text-xs md:text-sm rounded-lg font-medium transition-all ${
-                  timeFilter === 'lastmonth' 
-                    ? 'bg-violet-600 hover:bg-violet-500 text-white' 
-                    : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                className={`px-3 py-1.5 text-xs md:text-sm rounded-xl font-extrabold transition-all ${
+                  timeFilter === 'lastmonth'
+                    ? 'bg-[#1CB0F6] text-white border-2 border-b-4 border-[#1899D6]'
+                    : 'bg-white text-stone-500 border-2 border-b-4 border-stone-200 active:border-b-2 active:translate-y-0.5'
                 }`}
               >
                 Last month
@@ -605,13 +605,13 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
 
             {/* View Toggle */}
             <div className="flex items-center justify-between">
-              <span className="text-sm text-stone-500">View:</span>
-              <div className="flex bg-stone-100 rounded-xl p-1">
+              <span className="text-sm text-stone-500 font-extrabold">View:</span>
+              <div className="flex bg-stone-100 rounded-xl p-1 border-2 border-stone-200">
                 <button
                   onClick={() => setViewMode('grid')}
                   className={`p-2 rounded-lg transition-all ${
                     viewMode === 'grid'
-                      ? 'bg-white text-violet-600 shadow-sm'
+                      ? 'bg-[#1CB0F6] text-white'
                       : 'text-stone-500 hover:text-stone-700'
                   }`}
                   title="Grid View"
@@ -624,7 +624,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                   onClick={() => setViewMode('list')}
                   className={`p-2 rounded-lg transition-all ${
                     viewMode === 'list'
-                      ? 'bg-white text-violet-600 shadow-sm'
+                      ? 'bg-[#1CB0F6] text-white'
                       : 'text-stone-500 hover:text-stone-700'
                   }`}
                   title="List View"
@@ -665,16 +665,16 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                 {filteredDocuments.map((document) => (
                   <div
                     key={document.id}
-                    className={`${viewMode === 'grid' 
-                      ? `p-4 rounded-xl transition-all duration-200 border-2 hover:shadow-md ${
+                    className={`${viewMode === 'grid'
+                      ? `p-4 rounded-xl transition-all border-2 border-b-4 ${
                           selectedDocument?.id === document.id
-                            ? 'bg-violet-50 border-violet-500'
+                            ? 'bg-[#DDF4FF] border-[#1CB0F6]'
                             : 'bg-white border-stone-200 hover:border-stone-300'
                         }`
-                      : `py-2 px-3 rounded-xl transition-all duration-150 cursor-pointer border ${
+                      : `py-2 px-3 rounded-xl transition-all cursor-pointer border-2 border-b-4 ${
                           selectedDocument?.id === document.id
-                            ? 'bg-violet-50 border-violet-500'
-                            : 'bg-white border-stone-200 hover:bg-stone-50 hover:border-stone-300'
+                            ? 'bg-[#DDF4FF] border-[#1CB0F6]'
+                            : 'bg-white border-stone-200 hover:border-stone-300'
                         }`
                     }`}
                   >
@@ -728,13 +728,13 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                     </div>
                     
                     {/* File info stacked vertically */}
-                    <div className="space-y-1 text-xs text-gray-600">
+                    <div className="space-y-1 text-xs text-stone-500 font-bold">
                       <div>{formatFileSize(document.fileSize)}</div>
                       <div>{document.wordCount} words</div>
                       <div>{formatDate(document.createdAt)}</div>
                       {(document.analysisStatus?.hasAnalysis || document.hasAnalysis) && (
-                        <div className="flex items-center text-violet-600">
-                          <div className="w-1.5 h-1.5 bg-violet-500 rounded-full mr-1"></div>
+                        <div className="flex items-center text-[#58CC02] font-extrabold">
+                          <div className="w-1.5 h-1.5 bg-[#58CC02] rounded-full mr-1"></div>
                           Analyzed
                         </div>
                       )}
@@ -746,16 +746,12 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                         <>
                           <div className="flex items-center space-x-3 flex-1 min-w-0">
                             {/* Smaller file icon for list view */}
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                              document.fileType.toLowerCase() === 'pdf' ? 'bg-red-100' :
-                              document.fileType.toLowerCase() === 'docx' ? 'bg-violet-100' :
-                              document.fileType.toLowerCase() === 'doc' ? 'bg-green-100' : 'bg-gray-100'
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 border-2 border-b-4 ${
+                              document.fileType.toLowerCase() === 'pdf' ? 'bg-[#FF4B4B] border-[#E04343]' :
+                              document.fileType.toLowerCase() === 'docx' ? 'bg-[#A560E8] border-[#8A48C7]' :
+                              document.fileType.toLowerCase() === 'doc' ? 'bg-[#58CC02] border-[#46A302]' : 'bg-stone-400 border-stone-500'
                             }`}>
-                              <span className={`font-bold text-[10px] ${
-                                document.fileType.toLowerCase() === 'pdf' ? 'text-red-600' :
-                                document.fileType.toLowerCase() === 'docx' ? 'text-violet-600' :
-                                document.fileType.toLowerCase() === 'doc' ? 'text-green-600' : 'text-gray-600'
-                              }`}>
+                              <span className="font-extrabold text-[10px] text-white">
                                 {document.fileType.toUpperCase().slice(0, 3)}
                               </span>
                             </div>
@@ -778,13 +774,13 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                                 />
                                 <button
                                   onClick={() => handleRenameDocument(document.id, editTitle)}
-                                  className="px-1.5 py-0.5 text-[10px] bg-violet-600 text-white rounded hover:bg-violet-700"
+                                  className="px-1.5 py-0.5 text-[10px] bg-[#58CC02] text-white rounded-lg font-extrabold border-b-2 border-[#46A302]"
                                 >
                                   ✓
                                 </button>
                                 <button
                                   onClick={cancelEditing}
-                                  className="px-1.5 py-0.5 text-[10px] bg-gray-600 text-white rounded hover:bg-gray-700"
+                                  className="px-1.5 py-0.5 text-[10px] bg-stone-500 text-white rounded-lg font-extrabold border-b-2 border-stone-600"
                                 >
                                   ✕
                                 </button>
@@ -805,7 +801,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                                       {formatFileSize(document.fileSize)}
                                     </span>
                                     {(document.analysisStatus?.hasAnalysis || document.hasAnalysis) && (
-                                      <div className="w-1.5 h-1.5 bg-violet-500 rounded-full"></div>
+                                      <div className="w-1.5 h-1.5 bg-[#58CC02] rounded-full"></div>
                                     )}
                                   </div>
                                 </div>
@@ -848,14 +844,14 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                     </div>
                     
           {/* Recent Activity */}
-          <div className="hidden md:block p-4 border-t border-gray-100 bg-white">
-            <h3 className="text-sm font-semibold text-gray-900 mb-3">Recent Activity</h3>
+          <div className="hidden md:block p-4 border-t-2 border-stone-200 bg-white">
+            <h3 className="text-sm font-extrabold text-stone-900 mb-3">⚡ Recent Activity</h3>
             <div className="space-y-2">
               {filteredDocuments.slice(0, 3).map((doc) => (
-                <div key={doc.id} className="flex items-center text-xs text-gray-600 p-2 bg-gray-50 rounded-lg">
-                  <div className="w-2 h-2 bg-violet-500 rounded-full mr-2 flex-shrink-0"></div>
-                  <span className="truncate flex-1 min-w-0 font-medium text-gray-700">{doc.title}</span>
-                  <span className="ml-2 text-gray-400 text-xs flex-shrink-0">
+                <div key={doc.id} className="flex items-center text-xs text-stone-600 p-2 bg-stone-50 rounded-xl border-2 border-stone-100">
+                  <div className="w-2 h-2 bg-[#1CB0F6] rounded-full mr-2 flex-shrink-0"></div>
+                  <span className="truncate flex-1 min-w-0 font-bold text-stone-700">{doc.title}</span>
+                  <span className="ml-2 text-stone-400 text-xs flex-shrink-0 font-bold">
                     {new Date(doc.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </span>
                 </div>
@@ -867,12 +863,12 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
         {/* Left Resize Handle */}
         <div
           ref={leftResizeRef}
-          className="hidden md:block w-1 bg-gray-100 hover:bg-violet-500 cursor-col-resize transition-colors relative group"
+          className="hidden md:block w-1 bg-stone-200 hover:bg-[#1CB0F6] cursor-col-resize transition-colors relative group"
           onMouseDown={() => handleMouseDown('left')}
         >
           <div className="absolute inset-y-0 -left-1 -right-1 bg-transparent"></div>
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <div className="w-1 h-10 bg-violet-500 rounded-full"></div>
+            <div className="w-1 h-10 bg-[#1CB0F6] rounded-full"></div>
           </div>
         </div>
 
@@ -885,13 +881,13 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
         >
           {selectedDocument ? (
             <>
-              <div className="p-5 md:p-6 border-b border-gray-100 bg-white">
+              <div className="p-5 md:p-6 border-b-2 border-stone-200 bg-white">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
-                    <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
+                    <h1 className="text-xl md:text-2xl font-extrabold text-stone-900 mb-2">
                       {selectedDocument.title}
                     </h1>
-                    <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+                    <div className="flex flex-wrap items-center gap-3 text-sm text-stone-500 font-bold">
                       <span className="flex items-center">
                         <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -920,7 +916,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                           localStorage.setItem('viewAnalysisType', 'comprehensive');
                           localStorage.setItem('cameFromLibrary', 'true');
                         }}
-                        className="flex-1 min-w-[200px] bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-3 rounded-xl hover:bg-emerald-700 transition-colors font-medium flex items-center justify-center space-x-2 text-sm"
+                        className="flex-1 min-w-[200px] bg-[#58CC02] text-white px-4 py-3 rounded-xl font-extrabold uppercase tracking-wide flex items-center justify-center space-x-2 text-sm border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -938,7 +934,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                           localStorage.setItem('viewAnalysisType', 'citation');
                           localStorage.setItem('cameFromLibrary', 'true');
                         }}
-                        className="flex-1 min-w-[200px] bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-3 rounded-xl hover:bg-emerald-700 transition-colors font-medium flex items-center justify-center space-x-2 text-sm"
+                        className="flex-1 min-w-[200px] bg-[#1CB0F6] text-white px-4 py-3 rounded-xl font-extrabold uppercase tracking-wide flex items-center justify-center space-x-2 text-sm border-2 border-b-4 border-[#1899D6] active:border-b-2 active:translate-y-0.5 transition-all"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -950,28 +946,26 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                 )}
               </div>
               
-              <div className="flex-1 overflow-y-auto p-5 md:p-6 bg-gray-50/50">
+              <div className="flex-1 overflow-y-auto p-5 md:p-6 bg-stone-50">
                 {loadingContent ? (
                   <div className="flex items-center justify-center h-full">
                     <LoadingSpinner />
                   </div>
                 ) : (
-                  <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+                  <div className="bg-white rounded-2xl border-2 border-b-4 border-stone-200 p-6">
                     {renderDocumentContent()}
                   </div>
                 )}
               </div>
             </>
           ) : (
-            <div className="flex-1 flex items-center justify-center bg-gray-50/30">
+            <div className="flex-1 flex items-center justify-center bg-stone-50">
               <div className="text-center">
-                <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
+                <div className="w-20 h-20 bg-[#DDF4FF] rounded-2xl flex items-center justify-center mx-auto mb-4 border-2 border-b-4 border-[#1CB0F6]/30">
+                  <span className="text-4xl">📄</span>
                 </div>
-                <p className="text-lg text-gray-500 font-medium">Select a document to view</p>
-                <p className="text-sm text-gray-400 mt-1">Choose from your library on the left</p>
+                <p className="text-lg text-stone-700 font-extrabold">Select a document to view</p>
+                <p className="text-sm text-stone-400 mt-1 font-bold">Choose from your library on the left</p>
               </div>
             </div>
           )}
@@ -980,36 +974,34 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
         {/* Right Resize Handle */}
         <div
           ref={rightResizeRef}
-          className="hidden md:block w-1 bg-gray-100 hover:bg-violet-500 cursor-col-resize transition-colors relative group"
+          className="hidden md:block w-1 bg-stone-200 hover:bg-[#1CB0F6] cursor-col-resize transition-colors relative group"
           onMouseDown={() => handleMouseDown('right')}
         >
           <div className="absolute inset-y-0 -left-1 -right-1 bg-transparent"></div>
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <div className="w-1 h-10 bg-violet-500 rounded-full"></div>
+            <div className="w-1 h-10 bg-[#1CB0F6] rounded-full"></div>
           </div>
         </div>
 
         {/* Right Panel - Annotations */}
         <div 
-          className={`flex border-l border-gray-100 bg-gray-50/50 flex-col w-full ${
+          className={`flex border-l-2 border-stone-200 bg-stone-50 flex-col w-full ${
             mobileView !== 'analysis' ? 'hidden md:flex' : ''
           }`}
           style={{ width: window.innerWidth < 768 ? '100%' : `${rightPanelWidth}%` }}
         >
-          <div className="p-4 md:p-5 border-b border-gray-100 bg-white">
-            <h2 className="text-lg md:text-xl font-bold text-gray-900">Document Analysis</h2>
-            <p className="text-sm text-gray-500 mt-1">AI-generated feedback and suggestions</p>
+          <div className="p-4 md:p-5 border-b-2 border-stone-200 bg-white">
+            <h2 className="text-lg md:text-xl font-extrabold text-stone-900">📝 Document Analysis</h2>
+            <p className="text-sm text-stone-500 mt-1 font-bold">AI-generated feedback and suggestions</p>
           </div>
           
           <div className="flex-1 overflow-y-auto p-4">
             {!selectedDocument ? (
               <div className="text-center mt-12">
-                <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
+                <div className="w-16 h-16 bg-[#F3EAFF] rounded-2xl flex items-center justify-center mx-auto mb-4 border-2 border-b-4 border-[#A560E8]/30">
+                  <span className="text-3xl">📋</span>
                 </div>
-                <p className="text-gray-500">Select a document to view analysis</p>
+                <p className="text-stone-500 font-bold">Select a document to view analysis</p>
               </div>
             ) : loadingAnalysis ? (
               <div className="flex items-center justify-center h-full">
@@ -1017,19 +1009,17 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
               </div>
             ) : !analysisData || (!analysisData.hasComprehensive && !analysisData.hasCitation) ? (
               <div className="text-center mt-12">
-                <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                  </svg>
+                <div className="w-16 h-16 bg-[#FFF4E0] rounded-2xl flex items-center justify-center mx-auto mb-4 border-2 border-b-4 border-[#FF9600]/30">
+                  <span className="text-3xl">💡</span>
                 </div>
-                <p className="text-gray-500 mb-4">No analysis available</p>
+                <p className="text-stone-500 mb-4 font-bold">No analysis available</p>
                 <button
                   onClick={() => {
                     localStorage.setItem('selectedDocumentId', selectedDocument.id);
                     localStorage.setItem('selectedDocumentTitle', selectedDocument.title);
                     onNavigate('analysis');
                   }}
-                  className="bg-violet-600 hover:bg-violet-500 text-white px-5 py-2.5 rounded-xl transition-colors font-medium text-sm"
+                  className="bg-[#58CC02] text-white px-5 py-2.5 rounded-xl font-extrabold uppercase tracking-wide text-sm border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all"
                 >
                   Analyze Document
                 </button>
@@ -1037,10 +1027,10 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
             ) : (
               <div className="space-y-4">
                 {/* Document Analysis - Full Analysis Display */}
-                <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
-                  <div className="p-4 bg-gray-900 text-white">
-                    <h3 className="text-base font-semibold">Analysis Summary</h3>
-                    <p className="text-sm text-gray-300 mt-0.5">AI-generated insights</p>
+                <div className="bg-white rounded-2xl border-2 border-b-4 border-stone-200 overflow-hidden">
+                  <div className="p-4 bg-[#1CB0F6] text-white border-b-2 border-[#1899D6]">
+                    <h3 className="text-base font-extrabold">Analysis Summary</h3>
+                    <p className="text-sm text-white/80 mt-0.5 font-bold">AI-generated insights</p>
                   </div>
                   
                   <div className="p-4 space-y-4">
@@ -1066,10 +1056,10 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                         <>
                           {/* Header Section - Analysis Type and Date */}
                           <div className="flex items-center justify-between mb-4">
-                            <span className={`inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold ${
-                              mostRecentAnalysis.analysis_type === 'citation_review' 
-                                ? 'bg-violet-100 text-violet-700' 
-                                : 'bg-violet-100 text-violet-700'
+                            <span className={`inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-extrabold border-2 ${
+                              mostRecentAnalysis.analysis_type === 'citation_review'
+                                ? 'bg-[#DDF4FF] text-[#1CB0F6] border-[#1CB0F6]/30'
+                                : 'bg-[#F3EAFF] text-[#A560E8] border-[#A560E8]/30'
                             }`}>
                               {analysisType} Analysis
                             </span>
@@ -1081,21 +1071,21 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                           {/* Summary Section - Quick Stats */}
                           <div className="grid grid-cols-3 gap-2 mb-4">
                             {results.strong_points && results.strong_points.length > 0 && (
-                              <div className="text-center p-3 bg-green-50 rounded-xl border border-green-200">
-                                <div className="text-2xl font-bold text-green-600">{results.strong_points.length}</div>
-                                <div className="text-xs text-green-700 font-medium">Strengths</div>
+                              <div className="text-center p-3 bg-[#EAFFD6] rounded-xl border-2 border-b-4 border-[#58CC02]/30">
+                                <div className="text-2xl font-extrabold text-[#58CC02]">{results.strong_points.length}</div>
+                                <div className="text-xs text-[#46A302] font-extrabold">Strengths</div>
                               </div>
                             )}
                             {results.areas_to_improve && results.areas_to_improve.length > 0 && (
-                              <div className="text-center p-3 bg-amber-50 rounded-xl border border-amber-200">
-                                <div className="text-2xl font-bold text-amber-600">{results.areas_to_improve.length}</div>
-                                <div className="text-xs text-amber-700 font-medium">Improve</div>
+                              <div className="text-center p-3 bg-[#FFF4E0] rounded-xl border-2 border-b-4 border-[#FF9600]/30">
+                                <div className="text-2xl font-extrabold text-[#FF9600]">{results.areas_to_improve.length}</div>
+                                <div className="text-xs text-[#D97F00] font-extrabold">Improve</div>
                               </div>
                             )}
                             {results.serious_concerns && results.serious_concerns.length > 0 && (
-                              <div className="text-center p-3 bg-red-50 rounded-xl border border-red-200">
-                                <div className="text-2xl font-bold text-red-600">{results.serious_concerns.length}</div>
-                                <div className="text-xs text-red-700 font-medium">Concerns</div>
+                              <div className="text-center p-3 bg-[#FFE8E8] rounded-xl border-2 border-b-4 border-[#FF4B4B]/30">
+                                <div className="text-2xl font-extrabold text-[#FF4B4B]">{results.serious_concerns.length}</div>
+                                <div className="text-xs text-[#E04343] font-extrabold">Concerns</div>
                               </div>
                             )}
                           </div>
@@ -1103,12 +1093,12 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                           {/* Full Analysis Section - Complete Assessment */}
                           {results.result && (
                             <div>
-                              <h4 className="text-sm font-semibold text-gray-900 mb-2">
+                              <h4 className="text-sm font-extrabold text-stone-900 mb-2">
                                 Overall Assessment
                               </h4>
-                              <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                              <div className="bg-stone-50 rounded-xl p-4 border-2 border-stone-200">
                                 <div className="prose pviolet-sm max-w-none">
-                                  <div className="whitespace-pre-wrap text-gray-700 leading-relaxed text-sm">
+                                  <div className="whitespace-pre-wrap text-stone-700 leading-relaxed text-sm font-medium">
                                     {results.result
                                       .replace(/#{1,6}\s*/g, '')
                                       .replace(/\*{1,2}([^*]+)\*{1,2}/g, '$1')
@@ -1122,7 +1112,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
                                 {results.result.length > 500 && (
                                   <button
                                     onClick={() => onNavigate('analysis-history')}
-                                    className="mt-3 w-full py-2.5 px-4 text-sm font-medium text-violet-600 hover:text-violet-700 bg-violet-50 hover:bg-violet-100 rounded-xl transition-colors flex items-center justify-center gap-2"
+                                    className="mt-3 w-full py-2.5 px-4 text-sm font-extrabold text-[#1CB0F6] bg-[#DDF4FF] rounded-xl border-2 border-b-4 border-[#1CB0F6]/30 active:border-b-2 active:translate-y-0.5 transition-all flex items-center justify-center gap-2"
                                   >
                                     <span>View full analysis</span>
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

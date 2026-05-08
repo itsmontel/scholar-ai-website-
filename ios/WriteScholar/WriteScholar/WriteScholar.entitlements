@@ -6,5 +6,29 @@
     <array>
         <string>Default</string>
     </array>
+
+    <!--
+      Focus mode (iOS Family Controls).
+
+      Requires a separate request to Apple via:
+        https://developer.apple.com/contact/request/family-controls-distribution
+      The app builds and runs without Apple's approval; FamilyControls
+      authorization will fail at runtime until they grant it. The Focus
+      tab UI handles that gracefully (shows an "Allow Screen Time"
+      prompt instead of the picker).
+
+      The app group below is shared with the four planned Focus
+      extensions (DeviceActivityMonitor, DeviceActivityReport,
+      ShieldConfiguration, ShieldAction) so they can read the user's
+      blocked selection + unlock window from the same UserDefaults
+      suite. Add those extension targets when you're ready to ship.
+    -->
+    <key>com.apple.developer.family-controls</key>
+    <true/>
+
+    <key>com.apple.security.application-groups</key>
+    <array>
+        <string>group.com.writescholar.focus</string>
+    </array>
 </dict>
 </plist>

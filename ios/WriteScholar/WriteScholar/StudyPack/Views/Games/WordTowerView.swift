@@ -668,6 +668,14 @@ struct WordTowerView: View {
             .buttonStyle(WSPrimaryButtonStyle(fullWidth: false))
         }
         .padding()
+        .onAppear {
+            // Award + log exactly once per game.
+            DailyGoalStore.shared.record(
+                .wordTowerPlayed,
+                title: wordTower.title ?? "Word Tower",
+                subtitle: "Floor \(towerBlocks.count) · score \(score)"
+            )
+        }
     }
 
     private func statBox(value: String, label: String, color: Color) -> some View {

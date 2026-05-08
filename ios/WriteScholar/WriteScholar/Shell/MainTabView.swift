@@ -2,12 +2,17 @@
 //  MainTabView.swift
 //  WriteScholar
 //
-//  Bottom tab bar shell. Order matches the user-requested layout:
+//  Bottom tab bar shell. Order:
 //
-//      Home  |  Study  |  Library  |  Analyze  |  Games
+//      Home  |  Study  |  Library  |  Games  |  Focus
 //
-//  Settings is no longer a tab — it now lives behind the profile avatar
-//  in the top-right of the Home tab and is presented as a sheet.
+//  Essay Analysis is desktop-only (citations + paper analysis live on
+//  writescholar.com), so the mobile shell drops the Analyze tab entirely
+//  and gives that slot to Games. Games are also linked from the Study
+//  hub for discoverability, but they get their own dedicated tab now.
+//
+//  Settings still lives behind the profile avatar in the top-right of
+//  the Home tab.
 //
 
 import SwiftUI
@@ -20,7 +25,7 @@ struct MainTabView: View {
     @State private var selectedTab: Tab = .home
 
     enum Tab: Hashable {
-        case home, study, library, analyze, games
+        case home, study, library, games, focus
     }
 
     var body: some View {
@@ -32,33 +37,33 @@ struct MainTabView: View {
             .tabItem { Label("Home", systemImage: "house.fill") }
             .tag(Tab.home)
 
-            StudyPackTabContainer()
+            StudyTabContainer(onOpenFocus: { selectedTab = .focus })
                 .tabItem { Label("Study", systemImage: "graduationcap.fill") }
                 .tag(Tab.study)
 
-            ComingSoonTab(
-                title: "Library",
-                subtitle: "Every essay analysis and study pack you create — all in one place.",
-                systemIcon: "books.vertical.fill",
-                tint: Color(hex: 0x6366F1),
-                chapterLabel: "Chapter 6"
-            )
+            LibraryTabView(onJumpToTab: { dest in
+                switch dest {
+                case .study:   selectedTab = .study
+                case .games:   selectedTab = .games
+                case .focus:   selectedTab = .focus
+                }
+            })
             .tabItem { Label("Library", systemImage: "books.vertical.fill") }
             .tag(Tab.library)
-
-            AnalyzeTabContainer()
-                .tabItem { Label("Analyze", systemImage: "doc.text.magnifyingglass") }
-                .tag(Tab.analyze)
 
             GamesTabView()
                 .tabItem { Label("Games", systemImage: "gamecontroller.fill") }
                 .tag(Tab.games)
+
+            FocusTabView()
+                .tabItem { Label("Focus", systemImage: "shield.lefthalf.filled") }
+                .tag(Tab.focus)
         }
         .tint(WSColor.brandPrimary)
     }
 }
 
-// MARK: - Placeholder tab body (Library still uses this for now)
+// MARK: - Placeholder tab body (kept for any future "coming soon" tabs)
 
 struct ComingSoonTab: View {
     let title: String

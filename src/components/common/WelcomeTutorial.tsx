@@ -39,7 +39,7 @@ const WelcomeTutorial = ({ userName, userId, onComplete }: WelcomeTutorialProps)
     },
     {
       title: 'Analyze Your Writing',
-      subtitle: 'Get instant feedback on essays & papers',
+      subtitle: 'Get instant feedback on your writing',
       description: '',
       icon: '',
       features: [

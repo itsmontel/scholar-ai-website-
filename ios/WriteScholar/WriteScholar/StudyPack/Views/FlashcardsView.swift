@@ -327,6 +327,18 @@ struct FlashcardsView: View {
             .buttonStyle(WSPrimaryButtonStyle(fullWidth: false))
             .padding(.top, 10)
         }
+        .onAppear {
+            // Award XP + log to History exactly once per cleared deck.
+            // Use a static guard so re-rendering the completed state
+            // doesn't re-award when SwiftUI rebuilds the view.
+            let total = knownCount + reviewCount
+            guard total > 0 else { return }
+            DailyGoalStore.shared.record(
+                .flashcardsReviewed,
+                title: flashcards.title ?? "Flashcards",
+                subtitle: "\(total) cards · \(knownCount) known"
+            )
+        }
     }
 }
 

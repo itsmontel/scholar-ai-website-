@@ -39,6 +39,9 @@ final class StudyPackCoordinator: ObservableObject {
         do {
             let pack = try await StudyPackAPI.generate(text: trimmed)
             Haptics.success()
+            // Record into the user's Library shelf so it's reachable from
+            // the Library tab without needing the website to round-trip.
+            LibraryStore.shared.recordStudyPack(pack)
             withAnimation(.spring(response: 0.55, dampingFraction: 0.85)) {
                 phase = .home(pack)
             }

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import Header from '../../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../../common/WriteScholarEditorialBackground';
 import Footer from '../../common/Footer';
 import ScholarMascot from '../../common/ScholarMascot';
 
@@ -312,11 +311,11 @@ const EssayOutlineGeneratorPage = ({ onNavigate, user, onLogout }: EssayOutlineG
 
   const copyOutline = () => {
     if (!outline) return;
-    
+
     let text = `Essay Outline: ${topic || 'My Essay'}\n`;
     text += `Type: ${essayTypes.find(t => t.value === essayType)?.label}\n`;
     text += `Thesis: ${thesis || '[Your thesis statement]'}\n\n`;
-    
+
     outline.forEach(section => {
       text += `${section.title}\n`;
       section.points.forEach(point => {
@@ -324,31 +323,39 @@ const EssayOutlineGeneratorPage = ({ onNavigate, user, onLogout }: EssayOutlineG
       });
       text += '\n';
     });
-    
+
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const sectionColors = [
+    { border: 'border-[#58CC02]', bg: 'bg-[#EAFFD6]', text: 'text-[#46A302]', dot: 'text-[#58CC02]' },
+    { border: 'border-[#1CB0F6]', bg: 'bg-[#DDF4FF]', text: 'text-[#1899D6]', dot: 'text-[#1CB0F6]' },
+    { border: 'border-[#FF9600]', bg: 'bg-[#FFF4E0]', text: 'text-[#D97F00]', dot: 'text-[#FF9600]' },
+    { border: 'border-[#A560E8]', bg: 'bg-[#F3EAFF]', text: 'text-[#8A48C7]', dot: 'text-[#A560E8]' },
+    { border: 'border-[#FF4B4B]', bg: 'bg-[#FFE8E8]', text: 'text-[#E04343]', dot: 'text-[#FF4B4B]' },
+    { border: 'border-[#1CB0F6]', bg: 'bg-[#DDF4FF]', text: 'text-[#1899D6]', dot: 'text-[#1CB0F6]' },
+  ];
+
   return (
-    <div className="relative min-h-screen overflow-x-hidden">
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
+    <div className="relative min-h-screen bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="essay-outline" />
 
       {/* Hero Section */}
-      <section className="py-16 sm:py-20 bg-gradient-to-b from-violet-50/50 to-white">
+      <section className="py-16 sm:py-20 bg-stone-50 dark:bg-stone-950">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto">
             <div className="inline-flex items-center justify-center mb-6">
               <ScholarMascot size={80} animated={false} pose="default" />
             </div>
-            <span className="inline-flex items-center px-4 py-1.5 bg-violet-100 text-violet-700 rounded-full text-sm font-semibold mb-5">
+            <span className="inline-flex items-center px-4 py-1.5 bg-[#EAFFD6] text-[#46A302] border-2 border-[#58CC02]/30 rounded-full text-sm font-extrabold uppercase tracking-wide mb-5">
               Free Tool
             </span>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-5 leading-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-900 dark:text-stone-100 mb-5 leading-tight">
               Essay Outline Generator
             </h1>
-            <p className="text-lg text-gray-500 leading-relaxed max-w-2xl mx-auto">
+            <p className="text-lg text-stone-500 dark:text-stone-400 leading-relaxed max-w-2xl mx-auto">
               Get a structured outline for your essay based on the type of writing. Perfect for planning argumentative, expository, narrative, and more.
             </p>
           </div>
@@ -360,69 +367,69 @@ const EssayOutlineGeneratorPage = ({ onNavigate, user, onLogout }: EssayOutlineG
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="grid lg:grid-cols-2 gap-8">
             {/* Input Form */}
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">Essay Details</h2>
-              
+            <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl p-6">
+              <h2 className="text-lg font-extrabold text-stone-900 dark:text-stone-100 mb-6">Essay Details</h2>
+
               {/* Essay Type Selection */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-3">Essay Type</label>
+                <label className="block text-sm font-extrabold text-stone-700 dark:text-stone-300 mb-3 uppercase tracking-wide">Essay Type</label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {essayTypes.map((type) => (
                     <button
                       key={type.value}
                       onClick={() => setEssayType(type.value as EssayType)}
-                      className={`p-3 rounded-xl text-left transition-all ${
+                      className={`p-3 rounded-xl text-left transition-all border-2 border-b-4 active:border-b-2 active:translate-y-0.5 ${
                         essayType === type.value
-                          ? 'bg-violet-600 text-white'
-                          : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                          ? 'bg-[#DDF4FF] border-[#1CB0F6] text-[#1899D6]'
+                          : 'bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-600 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700'
                       }`}
                     >
                       <div className="text-lg mb-1">{type.icon}</div>
-                      <div className="font-medium text-sm">{type.label}</div>
+                      <div className="font-extrabold text-sm">{type.label}</div>
                     </button>
                   ))}
                 </div>
-                <p className="text-sm text-gray-500 mt-2">
+                <p className="text-sm text-stone-500 dark:text-stone-400 mt-2">
                   {essayTypes.find(t => t.value === essayType)?.description}
                 </p>
               </div>
 
               {/* Topic */}
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Essay Topic (optional)</label>
+                <label className="block text-sm font-extrabold text-stone-700 dark:text-stone-300 mb-1 uppercase tracking-wide">Essay Topic (optional)</label>
                 <input
                   type="text"
                   value={topic}
                   onChange={(e) => setTopic(e.target.value)}
                   placeholder="e.g., Climate Change and Its Effects"
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none"
+                  className="w-full px-4 py-2.5 bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 outline-none text-stone-900 dark:text-stone-100 placeholder:text-stone-400"
                 />
               </div>
 
               {/* Thesis */}
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Thesis Statement (optional)</label>
+                <label className="block text-sm font-extrabold text-stone-700 dark:text-stone-300 mb-1 uppercase tracking-wide">Thesis Statement (optional)</label>
                 <textarea
                   value={thesis}
                   onChange={(e) => setThesis(e.target.value)}
                   placeholder="e.g., Climate change poses significant threats to global ecosystems and requires immediate action..."
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none resize-none h-20"
+                  className="w-full px-4 py-2.5 bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 outline-none resize-none h-20 text-stone-900 dark:text-stone-100 placeholder:text-stone-400"
                 />
               </div>
 
               {/* Body Paragraphs */}
               {(essayType === 'argumentative' || essayType === 'expository' || essayType === 'persuasive') && (
                 <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Number of Body Paragraphs</label>
+                  <label className="block text-sm font-extrabold text-stone-700 dark:text-stone-300 mb-2 uppercase tracking-wide">Number of Body Paragraphs</label>
                   <div className="flex items-center space-x-3">
                     {[2, 3, 4, 5].map((num) => (
                       <button
                         key={num}
                         onClick={() => setNumBodyParagraphs(num)}
-                        className={`w-12 h-12 rounded-xl font-medium transition-all ${
+                        className={`w-12 h-12 rounded-xl font-extrabold transition-all border-2 border-b-4 active:border-b-2 active:translate-y-0.5 ${
                           numBodyParagraphs === num
-                            ? 'bg-violet-600 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            ? 'bg-[#DDF4FF] border-[#1CB0F6] text-[#1899D6]'
+                            : 'bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-600 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700'
                         }`}
                       >
                         {num}
@@ -434,7 +441,7 @@ const EssayOutlineGeneratorPage = ({ onNavigate, user, onLogout }: EssayOutlineG
 
               <button
                 onClick={generateOutline}
-                className="w-full px-6 py-3 bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-xl hover:shadow-lg transition-all"
+                className="w-full px-6 py-3 bg-[#58CC02] hover:bg-[#46A302] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all"
               >
                 Generate Outline
               </button>
@@ -443,50 +450,53 @@ const EssayOutlineGeneratorPage = ({ onNavigate, user, onLogout }: EssayOutlineG
             {/* Output Panel */}
             <div>
               {outline ? (
-                <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+                <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl p-6">
                   <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg font-semibold text-gray-900">Your Essay Outline</h3>
+                    <h3 className="text-lg font-extrabold text-stone-900 dark:text-stone-100">Your Essay Outline</h3>
                     <button
                       onClick={copyOutline}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                      className={`px-4 py-2 rounded-xl text-sm font-extrabold uppercase tracking-wide transition-all border-2 border-b-4 active:border-b-2 active:translate-y-0.5 ${
                         copied
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? 'bg-[#EAFFD6] border-[#58CC02] text-[#46A302]'
+                          : 'bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-600 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700'
                       }`}
                     >
                       {copied ? 'Copied!' : 'Copy'}
                     </button>
                   </div>
-                  
+
                   <div className="space-y-6">
-                    {outline.map((section, index) => (
-                      <div key={index} className="border-l-4 border-violet-500 pl-4">
-                        <h4 className="font-semibold text-gray-900 mb-2">{section.title}</h4>
-                        <ul className="space-y-1.5 mb-2">
-                          {section.points.map((point, pIndex) => (
-                            <li key={pIndex} className="text-sm text-gray-600 flex items-start">
-                              <span className="text-violet-500 mr-2">•</span>
-                              <span>{point}</span>
-                            </li>
-                          ))}
-                        </ul>
-                        <p className="text-xs text-violet-600 bg-violet-50 px-2 py-1 rounded inline-block">
-                          💡 {section.tips}
-                        </p>
-                      </div>
-                    ))}
+                    {outline.map((section, index) => {
+                      const color = sectionColors[index % sectionColors.length];
+                      return (
+                        <div key={index} className={`border-l-4 ${color.border} pl-4`}>
+                          <h4 className="font-extrabold text-stone-900 dark:text-stone-100 mb-2">{section.title}</h4>
+                          <ul className="space-y-1.5 mb-2">
+                            {section.points.map((point, pIndex) => (
+                              <li key={pIndex} className="text-sm text-stone-600 dark:text-stone-400 flex items-start">
+                                <span className={`${color.dot} mr-2 font-extrabold`}>•</span>
+                                <span>{point}</span>
+                              </li>
+                            ))}
+                          </ul>
+                          <p className={`text-xs ${color.text} ${color.bg} px-3 py-1.5 rounded-lg inline-block font-extrabold`}>
+                            {section.tips}
+                          </p>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               ) : (
-                <div className="bg-gray-50 border border-gray-200 rounded-2xl p-8 text-center h-full flex flex-col items-center justify-center">
-                  <div className="w-16 h-16 bg-violet-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl p-8 text-center h-full flex flex-col items-center justify-center">
+                  <div className="w-16 h-16 bg-[#DDF4FF] rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-[#1CB0F6]/30">
+                    <svg className="w-8 h-8 text-[#1CB0F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Your Outline Will Appear Here</h3>
-                  <p className="text-gray-500 text-sm mb-4">Select an essay type and click "Generate Outline"</p>
-                  <div className="text-sm text-gray-400">
+                  <h3 className="text-lg font-extrabold text-stone-900 dark:text-stone-100 mb-2">Your Outline Will Appear Here</h3>
+                  <p className="text-stone-500 dark:text-stone-400 text-sm mb-4">Select an essay type and click "Generate Outline"</p>
+                  <div className="text-sm text-stone-400 dark:text-stone-500">
                     <p>Tip: Adding your topic and thesis makes the outline more personalized</p>
                   </div>
                 </div>
@@ -497,57 +507,60 @@ const EssayOutlineGeneratorPage = ({ onNavigate, user, onLogout }: EssayOutlineG
       </section>
 
       {/* Essay Types Explained */}
-      <section className="py-12 sm:py-16 bg-gray-50">
+      <section className="py-12 sm:py-16 bg-white dark:bg-stone-900">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">Understanding Essay Types</h2>
+          <h2 className="text-2xl font-extrabold text-stone-900 dark:text-stone-100 mb-8 text-center">Understanding Essay Types</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {essayTypes.map((type) => (
-              <div key={type.value} className="bg-white border border-gray-200 rounded-2xl p-6">
-                <div className="text-3xl mb-3">{type.icon}</div>
-                <h3 className="font-semibold text-gray-900 mb-2">{type.label}</h3>
-                <p className="text-gray-600 text-sm mb-3">{type.description}</p>
-                <p className="text-xs text-gray-500">
-                  {type.value === 'argumentative' && 'Best for: debates, position papers, academic arguments'}
-                  {type.value === 'expository' && 'Best for: explaining concepts, how-to guides, informative pieces'}
-                  {type.value === 'narrative' && 'Best for: personal essays, memoirs, creative writing'}
-                  {type.value === 'compare-contrast' && 'Best for: analyzing options, literary analysis, evaluations'}
-                  {type.value === 'persuasive' && 'Best for: opinion pieces, calls to action, advocacy'}
-                  {type.value === 'research' && 'Best for: academic papers, thesis work, scientific writing'}
-                </p>
-              </div>
-            ))}
+            {essayTypes.map((type, index) => {
+              const color = sectionColors[index % sectionColors.length];
+              return (
+                <div key={type.value} className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 rounded-2xl p-6">
+                  <div className="text-3xl mb-3">{type.icon}</div>
+                  <h3 className="font-extrabold text-stone-900 dark:text-stone-100 mb-2">{type.label}</h3>
+                  <p className="text-stone-600 dark:text-stone-400 text-sm mb-3">{type.description}</p>
+                  <p className={`text-xs font-extrabold ${color.text} ${color.bg} px-3 py-1.5 rounded-lg inline-block`}>
+                    {type.value === 'argumentative' && 'Best for: debates, position papers, academic arguments'}
+                    {type.value === 'expository' && 'Best for: explaining concepts, how-to guides, informative pieces'}
+                    {type.value === 'narrative' && 'Best for: personal essays, memoirs, creative writing'}
+                    {type.value === 'compare-contrast' && 'Best for: analyzing options, literary analysis, evaluations'}
+                    {type.value === 'persuasive' && 'Best for: opinion pieces, calls to action, advocacy'}
+                    {type.value === 'research' && 'Best for: academic papers, thesis work, scientific writing'}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-12 sm:py-16 bg-gray-900">
+      <section className="py-12 sm:py-16 bg-[#A560E8]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-4">
             Ready to write your essay?
           </h2>
-          <p className="text-gray-400 mb-8 max-w-xl mx-auto">
+          <p className="text-white/80 mb-8 max-w-xl mx-auto">
             WriteScholar can analyze your completed essay and provide AI-powered feedback on structure, grammar, citations, and academic style.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             {user ? (
-              <button 
+              <button
                 onClick={() => onNavigate('dashboard')}
-                className="px-6 py-3 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors"
+                className="px-6 py-3 bg-white text-[#8A48C7] font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-stone-200 active:border-b-2 active:translate-y-0.5 transition-all hover:bg-stone-50"
               >
                 Go to Dashboard
               </button>
             ) : (
               <>
-                <button 
+                <button
                   onClick={() => onNavigate('signup')}
-                  className="px-6 py-3 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors"
+                  className="px-6 py-3 bg-white text-[#8A48C7] font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-stone-200 active:border-b-2 active:translate-y-0.5 transition-all hover:bg-stone-50"
                 >
                   Try WriteScholar Free
                 </button>
-                <button 
+                <button
                   onClick={() => onNavigate('features')}
-                  className="px-6 py-3 border border-gray-600 text-white font-medium rounded-xl hover:border-gray-500 transition-colors"
+                  className="px-6 py-3 border-2 border-b-4 border-white/40 text-white font-extrabold uppercase tracking-wide rounded-xl active:border-b-2 active:translate-y-0.5 transition-all hover:bg-white/10"
                 >
                   Learn More
                 </button>

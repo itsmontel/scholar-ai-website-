@@ -83,3 +83,10 @@ targets:
       properties:
         com.apple.developer.applesignin:
           - Default
+        # Focus mode (iOS Family Controls / Screen Time API).
+        # Requires Apple to approve the entitlement request for this
+        # bundle ID before real shielding works at runtime — UI is
+        # safe to ship beforehand.
+        com.apple.developer.family-controls: true
+        com.apple.security.application-groups:
+          - group.com.writescholar.focus

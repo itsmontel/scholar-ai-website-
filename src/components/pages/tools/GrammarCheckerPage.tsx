@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import Header from '../../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../../common/WriteScholarEditorialBackground';
 import Footer from '../../common/Footer';
 import ScholarMascot from '../../common/ScholarMascot';
 
@@ -34,10 +33,10 @@ const GrammarCheckerPage = ({ onNavigate, user, onLogout }: GrammarCheckerPagePr
 
   const grammarRules: { pattern: RegExp; type: 'error' | 'warning' | 'suggestion'; category: string; message: string; suggestion?: string }[] = [
     // Capitalization errors
-    { pattern: /\bi\b(?!['\u2019])/g, type: 'error', category: 'Capitalization', message: '"i" should be capitalized to "I"', suggestion: 'I' },
+    { pattern: /\bi\b(?!['’])/g, type: 'error', category: 'Capitalization', message: '"i" should be capitalized to "I"', suggestion: 'I' },
     { pattern: /[.!?]\s+[a-z]/g, type: 'error', category: 'Capitalization', message: 'Sentence should start with a capital letter' },
     { pattern: /^[a-z]/g, type: 'error', category: 'Capitalization', message: 'Text should start with a capital letter' },
-    
+
     // Common spelling errors
     { pattern: /\b(alot)\b/gi, type: 'error', category: 'Spelling', message: '"alot" should be "a lot"', suggestion: 'a lot' },
     { pattern: /\b(definately|definatly)\b/gi, type: 'error', category: 'Spelling', message: 'Misspelling - should be "definitely"', suggestion: 'definitely' },
@@ -89,7 +88,7 @@ const GrammarCheckerPage = ({ onNavigate, user, onLogout }: GrammarCheckerPagePr
     { pattern: /\b(tommorow|tommorrow)\b/gi, type: 'error', category: 'Spelling', message: 'Misspelling - should be "tomorrow"', suggestion: 'tomorrow' },
     { pattern: /\b(truely)\b/gi, type: 'error', category: 'Spelling', message: 'Misspelling - should be "truly"', suggestion: 'truly' },
     { pattern: /\b(writting)\b/gi, type: 'error', category: 'Spelling', message: 'Misspelling - should be "writing"', suggestion: 'writing' },
-    
+
     // Commonly confused words
     { pattern: /\b(your)\s+(a|an)\b/gi, type: 'error', category: 'Grammar', message: 'Should be "you\'re" (you are)', suggestion: "you're" },
     { pattern: /\b(your)\s+(very|so|too|really)\b/gi, type: 'warning', category: 'Grammar', message: 'Check if "you\'re" (you are) is intended' },
@@ -107,14 +106,14 @@ const GrammarCheckerPage = ({ onNavigate, user, onLogout }: GrammarCheckerPagePr
     { pattern: /\b(whose)\s+(going|coming|doing|making)\b/gi, type: 'error', category: 'Grammar', message: '"Whose" shows possession; use "who\'s" for "who is"', suggestion: "who's" },
     { pattern: /\b(there)\s+(going|coming|doing)\b/gi, type: 'error', category: 'Grammar', message: '"There" is a place; use "they\'re" for "they are"', suggestion: "they're" },
     { pattern: /\b(their)\s+(is|are|was|were)\b/gi, type: 'error', category: 'Grammar', message: '"Their" shows possession; use "there" or "they\'re"' },
-    
+
     // Subject-verb agreement
     { pattern: /\b(everyone|everybody|someone|somebody|anyone|anybody|no one|nobody)\s+(are|were|have)\b/gi, type: 'error', category: 'Grammar', message: 'Indefinite pronouns take singular verbs (is/was/has)' },
     { pattern: /\b(each|every)\s+\w+\s+(are|were|have)\b/gi, type: 'warning', category: 'Grammar', message: '"Each" and "every" typically take singular verbs' },
     { pattern: /\b(none)\s+of\s+the\s+\w+\s+(are|were)\b/gi, type: 'suggestion', category: 'Grammar', message: '"None" can be singular or plural depending on context' },
     { pattern: /\b(the number of)\s+\w+\s+(are|were)\b/gi, type: 'error', category: 'Grammar', message: '"The number of" takes a singular verb' },
     { pattern: /\b(a number of)\s+\w+\s+(is|was)\b/gi, type: 'error', category: 'Grammar', message: '"A number of" takes a plural verb' },
-    
+
     // Word choice issues
     { pattern: /\b(irregardless)\b/gi, type: 'error', category: 'Word Choice', message: '"irregardless" is not standard; use "regardless"', suggestion: 'regardless' },
     { pattern: /\b(supposably)\b/gi, type: 'error', category: 'Word Choice', message: '"supposably" should be "supposedly"', suggestion: 'supposedly' },
@@ -133,7 +132,7 @@ const GrammarCheckerPage = ({ onNavigate, user, onLogout }: GrammarCheckerPagePr
     { pattern: /\b(nip it in the butt)\b/gi, type: 'error', category: 'Word Choice', message: 'Should be "nip it in the bud"', suggestion: 'nip it in the bud' },
     { pattern: /\b(baited breath)\b/gi, type: 'error', category: 'Word Choice', message: 'Should be "bated breath"', suggestion: 'bated breath' },
     { pattern: /\b(chomping at the bit)\b/gi, type: 'warning', category: 'Word Choice', message: 'Traditional phrase is "champing at the bit"', suggestion: 'champing at the bit' },
-    
+
     // Punctuation
     { pattern: /\s{2,}/g, type: 'warning', category: 'Punctuation', message: 'Multiple spaces detected', suggestion: ' ' },
     { pattern: /\.\.\.\./g, type: 'warning', category: 'Punctuation', message: 'Ellipsis should only have three dots (...)' },
@@ -144,7 +143,7 @@ const GrammarCheckerPage = ({ onNavigate, user, onLogout }: GrammarCheckerPagePr
     { pattern: /\s+[,]/g, type: 'warning', category: 'Punctuation', message: 'Space before comma' },
     { pattern: /\s+[.]/g, type: 'warning', category: 'Punctuation', message: 'Space before period' },
     { pattern: /[,][^\s]/g, type: 'warning', category: 'Punctuation', message: 'Missing space after comma' },
-    
+
     // Redundancy
     { pattern: /\b(and etc)\b/gi, type: 'error', category: 'Redundancy', message: '"and etc" is redundant; "etc." already implies "and others"' },
     { pattern: /\b(very)\s+(very)\b/gi, type: 'warning', category: 'Redundancy', message: 'Repeated "very" - consider stronger word choice' },
@@ -160,7 +159,7 @@ const GrammarCheckerPage = ({ onNavigate, user, onLogout }: GrammarCheckerPagePr
     { pattern: /\b(plan ahead)\b/gi, type: 'suggestion', category: 'Redundancy', message: '"Plan ahead" is redundant - planning is for the future', suggestion: 'plan' },
     { pattern: /\b(repeat again)\b/gi, type: 'warning', category: 'Redundancy', message: '"Repeat again" is redundant', suggestion: 'repeat' },
     { pattern: /\b(revert back)\b/gi, type: 'warning', category: 'Redundancy', message: '"Revert back" is redundant', suggestion: 'revert' },
-    
+
     // Style/conciseness
     { pattern: /\b(basically|actually|literally|really|very|just)\b/gi, type: 'suggestion', category: 'Style', message: 'Filler word detected - consider if it\'s necessary' },
     { pattern: /\b(in order to)\b/gi, type: 'suggestion', category: 'Conciseness', message: '"In order to" can usually be shortened to "to"', suggestion: 'to' },
@@ -216,9 +215,9 @@ const GrammarCheckerPage = ({ onNavigate, user, onLogout }: GrammarCheckerPagePr
 
   const getIssueColor = (type: 'error' | 'warning' | 'suggestion') => {
     switch (type) {
-      case 'error': return 'bg-red-50 border-red-200 text-red-700';
-      case 'warning': return 'bg-yellow-50 border-yellow-200 text-yellow-700';
-      case 'suggestion': return 'bg-violet-50 border-violet-200 text-violet-700';
+      case 'error': return 'bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-[#FF4B4B]/40 text-[#FF4B4B]';
+      case 'warning': return 'bg-[#FFF4E0] dark:bg-[#FF9600]/10 border-[#FF9600]/40 text-[#D97F00]';
+      case 'suggestion': return 'bg-[#F3EAFF] dark:bg-[#A560E8]/10 border-[#A560E8]/40 text-[#A560E8]';
     }
   };
 
@@ -238,24 +237,23 @@ const GrammarCheckerPage = ({ onNavigate, user, onLogout }: GrammarCheckerPagePr
   const sentenceCount = text.split(/[.!?]+/).filter(s => s.trim().length > 0).length;
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden">
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
+    <div className="relative min-h-screen overflow-x-hidden bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="grammar-checker" />
 
       {/* Hero Section */}
-      <section className="py-16 sm:py-20 bg-gradient-to-b from-red-50/50 to-white">
+      <section className="pt-16 pb-10 sm:pt-20 sm:pb-12">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto">
-            <div className="inline-flex items-center justify-center mb-6">
+            <div className="inline-flex items-center justify-center mb-5">
               <ScholarMascot size={80} animated={false} pose="default" />
             </div>
-            <span className="inline-flex items-center px-4 py-1.5 bg-red-100 text-red-700 rounded-full text-sm font-semibold mb-5">
+            <span className="inline-flex items-center px-4 py-1.5 bg-[#FFE8E8] text-[#FF4B4B] rounded-xl border-2 border-b-4 border-[#FF4B4B]/30 text-sm font-extrabold mb-5">
               Free Tool
             </span>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-5 leading-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4 leading-tight tracking-tight">
               Grammar Checker
             </h1>
-            <p className="text-lg text-gray-500 leading-relaxed max-w-2xl mx-auto">
+            <p className="text-base text-stone-500 dark:text-stone-400 leading-relaxed max-w-2xl mx-auto font-bold">
               Check your writing for 100+ common spelling, grammar, punctuation, and style errors. Instant client-side analysis.
             </p>
           </div>
@@ -263,17 +261,17 @@ const GrammarCheckerPage = ({ onNavigate, user, onLogout }: GrammarCheckerPagePr
       </section>
 
       {/* Main Tool Section */}
-      <section className="py-12 sm:py-16">
+      <section className="pb-12 sm:pb-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid lg:grid-cols-3 gap-6">
             {/* Text Input Area */}
             <div className="lg:col-span-2">
-              <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 rounded-2xl p-5 sm:p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-gray-900">Your Text</h2>
+                  <h2 className="text-lg font-extrabold text-stone-800 dark:text-stone-100">Your Text</h2>
                   <button
                     onClick={() => setText('')}
-                    className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-all font-medium"
+                    className="px-4 py-2 text-sm text-stone-500 hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-xl transition-all font-bold border-2 border-stone-200 dark:border-stone-700"
                   >
                     Clear
                   </button>
@@ -282,24 +280,24 @@ const GrammarCheckerPage = ({ onNavigate, user, onLogout }: GrammarCheckerPagePr
                   value={text}
                   onChange={(e) => setText(e.target.value)}
                   placeholder="Paste or type your text here to check for grammar and spelling errors. Try typing 'I recieve alot of emails' to see it in action..."
-                  className="w-full h-80 p-4 text-gray-700 bg-gray-50 border-0 rounded-xl outline-none resize-none placeholder-gray-400 focus:ring-2 focus:ring-red-500 focus:bg-white transition-all"
+                  className="w-full h-80 p-4 text-stone-700 dark:text-stone-200 bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 rounded-xl outline-none resize-none placeholder-stone-400 focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 focus:bg-white dark:focus:bg-stone-800 transition-all text-sm"
                 />
-                
+
                 {/* Stats */}
                 <div className="mt-4 flex flex-wrap items-center gap-4 text-sm">
-                  <span className="text-gray-500">{wordCount} words • {sentenceCount} sentences</span>
+                  <span className="text-stone-500 dark:text-stone-400 font-bold">{wordCount} words &bull; {sentenceCount} sentences</span>
                   <div className="flex items-center gap-4">
                     <span className="flex items-center space-x-1.5">
-                      <span className="w-3 h-3 bg-red-500 rounded-full"></span>
-                      <span className="text-gray-600">{errorCount} errors</span>
+                      <span className="w-3 h-3 bg-[#FF4B4B] rounded-full"></span>
+                      <span className="text-stone-600 dark:text-stone-400 font-bold">{errorCount} errors</span>
                     </span>
                     <span className="flex items-center space-x-1.5">
-                      <span className="w-3 h-3 bg-yellow-500 rounded-full"></span>
-                      <span className="text-gray-600">{warningCount} warnings</span>
+                      <span className="w-3 h-3 bg-[#FF9600] rounded-full"></span>
+                      <span className="text-stone-600 dark:text-stone-400 font-bold">{warningCount} warnings</span>
                     </span>
                     <span className="flex items-center space-x-1.5">
-                      <span className="w-3 h-3 bg-violet-500 rounded-full"></span>
-                      <span className="text-gray-600">{suggestionCount} suggestions</span>
+                      <span className="w-3 h-3 bg-[#A560E8] rounded-full"></span>
+                      <span className="text-stone-600 dark:text-stone-400 font-bold">{suggestionCount} suggestions</span>
                     </span>
                   </div>
                 </div>
@@ -310,23 +308,23 @@ const GrammarCheckerPage = ({ onNavigate, user, onLogout }: GrammarCheckerPagePr
             <div className="space-y-4">
               {issues.length > 0 ? (
                 <>
-                  <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Issues Found ({issues.length})</h3>
+                  <div className="bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 rounded-2xl p-5 sm:p-6">
+                    <h3 className="text-lg font-extrabold text-stone-800 dark:text-stone-100 mb-4">Issues Found ({issues.length})</h3>
                     <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
                       {issues.map((issue, index) => (
-                        <div key={index} className={`p-3 rounded-xl border ${getIssueColor(issue.type)}`}>
+                        <div key={index} className={`p-3 rounded-xl border-2 border-b-4 ${getIssueColor(issue.type)}`}>
                           <div className="flex items-start space-x-2">
                             <span className="text-lg flex-shrink-0">{getIssueIcon(issue.type)}</span>
                             <div className="flex-1 min-w-0">
-                              <div className="text-xs font-medium opacity-70 mb-1">{issue.category}</div>
-                              <div className="text-sm font-medium">{issue.message}</div>
+                              <div className="text-xs font-extrabold opacity-70 mb-1">{issue.category}</div>
+                              <div className="text-sm font-bold">{issue.message}</div>
                               {issue.match && (
-                                <div className="text-xs mt-1 opacity-70 truncate">Found: "{issue.match}"</div>
+                                <div className="text-xs mt-1 opacity-70 truncate font-bold">Found: &ldquo;{issue.match}&rdquo;</div>
                               )}
                               {issue.suggestion && (
                                 <div className="text-xs mt-1 flex items-center space-x-1">
-                                  <span>→</span>
-                                  <span className="font-medium bg-white/50 px-1.5 py-0.5 rounded">{issue.suggestion}</span>
+                                  <span>&rarr;</span>
+                                  <span className="font-extrabold bg-white/50 dark:bg-stone-800/50 px-1.5 py-0.5 rounded">{issue.suggestion}</span>
                                 </div>
                               )}
                             </div>
@@ -336,31 +334,31 @@ const GrammarCheckerPage = ({ onNavigate, user, onLogout }: GrammarCheckerPagePr
                     </div>
                   </div>
 
-                  <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
-                    <p className="text-sm text-amber-800">
+                  <div className="bg-[#FFF4E0] dark:bg-[#FF9600]/10 border-2 border-b-4 border-[#FF9600]/30 rounded-2xl p-4">
+                    <p className="text-sm text-[#D97F00] dark:text-[#FF9600] font-bold">
                       <strong>Note:</strong> This tool checks for common issues. For comprehensive context-aware grammar analysis, try WriteScholar's AI tools.
                     </p>
                   </div>
                 </>
               ) : text ? (
-                <div className="bg-green-50 border border-green-200 rounded-2xl p-6 text-center">
-                  <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <svg className="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="bg-[#EAFFD6] dark:bg-[#58CC02]/10 border-2 border-b-4 border-[#58CC02]/30 rounded-2xl p-6 text-center">
+                  <div className="w-14 h-14 bg-[#58CC02]/20 rounded-xl border-2 border-b-4 border-[#58CC02]/30 flex items-center justify-center mx-auto mb-3">
+                    <svg className="w-7 h-7 text-[#58CC02]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
-                  <h3 className="font-semibold text-green-800 mb-1">Looking Good!</h3>
-                  <p className="text-sm text-green-600">No common issues detected</p>
+                  <h3 className="font-extrabold text-[#46A302] dark:text-[#58CC02] mb-1">Looking Good!</h3>
+                  <p className="text-sm text-[#46A302] dark:text-[#6EE020] font-bold">No common issues detected</p>
                 </div>
               ) : (
-                <div className="bg-gray-50 border border-gray-200 rounded-2xl p-8 text-center">
-                  <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 rounded-2xl p-8 text-center">
+                  <div className="w-16 h-16 bg-[#FFE8E8] rounded-xl border-2 border-b-4 border-[#FF4B4B]/30 flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-[#FF4B4B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Enter Your Text</h3>
-                  <p className="text-gray-500 text-sm">Paste text to check for 100+ common grammar and style issues</p>
+                  <h3 className="text-lg font-extrabold text-stone-800 dark:text-stone-100 mb-2">Enter Your Text</h3>
+                  <p className="text-stone-500 dark:text-stone-400 text-sm font-bold">Paste text to check for 100+ common grammar and style issues</p>
                 </div>
               )}
             </div>
@@ -369,70 +367,59 @@ const GrammarCheckerPage = ({ onNavigate, user, onLogout }: GrammarCheckerPagePr
       </section>
 
       {/* What We Check Section */}
-      <section className="py-12 sm:py-16 bg-gray-50">
+      <section className="py-12 sm:py-16 bg-stone-100 dark:bg-stone-900">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">What We Check For</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center mb-4">
-                <span className="text-red-600 font-bold text-lg">Aa</span>
+          <h2 className="text-2xl font-extrabold text-stone-800 dark:text-stone-100 mb-8 text-center tracking-tight">What We Check For</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {[
+              { emoji: 'Aa', color: '#FF4B4B', tint: '#FFE8E8', title: '50+ Spelling Errors', desc: 'Common misspellings like "definately", "seperate", "occured", and many more.' },
+              { emoji: '!', color: '#FF9600', tint: '#FFF4E0', title: 'Grammar Rules', desc: 'Subject-verb agreement, commonly confused words (your/you\'re, its/it\'s, etc.).' },
+              { emoji: '"', color: '#A560E8', tint: '#F3EAFF', title: 'Word Choice', desc: 'Common malapropisms like "for all intensive purposes" or "escape goat".' },
+              { emoji: '✂', color: '#1CB0F6', tint: '#DDF4FF', title: 'Style & Conciseness', desc: 'Wordy phrases, redundancies, and filler words that weaken your writing.' },
+            ].map((item, i) => (
+              <div key={i} className="bg-white dark:bg-stone-800 border-2 border-b-4 border-stone-200 dark:border-stone-700 rounded-2xl p-5">
+                <div
+                  className="w-12 h-12 rounded-xl border-2 border-b-[3px] flex items-center justify-center mb-4"
+                  style={{ backgroundColor: `${item.color}20`, borderColor: `${item.color}50` }}
+                >
+                  <span className="font-extrabold text-lg" style={{ color: item.color }}>{item.emoji}</span>
+                </div>
+                <h3 className="font-extrabold text-stone-800 dark:text-stone-100 mb-2">{item.title}</h3>
+                <p className="text-stone-500 dark:text-stone-400 text-sm font-bold">{item.desc}</p>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">50+ Spelling Errors</h3>
-              <p className="text-gray-600 text-sm">Common misspellings like "definately", "seperate", "occured", and many more.</p>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-yellow-50 rounded-xl flex items-center justify-center mb-4">
-                <span className="text-yellow-600 font-bold text-lg">!</span>
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Grammar Rules</h3>
-              <p className="text-gray-600 text-sm">Subject-verb agreement, commonly confused words (your/you're, its/it's, etc.).</p>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center mb-4">
-                <span className="text-violet-600 font-bold text-lg">"</span>
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Word Choice</h3>
-              <p className="text-gray-600 text-sm">Common malapropisms like "for all intensive purposes" or "escape goat".</p>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center mb-4">
-                <span className="text-red-600 font-bold text-lg">✂</span>
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Style & Conciseness</h3>
-              <p className="text-gray-600 text-sm">Wordy phrases, redundancies, and filler words that weaken your writing.</p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-12 sm:py-16 bg-gray-900">
+      <section className="py-12 sm:py-16 bg-[#A560E8]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-4 tracking-tight">
             Need advanced grammar checking?
           </h2>
-          <p className="text-gray-400 mb-8 max-w-xl mx-auto">
+          <p className="text-white/80 mb-8 max-w-xl mx-auto font-bold">
             WriteScholar uses AI to understand context and provide comprehensive grammar analysis, style suggestions, and academic writing feedback.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             {user ? (
-              <button 
+              <button
                 onClick={() => onNavigate('dashboard')}
-                className="px-6 py-3 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors"
+                className="px-6 py-3.5 bg-white text-[#A560E8] font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#8A48C7] hover:bg-stone-50 active:border-b-2 active:translate-y-0.5 transition-all"
               >
                 Go to Dashboard
               </button>
             ) : (
               <>
-                <button 
+                <button
                   onClick={() => onNavigate('signup')}
-                  className="px-6 py-3 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors"
+                  className="px-6 py-3.5 bg-white text-[#A560E8] font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#8A48C7] hover:bg-stone-50 active:border-b-2 active:translate-y-0.5 transition-all"
                 >
                   Try WriteScholar Free
                 </button>
-                <button 
+                <button
                   onClick={() => onNavigate('features')}
-                  className="px-6 py-3 border border-gray-600 text-white font-medium rounded-xl hover:border-gray-500 transition-colors"
+                  className="px-6 py-3.5 border-2 border-b-4 border-white/40 text-white font-extrabold uppercase tracking-wide rounded-xl hover:bg-white/10 active:border-b-2 active:translate-y-0.5 transition-all"
                 >
                   Learn More
                 </button>

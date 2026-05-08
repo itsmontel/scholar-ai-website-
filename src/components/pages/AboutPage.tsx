@@ -1,7 +1,7 @@
 import Header from '../common/Header';
 import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
-import ScholarMascot from '../common/ScholarMascot';
+// ScholarMascot replaced with mascot GIFs
 import LandingSectionLayers from '../common/LandingSectionLayers';
 
 interface AboutPageProps {
@@ -12,10 +12,10 @@ interface AboutPageProps {
 
 const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
   const mainFeatures = [
-    { id: 'analyze', title: 'Essay Analyzer', desc: 'Professor-style feedback on structure, clarity, citations. Grade-level rubric.', accent: 'rose', emoji: '📝' },
-    { id: 'citations', title: 'Online Citations', desc: 'Find and format academic sources in APA, MLA, Chicago, Harvard, IEEE, Vancouver.', accent: 'sky', emoji: '📚' },
-    { id: 'dashboard', title: 'Study Packs', desc: 'Quizzes, flashcards, crosswords & lessons from any notes. One paste, five formats.', accent: 'amber', emoji: '📦' },
-    { id: 'focus-mode', title: 'Focus Mode', desc: 'Block YouTube, TikTok until you answer quiz questions from your notes. Earn your screen time.', accent: 'rose', emoji: '🔒' },
+    { id: 'analyze', title: 'Essay Analyzer', desc: 'Professor-style feedback on structure, clarity, citations. Grade-level rubric.', accent: 'rose', gif: '/mascot-study.gif' },
+    { id: 'citations', title: 'Online Citations', desc: 'Find and format academic sources in APA, MLA, Chicago, Harvard, IEEE, Vancouver.', accent: 'sky', gif: '/mascot-paper.gif' },
+    { id: 'dashboard', title: 'Study Packs', desc: 'Quizzes, flashcards, crosswords & lessons from any notes. One paste, five formats.', accent: 'amber', gif: '/mascot-juggling.gif' },
+    { id: 'focus-mode', title: 'Focus Mode', desc: 'Block YouTube, TikTok until you answer quiz questions from your notes. Earn your screen time.', accent: 'rose', gif: '/mascot-thinking.gif' },
   ];
 
   return (
@@ -31,14 +31,14 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
         <LandingSectionLayers />
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto">
-            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#58CC02] dark:text-[#58CC02] mb-3">
               About us
             </p>
-            <div className="mx-auto mb-4 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85" aria-hidden />
+            <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-[#58CC02]" aria-hidden />
             <h1
               id="about-page-heading"
-              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-semibold text-stone-900 dark:text-stone-100 mb-4 tracking-tight leading-tight"
-              style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-stone-900 dark:text-stone-100 mb-4 tracking-tight leading-tight"
+              style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
             >
               Empowering academic excellence worldwide
             </h1>
@@ -53,19 +53,19 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
         <LandingSectionLayers />
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
-            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#58CC02] dark:text-[#58CC02] mb-3">
               Mission
             </p>
-            <div className="mx-auto mb-4 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85" aria-hidden />
+            <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-[#58CC02]" aria-hidden />
             <h2
-              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-semibold text-stone-900 dark:text-stone-100 tracking-tight leading-tight"
-              style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-stone-900 dark:text-stone-100 tracking-tight leading-tight"
+              style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
             >
               Our mission
             </h2>
           </div>
           <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 items-center">
-            <div className="rounded-2xl border border-stone-200/90 dark:border-stone-700/90 bg-white/80 dark:bg-stone-900/50 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.1)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.4)] ring-1 ring-white/50 dark:ring-white/5 backdrop-blur-sm p-6 sm:p-8">
+            <div className="rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-6 sm:p-8">
               <p className="text-stone-600 dark:text-stone-400 leading-relaxed mb-4">
                 At WriteScholar, we believe exceptional academic writing should be accessible to everyone. Our mission is to democratize high-quality feedback by providing intelligent, AI-powered writing assistance.
               </p>
@@ -75,8 +75,8 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
               <div className="space-y-3">
                 {['Essay analysis with professor-style feedback', 'Online citations in 6 styles', 'Study packs: quizzes, flashcards, crosswords'].map((item, i) => (
                   <div key={i} className="flex items-center space-x-3">
-                    <div className="w-6 h-6 bg-violet-100 dark:bg-violet-900/50 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg className="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-6 h-6 bg-[#EAFFD6] dark:bg-[#58CC02]/20 rounded-full flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-[#58CC02]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
@@ -86,7 +86,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
               </div>
             </div>
             
-            <div className="rounded-2xl overflow-hidden border border-violet-200/80 dark:border-violet-800/50 shadow-[0_12px_40px_-12px_rgba(91,33,182,0.12)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.45)] backdrop-blur-sm bg-gradient-to-br from-violet-500/10 via-red-500/5 to-fuchsia-500/10 dark:from-violet-900/30 dark:via-red-900/20 dark:to-fuchsia-900/20 p-6 sm:p-8 ring-1 ring-white/50 dark:ring-white/5">
+            <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#58CC02]/30 dark:border-[#58CC02]/30 bg-[#EAFFD6] dark:bg-[#58CC02]/10 p-6 sm:p-8">
               <div className="grid grid-cols-2 gap-4 sm:gap-6">
                 {[
                   { value: '50K+', label: 'Students' },
@@ -95,7 +95,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
                   { value: '50+', label: 'Countries' },
                 ].map((stat, i) => (
                   <div key={i} className="text-center p-4 rounded-2xl bg-white/60 dark:bg-stone-800/50">
-                    <div className="text-3xl sm:text-4xl font-bold text-violet-600 dark:text-violet-400">{stat.value}</div>
+                    <div className="text-3xl sm:text-4xl font-bold text-[#58CC02]">{stat.value}</div>
                     <div className="text-stone-600 dark:text-stone-400 text-sm font-medium">{stat.label}</div>
                   </div>
                 ))}
@@ -109,13 +109,13 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
         <LandingSectionLayers variant="faq" />
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
-            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#58CC02] dark:text-[#58CC02] mb-3">
               What we offer
             </p>
-            <div className="mx-auto mb-4 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85" aria-hidden />
+            <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-[#58CC02]" aria-hidden />
             <h2
-              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-semibold text-stone-900 dark:text-stone-100 mb-4 tracking-tight leading-tight"
-              style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-stone-900 dark:text-stone-100 mb-4 tracking-tight leading-tight"
+              style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
             >
               Our main features
             </h2>
@@ -126,13 +126,13 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
           
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
             {mainFeatures.map((f) => {
-              const borderCls = f.accent === 'rose' ? 'border-violet-200/80 dark:border-violet-700/50 hover:border-violet-300 dark:hover:border-violet-500/60' : f.accent === 'sky' ? 'border-violet-200/80 dark:border-violet-700/50 hover:border-violet-300 dark:hover:border-violet-500/60' : f.accent === 'amber' ? 'border-amber-200/80 dark:border-amber-700/50 hover:border-amber-300 dark:hover:border-amber-500/60' : 'border-violet-200/80 dark:border-violet-700/50 hover:border-violet-300 dark:hover:border-violet-500/60';
-              const titleCls = f.accent === 'rose' ? 'text-violet-700 dark:text-violet-400' : f.accent === 'sky' ? 'text-violet-700 dark:text-violet-400' : f.accent === 'amber' ? 'text-amber-700 dark:text-amber-400' : 'text-violet-700 dark:text-violet-400';
-              const iconBgCls = f.accent === 'rose' ? 'bg-violet-100 dark:bg-violet-900/50' : f.accent === 'sky' ? 'bg-violet-100 dark:bg-violet-900/50' : f.accent === 'amber' ? 'bg-amber-100 dark:bg-amber-900/50' : 'bg-violet-100 dark:bg-violet-900/50';
+              const borderCls = f.accent === 'rose' ? 'border-stone-200 dark:border-stone-700 hover:border-[#1CB0F6] dark:hover:border-[#1CB0F6]' : f.accent === 'sky' ? 'border-stone-200 dark:border-stone-700 hover:border-[#1CB0F6] dark:hover:border-[#1CB0F6]' : f.accent === 'amber' ? 'border-[#FF9600]/30 dark:border-[#FF9600]/30 hover:border-[#FF9600]' : 'border-stone-200 dark:border-stone-700 hover:border-[#1CB0F6] dark:hover:border-[#1CB0F6]';
+              const titleCls = f.accent === 'rose' ? 'text-[#1CB0F6]' : f.accent === 'sky' ? 'text-[#1CB0F6]' : f.accent === 'amber' ? 'text-[#FF9600]' : 'text-[#1CB0F6]';
+              const iconBgCls = f.accent === 'rose' ? 'bg-[#DDF4FF] dark:bg-[#1CB0F6]/20' : f.accent === 'sky' ? 'bg-[#DDF4FF] dark:bg-[#1CB0F6]/20' : f.accent === 'amber' ? 'bg-[#FFF4E0] dark:bg-[#FF9600]/20' : 'bg-[#DDF4FF] dark:bg-[#1CB0F6]/20';
               return (
-                <button key={f.id} onClick={() => onNavigate(f.id)} className={`group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 ${borderCls} shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/80 dark:bg-stone-800/80 p-6 hover:shadow-2xl transition-all duration-300 text-left`}>
+                <button key={f.id} onClick={() => onNavigate(f.id)} className={`group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 ${borderCls} bg-white dark:bg-stone-800 border-b-4 p-6 transition-all duration-300 text-left`}>
                   <div className="relative flex flex-col items-center text-center mb-4">
-                    <div className={`w-14 h-14 rounded-2xl ${iconBgCls} flex items-center justify-center mb-3 text-2xl`}>{f.emoji}</div>
+                    <div className={`w-14 h-14 rounded-2xl ${iconBgCls} flex items-center justify-center mb-3`}><img src={f.gif} alt={f.title} className="w-[48px] h-[48px] object-contain" /></div>
                     <h3 className={`font-bold ${titleCls} text-lg`}>{f.title}</h3>
                   </div>
                   <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed text-center">{f.desc}</p>
@@ -141,7 +141,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
             })}
           </div>
           <div className="text-center mt-8">
-            <button onClick={() => onNavigate('features')} className="text-violet-600 dark:text-violet-400 font-semibold hover:text-violet-700 dark:hover:text-violet-300 transition-colors">
+            <button onClick={() => onNavigate('features')} className="text-[#1CB0F6] font-extrabold hover:text-[#1899D6] transition-colors">
               See all features →
             </button>
           </div>
@@ -152,13 +152,13 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
         <LandingSectionLayers />
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
-            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#58CC02] dark:text-[#58CC02] mb-3">
               Principles
             </p>
-            <div className="mx-auto mb-4 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85" aria-hidden />
+            <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-[#58CC02]" aria-hidden />
             <h2
-              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-semibold text-stone-900 dark:text-stone-100 mb-4 tracking-tight leading-tight"
-              style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-stone-900 dark:text-stone-100 mb-4 tracking-tight leading-tight"
+              style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
             >
               Our values
             </h2>
@@ -168,33 +168,33 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
           </div>
           
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
-            <div className="rounded-2xl sm:rounded-3xl border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-6 text-center hover:shadow-2xl hover:border-violet-300 dark:hover:border-violet-500/60 transition-all">
+            <div className="rounded-2xl sm:rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-6 text-center hover:border-[#58CC02] dark:hover:border-[#58CC02] transition-all">
               <div className="flex justify-center mb-4">
-                <ScholarMascot size={64} animated={false} pose="analyzing" />
+                <img src="/mascot-study.gif" alt="Quality" className="w-16 h-16 object-contain" />
               </div>
               <h3 className="font-bold text-stone-800 dark:text-stone-100 mb-2">Quality</h3>
               <p className="text-stone-600 dark:text-stone-400 text-sm">Highest standards in AI analysis and feedback</p>
             </div>
 
-            <div className="rounded-2xl sm:rounded-3xl border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-6 text-center hover:shadow-2xl hover:border-violet-300 dark:hover:border-violet-500/60 transition-all">
+            <div className="rounded-2xl sm:rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-6 text-center hover:border-[#58CC02] dark:hover:border-[#58CC02] transition-all">
               <div className="flex justify-center mb-4">
-                <ScholarMascot size={64} animated={false} pose="thinking" />
+                <img src="/mascot-thinking.gif" alt="Privacy" className="w-16 h-16 object-contain" />
               </div>
               <h3 className="font-bold text-stone-800 dark:text-stone-100 mb-2">Privacy</h3>
               <p className="text-stone-600 dark:text-stone-400 text-sm">Enterprise-grade security for your documents</p>
             </div>
 
-            <div className="rounded-2xl sm:rounded-3xl border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-6 text-center hover:shadow-2xl hover:border-violet-300 dark:hover:border-violet-500/60 transition-all">
+            <div className="rounded-2xl sm:rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-6 text-center hover:border-[#58CC02] dark:hover:border-[#58CC02] transition-all">
               <div className="flex justify-center mb-4">
-                <ScholarMascot size={64} animated={false} pose="pointing" />
+                <img src="/mascot-laptop.gif" alt="Innovation" className="w-16 h-16 object-contain" />
               </div>
               <h3 className="font-bold text-stone-800 dark:text-stone-100 mb-2">Innovation</h3>
               <p className="text-stone-600 dark:text-stone-400 text-sm">Continuous improvement of our technology</p>
             </div>
 
-            <div className="rounded-2xl sm:rounded-3xl border border-white/60 dark:border-stone-600/50 shadow-xl shadow-stone-900/5 dark:shadow-black/20 backdrop-blur-2xl bg-white/70 dark:bg-stone-800/70 p-6 text-center hover:shadow-2xl hover:border-violet-300 dark:hover:border-violet-500/60 transition-all">
+            <div className="rounded-2xl sm:rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-6 text-center hover:border-[#58CC02] dark:hover:border-[#58CC02] transition-all">
               <div className="flex justify-center mb-4">
-                <ScholarMascot size={64} animated={false} pose="waving" />
+                <img src="/mascot-dance.gif" alt="Accessibility" className="w-16 h-16 object-contain" />
               </div>
               <h3 className="font-bold text-stone-800 dark:text-stone-100 mb-2">Accessibility</h3>
               <p className="text-stone-600 dark:text-stone-400 text-sm">Tools for the global academic community</p>
@@ -207,18 +207,18 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
         <LandingSectionLayers variant="faq" />
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
-            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#58CC02] dark:text-[#58CC02] mb-3">
               Story
             </p>
-            <div className="mx-auto mb-4 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85" aria-hidden />
+            <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-[#58CC02]" aria-hidden />
             <h2
-              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-semibold text-stone-900 dark:text-stone-100 mb-6 tracking-tight leading-tight"
-              style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-stone-900 dark:text-stone-100 mb-6 tracking-tight leading-tight"
+              style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
             >
               Our story
             </h2>
           </div>
-          <div className="rounded-2xl border border-stone-200/90 dark:border-stone-700/90 bg-white/80 dark:bg-stone-900/50 p-6 sm:p-10 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.1)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.4)] ring-1 ring-white/50 dark:ring-white/5">
+          <div className="rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-6 sm:p-10">
             <div className="text-stone-600 dark:text-stone-400 leading-relaxed space-y-4 text-left text-base">
               <p>
                 WriteScholar started with a simple goal: give students access to the kind of feedback that used to require expensive tutors or professors with limited office hours. We saw how AI could bridge that gap.
@@ -240,14 +240,14 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
       <section className="relative py-16 sm:py-24 overflow-hidden border-t border-stone-200/90 dark:border-stone-800">
         <LandingSectionLayers variant="cta" />
         <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center rounded-2xl border border-stone-200/90 dark:border-stone-800/90 bg-white/75 dark:bg-stone-900/45 px-6 py-10 sm:px-10 sm:py-12 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.12)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.45)] backdrop-blur-[8px] ring-1 ring-white/50 dark:ring-white/5">
-            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">
+          <div className="text-center rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 px-6 py-10 sm:px-10 sm:py-12">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#58CC02] dark:text-[#58CC02] mb-3">
               Get started
             </p>
-            <div className="mx-auto mb-5 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85" aria-hidden />
+            <div className="mx-auto mb-5 h-1 w-12 rounded-full bg-[#58CC02]" aria-hidden />
             <h2
-              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-semibold text-stone-900 dark:text-stone-50 mb-4 tracking-tight leading-[1.15]"
-              style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-stone-900 dark:text-stone-50 mb-4 tracking-tight leading-[1.15]"
+              style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
             >
               {user ? 'Ready to write your next paper?' : 'Ready to improve your academic writing?'}
             </h2>
@@ -262,7 +262,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
                   <button
                     type="button"
                     onClick={() => onNavigate('dashboard')}
-                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white font-semibold rounded-xl shadow-md shadow-violet-900/15 dark:shadow-violet-950/40 ring-1 ring-violet-900/10 dark:ring-white/10 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 text-base"
+                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#58CC02] hover:bg-[#4CAF00] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all duration-150 text-base"
                   >
                     Go to dashboard
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
@@ -272,7 +272,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
                   <button
                     type="button"
                     onClick={() => onNavigate('features')}
-                    className="inline-flex items-center justify-center px-7 py-3.5 border border-stone-300/95 dark:border-stone-600 bg-white/90 dark:bg-stone-900/50 text-stone-800 dark:text-stone-200 font-medium rounded-xl hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors text-base shadow-sm"
+                    className="inline-flex items-center justify-center px-7 py-3.5 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-200 font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-stone-200 dark:border-stone-600 active:border-b-2 active:translate-y-0.5 hover:bg-stone-50 dark:hover:bg-stone-700 transition-all duration-150 text-base"
                   >
                     View features
                   </button>
@@ -282,7 +282,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
                   <button
                     type="button"
                     onClick={() => onNavigate('signup')}
-                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white font-semibold rounded-xl shadow-md shadow-violet-900/15 dark:shadow-violet-950/40 ring-1 ring-violet-900/10 dark:ring-white/10 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 text-base"
+                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#58CC02] hover:bg-[#4CAF00] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all duration-150 text-base"
                   >
                     Try free
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
@@ -292,7 +292,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
                   <button
                     type="button"
                     onClick={() => onNavigate('features')}
-                    className="inline-flex items-center justify-center px-7 py-3.5 border border-stone-300/95 dark:border-stone-600 bg-white/90 dark:bg-stone-900/50 text-stone-800 dark:text-stone-200 font-medium rounded-xl hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors text-base shadow-sm"
+                    className="inline-flex items-center justify-center px-7 py-3.5 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-200 font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-stone-200 dark:border-stone-600 active:border-b-2 active:translate-y-0.5 hover:bg-stone-50 dark:hover:bg-stone-700 transition-all duration-150 text-base"
                   >
                     Learn more
                   </button>

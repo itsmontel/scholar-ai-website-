@@ -34,5 +34,11 @@ export const LAST_TUTORIAL_CHECKOUT_PLAN_KEY = 'writescholar_last_tutorial_check
 /** Soft (API-limit) paywall was open — restore after refresh until dismissed or user upgrades. */
 export const SOFT_PAYWALL_OPEN_KEY = 'writescholar_soft_paywall_open';
 
+/**
+ * sessionStorage: user explicitly dismissed the soft paywall — do NOT re-open in this session,
+ * even if subsequent API calls return upgrade/limit flags.  Cleared on logout or new session.
+ */
+export const SOFT_PAYWALL_DISMISSED_KEY = 'writescholar_soft_paywall_dismissed';
+
 /** Post–activation tutorial hard paywall (Analysis page) — restore after refresh until checkout or dismiss. */
 export const POST_ACTIVATION_PAYWALL_PENDING_KEY = 'writescholar_post_activation_paywall_pending';

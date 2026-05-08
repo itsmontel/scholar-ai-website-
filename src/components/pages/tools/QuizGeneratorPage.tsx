@@ -33,9 +33,10 @@ function shuffleQuestionOptions(question: QuizQuestion): QuizQuestion {
 import Header from '../../common/Header';
 import { WriteScholarEditorialBackgroundLayers } from '../../common/WriteScholarEditorialBackground';
 import Footer from '../../common/Footer';
-import ScholarMascot from '../../common/ScholarMascot';
+// ScholarMascot replaced with mascot GIFs
 import AnalysisAnimation from '../../common/AnalysisAnimation';
 import FlashcardViewer from '../../common/FlashcardViewer';
+import QuizMascotReaction from '../../common/QuizMascotReaction';
 import { trackAction, trackExport } from '../../../data/achievements';
 import { getResetsInText } from '../../../utils/usageReset';
 import { jsPDF } from 'jspdf';
@@ -1145,10 +1146,10 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
     if (quizCompleted) {
       if (showQuizReview) {
         return (
-          <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-stone-200 dark:border-stone-600 overflow-hidden">
-            <div className="p-4 sm:p-6 border-b border-stone-200 dark:border-stone-600 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-stone-900 dark:text-stone-100">Quiz Review</h2>
-              <button onClick={() => setShowQuizReview(false)} className="px-4 py-2 rounded-lg bg-stone-200 dark:bg-stone-600 text-stone-700 dark:text-stone-200 font-semibold hover:bg-stone-300 dark:hover:bg-stone-500 transition-colors">
+          <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl border-2 border-b-4 border-stone-200 border-b-stone-300 dark:border-stone-600 dark:border-b-stone-500 overflow-hidden" style={{ fontFamily: "'Nunito', sans-serif" }}>
+            <div className="p-4 sm:p-6 border-b-2 border-stone-100 dark:border-stone-700 flex items-center justify-between">
+              <h2 className="text-xl font-extrabold text-stone-900 dark:text-stone-100">Quiz Review</h2>
+              <button onClick={() => setShowQuizReview(false)} className="px-5 py-2.5 rounded-2xl bg-[#1CB0F6] hover:bg-[#1AA3E5] text-white font-extrabold border-b-4 border-[#1899D6] active:border-b-2 active:translate-y-0.5 transition-all text-sm uppercase tracking-wide">
                 Back to Score
               </button>
             </div>
@@ -1201,96 +1202,99 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
       }
 
       const score = getScore();
+      const tier = score.percentage >= 80 ? 'great' : score.percentage >= 50 ? 'good' : 'keep_going';
+      const tierColor = tier === 'great' ? '#58CC02' : tier === 'good' ? '#FF9600' : '#FF4B4B';
+      const tierBorder = tier === 'great' ? '#46A302' : tier === 'good' ? '#E08600' : '#E03C3C';
+      const tierMsg = tier === 'great' ? 'Amazing work!' : tier === 'good' ? 'Nice effort!' : 'Keep practicing!';
       return (
-        <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-stone-200 dark:border-stone-600 overflow-hidden p-6 sm:p-10 text-center">
+        <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl border-2 border-b-4 border-stone-200 border-b-stone-300 dark:border-stone-600 dark:border-b-stone-500 overflow-hidden p-6 sm:p-10 text-center" style={{ fontFamily: "'Nunito', sans-serif" }}>
           <div className="mb-8">
-            <video
-              src="/happymascot.mp4"
-              autoPlay
-              muted
-              playsInline
-              loop
-              className="w-24 h-24 mx-auto mb-4 object-contain rounded-xl border-2 border-violet-300 dark:border-violet-500 shadow-lg overflow-hidden ring-2 ring-violet-400/30"
+            <img
+              src="/mascot-celebrating.gif"
+              alt="Celebrating mascot"
+              className="w-28 h-28 mx-auto mb-4 object-contain rounded-2xl border-2 border-b-4 overflow-hidden"
+              style={{ borderColor: tierColor }}
             />
-            <h2 className="text-3xl font-extrabold text-stone-800 dark:text-stone-100 mb-2">Quiz Complete!</h2>
-            <p className="text-stone-600 dark:text-stone-400">Here's how you did</p>
+            <h2 className="text-3xl font-extrabold text-stone-800 dark:text-stone-100 mb-1">{tierMsg}</h2>
+            <p className="text-stone-500 dark:text-stone-400 font-bold">Quiz complete</p>
           </div>
 
-          <div className="bg-gradient-to-br from-stone-50 to-white dark:from-stone-800 dark:to-stone-700 rounded-2xl p-6 mb-8 max-w-md mx-auto border border-stone-200 dark:border-stone-600">
-            <div className="text-6xl font-bold bg-amber-600 hover:bg-amber-500 bg-clip-text text-transparent mb-2">
-              {score.percentage}%
-            </div>
-            <p className="text-stone-600 dark:text-stone-400 text-lg">
-              {score.correct} out of {score.total} correct
-            </p>
-            <div className="w-full bg-stone-200 dark:bg-stone-600 rounded-full h-3 mt-4">
-              <div 
-                className={`h-3 rounded-full transition-all duration-500 ${
-                  score.percentage >= 70 ? 'bg-amber-600' :
-                  score.percentage >= 50 ? 'bg-amber-600' :
-                  'bg-gradient-to-r from-red-500 to-violet-600'
-                }`}
-                style={{ width: `${score.percentage}%` }}
-              ></div>
+          {/* Animated score ring */}
+          <div className="relative w-40 h-40 mx-auto mb-8">
+            <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="52" fill="none" stroke="currentColor" strokeWidth="10" className="text-stone-100 dark:text-stone-700" />
+              <circle
+                cx="60" cy="60" r="52" fill="none"
+                stroke={tierColor}
+                strokeWidth="10" strokeLinecap="round"
+                strokeDasharray={`${2 * Math.PI * 52}`}
+                strokeDashoffset={`${2 * Math.PI * 52 * (1 - score.percentage / 100)}`}
+                style={{ transition: 'stroke-dashoffset 1.2s ease-out' }}
+              />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-4xl font-extrabold" style={{ color: tierColor }}>{score.percentage}%</span>
+              <span className="text-xs font-bold text-stone-500 dark:text-stone-400 mt-0.5">
+                {score.correct}/{score.total}
+              </span>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 justify-center flex-wrap">
+          {/* Action buttons — Duolingo 3D style */}
+          <div className="flex flex-col sm:flex-row gap-3 justify-center flex-wrap max-w-xl mx-auto">
+            {/* Export buttons */}
             {isPaidUser ? (
               <>
                 <button
                   onClick={exportQuizToPDF}
-                  className="px-4 py-2.5 bg-red-50 text-red-700 font-medium rounded-xl hover:bg-red-100 transition-all flex items-center justify-center gap-2 text-sm"
+                  className="px-5 py-3 bg-[#FF4B4B] hover:bg-[#F04040] text-white font-extrabold rounded-2xl transition-all flex items-center justify-center gap-2 text-sm border-b-4 border-[#E03C3C] active:border-b-2 active:translate-y-0.5 uppercase tracking-wide"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                  Download PDF
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                  PDF
                 </button>
                 <button
                   onClick={exportQuizToDOCX}
-                  className="px-4 py-2.5 bg-violet-50 text-violet-700 font-medium rounded-xl hover:bg-violet-100 transition-all flex items-center justify-center gap-2 text-sm"
+                  className="px-5 py-3 bg-[#A560E8] hover:bg-[#9A55DD] text-white font-extrabold rounded-2xl transition-all flex items-center justify-center gap-2 text-sm border-b-4 border-[#8B4EC8] active:border-b-2 active:translate-y-0.5 uppercase tracking-wide"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                  Download DOCX
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                  DOCX
                 </button>
               </>
             ) : (
               <>
                 <button
                   onClick={() => setShowExportUpgradeModal(true)}
-                  className="px-4 py-2.5 bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 font-medium rounded-xl transition-all flex items-center justify-center gap-2 text-sm cursor-pointer"
+                  className="px-5 py-3 bg-stone-100 dark:bg-stone-700 text-stone-400 dark:text-stone-500 font-extrabold rounded-2xl transition-all flex items-center justify-center gap-2 text-sm cursor-pointer border-2 border-b-4 border-stone-200 border-b-stone-300 dark:border-stone-600 dark:border-b-stone-500 active:border-b-2 active:translate-y-0.5 uppercase tracking-wide"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                   PDF
-                  <svg className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
+                  <svg className="w-3.5 h-3.5 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
                 </button>
                 <button
                   onClick={() => setShowExportUpgradeModal(true)}
-                  className="px-4 py-2.5 bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 font-medium rounded-xl transition-all flex items-center justify-center gap-2 text-sm cursor-pointer"
+                  className="px-5 py-3 bg-stone-100 dark:bg-stone-700 text-stone-400 dark:text-stone-500 font-extrabold rounded-2xl transition-all flex items-center justify-center gap-2 text-sm cursor-pointer border-2 border-b-4 border-stone-200 border-b-stone-300 dark:border-stone-600 dark:border-b-stone-500 active:border-b-2 active:translate-y-0.5 uppercase tracking-wide"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                   DOCX
-                  <svg className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
+                  <svg className="w-3.5 h-3.5 text-amber-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
                 </button>
               </>
             )}
             <button
               onClick={() => { setShowQuizReview(true); window.scrollTo(0, 0); }}
-              className="w-full sm:w-auto px-6 py-3 bg-white dark:bg-stone-700 text-stone-700 dark:text-stone-200 font-semibold rounded-xl transition-all border border-stone-200 dark:border-stone-600 hover:bg-stone-50 dark:hover:bg-stone-600 flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-6 py-3 bg-white dark:bg-stone-700 text-stone-700 dark:text-stone-200 font-extrabold rounded-2xl transition-all border-2 border-b-4 border-stone-200 border-b-stone-300 dark:border-stone-600 dark:border-b-stone-500 hover:bg-stone-50 dark:hover:bg-stone-600 flex items-center justify-center gap-2 active:border-b-2 active:translate-y-0.5 text-sm uppercase tracking-wide"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-              Review Questions
+              Review
             </button>
             <button
               onClick={resetQuiz}
-              className="px-6 py-3 bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 text-stone-700 dark:text-stone-300 font-semibold rounded-xl transition-all flex items-center justify-center gap-2"
+              className="px-6 py-3 bg-[#FF9600] hover:bg-[#F08E00] text-white font-extrabold rounded-2xl transition-all flex items-center justify-center gap-2 border-b-4 border-[#E08600] active:border-b-2 active:translate-y-0.5 text-sm uppercase tracking-wide"
             >
-              🔄 Try Again
+              Try Again
             </button>
             <button
               onClick={() => { setQuiz(null); setIsQuizMode(false); setShowQuizReview(false); }}
-              className="px-6 py-3 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2"
+              className="px-6 py-3 bg-[#1CB0F6] hover:bg-[#1AA3E5] text-white font-extrabold rounded-2xl transition-all flex items-center justify-center gap-2 border-b-4 border-[#1899D6] active:border-b-2 active:translate-y-0.5 text-sm uppercase tracking-wide"
             >
-              ✨ New Quiz
+              New Quiz
             </button>
           </div>
         </div>
@@ -1300,37 +1304,37 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
     const question = displayedQuestions[currentQuestion];
 
     return (
-      <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-stone-200 dark:border-stone-600 overflow-hidden min-w-0">
-        {/* Progress bar */}
-        <div className="h-2 bg-stone-200 dark:bg-stone-600">
-          <div 
-            className="h-full bg-amber-600 transition-all duration-300"
+      <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl border-2 border-b-4 border-stone-200 border-b-stone-300 dark:border-stone-600 dark:border-b-stone-500 overflow-hidden min-w-0" style={{ fontFamily: "'Nunito', sans-serif" }}>
+        {/* Progress bar — thick Duolingo green */}
+        <div className="h-3 bg-stone-100 dark:bg-stone-700">
+          <div
+            className="h-full bg-[#58CC02] rounded-r-full transition-all duration-500 ease-out"
             style={{ width: `${((currentQuestion + 1) / displayedQuestions.length) * 100}%` }}
-          ></div>
+          />
         </div>
 
         <div className="p-4 sm:p-8">
           {/* Question header */}
           <div className="flex items-center justify-between mb-6">
-            <span className="text-sm font-medium text-stone-500 dark:text-stone-400">
+            <span className="text-sm font-extrabold text-stone-500 dark:text-stone-400 uppercase tracking-wide">
               Question {currentQuestion + 1} of {displayedQuestions.length}
             </span>
-            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-              question.type === 'multiple_choice' ? 'bg-violet-100 text-violet-700' :
-              question.type === 'true_false' ? 'bg-violet-100 text-violet-700' :
-              'bg-green-100 text-green-700'
+            <span className={`px-3 py-1.5 rounded-xl text-xs font-extrabold uppercase tracking-wide border-b-2 ${
+              question.type === 'multiple_choice' ? 'bg-[#A560E8] text-white border-[#8B4EC8]' :
+              question.type === 'true_false' ? 'bg-[#1CB0F6] text-white border-[#1899D6]' :
+              'bg-[#58CC02] text-white border-[#46A302]'
             }`}>
               {question.type === 'multiple_choice' ? 'Multiple Choice' :
                question.type === 'true_false' ? 'True/False' : 'Fill in the Blank'}
             </span>
           </div>
 
-          {/* Question (h2: primary content under page h1) */}
-          <h2 className="text-xl sm:text-2xl font-semibold text-stone-800 dark:text-stone-100 mb-6 leading-relaxed break-words">
+          {/* Question */}
+          <h2 className="text-xl sm:text-2xl font-extrabold text-stone-800 dark:text-stone-100 mb-6 leading-relaxed break-words">
             {question.question}
           </h2>
 
-          {/* Answer options */}
+          {/* Answer options — Duolingo 3D pill style */}
           <div className="space-y-3 mb-8">
             {question.type === 'multiple_choice' && question.options?.map((option, idx) => {
               const letter = option.charAt(0);
@@ -1343,24 +1347,24 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                   key={idx}
                   onClick={() => !showResult && setSelectedAnswer(letter)}
                   disabled={showResult}
-                  className={`w-full p-4 rounded-xl border-2 text-left transition-all flex items-center gap-3 ${
-                    isCorrect ? 'border-green-500 bg-green-50' :
-                    isWrong ? 'border-red-500 bg-red-50' :
-                    isSelected ? 'border-amber-500 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/30' :
-                    'border-stone-200 dark:border-stone-600 hover:border-amber-300 dark:hover:border-amber-600 hover:bg-amber-50/50 dark:hover:bg-amber-900/20'
+                  className={`w-full p-4 rounded-2xl border-2 border-b-4 text-left transition-all flex items-center gap-3 font-bold active:border-b-2 active:translate-y-0.5 ${
+                    isCorrect ? 'border-[#58CC02] border-b-[#46A302] bg-[#58CC02]/10' :
+                    isWrong ? 'border-[#FF4B4B] border-b-[#E03C3C] bg-[#FF4B4B]/10' :
+                    isSelected ? 'border-[#1CB0F6] border-b-[#1899D6] bg-[#1CB0F6]/10 dark:bg-[#1CB0F6]/15' :
+                    'border-stone-200 border-b-stone-300 dark:border-stone-600 dark:border-b-stone-500 hover:border-[#1CB0F6]/50 dark:hover:border-[#1CB0F6]/40 hover:bg-sky-50/50 dark:hover:bg-sky-900/15'
                   } ${showResult ? 'cursor-default' : 'cursor-pointer'}`}
                 >
-                  <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
-                    isCorrect ? 'bg-green-500 text-white' :
-                    isWrong ? 'bg-red-500 text-white' :
-                    isSelected ? 'bg-amber-500 text-white' :
-                    'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-400'
+                  <span className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-extrabold border-b-2 ${
+                    isCorrect ? 'bg-[#58CC02] text-white border-[#46A302]' :
+                    isWrong ? 'bg-[#FF4B4B] text-white border-[#E03C3C]' :
+                    isSelected ? 'bg-[#1CB0F6] text-white border-[#1899D6]' :
+                    'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-400 border-stone-200 dark:border-stone-600'
                   }`}>
                     {letter}
                   </span>
-                  <span className="flex-1 min-w-0 break-words text-left">{option.substring(3)}</span>
-                  {isCorrect && <span className="text-green-500">✓</span>}
-                  {isWrong && <span className="text-red-500">✗</span>}
+                  <span className="flex-1 min-w-0 break-words text-left text-stone-800 dark:text-stone-100">{option.substring(3)}</span>
+                  {isCorrect && <span className="text-[#58CC02] text-lg">✓</span>}
+                  {isWrong && <span className="text-[#FF4B4B] text-lg">✗</span>}
                 </button>
               );
             })}
@@ -1377,24 +1381,24 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                       key={opt}
                       onClick={() => !showResult && setSelectedAnswer(opt)}
                       disabled={showResult}
-                      className={`w-full p-4 rounded-xl border-2 text-left transition-all flex items-center gap-3 ${
-                        isCorrect ? 'border-green-500 bg-green-50' :
-                        isWrong ? 'border-red-500 bg-red-50' :
-                        isSelected ? 'border-amber-500 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/30' :
-                        'border-stone-200 dark:border-stone-600 hover:border-amber-300 dark:hover:border-amber-600 hover:bg-amber-50/50 dark:hover:bg-amber-900/20'
+                      className={`w-full p-4 rounded-2xl border-2 border-b-4 text-left transition-all flex items-center gap-3 font-bold active:border-b-2 active:translate-y-0.5 ${
+                        isCorrect ? 'border-[#58CC02] border-b-[#46A302] bg-[#58CC02]/10' :
+                        isWrong ? 'border-[#FF4B4B] border-b-[#E03C3C] bg-[#FF4B4B]/10' :
+                        isSelected ? 'border-[#1CB0F6] border-b-[#1899D6] bg-[#1CB0F6]/10 dark:bg-[#1CB0F6]/15' :
+                        'border-stone-200 border-b-stone-300 dark:border-stone-600 dark:border-b-stone-500 hover:border-[#1CB0F6]/50 dark:hover:border-[#1CB0F6]/40 hover:bg-sky-50/50 dark:hover:bg-sky-900/15'
                       } ${showResult ? 'cursor-default' : 'cursor-pointer'}`}
                     >
-                      <span className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        isCorrect ? 'bg-green-500 text-white' :
-                        isWrong ? 'bg-red-500 text-white' :
-                        isSelected ? 'bg-amber-500 text-white' :
-                        'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-400'
+                      <span className={`w-9 h-9 rounded-xl flex items-center justify-center border-b-2 ${
+                        isCorrect ? 'bg-[#58CC02] text-white border-[#46A302]' :
+                        isWrong ? 'bg-[#FF4B4B] text-white border-[#E03C3C]' :
+                        isSelected ? 'bg-[#1CB0F6] text-white border-[#1899D6]' :
+                        'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-400 border-stone-200 dark:border-stone-600'
                       }`}>
                         {opt === 'true' ? '✓' : '✗'}
                       </span>
-                      <span className="flex-1 min-w-0 break-words text-left capitalize font-medium">{opt}</span>
-                      {isCorrect && <span className="text-green-500">✓</span>}
-                      {isWrong && <span className="text-red-500">✗</span>}
+                      <span className="flex-1 min-w-0 break-words text-left capitalize font-extrabold text-stone-800 dark:text-stone-100">{opt}</span>
+                      {isCorrect && <span className="text-[#58CC02] text-lg">✓</span>}
+                      {isWrong && <span className="text-[#FF4B4B] text-lg">✗</span>}
                     </button>
                   );
                 })}
@@ -1408,30 +1412,30 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                   const isSelected = selectedAnswer === letter;
                   const isCorrect = showResult && letter === question.correctAnswer;
                   const isWrong = showResult && isSelected && letter !== question.correctAnswer;
-                  
+
                   return (
                     <button
                       key={idx}
                       onClick={() => !showResult && setSelectedAnswer(letter)}
                       disabled={showResult}
-                      className={`w-full p-4 rounded-xl border-2 text-left flex items-center gap-4 transition-all ${
-                        isCorrect ? 'border-green-500 bg-green-50' :
-                        isWrong ? 'border-red-500 bg-red-50' :
-                        isSelected ? 'border-amber-500 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/30' :
-                        'border-stone-200 dark:border-stone-600 hover:border-amber-300 dark:hover:border-amber-600 hover:bg-amber-50/50 dark:hover:bg-amber-900/20'
+                      className={`w-full p-4 rounded-2xl border-2 border-b-4 text-left flex items-center gap-4 transition-all font-bold active:border-b-2 active:translate-y-0.5 ${
+                        isCorrect ? 'border-[#58CC02] border-b-[#46A302] bg-[#58CC02]/10' :
+                        isWrong ? 'border-[#FF4B4B] border-b-[#E03C3C] bg-[#FF4B4B]/10' :
+                        isSelected ? 'border-[#1CB0F6] border-b-[#1899D6] bg-[#1CB0F6]/10 dark:bg-[#1CB0F6]/15' :
+                        'border-stone-200 border-b-stone-300 dark:border-stone-600 dark:border-b-stone-500 hover:border-[#1CB0F6]/50 dark:hover:border-[#1CB0F6]/40 hover:bg-sky-50/50 dark:hover:bg-sky-900/15'
                       }`}
                     >
-                      <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
-                        isCorrect ? 'bg-green-500 text-white' :
-                        isWrong ? 'bg-red-500 text-white' :
-                        isSelected ? 'bg-amber-500 text-white' :
-                        'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-400'
+                      <span className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-extrabold border-b-2 ${
+                        isCorrect ? 'bg-[#58CC02] text-white border-[#46A302]' :
+                        isWrong ? 'bg-[#FF4B4B] text-white border-[#E03C3C]' :
+                        isSelected ? 'bg-[#1CB0F6] text-white border-[#1899D6]' :
+                        'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-400 border-stone-200 dark:border-stone-600'
                       }`}>
                         {letter}
                       </span>
-                      <span className="flex-1 min-w-0 break-words text-left font-medium">{opt.substring(3)}</span>
-                      {isCorrect && <span className="text-green-500">✓</span>}
-                      {isWrong && <span className="text-red-500">✗</span>}
+                      <span className="flex-1 min-w-0 break-words text-left font-extrabold text-stone-800 dark:text-stone-100">{opt.substring(3)}</span>
+                      {isCorrect && <span className="text-[#58CC02] text-lg">✓</span>}
+                      {isWrong && <span className="text-[#FF4B4B] text-lg">✗</span>}
                     </button>
                   );
                 })}
@@ -1439,20 +1443,34 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
             )}
           </div>
 
+          {/* Mascot reaction — Duolingo-style happy/sad pop-in right after Check */}
+          {showResult && (() => {
+            const correctNow = selectedAnswer === question.correctAnswer;
+            return (
+              <div className="mb-4">
+                <QuizMascotReaction
+                  variant="inline"
+                  state={correctNow ? 'correct' : 'wrong'}
+                  subMessage={correctNow ? undefined : `Correct answer: ${question.correctAnswer}`}
+                />
+              </div>
+            );
+          })()}
+
           {/* Explanation (shown after answering) */}
           {showResult && (
-            <div className="p-4 bg-violet-50 rounded-xl mb-6 border border-violet-100">
+            <div className="p-4 bg-[#1CB0F6]/10 rounded-2xl mb-6 border-2 border-[#1CB0F6]/30">
               <div className="flex items-start gap-3">
-                <span className="text-violet-600 flex-shrink-0 mt-0.5">💡</span>
+                <span className="text-[#1CB0F6] flex-shrink-0 mt-0.5 text-lg">💡</span>
                 <div>
-                  <p className="text-sm font-semibold text-violet-800 mb-1">Explanation</p>
-                  <p className="text-sm text-violet-700">{question.explanation}</p>
+                  <p className="text-sm font-extrabold text-[#1899D6] dark:text-[#1CB0F6] mb-1">Explanation</p>
+                  <p className="text-sm font-semibold text-stone-700 dark:text-stone-300">{question.explanation}</p>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Action buttons */}
+          {/* Action buttons — Duolingo 3D style */}
           <div className="flex items-center justify-between">
             <button
               onClick={() => {
@@ -1463,7 +1481,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                 }
               }}
               disabled={currentQuestion === 0}
-              className="px-4 py-2 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-5 py-3 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-2 font-extrabold rounded-2xl border-2 border-b-4 border-stone-200 border-b-stone-300 dark:border-stone-600 dark:border-b-stone-500 hover:bg-stone-50 dark:hover:bg-stone-700/50 active:border-b-2 active:translate-y-0.5 transition-all"
             >
               ← Previous
             </button>
@@ -1472,19 +1490,19 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
               <button
                 onClick={submitAnswer}
                 disabled={!selectedAnswer}
-                className="px-6 py-3 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-8 py-3.5 bg-[#58CC02] hover:bg-[#4EBB02] text-white font-extrabold rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 shadow-md uppercase tracking-wide text-sm"
               >
-                🎯 Submit Answer
+                Check
               </button>
             ) : (
               <button
                 onClick={nextQuestion}
-                className="px-6 py-3 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl transition-all flex items-center gap-2"
+                className="px-8 py-3.5 bg-[#1CB0F6] hover:bg-[#1AA3E5] text-white font-extrabold rounded-2xl transition-all flex items-center gap-2 border-b-4 border-[#1899D6] active:border-b-2 active:translate-y-0.5 shadow-md uppercase tracking-wide text-sm"
               >
                 {currentQuestion + 1 >= displayedQuestions.length ? (
-                  <>🏆 See Results</>
+                  <>See Results</>
                 ) : (
-                  <>Next Question →</>
+                  <>Continue</>
                 )}
               </button>
             )}
@@ -1499,20 +1517,20 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
 
     return (
       <div className="mt-4 min-w-0 w-full">
-        <button onClick={() => setQuiz(null)} className="mb-4 px-4 py-2 text-stone-600 dark:text-stone-400 hover:text-stone-800 dark:text-stone-100 flex items-center gap-2">← Create New Quiz</button>
-        <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-none border border-stone-200 dark:border-stone-600 overflow-hidden">
-          <div className="p-4 sm:p-6 border-b border-stone-200 dark:border-stone-600 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20">
+        <button onClick={() => setQuiz(null)} className="mb-4 px-4 py-2 text-stone-600 dark:text-stone-400 hover:text-stone-800 dark:text-stone-100 flex items-center gap-2 font-extrabold rounded-xl border-2 border-stone-200 dark:border-stone-600 hover:bg-stone-50 dark:hover:bg-stone-800 transition-all">← Create New Quiz</button>
+        <div className="bg-white dark:bg-stone-900 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 overflow-hidden" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+          <div className="p-4 sm:p-6 border-b-2 border-stone-200 dark:border-stone-700 bg-[#FFF4E0] dark:bg-[#FF9600]/10">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h2 className="text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100">{quiz.title}</h2>
-                <p className="text-stone-600 dark:text-stone-400 text-sm mt-1">
+                <h2 className="text-xl sm:text-2xl font-extrabold text-stone-800 dark:text-stone-100">{quiz.title}</h2>
+                <p className="text-stone-500 dark:text-stone-400 text-sm mt-1 font-bold">
                   {displayedQuestions.length} questions • {quiz.difficulty} difficulty • {quiz.quizType} format
                 </p>
               </div>
               <div className="flex gap-2 flex-wrap">
                 <button
                   onClick={startQuiz}
-                  className="px-5 py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl transition-all flex items-center gap-2"
+                  className="px-5 py-2.5 bg-[#58CC02] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all flex items-center gap-2 text-sm"
                 >
                   🧠 Start Quiz
                 </button>
@@ -1572,20 +1590,20 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
         <div className="p-4 sm:p-6 max-h-[500px] overflow-y-auto">
           <div className="space-y-4">
             {displayedQuestions.map((q, idx) => (
-              <div key={q.id} className="p-4 bg-stone-50 dark:bg-stone-800/50 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-700/50 transition-colors">
+              <div key={q.id} className="p-4 bg-white dark:bg-stone-800 rounded-xl border-2 border-stone-200 dark:border-stone-700 hover:border-stone-300 dark:hover:border-stone-600 transition-all">
                 <div className="flex items-start gap-3">
-                  <span className="flex-shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white font-semibold text-sm">
+                  <span className="flex-shrink-0 w-8 h-8 rounded-lg bg-[#FF9600] border-b-2 border-[#D97F00] flex items-center justify-center text-white font-extrabold text-sm">
                     {idx + 1}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium mb-2 ${
-                      q.type === 'multiple_choice' ? 'bg-violet-100 text-violet-700' :
-                      q.type === 'true_false' ? 'bg-violet-100 text-violet-700' :
-                      'bg-green-100 text-green-700'
+                    <span className={`inline-block px-2 py-0.5 rounded-lg text-xs font-extrabold mb-2 border-b-2 ${
+                      q.type === 'multiple_choice' ? 'bg-[#A560E8] text-white border-[#8A48C7]' :
+                      q.type === 'true_false' ? 'bg-[#1CB0F6] text-white border-[#1899D6]' :
+                      'bg-[#58CC02] text-white border-[#46A302]'
                     }`}>
                       {q.type.replace('_', ' ')}
                     </span>
-                    <p className="text-stone-800 dark:text-stone-100 font-medium">{q.question}</p>
+                    <p className="text-stone-800 dark:text-stone-100 font-bold">{q.question}</p>
                     {q.options && (
                       <div className="mt-2 space-y-1">
                         {q.options.map((opt, optIdx) => (
@@ -1629,7 +1647,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                   ? 'Crossword Generator'
                   : 'Quiz Generator'}
             </h1>
-            <div className="sticky top-0 z-10 flex items-center gap-3 px-4 sm:px-6 py-4 bg-white/95 dark:bg-stone-800/95 backdrop-blur border-b border-stone-200 dark:border-stone-700">
+            <div className="sticky top-0 z-10 flex items-center gap-3 px-4 sm:px-6 py-3.5 bg-white/95 dark:bg-stone-800/95 backdrop-blur border-b-2 border-stone-200 dark:border-stone-700" style={{ fontFamily: "'Nunito', sans-serif" }}>
             <button onClick={() => {
               if (openedFromStudyPackViewer) {
                 sessionStorage.removeItem('writescholar_return_to_study_pack_viewer');
@@ -1638,10 +1656,10 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                 }
               }
               onNavigate(openedFromStudyPackViewer ? 'study-pack-viewer' : openedFromDashboard ? 'dashboard' : openedFromHistory ? 'quiz-history' : 'dashboard');
-            }} className="p-2.5 -ml-2 text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors" aria-label={openedFromStudyPackViewer ? 'Back to study pack' : openedFromDashboard ? 'Back to dashboard' : openedFromHistory ? 'Back to saved materials' : 'Back to dashboard'}>
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+            }} className="p-2.5 -ml-2 text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200 rounded-xl hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors border-2 border-stone-200 dark:border-stone-600" aria-label={openedFromStudyPackViewer ? 'Back to study pack' : openedFromDashboard ? 'Back to dashboard' : openedFromHistory ? 'Back to saved materials' : 'Back to dashboard'}>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
             </button>
-            <span className="text-sm font-medium text-stone-600 dark:text-stone-400">
+            <span className="text-sm font-extrabold text-stone-700 dark:text-stone-300 uppercase tracking-wide">
               {studyToolMode === 'quiz' ? 'Quiz' : studyToolMode === 'flashcards' ? 'Flashcards' : 'Crossword'}
             </span>
           </div>
@@ -1651,23 +1669,23 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
           <div className="max-w-6xl mx-auto">
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-8">
                 <div className="flex-shrink-0">
-                <ScholarMascot size={96} animated={false} pose="default" />
+                <img src="/mascot-study.gif" alt="WriteScholar mascot" className="w-[96px] h-[96px] object-contain rounded-2xl" />
               </div>
               <div className="flex-1 text-center sm:text-left">
                 <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-3 mb-3 sm:mb-4 flex-wrap">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-amber-600 text-white text-xs font-semibold shadow-lg shadow-amber-200/50 dark:shadow-amber-900/30">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-[#FF9600] text-white text-xs font-extrabold border-b-2 border-[#D97F00]">
                     Pro tool
                   </span>
-                  <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-xs font-semibold">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-[#FFF4E0] dark:bg-[#FF9600]/10 text-[#FF9600] text-xs font-extrabold border border-[#FF9600]/30">
                     🧠 AI-Powered
                   </span>
                 </div>
                 <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-3 sm:mb-4 leading-tight">
-                  AI <span className="bg-amber-600 hover:bg-amber-500 bg-clip-text text-transparent">
+                  AI <span className="text-[#FF9600]">
                     {studyToolMode === 'flashcards' ? 'Flashcard Generator' : studyToolMode === 'crossword' ? 'Crossword Generator' : 'Quiz Generator'}
                   </span>
                 </h1>
-                <p className="text-sm sm:text-lg text-stone-600 dark:text-stone-400 max-w-2xl leading-relaxed">
+                <p className="text-sm sm:text-lg text-stone-600 dark:text-stone-400 max-w-2xl leading-relaxed font-bold">
                   {studyToolMode === 'flashcards'
                     ? 'Turn your notes into interactive flip-card study sets for effective memorization.'
                     : studyToolMode === 'crossword'
@@ -1677,7 +1695,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
 
                 {/* Study Tool Sub-Mode Tabs */}
                 <div className="flex items-center justify-center sm:justify-start gap-2 mt-6">
-                  <div className="inline-flex items-center bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-600 rounded-2xl p-1.5">
+                  <div className="inline-flex items-center bg-white dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 rounded-2xl p-1.5">
                     {([
                       { key: 'quiz' as const, label: 'Quiz', icon: '📝' },
                       { key: 'flashcards' as const, label: 'Flashcards', icon: '🃏' },
@@ -1686,10 +1704,10 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                       <button
                         key={tool.key}
                         onClick={() => { setStudyToolMode(tool.key); setQuiz(null); setFlashcardResult(null); setCrosswordResult(null); setError(null); setIsQuizMode(false); }}
-                        className={`px-4 sm:px-5 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-1.5 ${
+                        className={`px-4 sm:px-5 py-2 rounded-xl text-sm font-extrabold transition-all flex items-center gap-1.5 ${
                           studyToolMode === tool.key
-                            ? 'bg-white dark:bg-stone-600 text-amber-700 dark:text-amber-300 shadow-sm border border-stone-200 dark:border-stone-600'
-                            : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-700'
+                            ? 'bg-[#FFF4E0] dark:bg-[#FF9600]/10 text-[#FF9600] border-2 border-[#FF9600]/30'
+                            : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-700 border-2 border-transparent'
                         }`}
                       >
                         <span className="text-base">{tool.icon}</span>
@@ -1706,34 +1724,27 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
 
         {/* Main Content */}
         <div className={`pb-8 sm:pb-16 relative ${showMinimalUI ? 'pt-6 sm:pt-8 px-4 sm:px-6 lg:px-8' : showLockedOutLayout ? 'pt-8 sm:pt-12 px-4 sm:px-6 lg:px-8' : 'px-4 sm:px-6 lg:px-8'}`}>
-          {/* Floating decorative elements - hidden when minimal UI */}
-          {!showMinimalUI && (
-            <>
-              <div className="absolute top-20 left-6 w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400/12 to-orange-500/12 rotate-12 hidden lg:block pointer-events-none" />
-              <div className="absolute top-36 right-10 w-12 h-12 rounded-full bg-gradient-to-br from-violet-400/10 to-violet-500/10 hidden lg:block pointer-events-none" />
-              <div className="absolute bottom-1/3 left-8 w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400/10 to-orange-500/10 -rotate-12 hidden xl:block pointer-events-none" />
-            </>
-          )}
+          {/* Floating decorative elements removed for clean Duolingo style */}
           <div className="max-w-6xl mx-auto">
             {showLockedOutLayout ? (
               /* Stacked layout: generator on top, video below (locked-out scheme) */
               <div className="flex flex-col gap-8 lg:gap-10">
                 {/* Top: Generator form */}
                 <div className="order-1">
-                  <div className="bg-white/90 dark:bg-stone-800/90 backdrop-blur-sm rounded-3xl border border-stone-200/80 dark:border-stone-600/50 shadow-xl shadow-stone-200/50 dark:shadow-stone-900/50 overflow-hidden">
+                  <div className="bg-white dark:bg-stone-900 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 overflow-hidden">
                     {/* Hero inside card */}
-                    <div className="p-6 sm:p-8 pb-4 border-b border-stone-100 dark:border-stone-700/80">
+                    <div className="p-6 sm:p-8 pb-4 border-b-2 border-stone-100 dark:border-stone-700">
                       <div className="flex items-start gap-4">
                         <div className="flex-shrink-0 hidden sm:block">
-                          <ScholarMascot size={72} animated={false} pose="default" />
+                          <img src="/mascot-laptop.gif" alt="WriteScholar mascot" className="w-[72px] h-[72px] object-contain rounded-2xl" />
                         </div>
                         <div>
                           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-stone-800 dark:text-stone-100 leading-tight tracking-tight">
-                            AI <span className="bg-amber-600 hover:bg-amber-500 bg-clip-text text-transparent">
+                            AI <span className="text-[#FF9600]">
                               {studyToolMode === 'flashcards' ? 'Flashcard Generator' : studyToolMode === 'crossword' ? 'Crossword Generator' : 'Quiz Generator'}
                             </span>
                           </h1>
-                          <p className="text-sm sm:text-base text-stone-600 dark:text-stone-400 mt-1.5 leading-relaxed">
+                          <p className="text-sm sm:text-base text-stone-600 dark:text-stone-400 mt-1.5 leading-relaxed font-bold">
                             {studyToolMode === 'flashcards'
                               ? 'Turn your notes into interactive flip-card study sets.'
                               : studyToolMode === 'crossword'
@@ -1746,7 +1757,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                     {/* Form - quiz, flashcard, or crossword */}
                     {studyToolMode === 'quiz' && (
                   <div>
-                    <div className="border-b border-stone-200 dark:border-stone-600 bg-gradient-to-r from-amber-50/80 to-orange-50/80 dark:from-amber-900/15 dark:to-orange-900/15 px-4 sm:px-6 py-4">
+                    <div className="border-b border-stone-200 dark:border-stone-600 bg-[#FFF4E0] dark:bg-[#FF9600]/10 px-4 sm:px-6 py-4">
                       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
                         <div className="flex items-center gap-2 min-w-0 overflow-x-auto w-full sm:w-auto">
                           <span className="text-xs font-medium text-stone-500 dark:text-stone-400 whitespace-nowrap">Type:</span>
@@ -1755,7 +1766,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                               const locked = user != null && isFreeUser && opt.value !== 'mixed';
                               return (
                                 <button key={opt.value} onClick={() => !locked && setQuizType(opt.value as any)} disabled={locked} title={locked ? 'Pro only' : opt.description}
-                                  className={`px-2 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap ${locked ? 'text-stone-400 dark:text-stone-500 cursor-not-allowed' : quizType === opt.value ? 'bg-white dark:bg-stone-600 text-amber-700 dark:text-amber-300 shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'}`}>
+                                  className={`px-2 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap ${locked ? 'text-stone-400 dark:text-stone-500 cursor-not-allowed' : quizType === opt.value ? 'bg-[#FFF4E0] dark:bg-[#FF9600]/10 text-[#FF9600] font-extrabold border-b-2 border-[#FF9600]' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'}`}>
                                   {opt.label}{locked && <span className="ml-1 text-[9px]">🔒</span>}
                                 </button>
                               );
@@ -1769,7 +1780,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                               const locked = user != null && isFreeUser && opt.value !== 'medium';
                               return (
                                 <button key={opt.value} onClick={() => !locked && setDifficulty(opt.value as any)} disabled={locked} title={locked ? 'Pro only' : opt.description}
-                                  className={`px-2 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap ${locked ? 'text-stone-400 dark:text-stone-500 cursor-not-allowed' : difficulty === opt.value ? 'bg-white dark:bg-stone-600 text-amber-700 dark:text-amber-300 shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'}`}>
+                                  className={`px-2 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap ${locked ? 'text-stone-400 dark:text-stone-500 cursor-not-allowed' : difficulty === opt.value ? 'bg-[#FFF4E0] dark:bg-[#FF9600]/10 text-[#FF9600] font-extrabold border-b-2 border-[#FF9600]' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'}`}>
                                   {opt.label}{locked && <span className="ml-1 text-[9px]">🔒</span>}
                                 </button>
                               );
@@ -1779,26 +1790,26 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-medium text-stone-500 dark:text-stone-400 whitespace-nowrap">Questions:</span>
                           <select value={user != null && isFreeUser ? 10 : questionCount} onChange={(e) => setQuestionCount(Number(e.target.value))} disabled={user != null && isFreeUser}
-                            className={`px-2 py-1.5 bg-stone-100 dark:bg-stone-700 border-0 rounded-lg text-xs font-medium text-stone-700 dark:text-stone-300 focus:ring-2 focus:ring-amber-200 dark:focus:ring-amber-800 ${user != null && isFreeUser ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                            className={`px-2 py-1.5 bg-stone-100 dark:bg-stone-700 border-0 rounded-lg text-xs font-medium text-stone-700 dark:text-stone-300 border-2 border-stone-200 dark:border-stone-600 focus:border-[#FF9600] ${user != null && isFreeUser ? 'opacity-50 cursor-not-allowed' : ''}`}>
                             {user != null && isFreeUser ? <option value={10}>10</option> : [5, 10, 15, 20, 25].map(n => <option key={n} value={n}>{n}</option>)}
                           </select>
                           {user != null && isFreeUser && <span className="text-[9px]">🔒</span>}
                         </div>
                         <button onClick={handleGenerate} disabled={isLoading || !inputText.trim() || wordCount < 100 || wordCount > quizUsage.maxWordsPerGeneration || quizExhausted}
-                          className="w-full sm:w-auto sm:ml-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-amber-200/50 dark:shadow-amber-900/30 text-sm">
+                          className="w-full sm:w-auto sm:ml-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-[#58CC02] text-white font-bold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm">
                           {isLoading ? (<><svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Generating...</span></>) : (<><span>✨</span><span>Generate Quiz</span><span>→</span></>)}
                         </button>
                       </div>
                     </div>
                     <div className="flex flex-col">
                       <div className="px-4 sm:px-6 py-3 sm:py-3.5 border-b border-stone-200 dark:border-stone-600 bg-stone-50/60 dark:bg-stone-700/30 flex items-center justify-between">
-                        <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-amber-500 shadow-sm shadow-amber-500/30"></div><span className="text-sm font-semibold text-stone-700 dark:text-stone-300">Source Material</span></div>
+                        <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-[#FF9600]"></div><span className="text-sm font-semibold text-stone-700 dark:text-stone-300">Source Material</span></div>
                         <div className="flex items-center gap-1">
-                          <button onClick={() => fileInputRef.current?.click()} disabled={isParsingDoc} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-800/50 font-semibold text-xs transition-colors disabled:opacity-50 border border-amber-200 dark:border-amber-700" title="Upload PDF, Word, or TXT">
-                            {isParsingDoc ? <span className="w-3.5 h-3.5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" /> : <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>}
+                          <button onClick={() => fileInputRef.current?.click()} disabled={isParsingDoc} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#FFF4E0] dark:bg-[#FF9600]/10 text-[#FF9600] hover:bg-[#FF9600]/20 font-extrabold text-xs transition-colors disabled:opacity-50 border-2 border-[#FF9600]/30 rounded-xl" title="Upload PDF, Word, or TXT">
+                            {isParsingDoc ? <span className="w-3.5 h-3.5 border-2 border-[#FF9600] border-t-transparent rounded-full animate-spin" /> : <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>}
                             {isParsingDoc ? 'Parsing...' : 'Upload Document'}
                           </button>
-                          <button onClick={handlePaste} className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-lg transition-colors" title="Paste from clipboard"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg></button>
+                          <button onClick={handlePaste} className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-[#FF9600] dark:hover:text-[#FF9600] hover:bg-[#FFF4E0] dark:hover:bg-[#FF9600]/10 rounded-lg transition-colors" title="Paste from clipboard"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg></button>
                           <button onClick={handleClear} className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" title="Clear text"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                         </div>
                       </div>
@@ -1809,10 +1820,10 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                       </div>
                       <div className="px-4 sm:px-6 py-3 sm:py-3.5 border-t border-stone-200 dark:border-stone-600 bg-stone-50/80 dark:bg-stone-800/50">
                         <div className="flex items-center justify-between text-xs sm:text-sm text-stone-500 dark:text-stone-400">
-                          <span className={`${wordCount < 100 ? 'text-amber-600 dark:text-amber-400' : wordCount > quizUsage.maxWordsPerGeneration ? 'text-red-600' : ''}`}>
+                          <span className={`${wordCount < 100 ? 'text-[#FF9600]' : wordCount > quizUsage.maxWordsPerGeneration ? 'text-red-600' : ''}`}>
                             {wordCount.toLocaleString()} words{wordCount >= 100 && wordCount <= quizUsage.maxWordsPerGeneration && ` / ${quizUsage.maxWordsPerGeneration.toLocaleString()} max`}
                           </span>
-                          {wordCount < 100 && <span className="text-amber-600 dark:text-amber-400">Minimum 100 words</span>}
+                          {wordCount < 100 && <span className="text-[#FF9600]">Minimum 100 words</span>}
                           {wordCount > quizUsage.maxWordsPerGeneration && <span className="text-red-600">Exceeds {quizUsage.maxWordsPerGeneration.toLocaleString()} word limit{isFreeUser && ' (upgrade for 15,000)'}</span>}
                         </div>
                       </div>
@@ -1821,17 +1832,17 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                   )}
                   {studyToolMode === 'flashcards' && (
                   <div>
-                    <div className="border-b border-stone-200 dark:border-stone-600 bg-gradient-to-r from-amber-50/80 to-orange-50/80 dark:from-amber-900/15 dark:to-orange-900/15 px-4 sm:px-6 py-4">
+                    <div className="border-b border-stone-200 dark:border-stone-600 bg-[#FFF4E0] dark:bg-[#FF9600]/10 px-4 sm:px-6 py-4">
                       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-medium text-stone-500 dark:text-stone-400">Cards:</span>
-                          <select value={flashcardCount} onChange={(e) => setFlashcardCount(Number(e.target.value))} className="px-2 py-1.5 bg-stone-100 dark:bg-stone-700 border-0 rounded-lg text-xs font-medium text-stone-700 dark:text-stone-300 focus:ring-2 focus:ring-amber-200 dark:focus:ring-amber-800">
+                          <select value={flashcardCount} onChange={(e) => setFlashcardCount(Number(e.target.value))} className="px-2 py-1.5 bg-stone-100 dark:bg-stone-700 border-0 rounded-lg text-xs font-medium text-stone-700 dark:text-stone-300 border-2 border-stone-200 dark:border-stone-600 focus:border-[#FF9600]">
                             {[5, 10, 15, 20, 25, 30].map(n => <option key={n} value={n}>{n}</option>)}
                           </select>
                         </div>
                         <div className="flex items-center gap-2 w-full sm:w-auto sm:ml-auto">
-                          <button onClick={() => setFlashcardResult({ title: 'My Flashcards', cards: [] })} className="flex-1 sm:flex-none px-4 py-2 sm:py-2.5 bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400 font-semibold rounded-xl transition-all hover:bg-violet-200 dark:hover:bg-violet-900/50 flex items-center justify-center gap-2 text-sm">✏️ Create from Scratch</button>
-                          <button onClick={handleGenerate} disabled={isLoading || !inputText.trim() || wordCount < 50 || wordCount > quizUsage.maxWordsPerGeneration || quizExhausted} className="flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-amber-200/50 dark:shadow-amber-900/30 text-sm">
+                          <button onClick={() => setFlashcardResult({ title: 'My Flashcards', cards: [] })} className="flex-1 sm:flex-none px-4 py-2 sm:py-2.5 bg-[#A560E8] text-white font-bold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all flex items-center justify-center gap-2 text-sm">✏️ Create from Scratch</button>
+                          <button onClick={handleGenerate} disabled={isLoading || !inputText.trim() || wordCount < 50 || wordCount > quizUsage.maxWordsPerGeneration || quizExhausted} className="flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-2.5 bg-[#58CC02] text-white font-bold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm">
                             {isLoading ? (<><svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Generating...</span></>) : (<>🃏 Generate with AI →</>)}
                           </button>
                         </div>
@@ -1839,13 +1850,13 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                     </div>
                     <div className="flex flex-col">
                       <div className="px-4 sm:px-6 py-3 sm:py-3.5 border-b border-stone-200 dark:border-stone-600 bg-stone-50/60 dark:bg-stone-700/30 flex items-center justify-between">
-                        <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-amber-500 shadow-sm shadow-amber-500/30"></div><span className="text-sm font-semibold text-stone-700 dark:text-stone-300">Source Material</span></div>
+                        <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-[#FF9600]"></div><span className="text-sm font-semibold text-stone-700 dark:text-stone-300">Source Material</span></div>
                         <div className="flex items-center gap-1">
-                          <button onClick={() => fileInputRef.current?.click()} disabled={isParsingDoc} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-800/50 font-semibold text-xs transition-colors disabled:opacity-50 border border-amber-200 dark:border-amber-700" title="Upload PDF, Word, or TXT">
-                            {isParsingDoc ? <span className="w-3.5 h-3.5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" /> : <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>}
+                          <button onClick={() => fileInputRef.current?.click()} disabled={isParsingDoc} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#FFF4E0] dark:bg-[#FF9600]/10 text-[#FF9600] hover:bg-[#FF9600]/20 font-extrabold text-xs transition-colors disabled:opacity-50 border-2 border-[#FF9600]/30 rounded-xl" title="Upload PDF, Word, or TXT">
+                            {isParsingDoc ? <span className="w-3.5 h-3.5 border-2 border-[#FF9600] border-t-transparent rounded-full animate-spin" /> : <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>}
                             {isParsingDoc ? 'Parsing...' : 'Upload Document'}
                           </button>
-                          <button onClick={handlePaste} className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-lg transition-colors" title="Paste"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg></button>
+                          <button onClick={handlePaste} className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-[#FF9600] dark:hover:text-[#FF9600] hover:bg-[#FFF4E0] dark:hover:bg-[#FF9600]/10 rounded-lg transition-colors" title="Paste"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg></button>
                           <button onClick={handleClear} className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" title="Clear"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                         </div>
                       </div>
@@ -1856,8 +1867,8 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                       </div>
                       <div className="px-4 sm:px-6 py-3 sm:py-3.5 border-t border-stone-200 dark:border-stone-600 bg-stone-50/80 dark:bg-stone-800/50">
                         <div className="flex items-center justify-between text-xs sm:text-sm text-stone-500 dark:text-stone-400">
-                          <span className={`${wordCount < 50 ? 'text-amber-600 dark:text-amber-400' : wordCount > quizUsage.maxWordsPerGeneration ? 'text-red-600' : ''}`}>{wordCount.toLocaleString()} words</span>
-                          {wordCount < 50 && <span className="text-amber-600 dark:text-amber-400">Minimum 50 words</span>}
+                          <span className={`${wordCount < 50 ? 'text-[#FF9600]' : wordCount > quizUsage.maxWordsPerGeneration ? 'text-red-600' : ''}`}>{wordCount.toLocaleString()} words</span>
+                          {wordCount < 50 && <span className="text-[#FF9600]">Minimum 50 words</span>}
                         </div>
                       </div>
                     </div>
@@ -1865,28 +1876,28 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                   )}
                   {studyToolMode === 'crossword' && (
                   <div>
-                    <div className="border-b border-stone-200 dark:border-stone-600 bg-gradient-to-r from-amber-50/80 to-orange-50/80 dark:from-amber-900/15 dark:to-orange-900/15 px-4 sm:px-6 py-4">
+                    <div className="border-b border-stone-200 dark:border-stone-600 bg-[#FFF4E0] dark:bg-[#FF9600]/10 px-4 sm:px-6 py-4">
                       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-medium text-stone-500 dark:text-stone-400">Words:</span>
-                          <select value={crosswordWordCount} onChange={(e) => setCrosswordWordCount(Number(e.target.value))} className="px-2 py-1.5 bg-stone-100 dark:bg-stone-700 border-0 rounded-lg text-xs font-medium text-stone-700 dark:text-stone-300 focus:ring-2 focus:ring-amber-200 dark:focus:ring-amber-800">
+                          <select value={crosswordWordCount} onChange={(e) => setCrosswordWordCount(Number(e.target.value))} className="px-2 py-1.5 bg-stone-100 dark:bg-stone-700 border-0 rounded-lg text-xs font-medium text-stone-700 dark:text-stone-300 border-2 border-stone-200 dark:border-stone-600 focus:border-[#FF9600]">
                             {[6, 8, 10, 12, 15].map(n => <option key={n} value={n}>{n}</option>)}
                           </select>
                         </div>
-                        <button onClick={handleGenerate} disabled={isLoading || !inputText.trim() || wordCount < 50 || wordCount > quizUsage.maxWordsPerGeneration || quizExhausted} className="w-full sm:w-auto sm:ml-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-amber-200/50 dark:shadow-amber-900/30 text-sm">
+                        <button onClick={handleGenerate} disabled={isLoading || !inputText.trim() || wordCount < 50 || wordCount > quizUsage.maxWordsPerGeneration || quizExhausted} className="w-full sm:w-auto sm:ml-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-[#58CC02] text-white font-bold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm">
                           {isLoading ? (<><svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Generating...</span></>) : (<>🧩 Generate Crossword →</>)}
                         </button>
                       </div>
                     </div>
                     <div className="flex flex-col">
                       <div className="px-4 sm:px-6 py-3 sm:py-3.5 border-b border-stone-200 dark:border-stone-600 bg-stone-50/60 dark:bg-stone-700/30 flex items-center justify-between">
-                        <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-amber-500 shadow-sm shadow-amber-500/30"></div><span className="text-sm font-semibold text-stone-700 dark:text-stone-300">Source Material</span></div>
+                        <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-[#FF9600]"></div><span className="text-sm font-semibold text-stone-700 dark:text-stone-300">Source Material</span></div>
                         <div className="flex items-center gap-1">
-                          <button onClick={() => fileInputRef.current?.click()} disabled={isParsingDoc} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-800/50 font-semibold text-xs transition-colors disabled:opacity-50 border border-amber-200 dark:border-amber-700" title="Upload PDF, Word, or TXT">
-                            {isParsingDoc ? <span className="w-3.5 h-3.5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" /> : <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>}
+                          <button onClick={() => fileInputRef.current?.click()} disabled={isParsingDoc} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#FFF4E0] dark:bg-[#FF9600]/10 text-[#FF9600] hover:bg-[#FF9600]/20 font-extrabold text-xs transition-colors disabled:opacity-50 border-2 border-[#FF9600]/30 rounded-xl" title="Upload PDF, Word, or TXT">
+                            {isParsingDoc ? <span className="w-3.5 h-3.5 border-2 border-[#FF9600] border-t-transparent rounded-full animate-spin" /> : <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>}
                             {isParsingDoc ? 'Parsing...' : 'Upload Document'}
                           </button>
-                          <button onClick={handlePaste} className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-lg transition-colors" title="Paste"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg></button>
+                          <button onClick={handlePaste} className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-[#FF9600] dark:hover:text-[#FF9600] hover:bg-[#FFF4E0] dark:hover:bg-[#FF9600]/10 rounded-lg transition-colors" title="Paste"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg></button>
                           <button onClick={handleClear} className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" title="Clear"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                         </div>
                       </div>
@@ -1897,8 +1908,8 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                       </div>
                       <div className="px-4 sm:px-6 py-3 sm:py-3.5 border-t border-stone-200 dark:border-stone-600 bg-stone-50/80 dark:bg-stone-800/50">
                         <div className="flex items-center justify-between text-xs sm:text-sm text-stone-500 dark:text-stone-400">
-                          <span className={`${wordCount < 50 ? 'text-amber-600 dark:text-amber-400' : wordCount > quizUsage.maxWordsPerGeneration ? 'text-red-600' : ''}`}>{wordCount.toLocaleString()} words</span>
-                          {wordCount < 50 && <span className="text-amber-600 dark:text-amber-400">Minimum 50 words</span>}
+                          <span className={`${wordCount < 50 ? 'text-[#FF9600]' : wordCount > quizUsage.maxWordsPerGeneration ? 'text-red-600' : ''}`}>{wordCount.toLocaleString()} words</span>
+                          {wordCount < 50 && <span className="text-[#FF9600]">Minimum 50 words</span>}
                         </div>
                       </div>
                     </div>
@@ -1908,24 +1919,23 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                 </div>
 
                 {/* Bottom: Video - See how it works */}
-                <div className="relative order-2">
-                  <div className="absolute -inset-2 bg-gradient-to-r from-amber-400/12 via-orange-400/12 to-amber-500/12 rounded-3xl blur-2xl pointer-events-none" />
-                  <div className="relative">
+                <div className="order-2">
+                  <div>
                     <div className="flex items-center gap-2 mb-4">
-                      <h2 className="text-lg font-bold text-stone-800 dark:text-stone-100">See how it works</h2>
-                      <span className="h-px flex-1 max-w-32 bg-gradient-to-r from-amber-300/60 to-transparent dark:from-amber-500/40 rounded-full" />
+                      <h2 className="text-lg font-extrabold text-stone-800 dark:text-stone-100">See how it works</h2>
+                      <span className="h-px flex-1 max-w-32 bg-[#FF9600]/30 rounded-full" />
                     </div>
-                    <div className="relative bg-white dark:bg-stone-800 rounded-2xl overflow-hidden shadow-xl shadow-stone-200/50 dark:shadow-stone-900/50 border border-stone-200/60 dark:border-stone-600/50 ring-1 ring-stone-100 dark:ring-stone-700/50 max-w-3xl mx-auto">
-                      <div className={`bg-gradient-to-br from-amber-50/60 to-orange-50/60 dark:from-amber-900/25 dark:to-orange-900/25 flex items-center justify-center aspect-video min-h-[200px] sm:min-h-[320px]`}>
+                    <div className="bg-white dark:bg-stone-900 rounded-2xl overflow-hidden border-2 border-b-4 border-stone-200 dark:border-stone-700 max-w-3xl mx-auto">
+                      <div className="bg-[#FFF4E0] dark:bg-[#FF9600]/10 flex items-center justify-center aspect-video min-h-[200px] sm:min-h-[320px]">
                         <video key={studyToolMode} autoPlay loop muted playsInline className="w-full h-full object-contain" title={studyToolMode === 'quiz' ? 'WriteScholar AI Quiz Generator — Turn notes into practice tests' : studyToolMode === 'flashcards' ? 'WriteScholar Study Pack — AI flashcard generator from notes' : 'WriteScholar Crossword Generator — Create study puzzles from notes'} aria-label={studyToolMode === 'quiz' ? 'WriteScholar AI Quiz Generator — Turn notes into practice tests' : studyToolMode === 'flashcards' ? 'WriteScholar Study Pack — AI flashcard generator from notes' : 'WriteScholar Crossword Generator — Create study puzzles from notes'}>
                           <source src={studyToolMode === 'quiz' ? '/writescholar-quiz-generator-demo.mp4' : studyToolMode === 'flashcards' ? '/writescholar-flashcards-demo.mp4' : '/writescholar-crossword-demo.mp4'} type="video/mp4" />
                         </video>
                       </div>
-                      <div className="px-4 py-3.5 border-t border-stone-100 dark:border-stone-700/80">
-                        <p className="text-sm font-semibold text-stone-800 dark:text-stone-100">
+                      <div className="px-4 py-3.5 border-t-2 border-stone-100 dark:border-stone-700">
+                        <p className="text-sm font-extrabold text-stone-800 dark:text-stone-100">
                           {studyToolMode === 'quiz' ? 'Quiz generator' : studyToolMode === 'flashcards' ? 'Flashcard generator' : 'Crossword generator'}
                         </p>
-                        <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+                        <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5 font-bold">
                           {studyToolMode === 'quiz' ? 'Transform notes into interactive quizzes with multiple choice, true/false & fill-in-the-blank' : studyToolMode === 'flashcards' ? 'Turn study material into flip-card decks for effective memorization' : 'Build vocabulary puzzles from your key terms'}
                         </p>
                       </div>
@@ -1941,8 +1951,8 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                 {quiz && isQuizMode ? (
                   renderQuizTaking()
                 ) : !quiz && (
-                  <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-stone-900/30 border border-stone-200/80 dark:border-stone-600/80 overflow-hidden min-w-0">
-                    <div className="border-b border-stone-200 dark:border-stone-600 bg-gradient-to-r from-amber-50/90 to-orange-50/90 dark:from-amber-900/20 dark:to-orange-900/20 px-4 sm:px-6 py-4">
+                  <div className="bg-white dark:bg-stone-900 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 overflow-hidden min-w-0">
+                    <div className="border-b border-stone-200 dark:border-stone-600 bg-[#FFF4E0] dark:bg-[#FF9600]/10 px-4 sm:px-6 py-4">
                       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
                         <div className="flex items-center gap-2 min-w-0 overflow-x-auto w-full sm:w-auto">
                           <span className="text-xs font-medium text-stone-500 dark:text-stone-400 whitespace-nowrap">Type:</span>
@@ -1951,7 +1961,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                               const locked = user != null && isFreeUser && opt.value !== 'mixed';
                               return (
                                 <button key={opt.value} onClick={() => !locked && setQuizType(opt.value as any)} disabled={locked} title={locked ? 'Pro only' : opt.description}
-                                  className={`px-2 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap ${locked ? 'text-stone-400 dark:text-stone-500 cursor-not-allowed' : quizType === opt.value ? 'bg-white dark:bg-stone-600 text-amber-700 dark:text-amber-300 shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'}`}>
+                                  className={`px-2 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap ${locked ? 'text-stone-400 dark:text-stone-500 cursor-not-allowed' : quizType === opt.value ? 'bg-[#FFF4E0] dark:bg-[#FF9600]/10 text-[#FF9600] font-extrabold border-b-2 border-[#FF9600]' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'}`}>
                                   {opt.label}{locked && <span className="ml-1 text-[9px]">🔒</span>}
                                 </button>
                               );
@@ -1965,7 +1975,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                               const locked = user != null && isFreeUser && opt.value !== 'medium';
                               return (
                                 <button key={opt.value} onClick={() => !locked && setDifficulty(opt.value as any)} disabled={locked} title={locked ? 'Pro only' : opt.description}
-                                  className={`px-2 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap ${locked ? 'text-stone-400 dark:text-stone-500 cursor-not-allowed' : difficulty === opt.value ? 'bg-white dark:bg-stone-600 text-amber-700 dark:text-amber-300 shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'}`}>
+                                  className={`px-2 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap ${locked ? 'text-stone-400 dark:text-stone-500 cursor-not-allowed' : difficulty === opt.value ? 'bg-[#FFF4E0] dark:bg-[#FF9600]/10 text-[#FF9600] font-extrabold border-b-2 border-[#FF9600]' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-600'}`}>
                                   {opt.label}{locked && <span className="ml-1 text-[9px]">🔒</span>}
                                 </button>
                               );
@@ -1975,26 +1985,26 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-medium text-stone-500 dark:text-stone-400 whitespace-nowrap">Questions:</span>
                           <select value={user != null && isFreeUser ? 10 : questionCount} onChange={(e) => setQuestionCount(Number(e.target.value))} disabled={user != null && isFreeUser}
-                            className={`px-2 py-1.5 bg-stone-100 dark:bg-stone-700 border-0 rounded-lg text-xs font-medium text-stone-700 dark:text-stone-300 focus:ring-2 focus:ring-amber-200 dark:focus:ring-amber-800 ${user != null && isFreeUser ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                            className={`px-2 py-1.5 bg-stone-100 dark:bg-stone-700 border-0 rounded-lg text-xs font-medium text-stone-700 dark:text-stone-300 border-2 border-stone-200 dark:border-stone-600 focus:border-[#FF9600] ${user != null && isFreeUser ? 'opacity-50 cursor-not-allowed' : ''}`}>
                             {user != null && isFreeUser ? <option value={10}>10</option> : [5, 10, 15, 20, 25].map(n => <option key={n} value={n}>{n}</option>)}
                           </select>
                           {user != null && isFreeUser && <span className="text-[9px]">🔒</span>}
                         </div>
                         <button onClick={handleGenerate} disabled={isLoading || !inputText.trim() || wordCount < 100 || wordCount > quizUsage.maxWordsPerGeneration || quizExhausted}
-                          className="w-full sm:w-auto sm:ml-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-amber-200/50 dark:shadow-amber-900/30 text-sm">
+                          className="w-full sm:w-auto sm:ml-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-[#58CC02] text-white font-bold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm">
                           {isLoading ? (<><svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Generating...</span></>) : (<><span>✨</span><span>Generate Quiz</span><span>→</span></>)}
                         </button>
                       </div>
                     </div>
                     <div className="flex flex-col">
                       <div className="px-4 sm:px-6 py-3 sm:py-3.5 border-b border-stone-200 dark:border-stone-600 bg-stone-50/60 dark:bg-stone-700/30 flex items-center justify-between">
-                        <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-amber-500 shadow-sm shadow-amber-500/30"></div><span className="text-sm font-semibold text-stone-700 dark:text-stone-300">Source Material</span></div>
+                        <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-[#FF9600]"></div><span className="text-sm font-semibold text-stone-700 dark:text-stone-300">Source Material</span></div>
                         <div className="flex items-center gap-1">
-                          <button onClick={() => fileInputRef.current?.click()} disabled={isParsingDoc} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-800/50 font-semibold text-xs transition-colors disabled:opacity-50 border border-amber-200 dark:border-amber-700" title="Upload PDF, Word, or TXT">
-                            {isParsingDoc ? <span className="w-3.5 h-3.5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" /> : <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>}
+                          <button onClick={() => fileInputRef.current?.click()} disabled={isParsingDoc} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#FFF4E0] dark:bg-[#FF9600]/10 text-[#FF9600] hover:bg-[#FF9600]/20 font-extrabold text-xs transition-colors disabled:opacity-50 border-2 border-[#FF9600]/30 rounded-xl" title="Upload PDF, Word, or TXT">
+                            {isParsingDoc ? <span className="w-3.5 h-3.5 border-2 border-[#FF9600] border-t-transparent rounded-full animate-spin" /> : <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>}
                             {isParsingDoc ? 'Parsing...' : 'Upload Document'}
                           </button>
-                          <button onClick={handlePaste} className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-lg transition-colors" title="Paste from clipboard"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg></button>
+                          <button onClick={handlePaste} className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-[#FF9600] dark:hover:text-[#FF9600] hover:bg-[#FFF4E0] dark:hover:bg-[#FF9600]/10 rounded-lg transition-colors" title="Paste from clipboard"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg></button>
                           <button onClick={handleClear} className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" title="Clear text"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                         </div>
                       </div>
@@ -2005,10 +2015,10 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                       </div>
                       <div className="px-4 sm:px-6 py-3 sm:py-3.5 border-t border-stone-200 dark:border-stone-600 bg-stone-50/80 dark:bg-stone-800/50">
                         <div className="flex items-center justify-between text-xs sm:text-sm text-stone-500 dark:text-stone-400">
-                          <span className={`${wordCount < 100 ? 'text-amber-600 dark:text-amber-400' : wordCount > quizUsage.maxWordsPerGeneration ? 'text-red-600' : ''}`}>
+                          <span className={`${wordCount < 100 ? 'text-[#FF9600]' : wordCount > quizUsage.maxWordsPerGeneration ? 'text-red-600' : ''}`}>
                             {wordCount.toLocaleString()} words{wordCount >= 100 && wordCount <= quizUsage.maxWordsPerGeneration && ` / ${quizUsage.maxWordsPerGeneration.toLocaleString()} max`}
                           </span>
-                          {wordCount < 100 && <span className="text-amber-600 dark:text-amber-400">Minimum 100 words</span>}
+                          {wordCount < 100 && <span className="text-[#FF9600]">Minimum 100 words</span>}
                           {wordCount > quizUsage.maxWordsPerGeneration && <span className="text-red-600">Exceeds {quizUsage.maxWordsPerGeneration.toLocaleString()} word limit{isFreeUser && ' (upgrade for 15,000)'}</span>}
                         </div>
                       </div>
@@ -2048,8 +2058,8 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                     />
                   </div>
                 ) : (
-                  <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-stone-900/30 border border-stone-200/80 dark:border-stone-600/80 overflow-hidden min-w-0">
-                    <div className="border-b border-stone-200 dark:border-stone-600 bg-gradient-to-r from-amber-50/90 to-orange-50/90 dark:from-amber-900/20 dark:to-orange-900/20 px-4 sm:px-6 py-4">
+                  <div className="bg-white dark:bg-stone-900 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 overflow-hidden min-w-0">
+                    <div className="border-b border-stone-200 dark:border-stone-600 bg-[#FFF4E0] dark:bg-[#FF9600]/10 px-4 sm:px-6 py-4">
                       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-medium text-stone-500 dark:text-stone-400">Cards:</span>
@@ -2062,12 +2072,12 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                         <div className="flex items-center gap-2 w-full sm:w-auto sm:ml-auto">
                           <button
                             onClick={() => setFlashcardResult({ title: 'My Flashcards', cards: [] })}
-                            className="flex-1 sm:flex-none px-4 py-2 sm:py-2.5 bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400 font-semibold rounded-xl transition-all hover:bg-violet-200 dark:hover:bg-violet-900/50 flex items-center justify-center gap-2 text-sm"
+                            className="flex-1 sm:flex-none px-4 py-2 sm:py-2.5 bg-[#A560E8] text-white font-bold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all flex items-center justify-center gap-2 text-sm"
                           >
                             ✏️ Create from Scratch
                           </button>
                           <button onClick={handleGenerate} disabled={isLoading || !inputText.trim() || wordCount < 50 || wordCount > quizUsage.maxWordsPerGeneration || quizExhausted}
-                            className="flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-amber-200/50 dark:shadow-amber-900/30 text-sm">
+                            className="flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-2.5 bg-[#58CC02] text-white font-bold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm">
                             {isLoading ? (<><svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Generating...</span></>) : (<>🃏 Generate with AI →</>)}
                           </button>
                         </div>
@@ -2075,13 +2085,13 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                     </div>
                     <div className="flex flex-col">
                       <div className="px-4 sm:px-6 py-3 sm:py-3.5 border-b border-stone-200 dark:border-stone-600 bg-stone-50/60 dark:bg-stone-700/30 flex items-center justify-between">
-                        <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-amber-500 shadow-sm shadow-amber-500/30"></div><span className="text-sm font-semibold text-stone-700 dark:text-stone-300">Source Material</span></div>
+                        <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-[#FF9600]"></div><span className="text-sm font-semibold text-stone-700 dark:text-stone-300">Source Material</span></div>
                         <div className="flex items-center gap-1">
-                          <button onClick={() => fileInputRef.current?.click()} disabled={isParsingDoc} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-800/50 font-semibold text-xs transition-colors disabled:opacity-50 border border-amber-200 dark:border-amber-700" title="Upload PDF, Word, or TXT">
-                            {isParsingDoc ? <span className="w-3.5 h-3.5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" /> : <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>}
+                          <button onClick={() => fileInputRef.current?.click()} disabled={isParsingDoc} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#FFF4E0] dark:bg-[#FF9600]/10 text-[#FF9600] hover:bg-[#FF9600]/20 font-extrabold text-xs transition-colors disabled:opacity-50 border-2 border-[#FF9600]/30 rounded-xl" title="Upload PDF, Word, or TXT">
+                            {isParsingDoc ? <span className="w-3.5 h-3.5 border-2 border-[#FF9600] border-t-transparent rounded-full animate-spin" /> : <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>}
                             {isParsingDoc ? 'Parsing...' : 'Upload Document'}
                           </button>
-                          <button onClick={handlePaste} className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-lg transition-colors" title="Paste"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg></button>
+                          <button onClick={handlePaste} className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-[#FF9600] dark:hover:text-[#FF9600] hover:bg-[#FFF4E0] dark:hover:bg-[#FF9600]/10 rounded-lg transition-colors" title="Paste"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg></button>
                           <button onClick={handleClear} className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" title="Clear"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                         </div>
                       </div>
@@ -2092,8 +2102,8 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                       </div>
                       <div className="px-4 sm:px-6 py-3 sm:py-3.5 border-t border-stone-200 dark:border-stone-600 bg-stone-50/80 dark:bg-stone-800/50">
                         <div className="flex items-center justify-between text-xs sm:text-sm text-stone-500 dark:text-stone-400">
-                          <span className={`${wordCount < 50 ? 'text-amber-600 dark:text-amber-400' : wordCount > quizUsage.maxWordsPerGeneration ? 'text-red-600' : ''}`}>{wordCount.toLocaleString()} words</span>
-                          {wordCount < 50 && <span className="text-amber-600 dark:text-amber-400">Minimum 50 words</span>}
+                          <span className={`${wordCount < 50 ? 'text-[#FF9600]' : wordCount > quizUsage.maxWordsPerGeneration ? 'text-red-600' : ''}`}>{wordCount.toLocaleString()} words</span>
+                          {wordCount < 50 && <span className="text-[#FF9600]">Minimum 50 words</span>}
                         </div>
                       </div>
                     </div>
@@ -2108,26 +2118,26 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                 {crosswordResult && crosswordResult.placedWords?.length > 0 ? (
                   <div className="min-w-0 w-full overflow-x-hidden">
                     <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-                      <h2 className="text-lg font-bold text-stone-800 dark:text-stone-100">{crosswordResult.title}</h2>
+                      <h2 className="text-lg font-extrabold text-stone-800 dark:text-stone-100" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>{crosswordResult.title}</h2>
                       <div className="flex items-center gap-2 flex-wrap">
                         {isPaidUser ? (
                           <>
-                            <button onClick={exportCrosswordToPDF} className="px-3 py-1.5 bg-red-50 text-red-700 font-medium rounded-lg hover:bg-red-100 transition-colors flex items-center gap-1.5 text-xs">
+                            <button onClick={exportCrosswordToPDF} className="px-3 py-1.5 bg-[#FF4B4B] text-white font-bold rounded-xl border-2 border-b-4 border-[#E04343] active:border-b-2 active:translate-y-0.5 transition-all flex items-center gap-1.5 text-xs">
                               <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
                               PDF
                             </button>
-                            <button onClick={exportCrosswordToDOCX} className="px-3 py-1.5 bg-violet-50 text-violet-700 font-medium rounded-lg hover:bg-violet-100 transition-colors flex items-center gap-1.5 text-xs">
+                            <button onClick={exportCrosswordToDOCX} className="px-3 py-1.5 bg-[#A560E8] text-white font-bold rounded-xl border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all flex items-center gap-1.5 text-xs">
                               <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd"/></svg>
                               DOCX
                             </button>
                           </>
                         ) : (
                           <>
-                            <button onClick={() => setShowExportUpgradeModal(true)} className="px-3 py-1.5 bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 font-medium rounded-lg flex items-center gap-1.5 text-xs cursor-pointer">
+                            <button onClick={() => setShowExportUpgradeModal(true)} className="px-3 py-1.5 bg-stone-200 dark:bg-stone-700 text-stone-500 dark:text-stone-400 font-bold rounded-xl border-2 border-b-4 border-stone-300 dark:border-stone-500 flex items-center gap-1.5 text-xs cursor-pointer">
                               <svg className="w-3 h-3 text-amber-500 dark:text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/></svg>
                               PDF
                             </button>
-                            <button onClick={() => setShowExportUpgradeModal(true)} className="px-3 py-1.5 bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 font-medium rounded-lg flex items-center gap-1.5 text-xs cursor-pointer">
+                            <button onClick={() => setShowExportUpgradeModal(true)} className="px-3 py-1.5 bg-stone-200 dark:bg-stone-700 text-stone-500 dark:text-stone-400 font-bold rounded-xl border-2 border-b-4 border-stone-300 dark:border-stone-500 flex items-center gap-1.5 text-xs cursor-pointer">
                               <svg className="w-3 h-3 text-amber-500 dark:text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/></svg>
                               DOCX
                             </button>
@@ -2137,16 +2147,16 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                           <>
                             <button
                               onClick={handleCrosswordHint}
-                              className="px-4 py-2 text-sm font-medium bg-violet-50 text-violet-700 rounded-lg hover:bg-violet-100 transition-colors flex items-center gap-1.5"
+                              className="px-4 py-2 text-sm font-bold bg-[#A560E8] text-white rounded-xl border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all flex items-center gap-1.5"
                               title="Reveal one letter from the selected word"
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
                               Hint {hintsUsed > 0 && <span className="text-xs bg-violet-200 text-violet-800 rounded-full px-1.5 py-0.5 font-bold">{hintsUsed}</span>}
                             </button>
-                            <button onClick={() => setCrosswordChecked(true)} className="px-4 py-2 text-sm font-semibold bg-amber-600 hover:bg-amber-500 text-white rounded-lg">Check Answers</button>
+                            <button onClick={() => setCrosswordChecked(true)} className="px-4 py-2 text-sm font-bold uppercase tracking-wide bg-[#58CC02] text-white rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all">Check Answers</button>
                           </>
                         )}
-                        <button onClick={() => { setCrosswordResult(null); setCrosswordAnswers({}); setCrosswordChecked(false); setSelectedClue(null); setSelectedCell(null); setSelectedDirection('across'); setHintsUsed(0); }} className="px-4 py-2 text-sm text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/30 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-800/50 font-medium">New Puzzle</button>
+                        <button onClick={() => { setCrosswordResult(null); setCrosswordAnswers({}); setCrosswordChecked(false); setSelectedClue(null); setSelectedCell(null); setSelectedDirection('across'); setHintsUsed(0); }} className="px-4 py-2 text-sm text-white bg-[#FF9600] rounded-xl border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all font-bold">New Puzzle</button>
                       </div>
                     </div>
                     {crosswordChecked && (() => {
@@ -2155,9 +2165,9 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                       const correct = attemptedWords.filter((pw: any) => (crosswordAnswers[`word-${pw.number}`] || '').toUpperCase() === pw.word).length;
                       const notAttempted = crosswordResult.placedWords.length - total;
                       return (
-                        <div className={`mb-4 p-4 rounded-2xl text-center ${total === 0 ? 'bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-600' : correct === total ? 'bg-green-50 border border-green-200' : 'bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800'}`}>
+                        <div className={`mb-4 p-4 rounded-2xl text-center ${total === 0 ? 'bg-stone-50 dark:bg-stone-800 border-2 border-b-4 border-stone-200 dark:border-stone-600' : correct === total ? 'bg-[#EAFFD6] border-2 border-b-4 border-[#58CC02]/30' : 'bg-[#FFF4E0] dark:bg-amber-900/20 border-2 border-b-4 border-[#FF9600]/30'}`}>
                           {total === 0 ? <span className="text-3xl mb-1 block">✏️</span> : correct === total ? (
-                            <video src="/happymascot.mp4" autoPlay muted playsInline loop className="w-16 h-16 mx-auto mb-1 object-contain rounded-xl border-2 border-violet-300 dark:border-violet-500 shadow-lg overflow-hidden ring-2 ring-violet-400/30" />
+                            <img src="/mascot-celebrating.gif" alt="Celebrating mascot" className="w-16 h-16 mx-auto mb-1 object-contain rounded-xl border-2 border-b-4 border-[#58CC02]/50 dark:border-[#58CC02]/40 overflow-hidden" />
                           ) : <span className="text-3xl mb-1 block">📊</span>}
                           {total === 0 ? (
                             <>
@@ -2179,7 +2189,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 min-w-0">
                       {/* Crossword Grid - Interactive */}
                       <div 
-                        className="bg-white dark:bg-stone-600 rounded-2xl border border-stone-200 dark:border-stone-600 p-3 sm:p-4 overflow-x-auto overflow-y-visible focus:outline-none focus:ring-2 focus:ring-amber-400 dark:focus:ring-amber-600 min-w-0"
+                        className="bg-white dark:bg-stone-600 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-600 p-3 sm:p-4 overflow-x-auto overflow-y-visible focus:outline-none focus:ring-2 focus:ring-[#1CB0F6] dark:focus:ring-[#1CB0F6] min-w-0"
                         tabIndex={0}
                         onKeyDown={handleCrosswordKeyDown}
                       >
@@ -2203,9 +2213,9 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                                   }
                                 }
                                 
-                                let cellColor = 'bg-white dark:bg-stone-600 border-stone-300 dark:border-stone-600 hover:border-amber-300 dark:hover:border-amber-600';
-                                if (isSelectedCell) cellColor = 'bg-amber-200 dark:bg-amber-800/50 border-amber-500 ring-2 ring-amber-400 dark:ring-amber-600';
-                                else if (isHighlighted) cellColor = 'bg-amber-50 dark:bg-amber-900/30 border-amber-400 dark:border-amber-600';
+                                let cellColor = 'bg-white dark:bg-stone-600 border-stone-300 dark:border-stone-600 hover:border-[#1CB0F6]/50 dark:hover:border-[#1CB0F6]/50';
+                                if (isSelectedCell) cellColor = 'bg-[#DDF4FF] dark:bg-[#1CB0F6]/20 border-[#1CB0F6] ring-2 ring-[#1CB0F6]/40';
+                                else if (isHighlighted) cellColor = 'bg-[#DDF4FF]/50 dark:bg-[#1CB0F6]/10 border-[#1CB0F6]/60 dark:border-[#1CB0F6]/50';
                                 
                                 if (crosswordChecked) {
                                   const wordsThrough = crosswordResult.placedWords.filter((pw: any) => {
@@ -2242,7 +2252,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                           if (words.length === 0) return null;
                           return (
                             <div key={dir}>
-                              <h4 className="text-sm font-bold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-2">{dir === 'across' ? 'Across →' : 'Down ↓'}</h4>
+                              <h4 className="text-sm font-extrabold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-2" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>{dir === 'across' ? 'Across →' : 'Down ↓'}</h4>
                               <div className="space-y-2">
                                 {words.map((pw: any) => {
                                   const answerKey = `word-${pw.number}`;
@@ -2262,15 +2272,15 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                                           setSelectedCell(null);
                                         }
                                       }}
-                                      className={`p-3 rounded-xl border cursor-pointer transition-all ${
-                                        selectedClue === pw.number ? 'border-amber-400 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/30 shadow-sm' : 
-                                        isCorrectCW ? 'border-green-300 bg-green-50' : 
-                                        isWrongCW ? 'border-red-300 bg-red-50' : 
+                                      className={`p-3 rounded-xl border-2 border-b-4 cursor-pointer transition-all ${
+                                        selectedClue === pw.number ? 'border-[#1CB0F6] dark:border-[#1CB0F6] bg-[#DDF4FF] dark:bg-[#1CB0F6]/10' :
+                                        isCorrectCW ? 'border-[#58CC02]/40 bg-[#EAFFD6]' :
+                                        isWrongCW ? 'border-[#FF4B4B]/40 bg-[#FFE8E8]' :
                                         isNotAttempted ? 'border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800 opacity-60' :
                                         'border-stone-200 dark:border-stone-600 hover:border-stone-300 dark:hover:border-stone-500 bg-white dark:bg-stone-700'
                                       }`}>
                                       <div className="flex items-start gap-2 mb-2">
-                                        <span className="text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/50 rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0">{pw.number}</span>
+                                        <span className="text-xs font-extrabold text-white bg-[#1CB0F6] rounded-lg w-6 h-6 flex items-center justify-center flex-shrink-0 border-b-2 border-[#1899D6]">{pw.number}</span>
                                         <p className="text-sm text-stone-700 dark:text-stone-300">{pw.clue} <span className="text-stone-400 dark:text-stone-500">({pw.word.length} letters)</span></p>
                                       </div>
                                       <input 
@@ -2317,8 +2327,8 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                     </div>
                   </div>
                 ) : (
-                  <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl shadow-stone-100/50 dark:shadow-stone-900/30 border border-stone-200/80 dark:border-stone-600/80 overflow-hidden min-w-0">
-                    <div className="border-b border-stone-200 dark:border-stone-600 bg-gradient-to-r from-amber-50/90 to-orange-50/90 dark:from-amber-900/20 dark:to-orange-900/20 px-4 sm:px-6 py-4">
+                  <div className="bg-white dark:bg-stone-900 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 overflow-hidden min-w-0">
+                    <div className="border-b border-stone-200 dark:border-stone-600 bg-[#FFF4E0] dark:bg-[#FF9600]/10 px-4 sm:px-6 py-4">
                       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-medium text-stone-500 dark:text-stone-400">Words:</span>
@@ -2329,20 +2339,20 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                           {user != null && isFreeUser && <span className="text-[9px]">🔒</span>}
                         </div>
                         <button onClick={handleGenerate} disabled={isLoading || !inputText.trim() || wordCount < 50 || wordCount > quizUsage.maxWordsPerGeneration || quizExhausted}
-                          className="w-full sm:w-auto sm:ml-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-amber-200/50 dark:shadow-amber-900/30 text-sm">
+                          className="w-full sm:w-auto sm:ml-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-[#58CC02] text-white font-bold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm">
                           {isLoading ? (<><svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Generating...</span></>) : (<>🧩 Generate Crossword →</>)}
                         </button>
                       </div>
                     </div>
                     <div className="flex flex-col">
                       <div className="px-4 sm:px-6 py-3 sm:py-3.5 border-b border-stone-200 dark:border-stone-600 bg-stone-50/60 dark:bg-stone-700/30 flex items-center justify-between">
-                        <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-amber-500 shadow-sm shadow-amber-500/30"></div><span className="text-sm font-semibold text-stone-700 dark:text-stone-300">Source Material</span></div>
+                        <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-[#FF9600]"></div><span className="text-sm font-semibold text-stone-700 dark:text-stone-300">Source Material</span></div>
                         <div className="flex items-center gap-1">
-                          <button onClick={() => fileInputRef.current?.click()} disabled={isParsingDoc} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-800/50 font-semibold text-xs transition-colors disabled:opacity-50 border border-amber-200 dark:border-amber-700" title="Upload PDF, Word, or TXT">
-                            {isParsingDoc ? <span className="w-3.5 h-3.5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" /> : <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>}
+                          <button onClick={() => fileInputRef.current?.click()} disabled={isParsingDoc} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#FFF4E0] dark:bg-[#FF9600]/10 text-[#FF9600] hover:bg-[#FF9600]/20 font-extrabold text-xs transition-colors disabled:opacity-50 border-2 border-[#FF9600]/30 rounded-xl" title="Upload PDF, Word, or TXT">
+                            {isParsingDoc ? <span className="w-3.5 h-3.5 border-2 border-[#FF9600] border-t-transparent rounded-full animate-spin" /> : <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>}
                             {isParsingDoc ? 'Parsing...' : 'Upload Document'}
                           </button>
-                          <button onClick={handlePaste} className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-lg transition-colors" title="Paste"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg></button>
+                          <button onClick={handlePaste} className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-[#FF9600] dark:hover:text-[#FF9600] hover:bg-[#FFF4E0] dark:hover:bg-[#FF9600]/10 rounded-lg transition-colors" title="Paste"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg></button>
                           <button onClick={handleClear} className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" title="Clear"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                         </div>
                       </div>
@@ -2353,8 +2363,8 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                       </div>
                       <div className="px-4 sm:px-6 py-3 sm:py-3.5 border-t border-stone-200 dark:border-stone-600 bg-stone-50/80 dark:bg-stone-800/50">
                         <div className="flex items-center justify-between text-xs sm:text-sm text-stone-500 dark:text-stone-400">
-                          <span className={`${wordCount < 50 ? 'text-amber-600 dark:text-amber-400' : wordCount > quizUsage.maxWordsPerGeneration ? 'text-red-600' : ''}`}>{wordCount.toLocaleString()} words</span>
-                          {wordCount < 50 && <span className="text-amber-600 dark:text-amber-400">Minimum 50 words</span>}
+                          <span className={`${wordCount < 50 ? 'text-[#FF9600]' : wordCount > quizUsage.maxWordsPerGeneration ? 'text-red-600' : ''}`}>{wordCount.toLocaleString()} words</span>
+                          {wordCount < 50 && <span className="text-[#FF9600]">Minimum 50 words</span>}
                         </div>
                       </div>
                     </div>
@@ -2365,18 +2375,18 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
 
             {/* Error Message */}
             {error && (
-              <div className="mt-4 mx-3 sm:mx-0 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
-                <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-                  <span className="text-red-600 text-xs">!</span>
+              <div className="mt-4 mx-3 sm:mx-0 p-3 sm:p-4 bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-2 border-[#FF4B4B]/30 rounded-2xl flex items-start gap-3">
+                <div className="w-6 h-6 rounded-lg bg-[#FF4B4B] flex items-center justify-center flex-shrink-0 border-b-2 border-[#E04343]">
+                  <span className="text-white text-xs font-extrabold">!</span>
                 </div>
                 <div className="flex-1">
-                  <p className="text-red-800 dark:text-red-200 text-sm">{error}</p>
+                  <p className="text-stone-800 dark:text-stone-200 text-sm font-bold">{error}</p>
                   {(quizExhausted || (error && error.includes('Upgrade'))) && user && (
                     <>
-                      <p className="text-red-600 dark:text-red-400 text-xs mt-1">{getResetsInText(quizUsage.daysUntilReset)}</p>
+                      <p className="text-[#FF4B4B] text-xs mt-1 font-bold">{getResetsInText(quizUsage.daysUntilReset)}</p>
                       <button
                         onClick={() => onNavigate('pricing')}
-                        className="mt-2 px-4 py-1.5 bg-amber-600 hover:bg-amber-500 text-white text-sm font-medium rounded-lg transition-all inline-flex items-center gap-2"
+                        className="mt-2 px-4 py-2 bg-[#FF9600] text-white text-sm font-bold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all inline-flex items-center gap-2"
                       >
                         👑 View Plans
                       </button>
@@ -2389,14 +2399,14 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
             {/* Lock Overlay for Free Users who exhausted their limit */}
             {user && quizExhausted && !quiz && !flashcardResult && !crosswordResult && (
               <div className="mt-6 mx-3 sm:mx-0">
-                <div className="bg-amber-600 hover:bg-amber-500 rounded-2xl p-6 text-white text-center">
+                <div className="bg-[#FF9600] rounded-2xl p-6 text-white text-center border-2 border-b-4 border-[#D97F00]">
                   <span className="text-4xl mb-3 block">🔒</span>
-                  <h3 className="text-xl font-bold mb-2">Monthly Limit Reached</h3>
-                  <p className="text-amber-100 mb-1">You've used all your quiz generations this period. Upgrade to Pro for more!</p>
-                  <p className="text-amber-200/90 text-sm mb-4">{getResetsInText(quizUsage.daysUntilReset)}</p>
+                  <h3 className="text-xl font-extrabold mb-2">Monthly Limit Reached</h3>
+                  <p className="text-white/90 mb-1 font-bold">You've used all your quiz generations this period. Upgrade to Pro for more!</p>
+                  <p className="text-white/70 text-sm mb-4 font-bold">{getResetsInText(quizUsage.daysUntilReset)}</p>
                   <button
                     onClick={() => onNavigate('pricing')}
-                    className="px-6 py-2.5 bg-white dark:bg-stone-600 text-amber-700 dark:text-amber-800 font-semibold rounded-xl hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-all inline-flex items-center gap-2"
+                    className="px-6 py-2.5 bg-white text-[#FF9600] font-extrabold rounded-xl border-2 border-b-4 border-stone-200 active:border-b-2 active:translate-y-0.5 transition-all inline-flex items-center gap-2 uppercase tracking-wide"
                   >
                     👑 Upgrade Now
                   </button>
@@ -2408,20 +2418,20 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
             {!showLockedOutLayout && !quiz && !flashcardResult && !crosswordResult && (
               <div className="mt-8 sm:mt-10">
                 <div className="flex items-center gap-2 mb-4">
-                  <h2 className="text-lg font-bold text-stone-800 dark:text-stone-100">See how it works</h2>
-                  <span className="h-px flex-1 max-w-32 bg-gradient-to-r from-amber-300/60 to-transparent dark:from-amber-500/40 rounded-full" />
+                  <h2 className="text-lg font-extrabold text-stone-800 dark:text-stone-100">See how it works</h2>
+                  <span className="h-px flex-1 max-w-32 bg-[#FF9600]/30 rounded-full" />
                 </div>
-                <div className="relative bg-white dark:bg-stone-800 rounded-2xl overflow-hidden shadow-xl shadow-stone-200/50 dark:shadow-stone-900/50 border border-stone-200/60 dark:border-stone-600/50 max-w-3xl mx-auto">
-                  <div className="bg-gradient-to-br from-amber-50/60 to-orange-50/60 dark:from-amber-900/25 dark:to-orange-900/25 flex items-center justify-center aspect-video min-h-[200px] sm:min-h-[320px]">
+                <div className="bg-white dark:bg-stone-900 rounded-2xl overflow-hidden border-2 border-b-4 border-stone-200 dark:border-stone-700 max-w-3xl mx-auto">
+                  <div className="bg-[#FFF4E0] dark:bg-[#FF9600]/10 flex items-center justify-center aspect-video min-h-[200px] sm:min-h-[320px]">
                     <video key={studyToolMode} autoPlay loop muted playsInline className="w-full h-full object-contain" title={studyToolMode === 'quiz' ? 'WriteScholar AI Quiz Generator — Turn notes into practice tests' : studyToolMode === 'flashcards' ? 'WriteScholar Study Pack — AI flashcard generator from notes' : 'WriteScholar Crossword Generator — Create study puzzles from notes'} aria-label={studyToolMode === 'quiz' ? 'WriteScholar AI Quiz Generator — Turn notes into practice tests' : studyToolMode === 'flashcards' ? 'WriteScholar Study Pack — AI flashcard generator from notes' : 'WriteScholar Crossword Generator — Create study puzzles from notes'}>
                       <source src={studyToolMode === 'quiz' ? '/writescholar-quiz-generator-demo.mp4' : studyToolMode === 'flashcards' ? '/writescholar-flashcards-demo.mp4' : '/writescholar-crossword-demo.mp4'} type="video/mp4" />
                     </video>
                   </div>
-                  <div className="px-4 py-3.5 border-t border-stone-100 dark:border-stone-700/80">
-                    <p className="text-sm font-semibold text-stone-800 dark:text-stone-100">
+                  <div className="px-4 py-3.5 border-t-2 border-stone-100 dark:border-stone-700">
+                    <p className="text-sm font-extrabold text-stone-800 dark:text-stone-100">
                       {studyToolMode === 'quiz' ? 'Quiz generator' : studyToolMode === 'flashcards' ? 'Flashcard generator' : 'Crossword generator'}
                     </p>
-                    <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+                    <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5 font-bold">
                       {studyToolMode === 'quiz' ? 'Transform notes into interactive quizzes with multiple choice, true/false & fill-in-the-blank' : studyToolMode === 'flashcards' ? 'Turn study material into flip-card decks for effective memorization' : 'Build vocabulary puzzles from your key terms'}
                     </p>
                   </div>
@@ -2432,19 +2442,19 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
             {/* Plan Info for free and Pro users */}
             {user && isFreeUser && !quizExhausted && !quiz && !flashcardResult && !crosswordResult && (
               <div className="mt-6 mx-3 sm:mx-0">
-<div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-5 flex items-center justify-between flex-wrap gap-3">
+<div className="bg-[#FFF4E0] dark:bg-[#FF9600]/10 border-2 border-b-4 border-[#FF9600]/30 rounded-2xl p-5 flex items-center justify-between flex-wrap gap-3">
                     <div className="flex items-center gap-3">
                     <span className="text-2xl">🧠</span>
                     <div>
                       <>
-                        <p className="text-amber-800 dark:text-amber-200 font-medium text-sm">
+                        <p className="text-stone-800 dark:text-stone-200 font-bold text-sm">
                           Free plan: {quizUsage.generationsRemaining} of {quizUsage.generationLimit} quizzes remaining • Mixed type • Medium difficulty • 10 questions • Max {(quizUsage.maxWordsPerGeneration || 5000).toLocaleString()} words
                         </p>
-                        <p className="text-amber-600 dark:text-amber-400 text-xs mt-0.5">Upgrade to Pro for all quiz types, difficulties, and up to 15,000 words • {getResetsInText(quizUsage.daysUntilReset)}</p>
+                        <p className="text-[#FF9600] text-xs mt-0.5 font-bold">Upgrade to Pro for all quiz types, difficulties, and up to 15,000 words • {getResetsInText(quizUsage.daysUntilReset)}</p>
                       </>
                     </div>
                   </div>
-                  <button onClick={() => onNavigate('pricing')} className="px-4 py-1.5 bg-amber-600 text-white text-xs font-semibold rounded-lg hover:bg-amber-500 transition-all">
+                  <button onClick={() => onNavigate('pricing')} className="px-4 py-2 bg-[#FF9600] text-white text-xs font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all">
                     Upgrade
                   </button>
                 </div>
@@ -2457,35 +2467,41 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
 
         {/* Features Section - hidden when loaded from recents */}
         {!showMinimalUI && (
-        <div className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 bg-white dark:bg-stone-800 border-t border-stone-200 dark:border-stone-600">
+        <div className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 bg-white dark:bg-stone-900 border-t-2 border-stone-200 dark:border-stone-700" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
           <div className="max-w-5xl mx-auto">
-            <h2 className="text-2xl sm:text-3xl font-bold text-center text-stone-800 dark:text-stone-100 mb-8 sm:mb-12">
-              Why Use Our <span className="text-amber-600 dark:text-amber-400">Study Tools</span>?
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-center text-stone-800 dark:text-stone-100 mb-8 sm:mb-12">
+              Why Use Our <span className="text-[#FF9600]">Study Tools</span>?
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
               {[
                 {
                   icon: '📝',
                   title: 'Interactive Quizzes',
-                  description: 'Multiple choice, true/false, and fill-in-the-blank questions to test your understanding.'
+                  description: 'Multiple choice, true/false, and fill-in-the-blank questions to test your understanding.',
+                  color: 'bg-[#1CB0F6]',
+                  border: 'border-[#1899D6]',
                 },
                 {
                   icon: '🃏',
                   title: 'Flashcard Decks',
-                  description: 'Flip-card study sets with mastery tracking to memorize key concepts efficiently.'
+                  description: 'Flip-card study sets with mastery tracking to memorize key concepts efficiently.',
+                  color: 'bg-[#FF9600]',
+                  border: 'border-[#D97F00]',
                 },
                 {
                   icon: '🧩',
                   title: 'Crossword Puzzles',
-                  description: 'Fun vocabulary-building puzzles generated from your study material.'
+                  description: 'Fun vocabulary-building puzzles generated from your study material.',
+                  color: 'bg-[#58CC02]',
+                  border: 'border-[#46A302]',
                 }
               ].map((feature, idx) => (
-                <div key={idx} className="bg-gradient-to-br from-stone-50 to-white dark:from-stone-800 dark:to-stone-700 p-6 rounded-2xl border border-stone-200 dark:border-stone-600 hover:shadow-lg transition-shadow">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center mb-4 shadow-lg shadow-amber-200/50 dark:shadow-amber-900/30 text-2xl">
+                <div key={idx} className="bg-white dark:bg-stone-800 p-6 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 hover:border-stone-300 dark:hover:border-stone-600 transition-all">
+                  <div className={`w-12 h-12 rounded-xl ${feature.color} border-2 border-b-4 ${feature.border} flex items-center justify-center mb-4 text-2xl`}>
                     {feature.icon}
                   </div>
-                  <h3 className="text-lg font-semibold text-stone-800 dark:text-stone-100 mb-2">{feature.title}</h3>
-                  <p className="text-stone-600 dark:text-stone-400 text-sm leading-relaxed">{feature.description}</p>
+                  <h3 className="text-lg font-extrabold text-stone-800 dark:text-stone-100 mb-2">{feature.title}</h3>
+                  <p className="text-stone-500 dark:text-stone-400 text-sm leading-relaxed font-bold">{feature.description}</p>
                 </div>
               ))}
             </div>
@@ -2497,22 +2513,22 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
       {/* Export Upgrade Modal */}
       {showExportUpgradeModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
-          <div className="bg-white dark:bg-stone-600 rounded-2xl shadow-2xl max-w-md w-full p-6">
+          <div className="bg-white dark:bg-stone-900 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 max-w-md w-full p-6" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
             <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-amber-600 dark:text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+              <div className="w-16 h-16 bg-[#FFF4E0] dark:bg-[#FF9600]/10 rounded-2xl border-2 border-b-4 border-[#FF9600]/30 flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-[#FF9600]" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100 mb-2">Unlock Export Feature</h3>
-              <p className="text-stone-600 dark:text-stone-400">
+              <h3 className="text-xl font-extrabold text-stone-800 dark:text-stone-100 mb-2">Unlock Export Feature</h3>
+              <p className="text-stone-500 dark:text-stone-400 font-bold">
                 Export your quizzes, flashcards, and crosswords to PDF or Word documents with a paid plan.
               </p>
             </div>
-            
-            <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4 mb-6 border border-amber-200 dark:border-amber-800">
-              <h4 className="font-semibold text-amber-900 dark:text-amber-200 mb-3">Paid Plan Benefits:</h4>
-              <ul className="space-y-2 text-sm text-amber-800 dark:text-amber-300">
+
+            <div className="bg-[#FFF4E0] dark:bg-[#FF9600]/10 rounded-xl p-4 mb-6 border-2 border-[#FF9600]/30">
+              <h4 className="font-extrabold text-stone-800 dark:text-stone-200 mb-3">Paid Plan Benefits:</h4>
+              <ul className="space-y-2 text-sm text-stone-700 dark:text-stone-300 font-bold">
                 <li className="flex items-center gap-2">
                   <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -2543,13 +2559,13 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
             <div className="flex gap-3">
               <button
                 onClick={() => setShowExportUpgradeModal(false)}
-                className="flex-1 px-4 py-3 border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-300 rounded-xl hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors font-medium"
+                className="flex-1 px-4 py-3 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 rounded-xl border-2 border-b-4 border-stone-200 dark:border-stone-600 active:border-b-2 active:translate-y-0.5 transition-all font-extrabold"
               >
                 Maybe Later
               </button>
               <button
                 onClick={() => { setShowExportUpgradeModal(false); onNavigate('pricing'); }}
-                className="flex-1 px-4 py-3 bg-amber-600 hover:bg-amber-500 text-white rounded-xl transition-all font-medium"
+                className="flex-1 px-4 py-3 bg-[#58CC02] text-white rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all font-extrabold uppercase tracking-wide"
               >
                 View Plans
               </button>
@@ -2566,59 +2582,59 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
       {/* Logged-out: sign-up modal (same as landing page Study Tools modal) */}
       {showSignupPrompt && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 backdrop-blur-sm p-4">
-          <div className="relative bg-white dark:bg-stone-600 rounded-2xl p-6 sm:p-8 max-w-md w-full mx-4 shadow-2xl animate-fade-in">
+          <div className="relative bg-white dark:bg-stone-900 rounded-2xl p-6 sm:p-8 max-w-md w-full mx-4 border-2 border-b-4 border-stone-200 dark:border-stone-700 animate-fade-in" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
             <button type="button" onClick={() => setShowSignupPrompt(false)} className="absolute top-4 right-4 p-1.5 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-700 rounded-xl transition-colors" aria-label="Close">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
             <div className="flex justify-center mb-4">
-              <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/50 rounded-full flex items-center justify-center">
+              <div className="w-16 h-16 bg-[#FFF4E0] dark:bg-[#FF9600]/10 rounded-2xl border-2 border-b-4 border-[#FF9600]/30 flex items-center justify-center">
                 <span className="text-3xl">{studyToolMode === 'flashcards' ? '🃏' : studyToolMode === 'crossword' ? '🧩' : '📝'}</span>
               </div>
             </div>
-            <h3 className="text-xl font-bold text-stone-800 dark:text-stone-100 text-center mb-2">
+            <h3 className="text-xl font-extrabold text-stone-800 dark:text-stone-100 text-center mb-2">
               {studyToolMode === 'flashcards' ? 'Flashcards Generated' : studyToolMode === 'crossword' ? 'Crossword Generated' : 'Quiz Generated'}
             </h3>
-            <p className="text-stone-500 dark:text-stone-400 text-center text-sm mb-5">
+            <p className="text-stone-500 dark:text-stone-400 text-center text-sm mb-5 font-bold">
               {studyToolMode === 'flashcards' ? 'We\'ve created flip cards from your content' : studyToolMode === 'crossword' ? 'We\'ve created a puzzle from your content' : 'We\'ve created questions from your content'}
             </p>
             <div className="space-y-3 mb-5">
-              <div className="flex items-start p-3.5 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-800">
-                <span className="w-8 h-8 bg-amber-100 dark:bg-amber-900/50 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 mt-0.5">
-                  <svg className="w-4 h-4 text-amber-600 dark:text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+              <div className="flex items-start p-3.5 bg-[#EAFFD6] dark:bg-[#58CC02]/10 rounded-xl border-2 border-[#58CC02]/30">
+                <span className="w-8 h-8 bg-[#58CC02] rounded-lg flex items-center justify-center mr-3 flex-shrink-0 mt-0.5 border-b-2 border-[#46A302]">
+                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </span>
                 <div>
-                  <p className="text-amber-800 dark:text-amber-200 font-semibold text-sm">
+                  <p className="text-stone-800 dark:text-stone-200 font-extrabold text-sm">
                     {studyToolMode === 'flashcards' ? 'Interactive flip cards' : studyToolMode === 'crossword' ? 'Interactive crossword puzzle' : 'Multiple choice & true/false'}
                   </p>
-                  <p className="text-amber-600 dark:text-amber-400 text-xs mt-0.5">
+                  <p className="text-stone-500 dark:text-stone-400 text-xs mt-0.5 font-bold">
                     {studyToolMode === 'flashcards' ? 'Perfect for memorization and quick review' : studyToolMode === 'crossword' ? 'Fun way to learn key vocabulary' : 'Mix question types for better retention'}
                   </p>
                 </div>
               </div>
-              <div className="flex items-start p-3.5 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-800">
-                <span className="w-8 h-8 bg-amber-100 dark:bg-amber-900/50 rounded-lg flex items-center justify-center mr-3 flex-shrink-0 mt-0.5">
-                  <svg className="w-4 h-4 text-amber-600 dark:text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+              <div className="flex items-start p-3.5 bg-[#DDF4FF] dark:bg-[#1CB0F6]/10 rounded-xl border-2 border-[#1CB0F6]/30">
+                <span className="w-8 h-8 bg-[#1CB0F6] rounded-lg flex items-center justify-center mr-3 flex-shrink-0 mt-0.5 border-b-2 border-[#1899D6]">
+                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </span>
                 <div>
-                  <p className="text-amber-800 dark:text-amber-200 font-semibold text-sm">Sign up to generate quizzes</p>
-                  <p className="text-amber-600 dark:text-amber-400 text-xs mt-0.5">Create a free account — upgrade to Pro for unlimited</p>
+                  <p className="text-stone-800 dark:text-stone-200 font-extrabold text-sm">Sign up to generate quizzes</p>
+                  <p className="text-stone-500 dark:text-stone-400 text-xs mt-0.5 font-bold">Create a free account — upgrade to Pro for unlimited</p>
                 </div>
               </div>
             </div>
-            <div className="bg-stone-50 dark:bg-stone-800 rounded-xl p-3.5 mb-6">
-              <p className="text-stone-600 dark:text-stone-400 text-sm text-center leading-relaxed">
-                <span className="font-semibold text-stone-800 dark:text-stone-100">
+            <div className="bg-stone-50 dark:bg-stone-800 rounded-xl p-3.5 mb-6 border-2 border-stone-200 dark:border-stone-700">
+              <p className="text-stone-600 dark:text-stone-400 text-sm text-center leading-relaxed font-bold">
+                <span className="font-extrabold text-stone-800 dark:text-stone-100">
                   {studyToolMode === 'flashcards' ? 'Turn any notes into flashcards.' : studyToolMode === 'crossword' ? 'Turn key terms into puzzles.' : 'Turn any notes into a quiz.'}
                 </span> Great for exam prep and study sessions.
               </p>
             </div>
             <button
               onClick={() => { setShowSignupPrompt(false); onNavigate('signup'); }}
-              className="w-full py-3.5 bg-amber-600 hover:bg-amber-500 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg flex items-center justify-center"
+              className="w-full py-3.5 bg-[#58CC02] text-white font-extrabold rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all flex items-center justify-center uppercase tracking-wide"
             >
               Sign up to unlock Study Tools — it&apos;s free
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

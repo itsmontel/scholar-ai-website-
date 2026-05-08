@@ -14,35 +14,18 @@ import SwiftUI
 import UIKit
 
 // MARK: - Primary
+//
+// The legacy primary button now forwards to WSDuoPrimaryButtonStyle so
+// every existing `.buttonStyle(WSPrimaryButtonStyle())` call site picks
+// up the new 3D Duolingo-feel for free. Keep the old struct around so
+// nothing has to change.
 
 struct WSPrimaryButtonStyle: ButtonStyle {
     var fullWidth: Bool = true
 
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .wsBody(.medium, weight: .bold)
-            .foregroundStyle(.white)
-            .padding(.vertical, 18)
-            .padding(.horizontal, fullWidth ? 0 : 28)
-            .frame(maxWidth: fullWidth ? .infinity : nil)
-            .background(
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(WSGradient.brand)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 18, style: .continuous)
-                            .stroke(Color.white.opacity(0.15), lineWidth: 1)
-                    )
-                    .shadow(
-                        color: Color(hex: 0x7C3AED).opacity(configuration.isPressed ? 0.18 : 0.32),
-                        radius: configuration.isPressed ? 8 : 18,
-                        y: configuration.isPressed ? 3 : 8
-                    )
-            )
-            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
-            .animation(.spring(response: 0.28, dampingFraction: 0.7), value: configuration.isPressed)
-            .onChange(of: configuration.isPressed) { _, pressed in
-                if pressed { Haptics.light() }
-            }
+        WSDuoPrimaryButtonStyle(fullWidth: fullWidth)
+            .makeBody(configuration: configuration)
     }
 }
 
@@ -98,6 +81,12 @@ enum Haptics {
     }
     static func success() {
         UINotificationFeedbackGenerator().notificationOccurred(.success)
+    }
+    static func warning() {
+        UINotificationFeedbackGenerator().notificationOccurred(.warning)
+    }
+    static func error() {
+        UINotificationFeedbackGenerator().notificationOccurred(.error)
     }
     static func selection() {
         UISelectionFeedbackGenerator().selectionChanged()

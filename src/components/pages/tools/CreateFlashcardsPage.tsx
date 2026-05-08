@@ -146,6 +146,16 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
 
   // Study mode: when opening saved flashcards from Quiz History
   const [studyMode, setStudyMode] = useState<{ title: string; cards: { front: string; back: string }[] } | null>(null);
+  const [isMinimalUI] = useState(() => {
+    if (typeof localStorage !== 'undefined') {
+      const v = localStorage.getItem('writescholar_minimal_ui');
+      if (v === 'true') {
+        localStorage.removeItem('writescholar_minimal_ui');
+        return true;
+      }
+    }
+    return false;
+  });
 
   useEffect(() => {
     const saved = localStorage.getItem('savedFlashcards');
@@ -267,21 +277,47 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
 
   // Study mode: show FlashcardViewer (same layout as Create page)
   if (studyMode) {
+    const handleFlashcardBack = () => {
+      try {
+        const returnToStudyPack = sessionStorage.getItem('writescholar_return_to_study_pack_viewer');
+        if (returnToStudyPack) {
+          sessionStorage.removeItem('writescholar_return_to_study_pack_viewer');
+          onNavigate('study-pack-viewer');
+          return;
+        }
+      } catch (_) {}
+      onNavigate('dashboard');
+    };
+
     return (
-      <div className="relative min-h-screen overflow-x-hidden">
+      <div className="relative min-h-screen overflow-x-hidden" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
         <WriteScholarEditorialBackgroundLayers position="fixed" />
-        <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="create-flashcards" sticky />
-        <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl sm:text-3xl font-bold text-stone-800 dark:text-stone-100">Study Flashcards</h1>
+        {isMinimalUI ? (
+          <div className="sticky top-0 z-50 bg-white/95 dark:bg-stone-900/95 backdrop-blur-sm border-b-2 border-stone-200 dark:border-stone-700 px-4 py-3 flex items-center gap-3">
             <button
-              onClick={() => setStudyMode(null)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700 transition-all"
+              onClick={handleFlashcardBack}
+              className="p-2 rounded-xl bg-white dark:bg-stone-800 border-2 border-b-4 border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 active:border-b-2 active:translate-y-0.5 transition-all"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-              Create New Deck
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
             </button>
+            <h1 className="text-base font-extrabold uppercase tracking-wide text-stone-800 dark:text-stone-100 truncate" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>{studyMode.title}</h1>
           </div>
+        ) : (
+          <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="create-flashcards" sticky />
+        )}
+        <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+          {!isMinimalUI && (
+            <div className="flex items-center justify-between mb-6">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-800 dark:text-stone-100" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Study Flashcards</h1>
+              <button
+                onClick={() => setStudyMode(null)}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-white dark:bg-stone-800 border-2 border-b-4 border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700 active:border-b-2 active:translate-y-0.5 transition-all"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                Create New Deck
+              </button>
+            </div>
+          )}
           <FlashcardViewer
             initialCards={studyMode.cards}
             title={studyMode.title}
@@ -289,13 +325,13 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
             onLoadPrevious={() => onNavigate('quiz-history', undefined, { quizHistoryFilter: 'flashcards' })}
           />
         </main>
-        <Footer onNavigate={onNavigate} />
+        {!isMinimalUI && <Footer onNavigate={onNavigate} />}
       </div>
     );
   }
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden">
+    <div className="relative min-h-screen overflow-x-hidden" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="create-flashcards" sticky />
 
@@ -305,7 +341,7 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 sm:gap-6">
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <span className="inline-flex items-center px-2.5 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded-full text-xs font-semibold uppercase tracking-wide">
+                <span className="inline-flex items-center px-2.5 py-1 bg-[#FFC800] text-white rounded-full text-xs font-extrabold uppercase tracking-wide border-2 border-[#E0B000]">
                   Card Builder
                 </span>
                 {cards.length > 0 && (
@@ -322,7 +358,7 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
               </p>
               <button
                 onClick={() => onNavigate('dashboard')}
-                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 text-amber-700 dark:text-amber-300 text-xs font-medium hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#FFF4DB] dark:bg-[#FF9600]/20 border-2 border-b-4 border-[#FF9600] text-[#FF9600] text-xs font-extrabold hover:bg-[#FFECCC] dark:hover:bg-[#FF9600]/30 active:border-b-2 active:translate-y-0.5 transition-all"
               >
                 <span>✨</span>
                 Have notes? Use Study Pack to generate flashcards with AI
@@ -331,9 +367,9 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
             <div className="flex items-center gap-2 flex-shrink-0">
               <button
                 onClick={() => setShowSettings(!showSettings)}
-                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium border transition-all ${
+                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-extrabold border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all ${
                   showSettings
-                    ? 'bg-amber-50 dark:bg-amber-900/30 border-amber-300 dark:border-amber-600 text-amber-700 dark:text-amber-300'
+                    ? 'bg-[#1CB0F6] border-[#1899D6] text-white'
                     : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-600 text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700'
                 }`}
               >
@@ -345,7 +381,7 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
               {user && (
                 <button
                   onClick={() => onNavigate('dashboard')}
-                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 hover:bg-stone-50 dark:hover:bg-stone-700 transition-all"
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-extrabold text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 bg-white dark:bg-stone-800 border-2 border-b-4 border-stone-200 dark:border-stone-600 hover:bg-stone-50 dark:hover:bg-stone-700 active:border-b-2 active:translate-y-0.5 transition-all"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -362,19 +398,19 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
       {showSettings && (
         <section className="pb-4">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
-            <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl border border-stone-200 dark:border-stone-600 shadow-lg shadow-stone-100/50 dark:shadow-stone-900/50 p-5 sm:p-6">
+            <div className="bg-white dark:bg-stone-900 rounded-2xl sm:rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 p-5 sm:p-6">
               <div className="flex items-center gap-2 mb-5">
-                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
+                <div className="w-7 h-7 rounded-lg bg-[#FF9600] flex items-center justify-center">
                   <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
                   </svg>
                 </div>
-                <h3 className="font-bold text-stone-800 dark:text-stone-100">Deck Appearance</h3>
+                <h3 className="font-extrabold text-stone-800 dark:text-stone-100">Deck Appearance</h3>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
                 {/* Theme color */}
                 <div>
-                  <label className="block text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-3">Theme color</label>
+                  <label className="block text-xs font-extrabold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-3">Theme color</label>
                   <div className="flex flex-wrap gap-2.5">
                     {(Object.keys(THEMES) as CardTheme[]).map(key => (
                       <button
@@ -394,16 +430,16 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
                 </div>
                 {/* Font size */}
                 <div>
-                  <label className="block text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-3">Font size</label>
+                  <label className="block text-xs font-extrabold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-3">Font size</label>
                   <div className="flex gap-2">
                     {(['small', 'medium', 'large'] as FontSize[]).map(s => (
                       <button
                         key={s}
                         onClick={() => setFontSize(s)}
-                        className={`flex-1 py-2 rounded-xl text-xs font-medium border transition-all capitalize ${
+                        className={`flex-1 py-2 rounded-xl text-xs font-extrabold border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all capitalize ${
                           fontSize === s
-                            ? 'bg-amber-50 dark:bg-amber-900/30 border-amber-400 text-amber-700 dark:text-amber-300 font-semibold'
-                            : 'bg-stone-50 dark:bg-stone-900 border-stone-200 dark:border-stone-600 text-stone-600 dark:text-stone-400 hover:border-stone-300'
+                            ? 'bg-[#1CB0F6] border-[#1899D6] text-white'
+                            : 'bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-600 text-stone-500 dark:text-stone-400 hover:border-stone-300'
                         }`}
                       >
                         {s === 'small' ? 'Aa' : s === 'medium' ? 'AA' : 'AA'}
@@ -414,16 +450,16 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
                 </div>
                 {/* Card style */}
                 <div>
-                  <label className="block text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-3">Card style</label>
+                  <label className="block text-xs font-extrabold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-3">Card style</label>
                   <div className="flex gap-2">
                     {(['minimal', 'bordered', 'elevated'] as CardStyle[]).map(s => (
                       <button
                         key={s}
                         onClick={() => setCardStyle(s)}
-                        className={`flex-1 py-2 rounded-xl text-[11px] font-medium border transition-all capitalize ${
+                        className={`flex-1 py-2 rounded-xl text-[11px] font-extrabold border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all capitalize ${
                           cardStyle === s
-                            ? 'bg-amber-50 dark:bg-amber-900/30 border-amber-400 text-amber-700 dark:text-amber-300 font-semibold'
-                            : 'bg-stone-50 dark:bg-stone-900 border-stone-200 dark:border-stone-600 text-stone-600 dark:text-stone-400 hover:border-stone-300'
+                            ? 'bg-[#1CB0F6] border-[#1899D6] text-white'
+                            : 'bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-600 text-stone-500 dark:text-stone-400 hover:border-stone-300'
                         }`}
                       >
                         {s}
@@ -433,21 +469,21 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
                 </div>
                 {/* Labels */}
                 <div className="lg:col-span-2">
-                  <label className="block text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-3">Card labels</label>
+                  <label className="block text-xs font-extrabold text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-3">Card labels</label>
                   <div className="flex flex-col sm:flex-row gap-2">
                     <input
                       value={frontLabel}
                       onChange={e => setFrontLabel(e.target.value)}
                       placeholder="Front"
                       maxLength={24}
-                      className="flex-1 min-w-0 px-3 py-2 rounded-xl border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-900 text-stone-800 dark:text-stone-100 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400"
+                      className="flex-1 min-w-0 px-3 py-2 rounded-xl border-2 border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-900 text-stone-800 dark:text-stone-100 text-sm focus:outline-none focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20"
                     />
                     <input
                       value={backLabel}
                       onChange={e => setBackLabel(e.target.value)}
                       placeholder="Back"
                       maxLength={24}
-                      className="flex-1 min-w-0 px-3 py-2 rounded-xl border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-900 text-stone-800 dark:text-stone-100 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400"
+                      className="flex-1 min-w-0 px-3 py-2 rounded-xl border-2 border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-900 text-stone-800 dark:text-stone-100 text-sm focus:outline-none focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20"
                     />
                   </div>
                 </div>
@@ -466,7 +502,7 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
             <div className="space-y-5 order-1">
 
               {/* Deck title */}
-              <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-600 shadow-sm overflow-hidden">
+              <div className="bg-white dark:bg-stone-900 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 overflow-hidden">
                 <div className="flex items-center gap-3 px-5 py-4">
                   <div className={`w-8 h-8 rounded-lg ${THEME_DOTS[theme]} flex items-center justify-center flex-shrink-0`}>
                     <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -477,7 +513,7 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
                     value={deckTitle}
                     onChange={e => setDeckTitle(e.target.value)}
                     placeholder="Deck name, e.g. Biology Ch.5 or Spanish Vocab..."
-                    className="flex-1 text-base font-medium bg-transparent border-none outline-none text-stone-800 dark:text-stone-100 placeholder-stone-400"
+                    className="flex-1 text-base font-extrabold bg-transparent border-none outline-none text-stone-800 dark:text-stone-100 placeholder-stone-400"
                   />
                   {deckTitle && (
                     <button onClick={() => setDeckTitle('')} className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 p-1 rounded-lg">
@@ -535,7 +571,7 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
                   <button
                     onClick={addCard}
                     disabled={!frontInput.trim() || !backInput.trim()}
-                    className={`inline-flex items-center gap-2 px-5 py-2.5 ${t.addBtn} ${t.addBtnHover} text-white text-sm font-semibold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg active:scale-95`}
+                    className={`inline-flex items-center gap-2 px-5 py-2.5 bg-[#1CB0F6] text-white text-sm font-extrabold rounded-xl border-2 border-b-4 border-[#1899D6] active:border-b-2 active:translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed transition-all`}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
@@ -547,9 +583,9 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
 
               {/* Card list */}
               {cards.length > 0 && (
-                <div className="bg-white dark:bg-stone-800 rounded-2xl border border-stone-200 dark:border-stone-600 shadow-sm overflow-hidden">
-                  <div className="px-5 py-3.5 bg-stone-50 dark:bg-stone-800/60 border-b border-stone-200 dark:border-stone-600/50 flex items-center justify-between">
-                    <span className="font-semibold text-stone-700 dark:text-stone-200 text-sm flex items-center gap-2">
+                <div className="bg-white dark:bg-stone-900 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 overflow-hidden">
+                  <div className="px-5 py-3.5 bg-stone-50 dark:bg-stone-800/60 border-b-2 border-stone-200 dark:border-stone-700 flex items-center justify-between">
+                    <span className="font-extrabold text-stone-700 dark:text-stone-200 text-sm flex items-center gap-2">
                       <svg className="w-4 h-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                       </svg>
@@ -574,21 +610,21 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
                               value={editFront}
                               onChange={e => setEditFront(e.target.value)}
                               rows={2}
-                              className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-900 text-sm text-stone-800 dark:text-stone-100 resize-none focus:outline-none focus:ring-2 focus:ring-amber-400/50"
+                              className="w-full px-3.5 py-2.5 rounded-xl border-2 border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-900 text-sm text-stone-800 dark:text-stone-100 resize-none focus:outline-none focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20"
                               placeholder={frontLabel}
                             />
                             <textarea
                               value={editBack}
                               onChange={e => setEditBack(e.target.value)}
                               rows={2}
-                              className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-900 text-sm text-stone-800 dark:text-stone-100 resize-none focus:outline-none focus:ring-2 focus:ring-amber-400/50"
+                              className="w-full px-3.5 py-2.5 rounded-xl border-2 border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-900 text-sm text-stone-800 dark:text-stone-100 resize-none focus:outline-none focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20"
                               placeholder={backLabel}
                             />
                             <div className="flex items-center gap-2">
                               <button
                                 onClick={saveEdit}
                                 disabled={!editFront.trim() || !editBack.trim()}
-                                className="px-4 py-2 bg-amber-600 hover:bg-amber-700 disabled:opacity-40 text-white text-xs font-semibold rounded-lg transition-colors"
+                                className="px-4 py-2 bg-[#58CC02] text-white text-xs font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 disabled:opacity-40 transition-all"
                               >
                                 Save changes
                               </button>
@@ -630,7 +666,7 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
                             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all flex-shrink-0">
                               <button
                                 onClick={() => startEdit(i)}
-                                className="p-1.5 text-stone-400 hover:text-amber-600 dark:hover:text-amber-400 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
+                                className="p-1.5 text-stone-400 hover:text-[#1CB0F6] dark:hover:text-[#1CB0F6] rounded-lg hover:bg-[#1CB0F6]/10 dark:hover:bg-[#1CB0F6]/10 transition-colors"
                                 title="Edit"
                               >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -666,18 +702,18 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
 
               {/* Empty state */}
               {cards.length === 0 && (
-                <div className="text-center py-14 px-6 bg-white dark:bg-stone-800 rounded-2xl border border-dashed border-stone-300 dark:border-stone-600">
+                <div className="text-center py-14 px-6 bg-white dark:bg-stone-900 rounded-2xl border-2 border-dashed border-stone-300 dark:border-stone-700">
                   <div className={`w-16 h-16 ${THEME_DOTS[theme]} rounded-2xl flex items-center justify-center mx-auto mb-4 opacity-40`}>
                     <span className="text-3xl">🃏</span>
                   </div>
-                  <p className="font-semibold text-stone-500 dark:text-stone-400 mb-1">No cards yet</p>
+                  <p className="font-extrabold text-stone-500 dark:text-stone-400 mb-1">No cards yet</p>
                   <p className="text-sm text-stone-400 dark:text-stone-500">Fill in both sides above and click "Add Card"</p>
                 </div>
               )}
 
               {/* Error */}
               {error && (
-                <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-red-700 dark:text-red-400 text-sm flex items-center gap-3">
+                <div className="p-4 bg-red-50 dark:bg-red-900/20 border-2 border-b-4 border-[#FF4B4B] dark:border-[#E04343] rounded-xl text-red-700 dark:text-red-400 text-sm font-extrabold flex items-center gap-3">
                   <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -689,7 +725,7 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
               <button
                 onClick={saveDeck}
                 disabled={cards.length === 0 || isSaving || savedSuccess}
-                className={`w-full py-4 inline-flex items-center justify-center gap-2.5 font-bold text-base rounded-2xl transition-all shadow-lg ${t.saveShadow} hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-lg text-white bg-gradient-to-r ${t.saveBtnFrom} ${t.saveBtnTo} ${t.saveBtnHoverFrom} ${t.saveBtnHoverTo}`}
+                className={`w-full py-4 inline-flex items-center justify-center gap-2.5 font-extrabold uppercase tracking-wide text-base rounded-2xl transition-all border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed text-white bg-[#58CC02]`}
               >
                 {savedSuccess ? (
                   <>
@@ -717,7 +753,7 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
             {/* RIGHT: Live preview */}
             <div className="order-2">
               <div className="sticky top-24">
-                <p className="text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide mb-3">Live Preview</p>
+                <p className="text-xs font-extrabold text-stone-400 dark:text-stone-500 uppercase tracking-wide mb-3">Live Preview</p>
                 {/* Card */}
                 <div
                   onClick={() => setPreviewFlipped(!previewFlipped)}
@@ -768,7 +804,7 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
                           />
                         ))}
                       </div>
-                      <span className={`text-sm font-semibold ${t.accentText}`}>{cards.length} card{cards.length !== 1 ? 's' : ''}</span>
+                      <span className={`text-sm font-extrabold ${t.accentText}`}>{cards.length} card{cards.length !== 1 ? 's' : ''}</span>
                     </div>
                     <button
                       onClick={() => setPreviewFlipped(p => !p)}
@@ -785,13 +821,13 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
                 )}
 
                 {/* Tips */}
-                <div className="mt-6 p-4 bg-stone-50 dark:bg-stone-800/50 rounded-xl border border-stone-200/60 dark:border-stone-700/40 space-y-2">
-                  <p className="text-xs font-semibold text-stone-500 dark:text-stone-400">Tips</p>
+                <div className="mt-6 p-4 bg-white dark:bg-stone-900 rounded-xl border-2 border-b-4 border-stone-200 dark:border-stone-700 space-y-2">
+                  <p className="text-xs font-extrabold text-stone-500 dark:text-stone-400">Tips</p>
                   <ul className="space-y-1.5 text-xs text-stone-400 dark:text-stone-500">
-                    <li className="flex items-start gap-2"><span className="text-amber-500 mt-0.5">✓</span>Click any card in the list to edit it</li>
-                    <li className="flex items-start gap-2"><span className="text-amber-500 mt-0.5">✓</span>Use arrows to reorder cards</li>
-                    <li className="flex items-start gap-2"><span className="text-amber-500 mt-0.5">✓</span>Duplicate a card with the copy icon</li>
-                    <li className="flex items-start gap-2"><span className="text-amber-500 mt-0.5">✓</span>After saving, study in Saved Materials</li>
+                    <li className="flex items-start gap-2"><span className="text-[#58CC02] mt-0.5 font-extrabold">✓</span>Click any card in the list to edit it</li>
+                    <li className="flex items-start gap-2"><span className="text-[#58CC02] mt-0.5 font-extrabold">✓</span>Use arrows to reorder cards</li>
+                    <li className="flex items-start gap-2"><span className="text-[#58CC02] mt-0.5 font-extrabold">✓</span>Duplicate a card with the copy icon</li>
+                    <li className="flex items-start gap-2"><span className="text-[#58CC02] mt-0.5 font-extrabold">✓</span>After saving, study in Saved Materials</li>
                   </ul>
                 </div>
               </div>

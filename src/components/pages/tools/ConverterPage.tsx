@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import Header from '../../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../../common/WriteScholarEditorialBackground';
 import Footer from '../../common/Footer';
 
 interface ConverterPageProps {
@@ -22,7 +21,7 @@ interface Unit {
 const categories: Record<CategoryId, { label: string; icon: string; units: Unit[] }> = {
   length: {
     label: 'Length',
-    icon: '📏',
+    icon: '\u{1F4CF}',
     units: [
       { id: 'm', label: 'Meters (m)', toBase: (v) => v, fromBase: (v) => v },
       { id: 'ft', label: 'Feet (ft)', toBase: (v) => v / 3.28084, fromBase: (v) => v * 3.28084 },
@@ -50,7 +49,7 @@ const categories: Record<CategoryId, { label: string; icon: string; units: Unit[
   },
   temperature: {
     label: 'Temperature',
-    icon: '🌡️',
+    icon: '\u{1F321}️',
     units: [
       { id: 'c', label: 'Celsius (°C)', toBase: (v) => v, fromBase: (v) => v },
       { id: 'f', label: 'Fahrenheit (°F)', toBase: (v) => (v - 32) * (5 / 9), fromBase: (v) => v * (9 / 5) + 32 },
@@ -59,7 +58,7 @@ const categories: Record<CategoryId, { label: string; icon: string; units: Unit[
   },
   volume: {
     label: 'Volume',
-    icon: '🧪',
+    icon: '\u{1F9EA}',
     units: [
       { id: 'l', label: 'Liters (L)', toBase: (v) => v, fromBase: (v) => v },
       { id: 'ml', label: 'Milliliters (mL)', toBase: (v) => v / 1000, fromBase: (v) => v * 1000 },
@@ -97,7 +96,7 @@ const categories: Record<CategoryId, { label: string; icon: string; units: Unit[
   },
   speed: {
     label: 'Speed',
-    icon: '🚀',
+    icon: '\u{1F680}',
     units: [
       { id: 'ms', label: 'm/s', toBase: (v) => v, fromBase: (v) => v },
       { id: 'kmh', label: 'km/h', toBase: (v) => v / 3.6, fromBase: (v) => v * 3.6 },
@@ -122,6 +121,17 @@ const categories: Record<CategoryId, { label: string; icon: string; units: Unit[
 };
 
 const categoryIds: CategoryId[] = ['length', 'weight', 'temperature', 'volume', 'area', 'time', 'speed', 'energy'];
+
+const categoryColors: Record<CategoryId, { bg: string; border: string; text: string; tint: string }> = {
+  length: { bg: 'bg-[#58CC02]', border: 'border-[#46A302]', text: 'text-white', tint: 'bg-[#EAFFD6]' },
+  weight: { bg: 'bg-[#1CB0F6]', border: 'border-[#1899D6]', text: 'text-white', tint: 'bg-[#DDF4FF]' },
+  temperature: { bg: 'bg-[#FF4B4B]', border: 'border-[#E04343]', text: 'text-white', tint: 'bg-[#FFE8E8]' },
+  volume: { bg: 'bg-[#A560E8]', border: 'border-[#8A48C7]', text: 'text-white', tint: 'bg-[#F3EAFF]' },
+  area: { bg: 'bg-[#FF9600]', border: 'border-[#D97F00]', text: 'text-white', tint: 'bg-[#FFF4E0]' },
+  time: { bg: 'bg-[#1CB0F6]', border: 'border-[#1899D6]', text: 'text-white', tint: 'bg-[#DDF4FF]' },
+  speed: { bg: 'bg-[#FF9600]', border: 'border-[#D97F00]', text: 'text-white', tint: 'bg-[#FFF4E0]' },
+  energy: { bg: 'bg-[#58CC02]', border: 'border-[#46A302]', text: 'text-white', tint: 'bg-[#EAFFD6]' },
+};
 
 function formatResult(val: number): string {
   if (val === 0) return '0';
@@ -183,49 +193,59 @@ const ConverterPage = ({ onNavigate, user, onLogout }: ConverterPageProps) => {
   };
 
   const cat = categories[category];
+  const colors = categoryColors[category];
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden">
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
+    <div className="min-h-screen bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="converter" />
 
       <section className="py-12 sm:py-16">
         <div className="max-w-2xl mx-auto px-4 sm:px-6">
+          {/* Page heading */}
           <div className="text-center mb-8">
-            <span className="inline-flex items-center px-4 py-1.5 bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 rounded-full text-sm font-semibold mb-4">
-              Free Tool
+            <span className={`inline-flex items-center px-4 py-1.5 ${colors.tint} dark:bg-stone-800 rounded-full text-sm font-extrabold uppercase tracking-wide mb-4`}>
+              <span className={`w-2 h-2 rounded-full ${colors.bg} mr-2`} />
+              <span className="text-stone-700 dark:text-stone-300">Free Tool</span>
             </span>
-            <h1 className="text-3xl sm:text-4xl font-bold text-stone-800 dark:text-stone-100 mb-2">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-stone-800 dark:text-stone-100 mb-2">
               Unit Converter
             </h1>
-            <p className="text-stone-500 dark:text-stone-400">
-              Convert length, weight, temperature, volume, area, time, speed & energy. Meters to feet, m/s to mph & more.
+            <p className="text-stone-500 dark:text-stone-400 font-semibold">
+              Convert length, weight, temperature, volume, area, time, speed & energy.
             </p>
           </div>
 
-          <div className="bg-white dark:bg-stone-800 rounded-3xl shadow-xl border border-stone-200 dark:border-stone-700 overflow-hidden">
+          {/* Main converter card */}
+          <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl overflow-hidden">
             {/* Category tabs */}
-            <div className="flex flex-wrap gap-2 p-4 border-b border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900/50">
-              {categoryIds.map((id) => (
-                <button
-                  key={id}
-                  onClick={() => handleCategoryChange(id)}
-                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                    category === id
-                      ? 'bg-violet-500 text-white shadow-md'
-                      : 'bg-white dark:bg-stone-700 text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-600'
-                  }`}
-                >
-                  <span className="mr-1.5">{categories[id].icon}</span>
-                  {categories[id].label}
-                </button>
-              ))}
+            <div className="flex flex-wrap gap-2 p-4 border-b-2 border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900/80">
+              {categoryIds.map((id) => {
+                const isActive = category === id;
+                const c = categoryColors[id];
+                return (
+                  <button
+                    key={id}
+                    onClick={() => handleCategoryChange(id)}
+                    className={`px-3.5 py-2 rounded-xl text-sm font-extrabold uppercase tracking-wide transition-all border-2 border-b-4 active:border-b-2 active:translate-y-0.5 ${
+                      isActive
+                        ? `${c.bg} ${c.border} ${c.text}`
+                        : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-600 text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700'
+                    }`}
+                  >
+                    <span className="mr-1.5">{categories[id].icon}</span>
+                    {categories[id].label}
+                  </button>
+                );
+              })}
             </div>
 
             {/* Converter inputs */}
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-5">
+              {/* From */}
               <div>
-                <label className="block text-sm font-medium text-stone-500 dark:text-stone-400 mb-2">From</label>
+                <label className="block text-sm font-extrabold uppercase tracking-wide text-stone-500 dark:text-stone-400 mb-2">
+                  From
+                </label>
                 <div className="flex gap-3">
                   <input
                     type="text"
@@ -233,12 +253,12 @@ const ConverterPage = ({ onNavigate, user, onLogout }: ConverterPageProps) => {
                     value={fromValue}
                     onChange={(e) => setFromValue(e.target.value)}
                     placeholder="0"
-                    className="flex-1 px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-100 text-lg font-mono focus:ring-2 focus:ring-violet-400 focus:border-transparent"
+                    className="flex-1 px-4 py-3 rounded-xl bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 text-stone-800 dark:text-stone-100 text-lg font-mono font-bold focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 outline-none transition-all"
                   />
                   <select
                     value={fromUnit}
                     onChange={(e) => setFromUnit(e.target.value)}
-                    className="px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-100 min-w-[140px]"
+                    className="px-4 py-3 rounded-xl bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 text-stone-800 dark:text-stone-100 font-bold min-w-[140px] focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 outline-none transition-all"
                   >
                     {cat.units.map((u) => (
                       <option key={u.id} value={u.id}>
@@ -249,31 +269,36 @@ const ConverterPage = ({ onNavigate, user, onLogout }: ConverterPageProps) => {
                 </div>
               </div>
 
+              {/* Swap button */}
               <div className="flex justify-center">
                 <button
                   onClick={swapUnits}
-                  className="p-2 rounded-full bg-stone-200 dark:bg-stone-600 hover:bg-stone-300 dark:hover:bg-stone-500 text-stone-600 dark:text-stone-300 transition-colors"
+                  className={`p-2.5 rounded-xl border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all ${colors.bg} ${colors.border} ${colors.text}`}
                   title="Swap units"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4" />
                   </svg>
                 </button>
               </div>
 
+              {/* To */}
               <div>
-                <label className="block text-sm font-medium text-stone-500 dark:text-stone-400 mb-2">To</label>
+                <label className="block text-sm font-extrabold uppercase tracking-wide text-stone-500 dark:text-stone-400 mb-2">
+                  To
+                </label>
                 <div className="flex gap-3">
-                  <input
-                    type="text"
-                    readOnly
-                    value={toValue}
-                    className="flex-1 px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-900/50 text-stone-800 dark:text-stone-100 text-lg font-mono"
-                  />
+                  <div className={`flex-1 px-4 py-3 rounded-xl border-2 border-dashed text-lg font-mono font-bold ${
+                    toValue
+                      ? `${colors.tint} dark:bg-stone-800 border-stone-300 dark:border-stone-600 text-stone-800 dark:text-stone-100`
+                      : 'bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-600 text-stone-400 dark:text-stone-500'
+                  }`}>
+                    {toValue || '0'}
+                  </div>
                   <select
                     value={toUnit}
                     onChange={(e) => setToUnit(e.target.value)}
-                    className="px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-100 min-w-[140px]"
+                    className="px-4 py-3 rounded-xl bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 text-stone-800 dark:text-stone-100 font-bold min-w-[140px] focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 outline-none transition-all"
                   >
                     {cat.units.map((u) => (
                       <option key={u.id} value={u.id}>
@@ -283,10 +308,23 @@ const ConverterPage = ({ onNavigate, user, onLogout }: ConverterPageProps) => {
                   </select>
                 </div>
               </div>
+
+              {/* Conversion summary line */}
+              {fromValue && toValue && (
+                <div className={`rounded-xl p-3 ${colors.tint} dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-700 text-center`}>
+                  <span className="font-extrabold text-stone-700 dark:text-stone-200">
+                    {fromValue} {cat.units.find((u) => u.id === fromUnit)?.label.split(' (')[0]}
+                  </span>
+                  <span className="mx-2 text-stone-400">=</span>
+                  <span className="font-extrabold text-stone-700 dark:text-stone-200">
+                    {toValue} {cat.units.find((u) => u.id === toUnit)?.label.split(' (')[0]}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
-          <p className="text-center text-sm text-stone-500 dark:text-stone-400 mt-6">
+          <p className="text-center text-sm font-bold text-stone-400 dark:text-stone-500 mt-6">
             No signup required. Perfect for homework, labs & everyday conversions.
           </p>
         </div>

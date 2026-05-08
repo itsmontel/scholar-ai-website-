@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import Header from '../../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../../common/WriteScholarEditorialBackground';
 import Footer from '../../common/Footer';
 import ScholarMascot from '../../common/ScholarMascot';
 
@@ -103,31 +102,30 @@ const ThesisGeneratorPage = ({ onNavigate, user, onLogout }: ThesisGeneratorPage
   };
 
   const essayTypes = [
-    { value: 'argumentative', label: 'Argumentative', description: 'Take a position and defend it' },
-    { value: 'expository', label: 'Expository', description: 'Explain or inform' },
-    { value: 'analytical', label: 'Analytical', description: 'Analyze and interpret' },
-    { value: 'compare-contrast', label: 'Compare/Contrast', description: 'Examine similarities & differences' },
+    { value: 'argumentative', label: 'Argumentative', description: 'Take a position and defend it', color: '#A560E8', tint: '#F3EAFF', border: '#8A48C7' },
+    { value: 'expository', label: 'Expository', description: 'Explain or inform', color: '#1CB0F6', tint: '#DDF4FF', border: '#1899D6' },
+    { value: 'analytical', label: 'Analytical', description: 'Analyze and interpret', color: '#FF9600', tint: '#FFF4E0', border: '#D97F00' },
+    { value: 'compare-contrast', label: 'Compare/Contrast', description: 'Examine similarities & differences', color: '#58CC02', tint: '#EAFFD6', border: '#46A302' },
   ];
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden">
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
+    <div className="relative min-h-screen overflow-x-hidden bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="thesis-generator" />
 
       {/* Hero Section */}
-      <section className="py-16 sm:py-20 bg-gradient-to-b from-violet-50/50 to-white">
+      <section className="pt-16 pb-10 sm:pt-20 sm:pb-12">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto">
-            <div className="inline-flex items-center justify-center mb-6">
+            <div className="inline-flex items-center justify-center mb-5">
               <ScholarMascot size={80} animated={false} pose="default" />
             </div>
-            <span className="inline-flex items-center px-4 py-1.5 bg-violet-100 text-violet-700 rounded-full text-sm font-semibold mb-5">
+            <span className="inline-flex items-center px-4 py-1.5 bg-[#F3EAFF] text-[#A560E8] rounded-xl border-2 border-b-4 border-[#A560E8]/30 text-sm font-extrabold mb-5">
               Free Tool
             </span>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-5 leading-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4 leading-tight tracking-tight">
               Thesis Statement Generator
             </h1>
-            <p className="text-lg text-gray-500 leading-relaxed max-w-2xl mx-auto">
+            <p className="text-base text-stone-500 dark:text-stone-400 leading-relaxed max-w-2xl mx-auto font-bold">
               Create a strong thesis statement for your essay. Fill in the blanks and get a properly structured thesis for argumentative, expository, or analytical essays.
             </p>
           </div>
@@ -135,63 +133,66 @@ const ThesisGeneratorPage = ({ onNavigate, user, onLogout }: ThesisGeneratorPage
       </section>
 
       {/* Main Tool Section */}
-      <section className="py-12 sm:py-16">
+      <section className="pb-12 sm:pb-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow">
+          <div className="bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 rounded-2xl p-5 sm:p-8">
             {/* Essay Type Selection */}
             <div className="mb-8">
-              <label className="block text-sm font-semibold text-gray-900 mb-3">Essay Type</label>
+              <label className="block text-sm font-extrabold text-stone-700 dark:text-stone-300 mb-3 uppercase tracking-wide">Essay Type</label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {essayTypes.map((type) => (
-                  <button
-                    key={type.value}
-                    onClick={() => setEssayType(type.value as EssayType)}
-                    className={`p-3 rounded-xl text-left transition-all border-2 ${
-                      essayType === type.value
-                        ? 'bg-violet-50 border-violet-500 text-violet-700'
-                        : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
-                    <div className="font-semibold text-sm">{type.label}</div>
-                    <div className="text-xs opacity-70 mt-0.5">{type.description}</div>
-                  </button>
-                ))}
+                {essayTypes.map((type) => {
+                  const isActive = essayType === type.value;
+                  return (
+                    <button
+                      key={type.value}
+                      onClick={() => setEssayType(type.value as EssayType)}
+                      className="p-3 rounded-xl text-left transition-all border-2 border-b-4 active:border-b-2 active:translate-y-0.5"
+                      style={{
+                        backgroundColor: isActive ? type.tint : undefined,
+                        borderColor: isActive ? `${type.color}60` : undefined,
+                      }}
+                    >
+                      <div className="font-extrabold text-sm text-stone-800 dark:text-stone-100">{type.label}</div>
+                      <div className="text-xs text-stone-400 dark:text-stone-500 mt-0.5 font-bold">{type.description}</div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
             {/* Form Fields */}
             <div className="space-y-5">
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Topic / Subject</label>
+                <label className="block text-sm font-extrabold text-stone-700 dark:text-stone-300 mb-2 uppercase tracking-wide">Topic / Subject</label>
                 <input
                   type="text"
                   value={topic}
                   onChange={(e) => setTopic(e.target.value)}
                   placeholder="e.g., social media usage among teenagers"
-                  className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+                  className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 focus:bg-white dark:focus:bg-stone-800 outline-none transition-all text-sm text-stone-800 dark:text-stone-100"
                 />
               </div>
 
               {essayType === 'compare-contrast' && (
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">Subject 1</label>
+                    <label className="block text-sm font-extrabold text-stone-700 dark:text-stone-300 mb-2 uppercase tracking-wide">Subject 1</label>
                     <input
                       type="text"
                       value={subject1}
                       onChange={(e) => setSubject1(e.target.value)}
                       placeholder="e.g., traditional education"
-                      className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+                      className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 focus:bg-white dark:focus:bg-stone-800 outline-none transition-all text-sm text-stone-800 dark:text-stone-100"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">Subject 2</label>
+                    <label className="block text-sm font-extrabold text-stone-700 dark:text-stone-300 mb-2 uppercase tracking-wide">Subject 2</label>
                     <input
                       type="text"
                       value={subject2}
                       onChange={(e) => setSubject2(e.target.value)}
                       placeholder="e.g., online learning"
-                      className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+                      className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 focus:bg-white dark:focus:bg-stone-800 outline-none transition-all text-sm text-stone-800 dark:text-stone-100"
                     />
                   </div>
                 </div>
@@ -199,25 +200,25 @@ const ThesisGeneratorPage = ({ onNavigate, user, onLogout }: ThesisGeneratorPage
 
               {(essayType === 'argumentative' || essayType === 'analytical') && (
                 <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  <label className="block text-sm font-extrabold text-stone-700 dark:text-stone-300 mb-2 uppercase tracking-wide">
                     {essayType === 'argumentative' ? 'Your Position / Claim' : 'Your Analysis / Interpretation'}
                   </label>
                   <input
                     type="text"
                     value={position}
                     onChange={(e) => setPosition(e.target.value)}
-                    placeholder={essayType === 'argumentative' 
-                      ? "e.g., has negative effects on mental health" 
+                    placeholder={essayType === 'argumentative'
+                      ? "e.g., has negative effects on mental health"
                       : "e.g., reveals underlying themes of isolation"
                     }
-                    className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+                    className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 focus:bg-white dark:focus:bg-stone-800 outline-none transition-all text-sm text-stone-800 dark:text-stone-100"
                   />
                 </div>
               )}
 
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
-                  {essayType === 'expository' ? 'Key Points to Explain' : 
+                <label className="block text-sm font-extrabold text-stone-700 dark:text-stone-300 mb-2 uppercase tracking-wide">
+                  {essayType === 'expository' ? 'Key Points to Explain' :
                    essayType === 'analytical' ? 'Elements to Analyze' :
                    essayType === 'compare-contrast' ? 'Points of Comparison' :
                    'Supporting Reasons'}
@@ -228,28 +229,28 @@ const ThesisGeneratorPage = ({ onNavigate, user, onLogout }: ThesisGeneratorPage
                     value={reason1}
                     onChange={(e) => setReason1(e.target.value)}
                     placeholder={essayType === 'expository' ? "Point 1" : "Reason / Element 1"}
-                    className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+                    className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 focus:bg-white dark:focus:bg-stone-800 outline-none transition-all text-sm text-stone-800 dark:text-stone-100"
                   />
                   <input
                     type="text"
                     value={reason2}
                     onChange={(e) => setReason2(e.target.value)}
                     placeholder={essayType === 'expository' ? "Point 2" : "Reason / Element 2"}
-                    className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+                    className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 focus:bg-white dark:focus:bg-stone-800 outline-none transition-all text-sm text-stone-800 dark:text-stone-100"
                   />
                   <input
                     type="text"
                     value={reason3}
                     onChange={(e) => setReason3(e.target.value)}
                     placeholder={essayType === 'expository' ? "Point 3 (optional)" : "Reason / Element 3 (optional)"}
-                    className="w-full px-4 py-3 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+                    className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 focus:bg-white dark:focus:bg-stone-800 outline-none transition-all text-sm text-stone-800 dark:text-stone-100"
                   />
                 </div>
               </div>
 
               <button
                 onClick={generateThesis}
-                className="w-full py-3.5 bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-xl hover:shadow-lg transition-all"
+                className="w-full py-3.5 bg-[#A560E8] hover:bg-[#9450D8] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all"
               >
                 Generate Thesis Statement
               </button>
@@ -257,21 +258,21 @@ const ThesisGeneratorPage = ({ onNavigate, user, onLogout }: ThesisGeneratorPage
 
             {/* Generated Thesis */}
             {thesis && (
-              <div className="mt-8 p-6 bg-gradient-to-r from-violet-50 to-red-50 rounded-xl border border-violet-200">
+              <div className="mt-8 p-5 sm:p-6 bg-[#F3EAFF] dark:bg-[#A560E8]/10 rounded-xl border-2 border-b-4 border-[#A560E8]/30">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold text-gray-900">Your Thesis Statement</h3>
+                  <h3 className="font-extrabold text-stone-800 dark:text-stone-100">Your Thesis Statement</h3>
                   <button
                     onClick={handleCopy}
-                    className={`px-4 py-2 text-sm rounded-lg transition-all font-medium ${
+                    className={`px-4 py-2 text-sm rounded-xl transition-all font-extrabold border-2 border-b-4 active:border-b-2 active:translate-y-0.5 ${
                       copied
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-white text-gray-700 hover:bg-gray-100'
+                        ? 'bg-[#EAFFD6] text-[#46A302] border-[#58CC02]/40'
+                        : 'bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-600 hover:bg-stone-50'
                     }`}
                   >
                     {copied ? 'Copied!' : 'Copy'}
                   </button>
                 </div>
-                <p className="text-gray-800 text-lg leading-relaxed">{thesis}</p>
+                <p className="text-stone-800 dark:text-stone-200 text-lg leading-relaxed font-bold">{thesis}</p>
               </div>
             )}
           </div>
@@ -279,78 +280,59 @@ const ThesisGeneratorPage = ({ onNavigate, user, onLogout }: ThesisGeneratorPage
       </section>
 
       {/* Tips Section */}
-      <section className="py-12 sm:py-16 bg-gray-50">
+      <section className="py-12 sm:py-16 bg-stone-100 dark:bg-stone-900">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">What Makes a Strong Thesis?</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+          <h2 className="text-2xl font-extrabold text-stone-800 dark:text-stone-100 mb-8 text-center tracking-tight">What Makes a Strong Thesis?</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {[
+              { icon: '🎯', title: 'Specific', desc: 'Avoid vague language. Be precise about your topic and argument.', color: '#A560E8', tint: '#F3EAFF' },
+              { icon: '💬', title: 'Arguable', desc: 'Present a claim someone could disagree with, not a statement of fact.', color: '#1CB0F6', tint: '#DDF4FF' },
+              { icon: '✂️', title: 'Concise', desc: 'Keep it to one or two sentences. Every word should count.', color: '#FF4B4B', tint: '#FFE8E8' },
+              { icon: '🗺️', title: 'Roadmap', desc: 'Preview your main points to guide readers through your essay.', color: '#FF9600', tint: '#FFF4E0' },
+            ].map((tip, i) => (
+              <div key={i} className="bg-white dark:bg-stone-800 border-2 border-b-4 border-stone-200 dark:border-stone-700 rounded-2xl p-5">
+                <div
+                  className="w-12 h-12 rounded-xl border-2 border-b-[3px] flex items-center justify-center mb-4 text-xl"
+                  style={{ backgroundColor: `${tip.color}20`, borderColor: `${tip.color}50` }}
+                >
+                  {tip.icon}
+                </div>
+                <h3 className="font-extrabold text-stone-800 dark:text-stone-100 mb-2">{tip.title}</h3>
+                <p className="text-stone-500 dark:text-stone-400 text-sm font-bold">{tip.desc}</p>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Specific</h3>
-              <p className="text-gray-600 text-sm">Avoid vague language. Be precise about your topic and argument.</p>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Arguable</h3>
-              <p className="text-gray-600 text-sm">Present a claim someone could disagree with, not a statement of fact.</p>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
-                </svg>
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Concise</h3>
-              <p className="text-gray-600 text-sm">Keep it to one or two sentences. Every word should count.</p>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                </svg>
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Roadmap</h3>
-              <p className="text-gray-600 text-sm">Preview your main points to guide readers through your essay.</p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-12 sm:py-16 bg-gray-900">
+      <section className="py-12 sm:py-16 bg-[#A560E8]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-4 tracking-tight">
             Ready to write your essay?
           </h2>
-          <p className="text-gray-400 mb-8 max-w-xl mx-auto">
+          <p className="text-white/80 mb-8 max-w-xl mx-auto font-bold">
             WriteScholar can analyze your completed essay and provide AI-powered feedback on structure, grammar, and academic style.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             {user ? (
-              <button 
+              <button
                 onClick={() => onNavigate('dashboard')}
-                className="px-6 py-3 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors"
+                className="px-6 py-3.5 bg-white text-[#A560E8] font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#8A48C7] hover:bg-stone-50 active:border-b-2 active:translate-y-0.5 transition-all"
               >
                 Go to Dashboard
               </button>
             ) : (
               <>
-                <button 
+                <button
                   onClick={() => onNavigate('signup')}
-                  className="px-6 py-3 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors"
+                  className="px-6 py-3.5 bg-white text-[#A560E8] font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#8A48C7] hover:bg-stone-50 active:border-b-2 active:translate-y-0.5 transition-all"
                 >
                   Try WriteScholar Free
                 </button>
-                <button 
+                <button
                   onClick={() => onNavigate('features')}
-                  className="px-6 py-3 border border-gray-600 text-white font-medium rounded-xl hover:border-gray-500 transition-colors"
+                  className="px-6 py-3.5 border-2 border-b-4 border-white/40 text-white font-extrabold uppercase tracking-wide rounded-xl hover:bg-white/10 active:border-b-2 active:translate-y-0.5 transition-all"
                 >
                   Learn More
                 </button>

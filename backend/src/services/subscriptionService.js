@@ -39,20 +39,20 @@ const PLAN_LIMITS = {
   },
   pro: {
     documentsPerMonth: -1,
-    combinedActionsPerMonth: 49, // analyses + study packs + citations share this pool
+    combinedActionsPerMonth: 99, // analyses + study packs + citations share this pool
     combinedWordsPerMonth: 999999, // Paper Summarizer word pool
-    analysesPerMonth: 49, // used for combined check
-    citationSearchesPerMonth: 49,
+    analysesPerMonth: 99, // used for combined check
+    citationSearchesPerMonth: 99,
     humanizeWordsPerMonth: 999999,
     summarizeWordsPerMonth: 999999,
-    studyPackGenerationsPerMonth: 49,
+    studyPackGenerationsPerMonth: 99,
     studyPackMaxWordsPerGeneration: 10000,
     quizWordsPerMonth: 999999,
-    quizGenerationsPerMonth: 49,
+    quizGenerationsPerMonth: 99,
     quizMaxWordsPerGeneration: 10000,
     craterBlastMaxWordsPerGeneration: 10000,
     lessonWordsPerMonth: 999999,
-    lessonGenerationsPerMonth: 49,
+    lessonGenerationsPerMonth: 99,
     lessonMaxWordsPerGeneration: 10000,
     // Essay analysis uses OPENAI_PREMIUM_MODEL (default gpt-5-mini); same tier as former Premium
     aiModel: 'gpt-5-mini',
@@ -63,20 +63,20 @@ const PLAN_LIMITS = {
   },
   premium: {
     documentsPerMonth: -1,
-    combinedActionsPerMonth: 199,
+    combinedActionsPerMonth: 499,
     combinedWordsPerMonth: 4999999,
-    analysesPerMonth: 199,
-    citationSearchesPerMonth: 199,
+    analysesPerMonth: 499,
+    citationSearchesPerMonth: 499,
     humanizeWordsPerMonth: 4999999,
     summarizeWordsPerMonth: 4999999,
-    studyPackGenerationsPerMonth: 199,
+    studyPackGenerationsPerMonth: 499,
     studyPackMaxWordsPerGeneration: 10000,
     quizWordsPerMonth: 4999999,
-    quizGenerationsPerMonth: 199,
+    quizGenerationsPerMonth: 499,
     quizMaxWordsPerGeneration: 10000,
     craterBlastMaxWordsPerGeneration: 10000,
     lessonWordsPerMonth: 4999999,
-    lessonGenerationsPerMonth: 199,
+    lessonGenerationsPerMonth: 499,
     lessonMaxWordsPerGeneration: 10000,
     aiModel: 'gpt-5-mini',
     maxDocumentSize: 100 * 1024 * 1024,

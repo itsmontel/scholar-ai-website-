@@ -203,16 +203,16 @@ type DemoPhase =
 function SideLeftFlashcard({ card }: { card: { front: string; back: string } }) {
   const [flipped, setFlipped] = useState(false);
   return (
-    <div className="rounded-2xl border border-amber-200/80 dark:border-amber-800/50 bg-gradient-to-b from-amber-50/90 to-white dark:from-amber-950/25 dark:to-stone-900/80 p-3 shadow-sm ring-1 ring-amber-100/80 dark:ring-amber-900/40">
-      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-violet-700 dark:text-violet-400 mb-2 text-center">Flashcards</p>
+    <div className="rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-[#4A4A4A] bg-white dark:bg-[#3C3C3C] p-3">
+      <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#1CB0F6] mb-2 text-center" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Flashcards</p>
       <button
         type="button"
         onClick={() => setFlipped(!flipped)}
-        className="relative w-full min-h-[120px] rounded-xl border-2 border-violet-200/90 dark:border-violet-700/50 bg-gradient-to-br from-violet-50 to-white dark:from-violet-950/40 dark:to-stone-900 p-3 shadow-md transition-transform duration-300 hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-violet-400/80"
+        className="relative w-full min-h-[120px] rounded-xl border-2 border-b-4 border-[#1CB0F6]/40 bg-[#DDF4FF] dark:bg-[#1CB0F6]/10 p-3 transition-transform duration-300 hover:scale-[1.01] active:border-b-2 active:translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-[#1CB0F6]"
       >
-        <p className="text-[9px] font-bold uppercase tracking-wider text-violet-600 dark:text-violet-400 mb-1">{flipped ? 'Answer' : 'Prompt'}</p>
-        <p className="text-[11px] text-stone-800 dark:text-stone-100 leading-snug text-center line-clamp-6">{flipped ? card.back : card.front}</p>
-        <p className="text-[9px] text-violet-600/80 dark:text-violet-400/90 mt-2 text-center">Tap to flip</p>
+        <p className="text-[9px] font-extrabold uppercase tracking-wider text-[#1CB0F6] mb-1">{flipped ? 'Answer' : 'Prompt'}</p>
+        <p className="text-[11px] text-[#3C3C3C] dark:text-white leading-snug text-center line-clamp-6" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>{flipped ? card.back : card.front}</p>
+        <p className="text-[9px] text-[#1CB0F6] mt-2 text-center font-bold">Tap to flip</p>
       </button>
     </div>
   );
@@ -222,10 +222,10 @@ function SideQuiz({ quiz }: { quiz: GeneratedPack['quiz'] }) {
   const [selected, setSelected] = useState<number | null>(null);
   const [showAnswer, setShowAnswer] = useState(false);
   return (
-    <div className="rounded-2xl border border-emerald-200/80 dark:border-emerald-800/50 bg-gradient-to-b from-emerald-50/90 to-white dark:from-emerald-950/20 dark:to-stone-900/80 p-3 shadow-sm ring-1 ring-emerald-100/80 dark:ring-emerald-900/40">
-      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-700 dark:text-emerald-400 mb-2 text-center">Quiz</p>
-      <div className="rounded-lg border border-stone-200/90 dark:border-stone-600 bg-white/95 dark:bg-stone-900/50 p-2">
-        <p className="text-[11px] font-medium text-stone-900 dark:text-stone-100 mb-2 leading-snug line-clamp-4">{quiz.question}</p>
+    <div className="rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-[#4A4A4A] bg-white dark:bg-[#3C3C3C] p-3">
+      <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#58CC02] mb-2 text-center" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Quiz</p>
+      <div className="rounded-xl border-2 border-[#E5E5E5] dark:border-[#4A4A4A] bg-white dark:bg-[#3C3C3C] p-2">
+        <p className="text-[11px] font-extrabold text-[#3C3C3C] dark:text-white mb-2 leading-snug line-clamp-4" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>{quiz.question}</p>
         <div className="space-y-1.5">
           {quiz.options.slice(0, 3).map((opt, i) => {
             const isSel = selected === i;
@@ -239,17 +239,17 @@ function SideQuiz({ quiz }: { quiz: GeneratedPack['quiz'] }) {
                   setSelected(i);
                   setShowAnswer(true);
                 }}
-                className={`w-full text-left text-[10px] px-2 py-1.5 rounded-md border transition-all ${
+                className={`w-full text-left text-[10px] px-2 py-1.5 rounded-lg border-2 border-b-[3px] transition-all active:border-b-2 active:translate-y-0.5 ${
                   reveal && isCorrect
-                    ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-100'
+                    ? 'border-[#58CC02] bg-[#E5F8D0] text-[#58CC02]'
                     : reveal && isSel && !isCorrect
-                      ? 'border-rose-400 bg-rose-50 dark:bg-rose-950/30 text-rose-900 dark:text-rose-100'
+                      ? 'border-[#FF4B4B] bg-[#FFE8E8] text-[#FF4B4B]'
                       : isSel
-                        ? 'border-violet-400 bg-violet-50 dark:bg-violet-950/30'
-                        : 'border-stone-200 dark:border-stone-600 hover:border-violet-300/70'
+                        ? 'border-[#1CB0F6] bg-[#DDF4FF]'
+                        : 'border-[#E5E5E5] dark:border-[#4A4A4A] hover:border-[#1CB0F6]/50'
                 }`}
               >
-                <span className="font-semibold text-stone-500 dark:text-stone-400 mr-1">{String.fromCharCode(65 + i)}.</span>
+                <span className="font-extrabold text-[#AFAFAF] dark:text-stone-400 mr-1">{String.fromCharCode(65 + i)}.</span>
                 <span className="line-clamp-2">{opt}</span>
               </button>
             );
@@ -771,23 +771,22 @@ function InteractiveStudyPackFull() {
   return (
     <div ref={containerRef} className="space-y-4">
       <div className="mb-1">
-        <h3 className="text-lg sm:text-xl font-semibold text-stone-900 dark:text-stone-50 tracking-tight" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
+        <h3 className="text-lg sm:text-xl font-extrabold text-[#3C3C3C] dark:text-white tracking-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
           Study pack demo
         </h3>
-        <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 mt-1.5 leading-relaxed">
+        <p className="text-xs sm:text-sm text-[#777] dark:text-stone-400 mt-1.5 leading-relaxed font-bold" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
           Watch the cursor paste notes, then see flashcards, a quiz, and a lesson appear. Runs in your browser only.
         </p>
       </div>
 
-      <div className="rounded-2xl border border-amber-200/85 dark:border-amber-800/55 bg-gradient-to-b from-amber-50/95 via-orange-50/40 to-violet-50/50 dark:from-amber-950/30 dark:via-stone-900 dark:to-violet-950/25 p-4 sm:p-6 shadow-[0_20px_50px_-18px_rgba(245,158,11,0.25)] dark:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.55)] ring-1 ring-amber-100/90 dark:ring-amber-900/45">
+      <div className="rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-[#4A4A4A] bg-white dark:bg-[#3C3C3C] p-4 sm:p-6">
         {isLoadingPhase && (
           <div className="flex flex-col items-center justify-center py-14 px-4 text-center">
             <div className="relative mb-6">
-              <div className="h-14 w-14 rounded-full border-4 border-violet-200/90 dark:border-violet-800 border-t-violet-600 dark:border-t-violet-400 motion-safe:animate-spin" />
-              <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-400/20 to-violet-500/20 blur-xl motion-safe:animate-pulse" aria-hidden />
+              <div className="h-14 w-14 rounded-full border-4 border-[#E5E5E5] dark:border-[#4A4A4A] border-t-[#1CB0F6] motion-safe:animate-spin" />
             </div>
-            <p className="text-sm font-semibold text-stone-800 dark:text-stone-100">Building your pack</p>
-            <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">Flashcards, quiz, lesson</p>
+            <p className="text-sm font-extrabold text-[#3C3C3C] dark:text-white" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Building your pack</p>
+            <p className="text-xs text-[#AFAFAF] dark:text-stone-400 mt-1 font-bold" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Flashcards, quiz, lesson</p>
           </div>
         )}
 
@@ -816,10 +815,10 @@ function InteractiveStudyPackFull() {
             )}
 
             <div
-              className={`relative rounded-2xl border transition-all duration-500 bg-white/95 dark:bg-stone-900/60 ${
+              className={`relative rounded-2xl border-2 border-b-4 transition-all duration-200 bg-white dark:bg-[#3C3C3C] ${
                 isFieldActive
-                  ? 'border-amber-400/80 dark:border-amber-600/50 shadow-[0_12px_40px_-12px_rgba(245,158,11,0.35)] ring-2 ring-amber-300/30'
-                  : 'border-amber-200/90 dark:border-amber-800/50 shadow-inner'
+                  ? 'border-[#1CB0F6] ring-2 ring-[#1CB0F6]/30'
+                  : 'border-[#E5E5E5] dark:border-[#4A4A4A]'
               }`}
             >
               <textarea
@@ -828,11 +827,12 @@ function InteractiveStudyPackFull() {
                 readOnly
                 placeholder="Your notes appear here…"
                 rows={6}
-                className="relative w-full min-h-[140px] sm:min-h-[160px] rounded-[14px] p-4 sm:p-5 text-stone-800 dark:text-stone-100 text-sm sm:text-[15px] bg-transparent border-none outline-none resize-none placeholder-stone-400 dark:placeholder-stone-500 leading-relaxed overflow-x-hidden"
+                className="relative w-full min-h-[140px] sm:min-h-[160px] rounded-2xl p-4 sm:p-5 text-[#3C3C3C] dark:text-white text-sm sm:text-[15px] bg-transparent border-none outline-none resize-none placeholder-[#AFAFAF] dark:placeholder-stone-500 leading-relaxed overflow-x-hidden"
+                style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                 aria-label="Demo notes (illustration)"
               />
-              <div className="absolute bottom-3 right-4 text-[11px] font-medium tabular-nums text-amber-700/90 dark:text-amber-400/90">
-                {typed.length} chars{demoTyping ? <span className="ml-1 inline-block w-1.5 h-4 bg-amber-500 motion-safe:animate-pulse align-middle rounded-sm" aria-hidden /> : null}
+              <div className="absolute bottom-3 right-4 text-[11px] font-extrabold tabular-nums text-[#AFAFAF] dark:text-stone-400">
+                {typed.length} chars{demoTyping ? <span className="ml-1 inline-block w-1.5 h-4 bg-[#1CB0F6] motion-safe:animate-pulse align-middle rounded-sm" aria-hidden /> : null}
               </div>
             </div>
 
@@ -841,14 +841,15 @@ function InteractiveStudyPackFull() {
                 ref={buttonRef}
                 type="button"
                 disabled={typed.length < MIN_CHARS && phase !== 'click-button'}
-                className={`group relative px-8 sm:px-10 py-3.5 rounded-2xl flex items-center justify-center gap-2.5 font-semibold text-base min-w-[220px] overflow-hidden transition-all ${
+                className={`group relative px-8 sm:px-10 py-3.5 rounded-xl flex items-center justify-center gap-2.5 font-extrabold text-base min-w-[220px] overflow-hidden transition-all border-2 border-b-4 active:border-b-2 active:translate-y-0.5 ${
                   typed.length >= MIN_CHARS || phase === 'click-button' || phase === 'cursor-to-button'
-                    ? 'bg-gradient-to-b from-amber-500 via-amber-600 to-orange-600 dark:from-amber-500 dark:via-amber-600 dark:to-orange-700 text-white shadow-[0_14px_36px_-10px_rgba(234,88,12,0.55)] ring-1 ring-amber-300/40'
-                    : 'bg-stone-200 dark:bg-stone-700 text-stone-400 cursor-not-allowed'
-                } ${phase === 'cursor-to-button' || phase === 'click-button' ? 'ring-2 ring-amber-400/50 ring-offset-2 ring-offset-white dark:ring-offset-stone-900' : ''}`}
+                    ? 'bg-[#58CC02] border-[#46A302] text-white'
+                    : 'bg-[#E5E5E5] border-[#CCCCCC] text-[#AFAFAF] cursor-not-allowed'
+                } ${phase === 'cursor-to-button' || phase === 'click-button' ? 'ring-2 ring-[#58CC02]/50 ring-offset-2 ring-offset-white dark:ring-offset-[#3C3C3C]' : ''}`}
+                style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
               >
                 {(phase === 'cursor-to-button' || phase === 'click-button') && (
-                  <span className="absolute inset-0 bg-white/25 animate-ping rounded-2xl opacity-30" aria-hidden />
+                  <span className="absolute inset-0 bg-white/25 animate-ping rounded-xl opacity-30" aria-hidden />
                 )}
                 <span className="relative">Build study pack</span>
               </button>
@@ -880,21 +881,21 @@ function InteractiveStudyPackFull() {
               </div>
             )}
 
-            <div className="flex items-center justify-between gap-2 border-b border-amber-200/60 dark:border-amber-800/40 pb-3">
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-violet-700 dark:text-violet-400">Pack ready</p>
-              <button type="button" onClick={replay} className="text-xs font-semibold text-amber-800 dark:text-amber-300 hover:underline">
+            <div className="flex items-center justify-between gap-2 border-b-2 border-[#E5E5E5] dark:border-[#4A4A4A] pb-3">
+              <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[#58CC02]" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Pack ready</p>
+              <button type="button" onClick={replay} className="text-xs font-extrabold text-[#1CB0F6] hover:underline" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                 Replay demo
               </button>
             </div>
 
-            <div className="flex rounded-xl border border-amber-200/90 dark:border-amber-800/60 bg-amber-100/50 dark:bg-amber-950/20 p-1">
+            <div className="flex rounded-xl border-2 border-[#E5E5E5] dark:border-[#4A4A4A] bg-[#F7F7F7] dark:bg-[#2C2C2C] p-1">
               {(
                 [
-                  { id: 'flashcards' as const, label: 'Flashcards' },
-                  { id: 'quiz' as const, label: 'Quiz' },
-                  { id: 'lesson' as const, label: 'Lesson' },
+                  { id: 'flashcards' as const, label: 'Flashcards', color: 'bg-[#1CB0F6] border-[#1899D6]' },
+                  { id: 'quiz' as const, label: 'Quiz', color: 'bg-[#58CC02] border-[#46A302]' },
+                  { id: 'lesson' as const, label: 'Lesson', color: 'bg-[#FF9600] border-[#D97F00]' },
                 ] as const
-              ).map(({ id, label }) => (
+              ).map(({ id, label, color }) => (
                 <button
                   key={id}
                   type="button"
@@ -905,11 +906,12 @@ function InteractiveStudyPackFull() {
                     setSelected(null);
                     setShowAnswer(false);
                   }}
-                  className={`flex-1 py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all disabled:pointer-events-none disabled:opacity-50 ${
+                  className={`flex-1 py-2.5 rounded-lg text-xs sm:text-sm font-extrabold transition-all disabled:pointer-events-none disabled:opacity-50 ${
                     tab === id
-                      ? 'bg-amber-600 text-white shadow-md'
-                      : 'text-stone-600 dark:text-stone-400 hover:bg-amber-50 dark:hover:bg-amber-950/40'
+                      ? `${color} text-white border-2 border-b-[3px]`
+                      : 'text-[#AFAFAF] dark:text-stone-400 hover:text-[#3C3C3C] dark:hover:text-white'
                   }`}
+                  style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                 >
                   {label}
                 </button>
@@ -918,14 +920,14 @@ function InteractiveStudyPackFull() {
 
             {tab === 'flashcards' && (
               <div className="space-y-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-violet-600 dark:text-violet-400 text-center">
+                <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#1CB0F6] text-center" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                   Card {cardIdx + 1} of {cards.length} · {flipped ? 'Answer' : 'Question'}
                 </p>
                 <button
                   type="button"
                   disabled={walkthroughLock}
                   onClick={() => !walkthroughLock && setFlipped((f) => !f)}
-                  className="group relative w-full text-left focus:outline-none focus:ring-2 focus:ring-violet-400/80 rounded-2xl disabled:pointer-events-none disabled:opacity-90"
+                  className="group relative w-full text-left focus:outline-none focus:ring-2 focus:ring-[#1CB0F6] rounded-2xl disabled:pointer-events-none disabled:opacity-90"
                 >
                   <div className="[perspective:1400px] w-full min-h-[180px]">
                     <div
@@ -936,20 +938,20 @@ function InteractiveStudyPackFull() {
                       }}
                     >
                       <div
-                        className="absolute inset-0 flex flex-col rounded-2xl border-2 border-violet-300/80 dark:border-violet-600/50 bg-gradient-to-br from-violet-50 via-white to-amber-50/90 dark:from-violet-950/40 dark:via-stone-900 dark:to-amber-950/20 p-6 shadow-lg [backface-visibility:hidden]"
+                        className="absolute inset-0 flex flex-col rounded-2xl border-2 border-b-4 border-[#1CB0F6]/50 bg-[#DDF4FF] dark:bg-[#1CB0F6]/10 p-6 [backface-visibility:hidden]"
                         style={{ transform: 'rotateY(0deg)' }}
                       >
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-violet-600 dark:text-violet-400 mb-2">Question</p>
-                        <p className="text-sm sm:text-[15px] text-stone-800 dark:text-stone-100 leading-relaxed flex-1">{currentCard.front}</p>
-                        <p className="text-xs text-violet-600 dark:text-violet-400 mt-4 font-medium">Tap to flip</p>
+                        <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#1CB0F6] mb-2" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Question</p>
+                        <p className="text-sm sm:text-[15px] text-[#3C3C3C] dark:text-white leading-relaxed flex-1" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>{currentCard.front}</p>
+                        <p className="text-xs text-[#1CB0F6] mt-4 font-bold">Tap to flip</p>
                       </div>
                       <div
-                        className="absolute inset-0 flex flex-col rounded-2xl border-2 border-amber-300/80 dark:border-amber-700/50 bg-gradient-to-br from-amber-50/95 via-white to-violet-50/80 dark:from-amber-950/30 dark:via-stone-900 dark:to-violet-950/30 p-6 shadow-lg [backface-visibility:hidden]"
+                        className="absolute inset-0 flex flex-col rounded-2xl border-2 border-b-4 border-[#FF9600]/50 bg-[#FFF4E0] dark:bg-[#FF9600]/10 p-6 [backface-visibility:hidden]"
                         style={{ transform: 'rotateY(180deg)' }}
                       >
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 mb-2">Answer</p>
-                        <p className="text-sm sm:text-[15px] text-stone-800 dark:text-stone-100 leading-relaxed flex-1">{currentCard.back}</p>
-                        <p className="text-xs text-amber-700/80 dark:text-amber-400/90 mt-4 font-medium">Tap to flip back</p>
+                        <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#FF9600] mb-2" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Answer</p>
+                        <p className="text-sm sm:text-[15px] text-[#3C3C3C] dark:text-white leading-relaxed flex-1" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>{currentCard.back}</p>
+                        <p className="text-xs text-[#FF9600] mt-4 font-bold">Tap to flip back</p>
                       </div>
                     </div>
                   </div>
@@ -965,7 +967,7 @@ function InteractiveStudyPackFull() {
                         setCardIdx(i);
                         setFlipped(false);
                       }}
-                      className={`h-2 rounded-full transition-all disabled:pointer-events-none disabled:opacity-40 ${i === cardIdx ? 'w-8 bg-violet-600' : 'w-2 bg-amber-300 dark:bg-amber-700'}`}
+                      className={`h-2 rounded-full transition-all disabled:pointer-events-none disabled:opacity-40 ${i === cardIdx ? 'w-8 bg-[#1CB0F6]' : 'w-2 bg-[#E5E5E5] dark:bg-[#4A4A4A]'}`}
                     />
                   ))}
                 </div>
@@ -977,7 +979,8 @@ function InteractiveStudyPackFull() {
                       setCardIdx((i) => Math.max(0, i - 1));
                       setFlipped(false);
                     }}
-                    className="flex-1 py-2 rounded-xl border border-amber-200 dark:border-amber-800 text-sm font-medium text-stone-700 dark:text-stone-200 disabled:opacity-35 bg-white/80 dark:bg-stone-900/40"
+                    className="flex-1 py-2 rounded-xl border-2 border-b-4 border-[#E5E5E5] dark:border-[#4A4A4A] text-sm font-extrabold text-[#3C3C3C] dark:text-white disabled:opacity-35 bg-white dark:bg-[#3C3C3C] active:border-b-2 active:translate-y-0.5 transition-all"
+                    style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                   >
                     Previous
                   </button>
@@ -988,7 +991,8 @@ function InteractiveStudyPackFull() {
                       setCardIdx((i) => Math.min(cards.length - 1, i + 1));
                       setFlipped(false);
                     }}
-                    className="flex-1 py-2 rounded-xl border border-amber-200 dark:border-amber-800 text-sm font-medium text-stone-700 dark:text-stone-200 disabled:opacity-35 bg-white/80 dark:bg-stone-900/40"
+                    className="flex-1 py-2 rounded-xl border-2 border-b-4 border-[#E5E5E5] dark:border-[#4A4A4A] text-sm font-extrabold text-[#3C3C3C] dark:text-white disabled:opacity-35 bg-white dark:bg-[#3C3C3C] active:border-b-2 active:translate-y-0.5 transition-all"
+                    style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                   >
                     Next
                   </button>
@@ -997,8 +1001,8 @@ function InteractiveStudyPackFull() {
             )}
 
             {tab === 'quiz' && (
-              <div className="rounded-xl border border-emerald-200/90 dark:border-emerald-800/50 bg-gradient-to-b from-emerald-50/90 to-white dark:from-emerald-950/25 dark:to-stone-900/80 p-4 sm:p-5 ring-1 ring-emerald-100/80 dark:ring-emerald-900/40 motion-safe:transition-[box-shadow,opacity] motion-safe:duration-500">
-                <p className="text-sm font-medium text-stone-900 dark:text-stone-100 mb-4 leading-snug">{quizData.question}</p>
+              <div className="rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-[#4A4A4A] bg-white dark:bg-[#3C3C3C] p-4 sm:p-5 motion-safe:transition-all motion-safe:duration-500">
+                <p className="text-sm font-extrabold text-[#3C3C3C] dark:text-white mb-4 leading-snug" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>{quizData.question}</p>
                 <div className="space-y-2.5">
                   {quizData.options.map((opt, i) => {
                     const isSel = selected === i;
@@ -1016,17 +1020,18 @@ function InteractiveStudyPackFull() {
                           setSelected(i);
                           setShowAnswer(true);
                         }}
-                        className={`w-full text-left text-sm px-3 py-3 rounded-xl border motion-safe:transition-[transform,box-shadow,border-color,background-color,opacity] motion-safe:duration-500 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] disabled:pointer-events-none ${
+                        className={`w-full text-left text-sm px-3 py-3 rounded-xl border-2 border-b-4 motion-safe:transition-all motion-safe:duration-300 disabled:pointer-events-none active:border-b-2 active:translate-y-0.5 ${
                           reveal && isCorrect
-                            ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/45 text-emerald-900 dark:text-emerald-100 shadow-[0_10px_36px_-12px_rgba(16,185,129,0.45)] scale-[1.02] ring-2 ring-emerald-400/35'
+                            ? 'border-[#58CC02] bg-[#E5F8D0] text-[#58CC02] scale-[1.02]'
                             : reveal && isSel && !isCorrect
-                              ? 'border-rose-400 bg-rose-50 dark:bg-rose-950/30 text-rose-900 dark:text-rose-100'
+                              ? 'border-[#FF4B4B] bg-[#FFE8E8] text-[#FF4B4B]'
                               : isSel
-                                ? 'border-violet-400 bg-violet-50 dark:bg-violet-950/30'
-                                : 'border-stone-200 dark:border-stone-600 hover:border-emerald-300/70'
+                                ? 'border-[#1CB0F6] bg-[#DDF4FF] text-[#1CB0F6]'
+                                : 'border-[#E5E5E5] dark:border-[#4A4A4A] hover:border-[#1CB0F6]/50'
                         }`}
+                        style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                       >
-                        <span className="font-semibold text-stone-500 dark:text-stone-400 mr-2">{String.fromCharCode(65 + i)}.</span>
+                        <span className="font-extrabold text-[#AFAFAF] dark:text-stone-400 mr-2">{String.fromCharCode(65 + i)}.</span>
                         {opt}
                       </button>
                     );
@@ -1034,23 +1039,23 @@ function InteractiveStudyPackFull() {
                 </div>
                 {showAnswer && (
                   <div
-                    className="mt-5 overflow-hidden rounded-xl border border-emerald-200/90 bg-emerald-50/95 dark:border-emerald-800/50 dark:bg-emerald-950/40 px-4 py-3.5 shadow-sm animate-study-pack-quiz-feedback"
+                    className="mt-5 overflow-hidden rounded-xl border-2 border-[#58CC02]/40 bg-[#E5F8D0] dark:bg-[#58CC02]/10 px-4 py-3.5 animate-study-pack-quiz-feedback"
                     role="status"
                   >
-                    <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-emerald-700 dark:text-emerald-400 mb-2">Why this is correct</p>
-                    <p className="text-sm text-emerald-900 dark:text-emerald-100 leading-relaxed">{quizData.correctReason}</p>
+                    <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#58CC02] mb-2" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Why this is correct</p>
+                    <p className="text-sm text-[#3C3C3C] dark:text-white leading-relaxed" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>{quizData.correctReason}</p>
                   </div>
                 )}
               </div>
             )}
 
             {tab === 'lesson' && (
-              <div className="rounded-xl border border-amber-200/90 dark:border-amber-800/50 bg-white/95 dark:bg-stone-900/50 p-4 sm:p-5">
-                <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-amber-800 dark:text-amber-400 mb-4">Lesson from your notes</p>
+              <div className="rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-[#4A4A4A] bg-white dark:bg-[#3C3C3C] p-4 sm:p-5">
+                <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#FF9600] mb-4" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Lesson from your notes</p>
                 <ul className="space-y-3">
                   {lessonLines.map((line, i) => (
-                    <li key={i} className="flex gap-3 text-sm text-stone-700 dark:text-stone-300 leading-relaxed">
-                      <span className="shrink-0 w-8 h-8 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-white text-xs font-bold flex items-center justify-center shadow-md">
+                    <li key={i} className="flex gap-3 text-sm text-[#777] dark:text-stone-300 leading-relaxed" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+                      <span className="shrink-0 w-8 h-8 rounded-xl bg-[#FF9600] border-2 border-b-[3px] border-[#D97F00] text-white text-xs font-extrabold flex items-center justify-center">
                         {i + 1}
                       </span>
                       <span className="pt-1">{line}</span>

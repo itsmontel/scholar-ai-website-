@@ -1,5 +1,6 @@
 import { useState, useEffect, useLayoutEffect, Suspense, useRef, useCallback } from 'react';
 import { WriteScholarEditorialBackgroundLayers } from './common/WriteScholarEditorialBackground';
+import RandomMascotLoader from './common/RandomMascotLoader';
 import { logger } from '../utils/logger';
 import { HIDE_FRIENDS, HIDE_STREAK_AND_BADGES } from '../config/featureFlags';
 import { persistOnboardingToServer, persistTutorialToServer } from '../utils/onboarding';
@@ -15,6 +16,9 @@ import LoginPage from './pages/LoginPage';
 // Lazy with retry: recovers from chunk load failures (idle tab / deploy), retries with backoff before failing
 const EmailVerificationPage = lazyWithRetry(() => import('./pages/EmailVerificationPage'));
 const OnboardingPage = lazyWithRetry(() => import('./pages/OnboardingPage'));
+// Pre-signup Duolingo-style funnel — every "Sign up" CTA on the marketing
+// pages now routes through this 6-screen flow before the signup form.
+const WelcomeOnboardingPage = lazyWithRetry(() => import('./pages/WelcomeOnboardingPage'));
 const AuthCallbackPage = lazyWithRetry(() => import('./pages/AuthCallbackPage'));
 const DashboardPage = lazyWithRetry(() => import('./pages/DashboardPageNew'));
 const DashboardPageLegacy = lazyWithRetry(() => import('./pages/DashboardPage'));
@@ -63,11 +67,15 @@ const CalculatorPage = lazyWithRetry(() => import('./pages/tools/CalculatorPage'
 const ConverterPage = lazyWithRetry(() => import('./pages/tools/ConverterPage'));
 const LightningReflexQuizPage = lazyWithRetry(() => import('./pages/tools/LightningReflexQuizPage'));
 const WordTowerPage = lazyWithRetry(() => import('./pages/tools/WordTowerPage'));
+const GameLauncherPage = lazyWithRetry(() => import('./pages/GameLauncherPage'));
 const CreateFlashcardsPage = lazyWithRetry(() => import('./pages/tools/CreateFlashcardsPage'));
 const StudyPackViewerPage = lazyWithRetry(() => import('./pages/StudyPackViewerPage'));
 const AnalyzeEssayPage = lazyWithRetry(() => import('./pages/AnalyzeEssayPage'));
 const CitationsPage = lazyWithRetry(() => import('./pages/CitationsPage'));
 const StudyPackPage = lazyWithRetry(() => import('./pages/StudyPackPage'));
+const StudyPackHubPage = lazyWithRetry(() => import('./pages/StudyPackHubPage'));
+const AnalyzeHubPage = lazyWithRetry(() => import('./pages/AnalyzeHubPage'));
+const CitationsHubPage = lazyWithRetry(() => import('./pages/CitationsHubPage'));
 const UnlockQuizPage = lazyWithRetry(() => import('./pages/UnlockQuizPage'));
 
 // Import common components
@@ -81,6 +89,7 @@ import {
   MANDATORY_CHECKOUT_PENDING_KEY,
   POST_ACTIVATION_PAYWALL_PENDING_KEY,
   SOFT_PAYWALL_OPEN_KEY,
+  SOFT_PAYWALL_DISMISSED_KEY,
   STRIPE_CANCEL_TRIAL_MODAL_PENDING_KEY,
   TUTORIAL_CHECKOUT_CANCEL_MODAL_RESOLVED_KEY,
   TUTORIAL_CHECKOUT_CANCEL_MODAL_SEEN_KEY,
@@ -103,6 +112,7 @@ function getPageFromPath(pathname: string): string {
   if (p === '/email-verification') return 'email-verification';
   if (p === '/onboarding') return 'onboarding';
   if (p === '/auth/callback') return 'auth-callback';
+  if (p === '/get-started' || p === '/welcome') return 'welcome-onboarding';
   if (p === '/signup') return 'signup';
   if (p === '/login') return 'login';
   if (p === '/reset-password') return 'reset-password';
@@ -166,6 +176,8 @@ function getPageFromPath(pathname: string): string {
   if (p === '/tools/converter' || p === '/converter') return 'converter';
   if (p === '/tools/crater-blast' || p === '/crater-blast' || p === '/tools/lightning-reflex-quiz' || p === '/lightning-reflex-quiz') return 'crater-blast';
   if (p === '/tools/word-tower' || p === '/word-tower' || p === '/games/word-tower') return 'word-tower';
+  if (p === '/games/crater-blast-launcher' || p === '/game-launcher-crater-blast') return 'game-launcher-crater-blast';
+  if (p === '/games/word-tower-launcher' || p === '/game-launcher-word-tower') return 'game-launcher-word-tower';
   if (p === '/tools/interactive-lesson' || p === '/interactive-lesson' || p === '/lesson-generator') return 'dashboard';
   if (p === '/study-pack-viewer' || p === '/tools/study-pack-viewer') return 'study-pack-viewer';
   if (p === '/tools/more' || p === '/more-tools' || p === '/view-more-tools') return 'more-tools';
@@ -173,6 +185,10 @@ function getPageFromPath(pathname: string): string {
   if (p === '/tools/analyze' || p === '/analyze') return 'analyze';
   if (p === '/tools/citations' || p === '/citations') return 'citations';
   if (p === '/tools/study-pack' || p === '/study-pack') return 'study-pack';
+  /* Hub pages — friendlier landing screens that show recents + a "Create new" CTA. */
+  if (p === '/study-packs' || p === '/study-pack-hub' || p === '/tools/study-pack-hub') return 'study-pack-hub';
+  if (p === '/papers' || p === '/analyze-hub' || p === '/tools/analyze-hub') return 'analyze-hub';
+  if (p === '/citations-hub' || p === '/tools/citations-hub') return 'citations-hub';
   return 'landing';
 }
 
@@ -231,6 +247,7 @@ function readInitialSoftPaywallOpen(u: User | null): boolean {
   if (!u) return false;
   try {
     if (sessionStorage.getItem(SOFT_PAYWALL_OPEN_KEY) !== '1') return false;
+    if (sessionStorage.getItem(SOFT_PAYWALL_DISMISSED_KEY) === '1') return false;
     const plan = (u.plan || 'free').toLowerCase();
     if (plan === 'pro' || plan === 'premium') return false;
     return true;
@@ -362,7 +379,7 @@ const AcademicAIApp = () => {
     landing: { title: LANDING_PAGE_TITLE, description: LANDING_META_DESCRIPTION },
     analyze: { title: 'AI Essay Checker — Professor-Level Feedback in Seconds | WriteScholar', description: 'Paste or upload your paper for professor-level feedback on thesis, evidence, structure, and citations. Choose your education level for rubrics that match your course. Free to try.' },
     citations: { title: 'Citation Finder for College Papers — APA, MLA, Chicago | WriteScholar', description: 'Find peer-reviewed sources for research papers. Search by topic; export APA, MLA, Chicago, or Harvard citations. Built for bibliographies and lit reviews.' },
-    'study-pack': { title: 'AI Study Pack — Lesson, Flashcards, Quiz, Crossword & More | WriteScholar', description: 'Turn notes into a lesson, flashcards, quiz, crossword, and Crater Blast from one paste. Same study pack flow as the dashboard.' },
+    'study-pack': { title: 'AI Study Pack — Lesson, Flashcards, Quiz, Crossword & More | WriteScholar', description: 'Turn notes into a lesson, flashcards, quiz, crossword, Crater Blast & Word Tower from one paste. Same study pack flow as the dashboard.' },
     features: { title: 'AI Study Tools & Essay Feedback for College Students | WriteScholar', description: 'Essay analysis with rubrics, AI quizzes and flashcards from your notes, summarizer, citation finder, and Focus Mode—one workspace for college coursework.' },
     'focus-mode': { title: 'Focus Mode — Block Sites Until You Study (Chrome) | WriteScholar', description: 'Block TikTok, YouTube, and distracting sites until you answer questions from your own notes. Free: 3 sites; Pro: unlimited.' },
     pricing: { title: 'Pricing — Essay Analysis & Study Tools for Students | WriteScholar', description: 'Plans built for student budgets: free tier to try essay feedback and study packs, then Pro for heavier course loads. Compare to Quizlet Plus or textbook costs.' },
@@ -396,6 +413,8 @@ const AcademicAIApp = () => {
     'converter': { title: 'Free Unit Converter — STEM & Lab Units | WriteScholar', description: 'Convert SI and imperial units for problem sets and labs—length, temperature, speed, and more.' },
     'crater-blast': { title: 'Crater Blast — AI Quiz Game | WriteScholar', description: 'Blast the correct answer before it lands! AI-powered quiz game to reinforce what you studied.' },
     'word-tower': { title: 'Word Tower — AI Stacking Study Game | WriteScholar', description: 'Word Tower — the AI-powered stacking study game. Catch correct answers, dodge wrong ones, and build the tallest tower before it falls.' },
+    'game-launcher-crater-blast': { title: 'Crater Blast — Choose Study Packs | WriteScholar', description: 'Pick which study packs to combine into one Crater Blast game session.' },
+    'game-launcher-word-tower': { title: 'Word Tower — Choose Study Packs | WriteScholar', description: 'Pick which study packs to combine into one Word Tower game session.' },
     'more-tools': { title: 'More Free Tools for College Students | WriteScholar', description: 'Summarizer, word counter, citation generator, GPA calculator, essay outline, thesis helper, grammar check, and more—all in one place.' },
     'badges': { title: 'Achievements & Badges | WriteScholar', description: 'Collect badges, earn XP, and level up your scholar journey. Unlock cute monster companions by using WriteScholar tools.' },
     'friends': { title: 'Friends | WriteScholar', description: 'Connect with friends to share quizzes, flashcards, and crosswords. Add friends by code and collaborate on studying.' },
@@ -580,6 +599,8 @@ const AcademicAIApp = () => {
   useEffect(() => {
     const onOpenPaywall = () => {
       try {
+        // If user already dismissed the soft paywall this session, don't re-open it
+        if (sessionStorage.getItem(SOFT_PAYWALL_DISMISSED_KEY) === '1') return;
         sessionStorage.setItem(SOFT_PAYWALL_OPEN_KEY, '1');
       } catch {
         /* ignore */
@@ -597,6 +618,8 @@ const AcademicAIApp = () => {
     const plan = (user.plan || 'free').toLowerCase();
     if (plan === 'pro' || plan === 'premium') return;
     try {
+      // Don't restore if user already dismissed the paywall this session
+      if (sessionStorage.getItem(SOFT_PAYWALL_DISMISSED_KEY) === '1') return;
       if (sessionStorage.getItem(SOFT_PAYWALL_OPEN_KEY) === '1') {
         setApiLimitPaywallOpen(true);
       }
@@ -824,6 +847,7 @@ const AcademicAIApp = () => {
   // Canonical URL map – pages whose URL differs from /${page}
   const pageUrlMap: Record<string, string> = {
     landing: '/',
+    'welcome-onboarding': '/get-started',
     summarizer: '/tools/summarizer',
     'quiz-generator': '/tools/quiz-generator',
     'create-flashcards': '/tools/create-flashcards',
@@ -840,10 +864,15 @@ const AcademicAIApp = () => {
     'pomodoro-timer': '/tools/pomodoro-timer',
     'crater-blast': '/tools/crater-blast',
     'word-tower': '/tools/word-tower',
+    'game-launcher-crater-blast': '/games/crater-blast-launcher',
+    'game-launcher-word-tower': '/games/word-tower-launcher',
     'study-pack-viewer': '/study-pack-viewer',
     'analyze': '/tools/analyze',
     'citations': '/tools/citations',
     'study-pack': '/tools/study-pack',
+    'study-pack-hub': '/study-packs',
+    'analyze-hub': '/papers',
+    'citations-hub': '/citations-hub',
     'more-tools': '/more-tools',
     'badges': '/badges',
     'why-students-choose': '/why-students-choose',
@@ -919,6 +948,7 @@ const AcademicAIApp = () => {
       sessionStorage.removeItem(CHECKOUT_FROM_TUTORIAL_PAYWALL_KEY);
       sessionStorage.removeItem(LAST_TUTORIAL_CHECKOUT_PLAN_KEY);
       sessionStorage.removeItem(SOFT_PAYWALL_OPEN_KEY);
+      sessionStorage.removeItem(SOFT_PAYWALL_DISMISSED_KEY);
       sessionStorage.removeItem(POST_ACTIVATION_PAYWALL_PENDING_KEY);
       sessionStorage.removeItem(STRIPE_CANCEL_TRIAL_MODAL_PENDING_KEY);
     } catch {
@@ -1010,7 +1040,9 @@ const AcademicAIApp = () => {
       return (
         <div className="relative isolate min-h-screen min-h-[100dvh] flex items-center justify-center overflow-x-hidden">
           <WriteScholarEditorialBackgroundLayers position="fixed" />
-          <div className="animate-pulse text-stone-500 relative z-10">Loading...</div>
+          <div className="relative z-10">
+            <RandomMascotLoader size={140} />
+          </div>
         </div>
       );
     }
@@ -1018,6 +1050,10 @@ const AcademicAIApp = () => {
     switch (currentPage) {
       case 'landing':
         return <LandingPage onNavigate={navigateTo} user={user} />;
+      case 'welcome-onboarding':
+        // Pre-signup Duolingo-style funnel. All marketing CTAs land here
+        // first; the page itself routes to /signup on completion.
+        return <WelcomeOnboardingPage onNavigate={navigateTo} />;
       case 'signup':
         return <SignUpPage onNavigate={navigateTo} onSignUp={handleSignUp} />;
       case 'login':
@@ -1079,6 +1115,15 @@ const AcademicAIApp = () => {
       case 'study-pack':
         if (needsOnboarding) return renderOnboarding('dashboard');
         return <StudyPackPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'study-pack-hub':
+        if (needsOnboarding) return renderOnboarding('dashboard');
+        return <StudyPackHubPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'analyze-hub':
+        if (needsOnboarding) return renderOnboarding('dashboard');
+        return <AnalyzeHubPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'citations-hub':
+        if (needsOnboarding) return renderOnboarding('dashboard');
+        return <CitationsHubPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'analysis':
         return (
           <AnalysisPage onNavigate={navigateTo} user={user} onLogout={handleLogout} onUserUpdate={handleDashboardUserUpdate} />
@@ -1229,6 +1274,10 @@ const AcademicAIApp = () => {
         return <LightningReflexQuizPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'word-tower':
         return <WordTowerPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'game-launcher-crater-blast':
+        return <GameLauncherPage gameType="crater_blast" onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'game-launcher-word-tower':
+        return <GameLauncherPage gameType="word_tower" onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'study-pack-viewer':
         return <StudyPackViewerPage onNavigate={navigateTo} user={user} onLogout={handleLogout} initialData={studyPackInitialData || undefined} />;
       case 'admin':
@@ -1243,7 +1292,9 @@ const AcademicAIApp = () => {
   const pageFallback = (
     <div className="relative isolate min-h-screen min-h-[100dvh] flex items-center justify-center overflow-x-hidden">
       <WriteScholarEditorialBackgroundLayers position="fixed" />
-      <div className="animate-pulse text-stone-500 text-sm relative z-10">Loading...</div>
+      <div className="relative z-10">
+        <RandomMascotLoader size={140} />
+      </div>
     </div>
   );
 
@@ -1270,6 +1321,8 @@ const AcademicAIApp = () => {
             setApiLimitPaywallOpen(false);
             try {
               sessionStorage.removeItem(SOFT_PAYWALL_OPEN_KEY);
+              // Mark as dismissed so subsequent API limit responses don't re-open it
+              sessionStorage.setItem(SOFT_PAYWALL_DISMISSED_KEY, '1');
             } catch {
               /* ignore */
             }

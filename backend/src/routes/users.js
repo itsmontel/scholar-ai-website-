@@ -122,6 +122,57 @@ router.put('/profile', authenticateToken, validateUpdateProfile, async (req, res
   }
 });
 
+// @route   POST /api/users/onboarding-survey
+// @desc    Save the user's onboarding survey responses (referral source +
+//          feature interests). Upserts on user_id so re-submissions overwrite.
+// @access  Private
+router.post('/onboarding-survey', authenticateToken, async (req, res) => {
+  try {
+    const { referralSource, useGoal, featureInterests } = req.body || {};
+
+    // Allowlists — keep the analytics dimensions clean and prevent
+    // free-text injection from skewing the marketing dashboards.
+    const ALLOWED_SOURCES  = ['tiktok', 'instagram', 'youtube', 'friend', 'google', 'reddit', 'twitter', 'app_store', 'other'];
+    const ALLOWED_GOALS    = ['essays', 'exams', 'grades', 'learn', 'curious', 'other'];
+    const ALLOWED_FEATURES = ['essays', 'daily_review', 'study_packs', 'citations', 'games', 'motivation'];
+
+    const cleanSource = typeof referralSource === 'string' && ALLOWED_SOURCES.includes(referralSource)
+      ? referralSource
+      : null;
+    const cleanGoal = typeof useGoal === 'string' && ALLOWED_GOALS.includes(useGoal)
+      ? useGoal
+      : null;
+    const cleanFeatures = Array.isArray(featureInterests)
+      ? featureInterests.filter((f) => typeof f === 'string' && ALLOWED_FEATURES.includes(f))
+      : [];
+
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+
+    const { error } = await supabase
+      .from('onboarding_survey_responses')
+      .upsert({
+        user_id: req.user.id,
+        referral_source: cleanSource,
+        use_goal: cleanGoal,
+        feature_interests: cleanFeatures,
+        submitted_at: new Date().toISOString(),
+      }, { onConflict: 'user_id' });
+
+    if (error) {
+      console.error('[onboarding-survey] Supabase error:', error.message);
+      return res.status(500).json({ success: false, message: 'Failed to save survey' });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('[onboarding-survey] Error:', error.message);
+    res.status(500).json({ success: false, message: 'Failed to save survey' });
+  }
+});
+
 // @route   POST /api/users/complete-onboarding
 // @desc    Mark onboarding as completed for the current user
 // @access  Private

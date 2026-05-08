@@ -315,7 +315,7 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
               onClick={() => handlePageChange(page as number)}
               className={`w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${
                 currentPage === page
-                  ? 'bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-500/25'
+                  ? 'bg-[#1CB0F6] text-white border-2 border-b-4 border-[#1899D6] font-extrabold'
                   : 'text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800'
               }`}
             >
@@ -364,18 +364,18 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
               <svg className="w-4 h-4 mx-2 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
-              <span className="text-stone-900 dark:text-stone-100 font-semibold">Blog</span>
+              <span className="text-stone-900 dark:text-stone-100 font-extrabold">Blog</span>
             </nav>
 
             <header className="text-center max-w-2xl mx-auto">
-              <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">
+              <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#58CC02] dark:text-[#58CC02] mb-3">
                 Tips &amp; guides
               </p>
-              <div className="mx-auto mb-4 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85" aria-hidden />
+              <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-[#58CC02]" aria-hidden />
               <h1
                 id="blog-page-heading"
-                className="text-2xl sm:text-3xl lg:text-[2.35rem] font-semibold text-stone-900 dark:text-stone-100 mb-4 tracking-tight leading-tight"
-                style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+                className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-stone-900 dark:text-stone-100 mb-4 tracking-tight leading-tight"
+                style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
               >
                 Blog
               </h1>
@@ -393,7 +393,7 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
           {currentPosts.map((post, idx) => (
             <article
               key={post.slug}
-              className="group cursor-pointer rounded-2xl overflow-hidden border border-stone-200/90 dark:border-stone-700/90 bg-white/80 dark:bg-stone-900/50 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.1)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.4)] ring-1 ring-white/50 dark:ring-white/5 hover:shadow-[0_20px_50px_-20px_rgba(91,33,182,0.15)] dark:hover:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.5)] hover:border-violet-300/70 dark:hover:border-violet-600/50 transition-all duration-300"
+              className="group cursor-pointer rounded-2xl overflow-hidden border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 hover:border-[#1CB0F6] dark:hover:border-[#1CB0F6] transition-all duration-300"
               onClick={() => handlePostClick(post.slug)}
             >
               {/* Image Container */}
@@ -406,8 +406,8 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
               {/* Content */}
               <div className="p-5 sm:p-6">
                 <h2
-                  className="text-lg sm:text-xl font-semibold text-stone-900 dark:text-stone-100 mb-3 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors leading-snug line-clamp-2"
-                  style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+                  className="text-lg sm:text-xl font-extrabold text-stone-900 dark:text-stone-100 mb-3 group-hover:text-[#1CB0F6] transition-colors leading-snug line-clamp-2"
+                  style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                 >
                   {post.title}
                 </h2>
@@ -416,7 +416,7 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
                 </p>
                 
                 {/* Read time badge */}
-                <span className="inline-block px-3 py-1.5 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 text-sm font-medium rounded-xl">
+                <span className="inline-block px-3 py-1.5 bg-[#DDF4FF] dark:bg-[#1CB0F6]/20 text-[#1899D6] dark:text-[#1CB0F6] text-sm font-extrabold border border-[#1CB0F6]/30 rounded-xl">
                   {getReadTimeMinutes(post.readTime)} min read
                 </span>
               </div>
@@ -438,14 +438,14 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
         <section className="relative py-16 sm:py-24 overflow-hidden border-t border-stone-200/90 dark:border-stone-800">
           <LandingSectionLayers variant="cta" />
           <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center rounded-2xl border border-stone-200/90 dark:border-stone-800/90 bg-white/75 dark:bg-stone-900/45 px-6 py-10 sm:px-10 sm:py-12 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.12)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.45)] backdrop-blur-[8px] ring-1 ring-white/50 dark:ring-white/5">
-              <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">
+            <div className="text-center rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 px-6 py-10 sm:px-10 sm:py-12">
+              <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#58CC02] dark:text-[#58CC02] mb-3">
                 Get started
               </p>
-              <div className="mx-auto mb-5 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85" aria-hidden />
+              <div className="mx-auto mb-5 h-1 w-12 rounded-full bg-[#58CC02]" aria-hidden />
               <h2
-                className="text-2xl sm:text-3xl lg:text-[2.35rem] font-semibold text-stone-900 dark:text-stone-50 mb-4 tracking-tight leading-[1.15]"
-                style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+                className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-stone-900 dark:text-stone-50 mb-4 tracking-tight leading-[1.15]"
+                style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
               >
                 {user ? 'Put these tips into practice' : 'Ready to improve your academic writing?'}
               </h2>
@@ -460,7 +460,7 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
                     <button
                       type="button"
                       onClick={() => onNavigate('dashboard')}
-                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white font-semibold rounded-xl shadow-md shadow-violet-900/15 dark:shadow-violet-950/40 ring-1 ring-violet-900/10 dark:ring-white/10 transition-all duration-200 hover:shadow-lg"
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#58CC02] hover:bg-[#4CAF00] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all duration-150"
                     >
                       Go to dashboard
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
@@ -471,7 +471,7 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
                       <button
                         type="button"
                         onClick={() => onNavigate('billing')}
-                        className="w-full sm:w-auto inline-flex items-center justify-center px-7 py-3.5 border border-stone-300/95 dark:border-stone-600 bg-white/90 dark:bg-stone-900/50 text-stone-800 dark:text-stone-200 font-medium rounded-xl hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors shadow-sm"
+                        className="w-full sm:w-auto inline-flex items-center justify-center px-7 py-3.5 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-200 font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-stone-200 dark:border-stone-600 active:border-b-2 active:translate-y-0.5 hover:bg-stone-50 dark:hover:bg-stone-700 transition-all duration-150"
                       >
                         Upgrade plan
                       </button>
@@ -482,7 +482,7 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
                     <button
                       type="button"
                       onClick={() => onNavigate('signup')}
-                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white font-semibold rounded-xl shadow-md shadow-violet-900/15 dark:shadow-violet-950/40 ring-1 ring-violet-900/10 dark:ring-white/10 transition-all duration-200 hover:shadow-lg"
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#58CC02] hover:bg-[#4CAF00] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all duration-150"
                     >
                       Try free
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
@@ -492,7 +492,7 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
                     <button
                       type="button"
                       onClick={() => onNavigate('features')}
-                      className="w-full sm:w-auto inline-flex items-center justify-center px-7 py-3.5 border border-stone-300/95 dark:border-stone-600 bg-white/90 dark:bg-stone-900/50 text-stone-800 dark:text-stone-200 font-medium rounded-xl hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors shadow-sm"
+                      className="w-full sm:w-auto inline-flex items-center justify-center px-7 py-3.5 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-200 font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-stone-200 dark:border-stone-600 active:border-b-2 active:translate-y-0.5 hover:bg-stone-50 dark:hover:bg-stone-700 transition-all duration-150"
                     >
                       Learn more
                     </button>

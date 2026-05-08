@@ -514,10 +514,10 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'easy': return 'bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300';
-      case 'medium': return 'bg-amber-50 text-amber-700';
-      case 'hard': return 'bg-red-50 text-red-700';
-      default: return 'bg-stone-50 text-stone-700';
+      case 'easy': return 'bg-[#EAFFD6] text-[#46A302] font-extrabold border-2 border-[#58CC02]/30';
+      case 'medium': return 'bg-[#FFF4E0] text-[#D97F00] font-extrabold border-2 border-[#FF9600]/30';
+      case 'hard': return 'bg-[#FFE8E8] text-[#E04343] font-extrabold border-2 border-[#FF4B4B]/30';
+      default: return 'bg-stone-50 text-stone-700 font-extrabold';
     }
   };
 
@@ -1206,7 +1206,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
         <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
           <div className="flex items-center justify-center min-h-64">
             <div className="text-center">
-              <div className="animate-spin w-10 h-10 border-2 border-stone-300 border-t-violet-500 rounded-full mx-auto mb-4"></div>
+              <div className="animate-spin w-10 h-10 border-2 border-stone-300 border-t-[#58CC02] rounded-full mx-auto mb-4"></div>
               <p className="text-sm text-stone-500">Loading study tools...</p>
             </div>
           </div>
@@ -1221,17 +1221,17 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
         <WriteScholarEditorialBackgroundLayers position="fixed" />
         <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="quiz-history" />
         <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-          <div className="bg-white rounded-2xl border border-stone-200/80 shadow-sm p-12 text-center max-w-md mx-auto">
-            <div className="w-14 h-14 bg-red-50 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <svg className="w-7 h-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-white dark:bg-stone-900 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 p-12 text-center max-w-md mx-auto">
+            <div className="w-14 h-14 bg-[#FFE8E8] rounded-xl flex items-center justify-center mx-auto mb-4">
+              <svg className="w-7 h-7 text-[#FF4B4B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 19.5c-.77.833.192 2.5 1.732 2.5z" />
               </svg>
             </div>
-            <h2 className="text-lg font-semibold text-stone-900 mb-2">Couldn&apos;t load</h2>
-            <p className="text-sm text-stone-500 mb-6">{error}</p>
+            <h2 className="text-lg font-extrabold text-stone-900 mb-2">Couldn&apos;t load</h2>
+            <p className="text-sm text-stone-500 font-bold mb-6">{error}</p>
             <button
               onClick={fetchStudyToolHistory}
-              className="px-5 py-2.5 rounded-xl font-medium text-white bg-violet-600 hover:bg-violet-500 text-sm transition-all"
+              className="px-5 py-2.5 rounded-xl font-extrabold text-white bg-[#58CC02] border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 text-sm transition-all uppercase tracking-wide"
             >
               Try Again
             </button>
@@ -1275,7 +1275,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden">
+    <div className="relative min-h-screen overflow-x-hidden" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="quiz-history" />
 
@@ -1284,14 +1284,14 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 mb-10">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl bg-violet-600 hover:bg-violet-500 shadow-lg shadow-violet-500/30">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl bg-[#58CC02] border-2 border-b-4 border-[#46A302]">
                 🧠
               </div>
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">
                   Saved Materials
                 </h1>
-                <p className="text-sm text-stone-500 mt-0.5">
+                <p className="text-sm text-stone-500 font-bold mt-0.5">
                   {filteredTools.length} {filteredTools.length === 1 ? 'tool' : 'tools'} saved
                 </p>
               </div>
@@ -1307,13 +1307,13 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                 <div className="flex items-start sm:items-center gap-3">
                   <span className="text-xl flex-shrink-0">{expiringSoonCount <= 2 ? '⚠️' : '⏰'}</span>
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-medium ${expiringSoonCount <= 2 ? 'text-red-800 dark:text-red-200' : 'text-amber-800 dark:text-amber-200'}`}>
+                    <p className={`text-sm font-bold ${expiringSoonCount <= 2 ? 'text-red-800 dark:text-red-200' : 'text-amber-800 dark:text-amber-200'}`}>
                       {urgencyText}
                     </p>
                   </div>
                   <button
                     onClick={() => onNavigate('pricing')}
-                    className={`flex-shrink-0 px-4 py-1.5 text-xs font-semibold rounded-lg transition-colors ${expiringSoonCount <= 2 ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-amber-600 hover:bg-amber-700 text-white'}`}
+                    className={`flex-shrink-0 px-4 py-1.5 text-xs font-extrabold rounded-xl border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all ${expiringSoonCount <= 2 ? 'bg-[#FF4B4B] border-[#E04343] text-white' : 'bg-[#FF9600] border-[#D97F00] text-white'}`}
                   >
                     Upgrade Now
                   </button>
@@ -1324,7 +1324,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
           <div className="relative w-full sm:w-auto sm:shrink-0" onClick={(e) => e.stopPropagation()}>
             <button
               onClick={() => setCreateDropdownOpen(!createDropdownOpen)}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-white bg-violet-600 hover:bg-violet-500 transition-all duration-200 hover:shadow-lg hover:shadow-violet-500/25 hover:-translate-y-0.5"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#58CC02] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -1333,12 +1333,12 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
               <svg className={`w-4 h-4 transition-transform ${createDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
             </button>
             {createDropdownOpen && (
-              <div className="absolute right-0 top-full mt-1.5 w-48 py-1 bg-white dark:bg-stone-800 rounded-xl shadow-xl border border-stone-200 dark:border-stone-600 z-[100]">
+              <div className="absolute right-0 top-full mt-1.5 w-48 py-1 bg-white dark:bg-stone-900 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 z-[100]">
                 {createOptions.map((opt) => (
                   <button
                     key={opt.id}
                     onClick={() => { setCreateDropdownOpen(false); onNavigate(opt.page); }}
-                    className="w-full px-4 py-2.5 text-left text-sm text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700 flex items-center gap-2 rounded-lg transition-colors"
+                    className="w-full px-4 py-2.5 text-left text-sm font-bold text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700 flex items-center gap-2 rounded-lg transition-colors"
                   >
                     <span>{opt.icon}</span>
                     <span>{opt.label}</span>
@@ -1353,12 +1353,12 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
         <div className="mb-8 space-y-3">
 
           {/* Month navigator — primary browsing control */}
-          <div className="bg-white rounded-2xl border border-stone-200/70 shadow-sm overflow-hidden">
+          <div className="bg-white dark:bg-stone-900 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 overflow-hidden">
             <div className="flex items-stretch">
               {/* Prev arrow */}
               <button
                 onClick={goToPrevMonth}
-                className="flex items-center justify-center w-12 sm:w-14 shrink-0 text-stone-400 hover:text-stone-700 hover:bg-stone-50 border-r border-stone-100 transition-colors group"
+                className="flex items-center justify-center w-12 sm:w-14 shrink-0 text-stone-400 hover:text-stone-700 hover:bg-stone-50 border-r border-stone-200 transition-colors group"
                 aria-label="Previous month"
               >
                 <svg className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1371,11 +1371,11 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                 onClick={goToThisMonth}
                 className="flex-1 flex flex-col items-center justify-center gap-0.5 py-3.5 sm:py-4 hover:bg-stone-50/70 transition-colors"
               >
-                <span className={`text-base sm:text-lg font-bold tracking-tight transition-colors ${timePeriod === 'month' ? 'text-stone-900' : 'text-stone-400'}`}>
+                <span className={`text-base sm:text-lg font-extrabold tracking-tight transition-colors ${timePeriod === 'month' ? 'text-stone-900' : 'text-stone-400'}`}>
                   {timePeriod === 'month' ? formatMonthLabel() : 'Browse by month'}
                 </span>
                 {timePeriod === 'month' ? (
-                  <span className="text-[11px] sm:text-xs text-stone-400 font-medium">
+                  <span className="text-[11px] sm:text-xs text-stone-400 font-bold">
                     {isCurrentMonth
                       ? formatMonthLabel()
                       : 'click to jump to this month'
@@ -1390,7 +1390,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
               <button
                 onClick={goToNextMonth}
                 disabled={timePeriod === 'month' && isCurrentMonth}
-                className={`flex items-center justify-center w-12 sm:w-14 shrink-0 border-l border-stone-100 transition-colors group ${
+                className={`flex items-center justify-center w-12 sm:w-14 shrink-0 border-l border-stone-200 transition-colors group ${
                   timePeriod === 'month' && isCurrentMonth
                     ? 'text-stone-200 cursor-default'
                     : 'text-stone-400 hover:text-stone-700 hover:bg-stone-50'
@@ -1407,7 +1407,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
 
           {/* Quick period pills — secondary shortcuts */}
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs text-stone-400 font-medium shrink-0">Quick:</span>
+            <span className="text-xs text-stone-400 font-bold shrink-0">Quick:</span>
             {timePeriodOptions.map((option) => (
               <button
                 key={option.key}
@@ -1415,10 +1415,10 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                   setTimePeriod(option.key);
                   if (option.key === 'month') setSelectedMonthStart(getFirstOfMonth(new Date()));
                 }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all ${
                   timePeriod === option.key
-                    ? 'bg-stone-900 text-white shadow-sm'
-                    : 'bg-white border border-stone-200 text-stone-500 hover:border-stone-300 hover:text-stone-700 hover:bg-stone-50'
+                    ? 'bg-[#1CB0F6] text-white border-2 border-b-4 border-[#1899D6]'
+                    : 'bg-white text-stone-500 border-2 border-b-4 border-stone-200 active:border-b-2 active:translate-y-0.5'
                 }`}
               >
                 {option.label}
@@ -1433,7 +1433,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
         {/* Results count when filtering */}
         {timePeriod !== 'all' && (
           <div className="mb-4 flex items-center gap-2 text-sm text-stone-500">
-            <span className="font-semibold text-stone-700">{filteredTools.length}</span>
+            <span className="font-extrabold text-stone-700">{filteredTools.length}</span>
             <span>study set{filteredTools.length !== 1 ? 's' : ''}</span>
             <span className="text-stone-400">
               {timePeriod === 'month'
@@ -1451,28 +1451,28 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
         )}
 
         {/* Storage notice - compact inline */}
-        <div className={`mb-8 px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl flex items-center gap-3 sm:gap-4 min-w-0 ${isPaidUser ? 'bg-violet-50/80 border border-violet-200/60 dark:bg-violet-900/20 dark:border-violet-700/40' : 'bg-amber-50/80 border border-amber-200/60'}`}>
+        <div className={`mb-8 px-3 sm:px-4 py-2.5 sm:py-3 rounded-2xl flex items-center gap-3 sm:gap-4 min-w-0 border-2 border-b-4 ${isPaidUser ? 'bg-[#EAFFD6] border-[#46A302]/30 dark:bg-[#EAFFD6]/10 dark:border-[#46A302]/40' : 'bg-[#FFF4E0] border-[#D97F00]/30'}`}>
           {isPaidUser ? (
             <>
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-violet-500/20 flex items-center justify-center shrink-0">
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-[#58CC02]/20 flex items-center justify-center shrink-0">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-[#58CC02]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <p className="text-xs sm:text-sm text-violet-800 dark:text-violet-200 min-w-0">
-                <strong>Permanent storage</strong> — <span className="hidden sm:inline">Your study tools never expire.</span> Export to PDF or Word anytime.
+              <p className="text-xs sm:text-sm text-stone-800 dark:text-stone-200 font-bold min-w-0">
+                <strong className="font-extrabold">Permanent storage</strong> — <span className="hidden sm:inline">Your study tools never expire.</span> Export to PDF or Word anytime.
               </p>
             </>
           ) : (
             <>
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-amber-500/20 flex items-center justify-center shrink-0">
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-[#FF9600]/20 flex items-center justify-center shrink-0">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-[#FF9600]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <p className="text-xs sm:text-sm text-amber-800 flex-1 min-w-0">
+              <p className="text-xs sm:text-sm text-stone-800 font-bold flex-1 min-w-0">
                 Free plan: tools expire in 30 days.{' '}
-                <button onClick={() => onNavigate('pricing')} className="font-semibold underline underline-offset-2 hover:text-amber-900">
+                <button onClick={() => onNavigate('pricing')} className="font-extrabold underline underline-offset-2 hover:text-[#D97F00]">
                   Upgrade
                 </button>{' '}
                 <span className="hidden sm:inline">for permanent storage & export.</span>
@@ -1483,11 +1483,11 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
 
         {/* Study Tool Grid */}
         {filteredTools.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-stone-200/80 shadow-sm p-12 sm:p-16 text-center">
-            <div className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-4xl bg-violet-100 dark:bg-violet-900/30">
+          <div className="bg-white dark:bg-stone-900 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 p-12 sm:p-16 text-center">
+            <div className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-4xl bg-[#DDF4FF]">
               🧠
             </div>
-            <h2 className="text-xl font-bold text-stone-900 mb-2">
+            <h2 className="text-xl font-extrabold text-stone-900 mb-2">
               No study sets yet
             </h2>
             <p className="text-stone-500 mb-8 max-w-sm mx-auto">
@@ -1496,7 +1496,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
             <div className="relative inline-block" onClick={(e) => e.stopPropagation()}>
               <button
                 onClick={() => setCreateDropdownOpen(!createDropdownOpen)}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white bg-violet-600 hover:bg-violet-500 transition-all hover:shadow-lg hover:shadow-violet-500/25"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-[#58CC02] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -1505,12 +1505,12 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                 <svg className={`w-4 h-4 transition-transform ${createDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
               </button>
               {createDropdownOpen && (
-                <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1.5 w-48 py-1 bg-white dark:bg-stone-800 rounded-xl shadow-xl border border-stone-200 dark:border-stone-600 z-[100]">
+                <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1.5 w-48 py-1 bg-white dark:bg-stone-900 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 z-[100]">
                   {createOptions.map((opt) => (
                     <button
                       key={opt.id}
                       onClick={() => { setCreateDropdownOpen(false); onNavigate(opt.page); }}
-                      className="w-full px-4 py-2.5 text-left text-sm text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700 flex items-center gap-2 rounded-lg transition-colors"
+                      className="w-full px-4 py-2.5 text-left text-sm font-bold text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700 flex items-center gap-2 rounded-lg transition-colors"
                     >
                       <span>{opt.icon}</span>
                       <span>{opt.label}</span>
@@ -1532,57 +1532,57 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                 switch (type) {
                   case 'study_pack':
                     return {
-                      border: 'border-l-4 border-l-violet-500',
-                      iconBg: 'bg-gradient-to-br from-violet-100 to-violet-100',
-                      iconText: 'text-violet-600',
-                      badge: 'bg-violet-100 text-violet-700',
-                      preview: 'bg-violet-50 text-violet-700',
-                      button: 'from-violet-500 to-violet-500 shadow-violet-500/25',
+                      border: 'border-l-4 border-l-[#A560E8]',
+                      iconBg: 'bg-[#F3EAFF]',
+                      iconText: 'text-[#A560E8]',
+                      badge: 'bg-[#F3EAFF] text-[#A560E8] font-extrabold border-2 border-[#A560E8]/30',
+                      preview: 'bg-[#F3EAFF] text-[#A560E8]',
+                      button: 'bg-[#A560E8] border-2 border-b-4 border-[#8A48C7]',
                     };
                   case 'flashcards':
                     return {
-                      border: 'border-l-4 border-l-fuchsia-500',
-                      iconBg: 'bg-gradient-to-br from-fuchsia-100 to-fuchsia-100',
-                      iconText: 'text-fuchsia-600',
-                      badge: 'bg-fuchsia-100 text-fuchsia-700',
-                      preview: 'bg-fuchsia-50 text-fuchsia-700',
-                      button: 'from-fuchsia-500 to-fuchsia-500 shadow-fuchsia-500/25',
+                      border: 'border-l-4 border-l-[#1CB0F6]',
+                      iconBg: 'bg-[#DDF4FF]',
+                      iconText: 'text-[#1CB0F6]',
+                      badge: 'bg-[#DDF4FF] text-[#1CB0F6] font-extrabold border-2 border-[#1CB0F6]/30',
+                      preview: 'bg-[#DDF4FF] text-[#1899D6]',
+                      button: 'bg-[#1CB0F6] border-2 border-b-4 border-[#1899D6]',
                     };
                   case 'crossword':
                     return {
-                      border: 'border-l-4 border-l-emerald-500',
-                      iconBg: 'bg-gradient-to-br from-emerald-100 to-teal-100',
-                      iconText: 'text-emerald-600',
-                      badge: 'bg-emerald-100 text-emerald-700',
-                      preview: 'bg-emerald-50 text-emerald-700',
-                      button: 'from-emerald-500 to-teal-500 shadow-emerald-500/25',
+                      border: 'border-l-4 border-l-[#58CC02]',
+                      iconBg: 'bg-[#EAFFD6]',
+                      iconText: 'text-[#58CC02]',
+                      badge: 'bg-[#EAFFD6] text-[#46A302] font-extrabold border-2 border-[#58CC02]/30',
+                      preview: 'bg-[#EAFFD6] text-[#46A302]',
+                      button: 'bg-[#58CC02] border-2 border-b-4 border-[#46A302]',
                     };
                   case 'crater_blast':
                     return {
-                      border: 'border-l-4 border-l-orange-500',
-                      iconBg: 'bg-gradient-to-br from-orange-100 to-amber-100',
-                      iconText: 'text-orange-600',
-                      badge: 'bg-orange-100 text-orange-700',
-                      preview: 'bg-orange-50 text-orange-700',
-                      button: 'from-orange-500 to-amber-500 shadow-orange-500/25',
+                      border: 'border-l-4 border-l-[#FF9600]',
+                      iconBg: 'bg-[#FFF4E0]',
+                      iconText: 'text-[#FF9600]',
+                      badge: 'bg-[#FFF4E0] text-[#D97F00] font-extrabold border-2 border-[#FF9600]/30',
+                      preview: 'bg-[#FFF4E0] text-[#D97F00]',
+                      button: 'bg-[#FF9600] border-2 border-b-4 border-[#D97F00]',
                     };
                   case 'lesson':
                     return {
-                      border: 'border-l-4 border-l-violet-500',
-                      iconBg: 'bg-gradient-to-br from-violet-100 to-violet-100',
-                      iconText: 'text-violet-600',
-                      badge: 'bg-violet-100 text-violet-700',
-                      preview: 'bg-violet-50 text-violet-700',
-                      button: 'from-violet-500 to-violet-500 shadow-violet-500/25',
+                      border: 'border-l-4 border-l-[#A560E8]',
+                      iconBg: 'bg-[#F3EAFF]',
+                      iconText: 'text-[#A560E8]',
+                      badge: 'bg-[#F3EAFF] text-[#A560E8] font-extrabold border-2 border-[#A560E8]/30',
+                      preview: 'bg-[#F3EAFF] text-[#A560E8]',
+                      button: 'bg-[#A560E8] border-2 border-b-4 border-[#8A48C7]',
                     };
                   default:
                     return {
-                      border: 'border-l-4 border-l-violet-500',
-                      iconBg: 'bg-gradient-to-br from-violet-100 to-violet-100',
-                      iconText: 'text-violet-600',
-                      badge: 'bg-violet-100 text-violet-700',
-                      preview: 'bg-violet-50 text-violet-700',
-                      button: 'from-violet-500 to-violet-500 shadow-violet-500/25',
+                      border: 'border-l-4 border-l-[#1CB0F6]',
+                      iconBg: 'bg-[#DDF4FF]',
+                      iconText: 'text-[#1CB0F6]',
+                      badge: 'bg-[#DDF4FF] text-[#1CB0F6] font-extrabold border-2 border-[#1CB0F6]/30',
+                      preview: 'bg-[#DDF4FF] text-[#1899D6]',
+                      button: 'bg-[#1CB0F6] border-2 border-b-4 border-[#1899D6]',
                     };
                 }
               };
@@ -1592,7 +1592,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
               return (
                 <div
                   key={tool.id}
-                  className={`bg-white rounded-2xl border border-stone-200/80 shadow-sm hover:shadow-lg hover:border-stone-300/80 transition-all ${styles.border} ${exportDropdownToolId === tool.id ? 'relative z-20 overflow-visible' : 'overflow-hidden'}`}
+                  className={`bg-white dark:bg-stone-900 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 hover:border-stone-300 transition-all ${styles.border} ${exportDropdownToolId === tool.id ? 'relative z-20 overflow-visible' : 'overflow-hidden'}`}
                 >
                   <div className="p-4 sm:p-6 min-w-0">
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 min-w-0">
@@ -1613,13 +1613,13 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                                     if (e.key === 'Enter') saveRename(tool.id);
                                     if (e.key === 'Escape') cancelRename();
                                   }}
-                                  className="flex-1 min-w-0 px-3 py-1.5 rounded-lg border border-violet-300 dark:border-violet-600 bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 text-base font-semibold focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500"
+                                  className="flex-1 min-w-0 px-3 py-1.5 rounded-lg border-2 border-[#1CB0F6] bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 text-base font-extrabold focus:outline-none focus:ring-2 focus:ring-[#1CB0F6]/40 focus:border-[#1CB0F6]"
                                   maxLength={200}
                                 />
                                 <button
                                   onClick={() => saveRename(tool.id)}
                                   disabled={isRenaming || !renameValue.trim()}
-                                  className="p-1.5 rounded-lg bg-violet-600 text-white hover:bg-violet-500 disabled:opacity-50 transition-colors"
+                                  className="p-1.5 rounded-lg bg-[#58CC02] text-white border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 disabled:opacity-50 transition-all"
                                   title="Save"
                                 >
                                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
@@ -1634,12 +1634,12 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                               </div>
                             ) : (
                               <div className="flex items-center gap-2 group/title min-w-0">
-                                <h3 className="text-base sm:text-lg font-semibold text-stone-900 dark:text-stone-100 truncate min-w-0 flex-1">
+                                <h3 className="text-base sm:text-lg font-extrabold text-stone-900 dark:text-stone-100 truncate min-w-0 flex-1">
                                   {tool.title}
                                 </h3>
                                 <button
                                   onClick={() => startRename(tool)}
-                                  className="opacity-70 group-hover/title:opacity-100 flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 py-1 rounded-lg text-stone-500 hover:text-violet-600 hover:bg-violet-50 dark:hover:bg-violet-900/30 dark:text-stone-400 dark:hover:text-violet-400 transition-all shrink-0 text-xs sm:text-sm font-medium"
+                                  className="opacity-70 group-hover/title:opacity-100 flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 py-1 rounded-lg text-stone-500 hover:text-[#1CB0F6] hover:bg-[#DDF4FF] dark:hover:bg-[#1CB0F6]/10 dark:text-stone-400 dark:hover:text-[#1CB0F6] transition-all shrink-0 text-xs sm:text-sm font-bold"
                                   title="Rename"
                                 >
                                   <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
@@ -1655,27 +1655,27 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                                 {formatDate(tool.created_at)}
                               </span>
                               {isQuiz && (
-                                <span className={`px-1.5 sm:px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-medium ${getDifficultyColor(tool.difficulty)}`}>
+                                <span className={`px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] sm:text-xs ${getDifficultyColor(tool.difficulty)}`}>
                                   {tool.difficulty}
                                 </span>
                               )}
-                              <span className={`px-1.5 sm:px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-medium ${styles.badge}`}>
+                              <span className={`px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] sm:text-xs ${styles.badge}`}>
                                 {getTypeLabel(tool.quiz_type)}
                               </span>
-                              <span className="px-1.5 sm:px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-medium bg-stone-100 text-stone-600">
+                              <span className="px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] sm:text-xs font-bold bg-stone-100 text-stone-600 border-2 border-stone-200/50">
                                 {tool.quiz_type === 'study_pack' ? '5 formats' : `${tool.question_count} ${tool.quiz_type === 'flashcards' ? 'cards' : tool.quiz_type === 'crossword' ? 'words' : tool.quiz_type === 'crater_blast' ? 'questions' : tool.quiz_type === 'lesson' ? 'slides' : 'questions'}`}
                               </span>
                               {tool.quiz_type === 'lesson' && tool.quiz_bank && tool.quiz_bank.length > 0 && (
-                                <span className="px-1.5 sm:px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
+                                <span className="px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] sm:text-xs font-extrabold bg-[#EAFFD6] text-[#46A302] border-2 border-[#58CC02]/30">
                                   🎯 Quiz
                                 </span>
                               )}
                               {daysRemaining === null ? (
-                                <span className="px-1.5 sm:px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-medium bg-emerald-50 text-emerald-700">
+                                <span className="px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] sm:text-xs font-extrabold bg-[#EAFFD6] text-[#46A302] border-2 border-[#58CC02]/30">
                                   Permanent
                                 </span>
                               ) : (
-                                <span className={`px-1.5 sm:px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-medium ${daysRemaining <= 2 ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700'}`}>
+                                <span className={`px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] sm:text-xs font-extrabold ${daysRemaining <= 2 ? 'bg-[#FFE8E8] text-[#E04343] border-2 border-[#FF4B4B]/30' : 'bg-[#FFF4E0] text-[#D97F00] border-2 border-[#FF9600]/30'}`}>
                                   {daysRemaining <= 0 ? 'Expires today' : `${daysRemaining}d left`}
                                 </span>
                               )}
@@ -1687,7 +1687,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                       <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 sm:justify-end">
                         <button
                           onClick={() => startStudyTool(tool)}
-                          className={`px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-xl font-medium text-xs sm:text-sm text-white bg-gradient-to-r ${styles.button} hover:opacity-90 transition-all flex items-center gap-1 sm:gap-2 shadow-md shrink-0`}
+                          className={`px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-xl font-extrabold text-xs sm:text-sm text-white ${styles.button} active:border-b-2 active:translate-y-0.5 transition-all flex items-center gap-1 sm:gap-2 shrink-0`}
                         >
                           Open
                           <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1699,7 +1699,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                           <div className="relative" onClick={(e) => e.stopPropagation()}>
                             <button
                               onClick={() => setExportDropdownToolId(exportDropdownToolId === tool.id ? null : tool.id)}
-                              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 rounded-xl bg-stone-100 text-stone-600 hover:bg-stone-200 hover:text-stone-800 transition-colors text-xs sm:text-sm font-medium shrink-0"
+                              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 rounded-xl bg-white text-stone-600 border-2 border-b-4 border-stone-200 hover:bg-stone-50 active:border-b-2 active:translate-y-0.5 transition-all text-xs sm:text-sm font-bold shrink-0"
                               title="Export"
                             >
                               <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
@@ -1707,7 +1707,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                               <svg className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform ${exportDropdownToolId === tool.id ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                             </button>
                             {exportDropdownToolId === tool.id && (
-                              <div className="absolute left-0 top-full mt-1.5 w-40 py-1 bg-white dark:bg-stone-800 rounded-xl shadow-xl border border-stone-200 dark:border-stone-600 z-[100]">
+                              <div className="absolute left-0 top-full mt-1.5 w-40 py-1 bg-white dark:bg-stone-900 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 z-[100]">
                                 {isPaidUser && (
                                   <>
                                     <button
@@ -1774,7 +1774,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                         ) : (
                           <button
                             onClick={() => setShowUpgradeModal(true)}
-                            className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 rounded-xl bg-stone-100 text-stone-400 hover:bg-stone-200 transition-colors text-xs sm:text-sm font-medium shrink-0"
+                            className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 rounded-xl bg-white text-stone-400 border-2 border-b-4 border-stone-200 hover:bg-stone-50 active:border-b-2 active:translate-y-0.5 transition-all text-xs sm:text-sm font-bold shrink-0"
                             title="Upgrade to export"
                           >
                             <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
@@ -1785,7 +1785,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                         {!HIDE_FRIENDS && (
                         <button
                           onClick={() => openShareModal(tool.id)}
-                          className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 rounded-xl bg-violet-500 text-white hover:bg-violet-600 font-medium text-xs sm:text-sm shadow-sm hover:shadow transition-all shrink-0"
+                          className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 rounded-xl bg-[#1CB0F6] text-white font-extrabold border-2 border-b-4 border-[#1899D6] active:border-b-2 active:translate-y-0.5 text-xs sm:text-sm transition-all shrink-0"
                           title="Share with friends"
                         >
                           <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1812,7 +1812,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                       <div className="mt-4 pt-4 border-t border-stone-100 flex flex-wrap items-center gap-1.5 sm:gap-2 overflow-hidden">
                         {isQuiz && (
                           <>
-                            <span className="text-[10px] sm:text-xs text-stone-500 font-medium shrink-0">Preview:</span>
+                            <span className="text-[10px] sm:text-xs text-stone-500 font-bold shrink-0">Preview:</span>
                             {(tool.questions as QuizQuestion[]).slice(0, 2).map((q, i) => (
                               <span key={i} className={`px-1.5 sm:px-2 py-0.5 sm:py-1 ${styles.preview} rounded-lg text-[10px] sm:text-xs max-w-[120px] sm:max-w-[200px] truncate`}>
                                 {q.question.length > 30 ? q.question.substring(0, 30) + '…' : q.question}
@@ -1825,7 +1825,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                         )}
                         {tool.quiz_type === 'flashcards' && (
                           <>
-                            <span className="text-[10px] sm:text-xs text-stone-500 font-medium shrink-0">Preview:</span>
+                            <span className="text-[10px] sm:text-xs text-stone-500 font-bold shrink-0">Preview:</span>
                             {(tool.questions as FlashCard[]).slice(0, 2).map((card, i) => (
                               <span key={i} className={`px-1.5 sm:px-2 py-0.5 sm:py-1 ${styles.preview} rounded-lg text-[10px] sm:text-xs max-w-[120px] sm:max-w-[200px] truncate`}>
                                 {card.front.length > 25 ? card.front.substring(0, 25) + '…' : card.front}
@@ -1838,7 +1838,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                         )}
                         {tool.quiz_type === 'crossword' && (
                           <>
-                            <span className="text-[10px] sm:text-xs text-stone-500 font-medium shrink-0">Puzzle:</span>
+                            <span className="text-[10px] sm:text-xs text-stone-500 font-bold shrink-0">Puzzle:</span>
                             <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 ${styles.preview} rounded-lg text-[10px] sm:text-xs`}>
                               {((tool.questions as CrosswordData)?.clues?.across?.length || 0)} across
                             </span>
@@ -1849,7 +1849,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                         )}
                         {tool.quiz_type === 'crater_blast' && (
                           <>
-                            <span className="text-xs text-stone-500 font-medium">Game:</span>
+                            <span className="text-xs text-stone-500 font-bold">Game:</span>
                             <span className={`px-2 py-1 ${styles.preview} rounded-lg text-xs`}>
                               {((tool.questions as any)?.questions?.length || 0)} questions
                             </span>
@@ -1869,7 +1869,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
               <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl border border-stone-200 bg-white text-stone-700 hover:bg-stone-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-stone-700 border-2 border-b-4 border-stone-200 hover:bg-stone-50 active:border-b-2 active:translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed transition-all font-bold"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -1881,10 +1881,10 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                   <button
                     key={page}
                     onClick={() => setCurrentPage(page)}
-                    className={`w-10 h-10 rounded-lg font-medium transition-colors ${
+                    className={`w-10 h-10 rounded-lg font-extrabold transition-all ${
                       currentPage === page
-                        ? 'bg-violet-600 hover:bg-violet-500 text-white shadow-md'
-                        : 'bg-white border border-stone-200 text-stone-600 hover:bg-stone-50'
+                        ? 'bg-[#1CB0F6] text-white border-2 border-b-4 border-[#1899D6]'
+                        : 'bg-white text-stone-600 border-2 border-b-4 border-stone-200 active:border-b-2 active:translate-y-0.5'
                     }`}
                   >
                     {page}
@@ -1894,7 +1894,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
               <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl border border-stone-200 bg-white text-stone-700 hover:bg-stone-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-stone-700 border-2 border-b-4 border-stone-200 hover:bg-stone-50 active:border-b-2 active:translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed transition-all font-bold"
               >
                 Next
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1910,30 +1910,30 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
       {/* Delete Confirmation Modal */}
       {deleteConfirmId && (
         <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 border border-stone-200/80">
+          <div className="bg-white dark:bg-stone-900 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 max-w-md w-full p-6">
             <div className="flex items-start gap-4 mb-5">
-              <div className="w-11 h-11 bg-red-50 rounded-xl flex items-center justify-center shrink-0">
-                <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-11 h-11 bg-[#FFE8E8] rounded-xl flex items-center justify-center shrink-0">
+                <svg className="w-5 h-5 text-[#FF4B4B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-stone-900">Delete study tool?</h3>
-                <p className="text-sm text-stone-500 mt-1">This can&apos;t be undone.</p>
+                <h3 className="text-lg font-extrabold text-stone-900">Delete study tool?</h3>
+                <p className="text-sm text-stone-500 font-bold mt-1">This can&apos;t be undone.</p>
               </div>
             </div>
             <div className="flex gap-3">
               <button
                 onClick={cancelDelete}
                 disabled={isDeleting}
-                className="flex-1 px-4 py-2.5 border border-stone-200 text-stone-700 rounded-xl hover:bg-stone-50 transition-colors disabled:opacity-50 font-medium text-sm"
+                className="flex-1 px-4 py-2.5 bg-white text-stone-700 border-2 border-b-4 border-stone-200 rounded-xl hover:bg-stone-50 active:border-b-2 active:translate-y-0.5 transition-all disabled:opacity-50 font-bold text-sm"
               >
                 Cancel
               </button>
               <button
                 onClick={() => confirmDelete(deleteConfirmId)}
                 disabled={isDeleting}
-                className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors disabled:opacity-50 flex items-center justify-center font-medium text-sm"
+                className="flex-1 px-4 py-2.5 bg-[#FF4B4B] text-white font-extrabold rounded-xl border-2 border-b-4 border-[#E04343] active:border-b-2 active:translate-y-0.5 transition-all disabled:opacity-50 flex items-center justify-center text-sm"
               >
                 {isDeleting ? (
                   <>
@@ -1961,14 +1961,14 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
       )}
       {showUpgradeModal && (
         <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 border border-stone-200/80">
+          <div className="bg-white dark:bg-stone-900 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 max-w-md w-full p-6">
             <div className="text-center mb-6">
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-violet-100 dark:bg-violet-900/30">
-                <svg className="w-7 h-7 text-violet-600 dark:text-violet-400" fill="currentColor" viewBox="0 0 20 20">
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-[#F3EAFF]">
+                <svg className="w-7 h-7 text-[#A560E8]" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-stone-900 mb-2">Unlock export</h3>
+              <h3 className="text-lg font-extrabold text-stone-900 mb-2">Unlock export</h3>
               <p className="text-sm text-stone-500">
                 Export to PDF or Word with a paid plan.
               </p>
@@ -1976,7 +1976,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
             <ul className="space-y-3 mb-6">
               {['Export to PDF & Word', 'Permanent storage', 'Unlimited generations', 'All question types'].map((item, i) => (
                 <li key={i} className="flex items-center gap-3 text-sm text-stone-700">
-                  <svg className="w-4 h-4 text-emerald-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-4 h-4 text-[#58CC02] shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                   {item}
@@ -1986,13 +1986,13 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
             <div className="flex gap-3">
               <button
                 onClick={() => setShowUpgradeModal(false)}
-                className="flex-1 px-4 py-2.5 border border-stone-200 text-stone-700 rounded-xl hover:bg-stone-50 transition-colors font-medium text-sm"
+                className="flex-1 px-4 py-2.5 bg-white text-stone-700 border-2 border-b-4 border-stone-200 rounded-xl hover:bg-stone-50 active:border-b-2 active:translate-y-0.5 transition-all font-bold text-sm"
               >
                 Later
               </button>
               <button
                 onClick={() => { setShowUpgradeModal(false); onNavigate('pricing'); }}
-                className="flex-1 px-4 py-2.5 text-white bg-violet-600 hover:bg-violet-500 rounded-xl font-medium text-sm transition-all"
+                className="flex-1 px-4 py-2.5 text-white bg-[#58CC02] font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 text-sm transition-all"
               >
                 View Plans
               </button>
@@ -2004,16 +2004,16 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
       {/* Share Modal */}
       {!HIDE_FRIENDS && showShareModal && (
         <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 border border-stone-200/80">
+          <div className="bg-white dark:bg-stone-900 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 max-w-md w-full p-6">
             <div className="flex items-start justify-between mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 bg-violet-100 rounded-xl flex items-center justify-center">
-                  <svg className="w-5 h-5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-11 h-11 bg-[#DDF4FF] rounded-xl flex items-center justify-center">
+                  <svg className="w-5 h-5 text-[#1CB0F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-stone-900">Share with a Friend</h3>
+                  <h3 className="text-lg font-extrabold text-stone-900">Share with a Friend</h3>
                   <p className="text-sm text-stone-500">Send this study tool to a friend</p>
                 </div>
               </div>
@@ -2029,24 +2029,24 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
 
             {shareSuccess ? (
               <div className="text-center py-8">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-16 h-16 bg-[#EAFFD6] rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-[#58CC02]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <p className="text-lg font-medium text-stone-900">{shareSuccess}</p>
+                <p className="text-lg font-extrabold text-stone-900">{shareSuccess}</p>
               </div>
             ) : (
               <>
                 {shareError && (
-                  <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">
+                  <div className="mb-4 p-3 bg-[#FFE8E8] border-2 border-[#FF4B4B]/30 text-[#E04343] rounded-xl text-sm font-bold">
                     {shareError}
                   </div>
                 )}
 
                 {loadingFriends ? (
                   <div className="flex items-center justify-center py-8">
-                    <div className="animate-spin w-8 h-8 border-2 border-stone-300 border-t-violet-600 rounded-full"></div>
+                    <div className="animate-spin w-8 h-8 border-2 border-stone-300 border-t-[#1CB0F6] rounded-full"></div>
                   </div>
                 ) : friends.length === 0 ? (
                   <div className="text-center py-8">
@@ -2055,11 +2055,11 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
                     </div>
-                    <h4 className="font-medium text-stone-900 mb-2">No friends yet</h4>
+                    <h4 className="font-extrabold text-stone-900 mb-2">No friends yet</h4>
                     <p className="text-sm text-stone-500 mb-4">Add friends to share study tools with them</p>
                     <button
                       onClick={() => { closeShareModal(); onNavigate('friends'); }}
-                      className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium rounded-lg transition-colors"
+                      className="px-4 py-2 bg-[#58CC02] text-white text-sm font-extrabold rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all uppercase tracking-wide"
                     >
                       Add Friends
                     </button>
@@ -2067,33 +2067,33 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                 ) : (
                   <>
                     <div className="mb-4">
-                      <label className="block text-sm font-medium text-stone-700 mb-2">Select a friend</label>
+                      <label className="block text-sm font-bold text-stone-700 mb-2">Select a friend</label>
                       <div className="space-y-2 max-h-48 overflow-y-auto">
                         {friends.map((friend) => (
                           <button
                             key={friend.id}
                             onClick={() => setSelectedFriendId(friend.id)}
-                            className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all ${
+                            className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${
                               selectedFriendId === friend.id
-                                ? 'border-violet-500 bg-violet-50'
+                                ? 'border-[#1CB0F6] bg-[#DDF4FF]'
                                 : 'border-stone-200 hover:border-stone-300 hover:bg-stone-50'
                             }`}
                           >
                             <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                              selectedFriendId === friend.id ? 'bg-violet-200' : 'bg-stone-200'
+                              selectedFriendId === friend.id ? 'bg-[#1CB0F6]/20' : 'bg-stone-200'
                             }`}>
-                              <span className={`font-semibold ${
-                                selectedFriendId === friend.id ? 'text-violet-700' : 'text-stone-600'
+                              <span className={`font-extrabold ${
+                                selectedFriendId === friend.id ? 'text-[#1899D6]' : 'text-stone-600'
                               }`}>
                                 {(friend.username?.[0] || friend.first_name?.[0] || friend.email?.[0] || '?').toUpperCase()}
                               </span>
                             </div>
                             <div className="flex-1 text-left">
-                              <p className="font-medium text-stone-900">{getFriendName(friend)}</p>
+                              <p className="font-bold text-stone-900">{getFriendName(friend)}</p>
                               <p className="text-xs text-stone-500">{friend.friend_code}</p>
                             </div>
                             {selectedFriendId === friend.id && (
-                              <svg className="w-5 h-5 text-violet-600" fill="currentColor" viewBox="0 0 20 20">
+                              <svg className="w-5 h-5 text-[#1CB0F6]" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                               </svg>
                             )}
@@ -2103,13 +2103,13 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                     </div>
 
                     <div className="mb-6">
-                      <label className="block text-sm font-medium text-stone-700 mb-2">Add a message (optional)</label>
+                      <label className="block text-sm font-bold text-stone-700 mb-2">Add a message (optional)</label>
                       <input
                         type="text"
                         value={shareMessage}
                         onChange={(e) => setShareMessage(e.target.value)}
                         placeholder="e.g. Check out these flashcards!"
-                        className="w-full px-4 py-3 border border-stone-200 rounded-xl focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500 focus:outline-none text-sm"
+                        className="w-full px-4 py-3 border-2 border-stone-200 rounded-xl focus:ring-2 focus:ring-[#1CB0F6]/40 focus:border-[#1CB0F6] focus:outline-none text-sm font-bold"
                         maxLength={200}
                       />
                     </div>
@@ -2117,14 +2117,14 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                     <div className="flex gap-3">
                       <button
                         onClick={closeShareModal}
-                        className="flex-1 px-4 py-2.5 border border-stone-200 text-stone-700 rounded-xl hover:bg-stone-50 transition-colors font-medium text-sm"
+                        className="flex-1 px-4 py-2.5 bg-white text-stone-700 border-2 border-b-4 border-stone-200 rounded-xl hover:bg-stone-50 active:border-b-2 active:translate-y-0.5 transition-all font-bold text-sm"
                       >
                         Cancel
                       </button>
                       <button
                         onClick={handleShare}
                         disabled={!selectedFriendId || isSharing}
-                        className="flex-1 px-4 py-2.5 text-white bg-violet-600 hover:bg-violet-700 disabled:bg-stone-300 rounded-xl font-medium text-sm transition-all flex items-center justify-center gap-2"
+                        className="flex-1 px-4 py-2.5 text-white bg-[#1CB0F6] font-extrabold rounded-xl border-2 border-b-4 border-[#1899D6] active:border-b-2 active:translate-y-0.5 disabled:bg-stone-300 disabled:border-stone-400 text-sm transition-all flex items-center justify-center gap-2"
                       >
                         {isSharing ? (
                           <>

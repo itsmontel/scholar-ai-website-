@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import Header from '../../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../../common/WriteScholarEditorialBackground';
 import Footer from '../../common/Footer';
-import ScholarMascot from '../../common/ScholarMascot';
 
 interface TextCaseConverterPageProps {
   onNavigate: (page: string) => void;
@@ -27,7 +25,7 @@ const TextCaseConverterPage = ({ onNavigate, user, onLogout }: TextCaseConverter
 
   const convertCase = (type: CaseType): string => {
     if (!text) return '';
-    
+
     switch (type) {
       case 'uppercase':
         return text.toUpperCase();
@@ -58,45 +56,37 @@ const TextCaseConverterPage = ({ onNavigate, user, onLogout }: TextCaseConverter
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const caseOptions = [
-    { type: 'uppercase' as CaseType, label: 'UPPERCASE', description: 'ALL CAPS', icon: 'AA', color: 'rose' },
-    { type: 'lowercase' as CaseType, label: 'lowercase', description: 'all lower', icon: 'aa', color: 'green' },
-    { type: 'titlecase' as CaseType, label: 'Title Case', description: 'First Letter Cap', icon: 'Aa', color: 'rose' },
-    { type: 'sentencecase' as CaseType, label: 'Sentence case', description: 'Start of sentences', icon: 'Aa.', color: 'orange' },
-    { type: 'capitalizewords' as CaseType, label: 'Capitalize Words', description: 'Every Word', icon: 'Aw', color: 'pink' },
-    { type: 'inverse' as CaseType, label: 'InVeRsE', description: 'Swap cases', icon: 'aA', color: 'red' },
+  const caseOptions: { type: CaseType; label: string; description: string; icon: string; bg: string; border: string; borderDark: string; text: string }[] = [
+    { type: 'uppercase', label: 'UPPERCASE', description: 'ALL CAPS', icon: 'AA', bg: 'bg-[#FFE8E8]', border: 'border-[#FF4B4B]', borderDark: 'border-b-[#E04343]', text: 'text-[#FF4B4B]' },
+    { type: 'lowercase', label: 'lowercase', description: 'all lower', icon: 'aa', bg: 'bg-[#EAFFD6]', border: 'border-[#58CC02]', borderDark: 'border-b-[#46A302]', text: 'text-[#58CC02]' },
+    { type: 'titlecase', label: 'Title Case', description: 'First Letter Cap', icon: 'Aa', bg: 'bg-[#DDF4FF]', border: 'border-[#1CB0F6]', borderDark: 'border-b-[#1899D6]', text: 'text-[#1CB0F6]' },
+    { type: 'sentencecase', label: 'Sentence case', description: 'Start of sentences', icon: 'Aa.', bg: 'bg-[#FFF4E0]', border: 'border-[#FF9600]', borderDark: 'border-b-[#D97F00]', text: 'text-[#FF9600]' },
+    { type: 'capitalizewords', label: 'Capitalize Words', description: 'Every Word', icon: 'Aw', bg: 'bg-[#F3EAFF]', border: 'border-[#A560E8]', borderDark: 'border-b-[#8A48C7]', text: 'text-[#A560E8]' },
+    { type: 'inverse', label: 'InVeRsE', description: 'Swap cases', icon: 'aA', bg: 'bg-[#FFE8E8]', border: 'border-[#FF4B4B]', borderDark: 'border-b-[#E04343]', text: 'text-[#FF4B4B]' },
   ];
 
-  const getColorClasses = (color: string) => {
-    const colors: Record<string, string> = {
-      rose: 'bg-violet-50 hover:bg-violet-100 text-violet-700 border-violet-200',
-      green: 'bg-green-50 hover:bg-green-100 text-green-700 border-green-200',
-      orange: 'bg-orange-50 hover:bg-orange-100 text-orange-700 border-orange-200',
-      pink: 'bg-fuchsia-50 hover:bg-violet-100 text-violet-700 border-fuchsia-200',
-      indigo: 'bg-violet-50 hover:bg-violet-100 text-violet-700 border-violet-200',
-    };
-    return colors[color] || colors.rose;
-  };
+  const useCases = [
+    { icon: 'H1', label: 'Headings & Titles', description: 'Convert to Title Case for professional-looking headings and document titles.', bg: 'bg-[#DDF4FF]', text: 'text-[#1CB0F6]' },
+    { icon: '</>', label: 'Code Variables', description: 'Quickly convert text for variable names in different coding conventions.', bg: 'bg-[#EAFFD6]', text: 'text-[#58CC02]' },
+    { icon: 'Aa', label: 'Fix Caps Lock', description: 'Typed with caps lock on? Quickly convert to proper sentence case.', bg: 'bg-[#F3EAFF]', text: 'text-[#A560E8]' },
+    { icon: '@', label: 'Social Media', description: 'Format usernames, hashtags, and posts with consistent capitalization.', bg: 'bg-[#FFF4E0]', text: 'text-[#FF9600]' },
+  ];
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden">
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
+    <div className="relative min-h-screen overflow-x-hidden bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="text-case-converter" />
 
       {/* Hero Section */}
-      <section className="py-16 sm:py-20 bg-gradient-to-b from-violet-50/50 to-white">
+      <section className="py-16 sm:py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto">
-            <div className="inline-flex items-center justify-center mb-6">
-              <ScholarMascot size={80} animated={false} pose="default" />
-            </div>
-            <span className="inline-flex items-center px-4 py-1.5 bg-violet-100 text-violet-700 rounded-full text-sm font-semibold mb-5">
+            <span className="inline-flex items-center px-4 py-1.5 bg-[#EAFFD6] text-[#58CC02] border-2 border-[#58CC02] rounded-full text-sm font-extrabold uppercase tracking-wide mb-5">
               Free Tool
             </span>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-5 leading-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-900 dark:text-stone-100 mb-5 leading-tight tracking-tight">
               Text Case Converter
             </h1>
-            <p className="text-lg text-gray-500 leading-relaxed max-w-2xl mx-auto">
+            <p className="text-lg text-stone-500 dark:text-stone-400 leading-relaxed max-w-2xl mx-auto font-semibold">
               Convert your text to UPPERCASE, lowercase, Title Case, and more. Perfect for formatting titles, headings, and fixing accidental caps lock.
             </p>
           </div>
@@ -104,26 +94,26 @@ const TextCaseConverterPage = ({ onNavigate, user, onLogout }: TextCaseConverter
       </section>
 
       {/* Main Tool Section */}
-      <section className="py-12 sm:py-16">
+      <section className="pb-12 sm:pb-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
-          {/* Text Input */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow mb-8">
+          {/* Text Input Card */}
+          <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl p-6 mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Your Text</h2>
+              <h2 className="text-lg font-extrabold text-stone-900 dark:text-stone-100 uppercase tracking-wide">Your Text</h2>
               <div className="flex items-center space-x-2">
                 <button
                   onClick={handleCopy}
-                  className={`px-4 py-2 text-sm rounded-xl transition-all font-medium ${
+                  className={`px-4 py-2 text-sm rounded-xl border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all font-extrabold uppercase tracking-wide ${
                     copied
-                      ? 'bg-green-100 text-green-700'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                      ? 'bg-[#EAFFD6] text-[#58CC02] border-[#58CC02]'
+                      : 'text-stone-500 dark:text-stone-400 border-stone-200 dark:border-stone-600 hover:bg-stone-100 dark:hover:bg-stone-800'
                   }`}
                 >
                   {copied ? 'Copied!' : 'Copy'}
                 </button>
                 <button
                   onClick={() => setText('')}
-                  className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-all font-medium"
+                  className="px-4 py-2 text-sm rounded-xl border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all font-extrabold uppercase tracking-wide text-stone-500 dark:text-stone-400 border-stone-200 dark:border-stone-600 hover:bg-stone-100 dark:hover:bg-stone-800"
                 >
                   Clear
                 </button>
@@ -133,21 +123,21 @@ const TextCaseConverterPage = ({ onNavigate, user, onLogout }: TextCaseConverter
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="Type or paste your text here, then click a conversion button below..."
-              className="w-full h-48 p-4 text-gray-700 bg-gray-50 border-0 rounded-xl outline-none resize-none placeholder-gray-400 focus:ring-2 focus:ring-violet-500 focus:bg-white transition-all text-lg"
+              className="w-full h-48 p-4 text-stone-700 dark:text-stone-200 bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 rounded-xl outline-none resize-none placeholder-stone-400 dark:placeholder-stone-500 focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 transition-all text-lg"
             />
           </div>
 
-          {/* Conversion Options */}
+          {/* Conversion Options - Duolingo 3D pill buttons */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             {caseOptions.map((option) => (
               <button
                 key={option.type}
                 onClick={() => handleConvert(option.type)}
-                className={`p-4 rounded-2xl border-2 transition-all ${getColorClasses(option.color)}`}
+                className={`p-4 rounded-2xl border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all ${option.bg} ${option.border} ${option.borderDark} hover:brightness-95`}
               >
-                <div className="text-2xl font-bold mb-1">{option.icon}</div>
-                <div className="font-semibold text-sm">{option.label}</div>
-                <div className="text-xs opacity-70">{option.description}</div>
+                <div className={`text-2xl font-extrabold mb-1 ${option.text}`}>{option.icon}</div>
+                <div className={`font-extrabold text-sm uppercase tracking-wide ${option.text}`}>{option.label}</div>
+                <div className={`text-xs font-bold opacity-70 ${option.text}`}>{option.description}</div>
               </button>
             ))}
           </div>
@@ -155,70 +145,51 @@ const TextCaseConverterPage = ({ onNavigate, user, onLogout }: TextCaseConverter
       </section>
 
       {/* Use Cases Section */}
-      <section className="py-12 sm:py-16 bg-gray-50">
+      <section className="py-12 sm:py-16 bg-white dark:bg-stone-900">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">Common Uses</h2>
+          <h2 className="text-2xl font-extrabold text-stone-900 dark:text-stone-100 mb-8 text-center uppercase tracking-wide">Common Uses</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center mb-4">
-                <span className="text-violet-600 font-bold text-lg">H1</span>
+            {useCases.map((item) => (
+              <div key={item.label} className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl p-6">
+                <div className={`w-12 h-12 ${item.bg} rounded-xl flex items-center justify-center mb-4`}>
+                  <span className={`${item.text} font-extrabold text-lg`}>{item.icon}</span>
+                </div>
+                <h3 className="font-extrabold text-stone-900 dark:text-stone-100 mb-2">{item.label}</h3>
+                <p className="text-stone-500 dark:text-stone-400 text-sm font-semibold">{item.description}</p>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Headings & Titles</h3>
-              <p className="text-gray-600 text-sm">Convert to Title Case for professional-looking headings and document titles.</p>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center mb-4">
-                <span className="text-green-600 font-bold text-lg">{"</>"}</span>
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Code Variables</h3>
-              <p className="text-gray-600 text-sm">Quickly convert text for variable names in different coding conventions.</p>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center mb-4">
-                <span className="text-violet-600 font-bold text-lg">Aa</span>
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Fix Caps Lock</h3>
-              <p className="text-gray-600 text-sm">Typed with caps lock on? Quickly convert to proper sentence case.</p>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center mb-4">
-                <span className="text-orange-600 font-bold text-lg">@</span>
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Social Media</h3>
-              <p className="text-gray-600 text-sm">Format usernames, hashtags, and posts with consistent capitalization.</p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-12 sm:py-16 bg-gray-900">
+      <section className="py-12 sm:py-16 bg-[#58CC02]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-4 uppercase tracking-wide">
             Need more writing tools?
           </h2>
-          <p className="text-gray-400 mb-8 max-w-xl mx-auto">
+          <p className="text-white/80 mb-8 max-w-xl mx-auto font-semibold">
             WriteScholar provides AI-powered feedback on grammar, structure, and academic style to help you write better papers.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             {user ? (
-              <button 
+              <button
                 onClick={() => onNavigate('dashboard')}
-                className="px-6 py-3 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors"
+                className="px-6 py-3 bg-white text-[#58CC02] font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all hover:brightness-95"
               >
                 Go to Dashboard
               </button>
             ) : (
               <>
-                <button 
+                <button
                   onClick={() => onNavigate('signup')}
-                  className="px-6 py-3 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors"
+                  className="px-6 py-3 bg-white text-[#58CC02] font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all hover:brightness-95"
                 >
                   Try WriteScholar Free
                 </button>
-                <button 
+                <button
                   onClick={() => onNavigate('features')}
-                  className="px-6 py-3 border border-gray-600 text-white font-medium rounded-xl hover:border-gray-500 transition-colors"
+                  className="px-6 py-3 bg-[#46A302] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#3A8602] active:border-b-2 active:translate-y-0.5 transition-all hover:brightness-95"
                 >
                   Learn More
                 </button>

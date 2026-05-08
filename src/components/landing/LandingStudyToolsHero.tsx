@@ -5,7 +5,7 @@ interface LandingStudyToolsHeroProps {
   onNavigate: (page: string) => void;
 }
 
-type Tone = 'violet' | 'emerald' | 'amber' | 'fuchsia' | 'rose' | 'sky';
+type Tone = 'blue' | 'green' | 'orange' | 'purple' | 'red' | 'duoBlue';
 
 interface ToolCard {
   num: string;
@@ -37,7 +37,7 @@ const TOOLS: ToolCard[] = [
     desc: 'AI-built flashcards with click-to-flip, mark-as-known, and PDF/DOCX export.',
     image: '/flashcard pic.png',
     alt: 'WriteScholar flashcard interface showing a Piaget question card with flip and navigation controls',
-    tone: 'violet',
+    tone: 'blue',
     badge: 'Core',
     navTo: 'create-flashcards',
     span: 'lg:col-span-7',
@@ -51,7 +51,7 @@ const TOOLS: ToolCard[] = [
     desc: 'Multiple choice, true/false and fill-in-the-blank. Adjust difficulty and length.',
     image: '/quiz pic.png',
     alt: 'WriteScholar quiz showing question 3 of 10 with four multiple-choice options',
-    tone: 'emerald',
+    tone: 'green',
     badge: 'Core',
     navTo: 'quiz-generator',
     span: 'lg:col-span-5',
@@ -64,7 +64,7 @@ const TOOLS: ToolCard[] = [
     desc: 'Generate themed crosswords from your notes — print, hint, or solve on-screen.',
     image: '/crosssword pic.png',
     alt: 'WriteScholar crossword puzzle generator with grid and across/down clues',
-    tone: 'amber',
+    tone: 'orange',
     badge: 'Pro',
     navTo: 'study-pack',
     span: 'lg:col-span-6',
@@ -77,7 +77,7 @@ const TOOLS: ToolCard[] = [
     desc: 'Blast the right answer before the asteroid lands. A boss-battle take on revision.',
     video: '/writescholar-crater-blast-demo.mp4',
     alt: 'WriteScholar Crater Blast game demo — answer asteroids fall toward a planet and you blast the correct one',
-    tone: 'sky',
+    tone: 'duoBlue',
     badge: 'Game',
     navTo: 'crater-blast',
     span: 'lg:col-span-6',
@@ -90,7 +90,7 @@ const TOOLS: ToolCard[] = [
     desc: 'Stack the right words, beat your streak, climb the daily leaderboard.',
     image: '/study-pack-previews/word-tower.png',
     alt: 'WriteScholar Word Tower arcade game with starfield background and word blocks',
-    tone: 'fuchsia',
+    tone: 'purple',
     badge: 'Game',
     navTo: 'word-tower',
     span: 'lg:col-span-6',
@@ -104,7 +104,7 @@ const TOOLS: ToolCard[] = [
     desc: 'Notes turn into bite-size lessons with key terms, examples and check-points.',
     image: '/study-pack-previews/lesson-plan.png',
     alt: 'WriteScholar lesson plan view with key term, supporting bullets and progress indicator',
-    tone: 'rose',
+    tone: 'red',
     badge: 'Free',
     navTo: 'study-pack',
     span: 'lg:col-span-6',
@@ -112,70 +112,66 @@ const TOOLS: ToolCard[] = [
   },
 ];
 
-const TONE_STYLES: Record<Tone, { glow: string; accent: string; badge: string; ring: string; numBg: string }> = {
-  violet: {
-    glow: 'from-violet-500/30 via-violet-400/15 to-fuchsia-500/20 dark:from-violet-500/40 dark:via-violet-400/20 dark:to-fuchsia-500/30',
-    accent: 'from-violet-500 via-fuchsia-500 to-violet-500',
-    badge: 'bg-violet-100 text-violet-700 dark:bg-violet-950/60 dark:text-violet-300',
-    ring: 'ring-violet-300/40 dark:ring-violet-500/30',
-    numBg: 'bg-gradient-to-br from-violet-500 to-fuchsia-600',
+const TONE_STYLES: Record<Tone, { border: string; accent: string; badge: string; ring: string; numBg: string; tint: string }> = {
+  blue: {
+    border: 'border-[#1899D6]',
+    accent: 'bg-[#1CB0F6]',
+    badge: 'bg-[#DDF4FF] text-[#1CB0F6]',
+    ring: 'ring-[#1CB0F6]/30',
+    numBg: 'bg-[#1CB0F6]',
+    tint: 'bg-[#DDF4FF]',
   },
-  emerald: {
-    glow: 'from-emerald-500/25 via-teal-400/15 to-emerald-500/20 dark:from-emerald-500/35 dark:via-teal-400/20 dark:to-emerald-500/30',
-    accent: 'from-emerald-400 via-teal-400 to-emerald-500',
-    badge: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300',
-    ring: 'ring-emerald-300/40 dark:ring-emerald-500/30',
-    numBg: 'bg-gradient-to-br from-emerald-500 to-teal-600',
+  green: {
+    border: 'border-[#46A302]',
+    accent: 'bg-[#58CC02]',
+    badge: 'bg-[#E5F8D0] text-[#58CC02]',
+    ring: 'ring-[#58CC02]/30',
+    numBg: 'bg-[#58CC02]',
+    tint: 'bg-[#E5F8D0]',
   },
-  amber: {
-    glow: 'from-amber-400/30 via-orange-400/15 to-amber-400/20 dark:from-amber-400/35 dark:via-orange-400/20 dark:to-amber-400/25',
-    accent: 'from-amber-400 via-orange-400 to-amber-500',
-    badge: 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300',
-    ring: 'ring-amber-300/40 dark:ring-amber-500/30',
-    numBg: 'bg-gradient-to-br from-amber-500 to-orange-600',
+  orange: {
+    border: 'border-[#D97F00]',
+    accent: 'bg-[#FF9600]',
+    badge: 'bg-[#FFF4E0] text-[#FF9600]',
+    ring: 'ring-[#FF9600]/30',
+    numBg: 'bg-[#FF9600]',
+    tint: 'bg-[#FFF4E0]',
   },
-  fuchsia: {
-    glow: 'from-fuchsia-500/30 via-violet-500/20 to-fuchsia-500/30 dark:from-fuchsia-500/40 dark:via-violet-500/30 dark:to-fuchsia-500/40',
-    accent: 'from-fuchsia-500 via-violet-500 to-fuchsia-500',
-    badge: 'bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-950/60 dark:text-fuchsia-300',
-    ring: 'ring-fuchsia-300/40 dark:ring-fuchsia-500/30',
-    numBg: 'bg-gradient-to-br from-fuchsia-500 to-violet-600',
+  purple: {
+    border: 'border-[#8A48C7]',
+    accent: 'bg-[#A560E8]',
+    badge: 'bg-[#F3EAFF] text-[#A560E8]',
+    ring: 'ring-[#A560E8]/30',
+    numBg: 'bg-[#A560E8]',
+    tint: 'bg-[#F3EAFF]',
   },
-  rose: {
-    glow: 'from-rose-400/25 via-pink-400/15 to-rose-400/20 dark:from-rose-400/30 dark:via-pink-400/15 dark:to-rose-400/25',
-    accent: 'from-rose-400 via-pink-400 to-rose-500',
-    badge: 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300',
-    ring: 'ring-rose-300/40 dark:ring-rose-500/30',
-    numBg: 'bg-gradient-to-br from-rose-500 to-pink-600',
+  red: {
+    border: 'border-[#E04343]',
+    accent: 'bg-[#FF4B4B]',
+    badge: 'bg-[#FFE8E8] text-[#FF4B4B]',
+    ring: 'ring-[#FF4B4B]/30',
+    numBg: 'bg-[#FF4B4B]',
+    tint: 'bg-[#FFE8E8]',
   },
-  sky: {
-    glow: 'from-sky-400/25 via-blue-400/15 to-sky-400/20 dark:from-sky-400/30 dark:via-blue-400/15 dark:to-sky-400/25',
-    accent: 'from-sky-400 via-blue-400 to-sky-500',
-    badge: 'bg-sky-100 text-sky-700 dark:bg-sky-950/60 dark:text-sky-300',
-    ring: 'ring-sky-300/40 dark:ring-sky-500/30',
-    numBg: 'bg-gradient-to-br from-sky-500 to-blue-600',
+  duoBlue: {
+    border: 'border-[#1899D6]',
+    accent: 'bg-[#1CB0F6]',
+    badge: 'bg-[#DDF4FF] text-[#1CB0F6]',
+    ring: 'ring-[#1CB0F6]/30',
+    numBg: 'bg-[#1CB0F6]',
+    tint: 'bg-[#DDF4FF]',
   },
 };
 
 export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsHeroProps) {
   return (
     <section
-      className="relative py-20 sm:py-28 lg:py-32 overflow-hidden border-t border-stone-200/90 dark:border-stone-800 scroll-mt-20"
+      className="relative py-20 sm:py-28 lg:py-32 overflow-hidden border-t-2 border-[#E5E5E5] dark:border-[#4A4A4A] scroll-mt-20"
       aria-labelledby="landing-study-tools-heading"
       id="study-tools"
     >
-      {/* ─── Layered backgrounds ─── */}
-      <div className="absolute inset-0 bg-gradient-to-b from-white via-violet-50/30 to-white dark:from-stone-950 dark:via-violet-950/20 dark:to-stone-950" aria-hidden />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_45%_at_50%_0%,rgba(124,58,237,0.10),transparent_60%)] dark:bg-[radial-gradient(ellipse_60%_45%_at_50%_0%,rgba(139,92,246,0.18),transparent_62%)] pointer-events-none" aria-hidden />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_55%_40%_at_85%_60%,rgba(217,70,239,0.07),transparent_60%)] dark:bg-[radial-gradient(ellipse_55%_40%_at_85%_60%,rgba(217,70,239,0.12),transparent_60%)] pointer-events-none" aria-hidden />
-      <div
-        className="absolute inset-0 pointer-events-none bg-[length:42px_42px] bg-[linear-gradient(to_right,rgba(124,58,237,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(124,58,237,0.06)_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_40%,black,transparent)] dark:bg-[linear-gradient(to_right,rgba(167,139,250,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(167,139,250,0.07)_1px,transparent_1px)]"
-        aria-hidden
-      />
-      {/* Floating ambient orbs */}
-      <div className="pointer-events-none absolute top-16 left-[8%] h-40 w-40 rounded-full bg-violet-400/20 dark:bg-violet-500/15 blur-3xl lsth-orb" aria-hidden />
-      <div className="pointer-events-none absolute bottom-24 right-[6%] h-56 w-56 rounded-full bg-fuchsia-400/15 dark:bg-fuchsia-500/15 blur-3xl lsth-orb-delay" aria-hidden />
-      <div className="pointer-events-none absolute top-1/2 left-[40%] h-72 w-72 rounded-full bg-violet-300/10 dark:bg-violet-400/10 blur-3xl lsth-orb" style={{ animationDelay: '1.4s' }} aria-hidden />
+      {/* ─── Clean background ─── */}
+      <div className="absolute inset-0 bg-[#F7F7F7] dark:bg-[#3C3C3C]" aria-hidden />
 
       {/* Studying mascot — large, positioned in the top-right of the section
           so it draws the eye while the headline reads. */}
@@ -185,32 +181,32 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
         aria-hidden
         loading="lazy"
         decoding="async"
-        className="hidden lg:block pointer-events-none absolute top-12 right-6 xl:right-12 w-44 xl:w-56 h-auto z-10 drop-shadow-[0_22px_36px_rgba(124,58,237,0.30)]"
+        className="hidden lg:block pointer-events-none absolute top-12 right-6 xl:right-12 w-44 xl:w-56 h-auto z-10 drop-shadow-[0_12px_24px_rgba(0,0,0,0.15)]"
       />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* ─── Headline ─── */}
         <LandingScrollReveal>
           <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14 lg:mb-16">
-            <div className="inline-flex items-center gap-2 mb-5 rounded-full border border-violet-200/80 dark:border-violet-700/60 bg-white/80 dark:bg-stone-900/70 backdrop-blur px-3.5 py-1.5 shadow-sm">
+            <div className="inline-flex items-center gap-2 mb-5 rounded-full border-2 border-b-4 border-[#E5E5E5] bg-white dark:bg-[#3C3C3C] dark:border-[#4A4A4A] px-3.5 py-1.5">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-violet-600" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#58CC02] opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#58CC02]" />
               </span>
-              <span className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.18em] text-violet-700 dark:text-violet-300">
+              <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.18em] text-[#3C3C3C] dark:text-white">
                 Study tools · live in dashboard
               </span>
             </div>
             <h2
               id="landing-study-tools-heading"
-              className="text-3xl sm:text-5xl lg:text-6xl font-semibold text-stone-900 dark:text-stone-100 tracking-tight leading-[1.1] mb-5"
-              style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+              className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-[#3C3C3C] dark:text-white tracking-tight leading-[1.1] mb-5"
+              style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
             >
               <span className="block">Transform your notes into</span>
-              <span className="relative inline-block mt-1 sm:mt-1.5 text-orange-600 dark:text-orange-400">
+              <span className="relative inline-block mt-1 sm:mt-1.5 text-[#FF9600]">
                 6 powerful study tools
                 <svg
-                  className="absolute -bottom-1.5 left-0 w-full h-2 text-orange-400/80 dark:text-orange-500/70"
+                  className="absolute -bottom-1.5 left-0 w-full h-2 text-[#FF9600]"
                   viewBox="0 0 200 8"
                   preserveAspectRatio="none"
                   aria-hidden
@@ -225,7 +221,7 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
                 </svg>
               </span>
             </h2>
-            <p className="text-base sm:text-xl text-stone-600 dark:text-stone-300 leading-relaxed max-w-2xl mx-auto font-sans font-normal">
+            <p className="text-base sm:text-xl text-[#777] dark:text-stone-300 leading-relaxed max-w-2xl mx-auto font-normal" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
               Flashcards, quizzes, crosswords, lessons and arcade games — all generated from your own notes in under 60
               seconds.
             </p>
@@ -241,8 +237,8 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
             </div>
 
             {/* Cue arrow into the bento grid below */}
-            <div className="mt-8 sm:mt-12 flex flex-col items-center gap-2 text-stone-500 dark:text-stone-400">
-              <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.2em]">Each tool, in detail</span>
+            <div className="mt-8 sm:mt-12 flex flex-col items-center gap-2 text-[#AFAFAF] dark:text-stone-400">
+              <span className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-[0.2em]">Each tool, in detail</span>
               <svg className="w-4 h-4 lsth-bounce" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
                 <path fillRule="evenodd" d="M10 3a1 1 0 011 1v9.586l3.293-3.293a1 1 0 111.414 1.414l-5 5a1 1 0 01-1.414 0l-5-5a1 1 0 111.414-1.414L9 13.586V4a1 1 0 011-1z" clipRule="evenodd" />
               </svg>
@@ -253,17 +249,17 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
         {/* ─── Bento grid wrapper with sticker annotations ─── */}
         <div className="relative">
           {/* Floating annotation stickers (decoration only) */}
-          <Sticker className="hidden lg:flex -top-6 -left-3 rotate-[-4deg]" tone="emerald" emoji="✨">
-            <span className="font-semibold">Free plan</span> included
+          <Sticker className="hidden lg:flex -top-6 -left-3 rotate-[-4deg]" tone="green" emoji="✨">
+            <span className="font-extrabold">Free plan</span> included
           </Sticker>
-          <Sticker className="hidden lg:flex -top-4 -right-2 rotate-[3deg]" tone="amber" emoji="⚡">
-            Built in <span className="font-semibold">&lt;60s</span>
+          <Sticker className="hidden lg:flex -top-4 -right-2 rotate-[3deg]" tone="orange" emoji="⚡">
+            Built in <span className="font-extrabold">&lt;60s</span>
           </Sticker>
-          <Sticker className="hidden xl:flex top-1/2 -left-10 -translate-y-1/2 rotate-[-6deg]" tone="violet" emoji="🎯">
-            <span className="font-semibold">92%</span> recall rate
+          <Sticker className="hidden xl:flex top-1/2 -left-10 -translate-y-1/2 rotate-[-6deg]" tone="blue" emoji="🎯">
+            <span className="font-extrabold">92%</span> recall rate
           </Sticker>
-          <Sticker className="hidden xl:flex top-1/3 -right-8 rotate-[5deg]" tone="fuchsia" emoji="🎮">
-            <span className="font-semibold">Boss-battle</span> revision
+          <Sticker className="hidden xl:flex top-1/3 -right-8 rotate-[5deg]" tone="purple" emoji="🎮">
+            <span className="font-extrabold">Boss-battle</span> revision
           </Sticker>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 lg:gap-6 auto-rows-min">
@@ -282,34 +278,34 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
               <button
                 type="button"
                 onClick={() => onNavigate('study-pack')}
-                className="group relative inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-br from-violet-600 via-violet-700 to-fuchsia-700 text-white font-bold text-base shadow-[0_20px_50px_-15px_rgba(124,58,237,0.55)] hover:shadow-[0_28px_70px_-15px_rgba(124,58,237,0.7)] transition-all duration-300 hover:-translate-y-0.5 ring-1 ring-white/15 overflow-hidden"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-[#58CC02] text-white font-extrabold text-base border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all"
+                style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
               >
-                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" aria-hidden />
-                <span className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-[radial-gradient(circle_at_var(--mx,50%)_var(--my,50%),rgba(255,255,255,0.25),transparent_60%)]" aria-hidden />
-                <span className="relative">Try Study Pack free</span>
-                <svg className="relative w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+                Try Study Pack free
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
               </button>
               <button
                 type="button"
                 onClick={() => onNavigate('more-tools')}
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl border border-stone-300 dark:border-stone-600 bg-white/80 dark:bg-stone-900/60 backdrop-blur text-stone-800 dark:text-stone-100 font-semibold hover:bg-stone-100 dark:hover:bg-stone-800/70 hover:border-stone-400 dark:hover:border-stone-500 transition-all duration-200"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-white dark:bg-[#3C3C3C] text-[#3C3C3C] dark:text-white font-extrabold border-2 border-b-4 border-[#E5E5E5] dark:border-[#4A4A4A] active:border-b-2 active:translate-y-0.5 transition-all"
+                style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
               >
                 Browse all tools
-                <span className="text-stone-400">→</span>
+                <span className="text-[#AFAFAF]">→</span>
               </button>
             </div>
-            <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
+            <p className="text-xs sm:text-sm text-[#777] dark:text-stone-400 font-bold flex flex-wrap items-center justify-center gap-x-2 gap-y-1" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
               <span className="inline-flex items-center gap-1">
-                <svg className="w-3.5 h-3.5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+                <svg className="w-3.5 h-3.5 text-[#58CC02]" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
                 Free plan included
               </span>
-              <span className="text-stone-300 dark:text-stone-600">·</span>
+              <span className="text-[#E5E5E5] dark:text-[#4A4A4A]">·</span>
               <span>No credit card</span>
-              <span className="text-stone-300 dark:text-stone-600">·</span>
+              <span className="text-[#E5E5E5] dark:text-[#4A4A4A]">·</span>
               <span>Cancel anytime</span>
             </p>
           </div>
@@ -317,28 +313,19 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
       </div>
 
       <style>{`
-        @keyframes lsthOrb { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(14px,-12px) scale(1.05); } }
-        @keyframes lsthOrbDelay { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-12px,10px) scale(1.04); } }
-        @keyframes lsthShineText { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
         @keyframes lsthShimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(120%); } }
         @keyframes lsthFloatCard { 0%,100% { transform: translateY(0) rotate(var(--lsth-rot, 0deg)); } 50% { transform: translateY(-6px) rotate(var(--lsth-rot, 0deg)); } }
-        @keyframes lsthCaret { 0%,49% { opacity: 1; } 50%,100% { opacity: 0; } }
         @keyframes lsthBounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(4px); } }
         @keyframes lsthTilePop { 0% { transform: translateY(8px) scale(0.96); opacity: 0; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
-        .lsth-orb { animation: lsthOrb 14s ease-in-out infinite; }
-        .lsth-orb-delay { animation: lsthOrbDelay 16s ease-in-out infinite; }
-        .lsth-shine-text { animation: lsthShineText 6s linear infinite; }
         .lsth-shimmer { animation: lsthShimmer 1.4s ease-out 0.6s both; }
         .lsth-floatcard { display: inline-flex; animation: lsthFloatCard 5s ease-in-out infinite; }
         .lsth-floatcard:nth-child(2n) { animation-duration: 6s; animation-delay: -1.4s; }
         .lsth-floatcard:nth-child(3n) { animation-duration: 7s; animation-delay: -2.6s; }
-        .lsth-caret { animation: lsthCaret 1.05s steps(1) infinite; }
         .lsth-bounce { animation: lsthBounce 1.6s ease-in-out infinite; }
         .lsth-tile-pop { animation: lsthTilePop 0.5s cubic-bezier(.22,1.2,.36,1) backwards; }
         .lsth-no-cursor { caret-color: transparent; }
         @media (prefers-reduced-motion: reduce) {
-          .lsth-orb, .lsth-orb-delay, .lsth-shine-text, .lsth-shimmer, .lsth-floatcard, .lsth-caret,
-          .lsth-bounce, .lsth-tile-pop { animation: none; }
+          .lsth-shimmer, .lsth-floatcard, .lsth-bounce, .lsth-tile-pop { animation: none; }
         }
       `}</style>
     </section>
@@ -356,19 +343,9 @@ function BentoCard({ tool, onNavigate }: { tool: ToolCard; onNavigate: (page: st
   const [loaded, setLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const mediaWrapRef = useRef<HTMLDivElement | null>(null);
-  const cardRef = useRef<HTMLButtonElement | null>(null);
 
   const mediaAspectClass =
     tool.video && tool.featured ? 'aspect-[21/9]' : tool.featured ? 'aspect-[2/1]' : 'aspect-[16/9]';
-
-  // Mouse-follow spotlight (sets --mx / --my CSS vars in % so a radial gradient can track the cursor).
-  const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const el = cardRef.current;
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    el.style.setProperty('--mx', `${((e.clientX - r.left) / r.width) * 100}%`);
-    el.style.setProperty('--my', `${((e.clientY - r.top) / r.height) * 100}%`);
-  };
 
   // Auto-play the video when it scrolls into view; pause when it leaves.
   useEffect(() => {
@@ -396,28 +373,13 @@ function BentoCard({ tool, onNavigate }: { tool: ToolCard; onNavigate: (page: st
 
   return (
     <button
-      ref={cardRef}
       type="button"
       onClick={() => onNavigate(tool.navTo)}
-      onMouseMove={handleMouseMove}
-      className={`group relative w-full h-full text-left rounded-3xl border border-stone-200/90 dark:border-stone-700/70 bg-white dark:bg-stone-900 overflow-hidden transition-all duration-500 hover:-translate-y-1 hover:border-stone-300 dark:hover:border-stone-600 shadow-[0_4px_24px_-12px_rgba(15,23,42,0.08)] hover:shadow-[0_30px_80px_-30px_rgba(91,33,182,0.35)] dark:shadow-[0_4px_24px_-12px_rgba(0,0,0,0.4)] dark:hover:shadow-[0_30px_80px_-30px_rgba(0,0,0,0.7)] ${tool.minH ?? ''}`}
-      style={{ ['--mx' as string]: '50%', ['--my' as string]: '50%' }}
+      className={`group relative w-full h-full text-left rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-[#4A4A4A] bg-white dark:bg-[#3C3C3C] overflow-hidden transition-all duration-200 hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 ${tool.minH ?? ''}`}
     >
-      {/* Mouse-follow spotlight (subtle radial highlight that tracks the cursor) */}
-      <span
-        className="pointer-events-none absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-[radial-gradient(circle_220px_at_var(--mx)_var(--my),rgba(124,58,237,0.10),transparent_70%)] dark:bg-[radial-gradient(circle_220px_at_var(--mx)_var(--my),rgba(167,139,250,0.14),transparent_70%)]"
-        aria-hidden
-      />
-
-      {/* Animated halo behind card on hover */}
-      <span
-        className={`pointer-events-none absolute -inset-1 rounded-[1.75rem] bg-gradient-to-br ${styles.glow} opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500 -z-10`}
-        aria-hidden
-      />
-
       {/* Top accent line */}
       <span
-        className={`absolute top-0 inset-x-0 h-1 bg-gradient-to-r ${styles.accent} opacity-90`}
+        className={`absolute top-0 inset-x-0 h-1 ${styles.accent}`}
         aria-hidden
       />
 
@@ -425,57 +387,57 @@ function BentoCard({ tool, onNavigate }: { tool: ToolCard; onNavigate: (page: st
       <div className="relative px-4 sm:px-5 pt-4 sm:pt-5 pb-2 flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2.5 mb-1">
-            <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-white text-[10px] font-bold tabular-nums shadow-md ${styles.numBg}`} aria-hidden>
+            <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-white text-[10px] font-extrabold tabular-nums border-2 border-b-[3px] ${styles.border} ${styles.numBg}`} aria-hidden>
               {tool.num}
             </span>
-            <h3 className="text-lg sm:text-xl font-semibold text-stone-900 dark:text-stone-100 leading-tight" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
+            <h3 className="text-lg sm:text-xl font-extrabold text-[#3C3C3C] dark:text-white leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
               {tool.title}
             </h3>
           </div>
-          <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.14em] text-stone-500 dark:text-stone-400">
+          <p className="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.14em] text-[#AFAFAF] dark:text-stone-400">
             {tool.subtitle}
           </p>
         </div>
-        <span className={`shrink-0 inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${styles.badge}`}>
+        <span className={`shrink-0 inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider ${styles.badge}`}>
           {tool.badge}
         </span>
       </div>
 
       {/* Description */}
-      <p className="relative px-4 sm:px-5 pb-3 text-sm text-stone-600 dark:text-stone-300 leading-snug">
+      <p className="relative px-4 sm:px-5 pb-3 text-sm text-[#777] dark:text-stone-300 leading-snug" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
         {tool.desc}
       </p>
 
       {/* Image area */}
       <div
         ref={mediaWrapRef}
-        className={`relative mx-2.5 sm:mx-3 mb-2.5 sm:mb-3 rounded-xl sm:rounded-2xl overflow-hidden ring-1 ${styles.ring} ${
+        className={`relative mx-2.5 sm:mx-3 mb-2.5 sm:mb-3 rounded-xl sm:rounded-2xl overflow-hidden border-2 border-[#E5E5E5] dark:border-[#4A4A4A] ${
           tool.dark
-            ? 'bg-gradient-to-br from-indigo-950 via-violet-950 to-stone-950'
-            : 'bg-gradient-to-br from-stone-50 via-white to-stone-100/70 dark:from-stone-800/60 dark:via-stone-900 dark:to-stone-900'
+            ? 'bg-[#3C3C3C]'
+            : 'bg-[#F7F7F7] dark:bg-[#2C2C2C]'
         } ${mediaAspectClass}`}
       >
         {/* Skeleton shimmer until loaded */}
         {!loaded && (
           <div className="absolute inset-0 overflow-hidden" aria-hidden>
-            <div className="absolute inset-0 bg-stone-100 dark:bg-stone-800/60" />
+            <div className="absolute inset-0 bg-[#F7F7F7] dark:bg-[#2C2C2C]" />
             <div className="absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-white/60 dark:via-white/10 to-transparent lsth-shimmer" />
           </div>
         )}
 
         {/* Browser chrome strip on top */}
         <div
-          className={`relative z-10 flex ${MEDIA_CHROME_H} shrink-0 items-center gap-1 px-2.5 border-b border-stone-200/80 dark:border-stone-700/60 bg-white/85 dark:bg-stone-900/85 backdrop-blur-sm`}
+          className={`relative z-10 flex ${MEDIA_CHROME_H} shrink-0 items-center gap-1 px-2.5 border-b-2 border-[#E5E5E5] dark:border-[#4A4A4A] bg-white dark:bg-[#3C3C3C]`}
         >
-          <span className="h-2 w-2 rounded-full bg-red-400/80" />
-          <span className="h-2 w-2 rounded-full bg-amber-400/80" />
-          <span className="h-2 w-2 rounded-full bg-emerald-400/80" />
-          <span className="ml-2 text-[10px] text-stone-400 dark:text-stone-500 font-medium truncate">
+          <span className="h-2 w-2 rounded-full bg-[#FF4B4B]" />
+          <span className="h-2 w-2 rounded-full bg-[#FF9600]" />
+          <span className="h-2 w-2 rounded-full bg-[#58CC02]" />
+          <span className="ml-2 text-[10px] text-[#AFAFAF] dark:text-stone-500 font-bold truncate">
             writescholar.com · {tool.title.toLowerCase()}
           </span>
           {tool.video && (
-            <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-red-500/15 dark:bg-red-500/25 px-1.5 py-0.5 text-[9px] font-bold text-red-600 dark:text-red-300 uppercase tracking-wider">
-              <span className="h-1.5 w-1.5 rounded-full bg-red-500 motion-safe:animate-pulse" aria-hidden />
+            <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-[#FFE8E8] px-1.5 py-0.5 text-[9px] font-extrabold text-[#FF4B4B] uppercase tracking-wider">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#FF4B4B] motion-safe:animate-pulse" aria-hidden />
               Live
             </span>
           )}
@@ -493,7 +455,7 @@ function BentoCard({ tool, onNavigate }: { tool: ToolCard; onNavigate: (page: st
             preload="metadata"
             aria-label={tool.alt}
             onLoadedData={() => setLoaded(true)}
-            className={`absolute inset-0 ${MEDIA_TOP} w-full h-[calc(100%-1.75rem)] object-cover ${tool.objectPos || 'object-center'} transition-all duration-700 group-hover:scale-[1.04] ${
+            className={`absolute inset-0 ${MEDIA_TOP} w-full h-[calc(100%-1.75rem)] object-cover ${tool.objectPos || 'object-center'} transition-all duration-500 group-hover:scale-[1.02] ${
               loaded ? 'opacity-100' : 'opacity-0'
             }`}
           />
@@ -504,18 +466,14 @@ function BentoCard({ tool, onNavigate }: { tool: ToolCard; onNavigate: (page: st
             loading="lazy"
             decoding="async"
             onLoad={() => setLoaded(true)}
-            className={`absolute inset-0 ${MEDIA_TOP} w-full h-[calc(100%-1.75rem)] object-cover ${tool.objectPos || 'object-top'} transition-all duration-700 group-hover:scale-[1.04] ${
+            className={`absolute inset-0 ${MEDIA_TOP} w-full h-[calc(100%-1.75rem)] object-cover ${tool.objectPos || 'object-top'} transition-all duration-500 group-hover:scale-[1.02] ${
               loaded ? 'opacity-100' : 'opacity-0'
             }`}
           />
         )}
 
-        {/* Soft edge fade so screenshots don't fight with the frame */}
-        <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-black/5 dark:ring-white/5 rounded-xl sm:rounded-2xl" aria-hidden />
-        <div className={`pointer-events-none absolute bottom-0 inset-x-0 h-12 bg-gradient-to-t ${tool.dark ? 'from-stone-950/60' : 'from-white/40 dark:from-stone-900/50'} to-transparent`} aria-hidden />
-
         {/* Hover overlay CTA */}
-        <div className="absolute bottom-3 right-3 z-20 inline-flex items-center gap-1.5 rounded-full bg-white/95 dark:bg-stone-900/95 border border-stone-200/80 dark:border-stone-700 backdrop-blur px-3 py-1.5 text-[11px] font-semibold text-stone-800 dark:text-stone-100 shadow-md opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+        <div className="absolute bottom-3 right-3 z-20 inline-flex items-center gap-1.5 rounded-xl bg-white dark:bg-[#3C3C3C] border-2 border-b-[3px] border-[#E5E5E5] dark:border-[#4A4A4A] px-3 py-1.5 text-[11px] font-extrabold text-[#3C3C3C] dark:text-white opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
           Open {tool.title}
           <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
             <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -524,7 +482,7 @@ function BentoCard({ tool, onNavigate }: { tool: ToolCard; onNavigate: (page: st
 
         {/* Featured ribbon */}
         {tool.featured && (
-          <div className="absolute top-9 right-2.5 sm:right-3 z-20 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-600 px-2.5 py-0.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white shadow-lg shadow-violet-700/30">
+          <div className="absolute top-9 right-2.5 sm:right-3 z-20 inline-flex items-center gap-1.5 rounded-full bg-[#FF9600] border-2 border-[#D97F00] px-2.5 py-0.5 text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider text-white">
             <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.367 2.446a1 1 0 00-.364 1.118l1.287 3.958c.3.922-.755 1.688-1.54 1.118l-3.366-2.446a1 1 0 00-1.176 0l-3.366 2.446c-.784.57-1.838-.196-1.539-1.118l1.287-3.958a1 1 0 00-.364-1.118L2.05 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69l1.286-3.957z" />
             </svg>
@@ -539,11 +497,11 @@ function BentoCard({ tool, onNavigate }: { tool: ToolCard; onNavigate: (page: st
 /* ─────────────────── Sticker annotation ─────────────────── */
 
 const STICKER_TONES: Record<string, string> = {
-  emerald: 'bg-emerald-50 dark:bg-emerald-950/70 text-emerald-800 dark:text-emerald-200 border-emerald-200/80 dark:border-emerald-800/60',
-  amber: 'bg-amber-50 dark:bg-amber-950/70 text-amber-800 dark:text-amber-200 border-amber-200/80 dark:border-amber-800/60',
-  violet: 'bg-violet-50 dark:bg-violet-950/70 text-violet-800 dark:text-violet-200 border-violet-200/80 dark:border-violet-800/60',
-  fuchsia: 'bg-fuchsia-50 dark:bg-fuchsia-950/70 text-fuchsia-800 dark:text-fuchsia-200 border-fuchsia-200/80 dark:border-fuchsia-800/60',
-  rose: 'bg-rose-50 dark:bg-rose-950/70 text-rose-800 dark:text-rose-200 border-rose-200/80 dark:border-rose-800/60',
+  green: 'bg-[#E5F8D0] text-[#58CC02] border-2 border-b-[3px] border-[#58CC02]/30',
+  orange: 'bg-[#FFF4E0] text-[#FF9600] border-2 border-b-[3px] border-[#FF9600]/30',
+  blue: 'bg-[#DDF4FF] text-[#1CB0F6] border-2 border-b-[3px] border-[#1CB0F6]/30',
+  purple: 'bg-[#F3EAFF] text-[#A560E8] border-2 border-b-[3px] border-[#A560E8]/30',
+  red: 'bg-[#FFE8E8] text-[#FF4B4B] border-2 border-b-[3px] border-[#FF4B4B]/30',
 };
 
 function Sticker({
@@ -559,7 +517,7 @@ function Sticker({
 }) {
   return (
     <div
-      className={`pointer-events-none absolute z-20 items-center gap-1.5 rounded-full border ${STICKER_TONES[tone]} px-2.5 py-1 text-[11px] font-medium shadow-md backdrop-blur lsth-floatcard ${className}`}
+      className={`pointer-events-none absolute z-20 items-center gap-1.5 rounded-full ${STICKER_TONES[tone]} px-2.5 py-1 text-[11px] font-extrabold lsth-floatcard ${className}`}
       aria-hidden
     >
       <span className="text-sm leading-none">{emoji}</span>
@@ -805,9 +763,9 @@ function NotesPanel({ onNavigate }: LandingStudyToolsHeroProps) {
 
   return (
     <div ref={containerRef} className="w-full">
-      {/* Segmented tabs — reference: calm, light chrome */}
+      {/* Segmented tabs */}
       <div
-        className="mb-4 flex flex-wrap items-center gap-1 rounded-2xl border border-amber-100/90 dark:border-stone-700/80 bg-[#faf8f5] dark:bg-stone-900/80 p-1.5 shadow-sm"
+        className="mb-4 flex flex-wrap items-center gap-1 rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-[#4A4A4A] bg-white dark:bg-[#3C3C3C] p-1.5"
         role="tablist"
         aria-label="Input source"
       >
@@ -820,11 +778,12 @@ function NotesPanel({ onNavigate }: LandingStudyToolsHeroProps) {
               role="tab"
               aria-selected={active}
               onClick={() => handleTabClick(id)}
-              className={`relative flex-1 min-w-[4.5rem] sm:min-w-0 rounded-xl px-3 py-2 text-center text-[13px] font-semibold transition-colors ${
+              className={`relative flex-1 min-w-[4.5rem] sm:min-w-0 rounded-xl px-3 py-2 text-center text-[13px] font-extrabold transition-colors ${
                 active
-                  ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 shadow-sm ring-1 ring-amber-200/80 dark:ring-stone-600'
-                  : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'
+                  ? 'bg-[#DDF4FF] text-[#1CB0F6] border-2 border-[#1CB0F6]/30'
+                  : 'text-[#AFAFAF] dark:text-stone-400 hover:text-[#3C3C3C] dark:hover:text-white'
               }`}
+              style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
             >
               {label}
             </button>
@@ -832,20 +791,21 @@ function NotesPanel({ onNavigate }: LandingStudyToolsHeroProps) {
         })}
       </div>
 
-      {/* Main field — warm border, large radius (matches reference) */}
-      <div className="rounded-[1.75rem] border border-amber-200/90 dark:border-amber-900/40 bg-[#fdfcfa] dark:bg-stone-950 shadow-[0_1px_0_rgba(0,0,0,0.04)]">
+      {/* Main field */}
+      <div className="rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-[#4A4A4A] bg-white dark:bg-[#3C3C3C]">
         <div className="relative">
           {tab === 'pdf' || tab === 'docx' ? (
             <div className="min-h-[220px] flex flex-col items-center justify-center gap-4 px-6 py-10 text-center">
-              <p className="text-sm sm:text-[15px] text-stone-600 dark:text-stone-400 max-w-sm leading-relaxed">
+              <p className="text-sm sm:text-[15px] text-[#777] dark:text-stone-400 max-w-sm leading-relaxed font-bold" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                 Upload a {tab === 'pdf' ? 'PDF' : 'Word'} file on Study Pack — we&apos;ll extract the text and build your six tools.
               </p>
               <button
                 type="button"
                 onClick={() => onNavigate('study-pack')}
-                className="inline-flex items-center gap-2 rounded-xl border border-stone-200 dark:border-stone-600 bg-white dark:bg-stone-900 px-5 py-2.5 text-sm font-semibold text-stone-800 dark:text-stone-100 shadow-sm hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
+                className="inline-flex items-center gap-2 rounded-xl border-2 border-b-4 border-[#E5E5E5] dark:border-[#4A4A4A] bg-white dark:bg-[#3C3C3C] px-5 py-2.5 text-sm font-extrabold text-[#3C3C3C] dark:text-white active:border-b-2 active:translate-y-0.5 transition-all"
+                style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
               >
-                <svg className="w-4 h-4 text-stone-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden>
+                <svg className="w-4 h-4 text-[#1CB0F6]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
                 Go to upload
@@ -863,21 +823,22 @@ function NotesPanel({ onNavigate }: LandingStudyToolsHeroProps) {
                 onChange={tab === 'paste' ? handlePasteChange : undefined}
                 placeholder="Paste your study notes, textbook chapter, article, or any learning material here... (minimum 50 words)"
                 rows={tab === 'notes' ? 9 : 9}
-                className={`block w-full min-h-[260px] resize-y rounded-[1.65rem] border-0 bg-transparent px-5 pt-5 pb-12 text-[15px] sm:text-[15px] leading-relaxed text-stone-800 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-0 ${
+                className={`block w-full min-h-[260px] resize-y rounded-2xl border-0 bg-transparent px-5 pt-5 pb-12 text-[15px] sm:text-[15px] leading-relaxed text-[#3C3C3C] dark:text-white placeholder:text-[#AFAFAF] dark:placeholder:text-stone-500 focus:outline-none focus:ring-0 ${
                   inDemoMode && phase === 'typing' ? 'lsth-no-cursor' : ''
                 }`}
+                style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
               />
               {/* Live "is typing" indicator while demo is animating */}
               {inDemoMode && phase === 'typing' && (
-                <div className="pointer-events-none absolute top-4 right-5 inline-flex items-center gap-1.5 rounded-full bg-violet-50 dark:bg-violet-950/60 border border-violet-200/80 dark:border-violet-800/60 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-violet-700 dark:text-violet-300">
+                <div className="pointer-events-none absolute top-4 right-5 inline-flex items-center gap-1.5 rounded-full bg-[#DDF4FF] border-2 border-[#1CB0F6]/30 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-[#1CB0F6]">
                   <span className="relative flex h-1.5 w-1.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75" />
-                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-violet-600" />
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#1CB0F6] opacity-75" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#1CB0F6]" />
                   </span>
                   Typing...
                 </div>
               )}
-              <div className="pointer-events-none absolute bottom-4 left-5 text-[13px] text-stone-400 dark:text-stone-500 tabular-nums">
+              <div className="pointer-events-none absolute bottom-4 left-5 text-[13px] text-[#AFAFAF] dark:text-stone-500 tabular-nums font-bold">
                 {wc.toLocaleString()} {wc === 1 ? 'word' : 'words'}
               </div>
             </>
@@ -898,9 +859,10 @@ function NotesPanel({ onNavigate }: LandingStudyToolsHeroProps) {
         <button
           type="button"
           onClick={() => uploadRef.current?.click()}
-          className="inline-flex sm:flex-none items-center justify-center gap-2 rounded-2xl border border-stone-200/95 dark:border-stone-600 bg-white dark:bg-stone-900 px-5 py-3.5 text-sm font-semibold text-stone-800 dark:text-stone-100 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors shadow-sm"
+          className="inline-flex sm:flex-none items-center justify-center gap-2 rounded-xl border-2 border-b-4 border-[#E5E5E5] dark:border-[#4A4A4A] bg-white dark:bg-[#3C3C3C] px-5 py-3.5 text-sm font-extrabold text-[#3C3C3C] dark:text-white active:border-b-2 active:translate-y-0.5 transition-all"
+          style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
         >
-          <svg className="w-4 h-4 text-stone-500 shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden>
+          <svg className="w-4 h-4 text-[#1CB0F6] shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden>
             <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
           </svg>
           Upload file
@@ -909,22 +871,23 @@ function NotesPanel({ onNavigate }: LandingStudyToolsHeroProps) {
           type="button"
           disabled={!canGenerate && !inDemoMode}
           onClick={stashDraftAndGo}
-          className={`relative inline-flex flex-1 items-center justify-center gap-2 rounded-2xl px-6 py-3.5 text-sm font-semibold transition-all duration-300 shadow-sm overflow-hidden ${
+          className={`relative inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-sm font-extrabold transition-all duration-200 overflow-hidden border-2 border-b-4 active:border-b-2 active:translate-y-0.5 ${
             demoGenerating
-              ? 'bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-[0_12px_32px_-8px_rgba(124,58,237,0.55)] ring-1 ring-violet-400/30'
+              ? 'bg-[#A560E8] border-[#8A48C7] text-white'
               : demoDone
-                ? 'bg-gradient-to-br from-emerald-600 to-emerald-700 text-white shadow-[0_12px_32px_-8px_rgba(16,185,129,0.45)] ring-1 ring-emerald-400/30'
+                ? 'bg-[#58CC02] border-[#46A302] text-white'
                 : canGenerate || demoPulsing
-                  ? 'bg-neutral-700 hover:bg-neutral-800 dark:bg-neutral-600 dark:hover:bg-neutral-500 text-white'
-                  : 'bg-stone-400/85 dark:bg-stone-700 text-white/90 cursor-not-allowed'
+                  ? 'bg-[#3C3C3C] border-[#2C2C2C] text-white'
+                  : 'bg-[#E5E5E5] border-[#CCCCCC] text-white/90 cursor-not-allowed'
           } ${
             demoPulsing
-              ? 'ring-2 ring-violet-400/60 ring-offset-2 ring-offset-white dark:ring-offset-stone-900'
+              ? 'ring-2 ring-[#1CB0F6]/60 ring-offset-2 ring-offset-white dark:ring-offset-[#3C3C3C]'
               : ''
           }`}
+          style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
         >
           {demoPulsing && (
-            <span className="absolute inset-0 bg-violet-400/20 motion-safe:animate-ping rounded-2xl opacity-50" aria-hidden />
+            <span className="absolute inset-0 bg-[#1CB0F6]/20 motion-safe:animate-ping rounded-xl opacity-50" aria-hidden />
           )}
           {demoGenerating ? (
             <>

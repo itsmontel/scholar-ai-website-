@@ -7,7 +7,7 @@ import {
 
 /** Matches AnalysisPage revision marks (purple until revert). Inline flow — not inline-block — so words are not split awkwardly at line breaks. */
 const REVISION_MARK_CLASS =
-  'bg-violet-200/95 dark:bg-violet-900/50 text-violet-950 dark:text-violet-50 px-0.5 rounded-sm ring-2 ring-violet-500/80 dark:ring-violet-400/60 shadow-sm ring-offset-1 ring-offset-white dark:ring-offset-stone-900 [box-decoration-break:clone]';
+  'bg-[#F3EAFF] dark:bg-[#A560E8]/30 text-[#3C3C3C] dark:text-white px-0.5 rounded-sm ring-2 ring-[#A560E8] dark:ring-[#A560E8]/60 ring-offset-1 ring-offset-white dark:ring-offset-[#3C3C3C] [box-decoration-break:clone]';
 
 /** Landing hero: hero “Full interactive demo” CTA scrolls here and focuses the feedback column */
 export const LANDING_DEMO_FOCUS_FEEDBACK_EVENT = 'writescholar:landing-demo-focus-feedback';
@@ -298,11 +298,11 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
 
   const highlightClasses: Record<DemoAnnotation['type'], string> = {
     strong:
-      'bg-[#dcfce7] dark:bg-green-900/40 text-green-900 dark:text-green-100 rounded-sm px-0.5 border-b-2 border-green-600 dark:border-green-500 hover:bg-[#bbf7d0] dark:hover:bg-green-800/50',
+      'bg-[#E5F8D0] dark:bg-[#58CC02]/20 text-[#3C3C3C] dark:text-white rounded-sm px-0.5 border-b-2 border-[#58CC02] dark:border-[#46A302] hover:bg-[#d4f4b8]',
     improve:
-      'bg-[#fef3c7] dark:bg-amber-900/40 text-amber-900 dark:text-amber-100 rounded-sm px-0.5 border-b-2 border-amber-600 dark:border-amber-500 hover:bg-[#fde68a] dark:hover:bg-amber-800/50',
+      'bg-[#FFF4E0] dark:bg-[#FF9600]/20 text-[#3C3C3C] dark:text-white rounded-sm px-0.5 border-b-2 border-[#FF9600] dark:border-[#D97F00] hover:bg-[#ffe9c0]',
     concern:
-      'bg-[#fee2e2] dark:bg-red-900/40 text-red-900 dark:text-red-100 rounded-sm px-0.5 border-b-2 border-red-600 dark:border-red-500 hover:bg-[#fecaca] dark:hover:bg-red-800/50',
+      'bg-[#FFE8E8] dark:bg-[#FF4B4B]/20 text-[#3C3C3C] dark:text-white rounded-sm px-0.5 border-b-2 border-[#FF4B4B] dark:border-[#E04343] hover:bg-[#ffd0d0]',
   };
 
   const renderHighlightedDocument = () => {
@@ -313,7 +313,8 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
         return (
           <p
             key={paraIdx}
-            className={`mb-3 text-gray-700 dark:text-stone-300 leading-relaxed ${isTitle ? 'text-lg font-semibold text-left' : 'text-sm text-left text-pretty'}`}
+            className={`mb-3 text-[#3C3C3C] dark:text-stone-300 leading-relaxed ${isTitle ? 'text-lg font-extrabold text-left' : 'text-sm text-left text-pretty'}`}
+            style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
           >
             {range.text}
           </p>
@@ -322,7 +323,8 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
       return (
         <p
           key={paraIdx}
-          className={`mb-3 text-gray-700 dark:text-stone-300 leading-relaxed break-words ${isTitle ? 'text-lg font-semibold text-left' : 'text-sm text-left text-pretty'}`}
+          className={`mb-3 text-[#3C3C3C] dark:text-stone-300 leading-relaxed break-words ${isTitle ? 'text-lg font-extrabold text-left' : 'text-sm text-left text-pretty'}`}
+          style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
         >
           {segments.map((seg, i) => {
             if (seg.kind === 'plain') {
@@ -348,7 +350,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
                 key={`${ann.id}-${i}`}
                 data-landing-doc-ann={ann.id}
                 className={`relative inline ${highlightClasses[ann.type]} px-0.5 cursor-pointer transition-all duration-200 ${
-                  isSelected ? 'ring-2 ring-offset-2 ring-violet-500' : ''
+                  isSelected ? 'ring-2 ring-offset-2 ring-[#1CB0F6]' : ''
                 }`}
                 onClick={() => setSelectedAnnotation(ann.id)}
                 onMouseEnter={(e) => {
@@ -374,19 +376,19 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
     switch (type) {
       case 'strong':
         return (
-          <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+          <svg className="w-5 h-5 text-[#58CC02]" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
           </svg>
         );
       case 'improve':
         return (
-          <svg className="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+          <svg className="w-5 h-5 text-[#FF9600]" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
           </svg>
         );
       case 'concern':
         return (
-          <svg className="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+          <svg className="w-5 h-5 text-[#FF4B4B]" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
           </svg>
         );
@@ -400,33 +402,33 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
   const concernAnnotations = demo.annotations.filter(a => a.type === 'concern');
 
   const renderGradeBreakdown = () => (
-    <div className="mx-4 sm:mx-6 mt-6 mb-4 rounded-2xl border border-gray-200 dark:border-stone-600 overflow-hidden">
-      <div className="bg-teal-600 text-white px-6 py-5">
+    <div className="mx-4 sm:mx-6 mt-6 mb-4 rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-600 overflow-hidden">
+      <div className="bg-[#1CB0F6] text-white px-6 py-5">
         <div className="flex flex-wrap items-center gap-6">
           <div>
-            <h2 className="text-xl font-bold">General Academic Assessment</h2>
+            <h2 className="text-xl font-extrabold" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>General Academic Assessment</h2>
           </div>
           <div className="flex items-center gap-6 ml-auto">
             <div className="text-right">
               <div className="text-3xl font-extrabold">{demo.overallScore}/100</div>
-              <div className="text-emerald-100 text-xs">Score</div>
+              <div className="text-white/80 text-xs font-extrabold">Score</div>
             </div>
             <div className="text-right">
               <div className="text-3xl font-extrabold">{demo.grade}</div>
-              <div className="text-emerald-100 text-xs">Grade</div>
+              <div className="text-white/80 text-xs font-extrabold">Grade</div>
             </div>
           </div>
         </div>
       </div>
-      <div className="p-6 bg-[#F8FAFC] dark:bg-stone-800">
+      <div className="p-6 bg-white dark:bg-stone-800">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {demo.rubric.map((cat) => (
-            <div key={cat.name} className="p-4 rounded-xl bg-white dark:bg-stone-700/50 border border-gray-200 dark:border-stone-600 shadow-sm min-w-0">
+            <div key={cat.name} className="p-4 rounded-2xl bg-white dark:bg-stone-700/50 border-2 border-b-4 border-[#E5E5E5] dark:border-stone-600 min-w-0">
               <div className="flex justify-between items-start gap-2 mb-2">
-                <span className="font-medium text-gray-800 dark:text-stone-200 text-sm break-words flex-1 min-w-0">{cat.name}</span>
-                <span className="font-bold text-gray-900 dark:text-stone-100 text-sm flex-shrink-0">{cat.score}/{cat.maxScore}</span>
+                <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200 text-sm break-words flex-1 min-w-0" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>{cat.name}</span>
+                <span className="font-extrabold text-[#3C3C3C] dark:text-stone-100 text-sm flex-shrink-0">{cat.score}/{cat.maxScore}</span>
               </div>
-              <p className="text-xs text-gray-600 dark:text-stone-400 break-words leading-snug">{cat.feedback}</p>
+              <p className="text-xs text-[#AFAFAF] dark:text-stone-400 break-words leading-snug">{cat.feedback}</p>
             </div>
           ))}
         </div>
@@ -440,12 +442,12 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
     <div
       className={`relative overflow-hidden bg-white dark:bg-stone-900 min-w-0 max-w-full ${
         landingHeroEmbed
-          ? 'rounded-2xl sm:rounded-3xl border-0 shadow-none'
-          : 'rounded-2xl shadow-xl border border-gray-200 dark:border-stone-600'
+          ? 'rounded-2xl sm:rounded-3xl border-0'
+          : 'rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-600'
       }`}
     >
-      {/* Demo selector + Header — dark violet chrome (brand), not blue-gray */}
-      <div className="bg-violet-950 px-3 sm:px-6 py-4 sm:py-5">
+      {/* Demo selector + Header — Duolingo dark chrome */}
+      <div className="bg-[#3C3C3C] px-3 sm:px-6 py-4 sm:py-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-3 sm:gap-y-2 mb-4">
           <div className="flex flex-wrap gap-2">
             {DEMO_PAPERS.map((d) => (
@@ -457,34 +459,35 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
                   setHoveredAnnotation(null);
                   setMobileTab('document');
                 }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all ${
                   selectedDemoId === d.id
-                    ? 'bg-violet-600 text-violet-50 shadow-sm ring-1 ring-violet-400/35'
-                    : 'bg-violet-900/70 text-violet-200/90 hover:bg-violet-800/90 hover:text-violet-50 border border-violet-800/50'
+                    ? 'bg-[#58CC02] text-white border-2 border-b-4 border-[#46A302]'
+                    : 'bg-white/10 text-white/90 hover:bg-white/20 border-2 border-b-4 border-white/20 active:border-b-2 active:translate-y-0.5'
                 }`}
+                style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
               >
                 {d.label}
               </button>
             ))}
           </div>
-          <p className="text-[11px] sm:text-xs text-violet-300/90 text-left sm:text-right leading-snug sm:ml-auto max-w-none sm:max-w-[min(100%,22rem)]">
+          <p className="text-[11px] sm:text-xs text-white/70 text-left sm:text-right leading-snug sm:ml-auto max-w-none sm:max-w-[min(100%,22rem)]">
             Professor-style review · sample draft (not your work)
           </p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 min-w-0">
           <div className="min-w-0 flex-1">
-            <h2 className="text-[0.95rem] sm:text-base lg:text-xl font-bold text-violet-50 leading-snug break-words">{demo.title}</h2>
+            <h2 className="text-[0.95rem] sm:text-base lg:text-xl font-extrabold text-white leading-snug break-words" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>{demo.title}</h2>
           </div>
           <div className="flex flex-nowrap items-center gap-1.5 sm:flex-wrap sm:gap-2 md:gap-3 min-w-0 overflow-x-auto pb-0.5 sm:pb-0 sm:overflow-visible [-webkit-overflow-scrolling:touch]">
-          <button type="button" className="px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-colors flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-sm font-medium text-violet-50 shrink-0 bg-violet-900/80 hover:bg-violet-800 border border-violet-700/45">
+          <button type="button" className="px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-colors flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-sm font-medium text-white shrink-0 bg-white/10 hover:bg-white/20 border-2 border-b-4 border-white/20 active:border-b-2 active:translate-y-0.5">
             <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
             PDF
           </button>
-          <button type="button" className="px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-colors flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-sm font-medium text-violet-50 shrink-0 bg-violet-900/80 hover:bg-violet-800 border border-violet-700/45">
+          <button type="button" className="px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-colors flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-sm font-medium text-white shrink-0 bg-white/10 hover:bg-white/20 border-2 border-b-4 border-white/20 active:border-b-2 active:translate-y-0.5">
             <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
             Word
           </button>
-          <button type="button" className="px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-colors flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-sm font-medium text-violet-50 shrink-0 bg-violet-900/80 hover:bg-violet-800 border border-violet-700/45">
+          <button type="button" className="px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-colors flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-sm font-medium text-white shrink-0 bg-white/10 hover:bg-white/20 border-2 border-b-4 border-white/20 active:border-b-2 active:translate-y-0.5">
             <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             Close
           </button>
@@ -492,7 +495,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
         </div>
       </div>
 
-      <div className="hidden lg:block border-b border-gray-200 dark:border-stone-700">{renderGradeBreakdown()}</div>
+      <div className="hidden lg:block border-b-2 border-[#E5E5E5] dark:border-stone-700">{renderGradeBreakdown()}</div>
 
       {/* Hover tooltip for annotations */}
       {hoveredAnnotation && tooltipPos && (() => {
@@ -501,34 +504,34 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
         const tooltipCategory = {
           strong: {
             label: 'Strong point',
-            className: 'text-green-400 bg-green-500/20 border-green-500/50',
+            className: 'text-[#58CC02] bg-[#E5F8D0] border-[#58CC02]/50',
             icon: <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>,
           },
           improve: {
             label: 'Area to improve',
-            className: 'text-amber-400 bg-amber-500/20 border-amber-500/50',
+            className: 'text-[#FF9600] bg-[#FFF4E0] border-[#FF9600]/50',
             icon: <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>,
           },
           concern: {
             label: 'Serious concern',
-            className: 'text-red-400 bg-red-500/20 border-red-500/50',
+            className: 'text-[#FF4B4B] bg-[#FFE8E8] border-[#FF4B4B]/50',
             icon: <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>,
           },
         }[ann.type];
         return (
           <div
-            className="fixed z-[100] min-w-[220px] max-w-[320px] p-3 bg-stone-900 dark:bg-stone-800 text-white text-xs rounded-lg shadow-xl border border-stone-700 pointer-events-none"
+            className="fixed z-[100] min-w-[220px] max-w-[320px] p-3 bg-[#3C3C3C] dark:bg-[#3C3C3C] text-white text-xs rounded-2xl border-2 border-b-4 border-[#2a2a2a] pointer-events-none"
             style={{
               left: Math.min(tooltipPos.x, window.innerWidth - 340),
               top: tooltipPos.y - 8,
               transform: 'translateY(-100%)',
             }}
           >
-            <div className={`flex items-center gap-1.5 mb-2 pb-2 border-b border-stone-600 ${tooltipCategory.className} rounded px-2 py-1 w-fit text-[11px] font-semibold`}>
+            <div className={`flex items-center gap-1.5 mb-2 pb-2 border-b border-white/20 ${tooltipCategory.className} rounded-lg px-2 py-1 w-fit text-[11px] font-extrabold`}>
               {tooltipCategory.icon}
               <span>{tooltipCategory.label}</span>
             </div>
-            <p className="text-stone-400 text-[11px] mb-2 pb-2 border-b border-stone-600 italic leading-snug">"{ann.text}"</p>
+            <p className="text-stone-400 text-[11px] mb-2 pb-2 border-b border-white/20 italic leading-snug">"{ann.text}"</p>
             <p className="font-medium mb-1 text-white">{ann.comment}</p>
             <p className="text-stone-300 italic">{ann.suggestion}</p>
           </div>
@@ -537,59 +540,62 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
 
       {/* Legend + hint (on mobile, only when Document tab is active; always on lg+) */}
       <div
-        className={`bg-gray-50 dark:bg-stone-800/50 px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-stone-700 ${
+        className={`bg-white dark:bg-stone-800/50 px-4 sm:px-6 py-4 border-b-2 border-[#E5E5E5] dark:border-stone-700 ${
           mobileTab !== 'document' ? 'hidden lg:block' : ''
         }`}
       >
-        <p className="text-sm text-gray-600 dark:text-stone-400 mb-3">Click highlights to explore feedback</p>
+        <p className="text-sm text-[#3C3C3C] dark:text-stone-400 mb-3 font-extrabold" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Click highlights to explore feedback</p>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 sm:gap-6 text-xs sm:text-sm">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-green-400 rounded-full" />
-            <span className="text-gray-600 dark:text-stone-400">Strong sections</span>
+            <div className="w-3 h-3 bg-[#58CC02] rounded-full" />
+            <span className="text-[#3C3C3C] dark:text-stone-400 font-extrabold">Strong sections</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-amber-400 rounded-full" />
-            <span className="text-gray-600 dark:text-stone-400">Needs improvement</span>
+            <div className="w-3 h-3 bg-[#FF9600] rounded-full" />
+            <span className="text-[#3C3C3C] dark:text-stone-400 font-extrabold">Needs improvement</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-red-400 rounded-full" />
-            <span className="text-gray-600 dark:text-stone-400">Needs revision</span>
+            <div className="w-3 h-3 bg-[#FF4B4B] rounded-full" />
+            <span className="text-[#3C3C3C] dark:text-stone-400 font-extrabold">Needs revision</span>
           </div>
         </div>
       </div>
 
       {/* Mobile tabs: Document | Feedback | Analysis (lg+ keeps split view + full scroll) */}
-      <div className="lg:hidden flex border-b border-gray-200 dark:border-stone-700 bg-gray-50 dark:bg-stone-800/50">
+      <div className="lg:hidden flex border-b-2 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-800/50">
         <button
           type="button"
           onClick={() => setMobileTab('document')}
-          className={`flex-1 py-2.5 sm:py-3 px-1.5 sm:px-3 text-[11px] sm:text-sm font-semibold transition-colors leading-tight ${
+          className={`flex-1 py-2.5 sm:py-3 px-1.5 sm:px-3 text-[11px] sm:text-sm font-extrabold transition-colors leading-tight ${
             mobileTab === 'document'
-              ? 'text-violet-600 dark:text-violet-400 border-b-2 border-violet-500 bg-white dark:bg-stone-900'
-              : 'text-gray-600 dark:text-stone-400 hover:text-gray-900 dark:hover:text-stone-200'
+              ? 'text-[#1CB0F6] dark:text-[#1CB0F6] border-b-4 border-[#1CB0F6] bg-white dark:bg-stone-900'
+              : 'text-[#AFAFAF] dark:text-stone-400 hover:text-[#3C3C3C] dark:hover:text-stone-200'
           }`}
+          style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
         >
           Document
         </button>
         <button
           type="button"
           onClick={() => setMobileTab('feedback')}
-          className={`flex-1 py-2.5 sm:py-3 px-1.5 sm:px-3 text-[11px] sm:text-sm font-semibold transition-colors leading-tight ${
+          className={`flex-1 py-2.5 sm:py-3 px-1.5 sm:px-3 text-[11px] sm:text-sm font-extrabold transition-colors leading-tight ${
             mobileTab === 'feedback'
-              ? 'text-violet-600 dark:text-violet-400 border-b-2 border-violet-500 bg-white dark:bg-stone-900'
-              : 'text-gray-600 dark:text-stone-400 hover:text-gray-900 dark:hover:text-stone-200'
+              ? 'text-[#1CB0F6] dark:text-[#1CB0F6] border-b-4 border-[#1CB0F6] bg-white dark:bg-stone-900'
+              : 'text-[#AFAFAF] dark:text-stone-400 hover:text-[#3C3C3C] dark:hover:text-stone-200'
           }`}
+          style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
         >
           Feedback
         </button>
         <button
           type="button"
           onClick={() => setMobileTab('analysis')}
-          className={`flex-1 py-2.5 sm:py-3 px-1.5 sm:px-3 text-[11px] sm:text-sm font-semibold transition-colors leading-tight ${
+          className={`flex-1 py-2.5 sm:py-3 px-1.5 sm:px-3 text-[11px] sm:text-sm font-extrabold transition-colors leading-tight ${
             mobileTab === 'analysis'
-              ? 'text-violet-600 dark:text-violet-400 border-b-2 border-violet-500 bg-white dark:bg-stone-900'
-              : 'text-gray-600 dark:text-stone-400 hover:text-gray-900 dark:hover:text-stone-200'
+              ? 'text-[#1CB0F6] dark:text-[#1CB0F6] border-b-4 border-[#1CB0F6] bg-white dark:bg-stone-900'
+              : 'text-[#AFAFAF] dark:text-stone-400 hover:text-[#3C3C3C] dark:hover:text-stone-200'
           }`}
+          style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
         >
           Analysis
         </button>
@@ -616,11 +622,11 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
         {/* Annotations sidebar */}
         <div
           ref={feedbackPanelScrollRef}
-          className={`w-full lg:w-[380px] lg:min-w-[340px] bg-gray-50 dark:bg-stone-800/50 border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-stone-700 overflow-y-auto overscroll-contain max-h-[min(58dvh,460px)] sm:max-h-[420px] lg:max-h-[580px] flex-shrink-0 ${mobileTab !== 'feedback' ? 'hidden lg:block' : ''}`}
+          className={`w-full lg:w-[380px] lg:min-w-[340px] bg-white dark:bg-stone-800/50 border-t-2 lg:border-t-0 lg:border-l-2 border-[#E5E5E5] dark:border-stone-700 overflow-y-auto overscroll-contain max-h-[min(58dvh,460px)] sm:max-h-[420px] lg:max-h-[580px] flex-shrink-0 ${mobileTab !== 'feedback' ? 'hidden lg:block' : ''}`}
         >
           <div className="p-5 md:p-6">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-stone-100 mb-5 flex items-center">
-              <svg className="w-5 h-5 mr-2 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <h3 className="text-lg font-extrabold text-[#3C3C3C] dark:text-stone-100 mb-5 flex items-center" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+              <svg className="w-5 h-5 mr-2 text-[#1CB0F6]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
               </svg>
               Annotations
@@ -629,24 +635,24 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
               {/* Strong Points */}
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="flex items-center justify-center w-8 h-8 bg-green-100 dark:bg-green-900/50 rounded-xl">
+                  <div className="flex items-center justify-center w-8 h-8 bg-[#E5F8D0] dark:bg-[#58CC02]/20 rounded-xl">
                     {getAnnotationIcon('strong')}
                   </div>
-                  <h4 className="font-semibold text-green-800 dark:text-green-300">Strong Points ({strongAnnotations.length})</h4>
+                  <h4 className="font-extrabold text-[#58CC02] dark:text-[#58CC02]" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Strong Points ({strongAnnotations.length})</h4>
                 </div>
                 <div className="space-y-2">
                   {strongAnnotations.map((ann) => (
                     <div
                       key={ann.id}
-                      className={`bg-white dark:bg-stone-800 rounded-xl p-3.5 border-l-[6px] border-green-500 shadow-[0_4px_6px_rgba(0,0,0,0.07)] hover:shadow-md transition-all cursor-pointer min-w-0 ${
-                        selectedAnnotation === ann.id ? 'ring-2 ring-violet-500' : ''
+                      className={`bg-white dark:bg-stone-800 rounded-2xl p-3.5 border-2 border-b-4 border-[#E5E5E5] border-l-[6px] border-l-[#58CC02] transition-all cursor-pointer min-w-0 ${
+                        selectedAnnotation === ann.id ? 'ring-2 ring-[#1CB0F6]' : ''
                       }`}
                       onClick={() => setSelectedAnnotation(ann.id)}
                       onMouseEnter={() => setHoveredAnnotation(ann.id)}
                       onMouseLeave={() => setHoveredAnnotation(null)}
                     >
-                      <p className="text-[13px] text-gray-700 dark:text-stone-300 font-medium mb-1 break-words leading-snug">{ann.comment}</p>
-                      <p className="text-[12px] text-gray-500 dark:text-stone-400 italic break-words leading-snug">{ann.suggestion}</p>
+                      <p className="text-[13px] text-[#3C3C3C] dark:text-stone-300 font-extrabold mb-1 break-words leading-snug">{ann.comment}</p>
+                      <p className="text-[12px] text-[#AFAFAF] dark:text-stone-400 italic break-words leading-snug">{ann.suggestion}</p>
                     </div>
                   ))}
                 </div>
@@ -655,28 +661,28 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
               {/* Areas to Improve */}
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="flex items-center justify-center w-8 h-8 bg-amber-100 dark:bg-amber-900/50 rounded-xl">
+                  <div className="flex items-center justify-center w-8 h-8 bg-[#FFF4E0] dark:bg-[#FF9600]/20 rounded-xl">
                     {getAnnotationIcon('improve')}
                   </div>
-                  <h4 className="font-semibold text-amber-800 dark:text-amber-300">Areas to Improve ({improveAnnotations.length})</h4>
+                  <h4 className="font-extrabold text-[#FF9600] dark:text-[#FF9600]" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Areas to Improve ({improveAnnotations.length})</h4>
                 </div>
                 <div className="space-y-2">
                   {improveAnnotations.map((ann) => (
                     <div
                       key={ann.id}
                       data-landing-feedback-card={ann.id}
-                      className={`bg-white dark:bg-stone-800 rounded-xl p-3.5 border-l-[6px] border-amber-500 shadow-[0_4px_6px_rgba(0,0,0,0.07)] hover:shadow-md transition-all cursor-pointer min-w-0 ${
-                        selectedAnnotation === ann.id ? 'ring-2 ring-violet-500' : ''
+                      className={`bg-white dark:bg-stone-800 rounded-2xl p-3.5 border-2 border-b-4 border-[#E5E5E5] border-l-[6px] border-l-[#FF9600] transition-all cursor-pointer min-w-0 ${
+                        selectedAnnotation === ann.id ? 'ring-2 ring-[#1CB0F6]' : ''
                       }`}
                       onClick={() => setSelectedAnnotation(ann.id)}
                       onMouseEnter={() => setHoveredAnnotation(ann.id)}
                       onMouseLeave={() => setHoveredAnnotation(null)}
                     >
-                      <p className="text-[13px] text-gray-700 dark:text-stone-300 font-medium mb-1 break-words leading-snug">{ann.comment}</p>
-                      <p className="text-[12px] text-gray-500 dark:text-stone-400 italic break-words leading-snug">{ann.suggestion}</p>
+                      <p className="text-[13px] text-[#3C3C3C] dark:text-stone-300 font-extrabold mb-1 break-words leading-snug">{ann.comment}</p>
+                      <p className="text-[12px] text-[#AFAFAF] dark:text-stone-400 italic break-words leading-snug">{ann.suggestion}</p>
                       {ann.demoRevisedText && (
-                        <div className="mt-2.5 pt-2 border-t border-amber-200/60 dark:border-amber-800/50">
-                          <p className="text-[10px] font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-500 mb-1">
+                        <div className="mt-2.5 pt-2 border-t-2 border-[#E5E5E5] dark:border-[#FF9600]/30">
+                          <p className="text-[10px] font-extrabold uppercase tracking-wide text-[#AFAFAF] dark:text-stone-500 mb-1">
                             Suggested revision
                           </p>
                           <p className="text-[12px] text-stone-700 dark:text-stone-300 leading-snug">{ann.demoRevisedText}</p>
@@ -690,28 +696,28 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
               {/* Serious Concerns */}
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="flex items-center justify-center w-8 h-8 bg-red-100 dark:bg-red-900/50 rounded-xl">
+                  <div className="flex items-center justify-center w-8 h-8 bg-[#FFE8E8] dark:bg-[#FF4B4B]/20 rounded-xl">
                     {getAnnotationIcon('concern')}
                   </div>
-                  <h4 className="font-semibold text-red-800 dark:text-red-300">Serious Concerns ({concernAnnotations.length})</h4>
+                  <h4 className="font-extrabold text-[#FF4B4B] dark:text-[#FF4B4B]" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Serious Concerns ({concernAnnotations.length})</h4>
                 </div>
                 <div className="space-y-2">
                   {concernAnnotations.map((ann) => (
                     <div
                       key={ann.id}
                       data-landing-feedback-card={ann.id}
-                      className={`bg-white dark:bg-stone-800 rounded-xl p-3.5 border-l-[6px] border-red-500 shadow-[0_4px_6px_rgba(0,0,0,0.07)] hover:shadow-md transition-all cursor-pointer min-w-0 ${
-                        selectedAnnotation === ann.id ? 'ring-2 ring-violet-500' : ''
+                      className={`bg-white dark:bg-stone-800 rounded-2xl p-3.5 border-2 border-b-4 border-[#E5E5E5] border-l-[6px] border-l-[#FF4B4B] transition-all cursor-pointer min-w-0 ${
+                        selectedAnnotation === ann.id ? 'ring-2 ring-[#1CB0F6]' : ''
                       }`}
                       onClick={() => setSelectedAnnotation(ann.id)}
                       onMouseEnter={() => setHoveredAnnotation(ann.id)}
                       onMouseLeave={() => setHoveredAnnotation(null)}
                     >
-                      <p className="text-[13px] text-gray-700 dark:text-stone-300 font-medium mb-1 break-words leading-snug">{ann.comment}</p>
-                      <p className="text-[12px] text-gray-500 dark:text-stone-400 italic break-words leading-snug">{ann.suggestion}</p>
+                      <p className="text-[13px] text-[#3C3C3C] dark:text-stone-300 font-extrabold mb-1 break-words leading-snug">{ann.comment}</p>
+                      <p className="text-[12px] text-[#AFAFAF] dark:text-stone-400 italic break-words leading-snug">{ann.suggestion}</p>
                       {ann.demoRevisedText && (
-                        <div className="mt-2.5 pt-2 border-t border-red-200/60 dark:border-red-800/50">
-                          <p className="text-[10px] font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-500 mb-1">
+                        <div className="mt-2.5 pt-2 border-t-2 border-[#E5E5E5] dark:border-[#FF4B4B]/30">
+                          <p className="text-[10px] font-extrabold uppercase tracking-wide text-[#AFAFAF] dark:text-stone-500 mb-1">
                             Suggested revision
                           </p>
                           <p className="text-[12px] text-stone-700 dark:text-stone-300 leading-snug">{ann.demoRevisedText}</p>
@@ -727,7 +733,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
 
         {/* Mobile-only: rubric in Analysis tab */}
         <div
-          className={`lg:hidden w-full overflow-y-auto max-h-[min(72dvh,640px)] bg-white dark:bg-stone-900 border-t border-gray-200 dark:border-stone-700 ${
+          className={`lg:hidden w-full overflow-y-auto max-h-[min(72dvh,640px)] bg-white dark:bg-stone-900 border-t-2 border-[#E5E5E5] dark:border-stone-700 ${
             mobileTab !== 'analysis' ? 'hidden' : ''
           }`}
         >
@@ -738,18 +744,19 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
       </div>
 
       {/* Footer */}
-      <div className="px-4 sm:px-6 py-4 bg-gray-50 dark:bg-stone-800/50 border-t border-gray-200 dark:border-stone-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div className="px-4 sm:px-6 py-4 bg-white dark:bg-stone-800/50 border-t-2 border-[#E5E5E5] dark:border-stone-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex flex-wrap gap-3">
-          <span className="px-3 py-1.5 bg-white dark:bg-stone-800 rounded-lg text-xs font-medium text-gray-600 dark:text-stone-400 border border-gray-200 dark:border-stone-600">
+          <span className="px-3 py-1.5 bg-white dark:bg-stone-800 rounded-xl text-xs font-extrabold text-[#3C3C3C] dark:text-stone-400 border-2 border-[#E5E5E5] dark:border-stone-600">
             Word Count: {liveWordCount}
           </span>
-          <span className="px-3 py-1.5 bg-white dark:bg-stone-800 rounded-lg text-xs font-medium text-gray-600 dark:text-stone-400 border border-gray-200 dark:border-stone-600">
+          <span className="px-3 py-1.5 bg-white dark:bg-stone-800 rounded-xl text-xs font-extrabold text-[#3C3C3C] dark:text-stone-400 border-2 border-[#E5E5E5] dark:border-stone-600">
             Citation Style: None
           </span>
         </div>
         <button
           onClick={() => onNavigate('signup')}
-          className="px-6 py-2.5 bg-gray-900 dark:bg-stone-700 hover:bg-gray-800 dark:hover:bg-stone-600 text-white font-semibold rounded-xl transition-colors text-sm"
+          className="px-6 py-2.5 bg-[#58CC02] text-white font-extrabold border-2 border-b-4 border-[#46A302] rounded-xl transition-all text-sm active:border-b-2 active:translate-y-0.5"
+          style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
         >
           Export Report
         </button>

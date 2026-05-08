@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import DOMPurify from 'dompurify';
 import Header from '../../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../../common/WriteScholarEditorialBackground';
 import Footer from '../../common/Footer';
 import ScholarMascot from '../../common/ScholarMascot';
 import { trackCopy } from '../../../data/achievements';
@@ -319,7 +318,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
     }
 
     let result = '';
-    
+
     if (style === 'apa') {
       if (sourceType === 'book') {
         const formattedAuthors = formatAuthorsAPA(authors);
@@ -515,7 +514,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
         result = `${formattedAuthors}. ${title}. ${year}.`;
       }
     }
-    
+
     setCitation(result);
   };
 
@@ -554,49 +553,54 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
     { value: 'encyclopedia', label: 'Encyclopedia', icon: '📕' },
   ];
 
+  const inputClass = "w-full px-4 py-2.5 bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 outline-none transition-all text-stone-800 dark:text-stone-200";
+  const selectClass = "w-full px-4 py-2.5 bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 outline-none transition-all text-stone-800 dark:text-stone-200";
+  const labelClass = "block text-sm font-extrabold text-stone-700 dark:text-stone-300 mb-1";
+  const hintClass = "text-xs text-stone-500 dark:text-stone-400 mt-1";
+
   const renderFormFields = () => {
     const commonFields = (
       <>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Author(s) *</label>
+          <label className={labelClass}>Author(s) *</label>
           <input
             type="text"
             value={formData.authors}
             onChange={(e) => handleInputChange('authors', e.target.value)}
             placeholder="John Smith, Jane Doe or Li, Wei (family-name-first)"
-            className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+            className={inputClass}
           />
-          <p className="text-xs text-gray-500 mt-1">Multiple authors: use commas (John Smith, Jane Doe) or semicolons. Use &quot;Li, Wei&quot; for family-name-first (one author).</p>
+          <p className={hintClass}>Multiple authors: use commas (John Smith, Jane Doe) or semicolons. Use &quot;Li, Wei&quot; for family-name-first (one author).</p>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+          <label className={labelClass}>Title *</label>
           <input
             type="text"
             value={formData.title}
             onChange={(e) => handleInputChange('title', e.target.value)}
             placeholder="Enter the title"
-            className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+            className={inputClass}
           />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Year *</label>
+            <label className={labelClass}>Year *</label>
             <input
               type="text"
               value={formData.year}
               onChange={(e) => handleInputChange('year', e.target.value)}
               placeholder="2024"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Month</label>
+            <label className={labelClass}>Month</label>
             <input
               type="text"
               value={formData.month}
               onChange={(e) => handleInputChange('month', e.target.value)}
               placeholder="January"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
         </div>
@@ -608,57 +612,57 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
         <>
           {commonFields}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Publisher</label>
+            <label className={labelClass}>Publisher</label>
             <input
               type="text"
               value={formData.publisher}
               onChange={(e) => handleInputChange('publisher', e.target.value)}
               placeholder="Publisher name"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+              <label className={labelClass}>City</label>
               <input
                 type="text"
                 value={formData.city}
                 onChange={(e) => handleInputChange('city', e.target.value)}
                 placeholder="New York"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+                className={inputClass}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Edition</label>
+              <label className={labelClass}>Edition</label>
               <input
                 type="text"
                 value={formData.edition}
                 onChange={(e) => handleInputChange('edition', e.target.value)}
                 placeholder="2nd"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+                className={inputClass}
               />
             </div>
           </div>
           {sourceType === 'ebook' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">URL / Platform</label>
+              <label className={labelClass}>URL / Platform</label>
               <input
                 type="text"
                 value={formData.url}
                 onChange={(e) => handleInputChange('url', e.target.value)}
                 placeholder="https://... or Kindle"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+                className={inputClass}
               />
             </div>
           )}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">DOI</label>
+            <label className={labelClass}>DOI</label>
             <input
               type="text"
               value={formData.doi}
               onChange={(e) => handleInputChange('doi', e.target.value)}
               placeholder="10.1234/example"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
         </>
@@ -670,55 +674,55 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
         <>
           {commonFields}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Journal Name *</label>
+            <label className={labelClass}>Journal Name *</label>
             <input
               type="text"
               value={formData.journalName}
               onChange={(e) => handleInputChange('journalName', e.target.value)}
               placeholder="Journal of Academic Research"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Volume</label>
+              <label className={labelClass}>Volume</label>
               <input
                 type="text"
                 value={formData.volume}
                 onChange={(e) => handleInputChange('volume', e.target.value)}
                 placeholder="12"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+                className={inputClass}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Issue</label>
+              <label className={labelClass}>Issue</label>
               <input
                 type="text"
                 value={formData.issue}
                 onChange={(e) => handleInputChange('issue', e.target.value)}
                 placeholder="3"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+                className={inputClass}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Pages</label>
+              <label className={labelClass}>Pages</label>
               <input
                 type="text"
                 value={formData.pages}
                 onChange={(e) => handleInputChange('pages', e.target.value)}
                 placeholder="45-67"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+                className={inputClass}
               />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">DOI</label>
+            <label className={labelClass}>DOI</label>
             <input
               type="text"
               value={formData.doi}
               onChange={(e) => handleInputChange('doi', e.target.value)}
               placeholder="10.1234/example"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
         </>
@@ -730,43 +734,43 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
         <>
           {commonFields}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Day</label>
+            <label className={labelClass}>Day</label>
             <input
               type="text"
               value={formData.day}
               onChange={(e) => handleInputChange('day', e.target.value)}
               placeholder="15"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Website Name</label>
+            <label className={labelClass}>Website Name</label>
             <input
               type="text"
               value={formData.websiteName}
               onChange={(e) => handleInputChange('websiteName', e.target.value)}
               placeholder="Website or organization name"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">URL *</label>
+            <label className={labelClass}>URL *</label>
             <input
               type="text"
               value={formData.url}
               onChange={(e) => handleInputChange('url', e.target.value)}
               placeholder="https://example.com/article"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Access Date</label>
+            <label className={labelClass}>Access Date</label>
             <input
               type="text"
               value={formData.accessDate}
               onChange={(e) => handleInputChange('accessDate', e.target.value)}
               placeholder="January 15, 2024"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
         </>
@@ -778,67 +782,67 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
         <>
           {commonFields}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Day</label>
+            <label className={labelClass}>Day</label>
             <input
               type="text"
               value={formData.day}
               onChange={(e) => handleInputChange('day', e.target.value)}
               placeholder="15"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{sourceType === 'newspaper' ? 'Newspaper' : 'Magazine'} Name *</label>
+            <label className={labelClass}>{sourceType === 'newspaper' ? 'Newspaper' : 'Magazine'} Name *</label>
             <input
               type="text"
               value={sourceType === 'newspaper' ? formData.newspaperName : formData.magazineName}
               onChange={(e) => handleInputChange(sourceType === 'newspaper' ? 'newspaperName' : 'magazineName', e.target.value)}
               placeholder={sourceType === 'newspaper' ? 'The New York Times' : 'Time Magazine'}
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
           {sourceType === 'magazine' && (
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Volume</label>
+                <label className={labelClass}>Volume</label>
                 <input
                   type="text"
                   value={formData.volume}
                   onChange={(e) => handleInputChange('volume', e.target.value)}
                   placeholder="12"
-                  className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+                  className={inputClass}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Issue</label>
+                <label className={labelClass}>Issue</label>
                 <input
                   type="text"
                   value={formData.issue}
                   onChange={(e) => handleInputChange('issue', e.target.value)}
                   placeholder="3"
-                  className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+                  className={inputClass}
                 />
               </div>
             </div>
           )}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Pages</label>
+            <label className={labelClass}>Pages</label>
             <input
               type="text"
               value={formData.pages}
               onChange={(e) => handleInputChange('pages', e.target.value)}
               placeholder="A1, B3"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">URL (if online)</label>
+            <label className={labelClass}>URL (if online)</label>
             <input
               type="text"
               value={formData.url}
               onChange={(e) => handleInputChange('url', e.target.value)}
               placeholder="https://..."
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
         </>
@@ -850,43 +854,43 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
         <>
           {commonFields}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Conference Name *</label>
+            <label className={labelClass}>Conference Name *</label>
             <input
               type="text"
               value={formData.conferenceName}
               onChange={(e) => handleInputChange('conferenceName', e.target.value)}
               placeholder="International Conference on..."
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Conference Location</label>
+            <label className={labelClass}>Conference Location</label>
             <input
               type="text"
               value={formData.conferenceLocation}
               onChange={(e) => handleInputChange('conferenceLocation', e.target.value)}
               placeholder="New York, USA"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Pages</label>
+            <label className={labelClass}>Pages</label>
             <input
               type="text"
               value={formData.pages}
               onChange={(e) => handleInputChange('pages', e.target.value)}
               placeholder="45-52"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">DOI</label>
+            <label className={labelClass}>DOI</label>
             <input
               type="text"
               value={formData.doi}
               onChange={(e) => handleInputChange('doi', e.target.value)}
               placeholder="10.1234/example"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
         </>
@@ -898,22 +902,22 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
         <>
           {commonFields}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">University *</label>
+            <label className={labelClass}>University *</label>
             <input
               type="text"
               value={formData.university}
               onChange={(e) => handleInputChange('university', e.target.value)}
               placeholder="Harvard University"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Degree Type</label>
+              <label className={labelClass}>Degree Type</label>
               <select
                 value={formData.degree}
                 onChange={(e) => handleInputChange('degree', e.target.value)}
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+                className={selectClass}
               >
                 <option value="">Select degree</option>
                 <option value="Doctoral dissertation">PhD Dissertation</option>
@@ -922,24 +926,24 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+              <label className={labelClass}>City</label>
               <input
                 type="text"
                 value={formData.city}
                 onChange={(e) => handleInputChange('city', e.target.value)}
                 placeholder="Cambridge, MA"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+                className={inputClass}
               />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">URL (if available)</label>
+            <label className={labelClass}>URL (if available)</label>
             <input
               type="text"
               value={formData.url}
               onChange={(e) => handleInputChange('url', e.target.value)}
               placeholder="https://..."
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
         </>
@@ -950,55 +954,55 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
       return (
         <>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+            <label className={labelClass}>Title *</label>
             <input
               type="text"
               value={formData.title}
               onChange={(e) => handleInputChange('title', e.target.value)}
               placeholder="Video title"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Director / Creator</label>
+            <label className={labelClass}>Director / Creator</label>
             <input
               type="text"
               value={formData.director}
               onChange={(e) => handleInputChange('director', e.target.value)}
               placeholder="Christopher Nolan"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Year</label>
+              <label className={labelClass}>Year</label>
               <input
                 type="text"
                 value={formData.year}
                 onChange={(e) => handleInputChange('year', e.target.value)}
                 placeholder="2024"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+                className={inputClass}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Platform / Studio</label>
+              <label className={labelClass}>Platform / Studio</label>
               <input
                 type="text"
                 value={formData.platform}
                 onChange={(e) => handleInputChange('platform', e.target.value)}
                 placeholder="YouTube, Netflix, etc."
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+                className={inputClass}
               />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">URL</label>
+            <label className={labelClass}>URL</label>
             <input
               type="text"
               value={formData.url}
               onChange={(e) => handleInputChange('url', e.target.value)}
               placeholder="https://..."
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
         </>
@@ -1009,85 +1013,85 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
       return (
         <>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Podcast Name *</label>
+            <label className={labelClass}>Podcast Name *</label>
             <input
               type="text"
               value={formData.title}
               onChange={(e) => handleInputChange('title', e.target.value)}
               placeholder="The Daily"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Episode Title</label>
+            <label className={labelClass}>Episode Title</label>
             <input
               type="text"
               value={formData.episodeTitle}
               onChange={(e) => handleInputChange('episodeTitle', e.target.value)}
               placeholder="Episode title"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Host Name</label>
+            <label className={labelClass}>Host Name</label>
             <input
               type="text"
               value={formData.hostName}
               onChange={(e) => handleInputChange('hostName', e.target.value)}
               placeholder="Host name"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Year</label>
+              <label className={labelClass}>Year</label>
               <input
                 type="text"
                 value={formData.year}
                 onChange={(e) => handleInputChange('year', e.target.value)}
                 placeholder="2024"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+                className={inputClass}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Month</label>
+              <label className={labelClass}>Month</label>
               <input
                 type="text"
                 value={formData.month}
                 onChange={(e) => handleInputChange('month', e.target.value)}
                 placeholder="January"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+                className={inputClass}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Day</label>
+              <label className={labelClass}>Day</label>
               <input
                 type="text"
                 value={formData.day}
                 onChange={(e) => handleInputChange('day', e.target.value)}
                 placeholder="15"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+                className={inputClass}
               />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Platform</label>
+            <label className={labelClass}>Platform</label>
             <input
               type="text"
               value={formData.platform}
               onChange={(e) => handleInputChange('platform', e.target.value)}
               placeholder="Spotify, Apple Podcasts, etc."
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">URL</label>
+            <label className={labelClass}>URL</label>
             <input
               type="text"
               value={formData.url}
               onChange={(e) => handleInputChange('url', e.target.value)}
               placeholder="https://..."
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
         </>
@@ -1099,55 +1103,55 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
         <>
           {commonFields}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Organization</label>
+            <label className={labelClass}>Organization</label>
             <input
               type="text"
               value={formData.organization}
               onChange={(e) => handleInputChange('organization', e.target.value)}
               placeholder="World Health Organization"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Report Number</label>
+              <label className={labelClass}>Report Number</label>
               <input
                 type="text"
                 value={formData.reportNumber}
                 onChange={(e) => handleInputChange('reportNumber', e.target.value)}
                 placeholder="Report No. 123"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+                className={inputClass}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+              <label className={labelClass}>City</label>
               <input
                 type="text"
                 value={formData.city}
                 onChange={(e) => handleInputChange('city', e.target.value)}
                 placeholder="Geneva"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+                className={inputClass}
               />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Publisher</label>
+            <label className={labelClass}>Publisher</label>
             <input
               type="text"
               value={formData.publisher}
               onChange={(e) => handleInputChange('publisher', e.target.value)}
               placeholder="Publisher name"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">URL</label>
+            <label className={labelClass}>URL</label>
             <input
               type="text"
               value={formData.url}
               onChange={(e) => handleInputChange('url', e.target.value)}
               placeholder="https://..."
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
         </>
@@ -1158,97 +1162,97 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
       return (
         <>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Article/Entry Title *</label>
+            <label className={labelClass}>Article/Entry Title *</label>
             <input
               type="text"
               value={formData.title}
               onChange={(e) => handleInputChange('title', e.target.value)}
               placeholder="Climate Change"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Author(s)</label>
+            <label className={labelClass}>Author(s)</label>
             <input
               type="text"
               value={formData.authors}
               onChange={(e) => handleInputChange('authors', e.target.value)}
               placeholder="John Smith (leave blank if none)"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Encyclopedia Name *</label>
+            <label className={labelClass}>Encyclopedia Name *</label>
             <input
               type="text"
               value={formData.encyclopediaName}
               onChange={(e) => handleInputChange('encyclopediaName', e.target.value)}
               placeholder="Encyclopedia Britannica"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Editor(s)</label>
+              <label className={labelClass}>Editor(s)</label>
               <input
                 type="text"
                 value={formData.editorName}
                 onChange={(e) => handleInputChange('editorName', e.target.value)}
                 placeholder="Editor name"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+                className={inputClass}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Edition</label>
+              <label className={labelClass}>Edition</label>
               <input
                 type="text"
                 value={formData.edition}
                 onChange={(e) => handleInputChange('edition', e.target.value)}
                 placeholder="15th"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+                className={inputClass}
               />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Year</label>
+              <label className={labelClass}>Year</label>
               <input
                 type="text"
                 value={formData.year}
                 onChange={(e) => handleInputChange('year', e.target.value)}
                 placeholder="2024"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+                className={inputClass}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Pages</label>
+              <label className={labelClass}>Pages</label>
               <input
                 type="text"
                 value={formData.pages}
                 onChange={(e) => handleInputChange('pages', e.target.value)}
                 placeholder="123-130"
-                className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+                className={inputClass}
               />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Publisher</label>
+            <label className={labelClass}>Publisher</label>
             <input
               type="text"
               value={formData.publisher}
               onChange={(e) => handleInputChange('publisher', e.target.value)}
               placeholder="Publisher name"
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">URL (if online)</label>
+            <label className={labelClass}>URL (if online)</label>
             <input
               type="text"
               value={formData.url}
               onChange={(e) => handleInputChange('url', e.target.value)}
               placeholder="https://..."
-              className="w-full px-4 py-2.5 bg-gray-50 border-0 rounded-xl focus:ring-2 focus:ring-violet-500 focus:bg-white outline-none transition-all"
+              className={inputClass}
             />
           </div>
         </>
@@ -1259,15 +1263,14 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden">
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
+    <div className="relative min-h-screen overflow-x-hidden bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="citation-generator-tool" />
 
       {user && (
         <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4">
           <button
             onClick={() => onNavigate('dashboard')}
-            className="inline-flex items-center gap-2 text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100 transition-colors text-sm font-medium"
+            className="inline-flex items-center gap-2 text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100 transition-colors text-sm font-extrabold"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -1277,20 +1280,20 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
         </div>
       )}
 
-      {/* Hero Section - compact for above-the-fold tool visibility */}
-      <section className="py-8 sm:py-12 bg-gradient-to-b from-violet-50/50 to-white">
+      {/* Hero Section */}
+      <section className="py-8 sm:py-12">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto">
             <div className="inline-flex items-center justify-center mb-4">
               <ScholarMascot size={56} animated={false} pose="default" />
             </div>
-            <span className="inline-flex items-center px-4 py-1.5 bg-violet-100 text-violet-700 rounded-full text-sm font-semibold mb-3">
+            <span className="inline-flex items-center px-4 py-1.5 bg-[#EAFFD6] text-[#46A302] border-2 border-b-4 border-[#58CC02]/30 rounded-full text-sm font-extrabold uppercase tracking-wide mb-3">
               Free Tool
             </span>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 leading-tight">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-stone-900 dark:text-stone-50 mb-3 leading-tight">
               Citation Generator
             </h1>
-            <p className="text-base sm:text-lg text-gray-500 leading-relaxed max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg text-stone-500 dark:text-stone-400 leading-relaxed max-w-2xl mx-auto">
               APA, MLA, Chicago, Harvard, IEEE & Vancouver for 12 source types.
             </p>
           </div>
@@ -1301,22 +1304,22 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
       <section className="py-8 sm:py-12">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
-            {/* Input Form - order-2 on mobile so output appears first */}
-            <div className="order-2 lg:order-1 bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">Source Details</h2>
-              
+            {/* Input Form */}
+            <div className="order-2 lg:order-1 border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl p-6">
+              <h2 className="text-lg font-extrabold text-stone-900 dark:text-stone-50 mb-6">Source Details</h2>
+
               {/* Citation Style Selection */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Citation Style</label>
+                <label className="block text-sm font-extrabold text-stone-700 dark:text-stone-300 mb-2">Citation Style</label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {(['apa', 'mla', 'chicago', 'harvard', 'ieee', 'vancouver'] as CitationStyle[]).map((s) => (
                     <button
                       key={s}
                       onClick={() => setStyle(s)}
-                      className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                      className={`px-4 py-2.5 rounded-xl text-sm font-extrabold uppercase tracking-wide transition-all border-2 border-b-4 active:border-b-2 active:translate-y-0.5 ${
                         style === s
-                          ? 'bg-violet-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? 'bg-[#1CB0F6] border-[#1899D6] text-white'
+                          : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-600 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700'
                       }`}
                     >
                       {s.toUpperCase()}
@@ -1325,18 +1328,18 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                 </div>
               </div>
 
-              {/* Source Type Selection - Book, Website, Journal first; more expandable */}
+              {/* Source Type Selection */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Source Type</label>
+                <label className="block text-sm font-extrabold text-stone-700 dark:text-stone-300 mb-2">Source Type</label>
                 <div className="grid grid-cols-3 gap-2">
                   {primarySourceTypes.map((type) => (
                     <button
                       key={type.value}
                       onClick={() => setSourceType(type.value as SourceType)}
-                      className={`px-3 py-2.5 rounded-xl text-xs font-medium transition-all flex flex-col items-center justify-center space-y-1 ${
+                      className={`px-3 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wide transition-all flex flex-col items-center justify-center space-y-1 border-2 border-b-4 active:border-b-2 active:translate-y-0.5 ${
                         sourceType === type.value
-                          ? 'bg-violet-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? 'bg-[#58CC02] border-[#46A302] text-white'
+                          : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-600 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700'
                       }`}
                     >
                       <span className="text-base">{type.icon}</span>
@@ -1350,10 +1353,10 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                       <button
                         key={type.value}
                         onClick={() => setSourceType(type.value as SourceType)}
-                        className={`px-3 py-2 rounded-xl text-xs font-medium transition-all flex flex-col items-center justify-center space-y-1 ${
+                        className={`px-3 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wide transition-all flex flex-col items-center justify-center space-y-1 border-2 border-b-4 active:border-b-2 active:translate-y-0.5 ${
                           sourceType === type.value
-                            ? 'bg-violet-600 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            ? 'bg-[#58CC02] border-[#46A302] text-white'
+                            : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-600 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700'
                         }`}
                       >
                         <span className="text-base">{type.icon}</span>
@@ -1365,7 +1368,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                         if (moreSourceTypes.some(t => t.value === sourceType)) setSourceType('book');
                         setShowMoreSourceTypes(false);
                       }}
-                      className="px-3 py-2 rounded-xl text-xs font-medium text-violet-600 hover:bg-violet-50 transition-all flex items-center justify-center gap-1"
+                      className="px-3 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wide text-[#1CB0F6] hover:bg-[#DDF4FF] dark:hover:bg-[#1CB0F6]/10 transition-all flex items-center justify-center gap-1 border-2 border-b-4 border-[#1CB0F6]/30 active:border-b-2 active:translate-y-0.5"
                     >
                       Fewer
                     </button>
@@ -1373,7 +1376,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
                 ) : (
                   <button
                     onClick={() => setShowMoreSourceTypes(true)}
-                    className="mt-2 w-full py-2 rounded-xl text-xs font-medium text-violet-600 hover:bg-violet-50 transition-all"
+                    className="mt-2 w-full py-2 rounded-xl text-xs font-extrabold uppercase tracking-wide text-[#1CB0F6] hover:bg-[#DDF4FF] dark:hover:bg-[#1CB0F6]/10 transition-all border-2 border-b-4 border-[#1CB0F6]/30 active:border-b-2 active:translate-y-0.5"
                   >
                     + More (E-Book, Newspaper, Thesis, etc.)
                   </button>
@@ -1386,44 +1389,46 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               </div>
 
               {validationError && (
-                <p className="mt-4 text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2">
-                  {validationError}
-                </p>
+                <div className="mt-4 border-2 border-b-4 border-[#FF9600]/40 bg-[#FFF4E0] dark:bg-[#FF9600]/10 rounded-xl px-4 py-3">
+                  <p className="text-sm font-extrabold text-[#D97F00]">
+                    {validationError}
+                  </p>
+                </div>
               )}
               <button
                 onClick={generateCitation}
-                className="w-full mt-6 px-6 py-3 bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-xl transition-all"
+                className="w-full mt-6 px-6 py-3 bg-[#58CC02] hover:bg-[#46A302] border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 text-white font-extrabold uppercase tracking-wide rounded-xl transition-all"
               >
                 Generate Citation
               </button>
             </div>
 
-            {/* Output Panel - order-1 on mobile (visible first), sticky on desktop */}
+            {/* Output Panel */}
             <div ref={citationOutputRef} className="order-1 lg:order-2 space-y-6 lg:sticky lg:top-24 lg:self-start">
               {/* Generated Citation */}
-              <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+              <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">Your Citation</h3>
+                  <h3 className="text-lg font-extrabold text-stone-900 dark:text-stone-50">Your Citation</h3>
                   {citation && (
                     <button
                       onClick={handleCopy}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                      className={`px-4 py-2 rounded-xl text-sm font-extrabold uppercase tracking-wide transition-all border-2 border-b-4 active:border-b-2 active:translate-y-0.5 ${
                         copied
-                          ? 'bg-violet-100 text-violet-700'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? 'bg-[#EAFFD6] border-[#58CC02]/40 text-[#46A302]'
+                          : 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-600 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700'
                       }`}
                     >
                       {copied ? 'Copied!' : 'Copy'}
                     </button>
                   )}
                 </div>
-                <div className="bg-gray-50 rounded-xl p-4 min-h-[100px]">
+                <div className="bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 rounded-xl p-4 min-h-[100px]">
                   {citation ? (
-                    <p className="text-gray-800 leading-relaxed text-sm sm:text-base" dangerouslySetInnerHTML={{ 
+                    <p className="text-stone-800 dark:text-stone-200 leading-relaxed text-sm sm:text-base" dangerouslySetInnerHTML={{
                       __html: DOMPurify.sanitize(String(citation).replace(/\*([^*]+)\*/g, '<em>$1</em>'), { ALLOWED_TAGS: ['em', 'i'] })
                     }} />
                   ) : (
-                    <p className="text-gray-500 text-sm">
+                    <p className="text-stone-500 dark:text-stone-400 text-sm">
                       Fill in author, title, and year below, then click <strong>Generate Citation</strong>.
                     </p>
                   )}
@@ -1431,18 +1436,18 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               </div>
 
               {/* Style Guide - collapsible */}
-              <div className="border border-violet-200 rounded-2xl overflow-hidden">
+              <div className="border-2 border-b-4 border-[#A560E8]/30 rounded-2xl overflow-hidden">
                 <button
                   onClick={() => setOpenStyleGuide(!openStyleGuide)}
-                  className="w-full flex items-center justify-between px-5 py-4 bg-violet-600 text-white text-left transition-colors"
+                  className="w-full flex items-center justify-between px-5 py-4 bg-[#A560E8] text-white text-left transition-colors"
                 >
-                  <h3 className="text-base font-semibold">About {style.toUpperCase()} Style</h3>
+                  <h3 className="text-base font-extrabold">About {style.toUpperCase()} Style</h3>
                   <svg className={`w-5 h-5 flex-shrink-0 transition-transform ${openStyleGuide ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
                 {openStyleGuide && (
-                  <div className="px-5 py-4 bg-violet-50/50 text-violet-900 text-sm space-y-2">
+                  <div className="px-5 py-4 bg-[#F3EAFF] dark:bg-[#A560E8]/10 text-[#8A48C7] dark:text-[#A560E8] text-sm space-y-2">
                     {style === 'apa' && (
                       <>
                         <p>APA (American Psychological Association) 7th edition is commonly used in psychology, education, and social sciences.</p>
@@ -1484,30 +1489,30 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               </div>
 
               {/* Disclaimer */}
-              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
-                <p className="text-sm text-amber-800">
-                  <strong>Please verify:</strong> Always check citations against your style guide or professor&apos;s requirements. Formatting rules vary by edition and institution.
+              <div className="border-2 border-b-4 border-[#FF9600]/30 bg-[#FFF4E0] dark:bg-[#FF9600]/10 rounded-2xl p-4">
+                <p className="text-sm font-extrabold text-[#D97F00]">
+                  Please verify: <span className="font-semibold">Always check citations against your style guide or professor&apos;s requirements. Formatting rules vary by edition and institution.</span>
                 </p>
               </div>
 
               {/* Tips */}
-              <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Citation Tips</h3>
-                <ul className="space-y-2 text-sm text-gray-600">
+              <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl p-6">
+                <h3 className="text-lg font-extrabold text-stone-900 dark:text-stone-50 mb-4">Citation Tips</h3>
+                <ul className="space-y-2 text-sm text-stone-600 dark:text-stone-400">
                   <li className="flex items-start space-x-2">
-                    <span className="text-violet-300 mt-0.5">✓</span>
+                    <span className="text-[#58CC02] mt-0.5 font-extrabold">&#10003;</span>
                     <span>Always verify citations against official style guides</span>
                   </li>
                   <li className="flex items-start space-x-2">
-                    <span className="text-violet-300 mt-0.5">✓</span>
+                    <span className="text-[#58CC02] mt-0.5 font-extrabold">&#10003;</span>
                     <span>Include DOIs for journal articles when available</span>
                   </li>
                   <li className="flex items-start space-x-2">
-                    <span className="text-violet-300 mt-0.5">✓</span>
+                    <span className="text-[#58CC02] mt-0.5 font-extrabold">&#10003;</span>
                     <span>Check your institution's specific formatting requirements</span>
                   </li>
                   <li className="flex items-start space-x-2">
-                    <span className="text-violet-300 mt-0.5">✓</span>
+                    <span className="text-[#58CC02] mt-0.5 font-extrabold">&#10003;</span>
                     <span>Keep track of all sources as you research</span>
                   </li>
                 </ul>
@@ -1517,10 +1522,10 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
         </div>
       </section>
 
-      {/* FAQ Section - SEO rich snippets */}
-      <section className="py-12 sm:py-16 bg-white">
+      {/* FAQ Section */}
+      <section className="py-12 sm:py-16">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">Frequently Asked Questions</h2>
+          <h2 className="text-2xl font-extrabold text-stone-900 dark:text-stone-50 mb-8 text-center">Frequently Asked Questions</h2>
           <div className="space-y-3">
             {[
               { q: 'What citation styles does this generator support?', a: 'We support APA 7th edition, MLA 9th edition, Chicago 17th edition, Harvard, IEEE, and Vancouver. Choose your style and source type to format citations correctly.' },
@@ -1530,18 +1535,18 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               { q: 'Should I verify my citations?', a: 'Always verify citations against your style guide or professor\'s requirements. Formatting rules vary by edition and institution. Use this tool as a starting point, then double-check.' },
               { q: 'What\'s the difference between Citation Generator and Citation Finder?', a: 'The Citation Generator formats citations when you already have the source details. Citation Finder (in WriteScholar) searches academic databases to find relevant sources for your topic—then formats them. Use the generator for manual entries; use the finder to discover sources.' }
             ].map((faq, idx) => (
-              <div key={idx} className="border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 transition-colors">
+              <div key={idx} className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-xl overflow-hidden hover:border-stone-300 dark:hover:border-stone-600 transition-colors">
                 <button
                   onClick={() => setOpenFAQ(openFAQ === idx ? null : idx)}
-                  className="w-full px-5 py-4 text-left flex items-center justify-between gap-4 bg-white"
+                  className="w-full px-5 py-4 text-left flex items-center justify-between gap-4"
                 >
-                  <span className="font-semibold text-gray-900 text-sm sm:text-base">{faq.q}</span>
-                  <svg className={`w-5 h-5 text-gray-400 flex-shrink-0 transition-transform ${openFAQ === idx ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <span className="font-extrabold text-stone-900 dark:text-stone-50 text-sm sm:text-base">{faq.q}</span>
+                  <svg className={`w-5 h-5 text-stone-400 flex-shrink-0 transition-transform ${openFAQ === idx ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
                 {openFAQ === idx && (
-                  <div className="px-5 pb-4 pt-0 text-gray-600 text-sm sm:text-base leading-relaxed border-t border-gray-100">
+                  <div className="px-5 pb-4 pt-0 text-stone-600 dark:text-stone-400 text-sm sm:text-base leading-relaxed border-t-2 border-stone-100 dark:border-stone-700">
                     {faq.a}
                   </div>
                 )}
@@ -1552,33 +1557,33 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
       </section>
 
       {/* CTA Section */}
-      <section className="py-12 sm:py-16 bg-gray-900">
+      <section className="py-12 sm:py-16 bg-[#A560E8]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-4">
             Need AI-powered citation search?
           </h2>
-          <p className="text-gray-400 mb-8 max-w-xl mx-auto">
+          <p className="text-white/80 mb-8 max-w-xl mx-auto">
             WriteScholar can automatically find and format citations from academic databases. Get relevant sources for your research in seconds.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             {user ? (
-              <button 
+              <button
                 onClick={() => onNavigate('dashboard')}
-                className="px-6 py-3 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors"
+                className="px-6 py-3 bg-white text-[#A560E8] font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-stone-200 active:border-b-2 active:translate-y-0.5 hover:bg-stone-50 transition-all"
               >
                 Search Citations
               </button>
             ) : (
               <>
-                <button 
+                <button
                   onClick={() => onNavigate('signup')}
-                  className="px-6 py-3 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors"
+                  className="px-6 py-3 bg-white text-[#A560E8] font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-stone-200 active:border-b-2 active:translate-y-0.5 hover:bg-stone-50 transition-all"
                 >
                   Try WriteScholar Free
                 </button>
-                <button 
+                <button
                   onClick={() => onNavigate('features')}
-                  className="px-6 py-3 border border-gray-600 text-white font-medium rounded-xl hover:border-gray-500 transition-colors"
+                  className="px-6 py-3 border-2 border-b-4 border-white/40 text-white font-extrabold uppercase tracking-wide rounded-xl active:border-b-2 active:translate-y-0.5 hover:bg-white/10 transition-all"
                 >
                   Learn More
                 </button>

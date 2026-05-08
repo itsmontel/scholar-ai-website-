@@ -1,5 +1,5 @@
 import React from 'react';
-import ScholarMascot from './ScholarMascot';
+// ScholarMascot replaced with logo PNG
 
 interface FooterProps {
   onNavigate?: (page: string) => void;
@@ -7,14 +7,14 @@ interface FooterProps {
 
 const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
   return (
-    <footer className="border-t border-stone-300 dark:border-stone-700 bg-stone-800 dark:bg-stone-950">
+    <footer className="border-t-2 border-stone-200 dark:border-stone-700 bg-stone-800 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
         <div className="grid grid-cols-2 md:grid-cols-6 gap-8 mb-12">
           {/* Logo and Description */}
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center space-x-2.5 mb-4">
               <div className="flex-shrink-0">
-                <ScholarMascot size={36} animated={false} pose="default" />
+                <img src="/main-logo.png" alt="WriteScholar" className="w-9 h-9 object-contain" />
               </div>
               <span className="text-xl font-extrabold tracking-tight text-white">
                 WriteScholar
@@ -27,7 +27,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           
           {/* Product Links */}
           <div>
-            <h4 className="font-semibold text-white mb-4 text-sm">Product</h4>
+            <h4 className="font-extrabold text-white mb-4 text-sm uppercase tracking-wide">Product</h4>
             <ul className="space-y-3">
               <li>
                 <a href="/features" onClick={(e) => { e.preventDefault(); onNavigate?.('features'); }} className="text-stone-400 hover:text-white text-sm transition-colors">
@@ -64,7 +64,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
 
           {/* Free Tools Links */}
           <div>
-            <h4 className="font-semibold text-white mb-4 text-sm">Free Tools</h4>
+            <h4 className="font-extrabold text-white mb-4 text-sm uppercase tracking-wide">Free Tools</h4>
             <ul className="space-y-3">
               <li>
                 <a
@@ -191,59 +191,59 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
 
           {/* AI Tools Links */}
           <div>
-            <h4 className="font-semibold text-white mb-4 text-sm flex items-center gap-2">
+            <h4 className="font-extrabold text-white mb-4 text-sm uppercase tracking-wide flex items-center gap-2">
               <ScholarMascot size={24} animated={false} pose="default" />
               AI Tools
             </h4>
             <ul className="space-y-3">
               {/* Rose/Pink */}
               <li>
-                <a href="/tools/analyze" onClick={(e) => { e.preventDefault(); onNavigate?.('analyze'); }} className="text-sm font-medium transition-colors flex items-center gap-1.5 text-rose-400 hover:text-rose-300">
+                <a href="/tools/analyze" onClick={(e) => { e.preventDefault(); onNavigate?.('analyze'); }} className="text-sm font-bold transition-colors flex items-center gap-1.5 text-[#FF4B4B] hover:text-[#FF6B6B]">
                   Analyze Essay
                   <span className="text-xs opacity-75">📊</span>
                 </a>
               </li>
               {/* Study Pack / Citations */}
               <li>
-                <a href="/tools/study-pack" onClick={(e) => { e.preventDefault(); onNavigate?.('study-pack'); }} className="text-orange-400 hover:text-orange-300 text-sm font-medium transition-colors flex items-center gap-1.5">
+                <a href="/tools/study-pack" onClick={(e) => { e.preventDefault(); onNavigate?.('study-pack'); }} className="text-[#FF9600] hover:text-[#FFB340] text-sm font-bold transition-colors flex items-center gap-1.5">
                   Study Pack
                   <span className="text-xs opacity-75">📦</span>
                 </a>
               </li>
               <li>
-                <a href="/tools/citations" onClick={(e) => { e.preventDefault(); onNavigate?.('citations'); }} className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors flex items-center gap-1.5">
+                <a href="/tools/citations" onClick={(e) => { e.preventDefault(); onNavigate?.('citations'); }} className="text-[#1CB0F6] hover:text-[#4CC3FF] text-sm font-bold transition-colors flex items-center gap-1.5">
                   Citations Finder
                   <span className="text-xs opacity-75">📚</span>
                 </a>
               </li>
               <li>
-                <a href="/tools/summarizer" onClick={(e) => { e.preventDefault(); onNavigate?.('summarizer'); }} className="text-teal-400 hover:text-teal-300 text-sm font-medium transition-colors flex items-center gap-1.5">
+                <a href="/tools/summarizer" onClick={(e) => { e.preventDefault(); onNavigate?.('summarizer'); }} className="text-[#58CC02] hover:text-[#6EE020] text-sm font-bold transition-colors flex items-center gap-1.5">
                   AI Summarizer
                   <span className="text-xs opacity-75">📝</span>
                 </a>
               </li>
               {/* Violets/Purples */}
               <li>
-                <a href="/tools/crater-blast" onClick={(e) => { e.preventDefault(); onNavigate?.('crater-blast'); }} className="text-violet-400 hover:text-violet-300 text-sm font-medium transition-colors flex items-center gap-1.5">
+                <a href="/tools/crater-blast" onClick={(e) => { e.preventDefault(); onNavigate?.('crater-blast'); }} className="text-[#A560E8] hover:text-[#B87DEF] text-sm font-bold transition-colors flex items-center gap-1.5">
                   Crater Blast
                   <span className="text-xs opacity-75">💥</span>
                 </a>
               </li>
               <li>
-                <a href="/tools/word-tower" onClick={(e) => { e.preventDefault(); onNavigate?.('word-tower'); }} className="text-emerald-400 hover:text-emerald-300 text-sm font-medium transition-colors flex items-center gap-1.5">
+                <a href="/tools/word-tower" onClick={(e) => { e.preventDefault(); onNavigate?.('word-tower'); }} className="text-[#58CC02] hover:text-[#6EE020] text-sm font-bold transition-colors flex items-center gap-1.5">
                   Word Tower
                   <span className="text-xs opacity-75">🗼</span>
                 </a>
               </li>
               {/* Ambers/Oranges */}
               <li>
-                <a href="/tools/quiz-generator" onClick={(e) => { e.preventDefault(); onNavigate?.('quiz-generator'); }} className="text-amber-400 hover:text-amber-300 text-sm font-medium transition-colors flex items-center gap-1.5">
+                <a href="/tools/quiz-generator" onClick={(e) => { e.preventDefault(); onNavigate?.('quiz-generator'); }} className="text-[#FF9600] hover:text-[#FFB340] text-sm font-bold transition-colors flex items-center gap-1.5">
                   AI Quiz Generator
                   <span className="text-xs opacity-75">📝</span>
                 </a>
               </li>
               <li>
-                <a href="/tools/create-flashcards" onClick={(e) => { e.preventDefault(); onNavigate?.('create-flashcards'); }} className="text-amber-400 hover:text-amber-300 text-sm font-medium transition-colors flex items-center gap-1.5">
+                <a href="/tools/create-flashcards" onClick={(e) => { e.preventDefault(); onNavigate?.('create-flashcards'); }} className="text-[#FF9600] hover:text-[#FFB340] text-sm font-bold transition-colors flex items-center gap-1.5">
                   Flashcards
                   <span className="text-xs opacity-75">🃏</span>
                 </a>
@@ -253,7 +253,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           
           {/* Support Links */}
           <div>
-            <h4 className="font-semibold text-white mb-4 text-sm">Support</h4>
+            <h4 className="font-extrabold text-white mb-4 text-sm uppercase tracking-wide">Support</h4>
             <ul className="space-y-3">
               <li>
                 <a href="/help" onClick={(e) => { e.preventDefault(); onNavigate?.('help'); }} className="text-stone-400 hover:text-white text-sm transition-colors">
@@ -275,7 +275,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           
           {/* Legal Links */}
           <div>
-            <h4 className="font-semibold text-white mb-4 text-sm">Legal</h4>
+            <h4 className="font-extrabold text-white mb-4 text-sm uppercase tracking-wide">Legal</h4>
             <ul className="space-y-3">
               <li>
                 <a href="/terms" onClick={(e) => { e.preventDefault(); onNavigate?.('terms'); }} className="text-stone-400 hover:text-white text-sm transition-colors">
@@ -292,12 +292,12 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
         </div>
 
         {/* VivoResume — sister product (logo: public/Vivoresumemeta.png) */}
-        <div className="mb-10 rounded-2xl border border-white/10 bg-stone-900/70 px-5 py-5 sm:px-6 sm:py-6 flex flex-col sm:flex-row items-center gap-5 sm:gap-8 ring-1 ring-white/5">
+        <div className="mb-10 rounded-2xl border-2 border-b-4 border-stone-600 bg-stone-900 px-5 py-5 sm:px-6 sm:py-6 flex flex-col sm:flex-row items-center gap-5 sm:gap-8">
           <a
             href="https://vivoresume.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="shrink-0 rounded-xl bg-white p-2.5 shadow-sm ring-1 ring-stone-200/20 transition-transform hover:scale-[1.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/80"
+            className="shrink-0 rounded-xl bg-white p-2.5 border-2 border-b-4 border-stone-200 transition-transform hover:scale-[1.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#58CC02]/80"
           >
             <img
               src="/Vivoresumemeta.png"
@@ -317,7 +317,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               href="https://vivoresume.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block text-lg font-semibold text-white hover:text-emerald-300 transition-colors"
+              className="inline-block text-lg font-extrabold text-white hover:text-[#58CC02] transition-colors"
             >
               VivoResume
             </a>
@@ -329,7 +329,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             href="https://vivoresume.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="shrink-0 inline-flex items-center justify-center rounded-xl bg-emerald-600 hover:bg-emerald-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors shadow-lg shadow-emerald-900/20"
+            className="shrink-0 inline-flex items-center justify-center rounded-xl bg-[#58CC02] hover:bg-[#4CAF00] border-2 border-b-4 border-[#46A302] px-5 py-2.5 text-sm font-extrabold uppercase tracking-wide text-white active:border-b-2 active:translate-y-0.5 transition-all"
           >
             Try VivoResume
           </a>
@@ -349,7 +349,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="WriteScholar on Instagram"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-stone-400 transition-colors hover:bg-white/10 hover:text-white"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border-2 border-stone-600 text-stone-400 transition-all hover:bg-stone-700 hover:text-white hover:border-stone-500 active:translate-y-0.5"
             >
               <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
                 <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
@@ -360,7 +360,7 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="WriteScholar on TikTok"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-stone-400 transition-colors hover:bg-white/10 hover:text-white"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border-2 border-stone-600 text-stone-400 transition-all hover:bg-stone-700 hover:text-white hover:border-stone-500 active:translate-y-0.5"
             >
               <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
                 <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z" />

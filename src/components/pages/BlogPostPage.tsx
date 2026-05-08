@@ -144,7 +144,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
               e.preventDefault();
               onNavigate('blog');
             }}
-            className="text-violet-600 dark:text-violet-400 hover:underline font-medium"
+            className="text-[#1CB0F6] hover:text-[#1899D6] font-extrabold"
           >
             ← Back to blog
           </a>
@@ -180,7 +180,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
                     e.preventDefault();
                     onNavigate('landing');
                   }}
-                  className="hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
+                  className="hover:text-[#1CB0F6] transition-colors"
                 >
                   Home
                 </a>
@@ -195,7 +195,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
                     e.preventDefault();
                     onNavigate('blog');
                   }}
-                  className="hover:text-violet-600 dark:hover:text-violet-400 transition-colors"
+                  className="hover:text-[#1CB0F6] transition-colors"
                 >
                   Blog
                 </a>
@@ -203,13 +203,13 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
             </ol>
           </nav>
 
-          <p className="inline-flex items-center rounded-full bg-violet-100/90 dark:bg-violet-950/60 text-violet-800 dark:text-violet-200 text-[11px] font-semibold uppercase tracking-wider px-3 py-1 mb-4">
+          <p className="inline-flex items-center rounded-full bg-[#DDF4FF] dark:bg-[#1CB0F6]/20 text-[#1899D6] dark:text-[#1CB0F6] border border-[#1CB0F6]/30 font-extrabold text-[11px] uppercase tracking-wider px-3 py-1 mb-4">
             {category}
           </p>
 
           <h1
-            className="text-3xl sm:text-4xl lg:text-[2.35rem] font-bold text-stone-900 dark:text-stone-100 leading-tight mb-4"
-            style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+            className="text-3xl sm:text-4xl lg:text-[2.35rem] font-extrabold text-stone-900 dark:text-stone-100 leading-tight mb-4"
+            style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
           >
             {post.title}
           </h1>
@@ -225,7 +225,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,200px)_minmax(0,1fr)_minmax(0,56px)] xl:grid-cols-[minmax(0,220px)_minmax(0,680px)_minmax(0,64px)] gap-8 lg:gap-10 xl:gap-12 items-start">
           {/* Mobile TOC */}
           {tocItems.length > 0 ? (
-            <details className="lg:hidden rounded-2xl border border-stone-200/90 dark:border-stone-700 bg-white/80 dark:bg-stone-900/40 px-4 py-3">
+            <details className="lg:hidden rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 px-4 py-3">
               <summary className="cursor-pointer text-sm font-semibold text-stone-700 dark:text-stone-200">On this page</summary>
               <div className="mt-3 max-h-[50vh] overflow-y-auto pr-1">
                 <BlogTocSidebar items={tocItems} activeId={activeId} />
@@ -240,20 +240,20 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
 
           {/* Center: article */}
           <div className="min-w-0">
-            <div className="rounded-2xl border border-stone-200/90 dark:border-stone-700/90 bg-white/90 dark:bg-stone-900/35 shadow-sm p-5 sm:p-7 md:p-9 mb-6">
-              <div className="rounded-xl border border-stone-200/80 dark:border-stone-600/70 bg-stone-50/80 dark:bg-stone-800/40 px-4 py-4 sm:px-5 sm:py-5 mb-8">
+            <div className="rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-5 sm:p-7 md:p-9 mb-6">
+              <div className="rounded-xl border-2 border-stone-200 dark:border-stone-600 bg-stone-50 dark:bg-stone-800 px-4 py-4 sm:px-5 sm:py-5 mb-8">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400 mb-2">Written by</p>
-                <p className="text-lg font-bold text-stone-900 dark:text-stone-100" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
+                <p className="text-lg font-bold text-stone-900 dark:text-stone-100" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                   {post.author}
                 </p>
-                <p className="text-sm font-medium text-violet-700 dark:text-violet-300 mt-1">{authorRole}</p>
+                <p className="text-sm font-medium text-[#58CC02] mt-1">{authorRole}</p>
                 <p className="text-sm text-stone-600 dark:text-stone-400 mt-2 leading-relaxed">{authorBio}</p>
               </div>
 
               <div
                 ref={articleBodyRef}
                 id="blog-article-body"
-                className="prose prose-stone dark:prose-invert prose-lg max-w-none prose-headings:font-serif prose-a:text-violet-600 dark:prose-a:text-violet-400 prose-a:no-underline hover:prose-a:underline prose-p:text-stone-600 dark:prose-p:text-stone-400"
+                className="prose prose-stone dark:prose-invert prose-lg max-w-none prose-headings:font-sans prose-a:text-[#1CB0F6] prose-a:no-underline hover:prose-a:underline prose-p:text-stone-600 dark:prose-p:text-stone-400"
               >
                 <BlogPostContent slug={post.slug} onNavigate={onNavigate} />
                 <BlogKeyTakeaways bullets={post.keyTakeaways} />
@@ -278,7 +278,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
                 <button
                   type="button"
                   onClick={() => handleNavigateToPost(prevPost.slug)}
-                  className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-medium text-left transition-colors"
+                  className="text-[#1CB0F6] hover:text-[#1899D6] font-extrabold text-left transition-colors"
                 >
                   ← {prevPost.title}
                 </button>
@@ -289,7 +289,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
                 <button
                   type="button"
                   onClick={() => handleNavigateToPost(nextPost.slug)}
-                  className="text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-medium sm:text-right transition-colors"
+                  className="text-[#1CB0F6] hover:text-[#1899D6] font-extrabold sm:text-right transition-colors"
                 >
                   {nextPost.title} →
                 </button>
@@ -303,7 +303,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
                   e.preventDefault();
                   onNavigate('blog');
                 }}
-                className="inline-flex items-center px-6 py-3 bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-violet-500/20"
+                className="inline-flex items-center px-6 py-3 bg-[#58CC02] hover:bg-[#4CAF00] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all duration-150"
               >
                 All posts
               </a>

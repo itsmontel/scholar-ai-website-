@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Header from '../../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../../common/WriteScholarEditorialBackground';
 import Footer from '../../common/Footer';
-import ScholarMascot from '../../common/ScholarMascot';
 
 interface PomodoroTimerPageProps {
   onNavigate: (page: string) => void;
@@ -22,7 +20,7 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
   const [completedPomodoros, setCompletedPomodoros] = useState(0);
   const [totalFocusTime, setTotalFocusTime] = useState(0);
   const [soundEnabled, setSoundEnabled] = useState(true);
-  
+
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -40,16 +38,16 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
         const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
         const oscillator = audioContext.createOscillator();
         const gainNode = audioContext.createGain();
-        
+
         oscillator.connect(gainNode);
         gainNode.connect(audioContext.destination);
-        
+
         oscillator.frequency.value = 800;
         oscillator.type = 'sine';
-        
+
         gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
         gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-        
+
         oscillator.start(audioContext.currentTime);
         oscillator.stop(audioContext.currentTime + 0.5);
       } catch (e) {
@@ -81,7 +79,7 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
           if (prev <= 1) {
             setIsRunning(false);
             playSound();
-            
+
             if (mode === 'focus') {
               setCompletedPomodoros(p => p + 1);
               setTotalFocusTime(t => t + focusDuration);
@@ -168,35 +166,52 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
   const getModeColor = () => {
     switch (mode) {
       case 'focus':
-        return { bg: 'bg-red-600 hover:bg-red-500', panel: 'bg-red-600', light: 'bg-red-100', text: 'text-red-600', ring: 'ring-red-500' };
+        return {
+          primary: '#FF4B4B',
+          darker: '#E04343',
+          tinted: '#FFE8E8',
+          stroke: '#FF4B4B',
+          tabActive: 'bg-[#FF4B4B] text-white border-2 border-b-4 border-[#E04343]',
+          label: 'text-[#FF4B4B]',
+        };
       case 'shortBreak':
-        return { bg: 'bg-violet-600 hover:bg-violet-500', panel: 'bg-violet-600', light: 'bg-violet-100', text: 'text-violet-600', ring: 'ring-violet-500' };
+        return {
+          primary: '#1CB0F6',
+          darker: '#1899D6',
+          tinted: '#DDF4FF',
+          stroke: '#1CB0F6',
+          tabActive: 'bg-[#1CB0F6] text-white border-2 border-b-4 border-[#1899D6]',
+          label: 'text-[#1CB0F6]',
+        };
       case 'longBreak':
-        return { bg: 'bg-violet-600 hover:bg-violet-500', panel: 'bg-violet-600', light: 'bg-violet-100', text: 'text-violet-600', ring: 'ring-violet-500' };
+        return {
+          primary: '#A560E8',
+          darker: '#8A48C7',
+          tinted: '#F3EAFF',
+          stroke: '#A560E8',
+          tabActive: 'bg-[#A560E8] text-white border-2 border-b-4 border-[#8A48C7]',
+          label: 'text-[#A560E8]',
+        };
     }
   };
 
   const colors = getModeColor();
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden">
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
+    <div className="relative min-h-screen overflow-x-hidden bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="pomodoro-timer" />
 
       {/* Hero Section */}
-      <section className="py-16 sm:py-20 bg-gradient-to-b from-violet-50/50 to-white">
+      <section className="py-16 sm:py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto">
-            <div className="inline-flex items-center justify-center mb-6">
-              <ScholarMascot size={80} animated={false} pose="default" />
-            </div>
-            <span className="inline-flex items-center px-4 py-1.5 bg-violet-100 text-violet-700 rounded-full text-sm font-semibold mb-5">
+            <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-extrabold uppercase tracking-wide mb-5 border-2 border-b-4 border-[#46A302]" style={{ backgroundColor: '#EAFFD6', color: '#58CC02' }}>
               Free Tool
             </span>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-5 leading-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-900 dark:text-stone-50 mb-5 leading-tight">
               Pomodoro Timer
             </h1>
-            <p className="text-lg text-gray-500 leading-relaxed max-w-2xl mx-auto">
+            <p className="text-lg text-stone-500 dark:text-stone-400 leading-relaxed max-w-2xl mx-auto">
               Stay focused and productive with timed study sessions. Work in focused bursts with scheduled breaks to maximize your learning.
             </p>
           </div>
@@ -209,35 +224,35 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Timer Display */}
             <div className="lg:col-span-2">
-              <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow">
+              <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl p-8">
                 {/* Mode Tabs */}
                 <div className="flex justify-center gap-2 mb-8">
                   <button
                     onClick={() => switchMode('focus')}
-                    className={`px-5 py-2.5 rounded-xl font-medium transition-all ${
-                      mode === 'focus' 
-                        ? 'bg-red-500 text-white' 
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    className={`px-5 py-2.5 rounded-xl font-extrabold uppercase tracking-wide text-sm transition-all ${
+                      mode === 'focus'
+                        ? 'bg-[#FF4B4B] text-white border-2 border-b-4 border-[#E04343] active:border-b-2 active:translate-y-0.5'
+                        : 'bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 border-2 border-b-4 border-stone-200 dark:border-stone-700 hover:bg-stone-200 dark:hover:bg-stone-700 active:border-b-2 active:translate-y-0.5'
                     }`}
                   >
                     Focus
                   </button>
                   <button
                     onClick={() => switchMode('shortBreak')}
-                    className={`px-5 py-2.5 rounded-xl font-medium transition-all ${
-                      mode === 'shortBreak' 
-                        ? 'bg-violet-500 text-white' 
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    className={`px-5 py-2.5 rounded-xl font-extrabold uppercase tracking-wide text-sm transition-all ${
+                      mode === 'shortBreak'
+                        ? 'bg-[#1CB0F6] text-white border-2 border-b-4 border-[#1899D6] active:border-b-2 active:translate-y-0.5'
+                        : 'bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 border-2 border-b-4 border-stone-200 dark:border-stone-700 hover:bg-stone-200 dark:hover:bg-stone-700 active:border-b-2 active:translate-y-0.5'
                     }`}
                   >
                     Short Break
                   </button>
                   <button
                     onClick={() => switchMode('longBreak')}
-                    className={`px-5 py-2.5 rounded-xl font-medium transition-all ${
-                      mode === 'longBreak' 
-                        ? 'bg-violet-500 text-white' 
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    className={`px-5 py-2.5 rounded-xl font-extrabold uppercase tracking-wide text-sm transition-all ${
+                      mode === 'longBreak'
+                        ? 'bg-[#A560E8] text-white border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5'
+                        : 'bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 border-2 border-b-4 border-stone-200 dark:border-stone-700 hover:bg-stone-200 dark:hover:bg-stone-700 active:border-b-2 active:translate-y-0.5'
                     }`}
                   >
                     Long Break
@@ -254,7 +269,8 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
                         cy="128"
                         r="120"
                         fill="none"
-                        stroke="#E5E7EB"
+                        stroke="currentColor"
+                        className="text-stone-200 dark:text-stone-700"
                         strokeWidth="8"
                       />
                       <circle
@@ -262,7 +278,7 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
                         cy="128"
                         r="120"
                         fill="none"
-                        stroke={mode === 'focus' ? '#EF4444' : mode === 'shortBreak' ? '#10B981' : '#3B82F6'}
+                        stroke={colors.stroke}
                         strokeWidth="8"
                         strokeLinecap="round"
                         strokeDasharray={2 * Math.PI * 120}
@@ -273,7 +289,7 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
                     {/* Timer Display - editable when paused */}
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
                       {isRunning ? (
-                        <span className="text-5xl font-bold text-gray-900 tabular-nums">
+                        <span className="text-5xl font-extrabold text-stone-900 dark:text-stone-50 tabular-nums">
                           {formatTime(timeLeft)}
                         </span>
                       ) : (
@@ -284,22 +300,22 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
                             max={99}
                             value={displayMinutes.toString().padStart(2, '0')}
                             onChange={(e) => handleSetMinutes(parseInt(e.target.value, 10) || 0)}
-                            className="w-16 sm:w-20 text-5xl font-bold text-gray-900 bg-transparent border-b-2 border-gray-300 focus:border-red-500 focus:outline-none text-center tabular-nums [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            className="w-16 sm:w-20 text-5xl font-extrabold text-stone-900 dark:text-stone-50 bg-transparent border-b-2 border-stone-300 dark:border-stone-600 focus:border-[#1CB0F6] focus:outline-none text-center tabular-nums [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             aria-label="Minutes"
                           />
-                          <span className="text-5xl font-bold text-gray-900">:</span>
+                          <span className="text-5xl font-extrabold text-stone-900 dark:text-stone-50">:</span>
                           <input
                             type="number"
                             min={0}
                             max={59}
                             value={displaySeconds.toString().padStart(2, '0')}
                             onChange={(e) => handleSetSeconds(parseInt(e.target.value, 10) || 0)}
-                            className="w-14 sm:w-16 text-5xl font-bold text-gray-900 bg-transparent border-b-2 border-gray-300 focus:border-red-500 focus:outline-none text-center tabular-nums [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            className="w-14 sm:w-16 text-5xl font-extrabold text-stone-900 dark:text-stone-50 bg-transparent border-b-2 border-stone-300 dark:border-stone-600 focus:border-[#1CB0F6] focus:outline-none text-center tabular-nums [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             aria-label="Seconds"
                           />
                         </div>
                       )}
-                      <span className={`text-sm font-medium ${colors.text} capitalize mt-2`}>
+                      <span className={`text-sm font-extrabold uppercase tracking-wide mt-2 ${colors.label}`}>
                         {mode === 'focus' ? 'Focus Time' : mode === 'shortBreak' ? 'Short Break' : 'Long Break'}
                       </span>
                     </div>
@@ -310,13 +326,13 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
                 <div className="flex justify-center gap-4">
                   <button
                     onClick={toggleTimer}
-                    className={`px-8 py-3 ${colors.bg} text-white font-semibold rounded-xl transition-all shadow-lg`}
+                    className="px-8 py-3 bg-[#58CC02] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all"
                   >
                     {isRunning ? 'Pause' : 'Start'}
                   </button>
                   <button
                     onClick={resetTimer}
-                    className="px-6 py-3 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition-all"
+                    className="px-6 py-3 bg-[#FF4B4B] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#E04343] active:border-b-2 active:translate-y-0.5 transition-all"
                   >
                     Reset
                   </button>
@@ -326,8 +342,10 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
                 <div className="flex justify-center mt-6">
                   <button
                     onClick={() => setSoundEnabled(!soundEnabled)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-                      soundEnabled ? 'bg-gray-100 text-gray-700' : 'bg-gray-50 text-gray-400'
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-b-4 transition-all active:border-b-2 active:translate-y-0.5 ${
+                      soundEnabled
+                        ? 'bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-700'
+                        : 'bg-stone-50 dark:bg-stone-800 text-stone-400 dark:text-stone-500 border-stone-200 dark:border-stone-700'
                     }`}
                   >
                     {soundEnabled ? (
@@ -340,7 +358,7 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
                       </svg>
                     )}
-                    <span className="text-sm font-medium">{soundEnabled ? 'Sound On' : 'Sound Off'}</span>
+                    <span className="text-sm font-extrabold">{soundEnabled ? 'Sound On' : 'Sound Off'}</span>
                   </button>
                 </div>
               </div>
@@ -349,36 +367,36 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
             {/* Settings & Stats Panel */}
             <div className="space-y-6">
               {/* Session Stats */}
-              <div className={`${colors.panel} rounded-2xl p-4 sm:p-6 text-white overflow-hidden`}>
-                <h3 className="text-lg font-semibold mb-4 opacity-90">Today&apos;s Progress</h3>
+              <div className="border-2 border-b-4 rounded-2xl p-4 sm:p-6 text-white overflow-hidden" style={{ backgroundColor: colors.primary, borderColor: colors.darker }}>
+                <h3 className="text-lg font-extrabold mb-4 opacity-90 uppercase tracking-wide">Today&apos;s Progress</h3>
                 <div className="space-y-4">
                   <div className="flex justify-between items-center gap-3 min-w-0">
-                    <span className="opacity-80 shrink min-w-0 truncate">Pomodoros</span>
-                    <span className="text-2xl font-bold shrink-0 tabular-nums">{completedPomodoros}</span>
+                    <span className="opacity-80 shrink min-w-0 truncate font-extrabold">Pomodoros</span>
+                    <span className="text-2xl font-extrabold shrink-0 tabular-nums">{completedPomodoros}</span>
                   </div>
                   <div className="flex justify-between items-center gap-3 min-w-0">
-                    <span className="opacity-80 shrink min-w-0 truncate">Focus Time</span>
-                    <span className="text-xl font-bold shrink-0 tabular-nums">{totalFocusTime} min</span>
+                    <span className="opacity-80 shrink min-w-0 truncate font-extrabold">Focus Time</span>
+                    <span className="text-xl font-extrabold shrink-0 tabular-nums">{totalFocusTime} min</span>
                   </div>
                   <div className="flex justify-between items-center gap-3 min-w-0">
-                    <span className="opacity-80 shrink min-w-0 truncate">Until Long Break</span>
-                    <span className="text-xl font-bold shrink-0 tabular-nums">{4 - (completedPomodoros % 4)}</span>
+                    <span className="opacity-80 shrink min-w-0 truncate font-extrabold">Until Long Break</span>
+                    <span className="text-xl font-extrabold shrink-0 tabular-nums">{4 - (completedPomodoros % 4)}</span>
                   </div>
                 </div>
                 <button
                   onClick={resetAll}
-                  className="mt-4 w-full py-2 bg-white/20 text-white font-medium rounded-lg hover:bg-white/30 transition-all"
+                  className="mt-4 w-full py-2.5 bg-white/20 text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-white/30 hover:bg-white/30 active:border-b-2 active:translate-y-0.5 transition-all"
                 >
                   Reset Stats
                 </button>
               </div>
 
               {/* Timer Settings */}
-              <div className="bg-white border border-gray-200 rounded-2xl p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Timer Settings</h3>
+              <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl p-6">
+                <h3 className="text-lg font-extrabold text-stone-900 dark:text-stone-50 mb-4">Timer Settings</h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm text-gray-600 mb-2">Focus Duration (min)</label>
+                    <label className="block text-sm font-extrabold text-stone-500 dark:text-stone-400 mb-2 uppercase tracking-wide">Focus Duration (min)</label>
                     <select
                       value={focusDuration}
                       onChange={(e) => {
@@ -386,7 +404,7 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
                         setFocusDuration(val);
                         if (mode === 'focus' && !isRunning) setTimeLeft(val * 60);
                       }}
-                      className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                      className="w-full px-3 py-2.5 bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 focus:outline-none font-extrabold text-stone-900 dark:text-stone-50"
                       disabled={isRunning}
                     >
                       {[15, 20, 25, 30, 35, 40, 45, 50, 55, 60].map(n => (
@@ -395,7 +413,7 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm text-gray-600 mb-2">Short Break (min)</label>
+                    <label className="block text-sm font-extrabold text-stone-500 dark:text-stone-400 mb-2 uppercase tracking-wide">Short Break (min)</label>
                     <select
                       value={shortBreakDuration}
                       onChange={(e) => {
@@ -403,7 +421,7 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
                         setShortBreakDuration(val);
                         if (mode === 'shortBreak' && !isRunning) setTimeLeft(val * 60);
                       }}
-                      className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
+                      className="w-full px-3 py-2.5 bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 focus:outline-none font-extrabold text-stone-900 dark:text-stone-50"
                       disabled={isRunning}
                     >
                       {[3, 5, 10, 15].map(n => (
@@ -412,7 +430,7 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm text-gray-600 mb-2">Long Break (min)</label>
+                    <label className="block text-sm font-extrabold text-stone-500 dark:text-stone-400 mb-2 uppercase tracking-wide">Long Break (min)</label>
                     <select
                       value={longBreakDuration}
                       onChange={(e) => {
@@ -420,7 +438,7 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
                         setLongBreakDuration(val);
                         if (mode === 'longBreak' && !isRunning) setTimeLeft(val * 60);
                       }}
-                      className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500"
+                      className="w-full px-3 py-2.5 bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 focus:outline-none font-extrabold text-stone-900 dark:text-stone-50"
                       disabled={isRunning}
                     >
                       {[10, 15, 20, 25, 30].map(n => (
@@ -432,20 +450,20 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
               </div>
 
               {/* Quick Info */}
-              <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">How It Works</h3>
-                <ol className="space-y-2 text-sm text-gray-600">
-                  <li className="flex items-start gap-2">
-                    <span className="flex-shrink-0 w-5 h-5 bg-red-100 text-red-600 rounded-full flex items-center justify-center text-xs font-bold">1</span>
-                    <span>Focus for 25 minutes</span>
+              <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl p-6">
+                <h3 className="text-lg font-extrabold text-stone-900 dark:text-stone-50 mb-3">How It Works</h3>
+                <ol className="space-y-3 text-sm text-stone-600 dark:text-stone-400">
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-extrabold text-white border-2 border-b-4" style={{ backgroundColor: '#FF4B4B', borderColor: '#E04343' }}>1</span>
+                    <span className="font-extrabold pt-0.5">Focus for 25 minutes</span>
                   </li>
-                  <li className="flex items-start gap-2">
-                    <span className="flex-shrink-0 w-5 h-5 bg-violet-100 text-violet-600 rounded-full flex items-center justify-center text-xs font-bold">2</span>
-                    <span>Take a 5-minute break</span>
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-extrabold text-white border-2 border-b-4" style={{ backgroundColor: '#1CB0F6', borderColor: '#1899D6' }}>2</span>
+                    <span className="font-extrabold pt-0.5">Take a 5-minute break</span>
                   </li>
-                  <li className="flex items-start gap-2">
-                    <span className="flex-shrink-0 w-5 h-5 bg-violet-100 text-violet-600 rounded-full flex items-center justify-center text-xs font-bold">3</span>
-                    <span>After 4 sessions, take a longer break</span>
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-extrabold text-white border-2 border-b-4" style={{ backgroundColor: '#A560E8', borderColor: '#8A48C7' }}>3</span>
+                    <span className="font-extrabold pt-0.5">After 4 sessions, take a longer break</span>
                   </li>
                 </ol>
               </div>
@@ -455,69 +473,69 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
       </section>
 
       {/* Benefits Section */}
-      <section className="py-12 sm:py-16 bg-gray-50">
+      <section className="py-12 sm:py-16 bg-stone-100 dark:bg-stone-900">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">Why Use the Pomodoro Technique?</h2>
+          <h2 className="text-2xl font-extrabold text-stone-900 dark:text-stone-50 mb-8 text-center">Why Use the Pomodoro Technique?</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl p-6">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 border-2 border-b-4" style={{ backgroundColor: '#FFE8E8', borderColor: '#E04343' }}>
+                <svg className="w-6 h-6" style={{ color: '#FF4B4B' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Boost Focus</h3>
-              <p className="text-gray-600 text-sm">Short, timed sessions help you maintain intense focus without mental fatigue.</p>
+              <h3 className="font-extrabold text-stone-900 dark:text-stone-50 mb-2">Boost Focus</h3>
+              <p className="text-stone-500 dark:text-stone-400 text-sm">Short, timed sessions help you maintain intense focus without mental fatigue.</p>
             </div>
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl p-6">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 border-2 border-b-4" style={{ backgroundColor: '#EAFFD6', borderColor: '#46A302' }}>
+                <svg className="w-6 h-6" style={{ color: '#58CC02' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Beat Procrastination</h3>
-              <p className="text-gray-600 text-sm">Starting a 25-minute timer is easier than facing hours of work. Just begin.</p>
+              <h3 className="font-extrabold text-stone-900 dark:text-stone-50 mb-2">Beat Procrastination</h3>
+              <p className="text-stone-500 dark:text-stone-400 text-sm">Starting a 25-minute timer is easier than facing hours of work. Just begin.</p>
             </div>
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl p-6">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 border-2 border-b-4" style={{ backgroundColor: '#DDF4FF', borderColor: '#1899D6' }}>
+                <svg className="w-6 h-6" style={{ color: '#1CB0F6' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Track Progress</h3>
-              <p className="text-gray-600 text-sm">Count your completed pomodoros to see how much focused work you&apos;ve done.</p>
+              <h3 className="font-extrabold text-stone-900 dark:text-stone-50 mb-2">Track Progress</h3>
+              <p className="text-stone-500 dark:text-stone-400 text-sm">Count your completed pomodoros to see how much focused work you&apos;ve done.</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-12 sm:py-16 bg-gray-900">
+      <section className="py-12 sm:py-16 bg-stone-900 dark:bg-stone-950">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-4">
             Ready to supercharge your studying?
           </h2>
-          <p className="text-gray-400 mb-8 max-w-xl mx-auto">
+          <p className="text-stone-400 mb-8 max-w-xl mx-auto">
             WriteScholar helps you write better papers, generate study materials, and learn more effectively with AI-powered tools.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             {user ? (
-              <button 
+              <button
                 onClick={() => onNavigate('dashboard')}
-                className="px-6 py-3 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors"
+                className="px-6 py-3 bg-[#58CC02] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all"
               >
                 Go to Dashboard
               </button>
             ) : (
               <>
-                <button 
+                <button
                   onClick={() => onNavigate('signup')}
-                  className="px-6 py-3 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors"
+                  className="px-6 py-3 bg-[#58CC02] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all"
                 >
                   Try WriteScholar Free
                 </button>
-                <button 
+                <button
                   onClick={() => onNavigate('features')}
-                  className="px-6 py-3 border border-gray-600 text-white font-medium rounded-xl hover:border-gray-500 transition-colors"
+                  className="px-6 py-3 border-2 border-b-4 border-stone-600 text-white font-extrabold uppercase tracking-wide rounded-xl hover:border-stone-500 active:border-b-2 active:translate-y-0.5 transition-all"
                 >
                   Learn More
                 </button>

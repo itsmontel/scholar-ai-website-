@@ -4,15 +4,25 @@ import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEdi
 import Footer from '../common/Footer';
 import AnalysisAnimation from '../common/AnalysisAnimation';
 import LoadingSpinner from '../common/LoadingSpinner';
+import LevelUpCelebration from '../common/LevelUpCelebration';
 import { trackEvent } from '../../utils/analytics';
 import { getResetsInText } from '../../utils/usageReset';
 import CitationsPage, { type EmbeddedDashboardTool } from './CitationsPage';
 import StudyPackPage from './StudyPackPage';
 import { MoreToolsGrid } from './MoreToolsPage';
+import DailyReviewTab from './DailyReviewTab';
+import FeatureHub, { type HubItem } from '../common/FeatureHub';
+import {
+  getTotalXP,
+  getLevelInfo,
+  getUnlockedBadges,
+  BADGES,
+  type Badge,
+} from '../../data/achievements';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
-type DashboardTool = 'analyze' | 'citations' | 'study_pack' | 'more_tools';
+type DashboardTool = 'daily_review' | 'analyze' | 'citations' | 'study_pack' | 'more_tools';
 
 interface PlanLimitsSubset {
   analysesPerMonth?: number;
@@ -78,14 +88,25 @@ interface RecentAnalysis {
 
 const DASHBOARD_TOOL_ITEMS = [
   {
+    id: 'daily_review' as const,
+    title: 'Daily Review',
+    desc: 'Quick daily practice session',
+    emoji: '🎯',
+    iconClass: 'bg-[#FF9600]',
+    activeBar: 'border-l-[#FF9600]',
+    titleClass: 'text-[#FF9600]',
+    activeBg: 'bg-[#FFF4E0] dark:bg-[#FF9600]/10',
+    accent: 'orange',
+  },
+  {
     id: 'analyze' as const,
     title: 'Analyze',
     desc: 'Professor-style essay feedback',
     emoji: '📝',
-    iconClass: 'bg-gradient-to-br from-rose-400 to-violet-600',
-    activeBar: 'border-l-rose-500',
-    titleClass: 'text-rose-950 dark:text-rose-100',
-    activeBg: 'bg-gradient-to-r from-rose-50/95 via-white to-violet-50/40 dark:from-rose-950/35 dark:via-stone-900/90 dark:to-violet-950/25',
+    iconClass: 'bg-[#FF4B4B]',
+    activeBar: 'border-l-[#FF4B4B]',
+    titleClass: 'text-[#FF4B4B]',
+    activeBg: 'bg-[#FFE8E8] dark:bg-[#FF4B4B]/10',
     accent: 'rose',
   },
   {
@@ -93,21 +114,22 @@ const DASHBOARD_TOOL_ITEMS = [
     title: 'Study Pack',
     desc: 'Quiz, flashcards, lessons',
     emoji: '📦',
-    iconClass: 'bg-gradient-to-br from-amber-400 to-orange-500',
-    activeBar: 'border-l-amber-500',
-    titleClass: 'text-amber-950 dark:text-amber-100',
-    activeBg: 'bg-gradient-to-r from-amber-50/95 via-white to-orange-50/35 dark:from-amber-950/25 dark:via-stone-900/90 dark:to-orange-950/20',
+    iconClass: 'bg-[#FF9600]',
+    activeBar: 'border-l-[#FF9600]',
+    titleClass: 'text-[#FF9600]',
+    activeBg: 'bg-[#FFF4E0] dark:bg-[#FF9600]/10',
     accent: 'amber',
+    badge: '🔥 Most popular',
   },
   {
     id: 'citations' as const,
     title: 'Citations',
     desc: 'Find & format sources',
     emoji: '📚',
-    iconClass: 'bg-gradient-to-br from-sky-400 to-blue-600',
-    activeBar: 'border-l-sky-500',
-    titleClass: 'text-sky-900 dark:text-sky-100',
-    activeBg: 'bg-gradient-to-r from-sky-50/95 via-white to-blue-50/35 dark:from-sky-950/30 dark:via-stone-900/90 dark:to-blue-950/20',
+    iconClass: 'bg-[#1CB0F6]',
+    activeBar: 'border-l-[#1CB0F6]',
+    titleClass: 'text-[#1CB0F6]',
+    activeBg: 'bg-[#DDF4FF] dark:bg-[#1CB0F6]/10',
     accent: 'sky',
   },
   {
@@ -115,10 +137,10 @@ const DASHBOARD_TOOL_ITEMS = [
     title: 'More tools',
     desc: 'Summarizer, grammar & more',
     emoji: '✨',
-    iconClass: 'bg-gradient-to-br from-indigo-500 to-violet-600',
-    activeBar: 'border-l-violet-500',
-    titleClass: 'text-violet-950 dark:text-violet-100',
-    activeBg: 'bg-gradient-to-r from-violet-50/95 via-white to-fuchsia-50/35 dark:from-violet-950/30 dark:via-stone-900/90 dark:to-fuchsia-950/20',
+    iconClass: 'bg-[#A560E8]',
+    activeBar: 'border-l-[#A560E8]',
+    titleClass: 'text-[#A560E8]',
+    activeBg: 'bg-[#F3EAFF] dark:bg-[#A560E8]/10',
     accent: 'violet',
   },
 ] as const;
@@ -136,6 +158,8 @@ const WORKSPACE_SHORTCUTS = [
 const getWorkspaceSubtitle = (isNew: boolean, tool: DashboardTool): string => {
   if (!isNew) return 'Pick up where you left off.';
   switch (tool) {
+    case 'daily_review':
+      return 'Your workspace is ready — complete your daily review to keep your streak alive.';
     case 'analyze':
       return 'Your workspace is ready — drop in an essay to get started.';
     case 'citations':
@@ -159,7 +183,202 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
   const [uploadError, setUploadError] = useState('');
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
-  const [dashboardTool, setDashboardTool] = useState<DashboardTool>('analyze');
+  const [dashboardTool, setDashboardTool] = useState<DashboardTool>(() => {
+    const saved = localStorage.getItem('writescholar_dashboard_tab');
+    if (saved) {
+      localStorage.removeItem('writescholar_dashboard_tab');
+      const valid: DashboardTool[] = ['daily_review', 'analyze', 'citations', 'study_pack', 'more_tools'];
+      if (valid.includes(saved as DashboardTool)) return saved as DashboardTool;
+    }
+    return 'daily_review';
+  });
+
+  /* Embedded hub view state — each tool tab opens to its hub by default,
+     then expands into the create flow when the user clicks "+ Create new". */
+  type ToolView = 'hub' | 'create';
+  const [analyzeView, setAnalyzeView] = useState<ToolView>('hub');
+  const [studyPackView, setStudyPackView] = useState<ToolView>('hub');
+  const [citationsView, setCitationsView] = useState<ToolView>('hub');
+
+  /* Recent items — fetched once on dashboard load, refreshed whenever user
+     leaves a create flow back to a hub. */
+  const [analyzeRecents, setAnalyzeRecents] = useState<HubItem[]>([]);
+  const [studyPackRecents, setStudyPackRecents] = useState<HubItem[]>([]);
+  const [citationsRecents, setCitationsRecents] = useState<HubItem[]>([]);
+  const [hubRecentsLoading, setHubRecentsLoading] = useState(true);
+
+  /* Friendly relative time formatter for hub item meta lines. */
+  const timeAgoLabel = (iso: string): string => {
+    const d = new Date(iso).getTime();
+    if (Number.isNaN(d)) return '';
+    const m = Math.floor(Math.max(0, Date.now() - d) / 60000);
+    if (m < 1) return 'Just now';
+    if (m < 60) return `${m}m ago`;
+    const h = Math.floor(m / 60);
+    if (h < 24) return `${h}h ago`;
+    const days = Math.floor(h / 24);
+    if (days < 7) return `${days}d ago`;
+    const weeks = Math.floor(days / 7);
+    if (weeks < 5) return `${weeks}w ago`;
+    return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const token = localStorage.getItem('authToken');
+      if (!token) { setHubRecentsLoading(false); return; }
+
+      // Run all three in parallel — hub renders fast even if one fails.
+      const [analysesRes, quizRes, citesRes] = await Promise.allSettled([
+        fetch(`${API_URL}/analysis/history?limit=10`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API_URL}/analysis/quiz-history?limit=20`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API_URL}/analysis/citation-history?limit=10`, { headers: { Authorization: `Bearer ${token}` } }),
+      ]);
+      if (cancelled) return;
+
+      // Analyses
+      if (analysesRes.status === 'fulfilled' && analysesRes.value.ok) {
+        try {
+          const json = await analysesRes.value.json();
+          const items = (json?.data || json?.history || []) as Array<{ id: string; analysis_type?: string; created_at: string; documents?: { title?: string; original_filename?: string } | null }>;
+          setAnalyzeRecents(items.slice(0, 4).map((a) => ({
+            id: a.id,
+            title: a.documents?.title || a.documents?.original_filename || 'Untitled paper',
+            meta: `${timeAgoLabel(a.created_at)}${a.analysis_type ? ' · ' + a.analysis_type.replace(/_/g, ' ') : ''}`,
+            icon: '📝',
+            onOpen: () => {
+              if (typeof window !== 'undefined') {
+                const url = new URL(window.location.href);
+                url.pathname = '/analysis';
+                url.searchParams.set('id', a.id);
+                window.history.pushState({}, '', url);
+              }
+              onNavigate('analysis');
+            },
+          })));
+        } catch { /* silent */ }
+      }
+
+      // Quiz history → filter to study packs
+      if (quizRes.status === 'fulfilled' && quizRes.value.ok) {
+        try {
+          const json = await quizRes.value.json();
+          const items = ((json?.data || json?.history || []) as Array<{ id: string; quiz_type: string; title: string; created_at: string; question_count?: number; questions?: unknown; quiz_bank?: unknown; quiz_display_count?: number; source_word_count?: number }>)
+            .filter((row) => row.quiz_type === 'study_pack');
+          setStudyPackRecents(items.slice(0, 4).map((p) => ({
+            id: p.id,
+            title: p.title || 'Untitled study pack',
+            meta: `${timeAgoLabel(p.created_at)} · ${p.question_count || 0} ${p.question_count === 1 ? 'card' : 'cards'}`,
+            icon: '📚',
+            onOpen: () => {
+              onNavigate('study-pack-viewer', { studyPack: { data: { questions: p.questions, quiz_bank: p.quiz_bank, ...p }, title: p.title } } as unknown as Parameters<typeof onNavigate>[1]);
+            },
+          })));
+        } catch { /* silent */ }
+      }
+
+      // Citations
+      if (citesRes.status === 'fulfilled' && citesRes.value.ok) {
+        try {
+          const json = await citesRes.value.json();
+          const items = (json?.data || json?.history || []) as Array<{ id: string; research_topic?: string; citation_style?: string; year_range?: string; created_at: string; search_results?: { citations?: unknown[]; keywords?: string[]; searchStrategies?: string[]; researchTopic?: string; citationStyle?: string; yearRange?: string } }>;
+          setCitationsRecents(items.slice(0, 4).map((s) => {
+            const count = s.search_results?.citations?.length ?? 0;
+            return {
+              id: s.id,
+              title: s.research_topic || 'Untitled search',
+              meta: `${timeAgoLabel(s.created_at)} · ${s.citation_style || 'APA'} · ${count} ${count === 1 ? 'source' : 'sources'}`,
+              icon: '📖',
+              onOpen: () => {
+                if (typeof window !== 'undefined' && s.search_results) {
+                  localStorage.setItem('citationSearchResults', JSON.stringify({
+                    citations: s.search_results.citations ?? [],
+                    keywords: s.search_results.keywords ?? [],
+                    searchStrategies: s.search_results.searchStrategies ?? [],
+                    researchTopic: s.research_topic || s.search_results.researchTopic || '',
+                    citationStyle: s.citation_style || s.search_results.citationStyle || 'APA',
+                    yearRange: s.year_range || s.search_results.yearRange,
+                  }));
+                }
+                onNavigate('citation-results');
+              },
+            };
+          }));
+        } catch { /* silent */ }
+      }
+
+      setHubRecentsLoading(false);
+    })();
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ── Streak data for header badge ──
+  const getStreakFromStorage = (): { currentStreak: number; lastCompletedDate: string | null } => {
+    try {
+      const userId = user?.id || user?._id;
+      const raw = localStorage.getItem(`writescholar_daily_review_streak_${userId || 'anon'}`);
+      if (raw) {
+        const data = JSON.parse(raw);
+        const last = data.lastCompletedDate ? new Date(data.lastCompletedDate) : null;
+        const now = new Date(new Date().toISOString().slice(0, 10));
+        if (last) {
+          const diff = Math.floor((now.getTime() - last.getTime()) / (1000 * 60 * 60 * 24));
+          if (diff <= 1) return { currentStreak: data.currentStreak || 0, lastCompletedDate: data.lastCompletedDate };
+        }
+        return { currentStreak: 0, lastCompletedDate: data.lastCompletedDate };
+      }
+    } catch { /* ignore */ }
+    return { currentStreak: 0, lastCompletedDate: null };
+  };
+  const streakInfo = getStreakFromStorage();
+
+  // ── Level & XP state ──
+  const [levelUpData, setLevelUpData] = useState<{ level: number; name: string; xp: number } | null>(null);
+  const prevLevelRef = useRef<number | null>(null);
+
+  const totalXP = getTotalXP();
+  const levelInfo = getLevelInfo(totalXP);
+  const unlockedBadges = getUnlockedBadges();
+  const unlockedBadgeList: (Badge & { unlockedAt: string })[] = BADGES
+    .filter(b => unlockedBadges[b.id])
+    .map(b => ({ ...b, unlockedAt: unlockedBadges[b.id] }))
+    .sort((a, b) => new Date(b.unlockedAt).getTime() - new Date(a.unlockedAt).getTime());
+
+  const recentBadges = unlockedBadgeList.slice(0, 3);
+  const nextBadges = BADGES.filter(b => !unlockedBadges[b.id]).slice(0, 3);
+
+  // Check for level-up on XP changes
+  useEffect(() => {
+    if (prevLevelRef.current === null) {
+      prevLevelRef.current = levelInfo.level;
+      return;
+    }
+    if (levelInfo.level > prevLevelRef.current) {
+      setLevelUpData({ level: levelInfo.level, name: levelInfo.name, xp: totalXP });
+    }
+    prevLevelRef.current = levelInfo.level;
+  }, [levelInfo.level, levelInfo.name, totalXP]);
+
+  // Listen for badge-unlocked events (triggers XP recalc)
+  useEffect(() => {
+    const handler = () => {
+      // Force re-render by using a dummy state update
+      setDashboardTool(prev => prev);
+    };
+    window.addEventListener('writescholar-badge-unlocked', handler);
+    return () => window.removeEventListener('writescholar-badge-unlocked', handler);
+  }, []);
+
+  const RARITY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
+    common: { bg: 'bg-stone-100 dark:bg-stone-700', text: 'text-stone-600 dark:text-stone-300', border: 'border-stone-300 dark:border-stone-600' },
+    uncommon: { bg: 'bg-[#EAFFD6] dark:bg-[#58CC02]/10', text: 'text-[#58CC02]', border: 'border-[#58CC02]/30' },
+    rare: { bg: 'bg-[#F3EAFF] dark:bg-[#A560E8]/10', text: 'text-[#A560E8]', border: 'border-[#A560E8]/30' },
+    epic: { bg: 'bg-[#DDF4FF] dark:bg-[#1CB0F6]/10', text: 'text-[#1CB0F6]', border: 'border-[#1CB0F6]/30' },
+    legendary: { bg: 'bg-[#FFF4E0] dark:bg-[#FF9600]/10', text: 'text-[#FF9600]', border: 'border-[#FF9600]/30' },
+  };
+
   const switchEmbeddedTool = (tool: EmbeddedDashboardTool) => {
     if (tool === 'analyze') setDashboardTool('analyze');
     else if (tool === 'citations') setDashboardTool('citations');
@@ -406,18 +625,18 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
   };
   const combinedLimit =
     usageStats.planLimits?.combinedActionsPerMonth ??
-    (usageStats.plan === 'premium' ? 199 : 49);
+    (usageStats.plan === 'premium' ? 499 : 99);
 
   const todayLabel = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
   const greetingEmoji = greeting === 'Good morning' ? '☀️' : greeting === 'Good afternoon' ? '👋' : '🌙';
 
   const QUICK_ACCESS_TINTS = [
-    { grad: 'from-violet-400 to-purple-500', tint: 'from-violet-50/80 to-white dark:from-violet-950/30 dark:to-stone-900/80', clr: 'text-violet-700 dark:text-violet-300' },
-    { grad: 'from-sky-400 to-blue-500', tint: 'from-sky-50/80 to-white dark:from-sky-950/30 dark:to-stone-900/80', clr: 'text-sky-700 dark:text-sky-300' },
-    { grad: 'from-amber-400 to-orange-500', tint: 'from-amber-50/80 to-white dark:from-amber-950/30 dark:to-stone-900/80', clr: 'text-amber-700 dark:text-amber-300' },
-    { grad: 'from-emerald-400 to-teal-500', tint: 'from-emerald-50/80 to-white dark:from-emerald-950/30 dark:to-stone-900/80', clr: 'text-emerald-700 dark:text-emerald-300' },
-    { grad: 'from-rose-400 to-pink-500', tint: 'from-rose-50/80 to-white dark:from-rose-950/30 dark:to-stone-900/80', clr: 'text-rose-700 dark:text-rose-300' },
-    { grad: 'from-fuchsia-400 to-purple-500', tint: 'from-fuchsia-50/80 to-white dark:from-fuchsia-950/30 dark:to-stone-900/80', clr: 'text-fuchsia-700 dark:text-fuchsia-300' },
+    { bg: 'bg-[#A560E8]', border: 'border-[#8A48C7]', tintBg: 'bg-[#F3EAFF] dark:bg-[#A560E8]/10', clr: 'text-[#A560E8]' },
+    { bg: 'bg-[#1CB0F6]', border: 'border-[#1899D6]', tintBg: 'bg-[#DDF4FF] dark:bg-[#1CB0F6]/10', clr: 'text-[#1CB0F6]' },
+    { bg: 'bg-[#FF9600]', border: 'border-[#D97F00]', tintBg: 'bg-[#FFF4E0] dark:bg-[#FF9600]/10', clr: 'text-[#FF9600]' },
+    { bg: 'bg-[#58CC02]', border: 'border-[#46A302]', tintBg: 'bg-[#EAFFD6] dark:bg-[#58CC02]/10', clr: 'text-[#58CC02]' },
+    { bg: 'bg-[#FF4B4B]', border: 'border-[#E04343]', tintBg: 'bg-[#FFE8E8] dark:bg-[#FF4B4B]/10', clr: 'text-[#FF4B4B]' },
+    { bg: 'bg-[#1CB0F6]', border: 'border-[#1899D6]', tintBg: 'bg-[#DDF4FF] dark:bg-[#1CB0F6]/10', clr: 'text-[#1CB0F6]' },
   ];
 
   return (
@@ -429,20 +648,16 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
         <div
           role="region"
           aria-label="Limited time promotion"
-          className="relative overflow-hidden border-b border-violet-200/70 dark:border-violet-900/60 bg-gradient-to-r from-violet-50 via-white to-violet-50 dark:from-stone-950 dark:via-stone-900 dark:to-stone-950"
+          className="border-b-2 border-[#FF9600]/30 bg-[#FFF4E0] dark:bg-[#FF9600]/10"
         >
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_120%_at_50%_50%,rgba(124,58,237,0.10),transparent_70%)] dark:bg-[radial-gradient(ellipse_60%_120%_at_50%_50%,rgba(139,92,246,0.18),transparent_70%)]" aria-hidden />
-          <div className="relative mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3">
+          <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3">
             <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-center">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-600 px-2.5 py-0.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white shadow-sm">
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-                  <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H7a1 1 0 110-2h2V6.477L6.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 015 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L9 4.323V3a1 1 0 011-1z" clipRule="evenodd" />
-                </svg>
-                Limited Time
+              <span className="inline-flex items-center gap-1.5 rounded-xl bg-[#FF9600] px-2.5 py-1 text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-white border-b-2 border-[#D97F00]">
+                ⭐ Limited Time
               </span>
-              <p className="text-sm sm:text-base font-medium text-stone-800 dark:text-stone-100">
-                <span className="font-bold text-violet-700 dark:text-violet-300">50% off</span> your first month on monthly plans · use code{' '}
-                <span className="inline-flex items-center rounded-md border border-violet-300 dark:border-violet-700 bg-white dark:bg-stone-900 px-2 py-0.5 font-mono font-bold text-violet-700 dark:text-violet-300 tracking-wide">
+              <p className="text-sm sm:text-base font-bold text-stone-800 dark:text-stone-100">
+                <span className="text-[#FF4B4B]">50% off</span> your first month on monthly plans · use code{' '}
+                <span className="inline-flex items-center rounded-lg border-2 border-b-4 border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 px-2 py-0.5 font-mono font-extrabold text-[#A560E8] tracking-wide">
                   MAY2026
                 </span>
               </p>
@@ -453,6 +668,15 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
 
       {isAnalyzing && (
         <AnalysisAnimation isPopup={true} text="Analyzing your essay" isComplete={false} />
+      )}
+
+      {levelUpData && (
+        <LevelUpCelebration
+          level={levelUpData.level}
+          levelName={levelUpData.name}
+          totalXP={levelUpData.xp}
+          onClose={() => setLevelUpData(null)}
+        />
       )}
 
       <style>{`
@@ -472,7 +696,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
         .dash-stagger > *:nth-child(4) { animation-delay: 0.22s; }
         .dash-stagger > *:nth-child(5) { animation-delay: 0.28s; }
         .dash-stagger > *:nth-child(6) { animation-delay: 0.34s; }
-        .dash-serif { font-family: 'EB Garamond', Georgia, serif; }
+        .dash-serif { font-family: 'Nunito', system-ui, sans-serif; }
         .dash-shine {
           background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.45) 50%, transparent 100%);
           background-size: 200% 100%;
@@ -484,95 +708,115 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
         {/* ═══════════════════════════════════════════════════════════════════
             TOP GREETING BAR
            ═══════════════════════════════════════════════════════════════════ */}
-        <header className="dash-fade mb-6 lg:mb-8 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-          <div className="min-w-0 flex-1">
-            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-violet-500/95 dark:text-violet-400/95">
-              {todayLabel}
-            </p>
-            {/* Greeting + workspace subtitle + trust — harmonious jewel tones */}
-            <div className="mt-2 flex flex-wrap items-baseline gap-x-4 gap-y-3">
-              <h1 className="dash-serif shrink-0 text-[2rem] sm:text-4xl lg:text-[2.85rem] font-semibold leading-[1.08] tracking-tight text-stone-900 dark:text-stone-50">
+        <header className="dash-fade mb-6 lg:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.2em] text-[#1CB0F6]">
+                {todayLabel}
+              </p>
+              <h1 className="dash-serif mt-2 text-[2rem] sm:text-4xl lg:text-[2.85rem] font-extrabold leading-[1.08] tracking-tight text-stone-900 dark:text-stone-50">
                 {greeting}
                 {firstName ? (
                   <>
                     ,{' '}
-                    <span className="bg-gradient-to-r from-violet-600 via-fuchsia-500 to-rose-500 dark:from-violet-300 dark:via-fuchsia-300 dark:to-rose-300 bg-clip-text text-transparent">
+                    <span className="text-[#58CC02]">
                       {firstName}
                     </span>
                   </>
                 ) : (
                   ''
                 )}
-                <span className="ml-2 inline-block text-[1em] align-middle drop-shadow-sm" aria-hidden>
+                <span className="ml-2 inline-block text-[1em] align-middle" aria-hidden>
                   {greetingEmoji}
                 </span>
               </h1>
-              <span className="hidden md:inline shrink-0 h-px w-8 rounded-full bg-gradient-to-r from-violet-200 to-teal-200 dark:from-violet-700/70 dark:to-teal-600/70 select-none opacity-70" aria-hidden />
-              <p className="hidden md:block text-sm sm:text-base leading-snug min-w-[10rem] max-w-xl text-stone-600 dark:text-indigo-100/76 font-medium">
+              <p className="mt-1.5 text-sm sm:text-base leading-snug text-stone-600 dark:text-stone-300 font-bold max-w-xl">
                 {getWorkspaceSubtitle(isNewUser, dashboardTool)}
               </p>
-              <span className="hidden lg:inline shrink-0 h-px w-8 rounded-full bg-gradient-to-r from-teal-200 to-fuchsia-200 dark:from-teal-700/70 dark:to-fuchsia-600/70 select-none opacity-70" aria-hidden />
-              <div
-                className="hidden md:inline-flex shrink-0 items-center gap-2.5 px-3 py-2 sm:gap-3 sm:px-4 sm:py-2.5 rounded-[1.375rem] bg-gradient-to-br from-teal-50/98 via-emerald-50/95 to-violet-50/98 dark:from-teal-950/50 dark:via-emerald-950/35 dark:to-violet-950/48 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.65)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] ring-1 ring-teal-200/65 dark:ring-teal-700/40 backdrop-blur-md"
-              >
-                <div className="flex -space-x-2.5" aria-hidden>
-                  {[
-                    { emoji: '👩‍🎓', light: 'from-teal-200 via-emerald-100 to-teal-200', dark: 'dark:from-teal-950/85 dark:via-emerald-900/65 dark:to-teal-900/85' },
-                    { emoji: '👨‍🎓', light: 'from-sky-200 via-cyan-100 to-sky-200', dark: 'dark:from-sky-950/80 dark:via-cyan-950/55 dark:to-sky-900/85' },
-                    { emoji: '👩‍💻', light: 'from-violet-200 via-fuchsia-100 to-violet-200', dark: 'dark:from-violet-950/80 dark:via-fuchsia-950/50 dark:to-purple-950/85' },
-                  ].map((row, i) => (
-                    <div
-                      key={i}
-                      className={`w-8 h-8 rounded-full bg-gradient-to-br ${row.light} ${row.dark} flex items-center justify-center text-[14px] border-[2.5px] border-white/95 shadow-sm dark:border-stone-900/95`}
-                    >
-                      {row.emoji}
-                    </div>
-                  ))}
-                </div>
-                <p className="text-[11px] sm:text-xs leading-snug max-w-[14rem] sm:max-w-none">
-                  <span className="font-bold bg-gradient-to-r from-teal-700 via-emerald-600 to-violet-700 dark:from-teal-300 dark:via-emerald-300 dark:to-violet-300 bg-clip-text text-transparent drop-shadow-[0_0_24px_rgba(16,185,129,0.1)] dark:drop-shadow-none">
-                    50,000+
-                  </span>{' '}
-                  <span className="text-teal-900/90 dark:text-emerald-100/90 font-semibold tracking-tight">
-                    students trust WriteScholar
-                  </span>
-                </p>
-              </div>
             </div>
-          </div>
 
-          <div className="flex items-center gap-2.5 flex-wrap sm:justify-end sm:shrink-0">
-            {analysisCount > 0 && (
-              <div className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-gradient-to-r from-amber-50 to-rose-50 dark:from-amber-950/40 dark:to-rose-950/40 ring-1 ring-amber-200/70 dark:ring-amber-800/40 shadow-sm">
-                <span className="dash-fire text-base" aria-hidden>🔥</span>
-                <span className="text-xs font-semibold text-amber-900 dark:text-amber-200">
-                  {analysisCount} {analysisCount === 1 ? 'essay' : 'essays'} analyzed
-                </span>
-              </div>
-            )}
-            {isFree ? (
-              <>
-                <div className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-white/85 dark:bg-stone-900/70 ring-1 ring-stone-200 dark:ring-stone-700 shadow-sm backdrop-blur-sm">
-                  <span className="text-sm" aria-hidden>✨</span>
-                  <span className="text-xs font-semibold text-stone-700 dark:text-stone-200">Free plan</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => onNavigate('pricing')}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 hover:from-violet-500 hover:via-fuchsia-500 hover:to-rose-400 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-violet-500/30 hover:shadow-xl hover:shadow-fuchsia-500/30 hover:-translate-y-0.5 active:translate-y-0 transition-all"
+            <div className="flex items-center gap-2.5 flex-wrap sm:justify-end sm:shrink-0">
+              {/* Level + XP bar */}
+              <button
+                type="button"
+                onClick={() => onNavigate('badges')}
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 hover:border-stone-300 active:border-b-2 active:translate-y-0.5 transition-all cursor-pointer group"
+              >
+                <div
+                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[10px] font-extrabold text-white border-b-2 group-hover:scale-105 transition-transform"
+                  style={{
+                    backgroundColor: levelInfo.level >= 80 ? '#FF9600' : levelInfo.level >= 60 ? '#A560E8' : levelInfo.level >= 40 ? '#FF4B4B' : levelInfo.level >= 20 ? '#1CB0F6' : '#58CC02',
+                    borderColor: levelInfo.level >= 80 ? '#D97F00' : levelInfo.level >= 60 ? '#8A48C7' : levelInfo.level >= 40 ? '#E04343' : levelInfo.level >= 20 ? '#1899D6' : '#46A302',
+                  }}
                 >
-                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                  Upgrade
-                </button>
-              </>
-            ) : (
-              <div className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-md shadow-amber-500/30">
-                <span className="text-sm" aria-hidden>⭐</span>
-                <span className="text-xs font-bold uppercase tracking-wider">{plan}</span>
-              </div>
-            )}
+                  {levelInfo.level}
+                </div>
+                <div className="min-w-0" style={{ width: '140px' }}>
+                  <div className="flex items-center justify-between gap-1 mb-0.5">
+                    <p className="dash-serif text-[10px] font-extrabold text-stone-700 dark:text-stone-200 truncate">
+                      {levelInfo.name}
+                    </p>
+                    <p className="text-[8px] font-extrabold text-stone-400 dark:text-stone-500 shrink-0">
+                      {levelInfo.progress < 1 ? `${totalXP}/${levelInfo.nextLevelXP}` : 'MAX'}
+                    </p>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-stone-200 dark:bg-stone-700 overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-700"
+                      style={{
+                        width: `${Math.max(3, levelInfo.progress * 100)}%`,
+                        backgroundColor: levelInfo.level >= 80 ? '#FF9600' : levelInfo.level >= 60 ? '#A560E8' : levelInfo.level >= 40 ? '#FF4B4B' : levelInfo.level >= 20 ? '#1CB0F6' : '#58CC02',
+                      }}
+                    />
+                  </div>
+                </div>
+              </button>
+
+              {/* Streak badge */}
+              <button
+                type="button"
+                onClick={() => setDashboardTool('daily_review')}
+                className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all cursor-pointer ${
+                  streakInfo.currentStreak > 0
+                    ? 'bg-[#FFF4E0] dark:bg-[#FF9600]/10 border-[#FF9600]/40'
+                    : 'bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-700'
+                }`}
+              >
+                <span className="text-base" aria-hidden>{streakInfo.currentStreak > 0 ? '🔥' : '❄️'}</span>
+                <span className={`text-xs font-extrabold ${streakInfo.currentStreak > 0 ? 'text-[#FF9600]' : 'text-stone-400'}`}>
+                  {streakInfo.currentStreak} day{streakInfo.currentStreak !== 1 ? 's' : ''}
+                </span>
+              </button>
+
+              {analysisCount > 0 && (
+                <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#E5F8D0] dark:bg-[#58CC02]/10 border-2 border-b-4 border-[#58CC02]/30">
+                  <span className="text-base" aria-hidden>📝</span>
+                  <span className="text-xs font-extrabold text-[#58CC02]">
+                    {analysisCount} {analysisCount === 1 ? 'essay' : 'essays'}
+                  </span>
+                </div>
+              )}
+              {isFree ? (
+                <>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white dark:bg-stone-800 border-2 border-b-4 border-stone-200 dark:border-stone-700">
+                    <span className="text-sm" aria-hidden>✨</span>
+                    <span className="text-xs font-extrabold text-stone-700 dark:text-stone-200">Free plan</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => onNavigate('pricing')}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#FF9600] text-white text-xs sm:text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all"
+                  >
+                    ⭐ Upgrade
+                  </button>
+                </>
+              ) : (
+                <div className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#FF9600] text-white border-2 border-b-4 border-[#D97F00]">
+                  <span className="text-sm" aria-hidden>⭐</span>
+                  <span className="text-xs font-extrabold uppercase tracking-wider">{plan}</span>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 
@@ -580,8 +824,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
             MOBILE TAB BAR (lg- only)
            ═══════════════════════════════════════════════════════════════════ */}
         <div className="lg:hidden mb-5 -mx-4 sm:-mx-6 px-4 sm:px-6 overflow-x-auto">
-          <div className="relative inline-flex gap-1 p-2 rounded-[1.125rem] bg-white/98 dark:bg-stone-900/94 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.85)] dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] shadow-lg shadow-teal-900/[0.08] dark:shadow-black/45 border border-teal-200/55 dark:border-violet-800/45 backdrop-blur-xl">
-            <div aria-hidden className="pointer-events-none absolute inset-0 rounded-[1.125rem] bg-gradient-to-br from-teal-50/40 via-transparent to-violet-50/35 dark:from-teal-950/20 dark:via-transparent dark:to-violet-950/25" />
+          <div className="inline-flex gap-2 p-1">
             {DASHBOARD_TOOL_ITEMS.map((item) => {
               const active = dashboardTool === item.id;
               return (
@@ -589,19 +832,29 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                   key={item.id}
                   type="button"
                   onClick={() => {
+                    /* Switching tabs always lands on the embedded hub view —
+                       click "+ Create new" inside the panel to enter the create flow. */
+                    if (item.id === 'analyze') setAnalyzeView('hub');
+                    if (item.id === 'study_pack') setStudyPackView('hub');
+                    if (item.id === 'citations') setCitationsView('hub');
                     setDashboardTool(item.id);
                     trackEvent('dashboard_tool_tab', { tool: item.id });
                   }}
-                  className={`relative z-[1] flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-200 ${
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-extrabold whitespace-nowrap transition-all ${
                     active
-                      ? `${item.activeBg} text-stone-900 dark:text-stone-50 shadow-[0_8px_20px_-6px_rgba(91,33,182,0.18)] dark:shadow-black/35 ring-1 ring-white/80 dark:ring-white/10 scale-[1.02]`
-                      : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 hover:bg-white/70 dark:hover:bg-stone-800/50 hover:shadow-sm active:scale-[0.98]'
+                      ? `${item.activeBg} ${item.titleClass} border-2 border-b-4 border-current`
+                      : 'text-stone-500 dark:text-stone-400 bg-white dark:bg-stone-800 border-2 border-b-4 border-stone-200 dark:border-stone-700 hover:border-stone-300 active:border-b-2 active:translate-y-0.5'
                   }`}
                 >
-                  <span className={`text-base transition-transform ${active ? 'scale-110' : ''}`} aria-hidden>
+                  <span className="text-base" aria-hidden>
                     {item.emoji}
                   </span>
                   <span className="dash-serif tracking-tight">{item.title}</span>
+                  {'badge' in item && item.badge && (
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-[#FF9600] text-white text-[7px] font-extrabold uppercase tracking-wide leading-none whitespace-nowrap border border-b-2 border-[#D97F00]">
+                      🔥
+                    </span>
+                  )}
                 </button>
               );
             })}
@@ -615,31 +868,22 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
           {/* ─── SIDEBAR (lg+) ─── */}
           <aside className="hidden lg:block">
             <div className="sticky top-6 space-y-4">
-              {/* Workspace — airy glass + soft glow */}
-              <div className="relative rounded-2xl overflow-hidden bg-white/[0.97] dark:bg-stone-900/94 border border-white/90 dark:border-stone-700/90 shadow-[0_20px_50px_-20px_rgba(79,70,229,0.18),0_8px_24px_-12px_rgba(15,118,110,0.12)] dark:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.75)] backdrop-blur-[18px]">
-                {/* Ambient washes */}
-                <div aria-hidden className="pointer-events-none absolute -top-20 -right-16 h-44 w-44 rounded-full bg-gradient-to-br from-violet-400/22 to-fuchsia-400/14 blur-[48px] dark:from-violet-500/20 dark:to-fuchsia-600/14" />
-                <div aria-hidden className="pointer-events-none absolute -bottom-16 -left-12 h-40 w-40 rounded-full bg-gradient-to-tr from-teal-300/22 to-emerald-300/12 blur-[44px] dark:from-teal-600/16 dark:to-emerald-700/14" />
-
-                {/* Top accent */}
-                <div aria-hidden className="absolute inset-x-4 top-0 h-[3px] rounded-b-lg bg-gradient-to-r from-teal-400 via-violet-500 to-fuchsia-500 opacity-[0.95] shadow-[0_0_28px_-4px_rgba(139,92,246,0.42)] dark:opacity-100" />
-
-                {/* Header */}
-                <div className="relative px-4 pt-[1.125rem] pb-3 border-b border-stone-200/65 dark:border-stone-700/65 bg-[linear-gradient(165deg,rgba(250,251,253,0.98)_0%,rgba(240,251,246,0.55)_52%,rgba(245,243,255,0.45)_100%)] dark:bg-[linear-gradient(170deg,rgba(15,23,42,0.97)_0%,rgba(30,41,59,0.75)_58%,rgba(49,46,129,0.22)_100%)]">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-gradient-to-br from-teal-500/15 to-violet-600/25 dark:from-teal-400/25 dark:to-violet-600/35 text-[13px]" aria-hidden>
+              <div className="rounded-2xl bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 overflow-hidden">
+                <div className="px-4 pt-4 pb-3 border-b-2 border-stone-200 dark:border-stone-700">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#1CB0F6] text-white text-[13px] border-b-2 border-[#1899D6]" aria-hidden>
                       ✳︎
                     </span>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-transparent bg-gradient-to-r from-teal-700 via-violet-600 to-indigo-600 dark:from-teal-300 dark:via-violet-300 dark:to-indigo-300 bg-clip-text">
+                    <p className="text-[10px] font-extrabold uppercase tracking-[0.24em] text-[#1CB0F6]">
                       Workspace
                     </p>
                   </div>
-                  <p className="text-[12px] leading-relaxed text-stone-600/95 dark:text-stone-300/92 pl-0.5">
+                  <p className="text-[12px] leading-relaxed text-stone-500 dark:text-stone-400 pl-0.5 font-bold">
                     Switch tools or open your saved work.
                   </p>
                 </div>
 
-                <nav className="relative p-2.5 pt-3.5 flex flex-col gap-1.5" aria-label="Dashboard tools">
+                <nav className="p-2 flex flex-col gap-1" aria-label="Dashboard tools">
                   {DASHBOARD_TOOL_ITEMS.map((item) => {
                     const active = dashboardTool === item.id;
                     return (
@@ -647,32 +891,43 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                         key={item.id}
                         type="button"
                         onClick={() => {
+                          /* Switching tabs always lands on the embedded hub view. */
+                          if (item.id === 'analyze') setAnalyzeView('hub');
+                          if (item.id === 'study_pack') setStudyPackView('hub');
+                          if (item.id === 'citations') setCitationsView('hub');
                           setDashboardTool(item.id);
                           trackEvent('dashboard_tool_tab', { tool: item.id });
                         }}
-                        className={`group relative flex items-center gap-3 rounded-[0.875rem] border-l-[3px] pl-2.5 pr-2.5 py-2.5 text-left transition-all duration-300 ease-out will-change-transform ${
+                        className={`group flex items-center gap-3 rounded-xl px-2.5 py-2.5 text-left transition-all ${
                           active
-                            ? `${item.activeBar} ${item.activeBg} shadow-[0_6px_20px_-8px_rgba(15,23,42,0.12)] dark:shadow-[0_8px_28px_-10px_rgba(0,0,0,0.55)]`
-                            : 'border-l-transparent hover:border-l-stone-200/80 dark:hover:border-l-stone-600/60 hover:bg-white/75 dark:hover:bg-stone-800/45 hover:shadow-sm hover:-translate-y-px'
+                            ? `${item.activeBg} border-2 border-b-4 border-current ${item.titleClass}`
+                            : 'hover:bg-stone-50 dark:hover:bg-stone-800 border-2 border-transparent'
                         }`}
                       >
                         <div
-                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[0.65rem] text-base text-white shadow-[0_6px_16px_-4px_rgba(0,0,0,0.25)] ring-1 ring-white/35 dark:ring-white/10 ${item.iconClass} ${
-                            active ? 'scale-105 -rotate-[2deg] shadow-lg' : 'group-hover:scale-105 group-hover:-rotate-[2deg] group-hover:shadow-md'
-                          } transition-all duration-300`}
+                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-base text-white ${item.iconClass} border-2 border-b-4 ${
+                            item.id === 'daily_review' ? 'border-[#D97F00]' : item.id === 'analyze' ? 'border-[#E04343]' : item.id === 'study_pack' ? 'border-[#D97F00]' : item.id === 'citations' ? 'border-[#1899D6]' : 'border-[#8A48C7]'
+                          } ${active ? 'scale-105' : 'group-hover:scale-105'} transition-transform`}
                         >
                           <span aria-hidden>{item.emoji}</span>
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className={`dash-serif text-[15px] font-bold leading-tight tracking-tight ${active ? item.titleClass : 'text-stone-800 dark:text-stone-50'}`}>
-                            {item.title}
-                          </p>
-                          <p className={`mt-0.5 text-[10.5px] leading-snug line-clamp-1 ${active ? 'text-stone-600/90 dark:text-stone-400' : 'text-stone-500 dark:text-stone-400 group-hover:text-stone-700 dark:group-hover:text-stone-300'}`}>
+                          <div className="flex items-center gap-1.5">
+                            <p className={`dash-serif text-[15px] font-extrabold leading-tight ${active ? item.titleClass : 'text-stone-800 dark:text-stone-50'}`}>
+                              {item.title}
+                            </p>
+                            {'badge' in item && item.badge && (
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-[#FF9600] text-white text-[8px] font-extrabold uppercase tracking-wide leading-none whitespace-nowrap border border-b-2 border-[#D97F00]">
+                                {item.badge}
+                              </span>
+                            )}
+                          </div>
+                          <p className={`mt-0.5 text-[10.5px] font-bold leading-snug line-clamp-1 ${active ? 'text-stone-500 dark:text-stone-400' : 'text-stone-400 dark:text-stone-500'}`}>
                             {item.desc}
                           </p>
                         </div>
                         {active && (
-                          <svg className="h-3.5 w-3.5 shrink-0 text-violet-500/95 dark:text-emerald-400/95" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                          <svg className={`h-3.5 w-3.5 shrink-0 ${item.titleClass}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
                           </svg>
                         )}
@@ -681,47 +936,46 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                   })}
                 </nav>
 
-                {/* Shortcuts */}
-                <div className="relative px-4 pt-3.5 pb-2 border-t border-stone-200/65 dark:border-stone-700/65 bg-white/40 dark:bg-stone-950/25 backdrop-blur-sm">
-                  <div className="flex items-center justify-between gap-2 mb-1">
-                    <div className="flex items-center gap-2">
-                      <span aria-hidden className="text-[11px] opacity-85">
-                        ⚡
-                      </span>
-                      <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-stone-500 dark:text-violet-300/90">
-                        Shortcuts
-                      </p>
-                    </div>
-                    <span className="h-px flex-1 max-w-[3.5rem] ml-auto bg-gradient-to-r from-transparent to-violet-200/85 dark:to-violet-600/35 rounded-full opacity-75" aria-hidden />
+                {/* ── Games section ── */}
+                <div className="px-4 pt-1.5 pb-1 border-t-2 border-stone-200 dark:border-stone-700">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span aria-hidden className="text-[11px]">🎮</span>
+                    <p className="text-[10px] font-extrabold uppercase tracking-[0.22em] text-[#FF4B4B]">
+                      Games
+                    </p>
                   </div>
                 </div>
-                <nav className="relative px-2.5 pb-3 pt-1 flex flex-col gap-px" aria-label="Workspace shortcuts">
-                  {WORKSPACE_SHORTCUTS.map((link) => (
+                <nav className="px-2 pb-2 pt-0.5 flex flex-col gap-0.5" aria-label="Study games">
+                  {([
+                    { id: 'crater_blast', label: 'Crater Blast', hint: 'Blast the right answers', emoji: '💥', page: 'game-launcher-crater-blast', color: '#FF4B4B', borderColor: '#E04343' },
+                    { id: 'word_tower', label: 'Word Tower', hint: 'Build your knowledge tower', emoji: '🗼', page: 'game-launcher-word-tower', color: '#58CC02', borderColor: '#46A302' },
+                  ] as const).map((game) => (
                     <button
-                      key={link.id}
+                      key={game.id}
                       type="button"
                       onClick={() => {
-                        onNavigate(link.page);
-                        trackEvent('dashboard_workspace_shortcut', { page: link.page });
+                        onNavigate(game.page);
+                        trackEvent('dashboard_game_launch', { game: game.id });
                       }}
-                      className="group flex items-center gap-2.5 rounded-[0.6875rem] px-2 py-2 text-left transition-all duration-200 hover:bg-white/90 dark:hover:bg-stone-800/55 hover:shadow-[0_4px_14px_-6px_rgba(79,70,229,0.15)] focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/50 dark:focus-visible:ring-violet-500/35"
+                      className="group flex items-center gap-2.5 rounded-xl px-2 py-2 text-left transition-all hover:bg-stone-50 dark:hover:bg-stone-800"
                     >
                       <span
-                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[0.5rem] text-sm shadow-sm bg-white/95 dark:bg-stone-900/95 border border-teal-200/55 dark:border-stone-600/85 text-stone-800 dark:text-stone-100 group-hover:border-violet-300/85 dark:group-hover:border-violet-600/50 group-hover:bg-gradient-to-br group-hover:from-white group-hover:to-teal-50/90 dark:group-hover:from-stone-900 dark:group-hover:to-violet-950/60 group-hover:-translate-y-px transition-all"
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm text-white border-2 border-b-4 transition-colors"
+                        style={{ backgroundColor: game.color, borderColor: game.borderColor }}
                         aria-hidden
                       >
-                        {link.emoji}
+                        {game.emoji}
                       </span>
                       <span className="min-w-0 flex-1">
-                        <span className="block text-[12.5px] font-semibold leading-tight text-stone-800 dark:text-stone-50 group-hover:text-violet-900 dark:group-hover:text-violet-200 transition-colors duration-200">
-                          {link.label}
+                        <span className="block text-[12.5px] font-extrabold leading-tight text-stone-800 dark:text-stone-50">
+                          {game.label}
                         </span>
-                        <span className="block text-[10px] mt-px leading-snug text-stone-500 dark:text-stone-400 line-clamp-1 group-hover:text-stone-600 dark:group-hover:text-stone-300 transition-colors">
-                          {link.hint}
+                        <span className="block text-[10px] mt-px leading-snug text-stone-400 dark:text-stone-500 line-clamp-1 font-bold">
+                          {game.hint}
                         </span>
                       </span>
                       <svg
-                        className="h-3.5 w-3.5 shrink-0 translate-x-[-2px] text-stone-300 dark:text-violet-700/85 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 text-violet-400 dark:group-hover:text-emerald-300 transition-all duration-200"
+                        className="h-3.5 w-3.5 shrink-0 text-stone-300 dark:text-stone-600 opacity-0 group-hover:opacity-100 transition-opacity"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -732,29 +986,160 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                     </button>
                   ))}
                 </nav>
+
+                <div className="px-4 pt-3 pb-2 border-t-2 border-stone-200 dark:border-stone-700">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span aria-hidden className="text-[11px]">⚡</span>
+                    <p className="text-[10px] font-extrabold uppercase tracking-[0.22em] text-[#FF9600]">
+                      Shortcuts
+                    </p>
+                  </div>
+                </div>
+                <nav className="px-2 pb-3 pt-1 flex flex-col gap-0.5" aria-label="Workspace shortcuts">
+                  {WORKSPACE_SHORTCUTS.map((link) => (
+                    <button
+                      key={link.id}
+                      type="button"
+                      onClick={() => {
+                        onNavigate(link.page);
+                        trackEvent('dashboard_workspace_shortcut', { page: link.page });
+                      }}
+                      className="group flex items-center gap-2.5 rounded-xl px-2 py-2 text-left transition-all hover:bg-stone-50 dark:hover:bg-stone-800"
+                    >
+                      <span
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm bg-stone-100 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-700 group-hover:border-[#1CB0F6]/40 transition-colors"
+                        aria-hidden
+                      >
+                        {link.emoji}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-[12.5px] font-extrabold leading-tight text-stone-800 dark:text-stone-50">
+                          {link.label}
+                        </span>
+                        <span className="block text-[10px] mt-px leading-snug text-stone-400 dark:text-stone-500 line-clamp-1 font-bold">
+                          {link.hint}
+                        </span>
+                      </span>
+                      <svg
+                        className="h-3.5 w-3.5 shrink-0 text-stone-300 dark:text-stone-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        aria-hidden
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  ))}
+                </nav>
+
+                {/* TODO: Remove — dev-only test button */}
+                <div className="px-3 pb-3">
+                  <button
+                    type="button"
+                    onClick={() => onNavigate('onboarding')}
+                    className="w-full py-2 rounded-xl text-[10px] font-bold uppercase tracking-wide text-stone-400 border-2 border-dashed border-stone-300 hover:border-[#58CC02] hover:text-[#58CC02] transition-all"
+                  >
+                    🧪 Test Onboarding
+                  </button>
+                </div>
               </div>
 
-              {/* Sidebar Pro card (free users) */}
-              {isFree && (
-                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 via-fuchsia-600 to-rose-500 shadow-xl shadow-violet-500/25">
-                  <div className="absolute inset-0 pointer-events-none opacity-60" aria-hidden>
-                    <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-amber-300/30 blur-2xl dash-orb" />
-                    <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-pink-300/30 blur-2xl dash-orb" style={{ animationDelay: '3s' }} />
+              {/* ── Badges Card ── */}
+              <button
+                type="button"
+                onClick={() => onNavigate('badges')}
+                className="w-full text-left rounded-2xl bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 overflow-hidden hover:border-stone-300 dark:hover:border-stone-600 active:border-b-2 active:translate-y-0.5 transition-all group"
+              >
+                <div className="px-4 pt-3.5 pb-3">
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-lg" aria-hidden>🏅</span>
+                      <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-stone-400 dark:text-stone-500">
+                        Badges
+                      </p>
+                    </div>
+                    <p className="text-[11px] font-extrabold text-[#1CB0F6]">
+                      {unlockedBadgeList.length}/{BADGES.length}
+                    </p>
                   </div>
-                  <div className="relative p-4">
-                    <p className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 text-white text-[9px] font-bold uppercase tracking-wider backdrop-blur-sm">
+
+                  {/* Recent badges preview */}
+                  {recentBadges.length > 0 ? (
+                    <div className="flex gap-1.5">
+                      {recentBadges.map((badge) => {
+                        const rc = RARITY_COLORS[badge.rarity] || RARITY_COLORS.common;
+                        return (
+                          <div
+                            key={badge.id}
+                            className={`flex-1 rounded-lg ${rc.bg} border-2 ${rc.border} px-1.5 py-1.5 text-center`}
+                            title={`${badge.name} — ${badge.description}`}
+                          >
+                            <p className={`text-[9px] font-extrabold ${rc.text} truncate leading-tight`}>
+                              {badge.name}
+                            </p>
+                            <p className="text-[8px] font-bold text-stone-400 dark:text-stone-500 mt-0.5">
+                              +{badge.xp} XP
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-[10px] font-bold text-stone-400 dark:text-stone-500 text-center py-1">
+                      Earn badges to level up! <span aria-hidden>🏅</span>
+                    </p>
+                  )}
+                </div>
+
+                <div className="px-4 py-2 border-t-2 border-stone-200 dark:border-stone-700 bg-stone-50/50 dark:bg-stone-800/30 flex items-center justify-center gap-1.5">
+                  <p className="text-[10px] font-extrabold text-[#A560E8]">View all badges</p>
+                  <svg className="h-3 w-3 text-[#A560E8]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </button>
+
+              {/* Social proof */}
+              <div className="rounded-2xl bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 p-3.5">
+                <div className="flex items-center gap-3">
+                  <div className="flex -space-x-2" aria-hidden>
+                    {[
+                      { emoji: '👩‍🎓', bg: 'bg-[#58CC02]' },
+                      { emoji: '👨‍🎓', bg: 'bg-[#1CB0F6]' },
+                      { emoji: '👩‍💻', bg: 'bg-[#A560E8]' },
+                    ].map((row, i) => (
+                      <div
+                        key={i}
+                        className={`w-7 h-7 rounded-full ${row.bg} flex items-center justify-center text-[12px] border-2 border-white dark:border-stone-900`}
+                      >
+                        {row.emoji}
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-[11px] leading-snug">
+                    <span className="font-extrabold text-[#58CC02]">50,000+</span>{' '}
+                    <span className="text-stone-600 dark:text-stone-300 font-bold">students trust WriteScholar</span>
+                  </p>
+                </div>
+              </div>
+
+              {isFree && (
+                <div className="rounded-2xl bg-[#A560E8] border-2 border-b-4 border-[#8A48C7] overflow-hidden">
+                  <div className="p-4">
+                    <p className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/20 text-white text-[9px] font-extrabold uppercase tracking-wider">
                       <span aria-hidden>⭐</span> Pro
                     </p>
-                    <p className="dash-serif mt-2 text-[17px] font-bold text-white leading-tight">
+                    <p className="dash-serif mt-2 text-[17px] font-extrabold text-white leading-tight">
                       Unlock unlimited essays
                     </p>
-                    <p className="mt-1 text-[11px] text-white/90 leading-snug">
+                    <p className="mt-1 text-[11px] text-white/90 leading-snug font-bold">
                       Higher limits, larger uploads, every Pro tool.
                     </p>
                     <button
                       type="button"
                       onClick={() => onNavigate('pricing')}
-                      className="mt-3 w-full rounded-xl bg-white text-violet-700 hover:bg-amber-50 active:scale-[0.98] py-2 text-[12px] font-bold shadow-md transition-all"
+                      className="mt-3 w-full rounded-xl bg-white text-[#A560E8] py-2.5 text-[12px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-stone-200 active:border-b-2 active:translate-y-0.5 transition-all"
                     >
                       See plans →
                     </button>
@@ -766,59 +1151,78 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
 
           {/* ─── MAIN COLUMN ─── */}
           <div className="min-w-0 dash-fade space-y-7 lg:space-y-9">
+            {/* === DAILY REVIEW === */}
+            {dashboardTool === 'daily_review' && (
+              <DailyReviewTab user={user} onNavigate={onNavigate} onSwitchTool={(tool) => setDashboardTool(tool as DashboardTool)} />
+            )}
+
             {/* === ANALYZE TOOL === */}
-            {dashboardTool === 'analyze' && (
+            {dashboardTool === 'analyze' && analyzeView === 'hub' && (
+              <FeatureHub
+                title="Essay analysis"
+                subtitle="Paste an essay — get professor-level feedback, line-by-line."
+                mascotSrc="/mascot-paper.webp"
+                themeColor="#FF4B4B"
+                themeBorderColor="#E04343"
+                themeBgColor="#FFE8E8"
+                createLabel="+ Analyze a new essay"
+                createSubLabel="Drop in a draft and get feedback in seconds"
+                onCreate={() => setAnalyzeView('create')}
+                recentItems={analyzeRecents}
+                loading={hubRecentsLoading}
+                onViewAll={() => onNavigate('library')}
+                emptyStateMessage="Your analyzed papers will appear here."
+              />
+            )}
+            {dashboardTool === 'analyze' && analyzeView === 'create' && (
               <>
+                <button
+                  type="button"
+                  onClick={() => setAnalyzeView('hub')}
+                  className="mb-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-sm font-extrabold text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 active:border-b-2 active:translate-y-0.5 transition-all"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                  Back to recents
+                </button>
                 {/* Hero upload card */}
-                <section className="relative rounded-3xl overflow-hidden bg-white dark:bg-stone-900/80 ring-1 ring-stone-200/80 dark:ring-stone-700/60 shadow-xl shadow-stone-900/[0.05] dark:shadow-black/40">
-                  {/* Top accent strip */}
-                  <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-rose-400" />
-                  {/* Soft ambient glow */}
-                  <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
-                    <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-violet-300/15 dark:bg-violet-500/10 blur-3xl dash-orb" />
-                    <div className="absolute -bottom-24 -left-24 w-64 h-64 rounded-full bg-fuchsia-300/15 dark:bg-fuchsia-500/10 blur-3xl dash-orb" style={{ animationDelay: '5s' }} />
-                  </div>
+                <section className="rounded-2xl overflow-hidden bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700">
 
                   <div className="relative p-6 sm:p-8 lg:p-10">
-                    {/* Studying mascot — top left, always playing */}
                     <img
                       src="/mascot-study.webp"
                       alt=""
                       aria-hidden
                       loading="lazy"
                       decoding="async"
-                      className="hidden sm:block pointer-events-none absolute top-3 left-3 sm:top-4 sm:left-4 w-20 sm:w-24 lg:w-28 h-auto z-10 drop-shadow-[0_12px_22px_rgba(124,58,237,0.25)]"
+                      className="hidden lg:block pointer-events-none absolute -top-2 -left-2 w-20 lg:w-24 h-auto z-10 opacity-90"
                     />
-                    {/* Dancing mascot — top right, always playing */}
                     <img
                       src="/mascot-dance.webp"
                       alt=""
                       aria-hidden
                       loading="lazy"
                       decoding="async"
-                      className="hidden sm:block pointer-events-none absolute top-3 right-3 sm:top-4 sm:right-4 w-20 sm:w-24 lg:w-28 h-auto z-10 drop-shadow-[0_12px_22px_rgba(124,58,237,0.25)]"
+                      className="hidden lg:block pointer-events-none absolute -top-2 -right-2 w-20 lg:w-24 h-auto z-10 opacity-90"
                     />
-                    {/* Pill badge */}
                     <div className="text-center mb-5">
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-violet-300 ring-1 ring-violet-200/80 dark:ring-violet-800/50 text-xs font-medium">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#DDF4FF] dark:bg-[#1CB0F6]/10 text-[#1CB0F6] border-2 border-[#1CB0F6]/30 text-xs font-extrabold">
                         <span aria-hidden>✨</span>
                         {isNewUser ? 'Get started in under a minute' : 'Ready for your next analysis'}
                       </span>
                     </div>
 
-                    {/* Headline */}
-                    <h2 className="dash-serif text-center text-2xl sm:text-3xl lg:text-[2.4rem] font-semibold leading-[1.1] tracking-tight text-stone-900 dark:text-stone-50">
+                    <h2 className="dash-serif text-center text-2xl sm:text-3xl lg:text-[2.4rem] font-extrabold leading-[1.1] tracking-tight text-stone-900 dark:text-stone-50">
                       {isNewUser ? (
                         <>
-                          Get <span className="bg-gradient-to-r from-violet-700 via-fuchsia-600 to-rose-500 dark:from-violet-300 dark:via-fuchsia-300 dark:to-rose-300 bg-clip-text text-transparent">professor-style feedback</span> on your essay
+                          Get <span className="text-[#A560E8]">professor-style feedback</span> on your essay
                         </>
                       ) : (
                         <>
-                          Drop in your <span className="bg-gradient-to-r from-violet-700 via-fuchsia-600 to-rose-500 dark:from-violet-300 dark:via-fuchsia-300 dark:to-rose-300 bg-clip-text text-transparent">next essay</span>
+                          Drop in your <span className="text-[#A560E8]">next essay</span>
                         </>
                       )}
                     </h2>
-                    <p className="mt-3 text-center text-sm sm:text-base text-stone-500 dark:text-stone-400 max-w-2xl mx-auto leading-relaxed">
+                    <p className="mt-3 text-center text-sm sm:text-base text-stone-500 dark:text-stone-400 max-w-2xl mx-auto leading-relaxed font-bold">
                       {isNewUser
                         ? 'Drop in your paper and see exactly what to improve — structure, arguments, clarity, and more.'
                         : 'Detailed feedback on structure, arguments, and writing quality.'}
@@ -838,10 +1242,10 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                       onDrop={handleDrop}
                       onDragOver={handleDragOver}
                       onDragLeave={handleDragLeave}
-                      className={`group relative mt-6 cursor-pointer rounded-2xl border-2 border-dashed transition-all duration-300 ${
+                      className={`group relative mt-6 cursor-pointer rounded-2xl border-2 border-dashed transition-all ${
                         dropActive
-                          ? 'scale-[1.005] border-violet-500 bg-violet-50/80 dark:bg-violet-900/30 shadow-inner'
-                          : 'border-violet-300/70 dark:border-violet-700/50 bg-gradient-to-b from-violet-50/40 via-white to-white dark:from-violet-950/30 dark:via-stone-900/70 dark:to-stone-900/70 hover:border-violet-400 hover:from-violet-50/80 hover:to-white dark:hover:from-violet-950/40'
+                          ? 'border-[#1CB0F6] bg-[#DDF4FF] dark:bg-[#1CB0F6]/10'
+                          : 'border-stone-300 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/50 hover:border-[#1CB0F6] hover:bg-[#DDF4FF]/50'
                       }`}
                     >
                       <input
@@ -859,32 +1263,31 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                         {isUploading ? (
                           <div className="flex flex-col items-center gap-4">
                             <LoadingSpinner size="lg" text={`Uploading... ${uploadProgress}%`} color="blue" />
-                            <div className="w-full max-w-xs h-2 rounded-full bg-stone-200 dark:bg-stone-700 overflow-hidden">
-                              <div className="h-full rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 transition-all" style={{ width: `${uploadProgress}%` }} />
+                            <div className="w-full max-w-xs h-3 rounded-full bg-stone-200 dark:bg-stone-700 overflow-hidden">
+                              <div className="h-full rounded-full bg-[#58CC02] transition-all" style={{ width: `${uploadProgress}%` }} />
                             </div>
                           </div>
                         ) : (
                           <>
                             <div className="relative mx-auto mb-5 w-16 h-16 sm:w-20 sm:h-20">
-                              <span className="absolute inset-0 rounded-2xl dash-pulse" aria-hidden />
-                              <div className="relative w-full h-full rounded-2xl bg-gradient-to-br from-violet-600 via-fuchsia-600 to-rose-500 text-white flex items-center justify-center shadow-xl shadow-violet-600/35 group-hover:scale-105 group-hover:rotate-[-3deg] transition-all duration-300">
+                              <div className="w-full h-full rounded-2xl bg-[#1CB0F6] text-white flex items-center justify-center border-2 border-b-4 border-[#1899D6] group-hover:scale-105 transition-transform">
                                 <svg className="w-9 h-9 sm:w-10 sm:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                 </svg>
                               </div>
                             </div>
-                            <p className="dash-serif text-xl sm:text-2xl font-semibold text-stone-900 dark:text-stone-100">
+                            <p className="dash-serif text-xl sm:text-2xl font-extrabold text-stone-900 dark:text-stone-100">
                               Drop your essay here
                             </p>
-                            <p className="mt-1 text-sm sm:text-base text-stone-500 dark:text-stone-400">
-                              or <span className="text-violet-700 dark:text-violet-300 font-semibold underline-offset-4 group-hover:underline">click to browse</span>
+                            <p className="mt-1 text-sm sm:text-base text-stone-500 dark:text-stone-400 font-bold">
+                              or <span className="text-[#1CB0F6] font-extrabold underline-offset-4 group-hover:underline">click to browse</span>
                             </p>
                             <div className="mt-4 flex flex-wrap justify-center gap-2">
-                              <span className="px-2.5 py-1 rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 text-[11px] font-semibold ring-1 ring-rose-200/70 dark:ring-rose-800/40">PDF</span>
-                              <span className="px-2.5 py-1 rounded-full bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 text-[11px] font-semibold ring-1 ring-sky-200/70 dark:ring-sky-800/40">Word</span>
-                              <span className="px-2.5 py-1 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-[11px] font-semibold ring-1 ring-stone-200/70 dark:ring-stone-700/60">TXT</span>
+                              <span className="px-2.5 py-1 rounded-lg bg-[#FFE8E8] text-[#FF4B4B] text-[11px] font-extrabold border-2 border-[#FF4B4B]/20">PDF</span>
+                              <span className="px-2.5 py-1 rounded-lg bg-[#DDF4FF] text-[#1CB0F6] text-[11px] font-extrabold border-2 border-[#1CB0F6]/20">Word</span>
+                              <span className="px-2.5 py-1 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 text-[11px] font-extrabold border-2 border-stone-200 dark:border-stone-700">TXT</span>
                             </div>
-                            <p className="mt-3 text-[11px] text-stone-400 dark:text-stone-500">
+                            <p className="mt-3 text-[11px] text-stone-400 dark:text-stone-500 font-bold">
                               Up to {getMaxFileSizeLabel(plan)}
                               {isFree && (
                                 <>
@@ -892,7 +1295,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                                   <button
                                     type="button"
                                     onClick={(e) => { e.stopPropagation(); onNavigate('pricing'); }}
-                                    className="text-violet-600 dark:text-violet-400 font-semibold hover:underline"
+                                    className="text-[#FF9600] font-extrabold hover:underline"
                                   >
                                     Pro unlocks larger files
                                   </button>
@@ -907,63 +1310,63 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                     {/* Analysis previews — below drop zone */}
                     <section
                       aria-labelledby="analyze-output-examples-heading"
-                      className="mt-6 sm:mt-7 rounded-2xl border border-stone-200/85 dark:border-stone-700/75 bg-white/75 dark:bg-stone-900/45 p-4 sm:p-6 ring-1 ring-stone-200/35 dark:ring-white/5 shadow-inner"
+                      className="mt-6 sm:mt-7 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/50 p-4 sm:p-6"
                     >
                       <h3
                         id="analyze-output-examples-heading"
-                        className="text-center dash-serif text-sm sm:text-base font-semibold text-stone-800 dark:text-stone-100"
+                        className="text-center dash-serif text-sm sm:text-base font-extrabold text-stone-800 dark:text-stone-100"
                       >
                         See what your analysis looks like
                       </h3>
-                      <p className="mt-1 text-center text-[11px] sm:text-xs text-stone-500 dark:text-stone-400 mx-auto px-2 sm:px-0 text-balance max-w-[min(100%,36rem)]">
+                      <p className="mt-1 text-center text-[11px] sm:text-xs text-stone-500 dark:text-stone-400 mx-auto px-2 sm:px-0 text-balance max-w-[min(100%,36rem)] font-bold">
                         Muted previews for your draft—not canned advice.
                       </p>
 
                       <div className="mt-4 flex flex-nowrap gap-3 lg:gap-4 justify-between overflow-x-auto pb-3 snap-x snap-mandatory [scrollbar-width:thin]">
-                        <figure className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,260px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-violet-500 dark:border-violet-400 shadow-sm flex flex-col">
+                        <figure className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,260px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-b-4 border-[#A560E8] flex flex-col">
                           <div className="relative aspect-[16/11] w-full bg-black/80">
                             <video
                               className="absolute inset-0 h-full w-full object-cover object-center"
-                              aria-label="Short preview of essay analysis and professor-style feedback"
-                              title="Essay analyzer preview"
+                              aria-label="Quick walkthrough of essay analysis"
+                              title="Essay analyzer walkthrough"
                               muted
                               loop
                               playsInline
                               autoPlay
                               preload="metadata"
                             >
-                              <source src="/writescholar-essay-checker-demo.mp4" type="video/mp4" />
+                              <source src="/quick-walkthrough.mp4" type="video/mp4" />
                             </video>
                           </div>
-                          <figcaption className="px-2 py-1.5 text-center text-[10px] sm:text-[11px] font-semibold text-stone-600 dark:text-stone-400 border-t border-stone-200/70 dark:border-stone-700/70 bg-white/95 dark:bg-stone-900/95">
+                          <figcaption className="px-2 py-1.5 text-center text-[10px] sm:text-[11px] font-extrabold text-stone-600 dark:text-stone-400 border-t-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900">
                             Quick walkthrough
                           </figcaption>
                         </figure>
-                        <figure className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,260px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-violet-500 dark:border-violet-400 shadow-sm flex flex-col">
+                        <figure className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,260px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-b-4 border-[#1CB0F6] flex flex-col">
                           <div className="relative aspect-[16/11] w-full bg-stone-900">
                             <img
-                              src="/analyseimage1.png"
-                              alt="Sample rubric and feedback overview from an analyzed essay"
+                              src="/rubric-and-notes.png"
+                              alt="Sample rubric and feedback notes from an analyzed essay"
                               className="absolute inset-0 h-full w-full object-cover object-top"
                               loading="lazy"
                               decoding="async"
                             />
                           </div>
-                          <figcaption className="px-2 py-1.5 text-center text-[10px] sm:text-[11px] font-semibold text-stone-600 dark:text-stone-400 border-t border-stone-200/70 dark:border-stone-700/70 bg-white/95 dark:bg-stone-900/95">
+                          <figcaption className="px-2 py-1.5 text-center text-[10px] sm:text-[11px] font-extrabold text-stone-600 dark:text-stone-400 border-t-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900">
                             Rubric & notes
                           </figcaption>
                         </figure>
-                        <figure className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,260px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-violet-500 dark:border-violet-400 shadow-sm flex flex-col">
+                        <figure className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,260px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-b-4 border-[#58CC02] flex flex-col">
                           <div className="relative aspect-[16/11] w-full bg-stone-900">
                             <img
-                              src="/analyseimage2.png"
+                              src="/full-report.png"
                               alt="Sample full written breakdown from an analyzed essay"
                               className="absolute inset-0 h-full w-full object-cover object-top"
                               loading="lazy"
                               decoding="async"
                             />
                           </div>
-                          <figcaption className="px-2 py-1.5 text-center text-[10px] sm:text-[11px] font-semibold text-stone-600 dark:text-stone-400 border-t border-stone-200/70 dark:border-stone-700/70 bg-white/95 dark:bg-stone-900/95">
+                          <figcaption className="px-2 py-1.5 text-center text-[10px] sm:text-[11px] font-extrabold text-stone-600 dark:text-stone-400 border-t-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900">
                             Full report
                           </figcaption>
                         </figure>
@@ -971,33 +1374,31 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                     </section>
 
                     {uploadError && (
-                      <div className="mt-4 p-3 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm">
+                      <div className="mt-4 p-3 rounded-xl bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-2 border-[#FF4B4B]/30 text-[#FF4B4B] text-sm font-bold">
                         {uploadError}
                       </div>
                     )}
 
-                    {/* Divider */}
                     <div className="my-7 flex items-center gap-4">
-                      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-stone-200 to-transparent dark:via-stone-700" />
-                      <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-stone-400 dark:text-stone-500">Or paste below</span>
-                      <div className="h-px flex-1 bg-gradient-to-l from-transparent via-stone-200 to-transparent dark:via-stone-700" />
+                      <div className="h-0.5 flex-1 bg-stone-200 dark:bg-stone-700 rounded-full" />
+                      <span className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-stone-400 dark:text-stone-500">Or paste below</span>
+                      <div className="h-0.5 flex-1 bg-stone-200 dark:bg-stone-700 rounded-full" />
                     </div>
 
-                    {/* Textarea */}
                     <div className="relative">
                       <textarea
                         ref={textareaRef}
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
                         placeholder="Paste your essay here (minimum 200 words)..."
-                        className="w-full min-h-[180px] rounded-2xl border border-stone-200/90 dark:border-stone-700 bg-stone-50/80 dark:bg-stone-800/40 p-5 text-[15px] leading-relaxed text-stone-800 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 resize-none focus:outline-none focus:ring-4 focus:ring-violet-500/15 focus:border-violet-400 dark:focus:border-violet-600 transition-all"
+                        className="w-full min-h-[180px] rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-5 text-[15px] leading-relaxed text-stone-800 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 resize-none focus:outline-none focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 transition-all"
                       />
-                      <div className="absolute bottom-4 left-5 text-xs">
-                        <span className={isTextValid ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-stone-400 dark:text-stone-500'}>
+                      <div className="absolute bottom-4 left-5 text-xs font-bold">
+                        <span className={isTextValid ? 'text-[#58CC02] font-extrabold' : 'text-stone-400 dark:text-stone-500'}>
                           {getWordCount(inputText)} words
                         </span>
                         {getWordCount(inputText) > 0 && getWordCount(inputText) < 200 && (
-                          <span className="text-amber-600 dark:text-amber-400"> · {200 - getWordCount(inputText)} more needed</span>
+                          <span className="text-[#FF9600]"> · {200 - getWordCount(inputText)} more needed</span>
                         )}
                       </div>
                     </div>
@@ -1014,7 +1415,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                           </button>
                         )}
                         {isTextValid && (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 ring-1 ring-emerald-200/70 dark:ring-emerald-800/50 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#EAFFD6] dark:bg-[#58CC02]/10 border-2 border-[#58CC02]/30 text-[11px] font-extrabold text-[#58CC02]">
                             <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                             </svg>
@@ -1026,10 +1427,10 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                         type="button"
                         onClick={handleAnalyzeText}
                         disabled={!isTextValid}
-                        className={`inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm sm:text-base font-semibold transition-all ${
+                        className={`inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm sm:text-base font-extrabold uppercase tracking-wide transition-all ${
                           isTextValid
-                            ? 'bg-gradient-to-r from-violet-600 via-fuchsia-600 to-rose-500 text-white shadow-lg shadow-violet-500/30 hover:shadow-xl hover:shadow-fuchsia-500/35 hover:-translate-y-0.5 active:translate-y-0'
-                            : 'cursor-not-allowed bg-stone-100 dark:bg-stone-800 text-stone-400 dark:text-stone-500 ring-1 ring-stone-200/70 dark:ring-stone-700/60'
+                            ? 'bg-[#58CC02] text-white border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5'
+                            : 'cursor-not-allowed bg-stone-200 dark:bg-stone-800 text-stone-400 dark:text-stone-500 border-2 border-b-4 border-stone-300 dark:border-stone-700'
                         }`}
                       >
                         {isTextValid ? (
@@ -1049,10 +1450,10 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                   <section>
                     <div className="flex items-end justify-between mb-3 gap-3">
                       <div>
-                        <h3 className="dash-serif text-base sm:text-lg font-semibold text-stone-700 dark:text-stone-200">
+                        <h3 className="dash-serif text-base sm:text-lg font-extrabold text-stone-700 dark:text-stone-200">
                           {showCombinedUsage ? 'This month' : 'Monthly usage'}
                         </h3>
-                        <p className="text-[11px] text-stone-400 dark:text-stone-500 mt-0.5">
+                        <p className="text-[11px] text-stone-400 dark:text-stone-500 mt-0.5 font-bold">
                           {getResetsInText(usageStats.daysUntilReset)}
                         </p>
                       </div>
@@ -1060,7 +1461,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                         <button
                           type="button"
                           onClick={() => onNavigate('pricing')}
-                          className="text-[11px] font-semibold text-violet-700 dark:text-violet-400 hover:underline"
+                          className="text-[11px] font-extrabold text-[#FF9600] hover:underline"
                         >
                           Higher limits →
                         </button>
@@ -1068,40 +1469,37 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                     </div>
                     {showCombinedUsage ? (
                       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 dash-stagger">
-                        <div className="lg:col-span-2 relative overflow-hidden rounded-2xl bg-white/95 dark:bg-stone-900/70 ring-1 ring-violet-200/80 dark:ring-violet-800/50 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 group backdrop-blur-sm">
-                          <div className="pointer-events-none absolute -top-12 -right-12 w-32 h-32 rounded-full blur-2xl bg-violet-400/15" aria-hidden />
-                          <div className="relative p-4">
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="min-w-0">
-                                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-400 dark:text-stone-500 truncate">
-                                  Combined actions
-                                </p>
-                                <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">Analyses · Citations · Study packs · one monthly pool</p>
-                              </div>
-                              <span className="text-2xl" aria-hidden>⚡</span>
+                        <div className="lg:col-span-2 rounded-2xl bg-white dark:bg-stone-900 border-2 border-b-4 border-[#A560E8]/30 dark:border-[#A560E8]/40 p-4">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-stone-400 dark:text-stone-500 truncate">
+                                Combined actions
+                              </p>
+                              <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5 font-bold">Analyses · Citations · Study packs · one monthly pool</p>
                             </div>
-                            <p className={`dash-serif mt-2 text-3xl font-bold leading-none tabular-nums ${
-                              (usageStats.combinedActionsRemaining ?? 0) <= 0
-                                ? 'text-red-600 dark:text-red-400'
-                                : (usageStats.combinedActionsRemaining ?? 0) <= Math.max(1, Math.floor(combinedLimit * 0.2))
-                                  ? 'text-amber-600 dark:text-amber-400'
-                                  : 'text-violet-700 dark:text-violet-300'
-                            }`}>
-                              {usageStats.combinedActionsRemaining ?? 0}
-                              <span className="ml-1.5 text-xs font-normal text-stone-400 dark:text-stone-500">left</span>
-                            </p>
-                            <p className="text-[11px] text-stone-400 dark:text-stone-500 mt-1">of {combinedLimit} this period</p>
-                            <div className="mt-3 h-1 rounded-full bg-stone-100 dark:bg-stone-800 overflow-hidden">
-                              <div
-                                className="h-full rounded-full bg-gradient-to-r from-violet-500 via-fuchsia-500 to-purple-500 transition-all duration-700"
-                                style={{
-                                  width: `${Math.min(
-                                    100,
-                                    Math.max(2, Math.round(((usageStats.combinedActionsRemaining ?? 0) / Math.max(1, combinedLimit)) * 100))
-                                  )}%`,
-                                }}
-                              />
-                            </div>
+                            <span className="text-2xl" aria-hidden>⚡</span>
+                          </div>
+                          <p className={`dash-serif mt-2 text-3xl font-extrabold leading-none tabular-nums ${
+                            (usageStats.combinedActionsRemaining ?? 0) <= 0
+                              ? 'text-[#FF4B4B]'
+                              : (usageStats.combinedActionsRemaining ?? 0) <= Math.max(1, Math.floor(combinedLimit * 0.2))
+                                ? 'text-[#FF9600]'
+                                : 'text-[#A560E8]'
+                          }`}>
+                            {usageStats.combinedActionsRemaining ?? 0}
+                            <span className="ml-1.5 text-xs font-bold text-stone-400 dark:text-stone-500">left</span>
+                          </p>
+                          <p className="text-[11px] text-stone-400 dark:text-stone-500 mt-1 font-bold">of {combinedLimit} this period</p>
+                          <div className="mt-3 h-2 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden">
+                            <div
+                              className="h-full rounded-full bg-[#A560E8] transition-all duration-700"
+                              style={{
+                                width: `${Math.min(
+                                  100,
+                                  Math.max(2, Math.round(((usageStats.combinedActionsRemaining ?? 0) / Math.max(1, combinedLimit)) * 100))
+                                )}%`,
+                              }}
+                            />
                           </div>
                         </div>
                         {(() => {
@@ -1111,30 +1509,27 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                           const display = rem === -1 ? '∞' : `${rem}`;
                           const isUnlimited = rem === -1;
                           return (
-                            <div className="relative overflow-hidden rounded-2xl bg-white/95 dark:bg-stone-900/70 ring-1 ring-stone-200/80 dark:ring-stone-700/60 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 group backdrop-blur-sm">
-                              <div className="pointer-events-none absolute -top-12 -right-12 w-32 h-32 rounded-full blur-2xl bg-emerald-400/15" aria-hidden />
-                              <div className="relative p-4">
-                                <div className="flex items-start justify-between gap-2">
-                                  <div className="min-w-0">
-                                    <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-400 dark:text-stone-500 truncate">Uploads</p>
-                                    <p className={`dash-serif mt-1 text-3xl font-bold text-emerald-700 dark:text-emerald-300 leading-none`}>
-                                      {display}
-                                      {!isUnlimited && (
-                                        <span className="ml-1.5 text-xs font-normal text-stone-400 dark:text-stone-500">left</span>
-                                      )}
-                                      {isUnlimited && (
-                                        <span className="ml-1.5 text-xs font-normal text-stone-400 dark:text-stone-500">library</span>
-                                      )}
-                                    </p>
-                                  </div>
-                                  <span className="text-2xl group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-300" aria-hidden>📄</span>
+                            <div className="rounded-2xl bg-white dark:bg-stone-900 border-2 border-b-4 border-[#58CC02]/30 dark:border-[#58CC02]/40 p-4">
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="min-w-0">
+                                  <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-stone-400 dark:text-stone-500 truncate">Uploads</p>
+                                  <p className="dash-serif mt-1 text-3xl font-extrabold text-[#58CC02] leading-none">
+                                    {display}
+                                    {!isUnlimited && (
+                                      <span className="ml-1.5 text-xs font-bold text-stone-400 dark:text-stone-500">left</span>
+                                    )}
+                                    {isUnlimited && (
+                                      <span className="ml-1.5 text-xs font-bold text-stone-400 dark:text-stone-500">library</span>
+                                    )}
+                                  </p>
                                 </div>
-                                <div className="mt-3 h-1 rounded-full bg-stone-100 dark:bg-stone-800 overflow-hidden">
-                                  <div
-                                    className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-teal-500 transition-all duration-700"
-                                    style={{ width: `${pct}%` }}
-                                  />
-                                </div>
+                                <span className="text-2xl" aria-hidden>📄</span>
+                              </div>
+                              <div className="mt-3 h-2 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden">
+                                <div
+                                  className="h-full rounded-full bg-[#58CC02] transition-all duration-700"
+                                  style={{ width: `${pct}%` }}
+                                />
                               </div>
                             </div>
                           );
@@ -1149,7 +1544,8 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                             emoji: '📝',
                             remaining: usageStats.analysesRemaining,
                             total: freeMonthlyCaps.analyses,
-                            accent: 'rose' as const,
+                            color: '#FF4B4B',
+                            borderColor: '#FF4B4B',
                           },
                           {
                             key: 'study',
@@ -1157,7 +1553,8 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                             emoji: '📦',
                             remaining: usageStats.studyPacksRemaining,
                             total: freeMonthlyCaps.studyPacks,
-                            accent: 'amber' as const,
+                            color: '#FF9600',
+                            borderColor: '#FF9600',
                           },
                           {
                             key: 'citations',
@@ -1165,7 +1562,8 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                             emoji: '📚',
                             remaining: usageStats.citationsRemaining,
                             total: freeMonthlyCaps.citations,
-                            accent: 'sky' as const,
+                            color: '#1CB0F6',
+                            borderColor: '#1CB0F6',
                           },
                           {
                             key: 'uploads',
@@ -1173,36 +1571,27 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                             emoji: '📄',
                             remaining: usageStats.uploadsRemaining,
                             total: freeMonthlyCaps.uploads,
-                            accent: 'emerald' as const,
+                            color: '#58CC02',
+                            borderColor: '#58CC02',
                           },
                         ].map((card) => {
                           const pct = usagePct(card.remaining, card.total);
                           const display = card.remaining === -1 ? '∞' : `${card.remaining}`;
                           const isUnlimited = card.remaining === -1;
-                          const accentMap = {
-                            rose: { bar: 'from-rose-400 to-pink-500', text: 'text-rose-700 dark:text-rose-300', glow: 'bg-rose-400/15' },
-                            sky: { bar: 'from-sky-400 to-blue-500', text: 'text-sky-700 dark:text-sky-300', glow: 'bg-sky-400/15' },
-                            amber: { bar: 'from-amber-400 to-orange-500', text: 'text-amber-700 dark:text-amber-300', glow: 'bg-amber-400/15' },
-                            emerald: { bar: 'from-emerald-400 to-teal-500', text: 'text-emerald-700 dark:text-emerald-300', glow: 'bg-emerald-400/15' },
-                          };
-                          const a = accentMap[card.accent];
                           return (
-                            <div key={card.key} className="relative overflow-hidden rounded-2xl bg-white/95 dark:bg-stone-900/70 ring-1 ring-stone-200/80 dark:ring-stone-700/60 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 group backdrop-blur-sm">
-                              <div className={`pointer-events-none absolute -top-12 -right-12 w-32 h-32 rounded-full blur-2xl ${a.glow}`} aria-hidden />
-                              <div className="relative p-4">
-                                <div className="flex items-start justify-between gap-2">
-                                  <div className="min-w-0">
-                                    <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-stone-400 dark:text-stone-500 truncate">{card.label}</p>
-                                    <p className={`dash-serif mt-1 text-3xl font-bold ${a.text} leading-none`}>
-                                      {display}
-                                      {!isUnlimited && <span className="ml-1.5 text-xs font-normal text-stone-400 dark:text-stone-500">left</span>}
-                                    </p>
-                                  </div>
-                                  <span className="text-2xl group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-300" aria-hidden>{card.emoji}</span>
+                            <div key={card.key} className="rounded-2xl bg-white dark:bg-stone-900 border-2 border-b-4 p-4" style={{ borderColor: `${card.borderColor}30` }}>
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="min-w-0">
+                                  <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-stone-400 dark:text-stone-500 truncate">{card.label}</p>
+                                  <p className="dash-serif mt-1 text-3xl font-extrabold leading-none" style={{ color: card.color }}>
+                                    {display}
+                                    {!isUnlimited && <span className="ml-1.5 text-xs font-bold text-stone-400 dark:text-stone-500">left</span>}
+                                  </p>
                                 </div>
-                                <div className="mt-3 h-1 rounded-full bg-stone-100 dark:bg-stone-800 overflow-hidden">
-                                  <div className={`h-full rounded-full bg-gradient-to-r ${a.bar} transition-all duration-700`} style={{ width: `${pct}%` }} />
-                                </div>
+                                <span className="text-2xl" aria-hidden>{card.emoji}</span>
+                              </div>
+                              <div className="mt-3 h-2 rounded-full bg-stone-200 dark:bg-stone-800 overflow-hidden">
+                                <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, backgroundColor: card.color }} />
                               </div>
                             </div>
                           );
@@ -1216,29 +1605,28 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                 {isNewUser && (
                   <section>
                     <div className="mb-3">
-                      <h2 className="dash-serif text-xl sm:text-2xl font-semibold text-stone-900 dark:text-stone-50">What you'll get</h2>
-                      <p className="mt-0.5 text-xs sm:text-sm text-stone-500 dark:text-stone-400">A quick taste of what your analysis includes</p>
+                      <h2 className="dash-serif text-xl sm:text-2xl font-extrabold text-stone-900 dark:text-stone-50">What you'll get</h2>
+                      <p className="mt-0.5 text-xs sm:text-sm text-stone-500 dark:text-stone-400 font-bold">A quick taste of what your analysis includes</p>
                     </div>
                     <div className="grid sm:grid-cols-3 gap-3 sm:gap-4 dash-stagger">
-                      {/* Rubric scoring */}
-                      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-emerald-50/80 to-white dark:from-emerald-950/30 dark:to-stone-900/80 ring-1 ring-emerald-200/70 dark:ring-emerald-800/40 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 p-4">
+                      <div className="rounded-2xl bg-[#EAFFD6] dark:bg-[#58CC02]/10 border-2 border-b-4 border-[#58CC02]/30 p-4">
                         <div className="flex items-start justify-between gap-2 mb-3">
                           <div>
-                            <h3 className="dash-serif font-bold text-stone-900 dark:text-stone-50 text-[14.5px]">Rubric scoring</h3>
-                            <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">Category scores + estimated grade</p>
+                            <h3 className="dash-serif font-extrabold text-stone-900 dark:text-stone-50 text-[14.5px]">Rubric scoring</h3>
+                            <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5 font-bold">Category scores + estimated grade</p>
                           </div>
-                          <div className="shrink-0 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 text-white text-[10px] font-bold px-2 py-1 shadow-sm">B+</div>
+                          <div className="shrink-0 rounded-lg bg-[#58CC02] text-white text-[10px] font-extrabold px-2 py-1 border-b-2 border-[#46A302]">B+</div>
                         </div>
-                        <div className="space-y-2 rounded-xl bg-white/90 dark:bg-stone-950/40 ring-1 ring-emerald-100 dark:ring-emerald-900/40 p-2.5">
+                        <div className="space-y-2 rounded-xl bg-white dark:bg-stone-900 border-2 border-stone-200 dark:border-stone-700 p-2.5">
                           {[
-                            { label: 'Thesis & focus', w: '78%', tone: 'bg-emerald-500' },
-                            { label: 'Evidence', w: '65%', tone: 'bg-amber-500' },
-                            { label: 'Organization', w: '82%', tone: 'bg-emerald-500' },
-                            { label: 'Clarity & style', w: '71%', tone: 'bg-sky-500' },
+                            { label: 'Thesis & focus', w: '78%', tone: 'bg-[#58CC02]' },
+                            { label: 'Evidence', w: '65%', tone: 'bg-[#FF9600]' },
+                            { label: 'Organization', w: '82%', tone: 'bg-[#58CC02]' },
+                            { label: 'Clarity & style', w: '71%', tone: 'bg-[#1CB0F6]' },
                           ].map((row) => (
                             <div key={row.label} className="flex items-center gap-2">
-                              <span className="w-[40%] text-[10px] font-medium text-stone-600 dark:text-stone-400 truncate">{row.label}</span>
-                              <div className="flex-1 h-1.5 rounded-full bg-stone-200/90 dark:bg-stone-700/80 overflow-hidden">
+                              <span className="w-[40%] text-[10px] font-bold text-stone-600 dark:text-stone-400 truncate">{row.label}</span>
+                              <div className="flex-1 h-2 rounded-full bg-stone-200 dark:bg-stone-700 overflow-hidden">
                                 <div className={`h-full rounded-full ${row.tone}`} style={{ width: row.w }} />
                               </div>
                             </div>
@@ -1246,49 +1634,47 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                         </div>
                       </div>
 
-                      {/* Line-by-line notes */}
-                      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-amber-50/80 to-white dark:from-amber-950/30 dark:to-stone-900/80 ring-1 ring-amber-200/70 dark:ring-amber-800/40 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 p-4">
+                      <div className="rounded-2xl bg-[#FFF4E0] dark:bg-[#FF9600]/10 border-2 border-b-4 border-[#FF9600]/30 p-4">
                         <div className="mb-3">
-                          <h3 className="dash-serif font-bold text-stone-900 dark:text-stone-50 text-[14.5px]">Line-by-line notes</h3>
-                          <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">Inline highlights on your sentences</p>
+                          <h3 className="dash-serif font-extrabold text-stone-900 dark:text-stone-50 text-[14.5px]">Line-by-line notes</h3>
+                          <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5 font-bold">Inline highlights on your sentences</p>
                         </div>
-                        <div className="rounded-xl bg-white/90 dark:bg-stone-950/40 ring-1 ring-amber-100 dark:ring-amber-900/40 p-2.5 space-y-2">
+                        <div className="rounded-xl bg-white dark:bg-stone-900 border-2 border-stone-200 dark:border-stone-700 p-2.5 space-y-2">
                           <div className="flex gap-2">
-                            <span className="w-1 rounded-full bg-emerald-500 shrink-0" aria-hidden />
-                            <p className="text-[10px] leading-relaxed text-stone-600 dark:text-stone-300">
-                              <span className="bg-emerald-100 dark:bg-emerald-900/40 text-emerald-900 dark:text-emerald-100 rounded px-0.5">Strong thesis</span> — clearly states your position early.
+                            <span className="w-1 rounded-full bg-[#58CC02] shrink-0" aria-hidden />
+                            <p className="text-[10px] leading-relaxed text-stone-600 dark:text-stone-300 font-bold">
+                              <span className="bg-[#EAFFD6] text-[#46A302] rounded px-0.5 font-extrabold">Strong thesis</span> — clearly states your position early.
                             </p>
                           </div>
                           <div className="flex gap-2">
-                            <span className="w-1 rounded-full bg-amber-500 shrink-0" aria-hidden />
-                            <p className="text-[10px] leading-relaxed text-stone-600 dark:text-stone-300">
-                              This paragraph jumps topics — <span className="bg-amber-100 dark:bg-amber-900/40 text-amber-900 dark:text-amber-100 rounded px-0.5">add a bridge</span>.
+                            <span className="w-1 rounded-full bg-[#FF9600] shrink-0" aria-hidden />
+                            <p className="text-[10px] leading-relaxed text-stone-600 dark:text-stone-300 font-bold">
+                              This paragraph jumps topics — <span className="bg-[#FFF4E0] text-[#D97F00] rounded px-0.5 font-extrabold">add a bridge</span>.
                             </p>
                           </div>
                           <div className="flex gap-2">
-                            <span className="w-1 rounded-full bg-red-500 shrink-0" aria-hidden />
-                            <p className="text-[10px] leading-relaxed text-stone-600 dark:text-stone-300">
+                            <span className="w-1 rounded-full bg-[#FF4B4B] shrink-0" aria-hidden />
+                            <p className="text-[10px] leading-relaxed text-stone-600 dark:text-stone-300 font-bold">
                               Citation needed for{' '}
-                              <span className="bg-red-100 dark:bg-red-950/50 text-red-900 dark:text-red-100 rounded px-0.5 ring-1 ring-red-200 dark:ring-red-800/60">climate data</span>.
+                              <span className="bg-[#FFE8E8] text-[#E04343] rounded px-0.5 font-extrabold">climate data</span>.
                             </p>
                           </div>
                         </div>
                       </div>
 
-                      {/* Revision suggestions */}
-                      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-violet-50/80 to-white dark:from-violet-950/30 dark:to-stone-900/80 ring-1 ring-violet-200/70 dark:ring-violet-800/40 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 p-4">
+                      <div className="rounded-2xl bg-[#F3EAFF] dark:bg-[#A560E8]/10 border-2 border-b-4 border-[#A560E8]/30 p-4">
                         <div className="mb-3">
-                          <h3 className="dash-serif font-bold text-stone-900 dark:text-stone-50 text-[14.5px]">Revision suggestions</h3>
-                          <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">Actionable fixes, not vague advice</p>
+                          <h3 className="dash-serif font-extrabold text-stone-900 dark:text-stone-50 text-[14.5px]">Revision suggestions</h3>
+                          <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5 font-bold">Actionable fixes, not vague advice</p>
                         </div>
-                        <ul className="rounded-xl bg-white/90 dark:bg-stone-950/40 ring-1 ring-violet-100 dark:ring-violet-900/40 p-2.5 space-y-2">
+                        <ul className="rounded-xl bg-white dark:bg-stone-900 border-2 border-stone-200 dark:border-stone-700 p-2.5 space-y-2">
                           {[
                             'Tighten intro: move roadmap up',
                             'Swap passive → active in para 2',
                             'Add counterargument in section 3',
                           ].map((line) => (
-                            <li key={line} className="flex items-start gap-2 text-[10px] text-stone-700 dark:text-stone-200 leading-snug">
-                              <span className="mt-0.5 inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white">
+                            <li key={line} className="flex items-start gap-2 text-[10px] text-stone-700 dark:text-stone-200 leading-snug font-bold">
+                              <span className="mt-0.5 inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full bg-[#A560E8] text-white">
                                 <svg className="w-2 h-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                                 </svg>
@@ -1307,40 +1693,39 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                   <section>
                     <div className="flex items-end justify-between mb-3">
                       <div>
-                        <h2 className="dash-serif text-xl sm:text-2xl font-semibold text-stone-900 dark:text-stone-50">Recent analyses</h2>
-                        <p className="mt-0.5 text-xs sm:text-sm text-stone-500 dark:text-stone-400">Continue where you left off</p>
+                        <h2 className="dash-serif text-xl sm:text-2xl font-extrabold text-stone-900 dark:text-stone-50">Recent analyses</h2>
+                        <p className="mt-0.5 text-xs sm:text-sm text-stone-500 dark:text-stone-400 font-bold">Continue where you left off</p>
                       </div>
                       <button
                         onClick={() => onNavigate('library')}
-                        className="text-xs sm:text-sm font-semibold text-violet-700 dark:text-violet-400 hover:underline whitespace-nowrap"
+                        className="text-xs sm:text-sm font-extrabold text-[#1CB0F6] hover:underline whitespace-nowrap"
                       >
                         View all →
                       </button>
                     </div>
                     <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3 dash-stagger">
                       {recentAnalyses.slice(0, 6).map((a, idx) => {
-                        const palettes = ['from-rose-400 to-pink-500', 'from-violet-400 to-fuchsia-500', 'from-sky-400 to-blue-500', 'from-amber-400 to-orange-500', 'from-emerald-400 to-teal-500', 'from-fuchsia-400 to-purple-500'];
-                        const pal = palettes[idx % palettes.length];
+                        const duoColors = ['#FF4B4B', '#A560E8', '#1CB0F6', '#FF9600', '#58CC02', '#1CB0F6'];
+                        const c = duoColors[idx % duoColors.length];
                         return (
                           <button
                             key={a.id}
                             onClick={() => onNavigate('analysis', a.id)}
-                            className="group relative overflow-hidden rounded-2xl bg-white/95 dark:bg-stone-900/70 ring-1 ring-stone-200/80 dark:ring-stone-700/60 shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 text-left backdrop-blur-sm"
+                            className="group rounded-2xl bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 hover:border-stone-300 text-left transition-all active:border-b-2 active:translate-y-0.5"
                           >
-                            <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${pal}`} />
-                            <div className="relative p-4">
+                            <div className="p-4">
                               <div className="flex items-start gap-3">
-                                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${pal} text-white shadow-md group-hover:scale-105 group-hover:rotate-[-3deg] transition-all duration-300`}>
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white border-2 border-b-4 group-hover:scale-105 transition-transform" style={{ backgroundColor: c, borderColor: c }}>
                                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                   </svg>
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                  <p className="dash-serif text-[15px] font-bold text-stone-900 dark:text-stone-50 truncate group-hover:text-violet-700 dark:group-hover:text-violet-300 transition-colors">{a.title}</p>
-                                  <p className="mt-0.5 text-[11px] text-stone-500 dark:text-stone-400">{relativeTime(a.createdAt)}</p>
+                                  <p className="dash-serif text-[15px] font-extrabold text-stone-900 dark:text-stone-50 truncate">{a.title}</p>
+                                  <p className="mt-0.5 text-[11px] text-stone-500 dark:text-stone-400 font-bold">{relativeTime(a.createdAt)}</p>
                                 </div>
                                 {a.grade && (
-                                  <span className="px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-xs font-bold ring-1 ring-emerald-200/60 dark:ring-emerald-800/50">{a.grade}</span>
+                                  <span className="px-2 py-0.5 rounded-lg bg-[#EAFFD6] text-[#58CC02] text-xs font-extrabold border-2 border-[#58CC02]/30">{a.grade}</span>
                                 )}
                               </div>
                             </div>
@@ -1354,33 +1739,87 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
             )}
 
             {/* === STUDY PACK === */}
-            {dashboardTool === 'study_pack' && (
-              <StudyPackPage
-                embedded
-                onEmbeddedToolSwitch={switchEmbeddedTool}
-                onNavigate={onNavigate}
-                user={user}
-                onLogout={onLogout}
+            {dashboardTool === 'study_pack' && studyPackView === 'hub' && (
+              <FeatureHub
+                title="Study packs"
+                subtitle="Turn your notes into flashcards, quizzes, crosswords & more."
+                mascotSrc="/mascot-study.webp"
+                themeColor="#FF9600"
+                themeBorderColor="#D97F00"
+                themeBgColor="#FFF4E0"
+                createLabel="+ Create new study pack"
+                createSubLabel="Paste your notes — get a full pack in seconds"
+                onCreate={() => setStudyPackView('create')}
+                recentItems={studyPackRecents}
+                loading={hubRecentsLoading}
+                onViewAll={() => onNavigate('quiz-history')}
+                emptyStateMessage="Your first study pack will live here. Create one above to get started."
               />
+            )}
+            {dashboardTool === 'study_pack' && studyPackView === 'create' && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setStudyPackView('hub')}
+                  className="mb-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-sm font-extrabold text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 active:border-b-2 active:translate-y-0.5 transition-all"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                  Back to recents
+                </button>
+                <StudyPackPage
+                  embedded
+                  onEmbeddedToolSwitch={switchEmbeddedTool}
+                  onNavigate={onNavigate}
+                  user={user}
+                  onLogout={onLogout}
+                />
+              </>
             )}
 
             {/* === CITATIONS === */}
-            {dashboardTool === 'citations' && (
-              <CitationsPage
-                embedded
-                onEmbeddedToolSwitch={switchEmbeddedTool}
-                onNavigate={onNavigate}
-                user={user}
-                onLogout={onLogout}
+            {dashboardTool === 'citations' && citationsView === 'hub' && (
+              <FeatureHub
+                title="Citations"
+                subtitle="Find peer-reviewed sources in APA, MLA, Chicago & more."
+                mascotSrc="/mascot-thinking.webp"
+                themeColor="#1CB0F6"
+                themeBorderColor="#1899D6"
+                themeBgColor="#DDF4FF"
+                createLabel="+ Find new citations"
+                createSubLabel="Search by topic — get formatted, real sources"
+                onCreate={() => setCitationsView('create')}
+                recentItems={citationsRecents}
+                loading={hubRecentsLoading}
+                onViewAll={() => onNavigate('citation-history')}
+                emptyStateMessage="Your citation searches will live here."
               />
+            )}
+            {dashboardTool === 'citations' && citationsView === 'create' && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setCitationsView('hub')}
+                  className="mb-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-sm font-extrabold text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 active:border-b-2 active:translate-y-0.5 transition-all"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                  Back to recents
+                </button>
+                <CitationsPage
+                  embedded
+                  onEmbeddedToolSwitch={switchEmbeddedTool}
+                  onNavigate={onNavigate}
+                  user={user}
+                  onLogout={onLogout}
+                />
+              </>
             )}
 
             {/* === MORE TOOLS === */}
             {dashboardTool === 'more_tools' && (
-              <section className="rounded-3xl bg-white/85 dark:bg-stone-900/70 ring-1 ring-stone-200/80 dark:ring-stone-700/60 shadow-md backdrop-blur-md p-5 sm:p-7">
+              <section className="rounded-2xl bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 p-5 sm:p-7">
                 <div className="mb-5">
-                  <h2 className="dash-serif text-xl sm:text-2xl font-semibold text-stone-900 dark:text-stone-50">More tools</h2>
-                  <p className="mt-1 text-xs sm:text-sm text-stone-500 dark:text-stone-400">Free utilities — summarizer, calculators, grammar, and more.</p>
+                  <h2 className="dash-serif text-xl sm:text-2xl font-extrabold text-stone-900 dark:text-stone-50">More tools</h2>
+                  <p className="mt-1 text-xs sm:text-sm text-stone-500 dark:text-stone-400 font-bold">Free utilities — summarizer, calculators, grammar, and more.</p>
                 </div>
                 <MoreToolsGrid compact onNavigate={onNavigate} />
               </section>
@@ -1388,11 +1827,13 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
 
             {/* === QUICK ACCESS — always visible === */}
             <section>
-              <div className="mb-3">
-                <h2 className="dash-serif text-xl sm:text-2xl font-semibold text-stone-900 dark:text-stone-50">Quick access</h2>
-                <p className="mt-0.5 text-xs sm:text-sm text-stone-500 dark:text-stone-400">Jump straight into your saved work</p>
+              <div className="flex items-end justify-between mb-4">
+                <div>
+                  <h2 className="dash-serif text-xl sm:text-2xl font-extrabold text-stone-900 dark:text-stone-50">Quick access</h2>
+                  <p className="mt-0.5 text-xs sm:text-sm text-stone-500 dark:text-stone-400 font-bold">Jump straight into your saved work</p>
+                </div>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3 dash-stagger">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4 dash-stagger">
                 {WORKSPACE_SHORTCUTS.map((link, i) => {
                   const tint = QUICK_ACCESS_TINTS[i % QUICK_ACCESS_TINTS.length];
                   return (
@@ -1403,16 +1844,13 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                         onNavigate(link.page);
                         trackEvent('dashboard_workspace_shortcut', { page: link.page });
                       }}
-                      className={`group relative overflow-hidden rounded-2xl bg-gradient-to-br ${tint.tint} ring-1 ring-stone-200/80 dark:ring-stone-700/60 p-3.5 text-left shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300`}
+                      className={`group rounded-2xl ${tint.tintBg} border-2 border-b-4 border-stone-200 dark:border-stone-700 p-3.5 text-left hover:border-stone-300 active:border-b-2 active:translate-y-0.5 transition-all`}
                     >
-                      <div className={`relative w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br ${tint.grad} text-white flex items-center justify-center text-lg sm:text-xl shadow-md mb-2.5 group-hover:scale-110 group-hover:rotate-[-6deg] transition-transform duration-300`}>
+                      <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl ${tint.bg} text-white flex items-center justify-center text-lg sm:text-xl border-2 border-b-4 ${tint.border} mb-2.5 group-hover:scale-110 transition-transform`}>
                         <span aria-hidden>{link.emoji}</span>
                       </div>
-                      <p className={`dash-serif text-sm font-bold leading-tight ${tint.clr}`}>{link.label}</p>
-                      <p className="mt-0.5 text-[10.5px] leading-snug text-stone-500 dark:text-stone-400 line-clamp-1">{link.hint}</p>
-                      <svg className={`absolute right-3 top-3 w-3.5 h-3.5 ${tint.clr} opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all duration-200`} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-                      </svg>
+                      <p className={`dash-serif text-sm font-extrabold leading-tight ${tint.clr}`}>{link.label}</p>
+                      <p className="mt-0.5 text-[10.5px] leading-snug text-stone-500 dark:text-stone-400 line-clamp-1 font-bold">{link.hint}</p>
                     </button>
                   );
                 })}
@@ -1421,31 +1859,26 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
 
             {/* === PRO UPGRADE BANNER === */}
             {isFree && (
-              <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-600 via-fuchsia-600 to-rose-500 shadow-2xl shadow-fuchsia-500/30">
-                <div className="absolute inset-0 pointer-events-none" aria-hidden>
-                  <div className="absolute -top-12 -right-12 w-64 h-64 rounded-full bg-white/15 blur-3xl dash-orb" />
-                  <div className="absolute top-1/2 -left-16 w-48 h-48 rounded-full bg-amber-300/20 blur-3xl dash-orb" style={{ animationDelay: '2s' }} />
-                  <div className="absolute -bottom-8 right-1/3 w-40 h-40 rounded-full bg-pink-300/20 blur-3xl dash-orb" style={{ animationDelay: '4s' }} />
-                </div>
-                <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-5 p-6 sm:p-8">
+              <section className="rounded-2xl bg-[#FF9600] border-2 border-b-4 border-[#D97F00]">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5 p-6 sm:p-8">
                   <div className="flex items-start gap-4">
-                    <div className="hidden sm:flex h-14 w-14 lg:h-16 lg:w-16 shrink-0 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-md ring-2 ring-white/30 text-2xl lg:text-3xl shadow-lg">
+                    <div className="hidden sm:flex h-14 w-14 lg:h-16 lg:w-16 shrink-0 items-center justify-center rounded-2xl bg-white/20 text-2xl lg:text-3xl border-2 border-b-4 border-white/30">
                       <span aria-hidden>⭐</span>
                     </div>
                     <div className="min-w-0">
-                      <p className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-bold uppercase tracking-wider mb-1.5 backdrop-blur-sm">
-                        <span aria-hidden>✨</span> Limited offer
+                      <p className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/20 text-white text-[10px] font-extrabold uppercase tracking-wider mb-1.5">
+                        ✨ Limited offer
                       </p>
-                      <h3 className="dash-serif text-2xl sm:text-3xl font-bold text-white leading-tight">
-                        Unlock <span className="bg-gradient-to-r from-amber-200 to-yellow-100 bg-clip-text text-transparent">unlimited</span> essays
+                      <h3 className="dash-serif text-2xl sm:text-3xl font-extrabold text-white leading-tight">
+                        Unlock <span className="text-yellow-200">unlimited</span> essays
                       </h3>
-                      <p className="mt-1.5 text-sm sm:text-base text-white/90">Higher limits · 100 MB uploads · Every Pro tool</p>
+                      <p className="mt-1.5 text-sm sm:text-base text-white/90 font-bold">Higher limits · 100 MB uploads · Every Pro tool</p>
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={() => onNavigate('pricing')}
-                    className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-white hover:bg-amber-50 text-violet-700 font-bold rounded-xl shadow-xl shadow-black/15 hover:-translate-y-0.5 active:scale-95 transition-all whitespace-nowrap"
+                    className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-white text-[#FF9600] font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-stone-200 active:border-b-2 active:translate-y-0.5 transition-all whitespace-nowrap"
                   >
                     See Pro plans →
                   </button>

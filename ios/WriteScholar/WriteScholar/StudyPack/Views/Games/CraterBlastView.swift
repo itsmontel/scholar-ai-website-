@@ -747,6 +747,15 @@ struct CraterBlastView: View {
             .buttonStyle(WSPrimaryButtonStyle(fullWidth: false))
         }
         .padding()
+        .onAppear {
+            // Award + log exactly once per game. The end screen only
+            // appears once per match (resetGame() rebuilds state).
+            DailyGoalStore.shared.record(
+                .craterBlastPlayed,
+                title: craterBlast.title ?? "Crater Blast",
+                subtitle: "Score \(score) · streak \(longestStreak)"
+            )
+        }
     }
 
     private func statBox(value: String, label: String, color: Color) -> some View {

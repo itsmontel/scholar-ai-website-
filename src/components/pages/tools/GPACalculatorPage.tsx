@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import Header from '../../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../../common/WriteScholarEditorialBackground';
 import Footer from '../../common/Footer';
 import ScholarMascot from '../../common/ScholarMascot';
 
@@ -48,25 +47,25 @@ const GPACalculatorPage = ({ onNavigate, user, onLogout }: GPACalculatorPageProp
   useEffect(() => {
     let credits = 0;
     let points = 0;
-    
+
     courses.forEach(course => {
       if (course.credits > 0 && course.grade) {
         credits += course.credits;
         points += course.credits * gradePoints[course.grade];
       }
     });
-    
+
     setTotalCredits(credits);
     setTotalPoints(points);
     setGpa(credits > 0 ? points / credits : 0);
   }, [courses]);
 
   const addCourse = () => {
-    setCourses([...courses, { 
-      id: Date.now().toString(), 
-      name: '', 
-      credits: 3, 
-      grade: 'A' 
+    setCourses([...courses, {
+      id: Date.now().toString(),
+      name: '',
+      credits: 3,
+      grade: 'A'
     }]);
   };
 
@@ -77,7 +76,7 @@ const GPACalculatorPage = ({ onNavigate, user, onLogout }: GPACalculatorPageProp
   };
 
   const updateCourse = (id: string, field: keyof Course, value: string | number) => {
-    setCourses(courses.map(c => 
+    setCourses(courses.map(c =>
       c.id === id ? { ...c, [field]: value } : c
     ));
   };
@@ -91,10 +90,10 @@ const GPACalculatorPage = ({ onNavigate, user, onLogout }: GPACalculatorPageProp
   };
 
   const getGPAColor = (gpa: number) => {
-    if (gpa >= 3.7) return 'text-green-600';
-    if (gpa >= 3.0) return 'text-violet-600';
-    if (gpa >= 2.0) return 'text-yellow-600';
-    return 'text-red-600';
+    if (gpa >= 3.7) return 'text-[#58CC02]';
+    if (gpa >= 3.0) return 'text-[#1CB0F6]';
+    if (gpa >= 2.0) return 'text-[#FF9600]';
+    return 'text-[#FF4B4B]';
   };
 
   const getGPALabel = (gpa: number) => {
@@ -109,24 +108,23 @@ const GPACalculatorPage = ({ onNavigate, user, onLogout }: GPACalculatorPageProp
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden">
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
+    <div className="relative min-h-screen overflow-x-hidden bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="gpa-calculator" />
 
       {/* Hero Section */}
-      <section className="py-16 sm:py-20 bg-gradient-to-b from-emerald-50/50 to-white">
+      <section className="pt-16 pb-10 sm:pt-20 sm:pb-12">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-3xl mx-auto">
-            <div className="inline-flex items-center justify-center mb-6">
+            <div className="inline-flex items-center justify-center mb-5">
               <ScholarMascot size={80} animated={false} pose="default" />
             </div>
-            <span className="inline-flex items-center px-4 py-1.5 bg-emerald-100 text-emerald-700 rounded-full text-sm font-semibold mb-5">
+            <span className="inline-flex items-center px-4 py-1.5 bg-[#EAFFD6] text-[#58CC02] rounded-xl border-2 border-b-4 border-[#58CC02]/30 text-sm font-extrabold mb-5">
               Free Tool
             </span>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-5 leading-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4 leading-tight tracking-tight">
               GPA Calculator
             </h1>
-            <p className="text-lg text-gray-500 leading-relaxed max-w-2xl mx-auto">
+            <p className="text-base text-stone-500 dark:text-stone-400 leading-relaxed max-w-2xl mx-auto font-bold">
               Calculate your semester or cumulative GPA instantly. Add your courses, credit hours, and grades to see where you stand.
             </p>
           </div>
@@ -134,17 +132,17 @@ const GPACalculatorPage = ({ onNavigate, user, onLogout }: GPACalculatorPageProp
       </section>
 
       {/* Main Tool Section */}
-      <section className="py-12 sm:py-16">
+      <section className="pb-12 sm:pb-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid lg:grid-cols-3 gap-6">
             {/* Course Input Area */}
             <div className="lg:col-span-2">
-              <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 rounded-2xl p-5 sm:p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-lg font-semibold text-gray-900">Your Courses</h2>
+                  <h2 className="text-lg font-extrabold text-stone-800 dark:text-stone-100">Your Courses</h2>
                   <button
                     onClick={resetCalculator}
-                    className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-all font-medium"
+                    className="px-4 py-2 text-sm text-stone-500 hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-100 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-xl transition-all font-bold border-2 border-stone-200 dark:border-stone-700"
                   >
                     Reset
                   </button>
@@ -152,30 +150,30 @@ const GPACalculatorPage = ({ onNavigate, user, onLogout }: GPACalculatorPageProp
 
                 {/* Header Row */}
                 <div className="hidden sm:grid grid-cols-12 gap-3 mb-3 px-2">
-                  <div className="col-span-5 text-sm font-medium text-gray-500">Course Name (optional)</div>
-                  <div className="col-span-2 text-sm font-medium text-gray-500">Credits</div>
-                  <div className="col-span-3 text-sm font-medium text-gray-500">Grade</div>
-                  <div className="col-span-2 text-sm font-medium text-gray-500">Points</div>
+                  <div className="col-span-5 text-xs font-extrabold text-stone-400 uppercase tracking-wide">Course Name (optional)</div>
+                  <div className="col-span-2 text-xs font-extrabold text-stone-400 uppercase tracking-wide">Credits</div>
+                  <div className="col-span-3 text-xs font-extrabold text-stone-400 uppercase tracking-wide">Grade</div>
+                  <div className="col-span-2 text-xs font-extrabold text-stone-400 uppercase tracking-wide">Points</div>
                 </div>
 
                 {/* Course Rows */}
                 <div className="space-y-3">
                   {courses.map((course, index) => (
-                    <div key={course.id} className="grid grid-cols-12 gap-3 items-center p-3 bg-gray-50 rounded-xl">
+                    <div key={course.id} className="grid grid-cols-12 gap-3 items-center p-3 bg-stone-50 dark:bg-stone-800 rounded-xl border-2 border-stone-200 dark:border-stone-700">
                       <div className="col-span-12 sm:col-span-5">
                         <input
                           type="text"
                           value={course.name}
                           onChange={(e) => updateCourse(course.id, 'name', e.target.value)}
                           placeholder={`Course ${index + 1}`}
-                          className="w-full px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                          className="w-full px-3 py-2 text-sm bg-white dark:bg-stone-900 border-2 border-stone-200 dark:border-stone-600 rounded-lg focus:outline-none focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 text-stone-800 dark:text-stone-100"
                         />
                       </div>
                       <div className="col-span-4 sm:col-span-2">
                         <select
                           value={course.credits}
                           onChange={(e) => updateCourse(course.id, 'credits', parseInt(e.target.value))}
-                          className="w-full px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                          className="w-full px-3 py-2 text-sm bg-white dark:bg-stone-900 border-2 border-stone-200 dark:border-stone-600 rounded-lg focus:outline-none focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 text-stone-800 dark:text-stone-100"
                         >
                           {[1, 2, 3, 4, 5, 6].map(n => (
                             <option key={n} value={n}>{n}</option>
@@ -186,7 +184,7 @@ const GPACalculatorPage = ({ onNavigate, user, onLogout }: GPACalculatorPageProp
                         <select
                           value={course.grade}
                           onChange={(e) => updateCourse(course.id, 'grade', e.target.value)}
-                          className="w-full px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                          className="w-full px-3 py-2 text-sm bg-white dark:bg-stone-900 border-2 border-stone-200 dark:border-stone-600 rounded-lg focus:outline-none focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 text-stone-800 dark:text-stone-100"
                         >
                           {gradeOptions.map(g => (
                             <option key={g} value={g}>{g}</option>
@@ -194,14 +192,14 @@ const GPACalculatorPage = ({ onNavigate, user, onLogout }: GPACalculatorPageProp
                         </select>
                       </div>
                       <div className="col-span-2 sm:col-span-1 text-center">
-                        <span className="text-sm font-semibold text-gray-700">
+                        <span className="text-sm font-extrabold text-stone-700 dark:text-stone-300">
                           {(course.credits * gradePoints[course.grade]).toFixed(1)}
                         </span>
                       </div>
                       <div className="col-span-2 sm:col-span-1 text-right">
                         <button
                           onClick={() => removeCourse(course.id)}
-                          className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                          className="p-2 text-stone-400 hover:text-[#FF4B4B] hover:bg-[#FFE8E8] dark:hover:bg-[#FF4B4B]/10 rounded-lg transition-colors"
                           disabled={courses.length <= 1}
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -215,7 +213,7 @@ const GPACalculatorPage = ({ onNavigate, user, onLogout }: GPACalculatorPageProp
 
                 <button
                   onClick={addCourse}
-                  className="mt-4 w-full py-3 border-2 border-dashed border-gray-300 text-gray-600 font-medium rounded-xl hover:border-emerald-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all"
+                  className="mt-4 w-full py-3 border-2 border-dashed border-stone-300 dark:border-stone-600 text-stone-500 dark:text-stone-400 font-extrabold rounded-xl hover:border-[#58CC02] hover:text-[#58CC02] hover:bg-[#EAFFD6] dark:hover:bg-[#58CC02]/10 transition-all"
                 >
                   + Add Course
                 </button>
@@ -223,37 +221,37 @@ const GPACalculatorPage = ({ onNavigate, user, onLogout }: GPACalculatorPageProp
             </div>
 
             {/* GPA Results Panel */}
-            <div className="space-y-6">
+            <div className="space-y-5">
               {/* Main GPA Display */}
-              <div className="bg-violet-600 rounded-2xl p-6 text-white text-center">
-                <h3 className="text-lg font-semibold mb-2 opacity-90">Your GPA</h3>
-                <div className={`text-6xl font-bold mb-2`}>
+              <div className="bg-[#58CC02] border-2 border-b-4 border-[#46A302] rounded-2xl p-6 text-center">
+                <h3 className="text-sm font-extrabold uppercase tracking-wide mb-2 text-white/80">Your GPA</h3>
+                <div className="text-6xl font-extrabold text-white mb-2">
                   {gpa.toFixed(2)}
                 </div>
-                <div className="text-emerald-100 text-lg font-medium">
+                <div className="text-white/90 text-lg font-extrabold">
                   {getGPALabel(gpa)}
                 </div>
               </div>
 
               {/* Stats */}
-              <div className="bg-white border border-gray-200 rounded-2xl p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Summary</h3>
+              <div className="bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 rounded-2xl p-5">
+                <h3 className="text-sm font-extrabold text-stone-800 dark:text-stone-100 mb-4 uppercase tracking-wide">Summary</h3>
                 <div className="space-y-3">
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Total Credits</span>
-                    <span className="font-semibold text-gray-900">{totalCredits}</span>
+                  <div className="flex justify-between items-center py-2 border-b-2 border-stone-100 dark:border-stone-800">
+                    <span className="text-stone-500 dark:text-stone-400 font-bold text-sm">Total Credits</span>
+                    <span className="font-extrabold text-stone-800 dark:text-stone-100">{totalCredits}</span>
                   </div>
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Total Quality Points</span>
-                    <span className="font-semibold text-gray-900">{totalPoints.toFixed(1)}</span>
+                  <div className="flex justify-between items-center py-2 border-b-2 border-stone-100 dark:border-stone-800">
+                    <span className="text-stone-500 dark:text-stone-400 font-bold text-sm">Quality Points</span>
+                    <span className="font-extrabold text-stone-800 dark:text-stone-100">{totalPoints.toFixed(1)}</span>
                   </div>
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Courses</span>
-                    <span className="font-semibold text-gray-900">{courses.length}</span>
+                  <div className="flex justify-between items-center py-2 border-b-2 border-stone-100 dark:border-stone-800">
+                    <span className="text-stone-500 dark:text-stone-400 font-bold text-sm">Courses</span>
+                    <span className="font-extrabold text-stone-800 dark:text-stone-100">{courses.length}</span>
                   </div>
                   <div className="flex justify-between items-center py-2">
-                    <span className="text-gray-600">Letter Grade</span>
-                    <span className={`font-bold text-lg ${getGPAColor(gpa)}`}>
+                    <span className="text-stone-500 dark:text-stone-400 font-bold text-sm">Letter Grade</span>
+                    <span className={`font-extrabold text-lg ${getGPAColor(gpa)}`}>
                       {gpa >= 3.7 ? 'A' : gpa >= 3.0 ? 'B' : gpa >= 2.0 ? 'C' : gpa >= 1.0 ? 'D' : 'F'}
                     </span>
                   </div>
@@ -261,37 +259,23 @@ const GPACalculatorPage = ({ onNavigate, user, onLogout }: GPACalculatorPageProp
               </div>
 
               {/* GPA Scale Reference */}
-              <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">GPA Scale</h3>
+              <div className="bg-stone-100 dark:bg-stone-800 border-2 border-b-4 border-stone-200 dark:border-stone-700 rounded-2xl p-5">
+                <h3 className="text-sm font-extrabold text-stone-800 dark:text-stone-100 mb-4 uppercase tracking-wide">GPA Scale</h3>
                 <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">A+ / A</span>
-                    <span className="font-medium text-gray-900">4.0</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">A-</span>
-                    <span className="font-medium text-gray-900">3.7</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">B+</span>
-                    <span className="font-medium text-gray-900">3.3</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">B</span>
-                    <span className="font-medium text-gray-900">3.0</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">B-</span>
-                    <span className="font-medium text-gray-900">2.7</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">C+</span>
-                    <span className="font-medium text-gray-900">2.3</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">C</span>
-                    <span className="font-medium text-gray-900">2.0</span>
-                  </div>
+                  {[
+                    { grade: 'A+ / A', points: '4.0' },
+                    { grade: 'A-', points: '3.7' },
+                    { grade: 'B+', points: '3.3' },
+                    { grade: 'B', points: '3.0' },
+                    { grade: 'B-', points: '2.7' },
+                    { grade: 'C+', points: '2.3' },
+                    { grade: 'C', points: '2.0' },
+                  ].map((row, i) => (
+                    <div key={i} className="flex justify-between">
+                      <span className="text-stone-500 dark:text-stone-400 font-bold">{row.grade}</span>
+                      <span className="font-extrabold text-stone-800 dark:text-stone-100">{row.points}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -300,69 +284,58 @@ const GPACalculatorPage = ({ onNavigate, user, onLogout }: GPACalculatorPageProp
       </section>
 
       {/* Tips Section */}
-      <section className="py-12 sm:py-16 bg-gray-50">
+      <section className="py-12 sm:py-16 bg-stone-100 dark:bg-stone-900">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">Tips for Improving Your GPA</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                </svg>
+          <h2 className="text-2xl font-extrabold text-stone-800 dark:text-stone-100 mb-8 text-center tracking-tight">Tips for Improving Your GPA</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {[
+              { icon: '📊', title: 'Prioritize High-Credit Courses', desc: 'A good grade in a 4-credit course impacts your GPA more than in a 2-credit course.', color: '#58CC02', tint: '#EAFFD6' },
+              { icon: '🚀', title: 'Start Strong Each Semester', desc: "It's easier to maintain a high GPA than to raise a low one. Begin each term with focus.", color: '#A560E8', tint: '#F3EAFF' },
+              { icon: '⚡', title: 'Use Office Hours', desc: 'Professors notice students who seek help. It can make the difference between a B+ and an A.', color: '#FF4B4B', tint: '#FFE8E8' },
+            ].map((tip, i) => (
+              <div key={i} className="bg-white dark:bg-stone-800 border-2 border-b-4 border-stone-200 dark:border-stone-700 rounded-2xl p-5">
+                <div
+                  className="w-12 h-12 rounded-xl border-2 border-b-[3px] flex items-center justify-center mb-4 text-xl"
+                  style={{ backgroundColor: `${tip.color}20`, borderColor: `${tip.color}50` }}
+                >
+                  {tip.icon}
+                </div>
+                <h3 className="font-extrabold text-stone-800 dark:text-stone-100 mb-2">{tip.title}</h3>
+                <p className="text-stone-500 dark:text-stone-400 text-sm font-bold">{tip.desc}</p>
               </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Prioritize High-Credit Courses</h3>
-              <p className="text-gray-600 text-sm">A good grade in a 4-credit course impacts your GPA more than in a 2-credit course.</p>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Start Strong Each Semester</h3>
-              <p className="text-gray-600 text-sm">It&apos;s easier to maintain a high GPA than to raise a low one. Begin each term with focus.</p>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-2">Use Office Hours</h3>
-              <p className="text-gray-600 text-sm">Professors notice students who seek help. It can make the difference between a B+ and an A.</p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-12 sm:py-16 bg-gray-900">
+      <section className="py-12 sm:py-16 bg-[#58CC02]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-4 tracking-tight">
             Need help with your coursework?
           </h2>
-          <p className="text-gray-400 mb-8 max-w-xl mx-auto">
+          <p className="text-white/80 mb-8 max-w-xl mx-auto font-bold">
             WriteScholar helps you write better papers, find citations, and study smarter with AI-powered tools.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             {user ? (
-              <button 
+              <button
                 onClick={() => onNavigate('dashboard')}
-                className="px-6 py-3 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors"
+                className="px-6 py-3.5 bg-white text-[#58CC02] font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] hover:bg-stone-50 active:border-b-2 active:translate-y-0.5 transition-all"
               >
                 Go to Dashboard
               </button>
             ) : (
               <>
-                <button 
+                <button
                   onClick={() => onNavigate('signup')}
-                  className="px-6 py-3 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors"
+                  className="px-6 py-3.5 bg-white text-[#58CC02] font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] hover:bg-stone-50 active:border-b-2 active:translate-y-0.5 transition-all"
                 >
                   Try WriteScholar Free
                 </button>
-                <button 
+                <button
                   onClick={() => onNavigate('features')}
-                  className="px-6 py-3 border border-gray-600 text-white font-medium rounded-xl hover:border-gray-500 transition-colors"
+                  className="px-6 py-3.5 border-2 border-b-4 border-white/40 text-white font-extrabold uppercase tracking-wide rounded-xl hover:bg-white/10 active:border-b-2 active:translate-y-0.5 transition-all"
                 >
                   Learn More
                 </button>

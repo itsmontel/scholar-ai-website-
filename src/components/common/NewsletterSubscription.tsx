@@ -49,20 +49,18 @@ const NewsletterSubscription: React.FC<NewsletterSubscriptionProps> = ({ variant
 
   if (variant === 'blog') {
     return (
-      <div className="mt-12 mb-8 p-8 bg-gradient-to-br from-violet-50 to-violet-50 rounded-2xl border border-violet-100">
+      <div className="mt-12 mb-8 p-8 bg-[#EAFFD6] dark:bg-[#58CC02]/10 rounded-2xl border-2 border-b-4 border-[#58CC02]/30 dark:border-[#58CC02]/30" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
         <div className="text-center max-w-md mx-auto">
-          <div className="w-12 h-12 bg-violet-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-            <svg className="w-6 h-6 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
+          <div className="w-14 h-14 bg-white dark:bg-stone-800 rounded-2xl border-2 border-b-4 border-[#58CC02]/30 flex items-center justify-center mx-auto mb-4">
+            <img src="/mascot-celebrating.gif" alt="Newsletter mascot" className="w-10 h-10 object-contain" />
           </div>
-          <h3 className="text-xl font-bold text-gray-900 mb-2">Subscribe to Our Newsletter</h3>
-          <p className="text-gray-600 text-sm mb-6">
+          <h3 className="text-xl font-extrabold text-stone-900 dark:text-stone-100 mb-2">Subscribe to Our Newsletter</h3>
+          <p className="text-stone-600 dark:text-stone-400 text-sm mb-6">
             Get the latest study tips, writing guides, and product updates delivered to your inbox.
           </p>
           
           {status === 'success' ? (
-            <div className="flex items-center justify-center space-x-2 text-green-600 bg-green-50 py-3 px-4 rounded-lg">
+            <div className="flex items-center justify-center space-x-2 text-[#58CC02] bg-[#EAFFD6] dark:bg-[#58CC02]/20 py-3 px-4 rounded-xl border-2 border-[#58CC02]/30">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
@@ -76,13 +74,13 @@ const NewsletterSubscription: React.FC<NewsletterSubscriptionProps> = ({ variant
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
-                  className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500 text-sm"
+                  className="flex-1 px-4 py-3 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#58CC02]/40 focus:border-[#58CC02] bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 text-sm"
                   disabled={status === 'loading'}
                 />
                 <button
                   type="submit"
                   disabled={status === 'loading'}
-                  className="px-6 py-3 bg-violet-600 text-white font-semibold rounded-xl hover:bg-violet-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm whitespace-nowrap"
+                  className="px-6 py-3 bg-[#58CC02] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] hover:bg-[#4CAF00] active:border-b-2 active:translate-y-0.5 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed text-sm whitespace-nowrap"
                 >
                   {status === 'loading' ? (
                     <span className="flex items-center justify-center space-x-2">
@@ -100,7 +98,7 @@ const NewsletterSubscription: React.FC<NewsletterSubscriptionProps> = ({ variant
               {status === 'error' && (
                 <p className="text-red-600 text-sm">{message}</p>
               )}
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-stone-500 dark:text-stone-400">
                 No spam, unsubscribe anytime.
               </p>
             </form>

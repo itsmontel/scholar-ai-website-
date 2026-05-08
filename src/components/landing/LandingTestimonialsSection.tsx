@@ -14,7 +14,7 @@ const TESTIMONIALS: { name: string; text: string }[] = [
   {
     name: 'Elena V.',
     text:
-      'English isn’t my first language. The comments on clarity were concrete: swap this word, tighten that sentence. My TA said the draft sounded smoother.',
+      'English isn\'t my first language. The comments on clarity were concrete: swap this word, tighten that sentence. My TA said the draft sounded smoother.',
   },
   {
     name: 'James O.',
@@ -33,21 +33,23 @@ const TESTIMONIALS: { name: string; text: string }[] = [
   },
 ];
 
+const AVATAR_COLORS = [
+  { bg: 'bg-[#F3EAFF]', text: 'text-[#A560E8]', border: 'border-[#A560E8]' },
+  { bg: 'bg-[#E5F8D0]', text: 'text-[#58CC02]', border: 'border-[#58CC02]' },
+  { bg: 'bg-[#FFF4E0]', text: 'text-[#FF9600]', border: 'border-[#FF9600]' },
+  { bg: 'bg-[#FFE8E8]', text: 'text-[#FF4B4B]', border: 'border-[#FF4B4B]' },
+  { bg: 'bg-[#DDF4FF]', text: 'text-[#1CB0F6]', border: 'border-[#1CB0F6]' },
+  { bg: 'bg-[#E5F8D0]', text: 'text-[#58CC02]', border: 'border-[#58CC02]' },
+];
+
 function InitialAvatar({ name }: { name: string }) {
   const letter = name.trim().charAt(0).toUpperCase() || '?';
-  const hues = [
-    'bg-violet-100 text-violet-800 dark:bg-violet-950/60 dark:text-violet-200 border-violet-200/80 dark:border-violet-800/50',
-    'bg-teal-100 text-teal-800 dark:bg-teal-950/50 dark:text-teal-200 border-teal-200/80 dark:border-teal-800/50',
-    'bg-amber-100 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200 border-amber-200/80 dark:border-amber-800/50',
-    'bg-rose-100 text-rose-800 dark:bg-rose-950/50 dark:text-rose-200 border-rose-200/80 dark:border-rose-800/50',
-    'bg-sky-100 text-sky-800 dark:bg-sky-950/50 dark:text-sky-200 border-sky-200/80 dark:border-sky-800/50',
-    'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200 border-emerald-200/80 dark:border-emerald-800/50',
-  ];
-  const idx = name.split('').reduce((a, c) => a + c.charCodeAt(0), 0) % hues.length;
+  const idx = name.split('').reduce((a, c) => a + c.charCodeAt(0), 0) % AVATAR_COLORS.length;
+  const color = AVATAR_COLORS[idx];
 
   return (
     <div
-      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border text-sm font-bold ${hues[idx]}`}
+      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-b-4 text-sm font-extrabold ${color.bg} ${color.text} ${color.border}`}
       aria-hidden
     >
       {letter}
@@ -55,59 +57,72 @@ function InitialAvatar({ name }: { name: string }) {
   );
 }
 
+function StarRating() {
+  return (
+    <div className="flex gap-0.5" aria-label="5 out of 5 stars">
+      {[...Array(5)].map((_, i) => (
+        <svg key={i} className="w-4 h-4 text-[#FF9600]" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+        </svg>
+      ))}
+    </div>
+  );
+}
+
 export default function LandingTestimonialsSection() {
   return (
     <section
-      className="relative py-16 sm:py-24 overflow-hidden border-t border-stone-200/90 dark:border-stone-800 scroll-mt-20"
+      className="relative py-16 sm:py-24 overflow-hidden border-t-2 border-[#E5E5E5] scroll-mt-20 bg-white"
       aria-labelledby="landing-testimonials-heading"
+      style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
     >
-      <div className="absolute inset-0 bg-white dark:bg-stone-950/80" aria-hidden />
-      <div
-        className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(91,33,182,0.06),transparent_55%)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-8%,rgba(109,40,217,0.1),transparent_55%)] pointer-events-none"
-        aria-hidden
-      />
-
       <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <LandingScrollReveal>
         <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-14">
-          <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">
+          <span className="inline-block px-4 py-1.5 rounded-xl text-xs font-extrabold uppercase tracking-[0.22em] text-[#1CB0F6] bg-[#DDF4FF] border-2 border-b-4 border-[#1CB0F6] mb-4">
             Student stories
-          </p>
+          </span>
           <h2
             id="landing-testimonials-heading"
-            className="text-2xl sm:text-3xl lg:text-[2.15rem] font-semibold text-stone-900 dark:text-stone-100 mb-4 tracking-tight leading-tight px-2"
-            style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+            className="text-2xl sm:text-3xl lg:text-[2.15rem] font-extrabold text-[#3C3C3C] mb-4 tracking-tight leading-tight px-2"
+            style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
           >
             Join the{' '}
-            <span className="text-violet-700 dark:text-violet-400">50,000+ students</span> who’ve transformed their writing
+            <span className="text-[#58CC02]">50,000+ students</span> who've transformed their writing
           </h2>
-          <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed">
+          <p className="text-base sm:text-lg text-[#777] leading-relaxed">
             Essays, citations, and revision passes that match how assignments actually get graded.
           </p>
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-          {TESTIMONIALS.map((t) => (
-            <blockquote
-              key={t.name}
-              className="rounded-2xl border border-stone-200/90 dark:border-stone-700/90 bg-white/80 dark:bg-stone-900/50 p-5 sm:p-6 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.1)] dark:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.35)] ring-1 ring-black/[0.03] dark:ring-white/[0.04]"
-            >
-              <div className="flex items-start gap-3 mb-4">
-                <InitialAvatar name={t.name} />
-                <footer className="min-w-0 pt-0.5">
-                  <cite className="not-italic font-semibold text-stone-900 dark:text-stone-100 text-sm sm:text-base block">
-                    {t.name}
-                  </cite>
-                </footer>
-              </div>
-              <p className="text-sm sm:text-[15px] text-stone-700 dark:text-stone-300 leading-relaxed text-left">
-                “{t.text}”
-              </p>
-            </blockquote>
-          ))}
+          {TESTIMONIALS.map((t, idx) => {
+            const color = AVATAR_COLORS[idx % AVATAR_COLORS.length];
+            return (
+              <blockquote
+                key={t.name}
+                className="rounded-2xl border-2 border-b-4 border-[#E5E5E5] bg-white p-5 sm:p-6"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <InitialAvatar name={t.name} />
+                    <footer className="min-w-0 pt-0.5">
+                      <cite className="not-italic font-extrabold text-[#3C3C3C] text-sm sm:text-base block">
+                        {t.name}
+                      </cite>
+                    </footer>
+                  </div>
+                  <StarRating />
+                </div>
+                <p className="text-sm sm:text-[15px] text-[#777] leading-relaxed text-left">
+                  "{t.text}"
+                </p>
+              </blockquote>
+            );
+          })}
         </div>
 
-        <p className="mt-8 text-center text-xs text-stone-500 dark:text-stone-500 max-w-2xl mx-auto">
+        <p className="mt-8 text-center text-xs text-[#AFAFAF] max-w-2xl mx-auto">
           Sample quotes only. Not from real customers.
         </p>
         </LandingScrollReveal>

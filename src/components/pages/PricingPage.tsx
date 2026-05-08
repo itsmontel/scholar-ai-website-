@@ -192,7 +192,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       monthlyPrice: 19.99,
       yearlyPrice: 199.99,
       features: [
-        '49 combined analyses, study packs & citations/mo',
+        '99 combined analyses, study packs & citations/mo',
         '999,999 words Paper Summarizer',
         'All citation styles, PDF/Word export',
         'Focus Mode (unlimited blocked sites)',
@@ -219,7 +219,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       yearlyPrice: 399.99,
       features: [
         'Everything in Pro',
-        '199 combined analyses, study packs & citations/mo — great for heavy citation use',
+        '499 combined analyses, study packs & citations/mo — great for heavy citation use',
         'Summarise unlimited research papers',
         '1GB total document library storage'
       ],
@@ -248,11 +248,11 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
     },
     {
       question: "What does Pro include?",
-      answer: "Pro includes 49 combined actions per month (analyses, study packs & citations), 999,999 words for the Paper Summarizer, unlimited Focus Mode blocked sites, uploads up to 100MB per file, 100MB total library storage, all citation styles, full annotations and feedback, Apply WriteScholar revisions into your draft, and full access to quizzes, flashcards, crossword & Crater Blast."
+      answer: "Pro includes 99 combined actions per month (analyses, study packs & citations), 999,999 words for the Paper Summarizer, unlimited Focus Mode blocked sites, uploads up to 100MB per file, 100MB total library storage, all citation styles, full annotations and feedback, Apply WriteScholar revisions into your draft, and full access to quizzes, flashcards, crossword & Crater Blast."
     },
     {
       question: "What does Premium add?",
-      answer: "Premium includes everything in Pro with 4× usage: 199 combined actions per month, unlimited research-paper summarisation, and 1GB total library storage for your document library."
+      answer: "Premium includes everything in Pro with 5× usage: 499 combined actions per month, unlimited research-paper summarisation, and 1GB total library storage for your document library."
     },
     {
       question: "Can I change my plan after subscribing?",
@@ -294,22 +294,16 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden">
+    <div className="relative min-h-screen overflow-x-hidden" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="pricing" />
 
       {/* Hero + plans — same surface treatment as landing pricing section */}
       <section
-        className="relative py-16 sm:py-24 overflow-hidden border-b border-stone-200/90 dark:border-stone-800"
+        className="relative py-16 sm:py-24 overflow-hidden"
         aria-labelledby="pricing-page-heading"
       >
-        <div className="absolute inset-0 bg-[#f8fafc] dark:bg-[#0c0a09]" aria-hidden />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#f1f5f9] via-white to-[#f8fafc] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 pointer-events-none" aria-hidden />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_85%_55%_at_50%_-12%,rgba(91,33,182,0.08),transparent_55%)] dark:bg-[radial-gradient(ellipse_85%_50%_at_50%_-8%,rgba(109,40,217,0.12),transparent_58%)] pointer-events-none" aria-hidden />
-        <div
-          className="absolute inset-0 opacity-[0.4] dark:opacity-[0.15] pointer-events-none bg-[length:32px_32px] bg-[linear-gradient(to_right,rgba(148,163,184,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.07)_1px,transparent_1px)]"
-          aria-hidden
-        />
+        <div className="absolute inset-0 bg-stone-50 dark:bg-stone-950" aria-hidden />
 
         {/* Mascot working on a laptop — top-right of the pricing hero. Tells
             users "this is what you'll be doing on Pro". Hidden on small screens. */}
@@ -319,19 +313,18 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
           aria-hidden
           loading="lazy"
           decoding="async"
-          className="hidden lg:block pointer-events-none absolute top-10 right-6 xl:right-12 w-44 xl:w-52 h-auto z-10 drop-shadow-[0_22px_36px_rgba(124,58,237,0.30)]"
+          className="hidden lg:block pointer-events-none absolute top-10 right-6 xl:right-12 w-44 xl:w-52 h-auto z-10"
         />
 
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
-            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">
+            <p className="text-xs font-extrabold uppercase tracking-wider text-[#58CC02] dark:text-[#58CC02] mb-3">
               Pricing
             </p>
-            <div className="mx-auto mb-4 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85" aria-hidden />
+            <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-[#58CC02]" aria-hidden />
             <h1
               id="pricing-page-heading"
-              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-semibold text-stone-900 dark:text-stone-100 mb-4 tracking-tight leading-tight"
-              style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-stone-900 dark:text-stone-100 mb-4 tracking-tight leading-tight"
             >
               Simple, transparent pricing
             </h1>
@@ -341,14 +334,14 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
           </div>
 
           <div className="flex flex-col items-center mb-10 sm:mb-12">
-            <div className="inline-flex rounded-xl border border-violet-200/90 dark:border-violet-700/60 bg-white/90 dark:bg-stone-800/90 backdrop-blur-sm p-1 shadow-sm ring-1 ring-violet-500/10">
+            <div className="inline-flex rounded-xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-1">
               <button
                 type="button"
                 onClick={() => setBillingCycle('monthly')}
                 className={`px-5 sm:px-6 py-2.5 rounded-[0.65rem] text-sm sm:text-base font-semibold transition-all ${
                   billingCycle === 'monthly'
-                    ? 'bg-violet-600 text-white shadow-md shadow-violet-900/20'
-                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'
+                    ? 'bg-[#58CC02] text-white border-2 border-b-4 border-[#46A302] font-extrabold'
+                    : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'
                 }`}
               >
                 Bill monthly
@@ -358,8 +351,8 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                 onClick={() => setBillingCycle('yearly')}
                 className={`px-5 sm:px-6 py-2.5 rounded-[0.65rem] text-sm sm:text-base font-semibold transition-all flex items-center gap-2 ${
                   billingCycle === 'yearly'
-                    ? 'bg-violet-600 text-white shadow-md shadow-violet-900/20'
-                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'
+                    ? 'bg-[#58CC02] text-white border-2 border-b-4 border-[#46A302] font-extrabold'
+                    : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'
                 }`}
               >
                 Bill yearly
@@ -367,7 +360,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                   className={`px-2 py-0.5 text-[10px] sm:text-xs font-bold rounded-full ${
                     billingCycle === 'yearly'
                       ? 'bg-white/20 text-white'
-                      : 'bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-400'
+                      : 'bg-[#EAFFD6] dark:bg-[#58CC02]/20 text-[#58CC02] dark:text-[#58CC02]'
                   }`}
                 >
                   Save 17%
@@ -380,32 +373,31 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
           {plans.map((plan) => (
             <div
               key={plan.id}
-              className={`relative rounded-2xl p-6 sm:p-8 flex flex-col transition-shadow hover:shadow-[0_20px_50px_-20px_rgba(15,23,42,0.15)] dark:hover:shadow-[0_24px_60px_-24px_rgba(0,0,0,0.5)] ${
+              className={`relative rounded-2xl p-6 sm:p-8 flex flex-col transition-all bg-white dark:bg-stone-900 ${
                 plan.popular
-                  ? 'border border-violet-500/90 dark:border-violet-500/70 bg-white/85 dark:bg-stone-900/55 shadow-[0_12px_40px_-12px_rgba(91,33,182,0.18)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.45)] ring-2 ring-violet-200/80 dark:ring-violet-800/60'
+                  ? 'border-2 border-b-4 border-[#1CB0F6] dark:border-[#1CB0F6]'
                   : plan.id === 'premium'
-                  ? 'border border-amber-400/90 dark:border-amber-500/60 bg-gradient-to-b from-amber-50/90 to-white/90 dark:from-amber-950/40 dark:to-stone-900/55 shadow-[0_12px_40px_-12px_rgba(180,83,9,0.15)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.45)] ring-2 ring-amber-200/80 dark:ring-amber-800/50 sm:col-span-2 lg:col-span-1'
-                  : 'border border-stone-200/90 dark:border-stone-700/90 bg-white/80 dark:bg-stone-900/50 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.1)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.4)] ring-1 ring-white/50 dark:ring-white/5'
+                  ? 'border-2 border-b-4 border-[#FF9600] dark:border-[#FF9600] bg-[#FFF4E0] dark:bg-stone-900 sm:col-span-2 lg:col-span-1'
+                  : 'border-2 border-b-4 border-stone-200 dark:border-stone-700'
               }`}
             >
               {plan.popular && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-violet-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-md shadow-violet-500/25">
+                  <span className="bg-[#1CB0F6] text-white px-3 py-1 rounded-xl text-xs font-extrabold border-2 border-[#1899D6]">
                     Most popular
                   </span>
                 </div>
               )}
               {plan.id === 'premium' && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-gradient-to-r from-amber-500 to-amber-600 text-amber-950 px-3 py-1 rounded-full text-xs font-bold shadow-md shadow-amber-500/30 ring-1 ring-amber-400/50">
-                    4× usage
+                  <span className="bg-[#FF9600] text-white px-3 py-1 rounded-xl text-xs font-extrabold border-2 border-[#D97F00]">
+                    5× usage
                   </span>
                 </div>
               )}
               <div className={`text-center mb-6 ${plan.popular || plan.id === 'premium' ? 'pt-1' : ''}`}>
                 <h3
-                  className="text-xl font-semibold mb-1 text-stone-900 dark:text-stone-100"
-                  style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+                  className="text-xl font-extrabold mb-1 text-stone-900 dark:text-stone-100"
                 >
                   {plan.name}
                 </h3>
@@ -415,14 +407,14 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                   {plan.id !== 'free' && billingCycle === 'monthly' ? (
                     <>
                       <div className="flex flex-col items-center gap-1">
-                        <span className="text-2xl font-semibold text-red-600 dark:text-red-400 line-through decoration-2 decoration-red-500">
+                        <span className="text-2xl font-semibold text-stone-400 dark:text-stone-500 line-through decoration-2">
                           ${plan.monthlyPrice.toFixed(2)}
                         </span>
                         <span className="text-4xl font-bold text-stone-800 dark:text-stone-100">
                           ${(plan.monthlyPrice - 10).toFixed(2)}
                         </span>
                         <span className="text-stone-500 dark:text-stone-400 text-sm">
-                          /month <span className="text-violet-600 dark:text-violet-400 font-semibold">first month only</span>
+                          /month <span className="text-[#1CB0F6] font-extrabold">first month only</span>
                         </span>
                         <span className="text-xs text-stone-500 dark:text-stone-400">Then ${plan.monthlyPrice.toFixed(2)}/mo</span>
                       </div>
@@ -440,7 +432,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                 </div>
 
                 {getSavings(plan) > 0 && (
-                  <div className="text-violet-600 dark:text-violet-400 text-sm font-medium mb-4">
+                  <div className="text-[#58CC02] text-sm font-extrabold mb-4">
                     Save {getSavings(plan)}% with yearly billing
                   </div>
                 )}
@@ -453,8 +445,8 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                       <svg
                         className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
                           plan.id === 'premium'
-                            ? 'text-amber-600 dark:text-amber-400'
-                            : 'text-violet-500 dark:text-violet-400'
+                            ? 'text-[#FF9600]'
+                            : 'text-[#58CC02]'
                         }`}
                         fill="none"
                         stroke="currentColor"
@@ -483,14 +475,14 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                 type="button"
                 onClick={isCurrentPlanId(plan.id) ? undefined : () => plan.buttonAction()}
                 disabled={isCurrentPlanId(plan.id) || processingPlan !== null}
-                className={`w-full py-3 px-6 rounded-xl font-semibold transition-all duration-150 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 ${
+                className={`w-full py-3 px-6 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
                   isCurrentPlanId(plan.id)
-                    ? 'bg-stone-100 dark:bg-stone-700 text-stone-500 cursor-not-allowed'
+                    ? 'bg-stone-100 dark:bg-stone-800 text-stone-400 border-2 border-stone-200 dark:border-stone-700 cursor-not-allowed font-extrabold'
                     : plan.popular
-                      ? 'bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white shadow-md shadow-violet-900/15 dark:shadow-violet-950/40 ring-1 ring-violet-900/10 dark:ring-white/10'
+                      ? 'bg-[#1CB0F6] hover:bg-[#1899D6] text-white font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#1899D6] active:border-b-2 active:translate-y-0.5'
                       : plan.id === 'premium'
-                        ? 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-amber-950 shadow-md shadow-amber-900/15 ring-1 ring-amber-700/20'
-                        : 'bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-900 dark:text-stone-100 ring-1 ring-stone-200/80 dark:ring-stone-600/80'
+                        ? 'bg-[#FF9600] hover:bg-[#D97F00] text-white font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5'
+                        : 'bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-900 dark:text-stone-100 border-2 border-b-4 border-stone-200 dark:border-stone-600 font-extrabold active:border-b-2 active:translate-y-0.5'
                 }`}
               >
                 {isCurrentPlanId(plan.id) ? (
@@ -512,27 +504,20 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
 
       {/* FAQ — landing FAQ / editorial theme */}
       <section
-        className="relative py-16 sm:py-24 overflow-hidden border-t border-stone-200/90 dark:border-stone-800"
+        className="relative py-16 sm:py-24 overflow-hidden"
         aria-labelledby="pricing-faq-heading"
       >
-        <div className="absolute inset-0 bg-[#f8fafc] dark:bg-[#0c0a09]" aria-hidden />
-        <div className="absolute inset-0 bg-gradient-to-b from-white via-[#f8fafc] to-[#f1f5f9] dark:from-stone-950 dark:via-stone-950 dark:to-stone-950 pointer-events-none" aria-hidden />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_90%_60%_at_50%_-15%,rgba(91,33,182,0.07),transparent_55%)] dark:bg-[radial-gradient(ellipse_90%_55%_at_50%_-10%,rgba(109,40,217,0.12),transparent_58%)] pointer-events-none" aria-hidden />
-        <div
-          className="absolute inset-0 opacity-[0.4] dark:opacity-[0.15] pointer-events-none bg-[length:32px_32px] bg-[linear-gradient(to_right,rgba(148,163,184,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.07)_1px,transparent_1px)]"
-          aria-hidden
-        />
+        <div className="absolute inset-0 bg-white dark:bg-stone-950" aria-hidden />
 
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
-            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">
+            <p className="text-xs font-extrabold uppercase tracking-wider text-[#58CC02] dark:text-[#58CC02] mb-3">
               FAQ
             </p>
-            <div className="mx-auto mb-4 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85" aria-hidden />
+            <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-[#58CC02]" aria-hidden />
             <h2
               id="pricing-faq-heading"
-              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-semibold text-stone-900 dark:text-stone-100 mb-4 tracking-tight leading-tight"
-              style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-stone-900 dark:text-stone-100 mb-4 tracking-tight leading-tight"
             >
               Frequently Asked Questions
             </h2>
@@ -541,7 +526,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-stone-200/90 dark:border-stone-700/90 bg-white/80 dark:bg-stone-900/50 p-6 sm:p-8 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.1)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.4)] ring-1 ring-white/50 dark:ring-white/5 backdrop-blur-sm">
+          <div className="rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-6 sm:p-8">
             <div className="grid md:grid-cols-2 gap-6 sm:gap-8">
               {faqs.map((faq, index) => (
                 <div key={index} className="space-y-2">
@@ -555,24 +540,17 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       </section>
 
       {/* CTA — same glass card feel as landing “Get started” */}
-      <section className="relative py-16 sm:py-24 overflow-hidden border-t border-stone-200/90 dark:border-stone-800">
-        <div className="absolute inset-0 bg-[#f8fafc] dark:bg-[#0c0a09]" aria-hidden />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#f1f5f9] via-white to-[#f8fafc] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 pointer-events-none" aria-hidden />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_20%,rgba(91,33,182,0.06),transparent_50%)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_15%,rgba(109,40,217,0.1),transparent_55%)] pointer-events-none" aria-hidden />
-        <div
-          className="absolute inset-0 opacity-[0.35] dark:opacity-[0.12] pointer-events-none bg-[length:32px_32px] bg-[linear-gradient(to_right,rgba(148,163,184,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.07)_1px,transparent_1px)]"
-          aria-hidden
-        />
+      <section className="relative py-16 sm:py-24 overflow-hidden">
+        <div className="absolute inset-0 bg-stone-50 dark:bg-stone-950" aria-hidden />
 
         <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center rounded-2xl border border-stone-200/90 dark:border-stone-800/90 bg-white/75 dark:bg-stone-900/45 px-6 py-10 sm:px-10 sm:py-12 shadow-[0_12px_40px_-12px_rgba(15,23,42,0.12)] dark:shadow-[0_12px_40px_-12px_rgba(0,0,0,0.45)] backdrop-blur-[8px] ring-1 ring-white/50 dark:ring-white/5">
-            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-violet-800/90 dark:text-violet-300/95 mb-3">
+          <div className="text-center rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 px-6 py-10 sm:px-10 sm:py-12">
+            <p className="text-xs font-extrabold uppercase tracking-wider text-[#58CC02] dark:text-[#58CC02] mb-3">
               Get started
             </p>
-            <div className="mx-auto mb-5 h-0.5 w-16 rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-red-500 opacity-90 dark:opacity-85" aria-hidden />
+            <div className="mx-auto mb-5 h-1 w-12 rounded-full bg-[#58CC02]" aria-hidden />
             <h2
-              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-semibold text-stone-900 dark:text-stone-50 mb-4 tracking-tight leading-[1.15]"
-              style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-stone-900 dark:text-stone-50 mb-4 tracking-tight leading-[1.15]"
             >
               {user ? 'Continue with WriteScholar' : 'Ready to improve your academic writing?'}
             </h2>
@@ -587,7 +565,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                   <button
                     type="button"
                     onClick={() => onNavigate('dashboard')}
-                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white font-semibold rounded-xl shadow-md shadow-violet-900/15 dark:shadow-violet-950/40 ring-1 ring-violet-900/10 dark:ring-white/10 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 text-base"
+                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#58CC02] hover:bg-[#4CAF00] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all duration-150 text-base"
                   >
                     Go to dashboard
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
@@ -597,7 +575,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                   <button
                     type="button"
                     onClick={() => onNavigate('contact')}
-                    className="inline-flex items-center justify-center px-7 py-3.5 border border-stone-300/95 dark:border-stone-600 bg-white/90 dark:bg-stone-900/50 text-stone-800 dark:text-stone-200 font-medium rounded-xl hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors text-base shadow-sm"
+                    className="inline-flex items-center justify-center px-7 py-3.5 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-200 font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-stone-200 dark:border-stone-600 active:border-b-2 active:translate-y-0.5 hover:bg-stone-50 dark:hover:bg-stone-700 transition-all duration-150 text-base"
                   >
                     Contact support
                   </button>
@@ -607,7 +585,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                   <button
                     type="button"
                     onClick={() => onNavigate('signup')}
-                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-violet-700 hover:bg-violet-800 dark:bg-violet-600 dark:hover:bg-violet-500 text-white font-semibold rounded-xl shadow-md shadow-violet-900/15 dark:shadow-violet-950/40 ring-1 ring-violet-900/10 dark:ring-white/10 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 text-base"
+                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#58CC02] hover:bg-[#4CAF00] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all duration-150 text-base"
                   >
                     Sign up free
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
@@ -617,7 +595,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                   <button
                     type="button"
                     onClick={() => onNavigate('contact')}
-                    className="inline-flex items-center justify-center px-7 py-3.5 border border-stone-300/95 dark:border-stone-600 bg-white/90 dark:bg-stone-900/50 text-stone-800 dark:text-stone-200 font-medium rounded-xl hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors text-base shadow-sm"
+                    className="inline-flex items-center justify-center px-7 py-3.5 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-200 font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-stone-200 dark:border-stone-600 active:border-b-2 active:translate-y-0.5 hover:bg-stone-50 dark:hover:bg-stone-700 transition-all duration-150 text-base"
                   >
                     Contact us
                   </button>

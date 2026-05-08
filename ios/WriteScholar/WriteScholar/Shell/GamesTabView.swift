@@ -17,9 +17,13 @@ struct GamesTabView: View {
     @State private var presented: PresentedGame? = nil
     @State private var craterMode: CraterMode = .playForFun
     @State private var towerMode: TowerMode  = .playForFun
+    /// Drives the "My Notes" pack picker sheet. Set to `.craterBlast` or
+    /// `.wordTower` to present, set back to nil on dismiss/cancel.
+    @State private var pickerForGame: NotesPackPickerSheet.Game? = nil
 
     enum CraterMode: String, CaseIterable, Identifiable {
         case playForFun  = "Play for Fun"
+        case myNotes     = "My Notes"
         case mentalMath  = "Mental Math"
         case capitals    = "Capitals"
         case flags       = "Flags"
@@ -27,6 +31,7 @@ struct GamesTabView: View {
         var icon: String {
             switch self {
             case .playForFun: return "sparkles"
+            case .myNotes:    return "doc.text.fill"
             case .mentalMath: return "function"
             case .capitals:   return "building.columns.fill"
             case .flags:      return "flag.fill"
@@ -36,11 +41,13 @@ struct GamesTabView: View {
 
     enum TowerMode: String, CaseIterable, Identifiable {
         case playForFun  = "Play for Fun"
+        case myNotes     = "My Notes"
         case mentalMath  = "Mental Math"
         var id: Self { self }
         var icon: String {
             switch self {
             case .playForFun: return "sparkles"
+            case .myNotes:    return "doc.text.fill"
             case .mentalMath: return "function"
             }
         }
@@ -64,19 +71,48 @@ struct GamesTabView: View {
         ZStack {
             WSGradient.heroBackdrop.ignoresSafeArea()
 
-            // Soft brand orbs
+            // Multi-color brand orbs (red / amber / purple / mint) so the
+            // games-tab background pops the same way Home does.
             Circle()
-                .fill(Color(hex: 0xEF4444).opacity(0.10))
-                .frame(width: 320, height: 320)
-                .blur(radius: 70)
-                .offset(x: -180, y: -260)
+                .fill(Color(hex: 0xEF4444).opacity(0.18))
+                .frame(width: 360, height: 360)
+                .blur(radius: 90)
+                .offset(x: -180, y: -300)
                 .ignoresSafeArea()
             Circle()
-                .fill(Color(hex: 0x10B981).opacity(0.10))
+                .fill(Color(hex: 0xF59E0B).opacity(0.16))
                 .frame(width: 320, height: 320)
-                .blur(radius: 70)
-                .offset(x: 200, y: 320)
+                .blur(radius: 80)
+                .offset(x: 220, y: -140)
                 .ignoresSafeArea()
+            Circle()
+                .fill(Color(hex: 0x8B5CF6).opacity(0.14))
+                .frame(width: 360, height: 360)
+                .blur(radius: 90)
+                .offset(x: -200, y: 320)
+                .ignoresSafeArea()
+            Circle()
+                .fill(Color(hex: 0x10B981).opacity(0.14))
+                .frame(width: 320, height: 320)
+                .blur(radius: 90)
+                .offset(x: 220, y: 480)
+                .ignoresSafeArea()
+
+            // Faint sprinkle dots (settled confetti)
+            Canvas { ctx, size in
+                for i in 0..<32 {
+                    let seed = Double(i) * 137.508
+                    let x = ((seed * 7).truncatingRemainder(dividingBy: 100)) / 100 * size.width
+                    let y = ((seed * 3).truncatingRemainder(dividingBy: 100)) / 100 * size.height
+                    let r = (seed.truncatingRemainder(dividingBy: 2)) + 1.2
+                    ctx.fill(
+                        Path(ellipseIn: CGRect(x: x, y: y, width: r * 2, height: r * 2)),
+                        with: .color(.white.opacity(0.30))
+                    )
+                }
+            }
+            .ignoresSafeArea()
+            .allowsHitTesting(false)
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
@@ -90,8 +126,14 @@ struct GamesTabView: View {
                         accent: Color(hex: 0xFBBF24)
                     ) {
                         modePicker(modes: CraterMode.allCases, selected: $craterMode, tint: Color(hex: 0xFBBF24))
-                        playButton(label: "Play \(craterMode.rawValue)") {
-                            launchCrater(mode: craterMode)
+                        playButton(
+                            label: craterMode == .myNotes ? "Pick a study pack" : "Play \(craterMode.rawValue)"
+                        ) {
+                            if craterMode == .myNotes {
+                                pickerForGame = .craterBlast
+                            } else {
+                                launchCrater(mode: craterMode)
+                            }
                         }
                     }
 
@@ -103,8 +145,14 @@ struct GamesTabView: View {
                         accent: Color(hex: 0xFDE68A)
                     ) {
                         modePicker(modes: TowerMode.allCases, selected: $towerMode, tint: Color(hex: 0xFDE68A))
-                        playButton(label: "Play \(towerMode.rawValue)") {
-                            launchTower(mode: towerMode)
+                        playButton(
+                            label: towerMode == .myNotes ? "Pick a study pack" : "Play \(towerMode.rawValue)"
+                        ) {
+                            if towerMode == .myNotes {
+                                pickerForGame = .wordTower
+                            } else {
+                                launchTower(mode: towerMode)
+                            }
                         }
                     }
 
@@ -136,31 +184,122 @@ struct GamesTabView: View {
                 .padding(.leading, 14)
             }
         }
+        .sheet(item: $pickerForGame) { game in
+            NotesPackPickerSheet(game: game) { pack in
+                launchFromPack(pack, game: game)
+            }
+            .presentationDetents([.large, .medium])
+        }
     }
 
-    // MARK: - Header
+    /// Launches the chosen game with question banks pulled from the
+    /// user's saved study pack instead of the desktop-ported word banks.
+    private func launchFromPack(_ pack: StudyPack, game: NotesPackPickerSheet.Game) {
+        switch game {
+        case .craterBlast:
+            guard let cb = pack.craterBlast, !cb.questions.isEmpty else { return }
+            presented = .craterBlast(CraterBlast(
+                title: "Crater Blast · \(pack.displayTitle)",
+                questions: cb.questions
+            ))
+        case .wordTower:
+            guard let wt = pack.wordTower, !wt.questions.isEmpty else { return }
+            presented = .wordTower(WordTower(
+                title: "Word Tower · \(pack.displayTitle)",
+                questions: wt.questions
+            ))
+        }
+    }
+
+    // MARK: - Header (Duolingo-style hero with mascot-dance + halo)
 
     private var headerBlock: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 10) {
-                Text("GAMES")
-                    .wsEyebrow()
-                    .foregroundStyle(Color(hex: 0xEF4444))
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .background(Capsule().fill(Color(hex: 0xEF4444).opacity(0.15)))
-                Spacer()
+        VStack(spacing: 12) {
+            ZStack {
+                // Pulsing red halo behind the mascot
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [Color(hex: 0xEF4444).opacity(0.55), .clear],
+                            center: .center, startRadius: 8, endRadius: 110
+                        )
+                    )
+                    .frame(width: 220, height: 220)
+                    .blur(radius: 18)
+
+                // Six sparkle satellites in warm tones
+                ForEach(0..<6, id: \.self) { i in
+                    let angle = Double(i) * (.pi * 2 / 6)
+                    let radius: Double = 110
+                    Image(systemName: i.isMultiple(of: 2) ? "sparkle" : "star.fill")
+                        .font(.system(size: 13, weight: .heavy))
+                        .foregroundStyle(gameSparkleColor(for: i))
+                        .offset(x: CGFloat(cos(angle) * radius),
+                                y: CGFloat(sin(angle) * radius))
+                        .opacity(0.85)
+                }
+
                 WSAnimatedImage(name: "mascot-dance", ext: "webp")
-                    .frame(width: 56, height: 56)
-                    .shadow(color: Color(hex: 0xD946EF).opacity(0.30), radius: 8, y: 4)
+                    .frame(width: 170, height: 170)
+                    .shadow(color: Color(hex: 0xEF4444).opacity(0.45), radius: 22, y: 12)
+                    .wsBobbing(amount: 7, duration: 2.4)
             }
-            Text("Beat the boss. Build the tower.")
-                .wsHeadline(.large, weight: .semibold)
-                .foregroundStyle(WSColor.foreground)
-            Text("Same physics, scoring, and full word bank as desktop — over 750 questions across both games.")
-                .wsBody(.medium)
-                .foregroundStyle(WSColor.foregroundMuted)
+
+            // GAMES eyebrow chip + colorful headline
+            VStack(spacing: 8) {
+                HStack(spacing: 6) {
+                    Image(systemName: "gamecontroller.fill")
+                        .font(.system(size: 11, weight: .heavy))
+                    Text("GAMES")
+                        .font(.system(size: 11, weight: .black, design: .rounded))
+                        .tracking(0.8)
+                }
+                .foregroundStyle(.white)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(
+                    Capsule()
+                        .fill(LinearGradient(colors: [Color(hex: 0xF87171), Color(hex: 0xEF4444)],
+                                             startPoint: .topLeading, endPoint: .bottomTrailing))
+                        .shadow(color: Color(hex: 0xEF4444).opacity(0.45), radius: 8, y: 3)
+                )
+
+                // Two-color gradient title — "Beat the boss" with the verb popping
+                Text("Beat the ")
+                    .font(.system(size: 28, weight: .black, design: .rounded))
+                    .foregroundStyle(WSColor.foreground)
+                +
+                Text("boss")
+                    .font(.system(size: 28, weight: .black, design: .rounded))
+                    .foregroundStyle(
+                        LinearGradient(colors: [Color(hex: 0xF87171), Color(hex: 0xDC2626)],
+                                       startPoint: .leading, endPoint: .trailing)
+                    )
+                +
+                Text(" 🎮")
+                    .font(.system(size: 28, weight: .black, design: .rounded))
+
+                Text("Same physics + word banks as desktop. 750+ questions, two games, three lives — go.")
+                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                    .foregroundStyle(WSColor.foregroundMuted)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 6)
+            }
         }
+        .frame(maxWidth: .infinity)
+        .padding(.top, 6)
+    }
+
+    private func gameSparkleColor(for i: Int) -> Color {
+        let palette: [Color] = [
+            Color(hex: 0xFBBF24),  // gold
+            Color(hex: 0xF472B6),  // pink
+            Color(hex: 0x60A5FA),  // sky
+            Color(hex: 0xFDA4AF),  // rose
+            Color(hex: 0x34D399),  // mint
+            Color(hex: 0xA78BFA),  // lavender
+        ]
+        return palette[i % palette.count]
     }
 
     // MARK: - Game section card (gradient banner + body)
@@ -293,7 +432,7 @@ struct GamesTabView: View {
         .buttonStyle(WSPrimaryButtonStyle())
     }
 
-    // MARK: - Library hint (Chapter 6)
+    // MARK: - Library hint
 
     private var libraryHint: some View {
         HStack(spacing: 12) {
@@ -304,7 +443,7 @@ struct GamesTabView: View {
                 Text("Play with your own subjects")
                     .wsBody(.small, weight: .bold)
                     .foregroundStyle(WSColor.foreground)
-                Text("Generate a study pack on the Study tab to get personalised questions on your notes. Saved-pack library lands in Chapter 6.")
+                Text("Pick \"My Notes\" mode above to launch either game with questions from a study pack you've saved to your Library.")
                     .wsBody(.caption)
                     .foregroundStyle(WSColor.foregroundMuted)
             }
@@ -330,8 +469,13 @@ struct GamesTabView: View {
             case .mentalMath: return CraterBlastMentalMathBank.shuffledPool()
             case .capitals:   return CraterBlastCapitalsBank.allQuestions()
             case .flags:      return CraterBlastFlagsBank.allQuestions()
+            // .myNotes is routed to the pack picker by the play button —
+            // it should never reach here. Return an empty pool defensively
+            // so a future caller never crashes the game.
+            case .myNotes:    return []
             }
         }()
+        guard !questions.isEmpty else { return }
         presented = .craterBlast(CraterBlast(title: "Crater Blast · \(mode.rawValue)", questions: questions))
     }
 
@@ -340,8 +484,11 @@ struct GamesTabView: View {
             switch mode {
             case .playForFun: return WordTowerBank.playForFun.shuffled()
             case .mentalMath: return WordTowerBank.mentalMath().shuffled()
+            // Same as above — .myNotes goes through launchFromPack instead.
+            case .myNotes:    return []
             }
         }()
+        guard !questions.isEmpty else { return }
         presented = .wordTower(WordTower(title: "Word Tower · \(mode.rawValue)", questions: questions))
     }
 }

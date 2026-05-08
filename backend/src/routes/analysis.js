@@ -472,7 +472,7 @@ router.post('/generate-lesson', authenticateToken, async (req, res) => {
     if (generationsUsed >= generationLimit) {
       return res.status(429).json({
         success: false,
-        message: `You've used all ${generationLimit} lesson generation${generationLimit === 1 ? '' : 's'} this period. ${userPlan === 'free' ? 'Upgrade for Pro — 49 combined actions per month (shared).' : 'Limit resets when your billing period renews.'}`,
+        message: `You've used all ${generationLimit} lesson generation${generationLimit === 1 ? '' : 's'} this period. ${userPlan === 'free' ? 'Upgrade for Pro — 99 combined actions per month (shared).' : 'Limit resets when your billing period renews.'}`,
         generationsUsed,
         generationLimit,
         generationsRemaining: 0,
@@ -2684,7 +2684,7 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
       if (generationLimit !== -1 && generationsUsed >= generationLimit) {
         return res.status(429).json({
           success: false,
-          message: `You've used all ${generationLimit} study pack generation${generationLimit === 1 ? '' : 's'} this period. Upgrade for Pro — 49 combined analyses, study packs & citations per month.`,
+          message: `You've used all ${generationLimit} study pack generation${generationLimit === 1 ? '' : 's'} this period. Upgrade for Pro — 99 combined analyses, study packs & citations per month.`,
           generationsUsed,
           generationLimit,
           generationsRemaining: 0,
