@@ -29,7 +29,7 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate, user,
             Privacy Policy
           </h1>
           <p className="text-stone-500 dark:text-stone-400 font-bold text-sm uppercase tracking-wide">
-            Last updated: {new Date().toLocaleDateString()}
+            Last updated: May 9, 2026
           </p>
         </div>
 
@@ -92,7 +92,7 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate, user,
               </p>
               <ul className="list-disc list-inside space-y-2 ml-4">
                 <li><strong className="text-stone-700 dark:text-stone-300">OpenAI</strong> — Text you submit to AI-powered features (Essay Analyzer, Citation Finder, Study Pack, Paper Summarizer) is sent to OpenAI's API for processing. OpenAI's use of API data is governed by their <a href="https://openai.com/policies/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-[#1CB0F6] hover:text-[#1899D6] font-bold hover:underline">Privacy Policy</a>.</li>
-                <li><strong className="text-stone-700 dark:text-stone-300">Stripe</strong> — Payment processing and subscription management. Stripe receives your billing information. See <a href="https://stripe.com/privacy" target="_blank" rel="noopener noreferrer" className="text-[#1CB0F6] hover:text-[#1899D6] font-bold hover:underline">Stripe's Privacy Policy</a>.</li>
+                <li><strong className="text-stone-700 dark:text-stone-300">Stripe</strong> — Payment processing and subscription management. Stripe receives your name, email address, and billing details (including country and postal code) when you start or manage a paid subscription. <strong className="text-stone-700 dark:text-stone-300">Your full credit/debit card number is entered directly into Stripe's secure form and is never sent to or stored on WriteScholar's servers.</strong> See <a href="https://stripe.com/privacy" target="_blank" rel="noopener noreferrer" className="text-[#1CB0F6] hover:text-[#1899D6] font-bold hover:underline">Stripe's Privacy Policy</a>.</li>
                 <li><strong className="text-stone-700 dark:text-stone-300">Supabase</strong> — Our primary database and optional file storage provider, hosting your account data, document metadata, usage records, study pack history (quizzes, flashcards, crosswords, lessons), optional social/sharing data when those features are in use, and badge progress.</li>
                 <li><strong className="text-stone-700 dark:text-stone-300">Amazon Web Services (S3)</strong> — Cloud storage for uploaded document files in production environments.</li>
                 <li><strong className="text-stone-700 dark:text-stone-300">Email Provider (SMTP)</strong> — Transactional and marketing emails are delivered via our configured email service.</li>
@@ -120,7 +120,10 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate, user,
               <p>
                 AI-generated outputs (essay feedback, citations, lessons, quiz questions, flashcards, crossword puzzles, summaries) are provided as tools to assist your work. We make no warranty that
                 these outputs are accurate, original, or free from error. You are responsible for
-                reviewing all AI outputs before use. Focus Mode runs as a Chrome extension; site-blocking rules are processed locally and we do not receive content from sites you block.
+                reviewing all AI outputs before use.
+              </p>
+              <p>
+                <strong className="text-stone-700 dark:text-stone-300">Focus Mode (Chrome extension):</strong> Focus Mode is an optional Chrome extension. Your list of blocked sites, unlock activity, and daily session statistics are stored locally in your browser using the extension's storage API. <strong className="text-stone-700 dark:text-stone-300">No browsing history, page content, or activity from blocked sites is transmitted to WriteScholar's servers.</strong> The extension uses host permissions (<code className="px-1.5 py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-[0.85em]">&lt;all_urls&gt;</code>) only to detect when you visit a site on your block list and redirect you, not to read or transmit page contents.
               </p>
             </div>
           </section>
@@ -177,7 +180,7 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate, user,
             <div className="space-y-4 text-stone-600 dark:text-stone-400 leading-relaxed">
               <p>We retain data for as long as necessary to provide the service:</p>
               <ul className="list-disc list-inside space-y-2 ml-4">
-                <li><strong className="text-stone-700 dark:text-stone-300">Account data:</strong> Retained while your account is active. Deleted upon account deletion.</li>
+                <li><strong className="text-stone-700 dark:text-stone-300">Account data:</strong> Retained while your account is active. <strong className="text-stone-700 dark:text-stone-300">When you delete your account, all account data is permanently and immediately removed — there is no recovery period and we cannot restore deleted accounts.</strong></li>
                 <li><strong className="text-stone-700 dark:text-stone-300">Uploaded documents:</strong> Retained until you delete them or your account.</li>
                 <li><strong className="text-stone-700 dark:text-stone-300">Study pack history (quizzes, flashcards, crosswords, lessons):</strong> Study materials are automatically deleted after 30 days.</li>
                 <li><strong className="text-stone-700 dark:text-stone-300">Citation history and analysis history:</strong> Retained until deleted by you or as part of periodic cleanup.</li>
@@ -197,15 +200,24 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate, user,
               <p>You have the following rights regarding your personal data:</p>
               <ul className="list-disc list-inside space-y-2 ml-4">
                 <li><strong className="text-stone-700 dark:text-stone-300">Access &amp; Update:</strong> View and edit your profile at any time in Account Settings</li>
+                <li><strong className="text-stone-700 dark:text-stone-300">Rectification:</strong> Correct inaccurate or incomplete personal data we hold about you</li>
                 <li><strong className="text-stone-700 dark:text-stone-300">Delete:</strong> Delete your account and all associated data via Account Settings or by contacting us</li>
+                <li><strong className="text-stone-700 dark:text-stone-300">Restrict Processing:</strong> Ask us to limit how we use your personal data (for example, while a correction request is being reviewed)</li>
+                <li><strong className="text-stone-700 dark:text-stone-300">Object:</strong> Object to processing of your personal data for direct marketing or where we rely on legitimate interests</li>
                 <li><strong className="text-stone-700 dark:text-stone-300">Unsubscribe:</strong> Opt out of marketing emails at any time via the unsubscribe link or Settings</li>
-                <li><strong className="text-stone-700 dark:text-stone-300">Data Portability:</strong> Request a copy of your data by contacting privacy@writescholar.com</li>
+                <li><strong className="text-stone-700 dark:text-stone-300">Data Portability:</strong> Request a copy of your data in a structured, machine-readable format by contacting privacy@writescholar.com</li>
                 <li><strong className="text-stone-700 dark:text-stone-300">Withdraw Consent:</strong> Stop using the service and delete your account at any time</li>
               </ul>
               <p>
-                If you are located in the EU/EEA or UK, you may have additional rights under GDPR,
-                including the right to lodge a complaint with your local supervisory authority.
+                If you are located in the EU/EEA or UK, you may have additional rights under the GDPR
+                (or UK GDPR), including the right to lodge a complaint with your local supervisory
+                authority.
               </p>
+              <div className="border-2 border-b-4 border-[#1CB0F6]/30 bg-[#DDF4FF] dark:bg-[#1CB0F6]/10 p-4 rounded-xl mt-2">
+                <p className="text-stone-700 dark:text-stone-300">
+                  <strong className="font-extrabold">California residents (CCPA / CPRA):</strong> If you are a California resident, you have additional rights including: (1) the right to know what personal information we collect, use, and disclose about you; (2) the right to request deletion of your personal information; (3) the right to opt out of the sale or sharing of your personal information; and (4) the right not to be discriminated against for exercising these rights. <strong className="font-extrabold">We do not sell your personal information and we do not share it for cross-context behavioural advertising.</strong> To exercise your CCPA rights, contact privacy@writescholar.com.
+                </p>
+              </div>
             </div>
           </section>
 
@@ -236,9 +248,15 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate, user,
             </h2>
             <div className="space-y-4 text-stone-600 dark:text-stone-400 leading-relaxed">
               <p>
-                WriteScholar is not intended for children under 13 years of age. We do not knowingly
-                collect personal information from children under 13. If we become aware that we have
-                collected such information, we will delete it promptly.
+                WriteScholar is intended for users aged <strong className="text-stone-700 dark:text-stone-300">14 and older</strong>. We do not knowingly collect personal information from anyone under 14.
+              </p>
+              <p>
+                Some jurisdictions set a higher minimum age for digital consent — for example, parts of the EU/EEA require users to be 16 or older to consent to data processing without parental authorisation. <strong className="text-stone-700 dark:text-stone-300">If the law in your country sets a minimum age higher than 14, you must meet that age (or have verifiable parental consent) to use the service.</strong>
+              </p>
+              <p>
+                If we become aware that we have collected information from a user below the applicable
+                minimum age, we will delete that information promptly. Parents or guardians who believe
+                their child has provided us with personal data may contact privacy@writescholar.com.
               </p>
             </div>
           </section>

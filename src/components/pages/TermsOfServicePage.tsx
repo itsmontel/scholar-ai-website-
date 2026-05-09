@@ -35,7 +35,7 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
               Terms of Service
             </h1>
             <p className="text-stone-500 dark:text-stone-400 font-bold text-sm uppercase tracking-wide">
-              Last updated: {new Date().toLocaleDateString()}
+              Last updated: May 9, 2026
             </p>
           </div>
         </div>
@@ -113,7 +113,7 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
               </ul>
               <p>
                 You may register using an email and password or via Google OAuth. You must be at least
-                13 years old to create an account.
+                <strong className="text-stone-700 dark:text-stone-300"> 14 years old</strong> to create an account. If the law in your jurisdiction sets a higher minimum age for using online services without parental consent (for example, 16 in some EU member states), you must meet that age — or have verifiable parental authorisation — to use the service.
               </p>
             </div>
           </div>
@@ -181,7 +181,10 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
                 <li>You may cancel your subscription at any time; access continues until the end of the paid period</li>
                 <li>You may upgrade or downgrade your plan at any time through your Billing settings</li>
                 <li>Promotional codes may be applied at checkout and are subject to their own terms</li>
-                <li>All fees are non-refundable unless required by applicable law</li>
+                <li>
+                  <strong className="text-stone-700 dark:text-stone-300">14-day refund window:</strong> If you cancel a new paid subscription within 14 days of your initial purchase, you may request a full refund — regardless of where you live. To request a refund within this window, email <a href="mailto:support@writescholar.com" className="font-bold hover:underline" style={{ color: '#1CB0F6' }}>support@writescholar.com</a> from the email address on the account. Refunds are typically processed within 5–10 business days back to your original payment method.
+                </li>
+                <li>After the 14-day window has passed, fees are non-refundable except where required by applicable consumer-protection law in your jurisdiction</li>
                 <li>We reserve the right to change pricing with 30 days' notice to existing subscribers</li>
               </ul>
             </div>

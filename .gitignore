@@ -121,3 +121,36 @@ backend/temp/
 # Frontend specific
 src/node_modules/
 public/uploads/
+
+# Claude Code local state — user-specific tooling, never commit
+.claude/
+
+# Sibling apps kept locally in this folder but tracked elsewhere
+VirtuPet App/
+
+# Source media in project root — encoded/optimized versions live in /public
+# Keep this list explicit so legitimate .mov/.mp4/.gif elsewhere aren't blocked
+/HeroVid.mp4
+/HeroVid.mov
+/MascotCTA.gif
+/MascotCTA.png
+/MascotWalking.gif
+/mascotpointing.gif
+/MascotCelebrating.gif
+/MascotJuggling.gif
+/MascotJumpingJoy.gif
+/MascotSad.gif
+/QuickWalthroughvid.mov
+/analysevid.mov
+/crosswordvid.mov
+/flashcardsvid.mov
+/humanisevid.mov
+/quizvid.mov
+/promo_original.mp4
+/redditpost.mp4
+/redditviral.mp4
+/HeroPic.png
+/Analyseimage2.png
+/Citationsimage.png
+/LessonPlanpic.png
+/MainLogo.png

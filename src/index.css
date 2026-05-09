@@ -212,6 +212,50 @@
     transform: none !important;
     background-position: 50% 50% !important;
   }
+  /* Hero H1 typewriter sequence: snap straight to final state. */
+  .animate-hero-typewriter {
+    animation: none !important;
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+    opacity: 1 !important;
+  }
+  .animate-hero-squiggle-draw {
+    animation: none !important;
+    stroke-dashoffset: 0 !important;
+  }
+}
+
+/* Hero H1 typewriter sequence — each H1 segment wipes in left-to-right via
+   a moving CSS mask, while each squiggle SVG path draws itself on by
+   animating stroke-dashoffset. The whole sequence is composed via inline
+   animationDelay on each piece (see LandingPage.tsx hero <h1>). */
+@keyframes heroTypewriterReveal {
+  from {
+    -webkit-mask-position: 100% 0;
+    mask-position: 100% 0;
+  }
+  to {
+    -webkit-mask-position: 0% 0;
+    mask-position: 0% 0;
+  }
+}
+.animate-hero-typewriter {
+  -webkit-mask-image: linear-gradient(to right, #000 50%, transparent 50%);
+  mask-image: linear-gradient(to right, #000 50%, transparent 50%);
+  -webkit-mask-size: 200% 100%;
+  mask-size: 200% 100%;
+  -webkit-mask-position: 100% 0;
+  mask-position: 100% 0;
+  animation: heroTypewriterReveal 0.7s linear forwards;
+}
+
+@keyframes heroSquiggleDraw {
+  to { stroke-dashoffset: 0; }
+}
+.animate-hero-squiggle-draw {
+  stroke-dasharray: 240;
+  stroke-dashoffset: 240;
+  animation: heroSquiggleDraw 0.55s ease-in-out forwards;
 }
 
 /* Landing hero: grid pattern fades in (respects dark opacity) */
@@ -950,4 +994,18 @@ html.dark .landing-hero-grid-animate {
 }
 @media (prefers-reduced-motion: reduce) {
   .dash-gold-glow { animation: none; }
+}
+
+/* Hero pointing mascot — gentle bob + tilt to draw the eye toward the
+   green trial CTA without being hyperactive. */
+@keyframes heroCtaMascotBob {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50%      { transform: translateY(-4px) rotate(2deg); }
+}
+.hero-cta-mascot-bob {
+  animation: heroCtaMascotBob 1.8s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-cta-mascot-bob { animation: none; }
 }

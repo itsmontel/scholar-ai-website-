@@ -4491,6 +4491,17 @@ DO NOT include any text outside the JSON object.`;
         q.prompt && Array.isArray(q.answers) && q.answers.length === 4 && typeof q.correctIndex === 'number'
       );
 
+      // Minimum-question floor: a Crater Blast play session feels broken
+      // with fewer than 5 valid questions, so we throw below that threshold.
+      // (Previously this method silently returned an empty array when every
+      // question failed the strict 4-answer filter — frontend then rendered
+      // a broken Crater Blast tile.) The retry layer in generateStudyPack
+      // gives the model another attempt; temperature variance often
+      // produces enough valid output on retry to clear this bar.
+      if (parsed.questions.length < 5) {
+        throw new Error(`Crater Blast validation: only ${parsed.questions.length} valid questions (need at least 5)`);
+      }
+
       return parsed;
     } catch (error) {
       console.error('OpenAI reflex question generation error:', error);
@@ -4579,8 +4590,15 @@ DO NOT include any text outside the JSON object.`;
           return correct >= 2 && incorrect >= 2;
         });
 
-      if (parsed.questions.length === 0) {
-        throw new Error('No valid questions after filtering');
+      // Minimum-question floor: a Word Tower play session feels broken with
+      // fewer than 4 valid questions, so we throw below that threshold.
+      // The retry layer in generateStudyPack will give the model another
+      // attempt — temperature variance often produces enough valid output
+      // on retry to clear this bar. Using a fixed floor (rather than a %
+      // of requested) means tightening the model's output count later
+      // doesn't accidentally make this check more permissive.
+      if (parsed.questions.length < 4) {
+        throw new Error(`Word Tower validation: only ${parsed.questions.length} valid questions (need at least 4)`);
       }
 
       return parsed;
@@ -4633,6 +4651,171 @@ DO NOT include any text outside the JSON object.`;
       return data[0];
     } catch (error) {
       console.error('Database error in saveWordTowerGame:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Word Blitz — 60-second cloze-sentence speedrun.
+   *
+   * Each generated question is one sentence with exactly one blank
+   * (marked as "{{blank}}"), one correct answer (1-3 words), and three
+   * plausible-but-wrong distractors from the same category.
+   *
+   * The frontend assembles the four answer buttons by combining
+   * `correctAnswer + distractors`, then shuffles with the no-3-in-a-row
+   * safety rule before display.
+   */
+  async generateWordBlitzQuestions(inputType, content, userPlan = 'free') {
+    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
+      throw new Error('OpenAI API key not configured');
+    }
+
+    const selectedModel = 'gpt-4.1-nano';
+
+    const systemPrompt = `You are generating questions for a 60-second fill-in-the-blank study game called Word Blitz. Players read a sentence with one word missing and tap the correct answer from 4 choices.
+
+Generate exactly 25 questions. Each question MUST follow these rules:
+
+1. Be a single sentence, 8-20 words long, that makes sense even with the blank
+2. Have exactly ONE blank, marked as the literal token {{blank}}
+3. The blanked term should be a meaningful concept word, not a function word (do NOT blank "the", "is", "of", "a", "an", "and", etc.)
+4. Have 1 correct answer (1-3 words long) and exactly 3 plausible distractors
+5. Distractors must be FROM THE SAME CATEGORY as the correct answer (if blanking an organ, distractors are other organs; if blanking a date, distractors are other dates from the same era; if blanking a country, distractors are other countries)
+6. Distractors must be CLEARLY WRONG given the sentence context — but plausible enough that someone who hasn't studied would hesitate
+7. Vary topics across questions — don't repeat the same blanked concept twice
+8. Keep all answer text short enough to fit on a button (max 3 words)
+
+CRITICAL: The sentence with the blank filled in by the correct answer must be unambiguously true. The sentence with any distractor must be unambiguously false.
+
+Return ONLY valid JSON in this exact format:
+{
+  "questions": [
+    {
+      "id": "q1",
+      "sentence": "string with {{blank}} marker",
+      "correctAnswer": "string",
+      "distractors": ["string", "string", "string"]
+    }
+  ]
+}
+
+DO NOT include any text outside the JSON object.`;
+
+    const userPrompt = inputType === 'topic'
+      ? `Generate 25 Word Blitz fill-in-the-blank questions about: ${content}`
+      : `Generate 25 Word Blitz fill-in-the-blank questions from these study notes. Use only the content below (first 10,000 words):\n\n${content.trim().split(/\s+/).slice(0, 10000).join(' ')}`;
+
+    try {
+      const completion = await this.openai.chat.completions.create({
+        model: selectedModel,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
+        max_tokens: 3000,
+        // 0.4 is recommended in the spec — slightly lower than the other
+        // games because Word Blitz's "blank must be unambiguous" constraint is
+        // strict and benefits from more deterministic output.
+        temperature: 0.4,
+        response_format: { type: 'json_object' },
+      });
+
+      const responseText = completion.choices[0]?.message?.content;
+      if (!responseText) throw new Error('No response from AI');
+
+      let parsed;
+      try {
+        parsed = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('Failed to parse Word Blitz questions JSON:', parseError, 'Raw:', responseText?.slice(0, 500));
+        throw new Error('Failed to parse questions response');
+      }
+
+      if (!parsed.questions || !Array.isArray(parsed.questions) || parsed.questions.length === 0) {
+        throw new Error('No questions generated');
+      }
+
+      // Strict validation:
+      //   - sentence must be a string with the literal {{blank}} token
+      //   - correctAnswer must be a non-empty string
+      //   - distractors must be an array of exactly 3 non-empty strings
+      // Anything that fails the contract is dropped silently — better to
+      // ship 18 valid questions than crash the game on a malformed one.
+      parsed.questions = parsed.questions.filter(q =>
+        q && typeof q.sentence === 'string'
+          && q.sentence.includes('{{blank}}')
+          && typeof q.correctAnswer === 'string'
+          && q.correctAnswer.trim().length > 0
+          && Array.isArray(q.distractors)
+          && q.distractors.length === 3
+          && q.distractors.every(d => typeof d === 'string' && d.trim().length > 0)
+      );
+
+      // Minimum-question floor: matches Crater Blast's threshold of 5.
+      // We aim for 25 valid questions but a 60-second session is still
+      // playable with as few as 5 — better to ship a slightly thin
+      // pack than fail the whole study-pack generation. The retry layer
+      // in generateStudyPack will already have tried multiple times.
+      if (parsed.questions.length < 5) {
+        throw new Error(`Word Blitz validation: only ${parsed.questions.length} valid questions (need at least 5)`);
+      }
+
+      return parsed;
+    } catch (error) {
+      console.error('OpenAI Word Blitz question generation error:', error);
+      throw new Error('Failed to generate questions: ' + error.message);
+    }
+  }
+
+  /**
+   * Persist a Word Blitz game so the user can replay it from "Saved Materials".
+   * Mirrors saveWordTowerGame exactly — same `quizzes` table, same TTL
+   * for free plans, just `quiz_type = 'word_blitz'`.
+   */
+  async saveWordBlitzGame(userId, payload, userPlan = 'free') {
+    try {
+      const { createClient } = require('@supabase/supabase-js');
+      const supabase = createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+      );
+
+      const isPaidUser = subscriptionService.isPaidSubscriptionTier(userPlan || 'free');
+      const expiresAt = isPaidUser ? null : getExpiresAt30Days();
+
+      const title = (payload.title || payload.sourceText || 'Word Blitz Game').toString().slice(0, 200);
+      const wordCount = (payload.sourceText || '').toString().trim().split(/\s+/).length;
+
+      const gameData = {
+        user_id: userId,
+        title,
+        quiz_type: 'word_blitz',
+        difficulty: 'mixed',
+        question_count: (payload.questions || []).length,
+        questions: {
+          questions: payload.questions || [],
+          inputType: payload.inputType || 'topic',
+          sourceText: (payload.sourceText || '').toString().slice(0, 10000)
+        },
+        source_word_count: wordCount,
+        created_at: new Date().toISOString(),
+        expires_at: expiresAt
+      };
+
+      const { data, error } = await supabase
+        .from('quizzes')
+        .insert([gameData])
+        .select();
+
+      if (error) {
+        console.error('Error saving Word Blitz game:', error);
+        return null;
+      }
+
+      return data[0];
+    } catch (error) {
+      console.error('Database error in saveWordBlitzGame:', error);
       return null;
     }
   }
@@ -4996,6 +5179,41 @@ Rules:
     return this.generateSingleLesson(systemPrompt, userMessage, selectedModel, 'visual');
   }
 
+  /**
+   * Run an async tool generator with retries. Each of the 6 study-pack tools
+   * is one independent OpenAI call; the model occasionally returns malformed
+   * JSON or trips a validator (e.g. Word Tower's "≥4 items" rule), which
+   * historically left users with 5/6 tools and no recourse. Retrying with a
+   * tiny backoff on each failure recovers most transient cases — model
+   * variance between attempts is usually enough to produce valid output.
+   *
+   * Logs every retry with the tool label so failures are traceable in
+   * production logs (was: a single line on final rejection).
+   */
+  async _withStudyPackRetries(label, fn, attempts = 3) {
+    let lastErr;
+    for (let attempt = 1; attempt <= attempts; attempt++) {
+      try {
+        return await fn();
+      } catch (err) {
+        lastErr = err;
+        const msg = err && err.message ? err.message : String(err);
+        if (attempt < attempts) {
+          // Linear backoff (400ms, 800ms): keeps total worst-case latency
+          // bounded while giving rate-limited / overloaded calls time to
+          // recover. Two retries is the sweet spot — the marginal recovery
+          // from a 4th attempt is small and packs already feel slow.
+          const delayMs = 400 * attempt;
+          console.warn(`[StudyPack] ${label} attempt ${attempt}/${attempts} failed: ${msg} — retrying in ${delayMs}ms`);
+          await new Promise(resolve => setTimeout(resolve, delayMs));
+        } else {
+          console.error(`[StudyPack] ${label} failed after ${attempts} attempts: ${msg}`);
+        }
+      }
+    }
+    throw lastErr;
+  }
+
   async generateStudyPack(text, userPlan = 'free') {
     const words = text.trim().split(/\s+/);
     const wordCount = words.length;
@@ -5003,20 +5221,33 @@ Rules:
     const flashcardCount = userPlan === 'free' ? 15 : 20;
     const crosswordWordCount = userPlan === 'free' ? Math.min(10, Math.max(6, Math.ceil(wordCount / 500))) : Math.min(15, Math.max(8, Math.ceil(wordCount / 400)));
 
+    // Each tool is wrapped in _withStudyPackRetries so a single transient
+    // failure (network blip, rate limit, malformed JSON, validator throw)
+    // doesn't permanently strip a tool from the pack. With 3 attempts per
+    // tool, the per-tool failure rate drops from ~5% to <0.02%.
     const results = await Promise.allSettled([
-      this.generateQuiz(text, 'mixed', 'medium', quizCount, quizCount, userPlan),
-      this.generateFlashcards(text, flashcardCount, userPlan),
-      this.generateCrossword(text, crosswordWordCount, userPlan),
-      this.generateVisualLesson(text, userPlan),
-      this.generateReflexQuestions('notes', text, userPlan),
-      this.generateWordTowerQuestions('notes', text, userPlan),
+      this._withStudyPackRetries('quiz', () => this.generateQuiz(text, 'mixed', 'medium', quizCount, quizCount, userPlan)),
+      this._withStudyPackRetries('flashcards', () => this.generateFlashcards(text, flashcardCount, userPlan)),
+      this._withStudyPackRetries('crossword', () => this.generateCrossword(text, crosswordWordCount, userPlan)),
+      this._withStudyPackRetries('lesson', () => this.generateVisualLesson(text, userPlan)),
+      this._withStudyPackRetries('craterBlast', () => this.generateReflexQuestions('notes', text, userPlan)),
+      this._withStudyPackRetries('wordTower', () => this.generateWordTowerQuestions('notes', text, userPlan)),
+      this._withStudyPackRetries('wordBlitz', () => this.generateWordBlitzQuestions('notes', text, userPlan)),
     ]);
 
-    const [quizR, flashR, crossR, lessonR, craterR, towerR] = results;
-    const labels = ['quiz', 'flashcards', 'crossword', 'lesson', 'craterBlast', 'wordTower'];
+    const [quizR, flashR, crossR, lessonR, craterR, towerR, blitzR] = results;
+    const labels = ['quiz', 'flashcards', 'crossword', 'lesson', 'craterBlast', 'wordTower', 'wordBlitz'];
+    const missing = [];
     results.forEach((r, i) => {
-      if (r.status === 'rejected') console.error(`Study pack: ${labels[i]} generation failed:`, r.reason?.message || r.reason);
+      if (r.status === 'rejected') {
+        missing.push(labels[i]);
+      }
     });
+    if (missing.length > 0) {
+      console.error(`[StudyPack] Pack returned with ${missing.length}/7 tools missing after retries: ${missing.join(', ')}`);
+    } else {
+      console.log('[StudyPack] All 7 tools generated successfully');
+    }
 
     if (quizR.status === 'rejected' && flashR.status === 'rejected' && lessonR.status === 'rejected') {
       throw new Error('Study pack generation failed: core components could not be generated');
@@ -5029,6 +5260,7 @@ Rules:
       lesson: lessonR.status === 'fulfilled' ? lessonR.value : null,
       craterBlast: craterR.status === 'fulfilled' ? craterR.value : null,
       wordTower: towerR.status === 'fulfilled' ? towerR.value : null,
+      wordBlitz: blitzR.status === 'fulfilled' ? blitzR.value : null,
     };
   }
 

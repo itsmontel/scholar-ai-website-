@@ -664,11 +664,14 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
     <>
       <Header onNavigate={onNavigate} user={user} sticky={true} currentPage="landing" opaqueHeader />
       <main className="min-h-screen relative transition-colors font-sans overflow-x-hidden xl:overflow-x-visible" role="main">
-      {/* Promo Banner */}
+      {/* Promo Banner — TEMPORARILY HIDDEN via the leading `hidden` class.
+          Markup preserved for easy re-enable: just remove `hidden` from the
+          className (and `aria-hidden`) when the promo is live again. */}
       <div
         role="region"
         aria-label="Limited time promotion"
-        className="relative overflow-hidden border-b-2 border-[#FF9600]/30 dark:border-[#D97F00]/40 bg-[#FFF4E0] dark:bg-stone-950"
+        aria-hidden="true"
+        className="hidden relative overflow-hidden border-b-2 border-[#FF9600]/30 dark:border-[#D97F00]/40 bg-[#FFF4E0] dark:bg-stone-950"
       >
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_120%_at_50%_50%,rgba(255,150,0,0.08),transparent_70%)] dark:bg-[radial-gradient(ellipse_60%_120%_at_50%_50%,rgba(255,150,0,0.12),transparent_70%)]" aria-hidden />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3">
@@ -737,9 +740,13 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           <div className="w-full min-w-0 max-w-[1240px] xl:mx-auto">
             {/* Hero: before (top-left) + headline + after (top-right) on lg+; mobile stack below headline */}
             <div className="flex flex-col items-stretch w-full">
-              <div className="lg:grid lg:grid-cols-[minmax(0,220px)_minmax(0,1fr)_minmax(0,220px)] xl:grid-cols-[minmax(0,248px)_minmax(0,1fr)_minmax(0,248px)] lg:gap-8 xl:gap-10 lg:items-start">
+              <div className="lg:grid lg:grid-cols-2 lg:gap-10 xl:gap-14 lg:items-center">
+                {/* TEMPORARILY HIDDEN — Before/After essay asides preserved
+                    for easy re-enable. Hero now uses a 2-column layout with
+                    the Daily Review preview on the right (see below the
+                    matching After aside). */}
                 <aside
-                  className="hidden lg:flex lg:flex-col gap-0 pointer-events-auto lg:justify-self-end lg:items-end lg:pt-1 xl:pt-2 lg:min-w-0 w-full max-w-[248px] opacity-0 animate-hero-aside-left"
+                  className="hidden"
                   aria-label="Before essay preview"
                 >
                   <div className="w-full rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900/50 p-1 transition-all duration-300 hover:border-[#FF4B4B]/60 dark:hover:border-[#FF4B4B]/40">
@@ -754,18 +761,20 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </div>
                 </aside>
 
-              <div className="min-w-0 flex flex-col items-center w-full max-w-2xl lg:max-w-none mx-auto">
-              <div className="relative w-full max-w-3xl mx-auto px-1 sm:px-2 text-center pt-2 sm:pt-4 opacity-0 animate-hero-card-enter">
+              <div className="min-w-0 flex flex-col items-center lg:items-start w-full max-w-2xl lg:max-w-none mx-auto lg:mx-0">
+              <div className="relative w-full max-w-3xl mx-auto lg:mx-0 px-1 sm:px-2 text-center lg:text-left pt-2 sm:pt-4 opacity-0 animate-hero-card-enter">
                 {/* Hero mascots — pinned to the bottom corners of the hero
                     card, sitting below the trial/login buttons so they flank
-                    the trust badge. */}
+                    the trust badge. The walking mascot occupies the bottom-left
+                    slot (its in-frame walking animation keeps the corner alive
+                    without translating across the card). */}
                 <img
-                  src="/mascot-paper.webp"
+                  src="/mascot-walking.webp"
                   alt=""
                   aria-hidden
                   loading="lazy"
                   decoding="async"
-                  className="hidden lg:block pointer-events-none absolute bottom-0 left-0 xl:left-2 w-24 xl:w-28 h-auto z-10 drop-shadow-[0_14px_24px_rgba(124,58,237,0.32)] motion-safe:animate-hero-aside-left"
+                  className="hidden lg:block pointer-events-none absolute top-12 left-[15rem] xl:left-[18rem] w-20 xl:w-24 h-auto z-10 drop-shadow-[0_14px_24px_rgba(124,58,237,0.32)] motion-safe:animate-hero-aside-left"
                 />
                 <img
                   src="/mascot-laptop.webp"
@@ -773,9 +782,9 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   aria-hidden
                   loading="lazy"
                   decoding="async"
-                  className="hidden lg:block pointer-events-none absolute bottom-0 right-0 xl:right-2 w-24 xl:w-28 h-auto z-10 drop-shadow-[0_14px_24px_rgba(124,58,237,0.32)] motion-safe:animate-hero-aside-right"
+                  className="hidden lg:block pointer-events-none absolute bottom-12 right-0 xl:right-2 w-24 xl:w-28 h-auto z-10 drop-shadow-[0_14px_24px_rgba(124,58,237,0.32)] motion-safe:animate-hero-aside-right"
                 />
-                <div className="relative flex flex-col items-center text-center">
+                <div className="relative flex flex-col items-center text-center lg:items-start lg:text-left">
                 {/* MOBILE-ONLY: floating dancing mascot in the top-right of
                     the hero — replaces the dense pill row and adds movement. */}
                 <img
@@ -797,146 +806,192 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   className="md:hidden pointer-events-none absolute top-2 left-0 w-12 h-auto z-20 opacity-90 drop-shadow-[0_10px_20px_rgba(124,58,237,0.30)] motion-safe:animate-mobile-mascot-peek"
                 />
 
-                {/* Three-pillar banner — Essays + Studying + Motivation.
-                    Shows visitors the full product scope at a glance.
-                    Hidden on mobile (replaced by floating mascot above). */}
-                <div className="hidden md:block mx-auto mb-5 sm:mb-6 max-w-lg sm:max-w-2xl opacity-0 animate-hero-stagger-1">
-                  <div className="relative rounded-2xl border border-stone-200/60 dark:border-stone-700/60 bg-transparent p-1 overflow-hidden">
-                    <div className="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-stretch gap-1">
-                      <a
-                        href="#landing-tools"
-                        className="group relative rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 flex items-center gap-2 bg-[#DDF4FF] dark:bg-[#1CB0F6]/15 hover:bg-[#9CDAFC] dark:hover:bg-[#1CB0F6]/30 transition-colors"
-                      >
-                        <span className="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-lg bg-white dark:bg-[#1CB0F6]/30 text-base sm:text-[17px] ring-1 ring-[#1CB0F6]/40 dark:ring-[#1899D6]/40" aria-hidden>📝</span>
-                        <div className="min-w-0 leading-tight text-left">
-                          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#1CB0F6] dark:text-[#1CB0F6]">
-                            Essays
-                          </p>
-                          <p className="text-[12px] sm:text-[13px] font-semibold text-stone-900 dark:text-stone-100 truncate">
-                            Analyze drafts
-                          </p>
-                        </div>
-                      </a>
-
-                      <div className="relative flex items-center justify-center px-1" aria-hidden>
-                        <div className="h-9 sm:h-11 w-px bg-stone-200 dark:bg-stone-700" />
-                        <span className="absolute inset-0 flex items-center justify-center text-[#1CB0F6] dark:text-[#1CB0F6] text-xl sm:text-2xl font-bold leading-none -tracking-[0.02em]">
-                          +
-                        </span>
-                      </div>
-
-                      <a
-                        href="#study-tools"
-                        className="group relative rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 flex items-center gap-2 bg-[#F3EAFF] dark:bg-[#A560E8]/15 hover:bg-[#DEC4F5] dark:hover:bg-[#A560E8]/30 transition-colors"
-                      >
-                        <span className="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-lg bg-white dark:bg-[#A560E8]/30 text-base sm:text-[17px] ring-1 ring-[#A560E8]/40 dark:ring-[#8A48C7]/40" aria-hidden>📦</span>
-                        <div className="min-w-0 leading-tight text-left">
-                          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#A560E8] dark:text-[#A560E8]">
-                            Studying
-                          </p>
-                          <p className="text-[12px] sm:text-[13px] font-semibold text-stone-900 dark:text-stone-100 truncate">
-                            Notes &rarr; 6 tools
-                          </p>
-                        </div>
-                      </a>
-
-                      <div className="relative flex items-center justify-center px-1" aria-hidden>
-                        <div className="h-9 sm:h-11 w-px bg-stone-200 dark:bg-stone-700" />
-                        <span className="absolute inset-0 flex items-center justify-center text-[#FF9600] dark:text-[#FF9600] text-xl sm:text-2xl font-bold leading-none -tracking-[0.02em]">
-                          +
-                        </span>
-                      </div>
-
-                      <a
-                        href="#motivation"
-                        className="group relative rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 flex items-center gap-2 bg-[#FFF4E0] dark:bg-[#FF9600]/15 hover:bg-[#FFD898] dark:hover:bg-[#FF9600]/30 transition-colors"
-                      >
-                        <span className="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-lg bg-white dark:bg-[#FF9600]/30 text-base sm:text-[17px] ring-1 ring-[#FF9600]/40 dark:ring-[#D97F00]/40" aria-hidden>🔥</span>
-                        <div className="min-w-0 leading-tight text-left">
-                          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#FF9600] dark:text-[#FF9600]">
-                            Motivation
-                          </p>
-                          <p className="text-[12px] sm:text-[13px] font-semibold text-stone-900 dark:text-stone-100 truncate">
-                            XP, levels &amp; streaks
-                          </p>
-                        </div>
-                      </a>
-                    </div>
-                  </div>
+                {/* TRUST EYEBROW — credibility before the pitch. Cold-traffic
+                    visitors decide "is this real?" before reading the offer,
+                    so social proof earns its placement above the headline.
+                    Five gold stars are the universal "highly rated" signal;
+                    paired with the user count they imply both quality
+                    (rating) and scale (count). Border-2/border-b-4 matches
+                    the chunky Duolingo-style pattern used elsewhere on the
+                    site so the pill reads as part of the visual system. */}
+                <div className="mb-5 sm:mb-6 inline-flex items-center gap-2.5 rounded-full border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800/80 px-3.5 py-1.5 sm:px-4 sm:py-2 shadow-md shadow-stone-200/40 dark:shadow-black/20 opacity-0 animate-hero-trust-pop">
+                  <span className="flex items-center gap-0.5 text-[#FFC800]" aria-hidden>
+                    {[0, 1, 2, 3, 4].map((i) => (
+                      <svg key={i} className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    ))}
+                  </span>
+                  <span className="text-[12px] sm:text-sm font-bold text-stone-800 dark:text-stone-100 tracking-[0.01em]">
+                    Trusted by <span className="font-extrabold text-[#1CB0F6] dark:text-[#1CB0F6] tabular-nums">50,000+</span> students
+                  </span>
                 </div>
 
+                {/* HEADLINE — pain + outcome in one breath. "The A" is the
+                    desire; "without the all-nighter" is the pain relief.
+                    Two short clauses scan in under a second. */}
+                {/* HEADLINE — staged typewriter animation. The H1 is split
+                    into three "typewriter" segments that wipe in left-to-right
+                    via a CSS mask. Each squiggle SVG path stays invisible
+                    (full stroke-dashoffset) until its delayed draw-on
+                    animation kicks in. Sequence (timed via inline
+                    animationDelay):
+                      0.40s  Phase 1 typewriter starts ("Get the A.")
+                      1.05s  A's squiggle draws on
+                      1.15s  Phase 2 typewriter starts ("With the all-nighter")
+                      2.00s  red squiggly slash draws across "the all-nighter"
+                      2.70s  Phase 3 typewriter starts (" WriteScholar.")
+                      3.40s  WriteScholar's squiggle draws on
+                    Reduced-motion users see the final state immediately
+                    (overrides in src/index.css). */}
                 <h1
-                  className="text-[2rem] sm:text-[2.55rem] lg:text-[3.2rem] xl:text-[3.55rem] font-extrabold tracking-[-0.02em] leading-[1.08] mb-5 sm:mb-6 max-w-[min(28rem,calc(100vw-2rem))] sm:max-w-3xl mx-auto text-balance opacity-0 animate-hero-stagger-1"
+                  className="text-[2.2rem] sm:text-[2.85rem] lg:text-[3.5rem] xl:text-[3.85rem] font-extrabold tracking-[-0.02em] leading-[1.04] mb-5 sm:mb-6 max-w-[min(28rem,calc(100vw-2rem))] sm:max-w-3xl mx-auto lg:mx-0 text-balance"
                   style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                 >
-                  <span className="text-stone-900 dark:text-stone-50">Better essays.</span>{' '}
-                  <span className="text-stone-900 dark:text-stone-50">Smarter studying.</span>
-                  <br className="hidden sm:block" />
-                  <span className="relative inline-block text-[#A560E8] dark:text-[#A560E8]">
-                    WriteScholar does both.
-                    <svg
-                      className="absolute -bottom-1.5 left-0 w-full h-2 text-[#A560E8]/80 dark:text-[#A560E8]/70"
-                      viewBox="0 0 200 8"
-                      preserveAspectRatio="none"
-                      aria-hidden
-                    >
-                      <path
-                        d="M2 6 Q50 1 100 5 T198 4"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                      />
-                    </svg>
+                  {/* Phase 1: "Get the A." */}
+                  <span className="inline-block animate-hero-typewriter" style={{ animationDelay: '0.4s' }}>
+                    <span className="text-stone-900 dark:text-stone-50">Get the</span>{' '}
+                    <span className="relative inline-block overflow-visible text-[#A560E8] dark:text-[#A560E8]">
+                      A
+                      <svg
+                        className="absolute -bottom-2 left-0 w-full h-3 text-[#A560E8] dark:text-[#A560E8] overflow-visible"
+                        viewBox="0 0 200 12"
+                        preserveAspectRatio="none"
+                        aria-hidden
+                        style={{ overflow: 'visible' }}
+                      >
+                        <path
+                          className="animate-hero-squiggle-draw"
+                          style={{ animationDelay: '1.05s' }}
+                          d="M2 8 Q50 2 100 7 T198 6"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="3"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                    </span>
+                    <span className="text-[#A560E8] dark:text-[#A560E8]">.</span>
+                  </span>
+                  <br />
+                  {/* Phase 2: "With the all-nighter" + red strikethrough squiggle */}
+                  <span className="inline-block animate-hero-typewriter" style={{ animationDelay: '1.15s' }}>
+                    <span className="text-stone-900 dark:text-stone-50">With</span>{' '}
+                    <span className="relative inline-block text-stone-400 dark:text-stone-500">
+                      the all-nighter
+                      <svg
+                        className="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 w-full h-3 sm:h-4 lg:h-5 text-[#FF4B4B]"
+                        viewBox="0 0 200 12"
+                        preserveAspectRatio="none"
+                        aria-hidden
+                      >
+                        <path
+                          className="animate-hero-squiggle-draw"
+                          style={{ animationDelay: '2.0s' }}
+                          d="M2 6 Q18 1 34 6 T66 6 T98 6 T130 6 T162 6 T198 6"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="6"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </span>
+                  </span>{' '}
+                  {/* Phase 3: "WriteScholar." with its purple squiggle */}
+                  <span className="inline-block animate-hero-typewriter" style={{ animationDelay: '2.7s' }}>
+                    <span className="relative inline-block overflow-visible text-[#A560E8] dark:text-[#A560E8]">
+                      WriteScholar
+                      <svg
+                        className="absolute -bottom-2 left-0 w-full h-3 text-[#A560E8] dark:text-[#A560E8] overflow-visible"
+                        viewBox="0 0 200 12"
+                        preserveAspectRatio="none"
+                        aria-hidden
+                        style={{ overflow: 'visible' }}
+                      >
+                        <path
+                          className="animate-hero-squiggle-draw"
+                          style={{ animationDelay: '3.4s' }}
+                          d="M2 8 Q50 2 100 7 T198 6"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="3"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                    </span>
+                    <span className="text-[#A560E8] dark:text-[#A560E8]">.</span>
                   </span>
                 </h1>
-                <div className="mb-7 sm:mb-8 max-w-[min(24rem,calc(100vw-2rem))] sm:max-w-2xl mx-auto space-y-2.5 sm:space-y-3 text-stone-600 dark:text-stone-400">
-                  <p className="text-[1.02rem] sm:text-lg font-semibold text-stone-800 dark:text-stone-100 leading-snug tracking-[0.01em] opacity-0 animate-hero-stagger-2">
-                    Professor-style feedback on your writing — plus daily practice, XP, levels, and study tools that make learning addictive.
-                  </p>
-                </div>
 
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 w-full max-w-md sm:max-w-none mx-auto sm:mx-0 mb-5 sm:mb-6 opacity-0 animate-hero-stagger-4">
+                {/* SUBHEADLINE — covers BOTH products in parallel:
+                    1) the essay analyzer ("professor-style feedback")
+                    2) the study tools ("7 study tools built from your notes").
+                    Bolded nouns let it scan in under a second. */}
+                <p className="mb-7 sm:mb-8 max-w-[min(26rem,calc(100vw-2rem))] sm:max-w-xl mx-auto lg:mx-0 text-[1.02rem] sm:text-lg text-stone-700 dark:text-stone-300 leading-relaxed opacity-0 animate-hero-stagger-2">
+                  <span className="font-bold text-stone-900 dark:text-stone-50">Professor-style feedback</span> on every essay — plus <span className="font-bold text-stone-900 dark:text-stone-50">7 study tools</span> built from your notes. All in minutes.
+                </p>
+
+                {/* PRIMARY CTA — single dominant action. Login moved to a
+                    de-emphasized text link below the risk-reversal so the
+                    visual hierarchy stays one-CTA. */}
+                <div className="flex flex-col items-stretch sm:items-center lg:items-start justify-center lg:justify-start w-full max-w-md mx-auto lg:mx-0 mb-3 sm:mb-4 opacity-0 animate-hero-stagger-4">
                   <button
                     type="button"
                     onClick={() => onNavigate('signup')}
-                    className="group/btn relative inline-flex w-full sm:w-auto items-center justify-center gap-2 overflow-hidden px-8 py-3.5 sm:px-9 sm:py-4 bg-[#A560E8] hover:bg-[#B274EC] dark:bg-[#A560E8] dark:hover:bg-[#B274EC] text-white font-extrabold rounded-2xl border-2 border-b-4 border-[#8A48C7] dark:border-[#8A48C7] transition-all duration-200 hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 text-[0.97rem] sm:text-[1.02rem] tracking-wide"
+                    className="group/btn relative inline-flex w-full items-center justify-center gap-2 overflow-hidden px-8 py-4 sm:px-10 sm:py-5 bg-[#A560E8] hover:bg-[#B274EC] dark:bg-[#A560E8] dark:hover:bg-[#B274EC] text-white font-extrabold rounded-2xl border-2 border-b-4 border-[#8A48C7] dark:border-[#8A48C7] transition-all duration-200 hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 text-[1.05rem] sm:text-[1.15rem] tracking-wide shadow-lg shadow-[#A560E8]/25"
                   >
-                    <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 opacity-0 transition-opacity duration-300 group-hover/btn:opacity-100 pointer-events-none" aria-hidden />
-                    <span className="relative">Start my 7-day free trial</span>
-                    <svg className="relative w-4 h-4 group-hover/btn:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                    <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/25 to-white/0 opacity-0 transition-opacity duration-300 group-hover/btn:opacity-100 pointer-events-none" aria-hidden />
+                    <span className="relative">Start free — get the A</span>
+                    <svg className="relative w-5 h-5 group-hover/btn:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                   </button>
+                </div>
+
+                {/* RISK REVERSAL — three quick objections handled visually so
+                    the visitor's hesitations get answered before they bounce. */}
+                <div className="mb-4 sm:mb-5 flex flex-wrap items-center justify-center lg:justify-start gap-x-4 gap-y-1.5 text-[12px] sm:text-[13px] text-stone-600 dark:text-stone-400 opacity-0 animate-hero-stagger-5">
+                  <span className="inline-flex items-center gap-1.5">
+                    <svg className="w-3.5 h-3.5 text-[#58CC02]" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    No credit card
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <svg className="w-3.5 h-3.5 text-[#58CC02]" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    7-day free trial
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <svg className="w-3.5 h-3.5 text-[#58CC02]" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    Cancel anytime
+                  </span>
+                </div>
+
+                {/* SECONDARY: existing-user login as a low-weight text link
+                    so it doesn't compete with the trial CTA. */}
+                <p className="text-center lg:text-left text-[13px] sm:text-sm text-stone-500 dark:text-stone-400 opacity-0 animate-hero-stagger-5">
+                  Already have an account?{' '}
                   <button
                     type="button"
                     onClick={() => onNavigate('login')}
-                    className="inline-flex items-center justify-center px-7 py-3.5 sm:px-8 sm:py-4 border-2 border-b-4 border-[#E5E5E5] dark:border-stone-600 bg-white dark:bg-stone-900/60 text-[#3C3C3C] dark:text-stone-200 font-extrabold rounded-2xl hover:bg-stone-50 dark:hover:bg-stone-800 hover:border-stone-300 dark:hover:border-stone-500 active:border-b-2 active:translate-y-0.5 transition-all text-[0.97rem] sm:text-[1.02rem] tracking-wide"
+                    className="font-bold text-[#1CB0F6] hover:text-[#1899D6] underline-offset-2 hover:underline transition-colors"
                   >
                     Log in
                   </button>
-              </div>
-                <p className="mb-6 sm:mb-7 text-center text-[12px] sm:text-sm text-stone-500 dark:text-stone-400 tracking-[0.03em] opacity-0 animate-hero-stagger-5">
-                  About 30 seconds to get started. No payment today.
                 </p>
-
-                <div className="flex justify-center w-full">
-                  <div className="inline-flex items-center gap-2.5 rounded-full border border-stone-200/95 bg-white/90 py-2 pl-2.5 pr-4 text-[12px] sm:text-sm text-stone-700 shadow-sm dark:border-stone-600 dark:bg-stone-800/70 dark:text-stone-200 max-w-full opacity-0 animate-hero-trust-pop">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#DDF4FF] text-[#1CB0F6] dark:bg-[#1CB0F6]/20 dark:text-[#1CB0F6]" aria-hidden>
-                      <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                      </svg>
-                    </span>
-                    <span className="font-semibold leading-snug text-left sm:text-center">
-                      Trusted by <span className="text-[#1CB0F6] dark:text-[#1CB0F6] tabular-nums">50,000+</span> students worldwide
-                    </span>
-                  </div>
-                </div>
                 </div>
               </div>
               </div>
+                {/* TEMPORARILY HIDDEN — see matching note on the Before
+                    aside above. The hero now uses the right column for the
+                    Daily Review screenshot (rendered just below). */}
                 <aside
-                  className="hidden lg:flex lg:flex-col gap-0 pointer-events-auto lg:justify-self-start lg:items-start lg:pt-1 xl:pt-2 lg:min-w-0 w-full max-w-[248px] opacity-0 animate-hero-aside-right"
+                  className="hidden"
                   aria-label="After essay preview"
                 >
                   <div className="w-full rounded-2xl border-2 border-b-4 border-[#58CC02]/60 dark:border-[#58CC02]/40 bg-white dark:bg-stone-900/50 p-1 transition-all duration-300 hover:border-[#58CC02] dark:hover:border-[#58CC02]/60">
@@ -950,6 +1005,35 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     />
                   </div>
                 </aside>
+
+                {/* RIGHT COLUMN — Hero walkthrough video. Replaces the prior
+                    Daily Review screenshot with an autoplaying screen-recording
+                    demo of the full product. The same Daily Review screenshot
+                    is still rendered in the Motivation section below (kept in
+                    its original spot per the user's brief) AND in the mobile
+                    interactive demo area, so the visual is preserved at lower
+                    breakpoints where this video is hidden.
+                    Video specs: muted + autoPlay + loop + playsInline so iOS
+                    Safari plays it inline rather than hijacking full-screen.
+                    Poster image keeps the slot full while the MP4 streams. */}
+                <div className="hidden lg:block w-full opacity-0 animate-hero-aside-right">
+                  <div className="relative group">
+                    <div className="absolute -inset-2 bg-[#A560E8]/15 rounded-3xl blur-2xl opacity-50 group-hover:opacity-70 transition-opacity duration-500" aria-hidden />
+                    <div className="relative rounded-2xl overflow-hidden border-2 border-b-4 border-[#8A48C7] dark:border-[#8A48C7] shadow-2xl bg-white dark:bg-stone-900">
+                      <video
+                        src="/hero-vid.mp4"
+                        poster="/hero-vid-poster.jpg"
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        preload="metadata"
+                        aria-label="WriteScholar walkthrough: a quick screen recording of the full product — essay analyzer, study tools, daily review, and more"
+                        className="w-full h-auto block"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Strong horizontal section break between trust badge and
@@ -1003,7 +1087,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                       {
                         step: '2',
                         title: 'AI does the heavy lifting',
-                        desc: 'In under 60 seconds, get rubric-graded essay feedback or 6 study tools generated from your notes.',
+                        desc: 'In under 60 seconds, get rubric-graded essay feedback or 7 study tools generated from your notes.',
                         mascot: '/mascot-laptop.webp',
                         accentBorder: 'border-[#A560E8]/60 dark:border-[#8A48C7]/50',
                         accentRing: 'ring-[#A560E8]/30',
@@ -1132,7 +1216,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     <div className="pointer-events-none absolute -bottom-16 -left-12 w-44 h-44 rounded-full bg-[#1CB0F6]/15 dark:bg-[#1CB0F6]/12 blur-3xl" aria-hidden />
 
                     <div className="relative grid grid-cols-1 sm:grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-5 sm:gap-6">
-                      {/* Juggling mascot — "Scholar juggles 6 study tools so you don't have to" */}
+                      {/* Juggling mascot — "Scholar juggles 7 study tools so you don't have to" */}
                       <img
                         src="/mascot-juggling.webp"
                         alt=""
@@ -1153,7 +1237,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                         >
                           Paste any notes,{' '}
                           <span className="text-[#A560E8] dark:text-[#A560E8]">
-                            get 6 study tools
+                            get 7 study tools
                           </span>{' '}
                           in 60 seconds
                         </h3>
@@ -1182,119 +1266,31 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </a>
                 </div>
 
-                {/* Social proof: testimonial + universities — directly under primary CTA */}
-                <div
-                  className="relative w-screen max-w-[100vw] mt-8 sm:mt-10 mb-0 ml-[calc(50%-50vw)] overflow-x-clip overflow-hidden
-                    border-y border-stone-200/90 dark:border-stone-800
-                    bg-[#fafafa] dark:bg-stone-950
-                    shadow-[inset_0_1px_0_0_rgba(255,255,255,0.9)] dark:shadow-none"
-                  aria-label="Social proof: student testimonial and universities"
-                >
-                  <div
-                    className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_90%_70%_at_50%_-20%,rgba(28,176,246,0.04),transparent_50%)] dark:bg-[radial-gradient(ellipse_90%_70%_at_50%_-20%,rgba(28,176,246,0.08),transparent_50%)]"
-                    aria-hidden
-                  />
-                  <div className="relative z-10 pt-10 pb-8 sm:pt-12 sm:pb-10">
-                    <div className="max-w-6xl mx-auto px-3 sm:px-6">
-                      {/* Testimonial card — minimal, just the quote. Modern
-                          violet/fuchsia frame with a glow halo and a quote mark. */}
-                      <figure className="relative rounded-3xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900/70 px-5 py-6 sm:px-10 sm:py-9 w-full max-w-2xl min-w-0 mx-auto mb-9 sm:mb-12 overflow-hidden">
-                        <div className="pointer-events-none absolute -top-12 -right-12 w-40 h-40 rounded-full bg-[#1CB0F6]/20 dark:bg-[#1CB0F6]/15 blur-3xl" aria-hidden />
-                        <div className="pointer-events-none absolute -bottom-12 -left-12 w-40 h-40 rounded-full bg-[#58CC02]/15 dark:bg-[#58CC02]/12 blur-3xl" aria-hidden />
-
-                        <blockquote className="relative m-0 border-0 p-0 w-full text-center">
-                          <span
-                            className="block text-[#1CB0F6]/40 dark:text-[#1CB0F6]/30 text-5xl sm:text-6xl leading-none mb-2 select-none"
-                            aria-hidden
-                          >
-                            &ldquo;
-                          </span>
-                          <p
-                            className="text-stone-800 dark:text-stone-100 text-base sm:text-xl leading-snug sm:leading-relaxed font-medium italic break-words px-0.5"
-                            style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
-                          >
-                            Went from a B to an A in one submission. The feedback was exactly what my professor wanted.
-                          </p>
-                        </blockquote>
-                      </figure>
-
-                      {/* Universities header — modernized eyebrow + serif */}
-                      <div className="w-full max-w-2xl mx-auto text-center mb-7 sm:mb-9 px-1">
-                        <span className="inline-flex items-center gap-1.5 mb-3 rounded-full border-2 border-[#E5E5E5] dark:border-stone-700 bg-white/80 dark:bg-stone-900/70 backdrop-blur px-3 py-1 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.2em] text-[#1CB0F6] dark:text-[#1CB0F6]">
-                          <span aria-hidden>★</span>
-                          Used at top universities
-                        </span>
-                        <h3
-                          className="text-xl sm:text-2xl lg:text-[1.65rem] font-extrabold text-stone-900 dark:text-stone-50 tracking-tight leading-tight"
-                          style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                        >
-                          Students at <span className="text-[#1CB0F6] dark:text-[#1CB0F6]">leading universities</span> use WriteScholar
-                        </h3>
-                      </div>
-                    </div>
-
-                    {/* University name carousel — gradient pill chips */}
-                    <div className="relative overflow-hidden px-0">
-                      <div
-                        className="pointer-events-none absolute inset-y-0 left-0 z-10 w-14 sm:w-24 bg-gradient-to-r from-[#fafafa] dark:from-stone-950 via-[#fafafa] dark:via-stone-950 to-transparent"
-                        aria-hidden
-                      />
-                      <div
-                        className="pointer-events-none absolute inset-y-0 right-0 z-10 w-14 sm:w-24 bg-gradient-to-l from-[#fafafa] dark:from-stone-950 via-[#fafafa] dark:via-stone-950 to-transparent"
-                        aria-hidden
-                      />
-                      <div className="flex w-max animate-scroll-slow items-center py-1">
-                        {[...universities, ...universities, ...universities].map((uni, idx) => (
-                          <div key={`hero-uni-${idx}`} className="flex-shrink-0 mx-2 sm:mx-3">
-                            <span
-                              className={`inline-flex items-center gap-2 rounded-xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900 px-4 py-2.5 sm:px-5 sm:py-3 text-sm sm:text-[15px] font-extrabold hover:-translate-y-0.5 transition-all duration-300 ${uni.className} !text-stone-800 dark:!text-stone-100`}
-                            >
-                              <span className="h-1.5 w-1.5 rounded-full bg-[#1CB0F6] shrink-0" aria-hidden />
-                              {uni.name}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
 
-              {/* Before / after — phones & tablets only (desktop: side columns above) */}
+              {/* Daily Review preview — phones & tablets only. Replaces the
+                  previous Before/After essay comparison so the study-tools
+                  mechanic surfaces above the fold for mobile visitors (the
+                  hero shows this same screenshot in its right column on lg+).
+                  Same image is also rendered later in the Motivation section
+                  in its original spot. */}
               <div
                 className="lg:hidden w-full mt-8 sm:mt-10 pb-2 px-1"
-                aria-label="Before and after essay preview mock-ups"
+                aria-label="Daily Review preview"
               >
-                <p className="hidden sm:block text-center text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-500 mb-6">
-                  Same topic: professor-style annotations
+                <p className="text-center text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-500 mb-4 sm:mb-6">
+                  Daily Review — built from your notes
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-10 items-start justify-items-center max-w-4xl mx-auto">
-                  <div className="w-full max-w-[280px] flex flex-col items-center gap-3">
-                    <div className="text-center">
-                      <p className="text-[11px] font-bold uppercase tracking-wide text-[#FF4B4B] dark:text-[#FF4B4B]">Before</p>
-                      <p className="text-[10px] text-stone-500 dark:text-stone-500 mt-0.5">Draft with mixed feedback</p>
-                    </div>
-                    <div className="rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900/50 p-1 transition-all duration-300 hover:border-[#FF4B4B]/60 w-full">
-                      <HeroEssayPreviewCard
-                        paper={DEMO_PAPERS[1]}
-                        rotate="none"
-                        variant="before"
-                        onOpenDemo={scrollToInteractiveDemoFeedback}
-                      />
-                    </div>
-                  </div>
-                  <div className="w-full max-w-[280px] flex flex-col items-center gap-3">
-                    <div className="text-center">
-                      <p className="text-[11px] font-bold uppercase tracking-wide text-[#58CC02] dark:text-[#58CC02]">After</p>
-                      <p className="text-[10px] text-stone-500 dark:text-stone-500 mt-0.5">Revised · 90/100 (A)</p>
-                    </div>
-                    <div className="rounded-2xl border-2 border-b-4 border-[#58CC02]/60 dark:border-[#58CC02]/40 bg-white dark:bg-stone-900/50 p-1 transition-all duration-300 hover:border-[#58CC02] w-full">
-                      <HeroEssayPreviewCard
-                        paper={DEMO_HERO_AFTER_PAPER}
-                        rotate="none"
-                        variant="after"
-                        maxExcerptChars={720}
-                        onOpenDemo={scrollToInteractiveDemoFeedback}
+                <div className="max-w-md mx-auto">
+                  <div className="relative group">
+                    <div className="absolute -inset-2 bg-[#58CC02]/15 rounded-3xl blur-2xl opacity-50 group-hover:opacity-70 transition-opacity duration-500" aria-hidden />
+                    <div className="relative rounded-2xl overflow-hidden border-2 border-b-4 border-[#46A302] dark:border-[#46A302] shadow-2xl bg-white dark:bg-stone-900">
+                      <img
+                        src="/daily-review-preview.png"
+                        alt="WriteScholar Daily Review: personalised practice questions built from your notes, with instant feedback and XP rewards"
+                        className="w-full h-auto block"
+                        loading="lazy"
+                        decoding="async"
                       />
                     </div>
                   </div>
@@ -1432,6 +1428,89 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
       {/* Study tools sits above citations — flagship feature first. */}
       <LandingStudyToolsHero onNavigate={onNavigate} />
+
+      {/* Social proof: testimonial + universities — placed beneath the
+          study-tools showcase so visitors see the "7 study tools" promise
+          first, then immediately land on the proof that students at top
+          universities use it.
+          TEMPORARILY HIDDEN via the leading `hidden` class — keep markup
+          intact for easy re-enable (just remove `hidden` from className). */}
+      <div
+        className="hidden relative w-full overflow-x-clip overflow-hidden
+          border-y border-stone-200/90 dark:border-stone-800
+          bg-[#fafafa] dark:bg-stone-950
+          shadow-[inset_0_1px_0_0_rgba(255,255,255,0.9)] dark:shadow-none"
+        aria-label="Social proof: student testimonial and universities"
+        aria-hidden="true"
+      >
+        <div
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_90%_70%_at_50%_-20%,rgba(28,176,246,0.04),transparent_50%)] dark:bg-[radial-gradient(ellipse_90%_70%_at_50%_-20%,rgba(28,176,246,0.08),transparent_50%)]"
+          aria-hidden
+        />
+        <div className="relative z-10 pt-10 pb-8 sm:pt-12 sm:pb-10">
+          <div className="max-w-6xl mx-auto px-3 sm:px-6">
+            {/* Testimonial card — minimal, just the quote. Modern
+                violet/fuchsia frame with a glow halo and a quote mark. */}
+            <figure className="relative rounded-3xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900/70 px-5 py-6 sm:px-10 sm:py-9 w-full max-w-2xl min-w-0 mx-auto mb-9 sm:mb-12 overflow-hidden">
+              <div className="pointer-events-none absolute -top-12 -right-12 w-40 h-40 rounded-full bg-[#1CB0F6]/20 dark:bg-[#1CB0F6]/15 blur-3xl" aria-hidden />
+              <div className="pointer-events-none absolute -bottom-12 -left-12 w-40 h-40 rounded-full bg-[#58CC02]/15 dark:bg-[#58CC02]/12 blur-3xl" aria-hidden />
+
+              <blockquote className="relative m-0 border-0 p-0 w-full text-center">
+                <span
+                  className="block text-[#1CB0F6]/40 dark:text-[#1CB0F6]/30 text-5xl sm:text-6xl leading-none mb-2 select-none"
+                  aria-hidden
+                >
+                  &ldquo;
+                </span>
+                <p
+                  className="text-stone-800 dark:text-stone-100 text-base sm:text-xl leading-snug sm:leading-relaxed font-medium italic break-words px-0.5"
+                  style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+                >
+                  Went from a B to an A in one submission. The feedback was exactly what my professor wanted.
+                </p>
+              </blockquote>
+            </figure>
+
+            {/* Universities header — modernized eyebrow + serif */}
+            <div className="w-full max-w-2xl mx-auto text-center mb-7 sm:mb-9 px-1">
+              <span className="inline-flex items-center gap-1.5 mb-3 rounded-full border-2 border-[#E5E5E5] dark:border-stone-700 bg-white/80 dark:bg-stone-900/70 backdrop-blur px-3 py-1 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.2em] text-[#1CB0F6] dark:text-[#1CB0F6]">
+                <span aria-hidden>★</span>
+                Used at top universities
+              </span>
+              <h3
+                className="text-xl sm:text-2xl lg:text-[1.65rem] font-extrabold text-stone-900 dark:text-stone-50 tracking-tight leading-tight"
+                style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+              >
+                Students at <span className="text-[#1CB0F6] dark:text-[#1CB0F6]">leading universities</span> use WriteScholar
+              </h3>
+            </div>
+          </div>
+
+          {/* University name carousel — gradient pill chips */}
+          <div className="relative overflow-hidden px-0">
+            <div
+              className="pointer-events-none absolute inset-y-0 left-0 z-10 w-14 sm:w-24 bg-gradient-to-r from-[#fafafa] dark:from-stone-950 via-[#fafafa] dark:via-stone-950 to-transparent"
+              aria-hidden
+            />
+            <div
+              className="pointer-events-none absolute inset-y-0 right-0 z-10 w-14 sm:w-24 bg-gradient-to-l from-[#fafafa] dark:from-stone-950 via-[#fafafa] dark:via-stone-950 to-transparent"
+              aria-hidden
+            />
+            <div className="flex w-max animate-scroll-slow items-center py-1">
+              {[...universities, ...universities, ...universities].map((uni, idx) => (
+                <div key={`hero-uni-${idx}`} className="flex-shrink-0 mx-2 sm:mx-3">
+                  <span
+                    className={`inline-flex items-center gap-2 rounded-xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900 px-4 py-2.5 sm:px-5 sm:py-3 text-sm sm:text-[15px] font-extrabold hover:-translate-y-0.5 transition-all duration-300 ${uni.className} !text-stone-800 dark:!text-stone-100`}
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#1CB0F6] shrink-0" aria-hidden />
+                    {uni.name}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* ─── "Study daily. Level up." — gamification showcase.
           Daily Review, XP, Levels, Streaks, Badges — the habit loop
