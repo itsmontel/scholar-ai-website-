@@ -3,6 +3,8 @@ import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 import ScholarMascot from '../../common/ScholarMascot';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
+import ToolPageSeoContent from '../../common/ToolPageSeoContent';
+import { gpaSeo } from '../../../data/toolSeoContent';
 
 interface GPACalculatorPageProps {
   onNavigate: (page: string) => void;
@@ -349,6 +351,8 @@ const GPACalculatorPage = ({ onNavigate, user, onLogout }: GPACalculatorPageProp
           </div>
         </div>
       </section>
+
+      <ToolPageSeoContent {...gpaSeo} onNavigate={onNavigate} />
 
       <Footer onNavigate={onNavigate} />
     </div>

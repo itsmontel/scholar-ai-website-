@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
+import ToolPageSeoContent from '../../common/ToolPageSeoContent';
+import { textCaseSeo } from '../../../data/toolSeoContent';
 
 interface TextCaseConverterPageProps {
   onNavigate: (page: string) => void;
@@ -203,6 +205,8 @@ const TextCaseConverterPage = ({ onNavigate, user, onLogout }: TextCaseConverter
           </div>
         </div>
       </section>
+
+      <ToolPageSeoContent {...textCaseSeo} onNavigate={onNavigate} />
 
       <Footer onNavigate={onNavigate} />
     </div>

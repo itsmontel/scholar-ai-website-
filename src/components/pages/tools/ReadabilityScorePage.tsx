@@ -3,6 +3,8 @@ import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 import ScholarMascot from '../../common/ScholarMascot';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
+import ToolPageSeoContent from '../../common/ToolPageSeoContent';
+import { readabilitySeo } from '../../../data/toolSeoContent';
 
 interface ReadabilityScorePageProps {
   onNavigate: (page: string) => void;
@@ -571,6 +573,8 @@ const ReadabilityScorePage = ({ onNavigate, user, onLogout }: ReadabilityScorePa
           </div>
         </div>
       </section>
+
+      <ToolPageSeoContent {...readabilitySeo} onNavigate={onNavigate} />
 
       <Footer onNavigate={onNavigate} />
     </div>

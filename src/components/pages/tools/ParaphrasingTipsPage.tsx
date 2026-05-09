@@ -3,6 +3,8 @@ import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 import ScholarMascot from '../../common/ScholarMascot';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
+import ToolPageSeoContent from '../../common/ToolPageSeoContent';
+import { paraphraseSeo } from '../../../data/toolSeoContent';
 
 interface ParaphrasingTipsPageProps {
   onNavigate: (page: string) => void;
@@ -966,6 +968,8 @@ const ParaphrasingTipsPage = ({ onNavigate, user, onLogout }: ParaphrasingTipsPa
           </div>
         </div>
       </section>
+
+      <ToolPageSeoContent {...paraphraseSeo} onNavigate={onNavigate} />
 
       <Footer onNavigate={onNavigate} />
     </div>

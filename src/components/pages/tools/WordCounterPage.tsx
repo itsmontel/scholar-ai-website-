@@ -3,6 +3,8 @@ import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 import ScholarMascot from '../../common/ScholarMascot';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
+import ToolPageSeoContent from '../../common/ToolPageSeoContent';
+import { wordCounterSeo } from '../../../data/toolSeoContent';
 
 interface WordCounterPageProps {
   onNavigate: (page: string) => void;
@@ -266,6 +268,8 @@ const WordCounterPage = ({ onNavigate, user, onLogout }: WordCounterPageProps) =
           </div>
         </div>
       </section>
+
+      <ToolPageSeoContent {...wordCounterSeo} onNavigate={onNavigate} />
 
       <Footer onNavigate={onNavigate} />
     </div>

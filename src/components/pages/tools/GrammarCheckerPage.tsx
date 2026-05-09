@@ -3,6 +3,8 @@ import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 import ScholarMascot from '../../common/ScholarMascot';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
+import ToolPageSeoContent from '../../common/ToolPageSeoContent';
+import { grammarCheckerSeo } from '../../../data/toolSeoContent';
 
 interface GrammarCheckerPageProps {
   onNavigate: (page: string) => void;
@@ -433,6 +435,8 @@ const GrammarCheckerPage = ({ onNavigate, user, onLogout }: GrammarCheckerPagePr
           </div>
         </div>
       </section>
+
+      <ToolPageSeoContent {...grammarCheckerSeo} onNavigate={onNavigate} />
 
       <Footer onNavigate={onNavigate} />
     </div>

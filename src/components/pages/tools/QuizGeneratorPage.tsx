@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
+import ToolPageSeoContent from '../../common/ToolPageSeoContent';
+import { quizGenSeo } from '../../../data/toolSeoContent';
 
 function shuffleAndTake<T>(arr: T[], count: number): T[] {
   const shuffled = [...arr].sort(() => Math.random() - 0.5);
@@ -2649,6 +2651,8 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
           </div>
         </div>
       )}
+
+      {!showMinimalUI && <ToolPageSeoContent {...quizGenSeo} onNavigate={onNavigate} />}
 
       {!showMinimalUI && <Footer onNavigate={onNavigate} />}
     </div>

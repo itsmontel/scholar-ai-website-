@@ -3,6 +3,8 @@ import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 import ScholarMascot from '../../common/ScholarMascot';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
+import ToolPageSeoContent from '../../common/ToolPageSeoContent';
+import { essayOutlineSeo } from '../../../data/toolSeoContent';
 
 interface EssayOutlineGeneratorPageProps {
   onNavigate: (page: string) => void;
@@ -574,6 +576,8 @@ const EssayOutlineGeneratorPage = ({ onNavigate, user, onLogout }: EssayOutlineG
           </div>
         </div>
       </section>
+
+      <ToolPageSeoContent {...essayOutlineSeo} onNavigate={onNavigate} />
 
       <Footer onNavigate={onNavigate} />
     </div>

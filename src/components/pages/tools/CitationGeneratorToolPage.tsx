@@ -5,6 +5,8 @@ import Footer from '../../common/Footer';
 import ScholarMascot from '../../common/ScholarMascot';
 import { trackCopy } from '../../../data/achievements';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
+import ToolPageSeoContent from '../../common/ToolPageSeoContent';
+import { citationGeneratorSeo } from '../../../data/toolSeoContent';
 
 interface CitationGeneratorToolPageProps {
   onNavigate: (page: string) => void;
@@ -1597,6 +1599,8 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
           </div>
         </div>
       </section>
+
+      <ToolPageSeoContent {...citationGeneratorSeo} onNavigate={onNavigate} />
 
       <Footer onNavigate={onNavigate} />
     </div>

@@ -2,6 +2,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
+import ToolPageSeoContent from '../../common/ToolPageSeoContent';
+import { pomodoroSeo } from '../../../data/toolSeoContent';
 
 interface PomodoroTimerPageProps {
   onNavigate: (page: string) => void;
@@ -549,6 +551,8 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
           </div>
         </div>
       </section>
+
+      <ToolPageSeoContent {...pomodoroSeo} onNavigate={onNavigate} />
 
       <Footer onNavigate={onNavigate} />
     </div>

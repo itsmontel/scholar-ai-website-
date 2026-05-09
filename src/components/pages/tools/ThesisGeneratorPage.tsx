@@ -3,6 +3,8 @@ import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 import ScholarMascot from '../../common/ScholarMascot';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
+import ToolPageSeoContent from '../../common/ToolPageSeoContent';
+import { thesisGenSeo } from '../../../data/toolSeoContent';
 
 interface ThesisGeneratorPageProps {
   onNavigate: (page: string) => void;
@@ -346,6 +348,8 @@ const ThesisGeneratorPage = ({ onNavigate, user, onLogout }: ThesisGeneratorPage
           </div>
         </div>
       </section>
+
+      <ToolPageSeoContent {...thesisGenSeo} onNavigate={onNavigate} />
 
       <Footer onNavigate={onNavigate} />
     </div>

@@ -7,6 +7,8 @@ import AnalysisAnimation from '../../common/AnalysisAnimation';
 import { trackAction, trackCopy } from '../../../data/achievements';
 import { getResetsInText } from '../../../utils/usageReset';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
+import ToolPageSeoContent from '../../common/ToolPageSeoContent';
+import { summarizerSeo } from '../../../data/toolSeoContent';
 
 interface SummarizerPageProps {
   onNavigate: (page: string) => void;
@@ -636,6 +638,8 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
           </div>
         </div>
       </main>
+
+      <ToolPageSeoContent {...summarizerSeo} onNavigate={onNavigate} />
 
       <Footer onNavigate={onNavigate} />
     </div>

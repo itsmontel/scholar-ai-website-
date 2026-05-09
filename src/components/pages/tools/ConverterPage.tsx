@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
+import ToolPageSeoContent from '../../common/ToolPageSeoContent';
+import { converterSeo } from '../../../data/toolSeoContent';
 
 interface ConverterPageProps {
   onNavigate: (page: string) => void;
@@ -334,6 +336,8 @@ const ConverterPage = ({ onNavigate, user, onLogout }: ConverterPageProps) => {
           </p>
         </div>
       </section>
+
+      <ToolPageSeoContent {...converterSeo} onNavigate={onNavigate} />
 
       <Footer onNavigate={onNavigate} />
     </div>

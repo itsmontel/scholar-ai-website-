@@ -4,6 +4,8 @@ import { WriteScholarEditorialBackgroundLayers } from '../../common/WriteScholar
 import Footer from '../../common/Footer';
 import FlashcardViewer from '../../common/FlashcardViewer';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
+import ToolPageSeoContent from '../../common/ToolPageSeoContent';
+import { flashcardsSeo } from '../../../data/toolSeoContent';
 
 interface CreateFlashcardsPageProps {
   onNavigate: (page: string, slug?: string, options?: { quizHistoryFilter?: string }) => void;
@@ -853,6 +855,8 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
           </div>
         </div>
       </section>
+
+      <ToolPageSeoContent {...flashcardsSeo} onNavigate={onNavigate} />
 
       <Footer onNavigate={onNavigate} />
     </div>

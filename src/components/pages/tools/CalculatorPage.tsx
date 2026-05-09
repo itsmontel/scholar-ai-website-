@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
+import ToolPageSeoContent from '../../common/ToolPageSeoContent';
+import { calcSeo } from '../../../data/toolSeoContent';
 
 interface CalculatorPageProps {
   onNavigate: (page: string) => void;
@@ -279,6 +281,8 @@ const CalculatorPage = ({ onNavigate, user, onLogout }: CalculatorPageProps) => 
           </p>
         </div>
       </section>
+
+      <ToolPageSeoContent {...calcSeo} onNavigate={onNavigate} />
 
       <Footer onNavigate={onNavigate} />
     </div>
