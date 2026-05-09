@@ -762,7 +762,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           aria-hidden
         />
 
-        <div className="relative z-10 flex flex-col items-center justify-start px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12 lg:pt-8 pb-0 min-w-0">
+        <div className="relative z-10 flex flex-col items-center justify-start px-4 sm:px-6 lg:px-8 pt-4 sm:pt-12 lg:pt-8 pb-0 min-w-0">
           <div className="w-full min-w-0 max-w-[1240px] xl:mx-auto">
             {/* 3-column hero on lg+: BEFORE essay (left) + center content
                 + AFTER essay (right). Mobile stacks center content only —
@@ -837,7 +837,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     Reduced-motion users see the final state immediately
                     (overrides in src/index.css). */}
                 <h1
-                  className="text-[1.95rem] sm:text-[2.55rem] lg:text-[3.15rem] xl:text-[3.5rem] font-extrabold tracking-[-0.02em] leading-[1.05] mb-7 sm:mb-9 max-w-[min(30rem,calc(100vw-2rem))] sm:max-w-3xl mx-auto text-balance"
+                  className="text-[1.65rem] sm:text-[2.55rem] lg:text-[3.15rem] xl:text-[3.5rem] font-extrabold tracking-[-0.02em] leading-[1.06] mb-4 sm:mb-9 max-w-[min(22rem,calc(100vw-2rem))] sm:max-w-3xl mx-auto text-balance"
                   style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                 >
                   {/* Phase 1: "Turn your grades" — broad outcome (covers
@@ -914,7 +914,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     1) the essay analyzer ("professor-style feedback")
                     2) the study tools ("7 study tools built from your notes").
                     Bolded nouns let it scan in under a second. */}
-                <p className="mb-7 sm:mb-9 max-w-[min(24rem,calc(100vw-2rem))] sm:max-w-lg mx-auto text-[0.92rem] sm:text-[1rem] text-stone-700 dark:text-stone-300 leading-relaxed opacity-0 animate-hero-stagger-2">
+                <p className="mb-4 sm:mb-9 max-w-[min(22rem,calc(100vw-2rem))] sm:max-w-lg mx-auto text-[0.85rem] sm:text-[1rem] text-stone-700 dark:text-stone-300 leading-relaxed opacity-0 animate-hero-stagger-2">
                   <span className="font-bold text-stone-900 dark:text-stone-50">Professor-style essay feedback</span> + <span className="font-bold text-stone-900 dark:text-stone-50">7 AI study tools</span> built from your notes. Designed to get you A's on essays AND exams.
                 </p>
 
@@ -1020,7 +1020,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 {/* ─── "And it doesn't stop at essays" bridge — directs the
                     visitor's eye to the second big product (study tools) so it
                     isn't buried below the fold. ─── */}
-                <div className="mt-12 sm:mt-16 mb-2 max-w-5xl mx-auto px-1">
+                <div className="hidden sm:block mt-12 sm:mt-16 mb-2 max-w-5xl mx-auto px-1">
                   <a
                     href="#study-tools"
                     className="group relative block rounded-3xl border-2 border-b-4 border-[#A560E8]/40 dark:border-[#8A48C7]/40 bg-[#F3EAFF] dark:bg-stone-900/60 p-6 sm:p-8 hover:-translate-y-0.5 transition-all overflow-hidden"
@@ -1449,7 +1449,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
       {/* ─── "Study daily. Level up." — gamification showcase.
           Daily Review, XP, Levels, Streaks, Badges — the habit loop
           that makes WriteScholar feel like Duolingo for academics. ─── */}
-      <section id="motivation" className="relative py-16 sm:py-24 overflow-hidden border-t border-[#E5E5E5] dark:border-stone-800 bg-white dark:bg-stone-950 scroll-mt-20">
+      <section id="motivation" className="relative py-10 sm:py-24 overflow-hidden border-t border-[#E5E5E5] dark:border-stone-800 bg-white dark:bg-stone-950 scroll-mt-20">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_-15%,rgba(255,150,0,0.06),transparent_55%)] dark:bg-[radial-gradient(ellipse_70%_50%_at_50%_-10%,rgba(255,150,0,0.10),transparent_55%)]" aria-hidden />
         <div
           className="absolute inset-0 opacity-[0.4] dark:opacity-[0.15] pointer-events-none bg-[length:32px_32px] bg-[linear-gradient(to_right,rgba(148,163,184,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.07)_1px,transparent_1px)]"
@@ -1496,8 +1496,9 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed mb-4">
                     10 minutes a day beats 4 hours of cramming. Your personalised drill from saved notes — built around what you keep getting wrong.
                   </p>
-                  {/* Mini visual — lesson card mockup */}
-                  <div className="rounded-xl bg-[#E5F8D0]/60 dark:bg-[#58CC02]/10 border border-[#58CC02]/30 p-3">
+                  {/* Mini visual — lesson card mockup. Hidden on mobile to
+                      cut card height; the description already tells the story. */}
+                  <div className="hidden sm:block rounded-xl bg-[#E5F8D0]/60 dark:bg-[#58CC02]/10 border border-[#58CC02]/30 p-3">
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-6 h-6 rounded-lg bg-[#58CC02] flex items-center justify-center">
                         <span className="text-white text-[10px] font-extrabold">1</span>
@@ -1528,8 +1529,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed mb-4">
                     Every essay reviewed, every quiz aced, every streak day — they all stack into XP. Levels you actually want to chase.
                   </p>
-                  {/* Mini visual — level badge + XP bar */}
-                  <div className="rounded-xl bg-[#DDF4FF]/60 dark:bg-[#1CB0F6]/10 border border-[#1CB0F6]/30 p-3">
+                  {/* Mini visual — level badge + XP bar. Hidden on mobile. */}
+                  <div className="hidden sm:block rounded-xl bg-[#DDF4FF]/60 dark:bg-[#1CB0F6]/10 border border-[#1CB0F6]/30 p-3">
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-7 h-7 rounded-lg bg-[#1CB0F6] flex items-center justify-center border-b-2 border-[#1899D6]">
                         <span className="text-white text-[11px] font-extrabold">12</span>
@@ -1564,8 +1565,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed mb-4">
                     Your streak is your accountability. Miss a day and you'll feel it — that's the point. It's how casual users become 4.0 students.
                   </p>
-                  {/* Mini visual — streak counter */}
-                  <div className="rounded-xl bg-[#FFF4E0]/60 dark:bg-[#FF9600]/10 border border-[#FF9600]/30 p-3">
+                  {/* Mini visual — streak counter. Hidden on mobile. */}
+                  <div className="hidden sm:block rounded-xl bg-[#FFF4E0]/60 dark:bg-[#FF9600]/10 border border-[#FF9600]/30 p-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="text-2xl" aria-hidden>🔥</span>
@@ -1609,8 +1610,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed mb-4">
                     Visible milestones turn "I should study" into "I want my next badge." It works because it's stupid and you can't help it.
                   </p>
-                  {/* Mini visual — badge grid (real BadgeCreature SVGs) */}
-                  <div className="rounded-xl bg-[#F3EAFF]/60 dark:bg-[#A560E8]/10 border border-[#A560E8]/30 p-3">
+                  {/* Mini visual — badge grid. Hidden on mobile to cut height. */}
+                  <div className="hidden sm:block rounded-xl bg-[#F3EAFF]/60 dark:bg-[#A560E8]/10 border border-[#A560E8]/30 p-3">
                     <div className="grid grid-cols-4 gap-1.5">
                       {[
                         { badgeId: 'first_login', unlocked: true },
@@ -1870,8 +1871,12 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
       {/* ─── "Everything you need to ace school" — feature matrix that
           implicitly compares WriteScholar to single-purpose tools (Quizlet
-          flashcards only, ChatGPT essay help only, etc.) by showing breadth. ─── */}
-      <section className="relative py-16 sm:py-24 overflow-hidden border-t border-[#E5E5E5] dark:border-stone-800 bg-white dark:bg-stone-950">
+          flashcards only, ChatGPT essay help only, etc.) by showing breadth.
+          Hidden on mobile (hidden md:block) because the same product breadth
+          is already conveyed by the study-tools showcase, the gamification
+          section, and the pricing teaser — on a phone the dense 3-column
+          comparison just adds scroll for low return. ─── */}
+      <section className="relative hidden md:block py-16 sm:py-24 overflow-hidden border-t border-[#E5E5E5] dark:border-stone-800 bg-white dark:bg-stone-950">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_-15%,rgba(91,33,182,0.06),transparent_55%)] dark:bg-[radial-gradient(ellipse_70%_50%_at_50%_-10%,rgba(139,92,246,0.10),transparent_55%)]" aria-hidden />
 
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
