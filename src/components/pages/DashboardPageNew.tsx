@@ -13,6 +13,11 @@ import { MoreToolsGrid } from './MoreToolsPage';
 import DailyReviewTab from './DailyReviewTab';
 import FeatureHub, { type HubItem } from '../common/FeatureHub';
 import {
+  AnalysisPreviewSection,
+  StudyPackPreviewSection,
+  CitationsPreviewSection,
+} from '../common/PreviewSections';
+import {
   getTotalXP,
   getLevelInfo,
   getUnlockedBadges,
@@ -1163,21 +1168,27 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
 
             {/* === ANALYZE TOOL === */}
             {dashboardTool === 'analyze' && analyzeView === 'hub' && (
-              <FeatureHub
-                title="Essay analysis"
-                subtitle="Paste an essay — get professor-level feedback, line-by-line."
-                mascotSrc="/mascot-paper.webp"
-                themeColor="#FF4B4B"
-                themeBorderColor="#E04343"
-                themeBgColor="#FFE8E8"
-                createLabel="+ Analyze a new essay"
-                createSubLabel="Drop in a draft and get feedback in seconds"
-                onCreate={() => setAnalyzeView('create')}
-                recentItems={analyzeRecents}
-                loading={hubRecentsLoading}
-                onViewAll={() => onNavigate('library')}
-                emptyStateMessage="Your analyzed papers will appear here."
-              />
+              <>
+                <FeatureHub
+                  title="Essay analysis"
+                  subtitle="Paste an essay — get professor-level feedback, line-by-line."
+                  mascotSrc="/mascot-paper.webp"
+                  themeColor="#FF4B4B"
+                  themeBorderColor="#E04343"
+                  themeBgColor="#FFE8E8"
+                  createLabel="+ Analyze a new essay"
+                  createSubLabel="Drop in a draft and get feedback in seconds"
+                  onCreate={() => setAnalyzeView('create')}
+                  recentItems={analyzeRecents}
+                  loading={hubRecentsLoading}
+                  onViewAll={() => onNavigate('library')}
+                  emptyStateMessage="Your analyzed papers will appear here."
+                />
+                {/* Preview between Recent (inside FeatureHub) and Quick Access
+                    (rendered globally further down). Same component as the
+                    create flow uses, so users see the same sample either way. */}
+                <AnalysisPreviewSection embedded />
+              </>
             )}
             {dashboardTool === 'analyze' && analyzeView === 'create' && (
               <>
@@ -1312,71 +1323,8 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                       </div>
                     </div>
 
-                    {/* Analysis previews — below drop zone */}
-                    <section
-                      aria-labelledby="analyze-output-examples-heading"
-                      className="mt-6 sm:mt-7 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/50 p-4 sm:p-6"
-                    >
-                      <h3
-                        id="analyze-output-examples-heading"
-                        className="text-center dash-serif text-sm sm:text-base font-extrabold text-stone-800 dark:text-stone-100"
-                      >
-                        See what your analysis looks like
-                      </h3>
-                      <p className="mt-1 text-center text-[11px] sm:text-xs text-stone-500 dark:text-stone-400 mx-auto px-2 sm:px-0 text-balance max-w-[min(100%,36rem)] font-bold">
-                        Muted previews for your draft—not canned advice.
-                      </p>
-
-                      <div className="mt-4 flex flex-nowrap gap-3 lg:gap-4 justify-between overflow-x-auto pb-3 snap-x snap-mandatory [scrollbar-width:thin]">
-                        <figure className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,260px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-b-4 border-[#A560E8] flex flex-col">
-                          <div className="relative aspect-[16/11] w-full bg-black/80">
-                            <video
-                              className="absolute inset-0 h-full w-full object-cover object-center"
-                              aria-label="Quick walkthrough of essay analysis"
-                              title="Essay analyzer walkthrough"
-                              muted
-                              loop
-                              playsInline
-                              autoPlay
-                              preload="metadata"
-                            >
-                              <source src="/quick-walkthrough.mp4" type="video/mp4" />
-                            </video>
-                          </div>
-                          <figcaption className="px-2 py-1.5 text-center text-[10px] sm:text-[11px] font-extrabold text-stone-600 dark:text-stone-400 border-t-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900">
-                            Quick walkthrough
-                          </figcaption>
-                        </figure>
-                        <figure className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,260px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-b-4 border-[#1CB0F6] flex flex-col">
-                          <div className="relative aspect-[16/11] w-full bg-stone-900">
-                            <img
-                              src="/rubric-and-notes.png"
-                              alt="Sample rubric and feedback notes from an analyzed essay"
-                              className="absolute inset-0 h-full w-full object-cover object-top"
-                              loading="lazy"
-                              decoding="async"
-                            />
-                          </div>
-                          <figcaption className="px-2 py-1.5 text-center text-[10px] sm:text-[11px] font-extrabold text-stone-600 dark:text-stone-400 border-t-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900">
-                            Rubric & notes
-                          </figcaption>
-                        </figure>
-                        <figure className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,260px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-b-4 border-[#58CC02] flex flex-col">
-                          <div className="relative aspect-[16/11] w-full bg-stone-900">
-                            <img
-                              src="/full-report.png"
-                              alt="Sample full written breakdown from an analyzed essay"
-                              className="absolute inset-0 h-full w-full object-cover object-top"
-                              loading="lazy"
-                              decoding="async"
-                            />
-                          </div>
-                          <figcaption className="px-2 py-1.5 text-center text-[10px] sm:text-[11px] font-extrabold text-stone-600 dark:text-stone-400 border-t-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900">
-                            Full report
-                          </figcaption>
-                        </figure>
-                      </div>
-                    </section>
+                    {/* Analysis previews — below drop zone (shared with hub view) */}
+                    <AnalysisPreviewSection embedded />
 
                     {uploadError && (
                       <div className="mt-4 p-3 rounded-xl bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-2 border-[#FF4B4B]/30 text-[#FF4B4B] text-sm font-bold">
@@ -1745,21 +1693,27 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
 
             {/* === STUDY PACK === */}
             {dashboardTool === 'study_pack' && studyPackView === 'hub' && (
-              <FeatureHub
-                title="Study packs"
-                subtitle="Turn your notes into flashcards, quizzes, crosswords & more."
-                mascotSrc="/mascot-study.webp"
-                themeColor="#FF9600"
-                themeBorderColor="#D97F00"
-                themeBgColor="#FFF4E0"
-                createLabel="+ Create new study pack"
-                createSubLabel="Paste your notes — get a full pack in seconds"
-                onCreate={() => setStudyPackView('create')}
-                recentItems={studyPackRecents}
-                loading={hubRecentsLoading}
-                onViewAll={() => onNavigate('quiz-history')}
-                emptyStateMessage="Your first study pack will live here. Create one above to get started."
-              />
+              <>
+                <FeatureHub
+                  title="Study packs"
+                  subtitle="Turn your notes into flashcards, quizzes, crosswords & more."
+                  mascotSrc="/mascot-study.webp"
+                  themeColor="#FF9600"
+                  themeBorderColor="#D97F00"
+                  themeBgColor="#FFF4E0"
+                  createLabel="+ Create new study pack"
+                  createSubLabel="Paste your notes — get a full pack in seconds"
+                  onCreate={() => setStudyPackView('create')}
+                  recentItems={studyPackRecents}
+                  loading={hubRecentsLoading}
+                  onViewAll={() => onNavigate('quiz-history')}
+                  emptyStateMessage="Your first study pack will live here. Create one above to get started."
+                />
+                {/* Preview between Recent (inside FeatureHub) and Quick Access
+                    (rendered globally further down). Same component as the
+                    embedded create flow uses inside StudyPackPage. */}
+                <StudyPackPreviewSection embedded />
+              </>
             )}
             {dashboardTool === 'study_pack' && studyPackView === 'create' && (
               <>
@@ -1783,21 +1737,27 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
 
             {/* === CITATIONS === */}
             {dashboardTool === 'citations' && citationsView === 'hub' && (
-              <FeatureHub
-                title="Citations"
-                subtitle="Find peer-reviewed sources in APA, MLA, Chicago & more."
-                mascotSrc="/mascot-thinking.webp"
-                themeColor="#1CB0F6"
-                themeBorderColor="#1899D6"
-                themeBgColor="#DDF4FF"
-                createLabel="+ Find new citations"
-                createSubLabel="Search by topic — get formatted, real sources"
-                onCreate={() => setCitationsView('create')}
-                recentItems={citationsRecents}
-                loading={hubRecentsLoading}
-                onViewAll={() => onNavigate('citation-history')}
-                emptyStateMessage="Your citation searches will live here."
-              />
+              <>
+                <FeatureHub
+                  title="Citations"
+                  subtitle="Find peer-reviewed sources in APA, MLA, Chicago & more."
+                  mascotSrc="/mascot-thinking.webp"
+                  themeColor="#1CB0F6"
+                  themeBorderColor="#1899D6"
+                  themeBgColor="#DDF4FF"
+                  createLabel="+ Find new citations"
+                  createSubLabel="Search by topic — get formatted, real sources"
+                  onCreate={() => setCitationsView('create')}
+                  recentItems={citationsRecents}
+                  loading={hubRecentsLoading}
+                  onViewAll={() => onNavigate('citation-history')}
+                  emptyStateMessage="Your citation searches will live here."
+                />
+                {/* Preview between Recent (inside FeatureHub) and Quick Access
+                    (rendered globally further down). Same component as the
+                    embedded create flow uses inside CitationsPage. */}
+                <CitationsPreviewSection embedded />
+              </>
             )}
             {dashboardTool === 'citations' && citationsView === 'create' && (
               <>

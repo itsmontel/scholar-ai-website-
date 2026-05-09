@@ -4,6 +4,7 @@ import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEdi
 import Footer from '../common/Footer';
 import ScholarMascot from '../common/ScholarMascot';
 import AnalysisAnimation from '../common/AnalysisAnimation';
+import { CitationsPreviewSection } from '../common/PreviewSections';
 import { trackAction } from '../../data/achievements';
 
 export type EmbeddedDashboardTool = 'analyze' | 'citations' | 'study_pack';
@@ -31,26 +32,9 @@ const suggestedTopics: string[] = [
   "Remote work productivity research"
 ];
 
-/** Dashboard only — screenshot + muted walkthrough clip. */
-const EMBEDDED_CITATION_PREVIEWS: (
-  | { id: string; kind: 'image'; src: string; label: string; alt: string }
-  | { id: string; kind: 'video'; src: string; label: string; description: string }
-)[] = [
-  {
-    id: 'demo',
-    kind: 'video',
-    src: '/writescholar-citation-finder-demo.mp4',
-    label: 'Walkthrough',
-    description: 'Find sources, choose a style, and copy ready-to-use citations',
-  },
-  {
-    id: 'screenshot',
-    kind: 'image',
-    src: '/citations-preview.png',
-    label: 'Citation layout',
-    alt: 'Preview of citation finder results and formatting',
-  },
-];
+// Citation preview items have moved to ../common/PreviewSections so the
+// same row can also render on the dashboard's citations hub view (between
+// the FeatureHub recents and Quick Access).
 
 const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbeddedToolSwitch }: CitationsPageProps) => {
   const [inputText, setInputText] = useState(() => {
@@ -405,59 +389,7 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                   </div>
                 </div>
 
-                <section
-                  className={`rounded-2xl bg-[#DDF4FF] dark:bg-[#1CB0F6]/10 border-2 border-b-4 border-[#1CB0F6]/30 p-4 sm:p-6 ${
-                    embedded ? 'mt-7 sm:mt-8' : 'mt-8 sm:mt-10 pt-6 sm:pt-8'
-                  }`}
-                  aria-labelledby="citation-previews-heading"
-                >
-                  <h2
-                    id="citation-previews-heading"
-                    className="text-center text-base sm:text-lg font-extrabold text-stone-900 dark:text-stone-100"
-                    style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                  >
-                    What your sources can look like
-                  </h2>
-                  <p className="mt-1 text-center text-xs sm:text-sm text-stone-500 dark:text-stone-400 max-w-xl mx-auto">
-                    Muted demo and a static preview — your results follow your topic and style.
-                  </p>
-                  <div className="mt-4 flex flex-nowrap gap-3 sm:gap-4 justify-between overflow-x-auto pb-3 snap-x snap-mandatory [scrollbar-width:thin] max-w-5xl mx-auto">
-                    {EMBEDDED_CITATION_PREVIEWS.map((item) => (
-                      <figure
-                        key={item.id}
-                        className="snap-center shrink-0 w-[min(72vw,280px)] sm:w-[min(40vw,340px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-b-4 border-[#1CB0F6] flex flex-col"
-                      >
-                        <div className="relative aspect-[16/11] w-full bg-black/80">
-                          {item.kind === 'image' ? (
-                            <img
-                              src={item.src}
-                              alt={item.alt}
-                              className="absolute inset-0 h-full w-full object-cover object-top"
-                              loading="lazy"
-                              decoding="async"
-                            />
-                          ) : (
-                            <video
-                              className="absolute inset-0 h-full w-full object-cover object-center"
-                              aria-label={item.description}
-                              title={item.description}
-                              muted
-                              loop
-                              playsInline
-                              autoPlay
-                              preload="metadata"
-                            >
-                              <source src={item.src} type="video/mp4" />
-                            </video>
-                          )}
-                        </div>
-                        <figcaption className="px-2 py-1.5 text-center text-[10px] sm:text-[11px] font-extrabold text-stone-600 dark:text-stone-400 border-t-2 border-[#1CB0F6]/30 bg-white dark:bg-stone-900" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                          {item.label}
-                        </figcaption>
-                      </figure>
-                    ))}
-                  </div>
-                </section>
+                <CitationsPreviewSection embedded={embedded} />
               </div>
             </div>
           </div>

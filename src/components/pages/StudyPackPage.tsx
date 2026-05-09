@@ -9,6 +9,7 @@ import { ogImageUrlForPage } from '../../utils/ogImageUrls';
 import { getResetsInText } from '../../utils/usageReset';
 import type { EmbeddedDashboardTool } from './CitationsPage';
 import AnalysisAnimation from '../common/AnalysisAnimation';
+import { StudyPackPreviewSection } from '../common/PreviewSections';
 
 const STUDY_PACK_PAGE_SEO = {
   title: 'AI Study Pack — Lesson, Flashcards, Quiz, Crossword & More | WriteScholar',
@@ -33,56 +34,9 @@ interface StudyPackPageProps {
 const getWordCount = (text: string) =>
   text.trim().split(/\s+/).filter((word) => word.length > 0).length;
 
-/** Dashboard embedded row — one preview per study tool type (videos where we ship demos). */
-const EMBEDDED_STUDY_PACK_PREVIEWS: {
-  label: string;
-  video?: { src: string; alt: string };
-  /** Used only when no product video exists yet (e.g. Word Tower). */
-  fallbackImage?: { src: string; alt: string };
-}[] = [
-  {
-    label: 'Lesson',
-    fallbackImage: {
-      src: '/study-pack-previews/lesson-plan.png',
-      alt: 'Preview of AI lesson plan layout from pasted study notes',
-    },
-  },
-  {
-    label: 'Flashcards',
-    video: {
-      src: '/writescholar-flashcards-demo.mp4',
-      alt: 'Preview of flip flashcards generated from notes',
-    },
-  },
-  {
-    label: 'Quiz',
-    video: {
-      src: '/writescholar-quiz-generator-demo.mp4',
-      alt: 'Preview of multiple-choice quiz from study notes',
-    },
-  },
-  {
-    label: 'Crossword',
-    video: {
-      src: '/writescholar-crossword-demo.mp4',
-      alt: 'Preview of crossword puzzle from vocabulary',
-    },
-  },
-  {
-    label: 'Crater Blast',
-    video: {
-      src: '/writescholar-crater-blast-demo.mp4',
-      alt: 'Preview of Crater Blast quiz game built from quiz content',
-    },
-  },
-  {
-    label: 'Word Tower',
-    fallbackImage: {
-      src: '/study-pack-previews/word-tower.png',
-      alt: 'Word Tower stacking quiz game catching correct falling answers',
-    },
-  },
-];
+// Study-pack preview slots have moved to ../common/PreviewSections so the
+// same row can also render on the dashboard's study-pack hub view (between
+// the FeatureHub recents and Quick Access).
 
 const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbeddedToolSwitch }: StudyPackPageProps) => {
   const [inputText, setInputText] = useState(() => {
@@ -630,57 +584,7 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                   </div>
                 </div>
 
-                <section
-                  className={`rounded-2xl bg-[#FFF4E0] dark:bg-[#FF9600]/10 border-2 border-b-4 border-[#FF9600]/30 p-4 sm:p-6 ${
-                    embedded ? 'mt-7 sm:mt-8' : 'mt-8 sm:mt-10 pt-6 sm:pt-8'
-                  }`}
-                  aria-labelledby="study-pack-previews-heading"
-                >
-                  <h2
-                    id="study-pack-previews-heading"
-                    className="text-center text-base sm:text-lg font-extrabold text-stone-900 dark:text-stone-100"
-                  >
-                    What&apos;s included in your pack
-                  </h2>
-                  <p className="mt-1 text-center text-xs sm:text-sm text-stone-500 dark:text-stone-400">
-                    Quick previews for each study activity.
-                  </p>
-                  <div className="mt-4 flex flex-nowrap gap-2 sm:gap-3 justify-between overflow-x-auto pb-3 snap-x snap-mandatory [scrollbar-width:thin] max-w-5xl mx-auto">
-                    {EMBEDDED_STUDY_PACK_PREVIEWS.map((slot) => (
-                      <figure
-                        key={slot.label}
-                        className="snap-center shrink-0 w-[min(46vw,220px)] sm:w-[min(20vw,220px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-950 border-2 border-b-4 border-[#FF9600] flex flex-col"
-                      >
-                        <div className="relative aspect-[4/5] w-full bg-stone-950/5 dark:bg-black/40">
-                          {slot.video ? (
-                            <video
-                              className="absolute inset-0 h-full w-full object-cover object-center"
-                              src={slot.video.src}
-                              title={slot.video.alt}
-                              aria-label={slot.video.alt}
-                              muted
-                              loop
-                              playsInline
-                              autoPlay
-                              preload="metadata"
-                            />
-                          ) : slot.fallbackImage ? (
-                            <img
-                              src={slot.fallbackImage.src}
-                              alt={slot.fallbackImage.alt}
-                              className="absolute inset-0 h-full w-full object-cover object-top"
-                              loading="lazy"
-                              decoding="async"
-                            />
-                          ) : null}
-                        </div>
-                        <figcaption className="px-2 py-1.5 text-center text-[10px] sm:text-[11px] font-extrabold text-stone-600 dark:text-stone-400 border-t-2 border-[#FF9600] bg-white dark:bg-stone-900">
-                          {slot.label}
-                        </figcaption>
-                      </figure>
-                    ))}
-                  </div>
-                </section>
+                <StudyPackPreviewSection embedded={embedded} />
 
                 {isParsingStudyDoc && (
                   <div className="absolute inset-0 rounded-2xl bg-white/95 dark:bg-stone-900/90 backdrop-blur-sm flex items-center justify-center gap-3 z-20 pointer-events-auto" aria-live="polite" aria-busy="true">
