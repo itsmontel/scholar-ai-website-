@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
+import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 
 interface PomodoroTimerPageProps {
   onNavigate: (page: string) => void;
@@ -25,11 +26,15 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    document.title = 'Free Pomodoro Timer - Study Timer & Focus Tool | WriteScholar';
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute('content', 'Free Pomodoro timer for focused studying. Boost productivity with timed work sessions and breaks. Customizable focus and break intervals. No signup required.');
-    }
+    applyPageSeoTags({
+      title: 'Free Pomodoro Timer - Study Timer & Focus Tool | WriteScholar',
+      description: 'Free Pomodoro timer for focused studying. Boost productivity with timed work sessions and breaks. Customizable focus and break intervals. No signup required.',
+    });
+    injectToolProductSchema({
+      name: 'Pomodoro Timer',
+      description: 'Free Pomodoro timer for focused study sessions with customizable focus and break intervals.',
+    });
+    return () => removeJsonLd('tool-product');
   }, []);
 
   const playSound = useCallback(() => {

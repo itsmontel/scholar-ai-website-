@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 import ScholarMascot from '../../common/ScholarMascot';
+import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 
 interface ReadabilityScorePageProps {
   onNavigate: (page: string) => void;
@@ -34,13 +35,17 @@ const ReadabilityScorePage = ({ onNavigate, user, onLogout }: ReadabilityScorePa
   const [text, setText] = useState('');
   const [scores, setScores] = useState<ReadabilityScores | null>(null);
 
-  // SEO: Set page title and meta description
+  // SEO: per-route title, description, canonical, OG, Twitter, plus tool schema.
   useEffect(() => {
-    document.title = 'Free Readability Score Calculator - Flesch-Kincaid & More | WriteScholar';
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute('content', 'Free readability score calculator. Get Flesch-Kincaid, Gunning Fog, SMOG Index, and more. Check your text\'s grade level and reading difficulty. No signup required.');
-    }
+    applyPageSeoTags({
+      title: 'Free Readability Score Calculator - Flesch-Kincaid & More | WriteScholar',
+      description: 'Free readability score calculator. Get Flesch-Kincaid, Gunning Fog, SMOG Index, and more. Check your text\'s grade level and reading difficulty. No signup required.',
+    });
+    injectToolProductSchema({
+      name: 'Readability Score Calculator',
+      description: 'Free readability score tool — Flesch-Kincaid, Gunning Fog, SMOG, Coleman-Liau and more, with grade level and reading difficulty.',
+    });
+    return () => removeJsonLd('tool-product');
   }, []);
 
   const countSyllables = (word: string): number => {

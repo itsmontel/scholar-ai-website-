@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 import ScholarMascot from '../../common/ScholarMascot';
+import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 
 interface GrammarCheckerPageProps {
   onNavigate: (page: string) => void;
@@ -22,13 +23,17 @@ const GrammarCheckerPage = ({ onNavigate, user, onLogout }: GrammarCheckerPagePr
   const [text, setText] = useState('');
   const [issues, setIssues] = useState<GrammarIssue[]>([]);
 
-  // SEO: Set page title and meta description
+  // SEO: per-route title, description, canonical, OG, Twitter, plus tool schema.
   useEffect(() => {
-    document.title = 'Free Grammar Checker - Fix Spelling & Punctuation | WriteScholar';
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute('content', 'Free online grammar checker. Find and fix spelling, punctuation, and grammar errors instantly. Get suggestions to improve your writing. No signup required.');
-    }
+    applyPageSeoTags({
+      title: 'Free Grammar Checker - Fix Spelling & Punctuation | WriteScholar',
+      description: 'Free online grammar checker. Find and fix spelling, punctuation, and grammar errors instantly. Get suggestions to improve your writing. No signup required.',
+    });
+    injectToolProductSchema({
+      name: 'Grammar Checker',
+      description: 'Free online grammar checker — finds spelling, punctuation, and grammar errors with suggestions to improve your writing.',
+    });
+    return () => removeJsonLd('tool-product');
   }, []);
 
   const grammarRules: { pattern: RegExp; type: 'error' | 'warning' | 'suggestion'; category: string; message: string; suggestion?: string }[] = [

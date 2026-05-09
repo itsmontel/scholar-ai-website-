@@ -6,6 +6,7 @@ import { CRATER_BLAST_WORD_BANK } from '../../../data/craterBlastWordBank';
 import { CRATER_BLAST_MENTAL_MATH_BANK } from '../../../data/craterBlastMentalMathBank';
 import { buildCapitalQuestions, buildCapitalAnswers } from '../../../data/craterBlastCapitalCitiesBank';
 import { buildFlagQuestions, buildFlagAnswers } from '../../../data/craterBlastFlagsBank';
+import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 
 /* ────────────────────── Types ────────────────────── */
 
@@ -167,9 +168,15 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
   const handleHitRef = useRef<(crater: Crater, x: number, y: number) => void>(() => {});
 
   useEffect(() => {
-    document.title = 'Crater Blast | WriteScholar';
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute('content', 'Crater Blast — the AI-powered quiz shooter. Blast the correct falling crater before it lands. Build streaks, beat your high score!');
+    applyPageSeoTags({
+      title: 'Crater Blast — AI Quiz Arcade Game | WriteScholar',
+      description: 'Crater Blast — the AI-powered quiz shooter. Blast the correct falling crater before it lands. Build streaks, beat your high score!',
+    });
+    injectToolProductSchema({
+      name: 'Crater Blast',
+      description: 'AI-powered quiz arcade — falling craters carry answer choices, blast the correct one before it lands. Custom word banks built from your notes.',
+    });
+    return () => removeJsonLd('tool-product');
   }, []);
 
   // Default to Play for Fun when not logged in (so locked-out users can play immediately)

@@ -3,6 +3,7 @@ import Header from '../../common/Header';
 import { WriteScholarEditorialBackgroundLayers } from '../../common/WriteScholarEditorialBackground';
 import Footer from '../../common/Footer';
 import FlashcardViewer from '../../common/FlashcardViewer';
+import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 
 interface CreateFlashcardsPageProps {
   onNavigate: (page: string, slug?: string, options?: { quizHistoryFilter?: string }) => void;
@@ -176,7 +177,23 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
   }, []);
 
   useEffect(() => {
-    document.title = studyMode ? 'Study Flashcards | WriteScholar' : 'Create Flashcards – Custom Deck Builder | WriteScholar';
+    applyPageSeoTags({
+      title: studyMode
+        ? 'Study Flashcards | WriteScholar'
+        : 'Create Flashcards – Custom Deck Builder | WriteScholar',
+      description: studyMode
+        ? 'Study your flashcard decks with WriteScholar — flip, shuffle, and master your notes.'
+        : 'Build custom flashcard decks for any subject with WriteScholar. Free to start, save up to 5 decks. Auto-generate cards from your notes with the AI option.',
+    });
+    if (!studyMode) {
+      injectToolProductSchema({
+        name: 'Flashcard Deck Builder',
+        description: 'Free flashcard maker — build custom decks card-by-card or auto-generate them from notes. Study with shuffle, flip, and progress tracking.',
+      });
+    } else {
+      removeJsonLd('tool-product');
+    }
+    return () => removeJsonLd('tool-product');
   }, [studyMode]);
 
   useEffect(() => {

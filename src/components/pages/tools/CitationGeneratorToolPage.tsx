@@ -4,6 +4,7 @@ import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 import ScholarMascot from '../../common/ScholarMascot';
 import { trackCopy } from '../../../data/achievements';
+import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 
 interface CitationGeneratorToolPageProps {
   onNavigate: (page: string) => void;
@@ -87,13 +88,17 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
   const [citation, setCitation] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  // SEO: Set page title and meta description
+  // SEO: per-route title, description, canonical, OG, Twitter, plus tool schema.
   useEffect(() => {
-    document.title = 'Free Citation Generator – APA, MLA, Chicago, Harvard | WriteScholar';
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute('content', 'Free online citation generator. Create APA, MLA, Chicago, Harvard citations for books, journals, websites. Generate citations instantly—no signup. Trusted by students.');
-    }
+    applyPageSeoTags({
+      title: 'Free Citation Generator – APA, MLA, Chicago, Harvard | WriteScholar',
+      description: 'Free online citation generator. Create APA, MLA, Chicago, Harvard citations for books, journals, websites. Generate citations instantly—no signup. Trusted by students.',
+    });
+    injectToolProductSchema({
+      name: 'Citation Generator',
+      description: 'Free citation generator for APA, MLA, Chicago, Harvard, IEEE, and Vancouver — books, journals, websites, theses, podcasts and more.',
+    });
+    return () => removeJsonLd('tool-product');
   }, []);
   const [copied, setCopied] = useState(false);
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);

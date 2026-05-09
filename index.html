@@ -26,14 +26,15 @@
     <meta name="format-detection" content="telephone=no" />
     <meta name="application-name" content="WriteScholar" />
 
-    <!-- PRIMARY SEO META TAGS (sync: src/constants/landingSeo.ts) -->
-    <title>WriteScholar: AI Essay Feedback + Study Tools That Get You A's | Free Trial</title>
+    <!-- PRIMARY SEO META TAGS (sync: src/constants/landingSeo.ts)
+         Title kept under 60 chars so Google doesn't truncate it in SERPs. -->
+    <title>AI Essay Feedback + Study Tools That Get A's | WriteScholar</title>
     <meta name="description" content="Better essays. Smarter studying. Higher grades. Get professor-style essay feedback plus 7 AI study tools — flashcards, quizzes, games — built from any notes. Trusted by 50,000+ students. Free to try, no credit card." />
 
     <!-- OPEN GRAPH -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://writescholar.com/" />
-    <meta property="og:title" content="WriteScholar: AI Essay Feedback + Study Tools That Get You A's" />
+    <meta property="og:title" content="AI Essay Feedback + Study Tools That Get A's | WriteScholar" />
     <meta property="og:description" content="Better essays. Smarter studying. Higher grades. Professor-style essay feedback plus 7 AI study tools (flashcards, quizzes, games) built from any notes. 50,000+ students. Free trial." />
     <meta property="og:image" content="https://writescholar.com/og-image.png" />
     <meta property="og:image:width" content="1200" />
@@ -44,7 +45,7 @@
 
     <!-- TWITTER CARD -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="WriteScholar: AI Essay Feedback + Study Tools That Get You A's" />
+    <meta name="twitter:title" content="AI Essay Feedback + Study Tools That Get A's | WriteScholar" />
     <meta name="twitter:description" content="Better essays. Smarter studying. Higher grades. Professor-style essay feedback plus 7 AI study tools (flashcards, quizzes, games) built from any notes. 50,000+ students. Free trial." />
     <meta name="twitter:image" content="https://writescholar.com/og-image.png" />
     <meta name="twitter:image:alt" content="WriteScholar — AI essay feedback and study tools for college and university students." />
@@ -54,7 +55,18 @@
     <link rel="canonical" href="https://writescholar.com/" />
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
     <meta name="google-site-verification" content="kShTUVDKFzJu9ktJ6q6fQW2Il-7uS1CnlyoCFP77VwI" />
+    <!-- TODO: replace VERIFICATION_CODE with the value from
+         https://www.bing.com/webmasters → Add Site → "Meta tag" method.
+         Bing is ~10% of US student search traffic and is free. -->
+    <meta name="msvalidate.01" content="VERIFICATION_CODE" />
     <meta name="author" content="WriteScholar" />
+
+    <!-- HREFLANG — declares language/region variants for international targeting.
+         WriteScholar is one English version that serves all locales, so we set
+         x-default + en (no region-specific URLs yet). Add per-region URLs here
+         if you ever launch /uk, /au, etc. -->
+    <link rel="alternate" hreflang="en" href="https://writescholar.com/" />
+    <link rel="alternate" hreflang="x-default" href="https://writescholar.com/" />
     <meta name="keywords" content="AI essay checker, AI study app, AI study tools, AI flashcard generator, AI quiz generator, AI crossword maker, study app for college students, notes to flashcards, notes to quiz, academic essay feedback, professor-style feedback, university essay checker, research paper feedback, APA MLA Chicago Harvard citations, AI summarizer, Quizlet alternative, Knowt alternative, free AI study app, AI tutor for students, essay grader, GPA calculator, block websites study, focus mode for students, Crater Blast, Word Tower, Study Pack, AI lesson generator, learning games for students" />
 
     <!-- STRUCTURED DATA - SoftwareApplication -->
@@ -131,9 +143,36 @@
 
     <!-- FAQPage JSON-LD is injected at runtime by LandingPage.tsx so it stays in sync with the visible FAQ list. -->
 
-    <!-- Fonts: async load to avoid render-blocking (saves ~1s on mobile LCP) -->
+    <!-- VideoObject schema for the hero walkthrough video — helps Google show
+         a thumbnail in search results and in Discover. -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "VideoObject",
+      "name": "WriteScholar walkthrough — see the full product in 60 seconds",
+      "description": "Quick screen recording demo of WriteScholar: AI essay feedback, study pack generator, flashcards, quizzes, and Daily Review built from your own notes.",
+      "thumbnailUrl": "https://writescholar.com/og-image.png",
+      "uploadDate": "2026-04-01",
+      "contentUrl": "https://writescholar.com/hero-vid.mp4",
+      "embedUrl": "https://writescholar.com/",
+      "publisher": {
+        "@type": "Organization",
+        "name": "WriteScholar",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://writescholar.com/main-logo.png"
+        }
+      }
+    }
+    </script>
+
+    <!-- Fonts: preload Nunito 700 (display heading weight) so the H1 paints
+         without waiting for the full @font-face fetch — biggest LCP win on
+         mobile. Other weights still come via the async stylesheet below. -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/nunito/v31/XRXI3I6Li01BKofiOc5wtlZ2di8HDLshRTM9jw7aQQ.woff2" crossorigin>
+    <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/nunito/v31/XRXI3I6Li01BKofiOc5wtlZ2di8HDLshdTM9jw7aQQ.woff2" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Crimson+Text:wght@600;700&family=Baskervville:ital@0;1&family=EB+Garamond:wght@600;700&family=Source+Sans+Pro:wght@600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Crimson+Text:wght@600;700&family=Baskervville:ital@0;1&family=EB+Garamond:wght@600;700&family=Source+Sans+Pro:wght@600;700&display=swap" rel="stylesheet"></noscript>
   </head>

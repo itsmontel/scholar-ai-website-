@@ -4,6 +4,7 @@ import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEdi
 import Footer from '../common/Footer';
 import AnalysisAnimation from '../common/AnalysisAnimation';
 import { trackAction } from '../../data/achievements';
+import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../utils/seo';
 
 interface AnalyzeEssayPageProps {
   onNavigate: (page: string, slug?: string, options?: { studyPack?: { data: unknown; title?: string } }) => void;
@@ -35,7 +36,15 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
   const [analyzeDropActive, setAnalyzeDropActive] = useState(false);
 
   useEffect(() => {
-    document.title = 'AI Essay Checker — Professor-Level Feedback in Seconds | WriteScholar';
+    applyPageSeoTags({
+      title: 'AI Essay Checker — Professor-Level Feedback in Seconds | WriteScholar',
+      description: 'Paste your essay and get professor-style feedback with grade, rubric scores, line-by-line annotations, and a polished revision. Free first analysis, no credit card.',
+    });
+    injectToolProductSchema({
+      name: 'AI Essay Checker',
+      description: 'AI essay grader with professor-style feedback — overall grade, rubric breakdown (thesis, structure, evidence, style, mechanics), line-by-line annotations, and a polished revision.',
+    });
+    return () => removeJsonLd('tool-product');
   }, []);
 
   useEffect(() => {

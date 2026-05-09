@@ -100,11 +100,55 @@ import StudyTimerWidget from './common/StudyTimerWidget';
 import MobileGoogleSignInPopup from './common/MobileGoogleSignInPopup';
 import {
   absoluteCanonicalUrl,
+  applyNoIndex,
   applyPageSeoTags,
+  clearNoIndex,
   getCanonicalPathname,
   syncBrowserUrlToCanonical,
 } from '../utils/seo';
 import { ogImageUrlForPage } from '../utils/ogImageUrls';
+
+/**
+ * Pages that should never appear in Google's index — private user areas,
+ * auth flows, history views, payment screens, embedded tool views.
+ *
+ * Mirrors the Disallow list in /public/robots.txt but applied per-route
+ * via meta tags so the noindex sticks even if Google has already crawled
+ * the URL through internal links.
+ */
+const NOINDEX_PAGES = new Set<string>([
+  'dashboard',
+  'onboarding',
+  'auth-callback',
+  'email-verification',
+  'reset-password',
+  'login',
+  'signup',
+  'analysis',
+  'analysis-history',
+  'citation-results',
+  'citation-history',
+  'quiz-history',
+  'upload',
+  'account',
+  'profile',
+  'library',
+  'billing',
+  'badges',
+  'study-pack-viewer',
+  'unlock-quiz',
+  'study-pack-hub',
+  'analyze-hub',
+  'citations-hub',
+  'friends',
+  'share-friends',
+  'unsubscribe',
+  'crossword-generator', // requires saved data — never an entry point
+  'word-tower',          // game level launcher
+  'word-blitz',
+  'game-launcher-crater-blast',
+  'game-launcher-word-tower',
+]);
 
 /** Derive page from pathname - used for initial state and URL sync */
 function getPageFromPath(pathname: string): string {
@@ -438,6 +482,13 @@ const AcademicAIApp = () => {
         ogImage: meta.ogImage ?? ogImageUrlForPage(currentPage),
         ogImageAlt: meta.ogImageAlt,
       });
+    }
+    // Apply noindex on private routes; reset to indexable on every public route
+    // so we never leak a stale noindex tag set by a previous private page.
+    if (NOINDEX_PAGES.has(currentPage)) {
+      applyNoIndex();
+    } else {
+      clearNoIndex();
     }
   }, [currentPage]);
 

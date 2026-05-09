@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
+import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 
 interface CalculatorPageProps {
   onNavigate: (page: string) => void;
@@ -64,11 +65,15 @@ const CalculatorPage = ({ onNavigate, user, onLogout }: CalculatorPageProps) => 
   const [lastResult, setLastResult] = useState<number | null>(null);
 
   useEffect(() => {
-    document.title = 'Free Scientific Calculator – Trig, Log, Powers | WriteScholar';
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) {
-      meta.setAttribute('content', 'Free online scientific calculator for students. Trigonometry (sin, cos, tan), logarithms, square root, powers, and more. Works in degrees or radians. No signup required.');
-    }
+    applyPageSeoTags({
+      title: 'Free Scientific Calculator – Trig, Log, Powers | WriteScholar',
+      description: 'Free online scientific calculator for students. Trigonometry (sin, cos, tan), logarithms, square root, powers, and more. Works in degrees or radians. No signup required.',
+    });
+    injectToolProductSchema({
+      name: 'Scientific Calculator',
+      description: 'Free online scientific calculator — trigonometry (sin, cos, tan), logarithms, exponents, square root, factorial, π/e, and degree/radian modes.',
+    });
+    return () => removeJsonLd('tool-product');
   }, []);
 
   const handleInput = useCallback((char: string) => {

@@ -27,6 +27,58 @@ CREATE INDEX IF NOT EXISTS idx_onboarding_survey_goal      ON onboarding_survey_
 CREATE INDEX IF NOT EXISTS idx_onboarding_survey_submitted ON onboarding_survey_responses(submitted_at DESC);
 
 -- ─────────────────────────────────────────────────────────────────────
+-- ROW LEVEL SECURITY (required by Supabase — fixes the "RLS not enabled"
+-- security warning that blocks the SQL from running cleanly).
+--
+-- The backend writes survey rows using the SERVICE ROLE key, which bypasses
+-- RLS automatically — these policies exist for the case where the client
+-- (logged-in user) reads/writes their own row directly.
+--
+-- Each policy is wrapped in DROP IF EXISTS so this script is idempotent
+-- (safe to re-run without errors).
+-- ─────────────────────────────────────────────────────────────────────
+
+ALTER TABLE onboarding_survey_responses ENABLE ROW LEVEL SECURITY;
+
+-- 1) Users can SELECT their own survey response
+DROP POLICY IF EXISTS "Users can view own onboarding survey" ON onboarding_survey_responses;
+CREATE POLICY "Users can view own onboarding survey"
+  ON onboarding_survey_responses
+  FOR SELECT
+  TO authenticated
+  USING (auth.uid() = user_id);
+
+-- 2) Users can INSERT their own survey response (used on first submit)
+DROP POLICY IF EXISTS "Users can insert own onboarding survey" ON onboarding_survey_responses;
+CREATE POLICY "Users can insert own onboarding survey"
+  ON onboarding_survey_responses
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = user_id);
+
+-- 3) Users can UPDATE their own survey response (used when re-submitting /
+--    upserting from a new onboarding pass)
+DROP POLICY IF EXISTS "Users can update own onboarding survey" ON onboarding_survey_responses;
+CREATE POLICY "Users can update own onboarding survey"
+  ON onboarding_survey_responses
+  FOR UPDATE
+  TO authenticated
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+-- 4) Users can DELETE their own row (rare — included for GDPR-style
+--    self-service deletion if you ever wire it up)
+DROP POLICY IF EXISTS "Users can delete own onboarding survey" ON onboarding_survey_responses;
+CREATE POLICY "Users can delete own onboarding survey"
+  ON onboarding_survey_responses
+  FOR DELETE
+  TO authenticated
+  USING (auth.uid() = user_id);
+
+-- NOTE: the service_role key bypasses all RLS, so the backend's existing
+-- inserts/upserts continue to work without any code changes.
+
+-- ─────────────────────────────────────────────────────────────────────
 -- USEFUL ANALYTICS QUERIES (copy/paste in Supabase SQL Editor)
 -- ─────────────────────────────────────────────────────────────────────
 

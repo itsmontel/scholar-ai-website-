@@ -6,6 +6,7 @@ import Footer from '../../common/Footer';
 import AnalysisAnimation from '../../common/AnalysisAnimation';
 import { trackAction, trackCopy } from '../../../data/achievements';
 import { getResetsInText } from '../../../utils/usageReset';
+import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 
 interface SummarizerPageProps {
   onNavigate: (page: string) => void;
@@ -43,11 +44,15 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
   const wordCount = inputText.trim().split(/\s+/).filter(Boolean).length;
 
   useEffect(() => {
-    document.title = 'AI Summarizer – Condense Papers & Articles | WriteScholar';
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute('content', 'Transform lengthy papers, articles, and research documents into concise key points. Perfect for literature reviews and quick comprehension. Pro unlocks all styles and limits.');
-    }
+    applyPageSeoTags({
+      title: 'AI Summarizer – Condense Papers & Articles | WriteScholar',
+      description: 'Transform lengthy papers, articles, and research documents into concise key points. Perfect for literature reviews and quick comprehension. Pro unlocks all styles and limits.',
+    });
+    injectToolProductSchema({
+      name: 'AI Summarizer',
+      description: 'AI-powered summarizer — condense long papers, articles, and research documents into bullet, paragraph, TL;DR, or detailed summaries.',
+    });
+    return () => removeJsonLd('tool-product');
   }, []);
 
   useEffect(() => {

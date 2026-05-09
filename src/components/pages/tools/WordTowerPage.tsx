@@ -4,6 +4,7 @@ import { WriteScholarEditorialBackgroundLayers } from '../../common/WriteScholar
 import Footer from '../../common/Footer';
 import { WORD_TOWER_WORD_BANK, WordTowerQuestion as BankQuestion } from '../../../data/wordTowerWordBank';
 import { WORD_TOWER_MENTAL_MATH_BANK } from '../../../data/wordTowerMentalMathBank';
+import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 
 /* ────────────────────── Types ────────────────────── */
 
@@ -197,9 +198,15 @@ const WordTowerPage = ({ onNavigate, user, onLogout }: WordTowerPageProps) => {
   }, []);
 
   useEffect(() => {
-    document.title = 'Word Tower | WriteScholar';
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute('content', 'Word Tower — the AI-powered stacking study game. Build the tallest tower by catching correct answers. Don\'t let the tower fall!');
+    applyPageSeoTags({
+      title: 'Word Tower — AI Stacking Study Game | WriteScholar',
+      description: 'Word Tower — the AI-powered stacking study game. Build the tallest tower by catching correct answers. Don\'t let the tower fall!',
+    });
+    injectToolProductSchema({
+      name: 'Word Tower',
+      description: 'AI-powered stacking study game — answer correctly to keep stacking, miss and your tower falls. Custom word banks built from your notes.',
+    });
+    return () => removeJsonLd('tool-product');
   }, []);
 
   useEffect(() => {

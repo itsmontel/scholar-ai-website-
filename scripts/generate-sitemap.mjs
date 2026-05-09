@@ -1,0 +1,123 @@
+/**
+ * Build-time sitemap generator.
+ *
+ * Reads `src/data/blogPosts.ts` for the canonical list of blog slugs +
+ * publish dates, then writes a fresh `public/sitemap.xml` containing all
+ * static routes + every blog post. This keeps the sitemap from drifting
+ * out of sync whenever new posts are added.
+ *
+ * Wire into package.json `build` script BEFORE `vite build` so the
+ * regenerated sitemap is copied into `dist/` by Vite's public-asset step.
+ */
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = path.resolve(__dirname, '..');
+const BLOG_DATA_PATH = path.join(REPO_ROOT, 'src/data/blogPosts.ts');
+const SITEMAP_OUT = path.join(REPO_ROOT, 'public/sitemap.xml');
+const ORIGIN = 'https://writescholar.com';
+
+// Today in ISO yyyy-mm-dd — used for routes that don't have an explicit
+// lastmod (homepage, tools etc. — they change frequently with shipping).
+const today = new Date().toISOString().slice(0, 10);
+
+/* ─── Static routes ─────────────────────────────────────────── */
+// Each route includes priority and changefreq (Google ignores both, but
+// other crawlers like Bing still use them).
+const staticRoutes = [
+  { loc: '/',                                 priority: '1.0',  changefreq: 'weekly',  lastmod: today },
+  { loc: '/features',                         priority: '0.9',  changefreq: 'monthly', lastmod: today },
+  { loc: '/pricing',                          priority: '0.9',  changefreq: 'monthly', lastmod: today },
+  { loc: '/about',                            priority: '0.6',  changefreq: 'monthly', lastmod: today },
+  { loc: '/why-students-choose',              priority: '0.7',  changefreq: 'monthly', lastmod: today },
+  { loc: '/vs-quizlet-knowt',                 priority: '0.9',  changefreq: 'weekly',  lastmod: today },
+  { loc: '/more-tools',                       priority: '0.8',  changefreq: 'monthly', lastmod: today },
+  { loc: '/help',                             priority: '0.7',  changefreq: 'monthly', lastmod: today },
+  { loc: '/contact',                          priority: '0.5',  changefreq: 'monthly', lastmod: today },
+  { loc: '/focus-mode',                       priority: '0.9',  changefreq: 'weekly',  lastmod: today },
+  { loc: '/blog',                             priority: '0.8',  changefreq: 'weekly',  lastmod: today },
+
+  // AI tools
+  { loc: '/tools/analyze',                    priority: '0.95', changefreq: 'weekly',  lastmod: today },
+  { loc: '/tools/citations',                  priority: '0.9',  changefreq: 'weekly',  lastmod: today },
+  { loc: '/tools/study-pack',                 priority: '0.92', changefreq: 'weekly',  lastmod: today },
+  { loc: '/tools/summarizer',                 priority: '0.9',  changefreq: 'weekly',  lastmod: today },
+  { loc: '/tools/quiz-generator',             priority: '0.95', changefreq: 'weekly',  lastmod: today },
+  { loc: '/tools/create-flashcards',          priority: '0.95', changefreq: 'weekly',  lastmod: today },
+
+  // Free tools (high SEO value)
+  { loc: '/tools/word-counter',               priority: '0.8',  changefreq: 'monthly', lastmod: today },
+  { loc: '/tools/citation-generator',         priority: '0.85', changefreq: 'weekly',  lastmod: today },
+  { loc: '/tools/grammar-checker',            priority: '0.85', changefreq: 'monthly', lastmod: today },
+  { loc: '/tools/readability-score',          priority: '0.8',  changefreq: 'monthly', lastmod: today },
+  { loc: '/tools/thesis-generator',           priority: '0.85', changefreq: 'monthly', lastmod: today },
+  { loc: '/tools/essay-outline',              priority: '0.85', changefreq: 'monthly', lastmod: today },
+  { loc: '/tools/text-case-converter',        priority: '0.7',  changefreq: 'monthly', lastmod: today },
+  { loc: '/tools/paraphrasing-tips',          priority: '0.8',  changefreq: 'monthly', lastmod: today },
+  { loc: '/tools/gpa-calculator',             priority: '0.85', changefreq: 'monthly', lastmod: today },
+  { loc: '/tools/pomodoro-timer',             priority: '0.8',  changefreq: 'monthly', lastmod: today },
+  { loc: '/tools/calculator',                 priority: '0.7',  changefreq: 'monthly', lastmod: today },
+  { loc: '/tools/converter',                  priority: '0.7',  changefreq: 'monthly', lastmod: today },
+  { loc: '/tools/crater-blast',               priority: '0.6',  changefreq: 'monthly', lastmod: today },
+
+  // Legal — low priority, rarely changes
+  { loc: '/privacy',                          priority: '0.3',  changefreq: 'yearly',  lastmod: '2026-01-01' },
+  { loc: '/terms',                            priority: '0.3',  changefreq: 'yearly',  lastmod: '2026-01-01' },
+];
+
+/* ─── Read blog posts ─────────────────────────────────────────── */
+function readBlogPosts() {
+  const src = fs.readFileSync(BLOG_DATA_PATH, 'utf-8');
+  // Match every BlogPostMeta object — extract slug + date pair from each.
+  // The regex tolerates property order shuffling and whitespace.
+  const slugDateRe = /\{\s*slug:\s*'([^']+)'[\s\S]*?date:\s*'([^']+)'/g;
+  const posts = [];
+  let m;
+  while ((m = slugDateRe.exec(src)) !== null) {
+    posts.push({ slug: m[1], date: m[2] });
+  }
+  return posts;
+}
+
+/* ─── Build XML ───────────────────────────────────────────────── */
+function urlEntry({ loc, priority, changefreq, lastmod }) {
+  return `  <url><loc>${ORIGIN}${loc}</loc><lastmod>${lastmod}</lastmod><priority>${priority}</priority><changefreq>${changefreq}</changefreq></url>`;
+}
+
+function buildSitemap() {
+  const blogPosts = readBlogPosts();
+  console.log(`Found ${blogPosts.length} blog posts`);
+
+  const blogRoutes = blogPosts.map(({ slug, date }) => ({
+    loc: `/blog/${slug}`,
+    priority: '0.7',
+    changefreq: 'monthly',
+    lastmod: date,
+  }));
+
+  const lines = [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    '  <!-- Auto-generated by scripts/generate-sitemap.mjs from src/data/blogPosts.ts.',
+    '       Do not edit by hand — re-run `npm run build` to regenerate. -->',
+    '  <!-- Main + Tool routes -->',
+    ...staticRoutes
+      .filter((r) => !r.loc.startsWith('/blog/') && r.loc !== '/privacy' && r.loc !== '/terms')
+      .map(urlEntry),
+    '',
+    '  <!-- Blog posts (auto-synced from src/data/blogPosts.ts) -->',
+    ...blogRoutes.map(urlEntry),
+    '',
+    '  <!-- Legal -->',
+    ...staticRoutes.filter((r) => r.loc === '/privacy' || r.loc === '/terms').map(urlEntry),
+    '</urlset>',
+    '',
+  ];
+
+  fs.writeFileSync(SITEMAP_OUT, lines.join('\n'));
+  console.log(`✅ Wrote ${SITEMAP_OUT} with ${staticRoutes.length + blogRoutes.length} URLs`);
+}
+
+buildSitemap();

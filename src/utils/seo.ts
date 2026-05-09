@@ -166,3 +166,146 @@ export function removeJsonLd(id: string): void {
     el.parentNode.removeChild(el);
   }
 }
+
+/**
+ * Tag the current route as `noindex, nofollow` so private routes (dashboard,
+ * settings, account, etc.) are removed from Google's index even if they were
+ * previously crawled. Idempotent — safe to call repeatedly.
+ *
+ * Pair with applyPageSeoTags(): set tags first, then call applyNoIndex() if
+ * the route is private. The robots meta tag overrides the global "index,
+ * follow" set in index.html.
+ */
+export function applyNoIndex(): void {
+  setOrCreateMeta(
+    'meta[name="robots"]',
+    'content',
+    'noindex, nofollow, noarchive, nosnippet'
+  );
+}
+
+/**
+ * Reset robots tag back to the indexable default. Call this when navigating
+ * from a private route to a public one in the SPA so we don't accidentally
+ * leave a noindex tag lingering.
+ */
+export function clearNoIndex(): void {
+  setOrCreateMeta(
+    'meta[name="robots"]',
+    'content',
+    'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1'
+  );
+}
+
+/* ─── Schema.org JSON-LD helpers ───────────────────────────────────── */
+
+export interface ProductSchemaInput {
+  /** e.g. "AI Essay Checker" */
+  name: string;
+  /** Plain-text description (1-3 sentences). */
+  description: string;
+  /** Tool URL — e.g. https://writescholar.com/tools/analyze. Defaults to current canonical. */
+  url?: string;
+  /** Tool screenshot/og image URL. Defaults to site OG. */
+  image?: string;
+  /** "Free", "Freemium", or a $ amount. Defaults to Freemium. */
+  priceLabel?: string;
+  /** Star rating (e.g. 4.8). Optional. */
+  ratingValue?: number;
+  /** Review count. Required if ratingValue is set. */
+  ratingCount?: number;
+}
+
+/**
+ * Inject SoftwareApplication schema for a single tool page. Helps Google
+ * show rich tool cards (name, rating, price) in search results.
+ */
+export function injectToolProductSchema(input: ProductSchemaInput): void {
+  const url = input.url ?? absoluteCanonicalUrl(window.location.pathname);
+  const image = input.image ?? DEFAULT_OG_IMAGE;
+  const data: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: input.name,
+    description: input.description,
+    url,
+    image,
+    applicationCategory: 'EducationalApplication',
+    operatingSystem: 'Web',
+    inLanguage: 'en',
+    isAccessibleForFree: true,
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+      availability: 'https://schema.org/InStock',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'WriteScholar',
+      url: SITE_ORIGIN,
+    },
+  };
+  if (input.ratingValue && input.ratingCount) {
+    data.aggregateRating = {
+      '@type': 'AggregateRating',
+      ratingValue: input.ratingValue,
+      reviewCount: input.ratingCount,
+    };
+  }
+  injectJsonLd('tool-product', data);
+}
+
+export interface ArticleSchemaInput {
+  /** Post headline */
+  title: string;
+  /** Plain-text excerpt */
+  description: string;
+  /** ISO date — e.g. "2026-04-15" */
+  datePublished: string;
+  /** ISO date for last update; defaults to datePublished */
+  dateModified?: string;
+  /** Author name */
+  author: string;
+  /** Canonical URL of the post */
+  url?: string;
+  /** Hero image URL */
+  image?: string;
+}
+
+/**
+ * Inject Article schema for a single blog post. Required for Google News /
+ * Discover eligibility and rich-result snippets.
+ */
+export function injectArticleSchema(input: ArticleSchemaInput): void {
+  const url = input.url ?? absoluteCanonicalUrl(window.location.pathname);
+  const image = input.image ?? DEFAULT_OG_IMAGE;
+  const dateModified = input.dateModified ?? input.datePublished;
+  const data: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: input.title,
+    description: input.description,
+    image: [image],
+    datePublished: input.datePublished,
+    dateModified,
+    author: {
+      '@type': 'Person',
+      name: input.author,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'WriteScholar',
+      url: SITE_ORIGIN,
+      logo: {
+        '@type': 'ImageObject',
+        url: `${SITE_ORIGIN}/main-logo.png`,
+      },
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': url,
+    },
+  };
+  injectJsonLd('article', data);
+}

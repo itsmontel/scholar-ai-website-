@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 import ScholarMascot from '../../common/ScholarMascot';
+import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 
 interface WordCounterPageProps {
   onNavigate: (page: string) => void;
@@ -21,13 +22,17 @@ const WordCounterPage = ({ onNavigate, user, onLogout }: WordCounterPageProps) =
     speakingTime: '0 min'
   });
 
-  // SEO: Set page title and meta description
+  // SEO: per-route title, description, canonical, OG, Twitter, plus tool schema.
   useEffect(() => {
-    document.title = 'Free Word Counter Tool - Count Words & Characters | WriteScholar';
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute('content', 'Free online word counter tool. Count words, characters, sentences, and paragraphs instantly. Check reading time and speaking time. No signup required.');
-    }
+    applyPageSeoTags({
+      title: 'Free Word Counter Tool - Count Words & Characters | WriteScholar',
+      description: 'Free online word counter tool. Count words, characters, sentences, and paragraphs instantly. Check reading time and speaking time. No signup required.',
+    });
+    injectToolProductSchema({
+      name: 'Word Counter',
+      description: 'Free online word counter — count words, characters, sentences, paragraphs, plus reading and speaking time.',
+    });
+    return () => removeJsonLd('tool-product');
   }, []);
 
   useEffect(() => {

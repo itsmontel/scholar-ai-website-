@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 import ScholarMascot from '../../common/ScholarMascot';
+import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 
 interface GPACalculatorPageProps {
   onNavigate: (page: string) => void;
@@ -37,11 +38,15 @@ const GPACalculatorPage = ({ onNavigate, user, onLogout }: GPACalculatorPageProp
   const [totalPoints, setTotalPoints] = useState<number>(0);
 
   useEffect(() => {
-    document.title = 'Free GPA Calculator — College & University Grades | WriteScholar';
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute('content', 'Free GPA calculator for college and high school students. Calculate your semester or cumulative GPA instantly. Add courses, credits, and grades. No signup required.');
-    }
+    applyPageSeoTags({
+      title: 'Free GPA Calculator — College & University Grades | WriteScholar',
+      description: 'Free GPA calculator for college and high school students. Calculate your semester or cumulative GPA instantly. Add courses, credits, and grades. No signup required.',
+    });
+    injectToolProductSchema({
+      name: 'GPA Calculator',
+      description: 'Free GPA calculator for college and high school students — add courses, credits, and grades to instantly compute semester or cumulative GPA.',
+    });
+    return () => removeJsonLd('tool-product');
   }, []);
 
   useEffect(() => {

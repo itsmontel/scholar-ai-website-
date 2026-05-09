@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
+import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 
 interface ConverterPageProps {
   onNavigate: (page: string) => void;
@@ -152,11 +153,15 @@ const ConverterPage = ({ onNavigate, user, onLogout }: ConverterPageProps) => {
   const [toValue, setToValue] = useState('');
 
   useEffect(() => {
-    document.title = 'Free Unit Converter – Length, Weight, Temperature & More | WriteScholar';
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) {
-      meta.setAttribute('content', 'Free online unit converter for students. Length, weight, temperature, volume, area, time, speed, energy. Meters to feet, m/s to mph & more. No signup required.');
-    }
+    applyPageSeoTags({
+      title: 'Free Unit Converter – Length, Weight, Temperature & More | WriteScholar',
+      description: 'Free online unit converter for students. Length, weight, temperature, volume, area, time, speed, energy. Meters to feet, m/s to mph & more. No signup required.',
+    });
+    injectToolProductSchema({
+      name: 'Unit Converter',
+      description: 'Free online unit converter — length, weight, temperature, volume, area, time, speed, and energy. Metric and imperial in one tool.',
+    });
+    return () => removeJsonLd('tool-product');
   }, []);
 
   const convert = useCallback(() => {

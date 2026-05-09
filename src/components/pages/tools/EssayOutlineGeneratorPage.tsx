@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 import ScholarMascot from '../../common/ScholarMascot';
+import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 
 interface EssayOutlineGeneratorPageProps {
   onNavigate: (page: string) => void;
@@ -25,13 +26,17 @@ const EssayOutlineGeneratorPage = ({ onNavigate, user, onLogout }: EssayOutlineG
   const [outline, setOutline] = useState<OutlineSection[] | null>(null);
   const [copied, setCopied] = useState(false);
 
-  // SEO: Set page title and meta description
+  // SEO: per-route title, description, canonical, OG, Twitter, plus tool schema.
   useEffect(() => {
-    document.title = 'Free Essay Outline Generator - Structure Your Essay | WriteScholar';
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute('content', 'Free essay outline generator. Create organized outlines for argumentative, expository, narrative, and research essays. Get a structured template instantly. No signup required.');
-    }
+    applyPageSeoTags({
+      title: 'Free Essay Outline Generator - Structure Your Essay | WriteScholar',
+      description: 'Free essay outline generator. Create organized outlines for argumentative, expository, narrative, and research essays. Get a structured template instantly. No signup required.',
+    });
+    injectToolProductSchema({
+      name: 'Essay Outline Generator',
+      description: 'Free essay outline generator — builds a structured template for argumentative, expository, narrative, persuasive, compare-contrast, and research essays.',
+    });
+    return () => removeJsonLd('tool-product');
   }, []);
 
   const essayTypes = [

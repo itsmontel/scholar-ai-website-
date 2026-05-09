@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 import ScholarMascot from '../../common/ScholarMascot';
+import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 
 interface ThesisGeneratorPageProps {
   onNavigate: (page: string) => void;
@@ -23,13 +24,17 @@ const ThesisGeneratorPage = ({ onNavigate, user, onLogout }: ThesisGeneratorPage
   const [thesis, setThesis] = useState('');
   const [copied, setCopied] = useState(false);
 
-  // SEO: Set page title and meta description
+  // SEO: per-route title, description, canonical, OG, Twitter, plus tool schema.
   useEffect(() => {
-    document.title = 'Free Thesis Statement Generator - Create Strong Arguments | WriteScholar';
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute('content', 'Free thesis statement generator. Create strong thesis statements for argumentative, expository, and analytical essays. Get instant results with no signup required.');
-    }
+    applyPageSeoTags({
+      title: 'Free Thesis Statement Generator - Create Strong Arguments | WriteScholar',
+      description: 'Free thesis statement generator. Create strong thesis statements for argumentative, expository, and analytical essays. Get instant results with no signup required.',
+    });
+    injectToolProductSchema({
+      name: 'Thesis Statement Generator',
+      description: 'Free thesis statement generator — builds strong, focused thesis statements for argumentative, expository, analytical, and compare-contrast essays.',
+    });
+    return () => removeJsonLd('tool-product');
   }, []);
 
   const generateThesis = () => {

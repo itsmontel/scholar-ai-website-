@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
+import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 
 function shuffleAndTake<T>(arr: T[], count: number): T[] {
   const shuffled = [...arr].sort(() => Math.random() - 0.5);
@@ -175,11 +176,15 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
   }, [quiz, retakeKey]);
 
   useEffect(() => {
-    document.title = 'AI Quiz Generator from Notes — College Exam Prep | WriteScholar';
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute('content', 'Free quiz generator from text: paste notes or articles and get multiple-choice, true/false, fill-in-the-blank quizzes in seconds. Best free Quizlet alternative. No signup to start.');
-    }
+    applyPageSeoTags({
+      title: 'AI Quiz Generator from Notes — College Exam Prep | WriteScholar',
+      description: 'Free quiz generator from text: paste notes or articles and get multiple-choice, true/false, fill-in-the-blank quizzes in seconds. Best free Quizlet alternative. No signup to start.',
+    });
+    injectToolProductSchema({
+      name: 'AI Quiz Generator',
+      description: 'AI-powered quiz generator — paste notes, lecture slides, or articles and get multiple-choice, true/false, and fill-in-the-blank quizzes in seconds.',
+    });
+    return () => removeJsonLd('tool-product');
   }, []);
 
   // Load saved quiz from Quiz History "Take Quiz" button

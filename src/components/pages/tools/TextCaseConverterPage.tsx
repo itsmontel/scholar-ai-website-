@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Header from '../../common/Header';
 import Footer from '../../common/Footer';
+import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 
 interface TextCaseConverterPageProps {
   onNavigate: (page: string) => void;
@@ -14,13 +15,17 @@ const TextCaseConverterPage = ({ onNavigate, user, onLogout }: TextCaseConverter
   const [text, setText] = useState('');
   const [copied, setCopied] = useState(false);
 
-  // SEO: Set page title and meta description
+  // SEO: per-route title, description, canonical, OG, Twitter, plus tool schema.
   useEffect(() => {
-    document.title = 'Free Text Case Converter - Uppercase, Lowercase, Title Case | WriteScholar';
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute('content', 'Free text case converter. Convert text to uppercase, lowercase, title case, sentence case, and more. Transform your text instantly. No signup required.');
-    }
+    applyPageSeoTags({
+      title: 'Free Text Case Converter - Uppercase, Lowercase, Title Case | WriteScholar',
+      description: 'Free text case converter. Convert text to uppercase, lowercase, title case, sentence case, and more. Transform your text instantly. No signup required.',
+    });
+    injectToolProductSchema({
+      name: 'Text Case Converter',
+      description: 'Free text case converter — switch between UPPERCASE, lowercase, Title Case, Sentence case, aLtErNaTiNg, and inverse instantly.',
+    });
+    return () => removeJsonLd('tool-product');
   }, []);
 
   const convertCase = (type: CaseType): string => {

@@ -6,6 +6,7 @@ import ScholarMascot from '../common/ScholarMascot';
 import AnalysisAnimation from '../common/AnalysisAnimation';
 import { CitationsPreviewSection } from '../common/PreviewSections';
 import { trackAction } from '../../data/achievements';
+import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../utils/seo';
 
 export type EmbeddedDashboardTool = 'analyze' | 'citations' | 'study_pack';
 
@@ -53,7 +54,15 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
 
   useEffect(() => {
     if (embedded) return;
-    document.title = 'Citation Finder for College Papers — APA, MLA, Chicago | WriteScholar';
+    applyPageSeoTags({
+      title: 'Citation Finder for College Papers — APA, MLA, Chicago | WriteScholar',
+      description: 'Find real, citable sources for any research topic in seconds. WriteScholar surfaces peer-reviewed papers and books with formatted citations in APA, MLA, Chicago, Harvard, and IEEE.',
+    });
+    injectToolProductSchema({
+      name: 'Citation Finder',
+      description: 'AI citation finder for college research papers — surface real, peer-reviewed sources with formatted citations in APA, MLA, Chicago, Harvard, and IEEE.',
+    });
+    return () => removeJsonLd('tool-product');
   }, [embedded]);
 
   useEffect(() => {
