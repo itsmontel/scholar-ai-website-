@@ -1221,7 +1221,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                       className="hidden lg:block pointer-events-none absolute -top-2 -right-2 w-20 lg:w-24 h-auto z-10 opacity-90"
                     />
                     <div className="text-center mb-5">
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#DDF4FF] dark:bg-[#1CB0F6]/10 text-[#1CB0F6] border-2 border-[#1CB0F6]/30 text-xs font-extrabold">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 text-[#FF4B4B] border-2 border-[#FF4B4B]/30 text-xs font-extrabold">
                         <span aria-hidden>✨</span>
                         {isNewUser ? 'Get started in under a minute' : 'Ready for your next analysis'}
                       </span>
@@ -1230,11 +1230,11 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                     <h2 className="dash-serif text-center text-2xl sm:text-3xl lg:text-[2.4rem] font-extrabold leading-[1.1] tracking-tight text-stone-900 dark:text-stone-50">
                       {isNewUser ? (
                         <>
-                          Get <span className="text-[#A560E8]">professor-style feedback</span> on your essay
+                          Get <span className="text-[#FF4B4B]">professor-style feedback</span> on your essay
                         </>
                       ) : (
                         <>
-                          Drop in your <span className="text-[#A560E8]">next essay</span>
+                          Drop in your <span className="text-[#FF4B4B]">next essay</span>
                         </>
                       )}
                     </h2>
@@ -1260,8 +1260,8 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                       onDragLeave={handleDragLeave}
                       className={`group relative mt-6 cursor-pointer rounded-2xl border-2 border-dashed transition-all ${
                         dropActive
-                          ? 'border-[#1CB0F6] bg-[#DDF4FF] dark:bg-[#1CB0F6]/10'
-                          : 'border-stone-300 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/50 hover:border-[#1CB0F6] hover:bg-[#DDF4FF]/50'
+                          ? 'border-[#FF4B4B] bg-[#FFE8E8] dark:bg-[#FF4B4B]/10'
+                          : 'border-stone-300 dark:border-stone-600 bg-stone-50 dark:bg-stone-800/50 hover:border-[#FF4B4B] hover:bg-[#FFE8E8]/50'
                       }`}
                     >
                       <input
@@ -1286,7 +1286,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                         ) : (
                           <>
                             <div className="relative mx-auto mb-5 w-16 h-16 sm:w-20 sm:h-20">
-                              <div className="w-full h-full rounded-2xl bg-[#1CB0F6] text-white flex items-center justify-center border-2 border-b-4 border-[#1899D6] group-hover:scale-105 transition-transform">
+                              <div className="w-full h-full rounded-2xl bg-[#FF4B4B] text-white flex items-center justify-center border-2 border-b-4 border-[#E04343] group-hover:scale-105 transition-transform">
                                 <svg className="w-9 h-9 sm:w-10 sm:h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                 </svg>
@@ -1296,7 +1296,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                               Drop your essay here
                             </p>
                             <p className="mt-1 text-sm sm:text-base text-stone-500 dark:text-stone-400 font-bold">
-                              or <span className="text-[#1CB0F6] font-extrabold underline-offset-4 group-hover:underline">click to browse</span>
+                              or <span className="text-[#FF4B4B] font-extrabold underline-offset-4 group-hover:underline">click to browse</span>
                             </p>
                             <div className="mt-4 flex flex-wrap justify-center gap-2">
                               <span className="px-2.5 py-1 rounded-lg bg-[#FFE8E8] text-[#FF4B4B] text-[11px] font-extrabold border-2 border-[#FF4B4B]/20">PDF</span>

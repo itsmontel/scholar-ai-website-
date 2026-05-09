@@ -1009,3 +1009,26 @@ html.dark .landing-hero-grid-animate {
 @media (prefers-reduced-motion: reduce) {
   .hero-cta-mascot-bob { animation: none; }
 }
+
+/* ─── Floating PiP demo player entrance ─────────────────────────────────
+   Slides up from below with a gentle scale + fade so it feels like the
+   player "lifts into place" rather than popping in. Cubic-bezier mimics
+   iOS/macOS spring curves. */
+@keyframes pipSlideIn {
+  from {
+    transform: translateY(40px) scale(0.92);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* In reduced motion mode, just appear instantly without movement. */
+  [style*="pipSlideIn"] {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}

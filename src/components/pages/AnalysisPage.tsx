@@ -2745,13 +2745,18 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
-            {/* Middle: Message */}
+            {/* Middle: Message — explicitly tells free users that annotations
+                STOP here and they won't see feedback on the rest unless they
+                upgrade. Earlier copy was misleading ("Annotations continue
+                on 60%") because it sounded like more were coming. */}
             <div className="flex-1 text-center sm:text-left">
               <p className="text-sm font-extrabold text-stone-800 dark:text-stone-100">
-                Annotations continue on {Math.round((1 - (freePreviewCharCutoff / displayContent.length)) * 100)}% of your paper
+                Annotations stop here on the free plan
               </p>
               <p className="text-xs text-stone-600 dark:text-stone-400 mt-0.5">
-                You can read the rest below — {annotations.filter(a => a.startIndex >= freePreviewCharCutoff).length} more feedback points are waiting for you
+                {Math.round((1 - (freePreviewCharCutoff / displayContent.length)) * 100)}% of your paper has{' '}
+                <span className="font-bold text-[#D97F00] dark:text-[#FFB347]">{annotations.filter(a => a.startIndex >= freePreviewCharCutoff).length} more feedback points</span>{' '}
+                hidden below. Upgrade to Pro to unlock them.
               </p>
             </div>
             {/* Right: CTA */}
@@ -3691,7 +3696,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
               </div>
               <div className="p-6">
                 {gradeRubric && Object.keys(gradeRubric).length > 0 &&
-                (!lockedFeatures.includes('grade_rubric') || isFreePreview) ? (
+                !lockedFeatures.includes('grade_rubric') ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {Object.entries(gradeRubric).map(([key, val]) => (
                       <div key={key} className="p-4 rounded-xl bg-stone-50 dark:bg-stone-700/50 border-2 border-b-4 border-[#E5E5E5] dark:border-stone-600">
@@ -3703,7 +3708,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                       </div>
                     ))}
                   </div>
-                ) : lockedFeatures.includes('grade_rubric') && !isFreePreview ? (
+                ) : lockedFeatures.includes('grade_rubric') ? (
                   <div className="space-y-4">
                     <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
                       Your essay is graded on six college-style categories (thesis, evidence, analysis, structure, and writing quality). Upgrade to see{' '}

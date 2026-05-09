@@ -46,8 +46,11 @@ export function AnalysisPreviewSection({ embedded = false }: PreviewSectionProps
         Muted previews for your draft—not canned advice.
       </p>
 
+      {/* All three figure borders use the analyze tool's brand red
+          (#FF4B4B) so the preview row reads as part of the same surface
+          rather than three competing accent colors. */}
       <div className="mt-4 flex flex-nowrap gap-3 lg:gap-4 justify-between overflow-x-auto pb-3 snap-x snap-mandatory [scrollbar-width:thin]">
-        <figure className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,260px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-b-4 border-[#A560E8] flex flex-col">
+        <figure className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,260px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-b-4 border-[#FF4B4B] flex flex-col">
           <div className="relative aspect-[16/11] w-full bg-black/80">
             <video
               className="absolute inset-0 h-full w-full object-cover object-center"
@@ -66,7 +69,7 @@ export function AnalysisPreviewSection({ embedded = false }: PreviewSectionProps
             Quick walkthrough
           </figcaption>
         </figure>
-        <figure className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,260px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-b-4 border-[#1CB0F6] flex flex-col">
+        <figure className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,260px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-b-4 border-[#FF4B4B] flex flex-col">
           <div className="relative aspect-[16/11] w-full bg-stone-900">
             <img
               src="/rubric-and-notes.png"
@@ -80,7 +83,7 @@ export function AnalysisPreviewSection({ embedded = false }: PreviewSectionProps
             Rubric & notes
           </figcaption>
         </figure>
-        <figure className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,260px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-b-4 border-[#58CC02] flex flex-col">
+        <figure className="snap-center shrink-0 w-[min(72vw,260px)] sm:w-[min(34vw,260px)] lg:w-0 lg:min-w-0 lg:flex-1 rounded-xl overflow-hidden bg-stone-950 border-2 border-b-4 border-[#FF4B4B] flex flex-col">
           <div className="relative aspect-[16/11] w-full bg-stone-900">
             <img
               src="/full-report.png"

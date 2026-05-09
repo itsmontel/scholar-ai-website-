@@ -89,6 +89,33 @@ const LANDING_FAQ_ITEMS: { question: string; answer: string }[] = [
 const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { theme: _theme, toggleTheme: _toggleTheme } = useTheme();
+  // ─── Floating PiP demo video state ──────────────────────────────────────
+  // Mirrors a "video stays with you while you scroll" experience similar to
+  // YouTube's Miniplayer or how product demo overlays float on SaaS landings.
+  // Visibility logic:
+  //   - Starts HIDDEN. Becomes visible after user scrolls past the hero (so
+  //     it doesn't compete with the hero's main content on first impression).
+  //   - User can dismiss with the X. Dismissal is in-memory only — a page
+  //     refresh brings the player back so returning visitors get another
+  //     chance to engage with the demo.
+  const [pipVisible, setPipVisible] = useState(false);
+  const [pipDismissed, setPipDismissed] = useState(false);
+  const [pipMuted, setPipMuted] = useState(true);
+  const [pipExpanded, setPipExpanded] = useState(false);
+  useEffect(() => {
+    if (pipDismissed) return;
+    const onScroll = () => {
+      // Show the floating video once the user has scrolled at least 600px —
+      // typically just past the hero on most viewports.
+      if (window.scrollY > 600 && !pipVisible) setPipVisible(true);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [pipVisible, pipDismissed]);
+  const handleDismissPip = () => {
+    setPipVisible(false);
+    setPipDismissed(true);
+  };
   const [inputText, setInputText] = useState('');
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [isFocused, setIsFocused] = useState(false);
@@ -670,21 +697,20 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
       <div
         role="region"
         aria-label="Limited time promotion"
-        aria-hidden="true"
-        className="hidden relative overflow-hidden border-b-2 border-[#FF9600]/30 dark:border-[#D97F00]/40 bg-[#FFF4E0] dark:bg-stone-950"
+        className="relative overflow-hidden border-b-2 border-[#FF9600]/30 dark:border-[#D97F00]/40 bg-[#FFF4E0] dark:bg-stone-950"
       >
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_120%_at_50%_50%,rgba(255,150,0,0.08),transparent_70%)] dark:bg-[radial-gradient(ellipse_60%_120%_at_50%_50%,rgba(255,150,0,0.12),transparent_70%)]" aria-hidden />
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3">
-          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-center">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FF9600] px-2.5 py-0.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white">
-              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-1.5 sm:py-2">
+          <div className="flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1 text-center">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FF9600] px-2 py-0.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white">
+              <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
                 <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H7a1 1 0 110-2h2V6.477L6.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 015 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L9 4.323V3a1 1 0 011-1z" clipRule="evenodd" />
               </svg>
               Limited Time
             </span>
-            <p className="text-sm sm:text-base font-medium text-stone-800 dark:text-stone-100">
+            <p className="text-xs sm:text-[13px] font-medium text-stone-800 dark:text-stone-100">
               <span className="font-bold text-[#FF9600] dark:text-[#FF9600]">50% off</span> your first month on monthly plans · use code{' '}
-              <span className="inline-flex items-center rounded-md border border-[#FF9600]/40 dark:border-[#D97F00]/50 bg-white dark:bg-stone-900 px-2 py-0.5 font-mono font-bold text-[#FF9600] dark:text-[#FF9600] tracking-wide">
+              <span className="inline-flex items-center rounded-md border border-[#FF9600]/40 dark:border-[#D97F00]/50 bg-white dark:bg-stone-900 px-1.5 py-0.5 font-mono font-bold text-[#FF9600] dark:text-[#FF9600] tracking-wide text-[11px]">
                 MAY2026
               </span>
             </p>
@@ -738,18 +764,22 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
         <div className="relative z-10 flex flex-col items-center justify-start px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12 lg:pt-8 pb-0 min-w-0">
           <div className="w-full min-w-0 max-w-[1240px] xl:mx-auto">
-            {/* Hero: before (top-left) + headline + after (top-right) on lg+; mobile stack below headline */}
+            {/* 3-column hero on lg+: BEFORE essay (left) + center content
+                + AFTER essay (right). Mobile stacks center content only —
+                BEFORE/AFTER asides are hidden on small screens to keep the
+                phone hero compact. */}
             <div className="flex flex-col items-stretch w-full">
-              <div className="lg:grid lg:grid-cols-2 lg:gap-10 xl:gap-14 lg:items-center">
-                {/* TEMPORARILY HIDDEN — Before/After essay asides preserved
-                    for easy re-enable. Hero now uses a 2-column layout with
-                    the Daily Review preview on the right (see below the
-                    matching After aside). */}
+              <div className="lg:grid lg:grid-cols-[1fr_minmax(0,1.7fr)_1fr] lg:gap-6 xl:gap-8 lg:items-center">
+                {/* LEFT COLUMN — BEFORE essay preview card. Shows a rough
+                    draft with red improvement highlights, scoring B (82/100).
+                    Pairs with the AFTER card on the right to visually answer
+                    "what does the analyzer actually do?" before the visitor
+                    reads any copy. */}
                 <aside
-                  className="hidden"
+                  className="hidden lg:flex justify-center"
                   aria-label="Before essay preview"
                 >
-                  <div className="w-full rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900/50 p-1 transition-all duration-300 hover:border-[#FF4B4B]/60 dark:hover:border-[#FF4B4B]/40">
+                  <div className="w-full max-w-[260px] rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900/50 p-1 transition-all duration-300 hover:border-[#FF4B4B]/60 dark:hover:border-[#FF4B4B]/40">
                     <p className="text-[10px] font-bold uppercase tracking-wide text-[#FF4B4B] dark:text-[#FF4B4B] text-center mb-1.5">Before</p>
                     <HeroEssayPreviewCard
                       paper={DEMO_PAPERS[1]}
@@ -761,30 +791,14 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </div>
                 </aside>
 
-              <div className="min-w-0 flex flex-col items-center lg:items-start w-full max-w-2xl lg:max-w-none mx-auto lg:mx-0">
-              <div className="relative w-full max-w-3xl mx-auto lg:mx-0 px-1 sm:px-2 text-center lg:text-left pt-2 sm:pt-4 opacity-0 animate-hero-card-enter">
+              <div className="min-w-0 flex flex-col items-center w-full max-w-2xl mx-auto">
+              <div className="relative w-full max-w-3xl mx-auto px-1 sm:px-2 text-center pt-2 sm:pt-4 opacity-0 animate-hero-card-enter">
                 {/* Hero mascots — pinned to the bottom corners of the hero
                     card, sitting below the trial/login buttons so they flank
                     the trust badge. The walking mascot occupies the bottom-left
                     slot (its in-frame walking animation keeps the corner alive
                     without translating across the card). */}
-                <img
-                  src="/mascot-walking.webp"
-                  alt=""
-                  aria-hidden
-                  loading="lazy"
-                  decoding="async"
-                  className="hidden lg:block pointer-events-none absolute top-12 left-[15rem] xl:left-[18rem] w-20 xl:w-24 h-auto z-10 drop-shadow-[0_14px_24px_rgba(124,58,237,0.32)] motion-safe:animate-hero-aside-left"
-                />
-                <img
-                  src="/mascot-laptop.webp"
-                  alt=""
-                  aria-hidden
-                  loading="lazy"
-                  decoding="async"
-                  className="hidden lg:block pointer-events-none absolute bottom-12 right-0 xl:right-2 w-24 xl:w-28 h-auto z-10 drop-shadow-[0_14px_24px_rgba(124,58,237,0.32)] motion-safe:animate-hero-aside-right"
-                />
-                <div className="relative flex flex-col items-center text-center lg:items-start lg:text-left">
+                <div className="relative flex flex-col items-center text-center">
                 {/* MOBILE-ONLY: floating dancing mascot in the top-right of
                     the hero — replaces the dense pill row and adds movement. */}
                 <img
@@ -806,117 +820,89 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   className="md:hidden pointer-events-none absolute top-2 left-0 w-12 h-auto z-20 opacity-90 drop-shadow-[0_10px_20px_rgba(124,58,237,0.30)] motion-safe:animate-mobile-mascot-peek"
                 />
 
-                {/* TRUST EYEBROW — credibility before the pitch. Cold-traffic
-                    visitors decide "is this real?" before reading the offer,
-                    so social proof earns its placement above the headline.
-                    Five gold stars are the universal "highly rated" signal;
-                    paired with the user count they imply both quality
-                    (rating) and scale (count). Border-2/border-b-4 matches
-                    the chunky Duolingo-style pattern used elsewhere on the
-                    site so the pill reads as part of the visual system. */}
-                <div className="mb-5 sm:mb-6 inline-flex items-center gap-2.5 rounded-full border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800/80 px-3.5 py-1.5 sm:px-4 sm:py-2 shadow-md shadow-stone-200/40 dark:shadow-black/20 opacity-0 animate-hero-trust-pop">
-                  <span className="flex items-center gap-0.5 text-[#FFC800]" aria-hidden>
-                    {[0, 1, 2, 3, 4].map((i) => (
-                      <svg key={i} className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                    ))}
-                  </span>
-                  <span className="text-[12px] sm:text-sm font-bold text-stone-800 dark:text-stone-100 tracking-[0.01em]">
-                    Trusted by <span className="font-extrabold text-[#1CB0F6] dark:text-[#1CB0F6] tabular-nums">50,000+</span> students
-                  </span>
-                </div>
 
-                {/* HEADLINE — pain + outcome in one breath. "The A" is the
-                    desire; "without the all-nighter" is the pain relief.
-                    Two short clauses scan in under a second. */}
+                {/* HEADLINE — outcome + transformation, locked to 3 lines.
+                    Line 1: "Turn your grades" (broad outcome — covers all products)
+                    Line 2: "from [B → A]" (the transformation as a pill chip)
+                    Line 3: "With WriteScholar." (the brand)
+                    The B → A chip is the visual centerpiece — bordered box
+                    with orange B, gray arrow, green A in our Duolingo style. */}
                 {/* HEADLINE — staged typewriter animation. The H1 is split
                     into three "typewriter" segments that wipe in left-to-right
-                    via a CSS mask. Each squiggle SVG path stays invisible
-                    (full stroke-dashoffset) until its delayed draw-on
-                    animation kicks in. Sequence (timed via inline
-                    animationDelay):
-                      0.40s  Phase 1 typewriter starts ("Get the A.")
-                      1.05s  A's squiggle draws on
-                      1.15s  Phase 2 typewriter starts ("With the all-nighter")
-                      2.00s  red squiggly slash draws across "the all-nighter"
-                      2.70s  Phase 3 typewriter starts (" WriteScholar.")
-                      3.40s  WriteScholar's squiggle draws on
+                    via a CSS mask. Sequence (timed via inline animationDelay):
+                      0.15s  Phase 1 typewriter starts ("Turn your grades")
+                      0.55s  Phase 2 typewriter starts ("from [B → A]")
+                      1.30s  Phase 3 typewriter starts ("With WriteScholar.")
+                      1.70s  WriteScholar's purple squiggle draws on
                     Reduced-motion users see the final state immediately
                     (overrides in src/index.css). */}
                 <h1
-                  className="text-[2.2rem] sm:text-[2.85rem] lg:text-[3.5rem] xl:text-[3.85rem] font-extrabold tracking-[-0.02em] leading-[1.04] mb-5 sm:mb-6 max-w-[min(28rem,calc(100vw-2rem))] sm:max-w-3xl mx-auto lg:mx-0 text-balance"
+                  className="text-[1.95rem] sm:text-[2.55rem] lg:text-[3.15rem] xl:text-[3.5rem] font-extrabold tracking-[-0.02em] leading-[1.05] mb-7 sm:mb-9 max-w-[min(30rem,calc(100vw-2rem))] sm:max-w-3xl mx-auto text-balance"
                   style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                 >
-                  {/* Phase 1: "Get the A." */}
-                  <span className="inline-block animate-hero-typewriter" style={{ animationDelay: '0.4s' }}>
-                    <span className="text-stone-900 dark:text-stone-50">Get the</span>{' '}
-                    <span className="relative inline-block overflow-visible text-[#A560E8] dark:text-[#A560E8]">
-                      A
-                      <svg
-                        className="absolute -bottom-2 left-0 w-full h-3 text-[#A560E8] dark:text-[#A560E8] overflow-visible"
-                        viewBox="0 0 200 12"
-                        preserveAspectRatio="none"
-                        aria-hidden
-                        style={{ overflow: 'visible' }}
-                      >
-                        <path
-                          className="animate-hero-squiggle-draw"
-                          style={{ animationDelay: '1.05s' }}
-                          d="M2 8 Q50 2 100 7 T198 6"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="3"
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                    </span>
-                    <span className="text-[#A560E8] dark:text-[#A560E8]">.</span>
+                  {/* Phase 1: "Turn your grades" — broad outcome (covers
+                      essays, study tools, citations — all paths to grades). */}
+                  <span className="inline-block animate-hero-typewriter" style={{ animationDelay: '0.15s' }}>
+                    <span className="text-stone-900 dark:text-stone-50">Turn your grades</span>
                   </span>
                   <br />
-                  {/* Phase 2: "With the all-nighter" + red strikethrough squiggle */}
-                  <span className="inline-block animate-hero-typewriter" style={{ animationDelay: '1.15s' }}>
-                    <span className="text-stone-900 dark:text-stone-50">With</span>{' '}
-                    <span className="relative inline-block text-stone-400 dark:text-stone-500">
-                      the all-nighter
-                      <svg
-                        className="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 w-full h-3 sm:h-4 lg:h-5 text-[#FF4B4B]"
-                        viewBox="0 0 200 12"
-                        preserveAspectRatio="none"
-                        aria-hidden
-                      >
-                        <path
-                          className="animate-hero-squiggle-draw"
-                          style={{ animationDelay: '2.0s' }}
-                          d="M2 6 Q18 1 34 6 T66 6 T98 6 T130 6 T162 6 T198 6"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="6"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
+                  {/* Phase 2: "from [B → A]" — bordered Duolingo-style pill chip
+                      with orange B, gray arrow, green A. The chip is inline-flex
+                      so B/arrow/A stay perfectly aligned regardless of font size. */}
+                  <span className="inline-block animate-hero-typewriter" style={{ animationDelay: '0.55s' }}>
+                    <span className="text-stone-900 dark:text-stone-50">from</span>{' '}
+                    <span
+                      className="inline-flex items-center align-middle gap-1.5 sm:gap-2 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 px-2.5 py-0.5 sm:px-3 sm:py-1 shadow-md mx-1"
+                      aria-label="Grade improvement from B to A"
+                    >
+                      <span className="text-[1.55rem] sm:text-[2rem] lg:text-[2.45rem] xl:text-[2.7rem] font-extrabold tabular-nums leading-none text-[#FF9600] dark:text-[#FFB347]">
+                        B
+                      </span>
+                      <span className="text-[1.4rem] sm:text-[1.85rem] lg:text-[2.25rem] xl:text-[2.5rem] font-light leading-none select-none text-stone-400 dark:text-stone-500" aria-hidden>
+                        →
+                      </span>
+                      <span className="text-[1.55rem] sm:text-[2rem] lg:text-[2.45rem] xl:text-[2.7rem] font-extrabold tabular-nums leading-none text-[#58CC02] dark:text-[#9BE85C]">
+                        A
+                      </span>
                     </span>
-                  </span>{' '}
-                  {/* Phase 3: "WriteScholar." with its purple squiggle */}
-                  <span className="inline-block animate-hero-typewriter" style={{ animationDelay: '2.7s' }}>
+                  </span>
+                  <br />
+                  {/* Phase 3: "With WriteScholar." with its purple squiggle.
+                      pathLength="100" normalizes the path length so the
+                      stroke-dasharray draw animation works reliably even with
+                      preserveAspectRatio="none" stretching the path. Inline
+                      strokeDasharray/Offset override the class's defaults so
+                      the full squiggle is drawn (not just the first 240 user
+                      units of an unpredictably-stretched path). */}
+                  <span className="inline-block animate-hero-typewriter" style={{ animationDelay: '1.30s' }}>
+                    <span className="text-stone-900 dark:text-stone-50">With</span>{' '}
                     <span className="relative inline-block overflow-visible text-[#A560E8] dark:text-[#A560E8]">
                       WriteScholar
+                      {/* Squiggle SVG: bigger viewBox + taller container so
+                          the wave actually has vertical room to be visible.
+                          pathLength=100 + matching dasharray/offset normalize
+                          the draw-on animation regardless of horizontal stretch. */}
                       <svg
-                        className="absolute -bottom-2 left-0 w-full h-3 text-[#A560E8] dark:text-[#A560E8] overflow-visible"
-                        viewBox="0 0 200 12"
+                        className="absolute -bottom-3 sm:-bottom-3.5 left-0 w-full h-5 sm:h-6 text-[#A560E8] dark:text-[#A560E8] overflow-visible"
+                        viewBox="0 0 300 24"
                         preserveAspectRatio="none"
                         aria-hidden
                         style={{ overflow: 'visible' }}
                       >
                         <path
                           className="animate-hero-squiggle-draw"
-                          style={{ animationDelay: '3.4s' }}
-                          d="M2 8 Q50 2 100 7 T198 6"
+                          pathLength={100}
+                          style={{
+                            animationDelay: '1.70s',
+                            strokeDasharray: 100,
+                            strokeDashoffset: 100,
+                          }}
+                          d="M4 14 Q40 4 80 14 T156 14 T232 14 T296 14"
                           fill="none"
                           stroke="currentColor"
-                          strokeWidth="3"
+                          strokeWidth="5"
                           strokeLinecap="round"
+                          strokeLinejoin="round"
                         />
                       </svg>
                     </span>
@@ -928,18 +914,18 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     1) the essay analyzer ("professor-style feedback")
                     2) the study tools ("7 study tools built from your notes").
                     Bolded nouns let it scan in under a second. */}
-                <p className="mb-7 sm:mb-8 max-w-[min(26rem,calc(100vw-2rem))] sm:max-w-xl mx-auto lg:mx-0 text-[1.02rem] sm:text-lg text-stone-700 dark:text-stone-300 leading-relaxed opacity-0 animate-hero-stagger-2">
-                  <span className="font-bold text-stone-900 dark:text-stone-50">Professor-style feedback</span> on every essay — plus <span className="font-bold text-stone-900 dark:text-stone-50">7 study tools</span> built from your notes. All in minutes.
+                <p className="mb-7 sm:mb-9 max-w-[min(24rem,calc(100vw-2rem))] sm:max-w-lg mx-auto text-[0.92rem] sm:text-[1rem] text-stone-700 dark:text-stone-300 leading-relaxed opacity-0 animate-hero-stagger-2">
+                  <span className="font-bold text-stone-900 dark:text-stone-50">Professor-style essay feedback</span> + <span className="font-bold text-stone-900 dark:text-stone-50">7 AI study tools</span> built from your notes. Designed to get you A's on essays AND exams.
                 </p>
 
-                {/* PRIMARY CTA — single dominant action. Login moved to a
-                    de-emphasized text link below the risk-reversal so the
-                    visual hierarchy stays one-CTA. */}
-                <div className="flex flex-col items-stretch sm:items-center lg:items-start justify-center lg:justify-start w-full max-w-md mx-auto lg:mx-0 mb-3 sm:mb-4 opacity-0 animate-hero-stagger-4">
+                {/* PRIMARY + LOGIN CTAs — purple "Start free" is the dominant
+                    button, with a lower-weight "Log in" beside it for returning
+                    users. Stacked on mobile, side-by-side on sm+. */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 w-full max-w-md sm:max-w-lg mx-auto mb-3 sm:mb-4 opacity-0 animate-hero-stagger-4">
                   <button
                     type="button"
                     onClick={() => onNavigate('signup')}
-                    className="group/btn relative inline-flex w-full items-center justify-center gap-2 overflow-hidden px-8 py-4 sm:px-10 sm:py-5 bg-[#A560E8] hover:bg-[#B274EC] dark:bg-[#A560E8] dark:hover:bg-[#B274EC] text-white font-extrabold rounded-2xl border-2 border-b-4 border-[#8A48C7] dark:border-[#8A48C7] transition-all duration-200 hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 text-[1.05rem] sm:text-[1.15rem] tracking-wide shadow-lg shadow-[#A560E8]/25"
+                    className="group/btn relative inline-flex flex-1 items-center justify-center gap-2 overflow-hidden px-8 py-4 sm:px-8 sm:py-4 bg-[#A560E8] hover:bg-[#B274EC] dark:bg-[#A560E8] dark:hover:bg-[#B274EC] text-white font-extrabold rounded-2xl border-2 border-b-4 border-[#8A48C7] dark:border-[#8A48C7] transition-all duration-200 hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 text-[1rem] sm:text-[1.05rem] tracking-wide shadow-lg shadow-[#A560E8]/25"
                   >
                     <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/25 to-white/0 opacity-0 transition-opacity duration-300 group-hover/btn:opacity-100 pointer-events-none" aria-hidden />
                     <span className="relative">Start free — get the A</span>
@@ -947,54 +933,52 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                   </button>
-                </div>
-
-                {/* RISK REVERSAL — three quick objections handled visually so
-                    the visitor's hesitations get answered before they bounce. */}
-                <div className="mb-4 sm:mb-5 flex flex-wrap items-center justify-center lg:justify-start gap-x-4 gap-y-1.5 text-[12px] sm:text-[13px] text-stone-600 dark:text-stone-400 opacity-0 animate-hero-stagger-5">
-                  <span className="inline-flex items-center gap-1.5">
-                    <svg className="w-3.5 h-3.5 text-[#58CC02]" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    No credit card
-                  </span>
-                  <span className="inline-flex items-center gap-1.5">
-                    <svg className="w-3.5 h-3.5 text-[#58CC02]" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    7-day free trial
-                  </span>
-                  <span className="inline-flex items-center gap-1.5">
-                    <svg className="w-3.5 h-3.5 text-[#58CC02]" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                    Cancel anytime
-                  </span>
-                </div>
-
-                {/* SECONDARY: existing-user login as a low-weight text link
-                    so it doesn't compete with the trial CTA. */}
-                <p className="text-center lg:text-left text-[13px] sm:text-sm text-stone-500 dark:text-stone-400 opacity-0 animate-hero-stagger-5">
-                  Already have an account?{' '}
                   <button
                     type="button"
                     onClick={() => onNavigate('login')}
-                    className="font-bold text-[#1CB0F6] hover:text-[#1899D6] underline-offset-2 hover:underline transition-colors"
+                    className="inline-flex items-center justify-center px-6 py-3.5 sm:px-7 sm:py-4 bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-200 font-extrabold rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800 hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all text-[1rem] sm:text-[1.05rem] tracking-wide"
                   >
                     Log in
                   </button>
+                </div>
+
+                {/* RISK REVERSAL — single one-liner that captures the time
+                    cost ("30 seconds") + the price barrier ("no payment").
+                    Replaces the longer 3-pill row to reduce visual noise
+                    without losing the trust signal. */}
+                <p className="mb-5 sm:mb-6 text-center text-[13px] sm:text-sm text-stone-500 dark:text-stone-400 opacity-0 animate-hero-stagger-5">
+                  About 30 seconds to get started. No payment today.
                 </p>
+
+                {/* TRUST PILL — circular user-icon avatar + "Trusted by
+                    50,000+ students worldwide". Sits below the risk reversal
+                    line so the conversion-critical CTA + risk signal come
+                    first, then social proof reinforces. */}
+                <div className="inline-flex items-center gap-2.5 rounded-full border border-stone-200/80 dark:border-stone-700/60 bg-white dark:bg-stone-800/80 pl-1.5 pr-4 py-1 shadow-sm opacity-0 animate-hero-trust-pop">
+                  <span
+                    className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-[#DDF4FF] dark:bg-[#1CB0F6]/20"
+                    aria-hidden
+                  >
+                    <svg className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-[#1CB0F6]" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
+                    </svg>
+                  </span>
+                  <span className="text-[12px] sm:text-[14px] font-bold text-stone-800 dark:text-stone-100">
+                    Trusted by <span className="font-extrabold text-[#1CB0F6] dark:text-[#1CB0F6] tabular-nums">50,000+</span> students worldwide
+                  </span>
+                </div>
                 </div>
               </div>
               </div>
-                {/* TEMPORARILY HIDDEN — see matching note on the Before
-                    aside above. The hero now uses the right column for the
-                    Daily Review screenshot (rendered just below). */}
+                {/* RIGHT COLUMN — AFTER essay preview card. Shows the
+                    polished revision with green strengths-highlighted, scoring
+                    A (90/100). Visually completes the BEFORE → AFTER story
+                    that flanks the center hero content. */}
                 <aside
-                  className="hidden"
+                  className="hidden lg:flex justify-center"
                   aria-label="After essay preview"
                 >
-                  <div className="w-full rounded-2xl border-2 border-b-4 border-[#58CC02]/60 dark:border-[#58CC02]/40 bg-white dark:bg-stone-900/50 p-1 transition-all duration-300 hover:border-[#58CC02] dark:hover:border-[#58CC02]/60">
+                  <div className="w-full max-w-[260px] rounded-2xl border-2 border-b-4 border-[#58CC02]/60 dark:border-[#58CC02]/40 bg-white dark:bg-stone-900/50 p-1 transition-all duration-300 hover:border-[#58CC02] dark:hover:border-[#58CC02]/60">
                     <p className="text-[10px] font-bold uppercase tracking-wide text-[#58CC02] dark:text-[#58CC02] text-center mb-1.5">After</p>
                     <HeroEssayPreviewCard
                       paper={DEMO_HERO_AFTER_PAPER}
@@ -1005,40 +989,111 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     />
                   </div>
                 </aside>
-
-                {/* RIGHT COLUMN — Hero walkthrough video. Replaces the prior
-                    Daily Review screenshot with an autoplaying screen-recording
-                    demo of the full product. The same Daily Review screenshot
-                    is still rendered in the Motivation section below (kept in
-                    its original spot per the user's brief) AND in the mobile
-                    interactive demo area, so the visual is preserved at lower
-                    breakpoints where this video is hidden.
-                    Video specs: muted + autoPlay + loop + playsInline so iOS
-                    Safari plays it inline rather than hijacking full-screen.
-                    Poster image keeps the slot full while the MP4 streams. */}
-                <div className="hidden lg:block w-full opacity-0 animate-hero-aside-right">
-                  <div className="relative group">
-                    <div className="absolute -inset-2 bg-[#A560E8]/15 rounded-3xl blur-2xl opacity-50 group-hover:opacity-70 transition-opacity duration-500" aria-hidden />
-                    <div className="relative rounded-2xl overflow-hidden border-2 border-b-4 border-[#8A48C7] dark:border-[#8A48C7] shadow-2xl bg-white dark:bg-stone-900">
-                      <video
-                        src="/hero-vid.mp4"
-                        poster="/hero-vid-poster.jpg"
-                        autoPlay
-                        muted
-                        loop
-                        playsInline
-                        preload="metadata"
-                        aria-label="WriteScholar walkthrough: a quick screen recording of the full product — essay analyzer, study tools, daily review, and more"
-                        className="w-full h-auto block"
-                      />
-                    </div>
-                  </div>
-                </div>
               </div>
 
-              {/* Strong horizontal section break between trust badge and
-                  "How it works" — full-width line with labeled badge in the
-                  middle so users clearly see they're entering a new section. */}
+              {/* Analysis preview — pushed higher up since the intro
+                  header (eyebrow + h2 + subhead) was removed. The analyzer
+                  demo now sits directly under the hero. */}
+              <div
+                id="landing-tools"
+                className="w-full max-w-6xl mx-auto mt-6 sm:mt-8 lg:mt-10 scroll-mt-24 px-3 sm:px-2 lg:px-1"
+              >
+                <div className="relative rounded-2xl sm:rounded-3xl border border-stone-200/70 dark:border-stone-700/60 bg-white/95 dark:bg-stone-900/80 shadow-[0_28px_72px_-28px_rgba(15,23,42,0.16)] dark:shadow-[0_36px_90px_-32px_rgba(0,0,0,0.55)]">
+                  <InteractiveDocumentAnalysis onNavigate={onNavigate} landingHeroEmbed />
+                </div>
+                <div className="text-center mt-8 sm:mt-10">
+                  <button
+                    type="button"
+                    onClick={() => onNavigate('signup')}
+                    className="inline-flex items-center px-8 py-3.5 bg-[#58CC02] hover:bg-[#61E002] dark:bg-[#58CC02] dark:hover:bg-[#61E002] text-white font-extrabold rounded-2xl border-2 border-b-4 border-[#46A302] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all duration-200 text-base"
+                  >
+                    Try your first analysis
+                    <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </button>
+                  <p className="mt-4 text-sm text-stone-500 dark:text-stone-400">
+                    Free plan includes 2 analyses per month
+                  </p>
+                </div>
+
+                {/* ─── "And it doesn't stop at essays" bridge — directs the
+                    visitor's eye to the second big product (study tools) so it
+                    isn't buried below the fold. ─── */}
+                <div className="mt-12 sm:mt-16 mb-2 max-w-5xl mx-auto px-1">
+                  <a
+                    href="#study-tools"
+                    className="group relative block rounded-3xl border-2 border-b-4 border-[#A560E8]/40 dark:border-[#8A48C7]/40 bg-[#F3EAFF] dark:bg-stone-900/60 p-6 sm:p-8 hover:-translate-y-0.5 transition-all overflow-hidden"
+                  >
+                    <div className="pointer-events-none absolute -top-12 -right-12 w-48 h-48 rounded-full bg-[#58CC02]/15 dark:bg-[#58CC02]/12 blur-3xl" aria-hidden />
+                    <div className="pointer-events-none absolute -bottom-16 -left-12 w-44 h-44 rounded-full bg-[#1CB0F6]/15 dark:bg-[#1CB0F6]/12 blur-3xl" aria-hidden />
+
+                    <div className="relative grid grid-cols-1 sm:grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-5 sm:gap-6">
+                      {/* Juggling mascot — "Scholar juggles 7 study tools so you don't have to" */}
+                      <img
+                        src="/mascot-juggling.webp"
+                        alt=""
+                        aria-hidden
+                        loading="lazy"
+                        decoding="async"
+                        className="hidden sm:block w-28 lg:w-36 h-auto justify-self-center drop-shadow-[0_14px_24px_rgba(217,70,239,0.35)]"
+                      />
+
+                      <div className="text-center sm:text-left">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#F3EAFF] dark:bg-[#A560E8]/20 text-[#A560E8] dark:text-[#A560E8] text-[10px] font-bold uppercase tracking-wider mb-2">
+                          <span aria-hidden>▸</span>
+                          And it doesn&apos;t stop at essays
+                        </span>
+                        <h3
+                          className="text-xl sm:text-2xl lg:text-[1.65rem] font-extrabold text-stone-900 dark:text-stone-50 tracking-tight leading-tight"
+                          style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+                        >
+                          Paste any notes,{' '}
+                          <span className="text-[#A560E8] dark:text-[#A560E8]">
+                            get 7 study tools
+                          </span>{' '}
+                          in 60 seconds
+                        </h3>
+                        <p className="mt-2 text-sm sm:text-[15px] text-stone-600 dark:text-stone-400 leading-relaxed">
+                          Lessons, flashcards, quizzes, crosswords, plus arcade games like{' '}
+                          <span className="font-semibold text-stone-800 dark:text-stone-200">Crater Blast</span> and{' '}
+                          <span className="font-semibold text-stone-800 dark:text-stone-200">Word Tower</span>.
+                        </p>
+                      </div>
+
+                      <span className="hidden sm:inline-flex items-center gap-1.5 self-center justify-self-end rounded-full bg-[#A560E8] px-4 py-2.5 text-sm font-extrabold text-white border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-colors">
+                        See study tools
+                        <svg className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                      </span>
+
+                      {/* Mobile-only chevron under the text */}
+                      <span className="sm:hidden inline-flex items-center justify-center gap-1.5 mt-2 rounded-full bg-[#A560E8] px-4 py-2.5 text-sm font-extrabold text-white border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5">
+                        See study tools
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                      </span>
+                    </div>
+                  </a>
+                </div>
+
+              </div>
+
+              {/* ─── Before/After essay transformation — concrete visual
+                  proof right after the live demo. Visitors who just watched
+                  the analyzer grade an essay now see the actual transformation
+                  (rough draft → polished A-grade essay). This is the single
+                  strongest conversion signal because it answers the unspoken
+                  "but does it actually work?" objection. ─── */}
+              <div id="before-after" className="w-full mt-12 sm:mt-16">
+                <LandingBeforeAfterSection />
+              </div>
+
+              {/* Strong horizontal section break — full-width line with
+                  labeled badge in the middle so users clearly see they're
+                  entering the "how it works" 3-step explainer below. */}
               <div className="relative w-full max-w-6xl mx-auto mt-12 sm:mt-16 mb-4 sm:mb-6 flex items-center gap-4 sm:gap-6 px-1" aria-hidden>
                 <div className="flex-1 h-px bg-gradient-to-r from-transparent via-stone-300/80 to-stone-300/80 dark:via-stone-700/60 dark:to-stone-700/60" />
                 <span className="inline-flex items-center gap-2 rounded-full border-2 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900 px-4 py-1.5 text-[11px] sm:text-xs font-bold uppercase tracking-[0.18em] text-[#1CB0F6] dark:text-[#1CB0F6] whitespace-nowrap">
@@ -1050,9 +1105,10 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 <div className="flex-1 h-px bg-gradient-to-l from-transparent via-stone-300/80 to-stone-300/80 dark:via-stone-700/60 dark:to-stone-700/60" />
               </div>
 
-              {/* ─── How WriteScholar works — moved into the hero so it sits
-                  directly under the trust badge. Three-step flow connects
-                  essay analysis and study tools into one mental model. ─── */}
+              {/* ─── How WriteScholar works — 3-step flow connects essay
+                  analysis and study tools into one mental model. Sits AFTER
+                  the live analyzer demo so visitors first see the product in
+                  action, then understand the mental model. ─── */}
               <div className="relative w-full max-w-7xl mx-auto mt-6 sm:mt-8 lg:mt-10 px-1 sm:px-2 lg:px-4">
                 <div className="pointer-events-none absolute -top-8 left-[6%] w-32 h-32 rounded-full bg-[#1CB0F6]/15 dark:bg-[#1CB0F6]/12 blur-3xl" aria-hidden />
                 <div className="pointer-events-none absolute -bottom-4 right-[8%] w-36 h-36 rounded-full bg-[#58CC02]/15 dark:bg-[#58CC02]/12 blur-3xl" aria-hidden />
@@ -1144,128 +1200,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     ))}
                   </div>
                 </LandingScrollReveal>
-              </div>
-
-              {/* Header for the live analyzer demo — gives the embed context
-                  so visitors know they're watching a real essay get graded. */}
-              <div className="relative w-full max-w-3xl mx-auto mt-14 sm:mt-20 lg:mt-24 px-3 sm:px-4 text-center">
-                {/* Thinking mascot — Scholar examining the essay. Sits
-                    top-right of the heading, off to the side so it
-                    floats next to the heading. */}
-                <img
-                  src="/mascot-thinking.webp"
-                  alt=""
-                  aria-hidden
-                  loading="lazy"
-                  decoding="async"
-                  className="hidden md:block pointer-events-none absolute top-2 -right-10 lg:-right-20 xl:-right-28 w-28 lg:w-32 h-auto z-10 drop-shadow-[0_14px_24px_rgba(124,58,237,0.32)]"
-                />
-
-                <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400 mb-2">
-                  Sample analysis · not your own work
-                </p>
-                <span className="inline-flex items-center gap-1.5 mb-3 rounded-full border-2 border-[#E5E5E5] dark:border-stone-700 bg-white/80 dark:bg-stone-900/70 backdrop-blur px-3 py-1 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.18em] text-[#1CB0F6] dark:text-[#1CB0F6]">
-                  <span className="text-[#1CB0F6] dark:text-[#1CB0F6]">▸</span>
-                  See it in action
-                </span>
-                <h2
-                  className="text-2xl sm:text-3xl lg:text-[2.4rem] font-extrabold text-stone-900 dark:text-stone-50 tracking-tight leading-[1.05]"
-                  style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                >
-                  Watch the analyzer{' '}
-                  <span className="text-[#58CC02] dark:text-[#58CC02]">grade a real essay.</span>
-                </h2>
-                <p className="mt-2 text-sm sm:text-base text-stone-600 dark:text-stone-400 max-w-xl mx-auto">
-                  Professor-style review of a sample draft. Hover any line for feedback — switch between rubric, citations, and revisions.
-                </p>
-              </div>
-
-              {/* Analysis preview — high in hero */}
-              <div
-                id="landing-tools"
-                className="w-full max-w-6xl mx-auto mt-6 sm:mt-8 lg:mt-10 scroll-mt-24 px-3 sm:px-2 lg:px-1"
-              >
-                <div className="relative rounded-2xl sm:rounded-3xl border border-stone-200/70 dark:border-stone-700/60 bg-white/95 dark:bg-stone-900/80 shadow-[0_28px_72px_-28px_rgba(15,23,42,0.16)] dark:shadow-[0_36px_90px_-32px_rgba(0,0,0,0.55)]">
-                  <InteractiveDocumentAnalysis onNavigate={onNavigate} landingHeroEmbed />
-                </div>
-                <div className="text-center mt-8 sm:mt-10">
-                  <button
-                    type="button"
-                    onClick={() => onNavigate('signup')}
-                    className="inline-flex items-center px-8 py-3.5 bg-[#58CC02] hover:bg-[#61E002] dark:bg-[#58CC02] dark:hover:bg-[#61E002] text-white font-extrabold rounded-2xl border-2 border-b-4 border-[#46A302] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all duration-200 text-base"
-                  >
-                    Try your first analysis
-                    <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                  </button>
-                  <p className="mt-4 text-sm text-stone-500 dark:text-stone-400">
-                    Free plan includes 2 analyses per month
-                  </p>
-                </div>
-
-                {/* ─── "And it doesn't stop at essays" bridge — directs the
-                    visitor's eye to the second big product (study tools) so it
-                    isn't buried below the fold. ─── */}
-                <div className="mt-12 sm:mt-16 mb-2 max-w-5xl mx-auto px-1">
-                  <a
-                    href="#study-tools"
-                    className="group relative block rounded-3xl border-2 border-b-4 border-[#A560E8]/40 dark:border-[#8A48C7]/40 bg-[#F3EAFF] dark:bg-stone-900/60 p-6 sm:p-8 hover:-translate-y-0.5 transition-all overflow-hidden"
-                  >
-                    <div className="pointer-events-none absolute -top-12 -right-12 w-48 h-48 rounded-full bg-[#58CC02]/15 dark:bg-[#58CC02]/12 blur-3xl" aria-hidden />
-                    <div className="pointer-events-none absolute -bottom-16 -left-12 w-44 h-44 rounded-full bg-[#1CB0F6]/15 dark:bg-[#1CB0F6]/12 blur-3xl" aria-hidden />
-
-                    <div className="relative grid grid-cols-1 sm:grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-5 sm:gap-6">
-                      {/* Juggling mascot — "Scholar juggles 7 study tools so you don't have to" */}
-                      <img
-                        src="/mascot-juggling.webp"
-                        alt=""
-                        aria-hidden
-                        loading="lazy"
-                        decoding="async"
-                        className="hidden sm:block w-28 lg:w-36 h-auto justify-self-center drop-shadow-[0_14px_24px_rgba(217,70,239,0.35)]"
-                      />
-
-                      <div className="text-center sm:text-left">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#F3EAFF] dark:bg-[#A560E8]/20 text-[#A560E8] dark:text-[#A560E8] text-[10px] font-bold uppercase tracking-wider mb-2">
-                          <span aria-hidden>▸</span>
-                          And it doesn&apos;t stop at essays
-                        </span>
-                        <h3
-                          className="text-xl sm:text-2xl lg:text-[1.65rem] font-extrabold text-stone-900 dark:text-stone-50 tracking-tight leading-tight"
-                          style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                        >
-                          Paste any notes,{' '}
-                          <span className="text-[#A560E8] dark:text-[#A560E8]">
-                            get 7 study tools
-                          </span>{' '}
-                          in 60 seconds
-                        </h3>
-                        <p className="mt-2 text-sm sm:text-[15px] text-stone-600 dark:text-stone-400 leading-relaxed">
-                          Lessons, flashcards, quizzes, crosswords, plus arcade games like{' '}
-                          <span className="font-semibold text-stone-800 dark:text-stone-200">Crater Blast</span> and{' '}
-                          <span className="font-semibold text-stone-800 dark:text-stone-200">Word Tower</span>.
-                        </p>
-                      </div>
-
-                      <span className="hidden sm:inline-flex items-center gap-1.5 self-center justify-self-end rounded-full bg-[#A560E8] px-4 py-2.5 text-sm font-extrabold text-white border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-colors">
-                        See study tools
-                        <svg className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                      </span>
-
-                      {/* Mobile-only chevron under the text */}
-                      <span className="sm:hidden inline-flex items-center justify-center gap-1.5 mt-2 rounded-full bg-[#A560E8] px-4 py-2.5 text-sm font-extrabold text-white border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5">
-                        See study tools
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                      </span>
-                    </div>
-                  </a>
-                </div>
-
               </div>
 
               {/* Daily Review preview — phones & tablets only. Replaces the
@@ -1528,19 +1462,19 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             <div className="text-center mb-10 sm:mb-14 max-w-2xl mx-auto">
               <span className="inline-flex items-center gap-2 mb-4 rounded-full border border-orange-200/80 dark:border-orange-700/55 bg-[#FFF4E0]/80 dark:bg-[#FF9600]/10 backdrop-blur px-3.5 py-1.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.2em] text-[#FF9600] dark:text-[#FF9600] shadow-sm">
                 <span aria-hidden>🔥</span>
-                Built to keep you coming back
+                The habit loop that keeps grades up
               </span>
               <h2
                 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-extrabold text-[#3C3C3C] dark:text-stone-50 tracking-tight leading-[1.05]"
                 style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
               >
-                Study daily. Level up.{' '}
+                Studying that{' '}
                 <span className="text-[#FF9600]">
-                  Collect badges.
+                  actually sticks.
                 </span>
               </h2>
               <p className="mt-3 text-base sm:text-lg text-stone-600 dark:text-stone-400">
-                WriteScholar has a full Duolingo-style progression system — XP, levels, streaks, and 80+ badges that turn studying into a habit.
+                Most students give up after week two. WriteScholar's streak + XP system makes studying the easy choice — so you actually show up the day before the test.
               </p>
             </div>
 
@@ -1560,7 +1494,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     Daily Review
                   </h3>
                   <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed mb-4">
-                    Your personalised daily practice — flashcard drills, quiz questions, and vocabulary checks from your saved materials.
+                    10 minutes a day beats 4 hours of cramming. Your personalised drill from saved notes — built around what you keep getting wrong.
                   </p>
                   {/* Mini visual — lesson card mockup */}
                   <div className="rounded-xl bg-[#E5F8D0]/60 dark:bg-[#58CC02]/10 border border-[#58CC02]/30 p-3">
@@ -1592,7 +1526,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     XP & 100 Levels
                   </h3>
                   <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed mb-4">
-                    Earn XP for every essay, study pack, and daily review. Climb 100 levels from Scholar Seedling to Supreme Grandmaster.
+                    Every essay reviewed, every quiz aced, every streak day — they all stack into XP. Levels you actually want to chase.
                   </p>
                   {/* Mini visual — level badge + XP bar */}
                   <div className="rounded-xl bg-[#DDF4FF]/60 dark:bg-[#1CB0F6]/10 border border-[#1CB0F6]/30 p-3">
@@ -1628,7 +1562,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     Daily Streaks
                   </h3>
                   <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed mb-4">
-                    Complete your daily review to keep your streak alive. The longer your streak, the more badges you unlock.
+                    Your streak is your accountability. Miss a day and you'll feel it — that's the point. It's how casual users become 4.0 students.
                   </p>
                   {/* Mini visual — streak counter */}
                   <div className="rounded-xl bg-[#FFF4E0]/60 dark:bg-[#FF9600]/10 border border-[#FF9600]/30 p-3">
@@ -1673,7 +1607,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     80+ Badges
                   </h3>
                   <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed mb-4">
-                    Unlock achievements for writing, studying, streaks, and more. Collect them all and show off your progress.
+                    Visible milestones turn "I should study" into "I want my next badge." It works because it's stupid and you can't help it.
                   </p>
                   {/* Mini visual — badge grid (real BadgeCreature SVGs) */}
                   <div className="rounded-xl bg-[#F3EAFF]/60 dark:bg-[#A560E8]/10 border border-[#A560E8]/30 p-3">
@@ -1768,9 +1702,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
         </div>
       </section>
       <LandingCitationsShowcase onNavigate={onNavigate} />
-
-      {/* Before/After essay preview — hidden for now, may revisit later. */}
-      {/* <LandingBeforeAfterSection /> */}
 
       {/* H2 #2: Create Study Material, hidden (see More tools) */}
 
@@ -2745,6 +2676,129 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               Sign up to unlock Study Tools (it&apos;s free)
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ─── FLOATING PIP DEMO PLAYER ──────────────────────────────────────
+          A picture-in-picture style mini-video that pins to the bottom-right
+          of the viewport once the user scrolls past the hero. Three quality
+          touches make it feel premium:
+            1. Glass-morphism surround (gradient border + backdrop blur)
+            2. Animated entrance (slide up + fade) and graceful exit
+            3. Sound toggle + close so users always have control
+          Dismissal is sticky for the session (sessionStorage) so it never
+          feels like a popup ad. Hidden on small phones (<480px) where it
+          would dominate the viewport. */}
+      {!pipDismissed && pipVisible && (
+        <div
+          role="region"
+          aria-label="Product demo video"
+          className={`fixed z-[60] transition-all duration-500 ease-out
+            ${pipVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}
+            ${pipExpanded
+              ? 'bottom-4 right-4 left-4 sm:left-auto sm:bottom-6 sm:right-6 w-auto sm:w-[480px] lg:w-[560px]'
+              : 'bottom-4 right-4 sm:bottom-6 sm:right-6 w-[280px] sm:w-[320px]'}
+          `}
+          style={{
+            animation: 'pipSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+          }}
+        >
+          {/* Soft glow ring behind the card for that "premium product demo" feel */}
+          <div
+            className="absolute -inset-1.5 rounded-3xl bg-gradient-to-br from-[#A560E8]/40 via-[#1CB0F6]/30 to-[#58CC02]/30 blur-xl opacity-70 pointer-events-none"
+            aria-hidden
+          />
+
+          <div className="relative rounded-2xl overflow-hidden border-2 border-b-4 border-[#8A48C7] dark:border-[#8A48C7] shadow-2xl bg-white dark:bg-stone-900 backdrop-blur">
+            {/* Top chrome bar — gradient with live-dot, title, and controls */}
+            <div className="relative flex items-center justify-between px-3 py-2 bg-gradient-to-r from-[#A560E8] via-[#9B55E0] to-[#8A48C7]">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="relative flex h-2 w-2 shrink-0" aria-hidden>
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-[#FF4B4B] opacity-75 motion-safe:animate-ping" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-[#FF4B4B]" />
+                </span>
+                <span className="text-white text-[10px] sm:text-[11px] font-extrabold uppercase tracking-[0.15em] truncate">
+                  WriteScholar in 30s
+                </span>
+              </div>
+              <div className="flex items-center gap-1 shrink-0">
+                {/* Mute / Unmute */}
+                <button
+                  type="button"
+                  onClick={() => setPipMuted((m) => !m)}
+                  aria-label={pipMuted ? 'Unmute video' : 'Mute video'}
+                  className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/15 hover:bg-white/25 text-white transition-colors active:scale-95"
+                >
+                  {pipMuted ? (
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                    </svg>
+                  ) : (
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                    </svg>
+                  )}
+                </button>
+                {/* Expand / Compact */}
+                <button
+                  type="button"
+                  onClick={() => setPipExpanded((e) => !e)}
+                  aria-label={pipExpanded ? 'Make smaller' : 'Make bigger'}
+                  className="hidden sm:flex w-7 h-7 items-center justify-center rounded-lg bg-white/15 hover:bg-white/25 text-white transition-colors active:scale-95"
+                >
+                  {pipExpanded ? (
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 9V5a1 1 0 00-1-1H4m11 5V5a1 1 0 011-1h4M9 15v4a1 1 0 01-1 1H4m11-5v4a1 1 0 001 1h4" />
+                    </svg>
+                  ) : (
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                    </svg>
+                  )}
+                </button>
+                {/* Close */}
+                <button
+                  type="button"
+                  onClick={handleDismissPip}
+                  aria-label="Close demo video"
+                  className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/15 hover:bg-[#FF4B4B] text-white transition-colors active:scale-95"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Video itself */}
+            <div className="relative bg-black">
+              <video
+                src="/hero-vid.mp4"
+                poster="/hero-vid-poster.jpg"
+                autoPlay
+                muted={pipMuted}
+                loop
+                playsInline
+                preload="metadata"
+                aria-label="WriteScholar walkthrough: a quick screen recording of the full product"
+                className="w-full h-auto block"
+              />
+              {/* Subtle vignette for cinematic feel */}
+              <div className="absolute inset-0 pointer-events-none ring-1 ring-inset ring-black/10 rounded-b-[14px]" aria-hidden />
+            </div>
+
+            {/* Footer CTA bar — turns the player into a conversion surface */}
+            <button
+              type="button"
+              onClick={() => onNavigate('signup')}
+              className="group/pipcta relative w-full flex items-center justify-center gap-1.5 px-3 py-2.5 bg-gradient-to-r from-[#FFF4E0] via-white to-[#DDF4FF] dark:from-stone-800 dark:via-stone-900 dark:to-stone-800 text-[#3C3C3C] dark:text-stone-100 text-[12px] sm:text-[13px] font-extrabold border-t-2 border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800 active:translate-y-[1px] transition-all"
+            >
+              <span>Start free — get the A</span>
+              <svg className="w-4 h-4 text-[#A560E8] group-hover/pipcta:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
             </button>
           </div>

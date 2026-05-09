@@ -57,7 +57,10 @@ type Phase =
   | 'transition'
   | 'done';
 
-/* ─── Step ordering — used for the top progress bar ─── */
+/* ─── Step ordering — used for the top progress bar.
+   The daily-review-* phases (9, 10, 11) are still Phase types in case we
+   route to them in the future, but the live tour skips them: tour-motivation
+   goes straight to paywall. So progress shows 9 steps ending at paywall. */
 const PHASE_STEP: Record<string, number> = {
   profile: 1,
   'survey-source': 2,
@@ -67,12 +70,13 @@ const PHASE_STEP: Record<string, number> = {
   'tour-review': 6,
   'tour-study': 7,
   'tour-motivation': 8,
+  // Kept for routing flexibility but skipped in the default flow:
   'daily-review-intro': 9,
   'daily-review-demo': 10,
   'daily-review-results': 11,
-  paywall: 12,
+  paywall: 9,
 };
-const TOTAL_STEPS = 12;
+const TOTAL_STEPS = 9;
 
 /* ─── Survey: What are you using WriteScholar for? (single-select goal) ─── */
 const GOAL_OPTIONS = [
@@ -725,13 +729,17 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
   };
 
   const handleTourContinue = () => {
+    // After "TOOL 4 OF 4" (tour-motivation), the user-facing onboarding tour
+    // ends and the soft paywall takes over. Skipping the daily-review-intro,
+    // daily-review-demo, and daily-review-results steps shortens the flow
+    // significantly so users hit the conversion moment faster.
     const nextMap: Record<string, Phase> = {
       'tour-essays': 'tour-review',
       'tour-review': 'tour-study',
       'tour-study': 'tour-motivation',
-      'tour-motivation': 'daily-review-intro',
+      'tour-motivation': 'paywall',
     };
-    goToPhase(nextMap[phase] || 'daily-review-intro');
+    goToPhase(nextMap[phase] || 'paywall');
   };
 
   /* ─── Interactive tour handlers ─── */
