@@ -762,7 +762,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           aria-hidden
         />
 
-        <div className="relative z-10 flex flex-col items-center justify-start px-4 sm:px-6 lg:px-8 pt-4 sm:pt-12 lg:pt-8 pb-0 min-w-0">
+        <div className="relative z-10 flex flex-col items-center justify-start px-4 sm:px-6 lg:px-8 pt-10 sm:pt-12 lg:pt-8 pb-8 sm:pb-0 min-w-0">
           <div className="w-full min-w-0 max-w-[1240px] xl:mx-auto">
             {/* 3-column hero on lg+: BEFORE essay (left) + center content
                 + AFTER essay (right). Mobile stacks center content only —
@@ -799,25 +799,17 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     slot (its in-frame walking animation keeps the corner alive
                     without translating across the card). */}
                 <div className="relative flex flex-col items-center text-center">
-                {/* MOBILE-ONLY: floating dancing mascot in the top-right of
-                    the hero — replaces the dense pill row and adds movement. */}
+                {/* MOBILE-ONLY: single dancing mascot pinned to the top-right
+                    corner. Smaller and tucked further out of the way so it
+                    doesn't crowd the H1 on narrow screens. The left-side
+                    paper mascot was removed to give the headline more room. */}
                 <img
                   src="/mascot-dance.webp"
                   alt=""
                   aria-hidden
                   loading="lazy"
                   decoding="async"
-                  className="md:hidden pointer-events-none absolute -top-2 right-1 w-20 sm:w-24 h-auto z-20 drop-shadow-[0_14px_28px_rgba(124,58,237,0.35)] motion-safe:animate-mobile-mascot-bob"
-                />
-                {/* MOBILE-ONLY: smaller paper mascot peeking on the left so the
-                    top of the hero feels alive on phones. */}
-                <img
-                  src="/mascot-paper.webp"
-                  alt=""
-                  aria-hidden
-                  loading="lazy"
-                  decoding="async"
-                  className="md:hidden pointer-events-none absolute top-2 left-0 w-12 h-auto z-20 opacity-90 drop-shadow-[0_10px_20px_rgba(124,58,237,0.30)] motion-safe:animate-mobile-mascot-peek"
+                  className="md:hidden pointer-events-none absolute -top-1 -right-2 w-16 h-auto z-20 drop-shadow-[0_14px_28px_rgba(124,58,237,0.35)] motion-safe:animate-mobile-mascot-bob"
                 />
 
 
@@ -837,7 +829,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     Reduced-motion users see the final state immediately
                     (overrides in src/index.css). */}
                 <h1
-                  className="text-[1.65rem] sm:text-[2.55rem] lg:text-[3.15rem] xl:text-[3.5rem] font-extrabold tracking-[-0.02em] leading-[1.06] mb-4 sm:mb-9 max-w-[min(22rem,calc(100vw-2rem))] sm:max-w-3xl mx-auto text-balance"
+                  className="text-[2.1rem] sm:text-[2.55rem] lg:text-[3.15rem] xl:text-[3.5rem] font-extrabold tracking-[-0.02em] leading-[1.05] mb-8 sm:mb-9 max-w-[min(28rem,calc(100vw-2rem))] sm:max-w-3xl mx-auto text-balance"
                   style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                 >
                   {/* Phase 1: "Turn your grades" — broad outcome (covers
@@ -914,7 +906,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     1) the essay analyzer ("professor-style feedback")
                     2) the study tools ("7 study tools built from your notes").
                     Bolded nouns let it scan in under a second. */}
-                <p className="mb-4 sm:mb-9 max-w-[min(22rem,calc(100vw-2rem))] sm:max-w-lg mx-auto text-[0.85rem] sm:text-[1rem] text-stone-700 dark:text-stone-300 leading-relaxed opacity-0 animate-hero-stagger-2">
+                <p className="mb-8 sm:mb-9 max-w-[min(24rem,calc(100vw-2rem))] sm:max-w-lg mx-auto text-[0.95rem] sm:text-[1rem] text-stone-700 dark:text-stone-300 leading-relaxed opacity-0 animate-hero-stagger-2">
                   <span className="font-bold text-stone-900 dark:text-stone-50">Professor-style essay feedback</span> + <span className="font-bold text-stone-900 dark:text-stone-50">7 AI study tools</span> built from your notes. Designed to get you A's on essays AND exams.
                 </p>
 
@@ -996,7 +988,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   demo now sits directly under the hero. */}
               <div
                 id="landing-tools"
-                className="w-full max-w-6xl mx-auto mt-6 sm:mt-8 lg:mt-10 scroll-mt-24 px-3 sm:px-2 lg:px-1"
+                className="w-full max-w-6xl mx-auto mt-6 sm:mt-8 lg:mt-10 scroll-mt-24 px-1.5 sm:px-2 lg:px-1"
               >
                 <div className="relative rounded-2xl sm:rounded-3xl border border-stone-200/70 dark:border-stone-700/60 bg-white/95 dark:bg-stone-900/80 shadow-[0_28px_72px_-28px_rgba(15,23,42,0.16)] dark:shadow-[0_36px_90px_-32px_rgba(0,0,0,0.55)]">
                   <InteractiveDocumentAnalysis onNavigate={onNavigate} landingHeroEmbed />
@@ -1202,34 +1194,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 </LandingScrollReveal>
               </div>
 
-              {/* Daily Review preview — phones & tablets only. Replaces the
-                  previous Before/After essay comparison so the study-tools
-                  mechanic surfaces above the fold for mobile visitors (the
-                  hero shows this same screenshot in its right column on lg+).
-                  Same image is also rendered later in the Motivation section
-                  in its original spot. */}
-              <div
-                className="lg:hidden w-full mt-8 sm:mt-10 pb-2 px-1"
-                aria-label="Daily Review preview"
-              >
-                <p className="text-center text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-500 mb-4 sm:mb-6">
-                  Daily Review — built from your notes
-                </p>
-                <div className="max-w-md mx-auto">
-                  <div className="relative group">
-                    <div className="absolute -inset-2 bg-[#58CC02]/15 rounded-3xl blur-2xl opacity-50 group-hover:opacity-70 transition-opacity duration-500" aria-hidden />
-                    <div className="relative rounded-2xl overflow-hidden border-2 border-b-4 border-[#46A302] dark:border-[#46A302] shadow-2xl bg-white dark:bg-stone-900">
-                      <img
-                        src="/daily-review-preview.png"
-                        alt="WriteScholar Daily Review: personalised practice questions built from your notes, with instant feedback and XP rewards"
-                        className="w-full h-auto block"
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
 
               {/* ─── How your draft is reviewed — modernized to match the
                   new landing theme. Combined the legend + 5 focus-area cards
@@ -1702,7 +1666,12 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           </LandingScrollReveal>
         </div>
       </section>
-      <LandingCitationsShowcase onNavigate={onNavigate} />
+      {/* Citations showcase — hidden on mobile. Citations are a tertiary
+          feature; on a phone it's just extra scroll. Desktop visitors who
+          care about sources still see the full showcase. */}
+      <div className="hidden md:block">
+        <LandingCitationsShowcase onNavigate={onNavigate} />
+      </div>
 
       {/* H2 #2: Create Study Material, hidden (see More tools) */}
 
