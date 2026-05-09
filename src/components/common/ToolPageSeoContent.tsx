@@ -38,6 +38,48 @@ export interface ToolSeoRelatedTool {
   teaser: string;
 }
 
+/* ─── Optional rich sections (Phase 2.5 content boost) ─────────── */
+
+export interface ToolSeoMistake {
+  title: string;
+  body: string;
+}
+
+export interface ToolSeoExample {
+  /** Short label, e.g. "Wordy" or "Passive voice" */
+  label: string;
+  before: string;
+  after: string;
+  /** One-sentence explanation of the fix */
+  explanation: string;
+}
+
+export interface ToolSeoGlossaryTerm {
+  term: string;
+  definition: string;
+}
+
+export interface ToolSeoComparisonRow {
+  feature: string;
+  /** Cell values, one per column header */
+  values: string[];
+}
+
+export interface ToolSeoComparison {
+  /** Section heading, e.g. "WriteScholar vs Grammarly" */
+  heading: string;
+  /** Optional intro paragraph */
+  intro?: string;
+  /** Column headers — first one is "Feature", rest are products */
+  columns: string[];
+  rows: ToolSeoComparisonRow[];
+}
+
+export interface ToolSeoTip {
+  title: string;
+  body: string;
+}
+
 export interface ToolPageSeoContentProps {
   /** H2 heading, e.g. "Free Word Counter — How It Works" */
   heading: string;
@@ -55,6 +97,17 @@ export interface ToolPageSeoContentProps {
   accent?: string;
   /** Optional pre-FAQ extra paragraph for keyword density */
   closing?: string;
+  /* ─── Phase 2.5 — optional rich sections for high-competition tools ─── */
+  /** Common mistakes / pitfalls — 4-7 entries */
+  mistakes?: ToolSeoMistake[];
+  /** Worked examples (before/after) — 3-6 entries */
+  examples?: ToolSeoExample[];
+  /** Glossary of related terms — 4-10 entries */
+  glossary?: ToolSeoGlossaryTerm[];
+  /** Comparison table (us vs competitor or free vs paid) */
+  comparison?: ToolSeoComparison;
+  /** Tips / best practices — 4-7 entries */
+  tips?: ToolSeoTip[];
   onNavigate: (page: string) => void;
 }
 
@@ -91,6 +144,11 @@ const ToolPageSeoContent = ({
   related,
   accent = '#A560E8',
   closing,
+  mistakes,
+  examples,
+  glossary,
+  comparison,
+  tips,
   onNavigate,
 }: ToolPageSeoContentProps) => {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
@@ -169,6 +227,165 @@ const ToolPageSeoContent = ({
             ))}
           </div>
         </div>
+
+        {/* Optional: comparison table — best for "us vs competitor" or
+            "free vs Pro" framing */}
+        {comparison && (
+          <div className="mb-12">
+            <h3 className="text-xl sm:text-2xl font-extrabold text-stone-900 dark:text-stone-50 mb-4">
+              {comparison.heading}
+            </h3>
+            {comparison.intro && (
+              <p className="text-stone-700 dark:text-stone-300 leading-relaxed text-[15px] mb-5 max-w-2xl">
+                {comparison.intro}
+              </p>
+            )}
+            <div className="overflow-x-auto rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b-2 border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900/60">
+                    {comparison.columns.map((c, i) => (
+                      <th
+                        key={i}
+                        className="p-3 sm:p-4 text-[13px] sm:text-sm font-extrabold text-stone-900 dark:text-stone-50 whitespace-nowrap"
+                      >
+                        {c}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {comparison.rows.map((r, i) => (
+                    <tr
+                      key={i}
+                      className="border-b border-stone-100 dark:border-stone-800/60 last:border-0"
+                    >
+                      <td className="p-3 sm:p-4 text-[13px] sm:text-sm font-bold text-stone-800 dark:text-stone-200">
+                        {r.feature}
+                      </td>
+                      {r.values.map((v, j) => (
+                        <td
+                          key={j}
+                          className="p-3 sm:p-4 text-[13px] sm:text-sm text-stone-700 dark:text-stone-300"
+                        >
+                          {v}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Optional: common mistakes section */}
+        {mistakes && mistakes.length > 0 && (
+          <div className="mb-12">
+            <h3 className="text-xl sm:text-2xl font-extrabold text-stone-900 dark:text-stone-50 mb-6">
+              Common mistakes to avoid
+            </h3>
+            <div className="space-y-3">
+              {mistakes.map((m, i) => (
+                <div
+                  key={i}
+                  className="rounded-2xl border-2 border-b-4 border-red-200 dark:border-red-900/40 bg-red-50/50 dark:bg-red-950/10 p-5"
+                >
+                  <h4 className="font-extrabold text-stone-900 dark:text-stone-50 mb-1 flex items-center gap-2">
+                    <span aria-hidden className="text-red-500">✗</span>
+                    {m.title}
+                  </h4>
+                  <p className="text-stone-700 dark:text-stone-300 leading-relaxed text-[14px]">{m.body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Optional: worked examples (before / after) */}
+        {examples && examples.length > 0 && (
+          <div className="mb-12">
+            <h3 className="text-xl sm:text-2xl font-extrabold text-stone-900 dark:text-stone-50 mb-6">
+              Examples
+            </h3>
+            <div className="space-y-4">
+              {examples.map((ex, i) => (
+                <div
+                  key={i}
+                  className="rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 p-5"
+                >
+                  <div
+                    className="text-[12px] font-extrabold uppercase tracking-wider mb-3"
+                    style={{ color: accent }}
+                  >
+                    {ex.label}
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-3 mb-3">
+                    <div className="rounded-xl border border-red-200 dark:border-red-900/40 bg-red-50/40 dark:bg-red-950/10 p-3">
+                      <div className="text-[11px] font-bold uppercase tracking-wider text-red-600 dark:text-red-400 mb-1.5">Before</div>
+                      <div className="text-stone-800 dark:text-stone-200 text-[14px] leading-relaxed">{ex.before}</div>
+                    </div>
+                    <div className="rounded-xl border border-green-200 dark:border-green-900/40 bg-green-50/40 dark:bg-green-950/10 p-3">
+                      <div className="text-[11px] font-bold uppercase tracking-wider text-green-700 dark:text-green-400 mb-1.5">After</div>
+                      <div className="text-stone-800 dark:text-stone-200 text-[14px] leading-relaxed">{ex.after}</div>
+                    </div>
+                  </div>
+                  <p className="text-stone-600 dark:text-stone-400 text-[13px] leading-relaxed italic">{ex.explanation}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Optional: tips / best practices */}
+        {tips && tips.length > 0 && (
+          <div className="mb-12">
+            <h3 className="text-xl sm:text-2xl font-extrabold text-stone-900 dark:text-stone-50 mb-6">
+              Tips and best practices
+            </h3>
+            <div className="grid sm:grid-cols-2 gap-3">
+              {tips.map((t, i) => (
+                <div
+                  key={i}
+                  className="rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 p-5"
+                >
+                  <h4 className="font-extrabold text-stone-900 dark:text-stone-50 mb-1 flex items-center gap-2 text-[15px]">
+                    <span style={{ color: accent }} aria-hidden>✓</span>
+                    {t.title}
+                  </h4>
+                  <p className="text-stone-700 dark:text-stone-300 leading-relaxed text-[14px]">{t.body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Optional: glossary of related terms */}
+        {glossary && glossary.length > 0 && (
+          <div className="mb-12">
+            <h3 className="text-xl sm:text-2xl font-extrabold text-stone-900 dark:text-stone-50 mb-6">
+              Glossary
+            </h3>
+            <dl className="grid sm:grid-cols-2 gap-3">
+              {glossary.map((g, i) => (
+                <div
+                  key={i}
+                  className="rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 p-4"
+                >
+                  <dt
+                    className="font-extrabold text-[14px] mb-1"
+                    style={{ color: accent }}
+                  >
+                    {g.term}
+                  </dt>
+                  <dd className="text-stone-700 dark:text-stone-300 leading-relaxed text-[13px]">
+                    {g.definition}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        )}
 
         {/* Optional closing copy */}
         {closing && (

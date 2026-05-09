@@ -20,6 +20,11 @@ import type {
   ToolSeoUseCase,
   ToolSeoFaq,
   ToolSeoRelatedTool,
+  ToolSeoMistake,
+  ToolSeoExample,
+  ToolSeoGlossaryTerm,
+  ToolSeoComparison,
+  ToolSeoTip,
 } from '../components/common/ToolPageSeoContent';
 
 export interface ToolSeoConfig {
@@ -32,6 +37,12 @@ export interface ToolSeoConfig {
   closing?: string;
   /** Optional accent — defaults to #A560E8 */
   accent?: string;
+  /** Phase 2.5 deep-content additions (optional, used on top tools) */
+  mistakes?: ToolSeoMistake[];
+  examples?: ToolSeoExample[];
+  glossary?: ToolSeoGlossaryTerm[];
+  comparison?: ToolSeoComparison;
+  tips?: ToolSeoTip[];
 }
 
 /* ─── Cross-reference helpers ───────────────────────────────────── */
@@ -89,6 +100,37 @@ export const wordCounterSeo: ToolSeoConfig = {
   closing:
     'Word count is the most basic — and most overlooked — formatting requirement in academic writing. Going under is treated as an incomplete submission; going over is treated as ignoring instructions. Use this counter as a final check before every submission, and pair it with our AI essay checker to make sure the words you do have are pulling their weight.',
   accent: '#1CB0F6',
+  mistakes: [
+    { title: 'Counting every "word" the same way', body: 'Different word counters disagree on hyphenated words, contractions, numbers, and URLs. Microsoft Word counts "well-being" as one word; some online tools count it as two. Always use the same counter throughout a project so your numbers stay consistent.' },
+    { title: 'Forgetting that titles, references, and footnotes don\'t count', body: 'Most academic word limits exclude the title page, abstract, references, footnotes, tables, and appendices. Your professor cares about the body of the essay — count just that, not the entire document.' },
+    { title: 'Ignoring the character limit on platforms', body: 'Common App is 650 words AND has a character cap depending on the year. UCAS personal statement is 4,000 characters AND 47 lines — whichever you hit first. Always check both.' },
+    { title: 'Padding to hit a minimum', body: 'Adding "in order to" instead of "to" or "due to the fact that" instead of "because" pads but reads as filler. Professors notice. Better to write tighter and hit the minimum with substance than pad to 1,500 words with junk.' },
+    { title: 'Submitting at exactly the limit', body: 'A 1,500-word limit is a max, not a target. Submitting at 1,499 reads as just-getting-by. Aim for 90-95% of the max for a polished feel; cut deeper if your argument doesn\'t need every word.' },
+    { title: 'Trusting word count in non-English text', body: 'Many counters are calibrated for English word boundaries (whitespace-separated). Mandarin, Japanese, and Thai don\'t use spaces — most counters under-count by 80%+ for those languages.' },
+  ],
+  examples: [
+    { label: 'Trimming an over-limit essay', before: 'Due to the fact that the experiment was conducted under controlled conditions, the results are reliable in the sense that they can be replicated by other researchers.', after: 'Because the experiment was controlled, other researchers can replicate the results.', explanation: 'Cut from 30 words to 13 — same meaning. "Due to the fact that" → "Because"; "in the sense that" deleted. Apply this pattern across an essay and you can typically cut 15-20% without losing content.' },
+    { label: 'Reading time vs speaking time', before: '500 words at typical adult reading speed (200 wpm)', after: '500 words at presentation speaking pace (130 wpm)', explanation: 'A 500-word piece is 2.5 minutes to read silently but ~3:50 to read aloud. If you\'re writing a speech, target word count by speaking time, not reading time.' },
+    { label: 'Hitting an exact character limit', before: 'I am writing to express my interest in the position of Junior Software Engineer because I have a strong passion for technology.', after: 'I\'m applying for the Junior Software Engineer role — tech is what I love.', explanation: 'Cut from 119 to 76 characters. Twitter, SMS, and bio fields care about character count, not word count. The counter shows both so you can target whichever matters.' },
+  ],
+  tips: [
+    { title: 'Aim for 95% of the max, not the max', body: 'Submitting at 1,500/1,500 reads as filler. 1,425/1,500 reads as deliberately-edited. Professors who grade hundreds of papers can tell the difference.' },
+    { title: 'Cut 5-10% on the second pass', body: 'First-draft writing is always too wordy. Set a goal: cut 10% of your word count on the editing pass without losing meaning. Forces tighter prose.' },
+    { title: 'Use the character count for titles', body: 'Web titles cap at ~60 characters before Google truncates. Email subject lines cap at ~50. Pasting your title into the counter shows you exactly how much room you have.' },
+    { title: 'Mind the difference between words and tokens', body: 'AI tools (ChatGPT, etc.) charge by "tokens", not words. 1 token ≈ 0.75 English words on average. A 1,000-word essay ≈ 1,300 tokens.' },
+    { title: 'Don\'t pad references to hit a minimum', body: 'A reference list with 25 sources isn\'t automatically better than 12 well-chosen ones. Quality of citations > quantity. Word count for the bibliography usually isn\'t graded.' },
+    { title: 'Track your daily writing word count', body: 'Building a writing habit? Aim for 250-500 words/day. Use the counter to verify you hit your target, not "feels like enough" — momentum dies on subjective measures.' },
+  ],
+  glossary: [
+    { term: 'Word count', definition: 'Total number of words in a text. Used by most academic word limits, platforms with text limits, and reading-time estimators.' },
+    { term: 'Character count', definition: 'Total characters including or excluding spaces. Used by Twitter (280), SMS (160), most database fields, and some submission platforms.' },
+    { term: 'Reading time', definition: 'Estimated minutes to read silently. Standard formula: words ÷ 200 (adult reading speed). Academic text reads slower (~150 wpm).' },
+    { term: 'Speaking time', definition: 'Estimated minutes to deliver as a speech. Standard formula: words ÷ 130. Used for speech writing, presentation prep, and audiobook estimates.' },
+    { term: 'Sentence count', definition: 'Number of sentences ending in . ? or !. Average words/sentence is a key readability metric — over 25 wpm reads as dense.' },
+    { term: 'Paragraph count', definition: 'Blocks of text separated by blank lines. Most essays have one main idea per paragraph.' },
+    { term: 'Lexical density', definition: 'Ratio of content words (nouns, verbs, adjectives) to total words. Higher density = more information per word; usually a sign of strong academic writing.' },
+    { term: 'Type-token ratio', definition: 'Ratio of unique words to total words. A measure of vocabulary diversity. Diverse writing scores 0.5+; repetitive writing under 0.3.' },
+  ],
 };
 
 /* ─── CITATION GENERATOR ────────────────────────────────────────── */
@@ -125,6 +167,53 @@ export const citationGeneratorSeo: ToolSeoConfig = {
   related: [TOOL_LINKS.outline, TOOL_LINKS.thesisGen, TOOL_LINKS.grammarChecker, TOOL_LINKS.analyze, TOOL_LINKS.paraphrase, TOOL_LINKS.summarizer],
   closing:
     'Citations are usually graded for two things: are they in the right style, and are they formatted correctly. This tool guarantees the second. The first is on you — match the style your professor specified (APA, MLA, etc.) and use the same one consistently throughout the paper. Mixing styles is a much bigger red flag than tiny formatting errors within a single style.',
+  comparison: {
+    heading: 'WriteScholar vs the citation generators you might already know',
+    intro: 'There are dozens of citation generators online. Here\'s how WriteScholar stacks up against the most common ones students reach for.',
+    columns: ['Feature', 'WriteScholar', 'Cite This For Me (free)', 'EasyBib (free)', 'Zotero'],
+    rows: [
+      { feature: 'Sign-up required', values: ['No', 'No (limited)', 'Yes, after 5 cites', 'Yes (download)'] },
+      { feature: 'Sources per session', values: ['Unlimited', '5 free', '5 free', 'Unlimited'] },
+      { feature: 'APA, MLA, Chicago, Harvard', values: ['All', 'All (paid for some)', 'All (paid for some)', 'All'] },
+      { feature: 'IEEE / Vancouver', values: ['Yes', 'Paid only', 'Paid only', 'Yes'] },
+      { feature: 'DOI auto-fill', values: ['Pro', 'Paid', 'Paid', 'Yes'] },
+      { feature: 'Ads', values: ['None', 'Yes', 'Heavy', 'None'] },
+      { feature: 'Browser extension', values: ['Coming', 'No', 'No', 'Yes' ] },
+      { feature: 'Cost', values: ['Free + Pro $19.99/mo', 'Premium ~$10/mo', 'Premium ~$10/mo', 'Free' ] },
+    ],
+  },
+  mistakes: [
+    { title: 'Mixing citation styles in one paper', body: 'Half APA, half MLA. The single biggest red flag a professor sees. Pick one style at the start of the paper and use only that style — including for in-text citations.' },
+    { title: 'Forgetting the access date for online sources', body: 'MLA 9, Chicago, and Harvard all require an access date for websites. APA 7 only requires it for content that may change (e.g. Wikipedia). When in doubt, include it.' },
+    { title: 'Using a publisher logo or URL as the author', body: 'When a website has no listed author, the corporate or organization name becomes the author ("World Health Organization", not "WHO logo" or "https://who.int"). Move the title to author position only if there\'s no organization either.' },
+    { title: 'Italicizing the wrong part', body: 'In APA and MLA, journal article titles are NOT italicized — only the journal name is. Book titles ARE italicized. Confusing the two is the most common formatting error.' },
+    { title: 'Using "Anonymous" as the author', body: 'Most styles say to use "Anonymous" only if the source explicitly identifies the author that way. Otherwise, treat the source as having no author and start with the title.' },
+    { title: 'Misplacing the period in in-text citations', body: 'APA: (Smith, 2023). Period AFTER the closing parenthesis. The period goes inside the parenthesis only when the citation introduces a block quote.' },
+    { title: 'Forgetting "et al." rules differ by style', body: 'APA 7: use "et al." for 3+ authors from the first citation. MLA 9: use "et al." for 3+ authors. Chicago: spell out up to 10 authors in the bibliography. Always check the latest edition rules.' },
+  ],
+  examples: [
+    { label: 'APA 7 — book citation', before: 'Smith, John. The Art of Writing. New York: Penguin Books, 2020.', after: 'Smith, J. (2020). The art of writing. Penguin Books.', explanation: 'APA 7: initial only for first name; year in parentheses; only first word of title (and proper nouns) capitalized; no city for US publishers; title italicized; no publisher city.' },
+    { label: 'MLA 9 — journal article', before: 'Jones, M. (2021). Climate adaptation in coastal cities. Environmental Studies, 12(4), 45-60.', after: 'Jones, Maria. "Climate Adaptation in Coastal Cities." Environmental Studies, vol. 12, no. 4, 2021, pp. 45-60.', explanation: 'MLA: full first name; title in quotation marks (not italicized); journal name italicized; "vol." and "no." spelled out; "pp." prefix on page range.' },
+    { label: 'Citing a website with no author', before: 'No author. (2023). The benefits of meditation. https://example.com/meditation', after: 'World Health Organization. (2023). The benefits of meditation. https://example.com/meditation', explanation: 'When no individual author is named, use the organization or corporate author. If no organization either, move the title to the author position.' },
+  ],
+  tips: [
+    { title: 'Build your bibliography as you research', body: 'Add each source to your generator the moment you cite it in the draft. Don\'t leave it for the night before — that\'s when 3am formatting errors happen.' },
+    { title: 'Cross-check the official style manual for edge cases', body: 'For unusual sources (legal documents, archival manuscripts, social media posts), the generator may format conservatively. Cross-check with your style\'s official manual.' },
+    { title: 'Use DOI links over URLs when available', body: 'DOI links are permanent; URLs can break. APA 7 prefers DOI as the URL format ("https://doi.org/10.xxx") over the publisher\'s site URL.' },
+    { title: 'Double-check your reference list alphabetization', body: 'APA, MLA, and Chicago all require alphabetical order by first author\'s last name. The generator outputs each citation correctly but doesn\'t auto-sort the list — paste into Word and sort A-Z.' },
+    { title: 'Match in-text citations to your reference list', body: 'Every reference in your list MUST appear in the body text and vice versa. Missing citations or unused references are deductions in most rubrics.' },
+    { title: 'Consistency > perfection', body: 'A paper with 95% correct APA throughout reads better than one with 100% correct APA in some places and accidental MLA in others.' },
+  ],
+  glossary: [
+    { term: 'In-text citation', definition: 'Brief citation in the body text pointing to the full source in your reference list. APA: (Smith, 2023). MLA: (Smith 42).' },
+    { term: 'Reference list', definition: 'Full source list at the end of the paper. APA calls it "References", MLA calls it "Works Cited", Chicago calls it "Bibliography".' },
+    { term: 'DOI (Digital Object Identifier)', definition: 'Permanent identifier for academic publications. Format: 10.xxxx/yyyy. Always preferred over a URL when available.' },
+    { term: 'Hanging indent', definition: 'Reference list formatting where the first line is flush left and subsequent lines are indented 0.5". Required by APA, MLA, and Chicago.' },
+    { term: '"et al."', definition: 'Latin for "and others". Used in citations with 3+ authors. APA 7: from first citation. MLA: from first citation. Always italicized in some styles.' },
+    { term: 'Title case vs sentence case', definition: 'APA reference titles use sentence case (only first word + proper nouns capitalized). MLA uses title case (most words capitalized). Common mistake for new researchers.' },
+    { term: 'Citation style guide', definition: 'Official manual defining the formatting rules. APA: Publication Manual (7th ed.). MLA: MLA Handbook (9th ed.). Chicago: Chicago Manual of Style.' },
+    { term: 'Plagiarism', definition: 'Using someone else\'s ideas without attribution. Proper citations prevent it. Patchwriting (paraphrasing too closely) still counts as plagiarism.' },
+  ],
 };
 
 /* ─── GRAMMAR CHECKER ───────────────────────────────────────────── */
@@ -161,6 +250,56 @@ export const grammarCheckerSeo: ToolSeoConfig = {
   closing:
     'Grammar errors are the cheapest marks to lose. They have nothing to do with the quality of your argument or research — and yet a paper riddled with them reads as careless and gets graded down accordingly. A two-minute pass through a grammar checker before submitting solves 90% of the issue.',
   accent: '#58CC02',
+  comparison: {
+    heading: 'WriteScholar Grammar Checker vs the alternatives',
+    intro: 'Grammar tools all do similar surface-level checks. Differences appear at depth and pricing.',
+    columns: ['Feature', 'WriteScholar', 'Grammarly Free', 'Grammarly Premium', 'Hemingway'],
+    rows: [
+      { feature: 'Spelling + punctuation', values: ['Yes', 'Yes', 'Yes', 'Limited'] },
+      { feature: 'Style suggestions', values: ['Yes', 'Limited', 'Yes', 'Yes (different focus)'] },
+      { feature: 'Vocabulary diversity check', values: ['Yes (paraphrasing tool)', 'Premium only', 'Yes', 'No'] },
+      { feature: 'Plagiarism detection', values: ['No (use Turnitin)', 'No', 'Yes', 'No'] },
+      { feature: 'Tone analysis', values: ['Coming', 'No', 'Yes', 'No'] },
+      { feature: 'Browser extension', values: ['Coming', 'Yes', 'Yes', 'No'] },
+      { feature: 'Sign-up required', values: ['No', 'Yes', 'Yes', 'No'] },
+      { feature: 'Cost', values: ['Free', 'Free', '~$30/mo', 'Free / $20 desktop'] },
+    ],
+  },
+  mistakes: [
+    { title: 'Subject-verb disagreement', body: 'The number of cars are increasing → The number of cars IS increasing. "Number" is singular even when the noun after it is plural. Same with "amount", "team", "group", "majority".' },
+    { title: 'Comma splice', body: 'I went to the library, I forgot my book. Two independent clauses joined only by a comma. Fix: use a period, semicolon, or coordinating conjunction (and, but, so).' },
+    { title: 'Their / there / they\'re confusion', body: '"Their" = possessive. "There" = location. "They\'re" = they are. The grammar checker catches obvious cases but won\'t flag every misuse if the grammar is otherwise valid.' },
+    { title: 'Apostrophe misuse', body: '"It\'s" = it is. "Its" = possessive (no apostrophe). Plural nouns NEVER take apostrophes ("the 1990s", not "the 1990\'s"). Apostrophe-s indicates ownership or contraction, not a plural.' },
+    { title: 'Run-on sentences', body: 'A sentence that joins multiple complete thoughts without punctuation. "I love writing it\'s my passion." Fix with a period, semicolon, or conjunction. Run-ons are the most common readability killer in student essays.' },
+    { title: 'Misplaced modifier', body: '"Walking down the street, the building looked tall." Did the building walk? No. Fix: "Walking down the street, I saw the tall building." The modifier should sit next to the noun it describes.' },
+    { title: 'Capitalization slip-ups', body: 'i.e. → not capitalized after a period. e.g. → same. Months and days ARE capitalized. Seasons (spring, summer) are NOT. Compass directions are NOT (north) unless used as a region (the North).' },
+  ],
+  examples: [
+    { label: 'Comma splice fix', before: 'The experiment failed, the results were inconclusive.', after: 'The experiment failed; the results were inconclusive.', explanation: 'Two independent clauses need a semicolon, period, or coordinating conjunction (and/but/so) — not just a comma.' },
+    { label: 'Subject-verb agreement', before: 'The list of recommendations have been finalised.', after: 'The list of recommendations has been finalised.', explanation: '"List" is the subject (singular), not "recommendations". The verb agrees with the head noun, not the noun closest to the verb.' },
+    { label: 'Active vs passive voice', before: 'The data was analysed by the research team.', after: 'The research team analysed the data.', explanation: 'Active voice puts the actor first ("The research team"). Cleaner, more direct, easier to read. Use passive only when the actor is unknown or unimportant.' },
+    { label: 'Vague pronoun reference', before: 'The CEO told the manager that he should resign.', after: 'The CEO told the manager that the manager should resign.', explanation: '"He" is ambiguous — does it refer to the CEO or the manager? Replace pronouns with proper nouns when there\'s any chance of confusion.' },
+  ],
+  tips: [
+    { title: 'Read your work aloud', body: 'Reading aloud catches what your eye skips. Run-ons, awkward phrasing, missing words — all easier to hear than to see.' },
+    { title: 'Fix issues in passes, not all at once', body: 'First pass: spelling. Second pass: punctuation. Third pass: style. Trying to fix everything at once is how you miss things.' },
+    { title: 'Don\'t accept every suggestion', body: 'Grammar tools are rule-based. They flag violations even when your intentional choice is better. Trust your ear over the tool when you have a reason.' },
+    { title: 'Save the grammar pass for last', body: 'Polishing grammar before you\'ve finished editing for content is wasted work. Get the argument right first; check spelling and punctuation last.' },
+    { title: 'Use the readability score for sentence length', body: 'If your readability score is 14+, you\'re writing in too-long sentences. Pair the grammar checker with our readability tool for the full clarity check.' },
+    { title: 'Keep British vs American consistent', body: 'Don\'t mix "colour" with "favorize". Pick US or UK English at the start and stick with it. The grammar checker accepts both but doesn\'t flag mixing.' },
+  ],
+  glossary: [
+    { term: 'Independent clause', definition: 'A clause that can stand alone as a sentence. Has a subject and a verb. "She studies." is an independent clause.' },
+    { term: 'Dependent clause', definition: 'A clause that can\'t stand alone — needs an independent clause to complete the meaning. "Because she studies..." is a dependent clause.' },
+    { term: 'Comma splice', definition: 'Two independent clauses joined only by a comma. Always an error in formal writing. Fix with a period, semicolon, or conjunction.' },
+    { term: 'Run-on sentence', definition: 'Two or more independent clauses with no punctuation or conjunction between them. "She studies he doesn\'t." is a run-on.' },
+    { term: 'Modifier', definition: 'A word or phrase that describes another word. "Quickly" is a modifier of "ran" in "She quickly ran".' },
+    { term: 'Dangling modifier', definition: 'A modifier with no clear word to modify. "Walking home, the rain started." (Who was walking? The rain didn\'t.)' },
+    { term: 'Active voice', definition: 'Subject performs the verb action. "She wrote the essay."' },
+    { term: 'Passive voice', definition: 'Subject receives the verb action. "The essay was written by her." Generally weaker; use sparingly.' },
+    { term: 'Conjunction', definition: 'Word that joins clauses. Coordinating: and, but, or, so, yet, for, nor (FANBOYS). Subordinating: because, although, while, since.' },
+    { term: 'Apostrophe', definition: 'Punctuation mark. Indicates possession ("Sarah\'s book") or contraction ("don\'t" = "do not"). NOT used for plurals.' },
+  ],
 };
 
 /* ─── READABILITY SCORE ─────────────────────────────────────────── */
@@ -195,6 +334,25 @@ export const readabilitySeo: ToolSeoConfig = {
   ],
   related: [TOOL_LINKS.wordCounter, TOOL_LINKS.grammarChecker, TOOL_LINKS.paraphrase, TOOL_LINKS.thesisGen, TOOL_LINKS.outline, TOOL_LINKS.analyze],
   accent: '#FF9600',
+  mistakes: [
+    { title: 'Targeting one specific score', body: 'Different formulas weight things differently. A passage can hit Flesch-Kincaid grade 8 but Gunning Fog grade 11 because they prioritize different features. Look at the average, not one number.' },
+    { title: 'Lowering grade level by chopping random words', body: 'Cutting filler is good. Cutting precision to lower a number is bad. "Cardiopulmonary resuscitation" might raise your grade level — but "CPR" is fine if your audience knows the term.' },
+    { title: 'Ignoring sentence length', body: 'Average words per sentence is the single biggest readability factor. Bringing it from 25 to 15 typically drops your grade level by 2-3.' },
+    { title: 'Using readability for fiction', body: 'Readability scores are for non-fiction. Fiction breaks rules deliberately — Cormac McCarthy reads at college level by formula but is gripping. Don\'t score literary writing.' },
+    { title: 'Forgetting your audience', body: 'Grade 6 for a peer-reviewed journal is too dumbed-down. Grade 14 for a kids\' science magazine is too complex. Match the score to who\'s actually reading.' },
+  ],
+  examples: [
+    { label: 'Lowering grade level via sentence splitting', before: 'The committee recommended that all participating institutions submit comprehensive documentation regarding their compliance with federal accessibility standards by the end of the second quarter.', after: 'The committee made a recommendation. All institutions must submit accessibility documentation by Q2.', explanation: '34 words → 16 words across 2 sentences. Grade level drops from ~17 to ~10. Same information, dramatically more readable.' },
+    { label: 'Replacing complex words', before: 'The methodology utilized in the experiment necessitated extensive preliminary calibration.', after: 'The method needed careful prep work first.', explanation: '"Utilized" → "used"; "necessitated" → "needed"; "extensive preliminary calibration" → "careful prep work first". Drops average syllables per word and grade level.' },
+  ],
+  glossary: [
+    { term: 'Flesch-Kincaid Grade Level', definition: 'Most-cited readability formula. Outputs a US grade level (e.g. 9.5 = end of 9th grade). Heavily weights average sentence length.' },
+    { term: 'Flesch Reading Ease', definition: '0-100 score where higher = easier. 90-100: very easy. 60-70: plain English. Below 30: graduate-level. Inverse direction from grade level.' },
+    { term: 'Gunning Fog Index', definition: 'Years of formal education needed to understand text on first read. Weights complex (3+ syllable) words heavily.' },
+    { term: 'SMOG Index', definition: '"Simple Measure Of Gobbledygook". Standard for health communications. Counts polysyllabic words in 30-sentence sample.' },
+    { term: 'Coleman-Liau Index', definition: 'Uses character count (not syllables) to estimate grade level. Useful for computer text analysis.' },
+    { term: 'Plain Language', definition: 'Writing that\'s clear and direct. Plain Writing Act of 2010 (US) requires federal agencies to write public materials at grade 8 or below.' },
+  ],
 };
 
 /* ─── THESIS GENERATOR ──────────────────────────────────────────── */
@@ -230,6 +388,27 @@ export const thesisGenSeo: ToolSeoConfig = {
   related: [TOOL_LINKS.outline, TOOL_LINKS.analyze, TOOL_LINKS.grammarChecker, TOOL_LINKS.paraphrase, TOOL_LINKS.citationGenerator, TOOL_LINKS.summarizer],
   closing:
     'The thesis is the single most important sentence in your essay — it\'s the thing your reader uses to decide whether the rest is worth reading. Spending 15 minutes here before drafting saves hours of rewriting later.',
+  mistakes: [
+    { title: 'Writing a thesis that\'s a fact', body: '"Climate change is real" — not a thesis. Nobody reasonable disagrees. A thesis must take a position SOMEONE could disagree with.' },
+    { title: 'Writing a thesis that\'s too broad', body: '"Technology has changed society" — what technology? what change? Narrow it: "Smartphone notifications have measurably reduced college students\' deep-work capacity."' },
+    { title: 'Writing a thesis as a question', body: '"Is climate change reversible?" — the thesis is the ANSWER, not the question. State your position: "Climate change is partially reversible through aggressive carbon capture."' },
+    { title: 'Writing 3 theses in one', body: 'A thesis with 3 distinct claims becomes 3 essays. Pick the strongest claim and ditch the others.' },
+    { title: 'Putting the thesis in the conclusion', body: 'Thesis goes in the introduction (last sentence), so the reader knows what to track in the body. Conclusion RESTATES the thesis, not introduces it.' },
+  ],
+  examples: [
+    { label: 'Weak → strong (argumentative)', before: 'Social media is bad for teenagers.', after: 'Federal regulation of algorithmic content recommendations would reduce teen anxiety more effectively than age-verification laws because algorithms drive engagement-maximization, not well-being.', explanation: 'Specific (federal regulation), debatable (vs age verification), supported (because clause). All three thesis criteria met.' },
+    { label: 'Weak → strong (analytical)', before: 'Toni Morrison\'s Beloved is about slavery.', after: 'Morrison\'s use of second-person narration in Beloved forces the reader into Sethe\'s memory loops, making the trauma of slavery experiential rather than historical.', explanation: 'Specific technique (second-person), specific effect (memory loops, experiential trauma), debatable claim a critic could push back on.' },
+    { label: 'Weak → strong (compare-contrast)', before: 'Both novels critique consumer culture.', after: 'While Fight Club uses spectacle and violence to critique consumer culture, American Psycho uses psychological horror — and the latter is more effective because it implicates the reader, not just the protagonist.', explanation: 'Compares both works, names the criterion (mode of critique), and stakes a claim (latter is more effective).' },
+  ],
+  glossary: [
+    { term: 'Thesis statement', definition: 'A 1-2 sentence claim that states the central argument of your essay. Always at the end of the introduction.' },
+    { term: 'Argumentative thesis', definition: 'Takes a debatable position. "X should/should not Y because Z." Used in argumentative and persuasive essays.' },
+    { term: 'Analytical thesis', definition: 'Makes an interpretive claim about a text or concept. "Author X uses technique Y to achieve effect Z."' },
+    { term: 'Working thesis', definition: 'A draft thesis you write before drafting the essay. Often gets refined as the essay reveals what your real argument is.' },
+    { term: 'Hypothesis', definition: 'A testable prediction in research papers. Same role as a thesis but framed as a question awaiting evidence.' },
+    { term: 'Topic sentence', definition: 'First sentence of a body paragraph. Connects back to the thesis and previews what the paragraph will argue.' },
+    { term: 'Three-part thesis', definition: 'Older 5-paragraph-essay style: claim + 3 reasons in one sentence. Now considered restrictive — most modern thesis statements are leaner.' },
+  ],
 };
 
 /* ─── ESSAY OUTLINE GENERATOR ───────────────────────────────────── */
@@ -264,6 +443,26 @@ export const essayOutlineSeo: ToolSeoConfig = {
   ],
   related: [TOOL_LINKS.thesisGen, TOOL_LINKS.analyze, TOOL_LINKS.grammarChecker, TOOL_LINKS.citationGenerator, TOOL_LINKS.wordCounter, TOOL_LINKS.summarizer],
   accent: '#1CB0F6',
+  mistakes: [
+    { title: 'Outlining at the wrong altitude', body: 'A 50-bullet outline is a draft, not an outline. Aim for high-level structure (intro → 3 body sections → conclusion), then expand only on the body sections.' },
+    { title: 'Writing the introduction first', body: 'Most pros write the intro LAST. The body reveals what you actually argued; the intro should preview that. Outline the body, then frame the intro.' },
+    { title: 'Forgetting the "so what"', body: 'Every essay needs a "so what" answer. Why does this matter? The conclusion should land on it. If your outline doesn\'t have that ending, you\'re missing the point of the essay.' },
+    { title: 'Single-source body paragraphs', body: 'A strong body paragraph weaves 2-3 sources together. If your outline shows one paragraph = one source, you\'re writing summary, not analysis.' },
+    { title: 'Skipping transitions', body: 'Each body paragraph should end with a sentence pointing toward the next. Not "Furthermore..." — specific transitions that build the argument.' },
+  ],
+  examples: [
+    { label: 'Argumentative essay outline', before: 'Title: Why college should be free', after: 'I. Intro (hook → context → thesis: free college pays back via earnings tax)\nII. Body 1: Cost (evidence on tuition trends)\nIII. Body 2: Earnings (evidence on degree premium)\nIV. Body 3: Counterargument (rebut "moral hazard")\nV. Conclusion (so-what: societal ROI)', explanation: 'Skeleton outline shows 5 sections, each with a clear function. Filling in becomes much easier because you know what each section is for.' },
+    { label: 'Compare-contrast: block vs point-by-point', before: 'Topic: 1984 vs Brave New World', after: 'POINT-BY-POINT (better for short essays):\nI. Intro\nII. Theme of control: 1984 vs BNW\nIII. Theme of pleasure: 1984 vs BNW\nIV. Theme of language: 1984 vs BNW\nV. Conclusion', explanation: 'Block format covers all of A, then all of B (better for long essays). Point-by-point alternates by criterion (better for short, focused essays).' },
+  ],
+  glossary: [
+    { term: 'Outline', definition: 'Hierarchical sketch of an essay\'s structure before drafting. Shows the order of ideas and their relationships.' },
+    { term: 'Hook', definition: 'Opening sentence designed to grab the reader. Anecdote, question, statistic, or provocative claim.' },
+    { term: 'Topic sentence', definition: 'First sentence of each body paragraph. Names the paragraph\'s claim and ties to the thesis.' },
+    { term: 'Transition', definition: 'Sentence or phrase that connects paragraphs. Carries the reader from one idea to the next without disorientation.' },
+    { term: 'Block format', definition: 'Compare-contrast structure: discuss all of A, then all of B. Better for longer essays where holding distinctions in mind is harder.' },
+    { term: 'Point-by-point format', definition: 'Compare-contrast structure: alternate between A and B for each criterion. Better for shorter, focused essays.' },
+    { term: 'Five-paragraph essay', definition: 'Intro, three body, conclusion. Standard high-school structure. Limited in college; useful as a starting frame.' },
+  ],
 };
 
 /* ─── TEXT CASE CONVERTER ───────────────────────────────────────── */
@@ -296,6 +495,22 @@ export const textCaseSeo: ToolSeoConfig = {
     { question: 'Why is my "Title Case" output different from Microsoft Word\'s?', answer: 'Word follows the AP Stylebook by default. We follow the Chicago Manual of Style. Both are valid English title-case standards, but they differ on a handful of edge words ("Up" vs "up", "If" vs "if").' },
   ],
   related: [TOOL_LINKS.wordCounter, TOOL_LINKS.grammarChecker, TOOL_LINKS.readability, TOOL_LINKS.outline, TOOL_LINKS.thesisGen, TOOL_LINKS.paraphrase],
+  examples: [
+    { label: 'UPPERCASE for code constants', before: 'maxRetryCount, apiBaseUrl, defaultTimeout', after: 'MAX_RETRY_COUNT, API_BASE_URL, DEFAULT_TIMEOUT', explanation: 'Most languages use UPPER_SNAKE_CASE for constants. Convert variable names by replacing camelCase with words separated by underscores, then uppercase the lot.' },
+    { label: 'Title Case for headlines', before: 'a journey through the mountains of nepal', after: 'A Journey Through the Mountains of Nepal', explanation: 'Title case capitalizes most words but keeps articles ("the"), conjunctions ("and"), and short prepositions ("of") lowercase — except when they\'re the first or last word.' },
+    { label: 'Sentence case for paper titles (APA)', before: 'The Effect of Caffeine on Working Memory in College Students', after: 'The effect of caffeine on working memory in college students', explanation: 'APA reference list titles use sentence case. Only the first word, proper nouns, and the first word after a colon are capitalized.' },
+  ],
+  glossary: [
+    { term: 'UPPERCASE', definition: 'All letters capitalized. Used for emphasis, code constants, and acronyms. AKA "all caps".' },
+    { term: 'lowercase', definition: 'No capital letters. Default for body text in most contexts. Sometimes called "smallcaps" though that\'s technically a different concept.' },
+    { term: 'Title Case', definition: 'Most words capitalized, except articles (the, a), conjunctions (and, but), and short prepositions (of, in). Used for English headlines and book titles.' },
+    { term: 'Sentence case', definition: 'Only the first letter of each sentence and proper nouns capitalized. Used for body text and APA reference titles.' },
+    { term: 'camelCase', definition: 'firstWordLowercase, subsequentWordsCapitalized. Used in JavaScript, Java, Swift for variable and function names.' },
+    { term: 'PascalCase', definition: 'EveryWordCapitalized, no spaces. Used for class names in most programming languages. AKA UpperCamelCase.' },
+    { term: 'snake_case', definition: 'words_separated_by_underscores. Used in Python and Ruby for variable and function names.' },
+    { term: 'kebab-case', definition: 'words-separated-by-dashes. Used in URLs, CSS class names, and HTML attributes.' },
+    { term: 'CONSTANT_CASE', definition: 'UPPER_SNAKE_CASE — UPPERCASE words separated by underscores. Used for constants in most programming languages.' },
+  ],
 };
 
 /* ─── PARAPHRASING TIPS ─────────────────────────────────────────── */
@@ -330,6 +545,50 @@ export const paraphraseSeo: ToolSeoConfig = {
   ],
   related: [TOOL_LINKS.grammarChecker, TOOL_LINKS.readability, TOOL_LINKS.thesisGen, TOOL_LINKS.outline, TOOL_LINKS.analyze, TOOL_LINKS.summarizer],
   accent: '#FF9600',
+  comparison: {
+    heading: 'WriteScholar vs AI paraphrasing tools',
+    intro: 'Paraphrasing tools split into two camps: ones that rewrite for you (Quillbot, Wordtune) and ones that teach you to rewrite (us). Each has its place.',
+    columns: ['Feature', 'WriteScholar', 'Quillbot Free', 'Wordtune', 'Manual rewrite'],
+    rows: [
+      { feature: 'AI rewrites text for you', values: ['No — analysis only', 'Yes', 'Yes', 'No'] },
+      { feature: 'Plagiarism risk', values: ['Lowest (you write)', 'Medium (close paraphrasing)', 'Medium', 'Lowest'] },
+      { feature: 'Detects passive voice', values: ['Yes', 'Indirectly', 'No', 'Manual'] },
+      { feature: 'Identifies overused words', values: ['Yes', 'No', 'No', 'Manual'] },
+      { feature: 'Vocabulary diversity score', values: ['Yes', 'No', 'No', 'Manual'] },
+      { feature: 'Skill-building (learn from it)', values: ['Yes', 'Limited', 'Limited', 'Yes' ] },
+      { feature: 'Sign-up required', values: ['No', 'No (limited)', 'Yes', '—'] },
+    ],
+  },
+  mistakes: [
+    { title: 'Just swapping synonyms', body: '"He utilized the methodology" → "He used the method" is fine. But "He thoroughly investigated the matter" → "He completely scrutinized the issue" is patchwriting — same structure, just different words. Plagiarism detectors flag it.' },
+    { title: 'Paraphrasing without citing', body: 'Even a fully reworded paraphrase needs a citation. The IDEA isn\'t yours; the wording is. No citation = plagiarism.' },
+    { title: 'Over-paraphrasing strong original phrases', body: 'If the source has a uniquely apt phrase ("the banality of evil"), quote it. Paraphrasing diminishes it. Direct quote + citation is better than weakened paraphrase.' },
+    { title: 'Eliminating ALL passive voice', body: 'Passive is correct when the actor is unknown ("Bridges were built in the 1920s") or unimportant. Don\'t kill all passive — kill unnecessary passive.' },
+    { title: 'Using a thesaurus blindly', body: '"Big" and "enormous" are both synonyms for "large", but they have different connotations. A thesaurus replacement that ignores connotation usually reads worse, not better.' },
+  ],
+  examples: [
+    { label: 'Cutting wordiness', before: 'In view of the fact that the experiment was conducted under controlled conditions, the results can, in some sense, be considered reliable.', after: 'Because the experiment was controlled, the results are reliable.', explanation: '21 words → 9 words. Same meaning. "In view of the fact that" → "Because"; "in some sense, be considered" deleted as filler.' },
+    { label: 'Removing weak verbs', before: 'The author makes the argument that climate change has an impact on agriculture.', after: 'The author argues that climate change affects agriculture.', explanation: '"Makes the argument" → "argues". "Has an impact on" → "affects". Strong verbs replace weak verb + noun phrases.' },
+    { label: 'Active voice rewrite', before: 'The hypothesis was confirmed by the experiment.', after: 'The experiment confirmed the hypothesis.', explanation: 'Subject and object swap; passive verb becomes active. Tighter, more direct, easier to read.' },
+    { label: 'Real paraphrasing (not patchwriting)', before: 'Original: "Climate change is causing rising sea levels, which threaten coastal cities."', after: 'Paraphrase: "Coastal cities face flooding risks as global warming melts polar ice (Author, 2023)."', explanation: 'The structure, vocabulary, and emphasis all differ — but the meaning is preserved and the source is cited. That\'s genuine paraphrasing.' },
+  ],
+  tips: [
+    { title: 'Read, close, write', body: 'Read the source paragraph. CLOSE THE TAB. Write what you understood in your own words. Then add the citation. Never paraphrase with the source open in front of you.' },
+    { title: 'Aim for 50%+ vocabulary diversity', body: 'Use the analyzer\'s diversity score. Below 30% = repetitive (you keep using the same words). Above 50% = varied. Academic writing should target 50-65%.' },
+    { title: 'Replace 1 weak verb per paragraph', body: 'Even one substitution per paragraph ("makes a decision" → "decides") tightens the writing without overhauling it. Cumulatively, dramatic.' },
+    { title: 'Read aloud to spot wordiness', body: 'If you can\'t finish a sentence in one breath, it\'s probably too long. Wordiness reveals itself when spoken.' },
+    { title: 'Cite ideas, quote phrasings', body: 'If the original wording is genuinely unique, quote it directly with citation. Trying to paraphrase a brilliant phrase usually weakens it.' },
+  ],
+  glossary: [
+    { term: 'Paraphrasing', definition: 'Restating someone else\'s ideas in your own words and structure, while citing the source. The meaning is preserved; the language is yours.' },
+    { term: 'Patchwriting', definition: 'Replacing a few words with synonyms but keeping the original structure. Considered a form of plagiarism by most universities.' },
+    { term: 'Direct quote', definition: 'Verbatim words from a source, in quotation marks, with citation. Used when the exact wording matters.' },
+    { term: 'Passive voice', definition: 'Sentence structure where the subject receives the action. "The cake was eaten by John." Compare to active: "John ate the cake."' },
+    { term: 'Active voice', definition: 'Sentence structure where the subject performs the action. Generally clearer and more direct than passive.' },
+    { term: 'Hedge / hedging language', definition: 'Words that soften claims: "may", "might", "could", "tends to". Useful in academic writing but overused dilutes your argument.' },
+    { term: 'Cliché', definition: 'An overused phrase that\'s lost its meaning ("at the end of the day", "thinking outside the box"). Replace with specific, original phrasing.' },
+    { term: 'Vocabulary diversity', definition: 'The ratio of unique words to total words in a passage. A measure of how varied your word choice is.' },
+  ],
 };
 
 /* ─── GPA CALCULATOR ────────────────────────────────────────────── */
@@ -364,6 +623,52 @@ export const gpaSeo: ToolSeoConfig = {
   ],
   related: [TOOL_LINKS.calc, TOOL_LINKS.conv, TOOL_LINKS.pomodoro, TOOL_LINKS.outline, TOOL_LINKS.analyze, TOOL_LINKS.thesisGen],
   accent: '#58CC02',
+  comparison: {
+    heading: 'GPA grading scales by region',
+    intro: 'GPA isn\'t universal. Here\'s how the same student\'s performance translates across the most common systems.',
+    columns: ['Letter / Tier', 'US 4.0', 'US %', 'UK', 'India %', 'Australia'],
+    rows: [
+      { feature: 'A / A+', values: ['4.0', '93-100', 'First (1st)', '90-100', 'HD'] },
+      { feature: 'A-', values: ['3.7', '90-92', 'First (1st)', '85-89', 'HD'] },
+      { feature: 'B+', values: ['3.3', '87-89', 'Upper Second (2:1)', '75-84', 'D'] },
+      { feature: 'B', values: ['3.0', '83-86', 'Upper Second (2:1)', '65-74', 'D'] },
+      { feature: 'B-', values: ['2.7', '80-82', 'Lower Second (2:2)', '60-64', 'C'] },
+      { feature: 'C+', values: ['2.3', '77-79', 'Lower Second (2:2)', '55-59', 'C'] },
+      { feature: 'C', values: ['2.0', '73-76', 'Third (3rd)', '50-54', 'P'] },
+      { feature: 'D / Pass', values: ['1.0', '60-66', 'Pass / Ord.', '40-49', 'P (cond.)'] },
+      { feature: 'F', values: ['0.0', '<60', 'Fail', '<40', 'F'] },
+    ],
+  },
+  mistakes: [
+    { title: 'Forgetting to weight by credit hours', body: '4 credits of an A and 1 credit of a C is NOT a B. Weight matters: (4×4.0 + 1×2.0) / 5 = 3.6, not 3.0. Most calculators do this automatically; some students miscalculate by hand.' },
+    { title: 'Using high school weighted GPA on college apps', body: 'Most colleges recalculate using their own scale (often unweighted). Reporting "5.0 weighted" doesn\'t impress them — they want the unweighted equivalent (typically 4.0).' },
+    { title: 'Including pass/fail courses', body: 'Pass/fail courses don\'t count toward GPA at most schools. A "Pass" doesn\'t add or subtract grade points. Set the credit to 0 in the calculator or omit the course.' },
+    { title: 'Treating retakes wrong', body: 'Some schools replace the original grade; some average both. Check your registrar\'s policy. The calculator shows the math — but you have to apply your school\'s rule.' },
+    { title: 'Confusing semester and cumulative GPA', body: 'Semester GPA = this term only. Cumulative GPA = all terms combined. Many students celebrate a 4.0 semester without realizing their cumulative is still 3.4.' },
+    { title: 'Ignoring grade-grub potential', body: 'A 79.4% might round up to 80% (B-) at one school, stay 79% (C+) at another. Always check before assuming you know your final GPA.' },
+  ],
+  examples: [
+    { label: 'Single-semester GPA calculation', before: '5 courses: A (4cr), B+ (3cr), B (4cr), A- (3cr), C+ (1cr)', after: 'Total: (4.0×4) + (3.3×3) + (3.0×4) + (3.7×3) + (2.3×1) = 16 + 9.9 + 12 + 11.1 + 2.3 = 51.3 / 15 credits = 3.42 GPA', explanation: 'Multiply each grade point by credit hours, sum, divide by total credits. NOT a simple average of grade points.' },
+    { label: 'Calculating what you need on the final', before: 'Current grade in class: 78% (going into final worth 30%)', after: 'For an A (90%): need 100% on the final. For a B (80%): need 84.7% on the final. For a B- (78%): need 78% (no change).', explanation: 'New grade = (current grade × current weight) + (final score × final weight). Solve for final score given target.' },
+    { label: 'Cumulative GPA across semesters', before: 'Sem 1: 3.6 GPA over 15 credits. Sem 2: 3.2 GPA over 18 credits.', after: 'Cumulative: (3.6×15 + 3.2×18) / (15+18) = (54 + 57.6) / 33 = 3.38', explanation: 'Cumulative GPA = sum of (semester GPA × credits) ÷ total credits. NOT the average of semester GPAs.' },
+  ],
+  tips: [
+    { title: 'Aim for 0.1 above the threshold', body: 'Honors at 3.5 means submit at 3.6, not 3.5 exactly. Buffer protects you if a grade is recalculated downward.' },
+    { title: 'Front-load hard courses', body: 'A "C" in calc as a freshman hurts less than a "C" senior year for the same reason: it averages over more credits in cumulative GPA. Take the hard ones early when bad grades cost less proportionally.' },
+    { title: 'Use the predictor for finals week', body: 'Plug in your current grades to see your projected GPA. Tells you whether retention or graduation honors is at risk before grades are locked in.' },
+    { title: 'Track over time, not per assignment', body: 'A bad single test grade panics most students. Plug everything in to see the actual semester impact — usually less than feared.' },
+    { title: 'Consider grade replacement carefully', body: 'Some schools allow re-taking a course to replace the original grade. The "replaced" course still appears on the transcript with both grades — only the higher one counts toward GPA. Worth using on a C, less so on a B.' },
+  ],
+  glossary: [
+    { term: 'Grade Point Average (GPA)', definition: 'Numerical average of grade points (A=4.0, B=3.0, etc.) weighted by credit hours. Standard US measure of academic performance.' },
+    { term: 'Cumulative GPA', definition: 'GPA across all completed semesters. The number that appears on your transcript and what most employers/grad schools care about.' },
+    { term: 'Semester GPA', definition: 'GPA for a single term only. Used for honors lists, scholarship eligibility, and progress tracking.' },
+    { term: 'Weighted GPA', definition: 'High school GPA where AP/honors courses get +0.5 or +1.0 grade points. Maximum is 5.0 (or higher). Used for class ranking.' },
+    { term: 'Unweighted GPA', definition: 'GPA on a flat 4.0 scale regardless of course difficulty. Used by most colleges in admissions recalculation.' },
+    { term: 'Credit hour', definition: 'Unit of academic work. Typical college course = 3 credit hours = 3 hours/week of class for one semester.' },
+    { term: 'Honors GPA', definition: 'Threshold for academic honors at most colleges. Cum laude usually 3.5, magna cum laude 3.7, summa cum laude 3.9 — but exact thresholds vary.' },
+    { term: 'Last 60 GPA', definition: 'GPA across your most recent 60 credit hours. Used by many grad schools because it shows current performance, not freshman struggle.' },
+  ],
 };
 
 /* ─── POMODORO TIMER ────────────────────────────────────────────── */
@@ -398,6 +703,49 @@ export const pomodoroSeo: ToolSeoConfig = {
     { question: 'Can I use it for non-study work?', answer: 'Yes — Pomodoros work for any focused single-tasking work: writing, coding, reading, design, music practice. Less useful for collaborative or meeting-heavy work.' },
   ],
   related: [TOOL_LINKS.gpa, TOOL_LINKS.calc, TOOL_LINKS.outline, TOOL_LINKS.thesisGen, TOOL_LINKS.summarizer, TOOL_LINKS.flashcards],
+  comparison: {
+    heading: 'Pomodoro variations — pick what fits your brain',
+    intro: 'The classic 25/5 isn\'t the only Pomodoro split. Different tasks and different brains benefit from different intervals.',
+    columns: ['Variant', 'Focus', 'Short Break', 'Long Break', 'Best for'],
+    rows: [
+      { feature: 'Classic Pomodoro', values: ['25 min', '5 min', '15-30 min', 'General studying'] },
+      { feature: 'Deep Work', values: ['50 min', '10 min', '30 min', 'Coding, writing, research'] },
+      { feature: 'Ultradian Rhythm', values: ['90 min', '20 min', '—', 'Single-task creative work'] },
+      { feature: 'ADHD-friendly', values: ['15 min', '3 min', '15 min', 'Short attention span'] },
+      { feature: 'Animedoro', values: ['40-60 min', '20 min (anime episode)', '—', 'Reward-driven learners'] },
+      { feature: '52/17', values: ['52 min', '17 min', '—', 'Office workers (DeskTime study)'] },
+    ],
+  },
+  mistakes: [
+    { title: 'Skipping the breaks', body: 'The break is the technique. Working 25/0/25/0/25 is just working continuously and resentment-checking the clock. The break refreshes attention; without it, the second hour is wasted.' },
+    { title: 'Doing email or social media on breaks', body: 'Scrolling Instagram doesn\'t reset your focus — it engages a different part of your attention. Walk, drink water, look out a window. Anything that\'s NOT looking at a screen.' },
+    { title: 'Multitasking during a Pomodoro', body: 'Defeats the entire point. ONE task per Pomodoro. If your assignment has multiple parts, allocate one Pomodoro per part.' },
+    { title: 'Pausing the timer to take a phone call', body: 'Cirillo\'s rule: a Pomodoro is sacred. If interrupted, abandon it and start a fresh one when ready. Pausing breaks the focus discipline.' },
+    { title: 'Using it for collaborative work', body: 'Pomodoro is built for solo focus. Meetings, brainstorms, and pair programming need different time structures. Don\'t force it where it doesn\'t fit.' },
+    { title: 'Underestimating mental fatigue', body: 'After 4 Pomodoros (2 hours), your effective output drops sharply. Take the long break seriously — 15-30 minutes, walk outside if you can.' },
+  ],
+  examples: [
+    { label: 'Studying for a finals week', before: 'Plan: 8 hours straight on Wednesday', after: 'Plan: 4 sets of 4 Pomodoros = 5 hours of focus + 1 hour of breaks across the day. Stop at 9pm, sleep 8 hours, repeat.', explanation: 'The 8-hour grind almost always degrades to 4 hours of useful work + 4 hours of distracted scrolling. Pomodoro\'s 5 focused hours actually produce more.' },
+    { label: 'Writing a 2,000-word essay', before: 'Approach: sit down, write until done', after: 'Approach: 1 Pomodoro outlining + 4 Pomodoros writing (500 words/Pomodoro) + 2 Pomodoros editing. Total: 7 Pomodoros (~3.5 hours).', explanation: 'Breaking the essay into Pomodoro-sized chunks means each session has a clear, finish-able goal. No "I\'ll just write till I\'m done" drift.' },
+    { label: 'Beating procrastination', before: '"I\'ll work on the assignment all afternoon" (and then don\'t start)', after: '"I\'ll do ONE Pomodoro on the assignment right now"', explanation: '25 minutes is short enough to commit to. Once started, momentum usually carries you into a second Pomodoro. Procrastination beaten by lowering the activation cost.' },
+  ],
+  tips: [
+    { title: 'Plan your Pomodoros at the start of the day', body: '"I\'ll do 6 Pomodoros today, two each on assignments A, B, C." Beats vague "I\'ll get to it" — specific commitment increases follow-through.' },
+    { title: 'Use a different room for breaks', body: 'Physical separation between focus and rest cements both. Working at desk, breaking on couch (or outside) helps your brain switch modes.' },
+    { title: 'Don\'t use the technique forever', body: 'Heavy Pomodoro use is great for crunch periods. Cirillo himself recommends easing off when you\'re not in deep crunch — the structure becomes its own friction.' },
+    { title: 'Track Pomodoro completions, not hours', body: '"I did 8 Pomodoros today" beats "I studied for 4 hours" — completions are objective; hours include scrolling and snack breaks.' },
+    { title: 'Pair with a single task list', body: 'Each Pomodoro tackles ONE item. If a task takes 3 Pomodoros, that\'s fine — just pick the next sub-step at each break.' },
+    { title: 'Long break = phone-off walk', body: 'For the long break, leave your phone behind. 20 minutes outside, no screens — recharges focus far better than 20 minutes scrolling.' },
+  ],
+  glossary: [
+    { term: 'Pomodoro', definition: 'Italian for "tomato". Refers to a single 25-minute focus interval. Named after Francesco Cirillo\'s tomato-shaped kitchen timer.' },
+    { term: 'Pomodoro Technique', definition: 'Time-management method by Francesco Cirillo (1980s). Work in 25-minute focused intervals separated by 5-minute breaks; longer break every 4th interval.' },
+    { term: 'Time-boxing', definition: 'General term for setting a fixed time for a task. Pomodoro is one specific time-boxing method.' },
+    { term: 'Deep work', definition: 'Cal Newport\'s term for focused, distraction-free work. Pomodoro structures deep work in 25-minute intervals.' },
+    { term: 'Flow state', definition: 'Mihaly Csikszentmihalyi\'s term for total absorption in a task. Pomodoro purists argue you should still break out of flow at the bell; Cirillo\'s rule is firm on it.' },
+    { term: 'Context-switching cost', definition: 'Mental overhead of moving between unrelated tasks. Pomodoro reduces it by enforcing one task per interval.' },
+    { term: 'Ultradian rhythm', definition: 'Natural 90-120-minute cycles of human alertness. Long-form Pomodoro variants (90/20) align with these cycles.' },
+  ],
 };
 
 /* ─── SCIENTIFIC CALCULATOR ─────────────────────────────────────── */
@@ -431,6 +779,27 @@ export const calcSeo: ToolSeoConfig = {
     { question: 'Can I use it for matrix or graphing?', answer: 'No — this is a scientific calculator, not a graphing or matrix calculator. For matrices try Wolfram Alpha; for graphing try Desmos.' },
   ],
   related: [TOOL_LINKS.conv, TOOL_LINKS.gpa, TOOL_LINKS.pomodoro, TOOL_LINKS.outline, TOOL_LINKS.thesisGen, TOOL_LINKS.flashcards],
+  mistakes: [
+    { title: 'Wrong angle mode', body: 'sin(30) returns 0.5 in degrees but -0.988 in radians. Always check the Deg/Rad indicator before computing trig functions.' },
+    { title: 'Order of operations confusion', body: '2 + 3 × 4 = 14, not 20. Parentheses → exponents → multiply/divide → add/subtract (PEMDAS). The calculator handles it correctly; verify your input matches your intent.' },
+    { title: 'Mixing log and ln', body: 'log = base 10. ln = base e. log(100) = 2; ln(100) ≈ 4.6. Wrong button = wrong answer in chemistry pH calculations.' },
+    { title: 'Forgetting the parenthesis on exponents', body: '2^1/2 = 0.5 (because the calculator reads it as 2^1 then ÷2). For square root via exponent, type 2^(1/2) = 1.414.' },
+    { title: 'Trusting precision past the input', body: 'If you measured a length to 3 significant figures, your calculator answer to 12 decimals is false precision. Round results to match your input precision.' },
+  ],
+  examples: [
+    { label: 'Quadratic formula', before: 'Solve x² + 5x + 6 = 0', after: 'x = (-5 ± √(25 - 24)) / 2 = (-5 ± 1) / 2 → x = -2 or x = -3', explanation: 'Use the calculator step-by-step: compute discriminant (b² - 4ac), take square root, plug into (-b ± √disc) / 2a.' },
+    { label: 'pH from concentration', before: '[H⁺] = 1.5 × 10⁻⁴ M', after: 'pH = -log(1.5e-4) = 3.82', explanation: 'pH uses base-10 log. Type your concentration, hit log button, negate the result.' },
+    { label: 'Compound interest', before: '$1000 at 5% APR for 10 years, compounded monthly', after: 'A = 1000 × (1 + 0.05/12)^(12×10) = $1,647.01', explanation: 'Use parentheses to enforce order: A = P × (1 + r/n)^(n×t). Calculator handles the exponent on a parenthesized expression.' },
+  ],
+  glossary: [
+    { term: 'Trigonometry', definition: 'Branch of math dealing with angles. Sin, cos, tan and inverses are the core functions.' },
+    { term: 'Logarithm', definition: 'Inverse of an exponential. log₁₀(1000) = 3 because 10³ = 1000. ln is base e.' },
+    { term: 'Radian', definition: 'Angle unit where π radians = 180°. Used in calculus and physics. 1 rad ≈ 57.3°.' },
+    { term: 'Factorial', definition: 'n! = n × (n-1) × ... × 1. 5! = 120. Used in combinations, permutations, and Taylor series.' },
+    { term: 'Exponent', definition: 'Power to which a base is raised. 2³ = 8 (2 to the power 3). Calculator uses ^ or x^y button.' },
+    { term: 'Order of operations (PEMDAS)', definition: 'Parentheses, Exponents, Multiplication/Division, Addition/Subtraction. Standard rule for evaluating expressions.' },
+    { term: 'Significant figures', definition: 'Digits that carry meaningful precision. Round results to match the precision of your inputs.' },
+  ],
 };
 
 /* ─── UNIT CONVERTER ────────────────────────────────────────────── */
@@ -465,6 +834,27 @@ export const converterSeo: ToolSeoConfig = {
   ],
   related: [TOOL_LINKS.calc, TOOL_LINKS.gpa, TOOL_LINKS.pomodoro, TOOL_LINKS.outline, TOOL_LINKS.summarizer, TOOL_LINKS.flashcards],
   accent: '#1CB0F6',
+  mistakes: [
+    { title: 'Confusing weight and mass', body: 'Pounds and kilograms aren\'t the same thing — pound is a force unit, kilogram is mass. The everyday conversion (1 kg = 2.2 lb) is technically force vs mass at Earth gravity. On the moon, your kilograms stay the same but your pounds drop.' },
+    { title: 'Forgetting US gallon ≠ UK gallon', body: 'US gallon = 3.785 L. UK (imperial) gallon = 4.546 L. Recipes and fuel economy figures often don\'t specify which — check by context (US recipes use cups; UK use ounces by weight).' },
+    { title: 'Linear conversion of temperature', body: '°C → °F isn\'t × 1.8 — it\'s ×1.8 + 32. Most students try to scale temperature linearly and miss the +32 offset. 0°C = 32°F, not 0°F. The calculator gets it right; doing it in your head usually doesn\'t.' },
+    { title: 'Using volume for weight in cooking', body: '1 cup of flour ≠ 1 cup of sugar by weight. Volume conversions don\'t translate to weight conversions. For baking precision, weigh ingredients in grams.' },
+    { title: 'Mixing speed units', body: 'm/s vs km/h vs mph — easy to confuse. Highway speed is 100 km/h ≈ 28 m/s ≈ 62 mph. Always specify which unit; physics problems often surprise students by switching mid-problem.' },
+  ],
+  examples: [
+    { label: 'Cooking — recipe conversion', before: '500 grams of flour', after: '4 cups (US) — but weighing is more accurate', explanation: 'Volume measures vary by how you scoop and pack. 500g of all-purpose flour is roughly 4 cups loose, 3.5 cups packed. Stick to weight when accuracy matters.' },
+    { label: 'Travel — running pace', before: 'Treadmill says 8 mph', after: '12.87 km/h, or 4:39 per km', explanation: '8 mph is roughly a 7:30 mile, marathon-PB pace for many runners. Same speed in km is 12.87 km/h, or 4:39/km.' },
+    { label: 'Physics — common units', before: '20 m/s', after: '72 km/h, or 44.74 mph, or 38.88 knots', explanation: '20 m/s is highway-fast (about 70 km/h). When physics problems use SI units (m/s) but you think in mph, the converter saves time.' },
+  ],
+  glossary: [
+    { term: 'SI units', definition: 'International System of Units (metric). Length: meter. Mass: kilogram. Time: second. Used in science worldwide.' },
+    { term: 'Imperial units', definition: 'British/US system. Length: inch/foot/yard/mile. Mass: ounce/pound. Used in US everyday measures and some UK contexts.' },
+    { term: 'Conversion factor', definition: 'A multiplier that converts between units. 1 mile = 1.609 km is a conversion factor.' },
+    { term: 'Celsius (°C)', definition: 'Metric temperature scale. Water freezes at 0°C, boils at 100°C at sea level.' },
+    { term: 'Fahrenheit (°F)', definition: 'US temperature scale. Water freezes at 32°F, boils at 212°F. °F = (°C × 9/5) + 32.' },
+    { term: 'Kelvin (K)', definition: 'Scientific temperature scale, no offset. K = °C + 273.15. Absolute zero = 0 K.' },
+    { term: 'Knot', definition: 'Nautical speed unit. 1 knot = 1.852 km/h. Used by ships and aircraft.' },
+  ],
 };
 
 /* ─── AI SUMMARIZER ─────────────────────────────────────────────── */
@@ -498,6 +888,25 @@ export const summarizerSeo: ToolSeoConfig = {
     { question: 'Can I use the summary in my essay?', answer: 'Use it for understanding, not as direct text. Pasting an AI-generated summary into your essay risks plagiarism flags and academic-integrity issues. Read, understand, then write your own version.' },
   ],
   related: [TOOL_LINKS.analyze, TOOL_LINKS.thesisGen, TOOL_LINKS.outline, TOOL_LINKS.citationGenerator, TOOL_LINKS.quizGen, TOOL_LINKS.flashcards],
+  mistakes: [
+    { title: 'Pasting AI summaries into your essay', body: 'The summary is for understanding, not for direct copy-paste. Your professor\'s AI detector will flag it. Read the summary, then write your own version in your own voice with citation.' },
+    { title: 'Trusting summaries of conflicting sources', body: 'AI summaries flatten nuance. If your source argues "X is partially true under condition Y", the summary may say "X is true". Always check the summary against the original on critical claims.' },
+    { title: 'Summarizing too much at once', body: 'Pasting a 50-page document and asking for 5 bullet points loses too much detail. Summarize section by section, then summarize the section summaries.' },
+    { title: 'Skipping the source check', body: 'If a summary says "the study found X", verify "X" exists in the original before citing it. AI sometimes invents specific claims (called "hallucinations").' },
+    { title: 'Using bullet summaries when prose is needed', body: 'Bullet summaries are great for understanding, weak for writing. If you\'re summarizing for an essay, use the paragraph mode so the prose can flow into your draft.' },
+  ],
+  examples: [
+    { label: 'Bullet vs paragraph summary', before: 'Style: Bullet (for review)', after: 'Style: Paragraph (for embedding in essay draft)', explanation: 'For reading and understanding, bullet is faster. For drafting an essay where the summary feeds into your prose, paragraph is more useful. Pick by purpose.' },
+    { label: 'Length — when to use each', before: 'Short (TL;DR): 1-2 sentences', after: 'Medium: 5-8 bullets. Long: structured multi-paragraph.', explanation: 'TL;DR for "should I read this?". Medium for review notes. Long for replacing reading entirely (use cautiously — you lose nuance).' },
+  ],
+  glossary: [
+    { term: 'Extractive summary', definition: 'Pulls direct sentences from the source. Faithful to the original but can read disjointed.' },
+    { term: 'Abstractive summary', definition: 'Generates new sentences capturing the meaning. Reads more naturally but can introduce errors. Most modern AI summaries are abstractive.' },
+    { term: 'TL;DR', definition: '"Too Long; Didn\'t Read". Internet shorthand for a 1-2 sentence executive summary at the top of long content.' },
+    { term: 'Hallucination', definition: 'When AI invents facts not present in the source. Always verify specific claims against the original.' },
+    { term: 'Compression ratio', definition: 'Summary length ÷ original length. A 1,000-word article summarized to 100 words = 10:1 compression.' },
+    { term: 'Lossy summarization', definition: 'All summaries are lossy — information is removed. The art is removing the right things.' },
+  ],
 };
 
 /* ─── AI QUIZ GENERATOR ─────────────────────────────────────────── */
@@ -533,6 +942,26 @@ export const quizGenSeo: ToolSeoConfig = {
   ],
   related: [TOOL_LINKS.flashcards, TOOL_LINKS.summarizer, TOOL_LINKS.outline, TOOL_LINKS.thesisGen, TOOL_LINKS.analyze, TOOL_LINKS.citationGenerator],
   accent: '#FF9600',
+  mistakes: [
+    { title: 'Quizzing only on facts you already know', body: 'Generating a quiz from material you\'ve mastered feels good but doesn\'t add learning. Generate from material that\'s still murky for you.' },
+    { title: 'Treating wrong answers as failures', body: 'Wrong answers reveal exactly what to study. The whole point of quizzing is finding gaps. Celebrate wrong answers as cheap diagnostics.' },
+    { title: 'Skipping the "explain why" step', body: 'After getting a question wrong, don\'t just read the right answer. Articulate WHY the wrong answer was wrong. That\'s where the deepest learning happens.' },
+    { title: 'Only testing the day before the exam', body: 'Spaced quizzing (one round 7 days out, another 3 days out, another 1 day out) outperforms cramming the day before by 2-3x on retention.' },
+    { title: 'Generating only easy questions', body: 'Easy questions test recognition, not understanding. Mix easy/medium/hard to find your real level.' },
+  ],
+  examples: [
+    { label: 'Easy vs hard difficulty', before: 'Easy: "What year did WWII end?" → 1945', after: 'Hard: "How did the timing of D-Day affect the post-war division of Europe?"', explanation: 'Easy = factual recall. Hard = application and analysis. Hard questions reveal whether you understand or just memorized.' },
+    { label: 'Multiple choice vs fill-in-blank', before: 'MCQ: "What is the capital of France?" (a) Paris (b) Lyon (c) Marseille', after: 'Fill-in: "The capital of France is _____."', explanation: 'MCQ tests recognition. Fill-in tests recall. Recall is harder and a better predictor of exam performance.' },
+  ],
+  glossary: [
+    { term: 'Active recall', definition: 'Retrieving information from memory without prompts. The strongest learning technique. Quizzing is active recall.' },
+    { term: 'Multiple choice (MCQ)', definition: 'Question with several listed answers. Tests recognition. Easier than recall.' },
+    { term: 'Distractor', definition: 'Wrong answer in a multiple-choice question. Good distractors are plausible — they test whether you really know the answer or just guessed.' },
+    { term: 'Fill-in-the-blank', definition: 'Question with a missing word or phrase. Tests recall, harder than recognition.' },
+    { term: 'True/false', definition: 'Statement evaluated as true or false. Quick to answer, less depth than MCQ. Easy to game with 50/50 guessing.' },
+    { term: 'Spaced repetition', definition: 'Reviewing material on increasing intervals (1d, 3d, 7d, 14d, etc.). Locks information into long-term memory.' },
+    { term: 'Bloom\'s Taxonomy', definition: 'Hierarchy of cognitive skills: remember → understand → apply → analyze → evaluate → create. Quiz difficulty maps to this hierarchy.' },
+  ],
 };
 
 /* ─── FLASHCARDS ────────────────────────────────────────────────── */
@@ -568,4 +997,24 @@ export const flashcardsSeo: ToolSeoConfig = {
   ],
   related: [TOOL_LINKS.quizGen, TOOL_LINKS.summarizer, TOOL_LINKS.outline, TOOL_LINKS.thesisGen, TOOL_LINKS.analyze, TOOL_LINKS.pomodoro],
   accent: '#A560E8',
+  mistakes: [
+    { title: 'Front side too long', body: 'A flashcard front should be ONE question, ONE concept. "Define osmosis and explain its role in cell membranes" = two cards, not one.' },
+    { title: 'Just rewriting your notes as cards', body: 'Pasting your notes into card form doesn\'t help retention. Reformulate as questions YOU might be asked. "What is X?" → "When does X fail?".' },
+    { title: 'Reviewing in order every time', body: 'Always shuffle. Reviewing in the same order = you\'re memorizing the order, not the cards.' },
+    { title: 'Ignoring the cards you keep getting wrong', body: 'The wrong cards are the ones to study most, not skip. Move them to a "trouble" deck and drill them daily.' },
+    { title: 'Making decks too big', body: 'A 500-card deck is unwieldy. Split into chapter-sized 50-card decks. Easier to track, easier to schedule.' },
+  ],
+  examples: [
+    { label: 'Bad vs good front side', before: 'Photosynthesis (a multi-step process by which plants and some other organisms convert light energy, usually from the sun, into chemical energy that can be later released to fuel the organism\'s activities)', after: 'What is photosynthesis?', explanation: 'Front: just the question. Back: the answer (the long definition). Front side is for retrieval, not for cramming all the information.' },
+    { label: 'Two cards, not one', before: 'What is osmosis and when is it active vs passive transport?', after: 'Card 1: What is osmosis? / Card 2: How does osmosis differ from active transport?', explanation: 'One concept per card. Compound questions break the active recall principle — you\'re really memorizing TWO answers as one chunk.' },
+  ],
+  glossary: [
+    { term: 'Flashcard', definition: 'Two-sided study card. Front: question or term. Back: answer or definition. Active recall prompt.' },
+    { term: 'Deck', definition: 'Collection of related flashcards on one topic. Usually 30-200 cards.' },
+    { term: 'Spaced repetition (SRS)', definition: 'Reviewing cards on increasing intervals based on recall difficulty. Anki and similar apps schedule reviews automatically.' },
+    { term: 'Active recall', definition: 'Retrieving information from memory unprompted. Flashcards are the canonical active recall tool.' },
+    { term: 'Passive review', definition: 'Re-reading or highlighting notes without testing. Far less effective than active recall.' },
+    { term: 'Cloze deletion', definition: 'Card format with a word or phrase blanked out. "The capital of France is [...]." Tests recall in context.' },
+    { term: 'Atomic card', definition: 'A flashcard with one concept, not multiple. Easier to learn, easier to test.' },
+  ],
 };
