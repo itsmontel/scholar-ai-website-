@@ -36,8 +36,8 @@ struct WSChunkyCardModifier: ViewModifier {
     var fillColor: Color = WSColor.backgroundElevated
 
     func body(content: Content) -> some View {
-        let lipColor = (accent ?? WSColor.brandPrimary).opacity(0.18)
-        let glow     = (accent ?? WSColor.brandPrimary).opacity(0.10)
+        let lipColor = (accent ?? WSColor.duoBorder).opacity(accent != nil ? 0.35 : 1.0)
+        let glow     = (accent ?? WSColor.duoPurple).opacity(0.08)
 
         return ZStack(alignment: .top) {
             // Dark bottom lip — fixed in place. Slightly inset so it

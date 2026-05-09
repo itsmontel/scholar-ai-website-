@@ -2,57 +2,67 @@
 //  WSGradients.swift
 //  WriteScholar
 //
-//  Reusable brand gradients. Computed on access so colors track the
-//  current color scheme automatically (Color values are dynamic).
+//  Duolingo-style background washes. Flat/near-flat to match the solid
+//  color system — no more violet→fuchsia gradient sweeps.
 //
 
 import SwiftUI
 
 enum WSGradient {
-    /// Violet → fuchsia → indigo brand sweep. Used on headline accents,
-    /// CTA buttons, and the launch hero.
+    /// Brand accent — purple to purple-dark, used sparingly.
     static var brand: LinearGradient {
         LinearGradient(
-            colors: [
-                Color(hex: 0x7C3AED),   // violet-600
-                Color(hex: 0xD946EF),   // fuchsia-500
-                Color(hex: 0x6366F1)    // indigo-500
-            ],
+            colors: [WSColor.duoPurple, WSColor.duoPurpleDark],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
     }
 
-    /// Subtle background wash for the hero section / onboarding pages.
+    /// Subtle background wash for hero sections — near-white with a purple tint.
     static var heroBackdrop: LinearGradient {
         LinearGradient(
             colors: [
                 WSColor.background,
-                WSColor.background.opacity(0.95),
-                WSColor.brandSoft.opacity(0.55)
+                WSColor.background,
+                WSColor.duoPurpleLight.opacity(0.3)
             ],
             startPoint: .top,
             endPoint: .bottom
         )
     }
 
-    /// Per-page wash for onboarding (each page rotates through these so
-    /// the background subtly shifts as the user swipes).
+    /// Per-page wash for onboarding. Each page gets a Duolingo-colored tint.
     static func onboardingBackdrop(for index: Int) -> LinearGradient {
         let palettes: [[Color]] = [
-            [Color(hex: 0xFAF5FF), Color(hex: 0xFFE4F2)],   // violet → pink
-            [Color(hex: 0xF0F9FF), Color(hex: 0xEEF2FF)],   // sky → indigo
-            [Color(hex: 0xFFF7ED), Color(hex: 0xFEF3C7)],   // amber wash
-            [Color(hex: 0xECFDF5), Color(hex: 0xCFFAFE)],   // emerald → cyan
-            [Color(hex: 0xFFE4E6), Color(hex: 0xFEF3C7)],   // rose → amber
-            [Color(hex: 0xEDE9FE), Color(hex: 0xE0E7FF)],   // violet → indigo
-            [Color(hex: 0x7C3AED), Color(hex: 0xD946EF)]    // brand finale
+            // 0: Green welcome
+            [Color.white, WSColor.duoGreenLight],
+            // 1: Purple essays
+            [Color.white, WSColor.duoPurpleLight],
+            // 2: Blue study tools
+            [Color.white, WSColor.duoBlueLight],
+            // 3: Green flashcards
+            [Color.white, WSColor.duoGreenLight],
+            // 4: Orange games
+            [Color.white, WSColor.duoOrangeLight],
+            // 5: Blue library
+            [Color.white, WSColor.duoBlueLight],
+            // 6: Green CTA finale
+            [WSColor.duoGreenLight, WSColor.duoGreen.opacity(0.15)]
         ]
         let palette = palettes[index % palettes.count]
         return LinearGradient(
             colors: palette,
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
+            startPoint: .top,
+            endPoint: .bottom
+        )
+    }
+
+    /// Green CTA gradient for primary buttons in special contexts.
+    static var greenCTA: LinearGradient {
+        LinearGradient(
+            colors: [WSColor.duoGreen, WSColor.duoGreenDark],
+            startPoint: .top,
+            endPoint: .bottom
         )
     }
 }

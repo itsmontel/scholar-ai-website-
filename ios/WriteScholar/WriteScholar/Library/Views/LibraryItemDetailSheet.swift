@@ -2,17 +2,14 @@
 //  LibraryItemDetailSheet.swift
 //  WriteScholar
 //
-//  The full sheet shown when a library card is tapped. Surfaces:
+//  The full sheet shown when a library card is tapped — Duolingo-style
+//  design. Surfaces:
 //
-//    • A kind-tinted hero with the title and metadata chips
-//    • Snippet preview (first 1k chars of the source content)
-//    • Quick actions (Open · Share · Pin · Delete · Open on web)
-//    • Provenance card (when this was created, where it was synced from)
-//    • Tags (sample data uses these — placeholder for upcoming Folders)
-//
-//  The sheet doesn't try to actually re-render the full study pack /
-//  essay analysis. That'll come in a future pass when the per-kind deep
-//  links land.
+//    * A kind-tinted hero with the title and metadata chips
+//    * Snippet preview
+//    * Quick actions (Open + Share + Pin + Delete + Open on web)
+//    * Provenance card
+//    * Tags
 //
 
 import SwiftUI
@@ -27,32 +24,43 @@ struct LibraryItemDetailSheet: View {
 
     @State private var showDeleteConfirm = false
 
+    private var accentColor: Color {
+        switch item.kind {
+        case .studyPack:     return WSColor.duoPurple
+        case .essayAnalysis: return WSColor.duoBlue
+        case .document:      return WSColor.duoOrange
+        }
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
-                WSGradient.heroBackdrop.ignoresSafeArea()
+                WSColor.duoSurface.ignoresSafeArea()
 
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 18) {
-                        heroBlock
-                        actionsRow
-                        if let snippet = item.snippet, !snippet.isEmpty {
-                            snippetCard(snippet)
+                VStack(spacing: 0) {
+                    WSChunkyRibbon(color: accentColor)
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 18) {
+                            heroBlock
+                            actionsRow
+                            if let snippet = item.snippet, !snippet.isEmpty {
+                                snippetCard(snippet)
+                            }
+                            provenanceCard
+                            if !item.tags.isEmpty { tagsCard }
+                            Spacer(minLength: 12)
                         }
-                        provenanceCard
-                        if !item.tags.isEmpty { tagsCard }
-                        Spacer(minLength: 12)
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 14)
+                        .padding(.bottom, 32)
                     }
-                    .padding(.horizontal, 18)
-                    .padding(.vertical, 14)
-                    .padding(.bottom, 32)
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Close") { dismiss() }
-                        .foregroundStyle(WSColor.foregroundMuted)
+                        .foregroundStyle(WSColor.duoText.opacity(0.55))
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Menu {
@@ -75,7 +83,7 @@ struct LibraryItemDetailSheet: View {
                         }
                     } label: {
                         Image(systemName: "ellipsis.circle")
-                            .foregroundStyle(WSColor.foreground)
+                            .foregroundStyle(WSColor.duoText)
                     }
                 }
             }
@@ -96,25 +104,12 @@ struct LibraryItemDetailSheet: View {
     private var heroBlock: some View {
         VStack(alignment: .leading, spacing: 14) {
             ZStack(alignment: .topLeading) {
-                LinearGradient(colors: item.kind.heroGradient,
-                               startPoint: .topLeading, endPoint: .bottomTrailing)
-
-                Canvas { ctx, size in
-                    for i in 0..<16 {
-                        let x = (sin(Double(i) * 6.31) + 1) / 2 * size.width
-                        let y = (cos(Double(i) * 4.21) + 1) / 2 * size.height
-                        ctx.fill(
-                            Path(ellipseIn: CGRect(x: x, y: y, width: 2, height: 2)),
-                            with: .color(.white.opacity(0.50))
-                        )
-                    }
-                }
-                .allowsHitTesting(false)
+                accentColor
 
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
                         Text(item.kind.label.uppercased())
-                            .font(.system(size: 10, weight: .black, design: .rounded))
+                            .font(WSFont.sans(10, weight: .black))
                             .tracking(0.7)
                             .foregroundStyle(.white)
                             .padding(.horizontal, 9)
@@ -122,7 +117,7 @@ struct LibraryItemDetailSheet: View {
                             .background(Capsule().fill(Color.white.opacity(0.22)))
                         Spacer()
                         ZStack {
-                            Circle().fill(Color.white.opacity(0.18)).frame(width: 50, height: 50)
+                            Circle().fill(Color.white.opacity(0.20)).frame(width: 50, height: 50)
                             Image(systemName: item.kind.icon)
                                 .font(.system(size: 22, weight: .heavy))
                                 .foregroundStyle(.white)
@@ -130,7 +125,7 @@ struct LibraryItemDetailSheet: View {
                     }
 
                     Text(item.title)
-                        .wsHeadline(.medium, weight: .bold)
+                        .wsHeadline(.medium, weight: .black)
                         .foregroundStyle(.white)
                         .multilineTextAlignment(.leading)
                         .padding(.top, 2)
@@ -148,7 +143,7 @@ struct LibraryItemDetailSheet: View {
                                     HStack(spacing: 4) {
                                         Image(systemName: chip.icon).font(.system(size: 10, weight: .bold))
                                         Text(chip.label)
-                                            .font(.system(size: 11, weight: .bold, design: .rounded))
+                                            .font(WSFont.sans(11, weight: .bold))
                                     }
                                     .foregroundStyle(.white)
                                     .padding(.horizontal, 8)
@@ -163,11 +158,7 @@ struct LibraryItemDetailSheet: View {
                 .padding(18)
             }
             .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 22, style: .continuous)
-                    .stroke(Color.white.opacity(0.18), lineWidth: 1)
-            )
-            .shadow(color: item.kind.tint.opacity(0.40), radius: 18, y: 8)
+            .shadow(color: accentColor.opacity(0.40), radius: 18, y: 8)
         }
     }
 
@@ -178,7 +169,7 @@ struct LibraryItemDetailSheet: View {
             actionTile(
                 icon: "arrow.up.right.square.fill",
                 label: openLabel,
-                tint: item.kind.tint,
+                tint: accentColor,
                 primary: true
             ) {
                 onOpenSource()
@@ -188,13 +179,13 @@ struct LibraryItemDetailSheet: View {
             actionTile(
                 icon: item.isPinned ? "pin.slash.fill" : "pin.fill",
                 label: item.isPinned ? "Unpin" : "Pin",
-                tint: WSColor.brandPrimary
+                tint: WSColor.duoOrange
             ) {
                 onPinToggle()
             }
 
             ShareLink(item: shareText) {
-                actionTileLabel(icon: "square.and.arrow.up.fill", label: "Share", tint: Color(hex: 0x10B981))
+                actionTileLabel(icon: "square.and.arrow.up.fill", label: "Share", tint: WSColor.duoGreen)
             }
             .buttonStyle(.plain)
         }
@@ -232,20 +223,26 @@ struct LibraryItemDetailSheet: View {
                 .font(.system(size: 17, weight: .heavy))
                 .foregroundStyle(primary ? .white : tint)
             Text(label)
-                .font(.system(size: 11, weight: .bold, design: .rounded))
-                .foregroundStyle(primary ? .white : WSColor.foreground)
+                .font(WSFont.sans(11, weight: .bold))
+                .foregroundStyle(primary ? .white : WSColor.duoText)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 14)
         .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(primary ? AnyShapeStyle(LinearGradient(colors: item.kind.heroGradient, startPoint: .topLeading, endPoint: .bottomTrailing))
-                              : AnyShapeStyle(WSColor.backgroundElevated))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(primary ? Color.white.opacity(0.15) : tint.opacity(0.20), lineWidth: 1)
-                )
-                .shadow(color: tint.opacity(primary ? 0.30 : 0.10), radius: primary ? 10 : 4, y: primary ? 4 : 1)
+            ZStack(alignment: .top) {
+                // Chunky lip
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(primary ? tint.opacity(0.7) : WSColor.duoBorder)
+                    .padding(.top, 4)
+                    .padding(.horizontal, 1)
+                // Top face
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(primary ? tint : WSColor.backgroundElevated)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .stroke(primary ? Color.clear : WSColor.duoBorder, lineWidth: 2)
+                    )
+            }
         )
     }
 
@@ -256,19 +253,18 @@ struct LibraryItemDetailSheet: View {
             HStack(spacing: 8) {
                 Image(systemName: "text.alignleft")
                     .font(.system(size: 14, weight: .bold))
-                    .foregroundStyle(item.kind.tint)
+                    .foregroundStyle(accentColor)
                 Text("Preview")
-                    .wsBody(.small, weight: .bold)
-                    .foregroundStyle(WSColor.foregroundMuted)
+                    .wsHeadline(.small, weight: .black)
+                    .foregroundStyle(WSColor.duoText.opacity(0.55))
             }
             Text(snippet)
                 .wsBody(.medium)
-                .foregroundStyle(WSColor.foreground)
+                .foregroundStyle(WSColor.duoText)
                 .multilineTextAlignment(.leading)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
-        .wsCard(elevation: .low)
+        .wsChunkyCard(accent: accentColor)
     }
 
     // MARK: - Provenance
@@ -278,10 +274,10 @@ struct LibraryItemDetailSheet: View {
             HStack(spacing: 8) {
                 Image(systemName: "info.circle.fill")
                     .font(.system(size: 14, weight: .bold))
-                    .foregroundStyle(WSColor.foregroundMuted)
+                    .foregroundStyle(WSColor.duoBlue)
                 Text("Details")
-                    .wsBody(.small, weight: .bold)
-                    .foregroundStyle(WSColor.foregroundMuted)
+                    .wsHeadline(.small, weight: .black)
+                    .foregroundStyle(WSColor.duoText.opacity(0.55))
             }
 
             provenanceRow(icon: "calendar", label: "Created", value: LibraryRelativeFormatter.long(item.createdAt))
@@ -294,23 +290,22 @@ struct LibraryItemDetailSheet: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
-        .wsCard(elevation: .low)
+        .wsChunkyCard(accent: WSColor.duoBlue)
     }
 
     private func provenanceRow(icon: String, label: String, value: String) -> some View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: icon)
                 .frame(width: 18)
-                .foregroundStyle(item.kind.tint)
+                .foregroundStyle(accentColor)
                 .font(.system(size: 13, weight: .bold))
             Text(label)
                 .wsBody(.caption, weight: .bold)
-                .foregroundStyle(WSColor.foregroundMuted)
+                .foregroundStyle(WSColor.duoText.opacity(0.55))
                 .frame(width: 90, alignment: .leading)
             Text(value)
                 .wsBody(.caption)
-                .foregroundStyle(WSColor.foreground)
+                .foregroundStyle(WSColor.duoText)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
@@ -322,23 +317,20 @@ struct LibraryItemDetailSheet: View {
             HStack(spacing: 8) {
                 Image(systemName: "tag.fill")
                     .font(.system(size: 14, weight: .bold))
-                    .foregroundStyle(WSColor.brandPrimary)
+                    .foregroundStyle(WSColor.duoPurple)
                 Text("Tags")
-                    .wsBody(.small, weight: .bold)
-                    .foregroundStyle(WSColor.foregroundMuted)
+                    .wsHeadline(.small, weight: .black)
+                    .foregroundStyle(WSColor.duoText.opacity(0.55))
             }
-            FlowingTagRow(tags: item.tags, tint: item.kind.tint)
+            FlowingTagRow(tags: item.tags, tint: accentColor)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
-        .wsCard(elevation: .low)
+        .wsChunkyCard(accent: WSColor.duoPurple)
     }
 }
 
 // MARK: - Flowing tag row
 
-/// Simple wrapping tag row. Falls back to a horizontal scroller for very
-/// long tag lists so the layout never breaks.
 private struct FlowingTagRow: View {
     let tags: [String]
     let tint: Color
@@ -348,14 +340,14 @@ private struct FlowingTagRow: View {
             HStack(spacing: 6) {
                 ForEach(tags, id: \.self) { tag in
                     Text(tag.hasPrefix("#") ? tag : "#\(tag)")
-                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                        .font(WSFont.sans(11, weight: .bold))
                         .foregroundStyle(tint)
                         .padding(.horizontal, 9)
                         .padding(.vertical, 4)
                         .background(
                             Capsule()
                                 .fill(tint.opacity(0.10))
-                                .overlay(Capsule().stroke(tint.opacity(0.25), lineWidth: 0.5))
+                                .overlay(Capsule().stroke(tint.opacity(0.25), lineWidth: 1))
                         )
                 }
             }
@@ -371,7 +363,7 @@ private struct FlowingTagRow: View {
             kind: .studyPack,
             title: "Photosynthesis & Cell Respiration",
             subtitle: "AP Biology · Chapter 9",
-            snippet: "The light-dependent reactions take place in the thylakoid membrane and produce ATP and NADPH from sunlight, water, and ADP. The Calvin cycle then uses that ATP to fix CO2 into glucose…",
+            snippet: "The light-dependent reactions take place in the thylakoid membrane and produce ATP and NADPH from sunlight, water, and ADP. The Calvin cycle then uses that ATP to fix CO2 into glucose...",
             chips: [
                 .init(icon: "checkmark.bubble.fill", label: "Quiz · 12 qs"),
                 .init(icon: "rectangle.on.rectangle.angled.fill", label: "18 cards"),

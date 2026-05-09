@@ -35,62 +35,40 @@ struct WSStreakFlame: View {
     @State private var spin: Double = 0
 
     var body: some View {
+        let activeFlame  = WSColor.duoOrange
+        let activeRing   = WSColor.duoOrangeDark
+        let dormantTint  = Color(hex: 0x94A3B8)
+        let dormantRing  = Color(hex: 0xCBD5E1)
+        let chipFill     = activeToday ? WSColor.duoRed : dormantTint
+        let chipStroke   = activeToday ? WSColor.duoRedDark : Color(hex: 0x64748B)
+
         ZStack {
-            // Outer halo
+            // Outer halo — soft solid wash via blur+opacity (no radial gradient)
             Circle()
-                .fill(
-                    RadialGradient(
-                        colors: activeToday
-                            ? [Color(hex: 0xFBBF24).opacity(0.55), .clear]
-                            : [Color(hex: 0x94A3B8).opacity(0.30), .clear],
-                        center: .center,
-                        startRadius: 4,
-                        endRadius: size * 0.85
-                    )
-                )
+                .fill((activeToday ? activeFlame : dormantTint).opacity(activeToday ? 0.32 : 0.18))
                 .frame(width: size * 1.6, height: size * 1.6)
                 .scaleEffect(pulse)
-                .blur(radius: 6)
+                .blur(radius: 14)
 
-            // Outer ring
+            // Outer ring — solid color
             Circle()
-                .stroke(
-                    activeToday
-                        ? AnyShapeStyle(LinearGradient(colors: [Color(hex: 0xFCD34D), Color(hex: 0xF59E0B)],
-                                                       startPoint: .top, endPoint: .bottom))
-                        : AnyShapeStyle(Color(hex: 0xCBD5E1)),
-                    lineWidth: 4
-                )
+                .stroke(activeToday ? activeRing : dormantRing, lineWidth: 4)
                 .frame(width: size, height: size)
 
-            // Inner fill
+            // Inner fill — solid (was a radial gradient)
             Circle()
-                .fill(
-                    activeToday
-                        ? AnyShapeStyle(RadialGradient(
-                            colors: [Color(hex: 0xFFFBEB), Color(hex: 0xFEF3C7)],
-                            center: .center, startRadius: 4, endRadius: size / 2))
-                        : AnyShapeStyle(WSColor.surface)
-                )
+                .fill(activeToday ? Color(hex: 0xFFF4D8) : WSColor.surface)
                 .frame(width: size - 8, height: size - 8)
 
-            // Flame icon
+            // Flame icon — solid color
             Image(systemName: "flame.fill")
                 .font(.system(size: size * 0.42, weight: .black))
-                .foregroundStyle(
-                    activeToday
-                        ? LinearGradient(colors: [Color(hex: 0xFCD34D),
-                                                  Color(hex: 0xF59E0B),
-                                                  Color(hex: 0xEF4444)],
-                                         startPoint: .top, endPoint: .bottom)
-                        : LinearGradient(colors: [Color(hex: 0xCBD5E1), Color(hex: 0x94A3B8)],
-                                         startPoint: .top, endPoint: .bottom)
-                )
+                .foregroundStyle(activeToday ? activeFlame : dormantTint)
                 .scaleEffect(pulse)
                 .rotationEffect(.degrees(spin))
-                .shadow(color: activeToday ? Color(hex: 0xF59E0B).opacity(0.55) : .clear, radius: 6)
+                .shadow(color: activeToday ? activeRing.opacity(0.55) : .clear, radius: 6)
 
-            // Streak count chip — sits on the bottom-right of the flame
+            // Streak count chip — solid red on red-dark with chunky border lip feel
             Text("\(count)")
                 .font(.system(size: size * 0.28, weight: .black, design: .rounded))
                 .foregroundStyle(.white)
@@ -98,14 +76,8 @@ struct WSStreakFlame: View {
                 .padding(.vertical, max(2, size * 0.05))
                 .background(
                     Capsule()
-                        .fill(
-                            activeToday
-                                ? LinearGradient(colors: [Color(hex: 0xEF4444), Color(hex: 0xB91C1C)],
-                                                 startPoint: .top, endPoint: .bottom)
-                                : LinearGradient(colors: [Color(hex: 0x94A3B8), Color(hex: 0x64748B)],
-                                                 startPoint: .top, endPoint: .bottom)
-                        )
-                        .overlay(Capsule().stroke(.white.opacity(0.45), lineWidth: 1.5))
+                        .fill(chipFill)
+                        .overlay(Capsule().stroke(chipStroke, lineWidth: 1.5))
                         .shadow(color: .black.opacity(0.20), radius: 4, y: 2)
                 )
                 .offset(x: size * 0.30, y: size * 0.32)
@@ -145,7 +117,7 @@ struct WSXPBar: View {
                 HStack {
                     HStack(spacing: 4) {
                         Image(systemName: "bolt.fill")
-                            .foregroundStyle(Color(hex: 0xF59E0B))
+                            .foregroundStyle(WSColor.duoOrangeDark)
                         Text("\(xpInLevel) / \(xpForLevel) XP")
                             .font(.system(size: 12, weight: .black, design: .rounded))
                             .foregroundStyle(WSColor.foreground)
@@ -166,20 +138,13 @@ struct WSXPBar: View {
                                 .stroke(WSColor.hairline, lineWidth: 1)
                         )
 
-                    // Fill
+                    // Fill — solid color, with a thin white inner stroke for sheen
                     RoundedRectangle(cornerRadius: height, style: .continuous)
-                        .fill(
-                            LinearGradient(
-                                colors: [tint, tint.opacity(0.75)],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
+                        .fill(tint)
                         .frame(width: max(height, geo.size.width * fraction))
                         .overlay(
-                            // Sheen
                             RoundedRectangle(cornerRadius: height, style: .continuous)
-                                .stroke(.white.opacity(0.30), lineWidth: 1)
+                                .stroke(.white.opacity(0.40), lineWidth: 1)
                         )
                         .shadow(color: tint.opacity(0.4), radius: 4, y: 2)
                         .animation(.wsBouncePop, value: fraction)
@@ -198,28 +163,19 @@ struct WSLevelBadge: View {
     var tint: Color = WSColor.brandPrimary
 
     var body: some View {
-        ZStack {
-            // Outer ring
+        ZStack(alignment: .top) {
+            // 3D lip — darker tint a few pts below the top face
             Circle()
-                .fill(
-                    LinearGradient(
-                        colors: [tint, tint.opacity(0.75)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
+                .fill(tint.mix(with: .black, by: 0.22))
                 .frame(width: size, height: size)
-                .overlay(
-                    Circle().stroke(.white.opacity(0.35), lineWidth: 2)
-                )
-                .shadow(color: tint.opacity(0.45), radius: 8, y: 3)
+                .padding(.top, size * 0.08)
 
-            // Inner glow
+            // Top face — solid color with white inner stroke
             Circle()
-                .fill(.white.opacity(0.18))
-                .frame(width: size * 0.62, height: size * 0.62)
-                .blur(radius: 6)
-                .offset(y: -size * 0.08)
+                .fill(tint)
+                .frame(width: size, height: size)
+                .overlay(Circle().stroke(.white.opacity(0.30), lineWidth: 2))
+                .shadow(color: tint.opacity(0.45), radius: 8, y: 3)
 
             // Level number
             VStack(spacing: 0) {
@@ -231,6 +187,7 @@ struct WSLevelBadge: View {
                     .font(.system(size: size * 0.42, weight: .black, design: .rounded))
                     .foregroundStyle(.white)
             }
+            .padding(.top, size * 0.18)
         }
     }
 }
@@ -241,32 +198,30 @@ struct WSDailyGoalRing: View {
     /// 0...1
     let progress: Double
     let icon: String
-    var tint: Color = Color(hex: 0xF59E0B)
+    var tint: Color = WSColor.duoOrangeDark
     var size: CGFloat = 72
 
     var body: some View {
         ZStack {
+            // Track ring
             Circle()
-                .stroke(WSColor.surface, lineWidth: 6)
+                .stroke(WSColor.duoBorder.opacity(0.55), lineWidth: 6)
                 .frame(width: size, height: size)
+
+            // Progress arc — solid tint, no gradient
             Circle()
                 .trim(from: 0, to: max(0.001, min(1.0, progress)))
-                .stroke(
-                    LinearGradient(colors: [tint, tint.opacity(0.6)],
-                                   startPoint: .top, endPoint: .bottom),
-                    style: StrokeStyle(lineWidth: 6, lineCap: .round)
-                )
+                .stroke(tint,
+                        style: StrokeStyle(lineWidth: 6, lineCap: .round))
                 .rotationEffect(.degrees(-90))
                 .frame(width: size, height: size)
                 .shadow(color: tint.opacity(0.4), radius: 4, y: 1)
                 .animation(.wsBouncePop, value: progress)
 
+            // Center icon — solid color
             Image(systemName: icon)
-                .font(.system(size: size * 0.36, weight: .heavy))
-                .foregroundStyle(
-                    LinearGradient(colors: [tint, tint.opacity(0.7)],
-                                   startPoint: .top, endPoint: .bottom)
-                )
+                .font(.system(size: size * 0.36, weight: .black))
+                .foregroundStyle(tint)
         }
     }
 }
@@ -293,13 +248,13 @@ struct WSStreakWeekStrip: View {
 
                     ZStack {
                         Circle()
-                            .fill(active
-                                  ? AnyShapeStyle(LinearGradient(colors: [Color(hex: 0xFCD34D), Color(hex: 0xF59E0B)],
-                                                                 startPoint: .top, endPoint: .bottom))
-                                  : AnyShapeStyle(WSColor.surface))
+                            .fill(active ? WSColor.duoOrange : WSColor.surface)
                             .overlay(
                                 Circle()
-                                    .stroke(i == todayIndex ? WSColor.brandPrimary : .clear, lineWidth: 2)
+                                    .stroke(active
+                                            ? WSColor.duoOrangeDark
+                                            : (i == todayIndex ? WSColor.brandPrimary : Color.clear),
+                                            lineWidth: 2)
                             )
                             .frame(width: 26, height: 26)
                         if active {
@@ -358,7 +313,7 @@ struct WSHeartsRow: View {
             ForEach(0..<total, id: \.self) { i in
                 Image(systemName: i < lives ? "heart.fill" : "heart")
                     .font(.system(size: 16, weight: .heavy))
-                    .foregroundStyle(i < lives ? Color(hex: 0xEF4444) : Color(hex: 0xCBD5E1))
+                    .foregroundStyle(i < lives ? WSColor.duoRed : Color(hex: 0xCBD5E1))
                     .scaleEffect(i < lives ? 1.0 : 0.95)
             }
         }
@@ -391,7 +346,7 @@ struct WSHeartsRow: View {
             WSStreakWeekStrip(days: [true, true, false, true, true, false, false], todayIndex: 6)
             HStack(spacing: 10) {
                 WSGemChip(count: 1240)
-                WSGemChip(count: 4, icon: "heart.fill", tint: Color(hex: 0xEF4444))
+                WSGemChip(count: 4, icon: "heart.fill", tint: WSColor.duoRed)
                 WSHeartsRow(lives: 3, total: 5)
             }
         }

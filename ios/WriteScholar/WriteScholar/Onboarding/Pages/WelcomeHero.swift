@@ -2,8 +2,9 @@
 //  WelcomeHero.swift
 //  WriteScholar
 //
-//  Page 1 — animated dancing mascot inside a violet halo, with floating
-//  brand sparkles. Matches the web hero's mascot-aside aesthetic.
+//  Page 1 -- animated dancing mascot inside a chunky green card,
+//  with floating Duolingo-colored sparkle icons around the outside.
+//  Bold, playful, Duolingo-style welcome.
 //
 
 import SwiftUI
@@ -12,52 +13,57 @@ struct WelcomeHero: View {
     let progress: CGFloat
 
     @State private var bobOffset: CGFloat = 0
-    @State private var glowScale: CGFloat = 0.85
+    @State private var glowPulse: CGFloat = 0.92
     @State private var sparklesAppeared = false
 
     var body: some View {
         ZStack {
-            // Outer pulsing brand glow
+            // Outer pulsing green glow ring
             Circle()
                 .fill(
                     RadialGradient(
                         colors: [
-                            Color(hex: 0x7C3AED, opacity: 0.55),
-                            Color(hex: 0xD946EF, opacity: 0.30),
+                            WSColor.duoGreen.opacity(0.35),
+                            WSColor.duoGreen.opacity(0.10),
                             .clear
                         ],
                         center: .center,
                         startRadius: 10,
-                        endRadius: 240
+                        endRadius: 200
                     )
                 )
-                .frame(width: 380, height: 380)
-                .scaleEffect(glowScale)
-                .blur(radius: 18)
+                .frame(width: 360, height: 360)
+                .scaleEffect(glowPulse)
+                .blur(radius: 12)
+                .wsStaggerEntry(0)
 
-            // Soft white disc backing the mascot
-            Circle()
-                .fill(WSColor.backgroundElevated)
-                .frame(width: 240, height: 240)
-                .shadow(color: Color(hex: 0x7C3AED, opacity: 0.30), radius: 36, y: 18)
-                .overlay(
-                    Circle().stroke(WSColor.brandSoft, lineWidth: 1)
-                )
+            // Chunky mascot card
+            VStack(spacing: 0) {
+                // Real animated WebP mascot (dancing)
+                WSAnimatedImage(name: "mascot-dance", ext: "webp")
+                    .frame(width: 200, height: 200)
+                    .offset(y: bobOffset)
+            }
+            .frame(width: 240, height: 240)
+            .wsChunkyCard(
+                cornerRadius: 120,
+                horizontalPadding: 0,
+                verticalPadding: 0,
+                lipHeight: 7,
+                accent: WSColor.duoGreen
+            )
+            .wsStaggerEntry(1)
 
-            // Real animated WebP mascot (dancing)
-            WSAnimatedImage(name: "mascot-dance", ext: "webp")
-                .frame(width: 220, height: 220)
-                .offset(y: bobOffset)
-
-            // Floating brand sparkles, layered around the mascot
+            // Floating Duolingo-colored sparkles around the mascot
             sparkleLayer
+                .wsStaggerEntry(2)
         }
         .onAppear {
             withAnimation(.easeInOut(duration: 2.6).repeatForever(autoreverses: true)) {
                 bobOffset = -10
             }
             withAnimation(.easeInOut(duration: 3.4).repeatForever(autoreverses: true)) {
-                glowScale = 1.12
+                glowPulse = 1.08
             }
             withAnimation(.easeOut(duration: 0.9).delay(0.2)) {
                 sparklesAppeared = true
@@ -67,10 +73,11 @@ struct WelcomeHero: View {
 
     private var sparkleLayer: some View {
         ZStack {
-            sparkle(symbol: "sparkle",  size: 22, color: Color(hex: 0xFBBF24), x: -110, y: -90)
-            sparkle(symbol: "sparkles", size: 30, color: Color(hex: 0xD946EF), x:  100, y: -100)
-            sparkle(symbol: "sparkle",  size: 18, color: Color(hex: 0x6366F1), x:  120, y:  80)
-            sparkle(symbol: "sparkle",  size: 16, color: Color(hex: 0x10B981), x: -130, y:  50)
+            sparkle(symbol: "star.fill",    size: 22, color: WSColor.duoOrange,  x: -120, y: -100)
+            sparkle(symbol: "sparkles",     size: 28, color: WSColor.duoPurple,  x:  110, y: -110)
+            sparkle(symbol: "star.fill",    size: 16, color: WSColor.duoBlue,    x:  130, y:   70)
+            sparkle(symbol: "star.fill",    size: 18, color: WSColor.duoGreen,   x: -140, y:   50)
+            sparkle(symbol: "heart.fill",   size: 14, color: WSColor.duoRed,     x:   60, y:  120)
         }
         .opacity(sparklesAppeared ? 1 : 0)
     }
@@ -79,7 +86,7 @@ struct WelcomeHero: View {
         Image(systemName: symbol)
             .font(.system(size: size, weight: .bold))
             .foregroundStyle(color)
-            .shadow(color: color.opacity(0.55), radius: 8)
+            .shadow(color: color.opacity(0.4), radius: 6)
             .offset(x: x, y: y)
     }
 }

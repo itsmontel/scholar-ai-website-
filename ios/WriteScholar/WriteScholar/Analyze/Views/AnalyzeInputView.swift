@@ -5,7 +5,7 @@
 //  Entry point for the Analyze tab. Paste an essay (200+ words), pick a
 //  grading style, hit Analyze. Hits POST /api/analysis/analyze with
 //  analysisType=comprehensive. Document upload (PDF/DOCX) lands in a
-//  later pass — paste-only for now keeps the surface focused.
+//  later pass -- paste-only for now keeps the surface focused.
 //
 
 import SwiftUI
@@ -26,21 +26,7 @@ struct AnalyzeInputView: View {
 
     var body: some View {
         ZStack {
-            WSGradient.heroBackdrop.ignoresSafeArea()
-
-            // Soft brand orbs
-            Circle()
-                .fill(WSColor.brandPrimary.opacity(0.14))
-                .frame(width: 320, height: 320)
-                .blur(radius: 70)
-                .offset(x: -180, y: -260)
-                .ignoresSafeArea()
-            Circle()
-                .fill(Color(hex: 0x10B981).opacity(0.10))
-                .frame(width: 320, height: 320)
-                .blur(radius: 70)
-                .offset(x: 200, y: 320)
-                .ignoresSafeArea()
+            WSColor.duoSurface.ignoresSafeArea()
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
@@ -64,22 +50,22 @@ struct AnalyzeInputView: View {
             HStack(spacing: 10) {
                 Text("ANALYZE PAPER")
                     .wsEyebrow()
-                    .foregroundStyle(WSColor.brandPrimary)
+                    .foregroundStyle(.white)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
-                    .background(Capsule().fill(WSColor.brandSoft))
+                    .background(Capsule().fill(WSColor.duoPurple))
                 Spacer()
                 WSAnimatedImage(name: "mascot-paper", ext: "webp")
                     .frame(width: 56, height: 56)
-                    .shadow(color: WSColor.brandPrimary.opacity(0.25), radius: 8, y: 4)
+                    .shadow(color: WSColor.duoPurple.opacity(0.25), radius: 8, y: 4)
             }
 
             Text("Professor-style feedback in 60 seconds")
-                .wsHeadline(.large, weight: .semibold)
-                .foregroundStyle(WSColor.foreground)
+                .wsHeadline(.large, weight: .black)
+                .foregroundStyle(WSColor.duoText)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            Text("Paste your essay or draft. We grade structure, clarity, argument, and citations — section by section.")
+            Text("Paste your essay or draft. We grade structure, clarity, argument, and citations -- section by section.")
                 .wsBody(.medium)
                 .foregroundStyle(WSColor.foregroundMuted)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -90,26 +76,26 @@ struct AnalyzeInputView: View {
 
     private var inputCard: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Faux browser top-strip — same chrome as the web's tool cards
+            // Faux browser top-strip
             HStack(spacing: 6) {
-                Circle().fill(Color(hex: 0xEF4444)).frame(width: 8, height: 8)
-                Circle().fill(Color(hex: 0xF59E0B)).frame(width: 8, height: 8)
-                Circle().fill(Color(hex: 0x10B981)).frame(width: 8, height: 8)
+                Circle().fill(WSColor.duoRed).frame(width: 8, height: 8)
+                Circle().fill(WSColor.duoOrange).frame(width: 8, height: 8)
+                Circle().fill(WSColor.duoGreen).frame(width: 8, height: 8)
                 Spacer()
-                Text("writescholar.com · analyze")
+                Text("writescholar.com . analyze")
                     .wsBody(.caption, weight: .semibold)
                     .foregroundStyle(WSColor.foregroundMuted)
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .background(WSColor.surface)
+            .background(WSColor.duoSurface)
             .overlay(alignment: .bottom) {
-                Rectangle().fill(WSColor.hairline).frame(height: 1)
+                Rectangle().fill(WSColor.duoBorder).frame(height: 1)
             }
 
             ZStack(alignment: .topLeading) {
                 if text.isEmpty {
-                    Text("Paste your essay here…\n\nIntroduction, body paragraphs, conclusion. 200 words minimum so we can give you real feedback.")
+                    Text("Paste your essay here...\n\nIntroduction, body paragraphs, conclusion. 200 words minimum so we can give you real feedback.")
                         .wsBody(.medium)
                         .foregroundStyle(WSColor.foregroundMuted.opacity(0.7))
                         .padding(.horizontal, 18)
@@ -123,17 +109,17 @@ struct AnalyzeInputView: View {
                     .padding(.vertical, 10)
                     .frame(minHeight: 240, maxHeight: 360)
                     .wsBody(.medium)
-                    .foregroundStyle(WSColor.foreground)
+                    .foregroundStyle(WSColor.duoText)
             }
 
             HStack(spacing: 10) {
                 Text("\(wordCount) words")
                     .wsBody(.caption, weight: .semibold)
-                    .foregroundStyle(wordCount >= 200 ? WSColor.strong : WSColor.foregroundMuted)
+                    .foregroundStyle(wordCount >= 200 ? WSColor.duoGreen : WSColor.foregroundMuted)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 4)
                     .background(
-                        Capsule().fill(wordCount >= 200 ? WSColor.strong.opacity(0.14) : WSColor.surface)
+                        Capsule().fill(wordCount >= 200 ? WSColor.duoGreenLight : WSColor.duoSurface)
                     )
 
                 Text("Min 200")
@@ -150,7 +136,7 @@ struct AnalyzeInputView: View {
                 } label: {
                     Label("Paste", systemImage: "doc.on.clipboard")
                         .wsBody(.caption, weight: .bold)
-                        .foregroundStyle(WSColor.brandPrimary)
+                        .foregroundStyle(WSColor.duoPurple)
                 }
                 .buttonStyle(.plain)
 
@@ -168,19 +154,16 @@ struct AnalyzeInputView: View {
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .background(WSColor.surface)
+            .background(WSColor.duoSurface)
             .overlay(alignment: .top) {
-                Rectangle().fill(WSColor.hairline).frame(height: 1)
+                Rectangle().fill(WSColor.duoBorder).frame(height: 1)
             }
         }
-        .background(
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .fill(WSColor.backgroundElevated)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 22, style: .continuous)
-                        .stroke(WSColor.hairline, lineWidth: 1)
-                )
-                .shadow(color: WSColor.brandPrimary.opacity(0.18), radius: 22, y: 10)
+        .wsChunkyCard(
+            cornerRadius: 22,
+            horizontalPadding: 0,
+            verticalPadding: 0,
+            accent: WSColor.duoPurple
         )
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
     }
@@ -190,8 +173,8 @@ struct AnalyzeInputView: View {
     private var gradingStyleRow: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Grading style")
-                .wsBody(.small, weight: .bold)
-                .foregroundStyle(WSColor.foreground)
+                .wsBody(.small, weight: .black)
+                .foregroundStyle(WSColor.duoText)
 
             HStack(spacing: 8) {
                 ForEach(AnalyzeAPI.GradingStyle.allCases) { style in
@@ -204,16 +187,16 @@ struct AnalyzeInputView: View {
                     } label: {
                         Text(style.label)
                             .wsBody(.caption, weight: .bold)
-                            .foregroundStyle(active ? .white : WSColor.foreground)
+                            .foregroundStyle(active ? .white : WSColor.duoText)
                             .padding(.horizontal, 14)
                             .padding(.vertical, 8)
                             .background(
                                 Capsule()
-                                    .fill(active ? AnyShapeStyle(WSGradient.brand) : AnyShapeStyle(WSColor.backgroundElevated))
+                                    .fill(active ? WSColor.duoPurple : WSColor.backgroundElevated)
                                     .overlay(
-                                        Capsule().stroke(active ? .clear : WSColor.hairline, lineWidth: 1)
+                                        Capsule().stroke(active ? .clear : WSColor.duoBorder, lineWidth: 2)
                                     )
-                                    .shadow(color: active ? WSColor.brandPrimary.opacity(0.3) : .clear, radius: 8, y: 3)
+                                    .shadow(color: active ? WSColor.duoPurple.opacity(0.3) : .clear, radius: 8, y: 3)
                             )
                     }
                     .buttonStyle(.plain)
@@ -230,7 +213,7 @@ struct AnalyzeInputView: View {
             if let err = coordinator.errorMessage {
                 Text(err)
                     .wsBody(.small, weight: .semibold)
-                    .foregroundStyle(WSColor.concern)
+                    .foregroundStyle(WSColor.duoRed)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 4)
             }
@@ -244,18 +227,18 @@ struct AnalyzeInputView: View {
                     Text("Analyze paper")
                 }
             }
-            .buttonStyle(WSPrimaryButtonStyle())
+            .buttonStyle(WSDuoSuccessButtonStyle())
             .disabled(!canSubmit)
             .opacity(canSubmit ? 1 : 0.55)
 
             HStack(spacing: 14) {
-                feedbackChip(label: "Strong", color: WSColor.strong)
-                feedbackChip(label: "Revise", color: WSColor.revise)
-                feedbackChip(label: "Concern", color: WSColor.concern)
+                feedbackChip(label: "Strong", color: WSColor.duoGreen)
+                feedbackChip(label: "Revise", color: WSColor.duoOrange)
+                feedbackChip(label: "Concern", color: WSColor.duoRed)
             }
             .padding(.top, 4)
 
-            Text("Free plan: 2 analyses/month · Encrypted in transit · Cancel anytime")
+            Text("Free plan: 2 analyses/month . Encrypted in transit . Cancel anytime")
                 .wsBody(.caption)
                 .foregroundStyle(WSColor.foregroundMuted)
                 .frame(maxWidth: .infinity, alignment: .center)
@@ -271,7 +254,7 @@ struct AnalyzeInputView: View {
                 .shadow(color: color.opacity(0.6), radius: 4)
             Text(label)
                 .wsBody(.caption, weight: .bold)
-                .foregroundStyle(WSColor.foreground)
+                .foregroundStyle(WSColor.duoText)
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 6)

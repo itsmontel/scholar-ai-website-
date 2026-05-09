@@ -41,27 +41,20 @@ struct StudyPackHomeView: View {
 
         var tint: Color {
             switch self {
-            case .notes:      return WSColor.foregroundMuted
-            case .lesson:     return Color(hex: 0x6366F1)
-            case .flashcards: return Color(hex: 0x7C3AED)
-            case .quiz:       return Color(hex: 0xD946EF)
-            case .crossword:  return Color(hex: 0xF59E0B)
-            case .crater:     return Color(hex: 0xEF4444)
-            case .wordTower:  return Color(hex: 0x10B981)
+            case .notes:      return WSColor.duoBorder
+            case .lesson:     return WSColor.duoGreen
+            case .flashcards: return WSColor.duoBlue
+            case .quiz:       return WSColor.duoPurple
+            case .crossword:  return WSColor.duoRed
+            case .crater:     return WSColor.duoOrange
+            case .wordTower:  return WSColor.duoGreen
             }
         }
     }
 
     var body: some View {
         ZStack {
-            // Subtle brand backdrop matching the rest of the app
-            WSGradient.heroBackdrop.ignoresSafeArea()
-            Circle()
-                .fill(selectedTab.tint.opacity(0.10))
-                .frame(width: 320, height: 320)
-                .blur(radius: 80)
-                .offset(x: -180, y: -260)
-                .ignoresSafeArea()
+            WSColor.duoSurface.ignoresSafeArea()
 
             VStack(spacing: 0) {
                 packHeader
@@ -85,16 +78,17 @@ struct StudyPackHomeView: View {
             HStack(alignment: .top, spacing: 10) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("STUDY PACK")
-                        .font(.system(size: 10, weight: .black, design: .rounded))
-                        .tracking(0.7)
-                        .foregroundStyle(WSColor.brandPrimary)
+                        .font(WSFont.sans(10, weight: .black))
+                        .tracking(2.2)
+                        .textCase(.uppercase)
+                        .foregroundStyle(WSColor.duoGreen)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 3)
-                        .background(Capsule().fill(WSColor.brandSoft))
+                        .background(Capsule().fill(WSColor.duoGreenLight))
 
                     Text(pack.displayTitle)
-                        .font(.system(size: 24, weight: .black, design: .rounded))
-                        .foregroundStyle(WSColor.foreground)
+                        .font(WSFont.headline(24, weight: .black))
+                        .foregroundStyle(WSColor.duoText)
                         .lineLimit(2)
                 }
                 Spacer()
@@ -110,7 +104,7 @@ struct StudyPackHomeView: View {
                 .buttonStyle(WSDuoPillButtonStyle(palette: .secondary))
             }
 
-            // Inventory chip row — quick glance at what the pack contains
+            // Inventory chip row
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
                     if let lesson = pack.lesson {
@@ -139,18 +133,18 @@ struct StudyPackHomeView: View {
     private func countChip(icon: String, label: String, color: Color) -> some View {
         HStack(spacing: 5) {
             Image(systemName: icon).foregroundStyle(color).font(.system(size: 11, weight: .heavy))
-            Text(label).font(.system(size: 11, weight: .black, design: .rounded)).foregroundStyle(WSColor.foreground)
+            Text(label).font(WSFont.sans(11, weight: .black)).foregroundStyle(WSColor.duoText)
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
         .background(
             Capsule()
                 .fill(color.opacity(0.13))
-                .overlay(Capsule().stroke(color.opacity(0.30), lineWidth: 0.5))
+                .overlay(Capsule().stroke(color.opacity(0.30), lineWidth: 2))
         )
     }
 
-    // MARK: - Tab strip (horizontally scrollable, web-style)
+    // MARK: - Tab strip (horizontally scrollable Duolingo-style pills)
 
     private var tabStrip: some View {
         ScrollViewReader { reader in
@@ -181,40 +175,34 @@ struct StudyPackHomeView: View {
         let isAvailable = tabIsAvailable(tab)
 
         ZStack(alignment: .top) {
-            // 3D base lip — only when active to keep the row visually calm
+            // 3D base lip for the active pill
             if active {
                 Capsule()
-                    .fill(tab.tint.opacity(0.55))
+                    .fill(tab == .notes ? WSColor.duoBorder : tab.tint.opacity(0.55))
                     .padding(.top, 3)
-                    .blendMode(.multiply)
             }
 
             HStack(spacing: 6) {
                 Image(systemName: tab.icon)
                     .font(.system(size: 12, weight: .heavy))
                 Text(tab.rawValue)
-                    .font(.system(size: 12, weight: .black, design: .rounded))
+                    .font(WSFont.sans(12, weight: .black))
                 if !isAvailable && tab != .notes {
                     Image(systemName: "lock.fill")
                         .font(.system(size: 9, weight: .heavy))
                         .opacity(0.7)
                 }
             }
-            .foregroundStyle(active ? .white : tab.tint)
+            .foregroundStyle(active ? .white : (tab == .notes ? WSColor.duoText : tab.tint))
             .padding(.horizontal, 13)
             .padding(.vertical, 9)
             .background(
                 Capsule()
-                    .fill(
-                        active
-                            ? AnyShapeStyle(LinearGradient(colors: [tab.tint, tab.tint.opacity(0.78)],
-                                                           startPoint: .topLeading, endPoint: .bottomTrailing))
-                            : AnyShapeStyle(WSColor.backgroundElevated)
-                    )
+                    .fill(active ? tab.tint : WSColor.backgroundElevated)
                     .overlay(
-                        Capsule().stroke(active ? .white.opacity(0.25) : tab.tint.opacity(0.30), lineWidth: 1)
+                        Capsule().stroke(active ? .clear : WSColor.duoBorder, lineWidth: 2)
                     )
-                    .shadow(color: active ? tab.tint.opacity(0.40) : .clear, radius: active ? 8 : 0, y: 3)
+                    .shadow(color: active ? tab.tint.opacity(0.35) : .clear, radius: active ? 6 : 0, y: 2)
             )
         }
         .compositingGroup()
@@ -278,16 +266,19 @@ struct StudyPackHomeView: View {
                     Image(systemName: "doc.text")
                         .foregroundStyle(WSColor.foregroundMuted)
                     Text("Original notes")
-                        .wsBody(.medium, weight: .bold)
-                        .foregroundStyle(WSColor.foreground)
+                        .font(WSFont.sans(15, weight: .bold))
+                        .foregroundStyle(WSColor.duoText)
                 }
                 Text(pack.originalNotes ?? "No notes available.")
-                    .wsBody(.medium)
-                    .foregroundStyle(WSColor.foreground.opacity(0.92))
+                    .font(WSFont.sans(15))
+                    .foregroundStyle(WSColor.duoText.opacity(0.92))
                     .lineSpacing(4)
             }
             .padding(20)
             .frame(maxWidth: .infinity, alignment: .leading)
+            .wsChunkyCard(accent: WSColor.duoBorder)
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
         }
     }
 
@@ -295,18 +286,21 @@ struct StudyPackHomeView: View {
         VStack(spacing: 18) {
             ZStack {
                 Circle()
-                    .fill(WSColor.surface)
+                    .fill(WSColor.duoSurface)
                     .frame(width: 130, height: 130)
+                    .overlay(
+                        Circle().stroke(WSColor.duoBorder, lineWidth: 3)
+                    )
                 Image(systemName: "lock.fill")
                     .font(.system(size: 48, weight: .heavy))
-                    .foregroundStyle(WSColor.foregroundMuted)
+                    .foregroundStyle(WSColor.duoBorder)
             }
             VStack(spacing: 4) {
                 Text("\(tab.rawValue) is a Pro feature")
-                    .font(.system(size: 22, weight: .black, design: .rounded))
-                    .foregroundStyle(WSColor.foreground)
+                    .font(WSFont.headline(22, weight: .black))
+                    .foregroundStyle(WSColor.duoText)
                 Text("Upgrade in Settings to unlock the full study pack.")
-                    .wsBody(.small)
+                    .font(WSFont.sans(13))
                     .foregroundStyle(WSColor.foregroundMuted)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
@@ -319,6 +313,7 @@ struct StudyPackHomeView: View {
                 Label("Upgrade to Pro", systemImage: "crown.fill")
             }
             .buttonStyle(WSDuoWarnButtonStyle(fullWidth: false))
+            .wsShineSweep()
             .padding(.top, 4)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -330,30 +325,22 @@ struct StudyPackHomeView: View {
         return VStack(spacing: 18) {
             ZStack {
                 Circle()
-                    .fill(
-                        RadialGradient(colors: [tab.tint.opacity(0.30), .clear],
-                                       center: .center, startRadius: 6, endRadius: 100)
-                    )
-                    .frame(width: 200, height: 200)
-                    .blur(radius: 8)
-                Circle()
-                    .fill(LinearGradient(colors: [tab.tint, tab.tint.opacity(0.78)],
-                                         startPoint: .topLeading, endPoint: .bottomTrailing))
+                    .fill(WSColor.duoRedLight)
                     .frame(width: 130, height: 130)
-                    .overlay(Circle().stroke(.white.opacity(0.30), lineWidth: 2))
-                    .shadow(color: tab.tint.opacity(0.45), radius: 14, y: 6)
+                    .overlay(Circle().stroke(WSColor.duoRed, lineWidth: 3))
+                    .shadow(color: WSColor.duoRed.opacity(0.35), radius: 14, y: 6)
                 Image(systemName: tab.icon)
                     .font(.system(size: 48, weight: .heavy))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(WSColor.duoRed)
             }
 
             VStack(spacing: 4) {
                 Text("Crossword")
-                    .font(.system(size: 24, weight: .black, design: .rounded))
-                    .foregroundStyle(WSColor.foreground)
+                    .font(WSFont.headline(24, weight: .black))
+                    .foregroundStyle(WSColor.duoText)
 
                 Text("Crossword grids are best on a wider canvas — pop it open on writescholar.com to play.")
-                    .wsBody(.medium)
+                    .font(WSFont.sans(15))
                     .foregroundStyle(WSColor.foregroundMuted)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)

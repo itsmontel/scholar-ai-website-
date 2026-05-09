@@ -57,9 +57,9 @@ enum LibraryItemKind: String, Codable, CaseIterable, Identifiable {
     /// Solid brand-aligned tint used on the icon circle + side stripe.
     var tint: Color {
         switch self {
-        case .studyPack:     return WSColor.brandPrimary           // violet
-        case .essayAnalysis: return Color(hex: 0x6366F1)           // indigo
-        case .document:      return Color(hex: 0xF59E0B)           // amber
+        case .studyPack:     return WSColor.duoPurple
+        case .essayAnalysis: return WSColor.duoBlue
+        case .document:      return WSColor.duoOrange
         }
     }
 
@@ -67,11 +67,11 @@ enum LibraryItemKind: String, Codable, CaseIterable, Identifiable {
     var heroGradient: [Color] {
         switch self {
         case .studyPack:
-            return [Color(hex: 0x7C3AED), Color(hex: 0xD946EF)]
+            return [WSColor.duoPurple, WSColor.duoPurpleDark]
         case .essayAnalysis:
-            return [Color(hex: 0x6366F1), Color(hex: 0x0EA5E9)]
+            return [WSColor.duoBlue, WSColor.duoBlueDark]
         case .document:
-            return [Color(hex: 0xF59E0B), Color(hex: 0xEF4444)]
+            return [WSColor.duoOrange, WSColor.duoOrangeDark]
         }
     }
 
@@ -250,10 +250,10 @@ enum LibraryFilter: String, CaseIterable, Identifiable, Hashable {
 
     var tint: Color {
         switch self {
-        case .all:         return WSColor.brandPrimary
-        case .studyPacks:  return WSColor.brandPrimary
-        case .essays:      return Color(hex: 0x6366F1)
-        case .documents:   return Color(hex: 0xF59E0B)
+        case .all:         return WSColor.duoPurple
+        case .studyPacks:  return WSColor.duoBlue
+        case .essays:      return WSColor.duoOrange
+        case .documents:   return WSColor.duoGreen
         }
     }
 

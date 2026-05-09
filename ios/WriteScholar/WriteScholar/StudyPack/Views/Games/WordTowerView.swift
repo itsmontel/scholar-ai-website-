@@ -53,6 +53,7 @@ struct WordTowerView: View {
     @State private var blocksThisRound = 0
     @State private var blocksResolvedThisRound = 0
     @State private var roundActive = false
+    @State private var wrongShakeTrigger = 0
 
     private var question: WordTowerQuestion? {
         guard wordTower.questions.indices.contains(qIndex) else { return nil }
@@ -100,7 +101,7 @@ struct WordTowerView: View {
     var body: some View {
         GeometryReader { geo in
             ZStack {
-                cosmicBackdrop
+                duoBackdrop
 
                 switch gameState {
                 case .playing, .collapsing:
@@ -120,16 +121,21 @@ struct WordTowerView: View {
         .onAppear { startRound() }
     }
 
-    // MARK: - Cosmic backdrop (matches desktop purple/violet)
+    // MARK: - Duolingo-style backdrop (blue-tinted dark)
 
-    private var cosmicBackdrop: some View {
+    private var duoBackdrop: some View {
         ZStack {
             LinearGradient(
-                colors: [Color(hex: 0x0F0A26), Color(hex: 0x1E1B4B), Color(hex: 0x4C1D95)],
+                colors: [
+                    Color(hex: 0x0F1A2E),
+                    WSColor.duoBlueDark.opacity(0.20),
+                    Color(hex: 0x0F1A2E)
+                ],
                 startPoint: .top, endPoint: .bottom
             )
             .ignoresSafeArea()
 
+            // Subtle star dots
             Canvas { ctx, size in
                 for i in 0..<50 {
                     let seed = Double(i) * 137.508
@@ -145,12 +151,6 @@ struct WordTowerView: View {
             }
             .ignoresSafeArea()
             .allowsHitTesting(false)
-
-            Circle()
-                .fill(Color(hex: 0xFDE68A).opacity(0.35))
-                .frame(width: 60, height: 60)
-                .blur(radius: 1)
-                .offset(x: 100, y: -280)
         }
     }
 
@@ -172,77 +172,112 @@ struct WordTowerView: View {
         }
     }
 
-    // MARK: - HUD
+    // MARK: - HUD (Duolingo-style)
 
     private var hudBar: some View {
         HStack(spacing: 10) {
+            // Question counter pill
             HStack(spacing: 4) {
+                Image(systemName: "questionmark.circle.fill")
+                    .foregroundStyle(WSColor.duoBlue)
                 Text("Q\(qIndex + 1)/\(wordTower.questions.count)")
-                    .wsBody(.caption, weight: .bold)
+                    .font(WSFont.sans(12, weight: .bold))
                     .foregroundStyle(.white)
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 5)
-            .background(Capsule().fill(Color.white.opacity(0.10)))
+            .background(
+                Capsule().fill(Color.white.opacity(0.12))
+                    .overlay(Capsule().stroke(Color.white.opacity(0.08), lineWidth: 1))
+            )
 
+            // Tower floor counter
             HStack(spacing: 4) {
-                Image(systemName: "building.2.fill").foregroundStyle(Color(hex: 0x10B981))
+                Image(systemName: "building.2.fill").foregroundStyle(WSColor.duoGreen)
                 Text("\(towerBlocks.count)")
-                    .wsBody(.small, weight: .bold)
+                    .font(WSFont.sans(13, weight: .bold))
                     .foregroundStyle(.white)
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 5)
-            .background(Capsule().fill(Color.white.opacity(0.10)))
+            .background(
+                Capsule().fill(Color.white.opacity(0.12))
+                    .overlay(Capsule().stroke(WSColor.duoGreen.opacity(0.2), lineWidth: 1))
+            )
 
             Spacer()
 
+            // Score
             Text("\(score)")
-                .font(.system(size: 28, weight: .black, design: .rounded))
-                .foregroundStyle(.white)
-                .shadow(color: Color(hex: 0xA78BFA).opacity(0.4), radius: 10)
+                .font(WSFont.headline(28, weight: .black))
+                .foregroundStyle(WSColor.duoBlue)
+                .shadow(color: WSColor.duoBlue.opacity(0.4), radius: 8)
 
             Spacer()
 
+            // Streak flame
             if streak >= 3 {
                 HStack(spacing: 4) {
-                    Image(systemName: "flame.fill").foregroundStyle(Color(hex: 0x8B5CF6))
+                    Image(systemName: "flame.fill").foregroundStyle(WSColor.duoOrange)
                     Text("\(streak)x")
-                        .wsBody(.small, weight: .bold)
+                        .font(WSFont.sans(13, weight: .bold))
                         .foregroundStyle(.white)
                 }
                 .padding(.horizontal, 8)
                 .padding(.vertical, 4)
-                .background(Capsule().fill(Color(hex: 0x8B5CF6).opacity(0.20)))
+                .background(
+                    Capsule().fill(WSColor.duoOrange.opacity(0.25))
+                        .overlay(Capsule().stroke(WSColor.duoOrange.opacity(0.4), lineWidth: 1))
+                )
             }
 
-            HStack(spacing: 4) {
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .foregroundStyle(mistakes >= 5 ? Color(hex: 0xEF4444) : mistakes >= 3 ? Color(hex: 0xFBBF24) : Color.white.opacity(0.5))
-                Text("\(mistakes)/\(maxMistakes)")
-                    .wsBody(.caption, weight: .bold)
-                    .foregroundStyle(.white)
+            // Mistakes / lives (hearts-style)
+            HStack(spacing: 3) {
+                ForEach(0..<maxMistakes, id: \.self) { i in
+                    Circle()
+                        .fill(i < mistakes
+                              ? WSColor.duoRed
+                              : Color.white.opacity(0.15))
+                        .frame(width: 8, height: 8)
+                        .overlay(
+                            Circle()
+                                .stroke(i < mistakes ? WSColor.duoRedDark : Color.white.opacity(0.08), lineWidth: 1)
+                        )
+                }
             }
             .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(Capsule().fill(Color.white.opacity(0.10)))
+            .padding(.vertical, 6)
+            .background(
+                Capsule().fill(Color.white.opacity(0.08))
+                    .overlay(Capsule().stroke(Color.white.opacity(0.06), lineWidth: 1))
+            )
         }
     }
 
-    // MARK: - Question card
+    // MARK: - Question card (Duo-style, no serif)
 
     private func questionCard(_ prompt: String) -> some View {
         Text(prompt)
-            .font(.custom("Georgia", size: 18))
-            .fontWeight(.semibold)
+            .font(WSFont.sans(18, weight: .bold))
             .foregroundStyle(.white)
             .multilineTextAlignment(.center)
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
             .frame(maxWidth: .infinity)
             .background(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(Color.white.opacity(0.05))
+                ZStack(alignment: .top) {
+                    // Bottom lip
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .fill(Color.white.opacity(0.06))
+                        .padding(.top, 4)
+                    // Top face
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .fill(Color.white.opacity(0.10))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .stroke(Color.white.opacity(0.10), lineWidth: 1.5)
+                        )
+                }
             )
     }
 
@@ -267,8 +302,8 @@ struct WordTowerView: View {
 
             ForEach(scorePopups) { popup in
                 Text("+\(popup.points)")
-                    .font(.system(size: 18, weight: .black))
-                    .foregroundStyle(Color(hex: 0x10B981))
+                    .font(WSFont.headline(18, weight: .black))
+                    .foregroundStyle(WSColor.duoGreen)
                     .shadow(color: .black.opacity(0.6), radius: 4)
                     .position(x: popup.x, y: popup.y)
                     .transition(.opacity)
@@ -294,7 +329,7 @@ struct WordTowerView: View {
         }
     }
 
-    // MARK: - Falling block view
+    // MARK: - Falling block view (chunky 3D Duo-blue tiles)
 
     private func fallingBlockView(block: FallingBlock, areaWidth: CGFloat, areaHeight: CGFloat) -> some View {
         let elapsed = Date().timeIntervalSince(block.spawnTime)
@@ -302,26 +337,38 @@ struct WordTowerView: View {
         let yPos = -blockHeight + progress * (areaHeight + blockHeight)
         let xPos = block.xRatio * areaWidth
 
-        return Text(block.text)
-            .font(.system(size: block.text.count > 12 ? 11 : block.text.count > 8 ? 12 : 13, weight: .bold))
-            .foregroundStyle(Color(hex: 0x1C1917))
-            .lineLimit(2)
-            .minimumScaleFactor(0.7)
-            .multilineTextAlignment(.center)
-            .frame(width: blockWidth - 16, height: blockHeight - 8)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .fill(LinearGradient(colors: [Color(hex: 0xFFFEFB), Color(hex: 0xF5F3EE)],
-                                         startPoint: .top, endPoint: .bottom))
-                    .shadow(color: .black.opacity(0.4), radius: 8, y: 4)
-            )
-            .position(x: xPos, y: yPos)
-            .opacity(block.status == .falling ? 1 : 0)
+        return ZStack(alignment: .top) {
+            // Bottom lip (3D base)
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(WSColor.duoBlueDark)
+                .frame(width: blockWidth, height: blockHeight)
+                .offset(y: 4)
+
+            // Top face
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(WSColor.duoBlue)
+                .frame(width: blockWidth, height: blockHeight)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(Color.white.opacity(0.20), lineWidth: 1)
+                )
+
+            // Text
+            Text(block.text)
+                .font(WSFont.sans(block.text.count > 12 ? 11 : block.text.count > 8 ? 12 : 13, weight: .bold))
+                .foregroundStyle(.white)
+                .lineLimit(2)
+                .minimumScaleFactor(0.7)
+                .multilineTextAlignment(.center)
+                .frame(width: blockWidth - 16, height: blockHeight - 8)
+        }
+        .frame(width: blockWidth, height: blockHeight + 4)
+        .shadow(color: WSColor.duoBlue.opacity(0.35), radius: 6, y: 3)
+        .position(x: xPos, y: yPos)
+        .opacity(block.status == .falling ? 1 : 0)
     }
 
-    // MARK: - Tower view
+    // MARK: - Tower view (Duo green built levels)
 
     private func towerView(areaWidth: CGFloat, areaHeight: CGFloat) -> some View {
         let towerBottom = areaHeight - paddleBottomPx - paddleHeight - 12
@@ -329,39 +376,42 @@ struct WordTowerView: View {
 
         return VStack(spacing: 2) {
             ForEach(visible.reversed()) { block in
-                Text(block.text)
-                    .font(.system(size: block.text.count > 12 ? 10 : 12, weight: .heavy))
-                    .foregroundStyle(Color(hex: 0x451A03))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-                    .frame(width: blockWidth, height: blockHeight)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(towerBlockGradient(for: towerBlocks.firstIndex(where: { $0.id == block.id }) ?? 0))
-                            .shadow(color: .black.opacity(0.35), radius: 4, y: 2)
-                    )
+                ZStack(alignment: .top) {
+                    // Bottom lip
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(WSColor.duoGreenDark)
+                        .frame(width: blockWidth, height: blockHeight)
+                        .offset(y: 3)
+
+                    // Top face
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(WSColor.duoGreen)
+                        .frame(width: blockWidth, height: blockHeight)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                .stroke(Color.white.opacity(0.20), lineWidth: 1)
+                        )
+
+                    Text(block.text)
+                        .font(WSFont.sans(block.text.count > 12 ? 10 : 12, weight: .bold))
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                        .frame(width: blockWidth - 12, height: blockHeight - 8)
+                }
+                .frame(width: blockWidth, height: blockHeight + 3)
             }
         }
         .rotationEffect(.degrees(wobbleAngle), anchor: .bottom)
-        .position(x: areaWidth / 2, y: towerBottom - CGFloat(visible.count) * (blockHeight + 2) / 2)
-        .shadow(color: glowColor.opacity(0.5), radius: CGFloat(mistakes) * 3)
+        .position(x: areaWidth / 2, y: towerBottom - CGFloat(visible.count) * (blockHeight + 5) / 2)
+        .shadow(color: towerGlowColor.opacity(0.5), radius: CGFloat(mistakes) * 3)
     }
 
-    private func towerBlockGradient(for index: Int) -> LinearGradient {
-        if index % 2 == 0 {
-            return LinearGradient(colors: [Color(hex: 0xFEF3C7), Color(hex: 0xFDE68A), Color(hex: 0xFBBF24)],
-                                  startPoint: .top, endPoint: .bottom)
-        } else {
-            return LinearGradient(colors: [Color(hex: 0xFED7AA), Color(hex: 0xFDBA74), Color(hex: 0xFB923C)],
-                                  startPoint: .top, endPoint: .bottom)
-        }
-    }
-
-    private var glowColor: Color {
+    private var towerGlowColor: Color {
         if mistakes <= 2 { return .clear }
-        if mistakes <= 4 { return Color(hex: 0xFACC15) }
-        if mistakes <= 6 { return Color(hex: 0xF97316) }
-        return Color(hex: 0xEF4444)
+        if mistakes <= 4 { return WSColor.duoOrange }
+        if mistakes <= 6 { return WSColor.duoOrange }
+        return WSColor.duoRed
     }
 
     // MARK: - Collapsing tower
@@ -371,47 +421,68 @@ struct WordTowerView: View {
 
         return ZStack {
             ForEach(collapsingBlocks) { block in
-                Text(block.text)
-                    .font(.system(size: 12, weight: .heavy))
-                    .foregroundStyle(Color(hex: 0x451A03))
-                    .frame(width: blockWidth, height: blockHeight)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(LinearGradient(colors: [Color(hex: 0xFEF3C7), Color(hex: 0xFBBF24)],
-                                                 startPoint: .top, endPoint: .bottom))
-                    )
-                    .offset(x: block.xDrift, y: block.yOffset)
-                    .rotationEffect(.degrees(block.rotation))
-                    .position(x: areaWidth / 2, y: towerBottom)
+                ZStack(alignment: .top) {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(WSColor.duoGreenDark)
+                        .frame(width: blockWidth, height: blockHeight)
+                        .offset(y: 3)
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(WSColor.duoGreen)
+                        .frame(width: blockWidth, height: blockHeight)
+
+                    Text(block.text)
+                        .font(WSFont.sans(12, weight: .bold))
+                        .foregroundStyle(.white)
+                        .frame(width: blockWidth - 12, height: blockHeight - 8)
+                }
+                .frame(width: blockWidth, height: blockHeight + 3)
+                .offset(x: block.xDrift, y: block.yOffset)
+                .rotationEffect(.degrees(block.rotation))
+                .position(x: areaWidth / 2, y: towerBottom)
             }
         }
     }
 
-    // MARK: - Paddle
+    // MARK: - Paddle (Duo blue themed)
 
     private func paddleView(areaWidth: CGFloat, areaHeight: CGFloat) -> some View {
         let paddleY = areaHeight - paddleBottomPx - paddleHeight / 2
         let paddleW = areaWidth * paddleWidthRatio
 
-        let bg: LinearGradient = {
+        let topColor: Color = {
             switch paddleFlash {
-            case .good:
-                return LinearGradient(colors: [Color(hex: 0x6EE7B7), Color(hex: 0x10B981), Color(hex: 0x047857)],
-                                      startPoint: .top, endPoint: .bottom)
-            case .bad:
-                return LinearGradient(colors: [Color(hex: 0xFCA5A5), Color(hex: 0xDC2626), Color(hex: 0x991B1B)],
-                                      startPoint: .top, endPoint: .bottom)
-            case .none:
-                return LinearGradient(colors: [Color(hex: 0xC4B5FD), Color(hex: 0x8B5CF6), Color(hex: 0x6D28D9)],
-                                      startPoint: .top, endPoint: .bottom)
+            case .good:  return WSColor.duoGreen
+            case .bad:   return WSColor.duoRed
+            case .none:  return WSColor.duoBlue
             }
         }()
 
-        return Capsule()
-            .fill(bg)
-            .frame(width: max(80, min(paddleW, 240)), height: paddleHeight)
-            .shadow(color: Color(hex: 0x8B5CF6).opacity(0.5), radius: 12)
-            .position(x: paddleXRatio * areaWidth, y: paddleY)
+        let baseColor: Color = {
+            switch paddleFlash {
+            case .good:  return WSColor.duoGreenDark
+            case .bad:   return WSColor.duoRedDark
+            case .none:  return WSColor.duoBlueDark
+            }
+        }()
+
+        return ZStack(alignment: .top) {
+            // Bottom lip
+            Capsule()
+                .fill(baseColor)
+                .frame(width: max(80, min(paddleW, 240)), height: paddleHeight)
+                .offset(y: 4)
+
+            // Top face
+            Capsule()
+                .fill(topColor)
+                .frame(width: max(80, min(paddleW, 240)), height: paddleHeight)
+                .overlay(
+                    Capsule()
+                        .stroke(Color.white.opacity(0.25), lineWidth: 1)
+                )
+        }
+        .shadow(color: topColor.opacity(0.5), radius: 10)
+        .position(x: paddleXRatio * areaWidth, y: paddleY)
     }
 
     // MARK: - Wobble
@@ -520,7 +591,7 @@ struct WordTowerView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { paddleFlash = nil }
 
         withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-            screenFlash = Color(hex: 0x10B981)
+            screenFlash = WSColor.duoGreen
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             withAnimation { screenFlash = nil }
@@ -539,12 +610,13 @@ struct WordTowerView: View {
         Haptics.medium()
         mistakes += 1
         streak = 0
+        wrongShakeTrigger += 1
 
         paddleFlash = .bad
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { paddleFlash = nil }
 
         withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-            screenFlash = Color(hex: 0xEF4444)
+            screenFlash = WSColor.duoRed
         }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             withAnimation { screenFlash = nil }
@@ -632,27 +704,32 @@ struct WordTowerView: View {
         spawnRound(qIdx: qIndex)
     }
 
-    // MARK: - End screen
+    // MARK: - End screen (Duolingo celebration)
 
     private var endScreen: some View {
         VStack(spacing: 22) {
             WSAnimatedImage(name: "mascot-study", ext: "webp")
                 .frame(width: 160, height: 160)
-                .shadow(color: Color(hex: 0xEF4444).opacity(0.5), radius: 22, y: 8)
+                .shadow(color: WSColor.duoBlue.opacity(0.5), radius: 22, y: 8)
 
             VStack(spacing: 6) {
                 Text("Tower Fell at Floor \(towerBlocks.count)")
-                    .wsHeadline(.large, weight: .bold)
+                    .wsHeadline(.large, weight: .black)
                     .foregroundStyle(.white)
-                Text("Score \(score)")
-                    .wsBody(.medium, weight: .semibold)
-                    .foregroundStyle(.white.opacity(0.85))
+                Text("\(score)")
+                    .font(WSFont.headline(44, weight: .black))
+                    .foregroundStyle(WSColor.duoBlue)
+                    .shadow(color: WSColor.duoBlue.opacity(0.5), radius: 12)
+                Text("TOTAL SCORE")
+                    .font(WSFont.sans(11, weight: .black))
+                    .tracking(1.5)
+                    .foregroundStyle(.white.opacity(0.5))
             }
 
-            HStack(spacing: 16) {
-                statBox(value: "\(towerBlocks.count)", label: "Floor", color: Color(hex: 0x10B981))
-                statBox(value: "\(longestStreak)", label: "Best Streak", color: Color(hex: 0x8B5CF6))
-                statBox(value: "\(questionsAnswered)", label: "Questions", color: Color(hex: 0x6366F1))
+            HStack(spacing: 12) {
+                duoStatBox(value: "\(towerBlocks.count)", label: "Floor", color: WSColor.duoGreen)
+                duoStatBox(value: "\(longestStreak)", label: "Best Streak", color: WSColor.duoOrange)
+                duoStatBox(value: "\(questionsAnswered)", label: "Questions", color: WSColor.duoBlue)
             }
             .padding(.horizontal, 24)
 
@@ -665,7 +742,7 @@ struct WordTowerView: View {
                     Text("Play again")
                 }
             }
-            .buttonStyle(WSPrimaryButtonStyle(fullWidth: false))
+            .buttonStyle(WSDuoInfoButtonStyle(fullWidth: false))
         }
         .padding()
         .onAppear {
@@ -673,25 +750,34 @@ struct WordTowerView: View {
             DailyGoalStore.shared.record(
                 .wordTowerPlayed,
                 title: wordTower.title ?? "Word Tower",
-                subtitle: "Floor \(towerBlocks.count) · score \(score)"
+                subtitle: "Floor \(towerBlocks.count) \u{00B7} score \(score)"
             )
         }
     }
 
-    private func statBox(value: String, label: String, color: Color) -> some View {
+    private func duoStatBox(value: String, label: String, color: Color) -> some View {
         VStack(spacing: 4) {
             Text(value)
-                .font(.system(size: 24, weight: .bold))
+                .font(WSFont.headline(24, weight: .black))
                 .foregroundStyle(color)
             Text(label)
-                .wsBody(.caption, weight: .medium)
-                .foregroundStyle(.white.opacity(0.7))
+                .font(WSFont.sans(11, weight: .bold))
+                .foregroundStyle(.white.opacity(0.6))
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
         .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.white.opacity(0.08))
+            ZStack(alignment: .top) {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(color.opacity(0.08))
+                    .padding(.top, 3)
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(Color.white.opacity(0.08))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .stroke(color.opacity(0.25), lineWidth: 1.5)
+                    )
+            }
         )
     }
 
@@ -713,6 +799,7 @@ struct WordTowerView: View {
         scorePopups.removeAll()
         blocksThisRound = 0
         blocksResolvedThisRound = 0
+        wrongShakeTrigger = 0
         gameState = .playing
         startRound()
     }

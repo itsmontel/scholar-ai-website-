@@ -11,14 +11,14 @@ import SwiftUI
 
 struct AnalyzeGeneratingView: View {
     private static let steps: [(icon: String, text: String)] = [
-        ("doc.text",                  "Reading your essay…"),
-        ("text.book.closed",          "Mapping the structure…"),
-        ("checkmark.bubble",          "Checking your thesis…"),
-        ("quote.bubble",              "Reviewing transitions and tone…"),
-        ("checklist",                 "Scoring against the rubric…"),
-        ("highlighter",               "Marking strong, revise, concern…"),
-        ("books.vertical",            "Looking at citations…"),
-        ("sparkles",                  "Drafting your suggestions…")
+        ("doc.text",                  "Reading your essay..."),
+        ("text.book.closed",          "Mapping the structure..."),
+        ("checkmark.bubble",          "Checking your thesis..."),
+        ("quote.bubble",              "Reviewing transitions and tone..."),
+        ("checklist",                 "Scoring against the rubric..."),
+        ("highlighter",               "Marking strong, revise, concern..."),
+        ("books.vertical",            "Looking at citations..."),
+        ("sparkles",                  "Drafting your suggestions...")
     ]
 
     @State private var stepIndex = 0
@@ -26,43 +26,31 @@ struct AnalyzeGeneratingView: View {
 
     var body: some View {
         ZStack {
-            WSGradient.heroBackdrop.ignoresSafeArea()
-
-            // Pulsing brand glow behind the mascot
-            Circle()
-                .fill(
-                    RadialGradient(
-                        colors: [WSColor.brandPrimary.opacity(0.35), .clear],
-                        center: .center,
-                        startRadius: 20,
-                        endRadius: 260
-                    )
-                )
-                .frame(width: 460, height: 460)
-                .blur(radius: 26)
+            WSColor.duoSurface.ignoresSafeArea()
 
             VStack(spacing: 28) {
                 Spacer()
 
                 WSAnimatedImage(name: "mascot-paper", ext: "webp")
                     .frame(width: 200, height: 200)
-                    .shadow(color: WSColor.brandPrimary.opacity(0.35), radius: 28, y: 12)
+                    .shadow(color: WSColor.duoGreen.opacity(0.35), radius: 28, y: 12)
+                    .wsBobbing()
 
                 VStack(spacing: 6) {
                     Text("Reading your paper")
-                        .wsHeadline(.medium, weight: .semibold)
-                        .foregroundStyle(WSColor.foreground)
-                    Text("Usually 30–60 seconds.")
+                        .wsHeadline(.medium, weight: .black)
+                        .foregroundStyle(WSColor.duoText)
+                    Text("Usually 30-60 seconds.")
                         .wsBody(.small)
                         .foregroundStyle(WSColor.foregroundMuted)
                 }
 
                 HStack(spacing: 8) {
                     Image(systemName: Self.steps[stepIndex].icon)
-                        .foregroundStyle(WSColor.brandPrimary)
+                        .foregroundStyle(WSColor.duoGreen)
                     Text(Self.steps[stepIndex].text)
                         .wsBody(.medium, weight: .semibold)
-                        .foregroundStyle(WSColor.foreground)
+                        .foregroundStyle(WSColor.duoText)
                         .id(stepIndex)
                         .transition(.asymmetric(
                             insertion: .opacity.combined(with: .move(edge: .bottom)),
@@ -73,11 +61,10 @@ struct AnalyzeGeneratingView: View {
                 .padding(.vertical, 12)
                 .background(
                     Capsule().fill(WSColor.backgroundElevated)
-                        .overlay(Capsule().stroke(WSColor.hairline, lineWidth: 1))
+                        .overlay(Capsule().stroke(WSColor.duoBorder, lineWidth: 2))
                 )
 
-                progressBar
-                    .frame(height: 8)
+                WSProgressBar(fraction: progress, tint: WSColor.duoGreen, height: 14)
                     .padding(.horizontal, 32)
 
                 Spacer()
@@ -87,18 +74,6 @@ struct AnalyzeGeneratingView: View {
         .onAppear {
             startStepTicker()
             startProgressEasing()
-        }
-    }
-
-    private var progressBar: some View {
-        GeometryReader { geo in
-            ZStack(alignment: .leading) {
-                Capsule().fill(WSColor.surface)
-                Capsule()
-                    .fill(WSGradient.brand)
-                    .frame(width: max(8, geo.size.width * progress))
-                    .shadow(color: WSColor.brandPrimary.opacity(0.4), radius: 6, y: 1)
-            }
         }
     }
 

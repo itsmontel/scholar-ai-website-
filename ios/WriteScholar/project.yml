@@ -62,12 +62,17 @@ targets:
             localhost:
               NSExceptionAllowsInsecureHTTPLoads: true
               NSIncludesSubdomains: true
+        # Note: registered .ttf files must exist inside the bundle for
+        # iOS to load them. WSTypography.swift falls back to SF Pro Rounded
+        # gracefully when these aren't available, so this list is only
+        # populated when actual font files are present in Resources/.
+        # (EB Garamond was removed — the Duolingo redesign uses Nunito Black
+        # for headlines, never serifs.)
         UIAppFonts:
-          - "EBGaramond-Regular.ttf"
-          - "EBGaramond-Bold.ttf"
           - "Nunito-Regular.ttf"
           - "Nunito-SemiBold.ttf"
           - "Nunito-Bold.ttf"
+          - "Nunito-Black.ttf"
         # Light-status-bar so the violet hero looks right on launch
         UIStatusBarStyle: UIStatusBarStyleDarkContent
         UIViewControllerBasedStatusBarAppearance: true

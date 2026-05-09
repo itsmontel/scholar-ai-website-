@@ -2,16 +2,16 @@
 //  FocusUnlockChallenge.swift
 //  WriteScholar
 //
-//  The 5-question challenge sheet shown when the user wants to lift the
-//  Focus shield. Modes:
-//    • Quiz       — MCQ, single choice, instant feedback per question
-//    • Flashcards — front shown, tap to flip, then "Got it" / "Missed it"
+//  The 5-question challenge sheet — Duolingo lesson style.
+//  Modes:
+//    * Quiz       -- MCQ, single choice, instant feedback per question
+//    * Flashcards -- front shown, tap to flip, then "Got it" / "Missed it"
 //
 //  Settings:
-//    • Standard difficulty: 5 questions, need 4 right, 30s per question
-//    • Hard difficulty:     5 questions, need 5 right, 15s per question
+//    * Standard difficulty: 5 questions, need 4 right, 30s per question
+//    * Hard difficulty:     5 questions, need 5 right, 15s per question
 //
-//  On pass:  FocusManager.handleChallengeResult(.passed(...)) → unlock
+//  On pass:  FocusManager.handleChallengeResult(.passed(...)) -> unlock
 //            window opens, sheet dismisses, success haptic + toast
 //  On fail:  10-minute cooldown before another attempt
 //
@@ -24,11 +24,9 @@ struct FocusUnlockChallenge: View {
 
     @Environment(\.dismiss) private var dismiss
 
-    // Loaded once when the view appears
     @State private var quizQuestions: [QuizQuestion] = []
     @State private var flashcards:    [Flashcard]    = []
 
-    // Shared progress state
     @State private var index: Int = 0
     @State private var correctCount: Int = 0
     @State private var revealed: Bool = false
@@ -36,7 +34,6 @@ struct FocusUnlockChallenge: View {
     @State private var secondsLeft: Int = 30
     @State private var ticker: Timer? = nil
 
-    // Final phase
     @State private var phase: Phase = .running
 
     enum Phase: Equatable {
@@ -44,27 +41,24 @@ struct FocusUnlockChallenge: View {
         case results(FocusChallengeResult)
     }
 
-    /// Bumped once on a passing result — fires the confetti overlay so
-    /// the unlock feels like the celebration it is.
     @State private var celebrate: Int = 0
+
+    private var totalQuestions: Int {
+        manager.settings.difficulty.totalQuestions
+    }
+
+    /// Hearts = allowed mistakes. E.g. standard: 5 total, need 4, so 1 heart spare.
+    private var totalHearts: Int {
+        totalQuestions - manager.settings.difficulty.requiredCorrect
+    }
+
+    private var mistakesSoFar: Int {
+        max(0, (index + (revealed ? 1 : 0)) - correctCount - (revealed && pickedOption != nil ? 0 : 0))
+    }
 
     var body: some View {
         ZStack {
-            WSGradient.heroBackdrop.ignoresSafeArea()
-
-            // Soft brand orbs to match the rest of the app
-            Circle()
-                .fill(manager.settings.challengeType.tint.opacity(0.12))
-                .frame(width: 320, height: 320)
-                .blur(radius: 70)
-                .offset(x: -180, y: -260)
-                .ignoresSafeArea()
-            Circle()
-                .fill(WSColor.brandPrimary.opacity(0.10))
-                .frame(width: 320, height: 320)
-                .blur(radius: 70)
-                .offset(x: 200, y: 320)
-                .ignoresSafeArea()
+            WSColor.duoSurface.ignoresSafeArea()
 
             switch phase {
             case .running:
@@ -73,13 +67,12 @@ struct FocusUnlockChallenge: View {
                 resultsBody(result)
             }
 
-            // Confetti — fires only when a passing result lands.
             WSConfettiView(trigger: $celebrate)
                 .allowsHitTesting(false)
         }
         .onAppear { startChallenge() }
         .onDisappear { ticker?.invalidate() }
-        .interactiveDismissDisabled() // can't swipe away — must finish or tap "I'll wait"
+        .interactiveDismissDisabled()
     }
 
     // MARK: - Running
@@ -88,14 +81,16 @@ struct FocusUnlockChallenge: View {
         VStack(spacing: 0) {
             header
 
-            switch manager.settings.challengeType {
-            case .quiz:
-                if let q = currentQuiz {
-                    quizQuestionView(q)
-                }
-            case .flashcards:
-                if let c = currentFlashcard {
-                    flashcardView(c)
+            ScrollView {
+                switch manager.settings.challengeType {
+                case .quiz:
+                    if let q = currentQuiz {
+                        quizQuestionView(q)
+                    }
+                case .flashcards:
+                    if let c = currentFlashcard {
+                        flashcardView(c)
+                    }
                 }
             }
 
@@ -111,59 +106,52 @@ struct FocusUnlockChallenge: View {
     private var header: some View {
         VStack(spacing: 12) {
             HStack(spacing: 10) {
-                Text("UNLOCK CHALLENGE")
-                    .wsEyebrow()
-                    .foregroundStyle(manager.settings.challengeType.tint)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .background(Capsule().fill(manager.settings.challengeType.tint.opacity(0.14)))
-
-                Spacer()
-
-                // Score chip
-                HStack(spacing: 6) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(WSColor.strong)
-                    Text("\(correctCount)/\(manager.settings.difficulty.totalQuestions)")
-                        .wsBody(.caption, weight: .bold)
-                        .foregroundStyle(WSColor.foreground)
+                // Close button
+                Button {
+                    ticker?.invalidate()
+                    onFinish(.bailedOut)
+                    dismiss()
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(WSColor.duoText.opacity(0.4))
                 }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 4)
-                .background(Capsule().fill(WSColor.surface))
+
+                // Progress bar across the questions
+                WSProgressBar(
+                    fraction: Double(index) / Double(max(1, totalQuestions)),
+                    tint: WSColor.duoGreen,
+                    height: 14
+                )
+                .animation(.spring(response: 0.35), value: index)
+
+                // Hearts row (lives)
+                HStack(spacing: 2) {
+                    let missed = max(0, index - correctCount)
+                    ForEach(0..<max(1, totalHearts + 1), id: \.self) { i in
+                        Image(systemName: i < (totalHearts + 1 - missed) ? "heart.fill" : "heart")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundStyle(i < (totalHearts + 1 - missed) ? WSColor.duoRed : WSColor.duoBorder)
+                    }
+                }
 
                 // Timer chip
-                HStack(spacing: 6) {
+                HStack(spacing: 4) {
                     Image(systemName: "timer")
-                        .foregroundStyle(secondsLeft <= 5 ? WSColor.concern : WSColor.foregroundMuted)
+                        .font(.system(size: 11, weight: .bold))
                     Text("\(secondsLeft)s")
-                        .wsBody(.caption, weight: .bold)
-                        .foregroundStyle(secondsLeft <= 5 ? WSColor.concern : WSColor.foreground)
+                        .font(WSFont.sans(12, weight: .bold))
                 }
-                .padding(.horizontal, 10)
+                .foregroundStyle(secondsLeft <= 5 ? WSColor.duoRed : WSColor.duoText.opacity(0.55))
+                .padding(.horizontal, 8)
                 .padding(.vertical, 4)
-                .background(Capsule().fill(WSColor.surface))
-            }
-
-            // Progress bar across the 5 questions
-            HStack(spacing: 6) {
-                ForEach(0..<manager.settings.difficulty.totalQuestions, id: \.self) { i in
+                .background(
                     Capsule()
-                        .fill(barColor(for: i))
-                        .frame(height: 6)
-                }
+                        .fill(secondsLeft <= 5 ? WSColor.duoRedLight : WSColor.backgroundElevated)
+                        .overlay(Capsule().stroke(secondsLeft <= 5 ? WSColor.duoRed : WSColor.duoBorder, lineWidth: 2))
+                )
             }
         }
-    }
-
-    private func barColor(for i: Int) -> Color {
-        if i < index {
-            // already answered — show pass/fail color (we don't have the
-            // per-question outcome, so just use brand for "done")
-            return manager.settings.challengeType.tint
-        }
-        if i == index { return manager.settings.challengeType.tint.opacity(0.45) }
-        return WSColor.surface
     }
 
     // MARK: - Quiz mode
@@ -176,20 +164,31 @@ struct FocusUnlockChallenge: View {
     private func quizQuestionView(_ q: QuizQuestion) -> some View {
         VStack(alignment: .leading, spacing: 14) {
             Text(q.question)
-                .wsHeadline(.medium, weight: .bold)
-                .foregroundStyle(WSColor.foreground)
+                .wsHeadline(.medium, weight: .black)
+                .foregroundStyle(WSColor.duoText)
                 .padding(.top, 18)
 
             VStack(spacing: 10) {
-                ForEach(shuffledOptions(for: q), id: \.self) { option in
-                    Button {
-                        pickQuizOption(option, correct: q.correctAnswer)
-                    } label: {
-                        optionRow(text: option,
-                                  state: optionState(option, correct: q.correctAnswer))
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(revealed)
+                let options = shuffledOptions(for: q)
+                ForEach(Array(options.enumerated()), id: \.offset) { (i, option) in
+                    let letters = ["A", "B", "C", "D", "E", "F"]
+                    let letter = i < letters.count ? letters[i] : ""
+                    let state = chunkyState(option, correct: q.correctAnswer)
+                    WSChunkyOption(
+                        label: option,
+                        state: state,
+                        action: {
+                            pickQuizOption(option, correct: q.correctAnswer)
+                        },
+                        accessory: {
+                            WSChunkyOptionLetter(
+                                letter: letter,
+                                fillColor: letterFill(for: state),
+                                foreground: letterForeground(for: state)
+                            )
+                        }
+                    )
+                    .wsStaggerEntry(i, unit: 0.04)
                 }
             }
             .padding(.top, 6)
@@ -201,81 +200,54 @@ struct FocusUnlockChallenge: View {
         }
     }
 
-    private enum OptionState { case idle, picked, correct, wrong, missedCorrect }
-
-    private func optionState(_ option: String, correct: String) -> OptionState {
+    /// Translate the local picked/revealed/correct state into the shared
+    /// `WSChunkyOptionState` used across Quiz / Lesson / Focus answer rows.
+    private func chunkyState(_ option: String, correct: String) -> WSChunkyOptionState {
         guard revealed else {
-            return option == pickedOption ? .picked : .idle
+            return option == pickedOption ? .selected : .idle
         }
         if option == correct { return .correct }
         if option == pickedOption { return .wrong }
-        return .idle
+        return .disabled
     }
 
-    private func optionRow(text: String, state: OptionState) -> some View {
-        let (bg, fg, border) = optionPalette(state)
-        return HStack(spacing: 12) {
-            Text(text)
-                .wsBody(.medium, weight: .semibold)
-                .foregroundStyle(fg)
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-            switch state {
-            case .correct, .missedCorrect:
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(WSColor.strong)
-            case .wrong:
-                Image(systemName: "xmark.circle.fill")
-                    .foregroundStyle(WSColor.concern)
-            default:
-                EmptyView()
-            }
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 14)
-        .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(bg)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .stroke(border, lineWidth: 1.5)
-                )
-        )
-    }
-
-    private func optionPalette(_ state: OptionState) -> (Color, Color, Color) {
+    private func letterFill(for state: WSChunkyOptionState) -> Color {
         switch state {
-        case .idle:
-            return (WSColor.backgroundElevated, WSColor.foreground, WSColor.hairline)
-        case .picked:
-            return (manager.settings.challengeType.tint.opacity(0.12),
-                    WSColor.foreground,
-                    manager.settings.challengeType.tint.opacity(0.55))
-        case .correct, .missedCorrect:
-            return (WSColor.strong.opacity(0.14), WSColor.foreground, WSColor.strong)
-        case .wrong:
-            return (WSColor.concern.opacity(0.14), WSColor.foreground, WSColor.concern)
+        case .selected: return WSColor.duoBlue.opacity(0.18)
+        case .correct, .wrong: return Color.white.opacity(0.25)
+        default:        return WSColor.duoSurface
+        }
+    }
+
+    private func letterForeground(for state: WSChunkyOptionState) -> Color {
+        switch state {
+        case .selected: return WSColor.duoBlueDark
+        case .correct, .wrong: return Color.white
+        default:        return WSColor.duoText.opacity(0.65)
         }
     }
 
     private func explanationCard(text: String, isCorrect: Bool) -> some View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: isCorrect ? "lightbulb.fill" : "info.circle.fill")
-                .foregroundStyle(isCorrect ? WSColor.strong : WSColor.revise)
+                .foregroundStyle(isCorrect ? WSColor.duoGreen : WSColor.duoOrange)
             Text(text)
                 .wsBody(.small)
-                .foregroundStyle(WSColor.foreground)
+                .foregroundStyle(WSColor.duoText)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(12)
         .background(
             RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(WSColor.surface)
+                .fill(isCorrect ? WSColor.duoGreenLight : WSColor.duoOrangeLight)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(isCorrect ? WSColor.duoGreen.opacity(0.3) : WSColor.duoOrange.opacity(0.3), lineWidth: 1)
+                )
         )
     }
 
     private func shuffledOptions(for q: QuizQuestion) -> [String] {
-        // Stable per-question shuffle so taps don't reorder mid-question
         guard let opts = q.options, !opts.isEmpty else { return [q.correctAnswer] }
         var rng = SeededGenerator(seed: UInt64(abs((q.id ?? 0)) &+ 7919))
         return opts.shuffled(using: &rng)
@@ -291,7 +263,6 @@ struct FocusUnlockChallenge: View {
         } else {
             Haptics.warning()
         }
-        // Brief reveal pause then advance
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) {
             advanceQuestion()
         }
@@ -308,7 +279,7 @@ struct FocusUnlockChallenge: View {
         VStack(spacing: 14) {
             Text(revealed ? "ANSWER" : "RECALL THE ANSWER")
                 .wsEyebrow()
-                .foregroundStyle(manager.settings.challengeType.tint)
+                .foregroundStyle(WSColor.duoPurple)
                 .padding(.top, 24)
 
             Button {
@@ -319,63 +290,42 @@ struct FocusUnlockChallenge: View {
                     Haptics.light()
                 }
             } label: {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 22, style: .continuous)
-                        .fill(WSColor.backgroundElevated)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                                .stroke(WSColor.hairline, lineWidth: 1)
-                        )
-                        .shadow(color: manager.settings.challengeType.tint.opacity(0.15), radius: 16, y: 6)
-                    Text(revealed ? card.back : card.front)
-                        .wsHeadline(.medium, weight: .bold)
-                        .foregroundStyle(WSColor.foreground)
-                        .multilineTextAlignment(.center)
-                        .padding(20)
-                }
+                Text(revealed ? card.back : card.front)
+                    .wsHeadline(.medium, weight: .black)
+                    .foregroundStyle(WSColor.duoText)
+                    .multilineTextAlignment(.center)
+                    .padding(20)
+                    .frame(maxWidth: .infinity)
             }
             .buttonStyle(.plain)
             .frame(minHeight: 200)
+            .wsChunkyCard(accent: WSColor.duoPurple)
             .padding(.horizontal, 4)
 
             if !revealed {
                 Text("Tap the card to reveal the answer")
                     .wsBody(.caption)
-                    .foregroundStyle(WSColor.foregroundMuted)
+                    .foregroundStyle(WSColor.duoText.opacity(0.55))
             } else {
                 HStack(spacing: 10) {
                     Button {
                         gradeFlashcard(known: false)
                     } label: {
-                        gradeButtonLabel(text: "Missed it", icon: "xmark.circle.fill", color: WSColor.concern)
+                        Label("Missed it", systemImage: "xmark.circle.fill")
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(WSDuoDangerButtonStyle())
 
                     Button {
                         gradeFlashcard(known: true)
                     } label: {
-                        gradeButtonLabel(text: "Got it", icon: "checkmark.circle.fill", color: WSColor.strong)
+                        Label("Got it", systemImage: "checkmark.circle.fill")
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(WSDuoSuccessButtonStyle())
                 }
                 .padding(.top, 6)
             }
         }
         .padding(.horizontal, 4)
-    }
-
-    private func gradeButtonLabel(text: String, icon: String, color: Color) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: icon)
-            Text(text).wsBody(.medium, weight: .bold)
-        }
-        .foregroundStyle(.white)
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 14)
-        .background(
-            Capsule().fill(color)
-                .shadow(color: color.opacity(0.40), radius: 8, y: 3)
-        )
     }
 
     private func gradeFlashcard(known: Bool) {
@@ -411,16 +361,14 @@ struct FocusUnlockChallenge: View {
             ? .passed(score: correctCount, of: total)
             : .failed(score: correctCount, of: total, cooldown: 10 * 60)
 
-        // Inform the manager (it updates stats + opens unlock window on pass)
         manager.handleChallengeResult(result)
 
-        // Switch to the results screen so the user sees what happened
         withAnimation(.easeInOut(duration: 0.35)) {
             phase = .results(result)
         }
         if result.didUnlock {
             Haptics.success()
-            celebrate += 1     // 🎉 fire the confetti
+            celebrate += 1
         } else {
             Haptics.warning()
         }
@@ -435,15 +383,8 @@ struct FocusUnlockChallenge: View {
             dismiss()
         } label: {
             Text("I'll wait — close this")
-                .wsBody(.small, weight: .bold)
-                .foregroundStyle(WSColor.foregroundMuted)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .background(
-                    Capsule().fill(WSColor.surface)
-                )
         }
-        .buttonStyle(.plain)
+        .buttonStyle(WSDuoSecondaryButtonStyle(fullWidth: true))
         .padding(.top, 12)
     }
 
@@ -455,21 +396,21 @@ struct FocusUnlockChallenge: View {
 
             ZStack {
                 Circle()
-                    .fill(result.didUnlock ? WSColor.strong.opacity(0.18) : WSColor.concern.opacity(0.18))
+                    .fill(result.didUnlock ? WSColor.duoGreenLight : WSColor.duoRedLight)
                     .frame(width: 120, height: 120)
                 Image(systemName: result.didUnlock ? "lock.open.fill" : "lock.fill")
                     .font(.system(size: 50, weight: .heavy))
-                    .foregroundStyle(result.didUnlock ? WSColor.strong : WSColor.concern)
+                    .foregroundStyle(result.didUnlock ? WSColor.duoGreen : WSColor.duoRed)
             }
 
-            Text(result.didUnlock ? "Unlocked" : "Not quite")
-                .wsHeadline(.large, weight: .bold)
-                .foregroundStyle(WSColor.foreground)
+            Text(result.didUnlock ? "Unlocked!" : "Not quite")
+                .wsHeadline(.large, weight: .black)
+                .foregroundStyle(WSColor.duoText)
 
             Text(resultsBlurb(for: result))
                 .wsBody(.medium)
                 .multilineTextAlignment(.center)
-                .foregroundStyle(WSColor.foregroundMuted)
+                .foregroundStyle(WSColor.duoText.opacity(0.65))
                 .padding(.horizontal, 24)
 
             scoreSummary(for: result)
@@ -483,28 +424,22 @@ struct FocusUnlockChallenge: View {
                     } label: {
                         Label("Apps unlocked — done", systemImage: "checkmark.circle.fill")
                     }
-                    .buttonStyle(WSPrimaryButtonStyle())
+                    .buttonStyle(WSDuoSuccessButtonStyle())
                 } else {
                     Button {
-                        // Reset and re-attempt
                         startChallenge()
                     } label: {
                         Label("Try again", systemImage: "arrow.clockwise")
                     }
-                    .buttonStyle(WSPrimaryButtonStyle())
+                    .buttonStyle(WSDuoPrimaryButtonStyle())
 
                     Button {
                         onFinish(result)
                         dismiss()
                     } label: {
                         Text("I can wait")
-                            .wsBody(.small, weight: .bold)
-                            .foregroundStyle(WSColor.foregroundMuted)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(Capsule().fill(WSColor.surface))
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(WSDuoSecondaryButtonStyle(fullWidth: true))
                 }
             }
             .padding(.horizontal, 4)
@@ -533,37 +468,28 @@ struct FocusUnlockChallenge: View {
         let total = manager.settings.difficulty.totalQuestions
         let needed = manager.settings.difficulty.requiredCorrect
         HStack(spacing: 14) {
-            scoreChip(label: "Correct",  value: "\(correctCount)/\(total)", tint: WSColor.strong)
-            scoreChip(label: "Required", value: "\(needed)/\(total)",       tint: manager.settings.challengeType.tint)
+            scoreChip(label: "Correct",  value: "\(correctCount)/\(total)", tint: WSColor.duoGreen)
+            scoreChip(label: "Required", value: "\(needed)/\(total)",       tint: WSColor.duoPurple)
         }
     }
 
     private func scoreChip(label: String, value: String, tint: Color) -> some View {
         VStack(spacing: 4) {
             Text(value)
-                .wsHeadline(.medium, weight: .bold)
-                .foregroundStyle(WSColor.foreground)
+                .font(WSFont.headline(22))
+                .foregroundStyle(WSColor.duoText)
             Text(label)
-                .wsBody(.caption, weight: .semibold)
-                .foregroundStyle(WSColor.foregroundMuted)
+                .font(WSFont.sans(11, weight: .bold))
+                .foregroundStyle(WSColor.duoText.opacity(0.55))
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
-        .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(tint.opacity(0.10))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .stroke(tint.opacity(0.35), lineWidth: 1)
-                )
-        )
+        .wsChunkyCard(cornerRadius: 14, horizontalPadding: 0, verticalPadding: 12, lipHeight: 4, accent: tint)
     }
 
     // MARK: - Setup
 
     private func startChallenge() {
-        // Reload pools — for now from the sample bank. Later this can
-        // pull from the user's most-recent saved study pack.
         quizQuestions = FocusSampleQuestions.randomQuizSet()
         flashcards    = FocusSampleQuestions.randomFlashcardSet()
         index = 0
@@ -584,7 +510,6 @@ struct FocusUnlockChallenge: View {
                     secondsLeft -= 1
                     return
                 }
-                // Time-out — count as wrong + advance
                 if !revealed {
                     Haptics.warning()
                     revealed = true

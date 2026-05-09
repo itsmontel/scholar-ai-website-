@@ -58,11 +58,11 @@ struct Achievement: Identifiable, Equatable {
         /// Brand-tinted colour for the badge ring + glow
         var color: Color {
             switch self {
-            case .common:    return Color(hex: 0x94A3B8)  // slate
-            case .uncommon:  return Color(hex: 0x10B981)  // emerald
-            case .rare:      return Color(hex: 0x3B82F6)  // blue
-            case .epic:      return Color(hex: 0x8B5CF6)  // violet
-            case .legendary: return Color(hex: 0xF59E0B)  // amber
+            case .common:    return WSColor.duoGreen
+            case .uncommon:  return WSColor.duoBlue
+            case .rare:      return WSColor.duoPurple
+            case .epic:      return WSColor.duoOrange
+            case .legendary: return WSColor.duoRed
             }
         }
         var label: String { rawValue.capitalized }
@@ -261,14 +261,14 @@ struct Achievement: Identifiable, Equatable {
 
         var tint: Color {
             switch self {
-            case .streaks:        return Color(hex: 0xF59E0B)
-            case .studyPacks:     return WSColor.brandPrimary
-            case .quizzes:        return Color(hex: 0xD946EF)
-            case .games:          return Color(hex: 0xEF4444)
-            case .focus:          return Color(hex: 0x10B981)
-            case .subscription:   return Color(hex: 0xEAB308)
-            case .special:        return Color(hex: 0x6366F1)
-            case .gettingStarted: return Color(hex: 0x06B6D4)
+            case .streaks:        return WSColor.duoOrange
+            case .studyPacks:     return WSColor.duoPurple
+            case .quizzes:        return WSColor.duoBlue
+            case .games:          return WSColor.duoRed
+            case .focus:          return WSColor.duoGreen
+            case .subscription:   return WSColor.duoOrange
+            case .special:        return WSColor.duoPurple
+            case .gettingStarted: return WSColor.duoBlue
             }
         }
     }

@@ -12,6 +12,8 @@ struct AnalyzeTabContainer: View {
 
     var body: some View {
         ZStack {
+            WSColor.duoSurface.ignoresSafeArea()
+
             switch coordinator.phase {
             case .input:
                 AnalyzeInputView(coordinator: coordinator)

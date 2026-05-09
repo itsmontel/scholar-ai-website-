@@ -2,20 +2,20 @@
 //  HistorySheet.swift
 //  WriteScholar
 //
-//  Tap the history button on Home → this sheet pops up with a flat
+//  Tap the history button on Home -> this sheet pops up with a flat
 //  reverse-chronological log of every recent thing the user did on
-//  this device. No backend calls — just reads `DailyGoalStore.history`
+//  this device. No backend calls -- just reads `DailyGoalStore.history`
 //  and projects the per-day entries into a Today / Yesterday / Earlier
 //  timeline.
 //
-//  Sections (top → bottom):
+//  Sections (top -> bottom):
 //
-//    1. Hero strip   — "Today" XP earned + entry count.
-//    2. Timeline     — Bucketed (Today / Yesterday / This week / Earlier),
+//    1. Hero strip   -- "Today" XP earned + entry count.
+//    2. Timeline     -- Bucketed (Today / Yesterday / This week / Earlier),
 //                       each row shows activity icon, title, time-ago,
 //                       and the XP awarded (with a "capped" pill if the
 //                       row earned 0 XP because of the daily cap).
-//    3. Empty state  — Mascot + "Start studying and your activity will
+//    3. Empty state  -- Mascot + "Start studying and your activity will
 //                       show up here."
 //
 //  Cap-aware: rows that hit the per-activity daily cap show "capped" +
@@ -32,21 +32,29 @@ struct HistorySheet: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                WSGradient.heroBackdrop.ignoresSafeArea()
+                WSColor.duoSurface.ignoresSafeArea()
 
-                if flattenedEntries.isEmpty {
-                    emptyState
-                } else {
-                    listBody
+                VStack(spacing: 0) {
+                    WSChunkyRibbon(color: WSColor.duoBlue)
+                    if flattenedEntries.isEmpty {
+                        emptyState
+                    } else {
+                        listBody
+                    }
                 }
             }
-            .navigationTitle("Recent activity")
+            .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("Recent Activity")
+                        .wsHeadline(.small, weight: .black)
+                        .foregroundStyle(WSColor.duoText)
+                }
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Done") { dismiss() }
-                        .wsBody(.small, weight: .bold)
-                        .foregroundStyle(WSColor.brandPrimary)
+                        .font(WSFont.sans(15, weight: .bold))
+                        .foregroundStyle(WSColor.duoPurple)
                 }
             }
         }
@@ -59,15 +67,15 @@ struct HistorySheet: View {
             Spacer()
             ZStack {
                 Circle()
-                    .fill(WSColor.brandPrimary.opacity(0.12))
+                    .fill(WSColor.duoPurpleLight)
                     .frame(width: 110, height: 110)
                 Image(systemName: "clock.arrow.circlepath")
                     .font(.system(size: 44, weight: .semibold))
-                    .foregroundStyle(WSColor.brandPrimary)
+                    .foregroundStyle(WSColor.duoPurple)
             }
             Text("Nothing here yet")
-                .wsHeadline(.small, weight: .bold)
-                .foregroundStyle(WSColor.foreground)
+                .wsHeadline(.medium, weight: .black)
+                .foregroundStyle(WSColor.duoText)
             Text("Finish a quiz, play a game, or generate a study pack and it'll show up in your timeline here.")
                 .wsBody(.medium)
                 .foregroundStyle(WSColor.foregroundMuted)
@@ -101,8 +109,8 @@ struct HistorySheet: View {
 
     private var heroStrip: some View {
         HStack(spacing: 10) {
-            heroTile(value: "+\(goal.todayXP)", label: "XP today", color: WSColor.brandPrimary)
-            heroTile(value: "\(goal.todayLog.entries.count)", label: "Activities today", color: Color(hex: 0xF59E0B))
+            heroTile(value: "+\(goal.todayXP)", label: "XP today", color: WSColor.duoGreen)
+            heroTile(value: "\(goal.todayLog.entries.count)", label: "Activities today", color: WSColor.duoOrange)
         }
     }
 
@@ -117,14 +125,12 @@ struct HistorySheet: View {
                 .textCase(.uppercase)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(WSColor.backgroundElevated)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .stroke(color.opacity(0.25), lineWidth: 1)
-                )
+        .wsChunkyCard(
+            cornerRadius: 14,
+            horizontalPadding: 12,
+            verticalPadding: 12,
+            lipHeight: 4,
+            accent: color
         )
     }
 
@@ -157,7 +163,7 @@ struct HistorySheet: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(entry.title ?? activity.label)
                     .wsBody(.medium, weight: .bold)
-                    .foregroundStyle(WSColor.foreground)
+                    .foregroundStyle(WSColor.duoText)
                     .lineLimit(2)
                 if let sub = entry.subtitle, !sub.isEmpty {
                     Text(sub)
@@ -175,14 +181,14 @@ struct HistorySheet: View {
             VStack(alignment: .trailing, spacing: 2) {
                 Text("+\(entry.xp) XP")
                     .wsBody(.caption, weight: .black)
-                    .foregroundStyle(entry.xp > 0 ? WSColor.brandPrimary : WSColor.foregroundMuted)
+                    .foregroundStyle(entry.xp > 0 ? WSColor.duoGreen : WSColor.foregroundMuted)
                 if capped {
                     Text("DAILY CAP")
                         .font(.system(size: 9, weight: .black))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
-                        .background(Capsule().fill(Color(hex: 0xF59E0B)))
+                        .background(Capsule().fill(WSColor.duoOrange))
                 }
                 Text(timeAgo(entry.at))
                     .wsBody(.caption, weight: .semibold)
@@ -195,21 +201,20 @@ struct HistorySheet: View {
                 .fill(WSColor.backgroundElevated)
                 .overlay(
                     RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .stroke(WSColor.hairline, lineWidth: 1)
+                        .stroke(WSColor.duoBorder, lineWidth: 2)
                 )
         )
     }
 
-    /// Per-activity tint used for the row's icon. Mirrors the brand palette
-    /// the app uses elsewhere (Library item kinds, game cards, etc.).
+    /// Per-activity tint using Duolingo palette colors.
     private func activityTint(_ activity: DailyGoalStore.Activity) -> Color {
         switch activity {
-        case .studyPackGenerated, .lessonRead: return Color(hex: 0x7C3AED)
-        case .quizCompleted, .quizPerfectScore: return Color(hex: 0xD946EF)
-        case .flashcardsReviewed:               return Color(hex: 0x6366F1)
-        case .craterBlastPlayed:                return Color(hex: 0xEF4444)
-        case .wordTowerPlayed:                  return Color(hex: 0x10B981)
-        case .focusUnlock:                      return Color(hex: 0xF59E0B)
+        case .studyPackGenerated, .lessonRead: return WSColor.duoPurple
+        case .quizCompleted, .quizPerfectScore: return WSColor.duoBlue
+        case .flashcardsReviewed:               return WSColor.duoPurple
+        case .craterBlastPlayed:                return WSColor.duoRed
+        case .wordTowerPlayed:                  return WSColor.duoGreen
+        case .focusUnlock:                      return WSColor.duoOrange
         case .dailyOpen:                        return WSColor.foregroundMuted
         }
     }

@@ -2,10 +2,9 @@
 //  WSTypography.swift
 //  WriteScholar
 //
-//  Typography system. Headlines use a serif (EB Garamond if bundled in
-//  Resources/, else Apple's New York). Body uses Nunito if bundled, else
-//  SF Pro Rounded. Falls back gracefully so the app builds without the
-//  font files in place.
+//  Duolingo-style typography system. Headlines use Nunito Black (matching
+//  the web's font-extrabold). Body text uses Nunito at varying weights.
+//  Falls back to SF Pro Rounded if Nunito isn't bundled.
 //
 
 import SwiftUI
@@ -13,41 +12,41 @@ import SwiftUI
 // MARK: - Sizes
 
 enum WSHeadlineSize {
-    case huge    // 40pt — onboarding hero
-    case large   // 32pt — section H2
-    case medium  // 24pt — card H3
-    case small   // 18pt — labels
+    case huge    // 34pt — onboarding hero
+    case large   // 28pt — section H2
+    case medium  // 22pt — card H3
+    case small   // 17pt — labels
 
     var size: CGFloat {
         switch self {
-        case .huge: return 40
-        case .large: return 32
-        case .medium: return 24
-        case .small: return 18
+        case .huge: return 34
+        case .large: return 28
+        case .medium: return 22
+        case .small: return 17
         }
     }
 
     var lineSpacing: CGFloat {
         switch self {
-        case .huge: return -2
-        case .large: return -1
+        case .huge: return -1
+        case .large: return -0.5
         default: return 0
         }
     }
 }
 
 enum WSBodySize {
-    case large   // 18pt
-    case medium  // 16pt
-    case small   // 14pt
-    case caption // 12pt — uppercase eyebrow
+    case large   // 17pt
+    case medium  // 15pt
+    case small   // 13pt
+    case caption // 11pt — uppercase eyebrow
 
     var size: CGFloat {
         switch self {
-        case .large: return 18
-        case .medium: return 16
-        case .small: return 14
-        case .caption: return 12
+        case .large: return 17
+        case .medium: return 15
+        case .small: return 13
+        case .caption: return 11
         }
     }
 }
@@ -55,18 +54,25 @@ enum WSBodySize {
 // MARK: - Font lookups (with graceful fallback)
 
 enum WSFont {
-    /// Returns the bundled EB Garamond at the given size+weight, or falls
-    /// back to system serif if the font isn't installed yet.
-    static func serif(_ size: CGFloat, weight: Font.Weight = .semibold) -> Font {
+    /// Returns the bundled Nunito at the given size+weight for headlines.
+    /// Duolingo uses extrabold/black Nunito everywhere — no serif.
+    static func headline(_ size: CGFloat, weight: Font.Weight = .black) -> Font {
         let psName: String
         switch weight {
-        case .bold, .heavy, .black: psName = "EBGaramond-Bold"
-        default:                    psName = "EBGaramond-Regular"
+        case .bold, .heavy, .black:   psName = "Nunito-Black"
+        case .semibold, .medium:      psName = "Nunito-Bold"
+        default:                      psName = "Nunito-Bold"
         }
         if isFontAvailable(psName) {
             return .custom(psName, size: size)
         }
-        return .system(size: size, weight: weight, design: .serif)
+        // Fallback: SF Pro Rounded for the same chunky feel
+        return .system(size: size, weight: weight, design: .rounded)
+    }
+
+    /// Kept for compatibility — now forwards to headline()
+    static func serif(_ size: CGFloat, weight: Font.Weight = .semibold) -> Font {
+        headline(size, weight: weight)
     }
 
     /// Returns the bundled Nunito at the given size+weight, or falls
@@ -92,24 +98,24 @@ enum WSFont {
 // MARK: - View helpers
 
 extension View {
-    /// Brand serif headline with built-in tracking + line-spacing tweaks.
-    func wsHeadline(_ size: WSHeadlineSize, weight: Font.Weight = .semibold) -> some View {
+    /// Duolingo-style bold headline — Nunito Black with tight tracking.
+    func wsHeadline(_ size: WSHeadlineSize, weight: Font.Weight = .black) -> some View {
         self
-            .font(WSFont.serif(size.size, weight: weight))
-            .tracking(-0.5)
+            .font(WSFont.headline(size.size, weight: weight))
+            .tracking(-0.3)
             .lineSpacing(size.lineSpacing)
     }
 
-    /// Brand body / sans copy.
+    /// Brand body / sans copy — Nunito.
     func wsBody(_ size: WSBodySize, weight: Font.Weight = .regular) -> some View {
         self.font(WSFont.sans(size.size, weight: weight))
     }
 
-    /// Uppercase tracked eyebrow text — used above headlines.
+    /// Uppercase tracked eyebrow text — Duolingo-style label.
     func wsEyebrow() -> some View {
         self
-            .font(WSFont.sans(11, weight: .bold))
-            .tracking(2)
+            .font(WSFont.sans(10, weight: .black))
+            .tracking(2.2)
             .textCase(.uppercase)
     }
 }

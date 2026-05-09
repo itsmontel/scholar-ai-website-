@@ -2,33 +2,33 @@
 //  StreakInsightsSheet.swift
 //  WriteScholar
 //
-//  Tap the streak card on Home → this sheet pops up with a deep dive
+//  Tap the streak card on Home -> this sheet pops up with a deep dive
 //  into the user's streak life. Designed to feel like a celebration,
 //  not a stats dashboard.
 //
-//  Sections (top → bottom):
+//  Sections (top -> bottom):
 //
-//    1. Hero      — Big animated flame, current streak, "active today" pill.
-//    2. Stats row — Current · Longest · Total active days · This month.
-//    3. Calendar  — Month grid for the currently-selected month, with
+//    1. Hero      -- Big animated flame, current streak, "active today" pill.
+//    2. Stats row -- Current . Longest . Total active days . This month.
+//    3. Calendar  -- Month grid for the currently-selected month, with
 //                    flame dots on active days. Swipeable left/right
 //                    to walk through months.
-//    4. Year      — GitHub-style heatmap: one cell per day, the past
+//    4. Year      -- GitHub-style heatmap: one cell per day, the past
 //                    52 weeks. Tooltip on tap (long-press for now via
 //                    a sheet selection callback).
-//    5. Insights  — Three highlight cards (best week, longest streak
+//    5. Insights  -- Three highlight cards (best week, longest streak
 //                    date, average sessions per week).
-//    6. Milestones — Closest streak achievement(s) progress bars.
+//    6. Milestones -- Closest streak achievement(s) progress bars.
 //
 //  Inputs:
-//    • streak — StreakAPI.StreakInfo (currentStreak, longestStreak,
+//    * streak -- StreakAPI.StreakInfo (currentStreak, longestStreak,
 //               totalActivityDays, hasActivityToday, weekActivities)
-//    • activeDays — `Set<Date>` of days the user has been active. The
+//    * activeDays -- `Set<Date>` of days the user has been active. The
 //                   server only returns this week's activity, so the
 //                   sheet falls back to a synthetic "consecutive days
 //                   ending today" set for the past 90 days when only
 //                   the basic streak fields are available.
-//    • achievementStats — used to drive the milestones section.
+//    * achievementStats -- used to drive the milestones section.
 //
 
 import SwiftUI
@@ -43,7 +43,7 @@ struct StreakInsightsSheet: View {
     @State private var selectedHeatmapDate: Date? = nil
 
     /// Synthetic dataset: any day inside the last 365 the user was
-    /// "active" — derived from the few reliable signals the server
+    /// "active" -- derived from the few reliable signals the server
     /// returns today (currentStreak + weekActivities). When the API
     /// later starts returning a full activity calendar, swap this for
     /// `streak?.allActivities` and the rest of the view is unchanged.
@@ -65,51 +65,38 @@ struct StreakInsightsSheet: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Bright streak-themed backdrop
-                LinearGradient(
-                    colors: [
-                        Color(hex: 0xFFF7ED),
-                        Color(hex: 0xFEF3C7).opacity(0.55),
-                        WSColor.background
-                    ],
-                    startPoint: .top, endPoint: .bottom
-                )
-                .ignoresSafeArea()
+                WSColor.duoSurface.ignoresSafeArea()
 
-                Circle()
-                    .fill(Color(hex: 0xF59E0B).opacity(0.15))
-                    .frame(width: 360, height: 360)
-                    .blur(radius: 80)
-                    .offset(x: -180, y: -300)
-                    .ignoresSafeArea()
-                Circle()
-                    .fill(Color(hex: 0xEF4444).opacity(0.10))
-                    .frame(width: 320, height: 320)
-                    .blur(radius: 80)
-                    .offset(x: 200, y: 320)
-                    .ignoresSafeArea()
-
-                ScrollView {
-                    VStack(spacing: 22) {
-                        heroBlock
-                        statsRow
-                        monthCalendarBlock
-                        yearHeatmapBlock
-                        insightsBlock
-                        milestonesBlock
-                        Spacer(minLength: 12)
+                VStack(spacing: 0) {
+                    WSChunkyRibbon(color: WSColor.duoOrange)
+                    ScrollView {
+                        VStack(spacing: 22) {
+                            heroBlock
+                            statsRow
+                            monthCalendarBlock
+                            yearHeatmapBlock
+                            insightsBlock
+                            milestonesBlock
+                            Spacer(minLength: 12)
+                        }
+                        .padding(.horizontal, 18)
+                        .padding(.top, 14)
+                        .padding(.bottom, 32)
                     }
-                    .padding(.horizontal, 18)
-                    .padding(.top, 14)
-                    .padding(.bottom, 32)
                 }
             }
-            .navigationTitle("Your streak")
+            .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("Your Streak")
+                        .wsHeadline(.small, weight: .black)
+                        .foregroundStyle(WSColor.duoText)
+                }
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Close") { dismiss() }
-                        .foregroundStyle(WSColor.foregroundMuted)
+                        .font(WSFont.sans(15, weight: .bold))
+                        .foregroundStyle(WSColor.duoPurple)
                 }
             }
         }
@@ -128,12 +115,12 @@ struct StreakInsightsSheet: View {
                 Text(active ? "On a roll!" : "Streak paused")
                     .font(.system(size: 14, weight: .black, design: .rounded))
                     .tracking(0.5)
-                    .foregroundStyle(active ? Color(hex: 0xF59E0B) : WSColor.foregroundMuted)
+                    .foregroundStyle(active ? WSColor.duoOrange : WSColor.foregroundMuted)
                 Text("\(count)-day streak")
-                    .font(.system(size: 36, weight: .black, design: .rounded))
-                    .foregroundStyle(WSColor.foreground)
+                    .wsHeadline(.huge, weight: .black)
+                    .foregroundStyle(WSColor.duoText)
                 Text(active
-                    ? "You did something today — the fire keeps burning. 🔥"
+                    ? "You did something today -- the fire keeps burning."
                     : "Open a study pack today to keep your streak alive.")
                     .wsBody(.small)
                     .multilineTextAlignment(.center)
@@ -143,7 +130,7 @@ struct StreakInsightsSheet: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 20)
-        .wsChunkyCard(verticalPadding: 0, accent: Color(hex: 0xF59E0B))
+        .wsChunkyCard(verticalPadding: 0, accent: WSColor.duoOrange)
     }
 
     // MARK: - Stats row
@@ -156,13 +143,13 @@ struct StreakInsightsSheet: View {
 
         return HStack(spacing: 10) {
             statTile(label: "Current",  value: "\(current)", suffix: "days",
-                     icon: "flame.fill", tint: Color(hex: 0xF59E0B))
+                     icon: "flame.fill", tint: WSColor.duoOrange)
             statTile(label: "Longest",  value: "\(longest)", suffix: "days",
-                     icon: "trophy.fill", tint: Color(hex: 0xEAB308))
+                     icon: "trophy.fill", tint: WSColor.duoRed)
             statTile(label: "Lifetime", value: "\(total)",   suffix: "days",
-                     icon: "calendar", tint: Color(hex: 0xEF4444))
+                     icon: "calendar", tint: WSColor.duoPurple)
             statTile(label: "This month", value: "\(monthCount)", suffix: "days",
-                     icon: "calendar.badge.clock", tint: WSColor.brandPrimary)
+                     icon: "calendar.badge.clock", tint: WSColor.duoBlue)
         }
     }
 
@@ -174,7 +161,7 @@ struct StreakInsightsSheet: View {
             }
             Text(value)
                 .font(.system(size: 22, weight: .black, design: .rounded))
-                .foregroundStyle(WSColor.foreground)
+                .foregroundStyle(WSColor.duoText)
                 .contentTransition(.numericText())
             Text(label.uppercased())
                 .font(.system(size: 8, weight: .black, design: .rounded))
@@ -184,14 +171,12 @@ struct StreakInsightsSheet: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 12)
         .padding(.vertical, 12)
-        .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(WSColor.backgroundElevated)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(tint.opacity(0.20), lineWidth: 1)
-                )
-                .shadow(color: tint.opacity(0.10), radius: 6, y: 2)
+        .wsChunkyCard(
+            cornerRadius: 16,
+            horizontalPadding: 0,
+            verticalPadding: 0,
+            lipHeight: 4,
+            accent: tint
         )
     }
 
@@ -206,8 +191,8 @@ struct StreakInsightsSheet: View {
                         .tracking(0.7)
                         .foregroundStyle(WSColor.foregroundMuted)
                     Text(monthHeader)
-                        .font(.system(size: 18, weight: .black, design: .rounded))
-                        .foregroundStyle(WSColor.foreground)
+                        .wsHeadline(.small, weight: .black)
+                        .foregroundStyle(WSColor.duoText)
                 }
                 Spacer()
                 HStack(spacing: 8) {
@@ -233,7 +218,7 @@ struct StreakInsightsSheet: View {
                 }
             }
 
-            // 6 × 7 grid
+            // 6 x 7 grid
             let cells = monthCells()
             VStack(spacing: 6) {
                 ForEach(0..<6, id: \.self) { row in
@@ -251,19 +236,19 @@ struct StreakInsightsSheet: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .wsChunkyCard(verticalPadding: 16, accent: Color(hex: 0xF59E0B))
+        .wsChunkyCard(verticalPadding: 16, accent: WSColor.duoOrange)
     }
 
     private func monthArrow(systemName: String, disabled: Bool = false, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: systemName)
                 .font(.system(size: 12, weight: .heavy))
-                .foregroundStyle(disabled ? WSColor.foregroundMuted.opacity(0.5) : WSColor.foreground)
+                .foregroundStyle(disabled ? WSColor.foregroundMuted.opacity(0.5) : WSColor.duoText)
                 .padding(8)
                 .background(
                     Circle()
                         .fill(WSColor.backgroundElevated)
-                        .overlay(Circle().stroke(WSColor.hairline, lineWidth: 1))
+                        .overlay(Circle().stroke(WSColor.duoBorder, lineWidth: 2))
                 )
         }
         .buttonStyle(.plain)
@@ -316,14 +301,11 @@ struct StreakInsightsSheet: View {
         ZStack {
             RoundedRectangle(cornerRadius: 9, style: .continuous)
                 .fill(
-                    cell.isActive
-                        ? AnyShapeStyle(LinearGradient(colors: [Color(hex: 0xFCD34D), Color(hex: 0xF59E0B)],
-                                                       startPoint: .top, endPoint: .bottom))
-                        : AnyShapeStyle(WSColor.surface)
+                    cell.isActive ? WSColor.duoOrange : WSColor.duoSurface
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 9, style: .continuous)
-                        .stroke(cell.isToday ? WSColor.brandPrimary : .clear, lineWidth: 2)
+                        .stroke(cell.isToday ? WSColor.duoPurple : .clear, lineWidth: 2)
                 )
                 .opacity(cell.inMonth || cell.date != nil ? 1.0 : 0.0)
 
@@ -333,7 +315,7 @@ struct StreakInsightsSheet: View {
                     .font(.system(size: 11, weight: .black, design: .rounded))
                     .foregroundStyle(
                         cell.isActive ? .white :
-                        cell.inMonth ? WSColor.foreground : WSColor.foregroundMuted.opacity(0.45)
+                        cell.inMonth ? WSColor.duoText : WSColor.foregroundMuted.opacity(0.45)
                     )
                 if cell.isActive {
                     Image(systemName: "flame.fill")
@@ -389,8 +371,8 @@ struct StreakInsightsSheet: View {
                         .tracking(0.7)
                         .foregroundStyle(WSColor.foregroundMuted)
                     Text("Last 52 weeks")
-                        .font(.system(size: 16, weight: .black, design: .rounded))
-                        .foregroundStyle(WSColor.foreground)
+                        .wsHeadline(.small, weight: .black)
+                        .foregroundStyle(WSColor.duoText)
                 }
                 Spacer()
                 heatmapLegend
@@ -404,11 +386,11 @@ struct StreakInsightsSheet: View {
             if let sel = selectedHeatmapDate {
                 Text(LibraryRelativeFormatter.long(sel))
                     .wsBody(.caption, weight: .bold)
-                    .foregroundStyle(WSColor.brandPrimary)
+                    .foregroundStyle(WSColor.duoPurple)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .wsChunkyCard(verticalPadding: 16, accent: Color(hex: 0xEF4444))
+        .wsChunkyCard(verticalPadding: 16, accent: WSColor.duoRed)
     }
 
     private var heatmapLegend: some View {
@@ -419,8 +401,8 @@ struct StreakInsightsSheet: View {
             ForEach(0..<5, id: \.self) { i in
                 let intensity = Double(i) / 4.0
                 RoundedRectangle(cornerRadius: 3, style: .continuous)
-                    .fill(intensity == 0 ? WSColor.surface :
-                          Color(hex: 0xF59E0B).opacity(0.30 + intensity * 0.70))
+                    .fill(intensity == 0 ? WSColor.duoSurface :
+                          WSColor.duoOrange.opacity(0.30 + intensity * 0.70))
                     .frame(width: 9, height: 9)
             }
             Text("more")
@@ -430,7 +412,7 @@ struct StreakInsightsSheet: View {
     }
 
     private var heatmapGrid: some View {
-        let weeks = heatmapWeeks()  // 53 columns × 7 rows
+        let weeks = heatmapWeeks()  // 53 columns x 7 rows
         return HStack(spacing: 3) {
             ForEach(0..<weeks.count, id: \.self) { col in
                 VStack(spacing: 3) {
@@ -474,18 +456,15 @@ struct StreakInsightsSheet: View {
         let active = date.map { isActive($0) } ?? false
         let isToday = date.map { Calendar.current.isDateInToday($0) } ?? false
 
-        // Intensity placeholder: in real data we'd count sessions.
-        // For now we just have on/off — but render 5 buckets so the
-        // legend feels accurate when the API later returns counts.
         let intensity: Double = active ? 0.85 : 0.0
-        let fill: Color = intensity == 0 ? WSColor.surface
-            : Color(hex: 0xF59E0B).opacity(0.30 + intensity * 0.70)
+        let fill: Color = intensity == 0 ? WSColor.duoSurface
+            : WSColor.duoOrange.opacity(0.30 + intensity * 0.70)
 
         return RoundedRectangle(cornerRadius: 3, style: .continuous)
             .fill(fill)
             .overlay(
                 RoundedRectangle(cornerRadius: 3, style: .continuous)
-                    .stroke(isToday ? WSColor.brandPrimary : .clear, lineWidth: 1.5)
+                    .stroke(isToday ? WSColor.duoPurple : .clear, lineWidth: 1.5)
             )
             .frame(width: 11, height: 11)
             .opacity(date == nil ? 0.0 : 1.0)
@@ -506,25 +485,25 @@ struct StreakInsightsSheet: View {
                 .foregroundStyle(WSColor.foregroundMuted)
             insightRow(
                 icon: "sparkle",
-                tint: Color(hex: 0xF59E0B),
+                tint: WSColor.duoOrange,
                 title: bestWeekHeadline,
                 body: "Your most-active week in the last 52."
             )
             insightRow(
                 icon: "trophy.fill",
-                tint: Color(hex: 0xEAB308),
+                tint: WSColor.duoRed,
                 title: "Longest run: \(streak?.longestStreak ?? 0) days",
                 body: "Beat that to unlock the next streak achievement."
             )
             insightRow(
                 icon: "chart.line.uptrend.xyaxis",
-                tint: WSColor.brandPrimary,
+                tint: WSColor.duoPurple,
                 title: averagePerWeekHeadline,
                 body: "Average days per week over the last month."
             )
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .wsChunkyCard(verticalPadding: 14, accent: WSColor.brandPrimary)
+        .wsChunkyCard(verticalPadding: 14, accent: WSColor.duoPurple)
     }
 
     private func insightRow(icon: String, tint: Color, title: String, body: String) -> some View {
@@ -534,7 +513,7 @@ struct StreakInsightsSheet: View {
                 Image(systemName: icon).foregroundStyle(tint).font(.system(size: 14, weight: .heavy))
             }
             VStack(alignment: .leading, spacing: 2) {
-                Text(title).wsBody(.medium, weight: .black).foregroundStyle(WSColor.foreground)
+                Text(title).wsBody(.medium, weight: .black).foregroundStyle(WSColor.duoText)
                 Text(body).wsBody(.caption).foregroundStyle(WSColor.foregroundMuted)
             }
             Spacer(minLength: 0)
@@ -569,10 +548,10 @@ struct StreakInsightsSheet: View {
             if upcoming.isEmpty {
                 HStack(spacing: 10) {
                     Image(systemName: "checkmark.seal.fill")
-                        .foregroundStyle(Color(hex: 0x10B981))
-                    Text("You've unlocked every streak badge — legend!")
+                        .foregroundStyle(WSColor.duoGreen)
+                    Text("You've unlocked every streak badge -- legend!")
                         .wsBody(.medium, weight: .bold)
-                        .foregroundStyle(WSColor.foreground)
+                        .foregroundStyle(WSColor.duoText)
                 }
             } else {
                 ForEach(upcoming, id: \.id) { ach in
@@ -581,7 +560,7 @@ struct StreakInsightsSheet: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .wsChunkyCard(verticalPadding: 14, accent: Color(hex: 0xEAB308))
+        .wsChunkyCard(verticalPadding: 14, accent: WSColor.duoOrange)
     }
 
     private func milestoneRow(_ ach: Achievement) -> some View {
@@ -589,13 +568,13 @@ struct StreakInsightsSheet: View {
         return VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 10) {
                 ZStack {
-                    Circle().fill(ach.rarity.color.opacity(0.16)).frame(width: 32, height: 32)
-                    Image(systemName: "flame.fill").foregroundStyle(ach.rarity.color).font(.system(size: 13, weight: .heavy))
+                    Circle().fill(WSColor.duoOrangeLight).frame(width: 32, height: 32)
+                    Image(systemName: "flame.fill").foregroundStyle(WSColor.duoOrange).font(.system(size: 13, weight: .heavy))
                 }
                 VStack(alignment: .leading, spacing: 1) {
                     Text(ach.name)
                         .wsBody(.medium, weight: .black)
-                        .foregroundStyle(WSColor.foreground)
+                        .foregroundStyle(WSColor.duoText)
                     Text(ach.conditionText)
                         .wsBody(.caption)
                         .foregroundStyle(WSColor.foregroundMuted)
@@ -603,11 +582,11 @@ struct StreakInsightsSheet: View {
                 Spacer()
                 Text("+\(ach.xp) XP")
                     .font(.system(size: 11, weight: .black, design: .rounded))
-                    .foregroundStyle(Color(hex: 0xF59E0B))
+                    .foregroundStyle(WSColor.duoOrange)
                     .padding(.horizontal, 8).padding(.vertical, 3)
-                    .background(Capsule().fill(Color(hex: 0xF59E0B).opacity(0.14)))
+                    .background(Capsule().fill(WSColor.duoOrangeLight))
             }
-            WSXPBar(xpInLevel: Int(progress * 100), xpForLevel: 100, tint: ach.rarity.color, height: 8, showsLabel: false)
+            WSXPBar(xpInLevel: Int(progress * 100), xpForLevel: 100, tint: WSColor.duoOrange, height: 8, showsLabel: false)
         }
     }
 

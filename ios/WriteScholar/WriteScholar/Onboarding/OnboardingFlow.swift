@@ -4,7 +4,7 @@
 //
 //  Coordinator for the 7-page onboarding. Each page renders a shared
 //  layout (eyebrow + headline + supporting copy + per-page hero) on top
-//  of a unique gradient backdrop that morphs between pages.
+//  of a unique Duolingo-colored backdrop that morphs between pages.
 //
 
 import SwiftUI
@@ -19,7 +19,7 @@ struct OnboardingFlow: View {
     var body: some View {
         GeometryReader { geo in
             ZStack {
-                // Background — cross-fades between page-specific gradients
+                // Background -- cross-fades between page-specific gradients
                 ZStack {
                     ForEach(pages.indices, id: \.self) { idx in
                         WSGradient.onboardingBackdrop(for: idx)
@@ -63,13 +63,13 @@ struct OnboardingFlow: View {
 
     private var topBar: some View {
         HStack {
-            // Logo dot — quick brand anchor
+            // Logo dot -- quick brand anchor
             Image(systemName: "graduationcap.fill")
-                .foregroundStyle(WSGradient.brand)
+                .foregroundStyle(WSColor.duoGreen)
                 .font(.system(size: 22, weight: .bold))
             Text("WriteScholar")
                 .wsBody(.small, weight: .bold)
-                .foregroundStyle(WSColor.foreground)
+                .foregroundStyle(WSColor.duoText)
             Spacer()
             if showsSkipControl {
                 Button {
@@ -78,20 +78,11 @@ struct OnboardingFlow: View {
                 } label: {
                     HStack(spacing: 5) {
                         Text(skipControlTitle)
-                            .wsBody(.caption, weight: .bold)
                         Image(systemName: "arrow.forward")
                             .font(.system(size: 11, weight: .bold))
                     }
-                    .foregroundStyle(WSColor.brandPrimary)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 7)
-                    .background(
-                        Capsule()
-                            .fill(WSColor.brandSoft)
-                            .overlay(Capsule().stroke(WSColor.brandPrimary.opacity(0.30), lineWidth: 1))
-                    )
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(WSDuoPillButtonStyle(palette: .secondary))
                 .accessibilityLabel("Skip onboarding and open the app")
             }
         }
@@ -104,6 +95,16 @@ struct OnboardingFlow: View {
             pageIndicator
             primaryCTA
 
+            // Get-started page: chunky trust badge row beneath the trial CTA.
+            if pageIndex == pages.count - 1 {
+                WSTrustBadgeRow(badges: [
+                    WSTrustBadge(icon: "checkmark.seal.fill", label: "Cancel anytime",  tint: WSColor.duoGreen),
+                    WSTrustBadge(icon: "creditcard.fill",     label: "No charge today", tint: WSColor.duoBlue),
+                    WSTrustBadge(icon: "iphone",              label: "Sync everywhere", tint: WSColor.duoPurple)
+                ])
+                .padding(.top, 2)
+            }
+
             // Welcome-page only: tertiary escape straight into the tab shell (guest).
             if pageIndex == 0 {
                 Button {
@@ -111,7 +112,7 @@ struct OnboardingFlow: View {
                     skipOnboardingToHome()
                 } label: {
                     HStack(spacing: 6) {
-                        Text("I've used this — open the app")
+                        Text("I've used this -- open the app")
                         Image(systemName: "arrow.forward")
                             .font(.system(size: 11, weight: .bold))
                     }
@@ -125,11 +126,16 @@ struct OnboardingFlow: View {
     }
 
     private var pageIndicator: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: 8) {
             ForEach(pages.indices, id: \.self) { idx in
-                Capsule()
-                    .fill(idx == pageIndex ? WSColor.brandPrimary : WSColor.foregroundMuted.opacity(0.25))
-                    .frame(width: idx == pageIndex ? 28 : 8, height: 8)
+                Circle()
+                    .fill(idx == pageIndex ? accentColorForPage(idx) : WSColor.duoBorder)
+                    .frame(width: idx == pageIndex ? 14 : 10, height: idx == pageIndex ? 14 : 10)
+                    .overlay(
+                        Circle()
+                            .stroke(idx == pageIndex ? accentColorForPage(idx).opacity(0.4) : Color.clear, lineWidth: 2)
+                            .frame(width: idx == pageIndex ? 20 : 10, height: idx == pageIndex ? 20 : 10)
+                    )
                     .animation(.spring(response: 0.4, dampingFraction: 0.7), value: pageIndex)
             }
         }
@@ -146,7 +152,8 @@ struct OnboardingFlow: View {
                 }
             }
         }
-        .buttonStyle(WSPrimaryButtonStyle())
+        .buttonStyle(WSDuoSuccessButtonStyle())
+        .wsShineSweep()
     }
 
     private var ctaLabel: String {
@@ -176,7 +183,7 @@ struct OnboardingFlow: View {
         }
     }
 
-    /// Skip carousel: jump into the main tabs without signing in (local guest — no JWT).
+    /// Skip carousel: jump into the main tabs without signing in (local guest -- no JWT).
     private func skipOnboardingToHome() {
         session.continueWithoutSigningIn()
         withAnimation(.easeInOut(duration: 0.35)) {
@@ -203,6 +210,20 @@ struct OnboardingFlow: View {
     private func opacityForBackdrop(at idx: Int) -> Double {
         idx == pageIndex ? 1.0 : 0.0
     }
+
+    /// Per-page Duolingo accent color for the page indicator dots.
+    private func accentColorForPage(_ idx: Int) -> Color {
+        let colors: [Color] = [
+            WSColor.duoGreen,   // 0: Welcome
+            WSColor.duoPurple,  // 1: Essays
+            WSColor.duoBlue,    // 2: Study tools
+            WSColor.duoGreen,   // 3: Flashcards
+            WSColor.duoOrange,  // 4: Games
+            WSColor.duoBlue,    // 5: Library
+            WSColor.duoGreen    // 6: Get started
+        ]
+        return colors[idx % colors.count]
+    }
 }
 
 // MARK: - Single page view (shared layout)
@@ -222,46 +243,54 @@ struct OnboardingPageView: View {
 
             Spacer(minLength: 24)
 
-            // Copy block — eyebrow + headline + supporting
+            // Copy block -- eyebrow + headline + supporting (each row staggers in)
             VStack(spacing: 14) {
+                // Duolingo-style eyebrow pill with per-page color
                 Text(page.eyebrow)
                     .wsEyebrow()
-                    .foregroundStyle(WSColor.brandPrimary)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
+                    .foregroundStyle(page.badgeColor)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 7)
                     .background(
-                        Capsule().fill(WSColor.brandSoft)
+                        Capsule()
+                            .fill(page.badgeColor.opacity(0.12))
+                            .overlay(
+                                Capsule()
+                                    .stroke(page.badgeColor.opacity(0.25), lineWidth: 1.5)
+                            )
                     )
+                    .wsStaggerEntry(0)
 
                 styledHeadline
                     .multilineTextAlignment(.center)
+                    .wsStaggerEntry(1)
 
                 Text(page.supporting)
-                    .wsBody(.medium)
+                    .wsBody(.medium, weight: .semibold)
                     .foregroundStyle(WSColor.foregroundMuted)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 12)
                     .lineSpacing(2)
+                    .wsStaggerEntry(2)
             }
             .padding(.bottom, 12)
+            .id(page.id)
         }
     }
 
-    /// Renders the headline with the highlighted slice in a brand gradient.
-    /// Concatenated `Text` lets each segment carry its own foregroundStyle
-    /// while font + tracking apply to the whole composed Text.
+    /// Renders the headline with the highlighted slice in a solid Duolingo color.
+    /// Uses Nunito Black via wsHeadline -- no serif, no gradient text.
     private var styledHeadline: some View {
         let parts = splitHeadline(page.headline, highlight: page.highlight)
         return (
             Text(parts.before)
-                .foregroundStyle(WSColor.foreground)
+                .foregroundStyle(WSColor.duoText)
             + Text(parts.highlight)
-                .foregroundStyle(WSGradient.brand)
+                .foregroundStyle(page.highlightColor)
             + Text(parts.after)
-                .foregroundStyle(WSColor.foreground)
+                .foregroundStyle(WSColor.duoText)
         )
-        .font(WSFont.serif(32, weight: .semibold))
-        .tracking(-0.5)
+        .wsHeadline(.huge, weight: .black)
     }
 
     private func splitHeadline(_ headline: String, highlight: String?) -> (before: String, highlight: String, after: String) {

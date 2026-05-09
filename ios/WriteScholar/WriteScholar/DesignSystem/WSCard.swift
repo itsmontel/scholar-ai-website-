@@ -56,7 +56,7 @@ struct WSCardModifier: ViewModifier {
                             .stroke(showBorder ? WSColor.hairline : .clear, lineWidth: 1)
                     )
                     .shadow(
-                        color: Color(hex: 0x7C3AED).opacity(elevation.shadowOpacity),
+                        color: WSColor.duoPurple.opacity(elevation.shadowOpacity),
                         radius: elevation.shadowRadius,
                         y: elevation.shadowY
                     )

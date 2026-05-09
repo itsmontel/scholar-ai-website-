@@ -59,7 +59,7 @@ struct MainTabView: View {
                 .tabItem { Label("Focus", systemImage: "shield.lefthalf.filled") }
                 .tag(Tab.focus)
         }
-        .tint(WSColor.brandPrimary)
+        .tint(WSColor.duoGreen)
     }
 }
 
@@ -74,38 +74,46 @@ struct ComingSoonTab: View {
 
     var body: some View {
         ZStack {
-            WSGradient.heroBackdrop.ignoresSafeArea()
+            WSColor.backgroundElevated.ignoresSafeArea()
 
-            VStack(spacing: 18) {
-                ZStack {
-                    Circle()
-                        .fill(tint.opacity(0.15))
-                        .frame(width: 130, height: 130)
-                    Image(systemName: systemIcon)
-                        .font(.system(size: 56, weight: .semibold))
-                        .foregroundStyle(tint)
+            VStack(spacing: 24) {
+                Spacer()
+
+                VStack(spacing: 18) {
+                    ZStack {
+                        Circle()
+                            .fill(tint.opacity(0.12))
+                            .frame(width: 120, height: 120)
+                        Image(systemName: systemIcon)
+                            .font(.system(size: 52, weight: .heavy))
+                            .foregroundStyle(tint)
+                    }
+
+                    VStack(spacing: 8) {
+                        Text(title)
+                            .wsHeadline(.medium, weight: .black)
+                            .foregroundStyle(WSColor.duoText)
+
+                        Text(chapterLabel)
+                            .wsEyebrow()
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 5)
+                            .background(Capsule().fill(tint))
+                    }
+
+                    Text(subtitle)
+                        .wsBody(.medium, weight: .semibold)
+                        .foregroundStyle(WSColor.duoText.opacity(0.6))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
                 }
+                .frame(maxWidth: .infinity)
+                .wsChunkyCard(accent: tint)
 
-                VStack(spacing: 6) {
-                    Text(title)
-                        .wsHeadline(.medium, weight: .semibold)
-                        .foregroundStyle(WSColor.foreground)
-
-                    Text(chapterLabel)
-                        .wsEyebrow()
-                        .foregroundStyle(tint)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 4)
-                        .background(Capsule().fill(tint.opacity(0.15)))
-                }
-
-                Text(subtitle)
-                    .wsBody(.medium)
-                    .foregroundStyle(WSColor.foregroundMuted)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
+                Spacer()
             }
-            .padding(.top, 60)
+            .padding(.horizontal, 24)
         }
     }
 }

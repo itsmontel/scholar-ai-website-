@@ -5,16 +5,16 @@
 //  Full-screen browser for the user's achievement collection. Opened
 //  from the "View all" button on the Home tab achievements row.
 //
-//  Layout (top → bottom):
+//  Layout (top -> bottom):
 //
-//    1. Hero header        — XP total, Level badge, % complete bar
-//    2. Filter chips       — All · Unlocked · Locked
-//    3. Section list       — One section per MobileGroup (Streaks /
+//    1. Hero header        -- XP total, Level badge, % complete bar
+//    2. Filter chips       -- All . Unlocked . Locked
+//    3. Section list       -- One section per MobileGroup (Streaks /
 //                             Study Packs / Quizzes / Games / Focus /
 //                             Pro / Special / Getting Started). Each
 //                             section: a section header + a 3-col grid
 //                             of badge tiles.
-//    4. Tap a tile         — Pushes a detail sheet with the rule, XP,
+//    4. Tap a tile         -- Pushes a detail sheet with the rule, XP,
 //                             progress, and a flavor description.
 //
 
@@ -51,39 +51,34 @@ struct AchievementsGallerySheet: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                WSGradient.heroBackdrop.ignoresSafeArea()
+                WSColor.duoSurface.ignoresSafeArea()
 
-                // Decorative orbs
-                Circle()
-                    .fill(WSColor.brandPrimary.opacity(0.10))
-                    .frame(width: 360, height: 360)
-                    .blur(radius: 80)
-                    .offset(x: -200, y: -300)
-                    .ignoresSafeArea()
-                Circle()
-                    .fill(Color(hex: 0xF59E0B).opacity(0.10))
-                    .frame(width: 320, height: 320)
-                    .blur(radius: 80)
-                    .offset(x: 200, y: 320)
-                    .ignoresSafeArea()
-
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 22, pinnedViews: []) {
-                        heroHeader
-                        filterChips
-                        sectionsList
+                VStack(spacing: 0) {
+                    WSChunkyRibbon(color: WSColor.duoPurple)
+                    ScrollView {
+                        LazyVStack(alignment: .leading, spacing: 22, pinnedViews: []) {
+                            heroHeader
+                            filterChips
+                            sectionsList
+                        }
+                        .padding(.horizontal, 18)
+                        .padding(.top, 14)
+                        .padding(.bottom, 32)
                     }
-                    .padding(.horizontal, 18)
-                    .padding(.top, 14)
-                    .padding(.bottom, 32)
                 }
             }
-            .navigationTitle("Achievements")
+            .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("Your Badges")
+                        .wsHeadline(.small, weight: .black)
+                        .foregroundStyle(WSColor.duoText)
+                }
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Close") { dismiss() }
-                        .foregroundStyle(WSColor.foregroundMuted)
+                        .font(WSFont.sans(15, weight: .bold))
+                        .foregroundStyle(WSColor.duoPurple)
                 }
             }
             .sheet(item: $detailItem) { item in
@@ -110,13 +105,13 @@ struct AchievementsGallerySheet: View {
 
         return VStack(spacing: 16) {
             HStack(alignment: .top, spacing: 14) {
-                WSLevelBadge(level: level.level, size: 64, tint: WSColor.brandPrimary)
+                WSLevelBadge(level: level.level, size: 64, tint: WSColor.duoPurple)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(level.name)
-                        .font(.system(size: 20, weight: .black, design: .rounded))
-                        .foregroundStyle(WSColor.foreground)
+                        .wsHeadline(.medium, weight: .black)
+                        .foregroundStyle(WSColor.duoText)
                     HStack(spacing: 6) {
-                        WSGemChip(count: xp, icon: "bolt.fill", tint: Color(hex: 0xF59E0B))
+                        WSGemChip(count: xp, icon: "bolt.fill", tint: WSColor.duoOrange)
                         Text("\(unlockedCount)/\(totalCount) badges")
                             .wsBody(.caption, weight: .bold)
                             .foregroundStyle(WSColor.foregroundMuted)
@@ -135,9 +130,9 @@ struct AchievementsGallerySheet: View {
                     Spacer()
                     Text("\(Int(percent * 100))%")
                         .font(.system(size: 11, weight: .black, design: .rounded))
-                        .foregroundStyle(WSColor.brandPrimary)
+                        .foregroundStyle(WSColor.duoGreen)
                 }
-                WSXPBar(xpInLevel: unlockedCount, xpForLevel: totalCount, tint: WSColor.brandPrimary, height: 12, showsLabel: false)
+                WSXPBar(xpInLevel: unlockedCount, xpForLevel: totalCount, tint: WSColor.duoGreen, height: 12, showsLabel: false)
             }
 
             // XP-to-next-level
@@ -150,13 +145,13 @@ struct AchievementsGallerySheet: View {
                     Spacer()
                     Text(level.maxXP == .max ? "Top tier" : "\(xp - level.minXP)/\(xpForLevel) XP")
                         .font(.system(size: 11, weight: .black, design: .rounded))
-                        .foregroundStyle(Color(hex: 0xF59E0B))
+                        .foregroundStyle(WSColor.duoOrange)
                 }
-                WSXPBar(xpInLevel: xpInLevel, xpForLevel: xpForLevel, tint: Color(hex: 0xF59E0B), height: 12, showsLabel: false)
+                WSXPBar(xpInLevel: xpInLevel, xpForLevel: xpForLevel, tint: WSColor.duoOrange, height: 12, showsLabel: false)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .wsChunkyCard(verticalPadding: 18, accent: WSColor.brandPrimary)
+        .wsChunkyCard(verticalPadding: 18, accent: WSColor.duoPurple)
     }
 
     // MARK: - Filter chips
@@ -179,18 +174,18 @@ struct AchievementsGallerySheet: View {
                             .padding(.vertical, 2)
                             .background(
                                 Capsule()
-                                    .fill(active ? Color.white.opacity(0.25) : WSColor.surface)
+                                    .fill(active ? Color.white.opacity(0.25) : WSColor.duoSurface)
                             )
                             .foregroundStyle(active ? .white : WSColor.foregroundMuted)
                     }
-                    .foregroundStyle(active ? .white : WSColor.foreground)
+                    .foregroundStyle(active ? .white : WSColor.duoText)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 9)
                     .background(
                         Capsule()
-                            .fill(active ? AnyShapeStyle(WSColor.brandPrimary) : AnyShapeStyle(WSColor.backgroundElevated))
-                            .overlay(Capsule().stroke(active ? .clear : WSColor.hairline, lineWidth: 1))
-                            .shadow(color: active ? WSColor.brandPrimary.opacity(0.40) : .clear, radius: 8, y: 3)
+                            .fill(active ? WSColor.duoPurple : WSColor.backgroundElevated)
+                            .overlay(Capsule().stroke(active ? .clear : WSColor.duoBorder, lineWidth: 2))
+                            .shadow(color: active ? WSColor.duoPurple.opacity(0.40) : .clear, radius: 8, y: 3)
                     )
                 }
                 .buttonStyle(.plain)
@@ -231,22 +226,39 @@ struct AchievementsGallerySheet: View {
         }
     }
 
+    /// Maps rarity to Duolingo accent colors
+    private static func rarityAccent(_ rarity: Achievement.Rarity) -> Color {
+        switch rarity {
+        case .common:    return WSColor.duoGreen
+        case .uncommon:  return WSColor.duoBlue
+        case .rare:      return WSColor.duoPurple
+        case .epic:      return WSColor.duoOrange
+        case .legendary: return WSColor.duoRed
+        }
+    }
+
     private func sectionBlock(group: Achievement.MobileGroup, items: [Achievement]) -> some View {
         let groupUnlocked = items.filter { unlocked.contains($0.id) }.count
         return VStack(alignment: .leading, spacing: 12) {
+            // Colored pill header
             HStack(spacing: 8) {
-                ZStack {
-                    Circle()
-                        .fill(group.tint.opacity(0.16))
-                        .frame(width: 28, height: 28)
+                HStack(spacing: 6) {
                     Image(systemName: group.icon)
                         .font(.system(size: 13, weight: .heavy))
-                        .foregroundStyle(group.tint)
+                        .foregroundStyle(.white)
+                    Text(group.label)
+                        .font(.system(size: 14, weight: .black, design: .rounded))
+                        .foregroundStyle(.white)
                 }
-                Text(group.label)
-                    .font(.system(size: 16, weight: .black, design: .rounded))
-                    .foregroundStyle(WSColor.foreground)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(
+                    Capsule().fill(group.tint)
+                        .shadow(color: group.tint.opacity(0.35), radius: 4, y: 2)
+                )
+
                 Spacer()
+
                 Text("\(groupUnlocked) / \(items.count)")
                     .font(.system(size: 11, weight: .black, design: .rounded))
                     .foregroundStyle(group.tint)
@@ -284,35 +296,36 @@ struct AchievementTile: View {
     let unlocked: Bool
     let progress: Double
 
+    /// Maps rarity to Duolingo accent colors
+    private var rarityColor: Color {
+        switch achievement.rarity {
+        case .common:    return WSColor.duoGreen
+        case .uncommon:  return WSColor.duoBlue
+        case .rare:      return WSColor.duoPurple
+        case .epic:      return WSColor.duoOrange
+        case .legendary: return WSColor.duoRed
+        }
+    }
+
     var body: some View {
         VStack(spacing: 8) {
             ZStack {
-                // Halo when unlocked
-                if unlocked {
-                    Circle()
-                        .fill(
-                            RadialGradient(colors: [achievement.rarity.color.opacity(0.40), .clear],
-                                           center: .center, startRadius: 6, endRadius: 50)
-                        )
-                        .frame(width: 90, height: 90)
-                        .blur(radius: 6)
-                }
-
                 // Outer ring
                 Circle()
                     .fill(
                         unlocked
-                            ? AnyShapeStyle(LinearGradient(colors: [achievement.rarity.color, achievement.rarity.color.opacity(0.78)],
-                                                           startPoint: .topLeading, endPoint: .bottomTrailing))
-                            : AnyShapeStyle(WSColor.surface)
+                            ? rarityColor
+                            : WSColor.duoSurface
                     )
                     .frame(width: 64, height: 64)
                     .overlay(
                         Circle()
-                            .stroke(unlocked ? .white.opacity(0.30) : achievement.rarity.color.opacity(0.35),
-                                    lineWidth: unlocked ? 2 : 1.5)
+                            .stroke(
+                                unlocked ? rarityColor.opacity(0.50) : WSColor.duoBorder,
+                                lineWidth: unlocked ? 3 : 2
+                            )
                     )
-                    .shadow(color: unlocked ? achievement.rarity.color.opacity(0.55) : .clear, radius: 8, y: 3)
+                    .shadow(color: unlocked ? rarityColor.opacity(0.45) : .clear, radius: 8, y: 3)
 
                 Image(systemName: achievement.category.icon)
                     .font(.system(size: 22, weight: .heavy))
@@ -321,7 +334,7 @@ struct AchievementTile: View {
                 if !unlocked && progress > 0 {
                     Circle()
                         .trim(from: 0, to: max(0.001, min(1.0, CGFloat(progress))))
-                        .stroke(achievement.rarity.color,
+                        .stroke(rarityColor,
                                 style: StrokeStyle(lineWidth: 4, lineCap: .round))
                         .rotationEffect(.degrees(-90))
                         .frame(width: 64, height: 64)
@@ -332,7 +345,7 @@ struct AchievementTile: View {
                         .font(.system(size: 10, weight: .black))
                         .foregroundStyle(.white)
                         .padding(5)
-                        .background(Circle().fill(WSColor.foregroundMuted))
+                        .background(Circle().fill(Color(hex: 0x94A3B8)))
                         .offset(x: 22, y: 22)
                 }
             }
@@ -340,7 +353,7 @@ struct AchievementTile: View {
 
             Text(achievement.name)
                 .font(.system(size: 11, weight: .black, design: .rounded))
-                .foregroundStyle(WSColor.foreground)
+                .foregroundStyle(WSColor.duoText)
                 .lineLimit(1)
                 .truncationMode(.tail)
                 .multilineTextAlignment(.center)
@@ -348,7 +361,7 @@ struct AchievementTile: View {
 
             Text(unlocked ? "+\(achievement.xp) XP" : achievement.conditionText)
                 .font(.system(size: 9, weight: .bold, design: .rounded))
-                .foregroundStyle(unlocked ? achievement.rarity.color : WSColor.foregroundMuted)
+                .foregroundStyle(unlocked ? rarityColor : WSColor.foregroundMuted)
                 .lineLimit(2)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity, minHeight: 24)
@@ -356,16 +369,12 @@ struct AchievementTile: View {
         .padding(.vertical, 12)
         .padding(.horizontal, 6)
         .frame(maxWidth: .infinity)
-        .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(WSColor.backgroundElevated)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(unlocked ? achievement.rarity.color.opacity(0.30) : WSColor.hairline,
-                                lineWidth: 1)
-                )
-                .shadow(color: unlocked ? achievement.rarity.color.opacity(0.18) : .black.opacity(0.04),
-                        radius: 8, y: 3)
+        .wsChunkyCard(
+            cornerRadius: 16,
+            horizontalPadding: 0,
+            verticalPadding: 0,
+            lipHeight: 4,
+            accent: unlocked ? rarityColor : WSColor.duoBorder
         )
     }
 }
@@ -379,10 +388,21 @@ struct AchievementDetailSheet: View {
 
     @Environment(\.dismiss) private var dismiss
 
+    /// Maps rarity to Duolingo accent colors
+    private var rarityColor: Color {
+        switch achievement.rarity {
+        case .common:    return WSColor.duoGreen
+        case .uncommon:  return WSColor.duoBlue
+        case .rare:      return WSColor.duoPurple
+        case .epic:      return WSColor.duoOrange
+        case .legendary: return WSColor.duoRed
+        }
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
-                WSGradient.heroBackdrop.ignoresSafeArea()
+                WSColor.duoSurface.ignoresSafeArea()
 
                 ScrollView {
                     VStack(spacing: 18) {
@@ -401,7 +421,8 @@ struct AchievementDetailSheet: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Done") { dismiss() }
-                        .foregroundStyle(WSColor.foregroundMuted)
+                        .font(WSFont.sans(15, weight: .bold))
+                        .foregroundStyle(WSColor.duoPurple)
                 }
             }
         }
@@ -409,28 +430,20 @@ struct AchievementDetailSheet: View {
 
     private var bigBadge: some View {
         ZStack {
-            if isUnlocked {
-                Circle()
-                    .fill(
-                        RadialGradient(colors: [achievement.rarity.color.opacity(0.45), .clear],
-                                       center: .center, startRadius: 6, endRadius: 130)
-                    )
-                    .frame(width: 280, height: 280)
-                    .blur(radius: 12)
-            }
-
             Circle()
                 .fill(
                     isUnlocked
-                        ? AnyShapeStyle(LinearGradient(colors: [achievement.rarity.color, achievement.rarity.color.opacity(0.75)],
-                                                       startPoint: .topLeading, endPoint: .bottomTrailing))
-                        : AnyShapeStyle(WSColor.surface)
+                        ? rarityColor
+                        : WSColor.duoSurface
                 )
                 .frame(width: 140, height: 140)
                 .overlay(
-                    Circle().stroke(isUnlocked ? .white.opacity(0.40) : achievement.rarity.color.opacity(0.35), lineWidth: 3)
+                    Circle().stroke(
+                        isUnlocked ? rarityColor.opacity(0.50) : WSColor.duoBorder,
+                        lineWidth: 4
+                    )
                 )
-                .shadow(color: isUnlocked ? achievement.rarity.color.opacity(0.55) : .clear, radius: 22, y: 8)
+                .shadow(color: isUnlocked ? rarityColor.opacity(0.45) : .clear, radius: 22, y: 8)
 
             Image(systemName: achievement.category.icon)
                 .font(.system(size: 56, weight: .heavy))
@@ -441,14 +454,14 @@ struct AchievementDetailSheet: View {
                     .font(.system(size: 28, weight: .black))
                     .foregroundStyle(.white)
                     .padding(8)
-                    .background(Circle().fill(Color(hex: 0x10B981)))
+                    .background(Circle().fill(WSColor.duoGreen))
                     .offset(x: 50, y: 50)
             } else {
                 Image(systemName: "lock.fill")
                     .font(.system(size: 20, weight: .black))
                     .foregroundStyle(.white)
                     .padding(10)
-                    .background(Circle().fill(WSColor.foregroundMuted))
+                    .background(Circle().fill(Color(hex: 0x94A3B8)))
                     .offset(x: 50, y: 50)
             }
         }
@@ -460,14 +473,14 @@ struct AchievementDetailSheet: View {
             Text(achievement.rarity.label.uppercased())
                 .font(.system(size: 10, weight: .black, design: .rounded))
                 .tracking(0.8)
-                .foregroundStyle(achievement.rarity.color)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 4)
-                .background(Capsule().fill(achievement.rarity.color.opacity(0.16)))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 5)
+                .background(Capsule().fill(rarityColor))
 
             Text(achievement.name)
-                .font(.system(size: 26, weight: .black, design: .rounded))
-                .foregroundStyle(WSColor.foreground)
+                .wsHeadline(.large, weight: .black)
+                .foregroundStyle(WSColor.duoText)
                 .multilineTextAlignment(.center)
 
             Text("Meet \(achievement.creatureName)")
@@ -480,7 +493,7 @@ struct AchievementDetailSheet: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Image(systemName: "hourglass")
-                    .foregroundStyle(achievement.rarity.color)
+                    .foregroundStyle(rarityColor)
                 Text("PROGRESS")
                     .font(.system(size: 10, weight: .black, design: .rounded))
                     .tracking(0.7)
@@ -488,22 +501,22 @@ struct AchievementDetailSheet: View {
                 Spacer()
                 Text("\(Int(progress * 100))%")
                     .font(.system(size: 12, weight: .black, design: .rounded))
-                    .foregroundStyle(achievement.rarity.color)
+                    .foregroundStyle(rarityColor)
             }
-            WSXPBar(xpInLevel: Int(progress * 100), xpForLevel: 100, tint: achievement.rarity.color, height: 12, showsLabel: false)
+            WSXPBar(xpInLevel: Int(progress * 100), xpForLevel: 100, tint: rarityColor, height: 12, showsLabel: false)
             Text(achievement.conditionText)
                 .wsBody(.small, weight: .semibold)
-                .foregroundStyle(WSColor.foreground)
+                .foregroundStyle(WSColor.duoText)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .wsChunkyCard(verticalPadding: 14, accent: achievement.rarity.color)
+        .wsChunkyCard(verticalPadding: 14, accent: rarityColor)
     }
 
     private var rewardCard: some View {
         HStack(spacing: 12) {
             ZStack {
-                Circle().fill(Color(hex: 0xF59E0B).opacity(0.16)).frame(width: 44, height: 44)
-                Image(systemName: "bolt.fill").foregroundStyle(Color(hex: 0xF59E0B)).font(.system(size: 18, weight: .heavy))
+                Circle().fill(WSColor.duoOrangeLight).frame(width: 44, height: 44)
+                Image(systemName: "bolt.fill").foregroundStyle(WSColor.duoOrange).font(.system(size: 18, weight: .heavy))
             }
             VStack(alignment: .leading, spacing: 2) {
                 Text(isUnlocked ? "Earned" : "Reward")
@@ -511,20 +524,20 @@ struct AchievementDetailSheet: View {
                     .tracking(0.5)
                     .foregroundStyle(WSColor.foregroundMuted)
                 Text("+\(achievement.xp) XP")
-                    .font(.system(size: 22, weight: .black, design: .rounded))
-                    .foregroundStyle(WSColor.foreground)
+                    .wsHeadline(.medium, weight: .black)
+                    .foregroundStyle(WSColor.duoText)
             }
             Spacer()
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .wsChunkyCard(verticalPadding: 14, accent: Color(hex: 0xF59E0B))
+        .wsChunkyCard(verticalPadding: 14, accent: WSColor.duoOrange)
     }
 
     private var flavorCard: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 6) {
                 Image(systemName: "info.circle.fill")
-                    .foregroundStyle(WSColor.foregroundMuted)
+                    .foregroundStyle(WSColor.duoBlue)
                 Text("ABOUT")
                     .font(.system(size: 10, weight: .black, design: .rounded))
                     .tracking(0.7)
@@ -532,11 +545,10 @@ struct AchievementDetailSheet: View {
             }
             Text(achievement.description)
                 .wsBody(.medium)
-                .foregroundStyle(WSColor.foreground)
+                .foregroundStyle(WSColor.duoText)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
-        .wsCard(elevation: .low)
+        .wsChunkyCard(verticalPadding: 14, accent: WSColor.duoBlue)
     }
 }
 

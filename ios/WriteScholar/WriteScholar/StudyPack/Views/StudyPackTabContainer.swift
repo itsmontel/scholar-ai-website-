@@ -13,6 +13,8 @@ struct StudyPackTabContainer: View {
 
     var body: some View {
         ZStack {
+            WSColor.duoSurface.ignoresSafeArea()
+
             switch coordinator.phase {
             case .input:
                 StudyPackInputView(coordinator: coordinator)

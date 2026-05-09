@@ -31,12 +31,15 @@ struct NotesPackPickerSheet: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                WSGradient.heroBackdrop.ignoresSafeArea()
+                WSColor.duoSurface.ignoresSafeArea()
 
-                if eligibleEntries.isEmpty && ineligibleEntries.isEmpty {
-                    emptyState
-                } else {
-                    listBody
+                VStack(spacing: 0) {
+                    WSChunkyRibbon(color: WSColor.duoBlue)
+                    if eligibleEntries.isEmpty && ineligibleEntries.isEmpty {
+                        emptyState
+                    } else {
+                        listBody
+                    }
                 }
             }
             .navigationTitle(navTitle)
@@ -44,8 +47,8 @@ struct NotesPackPickerSheet: View {
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Cancel") { dismiss() }
-                        .wsBody(.small, weight: .bold)
-                        .foregroundStyle(WSColor.brandPrimary)
+                        .font(WSFont.headline(13, weight: .black))
+                        .foregroundStyle(WSColor.duoBlue)
                 }
             }
         }
@@ -57,8 +60,8 @@ struct NotesPackPickerSheet: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 10) {
                 Text("Pick one of your study packs to play with your own questions.")
-                    .wsBody(.small, weight: .semibold)
-                    .foregroundStyle(WSColor.foregroundMuted)
+                    .font(WSFont.sans(13, weight: .semibold))
+                    .foregroundStyle(WSColor.duoText.opacity(0.55))
                     .padding(.bottom, 4)
 
                 ForEach(eligibleEntries) { row in
@@ -69,22 +72,24 @@ struct NotesPackPickerSheet: View {
                     } label: {
                         eligibleRow(row)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(WSBouncyButtonStyle())
                 }
 
                 if !ineligibleEntries.isEmpty {
-                    Divider().padding(.vertical, 14)
+                    Divider()
+                        .background(WSColor.duoBorder)
+                        .padding(.vertical, 14)
                     Text("Packs without \(gameLabel) questions")
-                        .wsBody(.caption, weight: .bold)
-                        .foregroundStyle(WSColor.foregroundMuted)
+                        .font(WSFont.headline(11, weight: .black))
+                        .foregroundStyle(WSColor.duoText.opacity(0.5))
                         .textCase(.uppercase)
                         .padding(.bottom, 6)
                     ForEach(ineligibleEntries) { item in
                         ineligibleRow(item)
                     }
                     Text("\(gameLabel) is a Pro feature — packs you generated on the free plan won't include it.")
-                        .wsBody(.caption)
-                        .foregroundStyle(WSColor.foregroundMuted)
+                        .font(WSFont.sans(11))
+                        .foregroundStyle(WSColor.duoText.opacity(0.5))
                         .padding(.top, 6)
                 }
             }
@@ -97,36 +102,33 @@ struct NotesPackPickerSheet: View {
         HStack(spacing: 14) {
             ZStack {
                 Circle()
-                    .fill(accent.opacity(0.16))
+                    .fill(accent.opacity(0.12))
                     .frame(width: 44, height: 44)
                 Image(systemName: gameIcon)
-                    .font(.system(size: 18, weight: .bold))
+                    .font(.system(size: 18, weight: .heavy))
                     .foregroundStyle(accent)
             }
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(row.item.title)
-                    .wsBody(.medium, weight: .bold)
-                    .foregroundStyle(WSColor.foreground)
+                    .font(WSFont.headline(15, weight: .black))
+                    .foregroundStyle(WSColor.duoText)
                     .lineLimit(2)
                 Text("\(row.questionCount) \(gameLabel) questions")
-                    .wsBody(.caption, weight: .semibold)
-                    .foregroundStyle(WSColor.foregroundMuted)
+                    .font(WSFont.sans(11, weight: .semibold))
+                    .foregroundStyle(WSColor.duoText.opacity(0.55))
             }
             Spacer()
             Image(systemName: "play.fill")
                 .foregroundStyle(accent)
-                .font(.system(size: 16, weight: .bold))
+                .font(.system(size: 16, weight: .heavy))
         }
-        .padding(14)
-        .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(WSColor.backgroundElevated)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(accent.opacity(0.30), lineWidth: 1)
-                )
-                .shadow(color: accent.opacity(0.18), radius: 10, y: 4)
+        .wsChunkyCard(
+            cornerRadius: 16,
+            horizontalPadding: 14,
+            verticalPadding: 12,
+            lipHeight: 5,
+            accent: accent
         )
     }
 
@@ -134,15 +136,15 @@ struct NotesPackPickerSheet: View {
         HStack(spacing: 14) {
             ZStack {
                 Circle()
-                    .fill(WSColor.surface)
+                    .fill(WSColor.duoSurface)
                     .frame(width: 36, height: 36)
                 Image(systemName: "lock.fill")
                     .font(.system(size: 14, weight: .bold))
-                    .foregroundStyle(WSColor.foregroundMuted)
+                    .foregroundStyle(WSColor.duoBorder)
             }
             Text(item.title)
-                .wsBody(.small, weight: .semibold)
-                .foregroundStyle(WSColor.foregroundMuted)
+                .font(WSFont.sans(13, weight: .semibold))
+                .foregroundStyle(WSColor.duoText.opacity(0.45))
                 .lineLimit(1)
             Spacer()
         }
@@ -150,29 +152,39 @@ struct NotesPackPickerSheet: View {
         .padding(.vertical, 10)
         .background(
             RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(WSColor.backgroundElevated.opacity(0.5))
+                .fill(WSColor.duoSurface)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(WSColor.duoBorder, lineWidth: 1)
+                )
         )
     }
 
     private var emptyState: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 20) {
             Spacer()
-            ZStack {
-                Circle()
-                    .fill(accent.opacity(0.12))
-                    .frame(width: 110, height: 110)
-                Image(systemName: gameIcon)
-                    .font(.system(size: 44, weight: .semibold))
-                    .foregroundStyle(accent)
+
+            VStack(spacing: 16) {
+                ZStack {
+                    Circle()
+                        .fill(accent.opacity(0.10))
+                        .frame(width: 110, height: 110)
+                    Image(systemName: gameIcon)
+                        .font(.system(size: 44, weight: .heavy))
+                        .foregroundStyle(accent)
+                }
+                Text("No packs ready for \(gameLabel)")
+                    .wsHeadline(.small, weight: .black)
+                    .foregroundStyle(WSColor.duoText)
+                Text("Generate a study pack from the Study tab — \(gameLabel) questions get attached automatically and packs you've made will show up here.")
+                    .font(WSFont.sans(15))
+                    .foregroundStyle(WSColor.duoText.opacity(0.55))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 12)
             }
-            Text("No packs ready for \(gameLabel)")
-                .wsHeadline(.small, weight: .bold)
-                .foregroundStyle(WSColor.foreground)
-            Text("Generate a study pack from the Study tab — \(gameLabel) questions get attached automatically and packs you've made will show up here.")
-                .wsBody(.medium)
-                .foregroundStyle(WSColor.foregroundMuted)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 30)
+            .wsChunkyCard(accent: accent)
+            .padding(.horizontal, 6)
+
             Spacer()
         }
     }
@@ -236,8 +248,8 @@ struct NotesPackPickerSheet: View {
 
     private var accent: Color {
         switch game {
-        case .craterBlast: return Color(hex: 0xEF4444)
-        case .wordTower:   return Color(hex: 0x10B981)
+        case .craterBlast: return WSColor.duoRed
+        case .wordTower:   return WSColor.duoGreen
         }
     }
 

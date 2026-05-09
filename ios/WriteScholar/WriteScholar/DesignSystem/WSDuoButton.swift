@@ -2,135 +2,125 @@
 //  WSDuoButton.swift
 //  WriteScholar
 //
-//  The "Duolingo-style" 3D button family. Every button has two visible
-//  layers stacked on top of each other:
+//  The "Duolingo-style" 3D button family matching the web app's
+//  border-2 border-b-4 active:border-b-2 active:translate-y-0.5 pattern.
 //
-//    ┌──────────────────────┐  ← Top face (the colored fill)
-//    └──────────────────────┘
-//      ████████████████████    ← Darker base (the "shadow lip")
+//  Every button has two visible layers:
+//    +-----------------------+  <- Top face (the solid fill)
+//    +=======================+  <- Darker base lip
 //
-//  When pressed, the top face slides DOWN by the lip height so the
-//  visible base disappears — the button physically "presses" into the
-//  surface. Combined with a quick spring + soft haptic, this is the
-//  unmistakable tactile feel that makes Duolingo feel like a toy.
+//  When pressed, the top face slides DOWN by the lip height.
+//  Combined with a quick spring + soft haptic = unmistakable Duolingo feel.
 //
-//  Variants:
-//    • WSDuoPrimaryButtonStyle    — brand violet → fuchsia gradient
-//    • WSDuoSecondaryButtonStyle  — surface fill, brand text
-//    • WSDuoSuccessButtonStyle    — emerald (used for "Got it" / wins)
-//    • WSDuoWarnButtonStyle       — amber (used for upgrades / streaks)
-//    • WSDuoDangerButtonStyle     — rose (used for destructive actions)
-//
-//  All take a `fullWidth` flag so they can either stretch or hug.
-//
-//  Use it like any other button style:
-//
-//      Button("Continue") { … }
-//          .buttonStyle(WSDuoPrimaryButtonStyle())
+//  Variants use the ACTUAL Duolingo hex colors:
+//    * Primary   — #A560E8 purple (brand)
+//    * Green     — #58CC02 green (CTAs, success)
+//    * Orange    — #FF9600 (upgrades, streaks)
+//    * Red       — #FF4B4B (danger)
+//    * Blue      — #1CB0F6 (info, links)
+//    * Secondary — white surface with brand text
 //
 
 import SwiftUI
 
 // MARK: - Shared palette
 
-/// Two-color palette used by every Duo button: a top-face color (fill +
-/// gradient) and a darker base color (the "lip" that disappears on press).
 struct WSDuoPalette {
-    let topGradient: [Color]
+    let topColor: Color
     let baseColor: Color
     let foreground: Color
     let glow: Color
 
+    // Duolingo solid palettes — NO gradients, just solid fills
     static let primary = WSDuoPalette(
-        topGradient: [Color(hex: 0x8B5CF6), Color(hex: 0x7C3AED), Color(hex: 0xD946EF)],
-        baseColor:   Color(hex: 0x5B21B6),
-        foreground:  .white,
-        glow:        Color(hex: 0x7C3AED)
+        topColor:   WSColor.duoPurple,
+        baseColor:  WSColor.duoPurpleDark,
+        foreground: .white,
+        glow:       WSColor.duoPurple
     )
 
     static let secondary = WSDuoPalette(
-        topGradient: [Color(hex: 0xFFFFFF), Color(hex: 0xF8FAFC)],
-        baseColor:   Color(hex: 0xCBD5E1),
-        foreground:  Color(hex: 0x7C3AED),
-        glow:        Color(hex: 0x7C3AED).opacity(0.18)
+        topColor:   Color.white,
+        baseColor:  WSColor.duoBorder,
+        foreground: WSColor.duoText,
+        glow:       WSColor.duoPurple.opacity(0.12)
     )
 
     static let success = WSDuoPalette(
-        topGradient: [Color(hex: 0x34D399), Color(hex: 0x10B981)],
-        baseColor:   Color(hex: 0x047857),
-        foreground:  .white,
-        glow:        Color(hex: 0x10B981)
+        topColor:   WSColor.duoGreen,
+        baseColor:  WSColor.duoGreenDark,
+        foreground: .white,
+        glow:       WSColor.duoGreen
     )
 
     static let warn = WSDuoPalette(
-        topGradient: [Color(hex: 0xFBBF24), Color(hex: 0xF59E0B)],
-        baseColor:   Color(hex: 0xB45309),
-        foreground:  .white,
-        glow:        Color(hex: 0xF59E0B)
+        topColor:   WSColor.duoOrange,
+        baseColor:  WSColor.duoOrangeDark,
+        foreground: .white,
+        glow:       WSColor.duoOrange
     )
 
     static let danger = WSDuoPalette(
-        topGradient: [Color(hex: 0xFB7185), Color(hex: 0xEF4444)],
-        baseColor:   Color(hex: 0xB91C1C),
-        foreground:  .white,
-        glow:        Color(hex: 0xEF4444)
+        topColor:   WSColor.duoRed,
+        baseColor:  WSColor.duoRedDark,
+        foreground: .white,
+        glow:       WSColor.duoRed
     )
 
     static let info = WSDuoPalette(
-        topGradient: [Color(hex: 0x60A5FA), Color(hex: 0x6366F1)],
-        baseColor:   Color(hex: 0x4338CA),
-        foreground:  .white,
-        glow:        Color(hex: 0x6366F1)
+        topColor:   WSColor.duoBlue,
+        baseColor:  WSColor.duoBlueDark,
+        foreground: .white,
+        glow:       WSColor.duoBlue
     )
+
+    // Keep legacy gradient-based name for backward compat
+    var topGradient: [Color] { [topColor] }
 }
 
 // MARK: - The base style
 
-/// All variants funnel through this. The lip height defines how much the
-/// top face slides on press — 6pt feels punchy without looking comical.
 struct WSDuoButtonStyle: ButtonStyle {
     var palette: WSDuoPalette
     var fullWidth: Bool = true
-    var lip: CGFloat = 6
-    var cornerRadius: CGFloat = 18
-    /// Optional override for vertical padding (pill = 14, regular = 17).
-    var verticalPadding: CGFloat = 17
+    var lip: CGFloat = 5
+    var cornerRadius: CGFloat = 16
+    var verticalPadding: CGFloat = 16
 
     func makeBody(configuration: Configuration) -> some View {
         let pressed = configuration.isPressed
 
         return ZStack(alignment: .top) {
-            // Base "lip" — fixed in place; the top face slides over it
+            // Base "lip" — fixed in place
             RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                 .fill(palette.baseColor)
                 .frame(maxWidth: fullWidth ? .infinity : nil)
                 .padding(.top, lip)
 
-            // Top face — the visible colored button
+            // Top face — the visible solid button
             configuration.label
-                .wsBody(.medium, weight: .black)
+                .font(WSFont.sans(15, weight: .black))
+                .textCase(.uppercase)
+                .tracking(1.0)
                 .foregroundStyle(palette.foreground)
                 .padding(.vertical, verticalPadding)
                 .padding(.horizontal, fullWidth ? 0 : 22)
                 .frame(maxWidth: fullWidth ? .infinity : nil)
                 .background(
                     RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                        .fill(
-                            LinearGradient(colors: palette.topGradient,
-                                           startPoint: .top, endPoint: .bottom)
-                        )
+                        .fill(palette.topColor)
                         .overlay(
                             RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                                .stroke(Color.white.opacity(0.18), lineWidth: 1)
+                                .stroke(Color.white.opacity(0.12), lineWidth: 1)
                         )
                 )
                 .offset(y: pressed ? lip : 0)
         }
         .compositingGroup()
-        .shadow(color: palette.glow.opacity(pressed ? 0.10 : 0.32),
-                radius: pressed ? 4 : 12,
-                y: pressed ? 1 : 6)
-        .animation(.spring(response: 0.18, dampingFraction: 0.62), value: pressed)
+        .shadow(color: palette.glow.opacity(pressed ? 0.06 : 0.22),
+                radius: pressed ? 2 : 8,
+                y: pressed ? 1 : 4)
+        .animation(.spring(response: 0.16, dampingFraction: 0.65), value: pressed)
         .onChange(of: configuration.isPressed) { _, isPressed in
             if isPressed { Haptics.light() }
         }
@@ -189,16 +179,15 @@ struct WSDuoInfoButtonStyle: ButtonStyle {
 
 // MARK: - Pill (compact) variant
 
-/// Smaller, hug-content version used in inline rows / chips.
 struct WSDuoPillButtonStyle: ButtonStyle {
     var palette: WSDuoPalette = .primary
     func makeBody(configuration: Configuration) -> some View {
         WSDuoButtonStyle(
             palette: palette,
             fullWidth: false,
-            lip: 4,
+            lip: 3,
             cornerRadius: 999,
-            verticalPadding: 11
+            verticalPadding: 10
         )
         .makeBody(configuration: configuration)
     }
@@ -206,19 +195,68 @@ struct WSDuoPillButtonStyle: ButtonStyle {
 
 // MARK: - Spring presets
 
-/// Reusable Duolingo-feel springs. Bouncier than typical iOS easing.
 extension Animation {
     /// Quick + punchy — for press feedback.
-    static let wsBounceTight = Animation.spring(response: 0.22, dampingFraction: 0.62)
-
+    static let wsBounceTight = Animation.spring(response: 0.20, dampingFraction: 0.65)
     /// Medium pop — for tab swaps, sheet presents.
-    static let wsBouncePop = Animation.spring(response: 0.40, dampingFraction: 0.66)
-
+    static let wsBouncePop = Animation.spring(response: 0.38, dampingFraction: 0.68)
     /// Long, juicy — for hero element entrances.
-    static let wsBounceJuicy = Animation.spring(response: 0.55, dampingFraction: 0.58)
-
+    static let wsBounceJuicy = Animation.spring(response: 0.50, dampingFraction: 0.60)
     /// "Wobble" — exaggerated overshoot for celebrations.
-    static let wsWobble = Animation.spring(response: 0.45, dampingFraction: 0.42)
+    static let wsWobble = Animation.spring(response: 0.42, dampingFraction: 0.44)
+}
+
+// MARK: - Legacy aliases
+
+struct WSPrimaryButtonStyle: ButtonStyle {
+    var fullWidth: Bool = true
+    func makeBody(configuration: Configuration) -> some View {
+        WSDuoButtonStyle(palette: .success, fullWidth: fullWidth)
+            .makeBody(configuration: configuration)
+    }
+}
+
+struct WSSecondaryButtonStyle: ButtonStyle {
+    var fullWidth: Bool = false
+    func makeBody(configuration: Configuration) -> some View {
+        WSDuoButtonStyle(palette: .secondary, fullWidth: fullWidth)
+            .makeBody(configuration: configuration)
+    }
+}
+
+struct WSTertiaryButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(WSFont.sans(13, weight: .bold))
+            .foregroundStyle(WSColor.duoPurple)
+            .padding(.vertical, 8)
+            .padding(.horizontal, 12)
+            .opacity(configuration.isPressed ? 0.6 : 1.0)
+    }
+}
+
+// MARK: - Haptics helper
+
+@MainActor
+enum Haptics {
+    static func light() {
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+    }
+    static func medium() {
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+    }
+    static func success() {
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+    }
+    static func warning() {
+        UINotificationFeedbackGenerator().notificationOccurred(.warning)
+    }
+    static func error() {
+        UINotificationFeedbackGenerator().notificationOccurred(.error)
+    }
+    static func selection() {
+        UISelectionFeedbackGenerator().selectionChanged()
+    }
 }
 
 // MARK: - Previews
@@ -252,5 +290,5 @@ extension Animation {
         }
         .padding()
     }
-    .background(WSGradient.heroBackdrop)
+    .background(WSColor.duoSurface)
 }

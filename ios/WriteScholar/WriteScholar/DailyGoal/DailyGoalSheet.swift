@@ -2,14 +2,14 @@
 //  DailyGoalSheet.swift
 //  WriteScholar
 //
-//  Tap the daily-goal card on Home → this sheet pops up with:
+//  Tap the daily-goal card on Home -> this sheet pops up with:
 //
-//    1. Hero ring     — Big animated XP ring for today
-//    2. Picker        — Casual / Regular / Serious / Intense (chunky
+//    1. Hero ring     -- Big animated XP ring for today
+//    2. Picker        -- Casual / Regular / Serious / Intense (chunky
 //                        cards with emoji + blurb + XP target)
-//    3. Today's log   — Per-activity rows with the XP earned
-//    4. 7-day strip   — Mini bar chart of the past week's progress
-//    5. How XP works  — Cheat sheet showing what awards how much XP
+//    3. Today's log   -- Per-activity rows with the XP earned
+//    4. 7-day strip   -- Mini bar chart of the past week's progress
+//    5. How XP works  -- Cheat sheet showing what awards how much XP
 //
 //  All persistence flows through DailyGoalStore.
 //
@@ -24,44 +24,37 @@ struct DailyGoalSheet: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Tinted backdrop following the active goal color
-                LinearGradient(
-                    colors: [
-                        store.target.tint.opacity(0.10),
-                        WSColor.background,
-                        store.target.tint.opacity(0.06)
-                    ],
-                    startPoint: .top, endPoint: .bottom
-                )
-                .ignoresSafeArea()
+                WSColor.duoSurface.ignoresSafeArea()
 
-                Circle()
-                    .fill(store.target.tint.opacity(0.12))
-                    .frame(width: 360, height: 360)
-                    .blur(radius: 80)
-                    .offset(x: -180, y: -300)
-                    .ignoresSafeArea()
-
-                ScrollView {
-                    VStack(spacing: 22) {
-                        heroRing
-                        picker
-                        todayLogCard
-                        weekStrip
-                        xpCheatSheet
-                        Spacer(minLength: 12)
+                VStack(spacing: 0) {
+                    WSChunkyRibbon(color: WSColor.duoGreen)
+                    ScrollView {
+                        VStack(spacing: 22) {
+                            heroRing
+                            picker
+                            todayLogCard
+                            weekStrip
+                            xpCheatSheet
+                            Spacer(minLength: 12)
+                        }
+                        .padding(.horizontal, 18)
+                        .padding(.top, 14)
+                        .padding(.bottom, 32)
                     }
-                    .padding(.horizontal, 18)
-                    .padding(.top, 14)
-                    .padding(.bottom, 32)
                 }
             }
-            .navigationTitle("Daily goal")
+            .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("Daily Goal")
+                        .wsHeadline(.small, weight: .black)
+                        .foregroundStyle(WSColor.duoText)
+                }
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Close") { dismiss() }
-                        .foregroundStyle(WSColor.foregroundMuted)
+                        .font(WSFont.sans(15, weight: .bold))
+                        .foregroundStyle(WSColor.duoPurple)
                 }
             }
         }
@@ -73,45 +66,34 @@ struct DailyGoalSheet: View {
         VStack(spacing: 14) {
             ZStack {
                 Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [store.target.tint.opacity(0.30), .clear],
-                            center: .center, startRadius: 6, endRadius: 130
-                        )
-                    )
-                    .frame(width: 240, height: 240)
-                    .blur(radius: 12)
-
-                Circle()
-                    .stroke(WSColor.surface, lineWidth: 14)
+                    .stroke(WSColor.duoSurface, lineWidth: 14)
                     .frame(width: 170, height: 170)
 
                 Circle()
                     .trim(from: 0, to: max(0.001, min(1.0, store.todayFraction)))
                     .stroke(
-                        LinearGradient(colors: [store.target.tint, store.target.tint.opacity(0.7)],
-                                       startPoint: .top, endPoint: .bottom),
+                        WSColor.duoGreen,
                         style: StrokeStyle(lineWidth: 14, lineCap: .round)
                     )
                     .rotationEffect(.degrees(-90))
                     .frame(width: 170, height: 170)
-                    .shadow(color: store.target.tint.opacity(0.45), radius: 8, y: 2)
+                    .shadow(color: WSColor.duoGreen.opacity(0.45), radius: 8, y: 2)
                     .animation(.wsBouncePop, value: store.todayFraction)
 
                 if store.todayIsComplete {
                     VStack(spacing: 4) {
                         Image(systemName: "checkmark.seal.fill")
                             .font(.system(size: 50, weight: .black))
-                            .foregroundStyle(Color(hex: 0x10B981))
+                            .foregroundStyle(WSColor.duoGreen)
                         Text("Done!")
-                            .font(.system(size: 18, weight: .black, design: .rounded))
-                            .foregroundStyle(WSColor.foreground)
+                            .wsHeadline(.small, weight: .black)
+                            .foregroundStyle(WSColor.duoText)
                     }
                 } else {
                     VStack(spacing: 2) {
                         Text("\(store.todayXP)")
                             .font(.system(size: 44, weight: .black, design: .rounded))
-                            .foregroundStyle(WSColor.foreground)
+                            .foregroundStyle(WSColor.duoText)
                             .contentTransition(.numericText())
                         Text("of \(store.todayLog.target) XP")
                             .font(.system(size: 12, weight: .black, design: .rounded))
@@ -123,8 +105,8 @@ struct DailyGoalSheet: View {
 
             VStack(spacing: 4) {
                 Text(store.todayIsComplete ? "Goal complete for today" : "\(max(0, store.todayLog.target - store.todayXP)) XP to go")
-                    .font(.system(size: 22, weight: .black, design: .rounded))
-                    .foregroundStyle(WSColor.foreground)
+                    .wsHeadline(.medium, weight: .black)
+                    .foregroundStyle(WSColor.duoText)
                 Text(store.todayIsComplete
                     ? "You earned the \(store.consecutiveCompletedDays)-day goal streak. Come back tomorrow!"
                     : "Pick a study activity to add XP toward today's goal.")
@@ -136,14 +118,14 @@ struct DailyGoalSheet: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 18)
-        .wsChunkyCard(verticalPadding: 0, accent: store.target.tint)
+        .wsChunkyCard(verticalPadding: 0, accent: WSColor.duoGreen)
     }
 
     // MARK: - Picker
 
     private var picker: some View {
         VStack(alignment: .leading, spacing: 10) {
-            sectionHeader(label: "TARGET", systemIcon: "target", tint: store.target.tint)
+            sectionHeader(label: "TARGET", systemIcon: "target", tint: WSColor.duoGreen)
             VStack(spacing: 8) {
                 ForEach(DailyGoalStore.Target.allCases) { t in
                     targetRow(t)
@@ -163,14 +145,9 @@ struct DailyGoalSheet: View {
             HStack(spacing: 14) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(LinearGradient(colors: [t.tint, t.tint.opacity(0.78)],
-                                             startPoint: .topLeading, endPoint: .bottomTrailing))
+                        .fill(WSColor.duoGreen)
                         .frame(width: 46, height: 46)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                .stroke(.white.opacity(0.30), lineWidth: 1)
-                        )
-                        .shadow(color: t.tint.opacity(0.40), radius: 6, y: 2)
+                        .shadow(color: WSColor.duoGreenDark.opacity(0.40), radius: 6, y: 2)
                     Text(t.emoji)
                         .font(.system(size: 22))
                 }
@@ -179,13 +156,13 @@ struct DailyGoalSheet: View {
                     HStack(spacing: 6) {
                         Text(t.label)
                             .wsBody(.medium, weight: .black)
-                            .foregroundStyle(WSColor.foreground)
+                            .foregroundStyle(WSColor.duoText)
                         Text("\(t.xp) XP")
                             .font(.system(size: 11, weight: .black, design: .rounded))
-                            .foregroundStyle(t.tint)
+                            .foregroundStyle(.white)
                             .padding(.horizontal, 7)
                             .padding(.vertical, 2)
-                            .background(Capsule().fill(t.tint.opacity(0.13)))
+                            .background(Capsule().fill(WSColor.duoGreen))
                     }
                     Text(t.blurb)
                         .wsBody(.caption)
@@ -193,16 +170,16 @@ struct DailyGoalSheet: View {
                 }
                 Spacer()
                 Image(systemName: active ? "checkmark.circle.fill" : "circle")
-                    .foregroundStyle(active ? t.tint : WSColor.foregroundMuted)
+                    .foregroundStyle(active ? WSColor.duoGreen : WSColor.foregroundMuted)
                     .font(.system(size: 22))
             }
             .padding(12)
             .background(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(active ? t.tint.opacity(0.08) : WSColor.backgroundElevated)
+                    .fill(active ? WSColor.duoGreenLight : WSColor.backgroundElevated)
                     .overlay(
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(active ? t.tint.opacity(0.50) : WSColor.hairline, lineWidth: 1)
+                            .stroke(active ? WSColor.duoGreen : WSColor.duoBorder, lineWidth: active ? 2 : 1)
                     )
             )
         }
@@ -213,7 +190,7 @@ struct DailyGoalSheet: View {
 
     private var todayLogCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            sectionHeader(label: "TODAY", systemIcon: "list.bullet.clipboard.fill", tint: WSColor.brandPrimary)
+            sectionHeader(label: "TODAY", systemIcon: "list.bullet.clipboard.fill", tint: WSColor.duoPurple)
 
             if store.todayLog.entries.isEmpty {
                 HStack(spacing: 10) {
@@ -223,7 +200,7 @@ struct DailyGoalSheet: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Nothing yet today")
                             .wsBody(.medium, weight: .bold)
-                            .foregroundStyle(WSColor.foreground)
+                            .foregroundStyle(WSColor.duoText)
                         Text("Generate a pack, finish a quiz, or pass a Focus unlock to earn XP.")
                             .wsBody(.caption)
                             .foregroundStyle(WSColor.foregroundMuted)
@@ -236,7 +213,7 @@ struct DailyGoalSheet: View {
                         .fill(WSColor.backgroundElevated)
                         .overlay(
                             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .stroke(WSColor.hairline, lineWidth: 1)
+                                .stroke(WSColor.duoBorder, lineWidth: 2)
                         )
                 )
             } else {
@@ -253,15 +230,15 @@ struct DailyGoalSheet: View {
     private func logRow(_ entry: DailyGoalStore.DayLog.Entry) -> some View {
         HStack(spacing: 12) {
             ZStack {
-                Circle().fill(WSColor.brandPrimary.opacity(0.16)).frame(width: 32, height: 32)
+                Circle().fill(WSColor.duoPurpleLight).frame(width: 32, height: 32)
                 Image(systemName: entry.activity.icon)
-                    .foregroundStyle(WSColor.brandPrimary)
+                    .foregroundStyle(WSColor.duoPurple)
                     .font(.system(size: 13, weight: .heavy))
             }
             VStack(alignment: .leading, spacing: 1) {
                 Text(entry.activity.label)
                     .wsBody(.medium, weight: .bold)
-                    .foregroundStyle(WSColor.foreground)
+                    .foregroundStyle(WSColor.duoText)
                 Text(formatTime(entry.at))
                     .wsBody(.caption)
                     .foregroundStyle(WSColor.foregroundMuted)
@@ -269,10 +246,10 @@ struct DailyGoalSheet: View {
             Spacer()
             Text("+\(entry.xp) XP")
                 .font(.system(size: 12, weight: .black, design: .rounded))
-                .foregroundStyle(Color(hex: 0xF59E0B))
+                .foregroundStyle(WSColor.duoOrange)
                 .padding(.horizontal, 8)
                 .padding(.vertical, 3)
-                .background(Capsule().fill(Color(hex: 0xF59E0B).opacity(0.14)))
+                .background(Capsule().fill(WSColor.duoOrangeLight))
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
@@ -281,7 +258,7 @@ struct DailyGoalSheet: View {
                 .fill(WSColor.backgroundElevated)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .stroke(WSColor.hairline, lineWidth: 1)
+                        .stroke(WSColor.duoBorder, lineWidth: 2)
                 )
         )
     }
@@ -295,11 +272,11 @@ struct DailyGoalSheet: View {
     // MARK: - Week strip (mini bar chart)
 
     private var weekStrip: some View {
-        let days = store.lastDays(7).reversed().map { $0 }    // oldest → newest
+        let days = store.lastDays(7).reversed().map { $0 }    // oldest -> newest
         let maxXP = max(days.map(\.xp).max() ?? 1, store.target.xp)
 
         return VStack(alignment: .leading, spacing: 12) {
-            sectionHeader(label: "LAST 7 DAYS", systemIcon: "chart.bar.fill", tint: Color(hex: 0xF59E0B))
+            sectionHeader(label: "LAST 7 DAYS", systemIcon: "chart.bar.fill", tint: WSColor.duoOrange)
 
             HStack(alignment: .bottom, spacing: 8) {
                 ForEach(days) { log in
@@ -309,33 +286,22 @@ struct DailyGoalSheet: View {
             .frame(height: 110)
             .frame(maxWidth: .infinity)
         }
-        .padding(14)
-        .background(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(WSColor.backgroundElevated)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .stroke(WSColor.hairline, lineWidth: 1)
-                )
-        )
+        .wsChunkyCard(verticalPadding: 14, accent: WSColor.duoOrange)
     }
 
     private func weekBar(log: DailyGoalStore.DayLog, maxXP: Int) -> some View {
         let frac = max(0.04, min(1.0, Double(log.xp) / Double(max(1, maxXP))))
         let isToday = Calendar.current.isDateInToday(log.date)
         let met = log.isComplete
-        let color = met ? Color(hex: 0x10B981) : (isToday ? store.target.tint : Color(hex: 0xCBD5E1))
+        let color = met ? WSColor.duoGreen : (isToday ? WSColor.duoBlue : WSColor.duoBorder)
         return VStack(spacing: 6) {
             ZStack(alignment: .bottom) {
                 RoundedRectangle(cornerRadius: 6, style: .continuous)
-                    .fill(WSColor.surface)
+                    .fill(WSColor.duoSurface)
                     .frame(maxWidth: .infinity)
                     .frame(height: 80)
                 RoundedRectangle(cornerRadius: 6, style: .continuous)
-                    .fill(
-                        LinearGradient(colors: [color, color.opacity(0.78)],
-                                       startPoint: .top, endPoint: .bottom)
-                    )
+                    .fill(color)
                     .frame(height: 80 * frac)
                     .frame(maxWidth: .infinity)
                     .shadow(color: color.opacity(0.30), radius: 4, y: 1)
@@ -349,7 +315,7 @@ struct DailyGoalSheet: View {
 
             Text(weekdayShort(log.date))
                 .font(.system(size: 10, weight: .black, design: .rounded))
-                .foregroundStyle(isToday ? store.target.tint : WSColor.foregroundMuted)
+                .foregroundStyle(isToday ? WSColor.duoBlue : WSColor.foregroundMuted)
         }
     }
 
@@ -363,7 +329,7 @@ struct DailyGoalSheet: View {
 
     private var xpCheatSheet: some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionHeader(label: "HOW XP WORKS", systemIcon: "info.circle.fill", tint: Color(hex: 0x6366F1))
+            sectionHeader(label: "HOW XP WORKS", systemIcon: "info.circle.fill", tint: WSColor.duoBlue)
 
             VStack(spacing: 6) {
                 xpRow(.studyPackGenerated)
@@ -374,30 +340,22 @@ struct DailyGoalSheet: View {
                 xpRow(.focusUnlock)
             }
         }
-        .padding(14)
-        .background(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(Color(hex: 0x6366F1).opacity(0.06))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .stroke(Color(hex: 0x6366F1).opacity(0.20), lineWidth: 1)
-                )
-        )
+        .wsChunkyCard(verticalPadding: 14, accent: WSColor.duoBlue)
     }
 
     private func xpRow(_ activity: DailyGoalStore.Activity) -> some View {
         HStack(spacing: 10) {
             Image(systemName: activity.icon)
-                .foregroundStyle(WSColor.brandPrimary)
+                .foregroundStyle(WSColor.duoPurple)
                 .font(.system(size: 12, weight: .heavy))
                 .frame(width: 18)
             Text(activity.label)
                 .wsBody(.small, weight: .bold)
-                .foregroundStyle(WSColor.foreground)
+                .foregroundStyle(WSColor.duoText)
             Spacer()
             Text("+\(activity.xp) XP")
                 .font(.system(size: 11, weight: .black, design: .rounded))
-                .foregroundStyle(Color(hex: 0xF59E0B))
+                .foregroundStyle(WSColor.duoOrange)
         }
     }
 

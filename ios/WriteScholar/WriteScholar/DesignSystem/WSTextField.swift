@@ -25,7 +25,7 @@ struct WSTextField: View {
         HStack(spacing: 10) {
             Image(systemName: icon)
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(isFocused ? WSColor.brandPrimary : WSColor.foregroundMuted)
+                .foregroundStyle(isFocused ? WSColor.duoPurple : WSColor.foregroundMuted)
                 .frame(width: 22)
 
             Group {
@@ -62,12 +62,12 @@ struct WSTextField: View {
                 .overlay(
                     RoundedRectangle(cornerRadius: 14, style: .continuous)
                         .stroke(
-                            isFocused ? WSColor.brandPrimary.opacity(0.7) : WSColor.hairline,
-                            lineWidth: isFocused ? 1.5 : 1
+                            isFocused ? WSColor.duoPurple.opacity(0.7) : WSColor.hairline,
+                            lineWidth: isFocused ? 2 : 1
                         )
                 )
                 .shadow(
-                    color: isFocused ? WSColor.brandPrimary.opacity(0.2) : .clear,
+                    color: isFocused ? WSColor.duoPurple.opacity(0.2) : .clear,
                     radius: isFocused ? 12 : 0,
                     y: 3
                 )

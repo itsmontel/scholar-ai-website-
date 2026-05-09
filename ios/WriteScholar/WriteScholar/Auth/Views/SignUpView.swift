@@ -26,15 +26,18 @@ struct SignUpView: View {
             WSGradient.heroBackdrop.ignoresSafeArea()
 
             ScrollView {
-                VStack(spacing: 28) {
+                VStack(spacing: 24) {
                     headerBlock
-                        .padding(.top, 12)
+                        .padding(.top, 16)
+                        .wsStaggerEntry(0)
 
-                    formBlock
+                    formCard
                         .padding(.horizontal, 24)
+                        .wsStaggerEntry(1)
 
                     footerBlock
                         .padding(.horizontal, 24)
+                        .wsStaggerEntry(2)
                 }
                 .padding(.bottom, 40)
             }
@@ -52,11 +55,11 @@ struct SignUpView: View {
                 } label: {
                     HStack(spacing: 5) {
                         Image(systemName: "chevron.backward")
-                            .font(.system(size: 14, weight: .semibold))
+                            .font(.system(size: 14, weight: .bold))
                         Text("Skip")
-                            .wsBody(.small, weight: .bold)
+                            .font(WSFont.sans(14, weight: .bold))
                     }
-                    .foregroundStyle(WSColor.brandPrimary)
+                    .foregroundStyle(WSColor.duoPurple)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Skip sign up and go back")
@@ -68,19 +71,15 @@ struct SignUpView: View {
     // MARK: - Header
 
     private var headerBlock: some View {
-        VStack(spacing: 14) {
-            ZStack {
-                Circle()
-                    .fill(WSColor.brandSoft)
-                    .frame(width: 110, height: 110)
-                WSAnimatedImage(name: "mascot-laptop", ext: "webp")
-                    .frame(width: 90, height: 90)
-            }
+        VStack(spacing: 16) {
+            WSAnimatedImage(name: "mascot-laptop", ext: "webp")
+                .frame(width: 100, height: 100)
+                .wsBobbing(amount: 3, duration: 2.8)
 
-            VStack(spacing: 6) {
+            VStack(spacing: 8) {
                 Text("Create your account")
-                    .wsHeadline(.medium, weight: .semibold)
-                    .foregroundStyle(WSColor.foreground)
+                    .wsHeadline(.large, weight: .black)
+                    .foregroundStyle(WSColor.duoText)
                 Text("Free forever. Pro upgrades inside the app.")
                     .wsBody(.medium)
                     .foregroundStyle(WSColor.foregroundMuted)
@@ -88,10 +87,10 @@ struct SignUpView: View {
         }
     }
 
-    // MARK: - Form
+    // MARK: - Form inside a chunky card
 
-    private var formBlock: some View {
-        VStack(spacing: 12) {
+    private var formCard: some View {
+        VStack(spacing: 14) {
             WSTextField(
                 placeholder: "Email",
                 icon: "envelope",
@@ -121,19 +120,39 @@ struct SignUpView: View {
             .focused($focusedField, equals: .confirm)
 
             if let err = session.lastError {
-                Text(err)
-                    .wsBody(.small, weight: .semibold)
-                    .foregroundStyle(WSColor.concern)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 4)
+                HStack(spacing: 6) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 13, weight: .bold))
+                    Text(err)
+                        .wsBody(.small, weight: .bold)
+                }
+                .foregroundStyle(WSColor.duoRed)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(WSColor.duoRedLight)
+                )
+                .transition(.opacity.combined(with: .scale(scale: 0.95)))
             }
 
             if !confirmPassword.isEmpty && password != confirmPassword {
-                Text("Passwords don't match yet.")
-                    .wsBody(.small, weight: .semibold)
-                    .foregroundStyle(WSColor.revise)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 4)
+                HStack(spacing: 6) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 13, weight: .bold))
+                    Text("Passwords don't match yet.")
+                        .wsBody(.small, weight: .bold)
+                }
+                .foregroundStyle(WSColor.duoOrange)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(WSColor.duoOrangeLight)
+                )
+                .transition(.opacity.combined(with: .scale(scale: 0.95)))
             }
 
             Button {
@@ -144,14 +163,20 @@ struct SignUpView: View {
                         ProgressView()
                             .tint(.white)
                     }
-                    Text(isLoading ? "Creating account…" : "Create account")
+                    Text(isLoading ? "Creating account..." : "Create account")
                 }
             }
-            .buttonStyle(WSPrimaryButtonStyle())
+            .buttonStyle(WSDuoSuccessButtonStyle())
             .disabled(!canSubmit || isLoading)
-            .opacity(canSubmit ? 1 : 0.65)
+            .opacity(canSubmit ? 1 : 0.55)
             .padding(.top, 4)
         }
+        .wsChunkyCard(
+            cornerRadius: 22,
+            horizontalPadding: 20,
+            verticalPadding: 24,
+            accent: WSColor.duoPurple
+        )
     }
 
     // MARK: - Footer

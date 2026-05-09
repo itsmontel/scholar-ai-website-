@@ -2,25 +2,15 @@
 //  LibraryTabView.swift
 //  WriteScholar
 //
-//  Top-level Library tab. Designed for *clarity* — a single column of
-//  ideas the user can scan top → bottom without thinking:
+//  Top-level Library tab — Duolingo-style design.
 //
-//    1. Top bar           — "Library" title · sort menu · search button
-//    2. Hero stat capsule — total count + a one-line subtitle (no
-//                            separate filter chips above; the segmented
-//                            control IS the filter UI)
-//    3. Search bar        — slides in/out, native-looking
-//    4. Segmented filter  — All / Packs / Essays / Docs (chunky pill,
-//                            shows the count next to each label)
-//    5. Continue card     — Big featured card for the most-recent item
-//                            (only when filter == .all and no search)
-//    6. Section list      — Today / Yesterday / This week / etc.
-//    7. Empty state       — full LibraryEmptyState when nothing exists,
-//                            or a slim LibraryFilteredEmptyState when
-//                            the current slice is empty
-//
-//  All persistence + filtering lives in LibraryStore so this view stays
-//  presentation-only.
+//    1. Top bar           -- "Library" title + sort menu + search button
+//    2. Hero stat capsule -- total count + a one-line subtitle
+//    3. Search bar        -- slides in/out
+//    4. Segmented filter  -- All / Packs / Essays / Docs
+//    5. Continue card     -- Big featured card for the most-recent item
+//    6. Section list      -- Today / Yesterday / This week / etc.
+//    7. Empty state       -- full LibraryEmptyState when nothing exists
 //
 
 import SwiftUI
@@ -40,50 +30,7 @@ struct LibraryTabView: View {
 
     var body: some View {
         ZStack {
-            WSGradient.heroBackdrop.ignoresSafeArea()
-
-            // Multi-color brand orbs (indigo / blue / pink / purple) so
-            // the Library tab pops the same way Home does.
-            Circle()
-                .fill(WSColor.brandPrimary.opacity(0.18))
-                .frame(width: 360, height: 360)
-                .blur(radius: 90)
-                .offset(x: -200, y: -300)
-                .ignoresSafeArea()
-            Circle()
-                .fill(Color(hex: 0x6366F1).opacity(0.18))
-                .frame(width: 320, height: 320)
-                .blur(radius: 80)
-                .offset(x: 220, y: -120)
-                .ignoresSafeArea()
-            Circle()
-                .fill(Color(hex: 0x60A5FA).opacity(0.14))
-                .frame(width: 360, height: 360)
-                .blur(radius: 90)
-                .offset(x: -200, y: 320)
-                .ignoresSafeArea()
-            Circle()
-                .fill(Color(hex: 0xD946EF).opacity(0.14))
-                .frame(width: 320, height: 320)
-                .blur(radius: 90)
-                .offset(x: 220, y: 480)
-                .ignoresSafeArea()
-
-            // Faint sprinkle of dots, like settled confetti
-            Canvas { ctx, size in
-                for i in 0..<32 {
-                    let seed = Double(i) * 137.508
-                    let x = ((seed * 7).truncatingRemainder(dividingBy: 100)) / 100 * size.width
-                    let y = ((seed * 3).truncatingRemainder(dividingBy: 100)) / 100 * size.height
-                    let r = (seed.truncatingRemainder(dividingBy: 2)) + 1.2
-                    ctx.fill(
-                        Path(ellipseIn: CGRect(x: x, y: y, width: r * 2, height: r * 2)),
-                        with: .color(.white.opacity(0.30))
-                    )
-                }
-            }
-            .ignoresSafeArea()
-            .allowsHitTesting(false)
+            WSColor.duoSurface.ignoresSafeArea()
 
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 18, pinnedViews: []) {
@@ -148,32 +95,13 @@ struct LibraryTabView: View {
     private var mascotHero: some View {
         VStack(spacing: 12) {
             ZStack {
-                // Pulsing indigo halo
                 Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [Color(hex: 0x6366F1).opacity(0.55), .clear],
-                            center: .center, startRadius: 8, endRadius: 110
-                        )
-                    )
-                    .frame(width: 220, height: 220)
-                    .blur(radius: 18)
-
-                // Six sparkle satellites in cool tones
-                ForEach(0..<6, id: \.self) { i in
-                    let angle = Double(i) * (.pi * 2 / 6)
-                    let radius: Double = 110
-                    Image(systemName: i.isMultiple(of: 2) ? "sparkle" : "star.fill")
-                        .font(.system(size: 13, weight: .heavy))
-                        .foregroundStyle(librarySparkleColor(for: i))
-                        .offset(x: CGFloat(cos(angle) * radius),
-                                y: CGFloat(sin(angle) * radius))
-                        .opacity(0.85)
-                }
+                    .fill(WSColor.duoPurpleLight)
+                    .frame(width: 180, height: 180)
 
                 WSAnimatedImage(name: "mascot-laptop", ext: "webp")
-                    .frame(width: 170, height: 170)
-                    .shadow(color: Color(hex: 0x6366F1).opacity(0.45), radius: 22, y: 12)
+                    .frame(width: 140, height: 140)
+                    .shadow(color: WSColor.duoPurple.opacity(0.30), radius: 16, y: 8)
                     .wsBobbing(amount: 6, duration: 2.6)
             }
 
@@ -182,7 +110,7 @@ struct LibraryTabView: View {
                     Image(systemName: "books.vertical.fill")
                         .font(.system(size: 11, weight: .heavy))
                     Text("LIBRARY")
-                        .font(.system(size: 11, weight: .black, design: .rounded))
+                        .font(WSFont.sans(11, weight: .black))
                         .tracking(0.8)
                 }
                 .foregroundStyle(.white)
@@ -190,43 +118,24 @@ struct LibraryTabView: View {
                 .padding(.vertical, 6)
                 .background(
                     Capsule()
-                        .fill(LinearGradient(colors: [Color(hex: 0x818CF8), Color(hex: 0x4338CA)],
-                                             startPoint: .topLeading, endPoint: .bottomTrailing))
-                        .shadow(color: Color(hex: 0x6366F1).opacity(0.45), radius: 8, y: 3)
+                        .fill(WSColor.duoPurple)
+                        .shadow(color: WSColor.duoPurple.opacity(0.35), radius: 6, y: 3)
                 )
 
                 Text("Your ")
-                    .font(.system(size: 28, weight: .black, design: .rounded))
-                    .foregroundStyle(WSColor.foreground)
+                    .font(WSFont.headline(28))
+                    .foregroundStyle(WSColor.duoText)
                 +
                 Text("shelf")
-                    .font(.system(size: 28, weight: .black, design: .rounded))
-                    .foregroundStyle(
-                        LinearGradient(colors: [Color(hex: 0x60A5FA), Color(hex: 0x4338CA)],
-                                       startPoint: .leading, endPoint: .trailing)
-                    )
-                +
-                Text(" 📚")
-                    .font(.system(size: 28, weight: .black, design: .rounded))
+                    .font(WSFont.headline(28))
+                    .foregroundStyle(WSColor.duoBlue)
             }
         }
         .frame(maxWidth: .infinity)
         .padding(.top, 4)
     }
 
-    private func librarySparkleColor(for i: Int) -> Color {
-        let palette: [Color] = [
-            Color(hex: 0x60A5FA),  // sky
-            Color(hex: 0xA78BFA),  // lavender
-            Color(hex: 0xFBBF24),  // gold
-            Color(hex: 0xF472B6),  // pink
-            Color(hex: 0x34D399),  // mint
-            Color(hex: 0xFDA4AF),  // rose
-        ]
-        return palette[i % palette.count]
-    }
-
-    // MARK: - Top bar (utility row — search + sort)
+    // MARK: - Top bar (utility row -- search + sort)
 
     private var topBar: some View {
         HStack(spacing: 12) {
@@ -253,11 +162,10 @@ struct LibraryTabView: View {
                 }
             } label: {
                 ZStack {
-                    Circle().fill(WSColor.backgroundElevated).frame(width: 38, height: 38)
-                        .overlay(Circle().stroke(WSColor.hairline, lineWidth: 1))
-                        .shadow(color: .black.opacity(0.05), radius: 4, y: 2)
+                    Circle().fill(WSColor.backgroundElevated).frame(width: 40, height: 40)
+                        .overlay(Circle().stroke(WSColor.duoBorder, lineWidth: 2))
                     Image(systemName: "arrow.up.arrow.down")
-                        .foregroundStyle(WSColor.foreground)
+                        .foregroundStyle(WSColor.duoText)
                         .font(.system(size: 14, weight: .heavy))
                 }
             }
@@ -268,11 +176,10 @@ struct LibraryTabView: View {
     private func iconButton(systemImage: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             ZStack {
-                Circle().fill(WSColor.backgroundElevated).frame(width: 38, height: 38)
-                    .overlay(Circle().stroke(WSColor.hairline, lineWidth: 1))
-                    .shadow(color: .black.opacity(0.05), radius: 4, y: 2)
+                Circle().fill(WSColor.backgroundElevated).frame(width: 40, height: 40)
+                    .overlay(Circle().stroke(WSColor.duoBorder, lineWidth: 2))
                 Image(systemName: systemImage)
-                    .foregroundStyle(WSColor.foreground)
+                    .foregroundStyle(WSColor.duoText)
                     .font(.system(size: 14, weight: .heavy))
             }
         }
@@ -280,46 +187,37 @@ struct LibraryTabView: View {
     }
 
     // MARK: - Hero capsule
-    //
-    // A small, calm header that doesn't compete with the list. Just
-    // shows total count + a one-line context line. No big mascot —
-    // the list IS the hero.
 
     private var heroCapsule: some View {
         HStack(spacing: 12) {
             ZStack {
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(WSGradient.brand)
+                    .fill(WSColor.duoPurple)
                     .frame(width: 48, height: 48)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .stroke(.white.opacity(0.30), lineWidth: 1)
-                    )
-                    .shadow(color: WSColor.brandPrimary.opacity(0.40), radius: 8, y: 3)
                 Image(systemName: "books.vertical.fill")
                     .foregroundStyle(.white)
                     .font(.system(size: 20, weight: .heavy))
             }
             VStack(alignment: .leading, spacing: 2) {
                 Text("\(store.totalCount) item\(store.totalCount == 1 ? "" : "s")")
-                    .font(.system(size: 18, weight: .black, design: .rounded))
-                    .foregroundStyle(WSColor.foreground)
+                    .font(WSFont.headline(18))
+                    .foregroundStyle(WSColor.duoText)
                 Text(heroSubtitle)
                     .wsBody(.caption, weight: .semibold)
-                    .foregroundStyle(WSColor.foregroundMuted)
+                    .foregroundStyle(WSColor.duoText.opacity(0.55))
             }
             Spacer()
             if let last = store.lastSyncedAt {
                 HStack(spacing: 4) {
-                    Circle().fill(Color(hex: 0x10B981)).frame(width: 6, height: 6)
+                    Circle().fill(WSColor.duoGreen).frame(width: 6, height: 6)
                     Text("Synced \(LibraryRelativeFormatter.compact(last))")
-                        .font(.system(size: 10, weight: .black, design: .rounded))
-                        .foregroundStyle(WSColor.foregroundMuted)
+                        .font(WSFont.sans(10, weight: .bold))
+                        .foregroundStyle(WSColor.duoText.opacity(0.55))
                 }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .wsChunkyCard(verticalPadding: 14, accent: WSColor.brandPrimary)
+        .wsChunkyCard(verticalPadding: 14, accent: WSColor.duoPurple)
     }
 
     private var heroSubtitle: String {
@@ -337,22 +235,22 @@ struct LibraryTabView: View {
     private var searchBar: some View {
         HStack(spacing: 10) {
             Image(systemName: "magnifyingglass")
-                .foregroundStyle(WSColor.foregroundMuted)
+                .foregroundStyle(WSColor.duoText.opacity(0.4))
                 .font(.system(size: 14, weight: .heavy))
-            TextField("Search titles, snippets, tags…", text: $store.searchQuery)
+            TextField("Search titles, snippets, tags...", text: $store.searchQuery)
                 .textFieldStyle(.plain)
                 .autocorrectionDisabled()
                 .textInputAutocapitalization(.never)
                 .submitLabel(.search)
                 .focused($searchFocused)
-                .foregroundStyle(WSColor.foreground)
+                .foregroundStyle(WSColor.duoText)
             if !store.searchQuery.isEmpty {
                 Button {
                     Haptics.light()
                     store.searchQuery = ""
                 } label: {
                     Image(systemName: "xmark.circle.fill")
-                        .foregroundStyle(WSColor.foregroundMuted)
+                        .foregroundStyle(WSColor.duoText.opacity(0.4))
                 }
                 .buttonStyle(.plain)
             }
@@ -364,7 +262,7 @@ struct LibraryTabView: View {
                 .fill(WSColor.backgroundElevated)
                 .overlay(
                     RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .stroke(WSColor.brandPrimary.opacity(0.30), lineWidth: 1)
+                        .stroke(WSColor.duoPurple.opacity(0.40), lineWidth: 2)
                 )
         )
         .transition(.opacity.combined(with: .move(edge: .top)))
@@ -372,8 +270,6 @@ struct LibraryTabView: View {
 
     // MARK: - Segmented filter
 
-    /// A single segmented control replaces the old "stat tile + filter
-    /// chips" combo. One control, one source of truth, fewer taps.
     private var segmentedFilter: some View {
         HStack(spacing: 0) {
             ForEach(LibraryFilter.allCases) { f in
@@ -386,9 +282,8 @@ struct LibraryTabView: View {
                 .fill(WSColor.backgroundElevated)
                 .overlay(
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(WSColor.hairline, lineWidth: 1)
+                        .stroke(WSColor.duoBorder, lineWidth: 2)
                 )
-                .shadow(color: .black.opacity(0.05), radius: 6, y: 2)
         )
     }
 
@@ -403,13 +298,13 @@ struct LibraryTabView: View {
                 HStack(spacing: 5) {
                     Image(systemName: f.icon).font(.system(size: 11, weight: .heavy))
                     Text(filterShortLabel(f))
-                        .font(.system(size: 12, weight: .black, design: .rounded))
+                        .font(WSFont.sans(12, weight: .black))
                 }
-                .foregroundStyle(active ? .white : WSColor.foreground)
+                .foregroundStyle(active ? .white : WSColor.duoText)
 
                 Text("\(count)")
-                    .font(.system(size: 9, weight: .black, design: .rounded))
-                    .foregroundStyle(active ? .white.opacity(0.85) : WSColor.foregroundMuted)
+                    .font(WSFont.sans(9, weight: .black))
+                    .foregroundStyle(active ? .white.opacity(0.85) : WSColor.duoText.opacity(0.55))
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 8)
@@ -417,11 +312,7 @@ struct LibraryTabView: View {
                 Group {
                     if active {
                         RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(
-                                LinearGradient(colors: [f.tint, f.tint.opacity(0.78)],
-                                               startPoint: .topLeading, endPoint: .bottomTrailing)
-                            )
-                            .shadow(color: f.tint.opacity(0.40), radius: 6, y: 2)
+                            .fill(segmentColor(for: f))
                     } else {
                         Color.clear
                     }
@@ -431,8 +322,15 @@ struct LibraryTabView: View {
         .buttonStyle(.plain)
     }
 
-    /// Shorter labels so the segmented control fits on one line on
-    /// every iPhone width.
+    private func segmentColor(for f: LibraryFilter) -> Color {
+        switch f {
+        case .all:        return WSColor.duoPurple
+        case .studyPacks: return WSColor.duoBlue
+        case .essays:     return WSColor.duoOrange
+        case .documents:  return WSColor.duoGreen
+        }
+    }
+
     private func filterShortLabel(_ f: LibraryFilter) -> String {
         switch f {
         case .all:        return "All"
@@ -453,7 +351,7 @@ struct LibraryTabView: View {
         if store.items.isEmpty {
             LibraryEmptyState(
                 onCreateStudyPack: { onJumpToTab(.study) },
-                onAnalyzeEssay:    { onJumpToTab(.study) }, // essays are desktop-only
+                onAnalyzeEssay:    { onJumpToTab(.study) },
                 onUploadDoc:       { onJumpToTab(.study) }
             )
             .padding(.top, 6)
@@ -470,7 +368,7 @@ struct LibraryTabView: View {
             }
             .padding(.top, 6)
         } else {
-            // Featured "Continue" card — only when no slice is active
+            // Featured "Continue" card -- only when no slice is active
             if let mostRecent = store.mostRecent,
                store.sort == .recent,
                store.searchQuery.isEmpty,
@@ -503,7 +401,7 @@ struct LibraryTabView: View {
         }
     }
 
-    private func sectionHeader(label: String, count: Int, icon: String? = nil, tint: Color = WSColor.foregroundMuted) -> some View {
+    private func sectionHeader(label: String, count: Int, icon: String? = nil, tint: Color = WSColor.duoText) -> some View {
         HStack(spacing: 8) {
             if let icon = icon {
                 Image(systemName: icon)
@@ -511,18 +409,22 @@ struct LibraryTabView: View {
                     .foregroundStyle(tint)
             }
             Text(label.uppercased())
-                .font(.system(size: 10, weight: .black, design: .rounded))
+                .font(WSFont.sans(10, weight: .black))
                 .tracking(0.8)
-                .foregroundStyle(tint == WSColor.foregroundMuted ? WSColor.foregroundMuted : tint)
+                .foregroundStyle(tint == WSColor.duoText ? WSColor.duoText.opacity(0.55) : tint)
             Rectangle()
-                .fill(WSColor.hairline)
-                .frame(height: 1)
+                .fill(WSColor.duoBorder)
+                .frame(height: 2)
             Text("\(count)")
-                .font(.system(size: 10, weight: .black, design: .rounded))
-                .foregroundStyle(WSColor.foregroundMuted)
+                .font(WSFont.sans(10, weight: .black))
+                .foregroundStyle(WSColor.duoText.opacity(0.55))
                 .padding(.horizontal, 7)
                 .padding(.vertical, 2)
-                .background(Capsule().fill(WSColor.surface))
+                .background(
+                    Capsule()
+                        .fill(WSColor.backgroundElevated)
+                        .overlay(Capsule().stroke(WSColor.duoBorder, lineWidth: 2))
+                )
         }
         .padding(.top, 8)
     }

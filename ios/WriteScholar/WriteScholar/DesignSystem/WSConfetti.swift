@@ -54,14 +54,14 @@ struct WSConfettiView: View {
     var origin: CGPoint? = nil
     /// Override palette (defaults to brand confetti palette).
     var palette: [Color] = [
-        Color(hex: 0x7C3AED),
-        Color(hex: 0xD946EF),
-        Color(hex: 0x6366F1),
-        Color(hex: 0x10B981),
-        Color(hex: 0xF59E0B),
-        Color(hex: 0xEF4444),
-        Color(hex: 0x06B6D4),
-        Color(hex: 0xFCD34D)
+        WSColor.duoPurple,
+        WSColor.duoGreen,
+        WSColor.duoBlue,
+        WSColor.duoOrange,
+        WSColor.duoRed,
+        WSColor.duoGreenDark,
+        WSColor.duoOrangeDark,
+        WSColor.duoPurpleDark
     ]
 
     @State private var particles: [ConfettoParticle] = []

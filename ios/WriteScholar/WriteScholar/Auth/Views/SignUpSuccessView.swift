@@ -11,59 +11,72 @@ import SwiftUI
 struct SignUpSuccessView: View {
     let email: String
     @Binding var path: NavigationPath
-    @State private var bob: CGFloat = 0
+    @State private var celebrate = 0
+    @State private var appeared = false
 
     var body: some View {
         ZStack {
-            WSGradient.heroBackdrop.ignoresSafeArea()
+            // Green-tinted celebration background
+            LinearGradient(
+                colors: [
+                    WSColor.backgroundElevated,
+                    WSColor.duoGreenLight,
+                    WSColor.duoGreenLight.opacity(0.6)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
 
             VStack(spacing: 28) {
                 Spacer(minLength: 0)
 
-                ZStack {
-                    Circle()
-                        .fill(
-                            RadialGradient(
-                                colors: [
-                                    Color(hex: 0x10B981, opacity: 0.32),
-                                    .clear
-                                ],
-                                center: .center, startRadius: 10, endRadius: 180
-                            )
-                        )
-                        .frame(width: 280, height: 280)
-                        .blur(radius: 12)
+                // Mascot with green glow
+                WSAnimatedImage(name: "mascot-dance", ext: "webp")
+                    .frame(width: 160, height: 160)
+                    .wsBobbing(amount: 6, duration: 2.2)
+                    .shadow(color: WSColor.duoGreen.opacity(0.3), radius: 20, y: 8)
+                    .wsStaggerEntry(0)
 
-                    WSAnimatedImage(name: "mascot-dance", ext: "webp")
-                        .frame(width: 160, height: 160)
-                        .offset(y: bob)
-                        .shadow(color: Color(hex: 0x10B981, opacity: 0.32), radius: 22, y: 12)
-                }
+                // Success message in a chunky card
+                VStack(spacing: 14) {
+                    // Green checkmark badge
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 44, weight: .bold))
+                        .foregroundStyle(WSColor.duoGreen)
 
-                VStack(spacing: 12) {
                     Text("Check your inbox")
-                        .wsHeadline(.large, weight: .semibold)
-                        .foregroundStyle(WSColor.foreground)
+                        .wsHeadline(.large, weight: .black)
+                        .foregroundStyle(WSColor.duoText)
 
-                    VStack(spacing: 4) {
+                    VStack(spacing: 6) {
                         Text("We sent a verification link to")
                             .wsBody(.medium)
                             .foregroundStyle(WSColor.foregroundMuted)
                         Text(email)
                             .wsBody(.medium, weight: .bold)
-                            .foregroundStyle(WSColor.brandPrimary)
+                            .foregroundStyle(WSColor.duoPurple)
                     }
 
                     Text("Click the link to activate your account, then come back here to sign in.")
                         .wsBody(.small)
                         .foregroundStyle(WSColor.foregroundMuted)
                         .multilineTextAlignment(.center)
-                        .padding(.horizontal, 32)
-                        .padding(.top, 4)
+                        .padding(.top, 2)
                 }
+                .multilineTextAlignment(.center)
+                .wsChunkyCard(
+                    cornerRadius: 24,
+                    horizontalPadding: 24,
+                    verticalPadding: 28,
+                    accent: WSColor.duoGreen
+                )
+                .padding(.horizontal, 24)
+                .wsStaggerEntry(1)
 
                 Spacer(minLength: 0)
 
+                // Action buttons
                 VStack(spacing: 12) {
                     Button("Open Mail") {
                         if let url = URL(string: "message://"),
@@ -71,23 +84,31 @@ struct SignUpSuccessView: View {
                             UIApplication.shared.open(url)
                         }
                     }
-                    .buttonStyle(WSPrimaryButtonStyle())
+                    .buttonStyle(WSDuoSuccessButtonStyle())
 
-                    Button("I've verified — sign me in") {
+                    Button("I've verified \u{2014} sign me in") {
                         // Pop back to sign-in so user can log in.
                         path.removeLast(path.count)
                         path.append(AuthRoute.signIn)
                     }
-                    .buttonStyle(WSSecondaryButtonStyle(fullWidth: true))
+                    .buttonStyle(WSDuoSecondaryButtonStyle(fullWidth: true))
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 24)
+                .wsStaggerEntry(2)
             }
+
+            // Confetti overlay
+            WSConfettiView(trigger: $celebrate)
+                .ignoresSafeArea()
         }
         .navigationBarBackButtonHidden(true)
         .onAppear {
-            withAnimation(.easeInOut(duration: 2.2).repeatForever(autoreverses: true)) {
-                bob = -10
+            guard !appeared else { return }
+            appeared = true
+            // Fire confetti after a brief delay so the view is visible
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                celebrate += 1
             }
         }
     }

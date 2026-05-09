@@ -25,21 +25,7 @@ struct StudyPackInputView: View {
 
     var body: some View {
         ZStack {
-            WSGradient.heroBackdrop.ignoresSafeArea()
-
-            // Soft brand orbs in the corners — matches web hero
-            Circle()
-                .fill(WSColor.brandPrimary.opacity(0.14))
-                .frame(width: 320, height: 320)
-                .blur(radius: 70)
-                .offset(x: -180, y: -260)
-                .ignoresSafeArea()
-            Circle()
-                .fill(Color(hex: 0xD946EF).opacity(0.12))
-                .frame(width: 320, height: 320)
-                .blur(radius: 70)
-                .offset(x: 200, y: 320)
-                .ignoresSafeArea()
+            WSColor.duoSurface.ignoresSafeArea()
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
@@ -61,57 +47,59 @@ struct StudyPackInputView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 10) {
                 Text("STUDY PACK")
-                    .wsEyebrow()
-                    .foregroundStyle(WSColor.brandPrimary)
+                    .font(WSFont.sans(10, weight: .black))
+                    .tracking(2.2)
+                    .textCase(.uppercase)
+                    .foregroundStyle(WSColor.duoPurple)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
                     .background(
-                        Capsule().fill(WSColor.brandSoft)
+                        Capsule().fill(WSColor.duoPurpleLight)
                     )
                 Spacer()
                 WSAnimatedImage(name: "mascot-study", ext: "webp")
                     .frame(width: 56, height: 56)
-                    .shadow(color: Color(hex: 0x7C3AED, opacity: 0.25), radius: 8, y: 4)
+                    .shadow(color: WSColor.duoPurple.opacity(0.25), radius: 8, y: 4)
             }
 
             Text("Turn your notes into a study pack")
-                .wsHeadline(.large, weight: .semibold)
-                .foregroundStyle(WSColor.foreground)
+                .font(WSFont.headline(28, weight: .black))
+                .foregroundStyle(WSColor.duoText)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             Text("Paste a section of notes, a chapter, or a study guide. We'll build a lesson, flashcards, a quiz, and a crossword in seconds.")
-                .wsBody(.medium)
+                .font(WSFont.sans(15))
                 .foregroundStyle(WSColor.foregroundMuted)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 
-    // MARK: - Input card
+    // MARK: - Input card (chunky card wrapping the text area)
 
     private var inputCard: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Faux browser top-strip — matches the web's tool card chrome
+            // Faux browser top-strip
             HStack(spacing: 6) {
-                Circle().fill(Color(hex: 0xEF4444)).frame(width: 8, height: 8)
-                Circle().fill(Color(hex: 0xF59E0B)).frame(width: 8, height: 8)
-                Circle().fill(Color(hex: 0x10B981)).frame(width: 8, height: 8)
+                Circle().fill(WSColor.duoRed).frame(width: 8, height: 8)
+                Circle().fill(WSColor.duoOrange).frame(width: 8, height: 8)
+                Circle().fill(WSColor.duoGreen).frame(width: 8, height: 8)
                 Spacer()
-                Text("writescholar.com · study pack")
-                    .wsBody(.caption, weight: .semibold)
+                Text("writescholar.com")
+                    .font(WSFont.sans(11, weight: .bold))
                     .foregroundStyle(WSColor.foregroundMuted)
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .background(WSColor.surface)
+            .background(WSColor.duoSurface)
             .overlay(alignment: .bottom) {
-                Rectangle().fill(WSColor.hairline).frame(height: 1)
+                Rectangle().fill(WSColor.duoBorder).frame(height: 1)
             }
 
             // Editor
             ZStack(alignment: .topLeading) {
                 if text.isEmpty {
-                    Text("Paste your notes here…\n\nWorks great with chapter excerpts, lecture slides, or your own study guide. 50 words minimum.")
-                        .wsBody(.medium)
+                    Text("Paste your notes here...\n\nWorks great with chapter excerpts, lecture slides, or your own study guide. 50 words minimum.")
+                        .font(WSFont.sans(15))
                         .foregroundStyle(WSColor.foregroundMuted.opacity(0.7))
                         .padding(.horizontal, 18)
                         .padding(.top, 16)
@@ -123,23 +111,24 @@ struct StudyPackInputView: View {
                     .padding(.horizontal, 14)
                     .padding(.vertical, 10)
                     .frame(minHeight: 220, maxHeight: 320)
-                    .wsBody(.medium)
-                    .foregroundStyle(WSColor.foreground)
+                    .font(WSFont.sans(15))
+                    .foregroundStyle(WSColor.duoText)
             }
 
             // Footer with word count + paste / clear
             HStack(spacing: 10) {
                 Text("\(wordCount) words")
-                    .wsBody(.caption, weight: .semibold)
-                    .foregroundStyle(wordCount >= 50 ? WSColor.strong : WSColor.foregroundMuted)
+                    .font(WSFont.sans(11, weight: .bold))
+                    .foregroundStyle(wordCount >= 50 ? WSColor.duoGreen : WSColor.foregroundMuted)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 4)
                     .background(
-                        Capsule().fill(wordCount >= 50 ? WSColor.strong.opacity(0.14) : WSColor.surface)
+                        Capsule().fill(wordCount >= 50 ? WSColor.duoGreenLight : WSColor.duoSurface)
+                            .overlay(Capsule().stroke(wordCount >= 50 ? WSColor.duoGreen.opacity(0.3) : .clear, lineWidth: 2))
                     )
 
-                Text("Min 50 · Max 5,000 (free)")
-                    .wsBody(.caption)
+                Text("Min 50 / Max 5,000 (free)")
+                    .font(WSFont.sans(11))
                     .foregroundStyle(WSColor.foregroundMuted)
 
                 Spacer()
@@ -151,8 +140,8 @@ struct StudyPackInputView: View {
                     }
                 } label: {
                     Label("Paste", systemImage: "doc.on.clipboard")
-                        .wsBody(.caption, weight: .bold)
-                        .foregroundStyle(WSColor.brandPrimary)
+                        .font(WSFont.sans(11, weight: .bold))
+                        .foregroundStyle(WSColor.duoPurple)
                 }
                 .buttonStyle(.plain)
 
@@ -162,7 +151,7 @@ struct StudyPackInputView: View {
                         Haptics.light()
                     } label: {
                         Label("Clear", systemImage: "xmark.circle.fill")
-                            .wsBody(.caption, weight: .bold)
+                            .font(WSFont.sans(11, weight: .bold))
                             .foregroundStyle(WSColor.foregroundMuted)
                     }
                     .buttonStyle(.plain)
@@ -170,21 +159,21 @@ struct StudyPackInputView: View {
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .background(WSColor.surface)
+            .background(WSColor.duoSurface)
             .overlay(alignment: .top) {
-                Rectangle().fill(WSColor.hairline).frame(height: 1)
+                Rectangle().fill(WSColor.duoBorder).frame(height: 1)
             }
         }
         .background(
             RoundedRectangle(cornerRadius: 22, style: .continuous)
                 .fill(WSColor.backgroundElevated)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 22, style: .continuous)
-                        .stroke(WSColor.hairline, lineWidth: 1)
-                )
-                .shadow(color: WSColor.brandPrimary.opacity(0.18), radius: 22, y: 10)
         )
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .stroke(WSColor.duoBorder, lineWidth: 2)
+        )
+        .shadow(color: WSColor.duoPurple.opacity(0.10), radius: 12, y: 6)
     }
 
     // MARK: - Actions
@@ -193,8 +182,8 @@ struct StudyPackInputView: View {
         VStack(spacing: 12) {
             if let err = coordinator.errorMessage {
                 Text(err)
-                    .wsBody(.small, weight: .semibold)
-                    .foregroundStyle(WSColor.concern)
+                    .font(WSFont.sans(13, weight: .bold))
+                    .foregroundStyle(WSColor.duoRed)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 4)
             }
@@ -210,21 +199,21 @@ struct StudyPackInputView: View {
                     Text("Generate study pack")
                 }
             }
-            .buttonStyle(WSPrimaryButtonStyle())
+            .buttonStyle(WSDuoSuccessButtonStyle())
             .disabled(!canSubmit)
             .opacity(canSubmit ? 1 : 0.55)
 
-            // Footnote feature row
+            // Feature row
             HStack(spacing: 14) {
-                featureItem(icon: "book.pages.fill",         label: "Lesson",     color: Color(hex: 0x6366F1))
-                featureItem(icon: "square.stack.3d.up.fill", label: "Flashcards", color: Color(hex: 0x7C3AED))
-                featureItem(icon: "checkmark.bubble.fill",   label: "Quiz",       color: Color(hex: 0xD946EF))
-                featureItem(icon: "grid",                    label: "Crossword",  color: Color(hex: 0xF59E0B))
+                featureItem(icon: "book.pages.fill",         label: "Lesson",     color: WSColor.duoGreen)
+                featureItem(icon: "square.stack.3d.up.fill", label: "Flashcards", color: WSColor.duoBlue)
+                featureItem(icon: "checkmark.bubble.fill",   label: "Quiz",       color: WSColor.duoPurple)
+                featureItem(icon: "grid",                    label: "Crossword",  color: WSColor.duoOrange)
             }
             .padding(.top, 4)
 
-            Text("Free plan: 2 study packs/month · 5,000 word max")
-                .wsBody(.caption)
+            Text("Free plan: 2 study packs/month / 5,000 word max")
+                .font(WSFont.sans(11))
                 .foregroundStyle(WSColor.foregroundMuted)
                 .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.top, 4)
@@ -237,14 +226,18 @@ struct StudyPackInputView: View {
                 .font(.system(size: 16, weight: .bold))
                 .foregroundStyle(color)
             Text(label)
-                .wsBody(.caption, weight: .bold)
-                .foregroundStyle(WSColor.foreground)
+                .font(WSFont.sans(11, weight: .bold))
+                .foregroundStyle(WSColor.duoText)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 8)
         .background(
             RoundedRectangle(cornerRadius: 12, style: .continuous)
                 .fill(color.opacity(0.10))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(color.opacity(0.25), lineWidth: 2)
+                )
         )
     }
 }

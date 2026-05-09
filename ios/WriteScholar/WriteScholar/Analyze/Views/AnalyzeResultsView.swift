@@ -3,10 +3,10 @@
 //  WriteScholar
 //
 //  Three-tab results screen:
-//    Highlights — essay rendered with inline annotation backgrounds +
+//    Highlights -- essay rendered with inline annotation backgrounds +
 //                 a list of annotation cards underneath.
-//    Rubric    — per-criterion bars (Pro). Free users see a lock pane.
-//    Tips      — top suggestions + Pro CTA for Specific Rewrites.
+//    Rubric    -- per-criterion bars (Pro). Free users see a lock pane.
+//    Tips      -- top suggestions + Pro CTA for Specific Rewrites.
 //
 //  The score banner sits above the tab strip so the headline number is
 //  always visible while you switch tabs.
@@ -49,7 +49,7 @@ struct AnalyzeResultsView: View {
 
             content(for: tab)
         }
-        .background(WSColor.background.ignoresSafeArea())
+        .background(WSColor.duoSurface.ignoresSafeArea())
     }
 
     // MARK: - Score banner
@@ -58,23 +58,24 @@ struct AnalyzeResultsView: View {
         HStack(spacing: 14) {
             ZStack {
                 Circle()
-                    .stroke(WSColor.surface, lineWidth: 6)
+                    .stroke(WSColor.duoSurface, lineWidth: 6)
                     .frame(width: 70, height: 70)
                 Circle()
                     .trim(from: 0, to: scoreFraction)
-                    .stroke(WSGradient.brand, style: StrokeStyle(lineWidth: 6, lineCap: .round))
+                    .stroke(scoreFraction >= 0.7 ? WSColor.duoGreen : (scoreFraction >= 0.45 ? WSColor.duoOrange : WSColor.duoRed),
+                            style: StrokeStyle(lineWidth: 6, lineCap: .round))
                     .rotationEffect(.degrees(-90))
                     .frame(width: 70, height: 70)
-                    .shadow(color: WSColor.brandPrimary.opacity(0.4), radius: 6, y: 1)
+                    .shadow(color: (scoreFraction >= 0.7 ? WSColor.duoGreen : WSColor.duoOrange).opacity(0.4), radius: 6, y: 1)
                 Text(scoreLabel)
-                    .wsHeadline(.small, weight: .bold)
-                    .foregroundStyle(WSColor.foreground)
+                    .wsHeadline(.small, weight: .black)
+                    .foregroundStyle(WSColor.duoText)
             }
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(result.gradeEstimate ?? "Analysis ready")
-                    .wsHeadline(.small, weight: .semibold)
-                    .foregroundStyle(WSColor.foreground)
+                    .wsHeadline(.small, weight: .black)
+                    .foregroundStyle(WSColor.duoText)
                 if let clarity = result.clarityRating, !clarity.isEmpty {
                     HStack(spacing: 6) {
                         Image(systemName: "eye")
@@ -87,11 +88,11 @@ struct AnalyzeResultsView: View {
                 if let lockedFeatures = result.lockedFeatures, !lockedFeatures.isEmpty {
                     HStack(spacing: 5) {
                         Image(systemName: "lock.fill")
-                            .foregroundStyle(Color(hex: 0xF59E0B))
+                            .foregroundStyle(WSColor.duoOrange)
                             .font(.system(size: 10, weight: .bold))
                         Text("\(lockedFeatures.count) Pro features locked")
                             .wsBody(.caption, weight: .bold)
-                            .foregroundStyle(Color(hex: 0xF59E0B))
+                            .foregroundStyle(WSColor.duoOrange)
                     }
                 }
             }
@@ -103,15 +104,20 @@ struct AnalyzeResultsView: View {
             } label: {
                 Label("New", systemImage: "plus")
                     .wsBody(.small, weight: .bold)
-                    .foregroundStyle(WSColor.brandPrimary)
+                    .foregroundStyle(WSColor.duoPurple)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
-                    .background(Capsule().fill(WSColor.brandSoft))
+                    .background(Capsule().fill(WSColor.duoPurpleLight))
             }
             .buttonStyle(.plain)
         }
         .padding(14)
-        .wsCard(elevation: .medium)
+        .wsChunkyCard(
+            cornerRadius: 22,
+            horizontalPadding: 0,
+            verticalPadding: 0,
+            accent: scoreFraction >= 0.7 ? WSColor.duoGreen : (scoreFraction >= 0.45 ? WSColor.duoOrange : WSColor.duoRed)
+        )
     }
 
     private var scoreFraction: CGFloat {
@@ -123,7 +129,7 @@ struct AnalyzeResultsView: View {
         if let s = result.overallScore {
             return "\(Int(round(s)))"
         }
-        return "—"
+        return "--"
     }
 
     // MARK: - Tab strip
@@ -144,13 +150,13 @@ struct AnalyzeResultsView: View {
                         Text(t.rawValue)
                             .wsBody(.small, weight: .bold)
                     }
-                    .foregroundStyle(active ? .white : WSColor.brandPrimary)
+                    .foregroundStyle(active ? .white : WSColor.duoPurple)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 8)
                     .background(
                         Capsule()
-                            .fill(active ? AnyShapeStyle(WSGradient.brand) : AnyShapeStyle(WSColor.brandSoft))
-                            .shadow(color: active ? WSColor.brandPrimary.opacity(0.3) : .clear, radius: 8, y: 3)
+                            .fill(active ? WSColor.duoPurple : WSColor.duoPurpleLight)
+                            .shadow(color: active ? WSColor.duoPurple.opacity(0.3) : .clear, radius: 8, y: 3)
                     )
                 }
                 .buttonStyle(.plain)
@@ -184,7 +190,7 @@ private struct HighlightsTab: View {
             VStack(alignment: .leading, spacing: 18) {
                 annotatedEssay
                     .padding(16)
-                    .wsCard(elevation: .low)
+                    .wsChunkyCard(accent: WSColor.duoPurple)
 
                 if annotations.isEmpty {
                     Text("No annotations were returned.")
@@ -210,7 +216,7 @@ private struct HighlightsTab: View {
         HStack(spacing: 8) {
             Text("\(annotations.count) annotations")
                 .wsBody(.caption, weight: .bold)
-                .foregroundStyle(WSColor.foreground)
+                .foregroundStyle(WSColor.duoText)
             Spacer()
             ForEach([Annotation.AnnotationType.strong, .improve, .concern], id: \.self) { type in
                 let count = annotations.filter { $0.type == type }.count
@@ -219,7 +225,7 @@ private struct HighlightsTab: View {
                         Circle().fill(tint(for: type)).frame(width: 8, height: 8)
                         Text("\(count)")
                             .wsBody(.caption, weight: .bold)
-                            .foregroundStyle(WSColor.foreground)
+                            .foregroundStyle(WSColor.duoText)
                     }
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
@@ -231,9 +237,9 @@ private struct HighlightsTab: View {
 
     private func tint(for type: Annotation.AnnotationType) -> Color {
         switch type {
-        case .strong:  return WSColor.strong
-        case .improve: return WSColor.revise
-        case .concern: return WSColor.concern
+        case .strong:  return WSColor.duoGreen
+        case .improve: return WSColor.duoOrange
+        case .concern: return WSColor.duoRed
         }
     }
 
@@ -247,11 +253,11 @@ private struct HighlightsTab: View {
         for seg in segments {
             var t = Text(seg.text)
             if let ann = seg.annotation {
-                t = t.foregroundColor(WSColor.foreground)
+                t = t.foregroundColor(WSColor.duoText)
                     .font(WSFont.sans(15, weight: .semibold))
                     .underline(true, color: ann.tint.opacity(0.85))
             } else {
-                t = t.foregroundColor(WSColor.foreground)
+                t = t.foregroundColor(WSColor.duoText)
                     .font(WSFont.sans(15))
             }
             composed = composed + t
@@ -269,15 +275,24 @@ private struct AnnotationCard: View {
 
     @State private var expanded = false
 
+    /// Annotation type -> Duolingo color
+    private var cardTint: Color {
+        switch annotation.type {
+        case .strong:  return WSColor.duoGreen
+        case .improve: return WSColor.duoOrange
+        case .concern: return WSColor.duoRed
+        }
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 8) {
                 Image(systemName: annotation.icon)
-                    .foregroundStyle(annotation.tint)
-                    .shadow(color: annotation.tint.opacity(0.5), radius: 4)
+                    .foregroundStyle(cardTint)
+                    .shadow(color: cardTint.opacity(0.5), radius: 4)
                 Text(annotation.label.uppercased())
                     .wsEyebrow()
-                    .foregroundStyle(annotation.tint)
+                    .foregroundStyle(cardTint)
                 Spacer()
                 Button {
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
@@ -291,51 +306,49 @@ private struct AnnotationCard: View {
                 .buttonStyle(.plain)
             }
 
-            Text("“\(annotation.text)”")
+            Text("\"\(annotation.text)\"")
                 .wsBody(.small)
-                .foregroundStyle(WSColor.foreground)
+                .foregroundStyle(WSColor.duoText)
                 .lineLimit(expanded ? nil : 2)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 8)
                 .background(
                     RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .fill(annotation.tint.opacity(0.10))
+                        .fill(cardTint.opacity(0.10))
                         .overlay(
                             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                .stroke(annotation.tint.opacity(0.30), lineWidth: 1)
+                                .stroke(cardTint.opacity(0.30), lineWidth: 1)
                         )
                 )
 
             Text(annotation.comment)
                 .wsBody(.small)
-                .foregroundStyle(WSColor.foreground.opacity(0.92))
+                .foregroundStyle(WSColor.duoText.opacity(0.92))
                 .lineLimit(expanded ? nil : 3)
 
             if expanded, let suggestion = annotation.suggestion, !suggestion.isEmpty {
                 HStack(alignment: .top, spacing: 8) {
                     Image(systemName: "wand.and.stars")
-                        .foregroundStyle(annotation.tint)
+                        .foregroundStyle(cardTint)
                     Text(suggestion)
                         .wsBody(.small, weight: .semibold)
-                        .foregroundStyle(WSColor.foreground)
+                        .foregroundStyle(WSColor.duoText)
                 }
                 .padding(10)
                 .background(
                     RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .fill(annotation.tint.opacity(0.10))
+                        .fill(cardTint.opacity(0.10))
                 )
                 .transition(.opacity.combined(with: .scale(scale: 0.98)))
             }
         }
         .padding(14)
-        .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(WSColor.backgroundElevated)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(annotation.tint.opacity(0.25), lineWidth: 1)
-                )
-                .shadow(color: annotation.tint.opacity(0.15), radius: 10, y: 4)
+        .wsChunkyCard(
+            cornerRadius: 16,
+            horizontalPadding: 0,
+            verticalPadding: 0,
+            lipHeight: 4,
+            accent: cardTint
         )
         .contentShape(Rectangle())
         .onTapGesture {
@@ -413,14 +426,14 @@ private struct RubricTab: View {
         } else {
             ProLockPane(
                 title: "Rubric is a Pro feature",
-                message: "Upgrade to see a per-criterion grade rubric — structure, argument, citations, clarity, and academic style scored individually.",
+                message: "Upgrade to see a per-criterion grade rubric -- structure, argument, citations, clarity, and academic style scored individually.",
                 icon: "list.bullet.clipboard.fill"
             )
         }
     }
 
     private func orderedKeys(_ dict: [String: RubricCriterion]) -> [String] {
-        // Common ordering — fall back to alpha for unknown keys
+        // Common ordering -- fall back to alpha for unknown keys
         let preferred = ["structure", "argument", "evidence", "clarity", "citations", "style", "tone", "grammar"]
         let knownInOrder = preferred.filter { dict.keys.contains($0) }
         let extras = dict.keys.filter { !preferred.contains($0) }.sorted()
@@ -436,46 +449,53 @@ private struct RubricTab: View {
     private func criterionRow(name: String, criterion: RubricCriterion) -> some View {
         let frac = criterion.fraction
         let color: Color = {
-            if frac >= 0.85 { return WSColor.strong }
-            if frac >= 0.65 { return WSColor.brandPrimary }
-            if frac >= 0.45 { return WSColor.revise }
-            return WSColor.concern
+            if frac >= 0.85 { return WSColor.duoGreen }
+            if frac >= 0.65 { return WSColor.duoBlue }
+            if frac >= 0.45 { return WSColor.duoOrange }
+            return WSColor.duoRed
         }()
 
         return VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Text(name)
-                    .wsBody(.medium, weight: .bold)
-                    .foregroundStyle(WSColor.foreground)
+                    .wsBody(.medium, weight: .black)
+                    .foregroundStyle(WSColor.duoText)
                 Spacer()
                 if let s = criterion.score, let m = criterion.maxScore {
                     Text("\(Int(s)) / \(Int(m))")
                         .wsBody(.small, weight: .bold)
-                        .foregroundStyle(color)
+                        .foregroundStyle(.white)
                         .padding(.horizontal, 10)
                         .padding(.vertical, 4)
-                        .background(Capsule().fill(color.opacity(0.15)))
+                        .background(Capsule().fill(color))
                 }
             }
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
-                    Capsule().fill(WSColor.surface).frame(height: 8)
+                    Capsule().fill(WSColor.duoSurface).frame(height: 10)
+                        .overlay(Capsule().stroke(WSColor.duoBorder, lineWidth: 1))
                     Capsule()
                         .fill(color)
-                        .frame(width: max(8, geo.size.width * frac), height: 8)
+                        .frame(width: max(10, geo.size.width * frac), height: 10)
                         .shadow(color: color.opacity(0.5), radius: 4, y: 1)
                 }
             }
-            .frame(height: 8)
+            .frame(height: 10)
 
             if let feedback = criterion.feedback, !feedback.isEmpty {
                 Text(feedback)
                     .wsBody(.small)
-                    .foregroundStyle(WSColor.foreground.opacity(0.9))
+                    .foregroundStyle(WSColor.duoText.opacity(0.9))
             }
         }
         .padding(14)
-        .wsCard(elevation: .low)
+        .wsChunkyCard(
+            cornerRadius: 16,
+            horizontalPadding: 0,
+            verticalPadding: 0,
+            lipHeight: 4,
+            accent: color
+        )
     }
 }
 
@@ -516,7 +536,7 @@ private struct TipsTab: View {
         HStack(alignment: .top, spacing: 12) {
             ZStack {
                 Circle()
-                    .fill(WSGradient.brand)
+                    .fill(WSColor.duoPurple)
                     .frame(width: 28, height: 28)
                 Text("\(idx + 1)")
                     .wsBody(.small, weight: .bold)
@@ -524,44 +544,50 @@ private struct TipsTab: View {
             }
             Text(tip)
                 .wsBody(.medium)
-                .foregroundStyle(WSColor.foreground)
+                .foregroundStyle(WSColor.duoText)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(14)
-        .wsCard(elevation: .low)
+        .wsChunkyCard(
+            cornerRadius: 16,
+            horizontalPadding: 0,
+            verticalPadding: 0,
+            lipHeight: 4,
+            accent: WSColor.duoPurple
+        )
     }
 
     private func rewriteBlock(rewrites: [SpecificRewrite]) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Suggested rewrites")
-                .wsHeadline(.small, weight: .semibold)
-                .foregroundStyle(WSColor.foreground)
+                .wsHeadline(.small, weight: .black)
+                .foregroundStyle(WSColor.duoText)
 
             ForEach(rewrites) { rw in
                 VStack(alignment: .leading, spacing: 8) {
                     if let original = rw.original {
                         Text(original)
                             .wsBody(.small)
-                            .foregroundStyle(WSColor.foreground.opacity(0.85))
-                            .strikethrough(true, color: WSColor.concern.opacity(0.7))
+                            .foregroundStyle(WSColor.duoText.opacity(0.85))
+                            .strikethrough(true, color: WSColor.duoRed.opacity(0.7))
                             .padding(10)
                             .background(
-                                RoundedRectangle(cornerRadius: 10).fill(WSColor.concern.opacity(0.08))
+                                RoundedRectangle(cornerRadius: 10).fill(WSColor.duoRedLight)
                             )
                     }
                     if let rewrite = rw.rewrite {
                         Text(rewrite)
                             .wsBody(.small, weight: .semibold)
-                            .foregroundStyle(WSColor.foreground)
+                            .foregroundStyle(WSColor.duoText)
                             .padding(10)
                             .background(
-                                RoundedRectangle(cornerRadius: 10).fill(WSColor.strong.opacity(0.10))
+                                RoundedRectangle(cornerRadius: 10).fill(WSColor.duoGreenLight)
                             )
                     }
                     if let reason = rw.reason {
                         HStack(spacing: 6) {
                             Image(systemName: "lightbulb.fill")
-                                .foregroundStyle(WSColor.revise)
+                                .foregroundStyle(WSColor.duoOrange)
                             Text(reason)
                                 .wsBody(.caption, weight: .semibold)
                                 .foregroundStyle(WSColor.foregroundMuted)
@@ -569,7 +595,13 @@ private struct TipsTab: View {
                     }
                 }
                 .padding(14)
-                .wsCard(elevation: .low)
+                .wsChunkyCard(
+                    cornerRadius: 16,
+                    horizontalPadding: 0,
+                    verticalPadding: 0,
+                    lipHeight: 4,
+                    accent: WSColor.duoGreen
+                )
             }
         }
         .padding(.top, 6)
@@ -579,11 +611,11 @@ private struct TipsTab: View {
         HStack(spacing: 12) {
             Image(systemName: "wand.and.stars")
                 .font(.system(size: 22, weight: .bold))
-                .foregroundStyle(Color(hex: 0xF59E0B))
+                .foregroundStyle(WSColor.duoOrange)
             VStack(alignment: .leading, spacing: 2) {
                 Text("Specific rewrites are Pro")
                     .wsBody(.small, weight: .bold)
-                    .foregroundStyle(WSColor.foreground)
+                    .foregroundStyle(WSColor.duoText)
                 Text("See exactly which sentences to swap and why.")
                     .wsBody(.caption)
                     .foregroundStyle(WSColor.foregroundMuted)
@@ -594,13 +626,12 @@ private struct TipsTab: View {
                 .font(.system(size: 13, weight: .bold))
         }
         .padding(14)
-        .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color(hex: 0xF59E0B).opacity(0.10))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(Color(hex: 0xF59E0B).opacity(0.30), lineWidth: 1)
-                )
+        .wsChunkyCard(
+            cornerRadius: 16,
+            horizontalPadding: 0,
+            verticalPadding: 0,
+            lipHeight: 4,
+            accent: WSColor.duoOrange
         )
     }
 }
@@ -616,24 +647,24 @@ struct ProLockPane: View {
         VStack(spacing: 16) {
             ZStack {
                 Circle()
-                    .fill(Color(hex: 0xF59E0B).opacity(0.16))
+                    .fill(WSColor.duoOrangeLight)
                     .frame(width: 100, height: 100)
                 Image(systemName: icon)
                     .font(.system(size: 36, weight: .semibold))
-                    .foregroundStyle(Color(hex: 0xF59E0B))
+                    .foregroundStyle(WSColor.duoOrange)
             }
             Text(title)
-                .wsHeadline(.small, weight: .semibold)
-                .foregroundStyle(WSColor.foreground)
+                .wsHeadline(.small, weight: .black)
+                .foregroundStyle(WSColor.duoText)
             Text(message)
                 .wsBody(.small)
                 .foregroundStyle(WSColor.foregroundMuted)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
             Button("Upgrade to Pro") {
-                // Chapter 6 — RevenueCat paywall
+                // Chapter 6 -- RevenueCat paywall
             }
-            .buttonStyle(WSPrimaryButtonStyle(fullWidth: false))
+            .buttonStyle(WSDuoWarnButtonStyle(fullWidth: false))
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding()
@@ -656,7 +687,7 @@ struct ProLockPane: View {
                     id: "2", type: .improve, text: "transitions between paragraphs are abrupt",
                     startIndex: 56, endIndex: 96,
                     comment: "Add transitional phrases to guide the reader.",
-                    suggestion: "Try a connector like 'Building on this…' to link the next paragraph.",
+                    suggestion: "Try a connector like 'Building on this...' to link the next paragraph.",
                     isCoverageOnly: nil
                 )
             ],

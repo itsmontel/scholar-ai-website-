@@ -73,10 +73,10 @@ final class DailyGoalStore: ObservableObject {
 
         var tint: Color {
             switch self {
-            case .casual:  return Color(hex: 0x10B981)
-            case .regular: return Color(hex: 0xF59E0B)
-            case .serious: return Color(hex: 0xEF4444)
-            case .intense: return Color(hex: 0x7C3AED)
+            case .casual:  return WSColor.duoGreen
+            case .regular: return WSColor.duoOrange
+            case .serious: return WSColor.duoRed
+            case .intense: return WSColor.duoPurple
             }
         }
     }

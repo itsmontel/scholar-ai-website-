@@ -41,8 +41,8 @@ enum FocusChallengeType: String, CaseIterable, Identifiable, Codable {
 
     var tint: Color {
         switch self {
-        case .quiz:       return Color(hex: 0xD946EF)
-        case .flashcards: return Color(hex: 0x7C3AED)
+        case .quiz:       return WSColor.duoPurple
+        case .flashcards: return WSColor.duoBlue
         }
     }
 }
@@ -176,14 +176,14 @@ enum FocusTopic: String, Codable, Hashable, CaseIterable, Identifiable {
 
     var tint: Color {
         switch self {
-        case .math:       return Color(hex: 0x6366F1)
-        case .science:    return Color(hex: 0x10B981)
-        case .history:    return Color(hex: 0xB45309)
-        case .geography:  return Color(hex: 0x0EA5E9)
-        case .vocabulary: return Color(hex: 0x7C3AED)
-        case .music:      return Color(hex: 0xD946EF)
-        case .sports:     return Color(hex: 0xEF4444)
-        case .trivia:     return Color(hex: 0xF59E0B)
+        case .math:       return WSColor.duoBlue
+        case .science:    return WSColor.duoGreen
+        case .history:    return WSColor.duoOrangeDark
+        case .geography:  return WSColor.duoBlue
+        case .vocabulary: return WSColor.duoPurple
+        case .music:      return WSColor.duoRed
+        case .sports:     return WSColor.duoOrange
+        case .trivia:     return WSColor.duoPurple
         }
     }
 }

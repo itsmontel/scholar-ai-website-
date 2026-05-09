@@ -2,7 +2,9 @@
 //  FocusBlockedAppsView.swift
 //  WriteScholar
 //
-//  Sheet for picking which apps + categories Focus mode should shield.
+//  Sheet for picking which apps + categories Focus mode should shield —
+//  Duolingo-style design.
+//
 //  Wraps Apple's FamilyActivityPicker, which renders Apple's privacy-
 //  preserving system UI (we never see the bundle IDs).
 //
@@ -26,14 +28,13 @@ struct FocusBlockedAppsView: View {
 
     init(manager: FocusManager) {
         self.manager = manager
-        // Local copy so the user can cancel without persisting changes
         _draft = State(initialValue: manager.blockedSelection)
     }
 
     var body: some View {
         NavigationStack {
             ZStack {
-                WSGradient.heroBackdrop.ignoresSafeArea()
+                WSColor.duoSurface.ignoresSafeArea()
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {
@@ -51,10 +52,9 @@ struct FocusBlockedAppsView: View {
                     }
                     .padding(.horizontal, 18)
                     .padding(.vertical, 14)
-                    .padding(.bottom, 90) // leave room for the save bar
+                    .padding(.bottom, 90)
                 }
 
-                // Sticky save bar
                 VStack {
                     Spacer()
                     saveBar
@@ -66,7 +66,7 @@ struct FocusBlockedAppsView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
-                        .foregroundStyle(WSColor.foregroundMuted)
+                        .foregroundStyle(WSColor.duoText.opacity(0.55))
                 }
             }
             .familyActivityPicker(isPresented: $pickerVisible, selection: $draft)
@@ -79,18 +79,18 @@ struct FocusBlockedAppsView: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("BLOCK LIST")
                 .wsEyebrow()
-                .foregroundStyle(WSColor.brandPrimary)
+                .foregroundStyle(WSColor.duoPurple)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 5)
-                .background(Capsule().fill(WSColor.brandSoft))
+                .background(Capsule().fill(WSColor.duoPurpleLight))
 
             Text("Pick the apps that pull you in.")
-                .wsHeadline(.medium, weight: .semibold)
-                .foregroundStyle(WSColor.foreground)
+                .wsHeadline(.medium, weight: .black)
+                .foregroundStyle(WSColor.duoText)
 
             Text("They'll be shielded by Focus mode. To open one, you'll need to pass a quick \(manager.settings.challengeType.rawValue.lowercased()) challenge.")
                 .wsBody(.medium)
-                .foregroundStyle(WSColor.foregroundMuted)
+                .foregroundStyle(WSColor.duoText.opacity(0.65))
         }
     }
 
@@ -101,14 +101,14 @@ struct FocusBlockedAppsView: View {
             HStack(spacing: 10) {
                 Image(systemName: "shield.lefthalf.filled")
                     .font(.system(size: 22, weight: .bold))
-                    .foregroundStyle(WSColor.revise)
+                    .foregroundStyle(WSColor.duoOrange)
                 Text("Allow Screen Time first")
-                    .wsBody(.medium, weight: .bold)
-                    .foregroundStyle(WSColor.foreground)
+                    .wsHeadline(.small, weight: .black)
+                    .foregroundStyle(WSColor.duoText)
             }
             Text("WriteScholar uses Apple's Family Controls to shield apps you choose — without seeing what they are. Tap below and approve when iOS asks.")
                 .wsBody(.small)
-                .foregroundStyle(WSColor.foregroundMuted)
+                .foregroundStyle(WSColor.duoText.opacity(0.55))
 
             Button {
                 requestingAuth = true
@@ -123,21 +123,13 @@ struct FocusBlockedAppsView: View {
                     } else {
                         Image(systemName: "lock.shield.fill")
                     }
-                    Text(requestingAuth ? "Requesting…" : "Allow Screen Time")
+                    Text(requestingAuth ? "Requesting..." : "Allow Screen Time")
                 }
             }
-            .buttonStyle(WSPrimaryButtonStyle())
+            .buttonStyle(WSDuoWarnButtonStyle())
             .disabled(requestingAuth)
         }
-        .padding(14)
-        .background(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(WSColor.revise.opacity(0.08))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .stroke(WSColor.revise.opacity(0.30), lineWidth: 1)
-                )
-        )
+        .wsChunkyCard(accent: WSColor.duoOrange)
     }
 
     // MARK: - Selection summary
@@ -146,31 +138,30 @@ struct FocusBlockedAppsView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("Currently blocking")
-                    .wsBody(.medium, weight: .bold)
-                    .foregroundStyle(WSColor.foreground)
+                    .wsHeadline(.small, weight: .black)
+                    .foregroundStyle(WSColor.duoText)
                 Spacer()
                 Text(summaryCountText)
-                    .wsBody(.caption, weight: .bold)
-                    .foregroundStyle(WSColor.brandPrimary)
+                    .font(WSFont.sans(11, weight: .bold))
+                    .foregroundStyle(WSColor.duoPurple)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 4)
-                    .background(Capsule().fill(WSColor.brandSoft))
+                    .background(Capsule().fill(WSColor.duoPurpleLight))
             }
 
-            // The picker is the canonical source — show three rows summarizing it
             VStack(spacing: 10) {
                 summaryRow(icon: "app.badge.fill",
                            label: "Apps",
                            count: draft.applicationTokens.count,
-                           tint: WSColor.brandPrimary)
+                           tint: WSColor.duoPurple)
                 summaryRow(icon: "square.grid.2x2.fill",
                            label: "Categories",
                            count: draft.categoryTokens.count,
-                           tint: Color(hex: 0xD946EF))
+                           tint: WSColor.duoBlue)
                 summaryRow(icon: "globe",
                            label: "Web domains",
                            count: draft.webDomainTokens.count,
-                           tint: Color(hex: 0x10B981))
+                           tint: WSColor.duoGreen)
             }
 
             Button {
@@ -182,7 +173,7 @@ struct FocusBlockedAppsView: View {
                       : "Edit selection",
                       systemImage: "plus.circle.fill")
             }
-            .buttonStyle(WSPrimaryButtonStyle())
+            .buttonStyle(WSDuoPrimaryButtonStyle())
 
             if !draft.applicationTokens.isEmpty || !draft.categoryTokens.isEmpty {
                 Button(role: .destructive) {
@@ -190,19 +181,11 @@ struct FocusBlockedAppsView: View {
                     draft = FamilyActivitySelection()
                 } label: {
                     Label("Clear all", systemImage: "trash")
-                        .wsBody(.small, weight: .bold)
-                        .foregroundStyle(WSColor.concern)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(
-                            Capsule().fill(WSColor.concern.opacity(0.12))
-                        )
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(WSDuoDangerButtonStyle())
             }
         }
-        .padding(14)
-        .wsCard(elevation: .medium)
+        .wsChunkyCard(accent: WSColor.duoPurple)
     }
 
     private var summaryCountText: String {
@@ -216,17 +199,26 @@ struct FocusBlockedAppsView: View {
     private func summaryRow(icon: String, label: String, count: Int, tint: Color) -> some View {
         HStack(spacing: 12) {
             ZStack {
-                Circle().fill(tint.opacity(0.16)).frame(width: 36, height: 36)
+                Circle().fill(tint.opacity(0.15)).frame(width: 36, height: 36)
                 Image(systemName: icon).foregroundStyle(tint).font(.system(size: 14, weight: .bold))
             }
             Text(label)
                 .wsBody(.medium, weight: .semibold)
-                .foregroundStyle(WSColor.foreground)
+                .foregroundStyle(WSColor.duoText)
             Spacer()
             Text("\(count)")
-                .wsBody(.medium, weight: .bold)
-                .foregroundStyle(count > 0 ? tint : WSColor.foregroundMuted)
+                .font(WSFont.headline(17))
+                .foregroundStyle(count > 0 ? tint : WSColor.duoBorder)
         }
+        .padding(10)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(WSColor.backgroundElevated)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(WSColor.duoBorder, lineWidth: 2)
+                )
+        )
     }
 
     // MARK: - Suggestion list
@@ -234,21 +226,18 @@ struct FocusBlockedAppsView: View {
     private var suggestionList: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Common distractions")
-                .wsBody(.small, weight: .bold)
-                .foregroundStyle(WSColor.foregroundMuted)
+                .wsHeadline(.small, weight: .black)
+                .foregroundStyle(WSColor.duoText)
 
-            // These are visual suggestions only — the picker is the
-            // actual source of truth. They mirror the preset list used
-            // by the website's FocusModeSettingsSection.
             let presets = [
-                ("TikTok",     "play.rectangle.fill",     Color(hex: 0xEC4899)),
-                ("Instagram",  "camera.fill",             Color(hex: 0xD946EF)),
-                ("YouTube",    "play.tv.fill",            Color(hex: 0xEF4444)),
-                ("X / Twitter", "bird.fill",              Color(hex: 0x0EA5E9)),
-                ("Reddit",     "bubble.left.and.bubble.right.fill", Color(hex: 0xF97316)),
-                ("Snapchat",   "ghost.fill",              Color(hex: 0xF59E0B)),
-                ("Discord",    "headphones",              Color(hex: 0x6366F1)),
-                ("Netflix",    "film.fill",               Color(hex: 0xDC2626))
+                ("TikTok",     "play.rectangle.fill",     WSColor.duoRed),
+                ("Instagram",  "camera.fill",             WSColor.duoPurple),
+                ("YouTube",    "play.tv.fill",            WSColor.duoRed),
+                ("X / Twitter", "bird.fill",              WSColor.duoBlue),
+                ("Reddit",     "bubble.left.and.bubble.right.fill", WSColor.duoOrange),
+                ("Snapchat",   "ghost.fill",              WSColor.duoOrange),
+                ("Discord",    "headphones",              WSColor.duoPurple),
+                ("Netflix",    "film.fill",               WSColor.duoRed)
             ]
 
             let cols = [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)]
@@ -258,29 +247,28 @@ struct FocusBlockedAppsView: View {
                 }
             }
 
-            Text("Tap “Pick apps to block” above and search for these by name in Apple's picker.")
+            Text("Tap \"Pick apps to block\" above and search for these by name in Apple's picker.")
                 .wsBody(.caption)
-                .foregroundStyle(WSColor.foregroundMuted)
+                .foregroundStyle(WSColor.duoText.opacity(0.55))
                 .padding(.top, 2)
         }
-        .padding(14)
-        .wsCard(elevation: .low)
+        .wsChunkyCard(accent: WSColor.duoBlue)
     }
 
     private func presetChip(name: String, icon: String, tint: Color) -> some View {
         HStack(spacing: 8) {
             Image(systemName: icon).foregroundStyle(tint)
-            Text(name).wsBody(.small, weight: .semibold).foregroundStyle(WSColor.foreground)
+            Text(name).wsBody(.small, weight: .semibold).foregroundStyle(WSColor.duoText)
             Spacer(minLength: 0)
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
         .background(
             RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(WSColor.surface)
+                .fill(WSColor.backgroundElevated)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .stroke(tint.opacity(0.30), lineWidth: 1)
+                        .stroke(tint.opacity(0.35), lineWidth: 2)
                 )
         )
     }
@@ -293,13 +281,8 @@ struct FocusBlockedAppsView: View {
                 dismiss()
             } label: {
                 Text("Cancel")
-                    .wsBody(.medium, weight: .bold)
-                    .foregroundStyle(WSColor.foreground)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(Capsule().fill(WSColor.surface))
             }
-            .buttonStyle(.plain)
+            .buttonStyle(WSDuoSecondaryButtonStyle(fullWidth: true))
 
             Button {
                 manager.updateBlockedSelection(draft)
@@ -307,15 +290,14 @@ struct FocusBlockedAppsView: View {
                 dismiss()
             } label: {
                 Label("Save", systemImage: "checkmark.circle.fill")
-                    .frame(maxWidth: .infinity)
             }
-            .buttonStyle(WSPrimaryButtonStyle())
+            .buttonStyle(WSDuoSuccessButtonStyle())
         }
         .padding(14)
         .background(
             Rectangle()
                 .fill(.ultraThinMaterial)
-                .overlay(Rectangle().fill(WSColor.background.opacity(0.4)))
+                .overlay(Rectangle().fill(WSColor.duoSurface.opacity(0.6)))
                 .ignoresSafeArea(edges: .bottom)
         )
     }

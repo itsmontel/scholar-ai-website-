@@ -24,15 +24,18 @@ struct SignInView: View {
             WSGradient.heroBackdrop.ignoresSafeArea()
 
             ScrollView {
-                VStack(spacing: 28) {
+                VStack(spacing: 24) {
                     headerBlock
-                        .padding(.top, 12)
+                        .padding(.top, 16)
+                        .wsStaggerEntry(0)
 
-                    formBlock
+                    formCard
                         .padding(.horizontal, 24)
+                        .wsStaggerEntry(1)
 
                     footerBlock
                         .padding(.horizontal, 24)
+                        .wsStaggerEntry(2)
                 }
                 .padding(.bottom, 40)
             }
@@ -46,19 +49,15 @@ struct SignInView: View {
     // MARK: - Header
 
     private var headerBlock: some View {
-        VStack(spacing: 14) {
-            ZStack {
-                Circle()
-                    .fill(WSColor.brandSoft)
-                    .frame(width: 110, height: 110)
-                WSAnimatedImage(name: "mascot-paper", ext: "webp")
-                    .frame(width: 90, height: 90)
-            }
+        VStack(spacing: 16) {
+            WSAnimatedImage(name: "mascot-paper", ext: "webp")
+                .frame(width: 100, height: 100)
+                .wsBobbing(amount: 3, duration: 2.8)
 
-            VStack(spacing: 6) {
+            VStack(spacing: 8) {
                 Text("Welcome back")
-                    .wsHeadline(.medium, weight: .semibold)
-                    .foregroundStyle(WSColor.foreground)
+                    .wsHeadline(.large, weight: .black)
+                    .foregroundStyle(WSColor.duoText)
                 Text("Sign in to your WriteScholar account.")
                     .wsBody(.medium)
                     .foregroundStyle(WSColor.foregroundMuted)
@@ -66,10 +65,10 @@ struct SignInView: View {
         }
     }
 
-    // MARK: - Form
+    // MARK: - Form inside a chunky card
 
-    private var formBlock: some View {
-        VStack(spacing: 12) {
+    private var formCard: some View {
+        VStack(spacing: 14) {
             WSTextField(
                 placeholder: "Email",
                 icon: "envelope",
@@ -90,11 +89,21 @@ struct SignInView: View {
             .focused($focusedField, equals: .password)
 
             if let err = session.lastError {
-                Text(err)
-                    .wsBody(.small, weight: .semibold)
-                    .foregroundStyle(WSColor.concern)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 4)
+                HStack(spacing: 6) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 13, weight: .bold))
+                    Text(err)
+                        .wsBody(.small, weight: .bold)
+                }
+                .foregroundStyle(WSColor.duoRed)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(WSColor.duoRedLight)
+                )
+                .transition(.opacity.combined(with: .scale(scale: 0.95)))
             }
 
             Button {
@@ -105,14 +114,20 @@ struct SignInView: View {
                         ProgressView()
                             .tint(.white)
                     }
-                    Text(isLoading ? "Signing in…" : "Sign in")
+                    Text(isLoading ? "Signing in..." : "Sign in")
                 }
             }
-            .buttonStyle(WSPrimaryButtonStyle())
+            .buttonStyle(WSDuoSuccessButtonStyle())
             .disabled(!canSubmit || isLoading)
-            .opacity(canSubmit ? 1 : 0.65)
+            .opacity(canSubmit ? 1 : 0.55)
             .padding(.top, 4)
         }
+        .wsChunkyCard(
+            cornerRadius: 22,
+            horizontalPadding: 20,
+            verticalPadding: 24,
+            accent: WSColor.duoPurple
+        )
     }
 
     // MARK: - Footer

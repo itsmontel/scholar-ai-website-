@@ -2,9 +2,9 @@
 //  GetStartedHero.swift
 //  WriteScholar
 //
-//  Page 7 — final CTA hero. The dancing mascot front and centre, with
-//  a "7 days free trial" trophy badge and a rotating ring of feature
-//  pills around the outside.
+//  Page 7 -- final CTA hero. The dancing mascot front and centre, with
+//  a chunky green "7 days free trial" badge and a rotating ring of
+//  Duolingo-colored feature pills. Bold, celebratory energy.
 //
 
 import SwiftUI
@@ -12,13 +12,13 @@ import SwiftUI
 struct GetStartedHero: View {
     let progress: CGFloat
 
-    private let pills = [
-        "Essay analyzer",
-        "Study packs",
-        "Flashcards",
-        "Crater Blast",
-        "Word Tower",
-        "Citations"
+    private let pills: [(String, Color)] = [
+        ("Essay analyzer", WSColor.duoPurple),
+        ("Study packs",    WSColor.duoBlue),
+        ("Flashcards",     WSColor.duoGreen),
+        ("Crater Blast",   WSColor.duoRed),
+        ("Word Tower",     WSColor.duoOrange),
+        ("Citations",      WSColor.duoPurple)
     ]
 
     @State private var ringRotation: Double = 0
@@ -27,18 +27,18 @@ struct GetStartedHero: View {
 
     var body: some View {
         ZStack {
-            // Confetti scattered behind
+            // Confetti scattered behind -- Duolingo palette
             ForEach(0..<14, id: \.self) { i in
                 let palette = [
-                    Color(hex: 0x7C3AED),
-                    Color(hex: 0xD946EF),
-                    Color(hex: 0x10B981),
-                    Color(hex: 0xF59E0B),
-                    Color(hex: 0x6366F1)
+                    WSColor.duoGreen,
+                    WSColor.duoPurple,
+                    WSColor.duoBlue,
+                    WSColor.duoOrange,
+                    WSColor.duoRed
                 ]
                 Circle()
                     .fill(palette[i % palette.count])
-                    .frame(width: 7, height: 7)
+                    .frame(width: 8, height: 8)
                     .offset(
                         x: CGFloat(cos(Double(i) * 0.9)) * 145,
                         y: CGFloat(sin(Double(i) * 0.9)) * 145
@@ -48,19 +48,21 @@ struct GetStartedHero: View {
                     .animation(.spring(response: 0.7, dampingFraction: 0.7).delay(Double(i) * 0.04), value: confettiAppeared)
             }
 
-            // Rotating feature ring
+            // Rotating feature ring -- each pill in its Duolingo color
             ZStack {
                 ForEach(Array(pills.enumerated()), id: \.offset) { idx, pill in
                     let angle = (Double(idx) / Double(pills.count)) * 2 * .pi
-                    Text(pill)
+                    Text(pill.0)
                         .wsBody(.caption, weight: .bold)
-                        .foregroundStyle(WSColor.foreground)
+                        .foregroundStyle(pill.1)
                         .padding(.horizontal, 10)
                         .padding(.vertical, 6)
                         .background(
-                            Capsule().fill(WSColor.backgroundElevated)
-                                .overlay(Capsule().stroke(WSColor.brandPrimary.opacity(0.30), lineWidth: 1))
-                                .shadow(color: WSColor.brandPrimary.opacity(0.20), radius: 8, y: 3)
+                            Capsule().fill(pill.1.opacity(0.12))
+                                .overlay(
+                                    Capsule().stroke(pill.1.opacity(0.30), lineWidth: 1.5)
+                                )
+                                .shadow(color: pill.1.opacity(0.15), radius: 6, y: 2)
                         )
                         .offset(
                             x: cos(angle) * 145,
@@ -70,17 +72,20 @@ struct GetStartedHero: View {
                 }
             }
             .rotationEffect(.degrees(ringRotation))
+            .wsStaggerEntry(0)
 
             // Dancing mascot in the centre
             WSAnimatedImage(name: "mascot-dance", ext: "webp")
                 .frame(width: 180, height: 180)
                 .scaleEffect(badgeScale)
-                .shadow(color: Color(hex: 0x7C3AED, opacity: 0.40), radius: 30, y: 12)
+                .shadow(color: WSColor.duoGreen.opacity(0.30), radius: 24, y: 10)
+                .wsStaggerEntry(1)
 
-            // "7 days free trial" trophy floating top-right
+            // "7 days free trial" trophy floating top-right -- chunky green badge
             trialBadge
                 .offset(x: 90, y: -110)
                 .rotationEffect(.degrees(8))
+                .wsStaggerEntry(2)
         }
         .frame(width: 360, height: 360)
         .onAppear {
@@ -103,15 +108,22 @@ struct GetStartedHero: View {
                 .foregroundStyle(.white)
             Text("FREE TRIAL")
                 .wsEyebrow()
-                .foregroundStyle(.white.opacity(0.85))
+                .foregroundStyle(.white.opacity(0.90))
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
         .background(
-            Capsule()
-                .fill(WSGradient.brand)
-                .overlay(Capsule().stroke(.white.opacity(0.25), lineWidth: 1.5))
-                .shadow(color: WSColor.brandPrimary.opacity(0.45), radius: 18, y: 8)
+            ZStack(alignment: .top) {
+                // Lip
+                Capsule()
+                    .fill(WSColor.duoGreenDark)
+                    .padding(.top, 4)
+                // Top face
+                Capsule()
+                    .fill(WSColor.duoGreen)
+                    .overlay(Capsule().stroke(.white.opacity(0.20), lineWidth: 1.5))
+            }
+            .shadow(color: WSColor.duoGreen.opacity(0.35), radius: 12, y: 6)
         )
     }
 }

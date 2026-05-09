@@ -2,11 +2,11 @@
 //  FocusSettingsSheet.swift
 //  WriteScholar
 //
-//  User-facing knobs for Focus mode:
-//    • Challenge type   — Quiz or Flashcards
-//    • Difficulty       — Standard (4/5) or Hard (5/5, faster timer)
-//    • Unlock duration  — 5 / 15 / 30 / 60 minutes
-//    • Streak rule      — Counts a "focused day" on unlock or pure-block
+//  User-facing knobs for Focus mode — Duolingo-style design.
+//    * Challenge type   -- Quiz or Flashcards
+//    * Difficulty       -- Standard (4/5) or Hard (5/5, faster timer)
+//    * Unlock duration  -- 5 / 15 / 30 / 60 minutes
+//    * Streak rule      -- Counts a "focused day" on unlock or pure-block
 //
 //  All changes go through FocusManager.updateSettings() so they
 //  persist to the App Group and survive relaunches.
@@ -28,20 +28,23 @@ struct FocusSettingsSheet: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                WSGradient.heroBackdrop.ignoresSafeArea()
+                WSColor.duoSurface.ignoresSafeArea()
 
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 18) {
-                        challengeTypeSection
-                        topicBanksSection
-                        difficultySection
-                        unlockDurationSection
-                        streakRuleSection
-                        resetSection
+                VStack(spacing: 0) {
+                    WSChunkyRibbon(color: WSColor.duoGreen)
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 18) {
+                            challengeTypeSection
+                            topicBanksSection
+                            difficultySection
+                            unlockDurationSection
+                            streakRuleSection
+                            resetSection
+                        }
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 16)
+                        .padding(.bottom, 90)
                     }
-                    .padding(.horizontal, 18)
-                    .padding(.vertical, 16)
-                    .padding(.bottom, 90)
                 }
 
                 VStack {
@@ -55,7 +58,7 @@ struct FocusSettingsSheet: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
-                        .foregroundStyle(WSColor.foregroundMuted)
+                        .foregroundStyle(WSColor.duoText.opacity(0.55))
                 }
             }
         }
@@ -65,7 +68,8 @@ struct FocusSettingsSheet: View {
 
     private var challengeTypeSection: some View {
         sectionCard(title: "Challenge type",
-                    subtitle: "How you'll prove you're ready to switch contexts.") {
+                    subtitle: "How you'll prove you're ready to switch contexts.",
+                    accent: WSColor.duoPurple) {
             HStack(spacing: 10) {
                 ForEach(FocusChallengeType.allCases) { type in
                     challengeTypeChip(type)
@@ -85,7 +89,7 @@ struct FocusSettingsSheet: View {
             VStack(spacing: 8) {
                 ZStack {
                     Circle()
-                        .fill(active ? type.tint : type.tint.opacity(0.16))
+                        .fill(active ? type.tint : type.tint.opacity(0.15))
                         .frame(width: 44, height: 44)
                     Image(systemName: type.icon)
                         .foregroundStyle(active ? .white : type.tint)
@@ -93,10 +97,10 @@ struct FocusSettingsSheet: View {
                 }
                 Text(type.rawValue)
                     .wsBody(.small, weight: .bold)
-                    .foregroundStyle(WSColor.foreground)
+                    .foregroundStyle(WSColor.duoText)
                 Text(type.blurb)
                     .wsBody(.caption)
-                    .foregroundStyle(WSColor.foregroundMuted)
+                    .foregroundStyle(WSColor.duoText.opacity(0.55))
                     .multilineTextAlignment(.center)
                     .frame(minHeight: 38)
             }
@@ -108,9 +112,8 @@ struct FocusSettingsSheet: View {
                     .fill(active ? type.tint.opacity(0.10) : WSColor.backgroundElevated)
                     .overlay(
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(active ? type.tint : WSColor.hairline, lineWidth: active ? 1.5 : 1)
+                            .stroke(active ? type.tint : WSColor.duoBorder, lineWidth: active ? 2 : 2)
                     )
-                    .shadow(color: active ? type.tint.opacity(0.30) : .clear, radius: 8, y: 3)
             )
         }
         .buttonStyle(.plain)
@@ -120,7 +123,8 @@ struct FocusSettingsSheet: View {
 
     private var topicBanksSection: some View {
         sectionCard(title: "Topic banks",
-                    subtitle: "Used when you don't have a study pack saved. Pick the categories the unlock challenge can pull from. All facts are timeless — nothing that drifts year-to-year.") {
+                    subtitle: "Used when you don't have a study pack saved. Pick the categories the unlock challenge can pull from. All facts are timeless — nothing that drifts year-to-year.",
+                    accent: WSColor.duoBlue) {
             VStack(spacing: 10) {
                 let cols = [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)]
                 LazyVGrid(columns: cols, spacing: 8) {
@@ -132,23 +136,23 @@ struct FocusSettingsSheet: View {
                 if draft.selectedTopics.isEmpty {
                     HStack(spacing: 8) {
                         Image(systemName: "info.circle.fill")
-                            .foregroundStyle(WSColor.revise)
+                            .foregroundStyle(WSColor.duoOrange)
                         Text("Pick at least one topic — otherwise we'll fall back to a small mixed sample bank.")
                             .wsBody(.caption)
-                            .foregroundStyle(WSColor.foregroundMuted)
+                            .foregroundStyle(WSColor.duoText.opacity(0.55))
                     }
                     .padding(10)
                     .background(
                         RoundedRectangle(cornerRadius: 10)
-                            .fill(WSColor.revise.opacity(0.10))
+                            .fill(WSColor.duoOrangeLight)
                     )
                 } else {
                     HStack(spacing: 6) {
                         Image(systemName: "checkmark.circle.fill")
-                            .foregroundStyle(WSColor.strong)
+                            .foregroundStyle(WSColor.duoGreen)
                         Text("\(totalSelectedQuestions) questions across \(draft.selectedTopics.count) topic\(draft.selectedTopics.count == 1 ? "" : "s")")
                             .wsBody(.caption, weight: .semibold)
-                            .foregroundStyle(WSColor.foreground)
+                            .foregroundStyle(WSColor.duoText)
                         Spacer()
                     }
                 }
@@ -176,7 +180,7 @@ struct FocusSettingsSheet: View {
                 HStack(spacing: 8) {
                     ZStack {
                         Circle()
-                            .fill(active ? topic.tint : topic.tint.opacity(0.16))
+                            .fill(active ? topic.tint : topic.tint.opacity(0.15))
                             .frame(width: 32, height: 32)
                         Image(systemName: topic.icon)
                             .foregroundStyle(active ? .white : topic.tint)
@@ -184,15 +188,15 @@ struct FocusSettingsSheet: View {
                     }
                     Spacer()
                     Image(systemName: active ? "checkmark.circle.fill" : "plus.circle")
-                        .foregroundStyle(active ? topic.tint : WSColor.foregroundMuted)
+                        .foregroundStyle(active ? topic.tint : WSColor.duoText.opacity(0.35))
                         .font(.system(size: 16, weight: .bold))
                 }
                 Text(topic.label)
                     .wsBody(.small, weight: .bold)
-                    .foregroundStyle(WSColor.foreground)
+                    .foregroundStyle(WSColor.duoText)
                 Text("\(FocusQuestionRegistry.count(for: topic)) questions")
                     .wsBody(.caption, weight: .semibold)
-                    .foregroundStyle(active ? topic.tint : WSColor.foregroundMuted)
+                    .foregroundStyle(active ? topic.tint : WSColor.duoText.opacity(0.55))
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(12)
@@ -201,9 +205,8 @@ struct FocusSettingsSheet: View {
                     .fill(active ? topic.tint.opacity(0.10) : WSColor.backgroundElevated)
                     .overlay(
                         RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .stroke(active ? topic.tint.opacity(0.55) : WSColor.hairline, lineWidth: active ? 1.5 : 1)
+                            .stroke(active ? topic.tint : WSColor.duoBorder, lineWidth: 2)
                     )
-                    .shadow(color: active ? topic.tint.opacity(0.25) : .clear, radius: 6, y: 3)
             )
         }
         .buttonStyle(.plain)
@@ -213,7 +216,8 @@ struct FocusSettingsSheet: View {
 
     private var difficultySection: some View {
         sectionCard(title: "Difficulty",
-                    subtitle: "Standard is 4 of 5 to pass. Hard demands a clean sweep with a tighter timer.") {
+                    subtitle: "Standard is 4 of 5 to pass. Hard demands a clean sweep with a tighter timer.",
+                    accent: WSColor.duoOrange) {
             VStack(spacing: 10) {
                 ForEach(FocusDifficulty.allCases) { d in
                     difficultyRow(d)
@@ -224,28 +228,28 @@ struct FocusSettingsSheet: View {
 
     private func difficultyRow(_ d: FocusDifficulty) -> some View {
         let active = draft.difficulty == d
-        let tint: Color = (d == .hard) ? WSColor.concern : WSColor.brandPrimary
+        let tint: Color = (d == .hard) ? WSColor.duoRed : WSColor.duoBlue
         return Button {
             Haptics.selection()
             draft.difficulty = d
         } label: {
             HStack(spacing: 12) {
                 ZStack {
-                    Circle().fill(tint.opacity(0.16)).frame(width: 36, height: 36)
+                    Circle().fill(tint.opacity(0.15)).frame(width: 36, height: 36)
                     Image(systemName: d == .hard ? "bolt.fill" : "checkmark.shield.fill")
                         .foregroundStyle(tint).font(.system(size: 14, weight: .bold))
                 }
                 VStack(alignment: .leading, spacing: 2) {
                     Text(d.label)
                         .wsBody(.medium, weight: .bold)
-                        .foregroundStyle(WSColor.foreground)
+                        .foregroundStyle(WSColor.duoText)
                     Text(d.subtitle)
                         .wsBody(.caption)
-                        .foregroundStyle(WSColor.foregroundMuted)
+                        .foregroundStyle(WSColor.duoText.opacity(0.55))
                 }
                 Spacer()
                 Image(systemName: active ? "checkmark.circle.fill" : "circle")
-                    .foregroundStyle(active ? tint : WSColor.foregroundMuted)
+                    .foregroundStyle(active ? tint : WSColor.duoBorder)
                     .font(.system(size: 22))
             }
             .padding(12)
@@ -254,7 +258,7 @@ struct FocusSettingsSheet: View {
                     .fill(active ? tint.opacity(0.08) : WSColor.backgroundElevated)
                     .overlay(
                         RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .stroke(active ? tint.opacity(0.50) : WSColor.hairline, lineWidth: 1)
+                            .stroke(active ? tint : WSColor.duoBorder, lineWidth: 2)
                     )
             )
         }
@@ -265,7 +269,8 @@ struct FocusSettingsSheet: View {
 
     private var unlockDurationSection: some View {
         sectionCard(title: "Unlock window",
-                    subtitle: draft.unlockDuration.caption) {
+                    subtitle: draft.unlockDuration.caption,
+                    accent: WSColor.duoGreen) {
             HStack(spacing: 8) {
                 ForEach(FocusUnlockDuration.allCases) { d in
                     let active = draft.unlockDuration == d
@@ -274,15 +279,14 @@ struct FocusSettingsSheet: View {
                         draft.unlockDuration = d
                     } label: {
                         Text(d.label)
-                            .wsBody(.small, weight: .bold)
-                            .foregroundStyle(active ? .white : WSColor.foreground)
+                            .font(WSFont.sans(13, weight: .bold))
+                            .foregroundStyle(active ? .white : WSColor.duoText)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 10)
                             .background(
                                 Capsule()
-                                    .fill(active ? AnyShapeStyle(WSColor.brandPrimary) : AnyShapeStyle(WSColor.surface))
-                                    .overlay(Capsule().stroke(active ? .clear : WSColor.hairline, lineWidth: 1))
-                                    .shadow(color: active ? WSColor.brandPrimary.opacity(0.5) : .clear, radius: 8, y: 3)
+                                    .fill(active ? WSColor.duoPurple : WSColor.backgroundElevated)
+                                    .overlay(Capsule().stroke(active ? WSColor.duoPurpleDark : WSColor.duoBorder, lineWidth: 2))
                             )
                     }
                     .buttonStyle(.plain)
@@ -295,17 +299,18 @@ struct FocusSettingsSheet: View {
 
     private var streakRuleSection: some View {
         sectionCard(title: "Counts toward streak",
-                    subtitle: "When does today count as a 'focused day' on your streak?") {
+                    subtitle: "When does today count as a 'focused day' on your streak?",
+                    accent: WSColor.duoOrange) {
             VStack(spacing: 10) {
                 streakRow(label: "On any successful unlock challenge",
-                          subtitle: "Solve one challenge → today counts.",
+                          subtitle: "Solve one challenge -> today counts.",
                           isOn: draft.streakOnUnlock)
                     .onTapGesture {
                         Haptics.selection()
                         draft.streakOnUnlock = true
                     }
                 streakRow(label: "Only on a pure-focus day",
-                          subtitle: "No unlocks at all → today counts.",
+                          subtitle: "No unlocks at all -> today counts.",
                           isOn: !draft.streakOnUnlock)
                     .onTapGesture {
                         Haptics.selection()
@@ -318,21 +323,21 @@ struct FocusSettingsSheet: View {
     private func streakRow(label: String, subtitle: String, isOn: Bool) -> some View {
         HStack(spacing: 12) {
             Image(systemName: isOn ? "checkmark.circle.fill" : "circle")
-                .foregroundStyle(isOn ? WSColor.brandPrimary : WSColor.foregroundMuted)
+                .foregroundStyle(isOn ? WSColor.duoGreen : WSColor.duoBorder)
                 .font(.system(size: 22))
             VStack(alignment: .leading, spacing: 2) {
-                Text(label).wsBody(.medium, weight: .semibold).foregroundStyle(WSColor.foreground)
-                Text(subtitle).wsBody(.caption).foregroundStyle(WSColor.foregroundMuted)
+                Text(label).wsBody(.medium, weight: .semibold).foregroundStyle(WSColor.duoText)
+                Text(subtitle).wsBody(.caption).foregroundStyle(WSColor.duoText.opacity(0.55))
             }
             Spacer()
         }
         .padding(12)
         .background(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(isOn ? WSColor.brandSoft : WSColor.backgroundElevated)
+                .fill(isOn ? WSColor.duoGreenLight : WSColor.backgroundElevated)
                 .overlay(
                     RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .stroke(isOn ? WSColor.brandPrimary.opacity(0.45) : WSColor.hairline, lineWidth: 1)
+                        .stroke(isOn ? WSColor.duoGreen : WSColor.duoBorder, lineWidth: 2)
                 )
         )
     }
@@ -345,11 +350,15 @@ struct FocusSettingsSheet: View {
             draft = .default
         } label: {
             Label("Reset to defaults", systemImage: "arrow.counterclockwise")
-                .wsBody(.small, weight: .bold)
-                .foregroundStyle(WSColor.foregroundMuted)
+                .font(WSFont.sans(13, weight: .bold))
+                .foregroundStyle(WSColor.duoText.opacity(0.55))
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
-                .background(Capsule().fill(WSColor.surface))
+                .background(
+                    Capsule()
+                        .fill(WSColor.backgroundElevated)
+                        .overlay(Capsule().stroke(WSColor.duoBorder, lineWidth: 2))
+                )
         }
         .buttonStyle(.plain)
     }
@@ -362,13 +371,8 @@ struct FocusSettingsSheet: View {
                 dismiss()
             } label: {
                 Text("Cancel")
-                    .wsBody(.medium, weight: .bold)
-                    .foregroundStyle(WSColor.foreground)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(Capsule().fill(WSColor.surface))
             }
-            .buttonStyle(.plain)
+            .buttonStyle(WSDuoSecondaryButtonStyle(fullWidth: true))
 
             Button {
                 manager.updateSettings(draft)
@@ -376,15 +380,14 @@ struct FocusSettingsSheet: View {
                 dismiss()
             } label: {
                 Label("Save", systemImage: "checkmark.circle.fill")
-                    .frame(maxWidth: .infinity)
             }
-            .buttonStyle(WSPrimaryButtonStyle())
+            .buttonStyle(WSDuoSuccessButtonStyle())
         }
         .padding(14)
         .background(
             Rectangle()
                 .fill(.ultraThinMaterial)
-                .overlay(Rectangle().fill(WSColor.background.opacity(0.4)))
+                .overlay(Rectangle().fill(WSColor.duoSurface.opacity(0.6)))
                 .ignoresSafeArea(edges: .bottom)
         )
     }
@@ -394,21 +397,21 @@ struct FocusSettingsSheet: View {
     private func sectionCard<Content: View>(
         title: String,
         subtitle: String,
+        accent: Color = WSColor.duoPurple,
         @ViewBuilder content: () -> Content
     ) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .wsBody(.medium, weight: .bold)
-                    .foregroundStyle(WSColor.foreground)
+                    .wsHeadline(.small, weight: .black)
+                    .foregroundStyle(WSColor.duoText)
                 Text(subtitle)
                     .wsBody(.caption)
-                    .foregroundStyle(WSColor.foregroundMuted)
+                    .foregroundStyle(WSColor.duoText.opacity(0.55))
             }
             content()
         }
-        .padding(14)
-        .wsCard(elevation: .low)
+        .wsChunkyCard(accent: accent)
     }
 }
 

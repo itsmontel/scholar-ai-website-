@@ -11,14 +11,14 @@ import SwiftUI
 
 struct StudyPackGeneratingView: View {
     private static let steps: [(icon: String, text: String)] = [
-        ("doc.text",          "Reading your notes…"),
-        ("brain.head.profile", "Pulling out the key ideas…"),
-        ("book.pages",        "Writing your lesson…"),
-        ("square.stack.3d.up", "Building flashcards…"),
-        ("checkmark.bubble",  "Crafting quiz questions…"),
-        ("grid",              "Drawing the crossword…"),
-        ("burst",             "Loading the boss battle…"),
-        ("sparkles",          "Adding the finishing touches…")
+        ("doc.text",          "Reading your notes..."),
+        ("brain.head.profile", "Pulling out the key ideas..."),
+        ("book.pages",        "Writing your lesson..."),
+        ("square.stack.3d.up", "Building flashcards..."),
+        ("checkmark.bubble",  "Crafting quiz questions..."),
+        ("grid",              "Drawing the crossword..."),
+        ("burst",             "Loading the boss battle..."),
+        ("sparkles",          "Adding the finishing touches...")
     ]
 
     @State private var stepIndex = 0
@@ -26,47 +26,43 @@ struct StudyPackGeneratingView: View {
 
     var body: some View {
         ZStack {
-            WSGradient.heroBackdrop.ignoresSafeArea()
-
-            // Background pulsing glow
-            Circle()
-                .fill(
-                    RadialGradient(
-                        colors: [WSColor.brandPrimary.opacity(0.35), .clear],
-                        center: .center,
-                        startRadius: 20,
-                        endRadius: 260
-                    )
-                )
-                .frame(width: 460, height: 460)
-                .blur(radius: 26)
+            WSColor.duoSurface.ignoresSafeArea()
 
             VStack(spacing: 28) {
                 Spacer()
 
-                // Mascot
-                WSAnimatedImage(name: "mascot-study", ext: "webp")
-                    .frame(width: 200, height: 200)
-                    .shadow(color: WSColor.brandPrimary.opacity(0.35), radius: 28, y: 12)
+                // Mascot with green glow
+                ZStack {
+                    Circle()
+                        .fill(WSColor.duoGreenLight)
+                        .frame(width: 240, height: 240)
+                        .blur(radius: 30)
+
+                    WSAnimatedImage(name: "mascot-study", ext: "webp")
+                        .frame(width: 200, height: 200)
+                        .shadow(color: WSColor.duoGreen.opacity(0.35), radius: 28, y: 12)
+                        .wsBobbing(amount: 8, duration: 2.6)
+                }
 
                 // Title
                 VStack(spacing: 6) {
                     Text("Building your study pack")
-                        .wsHeadline(.medium, weight: .semibold)
-                        .foregroundStyle(WSColor.foreground)
-                    Text("Usually 30–60 seconds.")
-                        .wsBody(.small)
+                        .font(WSFont.headline(22, weight: .black))
+                        .foregroundStyle(WSColor.duoText)
+                    Text("Usually 30-60 seconds.")
+                        .font(WSFont.sans(13))
                         .foregroundStyle(WSColor.foregroundMuted)
                 }
 
-                // Step ticker
+                // Step ticker — chunky pill
                 HStack(spacing: 8) {
                     Image(systemName: Self.steps[stepIndex].icon)
-                        .foregroundStyle(WSColor.brandPrimary)
+                        .foregroundStyle(WSColor.duoGreen)
+                        .font(.system(size: 16, weight: .heavy))
                     Text(Self.steps[stepIndex].text)
-                        .wsBody(.medium, weight: .semibold)
-                        .foregroundStyle(WSColor.foreground)
-                        .id(stepIndex) // forces transition on change
+                        .font(WSFont.sans(15, weight: .bold))
+                        .foregroundStyle(WSColor.duoText)
+                        .id(stepIndex)
                         .transition(.asymmetric(
                             insertion: .opacity.combined(with: .move(edge: .bottom)),
                             removal: .opacity.combined(with: .move(edge: .top))
@@ -76,12 +72,13 @@ struct StudyPackGeneratingView: View {
                 .padding(.vertical, 12)
                 .background(
                     Capsule().fill(WSColor.backgroundElevated)
-                        .overlay(Capsule().stroke(WSColor.hairline, lineWidth: 1))
+                        .overlay(Capsule().stroke(WSColor.duoBorder, lineWidth: 2))
+                        .shadow(color: WSColor.duoGreen.opacity(0.12), radius: 8, y: 3)
                 )
 
-                // Progress bar
+                // Green Duolingo-style progress bar
                 progressBar
-                    .frame(height: 8)
+                    .frame(height: 16)
                     .padding(.horizontal, 32)
 
                 Spacer()
@@ -97,11 +94,23 @@ struct StudyPackGeneratingView: View {
     private var progressBar: some View {
         GeometryReader { geo in
             ZStack(alignment: .leading) {
-                Capsule().fill(WSColor.surface)
                 Capsule()
-                    .fill(WSGradient.brand)
-                    .frame(width: max(8, geo.size.width * progress))
-                    .shadow(color: WSColor.brandPrimary.opacity(0.4), radius: 6, y: 1)
+                    .fill(WSColor.duoBorder)
+                Capsule()
+                    .fill(WSColor.duoGreen)
+                    .frame(width: max(16, geo.size.width * progress))
+                    .overlay(
+                        // Shine stripe inside the bar
+                        Capsule()
+                            .fill(
+                                LinearGradient(
+                                    colors: [.white.opacity(0.0), .white.opacity(0.25), .white.opacity(0.0)],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                    )
+                    .shadow(color: WSColor.duoGreen.opacity(0.4), radius: 4, y: 1)
             }
         }
     }

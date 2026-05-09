@@ -12,38 +12,35 @@ import AuthenticationServices
 struct AuthFlowView: View {
     @EnvironmentObject var session: AuthSession
     @State private var path = NavigationPath()
-    @State private var dancingMascotBob: CGFloat = 0
+    @State private var mascotBob: CGFloat = 0
 
     var body: some View {
         NavigationStack(path: $path) {
             ZStack {
+                // Flat Duolingo surface — white top fading to a subtle purple tint
                 WSGradient.heroBackdrop.ignoresSafeArea()
-
-                // Soft brand orb in the corner for depth
-                Circle()
-                    .fill(WSColor.brandPrimary.opacity(0.15))
-                    .frame(width: 360, height: 360)
-                    .blur(radius: 60)
-                    .offset(x: -180, y: -260)
-                    .ignoresSafeArea()
 
                 VStack(spacing: 0) {
                     Spacer(minLength: 24)
 
                     heroBlock
-                        .padding(.bottom, 24)
+                        .padding(.bottom, 28)
+                        .wsStaggerEntry(0)
 
                     Spacer(minLength: 0)
 
                     actionStack
                         .padding(.horizontal, 24)
                         .padding(.bottom, 8)
+                        .wsStaggerEntry(1)
 
                     legalFooter
                         .padding(.horizontal, 32)
+                        .wsStaggerEntry(2)
 
                     ExploreWithoutSigningInButton()
                         .padding(.bottom, 16)
+                        .wsStaggerEntry(3)
                 }
             }
             .navigationDestination(for: AuthRoute.self) { route in
@@ -56,7 +53,7 @@ struct AuthFlowView: View {
             }
             .onAppear {
                 withAnimation(.easeInOut(duration: 2.6).repeatForever(autoreverses: true)) {
-                    dancingMascotBob = -10
+                    mascotBob = -10
                 }
             }
         }
@@ -65,23 +62,16 @@ struct AuthFlowView: View {
     // MARK: - Hero
 
     private var heroBlock: some View {
-        VStack(spacing: 16) {
-            ZStack {
-                Circle()
-                    .fill(WSColor.brandPrimary.opacity(0.18))
-                    .frame(width: 220, height: 220)
-                    .blur(radius: 30)
+        VStack(spacing: 20) {
+            WSAnimatedImage(name: "mascot-dance", ext: "webp")
+                .frame(width: 160, height: 160)
+                .offset(y: mascotBob)
+                .shadow(color: WSColor.duoGreen.opacity(0.25), radius: 16, y: 8)
 
-                WSAnimatedImage(name: "mascot-dance", ext: "webp")
-                    .frame(width: 160, height: 160)
-                    .offset(y: dancingMascotBob)
-                    .shadow(color: Color(hex: 0x7C3AED, opacity: 0.30), radius: 22, y: 12)
-            }
-
-            VStack(spacing: 8) {
+            VStack(spacing: 10) {
                 Text("Welcome to WriteScholar")
-                    .wsHeadline(.large, weight: .semibold)
-                    .foregroundStyle(WSColor.foreground)
+                    .wsHeadline(.large, weight: .black)
+                    .foregroundStyle(WSColor.duoText)
                     .multilineTextAlignment(.center)
 
                 Text("Sign in to keep your essays, study packs, and streaks in sync.")
@@ -96,20 +86,35 @@ struct AuthFlowView: View {
     // MARK: - Buttons
 
     private var actionStack: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 14) {
             // Apple — required by App Store guideline 4.8 since we offer
-            // other 3rd-party sign-in. Native AS button per HIG.
+            // other 3rd-party sign-in. Wrapped in a chunky card for 3D feel.
             SignInWithAppleButton(.continue) { request in
                 request.requestedScopes = [.fullName, .email]
             } onCompletion: { result in
                 handleAppleResult(result)
             }
             .signInWithAppleButtonStyle(.black)
-            .frame(height: 54)
-            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .shadow(color: .black.opacity(0.18), radius: 10, y: 4)
+            .frame(height: 56)
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(WSColor.duoBorder, lineWidth: 2)
+            )
+            .overlay(
+                // Chunky bottom border for 3D lip effect
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(Color.black.opacity(0.15), lineWidth: 2)
+                    .offset(y: 3)
+                    .mask(
+                        VStack {
+                            Spacer()
+                            Rectangle().frame(height: 10)
+                        }
+                    )
+            )
 
-            // Google — wired up to a placeholder; needs Google Sign-In SDK
+            // Google — chunky card style button
             Button {
                 // TODO Chapter 2.5: integrate GoogleSignIn iOS SDK
                 Haptics.light()
@@ -120,32 +125,26 @@ struct AuthFlowView: View {
                         .font(.system(size: 22, weight: .bold))
                         .foregroundStyle(Color(hex: 0xEA4335))
                     Text("Continue with Google")
-                        .wsBody(.medium, weight: .bold)
-                        .foregroundStyle(WSColor.foreground)
+                        .font(WSFont.sans(15, weight: .bold))
+                        .foregroundStyle(WSColor.duoText)
                 }
                 .frame(maxWidth: .infinity)
-                .frame(height: 54)
-                .background(
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .fill(WSColor.backgroundElevated)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                .stroke(WSColor.hairline, lineWidth: 1)
-                        )
-                        .shadow(color: .black.opacity(0.06), radius: 10, y: 3)
-                )
+                .frame(height: 56)
             }
+            .buttonStyle(WSDuoSecondaryButtonStyle(fullWidth: true))
 
-            // Divider
+            // Divider — Duolingo style
             HStack(spacing: 12) {
-                line
+                duoDividerLine
                 Text("or")
-                    .wsBody(.caption, weight: .semibold)
-                    .foregroundStyle(WSColor.foregroundMuted)
-                line
+                    .font(WSFont.sans(13, weight: .bold))
+                    .foregroundStyle(WSColor.duoBorder)
+                    .textCase(.uppercase)
+                duoDividerLine
             }
-            .padding(.vertical, 4)
+            .padding(.vertical, 2)
 
+            // Email CTA — green success button
             Button {
                 path.append(AuthRoute.signIn)
             } label: {
@@ -154,8 +153,9 @@ struct AuthFlowView: View {
                     Text("Continue with email")
                 }
             }
-            .buttonStyle(WSPrimaryButtonStyle())
+            .buttonStyle(WSDuoSuccessButtonStyle())
 
+            // Sign up nudge
             Button {
                 path.append(AuthRoute.signUp)
             } label: {
@@ -163,28 +163,32 @@ struct AuthFlowView: View {
                     Text("New to WriteScholar?")
                         .foregroundStyle(WSColor.foregroundMuted)
                     Text("Create account")
-                        .foregroundStyle(WSColor.brandPrimary)
+                        .foregroundStyle(WSColor.duoPurple)
                 }
-                .wsBody(.small, weight: .semibold)
+                .wsBody(.small, weight: .bold)
             }
             .buttonStyle(WSTertiaryButtonStyle())
             .padding(.top, 4)
 
             if let err = session.lastError {
                 Text(err)
-                    .wsBody(.small, weight: .semibold)
-                    .foregroundStyle(WSColor.concern)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 8)
-                    .transition(.opacity)
+                    .wsBody(.small, weight: .bold)
+                    .foregroundStyle(WSColor.duoRed)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(WSColor.duoRedLight)
+                    )
+                    .transition(.opacity.combined(with: .scale(scale: 0.95)))
             }
         }
     }
 
-    private var line: some View {
+    private var duoDividerLine: some View {
         Rectangle()
-            .fill(WSColor.hairline)
-            .frame(height: 1)
+            .fill(WSColor.duoBorder)
+            .frame(height: 2)
             .frame(maxWidth: .infinity)
     }
 
@@ -250,7 +254,7 @@ struct ExploreWithoutSigningInButton: View {
         } label: {
             Text("Explore without signing in")
                 .wsBody(.small, weight: .semibold)
-                .foregroundStyle(WSColor.brandPrimary)
+                .foregroundStyle(WSColor.duoPurple)
                 .underline()
         }
         .buttonStyle(.plain)

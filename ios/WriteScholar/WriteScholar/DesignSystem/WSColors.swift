@@ -2,50 +2,104 @@
 //  WSColors.swift
 //  WriteScholar
 //
-//  Brand color tokens, sourced from Assets.xcassets so each color has a
-//  light + dark variant that matches the web app's Tailwind palette.
+//  Duolingo-style color tokens. Solid hex values matching the web app's
+//  Tailwind palette. Each color has a "main", "dark" (for 3D lip borders),
+//  and "light" (for tinted backgrounds) variant.
 //
 //  Usage:
-//    .foregroundStyle(WSColor.foreground)
-//    .background(WSColor.background)
+//    .foregroundStyle(WSColor.duoGreen)
+//    .background(WSColor.duoGreenLight)
 //
 
 import SwiftUI
 
 enum WSColor {
-    // MARK: Brand
-    /// Primary brand violet (violet-600 light / violet-400 dark).
-    static let brandPrimary = Color("Brand")
-    /// Soft violet wash for chips, badges, hover states.
-    static let brandSoft = Color("BrandSoft")
-    /// Accent fuchsia for highlights / "studying" pillar.
-    static let brandAccent = Color("BrandAccent")
+    // MARK: - Duolingo solid palette
 
-    // MARK: Surfaces
-    /// Page background (stone-50 light / stone-950 dark).
-    static let background = Color("Background")
-    /// Elevated card surface (white light / stone-900 dark).
-    static let backgroundElevated = Color("BackgroundElevated")
-    /// Sunken surface for inset rows / preview panes.
-    static let surface = Color("Surface")
+    /// Green — primary CTA, success, streaks
+    static let duoGreen      = Color(hex: 0x58CC02)
+    static let duoGreenDark  = Color(hex: 0x46A302)
+    static let duoGreenLight = Color(hex: 0xEAFFD6)
 
-    // MARK: Text
-    /// Primary text color (stone-900 light / stone-50 dark).
-    static let foreground = Color("Foreground")
-    /// Secondary / muted text (stone-600 light / stone-400 dark).
-    static let foregroundMuted = Color("ForegroundMuted")
+    /// Blue — info, links, secondary actions
+    static let duoBlue      = Color(hex: 0x1CB0F6)
+    static let duoBlueDark  = Color(hex: 0x1899D6)
+    static let duoBlueLight = Color(hex: 0xDDF4FF)
 
-    // MARK: Lines
-    /// 1pt divider hairline.
-    static let hairline = Color("Hairline")
+    /// Orange — warnings, upgrades, streaks
+    static let duoOrange      = Color(hex: 0xFF9600)
+    static let duoOrangeDark  = Color(hex: 0xD97F00)
+    static let duoOrangeLight = Color(hex: 0xFFF4E0)
 
-    // MARK: Essay annotation tones
-    /// Strong / positive annotation (emerald).
-    static let strong = Color("Strong")
-    /// Yellow / "revise" annotation (amber).
-    static let revise = Color("Revise")
-    /// Red / "concern" annotation (rose).
-    static let concern = Color("Concern")
+    /// Red — errors, danger, hearts
+    static let duoRed      = Color(hex: 0xFF4B4B)
+    static let duoRedDark  = Color(hex: 0xE04343)
+    static let duoRedLight = Color(hex: 0xFFE8E8)
+
+    /// Purple — brand primary, achievements, premium
+    static let duoPurple      = Color(hex: 0xA560E8)
+    static let duoPurpleDark  = Color(hex: 0x8A48C7)
+    static let duoPurpleLight = Color(hex: 0xF3EAFF)
+
+    // MARK: - Neutrals (Duolingo-style)
+
+    /// Dark text — matches Duolingo's #3C3C3C
+    static let duoText = Color(hex: 0x3C3C3C)
+    /// Light border / dividers — matches Duolingo's #E5E5E5
+    static let duoBorder = Color(hex: 0xE5E5E5)
+    /// Off-white surface background — matches #F7F7F7
+    static let duoSurface = Color(hex: 0xF7F7F7)
+
+    // MARK: - Semantic aliases (used throughout the app)
+
+    /// Primary brand color — purple
+    static let brandPrimary = duoPurple
+    /// Soft wash for chips, badges, hover states
+    static let brandSoft = duoPurpleLight
+    /// Accent for highlights
+    static let brandAccent = duoBlue
+
+    // MARK: - Surfaces (adapt to dark mode)
+
+    /// Page background
+    static var background: Color {
+        Color("Background", bundle: nil)
+    }
+    /// Elevated card surface (white light / stone-900 dark)
+    static var backgroundElevated: Color {
+        Color("BackgroundElevated", bundle: nil)
+    }
+    /// Sunken surface for inset rows / preview panes
+    static var surface: Color {
+        Color("Surface", bundle: nil)
+    }
+
+    // MARK: - Text (adapt to dark mode)
+
+    /// Primary text color
+    static var foreground: Color {
+        Color("Foreground", bundle: nil)
+    }
+    /// Secondary / muted text
+    static var foregroundMuted: Color {
+        Color("ForegroundMuted", bundle: nil)
+    }
+
+    // MARK: - Lines
+
+    /// 1pt divider hairline
+    static var hairline: Color {
+        Color("Hairline", bundle: nil)
+    }
+
+    // MARK: - Essay annotation tones
+
+    /// Strong / positive (emerald)
+    static let strong = duoGreen
+    /// Revise (amber/orange)
+    static let revise = duoOrange
+    /// Concern (red)
+    static let concern = duoRed
 }
 
 // MARK: - Convenience hex initializer (for one-off colors not in catalog)

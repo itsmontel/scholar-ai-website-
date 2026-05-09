@@ -50,16 +50,17 @@ struct FlashcardsView: View {
 
     private var scoreboard: some View {
         HStack(spacing: 12) {
-            scorePill(label: "Got it",     count: knownCount,  color: WSColor.strong)
-            scorePill(label: "Reviewing",  count: reviewCount, color: WSColor.revise)
+            scorePill(label: "Got it",     count: knownCount,  color: WSColor.duoGreen)
+            scorePill(label: "Reviewing",  count: reviewCount, color: WSColor.duoOrange)
             Spacer()
             Text("\(deck.count) left")
-                .wsBody(.caption, weight: .bold)
+                .font(WSFont.sans(11, weight: .bold))
                 .foregroundStyle(WSColor.foregroundMuted)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 5)
                 .background(
-                    Capsule().fill(WSColor.surface)
+                    Capsule().fill(WSColor.backgroundElevated)
+                        .overlay(Capsule().stroke(WSColor.duoBorder, lineWidth: 2))
                 )
         }
     }
@@ -68,17 +69,17 @@ struct FlashcardsView: View {
         HStack(spacing: 6) {
             Circle().fill(color).frame(width: 8, height: 8)
             Text("\(count)")
-                .wsBody(.small, weight: .bold)
-                .foregroundStyle(WSColor.foreground)
+                .font(WSFont.sans(13, weight: .bold))
+                .foregroundStyle(WSColor.duoText)
             Text(label)
-                .wsBody(.caption, weight: .semibold)
+                .font(WSFont.sans(11, weight: .bold))
                 .foregroundStyle(WSColor.foregroundMuted)
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
         .background(
-            Capsule().fill(color.opacity(0.14))
-                .overlay(Capsule().stroke(color.opacity(0.3), lineWidth: 1))
+            Capsule().fill(color.opacity(0.12))
+                .overlay(Capsule().stroke(color.opacity(0.3), lineWidth: 2))
         )
     }
 
@@ -109,11 +110,11 @@ struct FlashcardsView: View {
 
             // Action hint chips that fade in based on drag direction
             if dragOffset.width >= 30 {
-                tagHint(label: "Got it", icon: "checkmark.circle.fill", color: WSColor.strong)
+                tagHint(label: "Got it", icon: "checkmark.circle.fill", color: WSColor.duoGreen)
                     .offset(x: -100, y: -150)
                     .opacity(min(1, Double(dragOffset.width) / 100))
             } else if dragOffset.width <= -30 {
-                tagHint(label: "Review", icon: "arrow.uturn.backward.circle.fill", color: WSColor.revise)
+                tagHint(label: "Review", icon: "arrow.uturn.backward.circle.fill", color: WSColor.duoOrange)
                     .offset(x: 100, y: -150)
                     .opacity(min(1, Double(-dragOffset.width) / 100))
             }
@@ -131,10 +132,10 @@ struct FlashcardsView: View {
         let isTop = (deck.first?.id == card.id)
         return ZStack {
             // Front face
-            cardFace(text: card.front, eyebrow: "QUESTION", accent: WSColor.brandPrimary)
+            cardFace(text: card.front, eyebrow: "QUESTION", accent: WSColor.duoBlue)
                 .opacity(isTop && topFlipped ? 0 : 1)
             // Back face
-            cardFace(text: card.back, eyebrow: "ANSWER", accent: WSColor.strong)
+            cardFace(text: card.back, eyebrow: "ANSWER", accent: WSColor.duoGreen)
                 .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
                 .opacity(isTop && topFlipped ? 1 : 0)
         }
@@ -148,7 +149,9 @@ struct FlashcardsView: View {
         VStack(spacing: 14) {
             HStack {
                 Text(eyebrow)
-                    .wsEyebrow()
+                    .font(WSFont.sans(10, weight: .black))
+                    .tracking(2.2)
+                    .textCase(.uppercase)
                     .foregroundStyle(accent)
                 Spacer()
                 Image(systemName: "square.stack.3d.up.fill")
@@ -157,8 +160,8 @@ struct FlashcardsView: View {
             }
             Spacer()
             Text(text)
-                .wsHeadline(.small, weight: .semibold)
-                .foregroundStyle(WSColor.foreground)
+                .font(WSFont.headline(17, weight: .black))
+                .foregroundStyle(WSColor.duoText)
                 .multilineTextAlignment(.center)
                 .minimumScaleFactor(0.6)
             Spacer()
@@ -166,19 +169,25 @@ struct FlashcardsView: View {
                 Image(systemName: "hand.point.up.left.fill")
                 Text("Tap to flip")
             }
-            .wsBody(.caption, weight: .semibold)
+            .font(WSFont.sans(11, weight: .bold))
             .foregroundStyle(WSColor.foregroundMuted)
         }
         .padding(24)
         .frame(width: 280, height: 360)
         .background(
-            RoundedRectangle(cornerRadius: 26, style: .continuous)
-                .fill(WSColor.backgroundElevated)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 26, style: .continuous)
-                        .stroke(accent.opacity(0.30), lineWidth: 1)
-                )
-                .shadow(color: accent.opacity(0.30), radius: 22, y: 12)
+            ZStack(alignment: .top) {
+                // 3D lip
+                RoundedRectangle(cornerRadius: 26, style: .continuous)
+                    .fill(accent.opacity(0.35))
+                    .padding(.top, 6)
+                // Top face
+                RoundedRectangle(cornerRadius: 26, style: .continuous)
+                    .fill(WSColor.backgroundElevated)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 26, style: .continuous)
+                            .stroke(WSColor.duoBorder, lineWidth: 2)
+                    )
+            }
         )
     }
 
@@ -188,15 +197,15 @@ struct FlashcardsView: View {
                 .foregroundStyle(color)
                 .font(.system(size: 14, weight: .bold))
             Text(label)
-                .wsBody(.small, weight: .bold)
-                .foregroundStyle(WSColor.foreground)
+                .font(WSFont.sans(13, weight: .bold))
+                .foregroundStyle(WSColor.duoText)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 8)
         .background(
             Capsule().fill(WSColor.backgroundElevated)
-                .overlay(Capsule().stroke(color.opacity(0.5), lineWidth: 1.5))
-                .shadow(color: color.opacity(0.4), radius: 12, y: 4)
+                .overlay(Capsule().stroke(color, lineWidth: 2))
+                .shadow(color: color.opacity(0.35), radius: 10, y: 3)
         )
     }
 
@@ -247,14 +256,14 @@ struct FlashcardsView: View {
             actionButton(
                 title: "Review",
                 icon: "arrow.uturn.backward",
-                color: WSColor.revise
+                color: WSColor.duoOrange
             ) {
                 advance(known: false)
             }
             actionButton(
                 title: "Flip",
                 icon: "arrow.left.arrow.right",
-                color: WSColor.brandPrimary
+                color: WSColor.duoBlue
             ) {
                 withAnimation(.spring(response: 0.45, dampingFraction: 0.75)) {
                     topFlipped.toggle()
@@ -264,7 +273,7 @@ struct FlashcardsView: View {
             actionButton(
                 title: "Got it",
                 icon: "checkmark",
-                color: WSColor.strong
+                color: WSColor.duoGreen
             ) {
                 advance(known: true)
             }
@@ -275,25 +284,30 @@ struct FlashcardsView: View {
         Button(action: action) {
             VStack(spacing: 6) {
                 Image(systemName: icon)
-                    .font(.system(size: 18, weight: .bold))
+                    .font(.system(size: 18, weight: .black))
                     .foregroundStyle(color)
                 Text(title)
-                    .wsBody(.caption, weight: .bold)
-                    .foregroundStyle(WSColor.foreground)
+                    .font(WSFont.sans(11, weight: .black))
+                    .tracking(0.4)
+                    .foregroundStyle(WSColor.duoText)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 12)
             .background(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(WSColor.backgroundElevated)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(color.opacity(0.3), lineWidth: 1)
-                    )
-                    .shadow(color: color.opacity(0.18), radius: 10, y: 4)
+                ZStack(alignment: .top) {
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(color.opacity(0.32))
+                        .padding(.top, 4)
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(WSColor.backgroundElevated)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .stroke(color.opacity(0.45), lineWidth: 2)
+                        )
+                }
             )
         }
-        .buttonStyle(.plain)
+        .buttonStyle(WSBouncyButtonStyle())
     }
 
     // MARK: - Completed state
@@ -302,15 +316,23 @@ struct FlashcardsView: View {
         VStack(spacing: 18) {
             WSAnimatedImage(name: "mascot-dance", ext: "webp")
                 .frame(width: 160, height: 160)
-                .shadow(color: WSColor.brandPrimary.opacity(0.3), radius: 20, y: 8)
+                .shadow(color: WSColor.duoGreen.opacity(0.3), radius: 20, y: 8)
 
-            Text("Deck cleared")
-                .wsHeadline(.medium, weight: .semibold)
-                .foregroundStyle(WSColor.foreground)
+            Text("Deck cleared!")
+                .font(WSFont.headline(22, weight: .black))
+                .foregroundStyle(WSColor.duoText)
 
-            Text("\(knownCount) known · \(reviewCount) for review")
-                .wsBody(.medium, weight: .semibold)
-                .foregroundStyle(WSColor.foregroundMuted)
+            HStack(spacing: 16) {
+                WSChunkyStat(icon: "checkmark.circle.fill",
+                             value: "\(knownCount)",
+                             label: "Known",
+                             tint: WSColor.duoGreen)
+                WSChunkyStat(icon: "arrow.uturn.backward.circle.fill",
+                             value: "\(reviewCount)",
+                             label: "Review",
+                             tint: WSColor.duoOrange)
+            }
+            .padding(.horizontal, 32)
 
             Button {
                 deck = flashcards.cards
@@ -324,7 +346,7 @@ struct FlashcardsView: View {
                     Text("Restart deck")
                 }
             }
-            .buttonStyle(WSPrimaryButtonStyle(fullWidth: false))
+            .buttonStyle(WSDuoSuccessButtonStyle(fullWidth: false))
             .padding(.top, 10)
         }
         .onAppear {

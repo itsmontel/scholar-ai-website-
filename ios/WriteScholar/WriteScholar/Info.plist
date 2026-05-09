@@ -39,11 +39,10 @@
 	</dict>
 	<key>UIAppFonts</key>
 	<array>
-		<string>EBGaramond-Regular.ttf</string>
-		<string>EBGaramond-Bold.ttf</string>
 		<string>Nunito-Regular.ttf</string>
 		<string>Nunito-SemiBold.ttf</string>
 		<string>Nunito-Bold.ttf</string>
+		<string>Nunito-Black.ttf</string>
 	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>

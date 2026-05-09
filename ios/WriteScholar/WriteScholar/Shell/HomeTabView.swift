@@ -115,55 +115,19 @@ struct HomeTabView: View {
 
     // MARK: - Backdrop (4 brand-orb glows + faint dot pattern)
 
-    /// Stacks the standard hero gradient with four soft, blurred color
-    /// orbs (purple / amber / pink / cyan) and a faint dot pattern. The
-    /// orbs give every section a different ambient cast as the user
-    /// scrolls — Duolingo-style "the world is colorful" feel.
+    /// Clean white backdrop with a subtle green tint at the top, matching
+    /// Duolingo's flat, bright home screen feel.
     private var colorfulBackdrop: some View {
         ZStack {
-            WSGradient.heroBackdrop.ignoresSafeArea()
+            Color.white.ignoresSafeArea()
 
-            Circle()
-                .fill(WSColor.brandPrimary.opacity(0.18))
-                .frame(width: 360, height: 360)
-                .blur(radius: 90)
-                .offset(x: -180, y: -300)
-                .ignoresSafeArea()
-            Circle()
-                .fill(Color(hex: 0xF59E0B).opacity(0.16))
-                .frame(width: 320, height: 320)
-                .blur(radius: 80)
-                .offset(x: 200, y: -120)
-                .ignoresSafeArea()
-            Circle()
-                .fill(Color(hex: 0xD946EF).opacity(0.14))
-                .frame(width: 360, height: 360)
-                .blur(radius: 90)
-                .offset(x: -200, y: 320)
-                .ignoresSafeArea()
-            Circle()
-                .fill(Color(hex: 0x10B981).opacity(0.14))
-                .frame(width: 320, height: 320)
-                .blur(radius: 90)
-                .offset(x: 220, y: 480)
-                .ignoresSafeArea()
-
-            // Faint sprinkle of dots, like confetti at rest
-            Canvas { ctx, size in
-                let dotCount = 38
-                for i in 0..<dotCount {
-                    let seed = Double(i) * 137.508
-                    let x = ((seed * 7).truncatingRemainder(dividingBy: 100)) / 100 * size.width
-                    let y = ((seed * 3).truncatingRemainder(dividingBy: 100)) / 100 * size.height
-                    let r = (seed.truncatingRemainder(dividingBy: 2)) + 1.2
-                    ctx.fill(
-                        Path(ellipseIn: CGRect(x: x, y: y, width: r * 2, height: r * 2)),
-                        with: .color(.white.opacity(0.30))
-                    )
-                }
+            VStack {
+                WSColor.duoGreenLight.opacity(0.35)
+                    .frame(height: 280)
+                    .blur(radius: 50)
+                Spacer()
             }
             .ignoresSafeArea()
-            .allowsHitTesting(false)
         }
     }
 
@@ -179,12 +143,11 @@ struct HomeTabView: View {
                 ZStack {
                     Circle()
                         .fill(WSColor.backgroundElevated)
-                        .overlay(Circle().stroke(WSColor.hairline, lineWidth: 1))
-                        .frame(width: 42, height: 42)
-                        .shadow(color: .black.opacity(0.06), radius: 6, y: 3)
+                        .overlay(Circle().stroke(WSColor.duoBorder, lineWidth: 2))
+                        .frame(width: 44, height: 44)
                     Image(systemName: "clock.arrow.circlepath")
                         .font(.system(size: 17, weight: .heavy))
-                        .foregroundStyle(WSColor.brandPrimary)
+                        .foregroundStyle(WSColor.duoGreen)
                 }
             }
             .buttonStyle(WSBouncyButtonStyle())
@@ -192,22 +155,22 @@ struct HomeTabView: View {
 
             Spacer()
 
-            // Live streak chip — orange/red gradient with flame
+            // Live streak chip — solid orange with flame
             topChip(
                 icon: "flame.fill",
                 value: "\(streak?.currentStreak ?? 0)",
-                gradient: [Color(hex: 0xFB923C), Color(hex: 0xEF4444)],
+                color: WSColor.duoOrange,
                 action: {
                     Haptics.light()
                     showStreakSheet = true
                 }
             )
 
-            // Live XP chip — gold gradient with bolt
+            // Live XP chip — solid purple with bolt
             topChip(
                 icon: "bolt.fill",
                 value: "\(totalXP)",
-                gradient: [Color(hex: 0xFBBF24), Color(hex: 0xF59E0B)],
+                color: WSColor.duoPurple,
                 action: {
                     Haptics.light()
                     showAchievementsSheet = true
@@ -221,14 +184,13 @@ struct HomeTabView: View {
             } label: {
                 ZStack {
                     Circle()
-                        .fill(WSGradient.brand)
+                        .fill(WSColor.duoGreen)
                         .frame(width: 44, height: 44)
-                        .shadow(color: WSColor.brandPrimary.opacity(0.45), radius: 10, y: 4)
                     Circle()
-                        .stroke(.white.opacity(0.35), lineWidth: 1.5)
+                        .stroke(WSColor.duoGreenDark, lineWidth: 2)
                         .frame(width: 44, height: 44)
                     Text(initial)
-                        .font(.system(size: 18, weight: .black, design: .rounded))
+                        .font(WSFont.headline(18, weight: .black))
                         .foregroundStyle(.white)
                 }
             }
@@ -237,24 +199,21 @@ struct HomeTabView: View {
         }
     }
 
-    private func topChip(icon: String, value: String, gradient: [Color], action: @escaping () -> Void) -> some View {
+    private func topChip(icon: String, value: String, color: Color, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 5) {
                 Image(systemName: icon)
                     .font(.system(size: 13, weight: .heavy))
                 Text(value)
-                    .font(.system(size: 14, weight: .black, design: .rounded))
+                    .font(WSFont.headline(14, weight: .black))
             }
             .foregroundStyle(.white)
-            .padding(.horizontal, 11)
+            .padding(.horizontal, 12)
             .padding(.vertical, 8)
             .background(
                 Capsule()
-                    .fill(LinearGradient(colors: gradient,
-                                         startPoint: .topLeading,
-                                         endPoint: .bottomTrailing))
-                    .overlay(Capsule().stroke(.white.opacity(0.30), lineWidth: 1))
-                    .shadow(color: gradient[1].opacity(0.45), radius: 8, y: 3)
+                    .fill(color)
+                    .overlay(Capsule().stroke(color.opacity(0.3), lineWidth: 2))
             )
         }
         .buttonStyle(WSBouncyButtonStyle())
@@ -262,7 +221,7 @@ struct HomeTabView: View {
 
     private var initial: String {
         let name = session.state.user?.displayName ?? "?"
-        return String(name.first.map(String.init) ?? "?").uppercased()
+        return String(name.prefix(1)).uppercased()
     }
 
     private var totalXP: Int {
@@ -274,62 +233,45 @@ struct HomeTabView: View {
     private var heroBlock: some View {
         VStack(spacing: 16) {
             ZStack {
-                // Pulsing brand halo behind the mascot
+                // Clean green halo behind the mascot
                 Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [WSColor.brandPrimary.opacity(0.55), .clear],
-                            center: .center,
-                            startRadius: 10,
-                            endRadius: 140
-                        )
-                    )
-                    .frame(width: 280, height: 280)
-                    .blur(radius: 20)
+                    .fill(WSColor.duoGreenLight)
+                    .frame(width: 200, height: 200)
                     .scaleEffect(mascotPulse)
 
-                // Decorative sparkles around the mascot
-                ForEach(0..<6, id: \.self) { i in
-                    let angle = Double(i) * (.pi * 2 / 6)
-                    let radius: Double = 130
-                    Image(systemName: i.isMultiple(of: 2) ? "sparkle" : "star.fill")
-                        .font(.system(size: 14, weight: .heavy))
-                        .foregroundStyle(sparkleColor(for: i))
-                        .offset(x: CGFloat(cos(angle) * radius),
-                                y: CGFloat(sin(angle) * radius))
-                        .opacity(0.85)
-                        .scaleEffect(mascotPulse)
-                }
-
                 WSAnimatedImage(name: "mascot-dance", ext: "webp")
-                    .frame(width: 220, height: 220)
-                    .shadow(color: WSColor.brandPrimary.opacity(0.45), radius: 26, y: 14)
-                    .wsBobbing(amount: 7, duration: 2.6)
+                    .frame(width: 180, height: 180)
+                    .wsBobbing(amount: 6, duration: 2.6)
             }
 
             VStack(spacing: 8) {
                 Text(casualGreeting)
-                    .font(.system(size: 13, weight: .black, design: .rounded))
-                    .foregroundStyle(WSColor.brandPrimary)
+                    .font(WSFont.headline(13, weight: .black))
+                    .foregroundStyle(WSColor.duoGreen)
                     .textCase(.uppercase)
                     .tracking(0.8)
 
-                // Headline with a colorful gradient on the verb so it
-                // pops without an extra accent line.
-                Text("What shall we ")
-                    .font(.system(size: 32, weight: .black, design: .rounded))
-                    .foregroundStyle(WSColor.foreground)
-                +
-                Text("learn")
-                    .font(.system(size: 32, weight: .black, design: .rounded))
-                    .foregroundStyle(
-                        LinearGradient(colors: [Color(hex: 0xD946EF), Color(hex: 0x7C3AED)],
-                                       startPoint: .leading, endPoint: .trailing)
-                    )
-                +
-                Text("?")
-                    .font(.system(size: 32, weight: .black, design: .rounded))
-                    .foregroundStyle(WSColor.foreground)
+                // Bold Nunito Black headline — solid green on the verb,
+                // with a hand-drawn squiggly underline under it (matching
+                // the desktop hero accent pattern).
+                ZStack(alignment: .bottom) {
+                    Text("What shall we ")
+                        .font(WSFont.headline(32, weight: .black))
+                        .foregroundStyle(WSColor.duoText)
+                    +
+                    Text("learn")
+                        .font(WSFont.headline(32, weight: .black))
+                        .foregroundStyle(WSColor.duoGreen)
+                    +
+                    Text("?")
+                        .font(WSFont.headline(32, weight: .black))
+                        .foregroundStyle(WSColor.duoText)
+                }
+
+                // Hand-drawn underline accent — only sits beneath "learn"
+                WSSquigglyUnderline(color: WSColor.duoGreen.opacity(0.85), lineWidth: 3.5)
+                    .frame(width: 96, height: 8)
+                    .offset(y: -4)
             }
             .multilineTextAlignment(.center)
 
@@ -339,26 +281,12 @@ struct HomeTabView: View {
             } label: {
                 Label("Let's go!", systemImage: "sparkles")
             }
-            .buttonStyle(WSDuoPrimaryButtonStyle())
+            .buttonStyle(WSDuoSuccessButtonStyle())
             .padding(.horizontal, 18)
             .padding(.top, 2)
         }
         .frame(maxWidth: .infinity)
         .padding(.top, 6)
-    }
-
-    /// Colors used for the halo sparkles. Cycles through brand-adjacent
-    /// hues so the hero feels alive without going circus.
-    private func sparkleColor(for i: Int) -> Color {
-        let palette: [Color] = [
-            Color(hex: 0xFBBF24),  // gold
-            Color(hex: 0xD946EF),  // pink
-            Color(hex: 0x60A5FA),  // sky
-            Color(hex: 0xF87171),  // coral
-            Color(hex: 0x34D399),  // mint
-            Color(hex: 0xA78BFA),  // lavender
-        ]
-        return palette[i % palette.count]
     }
 
     private var casualGreeting: String {
@@ -380,58 +308,51 @@ struct HomeTabView: View {
                 subtitle: "Notes → pack",
                 icon: "doc.on.clipboard.fill",
                 mascot: "mascot-paper",
-                gradient: [Color(hex: 0x8B5CF6), Color(hex: 0x6D28D9)]
+                color: WSColor.duoPurple,
+                darkColor: WSColor.duoPurpleDark
             ) { selectedTab = .study }
+            .wsStaggerEntry(0, unit: 0.08)
 
             chunkyAction(
                 title: "Games",
                 subtitle: "Play & blast",
                 icon: "gamecontroller.fill",
                 mascot: "mascot-dance",
-                gradient: [Color(hex: 0xF87171), Color(hex: 0xDC2626)]
+                color: WSColor.duoOrange,
+                darkColor: WSColor.duoOrangeDark
             ) { selectedTab = .games }
+            .wsStaggerEntry(1, unit: 0.08)
 
             chunkyAction(
                 title: "Focus",
                 subtitle: "Block & study",
                 icon: "shield.lefthalf.filled",
                 mascot: "mascot-study",
-                gradient: [Color(hex: 0x34D399), Color(hex: 0x059669)]
+                color: WSColor.duoGreen,
+                darkColor: WSColor.duoGreenDark
             ) { selectedTab = .focus }
+            .wsStaggerEntry(2, unit: 0.08)
 
             chunkyAction(
                 title: "Library",
                 subtitle: "Your shelf",
                 icon: "books.vertical.fill",
                 mascot: "mascot-laptop",
-                gradient: [Color(hex: 0x60A5FA), Color(hex: 0x4338CA)]
+                color: WSColor.duoBlue,
+                darkColor: WSColor.duoBlueDark
             ) { selectedTab = .library }
+            .wsStaggerEntry(3, unit: 0.08)
         }
     }
 
     private func chunkyAction(title: String, subtitle: String, icon: String, mascot: String,
-                              gradient: [Color], action: @escaping () -> Void) -> some View {
+                              color: Color, darkColor: Color, action: @escaping () -> Void) -> some View {
         Button {
             Haptics.medium()
             action()
         } label: {
             ZStack(alignment: .topTrailing) {
-                LinearGradient(colors: gradient, startPoint: .topLeading, endPoint: .bottomTrailing)
-
-                // Subtle dot pattern decoration so the gradient doesn't
-                // look like a flat solid swatch.
-                Canvas { ctx, size in
-                    for i in 0..<10 {
-                        let seed = Double(i) * 73.91
-                        let x = ((seed * 7).truncatingRemainder(dividingBy: 100)) / 100 * size.width
-                        let y = ((seed * 5).truncatingRemainder(dividingBy: 100)) / 100 * size.height
-                        ctx.fill(
-                            Path(ellipseIn: CGRect(x: x, y: y, width: 3, height: 3)),
-                            with: .color(.white.opacity(0.35))
-                        )
-                    }
-                }
-                .allowsHitTesting(false)
+                color
 
                 // Mascot peeks from the corner — small, decorative.
                 WSAnimatedImage(name: mascot, ext: "webp")
@@ -446,32 +367,27 @@ struct HomeTabView: View {
                         Circle()
                             .fill(.white.opacity(0.22))
                             .frame(width: 38, height: 38)
-                            .overlay(Circle().stroke(.white.opacity(0.35), lineWidth: 1))
                         Image(systemName: icon)
                             .font(.system(size: 18, weight: .heavy))
                             .foregroundStyle(.white)
                     }
                     Text(title)
-                        .font(.system(size: 22, weight: .black, design: .rounded))
+                        .font(WSFont.headline(22, weight: .black))
                         .foregroundStyle(.white)
                     Text(subtitle)
-                        .font(.system(size: 12, weight: .black, design: .rounded))
+                        .font(WSFont.headline(12, weight: .black))
                         .foregroundStyle(.white.opacity(0.85))
                 }
                 .padding(14)
             }
             .frame(height: 150)
             .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 22, style: .continuous)
-                    .stroke(.white.opacity(0.30), lineWidth: 1)
-            )
             .wsChunkyCard(
                 cornerRadius: 22,
                 horizontalPadding: 0,
                 verticalPadding: 0,
                 lipHeight: 6,
-                accent: gradient[1]
+                accent: darkColor
             )
         }
         .buttonStyle(WSBouncyButtonStyle())
@@ -489,8 +405,8 @@ struct HomeTabView: View {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
                     Text("Jump back in")
-                        .font(.system(size: 19, weight: .black, design: .rounded))
-                        .foregroundStyle(WSColor.foreground)
+                        .font(WSFont.headline(19, weight: .black))
+                        .foregroundStyle(WSColor.duoText)
                     Spacer()
                     Button {
                         Haptics.light()
@@ -498,7 +414,7 @@ struct HomeTabView: View {
                     } label: {
                         HStack(spacing: 4) {
                             Text("View all")
-                                .font(.system(size: 12, weight: .black, design: .rounded))
+                                .font(WSFont.headline(12, weight: .black))
                             Image(systemName: "chevron.right")
                                 .font(.system(size: 11, weight: .heavy))
                         }
@@ -507,8 +423,7 @@ struct HomeTabView: View {
                         .padding(.vertical, 6)
                         .background(
                             Capsule()
-                                .fill(WSGradient.brand)
-                                .shadow(color: WSColor.brandPrimary.opacity(0.4), radius: 6, y: 2)
+                                .fill(WSColor.duoBlue)
                         )
                     }
                     .buttonStyle(WSBouncyButtonStyle())
@@ -535,22 +450,7 @@ struct HomeTabView: View {
             selectedTab = .library
         } label: {
             ZStack(alignment: .topLeading) {
-                LinearGradient(colors: item.kind.heroGradient,
-                               startPoint: .topLeading, endPoint: .bottomTrailing)
-
-                // Decorative dots for texture
-                Canvas { ctx, size in
-                    for i in 0..<8 {
-                        let seed = Double(i) * 91.7
-                        let x = ((seed * 7).truncatingRemainder(dividingBy: 100)) / 100 * size.width
-                        let y = ((seed * 5).truncatingRemainder(dividingBy: 100)) / 100 * size.height
-                        ctx.fill(
-                            Path(ellipseIn: CGRect(x: x, y: y, width: 3, height: 3)),
-                            with: .color(.white.opacity(0.30))
-                        )
-                    }
-                }
-                .allowsHitTesting(false)
+                item.kind.tint
 
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
@@ -564,7 +464,7 @@ struct HomeTabView: View {
                         }
                         Spacer()
                         Text(item.kind.label.uppercased())
-                            .font(.system(size: 9, weight: .black, design: .rounded))
+                            .font(WSFont.headline(9, weight: .black))
                             .tracking(0.6)
                             .foregroundStyle(.white)
                             .padding(.horizontal, 7)
@@ -573,30 +473,26 @@ struct HomeTabView: View {
                     }
 
                     Text(item.title)
-                        .font(.system(size: 15, weight: .black, design: .rounded))
+                        .font(WSFont.headline(15, weight: .black))
                         .foregroundStyle(.white)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
 
                     if let subtitle = item.subtitle, !subtitle.isEmpty {
                         Text(subtitle)
-                            .font(.system(size: 11, weight: .bold, design: .rounded))
+                            .font(WSFont.sans(11, weight: .bold))
                             .foregroundStyle(.white.opacity(0.85))
                             .lineLimit(1)
                     }
                     Spacer(minLength: 0)
                     Text(relativeDate(item.lastOpenedAt ?? item.createdAt))
-                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                        .font(WSFont.sans(11, weight: .bold))
                         .foregroundStyle(.white.opacity(0.80))
                 }
                 .padding(14)
             }
             .frame(width: 210, height: 160)
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .stroke(.white.opacity(0.25), lineWidth: 1)
-            )
             .wsChunkyCard(
                 cornerRadius: 18,
                 horizontalPadding: 0,
@@ -627,8 +523,8 @@ struct HomeTabView: View {
     private var statsTrio: some View {
         HStack(spacing: 10) {
             chunkyStat(
-                tint: Color(hex: 0xF59E0B),
-                gradient: [Color(hex: 0xFB923C), Color(hex: 0xEF4444)],
+                color: WSColor.duoOrange,
+                darkColor: WSColor.duoOrangeDark,
                 icon: "flame.fill",
                 value: "\(streak?.currentStreak ?? 0)",
                 title: "Streak",
@@ -636,8 +532,8 @@ struct HomeTabView: View {
                 action: { showStreakSheet = true }
             )
             chunkyStat(
-                tint: WSColor.brandPrimary,
-                gradient: [Color(hex: 0xA78BFA), Color(hex: 0x7C3AED)],
+                color: WSColor.duoGreen,
+                darkColor: WSColor.duoGreenDark,
                 icon: "target",
                 value: "\(dailyGoal.todayXP)",
                 title: "Goal",
@@ -648,8 +544,8 @@ struct HomeTabView: View {
                 action: { showDailyGoalSheet = true }
             )
             chunkyStat(
-                tint: Color(hex: 0xD946EF),
-                gradient: [Color(hex: 0xF472B6), Color(hex: 0xD946EF)],
+                color: WSColor.duoPurple,
+                darkColor: WSColor.duoPurpleDark,
                 icon: "rosette",
                 value: "\(AchievementCatalog.currentLevel(forXP: totalXP).level)",
                 title: "Level",
@@ -659,7 +555,7 @@ struct HomeTabView: View {
         }
     }
 
-    private func chunkyStat(tint: Color, gradient: [Color], icon: String,
+    private func chunkyStat(color: Color, darkColor: Color, icon: String,
                             value: String, title: String, subtitle: String,
                             progress: Double? = nil,
                             action: @escaping () -> Void) -> some View {
@@ -678,18 +574,18 @@ struct HomeTabView: View {
                             .foregroundStyle(.white)
                     }
                     Text(title)
-                        .font(.system(size: 11, weight: .black, design: .rounded))
+                        .font(WSFont.headline(11, weight: .black))
                         .foregroundStyle(.white.opacity(0.92))
                         .textCase(.uppercase)
                         .tracking(0.4)
                 }
                 Text(value)
-                    .font(.system(size: 32, weight: .black, design: .rounded))
+                    .font(WSFont.headline(32, weight: .black))
                     .foregroundStyle(.white)
                     .minimumScaleFactor(0.6)
                     .lineLimit(1)
                 Text(subtitle)
-                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                    .font(WSFont.sans(11, weight: .bold))
                     .foregroundStyle(.white.opacity(0.85))
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
@@ -707,35 +603,14 @@ struct HomeTabView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(12)
-            .background(
-                LinearGradient(colors: gradient,
-                               startPoint: .topLeading, endPoint: .bottomTrailing)
-            )
-            .overlay(
-                Canvas { ctx, size in
-                    for i in 0..<6 {
-                        let seed = Double(i) * 91.7
-                        let x = ((seed * 7).truncatingRemainder(dividingBy: 100)) / 100 * size.width
-                        let y = ((seed * 5).truncatingRemainder(dividingBy: 100)) / 100 * size.height
-                        ctx.fill(
-                            Path(ellipseIn: CGRect(x: x, y: y, width: 2, height: 2)),
-                            with: .color(.white.opacity(0.30))
-                        )
-                    }
-                }
-                .allowsHitTesting(false)
-            )
+            .background(color)
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .stroke(.white.opacity(0.30), lineWidth: 1)
-            )
             .wsChunkyCard(
                 cornerRadius: 18,
                 horizontalPadding: 0,
                 verticalPadding: 0,
                 lipHeight: 5,
-                accent: tint
+                accent: darkColor
             )
         }
         .buttonStyle(WSBouncyButtonStyle())
@@ -754,22 +629,19 @@ struct HomeTabView: View {
             HStack(spacing: 12) {
                 ZStack {
                     Circle()
-                        .fill(LinearGradient(colors: [Color(hex: 0xFBBF24), Color(hex: 0xF59E0B)],
-                                             startPoint: .topLeading, endPoint: .bottomTrailing))
+                        .fill(WSColor.duoOrange)
                         .frame(width: 44, height: 44)
-                        .overlay(Circle().stroke(.white.opacity(0.35), lineWidth: 1))
-                        .shadow(color: Color(hex: 0xF59E0B).opacity(0.45), radius: 8, y: 3)
                     Image(systemName: "star.circle.fill")
                         .foregroundStyle(.white)
                         .font(.system(size: 22, weight: .heavy))
                 }
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Achievements")
-                        .font(.system(size: 16, weight: .black, design: .rounded))
-                        .foregroundStyle(WSColor.foreground)
+                        .font(WSFont.headline(16, weight: .black))
+                        .foregroundStyle(WSColor.duoText)
                     Text("\(unlockedCount) of \(totalCount) unlocked · keep collecting!")
-                        .font(.system(size: 11, weight: .bold, design: .rounded))
-                        .foregroundStyle(WSColor.foregroundMuted)
+                        .font(WSFont.sans(11, weight: .bold))
+                        .foregroundStyle(WSColor.duoText.opacity(0.55))
                         .lineLimit(1)
                 }
                 Spacer()
@@ -780,7 +652,7 @@ struct HomeTabView: View {
                 }
                 Image(systemName: "chevron.right")
                     .font(.system(size: 12, weight: .heavy))
-                    .foregroundStyle(WSColor.foregroundMuted)
+                    .foregroundStyle(WSColor.duoBorder)
             }
             .padding(12)
             .frame(maxWidth: .infinity)
@@ -789,13 +661,8 @@ struct HomeTabView: View {
                 horizontalPadding: 0,
                 verticalPadding: 0,
                 lipHeight: 5,
-                accent: Color(hex: 0xF59E0B)
+                accent: WSColor.duoOrange
             )
-            .background(
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(WSColor.backgroundElevated)
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         }
         .buttonStyle(WSBouncyButtonStyle())
     }
@@ -805,13 +672,12 @@ struct HomeTabView: View {
         return ZStack {
             Circle()
                 .fill(unlocked
-                      ? AnyShapeStyle(LinearGradient(colors: [badge.rarity.color, badge.rarity.color.opacity(0.78)],
-                                                     startPoint: .topLeading, endPoint: .bottomTrailing))
-                      : AnyShapeStyle(WSColor.surface))
+                      ? AnyShapeStyle(badge.rarity.color)
+                      : AnyShapeStyle(WSColor.duoSurface))
                 .frame(width: 30, height: 30)
-                .overlay(Circle().stroke(WSColor.backgroundElevated, lineWidth: 2))
+                .overlay(Circle().stroke(Color.white, lineWidth: 2))
             Image(systemName: unlocked ? badge.category.icon : "lock.fill")
-                .foregroundStyle(unlocked ? .white : WSColor.foregroundMuted)
+                .foregroundStyle(unlocked ? .white : WSColor.duoBorder)
                 .font(.system(size: 12, weight: .heavy))
         }
     }
@@ -830,17 +696,17 @@ struct HomeTabView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 8) {
                 Image(systemName: "macbook.and.iphone")
-                    .foregroundStyle(WSColor.brandPrimary)
+                    .foregroundStyle(WSColor.duoBlue)
                 Text("Also on desktop")
-                    .wsBody(.medium, weight: .black)
-                    .foregroundStyle(WSColor.foreground)
+                    .font(WSFont.headline(15, weight: .black))
+                    .foregroundStyle(WSColor.duoText)
                 Spacer()
                 Text("Web only")
-                    .wsBody(.caption, weight: .black)
-                    .foregroundStyle(WSColor.brandPrimary)
+                    .font(WSFont.headline(11, weight: .black))
+                    .foregroundStyle(WSColor.duoBlue)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
-                    .background(Capsule().fill(WSColor.brandSoft))
+                    .background(Capsule().fill(WSColor.duoBlueLight))
             }
 
             HStack(spacing: 10) {
@@ -848,28 +714,19 @@ struct HomeTabView: View {
                     title: "Essay Analyzer",
                     blurb: "Professor-style feedback + rubric",
                     imageName: "screenshot-analyse",
-                    color: Color(hex: 0xD946EF),
+                    color: WSColor.duoPurple,
                     url: "https://writescholar.com/analysis"
                 )
                 desktopFeatureTile(
                     title: "Citation Finder",
                     blurb: "APA · MLA · Chicago · Harvard",
                     imageName: "screenshot-citations",
-                    color: Color(hex: 0x10B981),
+                    color: WSColor.duoGreen,
                     url: "https://writescholar.com/tools/citation-generator"
                 )
             }
         }
-        .padding(14)
-        .background(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(WSColor.backgroundElevated)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .stroke(WSColor.hairline, lineWidth: 1)
-                )
-                .shadow(color: .black.opacity(0.05), radius: 8, y: 3)
-        )
+        .wsChunkyCard(accent: WSColor.duoBlue)
     }
 
     private func desktopFeatureTile(title: String, blurb: String, imageName: String,
@@ -885,27 +742,27 @@ struct HomeTabView: View {
                         .scaledToFill()
                         .frame(height: 72)
                         .clipped()
-                    LinearGradient(
-                        colors: [color.opacity(0.0), color.opacity(0.45)],
-                        startPoint: .top, endPoint: .bottom
-                    )
                 }
                 .frame(height: 72)
                 .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .stroke(WSColor.duoBorder, lineWidth: 1)
+                )
 
                 Text(title)
-                    .wsBody(.small, weight: .black)
-                    .foregroundStyle(WSColor.foreground)
+                    .font(WSFont.headline(13, weight: .black))
+                    .foregroundStyle(WSColor.duoText)
 
                 Text(blurb)
-                    .wsBody(.caption, weight: .semibold)
-                    .foregroundStyle(WSColor.foregroundMuted)
+                    .font(WSFont.sans(11, weight: .semibold))
+                    .foregroundStyle(WSColor.duoText.opacity(0.55))
                     .lineLimit(2)
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                 HStack(spacing: 4) {
                     Text("Open on web")
-                        .wsBody(.caption, weight: .black)
+                        .font(WSFont.headline(11, weight: .black))
                     Image(systemName: "arrow.up.right")
                         .font(.system(size: 9, weight: .black))
                 }
@@ -915,10 +772,10 @@ struct HomeTabView: View {
             .padding(10)
             .background(
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(WSColor.surface)
+                    .fill(WSColor.duoSurface)
                     .overlay(
                         RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .stroke(color.opacity(0.30), lineWidth: 1)
+                            .stroke(WSColor.duoBorder, lineWidth: 1)
                     )
             )
         }
