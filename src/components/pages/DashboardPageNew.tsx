@@ -735,15 +735,15 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
               </p>
             </div>
 
-            <div className="flex items-center gap-2.5 flex-wrap sm:justify-end sm:shrink-0">
-              {/* Level + XP bar */}
+            <div className="flex items-center gap-3 flex-wrap sm:justify-end sm:shrink-0">
+              {/* Level + XP bar — chunkier so the level title + bar reads at a glance */}
               <button
                 type="button"
                 onClick={() => onNavigate('badges')}
-                className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 hover:border-stone-300 active:border-b-2 active:translate-y-0.5 transition-all cursor-pointer group"
+                className="inline-flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 hover:border-stone-300 active:border-b-2 active:translate-y-0.5 transition-all cursor-pointer group"
               >
                 <div
-                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[10px] font-extrabold text-white border-b-2 group-hover:scale-105 transition-transform"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm font-extrabold text-white border-b-2 group-hover:scale-105 transition-transform"
                   style={{
                     backgroundColor: levelInfo.level >= 80 ? '#FF9600' : levelInfo.level >= 60 ? '#A560E8' : levelInfo.level >= 40 ? '#FF4B4B' : levelInfo.level >= 20 ? '#1CB0F6' : '#58CC02',
                     borderColor: levelInfo.level >= 80 ? '#D97F00' : levelInfo.level >= 60 ? '#8A48C7' : levelInfo.level >= 40 ? '#E04343' : levelInfo.level >= 20 ? '#1899D6' : '#46A302',
@@ -751,16 +751,16 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                 >
                   {levelInfo.level}
                 </div>
-                <div className="min-w-0" style={{ width: '140px' }}>
-                  <div className="flex items-center justify-between gap-1 mb-0.5">
-                    <p className="dash-serif text-[10px] font-extrabold text-stone-700 dark:text-stone-200 truncate">
+                <div className="min-w-0" style={{ width: '170px' }}>
+                  <div className="flex items-center justify-between gap-1.5 mb-1">
+                    <p className="dash-serif text-[13px] font-extrabold text-stone-700 dark:text-stone-200 truncate">
                       {levelInfo.name}
                     </p>
-                    <p className="text-[8px] font-extrabold text-stone-400 dark:text-stone-500 shrink-0">
+                    <p className="text-[10px] font-extrabold text-stone-400 dark:text-stone-500 shrink-0">
                       {levelInfo.progress < 1 ? `${totalXP}/${levelInfo.nextLevelXP}` : 'MAX'}
                     </p>
                   </div>
-                  <div className="h-1.5 rounded-full bg-stone-200 dark:bg-stone-700 overflow-hidden">
+                  <div className="h-2 rounded-full bg-stone-200 dark:bg-stone-700 overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all duration-700"
                       style={{
@@ -776,44 +776,45 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
               <button
                 type="button"
                 onClick={() => setDashboardTool('daily_review')}
-                className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all cursor-pointer ${
+                className={`inline-flex items-center gap-2 px-4 py-3 rounded-2xl border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all cursor-pointer ${
                   streakInfo.currentStreak > 0
                     ? 'bg-[#FFF4E0] dark:bg-[#FF9600]/10 border-[#FF9600]/40'
                     : 'bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-700'
                 }`}
               >
-                <span className="text-base" aria-hidden>{streakInfo.currentStreak > 0 ? '🔥' : '❄️'}</span>
-                <span className={`text-xs font-extrabold ${streakInfo.currentStreak > 0 ? 'text-[#FF9600]' : 'text-stone-400'}`}>
+                <span className="text-xl leading-none" aria-hidden>{streakInfo.currentStreak > 0 ? '🔥' : '❄️'}</span>
+                <span className={`text-sm font-extrabold ${streakInfo.currentStreak > 0 ? 'text-[#FF9600]' : 'text-stone-400'}`}>
                   {streakInfo.currentStreak} day{streakInfo.currentStreak !== 1 ? 's' : ''}
                 </span>
               </button>
 
               {analysisCount > 0 && (
-                <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#E5F8D0] dark:bg-[#58CC02]/10 border-2 border-b-4 border-[#58CC02]/30">
-                  <span className="text-base" aria-hidden>📝</span>
-                  <span className="text-xs font-extrabold text-[#58CC02]">
+                <div className="hidden sm:inline-flex items-center gap-2 px-4 py-3 rounded-2xl bg-[#E5F8D0] dark:bg-[#58CC02]/10 border-2 border-b-4 border-[#58CC02]/30">
+                  <span className="text-xl leading-none" aria-hidden>📝</span>
+                  <span className="text-sm font-extrabold text-[#58CC02]">
                     {analysisCount} {analysisCount === 1 ? 'essay' : 'essays'}
                   </span>
                 </div>
               )}
               {isFree ? (
                 <>
-                  <div className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white dark:bg-stone-800 border-2 border-b-4 border-stone-200 dark:border-stone-700">
-                    <span className="text-sm" aria-hidden>✨</span>
-                    <span className="text-xs font-extrabold text-stone-700 dark:text-stone-200">Free plan</span>
+                  <div className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl bg-white dark:bg-stone-800 border-2 border-b-4 border-stone-200 dark:border-stone-700">
+                    <span className="text-base leading-none" aria-hidden>✨</span>
+                    <span className="text-sm font-extrabold text-stone-700 dark:text-stone-200">Free plan</span>
                   </div>
                   <button
                     type="button"
                     onClick={() => onNavigate('pricing')}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#FF9600] text-white text-xs sm:text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all"
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-[#FF9600] text-white text-sm sm:text-base font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#D97F00] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all"
                   >
-                    ⭐ Upgrade
+                    <span className="text-base leading-none" aria-hidden>⭐</span>
+                    Upgrade
                   </button>
                 </>
               ) : (
-                <div className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#FF9600] text-white border-2 border-b-4 border-[#D97F00]">
-                  <span className="text-sm" aria-hidden>⭐</span>
-                  <span className="text-xs font-extrabold uppercase tracking-wider">{plan}</span>
+                <div className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl bg-[#FF9600] text-white border-2 border-b-4 border-[#D97F00]">
+                  <span className="text-base leading-none" aria-hidden>⭐</span>
+                  <span className="text-sm font-extrabold uppercase tracking-wider">{plan}</span>
                 </div>
               )}
             </div>
@@ -949,6 +950,10 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                   {([
                     { id: 'crater_blast', label: 'Crater Blast', hint: 'Blast the right answers', emoji: '💥', page: 'game-launcher-crater-blast', color: '#FF4B4B', borderColor: '#E04343' },
                     { id: 'word_tower', label: 'Word Tower', hint: 'Build your knowledge tower', emoji: '🗼', page: 'game-launcher-word-tower', color: '#58CC02', borderColor: '#46A302' },
+                    // Word Blitz — 60-second cloze speedrun. Goes straight to
+                    // its own page (no separate launcher) since it always
+                    // starts on the menu screen with the bank picker.
+                    { id: 'word_blitz', label: 'Word Blitz', hint: '60-second fill-in-the-blank', emoji: '⚡', page: 'word-blitz', color: '#FF9600', borderColor: '#D97F00' },
                   ] as const).map((game) => (
                     <button
                       key={game.id}

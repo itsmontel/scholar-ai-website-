@@ -373,12 +373,14 @@ const SoftPaywall = ({
                 </div>
               )}
               <PrimaryCta />
-              <button
-                onClick={handleDismiss}
-                className="w-full text-center text-sm text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-200 font-bold underline underline-offset-4"
-              >
-                No thanks
-              </button>
+              <div className="flex justify-center">
+                <button
+                  onClick={handleDismiss}
+                  className="text-center text-sm py-2.5 px-8 rounded-xl border-2 border-b-4 border-[#D97F00] bg-[#FF9600] hover:bg-[#E58800] active:border-b-2 active:translate-y-0.5 text-white font-extrabold uppercase tracking-wide transition-all"
+                >
+                  No thanks
+                </button>
+              </div>
             </div>
           </>
         ) : hard ? (
@@ -496,9 +498,9 @@ const SoftPaywall = ({
               BRANCH 3: Soft paywall — full pitch with sticky CTA footer
              ═══════════════════════════════════════════════════════════ */
           <>
-          <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 sm:px-10 pt-7 sm:pt-9 pb-4">
+          <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 sm:px-10 pt-4 sm:pt-5 pb-3">
             {/* Mascot + speech bubble — top-left layout, Duolingo style */}
-            <div className="flex items-start gap-3 sm:gap-4 mb-5">
+            <div className="flex items-start gap-3 sm:gap-4 mb-3">
               <img
                 src="/mascot-celebrating.webp"
                 alt=""
@@ -518,7 +520,7 @@ const SoftPaywall = ({
             </div>
 
             {/* Header */}
-            <div className="text-center mb-6">
+            <div className="text-center mb-4">
               <h2
                 className="text-2xl sm:text-[1.85rem] font-extrabold text-[#3C3C3C] dark:text-stone-50 mb-2 leading-tight"
                 style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
@@ -540,10 +542,10 @@ const SoftPaywall = ({
               </p>
             </div>
 
-            <div className="mb-5"><PlanToggle /></div>
+            <div className="mb-3"><PlanToggle /></div>
 
             {/* Price card */}
-            <div className="relative rounded-2xl border-2 border-b-4 p-5 sm:p-6 mb-5" style={{ backgroundColor: planAccent.bg, borderColor: planAccent.border }}>
+            <div className="relative rounded-2xl border-2 border-b-4 p-5 sm:p-6 mb-3" style={{ backgroundColor: planAccent.bg, borderColor: planAccent.border }}>
               <div className="absolute top-3 right-3">
                 <span
                   className="px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-white rounded-full border-2 border-b-2"
@@ -603,7 +605,7 @@ const SoftPaywall = ({
             </div>
 
             {/* Social proof ticker — stays in the scrollable area */}
-            <div className="mt-4 text-center h-5 overflow-hidden">
+            <div className="mt-2 text-center h-5 overflow-hidden">
               <p
                 key={socialIndex}
                 className="text-xs font-extrabold text-[#A560E8] animate-pwSocialIn"
@@ -641,14 +643,16 @@ const SoftPaywall = ({
               </p>
             )}
 
-            {/* Maybe later — text link, low emphasis */}
-            <button
-              type="button"
-              onClick={handleDismiss}
-              className="w-full text-center text-xs text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-200 font-bold underline underline-offset-4"
-            >
-              Maybe later
-            </button>
+            {/* Maybe later — orange secondary button, narrow & centered */}
+            <div className="flex justify-center">
+              <button
+                type="button"
+                onClick={handleDismiss}
+                className="text-center text-sm py-2.5 px-8 rounded-xl border-2 border-b-4 border-[#D97F00] bg-[#FF9600] hover:bg-[#E58800] active:border-b-2 active:translate-y-0.5 text-white font-extrabold uppercase tracking-wide transition-all"
+              >
+                Maybe later
+              </button>
+            </div>
           </div>
           </>
         )}

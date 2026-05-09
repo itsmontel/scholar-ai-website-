@@ -19,6 +19,7 @@ interface StripeCancelTrialChoiceModalProps {
 
 /**
  * Shown when user returns from Stripe cancel after opening checkout from the post-tutorial paywall.
+ * Duolingo-style design: 3D borders, bold Nunito headings, mascot, solid hex colours.
  */
 const StripeCancelTrialChoiceModal = ({
   open,
@@ -100,46 +101,112 @@ const StripeCancelTrialChoiceModal = ({
 
   return (
     <div className="fixed inset-0 z-[260] flex items-center justify-center p-4 sm:p-6">
-      <div aria-hidden className="absolute inset-0 bg-black/55 backdrop-blur-sm" onClick={busy ? undefined : onClose} />
+      {/* Backdrop */}
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-black/55 backdrop-blur-sm"
+        onClick={busy ? undefined : onClose}
+      />
+
+      {/* Modal — Duolingo card */}
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="stripe-cancel-trial-title"
-        className="relative w-full max-w-md rounded-2xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-600 shadow-2xl shadow-stone-900/20 ring-1 ring-stone-950/5 p-6 sm:p-8"
+        className="relative w-full max-w-md rounded-2xl bg-white dark:bg-stone-900 border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 shadow-2xl overflow-hidden"
       >
-        <h2 id="stripe-cancel-trial-title" className="text-lg sm:text-xl font-semibold text-stone-900 dark:text-stone-100 mb-2">
-          Leave checkout without subscribing?
-        </h2>
-        <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed mb-4">
-          Hi {first}, you haven&apos;t started your <span className="font-semibold text-stone-800 dark:text-stone-200">{TRIAL_DAYS}-day free trial</span> yet.
-          If you stay on the free plan now, you won&apos;t get this one-time trial again on this account.
-        </p>
-        <p className="text-sm text-stone-500 dark:text-stone-500 mb-6">
-          You can subscribe later, but there won&apos;t be a free trial again.
-        </p>
-        {error && (
-          <p className="text-sm text-red-600 dark:text-red-400 mb-4" role="alert">
-            {error}
+        {/* Top accent bar */}
+        <div className="h-1.5 bg-[#FF9600]" />
+
+        <div className="px-6 sm:px-8 pt-5 pb-6 sm:pb-7">
+          {/* Sad mascot */}
+          <div className="flex justify-center mb-4">
+            <div
+              className="inline-flex items-center justify-center w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-[#FF9600] bg-[#FFF4E0]"
+              style={{ boxShadow: '0 0 24px rgba(255,150,0,0.2)' }}
+            >
+              <img
+                src="/mascot-sad.webp"
+                alt=""
+                width={80}
+                height={80}
+                className="object-contain w-20 h-20 sm:w-24 sm:h-24"
+                loading="eager"
+              />
+            </div>
+          </div>
+
+          {/* Badge */}
+          <div className="flex justify-center mb-3">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFE8E8] border-2 border-[#FF4B4B]/40 text-[#FF4B4B] text-[10px] font-extrabold uppercase tracking-[0.2em]">
+              <span aria-hidden>&#x26A0;&#xFE0F;</span>
+              Before you go
+            </span>
+          </div>
+
+          {/* Heading */}
+          <h2
+            id="stripe-cancel-trial-title"
+            className="text-xl sm:text-2xl font-extrabold text-center text-[#3C3C3C] dark:text-stone-50 mb-2 leading-tight"
+            style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+          >
+            Leave checkout without subscribing?
+          </h2>
+
+          {/* Body copy */}
+          <p className="text-sm text-stone-500 dark:text-stone-400 font-bold leading-relaxed text-center mb-1.5">
+            Hi {first}, you haven&apos;t started your{' '}
+            <span className="font-extrabold text-[#58CC02]">{TRIAL_DAYS}-day free trial</span> yet.
           </p>
-        )}
-        <div className="flex flex-col gap-3">
+          <p className="text-xs text-stone-400 dark:text-stone-500 font-bold leading-relaxed text-center mb-5">
+            If you leave now, you won&apos;t get this one-time trial again on this account.
+            You can subscribe later, but without the free trial.
+          </p>
+
+          {/* Error */}
+          {error && (
+            <div className="rounded-xl bg-[#FFE8E8] border-2 border-[#FF4B4B]/30 px-3 py-2 text-sm text-[#FF4B4B] font-bold mb-4" role="alert">
+              {error}
+            </div>
+          )}
+
+          {/* CTA — Green trial button */}
           <button
             type="button"
             disabled={busy !== null}
             onClick={() => void startTrial()}
-            className="w-full py-3 px-4 rounded-xl font-semibold text-white bg-violet-600 hover:bg-violet-700 disabled:opacity-60 disabled:pointer-events-none shadow-md shadow-violet-900/20 ring-1 ring-violet-900/10 transition-colors"
+            className="w-full py-3.5 rounded-2xl bg-[#58CC02] text-white font-extrabold text-base uppercase tracking-wide border-2 border-b-4 border-[#46A302] hover:bg-[#46A302] active:border-b-2 active:translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-lg mb-3"
           >
-            {busy === 'trial' ? 'Opening checkout...' : `Start my ${TRIAL_DAYS}-day free trial`}
+            {busy === 'trial' ? (
+              <>
+                <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                Opening checkout...
+              </>
+            ) : (
+              <>
+                Start my {TRIAL_DAYS}-day free trial
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </>
+            )}
           </button>
+
+          {/* Forfeit — orange narrow button, centered */}
+          <div className="flex justify-center">
+            <button
+              type="button"
+              disabled={busy !== null}
+              onClick={() => void forfeitTrial()}
+              className="text-center text-sm py-2.5 px-8 rounded-xl border-2 border-b-4 border-[#D97F00] bg-[#FF9600] hover:bg-[#E58800] active:border-b-2 active:translate-y-0.5 text-white font-extrabold uppercase tracking-wide disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              {busy === 'forfeit' ? 'Updating...' : "I'll skip the trial"}
+            </button>
+          </div>
         </div>
-        <button
-          type="button"
-          disabled={busy !== null}
-          onClick={() => void forfeitTrial()}
-          className="mt-4 w-full py-2.5 px-3 rounded-lg text-center text-sm text-stone-600 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 hover:bg-stone-100/90 dark:hover:bg-stone-800/80 disabled:opacity-50 transition-colors"
-        >
-          {busy === 'forfeit' ? 'Updating...' : "I'm happy to lose my free trial"}
-        </button>
       </div>
     </div>
   );

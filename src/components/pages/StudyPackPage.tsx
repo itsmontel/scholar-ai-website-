@@ -8,6 +8,7 @@ import { applyPageSeoTags, absoluteCanonicalUrl, injectJsonLd, removeJsonLd } fr
 import { ogImageUrlForPage } from '../../utils/ogImageUrls';
 import { getResetsInText } from '../../utils/usageReset';
 import type { EmbeddedDashboardTool } from './CitationsPage';
+import AnalysisAnimation from '../common/AnalysisAnimation';
 
 const STUDY_PACK_PAGE_SEO = {
   title: 'AI Study Pack — Lesson, Flashcards, Quiz, Crossword & More | WriteScholar',
@@ -323,6 +324,19 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
           : 'min-h-screen relative transition-colors font-sans overflow-x-hidden'
       }
     >
+      {/* Study pack generation overlay — mascot popup with cycling progress
+          steps. Mirrors the same animation shown on DashboardPage so users
+          generating a study pack from /study-pack get the same feedback
+          they'd get from the dashboard. */}
+      {isGeneratingStudyPack && (
+        <AnalysisAnimation
+          isPopup
+          text="Creating your study pack"
+          variant="studyPack"
+          isComplete={false}
+        />
+      )}
+
       {!embedded && <WriteScholarEditorialBackgroundLayers position="fixed" />}
 
       {!embedded && <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="study-pack" />}
@@ -475,7 +489,7 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                     >
                       Turn your notes into{' '}
                       <span className="text-[#FF9600]">
-                        6 study tools
+                        7 study tools
                       </span>
                     </h1>
                     <p className={`relative text-stone-500 dark:text-stone-400 text-sm sm:text-base text-center max-w-xl mx-auto leading-relaxed ${embedded ? 'mb-5' : 'mb-5 sm:mb-6'}`}>

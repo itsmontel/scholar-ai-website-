@@ -91,6 +91,7 @@ module.exports = {
         'mobile-mascot-peek': 'mobileMascotPeek 5.5s ease-in-out infinite 0.4s',
         'mobile-orb-drift': 'mobileOrbDrift 12s ease-in-out infinite',
         'mobile-gradient-breathe': 'mobileGradientBreathe 7s ease-in-out infinite',
+        'hero-mascot-walk': 'heroMascotWalk 5.5s linear 0.8s forwards',
       },
       keyframes: {
         fadeIn: {
@@ -264,6 +265,11 @@ module.exports = {
         mobileGradientBreathe: {
           '0%, 100%': { opacity: '0.6' },
           '50%': { opacity: '1' },
+        },
+        heroMascotWalk: {
+          '0%': { opacity: '0', transform: 'translateX(-40px)' },
+          '8%': { opacity: '1', transform: 'translateX(-20px)' },
+          '100%': { opacity: '1', transform: 'translateX(260px)' },
         },
       },
       backgroundImage: {

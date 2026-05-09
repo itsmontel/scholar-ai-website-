@@ -2133,6 +2133,22 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                     proOnly: false,
                   },
                   {
+                    id: 'word-blitz',
+                    title: 'Word Blitz',
+                    desc: '60-second fill-in-the-blank speedrun',
+                    emoji: '⚡',
+                    iconGrad: 'from-orange-400 to-amber-500',
+                    titleClr: 'text-orange-600 dark:text-orange-400',
+                    activeRing: 'ring-orange-400 dark:ring-orange-500',
+                    blob1: 'bg-orange-200/60 dark:bg-orange-500/20',
+                    blob2: 'bg-amber-200/50 dark:bg-amber-500/15',
+                    badge: 'New',
+                    badgeBg: 'bg-emerald-500 text-white',
+                    onClick: () => onNavigate('word-blitz'),
+                    isActive: false,
+                    proOnly: false,
+                  },
+                  {
                     id: 'more-tools',
                     title: 'More Tools',
                     desc: 'Summarizer, grammar & more',
@@ -3142,7 +3158,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                     </div>
                     <div className="min-w-0 self-start">
                       <h2 className="relative text-lg sm:text-2xl md:text-[2rem] lg:text-[2.125rem] font-semibold text-stone-900 dark:text-stone-50 text-center mb-2 sm:mb-2 tracking-tight leading-snug px-0.5 sm:px-1" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
-                        Turn your notes into <span className="text-violet-800 dark:text-violet-300">6 study tools</span>
+                        Turn your notes into <span className="text-violet-800 dark:text-violet-300">7 study tools</span>
                   </h2>
                   <p className="relative text-stone-600 dark:text-stone-300 text-[13px] sm:text-base text-center mb-4 sm:mb-8 max-w-xl mx-auto leading-relaxed">
                     Lesson, flashcards, quiz, crossword, Crater Blast & Word Tower — all from one paste

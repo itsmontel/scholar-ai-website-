@@ -166,9 +166,9 @@ const DEMO_QUESTIONS = [
     correctIndex: 2,
   },
   {
-    question: 'How many continents are there?',
-    options: ['5', '6', '8', '7'],
-    correctIndex: 3,
+    question: 'How many days are in 3 weeks?',
+    options: ['14', '18', '21', '28'],
+    correctIndex: 2,
   },
 ];
 
@@ -1690,7 +1690,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
         bgColor: '#F3EAFF',
         eyebrow: 'TOOL 1 OF 4',
         title: 'Get professor-level feedback',
-        speech: "Paste any essay and I'll give you line-by-line feedback, rubric scores, and structure tips — try it on the sample below!",
+        speech: "Upload your essay and I'll give you professor style line-by-line feedback, rubric scores, and structure tips — see for yourself on the sample below!",
         visual: 'essay',
       },
       'tour-review': {

@@ -18,7 +18,6 @@ const EmailVerificationPage = lazyWithRetry(() => import('./pages/EmailVerificat
 const OnboardingPage = lazyWithRetry(() => import('./pages/OnboardingPage'));
 // Pre-signup Duolingo-style funnel — every "Sign up" CTA on the marketing
 // pages now routes through this 6-screen flow before the signup form.
-const WelcomeOnboardingPage = lazyWithRetry(() => import('./pages/WelcomeOnboardingPage'));
 const AuthCallbackPage = lazyWithRetry(() => import('./pages/AuthCallbackPage'));
 const DashboardPage = lazyWithRetry(() => import('./pages/DashboardPageNew'));
 const DashboardPageLegacy = lazyWithRetry(() => import('./pages/DashboardPage'));
@@ -67,6 +66,7 @@ const CalculatorPage = lazyWithRetry(() => import('./pages/tools/CalculatorPage'
 const ConverterPage = lazyWithRetry(() => import('./pages/tools/ConverterPage'));
 const LightningReflexQuizPage = lazyWithRetry(() => import('./pages/tools/LightningReflexQuizPage'));
 const WordTowerPage = lazyWithRetry(() => import('./pages/tools/WordTowerPage'));
+const WordBlitzPage = lazyWithRetry(() => import('./games/word-blitz/WordBlitzPage'));
 const GameLauncherPage = lazyWithRetry(() => import('./pages/GameLauncherPage'));
 const CreateFlashcardsPage = lazyWithRetry(() => import('./pages/tools/CreateFlashcardsPage'));
 const StudyPackViewerPage = lazyWithRetry(() => import('./pages/StudyPackViewerPage'));
@@ -112,7 +112,8 @@ function getPageFromPath(pathname: string): string {
   if (p === '/email-verification') return 'email-verification';
   if (p === '/onboarding') return 'onboarding';
   if (p === '/auth/callback') return 'auth-callback';
-  if (p === '/get-started' || p === '/welcome') return 'welcome-onboarding';
+  /* Pre-signup welcome funnel was removed — redirect old URLs to signup. */
+  if (p === '/get-started' || p === '/welcome') return 'signup';
   if (p === '/signup') return 'signup';
   if (p === '/login') return 'login';
   if (p === '/reset-password') return 'reset-password';
@@ -176,6 +177,7 @@ function getPageFromPath(pathname: string): string {
   if (p === '/tools/converter' || p === '/converter') return 'converter';
   if (p === '/tools/crater-blast' || p === '/crater-blast' || p === '/tools/lightning-reflex-quiz' || p === '/lightning-reflex-quiz') return 'crater-blast';
   if (p === '/tools/word-tower' || p === '/word-tower' || p === '/games/word-tower') return 'word-tower';
+  if (p === '/word-blitz' || p === '/tools/word-blitz' || p === '/games/word-blitz') return 'word-blitz';
   if (p === '/games/crater-blast-launcher' || p === '/game-launcher-crater-blast') return 'game-launcher-crater-blast';
   if (p === '/games/word-tower-launcher' || p === '/game-launcher-word-tower') return 'game-launcher-word-tower';
   if (p === '/tools/interactive-lesson' || p === '/interactive-lesson' || p === '/lesson-generator') return 'dashboard';
@@ -413,6 +415,7 @@ const AcademicAIApp = () => {
     'converter': { title: 'Free Unit Converter — STEM & Lab Units | WriteScholar', description: 'Convert SI and imperial units for problem sets and labs—length, temperature, speed, and more.' },
     'crater-blast': { title: 'Crater Blast — AI Quiz Game | WriteScholar', description: 'Blast the correct answer before it lands! AI-powered quiz game to reinforce what you studied.' },
     'word-tower': { title: 'Word Tower — AI Stacking Study Game | WriteScholar', description: 'Word Tower — the AI-powered stacking study game. Catch correct answers, dodge wrong ones, and build the tallest tower before it falls.' },
+    'word-blitz': { title: 'Word Blitz — 60-Second Fill-in-the-Blank Speedrun | WriteScholar', description: 'Word Blitz — the 60-second AI-powered fill-in-the-blank speedrun. Read the sentence, tap the right word. How many can you get in a minute?' },
     'game-launcher-crater-blast': { title: 'Crater Blast — Choose Study Packs | WriteScholar', description: 'Pick which study packs to combine into one Crater Blast game session.' },
     'game-launcher-word-tower': { title: 'Word Tower — Choose Study Packs | WriteScholar', description: 'Pick which study packs to combine into one Word Tower game session.' },
     'more-tools': { title: 'More Free Tools for College Students | WriteScholar', description: 'Summarizer, word counter, citation generator, GPA calculator, essay outline, thesis helper, grammar check, and more—all in one place.' },
@@ -847,7 +850,6 @@ const AcademicAIApp = () => {
   // Canonical URL map – pages whose URL differs from /${page}
   const pageUrlMap: Record<string, string> = {
     landing: '/',
-    'welcome-onboarding': '/get-started',
     summarizer: '/tools/summarizer',
     'quiz-generator': '/tools/quiz-generator',
     'create-flashcards': '/tools/create-flashcards',
@@ -864,6 +866,7 @@ const AcademicAIApp = () => {
     'pomodoro-timer': '/tools/pomodoro-timer',
     'crater-blast': '/tools/crater-blast',
     'word-tower': '/tools/word-tower',
+    'word-blitz': '/word-blitz',
     'game-launcher-crater-blast': '/games/crater-blast-launcher',
     'game-launcher-word-tower': '/games/word-tower-launcher',
     'study-pack-viewer': '/study-pack-viewer',
@@ -1050,10 +1053,6 @@ const AcademicAIApp = () => {
     switch (currentPage) {
       case 'landing':
         return <LandingPage onNavigate={navigateTo} user={user} />;
-      case 'welcome-onboarding':
-        // Pre-signup Duolingo-style funnel. All marketing CTAs land here
-        // first; the page itself routes to /signup on completion.
-        return <WelcomeOnboardingPage onNavigate={navigateTo} />;
       case 'signup':
         return <SignUpPage onNavigate={navigateTo} onSignUp={handleSignUp} />;
       case 'login':
@@ -1274,6 +1273,8 @@ const AcademicAIApp = () => {
         return <LightningReflexQuizPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'word-tower':
         return <WordTowerPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'word-blitz':
+        return <WordBlitzPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'game-launcher-crater-blast':
         return <GameLauncherPage gameType="crater_blast" onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'game-launcher-word-tower':
@@ -1342,6 +1343,11 @@ const AcademicAIApp = () => {
           onStartTrialRedirect={resolveTutorialStripeCancelModal}
           onForfeitComplete={() => {
             resolveTutorialStripeCancelModal();
+            setApiLimitPaywallOpen(false);
+            try {
+              sessionStorage.removeItem(SOFT_PAYWALL_OPEN_KEY);
+              sessionStorage.setItem(SOFT_PAYWALL_DISMISSED_KEY, '1');
+            } catch { /* ignore */ }
             void validateAndRefreshTokenRef.current();
           }}
         />

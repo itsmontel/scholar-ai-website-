@@ -275,23 +275,6 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
               </button>
             </p>
 
-            {/* TODO: Remove — dev-only test buttons */}
-            <div className="mt-4 flex gap-2">
-              <button
-                type="button"
-                onClick={() => onNavigate('welcome-onboarding')}
-                className="flex-1 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wide text-stone-400 border-2 border-dashed border-stone-300 hover:border-[#A560E8] hover:text-[#A560E8] transition-all"
-              >
-                🧪 Pre-Signup
-              </button>
-              <button
-                type="button"
-                onClick={() => onNavigate('onboarding')}
-                className="flex-1 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wide text-stone-400 border-2 border-dashed border-stone-300 hover:border-[#58CC02] hover:text-[#58CC02] transition-all"
-              >
-                🧪 Post-Signup
-              </button>
-            </div>
           </div>
         </div>
       </div>

@@ -1,0 +1,96 @@
+/**
+ * Word Blitz — Vocabulary "Play for Fun" bank.
+ *
+ * Cloze-style sentences where the blank is a vocabulary word the player
+ * must pick from four options. Distractors are *also* real words that
+ * sound similar or share a category — so the answer can't be guessed
+ * from "which word do I know?" alone, you have to know the meaning.
+ *
+ * Distractor strategy:
+ *   - Same part of speech as the correct answer
+ *   - Sometimes alliterative or similar prefixes (helps pace the game)
+ *   - Always real words; never gibberish
+ */
+
+import type { WordBlitzBankQuestion } from './wordBlitzTriviaBank';
+
+export const WORD_BLITZ_VOCAB_BANK: WordBlitzBankQuestion[] = [
+  { sentence: "Someone who studies the stars is called an {{blank}}.", correctAnswer: "astronomer", distractors: ["astrologer", "geographer", "biologist"] },
+  { sentence: "A person who fixes teeth is called a {{blank}}.", correctAnswer: "dentist", distractors: ["dermatologist", "optometrist", "podiatrist"] },
+  { sentence: "An animal that eats only plants is called a {{blank}}.", correctAnswer: "herbivore", distractors: ["carnivore", "omnivore", "insectivore"] },
+  { sentence: "An animal that eats only meat is called a {{blank}}.", correctAnswer: "carnivore", distractors: ["herbivore", "omnivore", "scavenger"] },
+  { sentence: "A word that means the opposite of another is an {{blank}}.", correctAnswer: "antonym", distractors: ["synonym", "homonym", "acronym"] },
+  { sentence: "A word that means the same as another is a {{blank}}.", correctAnswer: "synonym", distractors: ["antonym", "homonym", "pseudonym"] },
+  { sentence: "Words that sound the same but mean different things are {{blank}}.", correctAnswer: "homophones", distractors: ["antonyms", "synonyms", "morphemes"] },
+  { sentence: "A book of word definitions is called a {{blank}}.", correctAnswer: "dictionary", distractors: ["encyclopedia", "almanac", "thesaurus"] },
+  { sentence: "A book of synonyms is called a {{blank}}.", correctAnswer: "thesaurus", distractors: ["dictionary", "encyclopedia", "lexicon"] },
+  { sentence: "Fear of small spaces is called {{blank}}.", correctAnswer: "claustrophobia", distractors: ["acrophobia", "agoraphobia", "arachnophobia"] },
+  { sentence: "Fear of heights is called {{blank}}.", correctAnswer: "acrophobia", distractors: ["claustrophobia", "agoraphobia", "hydrophobia"] },
+  { sentence: "Fear of spiders is called {{blank}}.", correctAnswer: "arachnophobia", distractors: ["acrophobia", "claustrophobia", "ophidiophobia"] },
+  { sentence: "A creature that comes out at night is {{blank}}.", correctAnswer: "nocturnal", distractors: ["diurnal", "celestial", "terrestrial"] },
+  { sentence: "A creature active during the day is {{blank}}.", correctAnswer: "diurnal", distractors: ["nocturnal", "crepuscular", "lunar"] },
+  { sentence: "A long sleep some animals do in winter is called {{blank}}.", correctAnswer: "hibernation", distractors: ["migration", "estivation", "respiration"] },
+  { sentence: "When animals travel to a new region seasonally, it is called {{blank}}.", correctAnswer: "migration", distractors: ["hibernation", "evolution", "extinction"] },
+  { sentence: "A short story with a moral is called a {{blank}}.", correctAnswer: "fable", distractors: ["myth", "legend", "ballad"] },
+  { sentence: "A long poem about heroic deeds is called an {{blank}}.", correctAnswer: "epic", distractors: ["ode", "elegy", "sonnet"] },
+  { sentence: "A 14-line poem with a fixed rhyme is called a {{blank}}.", correctAnswer: "sonnet", distractors: ["haiku", "ode", "limerick"] },
+  { sentence: "A short Japanese poem with three lines is called a {{blank}}.", correctAnswer: "haiku", distractors: ["sonnet", "ode", "tanka"] },
+  { sentence: "A figure of speech using \"like\" or \"as\" is a {{blank}}.", correctAnswer: "simile", distractors: ["metaphor", "hyperbole", "alliteration"] },
+  { sentence: "Saying something is something else directly is a {{blank}}.", correctAnswer: "metaphor", distractors: ["simile", "personification", "irony"] },
+  { sentence: "An exaggeration for effect is called {{blank}}.", correctAnswer: "hyperbole", distractors: ["irony", "metaphor", "alliteration"] },
+  { sentence: "Repeating the same starting consonant is called {{blank}}.", correctAnswer: "alliteration", distractors: ["assonance", "rhyme", "meter"] },
+  { sentence: "A statement that contradicts itself but might be true is a {{blank}}.", correctAnswer: "paradox", distractors: ["hypothesis", "theorem", "syllogism"] },
+  { sentence: "A government ruled by the people is called a {{blank}}.", correctAnswer: "democracy", distractors: ["monarchy", "oligarchy", "theocracy"] },
+  { sentence: "A government ruled by a king or queen is a {{blank}}.", correctAnswer: "monarchy", distractors: ["democracy", "republic", "aristocracy"] },
+  { sentence: "A government ruled by religious leaders is a {{blank}}.", correctAnswer: "theocracy", distractors: ["aristocracy", "democracy", "plutocracy"] },
+  { sentence: "Rule by the wealthy few is called a {{blank}}.", correctAnswer: "plutocracy", distractors: ["democracy", "theocracy", "meritocracy"] },
+  { sentence: "Friendly behavior toward guests is called {{blank}}.", correctAnswer: "hospitality", distractors: ["generosity", "humility", "diplomacy"] },
+  { sentence: "Being able to bounce back from setbacks is {{blank}}.", correctAnswer: "resilience", distractors: ["persistence", "patience", "endurance"] },
+  { sentence: "Keenly observant and quick to understand is {{blank}}.", correctAnswer: "perceptive", distractors: ["receptive", "deceptive", "creative"] },
+  { sentence: "Brief and to the point is described as {{blank}}.", correctAnswer: "concise", distractors: ["precise", "decisive", "incisive"] },
+  { sentence: "A loud, confused noise is called a {{blank}}.", correctAnswer: "cacophony", distractors: ["symphony", "harmony", "euphony"] },
+  { sentence: "A person who travels to many countries is well-{{blank}}.", correctAnswer: "traveled", distractors: ["versed", "groomed", "spoken"] },
+  { sentence: "Something that lasts a very long time is called {{blank}}.", correctAnswer: "enduring", distractors: ["fleeting", "transient", "ephemeral"] },
+  { sentence: "Lasting only a short time is called {{blank}}.", correctAnswer: "ephemeral", distractors: ["eternal", "perpetual", "enduring"] },
+  { sentence: "Existing everywhere at once is described as {{blank}}.", correctAnswer: "ubiquitous", distractors: ["unique", "elusive", "obscure"] },
+  { sentence: "Difficult to find or catch is described as {{blank}}.", correctAnswer: "elusive", distractors: ["obvious", "abundant", "ubiquitous"] },
+  { sentence: "Highly respected and influential is described as {{blank}}.", correctAnswer: "eminent", distractors: ["imminent", "permanent", "dominant"] },
+  { sentence: "About to happen very soon is described as {{blank}}.", correctAnswer: "imminent", distractors: ["eminent", "prominent", "permanent"] },
+  { sentence: "A study of the past is called {{blank}}.", correctAnswer: "history", distractors: ["geography", "philosophy", "sociology"] },
+  { sentence: "The study of living things is called {{blank}}.", correctAnswer: "biology", distractors: ["geology", "ecology", "chemistry"] },
+  { sentence: "The study of rocks and Earth is called {{blank}}.", correctAnswer: "geology", distractors: ["biology", "geography", "astronomy"] },
+  { sentence: "The study of weather is called {{blank}}.", correctAnswer: "meteorology", distractors: ["geology", "astronomy", "biology"] },
+  { sentence: "The study of human society is called {{blank}}.", correctAnswer: "sociology", distractors: ["psychology", "anthropology", "philosophy"] },
+  { sentence: "The study of the mind and behavior is {{blank}}.", correctAnswer: "psychology", distractors: ["sociology", "philosophy", "neurology"] },
+  { sentence: "The study of human cultures is called {{blank}}.", correctAnswer: "anthropology", distractors: ["sociology", "archaeology", "ethnology"] },
+  { sentence: "The study of plants is called {{blank}}.", correctAnswer: "botany", distractors: ["zoology", "biology", "ecology"] },
+  { sentence: "The study of animals is called {{blank}}.", correctAnswer: "zoology", distractors: ["botany", "biology", "ecology"] },
+  { sentence: "Someone who writes for a newspaper is a {{blank}}.", correctAnswer: "journalist", distractors: ["novelist", "editor", "publisher"] },
+  { sentence: "Someone who designs buildings is an {{blank}}.", correctAnswer: "architect", distractors: ["engineer", "draftsman", "contractor"] },
+  { sentence: "A doctor who specializes in skin is a {{blank}}.", correctAnswer: "dermatologist", distractors: ["pediatrician", "cardiologist", "oncologist"] },
+  { sentence: "A doctor who specializes in the heart is a {{blank}}.", correctAnswer: "cardiologist", distractors: ["dermatologist", "neurologist", "oncologist"] },
+  { sentence: "A doctor who specializes in children is a {{blank}}.", correctAnswer: "pediatrician", distractors: ["geriatrician", "obstetrician", "gynecologist"] },
+  { sentence: "A doctor who specializes in cancer is an {{blank}}.", correctAnswer: "oncologist", distractors: ["radiologist", "cardiologist", "neurologist"] },
+  { sentence: "Loving humanity through generosity is called {{blank}}.", correctAnswer: "philanthropy", distractors: ["sociology", "psychology", "philosophy"] },
+  { sentence: "Hatred of humanity is called {{blank}}.", correctAnswer: "misanthropy", distractors: ["philanthropy", "sociopathy", "narcissism"] },
+  { sentence: "Excessive self-love is called {{blank}}.", correctAnswer: "narcissism", distractors: ["altruism", "egoism", "stoicism"] },
+  { sentence: "Acting selflessly for others is called {{blank}}.", correctAnswer: "altruism", distractors: ["narcissism", "egoism", "hedonism"] },
+  { sentence: "The pursuit of pleasure as the highest good is {{blank}}.", correctAnswer: "hedonism", distractors: ["stoicism", "asceticism", "altruism"] },
+  { sentence: "Calmly enduring hardship without complaint is {{blank}}.", correctAnswer: "stoicism", distractors: ["hedonism", "cynicism", "skepticism"] },
+  { sentence: "Doubting everything as a philosophy is called {{blank}}.", correctAnswer: "skepticism", distractors: ["stoicism", "cynicism", "optimism"] },
+  { sentence: "Believing things will turn out for the best is {{blank}}.", correctAnswer: "optimism", distractors: ["pessimism", "skepticism", "realism"] },
+  { sentence: "Believing things will turn out badly is {{blank}}.", correctAnswer: "pessimism", distractors: ["optimism", "cynicism", "realism"] },
+  { sentence: "A grand entrance with style is called a {{blank}}.", correctAnswer: "flourish", distractors: ["furnish", "tarnish", "blemish"] },
+  { sentence: "Excessive use of words is called being {{blank}}.", correctAnswer: "verbose", distractors: ["concise", "succinct", "terse"] },
+  { sentence: "Saying few words and being to the point is being {{blank}}.", correctAnswer: "succinct", distractors: ["verbose", "garrulous", "loquacious"] },
+  { sentence: "A talkative person is described as {{blank}}.", correctAnswer: "loquacious", distractors: ["taciturn", "succinct", "reserved"] },
+  { sentence: "A quiet, reserved person is described as {{blank}}.", correctAnswer: "taciturn", distractors: ["loquacious", "garrulous", "verbose"] },
+  { sentence: "A strong dislike for something is called {{blank}}.", correctAnswer: "aversion", distractors: ["affection", "attraction", "obsession"] },
+  { sentence: "A strong attraction to something is called an {{blank}}.", correctAnswer: "affinity", distractors: ["aversion", "antipathy", "anomaly"] },
+  { sentence: "Complete devotion to a cause is called {{blank}}.", correctAnswer: "zeal", distractors: ["apathy", "lethargy", "indifference"] },
+  { sentence: "A lack of interest or concern is called {{blank}}.", correctAnswer: "apathy", distractors: ["empathy", "sympathy", "antipathy"] },
+  { sentence: "Sharing in another's feelings is called {{blank}}.", correctAnswer: "empathy", distractors: ["apathy", "antipathy", "telepathy"] },
+  { sentence: "A strong dislike or hostility is called {{blank}}.", correctAnswer: "antipathy", distractors: ["empathy", "sympathy", "apathy"] },
+  { sentence: "A peace-loving person is called a {{blank}}.", correctAnswer: "pacifist", distractors: ["activist", "anarchist", "loyalist"] },
+  { sentence: "A person who believes in no government is an {{blank}}.", correctAnswer: "anarchist", distractors: ["activist", "loyalist", "monarchist"] },
+];

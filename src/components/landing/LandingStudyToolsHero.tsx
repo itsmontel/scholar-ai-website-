@@ -110,6 +110,20 @@ const TOOLS: ToolCard[] = [
     span: 'lg:col-span-6',
     objectPos: 'object-top',
   },
+  {
+    num: '07',
+    title: 'Word Blitz',
+    subtitle: '60-second cloze speedrun',
+    desc: 'Read the sentence, tap the missing word. Speed bonus rewards fast answers — beat the clock.',
+    image: '/study-pack-previews/word-blitz.png',
+    alt: 'WriteScholar Word Blitz fill-in-the-blank speedrun game with a 60-second timer and four answer choices',
+    tone: 'orange',
+    badge: 'Game',
+    navTo: 'word-blitz',
+    span: 'lg:col-span-12',
+    objectPos: 'object-center',
+    featured: true,
+  },
 ];
 
 const TONE_STYLES: Record<Tone, { border: string; accent: string; badge: string; ring: string; numBg: string; tint: string }> = {
@@ -204,7 +218,7 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
             >
               <span className="block">Transform your notes into</span>
               <span className="relative inline-block mt-1 sm:mt-1.5 text-[#FF9600]">
-                6 powerful study tools
+                7 powerful study tools
                 <svg
                   className="absolute -bottom-1.5 left-0 w-full h-2 text-[#FF9600]"
                   viewBox="0 0 200 8"
@@ -228,7 +242,7 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
           </div>
         </LandingScrollReveal>
 
-        {/* ─── Pipeline: notes → AI → six tools ─── */}
+        {/* ─── Pipeline: notes → AI → seven tools ─── */}
         <LandingScrollReveal delayMs={120}>
           <div className="relative mb-14 sm:mb-20">
             {/* Study Pack–style input (tabs + textarea + actions) */}
@@ -797,7 +811,7 @@ function NotesPanel({ onNavigate }: LandingStudyToolsHeroProps) {
           {tab === 'pdf' || tab === 'docx' ? (
             <div className="min-h-[220px] flex flex-col items-center justify-center gap-4 px-6 py-10 text-center">
               <p className="text-sm sm:text-[15px] text-[#777] dark:text-stone-400 max-w-sm leading-relaxed font-bold" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                Upload a {tab === 'pdf' ? 'PDF' : 'Word'} file on Study Pack — we&apos;ll extract the text and build your six tools.
+                Upload a {tab === 'pdf' ? 'PDF' : 'Word'} file on Study Pack — we&apos;ll extract the text and build your seven tools.
               </p>
               <button
                 type="button"
@@ -906,7 +920,7 @@ function NotesPanel({ onNavigate }: LandingStudyToolsHeroProps) {
               <svg className="relative w-4 h-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.7-9.3a1 1 0 00-1.4-1.4L9 10.6 7.7 9.3a1 1 0 00-1.4 1.4l2 2a1 1 0 001.4 0l4-4z" clipRule="evenodd" />
               </svg>
-              <span className="relative">6 study tools ready</span>
+              <span className="relative">7 study tools ready</span>
             </>
           ) : (
             <span className="relative">Generate Study Pack</span>

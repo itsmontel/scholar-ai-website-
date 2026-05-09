@@ -235,6 +235,12 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                   <span className="text-xs opacity-75">🗼</span>
                 </a>
               </li>
+              <li>
+                <a href="/word-blitz" onClick={(e) => { e.preventDefault(); onNavigate?.('word-blitz'); }} className="text-[#FF9600] hover:text-[#FFB340] text-sm font-bold transition-colors flex items-center gap-1.5">
+                  Word Blitz
+                  <span className="text-xs opacity-75">⚡</span>
+                </a>
+              </li>
               {/* Ambers/Oranges */}
               <li>
                 <a href="/tools/quiz-generator" onClick={(e) => { e.preventDefault(); onNavigate?.('quiz-generator'); }} className="text-[#FF9600] hover:text-[#FFB340] text-sm font-bold transition-colors flex items-center gap-1.5">

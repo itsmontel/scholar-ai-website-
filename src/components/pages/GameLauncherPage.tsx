@@ -26,6 +26,11 @@ const GAME_META = {
     color: '#FF4B4B',
     darkBorder: '#E04343',
     tint: '#FFE8E8',
+    /** Page-level backdrop tints — used for the radial glows on the launcher hero. */
+    backdropFrom: 'rgba(255,75,75,0.18)',
+    backdropTo:   'rgba(255,150,0,0.10)',
+    /** Decorative emojis that drift around the hero for vibe. */
+    decorEmojis: ['💥', '🔥', '☄️', '⭐', '✨'],
     navPage: 'crater-blast',
     storageKey: 'savedCraterBlast',
     quizType: 'crater_blast',
@@ -38,6 +43,9 @@ const GAME_META = {
     color: '#58CC02',
     darkBorder: '#46A302',
     tint: '#EAFFD6',
+    backdropFrom: 'rgba(88,204,2,0.20)',
+    backdropTo:   'rgba(28,176,246,0.10)',
+    decorEmojis: ['🟩', '🟦', '🧱', '✨', '⬆️'],
     navPage: 'word-tower',
     storageKey: 'savedWordTower',
     quizType: 'word_tower',
@@ -155,14 +163,78 @@ const GameLauncherPage: React.FC<GameLauncherPageProps> = ({ gameType, onNavigat
   };
 
   return (
-    <div className="min-h-screen bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+    <div
+      className="relative min-h-screen overflow-hidden bg-stone-50 dark:bg-stone-950"
+      style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+    >
+      {/* ──────────────────────────────────────────────────────────────
+          Themed background layer — game-tinted radial glows + faint grid
+          + floating decorative emojis. Per-game color so Crater Blast
+          burns red/orange and Word Tower glows green/blue.
+          ────────────────────────────────────────────────────────────── */}
+      <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden>
+        {/* Top-left radial wash in the game's primary tint */}
+        <div
+          className="absolute -top-32 -left-32 w-[42rem] h-[42rem] rounded-full blur-3xl"
+          style={{ background: `radial-gradient(circle, ${meta.backdropFrom} 0%, transparent 65%)` }}
+        />
+        {/* Bottom-right radial wash in the secondary tint */}
+        <div
+          className="absolute -bottom-40 -right-32 w-[40rem] h-[40rem] rounded-full blur-3xl"
+          style={{ background: `radial-gradient(circle, ${meta.backdropTo} 0%, transparent 65%)` }}
+        />
+        {/* Subtle 32px dot grid for visual rhythm — fades on dark mode */}
+        <div
+          className="absolute inset-0 opacity-[0.5] dark:opacity-[0.18]"
+          style={{
+            backgroundImage:
+              'radial-gradient(circle, rgba(120,113,108,0.18) 1px, transparent 1.6px)',
+            backgroundSize: '28px 28px',
+          }}
+        />
+        {/* Floating decorative emojis — arranged so they orbit the hero
+            without overlapping content. Hidden on small screens so the
+            launcher stays distraction-free on phones. */}
+        {meta.decorEmojis.map((e, i) => {
+          // Spread them around the page using deterministic positions.
+          const positions: React.CSSProperties[] = [
+            { top: '6%',  left: '6%',  fontSize: '2.6rem', transform: 'rotate(-12deg)' },
+            { top: '14%', right: '8%', fontSize: '2.2rem', transform: 'rotate(8deg)' },
+            { top: '52%', left: '4%',  fontSize: '2.4rem', transform: 'rotate(14deg)' },
+            { top: '60%', right: '5%', fontSize: '2.0rem', transform: 'rotate(-10deg)' },
+            { bottom: '8%', left: '14%', fontSize: '2.2rem', transform: 'rotate(6deg)' },
+          ];
+          const pos = positions[i] || positions[0];
+          // Stagger the float duration so they don't move in lockstep.
+          const dur = 5 + (i * 0.8);
+          return (
+            <div
+              key={`decor-${i}`}
+              className="absolute hidden md:block opacity-30 dark:opacity-25 select-none"
+              style={{
+                ...pos,
+                animation: `gameLauncherFloat ${dur}s ease-in-out ${i * 0.4}s infinite`,
+              }}
+            >
+              {e}
+            </div>
+          );
+        })}
+        <style>{`
+          @keyframes gameLauncherFloat {
+            0%, 100% { transform: translateY(0px) rotate(var(--r, 0deg)); }
+            50%      { transform: translateY(-14px) rotate(var(--r, 0deg)); }
+          }
+        `}</style>
+      </div>
+
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} />
 
-      <main className="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <main className="relative max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Back */}
         <button
           onClick={() => onNavigate('dashboard')}
-          className="mb-6 inline-flex items-center gap-2 text-sm font-bold text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 transition-colors"
+          className="mb-6 inline-flex items-center gap-2 px-3 py-1.5 -ml-3 rounded-xl text-sm font-bold text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 hover:bg-white/60 dark:hover:bg-stone-900/60 backdrop-blur-sm transition-colors"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
@@ -170,14 +242,23 @@ const GameLauncherPage: React.FC<GameLauncherPageProps> = ({ gameType, onNavigat
           Dashboard
         </button>
 
-        {/* Hero */}
+        {/* Hero — chunky 3D icon tile with a soft glow halo behind it */}
         <div className="text-center mb-8">
-          <div
-            className="inline-flex items-center justify-center w-20 h-20 rounded-2xl text-4xl border-2 border-b-4 mb-4"
-            style={{ backgroundColor: meta.tint, borderColor: `${meta.color}40` }}
-          >
-            {meta.emoji}
+          <div className="relative inline-block mb-5">
+            {/* Soft halo behind the icon */}
+            <div
+              className="absolute inset-0 -m-6 rounded-full blur-2xl opacity-70"
+              style={{ backgroundColor: `${meta.color}33` }}
+              aria-hidden
+            />
+            <div
+              className="relative inline-flex items-center justify-center w-24 h-24 rounded-3xl text-5xl border-2 border-b-4 shadow-[0_18px_40px_-12px_rgba(0,0,0,0.25)]"
+              style={{ backgroundColor: meta.tint, borderColor: `${meta.color}55` }}
+            >
+              {meta.emoji}
+            </div>
           </div>
+
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-stone-800 dark:text-stone-100 mb-2">
             {meta.name}
           </h1>
@@ -212,7 +293,7 @@ const GameLauncherPage: React.FC<GameLauncherPageProps> = ({ gameType, onNavigat
           <>
             {/* Study pack selection */}
             {entries.length > 0 ? (
-              <div className="rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 overflow-hidden mb-6">
+              <div className="rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 overflow-hidden mb-6 shadow-[0_18px_44px_-20px_rgba(0,0,0,0.18)]">
                 {/* Header */}
                 <div className="px-5 py-4 border-b-2 border-stone-200 dark:border-stone-700 flex items-center justify-between">
                   <div>
@@ -317,7 +398,7 @@ const GameLauncherPage: React.FC<GameLauncherPageProps> = ({ gameType, onNavigat
               </div>
             ) : (
               /* Empty state */
-              <div className="rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-8 text-center mb-6">
+              <div className="rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-8 text-center mb-6 shadow-[0_18px_44px_-20px_rgba(0,0,0,0.18)]">
                 <div
                   className="inline-flex items-center justify-center w-16 h-16 rounded-2xl text-3xl border-2 border-b-4 mb-4"
                   style={{ backgroundColor: meta.tint, borderColor: `${meta.color}40` }}
@@ -343,7 +424,7 @@ const GameLauncherPage: React.FC<GameLauncherPageProps> = ({ gameType, onNavigat
             )}
 
             {/* Play for Fun card */}
-            <div className="rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-5 flex items-center gap-4">
+            <div className="rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-5 flex items-center gap-4 shadow-[0_18px_44px_-20px_rgba(0,0,0,0.18)]">
               <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-[#FFF4E0] dark:bg-[#FF9600]/10 border-2 border-b-4 border-[#FF9600]/30 flex items-center justify-center text-2xl">
                 🎮
               </div>

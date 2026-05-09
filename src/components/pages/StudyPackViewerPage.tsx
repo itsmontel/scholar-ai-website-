@@ -16,6 +16,7 @@ import { exportStudyPackSegment } from '../../utils/studyPackExport';
 // that hides their Header/Footer — exactly what we need for inline play.
 const LightningReflexQuizPage = lazy(() => import('./tools/LightningReflexQuizPage'));
 const WordTowerPage = lazy(() => import('./tools/WordTowerPage'));
+const WordBlitzPage = lazy(() => import('../games/word-blitz/WordBlitzPage'));
 
 const TABS = [
   { key: 'notes', label: 'Original Notes', icon: '📄', proOnly: false },
@@ -25,6 +26,7 @@ const TABS = [
   { key: 'crossword', label: 'Crossword', icon: '🧩', proOnly: true },
   { key: 'craterBlast', label: 'Crater Blast', icon: '💥', proOnly: true },
   { key: 'wordTower', label: 'Word Tower', icon: '🗼', proOnly: true },
+  { key: 'wordBlitz', label: 'Word Blitz', icon: '⚡', proOnly: true },
 ] as const;
 
 type TabKey = typeof TABS[number]['key'];
@@ -66,7 +68,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
   const [exportFormatTarget, setExportFormatTarget] = useState<'pdf' | 'docx' | 'json' | null>(null);
   // When non-null, render the matching game page inline (full viewport,
   // minimal-UI). Setting it to null returns the user to the viewer tab.
-  const [inlineGame, setInlineGame] = useState<'craterBlast' | 'wordTower' | null>(null);
+  const [inlineGame, setInlineGame] = useState<'craterBlast' | 'wordTower' | 'wordBlitz' | null>(null);
 
   useEffect(() => {
     if (initialData?.data) {
@@ -102,7 +104,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
 
   const plan = (user?.plan || 'free').toLowerCase();
   const isPaidUser = plan === 'pro' || plan === 'premium';
-  const isLocked = (key: TabKey) => !isPaidUser && ['crossword', 'craterBlast', 'wordTower'].includes(key);
+  const isLocked = (key: TabKey) => !isPaidUser && ['crossword', 'craterBlast', 'wordTower', 'wordBlitz'].includes(key);
 
   const handleOpenFull = (tab: TabKey, state?: { questionIndex?: number; slideIndex?: number }) => {
     const d = pack?.data?.[tab];
@@ -170,6 +172,19 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
         localStorage.setItem('writescholar_minimal_ui', 'true');
         setInlineGame('wordTower');
         break;
+      case 'wordBlitz':
+        // Word Blitz expects the same `{ questions: { questions: [...] } }`
+        // shape so its saved-game-load effect can decode it. quiz_type stays
+        // 'word_blitz' so the My-Packs filter inside Word Blitz can pick
+        // this up too.
+        localStorage.setItem('savedWordBlitz', JSON.stringify({
+          title: title,
+          questions: { questions: d.questions, inputType: 'notes' },
+          quiz_type: 'word_blitz',
+        }));
+        localStorage.setItem('writescholar_minimal_ui', 'true');
+        setInlineGame('wordBlitz');
+        break;
     }
   };
 
@@ -211,9 +226,13 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
           <RandomMascotLoader size={140} />
         </div>
       }>
-        {inlineGame === 'craterBlast'
-          ? <LightningReflexQuizPage onNavigate={wrappedNavigate} user={user} onLogout={onLogout} />
-          : <WordTowerPage onNavigate={wrappedNavigate} user={user} onLogout={onLogout} />}
+        {inlineGame === 'craterBlast' ? (
+          <LightningReflexQuizPage onNavigate={wrappedNavigate} user={user} onLogout={onLogout} />
+        ) : inlineGame === 'wordTower' ? (
+          <WordTowerPage onNavigate={wrappedNavigate} user={user} onLogout={onLogout} />
+        ) : (
+          <WordBlitzPage onNavigate={wrappedNavigate} user={user} onLogout={onLogout} />
+        )}
       </Suspense>
     );
   }
@@ -426,13 +445,37 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
           </div>
         </div>
       )}
+      {activeTab === 'wordBlitz' && hasData('wordBlitz') && !isLocked('wordBlitz') && (
+        <div className="p-6 flex flex-col items-center justify-center min-h-[400px]">
+          <div className="w-full max-w-sm text-center">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-6 bg-[#FF9600] border-2 border-b-4 border-[#D97F00]">
+              <span className="text-4xl">⚡</span>
+            </div>
+            <h2 className="text-2xl font-extrabold text-stone-900 dark:text-stone-100 tracking-tight mb-2">Word Blitz</h2>
+            <p className="text-stone-500 dark:text-stone-400 text-sm mb-8 font-medium">{(Array.isArray(pack.data.wordBlitz?.questions) ? pack.data.wordBlitz.questions : pack.data.wordBlitz?.questions?.questions ?? []).length} questions ready · 60-second clock</p>
+            <button
+              onClick={() => handleOpenFull('wordBlitz')}
+              className="inline-flex items-center gap-2 px-12 py-3.5 rounded-xl text-white font-bold text-base uppercase tracking-wide bg-[#FF9600] border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all mb-6"
+            >
+              ⚡ Start Game
+            </button>
+            <button
+              onClick={() => setActiveTab('notes')}
+              className="block w-full max-w-xs mx-auto px-6 py-3 rounded-xl bg-white dark:bg-stone-700 text-stone-700 dark:text-stone-200 font-bold border-2 border-b-4 border-stone-300 dark:border-stone-500 active:border-b-2 active:translate-y-0.5 transition-all"
+            >
+              ← Back to menu
+            </button>
+          </div>
+        </div>
+      )}
       {(activeTab !== 'notes' || !hasData('notes')) &&
        (activeTab !== 'lesson' || isLocked('lesson') || !hasData('lesson')) &&
        (activeTab !== 'flashcards' || isLocked('flashcards') || !hasData('flashcards')) &&
        (activeTab !== 'quiz' || isLocked('quiz') || !hasData('quiz')) &&
        (activeTab !== 'crossword' || isLocked('crossword') || !hasData('crossword')) &&
        (activeTab !== 'craterBlast' || isLocked('craterBlast') || !hasData('craterBlast')) &&
-       (activeTab !== 'wordTower' || isLocked('wordTower') || !hasData('wordTower')) && (
+       (activeTab !== 'wordTower' || isLocked('wordTower') || !hasData('wordTower')) &&
+       (activeTab !== 'wordBlitz' || isLocked('wordBlitz') || !hasData('wordBlitz')) && (
         <div className="p-8 sm:p-12 flex flex-col items-center justify-center min-h-[400px] text-center">
           {isLocked(activeTab) ? (
             <>
@@ -440,7 +483,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
                 {TABS.find(t => t.key === activeTab)?.icon}
               </div>
               <h3 className="text-lg font-extrabold text-stone-800 dark:text-stone-100 mb-2">{TABS.find(t => t.key === activeTab)?.label} is a Pro feature</h3>
-              <p className="text-stone-500 dark:text-stone-400 text-sm mb-6 font-medium">Upgrade to unlock Crossword, Crater Blast, and Word Tower.</p>
+              <p className="text-stone-500 dark:text-stone-400 text-sm mb-6 font-medium">Upgrade to unlock Crossword, Crater Blast, Word Tower, and Word Blitz.</p>
               <button
                 onClick={() => onNavigate('pricing')}
                 className="px-8 py-3 bg-[#FF9600] text-white font-bold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all"
@@ -479,7 +522,8 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
                 {activeTab === 'crossword' && `${pack.data.crossword?.placedWords?.length || 0} words`}
                 {activeTab === 'craterBlast' && `${pack.data.craterBlast?.questions?.length || 0} questions`}
                 {activeTab === 'wordTower' && `${pack.data.wordTower?.questions?.length || 0} questions`}
-                {!['lesson','quiz','crossword','craterBlast','wordTower'].includes(activeTab) && 'Ready to study'}
+                {activeTab === 'wordBlitz' && `${pack.data.wordBlitz?.questions?.length || 0} questions`}
+                {!['lesson','quiz','crossword','craterBlast','wordTower','wordBlitz'].includes(activeTab) && 'Ready to study'}
               </p>
               <button
                 onClick={() => handleOpenFull(activeTab)}
