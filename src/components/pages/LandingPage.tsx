@@ -959,6 +959,31 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     Trusted by <span className="font-extrabold text-[#1CB0F6] dark:text-[#1CB0F6] tabular-nums">50,000+</span> students worldwide
                   </span>
                 </div>
+
+                {/* MOBILE-ONLY hero demo video — replaces the floating PiP on
+                    phones. Inline placement so the video is part of the hero
+                    flow rather than a floating overlay that would crowd a
+                    small viewport. Same source file, same autoplay/muted/loop
+                    behavior, wrapped with the Duolingo 3D border so it reads
+                    as a "look what you get" reveal under the trust pill. */}
+                <div className="md:hidden mt-8 w-full max-w-md mx-auto">
+                  <div className="relative group">
+                    <div className="absolute -inset-2 bg-[#A560E8]/15 rounded-3xl blur-2xl opacity-60" aria-hidden />
+                    <div className="relative rounded-2xl overflow-hidden border-2 border-b-4 border-[#8A48C7] shadow-xl bg-white dark:bg-stone-900">
+                      <video
+                        src="/hero-vid.mp4"
+                        poster="/hero-vid-poster.jpg"
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        preload="metadata"
+                        aria-label="WriteScholar walkthrough: a quick screen recording of the full product"
+                        className="w-full h-auto block"
+                      />
+                    </div>
+                  </div>
+                </div>
                 </div>
               </div>
               </div>
@@ -2670,7 +2695,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
         <div
           role="region"
           aria-label="Product demo video"
-          className={`fixed z-[60] transition-all duration-500 ease-out
+          className={`fixed z-[60] transition-all duration-500 ease-out hidden md:block
             ${pipVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}
             ${pipExpanded
               ? 'bottom-4 right-4 left-4 sm:left-auto sm:bottom-6 sm:right-6 w-auto sm:w-[480px] lg:w-[560px]'
