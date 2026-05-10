@@ -297,6 +297,74 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           </div>
         </div>
 
+        {/* ─── Guides & Resources mega-section ───────────────────────────
+            Internal-link footer block for the 30 programmatic SEO landing
+            pages (/study/*, /alternatives/*, /guides/*, /best/*). Without
+            this, those pages are SEO orphans — discoverable only by direct
+            URL or Google search, never by clicking around the site. The
+            block also gives Google a clear "internal link graph" to follow,
+            which is one of the strongest signals for ranking related pages.
+
+            Plain <a href> tags (not the SPA onNavigate handler) because:
+              - Google crawler follows real <a href> internally without JS
+              - Each programmatic page is prerendered to static HTML, so a
+                full page load actually serves cached HTML fast
+              - Avoids needing the SPA router to know about every URL
+        ─── */}
+        <div className="mb-10 pb-10 border-b border-stone-700">
+          <h4 className="font-extrabold text-white mb-2 text-sm uppercase tracking-wide">Guides &amp; Resources</h4>
+          <p className="text-stone-400 text-xs mb-6">Free study guides, tool comparisons, and writing tutorials for college students.</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
+            {/* Study by subject */}
+            <div>
+              <p className="text-stone-300 text-xs font-extrabold uppercase tracking-wider mb-3">Study by subject</p>
+              <ul className="space-y-2">
+                <li><a href="/study/biology" className="text-stone-400 hover:text-white text-sm transition-colors">Biology study tools</a></li>
+                <li><a href="/study/chemistry" className="text-stone-400 hover:text-white text-sm transition-colors">Chemistry study tools</a></li>
+                <li><a href="/study/anatomy" className="text-stone-400 hover:text-white text-sm transition-colors">Anatomy flashcards</a></li>
+                <li><a href="/study/calculus" className="text-stone-400 hover:text-white text-sm transition-colors">Calculus help</a></li>
+                <li><a href="/study/psychology" className="text-stone-400 hover:text-white text-sm transition-colors">Psychology study tools</a></li>
+                <li><a href="/study/statistics" className="text-stone-400 hover:text-white text-sm transition-colors">Statistics study tools</a></li>
+              </ul>
+            </div>
+            {/* Compare alternatives */}
+            <div>
+              <p className="text-stone-300 text-xs font-extrabold uppercase tracking-wider mb-3">Compare</p>
+              <ul className="space-y-2">
+                <li><a href="/alternatives/quizlet" className="text-stone-400 hover:text-white text-sm transition-colors">Quizlet alternative</a></li>
+                <li><a href="/alternatives/course-hero" className="text-stone-400 hover:text-white text-sm transition-colors">Course Hero alternative</a></li>
+                <li><a href="/alternatives/grammarly" className="text-stone-400 hover:text-white text-sm transition-colors">Grammarly alternative</a></li>
+                <li><a href="/alternatives/chegg" className="text-stone-400 hover:text-white text-sm transition-colors">Chegg alternative</a></li>
+                <li><a href="/alternatives/knowt" className="text-stone-400 hover:text-white text-sm transition-colors">Knowt alternative</a></li>
+              </ul>
+            </div>
+            {/* Writing guides */}
+            <div>
+              <p className="text-stone-300 text-xs font-extrabold uppercase tracking-wider mb-3">Writing guides</p>
+              <ul className="space-y-2">
+                <li><a href="/guides/how-to-write-argumentative-essay" className="text-stone-400 hover:text-white text-sm transition-colors">How to write an argumentative essay</a></li>
+                <li><a href="/guides/how-to-write-thesis-statement" className="text-stone-400 hover:text-white text-sm transition-colors">How to write a thesis statement</a></li>
+                <li><a href="/guides/how-to-write-research-paper" className="text-stone-400 hover:text-white text-sm transition-colors">How to write a research paper</a></li>
+                <li><a href="/guides/how-to-write-college-essay" className="text-stone-400 hover:text-white text-sm transition-colors">How to write a college essay</a></li>
+                <li><a href="/guides/how-to-cite-sources-apa" className="text-stone-400 hover:text-white text-sm transition-colors">APA citation guide</a></li>
+                <li><a href="/guides/how-to-write-analytical-essay" className="text-stone-400 hover:text-white text-sm transition-colors">How to write an analytical essay</a></li>
+              </ul>
+            </div>
+            {/* Best for */}
+            <div>
+              <p className="text-stone-300 text-xs font-extrabold uppercase tracking-wider mb-3">Best for</p>
+              <ul className="space-y-2">
+                <li><a href="/best/ai-essay-grader-for-college" className="text-stone-400 hover:text-white text-sm transition-colors">Best AI essay grader for college</a></li>
+                <li><a href="/best/flashcard-app-for-medical-school" className="text-stone-400 hover:text-white text-sm transition-colors">Best flashcard app for med school</a></li>
+                <li><a href="/best/study-app-for-college" className="text-stone-400 hover:text-white text-sm transition-colors">Best study app for college</a></li>
+                <li><a href="/best/quiz-maker-for-teachers" className="text-stone-400 hover:text-white text-sm transition-colors">Best quiz maker for teachers</a></li>
+                <li><a href="/best/citation-generator" className="text-stone-400 hover:text-white text-sm transition-colors">Best citation generator</a></li>
+                <li><a href="/press" className="text-stone-400 hover:text-white text-sm transition-colors">Press &amp; media kit</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
         {/* VivoResume — sister product (logo: public/Vivoresumemeta.png) */}
         <div className="mb-10 rounded-2xl border-2 border-b-4 border-stone-600 bg-stone-900 px-5 py-5 sm:px-6 sm:py-6 flex flex-col sm:flex-row items-center gap-5 sm:gap-8">
           <a

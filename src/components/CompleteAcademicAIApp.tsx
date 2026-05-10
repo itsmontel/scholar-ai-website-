@@ -947,6 +947,15 @@ const AcademicAIApp = () => {
   };
 
   const navigateTo = (page: string, slug?: string, options?: { quizHistoryFilter?: 'all' | 'quiz' | 'flashcards' | 'crossword' | 'crater_blast'; studyPack?: { data: any; title?: string }; unlockQuizQuery?: string }) => {
+    // Programmatic SEO routes — caller passes a URL path like "/study/biology"
+    // instead of a page name. Map it to the 'programmatic' page; the
+    // ProgrammaticLandingPage component looks up the config by URL pathname.
+    if (page.startsWith('/study/') || page.startsWith('/alternatives/') || page.startsWith('/guides/') || page.startsWith('/best/')) {
+      setCurrentPage('programmatic');
+      window.history.pushState({}, '', page);
+      window.scrollTo(0, 0);
+      return;
+    }
     if (HIDE_STREAK_AND_BADGES && page === 'badges') {
       setCurrentPage('dashboard');
       window.history.pushState({}, '', '/dashboard');
