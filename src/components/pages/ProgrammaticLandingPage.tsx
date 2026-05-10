@@ -208,8 +208,36 @@ interface Props {
   onLogout: () => void;
 }
 
+/**
+ * Mascot GIF picker. We rotate the mascot per page-type so visitors don't
+ * see the exact same illustration on every programmatic page in their
+ * session, but the choice is deterministic per page (no flicker on re-render).
+ *
+ * Available assets in /public:
+ *   - /mascot-laptop.gif      → studying / general purpose
+ *   - /mascot-paper.gif       → writing / essays
+ *   - /mascot-juggling.gif    → "lots of tools / lots of options"
+ *   - /mascot-celebrating.gif → CTA / closing
+ *   - /mascot-jumping-joy.gif → engagement / "ready to go"
+ *   - /mascot-dance.gif       → energy / fun
+ */
+function pickHeroMascot(type: string): string {
+  switch (type) {
+    case 'subject':       return '/mascot-laptop.gif';
+    case 'alternative':   return '/mascot-juggling.gif';
+    case 'guide':         return '/mascot-paper.gif';
+    case 'best':          return '/mascot-jumping-joy.gif';
+    default:              return '/mascot-laptop.gif';
+  }
+}
+function pickCtaMascot(): string {
+  return '/mascot-celebrating.gif';
+}
+
 const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) => {
   const accent = config.accent || '#A560E8';
+  const heroMascot = pickHeroMascot(config.type);
+  const ctaMascot = pickCtaMascot();
 
   useEffect(() => {
     applyPageSeoTags({
@@ -228,14 +256,32 @@ const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) 
     <div className="min-h-screen flex flex-col bg-stone-50 dark:bg-stone-950">
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} />
 
-      {/* Hero */}
-      <section className="relative pt-12 sm:pt-20 pb-12 sm:pb-16 border-b border-stone-200 dark:border-stone-800 overflow-hidden">
+      {/* Hero, with mascot GIF in a coloured ring above the H1 so the page
+          feels like part of the WriteScholar product (every other surface
+          uses the same mascot). */}
+      <section className="relative pt-12 sm:pt-16 pb-12 sm:pb-16 border-b border-stone-200 dark:border-stone-800 overflow-hidden">
         <div
           className="absolute inset-0 opacity-30 dark:opacity-20"
           style={{ background: `radial-gradient(ellipse 70% 50% at 50% 0%, ${accent}30, transparent 60%)` }}
           aria-hidden
         />
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          {/* Mascot GIF pinned above the eyebrow, sized to match the trust
+              pill style on the homepage so the visual language stays consistent. */}
+          <div className="flex justify-center mb-5">
+            <div
+              className="rounded-full p-1.5 border-4"
+              style={{ backgroundColor: `${accent}15`, borderColor: `${accent}50` }}
+            >
+              <img
+                src={heroMascot}
+                alt=""
+                aria-hidden
+                className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover bg-white"
+                loading="eager"
+              />
+            </div>
+          </div>
           <span
             className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[10px] sm:text-xs font-extrabold uppercase tracking-wider border mb-5"
             style={{
@@ -278,9 +324,39 @@ const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) 
       <main className="flex-1 py-12 sm:py-16">
         <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Intro paragraph */}
-          <p className="text-base sm:text-lg text-stone-700 dark:text-stone-300 leading-relaxed mb-12 max-w-3xl">
+          <p className="text-base sm:text-lg text-stone-700 dark:text-stone-300 leading-relaxed mb-10 max-w-3xl">
             {config.intro}
           </p>
+
+          {/* Mascot break card, sits between the intro and the first
+              section. Breaks up the wall of text and reinforces the
+              "this is a study app, not just a content site" framing. */}
+          <div
+            className="flex flex-col sm:flex-row items-center gap-5 rounded-3xl p-5 sm:p-6 mb-12 border-2 border-b-4"
+            style={{ backgroundColor: `${accent}08`, borderColor: `${accent}30` }}
+          >
+            <img
+              src="/mascot-juggling.gif"
+              alt=""
+              aria-hidden
+              loading="lazy"
+              className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover flex-shrink-0 bg-white"
+            />
+            <div className="text-center sm:text-left">
+              <div
+                className="text-[11px] font-extrabold uppercase tracking-wider mb-1"
+                style={{ color: accent }}
+              >
+                Built into WriteScholar
+              </div>
+              <h2 className="text-lg sm:text-xl font-extrabold text-stone-900 dark:text-stone-50 mb-1">
+                Flashcards, quizzes, and AI feedback in one app
+              </h2>
+              <p className="text-stone-700 dark:text-stone-300 text-[14px] leading-relaxed">
+                Free to start. No credit card. Used by 50,000+ college students.
+              </p>
+            </div>
+          </div>
 
           {/* Custom sections */}
           {config.sections.map((section, i) => {
@@ -325,11 +401,27 @@ const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) 
             </div>
           </div>
 
-          {/* Final CTA card */}
+          {/* Final CTA card with the celebrating-mascot GIF above the heading.
+              Reinforces the brand mascot used elsewhere on the site at the
+              moment of decision (when the user is most likely to convert). */}
           <div
             className="rounded-3xl p-8 sm:p-10 text-center border-2 border-b-4 mb-12"
             style={{ backgroundColor: `${accent}10`, borderColor: `${accent}40` }}
           >
+            <div className="flex justify-center mb-4">
+              <div
+                className="rounded-full p-1.5 border-4"
+                style={{ backgroundColor: 'white', borderColor: accent }}
+              >
+                <img
+                  src={ctaMascot}
+                  alt=""
+                  aria-hidden
+                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover bg-white"
+                  loading="lazy"
+                />
+              </div>
+            </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-900 dark:text-stone-50 mb-3">
               Ready to try it free?
             </h2>
