@@ -178,28 +178,28 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
       description: 'Upload a document or paste text to get AI-powered feedback',
       action: () => onNavigate?.('dashboard'),
       color: 'lime',
-      icon: <img src="/mascot-paper.gif" alt="" className="w-14 h-14 object-contain" />
+      icon: <img src="/mascot-paper.webp" alt="" className="w-14 h-14 object-contain" />
     },
     {
       title: 'View Analysis History',
       description: 'Access all your saved analyses and results',
       action: () => onNavigate?.('analysis-history'),
       color: 'lime',
-      icon: <img src="/mascot-study.gif" alt="" className="w-14 h-14 object-contain" />
+      icon: <img src="/mascot-study.webp" alt="" className="w-14 h-14 object-contain" />
     },
     {
       title: 'Upload Documents',
       description: 'Upload PDF, DOC, DOCX, or TXT files for analysis',
       action: () => onNavigate?.('dashboard'),
       color: 'lime',
-      icon: <img src="/mascot-laptop.gif" alt="" className="w-14 h-14 object-contain" />
+      icon: <img src="/mascot-laptop.webp" alt="" className="w-14 h-14 object-contain" />
     },
     {
       title: 'Contact Support',
       description: 'Get help from our expert team',
       action: () => onNavigate?.('contact'),
       color: 'lime',
-      icon: <img src="/mascot-celebrating.gif" alt="" className="w-14 h-14 object-contain" />
+      icon: <img src="/mascot-celebrating.webp" alt="" className="w-14 h-14 object-contain" />
     }
   ];
 

@@ -115,7 +115,7 @@ const StudyToolsComparisonPage: React.FC<StudyToolsComparisonPageProps> = ({ onN
           <div className="relative text-center mb-12">
             {/* Mascot - studying pose */}
             <div className="hidden lg:block absolute -right-[6rem] xl:-right-[7rem] top-0 -translate-y-[80%] w-28 h-36 flex items-center justify-center">
-              <img src="/mascot-study.gif" alt="WriteScholar mascot" className="w-28 h-28 object-contain" />
+              <img src="/mascot-study.webp" alt="WriteScholar mascot" className="w-28 h-28 object-contain" />
             </div>
           </div>
 

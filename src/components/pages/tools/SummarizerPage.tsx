@@ -289,7 +289,7 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
           <div className="max-w-5xl mx-auto">
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
               <div className="flex-shrink-0">
-                <img src="/mascot-paper.gif" alt="WriteScholar mascot" className="w-[100px] h-[100px] object-contain rounded-2xl" />
+                <img src="/mascot-paper.webp" alt="WriteScholar mascot" className="w-[100px] h-[100px] object-contain rounded-2xl" />
               </div>
               <div className="flex-1 text-center sm:text-left">
                 <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-3 mb-3 sm:mb-4 flex-wrap">

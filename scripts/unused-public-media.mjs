@@ -18,4 +18,17 @@ export const UNUSED_PUBLIC_MEDIA = [
   'humanisevid.mov',
   'writescholar-humanizer-demo.mp4',
   'quizvid.mov',
+  /* Mascot GIFs (6-29 MB each, ~165 MB total). All replaced with .webp
+     versions in src code (1-2 MB each). Strip from dist so production users
+     don't accidentally download them via stale URLs. */
+  'mascot-celebrating.gif',
+  'mascot-dance.gif',
+  'mascot-juggling.gif',
+  'mascot-jumping-joy.gif',
+  'mascot-laptop.gif',
+  'mascot-paper.gif',
+  'mascot-sad.gif',
+  'mascot-study.gif',
+  'mascot-thinking.gif',
+  'mascot-walking.gif',
 ];

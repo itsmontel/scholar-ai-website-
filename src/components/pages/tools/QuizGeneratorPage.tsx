@@ -1217,7 +1217,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
         <div className="bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl shadow-xl border-2 border-b-4 border-stone-200 border-b-stone-300 dark:border-stone-600 dark:border-b-stone-500 overflow-hidden p-6 sm:p-10 text-center" style={{ fontFamily: "'Nunito', sans-serif" }}>
           <div className="mb-8">
             <img
-              src="/mascot-celebrating.gif"
+              src="/mascot-celebrating.webp"
               alt="Celebrating mascot"
               className="w-28 h-28 mx-auto mb-4 object-contain rounded-2xl border-2 border-b-4 overflow-hidden"
               style={{ borderColor: tierColor }}
@@ -1676,7 +1676,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
           <div className="max-w-6xl mx-auto">
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-8">
                 <div className="flex-shrink-0">
-                <img src="/mascot-study.gif" alt="WriteScholar mascot" className="w-[96px] h-[96px] object-contain rounded-2xl" />
+                <img src="/mascot-study.webp" alt="WriteScholar mascot" className="w-[96px] h-[96px] object-contain rounded-2xl" />
               </div>
               <div className="flex-1 text-center sm:text-left">
                 <div className="flex items-center justify-center sm:justify-start gap-2 sm:gap-3 mb-3 sm:mb-4 flex-wrap">
@@ -1743,7 +1743,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                     <div className="p-6 sm:p-8 pb-4 border-b-2 border-stone-100 dark:border-stone-700">
                       <div className="flex items-start gap-4">
                         <div className="flex-shrink-0 hidden sm:block">
-                          <img src="/mascot-laptop.gif" alt="WriteScholar mascot" className="w-[72px] h-[72px] object-contain rounded-2xl" />
+                          <img src="/mascot-laptop.webp" alt="WriteScholar mascot" className="w-[72px] h-[72px] object-contain rounded-2xl" />
                         </div>
                         <div>
                           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-stone-800 dark:text-stone-100 leading-tight tracking-tight">
@@ -2174,7 +2174,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                       return (
                         <div className={`mb-4 p-4 rounded-2xl text-center ${total === 0 ? 'bg-stone-50 dark:bg-stone-800 border-2 border-b-4 border-stone-200 dark:border-stone-600' : correct === total ? 'bg-[#EAFFD6] border-2 border-b-4 border-[#58CC02]/30' : 'bg-[#FFF4E0] dark:bg-amber-900/20 border-2 border-b-4 border-[#FF9600]/30'}`}>
                           {total === 0 ? <span className="text-3xl mb-1 block">✏️</span> : correct === total ? (
-                            <img src="/mascot-celebrating.gif" alt="Celebrating mascot" className="w-16 h-16 mx-auto mb-1 object-contain rounded-xl border-2 border-b-4 border-[#58CC02]/50 dark:border-[#58CC02]/40 overflow-hidden" />
+                            <img src="/mascot-celebrating.webp" alt="Celebrating mascot" className="w-16 h-16 mx-auto mb-1 object-contain rounded-xl border-2 border-b-4 border-[#58CC02]/50 dark:border-[#58CC02]/40 overflow-hidden" />
                           ) : <span className="text-3xl mb-1 block">📊</span>}
                           {total === 0 ? (
                             <>

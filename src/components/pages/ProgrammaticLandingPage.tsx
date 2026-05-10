@@ -349,24 +349,24 @@ interface Props {
  * session, but the choice is deterministic per page (no flicker on re-render).
  *
  * Available assets in /public:
- *   - /mascot-laptop.gif      → studying / general purpose
- *   - /mascot-paper.gif       → writing / essays
- *   - /mascot-juggling.gif    → "lots of tools / lots of options"
- *   - /mascot-celebrating.gif → CTA / closing
- *   - /mascot-jumping-joy.gif → engagement / "ready to go"
- *   - /mascot-dance.gif       → energy / fun
+ *   - /mascot-laptop.webp      → studying / general purpose
+ *   - /mascot-paper.webp       → writing / essays
+ *   - /mascot-juggling.webp    → "lots of tools / lots of options"
+ *   - /mascot-celebrating.webp → CTA / closing
+ *   - /mascot-jumping-joy.webp → engagement / "ready to go"
+ *   - /mascot-dance.webp       → energy / fun
  */
 function pickHeroMascot(type: string): string {
   switch (type) {
-    case 'subject':       return '/mascot-laptop.gif';
-    case 'alternative':   return '/mascot-juggling.gif';
-    case 'guide':         return '/mascot-paper.gif';
-    case 'best':          return '/mascot-jumping-joy.gif';
-    default:              return '/mascot-laptop.gif';
+    case 'subject':       return '/mascot-laptop.webp';
+    case 'alternative':   return '/mascot-juggling.webp';
+    case 'guide':         return '/mascot-paper.webp';
+    case 'best':          return '/mascot-jumping-joy.webp';
+    default:              return '/mascot-laptop.webp';
   }
 }
 function pickCtaMascot(): string {
-  return '/mascot-celebrating.gif';
+  return '/mascot-celebrating.webp';
 }
 
 const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) => {
@@ -530,7 +530,7 @@ const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) 
                 style={{ borderColor: `${accent}40`, backgroundColor: `${accent}10` }}
               >
                 <img
-                  src="/mascot-juggling.gif"
+                  src="/mascot-juggling.webp"
                   alt=""
                   aria-hidden
                   loading="lazy"
@@ -589,7 +589,7 @@ const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) 
             <div className="flex items-center gap-4 mb-6">
               <SectionHeading accent={accent}>Frequently asked questions</SectionHeading>
               <img
-                src="/mascot-laptop.gif"
+                src="/mascot-laptop.webp"
                 alt=""
                 aria-hidden
                 loading="lazy"

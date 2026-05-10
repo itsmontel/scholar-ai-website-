@@ -764,7 +764,7 @@ const WordTowerPage = ({ onNavigate, user, onLogout }: WordTowerPageProps) => {
       <div className="relative max-w-2xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 mb-10 sm:mb-12">
           <div className="flex-shrink-0">
-            <img src="/mascot-study.gif" alt="WriteScholar mascot" className="w-[100px] h-[100px] object-contain rounded-2xl" />
+            <img src="/mascot-study.webp" alt="WriteScholar mascot" className="w-[100px] h-[100px] object-contain rounded-2xl" />
           </div>
           <div className="flex-1 text-center sm:text-left">
             <h1 className="text-3xl sm:text-4xl font-extrabold text-stone-900 tracking-tight mb-3">

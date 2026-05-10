@@ -84,7 +84,7 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
             <button onClick={() => onNavigate('analyze')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-6 hover:border-[#1CB0F6] dark:hover:border-[#1CB0F6] active:border-b-2 active:translate-y-0.5 transition-all duration-300 text-left">
               <div className="relative flex flex-col items-center text-center mb-4">
                 <div className="w-14 h-14 rounded-2xl bg-[#DDF4FF] dark:bg-[#1CB0F6]/20 flex items-center justify-center mb-3">
-                  <img src="/mascot-study.gif" alt="WriteScholar mascot" className="w-[48px] h-[48px] object-contain" />
+                  <img src="/mascot-study.webp" alt="WriteScholar mascot" className="w-[48px] h-[48px] object-contain" />
                 </div>
                 <h3 className="font-bold text-[#1CB0F6] text-lg">Essay Analyzer</h3>
               </div>
@@ -95,7 +95,7 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
             <button onClick={() => onNavigate('citations')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-6 hover:border-[#1CB0F6] dark:hover:border-[#1CB0F6] active:border-b-2 active:translate-y-0.5 transition-all duration-300 text-left">
               <div className="relative flex flex-col items-center text-center mb-4">
                 <div className="w-14 h-14 rounded-2xl bg-[#DDF4FF] dark:bg-[#1CB0F6]/20 flex items-center justify-center mb-3">
-                  <img src="/mascot-paper.gif" alt="WriteScholar mascot" className="w-[48px] h-[48px] object-contain" />
+                  <img src="/mascot-paper.webp" alt="WriteScholar mascot" className="w-[48px] h-[48px] object-contain" />
                 </div>
                 <h3 className="font-bold text-[#1CB0F6] text-lg">Online Citations</h3>
               </div>
@@ -105,7 +105,7 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
             {/* Study Packs - Flagship */}
             <button onClick={() => onNavigate('dashboard')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-b-4 border-[#FF9600]/30 dark:border-[#FF9600]/30 bg-white dark:bg-stone-800 p-6 hover:border-[#FF9600] dark:hover:border-[#FF9600] active:border-b-2 active:translate-y-0.5 transition-all duration-300 text-left">
               <div className="relative flex flex-col items-center text-center mb-4">
-                <div className="w-14 h-14 rounded-2xl bg-[#FFF4E0] dark:bg-[#FF9600]/20 flex items-center justify-center mb-3"><img src="/mascot-juggling.gif" alt="Study Packs" className="w-[48px] h-[48px] object-contain" /></div>
+                <div className="w-14 h-14 rounded-2xl bg-[#FFF4E0] dark:bg-[#FF9600]/20 flex items-center justify-center mb-3"><img src="/mascot-juggling.webp" alt="Study Packs" className="w-[48px] h-[48px] object-contain" /></div>
                 <h3 className="font-bold text-[#FF9600] text-lg">Study Packs</h3>
               </div>
               <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed text-center">Create quizzes, flashcards, crosswords & lessons from any notes. One paste, five formats.</p>
@@ -114,7 +114,7 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
             {/* Focus Mode - Flagship */}
             <button onClick={() => onNavigate('focus-mode')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-6 hover:border-[#1CB0F6] dark:hover:border-[#1CB0F6] active:border-b-2 active:translate-y-0.5 transition-all duration-300 text-left">
               <div className="relative flex flex-col items-center text-center mb-4">
-                <div className="w-14 h-14 rounded-2xl bg-[#DDF4FF] dark:bg-[#1CB0F6]/20 flex items-center justify-center mb-3"><img src="/mascot-thinking.gif" alt="Focus Mode" className="w-[48px] h-[48px] object-contain" /></div>
+                <div className="w-14 h-14 rounded-2xl bg-[#DDF4FF] dark:bg-[#1CB0F6]/20 flex items-center justify-center mb-3"><img src="/mascot-thinking.webp" alt="Focus Mode" className="w-[48px] h-[48px] object-contain" /></div>
                 <h3 className="font-bold text-[#1CB0F6] text-lg">Focus Mode</h3>
               </div>
               <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed text-center">Block YouTube, TikTok until you answer quiz questions from your notes. Earn your screen time.</p>
@@ -129,7 +129,7 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
             <div className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-4 sm:p-6 hover:border-[#1CB0F6] dark:hover:border-[#1CB0F6] transition-all duration-300 min-w-0">
               <div className="relative flex items-center gap-2 sm:gap-4 mb-2 sm:mb-4 min-w-0">
                 <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-stone-100 dark:bg-stone-700/80 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                  <img src="/mascot-laptop.gif" alt="WriteScholar mascot" className="w-[36px] h-[36px] object-contain" />
+                  <img src="/mascot-laptop.webp" alt="WriteScholar mascot" className="w-[36px] h-[36px] object-contain" />
                 </div>
                 <h3 className="font-bold text-stone-800 dark:text-stone-100 text-sm sm:text-lg truncate min-w-0">Document Library</h3>
               </div>
@@ -139,7 +139,7 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
             {/* Text Summarizer */}
             <button onClick={() => onNavigate('summarizer')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-4 sm:p-6 hover:border-[#58CC02] dark:hover:border-[#58CC02] transition-all duration-300 text-left min-w-0">
               <div className="relative flex items-center gap-2 sm:gap-4 mb-2 sm:mb-4 min-w-0">
-                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-[#EAFFD6] dark:bg-[#58CC02]/20 flex items-center justify-center flex-shrink-0"><img src="/mascot-paper.gif" alt="Paper Summarizer" className="w-[36px] h-[36px] object-contain" /></div>
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-[#EAFFD6] dark:bg-[#58CC02]/20 flex items-center justify-center flex-shrink-0"><img src="/mascot-paper.webp" alt="Paper Summarizer" className="w-[36px] h-[36px] object-contain" /></div>
                 <h3 className="font-bold text-[#58CC02] text-sm sm:text-lg truncate min-w-0">Paper Summarizer</h3>
               </div>
               <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 leading-relaxed line-clamp-3 sm:line-clamp-none">Condense research papers, articles, and textbooks into key points. Bullet points or paragraphs. 5,000 free words/month.</p>
@@ -148,7 +148,7 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
             {/* Citation Generator */}
             <button onClick={() => onNavigate('citation-generator-tool')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-4 sm:p-6 hover:border-[#1CB0F6] dark:hover:border-[#1CB0F6] transition-all duration-300 text-left min-w-0">
               <div className="relative flex items-center gap-2 sm:gap-4 mb-2 sm:mb-4 min-w-0">
-                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-[#DDF4FF] dark:bg-[#1CB0F6]/20 flex items-center justify-center flex-shrink-0"><img src="/mascot-laptop.gif" alt="Citation Generator" className="w-[36px] h-[36px] object-contain" /></div>
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-[#DDF4FF] dark:bg-[#1CB0F6]/20 flex items-center justify-center flex-shrink-0"><img src="/mascot-laptop.webp" alt="Citation Generator" className="w-[36px] h-[36px] object-contain" /></div>
                 <h3 className="font-bold text-[#1CB0F6] text-sm sm:text-lg truncate min-w-0">Citation Generator</h3>
               </div>
               <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 leading-relaxed line-clamp-3 sm:line-clamp-none">Generate perfectly formatted citations from a URL, book, or journal. APA, MLA, Chicago, Harvard, and more.</p>
@@ -157,7 +157,7 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
             {/* Pomodoro Timer */}
             <button onClick={() => onNavigate('pomodoro-timer')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-4 sm:p-6 hover:border-[#58CC02] dark:hover:border-[#58CC02] transition-all duration-300 text-left min-w-0">
               <div className="relative flex items-center gap-2 sm:gap-4 mb-2 sm:mb-4 min-w-0">
-                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-[#EAFFD6] dark:bg-[#58CC02]/20 flex items-center justify-center flex-shrink-0"><img src="/mascot-jumping-joy.gif" alt="Pomodoro Timer" className="w-[36px] h-[36px] object-contain" /></div>
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-[#EAFFD6] dark:bg-[#58CC02]/20 flex items-center justify-center flex-shrink-0"><img src="/mascot-jumping-joy.webp" alt="Pomodoro Timer" className="w-[36px] h-[36px] object-contain" /></div>
                 <h3 className="font-bold text-[#58CC02] text-sm sm:text-lg truncate min-w-0">Pomodoro Timer</h3>
               </div>
               <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 leading-relaxed line-clamp-3 sm:line-clamp-none">Stay focused with timed study sessions. Work in 25-minute sprints with built-in breaks for better productivity.</p>

@@ -227,7 +227,7 @@ const LevelUpCelebration = ({ level, levelName, totalXP, onClose }: LevelUpCeleb
             }}
           >
             <img
-              src="/mascot-celebrating.gif"
+              src="/mascot-celebrating.webp"
               alt="Mascot celebrating"
               className="w-24 h-24 sm:w-28 sm:h-28 object-contain"
             />

@@ -168,7 +168,7 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
             </p>
             <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-[#58CC02]" aria-hidden />
             <div className="flex justify-center mb-6">
-              <img src="/mascot-thinking.gif" alt="Focus Mode mascot" className="w-16 h-16 object-contain" />
+              <img src="/mascot-thinking.webp" alt="Focus Mode mascot" className="w-16 h-16 object-contain" />
             </div>
             <h1
               id="focus-mode-heading"
@@ -321,7 +321,7 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
                 </div>
               </div>
               <div className="flex items-center gap-4">
-                <img src="/mascot-thinking.gif" alt="Focus Mode mascot" className="w-20 h-20 object-contain" />
+                <img src="/mascot-thinking.webp" alt="Focus Mode mascot" className="w-20 h-20 object-contain" />
                 <p className="text-stone-600 dark:text-stone-400 italic font-medium">
                   &quot;Study first. Scroll later.&quot;
                 </p>
@@ -401,7 +401,7 @@ const FocusModePage = ({ onNavigate, user, onLogout }: FocusModePageProps) => {
         <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 px-6 py-10 sm:px-10 sm:py-12">
             <div className="flex justify-center">
-              <img src="/mascot-celebrating.gif" alt="Focus Mode mascot" className="w-24 h-24 object-contain" />
+              <img src="/mascot-celebrating.webp" alt="Focus Mode mascot" className="w-24 h-24 object-contain" />
             </div>
             <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#58CC02] dark:text-[#58CC02] mb-3 mt-4">
               Focus Mode

@@ -110,7 +110,7 @@ export const AuthMarketingSide: React.FC = () => {
             <div className="absolute inset-0 -m-2 rounded-2xl bg-white/40 blur-xl" />
             <div className="relative w-28 h-28 rounded-2xl border-2 border-b-4 border-[#A560E8]/25 bg-white shadow-xl shadow-[#A560E8]/10 flex items-center justify-center overflow-hidden">
               <img
-                src="/mascot-study.gif"
+                src="/mascot-study.webp"
                 alt=""
                 aria-hidden
                 loading="lazy"

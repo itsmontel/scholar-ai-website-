@@ -12,10 +12,10 @@ interface AboutPageProps {
 
 const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
   const mainFeatures = [
-    { id: 'analyze', title: 'Essay Analyzer', desc: 'Professor-style feedback on structure, clarity, citations. Grade-level rubric.', accent: 'rose', gif: '/mascot-study.gif' },
-    { id: 'citations', title: 'Online Citations', desc: 'Find and format academic sources in APA, MLA, Chicago, Harvard, IEEE, Vancouver.', accent: 'sky', gif: '/mascot-paper.gif' },
-    { id: 'dashboard', title: 'Study Packs', desc: 'Quizzes, flashcards, crosswords & lessons from any notes. One paste, five formats.', accent: 'amber', gif: '/mascot-juggling.gif' },
-    { id: 'focus-mode', title: 'Focus Mode', desc: 'Block YouTube, TikTok until you answer quiz questions from your notes. Earn your screen time.', accent: 'rose', gif: '/mascot-thinking.gif' },
+    { id: 'analyze', title: 'Essay Analyzer', desc: 'Professor-style feedback on structure, clarity, citations. Grade-level rubric.', accent: 'rose', gif: '/mascot-study.webp' },
+    { id: 'citations', title: 'Online Citations', desc: 'Find and format academic sources in APA, MLA, Chicago, Harvard, IEEE, Vancouver.', accent: 'sky', gif: '/mascot-paper.webp' },
+    { id: 'dashboard', title: 'Study Packs', desc: 'Quizzes, flashcards, crosswords & lessons from any notes. One paste, five formats.', accent: 'amber', gif: '/mascot-juggling.webp' },
+    { id: 'focus-mode', title: 'Focus Mode', desc: 'Block YouTube, TikTok until you answer quiz questions from your notes. Earn your screen time.', accent: 'rose', gif: '/mascot-thinking.webp' },
   ];
 
   return (
@@ -170,7 +170,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
             <div className="rounded-2xl sm:rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-6 text-center hover:border-[#58CC02] dark:hover:border-[#58CC02] transition-all">
               <div className="flex justify-center mb-4">
-                <img src="/mascot-study.gif" alt="Quality" className="w-16 h-16 object-contain" />
+                <img src="/mascot-study.webp" alt="Quality" className="w-16 h-16 object-contain" />
               </div>
               <h3 className="font-bold text-stone-800 dark:text-stone-100 mb-2">Quality</h3>
               <p className="text-stone-600 dark:text-stone-400 text-sm">Highest standards in AI analysis and feedback</p>
@@ -178,7 +178,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
 
             <div className="rounded-2xl sm:rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-6 text-center hover:border-[#58CC02] dark:hover:border-[#58CC02] transition-all">
               <div className="flex justify-center mb-4">
-                <img src="/mascot-thinking.gif" alt="Privacy" className="w-16 h-16 object-contain" />
+                <img src="/mascot-thinking.webp" alt="Privacy" className="w-16 h-16 object-contain" />
               </div>
               <h3 className="font-bold text-stone-800 dark:text-stone-100 mb-2">Privacy</h3>
               <p className="text-stone-600 dark:text-stone-400 text-sm">Enterprise-grade security for your documents</p>
@@ -186,7 +186,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
 
             <div className="rounded-2xl sm:rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-6 text-center hover:border-[#58CC02] dark:hover:border-[#58CC02] transition-all">
               <div className="flex justify-center mb-4">
-                <img src="/mascot-laptop.gif" alt="Innovation" className="w-16 h-16 object-contain" />
+                <img src="/mascot-laptop.webp" alt="Innovation" className="w-16 h-16 object-contain" />
               </div>
               <h3 className="font-bold text-stone-800 dark:text-stone-100 mb-2">Innovation</h3>
               <p className="text-stone-600 dark:text-stone-400 text-sm">Continuous improvement of our technology</p>
@@ -194,7 +194,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
 
             <div className="rounded-2xl sm:rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-6 text-center hover:border-[#58CC02] dark:hover:border-[#58CC02] transition-all">
               <div className="flex justify-center mb-4">
-                <img src="/mascot-dance.gif" alt="Accessibility" className="w-16 h-16 object-contain" />
+                <img src="/mascot-dance.webp" alt="Accessibility" className="w-16 h-16 object-contain" />
               </div>
               <h3 className="font-bold text-stone-800 dark:text-stone-100 mb-2">Accessibility</h3>
               <p className="text-stone-600 dark:text-stone-400 text-sm">Tools for the global academic community</p>
