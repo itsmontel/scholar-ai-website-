@@ -49,16 +49,31 @@ const PressKitPage = ({ onNavigate, user, onLogout }: PressKitPageProps) => {
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-stone-900 dark:text-stone-50 mb-5 text-balance leading-[1.05]">
             Press &amp; media kit
           </h1>
-          <p className="text-base sm:text-lg lg:text-xl text-stone-700 dark:text-stone-300 leading-relaxed max-w-2xl mx-auto mb-6">
+          <p className="text-base sm:text-lg lg:text-xl text-stone-700 dark:text-stone-300 leading-relaxed max-w-2xl mx-auto mb-8">
             Logos, boilerplate copy, screenshots, and founder bio for journalists, bloggers, and content creators writing about WriteScholar.
           </p>
-          <a
-            href="mailto:press@writescholar.com"
-            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-2xl font-extrabold text-white border-2 border-b-4 transition-transform hover:-translate-y-0.5 active:translate-y-0 active:border-b-2 text-[15px] bg-[#A560E8] border-[#8A48C7]"
-          >
-            Email press@writescholar.com
-            <span aria-hidden>→</span>
-          </a>
+
+          {/* CTA wrapper, relative so the pointing-mascot can be absolutely
+              positioned beside it. On desktop the mascot sits to the left of
+              the email button so it visually "points" at the call-to-action.
+              Hidden on small screens because the mascot crowds the layout. */}
+          <div className="relative inline-flex items-center justify-center">
+            <img
+              src="/mascot-pointing.webp"
+              alt=""
+              aria-hidden
+              loading="eager"
+              className="hidden md:block absolute right-full -mr-2 lg:-mr-3 -bottom-8 lg:-bottom-10 w-24 lg:w-28 h-auto pointer-events-none"
+            />
+            <a
+              href="mailto:press@writescholar.com"
+              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-2xl font-extrabold text-white border-2 border-b-4 transition-transform hover:-translate-y-0.5 active:translate-y-0 active:border-b-2 text-[15px] bg-[#A560E8] border-[#8A48C7] shadow-md"
+              style={{ boxShadow: '0 6px 16px -4px rgba(165, 96, 232, 0.4)' }}
+            >
+              Email press@writescholar.com
+              <span aria-hidden>→</span>
+            </a>
+          </div>
         </div>
       </section>
 
@@ -69,39 +84,30 @@ const PressKitPage = ({ onNavigate, user, onLogout }: PressKitPageProps) => {
           <Section heading="Boilerplate copy" subtitle="Ready-to-paste descriptions in three lengths.">
             <div className="space-y-4">
               <CopyableBlock
-                label="Short (1 sentence, 23 words)"
+                label="Short (1 sentence)"
                 text="WriteScholar is a free AI study app for college students that turns lecture notes into flashcards, quizzes, summaries, and graded essay feedback in seconds."
               />
               <CopyableBlock
                 label="Medium (~50 words)"
-                text="WriteScholar is a free AI study app for college and university students. Paste any lecture notes or textbook chapter and the AI generates flashcards, multiple-choice quizzes, summaries, and structured study guides in under 60 seconds. The platform also includes an AI essay grader that delivers professor-style rubric feedback. Trusted by 50,000+ students worldwide."
+                text="WriteScholar is a free AI study app for college and university students. Paste any lecture notes or textbook chapter and the AI generates flashcards, multiple-choice quizzes, summaries, and structured study guides in under 60 seconds. The platform also includes an AI essay grader that delivers professor-style rubric feedback. Used by students all over the world."
               />
               <CopyableBlock
                 label="Long (~150 words)"
-                text="WriteScholar is an all-in-one AI study app built for college and university students. The platform combines a free AI essay grader (with rubric-based feedback, line-by-line annotations, and a polished revision) with a study-pack generator that turns any lecture notes into flashcards, multiple-choice quizzes, summaries, and crosswords in under 60 seconds. WriteScholar also includes a free citation generator (APA, MLA, Chicago, Harvard, IEEE, Vancouver), a Pomodoro timer, GPA calculator, and 7+ other free study tools. The product is available on web, iOS, and Android, with a free tier covering most casual student use cases. WriteScholar is used by 50,000+ students across the US, UK, Australia, and Canada. Pro plans start at $19.99/month with a 7-day free trial."
+                text="WriteScholar is an all-in-one AI study app built for college and university students. The platform combines a free AI essay grader (with rubric-based feedback, line-by-line annotations, and a polished revision) with a study-pack generator that turns any lecture notes into flashcards, multiple-choice quizzes, summaries, and crosswords in under 60 seconds. WriteScholar also includes a free citation generator (APA, MLA, Chicago, Harvard, IEEE, Vancouver), a Pomodoro timer, GPA calculator, and 7+ other free study tools. The product is a mobile-responsive web app with a free tier covering most casual student use cases. WriteScholar is used by students all over the world. Pro plans start at $19.99/month with a 7-day free trial."
               />
             </div>
           </Section>
 
           {/* Logo + brand assets */}
-          <Section heading="Logo &amp; brand assets" subtitle="Right-click any logo to save. Use the version that contrasts with your background.">
-            <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
+          <Section heading="Logo &amp; brand assets" subtitle="Right-click the logo to save. For SVG/EPS or custom variants, email press@writescholar.com.">
+            <div className="max-w-md">
               <BrandAsset
                 title="Primary logo"
                 subtitle="Use on light backgrounds"
                 background="#FFFFFF"
                 imgSrc="/main-logo.png"
               />
-              <BrandAsset
-                title="Mascot"
-                subtitle="The friendly little guy"
-                background="#F3EAFF"
-                imgSrc="/mascot.png"
-              />
             </div>
-            <p className="text-[12px] text-stone-500 dark:text-stone-400 mt-3">
-              For SVG/EPS or custom variants, email press@writescholar.com.
-            </p>
           </Section>
 
           {/* Brand colours */}
@@ -118,10 +124,10 @@ const PressKitPage = ({ onNavigate, user, onLogout }: PressKitPageProps) => {
           {/* Stats */}
           <Section heading="Key stats" subtitle="Recent numbers, refreshed quarterly.">
             <div className="grid sm:grid-cols-3 gap-3">
-              <StatBlock value="50,000+" label="Active student users" />
+              <StatBlock value="Worldwide" label="Student community" />
               <StatBlock value="14" label="Free tools available" />
               <StatBlock value="6" label="Citation styles supported" />
-              <StatBlock value="iOS, Android, Web" label="Platforms" />
+              <StatBlock value="Web" label="Platform" />
               <StatBlock value="$19.99/mo" label="Pro plan starting price" />
               <StatBlock value="7-day" label="Free trial" />
             </div>
@@ -132,15 +138,15 @@ const PressKitPage = ({ onNavigate, user, onLogout }: PressKitPageProps) => {
             <div className="rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 p-5 sm:p-6">
               <div className="flex items-start gap-4 mb-4">
                 <div className="w-16 h-16 rounded-full bg-[#A560E8]/15 border-4 border-[#A560E8]/40 flex items-center justify-center text-2xl font-extrabold text-[#A560E8]" aria-hidden>
-                  W
+                  M
                 </div>
                 <div>
-                  <div className="font-extrabold text-stone-900 dark:text-stone-50 text-lg">Anthony Maxson</div>
+                  <div className="font-extrabold text-stone-900 dark:text-stone-50 text-lg">Montel</div>
                   <div className="text-[13px] text-stone-600 dark:text-stone-400">Founder &amp; CEO, WriteScholar</div>
                 </div>
               </div>
               <p className="text-stone-700 dark:text-stone-300 leading-relaxed text-[14px] sm:text-[15px] mb-4">
-                Anthony Maxson is the founder and CEO of WriteScholar. He started building the platform after watching college students juggle Quizlet, Grammarly, EasyBib, Notion, and Pomodoro apps to do what should have been one workflow. WriteScholar bundles those tools into a single AI-powered study app focused on getting students As, not subscribing them to ten separate services.
+                Montel is the founder and CEO of WriteScholar. He started building the platform after watching college students juggle Quizlet, Grammarly, EasyBib, Notion, and Pomodoro apps to do what should have been one workflow. WriteScholar bundles those tools into a single AI-powered study app focused on getting students As, not subscribing them to ten separate services.
               </p>
               <CopyableBlock
                 label="Pre-approved quote"

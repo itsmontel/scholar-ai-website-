@@ -910,20 +910,31 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   <span className="font-bold text-stone-900 dark:text-stone-50">Professor-style essay feedback</span> + <span className="font-bold text-stone-900 dark:text-stone-50">7 AI study tools</span> built from your notes. Designed to get you A's on essays AND exams.
                 </p>
 
-                {/* PRIMARY + LOGIN CTAs — purple "Start free" is the dominant
-                    button, with a lower-weight "Log in" beside it for returning
-                    users. Stacked on mobile, side-by-side on sm+. */}
+                {/* PRIMARY + LOGIN CTAs — the primary "Start free" CTA is now
+                    a custom-designed PNG (cta-button-hero.png, 1920x400 with
+                    alpha) wrapped in a button so it stays keyboard-accessible
+                    and screen-reader friendly. The smaller "Log in" outline
+                    button stays as a coded button so the visual hierarchy
+                    still clearly favours signup. Stacked on mobile, side by
+                    side on sm+. */}
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 w-full max-w-md sm:max-w-lg mx-auto mb-3 sm:mb-4 opacity-0 animate-hero-stagger-4">
                   <button
                     type="button"
                     onClick={() => onNavigate('signup')}
-                    className="group/btn relative inline-flex flex-1 items-center justify-center gap-2 overflow-hidden px-8 py-4 sm:px-8 sm:py-4 bg-[#A560E8] hover:bg-[#B274EC] dark:bg-[#A560E8] dark:hover:bg-[#B274EC] text-white font-extrabold rounded-2xl border-2 border-b-4 border-[#8A48C7] dark:border-[#8A48C7] transition-all duration-200 hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 text-[1rem] sm:text-[1.05rem] tracking-wide shadow-lg shadow-[#A560E8]/25"
+                    aria-label="Start free, get the A"
+                    className="group/btn flex-1 transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#A560E8]/40 rounded-2xl"
                   >
-                    <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/25 to-white/0 opacity-0 transition-opacity duration-300 group-hover/btn:opacity-100 pointer-events-none" aria-hidden />
-                    <span className="relative">Start free — get the A</span>
-                    <svg className="relative w-5 h-5 group-hover/btn:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
+                    {/* Subtle drop-shadow on hover only — follows the alpha
+                        shape of the PNG (silhouette glow, not rectangular
+                        box). Matches the rest of the site's "soft purple
+                        accent" treatment rather than a heavy neon halo. */}
+                    <img
+                      src="/cta-button-hero.png"
+                      alt=""
+                      className="w-full h-auto block transition-[filter] duration-300 ease-out group-hover/btn:[filter:drop-shadow(0_4px_14px_rgba(165,96,232,0.25))]"
+                      loading="eager"
+                      fetchPriority="high"
+                    />
                   </button>
                   <button
                     type="button"
@@ -2305,16 +2316,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_0%,rgba(255,255,255,0.12),transparent_70%)]" aria-hidden />
             <div className="pointer-events-none absolute -bottom-16 -right-12 w-56 h-56 rounded-full bg-[#8A48C7]/30 blur-3xl" aria-hidden />
             <div className="pointer-events-none absolute -top-12 -left-10 w-48 h-48 rounded-full bg-[#A560E8]/30 blur-3xl" aria-hidden />
-
-            {/* Dancing mascot — top-right corner */}
-            <img
-              src="/mascot-dance.webp"
-              alt=""
-              aria-hidden
-              loading="lazy"
-              decoding="async"
-              className="hidden md:block pointer-events-none absolute -top-2 -right-3 w-32 lg:w-36 h-auto z-10 drop-shadow-[0_18px_30px_rgba(0,0,0,0.35)]"
-            />
 
             <p className="relative text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.22em] text-white/90 mb-3">
               ⚡ Ready when you are
