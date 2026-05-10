@@ -97,6 +97,66 @@ function injectGuideSchema(cfg: ProgrammaticPageConfig) {
   });
 }
 
+/**
+ * Strip leading numbers/punctuation from step titles like
+ * "1. Introduction (5-10% of essay)" → "Introduction (5-10% of essay)".
+ * Google's HowTo rich result prefers clean step names without ordinal
+ * prefixes, since the carousel itself shows the step number.
+ */
+function cleanStepTitle(title: string): string {
+  return title.replace(/^\s*\d+\.\s*/, '').trim();
+}
+
+/**
+ * Inject HowTo schema for /guides/* pages so Google can render them as
+ * step-by-step rich result cards in search. Eligibility:
+ *   - Must be type 'guide'
+ *   - Must contain at least one section with type 'steps' (the structure
+ *     array in EssayGuideMeta is rendered as a steps section)
+ *
+ * Why this matters: HowTo rich results show the page title, an image, and
+ * 3-5 step previews directly on the SERP. They occupy ~3-4x the vertical
+ * space of a regular blue link, dramatically increasing CTR for
+ * "how to" queries.
+ *
+ * Note: Google deprecated HowTo rich results for desktop in late 2023 but
+ * they still serve on mobile. Mobile is where most student "how to" search
+ * happens anyway, so the upside remains real.
+ */
+function injectHowToSchema(cfg: ProgrammaticPageConfig) {
+  if (cfg.type !== 'guide') return;
+
+  // Find the first section of type 'steps' — that's the canonical step list.
+  const stepsSection = cfg.sections.find((s) => s.type === 'steps');
+  if (!stepsSection || stepsSection.type !== 'steps') return;
+
+  const url = absoluteCanonicalUrl(window.location.pathname);
+
+  injectJsonLd('programmatic-howto', {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name: cfg.h1,
+    description: cfg.metaDescription,
+    image: 'https://writescholar.com/og-image.png',
+    // Realistic time estimate for a typical writing guide (mid-length essay
+    // outline → first draft). Used by Google to show a "X min" badge on the
+    // rich card.
+    totalTime: 'PT30M',
+    supply: [{ '@type': 'HowToSupply', name: 'A topic and a working thesis' }],
+    tool: [
+      { '@type': 'HowToTool', name: 'Word processor or text editor' },
+      { '@type': 'HowToTool', name: 'WriteScholar essay tools', url: 'https://writescholar.com/tools/analyze' },
+    ],
+    step: stepsSection.steps.map((s, idx) => ({
+      '@type': 'HowToStep',
+      position: idx + 1,
+      name: cleanStepTitle(s.title),
+      text: s.body,
+      url: `${url}#step-${idx + 1}`,
+    })),
+  });
+}
+
 /* ─── Section helpers ─────────────────────────────────────────── */
 
 /** Heading with a small coloured accent bar to its left, for visual rhythm. */
@@ -272,7 +332,10 @@ const StepsSection = ({ section, accent }: { section: Extract<ProgrammaticSectio
       {section.steps.map((s, i) => (
         <li
           key={i}
-          className="relative flex gap-4 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 p-5 transition-transform hover:-translate-y-0.5"
+          /* id="step-N" so the HowTo schema's per-step URL fragments
+             (#step-1, #step-2, ...) actually scroll to the right card. */
+          id={`step-${i + 1}`}
+          className="relative flex gap-4 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 p-5 transition-transform hover:-translate-y-0.5 scroll-mt-24"
         >
           <span
             className="flex-shrink-0 w-11 h-11 rounded-full text-white font-extrabold flex items-center justify-center text-[17px] shadow-md"
@@ -381,9 +444,11 @@ const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) 
     });
     injectFaqSchema(config.faqs);
     injectGuideSchema(config);
+    injectHowToSchema(config);
     return () => {
       removeJsonLd('programmatic-faq');
       removeJsonLd('programmatic-article');
+      removeJsonLd('programmatic-howto');
     };
   }, [config]);
 
