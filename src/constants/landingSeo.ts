@@ -18,7 +18,7 @@
  *   - End with a friction-removal phrase ("Free, no credit card") to lift CTR
  */
 export const LANDING_PAGE_TITLE =
-  "Turn Your Grades from B to A with AI | WriteScholar";
+  "Turn Your Grades from B to A with Free AI | WriteScholar";
 
 export const LANDING_META_DESCRIPTION =
   "AI essay feedback + flashcards from your notes — designed to take your grades from B to A on essays AND exams. Free to start, no credit card needed.";
