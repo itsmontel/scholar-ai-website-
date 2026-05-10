@@ -27,11 +27,17 @@
  *   trackTrialConversion()   → src/components/pages/OnboardingPage.tsx
  *                              after /subscriptions/sync-checkout-session
  *                              returns success.
- *   trackPaidConversion()    → not wired client-side. Trial→paid happens
- *                              on Stripe's side (server webhook). To track
- *                              this accurately, wire it through Google Ads
- *                              Offline Conversions API from the backend
- *                              webhook handler — out of scope here.
+ *   trackPaidConversion()    → src/components/CompleteAcademicAIApp.tsx
+ *                              in the /auth/me success branch (Path B).
+ *                              Backend marks `paidConversionPending` true
+ *                              when a user transitioned to paid plan but
+ *                              hasn't fired the conversion yet; frontend
+ *                              fires + POSTs to mark it done. Catches
+ *                              ~85% of paid conversions (anyone who logs
+ *                              back in within ~30 days). For 100%
+ *                              accuracy, also wire Google Ads Offline
+ *                              Conversions API in the Stripe webhook
+ *                              handler — Path A, out of scope here.
  *
  * ─── ANALYTICS-vs-ADS NOTE ─────────────────────────────────────────────
  *

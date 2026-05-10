@@ -2,6 +2,11 @@ import { useState, useEffect, useLayoutEffect, Suspense, useRef, useCallback } f
 import { WriteScholarEditorialBackgroundLayers } from './common/WriteScholarEditorialBackground';
 import RandomMascotLoader from './common/RandomMascotLoader';
 import { logger } from '../utils/logger';
+// Static import: ensures gtag.ts loads at app mount so gtag.js script
+// starts loading on first paint, not when a conversion fires. Eliminates
+// the race condition where a conversion event could be queued in dataLayer
+// but lost if the user navigated away before gtag.js finished loading.
+import { trackSignupConversion, trackPaidConversion } from '../utils/gtag';
 import { HIDE_FRIENDS, HIDE_STREAK_AND_BADGES } from '../config/featureFlags';
 import { persistOnboardingToServer, persistTutorialToServer } from '../utils/onboarding';
 import { trackEvent } from '../utils/analytics';
@@ -408,9 +413,7 @@ const AcademicAIApp = () => {
             if (u.paidConversionPending && !sessionStorage.getItem('ws_paid_conversion_fired')) {
               sessionStorage.setItem('ws_paid_conversion_fired', '1');
               const planPrice = u.subscriptionPlan === 'premium' ? 39.99 : 19.99;
-              void import('../utils/gtag').then((m) =>
-                m.trackPaidConversion(planPrice, `${u.id}-paid`)
-              );
+              trackPaidConversion(planPrice, `${u.id}-paid`);
               void BulletproofAPI.post('/users/mark-paid-conversion-fired', token, {}).catch(() => {
                 // Non-fatal — if the mark fails, paidConversionPending stays
                 // true and we'll fire again on the next session, which is
@@ -1025,7 +1028,7 @@ const AcademicAIApp = () => {
     );
     // Google Ads signup conversion. No-ops cleanly until the IDs in
     // src/utils/gtag.ts are filled in, so this is safe to ship pre-launch.
-    void import('../utils/gtag').then((m) => m.trackSignupConversion());
+    trackSignupConversion();
   };
 
   const handleLogin = (userData: User) => {

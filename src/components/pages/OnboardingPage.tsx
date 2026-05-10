@@ -3,6 +3,10 @@ import { loadStripe } from '@stripe/stripe-js';
 import type { StripeEmbeddedCheckout } from '@stripe/stripe-js';
 import { SKIP_ONBOARDING_STRIPE } from '../../config/featureFlags';
 import { trackEvent } from '../../utils/analytics';
+// Static import: see CompleteAcademicAIApp.tsx for why we don't dynamic-
+// import the gtag helper. Short version — ensures gtag.js starts loading
+// on first paint so the conversion event isn't racing the script load.
+import { trackTrialConversion } from '../../utils/gtag';
 import BadgeCreature from '../common/BadgeCreature';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
@@ -517,9 +521,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
           // page reload after Stripe return can't double-count. Helper
           // is a no-op until IDs in src/utils/gtag.ts are configured.
           const planPrice = data.data.plan === 'premium' ? 39.99 : data.data.plan === 'pro' ? 19.99 : 0;
-          void import('../../utils/gtag').then((m) =>
-            m.trackTrialConversion(planPrice, sessionId)
-          );
+          trackTrialConversion(planPrice, sessionId);
           window.history.replaceState({}, '', '/onboarding');
           setPhase('transition');
         } else if (SKIP_ONBOARDING_STRIPE) {
