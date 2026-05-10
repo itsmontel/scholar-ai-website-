@@ -249,7 +249,7 @@ export default function LandingBeforeAfterSection() {
   return (
     <section
       id="before-after"
-      className="relative w-full min-w-0 -mx-4 sm:-mx-6 lg:-mx-8 scroll-mt-24 border-t-2 border-b-2 border-[#E5E5E5] bg-white py-12 sm:py-24 overflow-x-clip overflow-hidden"
+      className="relative w-full min-w-0 sm:-mx-6 lg:-mx-8 scroll-mt-24 border-t-2 border-b-2 border-[#E5E5E5] bg-white py-12 sm:py-24 overflow-x-clip overflow-hidden"
       aria-labelledby="before-after-heading"
       style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
     >

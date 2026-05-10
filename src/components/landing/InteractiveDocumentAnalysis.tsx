@@ -611,9 +611,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
             ref={documentPanelScrollRef}
             className="flex-1 min-h-0 bg-white p-4 sm:p-6 overflow-y-auto overscroll-contain dark:bg-stone-900"
           >
-            {/* Centered (mx-auto) so the essay sits in the middle of the
-                document panel on mobile rather than left-fixated. */}
-            <div className="max-w-3xl mx-auto">
+            <div className="max-w-3xl">
               <div className="text-sm leading-relaxed text-gray-700 dark:text-stone-300">
                 {renderHighlightedDocument()}
               </div>
