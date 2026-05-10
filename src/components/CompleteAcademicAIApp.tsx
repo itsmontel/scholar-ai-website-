@@ -15,6 +15,8 @@ import LoginPage from './pages/LoginPage';
 
 // Lazy with retry: recovers from chunk load failures (idle tab / deploy), retries with backoff before failing
 const ProgrammaticLandingPage = lazyWithRetry(() => import('./pages/ProgrammaticLandingPage'));
+const EmbedPage = lazyWithRetry(() => import('./pages/EmbedPage'));
+const PressKitPage = lazyWithRetry(() => import('./pages/PressKitPage'));
 const EmailVerificationPage = lazyWithRetry(() => import('./pages/EmailVerificationPage'));
 const OnboardingPage = lazyWithRetry(() => import('./pages/OnboardingPage'));
 // Pre-signup Duolingo-style funnel — every "Sign up" CTA on the marketing
@@ -119,6 +121,7 @@ import { getProgrammaticPageByPath } from '../data/programmaticPages';
  * the URL through internal links.
  */
 const NOINDEX_PAGES = new Set<string>([
+  'embed', // /embed/* are iframe widgets; the host site's embedded version is what we want indexed
   'dashboard',
   'onboarding',
   'auth-callback',
@@ -155,6 +158,9 @@ const NOINDEX_PAGES = new Set<string>([
 /** Derive page from pathname - used for initial state and URL sync */
 function getPageFromPath(pathname: string): string {
   const p = pathname.replace(/\/$/, '') || '/'; // normalize trailing slash
+  // Embed widgets — /embed/[slug]. Standalone iframe-friendly pages, no header
+  // or footer chrome. Always noindex (the host site's embed is what gets indexed).
+  if (/^\/embed\//.test(p)) return 'embed';
   // Programmatic SEO landing pages — /study/[slug], /alternatives/[slug],
   // /guides/[slug], /best/[slug]. Single 'programmatic' page name; the
   // actual config is looked up by path inside the render branch.
@@ -190,6 +196,7 @@ function getPageFromPath(pathname: string): string {
   if (p === '/account') return 'account';
   if (p === '/billing') return 'billing';
   if (p === '/help' || p === '/help-center') return 'help';
+  if (p === '/press' || p === '/media-kit' || p === '/press-kit') return 'press';
   if (p === '/privacy' || p === '/privacy-policy') return 'privacy';
   if (p === '/terms' || p === '/terms-of-service') return 'terms';
   if (p === '/unsubscribe') return 'unsubscribe';
@@ -1110,6 +1117,12 @@ const AcademicAIApp = () => {
     switch (currentPage) {
       case 'landing':
         return <LandingPage onNavigate={navigateTo} user={user} />;
+      case 'embed':
+        // Standalone embed widget — no header/footer, noindex. Lookup happens
+        // inside EmbedPage based on URL pathname.
+        return <EmbedPage />;
+      case 'press':
+        return <PressKitPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'programmatic': {
         // Look up the matching programmatic page by current URL.
         // Falls back to landing if no match (e.g. /study/unknown-subject).

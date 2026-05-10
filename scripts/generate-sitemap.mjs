@@ -36,6 +36,7 @@ const staticRoutes = [
   { loc: '/more-tools',                       priority: '0.8',  changefreq: 'monthly', lastmod: today },
   { loc: '/help',                             priority: '0.7',  changefreq: 'monthly', lastmod: today },
   { loc: '/contact',                          priority: '0.5',  changefreq: 'monthly', lastmod: today },
+  { loc: '/press',                            priority: '0.5',  changefreq: 'monthly', lastmod: today },
   { loc: '/focus-mode',                       priority: '0.9',  changefreq: 'weekly',  lastmod: today },
   { loc: '/blog',                             priority: '0.8',  changefreq: 'weekly',  lastmod: today },
 

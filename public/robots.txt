@@ -10,6 +10,7 @@ Allow: /blog
 Allow: /blog/*
 Allow: /help
 Allow: /contact
+Allow: /press
 Allow: /tools/
 Allow: /tools/*
 Allow: /study/
@@ -20,6 +21,8 @@ Allow: /guides/
 Allow: /guides/*
 Allow: /best/
 Allow: /best/*
+Allow: /embed/
+Allow: /embed/*
 
 Disallow: /dashboard
 Disallow: /analysis

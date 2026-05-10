@@ -5,6 +5,7 @@ import ScholarMascot from '../../common/ScholarMascot';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 import ToolPageSeoContent from '../../common/ToolPageSeoContent';
 import { wordCounterSeo } from '../../../data/toolSeoContent';
+import EmbedCodeBlock from '../../common/EmbedCodeBlock';
 
 interface WordCounterPageProps {
   onNavigate: (page: string) => void;
@@ -270,6 +271,8 @@ const WordCounterPage = ({ onNavigate, user, onLogout }: WordCounterPageProps) =
       </section>
 
       <ToolPageSeoContent {...wordCounterSeo} onNavigate={onNavigate} />
+
+      <EmbedCodeBlock slug="word-counter" toolName="Word Counter" height={500} accent="#1CB0F6" />
 
       <Footer onNavigate={onNavigate} />
     </div>

@@ -4,6 +4,7 @@ import Footer from '../../common/Footer';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 import ToolPageSeoContent from '../../common/ToolPageSeoContent';
 import { pomodoroSeo } from '../../../data/toolSeoContent';
+import EmbedCodeBlock from '../../common/EmbedCodeBlock';
 
 interface PomodoroTimerPageProps {
   onNavigate: (page: string) => void;
@@ -553,6 +554,8 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
       </section>
 
       <ToolPageSeoContent {...pomodoroSeo} onNavigate={onNavigate} />
+
+      <EmbedCodeBlock slug="pomodoro-timer" toolName="Pomodoro Timer" height={620} accent="#FF4B4B" />
 
       <Footer onNavigate={onNavigate} />
     </div>

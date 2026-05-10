@@ -5,6 +5,7 @@ import ScholarMascot from '../../common/ScholarMascot';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 import ToolPageSeoContent from '../../common/ToolPageSeoContent';
 import { gpaSeo } from '../../../data/toolSeoContent';
+import EmbedCodeBlock from '../../common/EmbedCodeBlock';
 
 interface GPACalculatorPageProps {
   onNavigate: (page: string) => void;
@@ -353,6 +354,8 @@ const GPACalculatorPage = ({ onNavigate, user, onLogout }: GPACalculatorPageProp
       </section>
 
       <ToolPageSeoContent {...gpaSeo} onNavigate={onNavigate} />
+
+      <EmbedCodeBlock slug="gpa-calculator" toolName="GPA Calculator" height={550} accent="#58CC02" />
 
       <Footer onNavigate={onNavigate} />
     </div>
