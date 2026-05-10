@@ -1003,6 +1003,9 @@ const AcademicAIApp = () => {
     void import('../utils/analytics').then((m) =>
       m.identifyUser(userData.id, { email: userData.email, signup: true })
     );
+    // Google Ads signup conversion. No-ops cleanly until the IDs in
+    // src/utils/gtag.ts are filled in, so this is safe to ship pre-launch.
+    void import('../utils/gtag').then((m) => m.trackSignupConversion());
   };
 
   const handleLogin = (userData: User) => {

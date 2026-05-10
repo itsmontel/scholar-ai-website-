@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>WriteScholar Flyer — Turn B Grades Into A's</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    @page { size: letter; margin: 0; }
+    html, body { margin: 0; padding: 0; }
+    body { font-family: 'Nunito', system-ui, sans-serif; background: #f5f5f4; }
+    .flyer {
+      width: 816px;
+      height: 1056px;
+      margin: 24px auto;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      background: linear-gradient(180deg, #F3EAFF 0%, #FFFFFF 60%);
+      position: relative;
+      overflow: hidden;
+      page-break-after: always;
+    }
+    @media print {
+      body { background: white; }
+      .flyer { margin: 0; box-shadow: none; }
+    }
+
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(45px);
+      opacity: 0.45;
+      pointer-events: none;
+    }
+
+    /* ─── HEADER ─── */
+    .header {
+      position: absolute;
+      top: 44px;
+      left: 56px;
+      right: 56px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .header .logo-img {
+      width: 60px;
+      height: 60px;
+      border-radius: 14px;
+      background: white;
+      padding: 8px;
+      border: 2px solid #E8DDF7;
+      box-shadow: 0 3px 0 #DCC9F0;
+      object-fit: contain;
+    }
+    .header .brand {
+      font-weight: 900;
+      font-size: 28px;
+      color: #3C3C3C;
+      letter-spacing: -0.02em;
+    }
+    .header .tagline {
+      margin-left: auto;
+      background: #58CC02;
+      color: white;
+      font-weight: 800;
+      font-size: 13px;
+      padding: 8px 16px;
+      border-radius: 999px;
+      border-bottom: 3px solid #46A302;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    /* ─── HERO ─── */
+    .hero {
+      position: absolute;
+      top: 144px;
+      left: 56px;
+      right: 56px;
+      text-align: center;
+    }
+    .hero .eyebrow {
+      display: inline-block;
+      background: white;
+      color: #A560E8;
+      font-weight: 800;
+      font-size: 13px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      padding: 7px 16px;
+      border-radius: 999px;
+      border: 2px solid #A560E8;
+      border-bottom: 4px solid #A560E8;
+      margin-bottom: 18px;
+    }
+    .hero h1 {
+      font-weight: 900;
+      font-size: 56px;
+      line-height: 1.05;
+      color: #3C3C3C;
+      letter-spacing: -0.025em;
+      margin: 0 0 8px 0;
+    }
+    .hero h1 .accent { color: #A560E8; }
+    .hero .grade-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 16px;
+      background: white;
+      border: 3px solid #A560E8;
+      border-bottom: 6px solid #8A48C7;
+      border-radius: 24px;
+      padding: 10px 28px;
+      margin-top: 8px;
+    }
+    .hero .grade-pill .grade {
+      font-weight: 900;
+      font-size: 44px;
+      letter-spacing: -0.04em;
+    }
+    .hero .grade-pill .grade.before { color: #FF9600; }
+    .hero .grade-pill .grade.after  { color: #58CC02; }
+    .hero .grade-pill .arrow {
+      font-weight: 900;
+      font-size: 30px;
+      color: #A560E8;
+    }
+
+    /* ─── REAL SCREENSHOT (the rubric + annotated notes) ─── */
+    .screenshot {
+      position: absolute;
+      top: 442px;
+      left: 76px;
+      right: 76px;
+      background: white;
+      border: 3px solid #E5E5E5;
+      border-bottom: 7px solid #DDDDDD;
+      border-radius: 18px;
+      padding: 12px;
+      box-shadow: 0 16px 36px -12px rgba(165,96,232,0.25);
+    }
+    .screenshot img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 10px;
+    }
+    .screenshot .badge {
+      position: absolute;
+      top: -16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #58CC02;
+      color: white;
+      font-weight: 900;
+      font-size: 12px;
+      padding: 6px 16px;
+      border-radius: 999px;
+      border: 2px solid white;
+      border-bottom: 3px solid #46A302;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    /* ─── CTA BAR ─── */
+    .cta {
+      position: absolute;
+      bottom: 44px;
+      left: 56px;
+      right: 56px;
+      background: #A560E8;
+      border-radius: 24px;
+      border-bottom: 8px solid #8A48C7;
+      padding: 24px 28px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      align-items: center;
+      color: white;
+    }
+    .cta .copy h2 {
+      font-weight: 900;
+      font-size: 28px;
+      margin: 0 0 4px 0;
+      letter-spacing: -0.02em;
+    }
+    .cta .copy .sub {
+      font-size: 15px;
+      font-weight: 700;
+      opacity: 0.95;
+      margin-bottom: 12px;
+    }
+    .cta .url {
+      display: inline-block;
+      background: white;
+      color: #A560E8;
+      font-weight: 900;
+      font-size: 17px;
+      padding: 8px 18px;
+      border-radius: 12px;
+    }
+    .cta .qr {
+      background: white;
+      border-radius: 16px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+    .cta .qr img { width: 110px; height: 110px; display: block; }
+    .cta .qr .scan {
+      font-size: 10px;
+      font-weight: 800;
+      color: #3C3C3C;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+    }
+
+    /* Promo ribbon */
+    .promo {
+      position: absolute;
+      top: 116px;
+      right: -6px;
+      background: #FF4B4B;
+      color: white;
+      font-weight: 900;
+      font-size: 13px;
+      letter-spacing: 0.06em;
+      padding: 7px 18px;
+      transform: rotate(8deg);
+      border-bottom: 3px solid #C53030;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    /* Mascot in lower-left of hero (real mascot-cta.png) */
+    .hero-mascot {
+      position: absolute;
+      top: 132px;
+      left: 32px;
+      width: 92px;
+      height: auto;
+      transform: rotate(-8deg);
+      filter: drop-shadow(0 6px 12px rgba(165,96,232,0.3));
+    }
+  </style>
+</head>
+<body>
+  <div class="flyer">
+    <div class="blob" style="top:-60px; left:-80px; width:280px; height:280px; background:#A560E8;"></div>
+    <div class="blob" style="bottom:160px; right:-80px; width:220px; height:220px; background:#58CC02;"></div>
+
+    <!-- Real WriteScholar mascot tucked into the hero corner -->
+    <img src="https://writescholar.com/mascot-cta.png" alt="" class="hero-mascot" />
+
+    <div class="header">
+      <img src="https://writescholar.com/main-logo.png" alt="WriteScholar" class="logo-img" />
+      <div class="brand">WriteScholar</div>
+      <div class="tagline">FREE FOR STUDENTS</div>
+    </div>
+
+    <div class="promo">50% OFF · CODE MAY2026</div>
+
+    <div class="hero">
+      <span class="eyebrow">Built for college</span>
+      <h1>Turn your grades<br/>from a <span class="accent">B → A</span></h1>
+      <div class="grade-pill">
+        <span class="grade before">B</span>
+        <span class="arrow">→</span>
+        <span class="grade after">A</span>
+      </div>
+    </div>
+
+    <!-- REAL screenshot of the actual analysis output (rubric + annotated notes) -->
+    <div class="screenshot">
+      <span class="badge">Real product · Real feedback</span>
+      <img src="https://writescholar.com/rubric-and-notes.png" alt="WriteScholar AI essay feedback with rubric scores and line-by-line annotations" />
+    </div>
+
+    <div class="cta">
+      <div class="copy">
+        <h2>Try free today</h2>
+        <div class="sub">No credit card. 30 seconds to start.</div>
+        <span class="url">writescholar.com</span>
+      </div>
+      <div class="qr">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&format=svg&data=https%3A%2F%2Fwritescholar.com%2F%3Futm_source%3Dflyer%26utm_medium%3Dprint%26utm_campaign%3Dgrades_b_to_a" alt="QR code to writescholar.com" />
+        <span class="scan">SCAN TO TRY</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

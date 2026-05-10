@@ -512,6 +512,14 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
         if (cancelled) return;
         if (data.success && data.data?.plan) {
           onUserUpdate?.({ plan: data.data.plan, subscription_status: data.data.subscriptionStatus });
+          // Google Ads trial-started conversion. Plan price passed for
+          // value-based bidding; sessionId acts as transaction_id so a
+          // page reload after Stripe return can't double-count. Helper
+          // is a no-op until IDs in src/utils/gtag.ts are configured.
+          const planPrice = data.data.plan === 'premium' ? 39.99 : data.data.plan === 'pro' ? 19.99 : 0;
+          void import('../../utils/gtag').then((m) =>
+            m.trackTrialConversion(planPrice, sessionId)
+          );
           window.history.replaceState({}, '', '/onboarding');
           setPhase('transition');
         } else if (SKIP_ONBOARDING_STRIPE) {
@@ -654,14 +662,29 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
     const token = localStorage.getItem('authToken');
     if (!token) return;
     try {
-      await fetch(`${API_URL}/users/onboarding-survey`, {
+      const res = await fetch(`${API_URL}/users/onboarding-survey`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ referralSource, useGoal, featureInterests }),
       });
+      // Surface non-OK responses (HTTP 4xx/5xx) so silent backend failures
+      // don't disappear into the void. fetch() only rejects on network errors,
+      // so without this check, a 500 from a foreign-key violation or schema
+      // mismatch would look identical to a successful insert from the caller's
+      // perspective. Survey save is still non-blocking — we just log loudly.
+      if (!res.ok) {
+        let detail = '';
+        try {
+          const json = await res.json();
+          detail = json?.message || '';
+        } catch {
+          /* response body wasn't JSON — ignore */
+        }
+        console.error(`[onboarding-survey] Save failed with HTTP ${res.status}${detail ? `: ${detail}` : ''}`);
+      }
     } catch (e) {
       // Survey is analytical — don't fail onboarding if the API is down.
-      console.warn('Survey submission failed (non-blocking):', e);
+      console.warn('[onboarding-survey] Network error (non-blocking):', e);
     }
   };
 
