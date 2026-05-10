@@ -653,7 +653,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
         <div
           role="region"
           aria-label="Limited time promotion"
-          className="border-b-2 border-[#FF9600]/30 bg-[#FFF4E0] dark:bg-[#FF9600]/10"
+          className="hidden md:block border-b-2 border-[#FF9600]/30 bg-[#FFF4E0] dark:bg-[#FF9600]/10"
         >
           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3">
             <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-center">
@@ -741,11 +741,12 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
             </div>
 
             <div className="flex items-center gap-3 flex-wrap sm:justify-end sm:shrink-0">
-              {/* Level + XP bar — chunkier so the level title + bar reads at a glance */}
+              {/* Level + XP bar — hidden on mobile (too crowded with tabs and
+                  greeting). Shows from sm+ where the layout has horizontal room. */}
               <button
                 type="button"
                 onClick={() => onNavigate('badges')}
-                className="inline-flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 hover:border-stone-300 active:border-b-2 active:translate-y-0.5 transition-all cursor-pointer group"
+                className="hidden sm:inline-flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 hover:border-stone-300 active:border-b-2 active:translate-y-0.5 transition-all cursor-pointer group"
               >
                 <div
                   className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm font-extrabold text-white border-b-2 group-hover:scale-105 transition-transform"
@@ -1398,9 +1399,12 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                   </div>
                 </section>
 
-                {/* Stats row — compact, refined */}
+                {/* Stats row — compact, refined. Hidden on mobile because
+                    quota tiles take ~480px of scroll for info users rarely
+                    need on the dashboard. They can still see usage on the
+                    account/settings page. */}
                 {!loadingUsage && (
-                  <section>
+                  <section className="hidden md:block">
                     <div className="flex items-end justify-between mb-3 gap-3">
                       <div>
                         <h3 className="dash-serif text-base sm:text-lg font-extrabold text-stone-700 dark:text-stone-200">
@@ -1554,9 +1558,11 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                   </section>
                 )}
 
-                {/* What you'll get — new users */}
+                {/* What you'll get — new users. Hidden on mobile so first-
+                    time users get a focused upload experience instead of
+                    scrolling through a feature preview before starting. */}
                 {isNewUser && (
-                  <section>
+                  <section className="hidden sm:block">
                     <div className="mb-3">
                       <h2 className="dash-serif text-xl sm:text-2xl font-extrabold text-stone-900 dark:text-stone-50">What you'll get</h2>
                       <p className="mt-0.5 text-xs sm:text-sm text-stone-500 dark:text-stone-400 font-bold">A quick taste of what your analysis includes</p>
@@ -1656,15 +1662,19 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                         View all →
                       </button>
                     </div>
+                    {/* Mobile shows the 3 most recent analyses; tablet+
+                        shows up to 6. Cuts ~3 stacked cards (~300px) on
+                        phones where scrolling matters most. */}
                     <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3 dash-stagger">
                       {recentAnalyses.slice(0, 6).map((a, idx) => {
+                        const isMobileOnly = idx >= 3;
                         const duoColors = ['#FF4B4B', '#A560E8', '#1CB0F6', '#FF9600', '#58CC02', '#1CB0F6'];
                         const c = duoColors[idx % duoColors.length];
                         return (
                           <button
                             key={a.id}
                             onClick={() => onNavigate('analysis', a.id)}
-                            className="group rounded-2xl bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 hover:border-stone-300 text-left transition-all active:border-b-2 active:translate-y-0.5"
+                            className={`group rounded-2xl bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 hover:border-stone-300 text-left transition-all active:border-b-2 active:translate-y-0.5 ${isMobileOnly ? 'hidden sm:block' : ''}`}
                           >
                             <div className="p-4">
                               <div className="flex items-start gap-3">
