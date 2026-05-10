@@ -742,23 +742,25 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
         {/* MOBILE-ONLY ambient flourishes — extra animated orbs + breathing
             gradient sheen so the phone hero feels lively without the desktop
-            side cards. Hidden at md+ where the desktop layout takes over. */}
+            side cards. Hidden at md+ where the desktop layout takes over.
+            Blue orb + gradient softened (was /30 + 10%, now /15 + 4%) so the
+            hero doesn't read as overly tinted on phones. */}
         <div
-          className="md:hidden pointer-events-none absolute top-[18%] left-[8%] h-24 w-24 rounded-full bg-[#1CB0F6]/30 dark:bg-[#1CB0F6]/25 blur-2xl motion-safe:animate-mobile-orb-drift"
+          className="md:hidden pointer-events-none absolute top-[18%] left-[8%] h-24 w-24 rounded-full bg-[#1CB0F6]/15 dark:bg-[#1CB0F6]/12 blur-2xl motion-safe:animate-mobile-orb-drift"
           aria-hidden
         />
         <div
-          className="md:hidden pointer-events-none absolute top-[42%] right-[10%] h-28 w-28 rounded-full bg-[#58CC02]/30 dark:bg-[#58CC02]/25 blur-3xl motion-safe:animate-mobile-orb-drift"
+          className="md:hidden pointer-events-none absolute top-[42%] right-[10%] h-28 w-28 rounded-full bg-[#58CC02]/20 dark:bg-[#58CC02]/15 blur-3xl motion-safe:animate-mobile-orb-drift"
           style={{ animationDelay: '1.6s' }}
           aria-hidden
         />
         <div
-          className="md:hidden pointer-events-none absolute top-[68%] left-[18%] h-20 w-20 rounded-full bg-[#FF9600]/25 dark:bg-[#FF9600]/22 blur-2xl motion-safe:animate-mobile-orb-drift"
+          className="md:hidden pointer-events-none absolute top-[68%] left-[18%] h-20 w-20 rounded-full bg-[#FF9600]/15 dark:bg-[#FF9600]/12 blur-2xl motion-safe:animate-mobile-orb-drift"
           style={{ animationDelay: '3.2s' }}
           aria-hidden
         />
         <div
-          className="md:hidden pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_45%_at_50%_5%,rgba(28,176,246,0.10),transparent_55%)] dark:bg-[radial-gradient(ellipse_80%_45%_at_50%_5%,rgba(28,176,246,0.16),transparent_55%)] motion-safe:animate-mobile-gradient-breathe"
+          className="md:hidden pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_45%_at_50%_5%,rgba(28,176,246,0.04),transparent_55%)] dark:bg-[radial-gradient(ellipse_80%_45%_at_50%_5%,rgba(28,176,246,0.08),transparent_55%)] motion-safe:animate-mobile-gradient-breathe"
           aria-hidden
         />
 
@@ -906,9 +908,36 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     1) the essay analyzer ("professor-style feedback")
                     2) the study tools ("7 study tools built from your notes").
                     Bolded nouns let it scan in under a second. */}
-                <p className="mb-8 sm:mb-9 max-w-[min(24rem,calc(100vw-2rem))] sm:max-w-lg mx-auto text-[0.95rem] sm:text-[1rem] text-stone-700 dark:text-stone-300 leading-relaxed opacity-0 animate-hero-stagger-2">
-                  <span className="font-bold text-stone-900 dark:text-stone-50">Professor-style essay feedback</span> + <span className="font-bold text-stone-900 dark:text-stone-50">7 AI study tools</span> built from your notes. Designed to get you A's on essays AND exams.
+                {/* Subheading. Mobile gets a tighter version (no "built from
+                    your notes") so it lands cleanly on 2 lines instead of 3.
+                    Desktop keeps the longer wording where it has the room. */}
+                <p className="mb-6 sm:mb-9 max-w-[min(24rem,calc(100vw-2rem))] sm:max-w-lg mx-auto text-[0.95rem] sm:text-[1rem] text-stone-700 dark:text-stone-300 leading-relaxed opacity-0 animate-hero-stagger-2">
+                  <span className="font-bold text-stone-900 dark:text-stone-50">Professor-style essay feedback</span> + <span className="font-bold text-stone-900 dark:text-stone-50">7 AI study tools</span><span className="hidden sm:inline"> built from your notes</span>. Designed to get you A's on essays AND exams.
                 </p>
+
+                {/* MOBILE-ONLY hero demo video — sits between the subheading
+                    and the CTAs so users see the product before deciding to
+                    sign up. Replaces the floating PiP on phones. Softer
+                    purple ring (10% opacity, smaller blur) than the original
+                    so it doesn't compete with the actual video frame. */}
+                <div className="md:hidden mb-6 w-full max-w-sm mx-auto">
+                  <div className="relative">
+                    <div className="absolute -inset-1.5 bg-[#A560E8]/10 rounded-3xl blur-xl opacity-50" aria-hidden />
+                    <div className="relative rounded-2xl overflow-hidden border-2 border-b-4 border-[#8A48C7]/60 shadow-md bg-white dark:bg-stone-900">
+                      <video
+                        src="/hero-vid.mp4"
+                        poster="/hero-vid-poster.jpg"
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        preload="metadata"
+                        aria-label="WriteScholar walkthrough: a quick screen recording of the full product"
+                        className="w-full h-auto block"
+                      />
+                    </div>
+                  </div>
+                </div>
 
                 {/* PRIMARY + LOGIN CTAs — the primary "Start free" CTA is now
                     a custom-designed PNG (cta-button-hero.png, 1920x400 with
@@ -969,31 +998,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   <span className="text-[12px] sm:text-[14px] font-bold text-stone-800 dark:text-stone-100">
                     Trusted by <span className="font-extrabold text-[#1CB0F6] dark:text-[#1CB0F6] tabular-nums">50,000+</span> students worldwide
                   </span>
-                </div>
-
-                {/* MOBILE-ONLY hero demo video — replaces the floating PiP on
-                    phones. Inline placement so the video is part of the hero
-                    flow rather than a floating overlay that would crowd a
-                    small viewport. Same source file, same autoplay/muted/loop
-                    behavior, wrapped with the Duolingo 3D border so it reads
-                    as a "look what you get" reveal under the trust pill. */}
-                <div className="md:hidden mt-8 w-full max-w-md mx-auto">
-                  <div className="relative group">
-                    <div className="absolute -inset-2 bg-[#A560E8]/15 rounded-3xl blur-2xl opacity-60" aria-hidden />
-                    <div className="relative rounded-2xl overflow-hidden border-2 border-b-4 border-[#8A48C7] shadow-xl bg-white dark:bg-stone-900">
-                      <video
-                        src="/hero-vid.mp4"
-                        poster="/hero-vid-poster.jpg"
-                        autoPlay
-                        muted
-                        loop
-                        playsInline
-                        preload="metadata"
-                        aria-label="WriteScholar walkthrough: a quick screen recording of the full product"
-                        className="w-full h-auto block"
-                      />
-                    </div>
-                  </div>
                 </div>
                 </div>
               </div>
