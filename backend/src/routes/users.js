@@ -173,6 +173,42 @@ router.post('/onboarding-survey', authenticateToken, async (req, res) => {
   }
 });
 
+// @route   POST /api/users/mark-paid-conversion-fired
+// @desc    Idempotently flag that the Google Ads "Paid plan" conversion
+//          has been fired for this user. Called by the frontend after
+//          gtag('event', 'conversion', ...) runs in response to the
+//          paidConversionPending flag from /auth/me.
+// @access  Private
+//
+// The .is('paid_conversion_fired_at', null) clause makes this idempotent —
+// only the FIRST call from any given user actually writes a timestamp. A
+// double-fire from the frontend (e.g., the page hits /auth/me twice
+// during cache refresh) is a no-op rather than an error.
+router.post('/mark-paid-conversion-fired', authenticateToken, async (req, res) => {
+  try {
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+
+    const { error } = await supabase
+      .from('users')
+      .update({ paid_conversion_fired_at: new Date().toISOString() })
+      .eq('id', req.user.id)
+      .is('paid_conversion_fired_at', null);
+
+    if (error) {
+      console.error('[mark-paid-conversion-fired] Supabase error:', error.message);
+      return res.status(500).json({ success: false, message: 'Failed to mark conversion fired' });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('[mark-paid-conversion-fired] Error:', error.message);
+    res.status(500).json({ success: false, message: 'Failed to mark conversion fired' });
+  }
+});
+
 // @route   POST /api/users/complete-onboarding
 // @desc    Mark onboarding as completed for the current user
 // @access  Private

@@ -338,7 +338,7 @@ const quizletAlt: ProgrammaticPageConfig = {
   related: [
     { label: 'AI Flashcard Maker', href: '/tools/create-flashcards', teaser: 'Build decks card-by-card or auto-generate from notes.' },
     { label: 'AI Quiz Generator', href: '/tools/quiz-generator', teaser: 'Multiple-choice and fill-in quizzes from any text.' },
-    { label: 'Study Pack Generator', href: '/tools/study-pack', teaser: 'Notes → 6 study tools in 60 seconds.' },
+    { label: 'Study Pack Generator', href: '/tools/study-pack', teaser: 'Notes → 7 study tools in 60 seconds.' },
     { label: 'Knowt alternative', href: '/alternatives/knowt', teaser: 'See how WriteScholar compares to Knowt.' },
     { label: 'Course Hero alternative', href: '/alternatives/course-hero', teaser: 'A free alternative to Course Hero\'s study packs.' },
   ],
@@ -455,7 +455,7 @@ const courseHeroAlt: ProgrammaticPageConfig = {
   related: [
     { label: 'Quizlet alternative', href: '/alternatives/quizlet', teaser: 'How WriteScholar compares to Quizlet.' },
     { label: 'Chegg alternative', href: '/alternatives/chegg', teaser: 'A cheaper, integrity-safer alternative to Chegg.' },
-    { label: 'Study Pack Generator', href: '/tools/study-pack', teaser: 'Notes → 6 tools in 60 seconds.' },
+    { label: 'Study Pack Generator', href: '/tools/study-pack', teaser: 'Notes → 7 tools in 60 seconds.' },
   ],
   primaryCta: { label: 'Get free study tools', page: 'signup' },
   secondaryCta: { label: 'See pricing', page: 'pricing' },

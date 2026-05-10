@@ -51,9 +51,16 @@ const CONVERSION_LABELS = {
   /** Fires on account creation (handleSignUp). */
   signup: 'kn7hCJKx5qocEIeDsJND',
   /** Fires when user starts a paid trial via Stripe (sync-checkout-session). */
-  trial: '',
-  /** Reserved — currently unwired (see "Where events fire" above). */
-  paid: '',
+  trial: 'H1K8CK3qzaocEIeDsJND',
+  /**
+   * Fires when a trial converts to a paid subscription. Currently unwired
+   * client-side — Stripe charges the card 7 days after trial start via a
+   * server-side webhook the browser never sees. To track this accurately,
+   * wire it through the Google Ads Offline Conversions API from the
+   * backend Stripe webhook handler. Label is stored here so when that
+   * server-side wiring happens, the value is in one place.
+   */
+  paid: 'VdFNCMiu56ocEIeDsJND',
 };
 
 /** Google Analytics 4 measurement ID. Format: 'G-XXXXXXXX'. Optional. */

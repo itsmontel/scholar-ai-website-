@@ -154,6 +154,13 @@ const STUDY_PACK_PREVIEW_SLOTS: {
       alt: 'Word Tower stacking quiz game catching correct falling answers',
     },
   },
+  {
+    label: 'Word Blitz',
+    fallbackImage: {
+      src: '/study-pack-previews/word-blitz.png',
+      alt: 'Word Blitz fill-in-the-blank speed quiz built from your notes',
+    },
+  },
 ];
 
 export function StudyPackPreviewSection({ embedded = false }: PreviewSectionProps) {

@@ -222,7 +222,7 @@ router.get('/me', authenticateToken, async (req, res) => {
 
     const { data: user, error } = await supabase
       .from('users')
-      .select('id, email, username, first_name, last_name, name, institution, research_field, subscription_plan, subscription_status, created_at, last_login, email_verified, onboarding_completed, welcome_tutorial_completed')
+      .select('id, email, username, first_name, last_name, name, institution, research_field, subscription_plan, subscription_status, created_at, last_login, email_verified, onboarding_completed, welcome_tutorial_completed, paid_conversion_fired_at')
       .eq('id', req.user.id)
       .single();
 
@@ -232,6 +232,19 @@ router.get('/me', authenticateToken, async (req, res) => {
         message: 'User not found'
       });
     }
+
+    // Computed flag: tells the frontend "this user just transitioned to a
+    // paid plan and we haven't fired the Google Ads paid-plan conversion
+    // yet." See backend/sql/paid_conversion_tracking.sql for the schema +
+    // the firing flow. Helper at src/utils/gtag.ts is what actually fires
+    // the conversion event when this is true.
+    const planLower = (user.subscription_plan || '').toLowerCase();
+    const statusLower = (user.subscription_status || '').toLowerCase();
+    const paidConversionPending = (
+      (planLower === 'pro' || planLower === 'premium') &&
+      statusLower === 'active' &&
+      !user.paid_conversion_fired_at
+    );
 
     // Record login for streak when user fetches /me (app load = active today)
     streakService.recordLogin(req.user.id).catch(() => {});
@@ -261,7 +274,8 @@ router.get('/me', authenticateToken, async (req, res) => {
           lastLogin: user.last_login,
           emailVerified: user.email_verified,
           onboardingCompleted: user.onboarding_completed || false,
-          welcomeTutorialCompleted: user.welcome_tutorial_completed || false
+          welcomeTutorialCompleted: user.welcome_tutorial_completed || false,
+          paidConversionPending,
         },
         achievements: {
           stats: achievements.stats,

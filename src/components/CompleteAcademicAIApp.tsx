@@ -397,6 +397,26 @@ const AcademicAIApp = () => {
             };
             setUser(fresh);
             localStorage.setItem('user', JSON.stringify(fresh));
+            // Path B paid-plan conversion firing — see backend SQL at
+            // backend/sql/paid_conversion_tracking.sql for the design notes.
+            // Backend computes paidConversionPending from
+            // (paid plan) AND (active status) AND (no fired_at timestamp).
+            // We fire the gtag event, then POST to mark the timestamp so
+            // future /auth/me responses return false. Wrapped in a session
+            // sentinel to prevent double-fires within the same browser tab
+            // before the backend write round-trips.
+            if (u.paidConversionPending && !sessionStorage.getItem('ws_paid_conversion_fired')) {
+              sessionStorage.setItem('ws_paid_conversion_fired', '1');
+              const planPrice = u.subscriptionPlan === 'premium' ? 39.99 : 19.99;
+              void import('../utils/gtag').then((m) =>
+                m.trackPaidConversion(planPrice, `${u.id}-paid`)
+              );
+              void BulletproofAPI.post('/users/mark-paid-conversion-fired', token, {}).catch(() => {
+                // Non-fatal — if the mark fails, paidConversionPending stays
+                // true and we'll fire again on the next session, which is
+                // dedup'd by Google Ads via the transaction_id we passed.
+              });
+            }
           }
         }
       } catch (_e) {
