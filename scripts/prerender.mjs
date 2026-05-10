@@ -65,8 +65,44 @@ try {
 }
 
 const blogRoutes = blogSlugs.map((s) => `/blog/${s}`);
+
+/* Programmatic SEO pages — /study/[slug], /alternatives/[slug], /guides/[slug],
+   /best/[slug]. Read directly from src/data/programmaticPages.ts so adding a
+   new programmatic page automatically prerenders it on next build. */
+let programmaticPaths = [];
+try {
+  const progDataPath = path.resolve(__dirname, '../src/data/programmaticPages.ts');
+  const content = fs.readFileSync(progDataPath, 'utf-8');
+
+  // Subjects (in SUBJECTS array)
+  const subjectBlock = content.match(/const SUBJECTS:[\s\S]*?\];/);
+  if (subjectBlock) {
+    const slugs = [...subjectBlock[0].matchAll(/slug:\s*'([^']+)'/g)].map((m) => m[1]);
+    slugs.forEach((s) => programmaticPaths.push(`/study/${s}`));
+  }
+
+  // Alternative pages — type: 'alternative'
+  const altMatches = [...content.matchAll(/slug:\s*'([^']+)'[\s\S]{0,200}?type:\s*'alternative'/g)];
+  altMatches.forEach((m) => programmaticPaths.push(`/alternatives/${m[1]}`));
+
+  // Guide pages — slugs starting with 'how-to-'
+  const guideBlock = content.match(/const ESSAY_GUIDES_META:[\s\S]*?(?=\nfunction essayGuidePage)/);
+  if (guideBlock) {
+    const slugs = [...guideBlock[0].matchAll(/slug:\s*'(how-to-[^']+)'/g)].map((m) => m[1]);
+    slugs.forEach((s) => programmaticPaths.push(`/guides/${s}`));
+  }
+
+  // Best pages — type: 'best'
+  const bestMatches = [...content.matchAll(/slug:\s*'([^']+)'[\s\S]{0,200}?type:\s*'best'/g)];
+  bestMatches.forEach((m) => programmaticPaths.push(`/best/${m[1]}`));
+
+  console.log(`Found ${programmaticPaths.length} programmatic SEO pages`);
+} catch (e) {
+  console.warn('Could not auto-detect programmatic pages:', e.message);
+}
+
 // Process root last so we never serve prerendered homepage when capturing other routes
-const allRoutes = [...staticRoutes.filter((r) => r !== '/'), ...blogRoutes, '/'];
+const allRoutes = [...staticRoutes.filter((r) => r !== '/'), ...blogRoutes, ...programmaticPaths, '/'];
 
 async function prerender() {
   const server = createServer((req, res) => {

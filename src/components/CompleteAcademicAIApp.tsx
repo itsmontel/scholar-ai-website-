@@ -14,6 +14,7 @@ import SignUpPage from './pages/SignUpPage';
 import LoginPage from './pages/LoginPage';
 
 // Lazy with retry: recovers from chunk load failures (idle tab / deploy), retries with backoff before failing
+const ProgrammaticLandingPage = lazyWithRetry(() => import('./pages/ProgrammaticLandingPage'));
 const EmailVerificationPage = lazyWithRetry(() => import('./pages/EmailVerificationPage'));
 const OnboardingPage = lazyWithRetry(() => import('./pages/OnboardingPage'));
 // Pre-signup Duolingo-style funnel — every "Sign up" CTA on the marketing
@@ -107,6 +108,7 @@ import {
   syncBrowserUrlToCanonical,
 } from '../utils/seo';
 import { ogImageUrlForPage } from '../utils/ogImageUrls';
+import { getProgrammaticPageByPath } from '../data/programmaticPages';
 
 /**
  * Pages that should never appear in Google's index — private user areas,
@@ -153,6 +155,10 @@ const NOINDEX_PAGES = new Set<string>([
 /** Derive page from pathname - used for initial state and URL sync */
 function getPageFromPath(pathname: string): string {
   const p = pathname.replace(/\/$/, '') || '/'; // normalize trailing slash
+  // Programmatic SEO landing pages — /study/[slug], /alternatives/[slug],
+  // /guides/[slug], /best/[slug]. Single 'programmatic' page name; the
+  // actual config is looked up by path inside the render branch.
+  if (/^\/(study|alternatives|guides|best)\//.test(p)) return 'programmatic';
   if (p === '/email-verification') return 'email-verification';
   if (p === '/onboarding') return 'onboarding';
   if (p === '/auth/callback') return 'auth-callback';
@@ -1104,6 +1110,13 @@ const AcademicAIApp = () => {
     switch (currentPage) {
       case 'landing':
         return <LandingPage onNavigate={navigateTo} user={user} />;
+      case 'programmatic': {
+        // Look up the matching programmatic page by current URL.
+        // Falls back to landing if no match (e.g. /study/unknown-subject).
+        const config = getProgrammaticPageByPath(window.location.pathname);
+        if (!config) return <LandingPage onNavigate={navigateTo} user={user} />;
+        return <ProgrammaticLandingPage config={config} onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      }
       case 'signup':
         return <SignUpPage onNavigate={navigateTo} onSignUp={handleSignUp} />;
       case 'login':

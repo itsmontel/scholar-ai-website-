@@ -12,6 +12,14 @@ Allow: /help
 Allow: /contact
 Allow: /tools/
 Allow: /tools/*
+Allow: /study/
+Allow: /study/*
+Allow: /alternatives/
+Allow: /alternatives/*
+Allow: /guides/
+Allow: /guides/*
+Allow: /best/
+Allow: /best/*
 
 Disallow: /dashboard
 Disallow: /analysis
