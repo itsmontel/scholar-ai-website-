@@ -705,7 +705,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                 const isStudyPack = tool.quiz_type === 'study_pack';
                 const isLesson = tool.quiz_type === 'lesson';
                 const countLabel = isStudyPack
-                  ? '5 formats'
+                  ? '7 formats'
                   : isLesson
                     ? (tool.question_count ? `${tool.question_count} slides` : '')
                     : (tool.question_count ? `${tool.question_count} questions` : '');

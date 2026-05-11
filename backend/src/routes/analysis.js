@@ -2381,7 +2381,16 @@ router.post('/generate-reflex-questions', authenticateToken, async (req, res) =>
       }
     }
 
-    const result = await aiAnalysisService.generateReflexQuestions(inputType, content, userPlan);
+    // 3-attempt retry with linear backoff + 5-question minimum (enforced
+    // inside generateReflexQuestions). A single transient AI flake — bad
+    // JSON, rate limit, etc. — used to drop the user straight into an
+    // error toast. Mirrors the wrapping used inside generateStudyPack so
+    // standalone play feels as reliable as study-pack generation.
+    const result = await aiAnalysisService.withRetries(
+      'craterBlast (standalone)',
+      () => aiAnalysisService.generateReflexQuestions(inputType, content, userPlan),
+      3
+    );
     res.json({ success: true, data: result });
   } catch (error) {
     console.error('Generate reflex questions error:', error);
@@ -2427,7 +2436,14 @@ router.post('/generate-tower-questions', authenticateToken, async (req, res) => 
       }
     }
 
-    const result = await aiAnalysisService.generateWordTowerQuestions(inputType, content, userPlan);
+    // 3-attempt retry — same recovery story as the standalone Crater
+    // Blast and Word Blitz routes. The 4-question minimum lives inside
+    // generateWordTowerQuestions.
+    const result = await aiAnalysisService.withRetries(
+      'wordTower (standalone)',
+      () => aiAnalysisService.generateWordTowerQuestions(inputType, content, userPlan),
+      3
+    );
     res.json({ success: true, data: result });
   } catch (error) {
     console.error('Generate word tower questions error:', error);
@@ -2506,7 +2522,16 @@ router.post('/generate-word-blitz-questions', authenticateToken, async (req, res
       }
     }
 
-    const result = await aiAnalysisService.generateWordBlitzQuestions(inputType, content, userPlan);
+    // 3-attempt retry with linear backoff (400ms / 800ms) — matches the
+    // wrapping used by Crater Blast + Word Tower standalone routes and
+    // inside generateStudyPack. The 5-question minimum is enforced inside
+    // generateWordBlitzQuestions itself, so any attempt that returns fewer
+    // valid questions throws and triggers the next retry.
+    const result = await aiAnalysisService.withRetries(
+      'wordBlitz (standalone)',
+      () => aiAnalysisService.generateWordBlitzQuestions(inputType, content, userPlan),
+      3
+    );
     res.json({ success: true, data: result });
   } catch (error) {
     console.error('Generate Word Blitz questions error:', error);

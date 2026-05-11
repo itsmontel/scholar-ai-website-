@@ -12,6 +12,7 @@ import StudyPackPage from './StudyPackPage';
 import { MoreToolsGrid } from './MoreToolsPage';
 import DailyReviewTab from './DailyReviewTab';
 import FeatureHub, { type HubItem } from '../common/FeatureHub';
+import MobileDashboard from './MobileDashboard';
 import {
   AnalysisPreviewSection,
   StudyPackPreviewSection,
@@ -648,8 +649,57 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
     { bg: 'bg-[#1CB0F6]', border: 'border-[#1899D6]', tintBg: 'bg-[#DDF4FF] dark:bg-[#1CB0F6]/10', clr: 'text-[#1CB0F6]' },
   ];
 
+  /* ─── Mobile dashboard payload ───────────────────────────────
+     Compute the small data slice the mobile redesign needs. We map
+     the existing recentAnalyses + hub recents into one unified list,
+     dedup-by-id, and sort by recency. The mobile component shows the
+     top 3. */
+  const mobileRecentItems = (() => {
+    const items: { id: string; title: string; createdAt: string; kind: 'analyze' | 'study_pack' | 'citations' | 'daily_review' }[] = [];
+    for (const a of recentAnalyses) {
+      items.push({
+        id: a.id,
+        title: (a as any).title || (a as any).essay_title || 'Essay analysis',
+        createdAt: (a as any).created_at || (a as any).createdAt || new Date().toISOString(),
+        kind: 'analyze',
+      });
+    }
+    for (const h of analyzeRecents) {
+      if (items.find((x) => x.id === h.id)) continue;
+      items.push({ id: h.id, title: (h as any).title || 'Essay', createdAt: (h as any).updated_at || new Date().toISOString(), kind: 'analyze' });
+    }
+    for (const h of studyPackRecents) {
+      items.push({ id: h.id, title: (h as any).title || 'Study pack', createdAt: (h as any).updated_at || new Date().toISOString(), kind: 'study_pack' });
+    }
+    for (const h of citationsRecents) {
+      items.push({ id: h.id, title: (h as any).title || 'Citation search', createdAt: (h as any).updated_at || new Date().toISOString(), kind: 'citations' });
+    }
+    return items
+      .filter((x, i, arr) => arr.findIndex((y) => y.id === x.id) === i)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  })();
+
   return (
     <div className="min-h-screen relative font-sans overflow-x-hidden bg-stone-50 dark:bg-stone-950">
+      {/* ─── MOBILE-ONLY DASHBOARD ─── completely separate component
+          from the desktop layout below. Renders its own Header + content
+          designed for one-handed phone use. Hidden at md+ where the
+          existing dashboard takes over. */}
+      <div className="md:hidden">
+        <MobileDashboard
+          user={user as any}
+          onNavigate={onNavigate}
+          onLogout={onLogout}
+          dashboardTool={dashboardTool}
+          setDashboardTool={setDashboardTool}
+          recentItems={mobileRecentItems}
+          streakDays={streakInfo?.currentStreak ?? 0}
+          isNewUser={isNewUser}
+        />
+      </div>
+
+      {/* ─── TABLET + DESKTOP DASHBOARD (existing layout) ─── */}
+      <div className="hidden md:block">
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="dashboard" />
 
@@ -1874,6 +1924,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
       </main>
 
       <Footer onNavigate={onNavigate} />
+      </div>
     </div>
   );
 };

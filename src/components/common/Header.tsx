@@ -253,7 +253,7 @@ const Header: React.FC<HeaderProps> = ({
                 onClick={() => onNavigate?.('signup')}
                 className="inline-flex items-center justify-center px-4 py-2 sm:px-5 text-sm font-extrabold uppercase tracking-wide text-white rounded-xl bg-[#A560E8] hover:bg-[#9450D8] border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all whitespace-nowrap shrink-0"
               >
-                Sign up free
+                Start for Free
               </button>
               <button
                 type="button"
@@ -304,7 +304,7 @@ const Header: React.FC<HeaderProps> = ({
                   onClick={() => { onNavigate?.('signup'); setIsMobileMenuOpen(false); }}
                   className="block text-center px-4 py-2.5 text-white text-sm font-extrabold uppercase tracking-wide rounded-xl bg-[#A560E8] hover:bg-[#9450D8] border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all"
                 >
-                  Sign up free
+                  Start for Free
                 </button>
               </div>
               </div>

@@ -719,20 +719,69 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
       </div>
       {/* HERO: formal, conversion-focused */}
       <section className="relative flex flex-col overflow-x-clip overflow-hidden border-b border-stone-200/90 dark:border-stone-800 xl:overflow-visible">
-        <div className="absolute inset-0 bg-[#f9f9fb] dark:bg-[#0c0a09]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-white via-[#f7f7fa] to-[#f3f4f8] dark:from-stone-950 dark:via-stone-950 dark:to-stone-950 pointer-events-none" />
-        {/* Ambient depth — single brand wash + soft lift (no competing emerald/amber) */}
+        {/* ─── HERO BACKGROUND — BOLD MULTI-COLOUR MESH ────────────────
+            Strategy: strong brand-colour washes at the four corners,
+            calm white spotlight in the centre to protect the H1/CTA/
+            video readability. Gives "lush, on-brand, premium" without
+            sacrificing legibility. Ruled-paper texture + red margin
+            line provide thematic depth (essay-feedback product). */}
+
+        {/* Base off-white */}
+        <div className="absolute inset-0 bg-[#fafafa] dark:bg-[#0c0a09]" />
+
+        {/* Top-left: BLUE wash — softened (was 0.28, too intense). Keeps
+            the cool tone but reads as ambient atmosphere rather than a
+            saturated coloured corner. */}
         <div
-          className="pointer-events-none absolute -top-32 -left-[15%] h-[min(95vw,34rem)] w-[min(95vw,34rem)] rounded-full bg-[#1CB0F6]/[0.11] blur-[110px] dark:bg-[#1CB0F6]/[0.14] animate-landing-hero-blob"
+          className="pointer-events-none absolute -top-40 -left-[12%] h-[min(95vw,42rem)] w-[min(95vw,42rem)] rounded-full bg-[#1CB0F6]/[0.15] blur-[100px] dark:bg-[#1CB0F6]/[0.13] animate-landing-hero-blob"
           aria-hidden
         />
+
+        {/* Top-right: PURPLE wash — softened (was 0.26, too intense).
+            Still anchors the brand colour into the bg, just no longer
+            competes with the foreground content. */}
         <div
-          className="pointer-events-none absolute top-[20%] -right-[20%] h-[min(85vw,24rem)] w-[min(85vw,24rem)] rounded-full bg-slate-400/[0.07] blur-[100px] dark:bg-stone-600/[0.12] animate-landing-hero-blob-delayed"
+          className="pointer-events-none absolute -top-40 -right-[10%] h-[min(95vw,40rem)] w-[min(95vw,40rem)] rounded-full bg-[#A560E8]/[0.14] blur-[100px] dark:bg-[#A560E8]/[0.13] animate-landing-hero-blob-delayed"
           aria-hidden
         />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_60%_at_50%_-25%,rgba(28,176,246,0.055),transparent_58%)] dark:bg-[radial-gradient(ellipse_95%_55%_at_50%_-15%,rgba(28,176,246,0.09),transparent_58%)] pointer-events-none" />
+
+        {/* Bottom-left: ORANGE warm wash — unchanged. Adds colour-
+            temperature contrast against the cool blue/purple corners. */}
         <div
-          className="absolute inset-0 landing-hero-grid-animate pointer-events-none bg-[length:32px_32px] bg-[linear-gradient(to_right,rgba(148,163,184,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.05)_1px,transparent_1px)]"
+          className="pointer-events-none absolute -bottom-40 -left-[8%] h-[min(85vw,36rem)] w-[min(85vw,36rem)] rounded-full bg-[#FF9600]/[0.18] blur-[110px] dark:bg-[#FF9600]/[0.13] animate-landing-hero-blob"
+          aria-hidden
+        />
+
+        {/* Bottom-right: PURPLE — softened (was 0.22). Carries brand
+            colour through to the bottom corner without overpowering. */}
+        <div
+          className="pointer-events-none absolute -bottom-40 -right-[10%] h-[min(95vw,40rem)] w-[min(95vw,40rem)] rounded-full bg-[#A560E8]/[0.12] blur-[110px] dark:bg-[#A560E8]/[0.11] animate-landing-hero-blob-delayed"
+          aria-hidden
+        />
+
+        {/* Centre spotlight — soft white radial keeps the content area
+            readable against the strong corner colours. Without this, the
+            H1/CTA/video would fight the colourful washes. */}
+        <div
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_55%_55%_at_50%_50%,rgba(255,255,255,0.55),transparent_70%)] dark:bg-[radial-gradient(ellipse_55%_55%_at_50%_50%,rgba(0,0,0,0.30),transparent_70%)]"
+          aria-hidden
+        />
+
+        {/* RULED-PAPER PATTERN — visible blue horizontal lines every
+            36px. Was 0.07 opacity (effectively invisible); now 0.14 so
+            the texture actually reads as "paper" instead of disappearing
+            into the gradient. */}
+        <div
+          className="absolute inset-0 landing-hero-grid-animate pointer-events-none bg-[length:100%_36px] bg-[linear-gradient(to_bottom,rgba(28,176,246,0.14)_1px,transparent_1px)] dark:bg-[linear-gradient(to_bottom,rgba(28,176,246,0.16)_1px,transparent_1px)]"
+          aria-hidden
+        />
+
+        {/* NOTEBOOK MARGIN LINE — bold red vertical at ~5% from the left,
+            full hero height. 2px wide, peak opacity 0.45 (was 0.18 — hardly
+            visible). Classic lined-paper margin marker; ties to the "Before"
+            red and the H1 strikethrough red. lg+ only. */}
+        <div
+          className="hidden lg:block pointer-events-none absolute top-0 bottom-0 left-[5%] w-[2px] bg-gradient-to-b from-transparent via-[#FF4B4B]/[0.45] to-transparent dark:via-[#FF4B4B]/[0.50]"
           aria-hidden
         />
         <div

@@ -1663,7 +1663,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                                 {getTypeLabel(tool.quiz_type)}
                               </span>
                               <span className="px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] sm:text-xs font-bold bg-stone-100 text-stone-600 border-2 border-stone-200/50">
-                                {tool.quiz_type === 'study_pack' ? '5 formats' : `${tool.question_count} ${tool.quiz_type === 'flashcards' ? 'cards' : tool.quiz_type === 'crossword' ? 'words' : tool.quiz_type === 'crater_blast' ? 'questions' : tool.quiz_type === 'lesson' ? 'slides' : 'questions'}`}
+                                {tool.quiz_type === 'study_pack' ? '7 formats' : `${tool.question_count} ${tool.quiz_type === 'flashcards' ? 'cards' : tool.quiz_type === 'crossword' ? 'words' : tool.quiz_type === 'crater_blast' || tool.quiz_type === 'word_tower' || tool.quiz_type === 'word_blitz' ? 'questions' : tool.quiz_type === 'lesson' ? 'slides' : 'questions'}`}
                               </span>
                               {tool.quiz_type === 'lesson' && tool.quiz_bank && tool.quiz_bank.length > 0 && (
                                 <span className="px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] sm:text-xs font-extrabold bg-[#EAFFD6] text-[#46A302] border-2 border-[#58CC02]/30">

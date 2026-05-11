@@ -1413,7 +1413,12 @@ const AcademicAIApp = () => {
 
   return (
     <ErrorBoundary>
-    <div className="relative min-h-screen overflow-x-hidden transition-colors">
+    {/* overflow-x-clip (not -hidden) is intentional: -hidden turns this div
+        into a scroll container, which silently disables `position: sticky`
+        on every descendant — including the public Header. `clip` clips
+        horizontal overflow the same way visually but doesn't create a
+        scroll context, so sticky behaviour works app-wide. */}
+    <div className="relative min-h-screen overflow-x-clip transition-colors">
       <Suspense fallback={pageFallback}>
         <PageErrorBoundary key={currentPage} onGoBack={() => navigateTo('dashboard')}>
           {renderCurrentPage()}

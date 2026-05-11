@@ -5190,7 +5190,7 @@ Rules:
    * Logs every retry with the tool label so failures are traceable in
    * production logs (was: a single line on final rejection).
    */
-  async _withStudyPackRetries(label, fn, attempts = 3) {
+  async withRetries(label, fn, attempts = 3) {
     let lastErr;
     for (let attempt = 1; attempt <= attempts; attempt++) {
       try {
@@ -5204,10 +5204,10 @@ Rules:
           // recover. Two retries is the sweet spot — the marginal recovery
           // from a 4th attempt is small and packs already feel slow.
           const delayMs = 400 * attempt;
-          console.warn(`[StudyPack] ${label} attempt ${attempt}/${attempts} failed: ${msg} — retrying in ${delayMs}ms`);
+          console.warn(`[AI] ${label} attempt ${attempt}/${attempts} failed: ${msg} — retrying in ${delayMs}ms`);
           await new Promise(resolve => setTimeout(resolve, delayMs));
         } else {
-          console.error(`[StudyPack] ${label} failed after ${attempts} attempts: ${msg}`);
+          console.error(`[AI] ${label} failed after ${attempts} attempts: ${msg}`);
         }
       }
     }
@@ -5221,18 +5221,18 @@ Rules:
     const flashcardCount = userPlan === 'free' ? 15 : 20;
     const crosswordWordCount = userPlan === 'free' ? Math.min(10, Math.max(6, Math.ceil(wordCount / 500))) : Math.min(15, Math.max(8, Math.ceil(wordCount / 400)));
 
-    // Each tool is wrapped in _withStudyPackRetries so a single transient
+    // Each tool is wrapped in withRetries so a single transient
     // failure (network blip, rate limit, malformed JSON, validator throw)
     // doesn't permanently strip a tool from the pack. With 3 attempts per
     // tool, the per-tool failure rate drops from ~5% to <0.02%.
     const results = await Promise.allSettled([
-      this._withStudyPackRetries('quiz', () => this.generateQuiz(text, 'mixed', 'medium', quizCount, quizCount, userPlan)),
-      this._withStudyPackRetries('flashcards', () => this.generateFlashcards(text, flashcardCount, userPlan)),
-      this._withStudyPackRetries('crossword', () => this.generateCrossword(text, crosswordWordCount, userPlan)),
-      this._withStudyPackRetries('lesson', () => this.generateVisualLesson(text, userPlan)),
-      this._withStudyPackRetries('craterBlast', () => this.generateReflexQuestions('notes', text, userPlan)),
-      this._withStudyPackRetries('wordTower', () => this.generateWordTowerQuestions('notes', text, userPlan)),
-      this._withStudyPackRetries('wordBlitz', () => this.generateWordBlitzQuestions('notes', text, userPlan)),
+      this.withRetries('quiz', () => this.generateQuiz(text, 'mixed', 'medium', quizCount, quizCount, userPlan)),
+      this.withRetries('flashcards', () => this.generateFlashcards(text, flashcardCount, userPlan)),
+      this.withRetries('crossword', () => this.generateCrossword(text, crosswordWordCount, userPlan)),
+      this.withRetries('lesson', () => this.generateVisualLesson(text, userPlan)),
+      this.withRetries('craterBlast', () => this.generateReflexQuestions('notes', text, userPlan)),
+      this.withRetries('wordTower', () => this.generateWordTowerQuestions('notes', text, userPlan)),
+      this.withRetries('wordBlitz', () => this.generateWordBlitzQuestions('notes', text, userPlan)),
     ]);
 
     const [quizR, flashR, crossR, lessonR, craterR, towerR, blitzR] = results;
@@ -5244,9 +5244,9 @@ Rules:
       }
     });
     if (missing.length > 0) {
-      console.error(`[StudyPack] Pack returned with ${missing.length}/7 tools missing after retries: ${missing.join(', ')}`);
+      console.error(`[AI] Pack returned with ${missing.length}/7 tools missing after retries: ${missing.join(', ')}`);
     } else {
-      console.log('[StudyPack] All 7 tools generated successfully');
+      console.log('[AI] All 7 tools generated successfully');
     }
 
     if (quizR.status === 'rejected' && flashR.status === 'rejected' && lessonR.status === 'rejected') {

@@ -62,7 +62,7 @@ type InputMode = 'topic' | 'notes' | 'play-for-fun' | 'mental-math' | 'my-packs'
 
 /* ────────────────────── Config ────────────────────── */
 
-const MAX_MISTAKES = 7;
+const MAX_MISTAKES = 5;
 const BASE_FALL_DURATION = 7800;
 const MIN_FALL_DURATION = 4600;
 const SPEED_DECREASE_PER_3 = 115;
@@ -107,10 +107,16 @@ function bankToQuestions(bank: BankQuestion[], prefix: string): Question[] {
   }));
 }
 
+// Tower halo color ramps with mistakes — bands rescaled for the new
+// MAX_MISTAKES = 5 cap (was 7) so the danger feels proportional.
+//   0–1 : invisible
+//   2   : yellow (40% — first warning)
+//   3   : orange (60%)
+//   4   : red (80% — one mistake from death)
 function glowColor(mistakes: number): string {
-  if (mistakes <= 2) return 'transparent';
-  if (mistakes <= 4) return 'rgba(250, 204, 21, 0.55)';
-  if (mistakes <= 6) return 'rgba(249, 115, 22, 0.7)';
+  if (mistakes <= 1) return 'transparent';
+  if (mistakes <= 2) return 'rgba(250, 204, 21, 0.55)';
+  if (mistakes <= 3) return 'rgba(249, 115, 22, 0.7)';
   return 'rgba(239, 68, 68, 0.9)';
 }
 
@@ -1021,7 +1027,10 @@ const WordTowerPage = ({ onNavigate, user, onLogout }: WordTowerPageProps) => {
       transform: 'translateX(-50%)',
       transformOrigin: 'bottom center',
       transition: 'filter 0.3s ease',
-      filter: mistakes >= 3 ? `drop-shadow(0 0 ${Math.min(28, mistakes * 4)}px ${glowColor(mistakes)})` : undefined,
+      // Tower halo kicks in at 2 mistakes (40% of new cap of 5). Multiplier
+      // bumped from ×4 to ×7 so the visual intensity at mistakes=4 still
+      // tops out near 28px, matching the old feel one-mistake-from-death.
+      filter: mistakes >= 2 ? `drop-shadow(0 0 ${Math.min(28, mistakes * 7)}px ${glowColor(mistakes)})` : undefined,
       zIndex: 4,
     };
 
@@ -1080,9 +1089,9 @@ const WordTowerPage = ({ onNavigate, user, onLogout }: WordTowerPageProps) => {
                 {streak >= 3 && '🔥'}{streak}x
               </div>
               <div className={`px-2.5 py-1 rounded-full border text-[11px] font-bold flex items-center gap-1 tabular-nums transition-colors ${
-                mistakes >= 5
+                mistakes >= 4
                   ? 'bg-red-500/20 border-red-400/40 text-red-200'
-                  : mistakes >= 3
+                  : mistakes >= 2
                     ? 'bg-amber-500/20 border-amber-400/40 text-amber-200'
                     : 'bg-slate-800/80 border-slate-700/60 text-slate-400'
               }`}>
