@@ -181,7 +181,7 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
       className={
         embedded
           ? 'relative w-full min-w-0'
-          : 'min-h-screen relative transition-colors font-sans overflow-x-hidden'
+          : 'min-h-screen relative transition-colors font-sans overflow-x-clip'
       }
     >
       {!embedded && <WriteScholarEditorialBackgroundLayers position="fixed" />}
@@ -191,8 +191,8 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
       <main
         className={
           embedded
-            ? 'relative max-w-none mx-auto px-0 pt-0 pb-2 w-full min-w-0 overflow-x-hidden'
-            : 'relative max-w-[1360px] mx-auto px-3 sm:px-6 lg:px-8 pt-3 sm:pt-6 pb-24 sm:pb-16 w-full min-w-0 overflow-x-hidden'
+            ? 'relative max-w-none mx-auto px-0 pt-0 pb-2 w-full min-w-0 overflow-x-clip'
+            : 'relative max-w-[1360px] mx-auto px-3 sm:px-6 lg:px-8 pt-3 sm:pt-6 pb-24 sm:pb-16 w-full min-w-0 overflow-x-clip'
         }
       >
         <div className="w-full min-w-0 space-y-4 sm:space-y-6">

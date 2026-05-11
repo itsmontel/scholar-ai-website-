@@ -70,7 +70,7 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
   };
 
   return (
-    <div className="relative isolate min-h-screen min-h-[100dvh] overflow-x-hidden bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+    <div className="relative isolate min-h-screen min-h-[100dvh] overflow-x-clip bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <div className="relative z-10 flex min-h-screen min-h-[100dvh] w-full flex-col lg:flex-row">
       {/* Back Button */}

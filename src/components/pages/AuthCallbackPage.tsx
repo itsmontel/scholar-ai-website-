@@ -105,7 +105,7 @@ const AuthCallbackPage: React.FC<AuthCallbackPageProps> = ({ onNavigate, onLogin
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-x-hidden">
+    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-x-clip">
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
         <div className="flex items-center gap-2.5 justify-center mb-8">

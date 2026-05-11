@@ -1631,11 +1631,11 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col overflow-x-hidden">
+    <div className="relative min-h-screen flex flex-col overflow-x-clip">
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       {!showMinimalUI && <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage={studyToolMode === 'quiz' ? 'quiz-generator' : studyToolMode === 'flashcards' ? 'quiz-generator' : 'crossword-generator'} />}
       
-      <main className="flex-1 w-full min-w-0 overflow-x-hidden relative max-w-full">
+      <main className="flex-1 w-full min-w-0 overflow-x-clip relative max-w-full">
         <input
           ref={fileInputRef}
           type="file"
@@ -2040,7 +2040,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
             {studyToolMode === 'flashcards' && (
               <>
                 {flashcardResult ? (
-                  <div className="min-w-0 w-full overflow-x-hidden">
+                  <div className="min-w-0 w-full overflow-x-clip">
                     <FlashcardViewer
                       initialCards={flashcardResult.cards ?? []}
                       title={flashcardResult.title || 'Flashcards'}
@@ -2123,7 +2123,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
             {studyToolMode === 'crossword' && (
               <>
                 {crosswordResult && crosswordResult.placedWords?.length > 0 ? (
-                  <div className="min-w-0 w-full overflow-x-hidden">
+                  <div className="min-w-0 w-full overflow-x-clip">
                     <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                       <h2 className="text-lg font-extrabold text-stone-800 dark:text-stone-100" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>{crosswordResult.title}</h2>
                       <div className="flex items-center gap-2 flex-wrap">

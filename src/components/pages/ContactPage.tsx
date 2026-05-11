@@ -19,7 +19,7 @@ const ContactPage = ({ onNavigate, user, onLogout }: ContactPageProps) => {
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden transition-colors bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+    <div className="relative min-h-screen overflow-x-clip transition-colors bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="contact" />
 
       {/* Main Content */}

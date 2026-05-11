@@ -269,7 +269,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
 
   if (loading) {
     return (
-      <div className="relative min-h-screen overflow-x-hidden">
+      <div className="relative min-h-screen overflow-x-clip">
         <WriteScholarEditorialBackgroundLayers position="fixed" />
         <Header 
           onNavigate={onNavigate} 
@@ -293,7 +293,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
     (id === 'premium' && currentPlan === 'premium');
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+    <div className="relative min-h-screen overflow-x-clip" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header
         onNavigate={onNavigate}

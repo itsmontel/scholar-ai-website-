@@ -1024,6 +1024,30 @@ html.dark .landing-hero-grid-animate {
     opacity: 1;
   }
 }
+/* Hero A-grade pill — gentle wiggle that orbits a -4deg "stamped" tilt
+   so the pill reads as a teacher's grade mark, with a tiny life-of-its-own
+   nudge every few seconds. The base rotate-[-4deg] on the element is
+   overridden by this animation while it runs. */
+@keyframes hero-a-wiggle {
+  0%, 100% { transform: rotate(-4deg) scale(1); }
+  20% { transform: rotate(-9deg) scale(1.04); }
+  45% { transform: rotate(-1deg) scale(1.02); }
+  70% { transform: rotate(-6deg) scale(1.03); }
+}
+
+/* Hero floating tiles — smooth horizontal-dominant drift.
+   Replaces the previous up/down `float` keyframe (felt too "bouncy").
+   The tile traces a soft, rounded path that's mostly left↔right with a
+   tiny vertical lilt for organic life. Long-duration ease-in-out + each
+   tile staggered by inline animationDelay gives the cluster a calm,
+   wave-like motion. */
+@keyframes hero-tile-drift {
+  0%, 100% { transform: translate(0px, 0px); }
+  25% { transform: translate(10px, -2px); }
+  50% { transform: translate(0px, -5px); }
+  75% { transform: translate(-10px, -2px); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   /* In reduced motion mode, just appear instantly without movement. */
   [style*="pipSlideIn"] {

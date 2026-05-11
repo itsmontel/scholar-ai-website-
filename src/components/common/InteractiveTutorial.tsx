@@ -737,7 +737,7 @@ function ImmersiveApplyDemo({
     return (
       <div
         key={k}
-        className={`tut-toolkit-panel absolute bottom-full left-1/2 z-[35] mb-2 w-[min(calc(100vw-5rem),22rem)] max-h-[min(30vh,12rem)] sm:max-h-[min(34vh,13.5rem)] -translate-x-1/2 overflow-y-auto overflow-x-hidden rounded-xl border ${border} bg-white shadow-[0_20px_50px_-12px_rgba(0,0,0,0.22)] ring-1 ring-stone-900/5 dark:bg-stone-900 dark:ring-white/10 animate-tutToolkitIn`}
+        className={`tut-toolkit-panel absolute bottom-full left-1/2 z-[35] mb-2 w-[min(calc(100vw-5rem),22rem)] max-h-[min(30vh,12rem)] sm:max-h-[min(34vh,13.5rem)] -translate-x-1/2 overflow-y-auto overflow-x-clip rounded-xl border ${border} bg-white shadow-[0_20px_50px_-12px_rgba(0,0,0,0.22)] ring-1 ring-stone-900/5 dark:bg-stone-900 dark:ring-white/10 animate-tutToolkitIn`}
         role="region"
         aria-label="WriteScholar toolkit"
       >

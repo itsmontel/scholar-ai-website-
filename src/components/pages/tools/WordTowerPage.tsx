@@ -1414,7 +1414,7 @@ const WordTowerPage = ({ onNavigate, user, onLogout }: WordTowerPageProps) => {
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col overflow-x-hidden" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+    <div className="relative min-h-screen flex flex-col overflow-x-clip" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       {!showMinimalUI && <Header onNavigate={onNavigate} user={user} onLogout={onLogout || (() => {})} currentPage="word-tower" />}
       {showMinimalUI && (gameState === 'menu' || gameState === 'loading' || gameState === 'ready' || gameState === 'gameover') && (

@@ -269,7 +269,7 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
 
   if (isLoading) {
     return (
-      <div className="relative min-h-screen flex items-center justify-center overflow-x-hidden bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+      <div className="relative min-h-screen flex items-center justify-center overflow-x-clip bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-stone-200 border-t-[#A560E8] mx-auto"></div>
           <p className="mt-4 text-stone-500 dark:text-stone-400 font-extrabold">Loading analysis history...</p>
@@ -280,7 +280,7 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
 
   if (!isPaidUser) {
     return (
-      <div className={showHeader ? 'relative min-h-screen overflow-x-hidden bg-stone-50 dark:bg-stone-950' : 'bg-stone-50 dark:bg-stone-950'} style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+      <div className={showHeader ? 'relative min-h-screen overflow-x-clip bg-stone-50 dark:bg-stone-950' : 'bg-stone-50 dark:bg-stone-950'} style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
         {showHeader && <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="analysis-history" />}
         <div className={showHeader ? 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10' : 'p-6'}>
           <div className="max-w-md mx-auto text-center py-16">
@@ -312,7 +312,7 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
   }
 
   return (
-    <div className={showHeader ? 'relative min-h-screen overflow-x-hidden bg-stone-50 dark:bg-stone-950' : 'bg-stone-50 dark:bg-stone-950'} style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+    <div className={showHeader ? 'relative min-h-screen overflow-x-clip bg-stone-50 dark:bg-stone-950' : 'bg-stone-50 dark:bg-stone-950'} style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       {showHeader && <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="analysis-history" />}
 
       <div className={showHeader ? "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10" : "p-6"}>

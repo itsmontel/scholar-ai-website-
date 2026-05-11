@@ -1140,7 +1140,7 @@ const AcademicAIApp = () => {
     // No cache + fetch in progress: brief loading (cache usually exists for instant render)
     if (isLoggedIn && !user && protectedRoutes.includes(currentPage)) {
       return (
-        <div className="relative isolate min-h-screen min-h-[100dvh] flex items-center justify-center overflow-x-hidden">
+        <div className="relative isolate min-h-screen min-h-[100dvh] flex items-center justify-center overflow-x-clip">
           <WriteScholarEditorialBackgroundLayers position="fixed" />
           <div className="relative z-10">
             <RandomMascotLoader size={140} />
@@ -1403,7 +1403,7 @@ const AcademicAIApp = () => {
   };
 
   const pageFallback = (
-    <div className="relative isolate min-h-screen min-h-[100dvh] flex items-center justify-center overflow-x-hidden">
+    <div className="relative isolate min-h-screen min-h-[100dvh] flex items-center justify-center overflow-x-clip">
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <div className="relative z-10">
         <RandomMascotLoader size={140} />
@@ -1486,7 +1486,7 @@ const AcademicAIApp = () => {
 
 // Admin Dashboard Component
 const AdminDashboard = ({ onNavigate, user: _user }: UserProps) => (
-  <div className="relative min-h-screen overflow-x-hidden">
+  <div className="relative min-h-screen overflow-x-clip">
     <WriteScholarEditorialBackgroundLayers position="fixed" />
     {/* Navigation */}
     <nav className="bg-white border-b border-gray-200 px-8 py-4">
@@ -1576,7 +1576,7 @@ const AdminDashboard = ({ onNavigate, user: _user }: UserProps) => (
 
 // Collaboration Page Component
 const CollaborationPage = ({ onNavigate, user: _user }: UserProps) => (
-  <div className="relative min-h-screen overflow-x-hidden">
+  <div className="relative min-h-screen overflow-x-clip">
     <WriteScholarEditorialBackgroundLayers position="fixed" />
     {/* Navigation */}
     <nav className="bg-white border-b border-gray-200 px-8 py-4">

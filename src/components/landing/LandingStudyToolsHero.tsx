@@ -87,7 +87,7 @@ const TOOLS: ToolCard[] = [
     num: '05',
     title: 'Word Tower',
     subtitle: 'Arcade vocab game',
-    desc: 'Stack the right words, beat your streak, climb the daily leaderboard.',
+    desc: 'Stack the right words, beat your streak.',
     image: '/study-pack-previews/word-tower.png',
     alt: 'WriteScholar Word Tower arcade game with starfield background and word blocks',
     tone: 'purple',

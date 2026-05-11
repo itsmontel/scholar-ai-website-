@@ -827,7 +827,7 @@ function InteractiveStudyPackFull() {
                 readOnly
                 placeholder="Your notes appear here…"
                 rows={6}
-                className="relative w-full min-h-[140px] sm:min-h-[160px] rounded-2xl p-4 sm:p-5 text-[#3C3C3C] dark:text-white text-sm sm:text-[15px] bg-transparent border-none outline-none resize-none placeholder-[#AFAFAF] dark:placeholder-stone-500 leading-relaxed overflow-x-hidden"
+                className="relative w-full min-h-[140px] sm:min-h-[160px] rounded-2xl p-4 sm:p-5 text-[#3C3C3C] dark:text-white text-sm sm:text-[15px] bg-transparent border-none outline-none resize-none placeholder-[#AFAFAF] dark:placeholder-stone-500 leading-relaxed overflow-x-clip"
                 style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                 aria-label="Demo notes (illustration)"
               />

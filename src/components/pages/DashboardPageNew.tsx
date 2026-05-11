@@ -690,7 +690,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
   })();
 
   return (
-    <div className="min-h-screen relative font-sans overflow-x-hidden bg-stone-50 dark:bg-stone-950">
+    <div className="min-h-screen relative font-sans overflow-x-clip bg-stone-50 dark:bg-stone-950">
       {/* ─── MOBILE-ONLY DASHBOARD ─── completely separate component
           from the desktop layout below. Renders its own Header + content
           designed for one-handed phone use. Hidden at md+ where the

@@ -88,7 +88,7 @@ const AnalyzeHubPage: React.FC<AnalyzeHubPageProps> = ({ onNavigate, user, onLog
   }));
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#FAFAFA] dark:bg-stone-950">
+    <div className="relative min-h-screen overflow-x-clip bg-[#FAFAFA] dark:bg-stone-950">
       <Header onNavigate={onNavigate} user={user as User} onLogout={onLogout} currentPage="analyze" />
       <FeatureHub
         title="Essay analysis"

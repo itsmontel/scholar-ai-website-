@@ -350,7 +350,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
                 key={`${ann.id}-${i}`}
                 data-landing-doc-ann={ann.id}
                 className={`relative inline ${highlightClasses[ann.type]} px-0.5 cursor-pointer transition-all duration-200 ${
-                  isSelected ? 'ring-2 ring-offset-2 ring-[#1CB0F6]' : ''
+                  isSelected ? 'ring-2 ring-offset-2 ring-[#A560E8]' : ''
                 }`}
                 onClick={() => setSelectedAnnotation(ann.id)}
                 onMouseEnter={(e) => {
@@ -403,7 +403,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
 
   const renderGradeBreakdown = () => (
     <div className="mx-4 sm:mx-6 mt-6 mb-4 rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-600 overflow-hidden">
-      <div className="bg-[#1CB0F6] text-white px-6 py-5">
+      <div className="bg-gradient-to-br from-[#A560E8] to-[#7733B5] text-white px-6 py-5">
         <div className="flex flex-wrap items-center gap-6">
           <div>
             <h2 className="text-base sm:text-xl font-extrabold" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>General Academic Assessment</h2>
@@ -447,7 +447,16 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
       }`}
     >
       {/* Demo selector + Header — Duolingo dark chrome */}
-      <div className="bg-[#3C3C3C] px-3 sm:px-6 py-4 sm:py-5">
+      {/* Sample-paper chrome bar — clean off-white "document folder"
+          look with a soft purple tint, dark text, and brand-purple
+          accents. Replaces the previous yellow (felt too loud) and the
+          earlier deep-purple/charcoal versions. Reads like a polished
+          document viewer that pairs naturally with the cream section
+          background below the hero. */}
+      <div className="relative bg-gradient-to-b from-white to-[#FAF5FF] dark:from-stone-900 dark:to-stone-900/95 px-3 sm:px-6 py-4 sm:py-5 border-b-2 border-[#E5E5E5] dark:border-stone-700">
+        {/* Thin brand-purple accent strip at the very top edge —
+            the "tab" detail that makes the chrome feel like a folder. */}
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#A560E8] via-[#8A48C7] to-[#A560E8]" aria-hidden />
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-3 sm:gap-y-2 mb-4">
           <div className="flex flex-wrap gap-2">
             {DEMO_PAPERS.map((d) => (
@@ -462,7 +471,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
                 className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all ${
                   selectedDemoId === d.id
                     ? 'bg-[#58CC02] text-white border-2 border-b-4 border-[#46A302]'
-                    : 'bg-white/10 text-white/90 hover:bg-white/20 border-2 border-b-4 border-white/20 active:border-b-2 active:translate-y-0.5'
+                    : 'bg-white text-stone-700 hover:bg-stone-50 border-2 border-b-4 border-stone-200 active:border-b-2 active:translate-y-0.5'
                 }`}
                 style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
               >
@@ -470,24 +479,24 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
               </button>
             ))}
           </div>
-          <p className="text-[11px] sm:text-xs text-white/70 text-left sm:text-right leading-snug sm:ml-auto max-w-none sm:max-w-[min(100%,22rem)]">
+          <p className="text-[11px] sm:text-xs text-stone-500 dark:text-stone-400 text-left sm:text-right leading-snug sm:ml-auto max-w-none sm:max-w-[min(100%,22rem)]">
             Professor-style review · sample draft (not your work)
           </p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 min-w-0">
           <div className="min-w-0 flex-1">
-            <h2 className="text-[0.95rem] sm:text-base lg:text-xl font-extrabold text-white leading-snug break-words" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>{demo.title}</h2>
+            <h2 className="text-[0.95rem] sm:text-base lg:text-xl font-extrabold text-stone-900 dark:text-stone-100 leading-snug break-words" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>{demo.title}</h2>
           </div>
           <div className="flex flex-nowrap items-center gap-1.5 sm:flex-wrap sm:gap-2 md:gap-3 min-w-0 overflow-x-auto pb-0.5 sm:pb-0 sm:overflow-visible [-webkit-overflow-scrolling:touch]">
-          <button type="button" className="px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-colors flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-sm font-medium text-white shrink-0 bg-white/10 hover:bg-white/20 border-2 border-b-4 border-white/20 active:border-b-2 active:translate-y-0.5">
+          <button type="button" className="px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-colors flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-sm font-bold text-stone-700 dark:text-stone-200 shrink-0 bg-white dark:bg-stone-800 hover:bg-stone-50 dark:hover:bg-stone-700 border-2 border-b-4 border-stone-200 dark:border-stone-700 active:border-b-2 active:translate-y-0.5">
             <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
             PDF
           </button>
-          <button type="button" className="px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-colors flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-sm font-medium text-white shrink-0 bg-white/10 hover:bg-white/20 border-2 border-b-4 border-white/20 active:border-b-2 active:translate-y-0.5">
+          <button type="button" className="px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-colors flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-sm font-bold text-stone-700 dark:text-stone-200 shrink-0 bg-white dark:bg-stone-800 hover:bg-stone-50 dark:hover:bg-stone-700 border-2 border-b-4 border-stone-200 dark:border-stone-700 active:border-b-2 active:translate-y-0.5">
             <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
             Word
           </button>
-          <button type="button" className="px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-colors flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-sm font-medium text-white shrink-0 bg-white/10 hover:bg-white/20 border-2 border-b-4 border-white/20 active:border-b-2 active:translate-y-0.5">
+          <button type="button" className="px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-colors flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-sm font-bold text-stone-700 dark:text-stone-200 shrink-0 bg-white dark:bg-stone-800 hover:bg-stone-50 dark:hover:bg-stone-700 border-2 border-b-4 border-stone-200 dark:border-stone-700 active:border-b-2 active:translate-y-0.5">
             <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             Close
           </button>
@@ -568,7 +577,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
           onClick={() => setMobileTab('document')}
           className={`flex-1 py-2.5 sm:py-3 px-1.5 sm:px-3 text-[11px] sm:text-sm font-extrabold transition-colors leading-tight ${
             mobileTab === 'document'
-              ? 'text-[#1CB0F6] dark:text-[#1CB0F6] border-b-4 border-[#1CB0F6] bg-white dark:bg-stone-900'
+              ? 'text-[#A560E8] dark:text-[#A560E8] border-b-4 border-[#A560E8] bg-white dark:bg-stone-900'
               : 'text-[#AFAFAF] dark:text-stone-400 hover:text-[#3C3C3C] dark:hover:text-stone-200'
           }`}
           style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
@@ -580,7 +589,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
           onClick={() => setMobileTab('feedback')}
           className={`flex-1 py-2.5 sm:py-3 px-1.5 sm:px-3 text-[11px] sm:text-sm font-extrabold transition-colors leading-tight ${
             mobileTab === 'feedback'
-              ? 'text-[#1CB0F6] dark:text-[#1CB0F6] border-b-4 border-[#1CB0F6] bg-white dark:bg-stone-900'
+              ? 'text-[#A560E8] dark:text-[#A560E8] border-b-4 border-[#A560E8] bg-white dark:bg-stone-900'
               : 'text-[#AFAFAF] dark:text-stone-400 hover:text-[#3C3C3C] dark:hover:text-stone-200'
           }`}
           style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
@@ -592,7 +601,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
           onClick={() => setMobileTab('analysis')}
           className={`flex-1 py-2.5 sm:py-3 px-1.5 sm:px-3 text-[11px] sm:text-sm font-extrabold transition-colors leading-tight ${
             mobileTab === 'analysis'
-              ? 'text-[#1CB0F6] dark:text-[#1CB0F6] border-b-4 border-[#1CB0F6] bg-white dark:bg-stone-900'
+              ? 'text-[#A560E8] dark:text-[#A560E8] border-b-4 border-[#A560E8] bg-white dark:bg-stone-900'
               : 'text-[#AFAFAF] dark:text-stone-400 hover:text-[#3C3C3C] dark:hover:text-stone-200'
           }`}
           style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
@@ -626,7 +635,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
         >
           <div className="p-5 md:p-6">
             <h3 className="text-sm sm:text-lg font-extrabold text-[#3C3C3C] dark:text-stone-100 mb-3 sm:mb-5 flex items-center" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-              <svg className="w-5 h-5 mr-2 text-[#1CB0F6]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-5 h-5 mr-2 text-[#A560E8]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
               </svg>
               Annotations
@@ -645,7 +654,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
                     <div
                       key={ann.id}
                       className={`bg-white dark:bg-stone-800 rounded-2xl p-3.5 border-2 border-b-4 border-[#E5E5E5] border-l-[6px] border-l-[#58CC02] transition-all cursor-pointer min-w-0 ${
-                        selectedAnnotation === ann.id ? 'ring-2 ring-[#1CB0F6]' : ''
+                        selectedAnnotation === ann.id ? 'ring-2 ring-[#A560E8]' : ''
                       }`}
                       onClick={() => setSelectedAnnotation(ann.id)}
                       onMouseEnter={() => setHoveredAnnotation(ann.id)}
@@ -672,7 +681,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
                       key={ann.id}
                       data-landing-feedback-card={ann.id}
                       className={`bg-white dark:bg-stone-800 rounded-2xl p-3.5 border-2 border-b-4 border-[#E5E5E5] border-l-[6px] border-l-[#FF9600] transition-all cursor-pointer min-w-0 ${
-                        selectedAnnotation === ann.id ? 'ring-2 ring-[#1CB0F6]' : ''
+                        selectedAnnotation === ann.id ? 'ring-2 ring-[#A560E8]' : ''
                       }`}
                       onClick={() => setSelectedAnnotation(ann.id)}
                       onMouseEnter={() => setHoveredAnnotation(ann.id)}
@@ -707,7 +716,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
                       key={ann.id}
                       data-landing-feedback-card={ann.id}
                       className={`bg-white dark:bg-stone-800 rounded-2xl p-3.5 border-2 border-b-4 border-[#E5E5E5] border-l-[6px] border-l-[#FF4B4B] transition-all cursor-pointer min-w-0 ${
-                        selectedAnnotation === ann.id ? 'ring-2 ring-[#1CB0F6]' : ''
+                        selectedAnnotation === ann.id ? 'ring-2 ring-[#A560E8]' : ''
                       }`}
                       onClick={() => setSelectedAnnotation(ann.id)}
                       onMouseEnter={() => setHoveredAnnotation(ann.id)}

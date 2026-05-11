@@ -68,7 +68,7 @@ const WordCounterPage = ({ onNavigate, user, onLogout }: WordCounterPageProps) =
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+    <div className="relative min-h-screen overflow-x-clip bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="word-counter" />
 
       {/* Hero Section */}

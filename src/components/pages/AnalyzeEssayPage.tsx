@@ -177,7 +177,7 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout, embedded = false }: Anal
 
   return (
     <div
-      className={`relative transition-colors font-sans overflow-x-hidden ${embedded ? '' : 'min-h-screen'}`}
+      className={`relative transition-colors font-sans overflow-x-clip ${embedded ? '' : 'min-h-screen'}`}
       style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
     >
       {!embedded && <WriteScholarEditorialBackgroundLayers position="fixed" />}
@@ -185,7 +185,7 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout, embedded = false }: Anal
       {!embedded && <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="analyze" />}
 
       <main
-        className={`relative w-full min-w-0 overflow-x-hidden ${embedded ? '' : 'max-w-[1360px] mx-auto px-3 sm:px-6 lg:px-8 pt-3 sm:pt-6 pb-24 sm:pb-16'}`}
+        className={`relative w-full min-w-0 overflow-x-clip ${embedded ? '' : 'max-w-[1360px] mx-auto px-3 sm:px-6 lg:px-8 pt-3 sm:pt-6 pb-24 sm:pb-16'}`}
       >
         <div className="w-full min-w-0">
           <div className="pt-1 sm:pt-2 pb-3 sm:pb-5 overflow-visible">

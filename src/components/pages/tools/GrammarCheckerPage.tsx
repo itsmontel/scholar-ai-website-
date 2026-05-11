@@ -244,7 +244,7 @@ const GrammarCheckerPage = ({ onNavigate, user, onLogout }: GrammarCheckerPagePr
   const sentenceCount = text.split(/[.!?]+/).filter(s => s.trim().length > 0).length;
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+    <div className="relative min-h-screen overflow-x-clip bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="grammar-checker" />
 
       {/* Hero Section */}

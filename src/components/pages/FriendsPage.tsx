@@ -500,7 +500,7 @@ const FriendsPage = ({ onNavigate, user, onLogout }: FriendsPageProps) => {
   const pendingCount = pendingRequests.length + incomingShares.length;
 
   return (
-    <div className="relative min-h-screen flex flex-col overflow-x-hidden">
+    <div className="relative min-h-screen flex flex-col overflow-x-clip">
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="friends" />
 

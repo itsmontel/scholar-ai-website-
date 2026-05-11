@@ -309,7 +309,7 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
     };
 
     return (
-      <div className="relative min-h-screen overflow-x-hidden" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+      <div className="relative min-h-screen overflow-x-clip" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
         <WriteScholarEditorialBackgroundLayers position="fixed" />
         {isMinimalUI ? (
           <div className="sticky top-0 z-50 bg-white/95 dark:bg-stone-900/95 backdrop-blur-sm border-b-2 border-stone-200 dark:border-stone-700 px-4 py-3 flex items-center gap-3">
@@ -350,7 +350,7 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
   }
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+    <div className="relative min-h-screen overflow-x-clip" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="create-flashcards" sticky />
 

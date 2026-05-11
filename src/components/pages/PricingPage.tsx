@@ -294,7 +294,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+    <div className="relative min-h-screen overflow-x-clip" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="pricing" />
 

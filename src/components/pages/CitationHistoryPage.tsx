@@ -194,7 +194,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
 
   if (isLoading) {
     return (
-      <div className="relative min-h-screen overflow-x-hidden bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+      <div className="relative min-h-screen overflow-x-clip bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
         <WriteScholarEditorialBackgroundLayers position="fixed" />
         <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="citations" />
         <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
@@ -211,7 +211,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
 
   if (error) {
     return (
-      <div className="relative min-h-screen overflow-x-hidden bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+      <div className="relative min-h-screen overflow-x-clip bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
         <WriteScholarEditorialBackgroundLayers position="fixed" />
         <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="citations" />
         <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
@@ -279,11 +279,11 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
   ];
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+    <div className="relative min-h-screen overflow-x-clip bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="citations" />
 
-      <main className="max-w-6xl mx-auto px-3 sm:px-6 py-8 sm:py-12 w-full min-w-0 overflow-x-hidden">
+      <main className="max-w-6xl mx-auto px-3 sm:px-6 py-8 sm:py-12 w-full min-w-0 overflow-x-clip">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 mb-10">
           <div>
             <div className="flex items-center gap-3 mb-2">

@@ -239,7 +239,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
 
   if (!pack?.data) {
     return (
-      <div className="relative min-h-screen overflow-x-hidden" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+      <div className="relative min-h-screen overflow-x-clip" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
         <WriteScholarEditorialBackgroundLayers position="fixed" />
         <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="study-pack-viewer" />
         <div className="max-w-2xl mx-auto px-4 py-20 text-center">
@@ -542,7 +542,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
   );
 
   return (
-    <div className="relative min-h-screen flex flex-col overflow-x-hidden" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+    <div className="relative min-h-screen flex flex-col overflow-x-clip" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="study-pack-viewer" />
 

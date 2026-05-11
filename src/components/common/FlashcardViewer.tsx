@@ -451,7 +451,7 @@ const FlashcardViewer = ({
   const card = cards[currentCard];
 
   return (
-    <div className="space-y-4 min-w-0 w-full overflow-x-hidden max-w-4xl mx-auto" style={{ fontFamily: "'Nunito', 'Nunito Sans', sans-serif" }}>
+    <div className="space-y-4 min-w-0 w-full overflow-x-clip max-w-4xl mx-auto" style={{ fontFamily: "'Nunito', 'Nunito Sans', sans-serif" }}>
       {/* Header with title and controls */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-2 min-w-0">

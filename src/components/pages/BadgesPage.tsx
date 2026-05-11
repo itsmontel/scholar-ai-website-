@@ -97,7 +97,7 @@ const BadgesPage = ({ onNavigate, user, onLogout }: BadgesPageProps) => {
   const categories: Array<'all' | 'getting-started' | 'streak' | 'mastery' | 'subscription' | 'special'> = ['all', 'getting-started', 'streak', 'mastery', 'subscription', 'special'];
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-stone-50 dark:bg-stone-950 font-sans">
+    <div className="relative min-h-screen overflow-x-clip bg-stone-50 dark:bg-stone-950 font-sans">
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="badges" />
 

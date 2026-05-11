@@ -6,4 +6,4 @@
  */
 export const HIDE_FRIENDS = true;
 export const HIDE_STREAK_AND_BADGES = false;
-export const SKIP_ONBOARDING_STRIPE = true;
+export const SKIP_ONBOARDING_STRIPE = false;

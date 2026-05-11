@@ -43,7 +43,7 @@ const EmailVerificationPage = ({ onNavigate }: EmailVerificationPageProps) => {
 
   if (verificationStatus === 'loading') {
     return (
-      <div className="relative min-h-screen flex items-center justify-center p-4 overflow-x-hidden">
+      <div className="relative min-h-screen flex items-center justify-center p-4 overflow-x-clip">
         <WriteScholarEditorialBackgroundLayers position="fixed" />
         <div className="max-w-md w-full">
           <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 text-center">
@@ -62,7 +62,7 @@ const EmailVerificationPage = ({ onNavigate }: EmailVerificationPageProps) => {
 
   if (verificationStatus === 'error') {
     return (
-      <div className="relative min-h-screen flex items-center justify-center p-4 overflow-x-hidden">
+      <div className="relative min-h-screen flex items-center justify-center p-4 overflow-x-clip">
         <WriteScholarEditorialBackgroundLayers position="fixed" />
         <div className="max-w-md w-full">
           <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 text-center">
@@ -104,7 +104,7 @@ const EmailVerificationPage = ({ onNavigate }: EmailVerificationPageProps) => {
   }
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-x-hidden">
+    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-x-clip">
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <div className="max-w-md w-full">
         <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 text-center">

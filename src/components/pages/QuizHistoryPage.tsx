@@ -1200,7 +1200,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
 
   if (isLoading) {
     return (
-      <div className="relative min-h-screen overflow-x-hidden">
+      <div className="relative min-h-screen overflow-x-clip">
         <WriteScholarEditorialBackgroundLayers position="fixed" />
         <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="quiz-history" />
         <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
@@ -1217,7 +1217,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
 
   if (error) {
     return (
-      <div className="relative min-h-screen overflow-x-hidden">
+      <div className="relative min-h-screen overflow-x-clip">
         <WriteScholarEditorialBackgroundLayers position="fixed" />
         <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="quiz-history" />
         <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
@@ -1275,11 +1275,11 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+    <div className="relative min-h-screen overflow-x-clip" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="quiz-history" />
 
-      <main className="max-w-6xl mx-auto px-3 sm:px-6 py-8 sm:py-12 w-full min-w-0 overflow-x-hidden">
+      <main className="max-w-6xl mx-auto px-3 sm:px-6 py-8 sm:py-12 w-full min-w-0 overflow-x-clip">
         {/* Hero - compact and sleek */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 mb-10">
           <div>

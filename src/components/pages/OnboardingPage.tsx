@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import type { StripeEmbeddedCheckout } from '@stripe/stripe-js';
 import { SKIP_ONBOARDING_STRIPE } from '../../config/featureFlags';
@@ -51,11 +51,14 @@ type Phase =
   | 'tour-essays'
   | 'tour-review'
   | 'tour-study'
+  | 'tour-citations'
+  | 'tour-games'
   | 'tour-motivation'
   | 'daily-review-intro'
   | 'daily-review-demo'
   | 'daily-review-results'
   | 'paywall'
+  | 'paywall-hard'
   | 'checkout'
   | 'verifying'
   | 'transition'
@@ -70,15 +73,23 @@ const PHASE_STEP: Record<string, number> = {
   'survey-source': 2,
   'survey-goal': 3,
   'survey-features': 4,
+  // All tour phases share the same step "5" — the progress bar holds
+  // steady through the personalised tour. Only essays + final step bump.
   'tour-essays': 5,
-  'tour-review': 6,
-  'tour-study': 7,
-  'tour-motivation': 8,
+  'tour-review': 5,
+  'tour-study': 5,
+  'tour-citations': 5,
+  'tour-games': 5,
+  'tour-motivation': 5,
   // Kept for routing flexibility but skipped in the default flow:
   'daily-review-intro': 9,
   'daily-review-demo': 10,
   'daily-review-results': 11,
   paywall: 9,
+  // Hard paywall is the "last chance" interception that fires when a
+  // user declines the soft paywall. Same step index — the progress bar
+  // stays at 100% so the page still reads as the final beat of the flow.
+  'paywall-hard': 9,
 };
 const TOTAL_STEPS = 9;
 
@@ -151,6 +162,22 @@ const REFERRAL_SOURCES = [
   { id: 'other',     label: 'Other',       emoji: '✨', color: '#A560E8', borderColor: '#8A48C7', bgColor: '#F3EAFF', mascotReply: "Cool — glad you found us, however you did! ✨" },
 ];
 
+/* ─── Tour priority order ─────────────────────────────────────────
+   Maps each survey "feature interest" to its dedicated tour slide.
+   The tour shows ONLY the slides whose feature the user picked, in
+   THIS priority order — so essays (if selected) is always first, then
+   the rest fall in the predefined cadence (review → study → citations
+   → games → motivation). Used at runtime to derive `tourSequence`. */
+type TourPhase = 'tour-essays' | 'tour-review' | 'tour-study' | 'tour-citations' | 'tour-games' | 'tour-motivation';
+const FEATURE_TOUR_ORDER: { id: string; phase: TourPhase }[] = [
+  { id: 'essays',       phase: 'tour-essays' },
+  { id: 'daily_review', phase: 'tour-review' },
+  { id: 'study_packs',  phase: 'tour-study' },
+  { id: 'citations',    phase: 'tour-citations' },
+  { id: 'games',        phase: 'tour-games' },
+  { id: 'motivation',   phase: 'tour-motivation' },
+];
+
 /* ─── Survey 2: What features excite you most? (multi-select) ─── */
 const FEATURE_INTERESTS = [
   { id: 'essays',       emoji: '📝', label: 'Essay analysis',      desc: 'Get instant feedback & rubric scores',  color: '#A560E8', borderColor: '#8A48C7', bgColor: '#F3EAFF' },
@@ -207,13 +234,13 @@ function getInitialPhase(): Phase {
 type ToolBadge = 'Free' | 'Pro' | 'Game';
 const PAYWALL_TOOLS: { title: string; desc: string; video?: string; image?: string; badge: ToolBadge; color: string; borderColor: string }[] = [
   { title: 'Essay Analyzer', desc: 'Line-by-line feedback & rubric scores',  video: '/writescholar-essay-checker-demo.mp4',   badge: 'Pro',  color: '#A560E8', borderColor: '#8A48C7' },
-  { title: 'Flashcards',     desc: 'AI-built decks from your notes',         video: '/writescholar-flashcards-demo.mp4',      badge: 'Free', color: '#58CC02', borderColor: '#46A302' },
-  { title: 'Quizzes',        desc: 'MCQ, true/false & fill-in-the-blank',    video: '/writescholar-quiz-generator-demo.mp4',  badge: 'Free', color: '#1CB0F6', borderColor: '#1899D6' },
+  { title: 'Flashcards',     desc: 'AI-built decks from your notes',         video: '/hero-flashcards.mp4',                   badge: 'Free', color: '#58CC02', borderColor: '#46A302' },
+  { title: 'Quizzes',        desc: 'MCQ, true/false & fill-in-the-blank',    video: '/hero-quiz.mp4',                         badge: 'Free', color: '#1CB0F6', borderColor: '#1899D6' },
   { title: 'Citations',      desc: 'APA, MLA, Chicago — real sources',       video: '/writescholar-citation-finder-demo.mp4', badge: 'Pro',  color: '#1CB0F6', borderColor: '#1899D6' },
   { title: 'Crater Blast',   desc: 'Boss-battle quiz arcade',                video: '/writescholar-crater-blast-demo.mp4',    badge: 'Game', color: '#FF9600', borderColor: '#D97F00' },
-  { title: 'Crosswords',     desc: 'Vocabulary puzzles from your terms',     video: '/writescholar-crossword-demo.mp4',       badge: 'Free', color: '#FF4B4B', borderColor: '#E04343' },
+  { title: 'Word Blitz',     desc: '60-second fill-the-blank speedrun',      video: '/hero-word-blitz.mp4',                   badge: 'Game', color: '#FF4B82', borderColor: '#D63672' },
   { title: 'Summarizer',     desc: 'Compress chapters into key points',      video: '/writescholar-summarizer-demo.mp4',      badge: 'Pro',  color: '#A560E8', borderColor: '#8A48C7' },
-  { title: 'Word Tower',     desc: 'Stack words, beat your streak',          image: '/study-pack-previews/word-tower.png',    badge: 'Game', color: '#FF9600', borderColor: '#D97F00' },
+  { title: 'Word Tower',     desc: 'Stack words, beat your streak',          video: '/hero-word-tower.mp4',                   badge: 'Game', color: '#FF9600', borderColor: '#D97F00' },
 ];
 
 const TOOL_BADGE_STYLE: Record<ToolBadge, { bg: string; border: string }> = {
@@ -223,22 +250,40 @@ const TOOL_BADGE_STYLE: Record<ToolBadge, { bg: string; border: string }> = {
 };
 
 /* Tool mini demo for tour-study — autoplay-on-visible video tile */
-function ToolMiniDemo({ name, video, color, borderColor, delayMs = 0 }: { name: string; video: string; color: string; borderColor: string; delayMs?: number }) {
+function ToolMiniDemo({ name, video, videos, image, color, borderColor, delayMs = 0 }: { name: string; video?: string; videos?: string[]; image?: string; color: string; borderColor: string; delayMs?: number }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const [loaded, setLoaded] = useState(false);
+  // Cycling playlist: when `videos` is provided we step through it on each
+  // video's `ended` event (`loop` must be off so `ended` fires). Single
+  // `video` falls back to the old single-clip + loop behaviour.
+  const playlist = videos && videos.length > 0 ? videos : (video ? [video] : []);
+  const [clipIdx, setClipIdx] = useState(0);
+  const isCycle = playlist.length > 1;
+  const currentSrc = playlist[clipIdx];
 
+  // Track whether the wrapper is currently on-screen so the observer's
+  // captured reference doesn't go stale when the playlist swaps the
+  // <video> element (key={currentSrc} re-mounts it on every cycle).
+  const [inView, setInView] = useState(false);
   useEffect(() => {
-    const v = videoRef.current;
     const w = wrapRef.current;
-    if (!v || !w || typeof IntersectionObserver === 'undefined') return;
+    if (!w || typeof IntersectionObserver === 'undefined') return;
     const obs = new IntersectionObserver(
-      (entries) => entries.forEach((e) => { if (e.isIntersecting) v.play().catch(() => {}); else v.pause(); }),
+      (entries) => entries.forEach((e) => setInView(e.isIntersecting)),
       { threshold: 0.25 }
     );
     obs.observe(w);
     return () => obs.disconnect();
   }, []);
+  // Re-run whenever `inView` or the source changes so a freshly-mounted
+  // video element (on cycle / src change) picks up the right play/pause
+  // state.
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (inView) v.play().catch(() => {}); else v.pause();
+  }, [inView, currentSrc]);
 
   return (
     <div
@@ -248,17 +293,32 @@ function ToolMiniDemo({ name, video, color, borderColor, delayMs = 0 }: { name: 
     >
       <div className="relative aspect-[16/10] bg-stone-100 dark:bg-stone-800 overflow-hidden">
         {!loaded && <div className="absolute inset-0 bg-gradient-to-br from-stone-200 to-stone-100 dark:from-stone-800 dark:to-stone-900 animate-pulse" aria-hidden />}
-        <video
-          ref={videoRef}
-          src={video}
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          aria-label={`${name} demo`}
-          onLoadedData={() => setLoaded(true)}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${loaded ? 'opacity-100' : 'opacity-0'}`}
-        />
+        {image ? (
+          <img
+            src={image}
+            alt={`${name} preview`}
+            loading="lazy"
+            decoding="async"
+            onLoad={() => setLoaded(true)}
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+          />
+        ) : currentSrc ? (
+          <video
+            ref={videoRef}
+            key={currentSrc}
+            src={currentSrc}
+            muted
+            loop={!isCycle}
+            playsInline
+            preload="metadata"
+            aria-label={`${name} demo`}
+            onLoadedData={() => setLoaded(true)}
+            onEnded={() => {
+              if (isCycle) setClipIdx((i) => (i + 1) % playlist.length);
+            }}
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+          />
+        ) : null}
       </div>
       <div className="px-3 py-2 flex items-center justify-center">
         <span className="text-xs sm:text-sm font-extrabold text-[#3C3C3C] dark:text-stone-100" style={{ color }}>{name}</span>
@@ -291,8 +351,6 @@ function ToolCard({ tool, delayMs = 0 }: { tool: typeof PAYWALL_TOOLS[number]; d
     return () => obs.disconnect();
   }, [tool.video]);
 
-  const badge = TOOL_BADGE_STYLE[tool.badge];
-
   return (
     <div
       ref={wrapRef}
@@ -323,12 +381,8 @@ function ToolCard({ tool, delayMs = 0 }: { tool: typeof PAYWALL_TOOLS[number]; d
             className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${loaded ? 'opacity-100' : 'opacity-0'}`}
           />
         ) : null}
-        <span
-          className="absolute top-2 right-2 inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider text-white border-2 border-b-2"
-          style={{ backgroundColor: badge.bg, borderColor: badge.border }}
-        >
-          {tool.badge}
-        </span>
+        {/* Badge pills (Free/Pro/Game) removed per user brief — the
+            cards now read as a clean visual grid without small overlays. */}
       </div>
       <div className="px-3 py-3">
         <p className="text-sm font-extrabold text-[#3C3C3C] dark:text-stone-100 leading-tight">{tool.title}</p>
@@ -475,8 +529,20 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
     setTimeout(() => {
       setPhase(next);
       setPhaseVisible(true);
-      // Scroll to top in case content overflows on small viewports.
-      if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'auto' });
+      // Reset scroll to the top. The onboarding screens use a
+      // `h-screen overflow-hidden` shell with an INNER
+      // `flex-1 overflow-y-auto` content area, so `window.scrollTo`
+      // doesn't help — we need to scroll the inner container(s)
+      // themselves. Defer one tick so the next phase's DOM is mounted
+      // before we query for scrollables.
+      if (typeof window !== 'undefined') {
+        window.scrollTo({ top: 0, behavior: 'auto' });
+        requestAnimationFrame(() => {
+          document.querySelectorAll<HTMLElement>('.flex-1.overflow-y-auto').forEach((el) => {
+            el.scrollTop = 0;
+          });
+        });
+      }
     }, 220);
   };
 
@@ -745,26 +811,56 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
     setFeatureInterests((prev) => prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]);
   };
 
+  // Personalised tour sequence with a baseline floor so every user
+  // sees AT LEAST 3 slides:
+  //   1. Their selected features come FIRST, in canonical priority
+  //      order (essays → review → study → citations → games → motivation).
+  //   2. `tour-essays` and `tour-study` are then appended if not
+  //      already present — they're our two "must-show" flagship tools.
+  //   3. If the list is still under 3 (i.e. user only picked one of
+  //      essays or study_packs, or nothing), `tour-review` (Daily
+  //      Review) fills the third slot.
+  // Examples:
+  //   • picks: [games]               → [games, essays, study]
+  //   • picks: [essays]              → [essays, study, review]
+  //   • picks: [study_packs]         → [study, essays, review]
+  //   • picks: [essays, study_packs] → [essays, study, review]
+  //   • picks: [games, motivation]   → [games, motivation, essays, study]
+  const tourSequence = useMemo<TourPhase[]>(() => {
+    const userPicks = FEATURE_TOUR_ORDER
+      .filter((f) => featureInterests.includes(f.id))
+      .map((f) => f.phase);
+    const result: TourPhase[] = [...userPicks];
+    // Step 2 — append the two must-show flagship slides if missing.
+    if (!result.includes('tour-essays')) result.push('tour-essays');
+    if (!result.includes('tour-study')) result.push('tour-study');
+    // Step 3 — backfill to a minimum of 3 with Daily Review.
+    if (result.length < 3 && !result.includes('tour-review')) {
+      result.push('tour-review');
+    }
+    return result;
+  }, [featureInterests]);
+
   const handleSurveyContinue = async () => {
     setSurveySaving(true);
     await saveSurvey();
     setSurveySaving(false);
     trackEvent('onboarding_survey_complete', { source: referralSource, features: featureInterests.join(',') });
-    goToPhase('tour-essays');
+    // Jump to the FIRST slide in their personalised tour (essays if
+    // selected, otherwise the highest-priority feature they picked).
+    goToPhase(tourSequence[0] ?? 'paywall');
   };
 
   const handleTourContinue = () => {
-    // After "TOOL 4 OF 4" (tour-motivation), the user-facing onboarding tour
-    // ends and the soft paywall takes over. Skipping the daily-review-intro,
-    // daily-review-demo, and daily-review-results steps shortens the flow
-    // significantly so users hit the conversion moment faster.
-    const nextMap: Record<string, Phase> = {
-      'tour-essays': 'tour-review',
-      'tour-review': 'tour-study',
-      'tour-study': 'tour-motivation',
-      'tour-motivation': 'paywall',
-    };
-    goToPhase(nextMap[phase] || 'paywall');
+    // Find current position in the personalised sequence and advance.
+    // When we run off the end of the sequence, the soft paywall takes
+    // over so users hit the conversion moment faster.
+    const idx = tourSequence.indexOf(phase as TourPhase);
+    if (idx === -1 || idx >= tourSequence.length - 1) {
+      goToPhase('paywall');
+    } else {
+      goToPhase(tourSequence[idx + 1]);
+    }
   };
 
   /* ─── Interactive tour handlers ─── */
@@ -860,6 +956,40 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
   const handleContinueFree = () => {
     trackEvent('onboarding_choose_free');
     goToPhase('transition');
+  };
+
+  // Called when the user clicks "Skip" / "Maybe later" on the SOFT
+  // paywall. Instead of dropping them straight into the dashboard, we
+  // route to the `paywall-hard` last-chance screen. New product rule:
+  // no user reaches the dashboard without starting a trial — so the
+  // hard paywall is the only branch left.
+  const handleSoftPaywallDecline = () => {
+    trackEvent('onboarding_paywall_decline_soft');
+    goToPhase('paywall-hard');
+  };
+
+  // Sign-out from the hard paywall is the ONLY way out without a
+  // trial. Bulletproof version:
+  //   1. Fire the analytics event in a try/catch so it can never
+  //      block the sign-out path.
+  //   2. Clear auth tokens directly — guarantees the user is logged
+  //      out even if the parent's onLogout() callback has any issue.
+  //   3. Call the parent's onLogout() for its other side effects
+  //      (state reset, sessionStorage cleanup, analytics reset).
+  //   4. Force a hard navigation to `/` so React state shuffles
+  //      can't accidentally re-route the user back into onboarding
+  //      (the fresh page load re-bootstraps and lands on the
+  //      public landing page).
+  const handleHardPaywallSignOut = () => {
+    try { trackEvent('onboarding_paywall_decline_hard'); } catch { /* ignore */ }
+    try {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('user');
+    } catch { /* ignore */ }
+    try { onLogout?.(); } catch { /* ignore */ }
+    if (typeof window !== 'undefined') {
+      window.location.href = '/';
+    }
   };
 
   /* ═══════════ RENDER ═══════════ */
@@ -1227,7 +1357,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
             </div>
             <span className="text-lg font-extrabold tracking-tight text-[#3C3C3C] dark:text-stone-100" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>WriteScholar</span>
           </div>
-          <button type="button" onClick={handleContinueFree} className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 font-bold underline underline-offset-4">
+          <button type="button" onClick={handleSoftPaywallDecline} className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 font-bold underline underline-offset-4">
             Skip
           </button>
         </div>
@@ -1324,7 +1454,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
           <div className="max-w-2xl mx-auto flex justify-end">
             <button
               type="button"
-              onClick={handleContinueFree}
+              onClick={handleSoftPaywallDecline}
               className="w-full sm:w-auto sm:min-w-[200px] py-3.5 px-8 rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-600 bg-white dark:bg-stone-900 text-[#3C3C3C] dark:text-stone-100 font-extrabold text-base hover:bg-stone-50 dark:hover:bg-stone-800 active:border-b-2 active:translate-y-0.5 transition-all"
             >
               Maybe later
@@ -1343,6 +1473,256 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
             100% { transform: translateY(0); opacity: 1; }
           }
           .ob-tool-pop { animation: obToolPop 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
+        `}</style>
+      </div>
+    );
+  }
+
+  /* ─── HARD PAYWALL — last-chance interception ────────────────────
+     Fires when the user declines the soft paywall. NEW PRODUCT RULE
+     (per user brief): no one reaches the dashboard without starting a
+     trial. So this screen has only ONE forward button (start trial) and
+     ONE way out (sign out). Visually it's a more emotional, "Wait —
+     don't go!" beat with the begging mascot, big loss-aversion copy,
+     and the same Duolingo Pro green CTA as the soft paywall.
+
+     Conversion mechanics:
+       1. Single decisive CTA — no choice paradox
+       2. Loss-framing list — what they LOSE without the trial
+       3. Risk reversal — "no payment today · cancel anytime"
+       4. Social proof reminder — "50,000+ students already on Pro"
+       5. The escape is a small low-contrast "Sign out instead" link
+          so it's findable but not the obvious path. */
+  if (phase === 'paywall-hard') {
+    return (
+      <div className="h-screen bg-[#F7F7F7] dark:bg-stone-950 flex flex-col overflow-hidden">
+        {/* Top bar — NO skip button, NO escape from the header */}
+        <div className="bg-white dark:bg-stone-900 border-b-2 border-[#E5E5E5] dark:border-stone-800 px-5 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-800">
+              <img src="/main-logo.png" alt="WriteScholar" className="w-full h-full object-contain" loading="eager" width="120" height="120" />
+            </div>
+            <span className="text-lg font-extrabold tracking-tight text-[#3C3C3C] dark:text-stone-100" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>WriteScholar</span>
+          </div>
+        </div>
+        <div className="h-3 bg-[#E5E5E5] dark:bg-stone-800">
+          <div className="h-full bg-[#58CC02] rounded-r-full transition-all duration-500" style={{ width: `100%` }} />
+        </div>
+
+        <div className="flex-1 overflow-y-auto">
+          <div className="px-4 sm:px-6 py-6 sm:py-10 max-w-2xl mx-auto w-full ob-fade-in">
+            {/* Pleading mascot + speech bubble */}
+            <div className="flex flex-col items-center text-center mb-6 sm:mb-8">
+              <div className="relative mb-4 ob-mascot-bob">
+                <img
+                  src="/mascot-paper.webp"
+                  alt=""
+                  aria-hidden
+                  width={180}
+                  height={180}
+                  className="w-32 h-32 sm:w-44 sm:h-44 object-contain drop-shadow-[0_12px_24px_rgba(165,96,232,0.30)]"
+                />
+                {/* Floating sparkles around the mascot */}
+                <span aria-hidden className="absolute -top-1 -right-2 text-2xl ob-sparkle-spin">✨</span>
+                <span aria-hidden className="absolute bottom-2 -left-3 text-xl ob-sparkle-spin" style={{ animationDelay: '0.7s' }}>⭐</span>
+              </div>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border-2 border-[#FF4B4B]/40 bg-[#FFE8E8] text-[#FF4B4B] text-[10px] font-extrabold uppercase tracking-wider mb-3">
+                <span aria-hidden>⏰</span>
+                Last chance, {firstName}!
+              </span>
+              <h1 className="text-2xl sm:text-3xl lg:text-[2.25rem] font-extrabold text-[#3C3C3C] dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+                Don&apos;t miss out on your{' '}
+                <span className="text-[#58CC02]">{TRIAL_DAYS}-day free trial</span>
+              </h1>
+              <p className="mt-3 text-base sm:text-lg text-stone-600 dark:text-stone-400 font-bold leading-snug max-w-md">
+                Plus an exclusive <em className="not-italic text-[#A560E8]">50% off</em> after your trial — only on this screen.
+              </p>
+            </div>
+
+            {/* Loss-aversion list — emotional, outcome-driven copy
+                that names specific pain points (B grades, 2 AM citation
+                hunts) so the user feels what they're walking away from.
+                Icons reuse the same brand SVGs designed for the landing
+                hero feature row (Study Pack, Essay Analyzer, Games,
+                Citations) — not generic emoji — so the visual identity
+                stays consistent end-to-end. */}
+            <div className="rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900 p-5 sm:p-6 mb-6">
+              <p className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#FF4B4B] mb-3 text-center">
+                Walk away and you&apos;ll miss:
+              </p>
+              <ul className="space-y-3">
+                {[
+                  {
+                    // Study Pack icon (orange stacked books + gold star)
+                    icon: (
+                      <svg viewBox="0 0 64 64" fill="none" aria-hidden>
+                        <rect x="6" y="44" width="52" height="14" rx="3" fill="#FF9600" />
+                        <rect x="14" y="44" width="3" height="14" fill="white" opacity="0.65" />
+                        <rect x="10" y="28" width="44" height="14" rx="3" fill="#FF9600" />
+                        <rect x="18" y="28" width="3" height="14" fill="white" opacity="0.65" />
+                        <rect x="14" y="12" width="36" height="14" rx="3" fill="#FF9600" />
+                        <rect x="22" y="12" width="3" height="14" fill="white" opacity="0.65" />
+                        <path d="M44 8 L45 11 L48 12 L45 13 L44 16 L43 13 L40 12 L43 11 Z" fill="#FFC800" />
+                      </svg>
+                    ),
+                    title: 'Better grades, guaranteed',
+                    desc: 'Our flagship AI catches the structure, citation, and clarity slips that cost you marks every paper.',
+                  },
+                  {
+                    // Essay Analyzer icon (red document + folded corner + white check)
+                    icon: (
+                      <svg viewBox="0 0 64 64" fill="none" aria-hidden>
+                        <path d="M14 6 Q12 6 12 8 L12 56 Q12 58 14 58 L50 58 Q52 58 52 56 L52 22 L36 6 Z" fill="#FF4B4B" />
+                        <path d="M36 6 L52 22 L38 22 Q36 22 36 20 Z" fill="#C13030" />
+                        <rect x="20" y="30" width="22" height="3" rx="1.5" fill="white" />
+                        <rect x="20" y="37" width="18" height="3" rx="1.5" fill="white" opacity="0.7" />
+                        <path d="M22 48 L28 54 L40 41" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    ),
+                    title: 'Pro-grade rubric scoring',
+                    desc: 'Turn B drafts into honor-roll papers with line-by-line revision suggestions from our Essay Analyzer.',
+                  },
+                  {
+                    // Games icon (green controller silhouette + white D-pad and buttons)
+                    icon: (
+                      <svg viewBox="0 0 64 64" fill="none" aria-hidden>
+                        <path d="M14 22 Q6 22 6 30 L6 44 Q6 56 18 56 Q23 56 26 50 L28 46 L36 46 L38 50 Q41 56 46 56 Q58 56 58 44 L58 30 Q58 22 50 22 Q46 17 40 21 Q36 24 32 24 Q28 24 24 21 Q18 17 14 22 Z" fill="#58CC02" />
+                        <rect x="14" y="32" width="12" height="3.5" rx="1.5" fill="white" />
+                        <rect x="18.25" y="27.75" width="3.5" height="12" rx="1.5" fill="white" />
+                        <circle cx="46" cy="30" r="3.2" fill="white" />
+                        <circle cx="52" cy="36" r="3.2" fill="white" />
+                        <circle cx="40" cy="36" r="3.2" fill="white" />
+                        <circle cx="46" cy="42" r="3.2" fill="white" />
+                      </svg>
+                    ),
+                    title: 'Studying that’s actually fun',
+                    desc: 'Crater Blast, Word Blitz & Word Tower turn cramming into a boss battle.',
+                  },
+                  {
+                    // Citations icon (two blue quote-mark blobs)
+                    icon: (
+                      <svg viewBox="0 0 64 64" fill="none" aria-hidden>
+                        <path d="M10 18 Q10 12 16 12 L24 12 Q28 12 28 16 L28 32 Q28 44 16 50 Q12 50 12 46 Q12 44 14 42 Q20 38 20 32 L16 32 Q10 32 10 26 Z" fill="#1CB0F6" />
+                        <path d="M36 18 Q36 12 42 12 L50 12 Q54 12 54 16 L54 32 Q54 44 42 50 Q38 50 38 46 Q38 44 40 42 Q46 38 46 32 L42 32 Q36 32 36 26 Z" fill="#1CB0F6" />
+                      </svg>
+                    ),
+                    title: 'No more 2 AM citation panic',
+                    desc: 'Real APA, MLA & Chicago sources pulled in seconds — no more Google Scholar rabbit holes.',
+                  },
+                ].map((b) => (
+                  <li key={b.title} className="flex items-start gap-3">
+                    <span aria-hidden className="block w-10 h-10 sm:w-11 sm:h-11 shrink-0 mt-[1px] [filter:drop-shadow(0_4px_8px_rgba(0,0,0,0.18))]">
+                      {b.icon}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-sm sm:text-[15px] font-extrabold text-[#3C3C3C] dark:text-stone-100 leading-snug" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+                        {b.title}
+                      </p>
+                      <p className="text-[12px] sm:text-[13px] font-semibold text-stone-600 dark:text-stone-400 leading-snug mt-0.5">
+                        {b.desc}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* PROMO BANNER — exclusive 50%-off code revealed on the
+                hard paywall. Yellow Duolingo "ticket" styling so it
+                reads as a one-time bonus, not a permanent discount. */}
+            <div className="relative rounded-2xl border-2 border-b-4 border-[#D4A300] bg-[#FFF4C2] dark:bg-[#FFC800]/10 p-4 sm:p-5 mb-4 overflow-hidden">
+              <div className="pointer-events-none absolute -top-10 -right-10 w-28 h-28 rounded-full bg-[#FFC800]/30 blur-2xl" aria-hidden />
+              <div className="relative flex items-center gap-3 sm:gap-4">
+                <span aria-hidden className="text-2xl sm:text-3xl shrink-0">🎟️</span>
+                <div className="flex-1 min-w-0 text-left">
+                  <p className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#7A5C00]">
+                    Exclusive bonus
+                  </p>
+                  <p className="mt-0.5 text-sm sm:text-base font-extrabold text-[#3C3C3C] dark:text-stone-100 leading-snug" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+                    Save <span className="text-[#46A302]">50%</span> on your monthly plan after the trial
+                  </p>
+                  <p className="mt-1 text-[11px] sm:text-xs font-bold text-stone-700 dark:text-stone-300">
+                    Use code{' '}
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-white dark:bg-stone-900 border-2 border-b-[3px] border-[#D4A300] text-[#7A5C00] font-extrabold tabular-nums tracking-wider">
+                      MAY2026
+                    </span>{' '}
+                    at billing — $19.99/mo becomes $9.99/mo.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Big green CTA — the only forward door */}
+            <div className="rounded-2xl border-2 border-b-4 border-[#46A302] bg-[#E5F8D0] dark:bg-[#58CC02]/10 p-5 sm:p-6 text-center relative overflow-hidden mb-4">
+              <div className="pointer-events-none absolute -top-12 -right-12 w-32 h-32 rounded-full bg-[#58CC02]/20 blur-2xl" aria-hidden />
+              <div className="pointer-events-none absolute -bottom-12 -left-12 w-32 h-32 rounded-full bg-[#58CC02]/15 blur-2xl" aria-hidden />
+              <p className="relative text-lg sm:text-xl font-extrabold text-[#3C3C3C] dark:text-stone-100" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+                Start your {TRIAL_DAYS}-day free trial
+              </p>
+              <p className="relative mt-1 text-sm font-bold text-stone-600 dark:text-stone-400">
+                $0 today ·{' '}
+                <span className="line-through decoration-2 decoration-[#FF4B4B] text-stone-400">$19.99/mo</span>{' '}
+                <span className="text-[#46A302] font-extrabold">$9.99/mo</span> after with{' '}
+                <span className="text-[#7A5C00] font-extrabold tabular-nums">MAY2026</span> code
+              </p>
+              <button
+                type="button"
+                onClick={SKIP_ONBOARDING_STRIPE ? handleContinueFree : handleStartTrial}
+                disabled={startingTrial}
+                className="relative mt-4 w-full py-4 rounded-2xl bg-[#58CC02] text-white font-extrabold text-base sm:text-lg uppercase tracking-wide border-2 border-b-4 border-[#46A302] hover:bg-[#46A302] active:border-b-2 active:translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-[0_8px_24px_-6px_rgba(88,204,2,0.55)] hover:shadow-[0_12px_32px_-6px_rgba(88,204,2,0.75)]"
+              >
+                {startingTrial ? (
+                  <>
+                    <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden>
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-25" />
+                      <path fill="currentColor" className="opacity-90" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Redirecting…
+                  </>
+                ) : (
+                  <>
+                    Yes! Start my free trial
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </>
+                )}
+              </button>
+              {trialError && <p className="relative mt-3 text-sm text-[#FF4B4B] font-bold">{trialError}</p>}
+              <div className="relative mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[10px] font-extrabold text-stone-600 dark:text-stone-400">
+                <span className="inline-flex items-center gap-1"><span className="text-[#58CC02]">✓</span> No charge today</span>
+                <span aria-hidden>·</span>
+                <span className="inline-flex items-center gap-1"><span className="text-[#58CC02]">✓</span> Cancel anytime</span>
+                <span aria-hidden>·</span>
+                <span className="inline-flex items-center gap-1"><span className="text-[#58CC02]">✓</span> 50k+ students</span>
+              </div>
+            </div>
+
+            {/* Subtle, low-contrast escape hatch — only way to leave
+                without starting a trial (per product rule). Sign-out
+                drops them back to the login page; no dashboard access. */}
+            <div className="text-center pb-4">
+              <button
+                type="button"
+                onClick={handleHardPaywallSignOut}
+                className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 font-bold underline underline-offset-4"
+              >
+                No thanks, sign me out
+              </button>
+            </div>
+
+            <p className="text-center text-[11px] text-stone-400 dark:text-stone-500 font-bold pb-2">
+              Secured by Stripe · Never lose progress
+            </p>
+          </div>
+        </div>
+
+        <style>{`
+          @keyframes obFadeIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          .ob-fade-in { animation: obFadeIn 0.4s ease-out; }
         `}</style>
       </div>
     );
@@ -1714,14 +2094,22 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
   }
 
   /* ─── TOUR SLIDES ─── */
-  if (phase === 'tour-essays' || phase === 'tour-review' || phase === 'tour-study' || phase === 'tour-motivation') {
-    const slideData: Record<string, { mascot: string; color: string; borderColor: string; bgColor: string; eyebrow: string; title: string; speech: string; visual: 'essay' | 'screenshot' | 'tools' | 'motivation' }> = {
+  if (phase === 'tour-essays' || phase === 'tour-review' || phase === 'tour-study' || phase === 'tour-citations' || phase === 'tour-games' || phase === 'tour-motivation') {
+    // Dynamic eyebrow: "TOOL X OF Y" — X is position in the user's
+    // personalised tour, Y is total slides they'll see.
+    const tourIdx = tourSequence.indexOf(phase as TourPhase);
+    const totalTools = tourSequence.length;
+    const eyebrowFor = (slot: TourPhase) => {
+      const i = tourSequence.indexOf(slot);
+      return i === -1 ? `TOOL ? OF ${totalTools}` : `TOOL ${i + 1} OF ${totalTools}`;
+    };
+    const slideData: Record<string, { mascot: string; color: string; borderColor: string; bgColor: string; eyebrow: string; title: string; speech: string; visual: 'essay' | 'screenshot' | 'tools' | 'motivation' | 'citations' | 'games' }> = {
       'tour-essays': {
         mascot: '/mascot-paper.webp',
         color: '#A560E8',
         borderColor: '#8A48C7',
         bgColor: '#F3EAFF',
-        eyebrow: 'TOOL 1 OF 4',
+        eyebrow: eyebrowFor('tour-essays'),
         title: 'Get professor-level feedback',
         speech: "Upload your essay and I'll give you professor style line-by-line feedback, rubric scores, and structure tips — see for yourself on the sample below!",
         visual: 'essay',
@@ -1731,7 +2119,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
         color: '#58CC02',
         borderColor: '#46A302',
         bgColor: '#E5F8D0',
-        eyebrow: 'TOOL 2 OF 4',
+        eyebrow: eyebrowFor('tour-review'),
         title: 'Practice daily. Remember everything.',
         speech: "Every day I'll build a quick quiz from your notes — flashcards and questions that lock in what you've learned.",
         visual: 'screenshot',
@@ -1741,17 +2129,37 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
         color: '#1CB0F6',
         borderColor: '#1899D6',
         bgColor: '#DDF4FF',
-        eyebrow: 'TOOL 3 OF 4',
+        eyebrow: eyebrowFor('tour-study'),
         title: 'Turn notes into study tools',
-        speech: "One paste of your notes turns into flashcards, quizzes, crosswords, and summaries. Watch them in action below!",
+        speech: "One paste of your notes turns into flashcards, quizzes, lessons, and summaries. Watch them in action below!",
         visual: 'tools',
+      },
+      'tour-citations': {
+        mascot: '/mascot-laptop.webp',
+        color: '#FF9600',
+        borderColor: '#D97F00',
+        bgColor: '#FFF4E0',
+        eyebrow: eyebrowFor('tour-citations'),
+        title: 'Find real citations in seconds',
+        speech: "Paste your topic and I'll pull real, formatted sources in APA, MLA, or Chicago — no more hunting through Google Scholar.",
+        visual: 'citations',
+      },
+      'tour-games': {
+        mascot: '/mascot-celebrating.webp',
+        color: '#FF4B4B',
+        borderColor: '#E04343',
+        bgColor: '#FFE8E8',
+        eyebrow: eyebrowFor('tour-games'),
+        title: 'Study with arcade games',
+        speech: "Crater Blast, Word Blitz, and Word Tower turn your notes into quick boss-battles — learning that actually feels like play.",
+        visual: 'games',
       },
       'tour-motivation': {
         mascot: '/mascot-jumping-joy.webp',
         color: '#FF9600',
         borderColor: '#D97F00',
         bgColor: '#FFF4E0',
-        eyebrow: 'TOOL 4 OF 4',
+        eyebrow: eyebrowFor('tour-motivation'),
         title: 'Stay motivated with XP & levels',
         speech: "Earn XP for everything you do. Climb 100 levels, keep your streak alive, and collect 80+ badges along the way!",
         visual: 'motivation',
@@ -1759,11 +2167,11 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
     };
 
     const slide = slideData[phase];
+    // Dynamic prev: walk one step back in the personalised sequence;
+    // if at the start, return to the feature-interests survey.
+    const prevPhase: Phase = tourIdx <= 0 ? 'survey-features' : tourSequence[tourIdx - 1];
     const prevMap: Record<string, Phase> = {
-      'tour-essays': 'survey-features',
-      'tour-review': 'tour-essays',
-      'tour-study': 'tour-review',
-      'tour-motivation': 'tour-study',
+      [phase]: prevPhase,
     };
 
     return (
@@ -1872,13 +2280,51 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
               {slide.visual === 'tools' && (
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { name: 'Flashcards', video: '/writescholar-flashcards-demo.mp4', color: '#A560E8', borderColor: '#8A48C7' },
-                    { name: 'Quizzes', video: '/writescholar-quiz-generator-demo.mp4', color: '#58CC02', borderColor: '#46A302' },
-                    { name: 'Crosswords', video: '/writescholar-crossword-demo.mp4', color: '#FF9600', borderColor: '#D97F00' },
-                    { name: 'Games', video: '/writescholar-crater-blast-demo.mp4', color: '#FF4B4B', borderColor: '#E04343' },
+                    // Flashcards + Quizzes — reuse the same compressed
+                    // hero videos so the onboarding deck visually matches
+                    // what the visitor saw on the landing page.
+                    { name: 'Flashcards', video: '/hero-flashcards.mp4', color: '#A560E8', borderColor: '#8A48C7' },
+                    { name: 'Quizzes', video: '/hero-quiz.mp4', color: '#58CC02', borderColor: '#46A302' },
+                    // Crosswords replaced by Lessons. Uses the existing
+                    // study-pack lesson PNG since we don't have a Lessons
+                    // video; ToolMiniDemo renders it as a still image.
+                    { name: 'Lessons', image: '/study-pack-previews/lesson-plan.png', color: '#FF9600', borderColor: '#D97F00' },
+                    // Games — cycles through the three arcade games
+                    // (Crater Blast → Word Blitz → Word Tower) by switching
+                    // src on each video's `ended` event.
+                    { name: 'Games', videos: ['/writescholar-crater-blast-demo.mp4', '/hero-word-blitz.mp4', '/hero-word-tower.mp4'], color: '#FF4B4B', borderColor: '#E04343' },
                   ].map((tool, i) => (
-                    <ToolMiniDemo key={tool.name} name={tool.name} video={tool.video} color={tool.color} borderColor={tool.borderColor} delayMs={i * 80} />
+                    <ToolMiniDemo
+                      key={tool.name}
+                      name={tool.name}
+                      video={tool.video}
+                      videos={tool.videos}
+                      image={tool.image}
+                      color={tool.color}
+                      borderColor={tool.borderColor}
+                      delayMs={i * 80}
+                    />
                   ))}
+                </div>
+              )}
+
+              {slide.visual === 'citations' && (
+                <div className="relative">
+                  <div className="absolute -inset-2 rounded-3xl blur-2xl opacity-30" style={{ backgroundColor: `${slide.color}40` }} aria-hidden />
+                  <div className="relative rounded-2xl overflow-hidden border-2 border-b-4 shadow-xl" style={{ borderColor: slide.borderColor }}>
+                    <img src="/citations-preview.png" alt="Citations finder preview" className="w-full h-auto" loading="eager" />
+                  </div>
+                </div>
+              )}
+
+              {slide.visual === 'games' && (
+                <div className="grid grid-cols-1 gap-3">
+                  <ToolMiniDemo
+                    name="Crater Blast · Word Blitz · Word Tower"
+                    videos={['/writescholar-crater-blast-demo.mp4', '/hero-word-blitz.mp4', '/hero-word-tower.mp4']}
+                    color="#FF4B4B"
+                    borderColor="#E04343"
+                  />
                 </div>
               )}
 

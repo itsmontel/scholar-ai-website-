@@ -3016,7 +3016,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
 
   if (isLoading) {
     return (
-      <div className="relative min-h-screen flex items-center justify-center overflow-x-hidden">
+      <div className="relative min-h-screen flex items-center justify-center overflow-x-clip">
         <WriteScholarEditorialBackgroundLayers position="fixed" />
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1CB0F6] mx-auto"></div>
@@ -3066,7 +3066,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
     isActivationTutorial && (activationCoachStep === 'mla' || activationCoachStep === 'analyze');
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden">
+    <div className="relative min-h-screen overflow-x-clip">
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <div
         className={

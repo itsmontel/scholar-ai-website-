@@ -185,17 +185,29 @@ const Header: React.FC<HeaderProps> = ({
       { id: 'blog', label: 'Blog' },
       { id: 'about', label: 'About' },
     ];
-    const publicNavActiveCls =
-      'bg-[#DDF4FF] dark:bg-[#1CB0F6]/15 text-[#1CB0F6] font-bold border-2 border-[#1CB0F6]/30 dark:border-[#1CB0F6]/30';
-    const publicNavInactiveCls =
-      'text-stone-600 dark:text-stone-400 hover:text-[#1CB0F6] dark:hover:text-[#1CB0F6] hover:bg-[#DDF4FF]/50 dark:hover:bg-[#1CB0F6]/10';
-    const publicHeaderBg = opaqueHeader
+    // Every logged-out page uses the new purple-themed public header
+    // (purple bg, white text, white Log-in pill, yellow Start-free pill).
+    // We're already inside `if (!user)` here so any page rendered while
+    // signed-out picks this variant up automatically.
+    const isLandingPurple = true;
+
+    const publicNavActiveCls = isLandingPurple
+      ? 'bg-white/25 text-white font-bold border-2 border-white/40'
+      : 'bg-[#DDF4FF] dark:bg-[#1CB0F6]/15 text-[#1CB0F6] font-bold border-2 border-[#1CB0F6]/30 dark:border-[#1CB0F6]/30';
+    const publicNavInactiveCls = isLandingPurple
+      ? 'text-white hover:text-[#FFC800] hover:bg-white/10'
+      : 'text-stone-600 dark:text-stone-400 hover:text-[#1CB0F6] dark:hover:text-[#1CB0F6] hover:bg-[#DDF4FF]/50 dark:hover:bg-[#1CB0F6]/10';
+    const publicHeaderBg = isLandingPurple
       ? isScrolled
-        ? 'bg-white dark:bg-stone-950 shadow-sm border-stone-200 dark:border-stone-800'
-        : 'bg-white dark:bg-stone-950 border-stone-200 dark:border-stone-800'
-      : isScrolled
-        ? 'bg-white dark:bg-stone-950 shadow-sm border-stone-200 dark:border-stone-800'
-        : 'bg-white dark:bg-stone-950 border-stone-200 dark:border-stone-800';
+        ? 'bg-[#A560E8] shadow-[0_4px_24px_-4px_rgba(107,39,163,0.45)] border-[#7733B5]/40'
+        : 'bg-[#A560E8] border-[#7733B5]/30'
+      : opaqueHeader
+        ? isScrolled
+          ? 'bg-white dark:bg-stone-950 shadow-sm border-stone-200 dark:border-stone-800'
+          : 'bg-white dark:bg-stone-950 border-stone-200 dark:border-stone-800'
+        : isScrolled
+          ? 'bg-white dark:bg-stone-950 shadow-sm border-stone-200 dark:border-stone-800'
+          : 'bg-white dark:bg-stone-950 border-stone-200 dark:border-stone-800';
 
     return (
       <>
@@ -213,11 +225,11 @@ const Header: React.FC<HeaderProps> = ({
               className="flex items-center gap-2.5 sm:gap-3 group min-w-0 shrink"
               aria-label="WriteScholar home"
             >
-              <div className="relative w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 group-hover:border-[#58CC02]/40 transition-all duration-200 shrink-0 overflow-hidden">
+              <div className={`relative w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-xl border-2 border-b-4 ${isLandingPurple ? 'border-white/40 bg-white shadow-[0_4px_12px_-2px_rgba(0,0,0,0.20)] group-hover:border-white' : 'border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 group-hover:border-[#58CC02]/40'} transition-all duration-200 shrink-0 overflow-hidden`}>
                 <img src="/main-logo.png" alt="" className="w-[85%] h-[85%] object-contain" fetchPriority="high" width="40" height="40" />
               </div>
               <span
-                className="text-[1.05rem] sm:text-lg font-extrabold tracking-tight text-stone-900 dark:text-stone-50 group-hover:text-[#58CC02] transition-colors duration-200 truncate max-w-[130px] sm:max-w-none"
+                className={`text-[1.05rem] sm:text-lg font-extrabold tracking-tight transition-colors duration-200 truncate max-w-[130px] sm:max-w-none ${isLandingPurple ? 'text-white group-hover:text-[#FFC800]' : 'text-stone-900 dark:text-stone-50 group-hover:text-[#58CC02]'}`}
                 style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
               >
                 WriteScholar
@@ -226,12 +238,12 @@ const Header: React.FC<HeaderProps> = ({
 
             {/* Desktop Navigation — centered (no search on logged-out bar) */}
             <nav className="hidden lg:flex flex-1 items-center justify-center min-w-0">
-              <div className="flex items-center rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-1">
+              <div className={`flex items-center ${isLandingPurple ? 'gap-1' : 'rounded-2xl border-2 border-b-4 p-1 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900'}`}>
                 {publicNavItems.map(({ id, label }) => (
                   <button
                     key={id}
                     onClick={() => onNavigate?.(id)}
-                    className={`px-3.5 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                    className={`px-3.5 py-2 text-sm rounded-lg transition-all duration-200 ${isLandingPurple ? 'font-bold' : 'font-medium'} ${
                       currentPage === id ? publicNavActiveCls : publicNavInactiveCls
                     }`}
                   >
@@ -245,20 +257,20 @@ const Header: React.FC<HeaderProps> = ({
             <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 shrink-0">
               <button
                 onClick={() => onNavigate?.('login')}
-                className="hidden sm:inline-flex px-4 py-2 text-sm font-bold uppercase tracking-wide text-stone-700 dark:text-stone-300 rounded-xl border-2 border-b-4 border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800 active:border-b-2 active:translate-y-0.5 transition-all shrink-0"
+                className={`hidden sm:inline-flex px-4 py-2 text-sm font-bold uppercase tracking-wide rounded-xl border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all shrink-0 ${isLandingPurple ? 'text-[#6B27A3] bg-white border-white/70 hover:bg-stone-50' : 'text-stone-700 dark:text-stone-300 border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800'}`}
               >
                 Log in
               </button>
               <button
                 onClick={() => onNavigate?.('signup')}
-                className="inline-flex items-center justify-center px-4 py-2 sm:px-5 text-sm font-extrabold uppercase tracking-wide text-white rounded-xl bg-[#A560E8] hover:bg-[#9450D8] border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all whitespace-nowrap shrink-0"
+                className={`inline-flex items-center justify-center px-4 py-2 sm:px-5 text-sm font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all whitespace-nowrap shrink-0 ${isLandingPurple ? 'text-[#6B27A3] bg-[#FFC800] hover:bg-[#FFD52E] border-[#D4A300]' : 'text-white bg-[#A560E8] hover:bg-[#9450D8] border-[#8A48C7]'}`}
               >
                 Start free
               </button>
               <button
                 type="button"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="mobile-menu-button lg:hidden p-2 rounded-xl border-2 border-b-4 border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-800 active:border-b-2 active:translate-y-0.5 transition-all shrink-0"
+                className={`mobile-menu-button lg:hidden p-2 rounded-xl border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all shrink-0 ${isLandingPurple ? 'border-white/40 bg-white/15 text-white hover:bg-white/25' : 'border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-800'}`}
                 aria-label="Toggle menu"
                 aria-expanded={isMobileMenuOpen}
               >
@@ -276,7 +288,7 @@ const Header: React.FC<HeaderProps> = ({
         {/* Mobile menu - mobile-menu-container required so click-outside doesn't close before onClick fires */}
         {isMobileMenuOpen && (
           <div
-            className={`lg:hidden mobile-menu-container border-t-2 border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950`}
+            className={`lg:hidden mobile-menu-container border-t-2 ${isLandingPurple ? 'border-white/20 bg-[#A560E8]' : 'border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-950'}`}
           >
             <div className="px-4 py-3 max-w-7xl mx-auto">
               <div className="space-y-1">
@@ -285,9 +297,13 @@ const Header: React.FC<HeaderProps> = ({
                   key={id}
                   onClick={() => { onNavigate?.(id); setIsMobileMenuOpen(false); }}
                   className={`block w-full text-left px-4 py-2.5 text-sm font-medium rounded-lg transition-all ${
-                    currentPage === id
-                      ? 'text-[#1CB0F6] bg-[#DDF4FF] dark:bg-[#1CB0F6]/15 border-2 border-[#1CB0F6]/30 dark:border-[#1CB0F6]/30 font-bold'
-                      : 'text-stone-600 dark:text-stone-400 hover:text-[#1CB0F6] hover:bg-[#DDF4FF]/50 dark:hover:bg-[#1CB0F6]/10'
+                    isLandingPurple
+                      ? currentPage === id
+                        ? 'text-white bg-white/25 border-2 border-white/40 font-bold'
+                        : 'text-white/85 hover:text-white hover:bg-white/15'
+                      : currentPage === id
+                        ? 'text-[#1CB0F6] bg-[#DDF4FF] dark:bg-[#1CB0F6]/15 border-2 border-[#1CB0F6]/30 dark:border-[#1CB0F6]/30 font-bold'
+                        : 'text-stone-600 dark:text-stone-400 hover:text-[#1CB0F6] hover:bg-[#DDF4FF]/50 dark:hover:bg-[#1CB0F6]/10'
                   }`}
                 >
                   {label}
@@ -296,13 +312,13 @@ const Header: React.FC<HeaderProps> = ({
               <div className="pt-2 pb-1 flex flex-col gap-2">
                 <button
                   onClick={() => { onNavigate?.('login'); setIsMobileMenuOpen(false); }}
-                  className="block text-center px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-stone-700 dark:text-stone-300 rounded-xl border-2 border-b-4 border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800 active:border-b-2 active:translate-y-0.5 transition-all"
+                  className={`block text-center px-4 py-2.5 text-sm font-bold uppercase tracking-wide rounded-xl border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all ${isLandingPurple ? 'text-[#6B27A3] bg-white border-white/70 hover:bg-stone-50' : 'text-stone-700 dark:text-stone-300 border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800'}`}
                 >
                   Log in
                 </button>
                 <button
                   onClick={() => { onNavigate?.('signup'); setIsMobileMenuOpen(false); }}
-                  className="block text-center px-4 py-2.5 text-white text-sm font-extrabold uppercase tracking-wide rounded-xl bg-[#A560E8] hover:bg-[#9450D8] border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all"
+                  className={`block text-center px-4 py-2.5 text-sm font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all ${isLandingPurple ? 'text-[#6B27A3] bg-[#FFC800] hover:bg-[#FFD52E] border-[#D4A300]' : 'text-white bg-[#A560E8] hover:bg-[#9450D8] border-[#8A48C7]'}`}
                 >
                   Start free
                 </button>
@@ -312,7 +328,7 @@ const Header: React.FC<HeaderProps> = ({
           </div>
         )}
         <div
-          className="h-[2px] bg-stone-200 dark:bg-stone-800"
+          className={`h-[2px] ${isLandingPurple ? 'bg-white/15' : 'bg-stone-200 dark:bg-stone-800'}`}
           aria-hidden
         />
       </header>

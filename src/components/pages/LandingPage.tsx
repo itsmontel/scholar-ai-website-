@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, lazy, Suspense, type ReactNode } from 'react';
+import { useState, useEffect, useMemo, useRef, lazy, Suspense, type ReactNode } from 'react';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -102,6 +102,13 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
   const [pipDismissed, setPipDismissed] = useState(false);
   const [pipMuted, setPipMuted] = useState(true);
   const [pipExpanded, setPipExpanded] = useState(false);
+  // Drag-to-move: once the user drags the PiP, pipPos goes from null →
+  // {x, y} (viewport coords). When non-null, inline `top/left` overrides
+  // the default bottom-right Tailwind position. Stays null until first
+  // drag, so the PiP starts pinned to bottom-right as designed.
+  const [pipPos, setPipPos] = useState<{ x: number; y: number } | null>(null);
+  const [pipDragging, setPipDragging] = useState(false);
+  const pipRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     if (pipDismissed) return;
     const onScroll = () => {
@@ -115,6 +122,49 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
   const handleDismissPip = () => {
     setPipVisible(false);
     setPipDismissed(true);
+  };
+  // Mouse + touch drag handler attached to the PiP's gradient title bar
+  // ("handle"). Skips drag start when the user clicks one of the chrome
+  // buttons (mute / expand / close) so those still work. Clamps the new
+  // position so the PiP can't be dragged off-screen.
+  const handlePipDragStart = (clientX: number, clientY: number, e: React.SyntheticEvent) => {
+    if ((e.target as HTMLElement).closest('button')) return;
+    e.preventDefault();
+    const el = pipRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const startX = clientX;
+    const startY = clientY;
+    const origX = rect.left;
+    const origY = rect.top;
+    const width = rect.width;
+    const height = rect.height;
+    setPipDragging(true);
+    const clamp = (v: number, min: number, max: number) => Math.max(min, Math.min(max, v));
+    const onMove = (x: number, y: number) => {
+      const dx = x - startX;
+      const dy = y - startY;
+      const margin = 8;
+      setPipPos({
+        x: clamp(origX + dx, margin, window.innerWidth - width - margin),
+        y: clamp(origY + dy, margin, window.innerHeight - height - margin),
+      });
+    };
+    const onMouseMove = (mv: MouseEvent) => onMove(mv.clientX, mv.clientY);
+    const onTouchMove = (mv: TouchEvent) => {
+      if (mv.touches[0]) onMove(mv.touches[0].clientX, mv.touches[0].clientY);
+    };
+    const cleanup = () => {
+      setPipDragging(false);
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', cleanup);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', cleanup);
+    };
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', cleanup);
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
+    window.addEventListener('touchend', cleanup);
   };
   const [inputText, setInputText] = useState('');
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
@@ -690,16 +740,17 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
   return (
     <>
       <Header onNavigate={onNavigate} user={user} sticky={true} currentPage="landing" opaqueHeader />
-      <main className="min-h-screen relative transition-colors font-sans overflow-x-hidden xl:overflow-x-visible" role="main">
-      {/* Promo Banner — visible on tablet/desktop (md+), hidden on mobile.
-          Crowds the mobile hero where vertical space is precious; on larger
-          screens it sits comfortably above the hero without pushing the
-          headline below the fold. To re-enable on mobile, swap
-          `hidden md:block` → `block` (and update the comment). */}
+      <main className="min-h-screen relative transition-colors font-sans overflow-x-clip xl:overflow-x-visible" role="main">
+      {/* Promo Banner — FULLY HIDDEN per redesign brief. The 50%-off
+          May2026 promo no longer surfaces on landing; the new centred
+          hero with floating feature tiles is the entire above-the-fold
+          story. Markup preserved (just swap `hidden` → `md:block` to
+          re-enable on desktop when a new promo runs). */}
       <div
         role="region"
         aria-label="Limited time promotion"
-        className="hidden md:block relative overflow-hidden border-b-2 border-[#FF9600]/30 dark:border-[#D97F00]/40 bg-[#FFF4E0] dark:bg-stone-950"
+        aria-hidden="true"
+        className="hidden relative overflow-hidden border-b-2 border-[#FF9600]/30 dark:border-[#D97F00]/40 bg-[#FFF4E0] dark:bg-stone-950"
       >
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_120%_at_50%_50%,rgba(255,150,0,0.08),transparent_70%)] dark:bg-[radial-gradient(ellipse_60%_120%_at_50%_50%,rgba(255,150,0,0.12),transparent_70%)]" aria-hidden />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-1.5 sm:py-2">
@@ -719,221 +770,292 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           </div>
         </div>
       </div>
-      {/* HERO: formal, conversion-focused */}
-      <section className="relative flex flex-col overflow-x-clip overflow-hidden border-b border-stone-200/90 dark:border-stone-800 xl:overflow-visible">
-        {/* ─── HERO BACKGROUND — BOLD MULTI-COLOUR MESH ────────────────
-            Strategy: strong brand-colour washes at the four corners,
-            calm white spotlight in the centre to protect the H1/CTA/
-            video readability. Gives "lush, on-brand, premium" without
-            sacrificing legibility. Ruled-paper texture + red margin
-            line provide thematic depth (essay-feedback product). */}
+      {/* HERO: formal, conversion-focused. Section base is cream so
+          everything below the hero (analyzer demo, before/after, etc.)
+          sits on the standard light-theme background. The purple hero
+          area is now scoped to a fixed-height wrapper at the top. */}
+      <section className="relative flex flex-col overflow-x-clip overflow-hidden border-b border-stone-200/90 dark:border-stone-800 xl:overflow-visible bg-[#FCFBF7] dark:bg-[#0c0a09]">
+        {/* ─── HERO BACKGROUND — SINGLE-COLOUR PURPLE (BOUNDED) ─────
+            Per user brief: the purple background only spans the hero
+            portion (H1 + CTA + tiles + feature-icons row). After that
+            point, the section reverts to the site's cream off-white so
+            the analyzer demo and downstream content read like any
+            other body section.
 
-        {/* Base off-white */}
-        <div className="absolute inset-0 bg-[#fafafa] dark:bg-[#0c0a09]" />
+            Implementation: all purple background artwork is wrapped in
+            a fixed-height absolute container with overflow-hidden so
+            it clips cleanly at the bottom edge of the feature-icons
+            row. Heights are responsive — taller on mobile because the
+            phone hero stacks H1, CTA/Login, mobile tile grid, and the
+            wrapping feature-icons row vertically. */}
+        <div
+          className="absolute top-0 left-0 right-0 h-[820px] md:h-[660px] lg:h-[710px] xl:h-[740px] overflow-hidden pointer-events-none"
+          aria-hidden
+        >
+          {/* Base — rich purple gradient. Brand purple #A560E8 at the top
+              transitioning to a deeper #7733B5 at the bottom for depth so
+              the hero doesn't feel flat. Knowunity does this with navy;
+              we do it with our brand purple. */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#A560E8] via-[#8A48C7] to-[#6B27A3] dark:from-[#4A1B70] dark:via-[#3A1457] dark:to-[#2A0E40]" />
 
-        {/* Top-left: BLUE wash — further softened (was 0.15, still too
-            intense per user). Now reads as a whisper of cool atmosphere
-            rather than a coloured corner. */}
-        <div
-          className="pointer-events-none absolute -top-40 -left-[12%] h-[min(95vw,42rem)] w-[min(95vw,42rem)] rounded-full bg-[#1CB0F6]/[0.08] blur-[100px] dark:bg-[#1CB0F6]/[0.09] animate-landing-hero-blob"
-          aria-hidden
-        />
+          {/* Lighter-purple atmospheric orb — top-left. */}
+          <div className="pointer-events-none absolute -top-40 -left-[10%] h-[min(95vw,40rem)] w-[min(95vw,40rem)] rounded-full bg-[#D4A8F5]/[0.22] blur-[110px] dark:bg-[#C589FF]/[0.14] animate-landing-hero-blob" />
 
-        {/* Top-right: PURPLE wash — further softened (was 0.14, still
-            too intense per user). Brand colour anchor without dominance. */}
-        <div
-          className="pointer-events-none absolute -top-40 -right-[10%] h-[min(95vw,40rem)] w-[min(95vw,40rem)] rounded-full bg-[#A560E8]/[0.07] blur-[100px] dark:bg-[#A560E8]/[0.08] animate-landing-hero-blob-delayed"
-          aria-hidden
-        />
+          {/* Lighter-purple atmospheric orb — top-right. */}
+          <div className="pointer-events-none absolute -top-40 -right-[10%] h-[min(95vw,38rem)] w-[min(95vw,38rem)] rounded-full bg-[#E2C2FA]/[0.20] blur-[110px] dark:bg-[#B873F0]/[0.14] animate-landing-hero-blob-delayed" />
 
-        {/* Bottom-left: ORANGE warm wash — kept as-is (user didn't flag
-            this one). The warm note is doing most of the colour work now
-            that the blue/purple are dialled way down. */}
-        <div
-          className="pointer-events-none absolute -bottom-40 -left-[8%] h-[min(85vw,36rem)] w-[min(85vw,36rem)] rounded-full bg-[#FF9600]/[0.18] blur-[110px] dark:bg-[#FF9600]/[0.13] animate-landing-hero-blob"
-          aria-hidden
-        />
+          {/* Deeper-purple shadow orb — bottom-left, adds depth/grounding. */}
+          <div className="pointer-events-none absolute -bottom-20 -left-[8%] h-[min(90vw,36rem)] w-[min(90vw,36rem)] rounded-full bg-[#5A1B8E]/[0.30] blur-[110px] dark:bg-[#3A0F66]/[0.45] animate-landing-hero-blob" />
 
-        {/* Bottom-right: PURPLE — further softened (was 0.12). */}
-        <div
-          className="pointer-events-none absolute -bottom-40 -right-[10%] h-[min(95vw,40rem)] w-[min(95vw,40rem)] rounded-full bg-[#A560E8]/[0.06] blur-[110px] dark:bg-[#A560E8]/[0.07] animate-landing-hero-blob-delayed"
-          aria-hidden
-        />
+          {/* Deeper-purple shadow orb — bottom-right. */}
+          <div className="pointer-events-none absolute -bottom-20 -right-[10%] h-[min(95vw,40rem)] w-[min(95vw,40rem)] rounded-full bg-[#6B27A3]/[0.32] blur-[110px] dark:bg-[#3A0F66]/[0.45] animate-landing-hero-blob-delayed" />
 
-        {/* Centre spotlight — soft white radial keeps the content area
-            readable against the strong corner colours. Without this, the
-            H1/CTA/video would fight the colourful washes. */}
-        <div
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_55%_55%_at_50%_50%,rgba(255,255,255,0.55),transparent_70%)] dark:bg-[radial-gradient(ellipse_55%_55%_at_50%_50%,rgba(0,0,0,0.30),transparent_70%)]"
-          aria-hidden
-        />
+          {/* Centre spotlight — very soft white radial sits behind the H1
+              so the white headline gets a subtle "halo" lift without
+              breaking the purple mood. */}
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_55%_50%_at_50%_45%,rgba(255,255,255,0.10),transparent_70%)]" />
 
-        {/* RULED-PAPER PATTERN — visible blue horizontal lines every
-            36px. Was 0.07 opacity (effectively invisible); now 0.14 so
-            the texture actually reads as "paper" instead of disappearing
-            into the gradient. */}
-        <div
-          className="absolute inset-0 landing-hero-grid-animate pointer-events-none bg-[length:100%_36px] bg-[linear-gradient(to_bottom,rgba(28,176,246,0.14)_1px,transparent_1px)] dark:bg-[linear-gradient(to_bottom,rgba(28,176,246,0.16)_1px,transparent_1px)]"
-          aria-hidden
-        />
+          {/* Subtle starry sparkle dots scattered across the hero — small
+              white pinpricks that give a "magical / academic constellation"
+              feel without competing with the H1. */}
+          <div className="hidden md:block pointer-events-none absolute top-[12%] left-[18%] h-1 w-1 rounded-full bg-white/60 shadow-[0_0_8px_2px_rgba(255,255,255,0.5)] motion-safe:animate-pulse" />
+          <div className="hidden md:block pointer-events-none absolute top-[22%] right-[14%] h-1.5 w-1.5 rounded-full bg-white/70 shadow-[0_0_10px_3px_rgba(255,255,255,0.5)] motion-safe:animate-pulse" style={{ animationDelay: '0.8s' }} />
+          <div className="hidden md:block pointer-events-none absolute top-[38%] left-[7%] h-1 w-1 rounded-full bg-white/55 shadow-[0_0_8px_2px_rgba(255,255,255,0.45)] motion-safe:animate-pulse" style={{ animationDelay: '1.6s' }} />
+          <div className="hidden md:block pointer-events-none absolute top-[44%] right-[6%] h-1 w-1 rounded-full bg-white/55 shadow-[0_0_8px_2px_rgba(255,255,255,0.45)] motion-safe:animate-pulse" style={{ animationDelay: '2.4s' }} />
+          <div className="hidden md:block pointer-events-none absolute bottom-[28%] left-[24%] h-1.5 w-1.5 rounded-full bg-white/65 shadow-[0_0_10px_3px_rgba(255,255,255,0.5)] motion-safe:animate-pulse" style={{ animationDelay: '0.4s' }} />
+          <div className="hidden md:block pointer-events-none absolute bottom-[22%] right-[22%] h-1 w-1 rounded-full bg-white/60 shadow-[0_0_8px_2px_rgba(255,255,255,0.45)] motion-safe:animate-pulse" style={{ animationDelay: '1.2s' }} />
 
-        {/* NOTEBOOK MARGIN LINE — bold red vertical at ~5% from the left,
-            full hero height. 2px wide, peak opacity 0.45 (was 0.18 — hardly
-            visible). Classic lined-paper margin marker; ties to the "Before"
-            red and the H1 strikethrough red. lg+ only. */}
-        <div
-          className="hidden lg:block pointer-events-none absolute top-0 bottom-0 left-[5%] w-[2px] bg-gradient-to-b from-transparent via-[#FF4B4B]/[0.45] to-transparent dark:via-[#FF4B4B]/[0.50]"
-          aria-hidden
-        />
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#1CB0F6]/30 to-transparent dark:via-[#1CB0F6]/25 animate-hero-top-shimmer"
-          aria-hidden
-        />
-
-        {/* MOBILE-ONLY ambient flourishes — extra animated orbs + breathing
-            gradient sheen so the phone hero feels lively without the desktop
-            side cards. Hidden at md+ where the desktop layout takes over.
-            Blue orb + gradient softened (was /30 + 10%, now /15 + 4%) so the
-            hero doesn't read as overly tinted on phones. */}
-        <div
-          className="md:hidden pointer-events-none absolute top-[18%] left-[8%] h-24 w-24 rounded-full bg-[#1CB0F6]/15 dark:bg-[#1CB0F6]/12 blur-2xl motion-safe:animate-mobile-orb-drift"
-          aria-hidden
-        />
-        <div
-          className="md:hidden pointer-events-none absolute top-[42%] right-[10%] h-28 w-28 rounded-full bg-[#58CC02]/20 dark:bg-[#58CC02]/15 blur-3xl motion-safe:animate-mobile-orb-drift"
-          style={{ animationDelay: '1.6s' }}
-          aria-hidden
-        />
-        <div
-          className="md:hidden pointer-events-none absolute top-[68%] left-[18%] h-20 w-20 rounded-full bg-[#FF9600]/15 dark:bg-[#FF9600]/12 blur-2xl motion-safe:animate-mobile-orb-drift"
-          style={{ animationDelay: '3.2s' }}
-          aria-hidden
-        />
-        <div
-          className="md:hidden pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_45%_at_50%_5%,rgba(28,176,246,0.04),transparent_55%)] dark:bg-[radial-gradient(ellipse_80%_45%_at_50%_5%,rgba(28,176,246,0.08),transparent_55%)] motion-safe:animate-mobile-gradient-breathe"
-          aria-hidden
-        />
+          {/* ─── INTERNAL FADE → CREAM ──────────────────────────────
+              Vertical gradient pinned to the BOTTOM of the purple
+              wrapper that fades the purple bg into cream WITHIN the
+              wrapper itself. Replaces the previous external fade
+              (which started AFTER the wrapper, so cream couldn't
+              emerge until the wrapper ended — felt too abrupt /
+              "too late" per user feedback).
+              `from-transparent from-30%` keeps the upper 30% of the
+              fade region fully transparent so the wrapper's deep
+              purple still reads behind the feature-icons row that
+              sits in this zone. Cream emerges over the lower 70%
+              and is fully opaque at the wrapper's bottom edge — so
+              by the time the wrapper "ends" the eye already sees
+              cream, no hard seam. */}
+          <div
+            className="absolute inset-x-0 bottom-0 h-44 sm:h-48 lg:h-52 xl:h-56 bg-gradient-to-b from-transparent from-65% to-[#FCFBF7] dark:to-[#0c0a09] pointer-events-none"
+            aria-hidden
+          />
+        </div>
 
         <div className="relative z-10 flex flex-col items-center justify-start px-4 sm:px-6 lg:px-8 pt-10 sm:pt-12 lg:pt-8 pb-8 sm:pb-0 min-w-0">
           <div className="w-full min-w-0 max-w-[1240px] xl:mx-auto">
-            {/* 3-column hero on lg+: BEFORE essay (left) + center content
-                + AFTER essay (right). Mobile stacks center content only —
-                BEFORE/AFTER asides are hidden on small screens to keep the
-                phone hero compact. */}
+            {/* ─── REDESIGNED HERO ──────────────────────────────────
+                Knowunity-style centered layout: single H1 + CTA in the
+                middle, six feature tiles (videos + screenshots) hovering
+                around the perimeter, gently floating in place. Replaces
+                the previous 3-column grid (BEFORE/AFTER asides + mascots
+                + typewriter H1 + B→A pill + subheadline + mobile video
+                + login link + risk reversal + 50,000+ trust pill) which
+                stacked too many competing elements above the fold. The
+                tiles do the social proof + product preview job that those
+                elements collectively used to handle.
+                The outer `flex flex-col items-stretch` wrapper is kept
+                so the section's downstream closing tags stay balanced
+                — that wrapper used to host the lg:grid. */}
             <div className="flex flex-col items-stretch w-full">
-              <div className="lg:grid lg:grid-cols-[1fr_minmax(0,1.7fr)_1fr] lg:gap-6 xl:gap-8 lg:items-center">
-                {/* LEFT COLUMN — BEFORE essay preview card. Shows a rough
-                    draft with red improvement highlights, scoring B (82/100).
-                    Pairs with the AFTER card on the right to visually answer
-                    "what does the analyzer actually do?" before the visitor
-                    reads any copy. */}
-                <aside
-                  className="hidden lg:flex justify-center"
-                  aria-label="Before essay preview"
-                >
-                  <div className="w-full max-w-[260px] rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900/50 p-1 transition-all duration-300 hover:border-[#FF4B4B]/60 dark:hover:border-[#FF4B4B]/40">
-                    <p className="text-[10px] font-bold uppercase tracking-wide text-[#FF4B4B] dark:text-[#FF4B4B] text-center mb-1.5">Before</p>
-                    <HeroEssayPreviewCard
-                      paper={DEMO_PAPERS[1]}
-                      rotate="none"
-                      variant="before"
-                      maxExcerptChars={560}
-                      onOpenDemo={scrollToInteractiveDemoFeedback}
-                    />
+            <div className="relative w-full max-w-6xl xl:max-w-7xl mx-auto px-4 sm:px-6 pt-3 pb-6 sm:pt-4 sm:pb-8 lg:pt-6 lg:pb-10 md:min-h-[560px] lg:min-h-[600px] xl:min-h-[640px]">
+
+              {/* ─── SIX FLOATING FEATURE TILES ──────────────────────
+                  Each tile = rounded card with Duolingo-style brand-colour
+                  border, holding a real feature video or screenshot.
+                  The outer div animates translateY (float keyframe from
+                  tailwind.config.js) with staggered delays so the tiles
+                  bob out of sync. The inner div carries the rotation so
+                  the float transform doesn't conflict with rotate().
+                  Hidden entirely on mobile — phones get a clean centred
+                  hero so the H1 + CTA dominate the viewport. */}
+              <div className="hidden md:block absolute inset-0 pointer-events-none" aria-hidden>
+
+                {/* SIX-TILE KNOWUNITY-STYLE SCATTER — md+ only.
+                    Layout (matching the reference image):
+                      Tile 1 (top-left)    Tile 2 (top-center)   Tile 3 (top-right)
+                      Tile 4 (mid-left)              [H1+CTA]              Tile 5 (mid-right)
+                                          Tile 6 (bottom-center, below CTA)
+                    Tiles are now SMALLER and 16:10 landscape (was 4:3).
+                    Borders use 6 different Duolingo brand colours so each
+                    tile pops against the purple background. White label
+                    strip at the bottom of each tile auto-separates the
+                    rounded card from the purple field. */}
+
+                {/* Tile 1 — Essay Analyzer — top-left — YELLOW border
+                    (was purple, swapped because purple-on-purple disappeared).
+                    PNG screenshot of the rubric-90 (A-grade) UI. */}
+                <div className="absolute top-[2%] left-[2%] lg:left-[4%] motion-safe:animate-[hero-tile-drift_8s_ease-in-out_infinite]">
+                  <div className="w-32 lg:w-36 xl:w-44">
+                    <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_18px_42px_-12px_rgba(255,200,0,0.55)] bg-white">
+                      <div className="relative aspect-[16/10] w-full bg-stone-100">
+                        <img
+                          src="/rubric-and-notes.png"
+                          alt=""
+                          loading="eager"
+                          decoding="async"
+                          className="absolute inset-0 w-full h-full object-cover object-top"
+                        />
+                      </div>
+                      <p className="px-2 py-1 text-center text-[9px] lg:text-[10px] font-extrabold text-stone-800 bg-white border-t-2 border-[#FFC800]/40">Essay Analyzer</p>
+                    </div>
                   </div>
-                </aside>
+                </div>
 
-              <div className="min-w-0 flex flex-col items-center w-full max-w-2xl mx-auto">
-              <div className="relative w-full max-w-3xl mx-auto px-1 sm:px-2 text-center pt-2 sm:pt-4 opacity-0 animate-hero-card-enter">
-                {/* Hero mascots — pinned to the bottom corners of the hero
-                    card, sitting below the trial/login buttons so they flank
-                    the trust badge. The walking mascot occupies the bottom-left
-                    slot (its in-frame walking animation keeps the corner alive
-                    without translating across the card). */}
-                <div className="relative flex flex-col items-center text-center">
-                {/* The mobile dance mascot used to sit here pinned above the
-                    H1. It's been relocated to peek over the top-right corner
-                    of the hero walkthrough video below (the video tile already
-                    has room to host it without crowding the headline). See
-                    the video container further down for the new placement. */}
+                {/* Tile 2 — Notes to Flashcards — sits at the SAME vertical
+                    line as the Word Blitz Game tile (bottom-[24%]) but well
+                    to the LEFT of it. Pairs with Word Blitz (now pushed to
+                    the right) for a symmetric lower-row pair. */}
+                <div className="absolute bottom-[22%] left-[28%] -translate-x-1/2 motion-safe:animate-[hero-tile-drift_9s_ease-in-out_infinite]" style={{ animationDelay: '0.8s' }}>
+                  <div className="w-32 lg:w-36 xl:w-44">
+                    <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_18px_42px_-12px_rgba(255,200,0,0.55)] bg-stone-950">
+                      <div className="relative aspect-[16/10] w-full bg-black">
+                        <video src="/hero-flashcards.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
+                      </div>
+                      <p className="px-2 py-1 text-center text-[9px] lg:text-[10px] font-extrabold text-stone-800 bg-white border-t-2 border-[#FFC800]/40">Notes to Flashcards</p>
+                    </div>
+                  </div>
+                </div>
 
+                {/* Tile 3 — Quiz — top-right — green border */}
+                <div className="absolute top-[2%] right-[2%] lg:right-[4%] motion-safe:animate-[hero-tile-drift_8.4s_ease-in-out_infinite]" style={{ animationDelay: '1.6s' }}>
+                  <div className="w-32 lg:w-36 xl:w-44">
+                    <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_18px_42px_-12px_rgba(255,200,0,0.55)] bg-stone-950">
+                      <div className="relative aspect-[16/10] w-full bg-black">
+                        <video src="/hero-quiz.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
+                      </div>
+                      <p className="px-2 py-1 text-center text-[9px] lg:text-[10px] font-extrabold text-stone-800 bg-white border-t-2 border-[#FFC800]/40">Notes to Quiz</p>
+                    </div>
+                  </div>
+                </div>
 
-                {/* HEADLINE — outcome + transformation, locked to 3 lines.
-                    Line 1: "Turn your grades" (broad outcome — covers all products)
-                    Line 2: "from [B → A]" (the transformation as a pill chip)
-                    Line 3: "With WriteScholar." (the brand)
-                    The B → A chip is the visual centerpiece — bordered box
-                    with orange B, gray arrow, green A in our Duolingo style. */}
-                {/* HEADLINE — staged typewriter animation. The H1 is split
-                    into three "typewriter" segments that wipe in left-to-right
-                    via a CSS mask. Sequence (timed via inline animationDelay):
-                      0.15s  Phase 1 typewriter starts ("Turn your grades")
-                      0.55s  Phase 2 typewriter starts ("from [B → A]")
-                      1.30s  Phase 3 typewriter starts ("With WriteScholar.")
-                      1.70s  WriteScholar's purple squiggle draws on
-                    Reduced-motion users see the final state immediately
-                    (overrides in src/index.css). */}
+                {/* Tile 4 — Crater Blast — MID-LEFT — red border.
+                    Slightly larger than top row (echoes Knowunity's larger
+                    rocket tile on the left side). */}
+                <div className="absolute top-[42%] left-[-1%] lg:left-[0%] motion-safe:animate-[hero-tile-drift_8.6s_ease-in-out_infinite]" style={{ animationDelay: '2.4s' }}>
+                  <div className="w-32 lg:w-36 xl:w-44">
+                    <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_22px_50px_-12px_rgba(255,200,0,0.55)] bg-stone-950">
+                      <div className="relative aspect-[16/10] w-full bg-black">
+                        <video src="/writescholar-crater-blast-demo.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
+                      </div>
+                      <p className="px-2 py-1 text-center text-[10px] lg:text-[11px] font-extrabold text-stone-800 bg-white border-t-2 border-[#FFC800]/40">Crater Blast Game</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tile 5 — Word Tower — MID-RIGHT — orange border.
+                    Larger like Tile 4 (echoes Knowunity's graduation cap). */}
+                <div className="absolute top-[44%] right-[-1%] lg:right-[0%] motion-safe:animate-[hero-tile-drift_9.2s_ease-in-out_infinite]" style={{ animationDelay: '3.2s' }}>
+                  <div className="w-32 lg:w-36 xl:w-44">
+                    <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_22px_50px_-12px_rgba(255,200,0,0.55)] bg-white">
+                      <div className="relative aspect-[16/10] w-full bg-stone-100">
+                        <video src="/hero-word-tower.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
+                      </div>
+                      <p className="px-2 py-1 text-center text-[10px] lg:text-[11px] font-extrabold text-stone-800 bg-white border-t-2 border-[#FFC800]/40">Word Tower Game</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tile 6 — Word Blitz Game — BOTTOM-CENTER — pink border.
+                    Lifted to bottom-[22%] (was bottom-[1%]) so it sits in
+                    the empty space directly under the CTA button without
+                    bleeding into the feature-icons row that follows the
+                    inner hero wrapper. */}
+                <div className="absolute bottom-[22%] left-[62%] -translate-x-1/2 motion-safe:animate-[hero-tile-drift_7.8s_ease-in-out_infinite]" style={{ animationDelay: '4s' }}>
+                  <div className="w-32 lg:w-36 xl:w-44">
+                    <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_18px_42px_-12px_rgba(255,200,0,0.55)] bg-white">
+                      <div className="relative aspect-[16/10] w-full bg-stone-100">
+                        <video src="/hero-word-blitz.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
+                      </div>
+                      <p className="px-2 py-1 text-center text-[9px] lg:text-[10px] font-extrabold text-stone-800 bg-white border-t-2 border-[#FFC800]/40">Word Blitz Game</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* ─── CENTERED H1 + CTA ────────────────────────────────
+                  Everything else previously stacked here — H2 subheadline,
+                  trust pill, login link, mobile video, mascots, risk
+                  reversal — has been intentionally removed per user brief
+                  to match Knowunity's minimal centred-hero pattern. The
+                  six floating tiles around this column do the
+                  "what does the product do?" job those elements used to
+                  share. */}
+              <div className="relative z-10 flex flex-col items-center text-center w-full mx-auto pt-6 pb-8 sm:pt-10 sm:pb-10 md:pt-2 md:pb-20 lg:pt-0 lg:pb-24 opacity-0 animate-hero-card-enter">
+                {/* ─── TRUST PILL — 50,000+ students worldwide ─────────
+                    Sits ABOVE the H1 as a credibility eyebrow on every
+                    viewport (desktop + mobile). Restored from commit
+                    40f28b3. White pill on purple hero bg with a green
+                    user-icon avatar + green "50,000+" accent to tie back
+                    to the green A-pill and Start-Free CTA. */}
+                <div className="mb-5 sm:mb-6 inline-flex items-center gap-2.5 rounded-full border-2 border-b-[3px] border-[#E5E5E5] bg-white pl-1.5 pr-4 py-1 shadow-[0_8px_22px_-6px_rgba(0,0,0,0.30)]">
+                  <span
+                    className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-[#E5F8D0]"
+                    aria-hidden
+                  >
+                    <svg className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-[#46A302]" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
+                    </svg>
+                  </span>
+                  <span className="text-[12px] sm:text-[13px] font-bold text-stone-800">
+                    Trusted by <span className="font-extrabold text-[#58CC02] tabular-nums">50,000+</span> students worldwide
+                  </span>
+                </div>
+
+                {/* ─── HEADLINE — two-line layout, ALL viewports ─────────
+                    Line 1: "Turn your grades from B to [A-pill]"
+                    Line 2: "with WriteScholar" (yellow on purple).
+                    Forced 2-line layout via responsive font sizing tuned
+                    so line 1 always fits without wrapping, even on 360px
+                    phones. Sizes reduced ~20% per user brief so the H1
+                    takes less vertical room and the feature-icons row
+                    can sit above the fold on a 900px viewport. */}
                 <h1
-                  className="text-[2.1rem] sm:text-[2.55rem] lg:text-[3.15rem] xl:text-[3.5rem] font-extrabold tracking-[-0.02em] leading-[1.05] mb-8 sm:mb-9 max-w-[min(28rem,calc(100vw-2rem))] sm:max-w-3xl mx-auto text-balance"
+                  className="text-[1.3rem] xs:text-[1.5rem] sm:text-[2rem] md:text-[2.25rem] lg:text-[2.5rem] xl:text-[2.85rem] font-extrabold tracking-[-0.02em] leading-[1.05] text-white mb-5 sm:mb-6"
                   style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                 >
-                  {/* Phase 1: "Turn your grades" — broad outcome (covers
-                      essays, study tools, citations — all paths to grades). */}
-                  <span className="inline-block animate-hero-typewriter" style={{ animationDelay: '0.15s' }}>
-                    <span className="text-stone-900 dark:text-stone-50">Turn your grades</span>
-                  </span>
-                  <br />
-                  {/* Phase 2: "from [B → A]" — bordered Duolingo-style pill chip
-                      with orange B, gray arrow, green A. The chip is inline-flex
-                      so B/arrow/A stay perfectly aligned regardless of font size. */}
-                  <span className="inline-block animate-hero-typewriter" style={{ animationDelay: '0.55s' }}>
-                    <span className="text-stone-900 dark:text-stone-50">from</span>{' '}
+                  <span className="block whitespace-nowrap">
+                    Turn your grades from B to{' '}
+                    {/* A-grade pill — sits inline on the baseline, slight
+                        rotation + green Duolingo chip with white "A".
+                        Extra glow ring on purple background. */}
                     <span
-                      className="inline-flex items-center align-middle gap-1.5 sm:gap-2 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 px-2.5 py-0.5 sm:px-3 sm:py-1 shadow-md mx-1"
-                      aria-label="Grade improvement from B to A"
+                      className="relative inline-flex items-center justify-center align-baseline rounded-2xl bg-[#58CC02] text-white font-extrabold leading-none w-[0.95em] h-[0.95em] border-2 border-b-[5px] border-[#46A302] rotate-[-4deg] motion-safe:animate-[hero-a-wiggle_4.5s_ease-in-out_infinite] shadow-[0_10px_30px_-4px_rgba(88,204,2,0.75)] ring-4 ring-white/15"
+                      style={{ verticalAlign: '-0.06em' }}
+                      aria-hidden
                     >
-                      <span className="text-[1.55rem] sm:text-[2rem] lg:text-[2.45rem] xl:text-[2.7rem] font-extrabold tabular-nums leading-none text-[#FF9600] dark:text-[#FFB347]">
-                        B
-                      </span>
-                      <span className="text-[1.4rem] sm:text-[1.85rem] lg:text-[2.25rem] xl:text-[2.5rem] font-light leading-none select-none text-stone-400 dark:text-stone-500" aria-hidden>
-                        →
-                      </span>
-                      <span className="text-[1.55rem] sm:text-[2rem] lg:text-[2.45rem] xl:text-[2.7rem] font-extrabold tabular-nums leading-none text-[#58CC02] dark:text-[#9BE85C]">
-                        A
+                      A
+                      {/* Sparkle accent on the pill */}
+                      <span
+                        className="absolute -top-2 -right-2 text-[0.32em] text-[#FFC800] motion-safe:animate-pulse"
+                        aria-hidden
+                      >
+                        ✦
                       </span>
                     </span>
+                    <span className="sr-only">A</span>
                   </span>
-                  <br />
-                  {/* Phase 3: "With WriteScholar." with its purple squiggle.
-                      pathLength="100" normalizes the path length so the
-                      stroke-dasharray draw animation works reliably even with
-                      preserveAspectRatio="none" stretching the path. Inline
-                      strokeDasharray/Offset override the class's defaults so
-                      the full squiggle is drawn (not just the first 240 user
-                      units of an unpredictably-stretched path). */}
-                  <span className="inline-block animate-hero-typewriter" style={{ animationDelay: '1.30s' }}>
-                    <span className="text-stone-900 dark:text-stone-50">With</span>{' '}
-                    <span className="relative inline-block overflow-visible text-[#A560E8] dark:text-[#A560E8]">
+                  <span className="block mt-1.5 sm:mt-2.5 whitespace-nowrap">
+                    with{' '}
+                    {/* "WriteScholar" — Duolingo-yellow on purple. The
+                        yellow/purple pairing is the highest-contrast,
+                        most-attention-grabbing colour combo on Duolingo
+                        itself, so it pops without leaving brand. */}
+                    <span className="relative inline-block text-[#FFC800]">
                       WriteScholar
-                      {/* Squiggle SVG: bigger viewBox + taller container so
-                          the wave actually has vertical room to be visible.
-                          pathLength=100 + matching dasharray/offset normalize
-                          the draw-on animation regardless of horizontal stretch. */}
+                      {/* Yellow squiggle underline echoing the word
+                          colour for visual cohesion. */}
                       <svg
-                        className="absolute -bottom-3 sm:-bottom-3.5 left-0 w-full h-5 sm:h-6 text-[#A560E8] dark:text-[#A560E8] overflow-visible"
+                        className="absolute -bottom-2 sm:-bottom-3 left-0 w-full h-3 sm:h-5 text-[#FFC800] overflow-visible"
                         viewBox="0 0 300 24"
                         preserveAspectRatio="none"
                         aria-hidden
                         style={{ overflow: 'visible' }}
                       >
                         <path
-                          className="animate-hero-squiggle-draw"
-                          pathLength={100}
-                          style={{
-                            animationDelay: '1.70s',
-                            strokeDasharray: 100,
-                            strokeDashoffset: 100,
-                          }}
                           d="M4 14 Q40 4 80 14 T156 14 T232 14 T296 14"
                           fill="none"
                           stroke="currentColor"
@@ -943,153 +1065,292 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                         />
                       </svg>
                     </span>
-                    <span className="text-[#A560E8] dark:text-[#A560E8]">.</span>
                   </span>
                 </h1>
 
-                {/* SUBHEADLINE — covers BOTH products in parallel:
-                    1) the essay analyzer ("professor-style feedback")
-                    2) the study tools ("7 study tools built from your notes").
-                    Bolded nouns let it scan in under a second. */}
-                {/* Subheading. Mobile gets a tighter version (no "built from
-                    your notes") so it lands cleanly on 2 lines instead of 3.
-                    Desktop keeps the longer wording where it has the room. */}
-                <p className="mb-6 sm:mb-9 max-w-[min(24rem,calc(100vw-2rem))] sm:max-w-lg mx-auto text-[0.95rem] sm:text-[1rem] text-stone-700 dark:text-stone-300 leading-relaxed opacity-0 animate-hero-stagger-2">
-                  <span className="font-bold text-stone-900 dark:text-stone-50">Professor-style essay feedback</span> + <span className="font-bold text-stone-900 dark:text-stone-50">7 AI study tools</span><span className="hidden sm:inline"> built from your notes</span>. Designed to get you A's on essays AND exams.
-                </p>
-
-                {/* MOBILE-ONLY hero demo video — sits between the subheading
-                    and the CTAs so users see the product before deciding to
-                    sign up. Replaces the floating PiP on phones. Softer
-                    purple ring (10% opacity, smaller blur) than the original
-                    so it doesn't compete with the actual video frame. The
-                    dance mascot peeks over the top-right corner — moved from
-                    its old spot above the H1 (gave that area back to the
-                    headline). */}
-                <div className="md:hidden mb-6 w-full max-w-sm mx-auto">
-                  <div className="relative">
-                    <div className="absolute -inset-1.5 bg-[#A560E8]/10 rounded-3xl blur-xl opacity-50" aria-hidden />
-                    <div className="relative rounded-2xl overflow-hidden border-2 border-b-4 border-[#8A48C7]/60 shadow-md bg-white dark:bg-stone-900">
-                      <video
-                        src="/hero-vid.mp4"
-                        poster="/hero-vid-poster.jpg"
-                        autoPlay
-                        muted
-                        loop
-                        playsInline
-                        preload="metadata"
-                        aria-label="WriteScholar walkthrough: a quick screen recording of the full product"
-                        className="w-full h-auto block"
-                      />
-                    </div>
-                    {/* Brand logo (main-logo.png) peeking over the top-LEFT
-                        corner of the video — replaces the dance mascot per
-                        user feedback. Same overlap trick (negative top/left)
-                        so it "perches" on the corner rather than floating
-                        above. Logo carries the WriteScholar brand mark
-                        directly into the hero proof point. */}
-                    <img
-                      src="/main-logo.png"
-                      alt=""
-                      aria-hidden
-                      loading="lazy"
-                      decoding="async"
-                      className="pointer-events-none absolute -top-6 -left-3 w-16 h-auto z-30 drop-shadow-[0_14px_28px_rgba(124,58,237,0.35)] motion-safe:animate-mobile-mascot-bob"
-                    />
-                  </div>
-                </div>
-
-                {/* PRIMARY + LOGIN CTAs — the primary "Start free" CTA is now
-                    a custom-designed PNG (cta-button-hero.png, 1920x400 with
-                    alpha) wrapped in a button so it stays keyboard-accessible
-                    and screen-reader friendly. The smaller "Log in" outline
-                    button stays as a coded button so the visual hierarchy
-                    still clearly favours signup. Stacked on mobile, side by
-                    side on sm+. */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 w-full max-w-md sm:max-w-lg mx-auto mb-3 sm:mb-4 opacity-0 animate-hero-stagger-4">
+                {/* ─── CTA + LOGIN ROW ─────────────────────────────────
+                    Primary CTA is now a hand-built Duolingo-style GREEN
+                    button (#58CC02) so it pops against the purple hero —
+                    green/purple is the highest-contrast brand pair on the
+                    site and it visually pairs with the green "A" pill in
+                    the headline, completing the "B → A" story. Replaces
+                    the previous purple-mascot PNG which blended into the
+                    purple background.
+                    Secondary white "Log in" button keeps its Duolingo
+                    structure (2px border + 4px bottom-border lip). On
+                    mobile they stack; on sm+ they sit side by side. */}
+                <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
                   <button
                     type="button"
                     onClick={() => onNavigate('signup')}
                     aria-label="Start free, get the A"
-                    className="group/btn flex-1 transition-transform duration-200 hover:-translate-y-0.5 active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#A560E8]/40 rounded-2xl"
+                    className="group/btn inline-flex items-center justify-center px-7 py-3.5 sm:px-8 sm:py-4 lg:px-9 lg:py-[18px] rounded-2xl bg-[#58CC02] hover:bg-[#61E002] text-white font-extrabold text-base sm:text-[17px] lg:text-lg border-2 border-b-4 border-[#46A302] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 whitespace-nowrap shadow-[0_8px_28px_-6px_rgba(88,204,2,0.55)] hover:shadow-[0_12px_36px_-6px_rgba(88,204,2,0.75)]"
+                    style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                   >
-                    {/* Subtle drop-shadow on hover only — follows the alpha
-                        shape of the PNG (silhouette glow, not rectangular
-                        box). Matches the rest of the site's "soft purple
-                        accent" treatment rather than a heavy neon halo. */}
-                    <img
-                      src="/cta-button-hero.png"
-                      alt=""
-                      className="w-full h-auto block transition-[filter] duration-300 ease-out group-hover/btn:[filter:drop-shadow(0_4px_14px_rgba(165,96,232,0.25))]"
-                      loading="eager"
-                      fetchPriority="high"
-                    />
+                    Get started today
+                    <svg className="ml-2 w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 group-hover/btn:translate-x-1" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
                   </button>
+
                   <button
                     type="button"
                     onClick={() => onNavigate('login')}
-                    className="inline-flex items-center justify-center px-6 py-3.5 sm:px-7 sm:py-4 bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-200 font-extrabold rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800 hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all text-[1rem] sm:text-[1.05rem] tracking-wide"
+                    aria-label="Log in to WriteScholar"
+                    className="inline-flex items-center justify-center px-7 py-3.5 sm:px-8 sm:py-4 lg:px-9 lg:py-[18px] rounded-2xl bg-white text-[#6B27A3] font-extrabold text-base sm:text-[17px] lg:text-lg border-2 border-b-4 border-stone-300 hover:bg-stone-50 hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 whitespace-nowrap shadow-[0_8px_28px_-6px_rgba(255,255,255,0.30)]"
+                    style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                   >
                     Log in
+                    <svg className="ml-1.5 w-4 h-4" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
                   </button>
                 </div>
 
-                {/* RISK REVERSAL — single one-liner that captures the time
-                    cost ("30 seconds") + the price barrier ("no payment").
-                    Replaces the longer 3-pill row to reduce visual noise
-                    without losing the trust signal. */}
-                <p className="mb-5 sm:mb-6 text-center text-[13px] sm:text-sm text-stone-500 dark:text-stone-400 opacity-0 animate-hero-stagger-5">
+                {/* Reassurance line below the CTA row — tells visitors
+                    the action is fast + free of payment friction. White
+                    text reads cleanly on the purple hero bg. */}
+                <p className="mt-3 sm:mt-4 text-xs sm:text-sm font-semibold text-white/85">
                   About 30 seconds to get started. No payment today.
                 </p>
 
-                {/* TRUST PILL — circular user-icon avatar + "Trusted by
-                    50,000+ students worldwide". Sits below the risk reversal
-                    line so the conversion-critical CTA + risk signal come
-                    first, then social proof reinforces. */}
-                <div className="inline-flex items-center gap-2.5 rounded-full border border-stone-200/80 dark:border-stone-700/60 bg-white dark:bg-stone-800/80 pl-1.5 pr-4 py-1 shadow-sm opacity-0 animate-hero-trust-pop">
-                  <span
-                    className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-[#DDF4FF] dark:bg-[#1CB0F6]/20"
-                    aria-hidden
-                  >
-                    <svg className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-[#1CB0F6]" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
-                    </svg>
-                  </span>
-                  <span className="text-[12px] sm:text-[14px] font-bold text-stone-800 dark:text-stone-100">
-                    Trusted by <span className="font-extrabold text-[#1CB0F6] dark:text-[#1CB0F6] tabular-nums">50,000+</span> students worldwide
-                  </span>
+                {/* ─── MOBILE TILE GRID — 3×2, md:hidden ─────────────────
+                    On phones the desktop scatter would overlap the H1,
+                    so we instead show all 6 tiles as a compact 3-col
+                    grid right under the CTA button (user explicit brief:
+                    "on mobile I want all six of them quite small
+                    underneath the h1"). Same brand-colour borders + same
+                    16:10 aspect as desktop, just smaller widths. */}
+                <div className="md:hidden mt-10 grid grid-cols-3 gap-2.5 w-full max-w-[20rem] mx-auto">
+                  {[
+                    { label: 'Essay', src: '/rubric-and-notes.png', isImg: true, color: '#FFC800' },
+                    { label: 'Flashcards', src: '/hero-flashcards.mp4', isImg: false, color: '#FFC800' },
+                    { label: 'Quiz', src: '/hero-quiz.mp4', isImg: false, color: '#FFC800' },
+                    { label: 'Crater Blast Game', src: '/writescholar-crater-blast-demo.mp4', isImg: false, color: '#FFC800' },
+                    { label: 'Word Tower Game', src: '/hero-word-tower.mp4', isImg: false, color: '#FFC800' },
+                    { label: 'Word Blitz Game', src: '/hero-word-blitz.mp4', isImg: false, color: '#FFC800' },
+                  ].map((t) => (
+                    <div
+                      key={t.label}
+                      className="rounded-xl overflow-hidden border-2 border-b-[3px] bg-white shadow-[0_10px_22px_-8px_rgba(0,0,0,0.35)]"
+                      style={{ borderColor: t.color }}
+                    >
+                      <div className="relative aspect-[16/10] w-full bg-stone-100">
+                        {t.isImg ? (
+                          <img src={t.src} alt="" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover object-top" />
+                        ) : (
+                          <video src={t.src} autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
+                        )}
+                      </div>
+                      <p
+                        className="px-1 py-0.5 text-center text-[8px] font-extrabold text-stone-800 bg-white border-t"
+                        style={{ borderColor: `${t.color}66` }}
+                      >
+                        {t.label}
+                      </p>
+                    </div>
+                  ))}
                 </div>
-                </div>
-              </div>
-              </div>
-                {/* RIGHT COLUMN — AFTER essay preview card. Shows the
-                    polished revision with green strengths-highlighted, scoring
-                    A (90/100). Visually completes the BEFORE → AFTER story
-                    that flanks the center hero content. */}
-                <aside
-                  className="hidden lg:flex justify-center"
-                  aria-label="After essay preview"
+
+                {/* "Plus many more to choose from" — mobile-only teaser
+                    line sitting right below the 3×2 tile grid, signalling
+                    to phone visitors that the six tiles above are just a
+                    sample of the full toolkit. Hidden at md+ where the
+                    desktop scatter already implies abundance. Tapping it
+                    routes to signup so it doubles as a soft secondary
+                    CTA. */}
+                <button
+                  type="button"
+                  onClick={() => onNavigate('signup')}
+                  className="md:hidden mt-4 mx-auto block text-xs sm:text-sm text-white/85 font-semibold tracking-wide hover:text-white transition-colors"
                 >
-                  <div className="w-full max-w-[260px] rounded-2xl border-2 border-b-4 border-[#58CC02]/60 dark:border-[#58CC02]/40 bg-white dark:bg-stone-900/50 p-1 transition-all duration-300 hover:border-[#58CC02] dark:hover:border-[#58CC02]/60">
-                    <p className="text-[10px] font-bold uppercase tracking-wide text-[#58CC02] dark:text-[#58CC02] text-center mb-1.5">After</p>
-                    <HeroEssayPreviewCard
-                      paper={DEMO_HERO_AFTER_PAPER}
-                      rotate="none"
-                      variant="after"
-                      maxExcerptChars={720}
-                      onOpenDemo={scrollToInteractiveDemoFeedback}
-                    />
-                  </div>
-                </aside>
+                  Plus many more to choose from{' '}
+                  <span aria-hidden className="inline-block ml-0.5">&rarr;</span>
+                </button>
               </div>
 
-              {/* Analysis preview — pushed higher up since the intro
-                  header (eyebrow + h2 + subhead) was removed. The analyzer
-                  demo now sits directly under the hero. */}
+              {/* ─── FEATURE ICONS ROW — bottom of hero (Knowunity-style)
+                  Each entry is a custom SVG illustration (NOT a generic
+                  emoji) with the label sitting directly underneath. No
+                  border, no background — pure icon + text floating on
+                  the purple field. Custom-drawn so the hero feels unique
+                  to WriteScholar instead of generic, per user brief. */}
+              <div className="relative z-10 w-full max-w-5xl mx-auto mt-6 sm:mt-7 lg:mt-28 pb-2 px-4">
+                <div className="flex flex-wrap items-start justify-center gap-x-5 gap-y-4 sm:gap-x-8 sm:gap-y-5">
+                  {[
+                    {
+                      label: 'Essay Analyzer',
+                      svg: (
+                        // FLAT-SOLID: RED document silhouette with folded
+                        // corner + crisp white ruled lines + bold white check
+                        // mark (Knowunity-standard: one solid colour shape,
+                        // simple white interior details, no outlines).
+                        <svg viewBox="0 0 64 64" fill="none" aria-hidden>
+                          <path d="M14 6 Q12 6 12 8 L12 56 Q12 58 14 58 L50 58 Q52 58 52 56 L52 22 L36 6 Z" fill="#FF4B4B" />
+                          <path d="M36 6 L52 22 L38 22 Q36 22 36 20 Z" fill="#C13030" />
+                          <rect x="20" y="30" width="22" height="3" rx="1.5" fill="white" />
+                          <rect x="20" y="37" width="18" height="3" rx="1.5" fill="white" opacity="0.7" />
+                          <path d="M22 48 L28 54 L40 41" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      ),
+                    },
+                    {
+                      label: 'Study Pack',
+                      svg: (
+                        // FLAT-SOLID: three orange books stacked, white spine
+                        // lines as the only inner detail.
+                        <svg viewBox="0 0 64 64" fill="none" aria-hidden>
+                          <rect x="6" y="44" width="52" height="14" rx="3" fill="#FF9600" />
+                          <rect x="14" y="44" width="3" height="14" fill="white" opacity="0.65" />
+                          <rect x="10" y="28" width="44" height="14" rx="3" fill="#FF9600" />
+                          <rect x="18" y="28" width="3" height="14" fill="white" opacity="0.65" />
+                          <rect x="14" y="12" width="36" height="14" rx="3" fill="#FF9600" />
+                          <rect x="22" y="12" width="3" height="14" fill="white" opacity="0.65" />
+                          <path d="M44 8 L45 11 L48 12 L45 13 L44 16 L43 13 L40 12 L43 11 Z" fill="#FFC800" />
+                        </svg>
+                      ),
+                    },
+                    {
+                      label: 'Citations',
+                      svg: (
+                        // FLAT-SOLID: two BLUE quotation-mark blobs — the
+                        // universal "this is a cited source" pictogram.
+                        <svg viewBox="0 0 64 64" fill="none" aria-hidden>
+                          <path d="M10 18 Q10 12 16 12 L24 12 Q28 12 28 16 L28 32 Q28 44 16 50 Q12 50 12 46 Q12 44 14 42 Q20 38 20 32 L16 32 Q10 32 10 26 Z" fill="#1CB0F6" />
+                          <path d="M36 18 Q36 12 42 12 L50 12 Q54 12 54 16 L54 32 Q54 44 42 50 Q38 50 38 46 Q38 44 40 42 Q46 38 46 32 L42 32 Q36 32 36 26 Z" fill="#1CB0F6" />
+                        </svg>
+                      ),
+                    },
+                    {
+                      label: 'Quizzes',
+                      svg: (
+                        // FLAT-SOLID: chunky pink question mark — silhouette
+                        // only, no outline, no badge. The single sparkle
+                        // accent stays as a tiny gold flourish.
+                        <svg viewBox="0 0 64 64" fill="none" aria-hidden>
+                          <path d="M20 22 Q20 8 32 8 Q44 8 44 22 Q44 30 32 34 L32 44" stroke="#FF4B82" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                          <circle cx="32" cy="55" r="5.5" fill="#FF4B82" />
+                          <path d="M52 10 L53.5 13 L56.5 14.5 L53.5 16 L52 19 L50.5 16 L47.5 14.5 L50.5 13 Z" fill="#FFC800" />
+                        </svg>
+                      ),
+                    },
+                    {
+                      label: 'Flashcards',
+                      svg: (
+                        // FLAT-SOLID: two YELLOW cards (back tilted, front
+                        // bold) with white text bars. No outlines.
+                        <svg viewBox="0 0 64 64" fill="none" aria-hidden>
+                          <rect x="20" y="14" width="34" height="42" rx="5" fill="#FFC800" opacity="0.55" transform="rotate(10 37 35)" />
+                          <rect x="10" y="10" width="34" height="42" rx="5" fill="#FFC800" />
+                          <rect x="16" y="20" width="22" height="3.5" rx="1.5" fill="white" />
+                          <rect x="16" y="28" width="18" height="3" rx="1.5" fill="white" opacity="0.75" />
+                          <rect x="16" y="35" width="20" height="3" rx="1.5" fill="white" opacity="0.75" />
+                          <rect x="16" y="42" width="14" height="3" rx="1.5" fill="white" opacity="0.75" />
+                        </svg>
+                      ),
+                    },
+                    {
+                      label: 'Games',
+                      svg: (
+                        // FLAT-SOLID: green gamepad silhouette. Top now has
+                        // two raised shoulder humps (where L/R bumpers sit
+                        // on a real controller) with a gentle center dip
+                        // between them — replaces the previous flat top.
+                        // D-pad + 4 white buttons stay the same.
+                        <svg viewBox="0 0 64 64" fill="none" aria-hidden>
+                          <path d="M14 22 Q6 22 6 30 L6 44 Q6 56 18 56 Q23 56 26 50 L28 46 L36 46 L38 50 Q41 56 46 56 Q58 56 58 44 L58 30 Q58 22 50 22 Q46 17 40 21 Q36 24 32 24 Q28 24 24 21 Q18 17 14 22 Z" fill="#58CC02" />
+                          <rect x="14" y="32" width="12" height="3.5" rx="1.5" fill="white" />
+                          <rect x="18.25" y="27.75" width="3.5" height="12" rx="1.5" fill="white" />
+                          <circle cx="46" cy="30" r="3.2" fill="white" />
+                          <circle cx="52" cy="36" r="3.2" fill="white" />
+                          <circle cx="40" cy="36" r="3.2" fill="white" />
+                          <circle cx="46" cy="42" r="3.2" fill="white" />
+                        </svg>
+                      ),
+                    },
+                  ].map((f) => (
+                    <button
+                      key={f.label}
+                      type="button"
+                      onClick={() => onNavigate('signup')}
+                      className="group flex flex-col items-center gap-1.5 sm:gap-2 px-1 py-1 hover:-translate-y-1 transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 rounded-md"
+                    >
+                      <span
+                        aria-hidden
+                        className="block w-7 h-7 sm:w-8 sm:h-8 lg:w-10 lg:h-10 [filter:drop-shadow(0_6px_14px_rgba(0,0,0,0.30))] group-hover:[filter:drop-shadow(0_10px_18px_rgba(255,200,0,0.55))] transition-[filter] duration-300"
+                      >
+                        {f.svg}
+                      </span>
+                      <span className="text-[11px] sm:text-xs lg:text-sm font-bold text-white/90 group-hover:text-white whitespace-nowrap tracking-wide">
+                        {f.label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+              {/* Analysis preview — restored eyebrow + h2 + subhead
+                  block (was removed in the Knowunity hero rebuild). The
+                  copy is the same one shipped on the pre-rebuild landing
+                  (commit 4763c37), restyled to the current cream-section
+                  language. Two-line H1, paper-mascot floating to the
+                  left on lg+, and floating ✦/📝 sparkles in the corners
+                  on xl+ — restores the "Analyze papers" decorative feel
+                  from the older 4763c37 / aec4bd3 commits. */}
               <div
                 id="landing-tools"
-                className="w-full max-w-6xl mx-auto mt-6 sm:mt-8 lg:mt-10 scroll-mt-24 px-1.5 sm:px-2 lg:px-1"
+                className="relative w-full max-w-6xl mx-auto mt-10 sm:mt-14 lg:mt-16 scroll-mt-24 px-1.5 sm:px-2 lg:px-1"
               >
+                {/* Floating decorations — visible at xl+ only so they
+                    don't compete on smaller screens. Echoes commit
+                    4763c37 which had 📝 + ✨ in the same corners. */}
+                <div
+                  className="hidden xl:block pointer-events-none absolute top-[2%] left-[3%] text-4xl opacity-40 motion-safe:animate-[hero-tile-drift_5s_ease-in-out_infinite]"
+                  aria-hidden
+                >📝</div>
+                <div
+                  className="hidden xl:block pointer-events-none absolute top-[8%] right-[4%] text-3xl opacity-35 motion-safe:animate-[hero-tile-drift_6s_ease-in-out_infinite]"
+                  style={{ animationDelay: '1.4s' }}
+                  aria-hidden
+                >✨</div>
+
+                <div className="relative text-center max-w-[34rem] lg:max-w-[40rem] xl:max-w-[46rem] mx-auto mb-8 sm:mb-10 lg:mb-12 px-2">
+                  {/* Paper-themed mascot — gently floats on lg+. Now
+                      positioned ABSOLUTELY to the LEFT of the heading
+                      block so it doesn't push the centered text off-
+                      centre. Hidden on smaller screens. */}
+                  <img
+                    src="/mascot-paper.webp"
+                    alt=""
+                    aria-hidden
+                    loading="lazy"
+                    decoding="async"
+                    className="hidden lg:block absolute right-full top-1/2 -translate-y-1/2 mr-6 w-24 xl:w-28 h-auto shrink-0 motion-safe:animate-[hero-tile-drift_4.5s_ease-in-out_infinite] [filter:drop-shadow(0_14px_24px_rgba(165,96,232,0.30))]"
+                  />
+
+                  <span className="inline-flex items-center gap-2 rounded-full border-2 border-[#E5E5E5] dark:border-stone-700 bg-white/80 dark:bg-stone-900/70 backdrop-blur px-3.5 py-1.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.2em] text-[#A560E8] dark:text-[#A560E8] mb-4">
+                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+                      <path d="M9 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H5a1 1 0 110-2h2V6.477L5.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 014 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L8 4.323V3a1 1 0 011-1z" />
+                    </svg>
+                    Feedback that grades like a professor
+                  </span>
+                  {/* Explicit 2-line layout — each phrase on its own
+                      block element so the wrap is predictable on any
+                      viewport instead of relying on the browser to
+                      choose the right break point. */}
+                  <h2
+                    className="text-2xl sm:text-3xl lg:text-[2.4rem] xl:text-[2.65rem] font-extrabold text-stone-900 dark:text-stone-50 tracking-tight leading-[1.05]"
+                    style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+                  >
+                    <span className="block">Analyze papers with feedback</span>
+                    <span className="block mt-1 sm:mt-1.5 text-[#A560E8] dark:text-[#A560E8]">that thinks like a professor</span>
+                  </h2>
+                  <p className="mt-3 sm:mt-4 text-sm sm:text-base lg:text-lg text-stone-600 dark:text-stone-400 leading-relaxed max-w-2xl mx-auto">
+                    Drop in your essay or paper. Our AI grades structure, clarity, and citations with actionable feedback.
+                  </p>
+                </div>
+
                 <div className="relative rounded-2xl sm:rounded-3xl border border-stone-200/70 dark:border-stone-700/60 bg-white/95 dark:bg-stone-900/80 shadow-[0_28px_72px_-28px_rgba(15,23,42,0.16)] dark:shadow-[0_36px_90px_-32px_rgba(0,0,0,0.55)]">
                   <InteractiveDocumentAnalysis onNavigate={onNavigate} landingHeroEmbed />
                 </div>
@@ -1201,18 +1462,18 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   analysis and study tools into one mental model. Sits AFTER
                   the live analyzer demo so visitors first see the product in
                   action, then understand the mental model. ─── */}
-              <div className="relative w-full max-w-7xl mx-auto mt-6 sm:mt-8 lg:mt-10 px-1 sm:px-2 lg:px-4">
-                <div className="pointer-events-none absolute -top-8 left-[6%] w-32 h-32 rounded-full bg-[#1CB0F6]/15 dark:bg-[#1CB0F6]/12 blur-3xl" aria-hidden />
-                <div className="pointer-events-none absolute -bottom-4 right-[8%] w-36 h-36 rounded-full bg-[#58CC02]/15 dark:bg-[#58CC02]/12 blur-3xl" aria-hidden />
+              <div className="relative w-full max-w-7xl mx-auto mt-12 sm:mt-16 lg:mt-24 pb-16 sm:pb-20 lg:pb-28 px-1 sm:px-2 lg:px-4">
+                <div className="pointer-events-none absolute -top-8 left-[6%] w-32 h-32 rounded-full bg-[#A560E8]/15 dark:bg-[#A560E8]/12 blur-3xl" aria-hidden />
+                <div className="pointer-events-none absolute -bottom-4 right-[8%] w-36 h-36 rounded-full bg-[#FFC800]/15 dark:bg-[#FFC800]/12 blur-3xl" aria-hidden />
 
                 <LandingScrollReveal>
-                  <div className="relative text-center mb-8 sm:mb-10 max-w-2xl mx-auto">
+                  <div className="relative text-center mb-10 sm:mb-12 lg:mb-14 max-w-2xl mx-auto">
                     <h2
                       className="text-2xl sm:text-3xl lg:text-[2.4rem] font-extrabold text-stone-900 dark:text-stone-50 tracking-tight leading-[1.05]"
                       style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                     >
                       Drop in your work.{' '}
-                      <span className="text-[#58CC02] dark:text-[#58CC02]">We do the rest.</span>
+                      <span className="text-[#A560E8] dark:text-[#A560E8]">We do the rest.</span>
                     </h2>
                     <p className="mt-2 text-sm sm:text-base text-stone-600 dark:text-stone-400">
                       One paste. Three steps. Better grades.
@@ -2758,16 +3019,21 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           would dominate the viewport. */}
       {!pipDismissed && pipVisible && (
         <div
+          ref={pipRef}
           role="region"
-          aria-label="Product demo video"
-          className={`fixed z-[60] transition-all duration-500 ease-out hidden md:block
+          aria-label="Product demo video — drag the title bar to move"
+          className={`fixed z-[60] hidden md:block ${pipDragging ? '' : 'transition-all duration-500 ease-out'}
             ${pipVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}
-            ${pipExpanded
-              ? 'bottom-4 right-4 left-4 sm:left-auto sm:bottom-6 sm:right-6 w-auto sm:w-[480px] lg:w-[560px]'
-              : 'bottom-4 right-4 sm:bottom-6 sm:right-6 w-[280px] sm:w-[320px]'}
+            ${pipExpanded ? 'w-[380px] lg:w-[440px]' : 'w-[240px]'}
+            ${pipPos ? '' : 'bottom-6 right-6'}
           `}
           style={{
-            animation: 'pipSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            // Once the user starts dragging, lock to inline coords (top/left)
+            // and override the bottom/right anchors from Tailwind classes.
+            ...(pipPos
+              ? { top: pipPos.y, left: pipPos.x, bottom: 'auto', right: 'auto' }
+              : {}),
+            animation: pipPos ? undefined : 'pipSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
           }}
         >
           {/* Soft glow ring behind the card for that "premium product demo" feel */}
@@ -2777,8 +3043,17 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           />
 
           <div className="relative rounded-2xl overflow-hidden border-2 border-b-4 border-[#8A48C7] dark:border-[#8A48C7] shadow-2xl bg-white dark:bg-stone-900 backdrop-blur">
-            {/* Top chrome bar — gradient with live-dot, title, and controls */}
-            <div className="relative flex items-center justify-between px-3 py-2 bg-gradient-to-r from-[#A560E8] via-[#9B55E0] to-[#8A48C7]">
+            {/* Top chrome bar — gradient with live-dot, title, and controls.
+                Doubles as the drag handle: grab anywhere on this bar (except
+                the buttons) to move the PiP around the viewport. */}
+            <div
+              className={`relative flex items-center justify-between px-3 py-2 bg-gradient-to-r from-[#A560E8] via-[#9B55E0] to-[#8A48C7] select-none ${pipDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+              onMouseDown={(e) => handlePipDragStart(e.clientX, e.clientY, e)}
+              onTouchStart={(e) => {
+                if (e.touches[0]) handlePipDragStart(e.touches[0].clientX, e.touches[0].clientY, e);
+              }}
+              title="Drag to move"
+            >
               <div className="flex items-center gap-2 min-w-0">
                 <span className="relative flex h-2 w-2 shrink-0" aria-hidden>
                   <span className="absolute inline-flex h-full w-full rounded-full bg-[#FF4B4B] opacity-75 motion-safe:animate-ping" />
@@ -2860,7 +3135,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               onClick={() => onNavigate('signup')}
               className="group/pipcta relative w-full flex items-center justify-center gap-1.5 px-3 py-2.5 bg-gradient-to-r from-[#FFF4E0] via-white to-[#DDF4FF] dark:from-stone-800 dark:via-stone-900 dark:to-stone-800 text-[#3C3C3C] dark:text-stone-100 text-[12px] sm:text-[13px] font-extrabold border-t-2 border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800 active:translate-y-[1px] transition-all"
             >
-              <span>Start free — get the A</span>
+              <span>Get started today</span>
               <svg className="w-4 h-4 text-[#A560E8] group-hover/pipcta:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>

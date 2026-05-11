@@ -57,7 +57,7 @@ const UnsubscribePage = ({ onNavigate }: UnsubscribePageProps) => {
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col overflow-x-hidden">
+    <div className="relative min-h-screen flex flex-col overflow-x-clip">
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       {/* Navigation */}
       <nav className="relative z-10 flex items-center justify-between px-2 sm:px-8 md:px-16 py-4 sm:py-6 backdrop-blur-sm bg-white/80 border-b border-white/20">

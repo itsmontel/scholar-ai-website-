@@ -99,7 +99,7 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
 
   return (
     <>
-      <main className="min-h-screen font-sans overflow-x-hidden transition-colors" role="main">
+      <main className="min-h-screen font-sans overflow-x-clip transition-colors" role="main">
         <Header onNavigate={onNavigate} user={user} onLogout={onLogout} sticky />
 
         {/* ══════════════════════════════════════════ */}

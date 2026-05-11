@@ -19,7 +19,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
   ];
 
   return (
-    <div className="min-h-screen relative transition-colors font-sans overflow-x-hidden">
+    <div className="min-h-screen relative transition-colors font-sans overflow-x-clip">
       <WriteScholarEditorialBackgroundLayers position="fixed" />
 
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="about" />

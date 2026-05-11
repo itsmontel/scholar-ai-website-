@@ -1821,7 +1821,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
   };
 
   return (
-    <div className="min-h-screen relative transition-colors font-sans overflow-x-hidden">
+    <div className="min-h-screen relative transition-colors font-sans overflow-x-clip">
       <WriteScholarEditorialBackgroundLayers position="fixed" />
 
       <div
@@ -1896,7 +1896,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
       )}
 
       {/* Main Content — Duolingo-style 3-column layout (left nav from Header + center + right sidebar) */}
-      <main className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6 pb-28 sm:pb-16 w-full min-w-0 overflow-x-hidden lg:ml-24 lg:mr-auto">
+      <main className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6 pb-28 sm:pb-16 w-full min-w-0 overflow-x-clip lg:ml-24 lg:mr-auto">
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-5 lg:gap-7 items-start">
         {/* ═══════════════════════════════════════════════════════════════════
             CENTER COLUMN — main content

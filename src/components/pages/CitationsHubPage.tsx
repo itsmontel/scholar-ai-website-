@@ -107,7 +107,7 @@ const CitationsHubPage: React.FC<CitationsHubPageProps> = ({ onNavigate, user, o
   });
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#FAFAFA] dark:bg-stone-950">
+    <div className="relative min-h-screen overflow-x-clip bg-[#FAFAFA] dark:bg-stone-950">
       <Header onNavigate={onNavigate} user={user as User} onLogout={onLogout} currentPage="citations" />
       <FeatureHub
         title="Citations"

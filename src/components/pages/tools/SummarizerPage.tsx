@@ -225,7 +225,7 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
 
   if (showFakeAnimation) {
     return (
-      <div className="relative min-h-screen flex flex-col overflow-x-hidden">
+      <div className="relative min-h-screen flex flex-col overflow-x-clip">
         <WriteScholarEditorialBackgroundLayers position="fixed" />
         <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="summarizer" />
         <main className="flex-1 flex items-center justify-center">
@@ -241,7 +241,7 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
 
   if (showSignupPrompt) {
     return (
-      <div className="relative min-h-screen flex flex-col overflow-x-hidden">
+      <div className="relative min-h-screen flex flex-col overflow-x-clip">
         <WriteScholarEditorialBackgroundLayers position="fixed" />
         <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="summarizer" />
         <main className="flex-1 flex items-center justify-center px-4">
@@ -279,11 +279,11 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
   }
 
   return (
-    <div className="relative min-h-screen flex flex-col overflow-x-hidden" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+    <div className="relative min-h-screen flex flex-col overflow-x-clip" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="summarizer" />
 
-      <main className="flex-1 w-full min-w-0 overflow-x-hidden">
+      <main className="flex-1 w-full min-w-0 overflow-x-clip">
         {/* Hero Section */}
         <div className="pt-6 sm:pt-10 pb-4 sm:pb-8 px-3 sm:px-6 lg:px-8">
           <div className="max-w-5xl mx-auto">
