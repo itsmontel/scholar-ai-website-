@@ -2,13 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
 import AnalysisAnimation from '../common/AnalysisAnimation';
+import { BulletproofAPI } from '../../config/api';
+import { trackEvent } from '../../utils/analytics';
 import {
   AnalysisPreviewSection,
   StudyPackPreviewSection,
   CitationsPreviewSection,
 } from '../common/PreviewSections';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 /**
  * Mobile dashboard — the chunky-card design with paste textarea + upload
@@ -226,14 +226,19 @@ const MobileDashboard = ({
     'Loading';
 
   /**
-   * Run the active tool's API call directly from the dashboard, then navigate
-   * to its results page on success. Matches desktop's pattern: the loading
-   * animation lives on the dashboard, the results page only shows results.
+   * Run the active tool's API call from the dashboard with the same
+   * bulletproof retry mechanics the desktop tool pages use:
+   *   - BulletproofAPI.post: 6 retries + exponential backoff + 30s timeout
+   *     per attempt + automatic 429 backoff
+   *   - Auth checks that match StudyPackPage / CitationsPage exactly
+   *   - Body shapes copied verbatim from the desktop page handlers
+   *   - Viewer chunk preload so the results page loads instantly
+   *   - sessionStorage backup of the input so the viewer can reread it
+   *   - trackEvent calls so funnel analytics see the mobile path
    *
-   * For analyze specifically the analysis API runs on AnalysisPage itself
-   * (it needs the user's citation/grading style picks), so we save the text
-   * and navigate. The animation still shows briefly so the user knows their
-   * tap was registered before the page transitions.
+   * For analyze, the actual analyze API runs on AnalysisPage itself
+   * (it needs citation/grading style picks). Mobile saves the text and
+   * navigates with a loading animation so the user knows the tap registered.
    */
   const handleSubmit = async () => {
     setSubmitError(null);
@@ -243,15 +248,20 @@ const MobileDashboard = ({
       return;
     }
 
-    // ANALYZE — defer to AnalysisPage which has the analyze API + results UI.
-    // Mobile shows a brief loading animation so the tap registers visibly.
+    // ────────── ANALYZE ──────────
+    // Defer to AnalysisPage (it owns the analyze API + the full results UI).
+    // Mobile shows a brief loading animation so the tap visibly registers.
     if (activeTool.id === 'analyze') {
-      if (!draftText.trim() || draftText.trim().split(/\s+/).filter(Boolean).length < 50) {
+      const wc = draftText.trim().split(/\s+/).filter(Boolean).length;
+      if (wc < 50) {
         setSubmitError('Please paste at least 50 words to analyze.');
         return;
       }
       setIsSubmitting(true);
       try { localStorage.setItem('textAnalysisContent', draftText); } catch { /* ignore */ }
+      trackEvent('dashboard_analyze_text_start', { source: 'mobile_dashboard' });
+      // Pre-warm the analysis page chunk so the navigation feels instant
+      import('./AnalysisPage').catch(() => { /* ignore preload failure */ });
       setTimeout(() => {
         setIsSubmitting(false);
         setSubmitComplete(true);
@@ -263,39 +273,55 @@ const MobileDashboard = ({
       return;
     }
 
+    // ────────── AUTH ──────────
+    // Match the desktop page handlers exactly: prompt login if not signed in.
     const token = (() => {
       try { return localStorage.getItem('authToken'); } catch { return null; }
     })();
-
+    if (!user) {
+      onNavigate('signup');
+      return;
+    }
     if (!token) {
       onNavigate('login');
       return;
     }
 
-    // CITATIONS — POST /analysis/citation-search, then navigate to results.
+    // ────────── CITATIONS ──────────
+    // Mirror of CitationsPage.handleSubmit. Same body shape, same success
+    // handling. Now uses BulletproofAPI.post for retry resilience.
     if (activeTool.id === 'citations') {
       if (!draftText.trim()) {
         setSubmitError('Please enter a research topic.');
         return;
       }
       setIsSubmitting(true);
+      // Pre-warm the citation-results chunk so it appears instantly on success
+      import('./CitationResultsPage').catch(() => { /* ignore */ });
+      // Backup the typed topic in sessionStorage so the results page can
+      // re-render the user's original query if needed
+      try { sessionStorage.setItem('writescholar_citations_draft', draftText); } catch { /* ignore */ }
       try {
-        const res = await fetch(`${API_URL}/analysis/citation-search`, {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
+        const res = await BulletproofAPI.post(
+          '/analysis/citation-search',
+          {
             researchTopic: draftText,
             citationStyle: 'APA',
             numberOfCitations: 10,
             minYear: null,
             yearRange: 'all',
-          }),
-        });
-        const data = await res.json();
-        if (!res.ok || !data?.success || !data?.data) {
-          throw new Error(data?.message || 'Citation search failed');
+          },
+          token
+        );
+        const data = await res.json().catch(() => ({} as any));
+        if (!res.ok) {
+          throw new Error(data?.message || `Citation search failed (${res.status})`);
+        }
+        if (!data?.success || !data?.data) {
+          throw new Error(data?.message || 'No citation results received');
         }
         try { localStorage.setItem('citationSearchResults', JSON.stringify(data.data)); } catch { /* ignore */ }
+        trackEvent('dashboard_citations_success', { source: 'mobile_dashboard' });
         setSubmitComplete(true);
         setTimeout(() => {
           setIsSubmitting(false);
@@ -303,15 +329,18 @@ const MobileDashboard = ({
           onNavigate('citation-results');
         }, 700);
       } catch (err: any) {
+        console.error('[MobileDashboard] Citations error:', err);
+        trackEvent('dashboard_citations_error', { source: 'mobile_dashboard', message: err?.message || 'unknown' });
         setIsSubmitting(false);
         setSubmitError(err?.message || 'Could not find citations. Please try again.');
       }
       return;
     }
 
-    // STUDY PACK — POST /analysis/generate-study-pack with the user's notes.
-    // Backend returns a generated pack object; we hand it off to the
-    // study-pack-viewer route via the studyPack navigate option.
+    // ────────── STUDY PACK ──────────
+    // Mirror of StudyPackPage.handleGenerateStudyPack. Body shape is { text }
+    // (NOT { content, sourceType } — that was the v5 bug that caused the
+    // "Load failed" error). Now uses BulletproofAPI.post for retry resilience.
     if (activeTool.id === 'study_pack') {
       const wc = draftText.trim().split(/\s+/).filter(Boolean).length;
       if (wc < 50) {
@@ -319,24 +348,35 @@ const MobileDashboard = ({
         return;
       }
       setIsSubmitting(true);
+      // Pre-warm the viewer chunk so the navigation feels instant
+      import('./StudyPackViewerPage').catch(() => { /* ignore */ });
+      // Backup input for the viewer to re-read if needed
+      try { sessionStorage.setItem('writescholar_dashboard_draft', draftText); } catch { /* ignore */ }
       try {
-        const res = await fetch(`${API_URL}/analysis/generate-study-pack`, {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ content: draftText, sourceType: 'text' }),
-        });
-        const data = await res.json();
-        if (!res.ok || !data?.success) {
-          throw new Error(data?.message || 'Study pack generation failed');
+        const res = await BulletproofAPI.post(
+          '/analysis/generate-study-pack',
+          { text: draftText },
+          token
+        );
+        const data = await res.json().catch(() => ({} as any));
+        if (!res.ok) {
+          throw new Error(data?.message || `Study pack failed (${res.status})`);
         }
+        const packTitle =
+          data?.data?.quiz?.title ||
+          data?.data?.flashcards?.title ||
+          data?.data?.lesson?.title ||
+          'Study Pack';
+        trackEvent('dashboard_study_pack_success', { source: 'mobile_dashboard' });
         setSubmitComplete(true);
         setTimeout(() => {
           setIsSubmitting(false);
           setSubmitComplete(false);
-          // Hand the generated pack to the viewer via nav options.
-          (onNavigate as any)('study-pack-viewer', undefined, { studyPack: { data: data.data, title: data?.data?.title } });
+          (onNavigate as any)('study-pack-viewer', undefined, { studyPack: { data: data.data, title: packTitle } });
         }, 700);
       } catch (err: any) {
+        console.error('[MobileDashboard] Study pack error:', err);
+        trackEvent('dashboard_study_pack_error', { source: 'mobile_dashboard', message: err?.message || 'unknown' });
         setIsSubmitting(false);
         setSubmitError(err?.message || 'Could not build study pack. Please try again.');
       }
