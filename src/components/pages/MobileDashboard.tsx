@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import Header from '../common/Header';
+import Footer from '../common/Footer';
+import {
+  AnalysisPreviewSection,
+  StudyPackPreviewSection,
+  CitationsPreviewSection,
+} from '../common/PreviewSections';
 
 /**
  * Mobile dashboard — a complete, from-scratch redesign that's separate
@@ -423,8 +429,51 @@ const MobileDashboard = ({
               {activeTool.submitLabel}
               <span className="text-base" aria-hidden>→</span>
             </button>
+
+            {/* "Or upload a file" alternate path for the two tools where
+                upload is the dominant input (essay grading and notes →
+                study pack). The full tool page has the real upload
+                UX (PDF / DOCX / TXT parsing); clicking here just routes
+                there with a sessionStorage marker so it can auto-open
+                the file picker on mount. Skipped for daily review (no
+                upload makes sense) and citations (search by topic, not
+                upload). */}
+            {(activeTool.id === 'analyze' || activeTool.id === 'study_pack') && (
+              <button
+                type="button"
+                onClick={() => {
+                  try { sessionStorage.setItem('writescholar_open_upload', activeTool.id); } catch { /* ignore */ }
+                  onNavigate(activeTool.submitPage);
+                }}
+                className="w-full mt-2.5 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl font-extrabold text-stone-700 dark:text-stone-200 bg-white dark:bg-stone-900 text-[14px] border-2 border-b-4 border-stone-200 dark:border-stone-700 active:translate-y-0.5 active:border-b-2 transition-transform"
+              >
+                <span aria-hidden>📎</span>
+                {activeTool.id === 'analyze' ? 'Or upload your essay' : 'Or upload your notes'}
+              </button>
+            )}
           </div>
         </div>
+
+        {/* ── PREVIEW SECTION — real screenshots of what the active
+            tool generates. Same components the desktop dashboard uses
+            in each tool hub, so users see "this is what I'll get"
+            before they commit. Skipped for daily review (already shows
+            a status card up top). */}
+        {activeTool.id === 'analyze' && (
+          <div className="mb-7">
+            <AnalysisPreviewSection embedded />
+          </div>
+        )}
+        {activeTool.id === 'study_pack' && (
+          <div className="mb-7">
+            <StudyPackPreviewSection embedded />
+          </div>
+        )}
+        {activeTool.id === 'citations' && (
+          <div className="mb-7">
+            <CitationsPreviewSection embedded />
+          </div>
+        )}
 
         {/* ── RECENT ACTIVITY — 3 items max ───────────────────── */}
         {recentItems.length > 0 && (
@@ -550,6 +599,8 @@ const MobileDashboard = ({
           </section>
         )}
       </main>
+
+      <Footer onNavigate={onNavigate} />
     </div>
   );
 };

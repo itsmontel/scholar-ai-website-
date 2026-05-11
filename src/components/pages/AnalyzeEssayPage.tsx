@@ -54,6 +54,20 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
     return () => clearInterval(interval);
   }, []);
 
+  /* If the user arrived from the mobile dashboard's "Upload essay" button,
+     sessionStorage has a marker telling us to auto-open the native file
+     picker on mount. Slight delay so layout settles + the input is mounted. */
+  useEffect(() => {
+    let flag: string | null = null;
+    try { flag = sessionStorage.getItem('writescholar_open_upload'); } catch { /* ignore */ }
+    if (flag !== 'analyze') return;
+    try { sessionStorage.removeItem('writescholar_open_upload'); } catch { /* ignore */ }
+    const t = setTimeout(() => {
+      analyzeFileInputRef.current?.click();
+    }, 200);
+    return () => clearTimeout(t);
+  }, []);
+
   const isTextValid = () => {
     if (user) return getWordCount(inputText) >= 200;
     return getWordCount(inputText) >= 200 || !!uploadedFileName;

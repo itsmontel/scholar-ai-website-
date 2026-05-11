@@ -91,6 +91,21 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
     return () => removeJsonLd('study-pack-page');
   }, [embedded]);
 
+  /* Auto-open the file picker when the user arrived here from the mobile
+     dashboard's "Upload your notes" button. The mobile dashboard sets a
+     sessionStorage marker; we clear it on detection so re-navigating
+     doesn't trigger the picker again. */
+  useEffect(() => {
+    let flag: string | null = null;
+    try { flag = sessionStorage.getItem('writescholar_open_upload'); } catch { /* ignore */ }
+    if (flag !== 'study_pack') return;
+    try { sessionStorage.removeItem('writescholar_open_upload'); } catch { /* ignore */ }
+    const t = setTimeout(() => {
+      studyToolsFileInputRef.current?.click();
+    }, 200);
+    return () => clearTimeout(t);
+  }, []);
+
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     if (!token) {
