@@ -598,9 +598,26 @@ const MobileDashboard = ({
               />
             )}
 
+            {/* Word count + Clear button row — only when there's text.
+                Clear wipes both the in-memory draft and the localStorage
+                backup so reopening the tool starts fresh. */}
             {activeTool.inputType === 'textarea' && draftText.trim().length > 0 && (
-              <div className="text-[11px] text-stone-400 mb-3 font-bold tabular-nums text-right">
-                {draftText.trim().split(/\s+/).filter(Boolean).length} words
+              <div className="flex items-center justify-between mb-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    persistDraft('');
+                    setUploadedFileName(null);
+                    setSubmitError(null);
+                  }}
+                  className="text-[12px] font-extrabold uppercase tracking-wider text-stone-500 hover:text-red-500 active:text-red-600 transition-colors inline-flex items-center gap-1"
+                  aria-label="Clear text"
+                >
+                  <span aria-hidden>✕</span> Clear
+                </button>
+                <span className="text-[11px] text-stone-400 font-bold tabular-nums">
+                  {draftText.trim().split(/\s+/).filter(Boolean).length} words
+                </span>
               </div>
             )}
 
