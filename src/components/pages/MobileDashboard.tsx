@@ -1,36 +1,37 @@
-import { useEffect, useRef, lazy, Suspense } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
+import AnalysisAnimation from '../common/AnalysisAnimation';
 import {
   AnalysisPreviewSection,
   StudyPackPreviewSection,
   CitationsPreviewSection,
 } from '../common/PreviewSections';
 
-/* The actual tool components, lazy-loaded so the dashboard doesn't pull
-   them all into the initial bundle. Each renders in embedded=true mode,
-   stripping its own Header/Footer so it slots cleanly inside the
-   MobileDashboard frame. */
-const AnalyzeEssayPage = lazy(() => import('./AnalyzeEssayPage'));
-const StudyPackPage = lazy(() => import('./StudyPackPage'));
-const CitationsPage = lazy(() => import('./CitationsPage'));
-const DailyReviewTab = lazy(() => import('./DailyReviewTab'));
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 /**
- * Mobile dashboard — a complete, from-scratch redesign that's separate
- * from the desktop dashboard. Desktop has level widgets, usage grids,
- * sidebar, hub cards. Mobile has:
+ * Mobile dashboard — the chunky-card design with paste textarea + upload
+ * button per tool, restored after a brief detour into embedding full tool
+ * pages (which the user did not want).
  *
- *   1. Compact greeting + streak chip
- *   2. 2×2 tool grid with "SMARTEST AI" / "MOST POPULAR" badges
- *   3. Inline tool form for the active tool (NO navigation away — submits
- *      to the full page only after the user clicks the action button)
- *   4. Compact recent activity (3 items max)
- *   5. Games row (3 small chunky cards)
- *   6. Quick tools row (citations, pomodoro, GPA, free tools)
- *   7. Upgrade nudge (free users only)
+ * Layout (top to bottom):
+ *   1. Greeting + streak chip
+ *   2. 2×2 tool grid (with SMARTEST AI / MOST POPULAR badges)
+ *   3. Active-tool form card — paste textarea OR daily-review status card,
+ *      + primary submit button, + secondary "Or upload" file picker
+ *   4. Preview screenshots of what the active tool generates
+ *   5. Recent activity (3 items max)
+ *   6. Games row (Crater Blast, Word Tower, Word Blitz)
+ *   7. Quick tools row (citation gen, pomodoro, GPA, all tools)
+ *   8. Upgrade nudge (free users only)
+ *   9. Site Footer
  *
- * Wired in by DashboardPageNew.tsx via md:hidden / hidden md:block toggle.
+ * IMPORTANT note about submit behavior:
+ *   Submit currently navigates to the full tool page (with the typed text
+ *   pre-filled via localStorage). True inline analysis on the dashboard
+ *   would require extracting the desktop dashboard's inline analyze logic
+ *   into a reusable component — a 2-3 hour refactor not yet done.
  */
 
 type DashboardTool = 'daily_review' | 'analyze' | 'citations' | 'study_pack' | 'more_tools';
@@ -59,29 +60,19 @@ interface ToolDef {
   id: DashboardTool;
   label: string;
   emoji: string;
-  /** Tag shown on the tool tile (e.g. SMARTEST AI, MOST POPULAR) */
   badge?: { text: string; bg: string; color: string };
   accent: string;
   accentBg: string;
   accentBorder: string;
-  /** Headline shown when the inline form is rendered */
   formTitle: string;
-  /** Subtitle shown above the form */
   formSub: string;
-  /** Placeholder text in the textarea/input */
   placeholder: string;
-  /** Button label that submits + navigates to the full tool */
   submitLabel: string;
-  /** Page name to navigate to on submit (full tool page handles the input) */
   submitPage: string;
-  /** localStorage key the full page reads to pre-fill the input */
   draftKey: string;
-  /** Use 'input' (single line) or 'textarea' (multiline) */
   inputType: 'input' | 'textarea';
 }
 
-/* Duolingo-style green tuned to match the green in the desktop daily review
-   card — the user flagged it was too pale on mobile. */
 const TOOLS: ToolDef[] = [
   {
     id: 'analyze',
@@ -148,30 +139,9 @@ const TOOLS: ToolDef[] = [
 ];
 
 const GAMES = [
-  {
-    id: 'crater-blast',
-    label: 'Crater Blast',
-    emoji: '💥',
-    accent: '#FF4B4B',
-    accentBg: '#FFE8E8',
-    page: 'crater-blast',
-  },
-  {
-    id: 'word-tower',
-    label: 'Word Tower',
-    emoji: '🗼',
-    accent: '#58CC02',
-    accentBg: '#E5F8D0',
-    page: 'word-tower',
-  },
-  {
-    id: 'word-blitz',
-    label: 'Word Blitz',
-    emoji: '⚡',
-    accent: '#FF9600',
-    accentBg: '#FFF4E0',
-    page: 'word-blitz',
-  },
+  { id: 'crater-blast', label: 'Crater Blast', emoji: '💥', accent: '#FF4B4B', accentBg: '#FFE8E8', page: 'crater-blast' },
+  { id: 'word-tower', label: 'Word Tower', emoji: '🗼', accent: '#58CC02', accentBg: '#E5F8D0', page: 'word-tower' },
+  { id: 'word-blitz', label: 'Word Blitz', emoji: '⚡', accent: '#FF9600', accentBg: '#FFF4E0', page: 'word-blitz' },
 ];
 
 const QUICK_TOOLS = [
@@ -189,14 +159,12 @@ function getFirstName(user: MobileDashboardProps['user']): string {
   if (user.name) return user.name.split(' ')[0];
   return 'there';
 }
-
 function getGreeting(): string {
   const hour = new Date().getHours();
   if (hour < 12) return 'Good morning';
   if (hour < 18) return 'Good afternoon';
   return 'Good evening';
 }
-
 function timeAgo(iso: string): string {
   const ms = Date.now() - new Date(iso).getTime();
   const min = Math.max(0, Math.floor(ms / 60000));
@@ -209,7 +177,6 @@ function timeAgo(iso: string): string {
   const w = Math.floor(d / 7);
   return `${w}w ago`;
 }
-
 function kindMeta(kind: RecentItem['kind']) {
   const t = TOOLS.find((x) => x.id === kind);
   if (!t) return { emoji: '📄', accent: '#A560E8', accentBg: '#F3EAFF' };
@@ -230,14 +197,159 @@ const MobileDashboard = ({
 }: MobileDashboardProps) => {
   const activeTool = TOOLS.find((t) => t.id === dashboardTool) ?? TOOLS[0];
 
+  /* Per-tool draft state, persisted to localStorage so the full tool page
+     can read it on mount and pre-fill the user's text. Switching tools
+     reloads the matching draft. */
+  const [draftText, setDraftText] = useState('');
+  useEffect(() => {
+    if (!activeTool.draftKey) { setDraftText(''); return; }
+    try { setDraftText(localStorage.getItem(activeTool.draftKey) ?? ''); } catch { setDraftText(''); }
+  }, [activeTool.draftKey]);
+
+  const persistDraft = (val: string) => {
+    setDraftText(val);
+    if (!activeTool.draftKey) return;
+    try { localStorage.setItem(activeTool.draftKey, val); } catch { /* ignore */ }
+  };
+
+  /* Inline submission state — drives the AnalysisAnimation popup while the
+     API call is in flight. Replaces the v3 "navigate immediately and let
+     the next page show loading" pattern. */
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitComplete, setSubmitComplete] = useState(false);
+
+  const animationText =
+    activeTool.id === 'analyze' ? 'Analyzing your essay' :
+    activeTool.id === 'study_pack' ? 'Building your study pack' :
+    activeTool.id === 'citations' ? 'Finding citations' :
+    'Loading';
+
+  /**
+   * Run the active tool's API call directly from the dashboard, then navigate
+   * to its results page on success. Matches desktop's pattern: the loading
+   * animation lives on the dashboard, the results page only shows results.
+   *
+   * For analyze specifically the analysis API runs on AnalysisPage itself
+   * (it needs the user's citation/grading style picks), so we save the text
+   * and navigate. The animation still shows briefly so the user knows their
+   * tap was registered before the page transitions.
+   */
+  const handleSubmit = async () => {
+    setSubmitError(null);
+
+    if (activeTool.id === 'daily_review') {
+      setDashboardTool('daily_review');
+      return;
+    }
+
+    // ANALYZE — defer to AnalysisPage which has the analyze API + results UI.
+    // Mobile shows a brief loading animation so the tap registers visibly.
+    if (activeTool.id === 'analyze') {
+      if (!draftText.trim() || draftText.trim().split(/\s+/).filter(Boolean).length < 50) {
+        setSubmitError('Please paste at least 50 words to analyze.');
+        return;
+      }
+      setIsSubmitting(true);
+      try { localStorage.setItem('textAnalysisContent', draftText); } catch { /* ignore */ }
+      setTimeout(() => {
+        setIsSubmitting(false);
+        setSubmitComplete(true);
+      }, 900);
+      setTimeout(() => {
+        setSubmitComplete(false);
+        onNavigate('analysis');
+      }, 1500);
+      return;
+    }
+
+    const token = (() => {
+      try { return localStorage.getItem('authToken'); } catch { return null; }
+    })();
+
+    if (!token) {
+      onNavigate('login');
+      return;
+    }
+
+    // CITATIONS — POST /analysis/citation-search, then navigate to results.
+    if (activeTool.id === 'citations') {
+      if (!draftText.trim()) {
+        setSubmitError('Please enter a research topic.');
+        return;
+      }
+      setIsSubmitting(true);
+      try {
+        const res = await fetch(`${API_URL}/analysis/citation-search`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            researchTopic: draftText,
+            citationStyle: 'APA',
+            numberOfCitations: 10,
+            minYear: null,
+            yearRange: 'all',
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data?.success || !data?.data) {
+          throw new Error(data?.message || 'Citation search failed');
+        }
+        try { localStorage.setItem('citationSearchResults', JSON.stringify(data.data)); } catch { /* ignore */ }
+        setSubmitComplete(true);
+        setTimeout(() => {
+          setIsSubmitting(false);
+          setSubmitComplete(false);
+          onNavigate('citation-results');
+        }, 700);
+      } catch (err: any) {
+        setIsSubmitting(false);
+        setSubmitError(err?.message || 'Could not find citations. Please try again.');
+      }
+      return;
+    }
+
+    // STUDY PACK — POST /analysis/generate-study-pack with the user's notes.
+    // Backend returns a generated pack object; we hand it off to the
+    // study-pack-viewer route via the studyPack navigate option.
+    if (activeTool.id === 'study_pack') {
+      const wc = draftText.trim().split(/\s+/).filter(Boolean).length;
+      if (wc < 50) {
+        setSubmitError('Paste at least 50 words of notes to build a pack.');
+        return;
+      }
+      setIsSubmitting(true);
+      try {
+        const res = await fetch(`${API_URL}/analysis/generate-study-pack`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: draftText, sourceType: 'text' }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data?.success) {
+          throw new Error(data?.message || 'Study pack generation failed');
+        }
+        setSubmitComplete(true);
+        setTimeout(() => {
+          setIsSubmitting(false);
+          setSubmitComplete(false);
+          // Hand the generated pack to the viewer via nav options.
+          (onNavigate as any)('study-pack-viewer', undefined, { studyPack: { data: data.data, title: data?.data?.title } });
+        }, 700);
+      } catch (err: any) {
+        setIsSubmitting(false);
+        setSubmitError(err?.message || 'Could not build study pack. Please try again.');
+      }
+      return;
+    }
+  };
+
   const subtitle = isNewUser
     ? "Let's start with your first essay."
     : streakDays > 0
       ? `Day ${streakDays} of your streak. Keep going.`
       : "Let's turn that B into an A.";
 
-  /* Subtle entrance fade-up on tool change so switching tools feels alive
-     instead of jumpy. */
   const formCardRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = formCardRef.current;
@@ -271,12 +383,8 @@ const MobileDashboard = ({
               aria-label={`${streakDays} day streak — open daily review`}
             >
               <span className="text-sm" aria-hidden>🔥</span>
-              <span className="text-[12px] font-extrabold text-[#FF9600] tabular-nums">
-                {streakDays}
-              </span>
-              <span className="text-[11px] font-bold text-[#FF9600]">
-                day streak
-              </span>
+              <span className="text-[12px] font-extrabold text-[#FF9600] tabular-nums">{streakDays}</span>
+              <span className="text-[11px] font-bold text-[#FF9600]">day streak</span>
             </button>
           )}
         </header>
@@ -299,7 +407,6 @@ const MobileDashboard = ({
                   }`}
                   style={{ borderColor: isActive ? tool.accent : '#E5E5E5' }}
                 >
-                  {/* Tag badge — only on tools with a badge */}
                   {tool.badge && (
                     <span
                       className="absolute -top-2 left-3 px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wider whitespace-nowrap"
@@ -312,7 +419,6 @@ const MobileDashboard = ({
                       {tool.badge.text}
                     </span>
                   )}
-                  {/* Active dot */}
                   {isActive && (
                     <span
                       className="absolute top-3 right-3 w-2 h-2 rounded-full"
@@ -336,99 +442,128 @@ const MobileDashboard = ({
           </div>
         </section>
 
-        {/* ── EMBEDDED TOOL — the active tool's actual page UI rendered
-            inline. Each tool component runs in embedded mode (skips its
-            own Header/Footer/background) so it slots into the dashboard
-            frame. This is what desktop does too — clicking a tool tab
-            doesn't navigate away, it just switches the inline panel. */}
+        {/* ── ACTIVE TOOL FORM CARD ───────────────────────────── */}
         <div
           ref={formCardRef}
-          className="relative mb-7 rounded-[24px] overflow-hidden border-2 border-b-4 transition-all duration-300 ease-out opacity-0 translate-y-2 bg-white dark:bg-stone-900"
-          style={{ borderColor: activeTool.accent }}
+          className="relative mb-7 rounded-[24px] overflow-hidden border-2 border-b-4 transition-all duration-300 ease-out opacity-0 translate-y-2"
+          style={{ backgroundColor: 'white', borderColor: activeTool.accent }}
         >
-          {/* Top accent bar matching the active tool's brand color */}
           <div className="h-1.5 w-full" style={{ backgroundColor: activeTool.accent }} aria-hidden />
 
-          <Suspense
-            fallback={
-              <div className="p-8 text-center text-stone-500 text-sm">
-                Loading {activeTool.label}…
+          <div className="p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <div
+                className="w-9 h-9 rounded-xl flex items-center justify-center text-[18px]"
+                style={{ backgroundColor: activeTool.accentBg }}
+                aria-hidden
+              >
+                {activeTool.emoji}
               </div>
-            }
-          >
-            {activeTool.id === 'analyze' && (
-              <AnalyzeEssayPage
-                onNavigate={onNavigate}
-                user={user as any}
-                onLogout={onLogout}
-                embedded
+              <h2 className="text-[18px] font-extrabold tracking-tight text-stone-900 dark:text-stone-50 leading-tight flex-1">
+                {activeTool.formTitle}
+              </h2>
+            </div>
+            <p className="text-[13px] text-stone-600 dark:text-stone-400 leading-relaxed mb-4 font-medium">
+              {activeTool.formSub}
+            </p>
+
+            {/* Tool-specific input */}
+            {activeTool.id === 'daily_review' ? (
+              <div
+                className="rounded-2xl p-4 mb-4 text-center border-2 border-dashed"
+                style={{ backgroundColor: activeTool.accentBg, borderColor: activeTool.accent }}
+              >
+                <div className="text-2xl mb-1" aria-hidden>📚</div>
+                <div className="text-[14px] font-extrabold text-stone-900 dark:text-stone-50 mb-0.5">
+                  10 questions ready
+                </div>
+                <div className="text-[11px] text-stone-600 dark:text-stone-400 font-bold">
+                  Built from your saved notes
+                </div>
+              </div>
+            ) : activeTool.inputType === 'input' ? (
+              <input
+                type="text"
+                value={draftText}
+                onChange={(e) => persistDraft(e.target.value)}
+                placeholder={activeTool.placeholder}
+                className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-700 text-[14px] font-medium text-stone-900 dark:text-stone-50 focus:outline-none focus:border-stone-400 mb-4"
+                style={{ borderColor: draftText ? activeTool.accent : undefined }}
+              />
+            ) : (
+              <textarea
+                value={draftText}
+                onChange={(e) => persistDraft(e.target.value)}
+                placeholder={activeTool.placeholder}
+                rows={5}
+                className="w-full px-4 py-3 rounded-2xl bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-700 text-[14px] font-medium text-stone-900 dark:text-stone-50 focus:outline-none focus:border-stone-400 mb-3 resize-none leading-relaxed"
+                style={{ borderColor: draftText ? activeTool.accent : undefined }}
               />
             )}
-            {activeTool.id === 'study_pack' && (
-              <StudyPackPage
-                onNavigate={onNavigate}
-                user={user as any}
-                onLogout={onLogout}
-                embedded
-                onEmbeddedToolSwitch={(t) => {
-                  if (t === 'analyze') setDashboardTool('analyze');
-                  else if (t === 'citations') setDashboardTool('citations');
-                  else if (t === 'study_pack') setDashboardTool('study_pack');
+
+            {activeTool.inputType === 'textarea' && draftText.trim().length > 0 && (
+              <div className="text-[11px] text-stone-400 mb-3 font-bold tabular-nums text-right">
+                {draftText.trim().split(/\s+/).filter(Boolean).length} words
+              </div>
+            )}
+
+            {submitError && (
+              <div className="mb-3 px-4 py-3 rounded-xl bg-red-50 dark:bg-red-950/30 border-2 border-red-200 dark:border-red-900/40 text-[13px] font-bold text-red-700 dark:text-red-300">
+                {submitError}
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-2xl font-extrabold text-white text-[15px] border-2 border-b-4 transition-transform active:translate-y-0.5 active:border-b-2 disabled:opacity-70 disabled:cursor-wait"
+              style={{ backgroundColor: activeTool.accent, borderColor: activeTool.accentBorder }}
+            >
+              {isSubmitting ? (
+                <>
+                  <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" aria-hidden />
+                  Working…
+                </>
+              ) : (
+                <>
+                  {activeTool.submitLabel}
+                  <span className="text-base" aria-hidden>→</span>
+                </>
+              )}
+            </button>
+
+            {/* Secondary "Upload file" button — only on the two tools that
+                accept file input (essay + notes). Sets a sessionStorage
+                marker; the full tool page auto-opens its native file
+                picker on mount. */}
+            {(activeTool.id === 'analyze' || activeTool.id === 'study_pack') && (
+              <button
+                type="button"
+                onClick={() => {
+                  try { sessionStorage.setItem('writescholar_open_upload', activeTool.id); } catch { /* ignore */ }
+                  onNavigate(activeTool.submitPage);
                 }}
-              />
+                className="w-full mt-2.5 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl font-extrabold text-stone-700 dark:text-stone-200 bg-white dark:bg-stone-900 text-[14px] border-2 border-b-4 border-stone-200 dark:border-stone-700 active:translate-y-0.5 active:border-b-2 transition-transform"
+              >
+                <span aria-hidden>📎</span>
+                {activeTool.id === 'analyze' ? 'Or upload your essay' : 'Or upload your notes'}
+              </button>
             )}
-            {activeTool.id === 'citations' && (
-              <CitationsPage
-                onNavigate={onNavigate}
-                user={user as any}
-                onLogout={onLogout}
-                embedded
-                onEmbeddedToolSwitch={(t) => {
-                  if (t === 'analyze') setDashboardTool('analyze');
-                  else if (t === 'citations') setDashboardTool('citations');
-                  else if (t === 'study_pack') setDashboardTool('study_pack');
-                }}
-              />
-            )}
-            {activeTool.id === 'daily_review' && (
-              <DailyReviewTab user={user as any} onNavigate={onNavigate} />
-            )}
-          </Suspense>
+          </div>
         </div>
 
-        {/* ── PREVIEW SECTION — real screenshots of what the active
-            tool generates. Same components the desktop dashboard uses
-            in each tool hub, so users see "this is what I'll get"
-            before they commit. Skipped for daily review (already shows
-            a status card up top). */}
-        {activeTool.id === 'analyze' && (
-          <div className="mb-7">
-            <AnalysisPreviewSection embedded />
-          </div>
-        )}
-        {activeTool.id === 'study_pack' && (
-          <div className="mb-7">
-            <StudyPackPreviewSection embedded />
-          </div>
-        )}
-        {activeTool.id === 'citations' && (
-          <div className="mb-7">
-            <CitationsPreviewSection embedded />
-          </div>
-        )}
+        {/* ── PREVIEW SCREENSHOTS — real product output ───────── */}
+        {activeTool.id === 'analyze' && <div className="mb-7"><AnalysisPreviewSection embedded /></div>}
+        {activeTool.id === 'study_pack' && <div className="mb-7"><StudyPackPreviewSection embedded /></div>}
+        {activeTool.id === 'citations' && <div className="mb-7"><CitationsPreviewSection embedded /></div>}
 
-        {/* ── RECENT ACTIVITY — 3 items max ───────────────────── */}
+        {/* ── RECENT ACTIVITY ─────────────────────────────────── */}
         {recentItems.length > 0 && (
           <section className="mb-7">
             <div className="flex items-center justify-between mb-3 pl-1">
-              <h3 className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-stone-400 dark:text-stone-500">
-                Recent
-              </h3>
-              <button
-                type="button"
-                onClick={() => onNavigate('library')}
-                className="text-[11px] font-extrabold text-[#A560E8]"
-              >
+              <h3 className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-stone-400 dark:text-stone-500">Recent</h3>
+              <button type="button" onClick={() => onNavigate('library')} className="text-[11px] font-extrabold text-[#A560E8]">
                 View all →
               </button>
             </div>
@@ -453,12 +588,8 @@ const MobileDashboard = ({
                       {meta.emoji}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-extrabold text-stone-900 dark:text-stone-50 text-[13px] truncate">
-                        {item.title}
-                      </div>
-                      <div className="text-[11px] font-medium text-stone-500 dark:text-stone-400 mt-0.5">
-                        {timeAgo(item.createdAt)}
-                      </div>
+                      <div className="font-extrabold text-stone-900 dark:text-stone-50 text-[13px] truncate">{item.title}</div>
+                      <div className="text-[11px] font-medium text-stone-500 dark:text-stone-400 mt-0.5">{timeAgo(item.createdAt)}</div>
                     </div>
                     <span className="flex-shrink-0 text-stone-400 text-base" aria-hidden>→</span>
                   </button>
@@ -468,7 +599,7 @@ const MobileDashboard = ({
           </section>
         )}
 
-        {/* ── GAMES ROW — 3 compact tiles ─────────────────────── */}
+        {/* ── GAMES ROW ───────────────────────────────────────── */}
         <section className="mb-7">
           <h3 className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-stone-400 dark:text-stone-500 mb-3 pl-1">
             Quick games
@@ -497,7 +628,7 @@ const MobileDashboard = ({
           </div>
         </section>
 
-        {/* ── QUICK TOOLS — small icon row ────────────────────── */}
+        {/* ── QUICK TOOLS ROW ─────────────────────────────────── */}
         <section className="mb-7">
           <h3 className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-stone-400 dark:text-stone-500 mb-3 pl-1">
             Quick tools
@@ -519,7 +650,7 @@ const MobileDashboard = ({
           </div>
         </section>
 
-        {/* ── UPGRADE NUDGE (free users only) ─────────────────── */}
+        {/* ── UPGRADE NUDGE ───────────────────────────────────── */}
         {user && (user.plan || user.subscription_plan || 'free').toLowerCase() === 'free' && (
           <section className="rounded-2xl bg-gradient-to-br from-[#A560E8] to-[#8A48C7] border-2 border-b-4 border-[#8A48C7] p-5 text-white">
             <div className="flex items-start gap-3 mb-4">
@@ -543,6 +674,18 @@ const MobileDashboard = ({
       </main>
 
       <Footer onNavigate={onNavigate} />
+
+      {/* Full-screen loading popup while the API call is in flight. Same
+          component the desktop dashboard + tool pages use, so the loading
+          experience feels consistent across surfaces. */}
+      {(isSubmitting || submitComplete) && (
+        <AnalysisAnimation
+          isPopup
+          text={animationText}
+          isComplete={submitComplete}
+          onComplete={() => { /* nav handled inline by handleSubmit's timeouts */ }}
+        />
+      )}
     </div>
   );
 };
