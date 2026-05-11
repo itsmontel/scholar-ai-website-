@@ -113,6 +113,10 @@ const DASHBOARD_TOOL_ITEMS = [
     titleClass: 'text-[#FF4B4B]',
     activeBg: 'bg-[#FFE8E8] dark:bg-[#FF4B4B]/10',
     accent: 'rose',
+    // Quality-anchored badge — Study Pack owns "Most popular," so Analyze
+    // leans into the AI-quality angle. Reinforces the "professor-style
+    // feedback" USP without competing on popularity claims.
+    badge: '✨ Smartest AI',
   },
   {
     id: 'study_pack' as const,
@@ -859,7 +863,12 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                   <span className="dash-serif tracking-tight">{item.title}</span>
                   {'badge' in item && item.badge && (
                     <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-[#FF9600] text-white text-[7px] font-extrabold uppercase tracking-wide leading-none whitespace-nowrap border border-b-2 border-[#D97F00]">
-                      🔥
+                      {/* Extract the leading emoji from the badge string so
+                          each tool shows its own icon in this compact view
+                          (was hardcoded 🔥, which collapsed all badges to
+                          look identical here). Falls back to 🔥 if the
+                          regex misses. */}
+                      {item.badge.match(/^\S+/)?.[0] || '🔥'}
                     </span>
                   )}
                 </button>

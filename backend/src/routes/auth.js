@@ -12,6 +12,7 @@ const {
   validateLogin 
 } = require('../middleware/validation');
 const emailService = require('../services/emailService');
+const { parseDeviceFromUserAgent } = require('../utils/deviceParser');
 const userService = require('../services/userService');
 const streakService = require('../services/streakService');
 
@@ -50,7 +51,10 @@ router.post('/register', validateRegister, async (req, res) => {
     // Generate email verification token
     const emailVerificationToken = crypto.randomBytes(32).toString('hex');
 
-    // Create user
+    // Create user. signup_device captures the User-Agent device class
+    // (mobile/tablet/desktop/unknown) at the moment of registration so we
+    // can run cohort analytics in Supabase later — e.g., "what % of paid
+    // Pro users came from mobile signups?" Captured once and never updated.
     const userData = {
       email: email.toLowerCase(),
       password_hash: passwordHash,
@@ -60,7 +64,8 @@ router.post('/register', validateRegister, async (req, res) => {
       subscription_plan: 'free',
       subscription_status: 'active',
       is_active: true,
-      email_verified: false
+      email_verified: false,
+      signup_device: parseDeviceFromUserAgent(req.headers['user-agent']),
     };
 
     const user = await userService.createUser(userData);

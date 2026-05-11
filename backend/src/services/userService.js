@@ -92,7 +92,7 @@ class UserService {
     }
   }
 
-  async createGoogleUser({ googleId, email, name, picture, emailVerified = true }) {
+  async createGoogleUser({ googleId, email, name, picture, emailVerified = true, signupDevice = null }) {
     try {
       const { data, error } = await this.getSupabaseClient()
         .from('users')
@@ -104,6 +104,11 @@ class UserService {
           email_verified: emailVerified,
           subscription_plan: 'free',
           subscription_status: 'active',
+          // Device class at signup (mobile/tablet/desktop/unknown). Optional —
+          // passport.js passes it through when available; legacy callers that
+          // don't pass it leave the column NULL. See signup_device.sql and
+          // src/utils/deviceParser.js for the parsing details.
+          signup_device: signupDevice,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
