@@ -2828,6 +2828,12 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
         lesson: pack.lesson,
         craterBlast: pack.craterBlast,
         wordTower: pack.wordTower,
+        // Bug fix: wordBlitz was missing here, so saved study packs never
+        // included Word Blitz questions. WordBlitzPage's "My packs" tab
+        // looks up t.questions.wordBlitz.questions and was always finding
+        // it undefined, hence the empty state for users replaying from
+        // saved notes.
+        wordBlitz: pack.wordBlitz,
         originalNotes: pack.originalNotes,
       },
       source_word_count: wordCount,
