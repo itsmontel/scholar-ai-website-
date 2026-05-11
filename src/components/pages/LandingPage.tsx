@@ -691,13 +691,15 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
     <>
       <Header onNavigate={onNavigate} user={user} sticky={true} currentPage="landing" opaqueHeader />
       <main className="min-h-screen relative transition-colors font-sans overflow-x-hidden xl:overflow-x-visible" role="main">
-      {/* Promo Banner — TEMPORARILY HIDDEN via the leading `hidden` class.
-          Markup preserved for easy re-enable: just remove `hidden` from the
-          className (and `aria-hidden`) when the promo is live again. */}
+      {/* Promo Banner — visible on tablet/desktop (md+), hidden on mobile.
+          Crowds the mobile hero where vertical space is precious; on larger
+          screens it sits comfortably above the hero without pushing the
+          headline below the fold. To re-enable on mobile, swap
+          `hidden md:block` → `block` (and update the comment). */}
       <div
         role="region"
         aria-label="Limited time promotion"
-        className="relative overflow-hidden border-b-2 border-[#FF9600]/30 dark:border-[#D97F00]/40 bg-[#FFF4E0] dark:bg-stone-950"
+        className="hidden md:block relative overflow-hidden border-b-2 border-[#FF9600]/30 dark:border-[#D97F00]/40 bg-[#FFF4E0] dark:bg-stone-950"
       >
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_120%_at_50%_50%,rgba(255,150,0,0.08),transparent_70%)] dark:bg-[radial-gradient(ellipse_60%_120%_at_50%_50%,rgba(255,150,0,0.12),transparent_70%)]" aria-hidden />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-1.5 sm:py-2">
@@ -850,18 +852,11 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     slot (its in-frame walking animation keeps the corner alive
                     without translating across the card). */}
                 <div className="relative flex flex-col items-center text-center">
-                {/* MOBILE-ONLY: single dancing mascot pinned to the top-right
-                    corner. Smaller and tucked further out of the way so it
-                    doesn't crowd the H1 on narrow screens. The left-side
-                    paper mascot was removed to give the headline more room. */}
-                <img
-                  src="/mascot-dance.webp"
-                  alt=""
-                  aria-hidden
-                  loading="lazy"
-                  decoding="async"
-                  className="md:hidden pointer-events-none absolute -top-1 -right-2 w-16 h-auto z-20 drop-shadow-[0_14px_28px_rgba(124,58,237,0.35)] motion-safe:animate-mobile-mascot-bob"
-                />
+                {/* The mobile dance mascot used to sit here pinned above the
+                    H1. It's been relocated to peek over the top-right corner
+                    of the hero walkthrough video below (the video tile already
+                    has room to host it without crowding the headline). See
+                    the video container further down for the new placement. */}
 
 
                 {/* HEADLINE — outcome + transformation, locked to 3 lines.
@@ -968,7 +963,10 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     and the CTAs so users see the product before deciding to
                     sign up. Replaces the floating PiP on phones. Softer
                     purple ring (10% opacity, smaller blur) than the original
-                    so it doesn't compete with the actual video frame. */}
+                    so it doesn't compete with the actual video frame. The
+                    dance mascot peeks over the top-right corner — moved from
+                    its old spot above the H1 (gave that area back to the
+                    headline). */}
                 <div className="md:hidden mb-6 w-full max-w-sm mx-auto">
                   <div className="relative">
                     <div className="absolute -inset-1.5 bg-[#A560E8]/10 rounded-3xl blur-xl opacity-50" aria-hidden />
@@ -985,6 +983,18 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                         className="w-full h-auto block"
                       />
                     </div>
+                    {/* Dance mascot peeking over the top-right corner. z-30
+                        sits above the video frame; negative top/right pushes
+                        the mascot to overlap the corner so it "perches" on
+                        the edge rather than floating in empty space above. */}
+                    <img
+                      src="/mascot-dance.webp"
+                      alt=""
+                      aria-hidden
+                      loading="lazy"
+                      decoding="async"
+                      className="pointer-events-none absolute -top-6 -right-3 w-16 h-auto z-30 drop-shadow-[0_14px_28px_rgba(124,58,237,0.35)] motion-safe:animate-mobile-mascot-bob"
+                    />
                   </div>
                 </div>
 
