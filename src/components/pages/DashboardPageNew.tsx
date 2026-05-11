@@ -200,7 +200,17 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
       const valid: DashboardTool[] = ['daily_review', 'analyze', 'citations', 'study_pack', 'more_tools'];
       if (valid.includes(saved as DashboardTool)) return saved as DashboardTool;
     }
-    return 'daily_review';
+    /* Smart default: if the user has never built a study pack, they have
+       nothing to review, so don't drop them on the Daily Review tab.
+       Default to the Essay Checker (the most-used entry point). The check
+       reads localStorage rather than waiting for an API call so the first
+       paint is correct. */
+    try {
+      const hasPack = !!localStorage.getItem('writescholar_has_study_pack');
+      return hasPack ? 'daily_review' : 'analyze';
+    } catch {
+      return 'analyze';
+    }
   });
 
   /* Embedded hub view state — each tool tab opens to its hub by default,
