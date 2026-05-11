@@ -313,7 +313,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
         return (
           <p
             key={paraIdx}
-            className={`mb-3 text-[#3C3C3C] dark:text-stone-300 leading-relaxed ${isTitle ? 'text-sm sm:text-lg font-extrabold text-left' : 'text-[12px] sm:text-sm text-left text-pretty'}`}
+            className={`mb-3 text-[#3C3C3C] dark:text-stone-300 leading-relaxed ${isTitle ? 'text-sm sm:text-lg font-extrabold text-left' : 'text-[11px] sm:text-sm text-justify text-pretty hyphens-auto'}`}
             style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
           >
             {range.text}
@@ -323,7 +323,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
       return (
         <p
           key={paraIdx}
-          className={`mb-3 text-[#3C3C3C] dark:text-stone-300 leading-relaxed break-words ${isTitle ? 'text-sm sm:text-lg font-extrabold text-left' : 'text-[12px] sm:text-sm text-left text-pretty'}`}
+          className={`mb-3 text-[#3C3C3C] dark:text-stone-300 leading-relaxed break-words ${isTitle ? 'text-sm sm:text-lg font-extrabold text-left' : 'text-[11px] sm:text-sm text-justify text-pretty hyphens-auto'}`}
           style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
         >
           {segments.map((seg, i) => {

@@ -700,7 +700,12 @@ const MobileDashboard = ({
         {activeTool.id === 'study_pack' && <div className="mb-7"><StudyPackPreviewSection embedded /></div>}
         {activeTool.id === 'citations' && <div className="mb-7"><CitationsPreviewSection embedded /></div>}
 
-        {/* ── RECENT ACTIVITY ─────────────────────────────────── */}
+        {/* ── RECENT ACTIVITY ───────────────────────────────────
+            Shows the 3 most-recent items across ALL tool types
+            (analyze / study pack / citations / daily review) — the
+            underlying `recentItems` array is already a unified,
+            sorted list from DashboardPageNew's mobileRecentItems
+            mapper. Full history is one tap away via View all. */}
         {recentItems.length > 0 && (
           <section className="mb-7">
             <div className="flex items-center justify-between mb-3 pl-1">
