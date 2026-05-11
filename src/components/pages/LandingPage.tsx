@@ -1084,7 +1084,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     type="button"
                     onClick={() => onNavigate('signup')}
                     aria-label="Start free, get the A"
-                    className="group/btn inline-flex items-center justify-center px-5 py-2.5 sm:px-8 sm:py-4 lg:px-9 lg:py-[18px] rounded-2xl bg-[#58CC02] hover:bg-[#61E002] text-white font-extrabold text-sm sm:text-[17px] lg:text-lg border-2 border-b-4 border-[#46A302] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 whitespace-nowrap shadow-[0_8px_28px_-6px_rgba(88,204,2,0.55)] hover:shadow-[0_12px_36px_-6px_rgba(88,204,2,0.75)]"
+                    className="group/btn inline-flex items-center justify-center px-7 py-3.5 sm:px-8 sm:py-4 lg:px-9 lg:py-[18px] rounded-2xl bg-[#58CC02] hover:bg-[#61E002] text-white font-extrabold text-base sm:text-[17px] lg:text-lg border-2 border-b-4 border-[#46A302] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 whitespace-nowrap shadow-[0_8px_28px_-6px_rgba(88,204,2,0.55)] hover:shadow-[0_12px_36px_-6px_rgba(88,204,2,0.75)]"
                     style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                   >
                     Get started today
@@ -1175,7 +1175,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   border, no background — pure icon + text floating on
                   the purple field. Custom-drawn so the hero feels unique
                   to WriteScholar instead of generic, per user brief. */}
-              <div className="relative z-10 w-full max-w-5xl mx-auto mt-6 sm:mt-7 lg:mt-28 pb-2 px-4">
+              <div className="relative z-10 w-full max-w-5xl mx-auto mt-2 sm:mt-7 lg:mt-28 pb-2 px-4">
                 <div className="flex flex-wrap items-start justify-center gap-x-5 gap-y-4 sm:gap-x-8 sm:gap-y-5">
                   {[
                     {
