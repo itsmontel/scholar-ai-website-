@@ -10,6 +10,10 @@ interface AnalyzeEssayPageProps {
   onNavigate: (page: string, slug?: string, options?: { studyPack?: { data: unknown; title?: string } }) => void;
   user?: any;
   onLogout: () => void;
+  /** When true, render without Header/Footer/background — for embedding
+   *  inside another page (e.g. the mobile dashboard). The functional UI
+   *  (paste box, file upload, results) renders normally. */
+  embedded?: boolean;
 }
 
 const getWordCount = (text: string) =>
@@ -21,7 +25,7 @@ const placeholders = [
   'Improve your academic writing in seconds...',
 ];
 
-const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps) => {
+const AnalyzeEssayPage = ({ onNavigate, user, onLogout, embedded = false }: AnalyzeEssayPageProps) => {
   const [inputText, setInputText] = useState('');
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [showWordWarning, setShowWordWarning] = useState(false);
@@ -172,12 +176,17 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
   };
 
   return (
-    <div className="min-h-screen relative transition-colors font-sans overflow-x-hidden" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
+    <div
+      className={`relative transition-colors font-sans overflow-x-hidden ${embedded ? '' : 'min-h-screen'}`}
+      style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+    >
+      {!embedded && <WriteScholarEditorialBackgroundLayers position="fixed" />}
 
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="analyze" />
+      {!embedded && <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="analyze" />}
 
-      <main className="relative max-w-[1360px] mx-auto px-3 sm:px-6 lg:px-8 pt-3 sm:pt-6 pb-24 sm:pb-16 w-full min-w-0 overflow-x-hidden">
+      <main
+        className={`relative w-full min-w-0 overflow-x-hidden ${embedded ? '' : 'max-w-[1360px] mx-auto px-3 sm:px-6 lg:px-8 pt-3 sm:pt-6 pb-24 sm:pb-16'}`}
+      >
         <div className="w-full min-w-0">
           <div className="pt-1 sm:pt-2 pb-3 sm:pb-5 overflow-visible">
             <section
@@ -614,7 +623,7 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout }: AnalyzeEssayPageProps)
         </div>
       )}
 
-      <Footer onNavigate={onNavigate} />
+      {!embedded && <Footer onNavigate={onNavigate} />}
     </div>
   );
 };

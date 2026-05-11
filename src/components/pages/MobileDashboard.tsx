@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, lazy, Suspense } from 'react';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
 import {
@@ -6,6 +6,15 @@ import {
   StudyPackPreviewSection,
   CitationsPreviewSection,
 } from '../common/PreviewSections';
+
+/* The actual tool components, lazy-loaded so the dashboard doesn't pull
+   them all into the initial bundle. Each renders in embedded=true mode,
+   stripping its own Header/Footer so it slots cleanly inside the
+   MobileDashboard frame. */
+const AnalyzeEssayPage = lazy(() => import('./AnalyzeEssayPage'));
+const StudyPackPage = lazy(() => import('./StudyPackPage'));
+const CitationsPage = lazy(() => import('./CitationsPage'));
+const DailyReviewTab = lazy(() => import('./DailyReviewTab'));
 
 /**
  * Mobile dashboard — a complete, from-scratch redesign that's separate
@@ -221,38 +230,14 @@ const MobileDashboard = ({
 }: MobileDashboardProps) => {
   const activeTool = TOOLS.find((t) => t.id === dashboardTool) ?? TOOLS[0];
 
-  // Inline form input state — separate per tool via the draftKey so switching
-  // tabs doesn't wipe what the user already typed.
-  const [draftText, setDraftText] = useState('');
-  useEffect(() => {
-    if (!activeTool.draftKey) { setDraftText(''); return; }
-    try {
-      setDraftText(localStorage.getItem(activeTool.draftKey) ?? '');
-    } catch { setDraftText(''); }
-  }, [activeTool.draftKey]);
-
-  const persistDraft = (val: string) => {
-    setDraftText(val);
-    if (!activeTool.draftKey) return;
-    try { localStorage.setItem(activeTool.draftKey, val); } catch { /* ignore */ }
-  };
-
-  const handleSubmit = () => {
-    // Daily review just switches tools — no submit page
-    if (activeTool.id === 'daily_review') {
-      setDashboardTool('daily_review');
-      return;
-    }
-    // Other tools navigate to their full page (which reads the saved draft).
-    onNavigate(activeTool.submitPage);
-  };
-
   const subtitle = isNewUser
     ? "Let's start with your first essay."
     : streakDays > 0
       ? `Day ${streakDays} of your streak. Keep going.`
       : "Let's turn that B into an A.";
 
+  /* Subtle entrance fade-up on tool change so switching tools feels alive
+     instead of jumpy. */
   const formCardRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = formCardRef.current;
@@ -351,107 +336,64 @@ const MobileDashboard = ({
           </div>
         </section>
 
-        {/* ── INLINE TOOL FORM (the embedded "tool surface") ─── */}
+        {/* ── EMBEDDED TOOL — the active tool's actual page UI rendered
+            inline. Each tool component runs in embedded mode (skips its
+            own Header/Footer/background) so it slots into the dashboard
+            frame. This is what desktop does too — clicking a tool tab
+            doesn't navigate away, it just switches the inline panel. */}
         <div
           ref={formCardRef}
-          className="relative mb-7 rounded-[24px] overflow-hidden border-2 border-b-4 transition-all duration-300 ease-out opacity-0 translate-y-2"
-          style={{ backgroundColor: 'white', borderColor: activeTool.accent }}
+          className="relative mb-7 rounded-[24px] overflow-hidden border-2 border-b-4 transition-all duration-300 ease-out opacity-0 translate-y-2 bg-white dark:bg-stone-900"
+          style={{ borderColor: activeTool.accent }}
         >
-          {/* Top accent bar */}
+          {/* Top accent bar matching the active tool's brand color */}
           <div className="h-1.5 w-full" style={{ backgroundColor: activeTool.accent }} aria-hidden />
 
-          <div className="p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center text-[18px]"
-                style={{ backgroundColor: activeTool.accentBg }}
-                aria-hidden
-              >
-                {activeTool.emoji}
+          <Suspense
+            fallback={
+              <div className="p-8 text-center text-stone-500 text-sm">
+                Loading {activeTool.label}…
               </div>
-              <h2 className="text-[18px] font-extrabold tracking-tight text-stone-900 dark:text-stone-50 leading-tight flex-1">
-                {activeTool.formTitle}
-              </h2>
-            </div>
-            <p className="text-[13px] text-stone-600 dark:text-stone-400 leading-relaxed mb-4 font-medium">
-              {activeTool.formSub}
-            </p>
-
-            {/* Tool-specific input */}
-            {activeTool.id === 'daily_review' ? (
-              <div
-                className="rounded-2xl p-4 mb-4 text-center border-2 border-dashed"
-                style={{ backgroundColor: activeTool.accentBg, borderColor: activeTool.accent }}
-              >
-                <div className="text-2xl mb-1" aria-hidden>📚</div>
-                <div className="text-[14px] font-extrabold text-stone-900 dark:text-stone-50 mb-0.5">
-                  10 questions ready
-                </div>
-                <div className="text-[11px] text-stone-600 dark:text-stone-400 font-bold">
-                  Built from your saved notes
-                </div>
-              </div>
-            ) : activeTool.inputType === 'input' ? (
-              <input
-                type="text"
-                value={draftText}
-                onChange={(e) => persistDraft(e.target.value)}
-                placeholder={activeTool.placeholder}
-                className="w-full px-4 py-3.5 rounded-2xl bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-700 text-[14px] font-medium text-stone-900 dark:text-stone-50 focus:outline-none focus:border-stone-400 mb-4"
-                style={{ borderColor: draftText ? activeTool.accent : undefined }}
-              />
-            ) : (
-              <textarea
-                value={draftText}
-                onChange={(e) => persistDraft(e.target.value)}
-                placeholder={activeTool.placeholder}
-                rows={5}
-                className="w-full px-4 py-3 rounded-2xl bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-700 text-[14px] font-medium text-stone-900 dark:text-stone-50 focus:outline-none focus:border-stone-400 mb-3 resize-none leading-relaxed"
-                style={{ borderColor: draftText ? activeTool.accent : undefined }}
+            }
+          >
+            {activeTool.id === 'analyze' && (
+              <AnalyzeEssayPage
+                onNavigate={onNavigate}
+                user={user as any}
+                onLogout={onLogout}
+                embedded
               />
             )}
-
-            {activeTool.inputType === 'textarea' && draftText.trim().length > 0 && (
-              <div className="text-[11px] text-stone-400 mb-3 font-bold tabular-nums text-right">
-                {draftText.trim().split(/\s+/).filter(Boolean).length} words
-              </div>
-            )}
-
-            <button
-              type="button"
-              onClick={handleSubmit}
-              className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-2xl font-extrabold text-white text-[15px] border-2 border-b-4 transition-transform active:translate-y-0.5 active:border-b-2"
-              style={{
-                backgroundColor: activeTool.accent,
-                borderColor: activeTool.accentBorder,
-              }}
-            >
-              {activeTool.submitLabel}
-              <span className="text-base" aria-hidden>→</span>
-            </button>
-
-            {/* "Or upload a file" alternate path for the two tools where
-                upload is the dominant input (essay grading and notes →
-                study pack). The full tool page has the real upload
-                UX (PDF / DOCX / TXT parsing); clicking here just routes
-                there with a sessionStorage marker so it can auto-open
-                the file picker on mount. Skipped for daily review (no
-                upload makes sense) and citations (search by topic, not
-                upload). */}
-            {(activeTool.id === 'analyze' || activeTool.id === 'study_pack') && (
-              <button
-                type="button"
-                onClick={() => {
-                  try { sessionStorage.setItem('writescholar_open_upload', activeTool.id); } catch { /* ignore */ }
-                  onNavigate(activeTool.submitPage);
+            {activeTool.id === 'study_pack' && (
+              <StudyPackPage
+                onNavigate={onNavigate}
+                user={user as any}
+                onLogout={onLogout}
+                embedded
+                onEmbeddedToolSwitch={(t) => {
+                  if (t === 'analyze') setDashboardTool('analyze');
+                  else if (t === 'citations') setDashboardTool('citations');
+                  else if (t === 'study_pack') setDashboardTool('study_pack');
                 }}
-                className="w-full mt-2.5 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl font-extrabold text-stone-700 dark:text-stone-200 bg-white dark:bg-stone-900 text-[14px] border-2 border-b-4 border-stone-200 dark:border-stone-700 active:translate-y-0.5 active:border-b-2 transition-transform"
-              >
-                <span aria-hidden>📎</span>
-                {activeTool.id === 'analyze' ? 'Or upload your essay' : 'Or upload your notes'}
-              </button>
+              />
             )}
-          </div>
+            {activeTool.id === 'citations' && (
+              <CitationsPage
+                onNavigate={onNavigate}
+                user={user as any}
+                onLogout={onLogout}
+                embedded
+                onEmbeddedToolSwitch={(t) => {
+                  if (t === 'analyze') setDashboardTool('analyze');
+                  else if (t === 'citations') setDashboardTool('citations');
+                  else if (t === 'study_pack') setDashboardTool('study_pack');
+                }}
+              />
+            )}
+            {activeTool.id === 'daily_review' && (
+              <DailyReviewTab user={user as any} onNavigate={onNavigate} />
+            )}
+          </Suspense>
         </div>
 
         {/* ── PREVIEW SECTION — real screenshots of what the active
