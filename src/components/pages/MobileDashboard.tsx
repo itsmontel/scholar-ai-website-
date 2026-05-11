@@ -219,6 +219,63 @@ const MobileDashboard = ({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitComplete, setSubmitComplete] = useState(false);
 
+  /* File upload state — when the user picks a PDF/DOCX/TXT from the upload
+     button, we POST it to /analysis/parse-document inline and fill the
+     textarea with the parsed content. No navigation. */
+  const [isParsingFile, setIsParsingFile] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const analyzeFileInputRef = useRef<HTMLInputElement>(null);
+  const studyPackFileInputRef = useRef<HTMLInputElement>(null);
+
+  /**
+   * Parse a user-picked file inline on the dashboard. POSTs the file as
+   * FormData to /analysis/parse-document (the same endpoint AnalyzeEssayPage
+   * uses), receives `{ data: { content } }`, fills the draft textarea.
+   * Mirrors AnalyzeEssayPage.processAnalyzeFile exactly.
+   */
+  const handleFileSelected = async (file: File | undefined) => {
+    if (!file) return;
+    setSubmitError(null);
+    setUploadedFileName(file.name);
+
+    // Logged-out users can't parse — bounce to signup like the desktop pages do
+    if (!user) {
+      onNavigate('signup');
+      return;
+    }
+    const token = (() => {
+      try { return localStorage.getItem('authToken'); } catch { return null; }
+    })();
+    if (!token) {
+      onNavigate('login');
+      return;
+    }
+
+    setIsParsingFile(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await BulletproofAPI.upload('/analysis/parse-document', formData, token);
+      const data = await res.json().catch(() => ({} as any));
+      if (!res.ok) {
+        throw new Error(data?.message || `Failed to parse file (${res.status})`);
+      }
+      const content: string = data?.data?.content || '';
+      if (!content.trim()) {
+        throw new Error('We could not read any text from that file.');
+      }
+      persistDraft(content);
+      setUploadedFileName(null);
+      trackEvent('dashboard_file_parsed', { source: 'mobile_dashboard', tool: activeTool.id });
+    } catch (err: any) {
+      console.error('[MobileDashboard] File parse error:', err);
+      setUploadedFileName(null);
+      setSubmitError(err?.message || 'Could not read that file. Try pasting the text instead.');
+    } finally {
+      setIsParsingFile(false);
+    }
+  };
+
   const animationText =
     activeTool.id === 'analyze' ? 'Analyzing your essay' :
     activeTool.id === 'study_pack' ? 'Building your study pack' :
@@ -573,22 +630,50 @@ const MobileDashboard = ({
               )}
             </button>
 
-            {/* Secondary "Upload file" button — only on the two tools that
-                accept file input (essay + notes). Sets a sessionStorage
-                marker; the full tool page auto-opens its native file
-                picker on mount. */}
+            {/* Inline file upload — for essay + study pack. Clicking the
+                visible button triggers the hidden <input type="file">,
+                which POSTs to /analysis/parse-document via BulletproofAPI
+                and fills the draft textarea with the parsed content.
+                NO navigation — everything happens on the dashboard, just
+                like desktop does. */}
             {(activeTool.id === 'analyze' || activeTool.id === 'study_pack') && (
-              <button
-                type="button"
-                onClick={() => {
-                  try { sessionStorage.setItem('writescholar_open_upload', activeTool.id); } catch { /* ignore */ }
-                  onNavigate(activeTool.submitPage);
-                }}
-                className="w-full mt-2.5 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl font-extrabold text-stone-700 dark:text-stone-200 bg-white dark:bg-stone-900 text-[14px] border-2 border-b-4 border-stone-200 dark:border-stone-700 active:translate-y-0.5 active:border-b-2 transition-transform"
-              >
-                <span aria-hidden>📎</span>
-                {activeTool.id === 'analyze' ? 'Or upload your essay' : 'Or upload your notes'}
-              </button>
+              <>
+                <input
+                  ref={activeTool.id === 'analyze' ? analyzeFileInputRef : studyPackFileInputRef}
+                  type="file"
+                  accept=".pdf,.docx,.doc,.txt,.rtf,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    e.target.value = ''; // reset so the same file can be re-picked
+                    void handleFileSelected(f);
+                  }}
+                />
+                <button
+                  type="button"
+                  disabled={isParsingFile}
+                  onClick={() => {
+                    if (activeTool.id === 'analyze') analyzeFileInputRef.current?.click();
+                    else studyPackFileInputRef.current?.click();
+                  }}
+                  className="w-full mt-2.5 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl font-extrabold text-stone-700 dark:text-stone-200 bg-white dark:bg-stone-900 text-[14px] border-2 border-b-4 border-stone-200 dark:border-stone-700 active:translate-y-0.5 active:border-b-2 transition-transform disabled:opacity-70 disabled:cursor-wait"
+                >
+                  {isParsingFile ? (
+                    <>
+                      <span className="inline-block w-4 h-4 border-2 border-stone-500 border-t-transparent rounded-full animate-spin" aria-hidden />
+                      Reading {uploadedFileName ? `"${uploadedFileName}"` : 'your file'}…
+                    </>
+                  ) : (
+                    <>
+                      <span aria-hidden>📎</span>
+                      {activeTool.id === 'analyze' ? 'Or upload your essay' : 'Or upload your notes'}
+                    </>
+                  )}
+                </button>
+                <p className="mt-2 text-[11px] text-center text-stone-500 font-bold">
+                  PDF, DOCX, or TXT · parsed inline on the dashboard
+                </p>
+              </>
             )}
           </div>
         </div>
