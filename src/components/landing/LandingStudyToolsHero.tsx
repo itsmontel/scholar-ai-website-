@@ -260,21 +260,13 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
           </div>
         </LandingScrollReveal>
 
-        {/* ─── Bento grid wrapper with sticker annotations ─── */}
+        {/* ─── Bento grid wrapper ─── */}
         <div className="relative">
-          {/* Floating annotation stickers (decoration only) */}
-          <Sticker className="hidden lg:flex -top-6 -left-3 rotate-[-4deg]" tone="green" emoji="✨">
-            <span className="font-extrabold">Free plan</span> included
-          </Sticker>
-          <Sticker className="hidden lg:flex -top-4 -right-2 rotate-[3deg]" tone="orange" emoji="⚡">
-            Built in <span className="font-extrabold">&lt;60s</span>
-          </Sticker>
-          <Sticker className="hidden xl:flex top-1/2 -left-10 -translate-y-1/2 rotate-[-6deg]" tone="blue" emoji="🎯">
-            <span className="font-extrabold">92%</span> recall rate
-          </Sticker>
-          <Sticker className="hidden xl:flex top-1/3 -right-8 rotate-[5deg]" tone="purple" emoji="🎮">
-            <span className="font-extrabold">Boss-battle</span> revision
-          </Sticker>
+          {/* The four floating sticker annotations ("Free plan included",
+              "Built in <60s", "92% recall rate", "Boss-battle revision")
+              were removed per user feedback — they added visual noise and
+              the trust signals are already covered by the CTA strip below
+              ("Free plan included · No credit card · Cancel anytime"). */}
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 lg:gap-6 auto-rows-min">
             {TOOLS.map((tool, i) => (

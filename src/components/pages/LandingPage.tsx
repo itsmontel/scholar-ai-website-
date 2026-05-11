@@ -731,33 +731,32 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
         {/* Base off-white */}
         <div className="absolute inset-0 bg-[#fafafa] dark:bg-[#0c0a09]" />
 
-        {/* Top-left: BLUE wash — softened (was 0.28, too intense). Keeps
-            the cool tone but reads as ambient atmosphere rather than a
-            saturated coloured corner. */}
+        {/* Top-left: BLUE wash — further softened (was 0.15, still too
+            intense per user). Now reads as a whisper of cool atmosphere
+            rather than a coloured corner. */}
         <div
-          className="pointer-events-none absolute -top-40 -left-[12%] h-[min(95vw,42rem)] w-[min(95vw,42rem)] rounded-full bg-[#1CB0F6]/[0.15] blur-[100px] dark:bg-[#1CB0F6]/[0.13] animate-landing-hero-blob"
+          className="pointer-events-none absolute -top-40 -left-[12%] h-[min(95vw,42rem)] w-[min(95vw,42rem)] rounded-full bg-[#1CB0F6]/[0.08] blur-[100px] dark:bg-[#1CB0F6]/[0.09] animate-landing-hero-blob"
           aria-hidden
         />
 
-        {/* Top-right: PURPLE wash — softened (was 0.26, too intense).
-            Still anchors the brand colour into the bg, just no longer
-            competes with the foreground content. */}
+        {/* Top-right: PURPLE wash — further softened (was 0.14, still
+            too intense per user). Brand colour anchor without dominance. */}
         <div
-          className="pointer-events-none absolute -top-40 -right-[10%] h-[min(95vw,40rem)] w-[min(95vw,40rem)] rounded-full bg-[#A560E8]/[0.14] blur-[100px] dark:bg-[#A560E8]/[0.13] animate-landing-hero-blob-delayed"
+          className="pointer-events-none absolute -top-40 -right-[10%] h-[min(95vw,40rem)] w-[min(95vw,40rem)] rounded-full bg-[#A560E8]/[0.07] blur-[100px] dark:bg-[#A560E8]/[0.08] animate-landing-hero-blob-delayed"
           aria-hidden
         />
 
-        {/* Bottom-left: ORANGE warm wash — unchanged. Adds colour-
-            temperature contrast against the cool blue/purple corners. */}
+        {/* Bottom-left: ORANGE warm wash — kept as-is (user didn't flag
+            this one). The warm note is doing most of the colour work now
+            that the blue/purple are dialled way down. */}
         <div
           className="pointer-events-none absolute -bottom-40 -left-[8%] h-[min(85vw,36rem)] w-[min(85vw,36rem)] rounded-full bg-[#FF9600]/[0.18] blur-[110px] dark:bg-[#FF9600]/[0.13] animate-landing-hero-blob"
           aria-hidden
         />
 
-        {/* Bottom-right: PURPLE — softened (was 0.22). Carries brand
-            colour through to the bottom corner without overpowering. */}
+        {/* Bottom-right: PURPLE — further softened (was 0.12). */}
         <div
-          className="pointer-events-none absolute -bottom-40 -right-[10%] h-[min(95vw,40rem)] w-[min(95vw,40rem)] rounded-full bg-[#A560E8]/[0.12] blur-[110px] dark:bg-[#A560E8]/[0.11] animate-landing-hero-blob-delayed"
+          className="pointer-events-none absolute -bottom-40 -right-[10%] h-[min(95vw,40rem)] w-[min(95vw,40rem)] rounded-full bg-[#A560E8]/[0.06] blur-[110px] dark:bg-[#A560E8]/[0.07] animate-landing-hero-blob-delayed"
           aria-hidden
         />
 
@@ -983,17 +982,19 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                         className="w-full h-auto block"
                       />
                     </div>
-                    {/* Dance mascot peeking over the top-right corner. z-30
-                        sits above the video frame; negative top/right pushes
-                        the mascot to overlap the corner so it "perches" on
-                        the edge rather than floating in empty space above. */}
+                    {/* Brand logo (main-logo.png) peeking over the top-LEFT
+                        corner of the video — replaces the dance mascot per
+                        user feedback. Same overlap trick (negative top/left)
+                        so it "perches" on the corner rather than floating
+                        above. Logo carries the WriteScholar brand mark
+                        directly into the hero proof point. */}
                     <img
-                      src="/mascot-dance.webp"
+                      src="/main-logo.png"
                       alt=""
                       aria-hidden
                       loading="lazy"
                       decoding="async"
-                      className="pointer-events-none absolute -top-6 -right-3 w-16 h-auto z-30 drop-shadow-[0_14px_28px_rgba(124,58,237,0.35)] motion-safe:animate-mobile-mascot-bob"
+                      className="pointer-events-none absolute -top-6 -left-3 w-16 h-auto z-30 drop-shadow-[0_14px_28px_rgba(124,58,237,0.35)] motion-safe:animate-mobile-mascot-bob"
                     />
                   </div>
                 </div>

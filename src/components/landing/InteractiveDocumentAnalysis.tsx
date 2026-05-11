@@ -313,7 +313,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
         return (
           <p
             key={paraIdx}
-            className={`mb-3 text-[#3C3C3C] dark:text-stone-300 leading-relaxed ${isTitle ? 'text-lg font-extrabold text-left' : 'text-sm text-left text-pretty'}`}
+            className={`mb-3 text-[#3C3C3C] dark:text-stone-300 leading-relaxed ${isTitle ? 'text-sm sm:text-lg font-extrabold text-left' : 'text-[12px] sm:text-sm text-left text-pretty'}`}
             style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
           >
             {range.text}
@@ -323,7 +323,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
       return (
         <p
           key={paraIdx}
-          className={`mb-3 text-[#3C3C3C] dark:text-stone-300 leading-relaxed break-words ${isTitle ? 'text-lg font-extrabold text-left' : 'text-sm text-left text-pretty'}`}
+          className={`mb-3 text-[#3C3C3C] dark:text-stone-300 leading-relaxed break-words ${isTitle ? 'text-sm sm:text-lg font-extrabold text-left' : 'text-[12px] sm:text-sm text-left text-pretty'}`}
           style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
         >
           {segments.map((seg, i) => {
@@ -406,7 +406,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
       <div className="bg-[#1CB0F6] text-white px-6 py-5">
         <div className="flex flex-wrap items-center gap-6">
           <div>
-            <h2 className="text-xl font-extrabold" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>General Academic Assessment</h2>
+            <h2 className="text-base sm:text-xl font-extrabold" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>General Academic Assessment</h2>
           </div>
           <div className="flex items-center gap-6 ml-auto">
             <div className="text-right">
@@ -625,7 +625,7 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
           className={`w-full lg:w-[380px] lg:min-w-[340px] bg-white dark:bg-stone-800/50 border-t-2 lg:border-t-0 lg:border-l-2 border-[#E5E5E5] dark:border-stone-700 overflow-y-auto overscroll-contain max-h-[min(58dvh,460px)] sm:max-h-[420px] lg:max-h-[580px] flex-shrink-0 ${mobileTab !== 'feedback' ? 'hidden lg:block' : ''}`}
         >
           <div className="p-5 md:p-6">
-            <h3 className="text-lg font-extrabold text-[#3C3C3C] dark:text-stone-100 mb-5 flex items-center" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+            <h3 className="text-sm sm:text-lg font-extrabold text-[#3C3C3C] dark:text-stone-100 mb-3 sm:mb-5 flex items-center" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
               <svg className="w-5 h-5 mr-2 text-[#1CB0F6]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
               </svg>
