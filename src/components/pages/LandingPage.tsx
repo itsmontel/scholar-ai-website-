@@ -1084,7 +1084,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     type="button"
                     onClick={() => onNavigate('signup')}
                     aria-label="Start free, get the A"
-                    className="group/btn inline-flex items-center justify-center px-7 py-3.5 sm:px-8 sm:py-4 lg:px-9 lg:py-[18px] rounded-2xl bg-[#58CC02] hover:bg-[#61E002] text-white font-extrabold text-base sm:text-[17px] lg:text-lg border-2 border-b-4 border-[#46A302] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 whitespace-nowrap shadow-[0_8px_28px_-6px_rgba(88,204,2,0.55)] hover:shadow-[0_12px_36px_-6px_rgba(88,204,2,0.75)]"
+                    className="group/btn inline-flex items-center justify-center px-5 py-2.5 sm:px-8 sm:py-4 lg:px-9 lg:py-[18px] rounded-2xl bg-[#58CC02] hover:bg-[#61E002] text-white font-extrabold text-sm sm:text-[17px] lg:text-lg border-2 border-b-4 border-[#46A302] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 whitespace-nowrap shadow-[0_8px_28px_-6px_rgba(88,204,2,0.55)] hover:shadow-[0_12px_36px_-6px_rgba(88,204,2,0.75)]"
                     style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                   >
                     Get started today
@@ -1097,7 +1097,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     type="button"
                     onClick={() => onNavigate('login')}
                     aria-label="Log in to WriteScholar"
-                    className="inline-flex items-center justify-center px-7 py-3.5 sm:px-8 sm:py-4 lg:px-9 lg:py-[18px] rounded-2xl bg-white text-[#6B27A3] font-extrabold text-base sm:text-[17px] lg:text-lg border-2 border-b-4 border-stone-300 hover:bg-stone-50 hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 whitespace-nowrap shadow-[0_8px_28px_-6px_rgba(255,255,255,0.30)]"
+                    className="inline-flex items-center justify-center px-5 py-2.5 sm:px-8 sm:py-4 lg:px-9 lg:py-[18px] rounded-2xl bg-white text-[#6B27A3] font-extrabold text-sm sm:text-[17px] lg:text-lg border-2 border-b-4 border-stone-300 hover:bg-stone-50 hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 whitespace-nowrap shadow-[0_8px_28px_-6px_rgba(255,255,255,0.30)]"
                     style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                   >
                     Log in

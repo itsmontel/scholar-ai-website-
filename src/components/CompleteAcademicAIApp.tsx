@@ -102,6 +102,8 @@ import {
   TUTORIAL_CHECKOUT_CANCEL_MODAL_RESOLVED_KEY,
   TUTORIAL_CHECKOUT_CANCEL_MODAL_SEEN_KEY,
   isTutorialCheckoutCancelModalResolved,
+  isSoftPaywallOnCooldown,
+  markSoftPaywallDismissedNow,
 } from '../constants/paywallSession';
 import BadgeNotificationToast from './common/BadgeNotificationToast';
 import StudyTimerWidget from './common/StudyTimerWidget';
@@ -312,6 +314,9 @@ function readInitialSoftPaywallOpen(u: User | null): boolean {
   try {
     if (sessionStorage.getItem(SOFT_PAYWALL_OPEN_KEY) !== '1') return false;
     if (sessionStorage.getItem(SOFT_PAYWALL_DISMISSED_KEY) === '1') return false;
+    // Weekly cooldown for free users — don't re-open if dismissed in
+    // the last 7 days (persists across sessions / logins).
+    if (isSoftPaywallOnCooldown()) return false;
     const plan = (u.plan || 'free').toLowerCase();
     if (plan === 'pro' || plan === 'premium') return false;
     return true;
@@ -691,6 +696,8 @@ const AcademicAIApp = () => {
       try {
         // If user already dismissed the soft paywall this session, don't re-open it
         if (sessionStorage.getItem(SOFT_PAYWALL_DISMISSED_KEY) === '1') return;
+        // Weekly cooldown — silent if dismissed within the last 7 days.
+        if (isSoftPaywallOnCooldown()) return;
         sessionStorage.setItem(SOFT_PAYWALL_OPEN_KEY, '1');
       } catch {
         /* ignore */
@@ -710,6 +717,8 @@ const AcademicAIApp = () => {
     try {
       // Don't restore if user already dismissed the paywall this session
       if (sessionStorage.getItem(SOFT_PAYWALL_DISMISSED_KEY) === '1') return;
+      // Weekly cooldown — quiet for 7 days after the last dismissal.
+      if (isSoftPaywallOnCooldown()) return;
       if (sessionStorage.getItem(SOFT_PAYWALL_OPEN_KEY) === '1') {
         setApiLimitPaywallOpen(true);
       }
@@ -1444,6 +1453,10 @@ const AcademicAIApp = () => {
             } catch {
               /* ignore */
             }
+            // Persist the dismissal timestamp in localStorage so the
+            // paywall stays quiet for the next 7 days, even across
+            // logouts and fresh sessions.
+            markSoftPaywallDismissedNow();
           }}
           onNavigate={navigateTo}
         />
@@ -1465,6 +1478,8 @@ const AcademicAIApp = () => {
               sessionStorage.removeItem(SOFT_PAYWALL_OPEN_KEY);
               sessionStorage.setItem(SOFT_PAYWALL_DISMISSED_KEY, '1');
             } catch { /* ignore */ }
+            // Weekly cooldown — quiet the paywall for 7 days across sessions.
+            markSoftPaywallDismissedNow();
             void validateAndRefreshTokenRef.current();
           }}
         />
