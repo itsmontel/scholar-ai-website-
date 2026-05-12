@@ -1055,10 +1055,16 @@ html.dark .landing-hero-grid-animate {
    tile staggered by inline animationDelay gives the cluster a calm,
    wave-like motion. */
 @keyframes hero-tile-drift {
+  /* Bumped from a very-subtle ±10px / 2–5px range to a more
+     perceptible elliptical drift — tiles now float up-right →
+     up → up-left → back down over their 7.8s–9.2s cycles. Stays
+     well below "distracting" but reads clearly as movement at a
+     glance. `motion-safe:` still gates this so users with
+     prefers-reduced-motion don't see it. */
   0%, 100% { transform: translate(0px, 0px); }
-  25% { transform: translate(10px, -2px); }
-  50% { transform: translate(0px, -5px); }
-  75% { transform: translate(-10px, -2px); }
+  25%      { transform: translate(14px, -6px); }
+  50%      { transform: translate(0px, -10px); }
+  75%      { transform: translate(-14px, -6px); }
 }
 
 @media (prefers-reduced-motion: reduce) {

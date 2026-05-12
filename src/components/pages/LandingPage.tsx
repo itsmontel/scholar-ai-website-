@@ -373,6 +373,36 @@ function LandingEssayCallout({
   );
 }
 
+/**
+ * Hero "Study Games" tile — single autoplaying <video> that cycles
+ * through Word Blitz → Word Tower → Crater Blast and loops. We can't
+ * use the native `loop` attribute because that prevents `onEnded`
+ * from firing, so we drive the cycle manually. `key={src}` re-mounts
+ * the element on each swap so Safari starts playback cleanly.
+ */
+const HERO_STUDY_GAMES_PLAYLIST = [
+  '/hero-word-blitz.mp4',
+  '/hero-word-tower.mp4',
+  '/writescholar-crater-blast-demo.mp4',
+] as const;
+
+const HeroStudyGamesVideo = () => {
+  const [idx, setIdx] = useState(0);
+  const src = HERO_STUDY_GAMES_PLAYLIST[idx];
+  return (
+    <video
+      key={src}
+      src={src}
+      autoPlay
+      muted
+      playsInline
+      preload="metadata"
+      onEnded={() => setIdx((i) => (i + 1) % HERO_STUDY_GAMES_PLAYLIST.length)}
+      className="absolute inset-0 w-full h-full object-cover"
+    />
+  );
+};
+
 const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { theme: _theme, toggleTheme: _toggleTheme } = useTheme();
@@ -1182,8 +1212,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 {/* Tile 1 — Essay Analyzer — top-left — YELLOW border
                     (was purple, swapped because purple-on-purple disappeared).
                     PNG screenshot of the rubric-90 (A-grade) UI. */}
-                <div className="absolute top-[2%] left-[-1%] lg:left-[0%] motion-safe:animate-[hero-tile-drift_8s_ease-in-out_infinite]">
-                  <div className="w-36 lg:w-40 xl:w-48">
+                <div className="absolute top-[2%] left-[-3%] lg:left-[-2%] motion-safe:animate-[hero-tile-drift_8s_ease-in-out_infinite]">
+                  <div className="w-44 lg:w-52 xl:w-60">
                     <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_18px_42px_-12px_rgba(255,200,0,0.55)] bg-white">
                       <div className="relative aspect-[16/10] w-full bg-stone-100">
                         <img
@@ -1204,7 +1234,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     to the LEFT of it. Pairs with Word Blitz (now pushed to
                     the right) for a symmetric lower-row pair. */}
                 <div className="absolute bottom-[22%] left-[28%] -translate-x-1/2 motion-safe:animate-[hero-tile-drift_9s_ease-in-out_infinite]" style={{ animationDelay: '0.8s' }}>
-                  <div className="w-36 lg:w-40 xl:w-48">
+                  <div className="w-44 lg:w-52 xl:w-60">
                     <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_18px_42px_-12px_rgba(255,200,0,0.55)] bg-stone-950">
                       <div className="relative aspect-[16/10] w-full bg-black">
                         <video src="/hero-flashcards.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
@@ -1215,8 +1245,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 </div>
 
                 {/* Tile 3 — Quiz — top-right — green border */}
-                <div className="absolute top-[2%] right-[-1%] lg:right-[0%] motion-safe:animate-[hero-tile-drift_8.4s_ease-in-out_infinite]" style={{ animationDelay: '1.6s' }}>
-                  <div className="w-36 lg:w-40 xl:w-48">
+                <div className="absolute top-[2%] right-[-3%] lg:right-[-2%] motion-safe:animate-[hero-tile-drift_8.4s_ease-in-out_infinite]" style={{ animationDelay: '1.6s' }}>
+                  <div className="w-44 lg:w-52 xl:w-60">
                     <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_18px_42px_-12px_rgba(255,200,0,0.55)] bg-stone-950">
                       <div className="relative aspect-[16/10] w-full bg-black">
                         <video src="/hero-quiz.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
@@ -1226,45 +1256,62 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </div>
                 </div>
 
-                {/* Tile 4 — Crater Blast — MID-LEFT — red border.
-                    Slightly larger than top row (echoes Knowunity's larger
-                    rocket tile on the left side). */}
-                <div className="absolute top-[42%] left-[-3%] lg:left-[-2%] motion-safe:animate-[hero-tile-drift_8.6s_ease-in-out_infinite]" style={{ animationDelay: '2.4s' }}>
-                  <div className="w-36 lg:w-40 xl:w-48">
+                {/* Tile 4 — Study Games — MID-LEFT. Combines Word
+                    Blitz / Word Tower / Crater Blast into one looping
+                    cycler (see HeroStudyGamesVideo) so we surface all
+                    three arcade games from a single slot. */}
+                <div className="absolute top-[42%] left-[-6%] lg:left-[-5%] motion-safe:animate-[hero-tile-drift_8.6s_ease-in-out_infinite]" style={{ animationDelay: '2.4s' }}>
+                  <div className="w-44 lg:w-52 xl:w-60">
                     <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_22px_50px_-12px_rgba(255,200,0,0.55)] bg-stone-950">
                       <div className="relative aspect-[16/10] w-full bg-black">
-                        <video src="/writescholar-crater-blast-demo.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
+                        <HeroStudyGamesVideo />
                       </div>
-                      <p className="px-2 py-1 text-center text-[10px] lg:text-[11px] font-extrabold text-stone-800 bg-white border-t-2 border-[#FFC800]/40">Crater Blast Game</p>
+                      <p className="px-2 py-1 text-center text-[10px] lg:text-[11px] font-extrabold text-stone-800 bg-white border-t-2 border-[#FFC800]/40">Fun Study Games</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Tile 5 — Word Tower — MID-RIGHT — orange border.
-                    Larger like Tile 4 (echoes Knowunity's graduation cap). */}
-                <div className="absolute top-[44%] right-[-3%] lg:right-[-2%] motion-safe:animate-[hero-tile-drift_9.2s_ease-in-out_infinite]" style={{ animationDelay: '3.2s' }}>
-                  <div className="w-36 lg:w-40 xl:w-48">
+                {/* Tile 5 — Premium essay analysis — MID-RIGHT.
+                    Screenshot of the comprehensive analysis report
+                    (/full-report.png) — same asset the onboarding's
+                    "essay-deep-dive" slide uses. Replaces the Word
+                    Tower video; the game now plays from the
+                    consolidated "Study Games" tile on the left. */}
+                <div className="absolute top-[44%] right-[-6%] lg:right-[-5%] motion-safe:animate-[hero-tile-drift_9.2s_ease-in-out_infinite]" style={{ animationDelay: '3.2s' }}>
+                  <div className="w-44 lg:w-52 xl:w-60">
                     <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_22px_50px_-12px_rgba(255,200,0,0.55)] bg-white">
                       <div className="relative aspect-[16/10] w-full bg-stone-100">
-                        <video src="/hero-word-tower.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
+                        <img
+                          src="/full-report.png"
+                          alt=""
+                          loading="eager"
+                          decoding="async"
+                          className="absolute inset-0 w-full h-full object-cover object-top"
+                        />
                       </div>
-                      <p className="px-2 py-1 text-center text-[10px] lg:text-[11px] font-extrabold text-stone-800 bg-white border-t-2 border-[#FFC800]/40">Word Tower Game</p>
+                      <p className="px-2 py-1 text-center text-[10px] lg:text-[11px] font-extrabold text-stone-800 bg-white border-t-2 border-[#FFC800]/40">Premium essay analysis</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Tile 6 — Word Blitz Game — BOTTOM-CENTER — pink border.
-                    Lifted to bottom-[22%] (was bottom-[1%]) so it sits in
-                    the empty space directly under the CTA button without
-                    bleeding into the feature-icons row that follows the
-                    inner hero wrapper. */}
-                <div className="absolute bottom-[22%] left-[62%] -translate-x-1/2 motion-safe:animate-[hero-tile-drift_7.8s_ease-in-out_infinite]" style={{ animationDelay: '4s' }}>
-                  <div className="w-36 lg:w-40 xl:w-48">
+                {/* Tile 6 — Daily review — BOTTOM-CENTRE. Reuses the
+                    old Word Blitz slot (`bottom-[22%] left-[55%]`).
+                    The daily-review-preview.png screenshot is the
+                    same asset the onboarding tour shows on its
+                    "Daily Review" slide. */}
+                <div className="absolute bottom-[22%] left-[55%] -translate-x-1/2 motion-safe:animate-[hero-tile-drift_7.8s_ease-in-out_infinite]" style={{ animationDelay: '4s' }}>
+                  <div className="w-44 lg:w-52 xl:w-60">
                     <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_18px_42px_-12px_rgba(255,200,0,0.55)] bg-white">
                       <div className="relative aspect-[16/10] w-full bg-stone-100">
-                        <video src="/hero-word-blitz.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
+                        <img
+                          src="/daily-review-preview.png"
+                          alt=""
+                          loading="eager"
+                          decoding="async"
+                          className="absolute inset-0 w-full h-full object-cover object-top"
+                        />
                       </div>
-                      <p className="px-2 py-1 text-center text-[9px] lg:text-[10px] font-extrabold text-stone-800 bg-white border-t-2 border-[#FFC800]/40">Word Blitz Game</p>
+                      <p className="px-2 py-1 text-center text-[9px] lg:text-[10px] font-extrabold text-stone-800 bg-white border-t-2 border-[#FFC800]/40">Daily review</p>
                     </div>
                   </div>
                 </div>
@@ -1404,25 +1451,26 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 {/* Reassurance line below the CTA row — tells visitors
                     the action is fast + free of payment friction. White
                     text reads cleanly on the purple hero bg. */}
-                <p className="mt-3 sm:mt-4 text-xs sm:text-sm font-semibold text-white/85">
+                <p className="mt-3 sm:mt-4 text-[10px] sm:text-[11px] font-semibold text-white/85">
                   About 30 seconds to get started. No payment today.
                 </p>
 
-                {/* ─── MOBILE TILE GRID — 3×2, md:hidden ─────────────────
+                {/* ─── MOBILE TILE GRID — 6 tiles, md:hidden ─────────
                     On phones the desktop scatter would overlap the H1,
-                    so we instead show all 6 tiles as a compact 3-col
-                    grid right under the CTA button (user explicit brief:
-                    "on mobile I want all six of them quite small
-                    underneath the h1"). Same brand-colour borders + same
-                    16:10 aspect as desktop, just smaller widths. */}
+                    so we instead show a compact 3-col grid right under
+                    the CTA button. Mirrors the desktop content exactly:
+                    Essay · Flashcards · Quiz on row 1, then Fun Study
+                    Games (the same cycling Word Blitz → Word Tower →
+                    Crater Blast video used on desktop), Premium essay
+                    analysis, and Daily review on row 2. */}
                 <div className="md:hidden mt-10 grid grid-cols-3 gap-2.5 w-full max-w-[20rem] mx-auto">
                   {[
                     { label: 'Essay', src: '/rubric-and-notes.png', isImg: true, color: '#FFC800' },
                     { label: 'Flashcards', src: '/hero-flashcards.mp4', isImg: false, color: '#FFC800' },
                     { label: 'Quiz', src: '/hero-quiz.mp4', isImg: false, color: '#FFC800' },
-                    { label: 'Crater Blast Game', src: '/writescholar-crater-blast-demo.mp4', isImg: false, color: '#FFC800' },
-                    { label: 'Word Tower Game', src: '/hero-word-tower.mp4', isImg: false, color: '#FFC800' },
-                    { label: 'Word Blitz Game', src: '/hero-word-blitz.mp4', isImg: false, color: '#FFC800' },
+                    { label: 'Fun Study Games', src: '', isImg: false, isCycle: true, color: '#FFC800' },
+                    { label: 'Premium analysis', src: '/full-report.png', isImg: true, color: '#FFC800' },
+                    { label: 'Daily review', src: '/daily-review-preview.png', isImg: true, color: '#FFC800' },
                   ].map((t) => (
                     <div
                       key={t.label}
@@ -1430,7 +1478,9 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                       style={{ borderColor: t.color }}
                     >
                       <div className="relative aspect-[16/10] w-full bg-stone-100">
-                        {t.isImg ? (
+                        {t.isCycle ? (
+                          <HeroStudyGamesVideo />
+                        ) : t.isImg ? (
                           <img src={t.src} alt="" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover object-top" />
                         ) : (
                           <video src={t.src} autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
