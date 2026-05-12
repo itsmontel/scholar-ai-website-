@@ -1471,11 +1471,23 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     { label: 'Fun Study Games', src: '', isImg: false, isCycle: true, color: '#FFC800' },
                     { label: 'Premium analysis', src: '/full-report.png', isImg: true, color: '#FFC800' },
                     { label: 'Daily review', src: '/daily-review-preview.png', isImg: true, color: '#FFC800' },
-                  ].map((t) => (
+                  ].map((t, i) => (
+                    /* `hero-tile-drift-mobile` is the dramatic-drift
+                       keyframe (defined in src/index.css). Per-tile
+                       duration + delay arrays stagger the six tiles
+                       so they float out of sync with one another.
+                       `motion-safe:` keeps reduced-motion users
+                       static. Inline `animationDuration` /
+                       `animationDelay` override the values baked
+                       into the Tailwind arbitrary class. */
                     <div
                       key={t.label}
-                      className="rounded-xl overflow-hidden border-2 border-b-[3px] bg-white shadow-[0_10px_22px_-8px_rgba(0,0,0,0.35)]"
-                      style={{ borderColor: t.color }}
+                      className="rounded-xl overflow-hidden border-2 border-b-[3px] bg-white shadow-[0_10px_22px_-8px_rgba(0,0,0,0.35)] motion-safe:animate-[hero-tile-drift-mobile_7s_ease-in-out_infinite]"
+                      style={{
+                        borderColor: t.color,
+                        animationDuration: ['5.5s', '6.4s', '7s', '5.8s', '6.8s', '6.1s'][i % 6],
+                        animationDelay: ['0s', '0.5s', '1s', '1.5s', '2s', '2.5s'][i % 6],
+                      }}
                     >
                       <div className="relative aspect-[16/10] w-full bg-stone-100">
                         {t.isCycle ? (
