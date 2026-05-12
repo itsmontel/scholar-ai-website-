@@ -1014,7 +1014,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     takes less vertical room and the feature-icons row
                     can sit above the fold on a 900px viewport. */}
                 <h1
-                  className="text-[1.3rem] xs:text-[1.5rem] sm:text-[2rem] md:text-[2.25rem] lg:text-[2.5rem] xl:text-[2.85rem] font-extrabold tracking-[-0.02em] leading-[1.05] text-white mb-5 sm:mb-6"
+                  className="text-[1.5rem] xs:text-[1.7rem] sm:text-[2rem] md:text-[2.25rem] lg:text-[2.5rem] xl:text-[2.85rem] font-extrabold tracking-[-0.02em] leading-[1.05] text-white mb-5 sm:mb-6"
                   style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                 >
                   <span className="block whitespace-nowrap">
@@ -1175,7 +1175,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   border, no background — pure icon + text floating on
                   the purple field. Custom-drawn so the hero feels unique
                   to WriteScholar instead of generic, per user brief. */}
-              <div className="relative z-10 w-full max-w-5xl mx-auto mt-2 sm:mt-7 lg:mt-28 pb-2 px-4">
+              <div className="relative z-10 w-full max-w-5xl mx-auto mt-1 sm:mt-7 lg:mt-28 pb-2 px-4">
                 <div className="flex flex-wrap items-start justify-center gap-x-5 gap-y-4 sm:gap-x-8 sm:gap-y-5">
                   {[
                     {

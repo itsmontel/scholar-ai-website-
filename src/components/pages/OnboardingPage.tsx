@@ -8,9 +8,15 @@ import { trackEvent } from '../../utils/analytics';
 // on first paint so the conversion event isn't racing the script load.
 import { trackTrialConversion } from '../../utils/gtag';
 import BadgeCreature from '../common/BadgeCreature';
+import { markSoftPaywallDismissedNow } from '../../constants/paywallSession';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 const TRIAL_DAYS = 7;
+/* Promo code silently pre-applied to checkout when the user clicks the
+   trial CTA from the hard paywall.  Surfaces a 50% lifetime discount
+   ($19.99/mo → $9.99/mo) so the on-page copy and the Stripe session
+   stay in sync. */
+const HARD_PAYWALL_PROMO_CODE = 'MAY2026';
 
 /* ═══════════════════════════════════════════════════════════════
    OnboardingPage — Duolingo-style interactive onboarding
@@ -49,6 +55,7 @@ type Phase =
   | 'survey-goal'
   | 'survey-features'
   | 'tour-essays'
+  | 'tour-essays-2'
   | 'tour-review'
   | 'tour-study'
   | 'tour-citations'
@@ -57,6 +64,7 @@ type Phase =
   | 'daily-review-intro'
   | 'daily-review-demo'
   | 'daily-review-results'
+  | 'value-prop'
   | 'paywall'
   | 'paywall-hard'
   | 'checkout'
@@ -76,6 +84,7 @@ const PHASE_STEP: Record<string, number> = {
   // All tour phases share the same step "5" — the progress bar holds
   // steady through the personalised tour. Only essays + final step bump.
   'tour-essays': 5,
+  'tour-essays-2': 5,
   'tour-review': 5,
   'tour-study': 5,
   'tour-citations': 5,
@@ -85,13 +94,17 @@ const PHASE_STEP: Record<string, number> = {
   'daily-review-intro': 9,
   'daily-review-demo': 10,
   'daily-review-results': 11,
-  paywall: 9,
+  // Value-prop page sits between the tour and the paywall.  It builds
+  // up the "everything you get" pitch + social proof so the paywall
+  // doesn't land cold.
+  'value-prop': 9,
+  paywall: 10,
   // Hard paywall is the "last chance" interception that fires when a
   // user declines the soft paywall. Same step index — the progress bar
   // stays at 100% so the page still reads as the final beat of the flow.
-  'paywall-hard': 9,
+  'paywall-hard': 10,
 };
-const TOTAL_STEPS = 9;
+const TOTAL_STEPS = 10;
 
 /* ─── Survey: What are you using WriteScholar for? (single-select goal) ─── */
 const GOAL_OPTIONS = [
@@ -168,7 +181,7 @@ const REFERRAL_SOURCES = [
    THIS priority order — so essays (if selected) is always first, then
    the rest fall in the predefined cadence (review → study → citations
    → games → motivation). Used at runtime to derive `tourSequence`. */
-type TourPhase = 'tour-essays' | 'tour-review' | 'tour-study' | 'tour-citations' | 'tour-games' | 'tour-motivation';
+type TourPhase = 'tour-essays' | 'tour-essays-2' | 'tour-review' | 'tour-study' | 'tour-citations' | 'tour-games' | 'tour-motivation';
 const FEATURE_TOUR_ORDER: { id: string; phase: TourPhase }[] = [
   { id: 'essays',       phase: 'tour-essays' },
   { id: 'daily_review', phase: 'tour-review' },
@@ -445,6 +458,540 @@ function MascotGif({
       loading="eager"
       decoding="async"
     />
+  );
+}
+
+/* ─── Annotated screenshot helper ─────────────────────────────────
+   Renders an image with numbered hotspot badges overlaid at given
+   percent coordinates. Each badge is tappable; the active one pulses,
+   gets a coloured outline, and reveals a matching callout below.
+   The visual link (matching number + colour + arrow icon in the
+   callout) makes the badges function as "arrows" from the image to
+   the explanation. */
+function AnnotatedScreenshot({
+  image,
+  alt,
+  color,
+  borderColor,
+  hotspots,
+}: {
+  image: string;
+  alt: string;
+  color: string;
+  borderColor: string;
+  hotspots: { x: number; y: number; title: string; desc: string }[];
+}) {
+  const [activeHotspot, setActiveHotspot] = useState<number>(0);
+  return (
+    <div className="space-y-3">
+      {/* Image with overlaid hotspots */}
+      <div className="relative">
+        <div className="absolute -inset-2 rounded-3xl blur-2xl opacity-25" style={{ backgroundColor: `${color}40` }} aria-hidden />
+        <div className="relative rounded-2xl overflow-hidden border-2 border-b-4 shadow-xl bg-white dark:bg-stone-900" style={{ borderColor }}>
+          <img
+            src={image}
+            alt={alt}
+            className="w-full h-auto block"
+            loading="eager"
+            decoding="async"
+          />
+          {/* Numbered badge dots — absolute over the image */}
+          {hotspots.map((h, i) => {
+            const isOn = activeHotspot === i;
+            return (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setActiveHotspot(i)}
+                aria-label={`Show explanation ${i + 1}: ${h.title}`}
+                className="absolute -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-full font-extrabold transition-all duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
+                style={{
+                  left: `${h.x}%`,
+                  top: `${h.y}%`,
+                  width: isOn ? '34px' : '28px',
+                  height: isOn ? '34px' : '28px',
+                  backgroundColor: color,
+                  color: 'white',
+                  fontSize: isOn ? '15px' : '13px',
+                  boxShadow: isOn
+                    ? `0 0 0 4px white, 0 0 0 7px ${color}, 0 6px 16px rgba(0,0,0,0.25)`
+                    : `0 0 0 3px white, 0 4px 10px rgba(0,0,0,0.25)`,
+                }}
+              >
+                {/* Pulsing halo on the active hotspot */}
+                {isOn && (
+                  <span
+                    aria-hidden
+                    className="absolute inset-0 rounded-full motion-safe:animate-ping"
+                    style={{ backgroundColor: color, opacity: 0.45 }}
+                  />
+                )}
+                <span className="relative">{i + 1}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Callout list — each "arrow" from a numbered badge to its
+          explanation. Tapping a card switches the active hotspot. */}
+      <div className="space-y-2">
+        {hotspots.map((h, i) => {
+          const isOn = activeHotspot === i;
+          return (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setActiveHotspot(i)}
+              className="w-full text-left rounded-2xl border-2 border-b-4 bg-white dark:bg-stone-900 p-3.5 transition-all active:border-b-2 active:translate-y-0.5 flex items-start gap-3"
+              style={{
+                borderColor: isOn ? color : '#E5E5E5',
+                boxShadow: isOn ? `0 8px 22px -10px ${color}55` : undefined,
+              }}
+            >
+              <div className="flex flex-col items-center gap-1 shrink-0">
+                <span
+                  className="flex items-center justify-center rounded-full text-white font-extrabold"
+                  style={{ backgroundColor: color, width: '26px', height: '26px', fontSize: '13px' }}
+                >
+                  {i + 1}
+                </span>
+                {/* Small upward arrow indicator linking the card to the hotspot above */}
+                <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none" aria-hidden>
+                  <path d="M6 1 L6 11 M2 5 L6 1 L10 5" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[13px] sm:text-sm font-extrabold text-[#3C3C3C] dark:text-stone-100 leading-snug" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+                  {h.title}
+                </p>
+                <p className="text-[11px] sm:text-[12px] text-stone-600 dark:text-stone-400 leading-snug font-semibold mt-0.5">
+                  {h.desc}
+                </p>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ─── Essay tour Page 1 — interactive PITCH ──────────────────────
+   Two layouts:
+     • Mobile/tablet (< lg): AnnotatedScreenshot — image with numbered
+       badges + stacked callouts beneath.
+     • Desktop (lg+): image centred, 4 callout cards in the corners,
+       each connected to its matching numbered hotspot on the image
+       via a curved SVG arrow. */
+function EssayPitchVisual({ color, borderColor }: { color: string; borderColor: string }) {
+  // Shared content — same numbers on both layouts.
+  // Badge positions on the image: each one MUST sit on the same side
+  // as its callout column so the arrow doesn't cross another arrow.
+  //   #1  = top-RIGHT column → badge 1 on top-RIGHT of the image (score)
+  //   #2  = top-LEFT  column → badge 2 on top-LEFT  of the image (rubric)
+  //   #3  = bot-LEFT  column → badge 3 on bot-LEFT  of the image (essay text)
+  //   #4  = bot-RIGHT column → badge 4 on bot-RIGHT of the image (revisions)
+  const hotspots: { x: number; y: number; title: string; desc: string; sample?: { strong?: string; improve?: string; concern?: string; lead?: string } }[] = [
+    {
+      // #1 — RIGHT column, badge pinned HIGH on the big "80…B (80-89%)"
+      // score in the green header. Talks about the grade + score system.
+      x: 82, y: 6,
+      title: 'Real /100 grade + score system',
+      desc: 'Every essay is graded out of 100 with a letter grade — using the same rubric weights real professors mark with. You always know how close you are to an A.',
+    },
+    {
+      // #2 — LEFT column, badge sits on the rubric grid below the
+      // green score header. Talks about the 5-category breakdown.
+      x: 22, y: 22,
+      title: 'Five-category rubric breakdown',
+      desc: 'Thesis · Evidence · Structure · Clarity · Mechanics — each scored individually. You see exactly which category is costing you marks instead of guessing.',
+    },
+    {
+      // Swapped from #4 — color-coded text is now #3 (bottom-left).
+      x: 22, y: 68,
+      title: 'Color-coded essay text · hover for AI feedback',
+      desc: 'Your essay text turns green (strong), amber (revise), or red (serious concern). Hover any highlight to read the AI\'s exact feedback for that line.',
+      sample: {
+        lead: 'Sample sentence:',
+        strong: 'The film positions race as both personal and structural,',
+        improve: 'showing a lot of stuff about identity,',
+        concern: 'and hegemony means power.',
+      },
+    },
+    {
+      // Swapped from #3 — annotations are now #4 (bottom-right).
+      x: 78, y: 84,
+      title: 'Line-by-line annotations + revisions',
+      desc: 'Every sentence gets a verdict plus a specific revise-to suggestion. Not "make it better" — actual rewritten lines you can copy straight in.',
+    },
+  ];
+
+  return (
+    <>
+      {/* MOBILE / TABLET — stacked annotated screenshot, no SVG arrows */}
+      <div className="lg:hidden">
+        <AnnotatedScreenshot
+          image="/rubric-and-notes.png"
+          alt="WriteScholar rubric and feedback notes — annotated breakdown"
+          color={color}
+          borderColor={borderColor}
+          hotspots={hotspots.map(({ x, y, title, desc }) => ({ x, y, title, desc }))}
+        />
+      </div>
+
+      {/* DESKTOP — image in centre, callouts in corners, SVG arrows
+          connecting each callout to its hotspot. The viewBox is a
+          fixed 1000×640 frame that matches the container's
+          aspect-[1000/640] so arrow coordinates line up consistently. */}
+      <DesktopArrowCallouts image="/rubric-and-notes.png" color={color} borderColor={borderColor} hotspots={hotspots} />
+    </>
+  );
+}
+
+/* ─── Desktop arrow-callout layout (lg+) ─────────────────────────
+   Flexible 3-column CSS grid: callouts | image | callouts. The grid
+   GROWS with content — no fixed aspect ratio — so longer callout
+   text or a taller screenshot won't break the layout.
+
+   Each callout has a small inline arrow icon on its INNER edge
+   pointing toward the image. Combined with the matching numbered
+   badge on the image itself, the eye reads it as "this callout is
+   connected to that badge". */
+function DesktopArrowCallouts({
+  image,
+  color,
+  borderColor,
+  hotspots,
+}: {
+  image: string;
+  color: string;
+  borderColor: string;
+  hotspots: { x: number; y: number; title: string; desc: string; sample?: { lead?: string; strong?: string; improve?: string; concern?: string } }[];
+}) {
+  // Each callout maps to an index in the hotspots array. We place
+  // them so the arrow direction (left/right) matches the image side
+  // each badge sits on — preventing the arrows from criss-crossing.
+  //   LEFT column  → hotspots[1] (#2 rubric, top), hotspots[2] (#3 color, bottom)
+  //   RIGHT column → hotspots[0] (#1 score, top),  hotspots[3] (#4 annot, bottom)
+  return (
+    /* `items-stretch` (default) lets each side column fill the row
+        height, so `justify-between` on the column can push the top
+        callout flush with the top of the image and the bottom callout
+        flush with the bottom — aligning their arrows with the badges
+        at the top and bottom of the screenshot. */
+    <div className="hidden lg:grid lg:grid-cols-[1fr_minmax(0,1.7fr)_1fr] gap-10 xl:gap-14 items-stretch">
+      {/* LEFT column — callouts #2 (rubric) and #3 (color-coded text).
+          Callout #2 is wrapped in an mt-* offset so it sits a bit lower
+          than the very top — aligning its arrow with the rubric grid,
+          which sits below the green score header. */}
+      <div className="flex flex-col justify-between gap-6 py-2">
+        <div className="mt-10 xl:mt-14">
+          <DesktopCallout n={2} hotspot={hotspots[1]} color={color} arrow="right" />
+        </div>
+        <DesktopCallout n={3} hotspot={hotspots[2]} color={color} arrow="right" />
+      </div>
+
+      {/* CENTRE — image with hotspot badges */}
+      <div className="relative pt-2">
+        <div className="absolute -inset-3 rounded-3xl blur-2xl opacity-25" style={{ backgroundColor: `${color}40` }} aria-hidden />
+        <div className="relative rounded-2xl overflow-hidden border-2 border-b-4 shadow-xl bg-white dark:bg-stone-900" style={{ borderColor }}>
+          <img
+            src={image}
+            alt="WriteScholar rubric and feedback notes — annotated breakdown"
+            className="w-full h-auto block"
+            loading="eager"
+            decoding="async"
+          />
+          {hotspots.map((h, i) => (
+            <span
+              key={i}
+              aria-hidden
+              className="absolute -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-full font-extrabold"
+              style={{
+                left: `${h.x}%`,
+                top: `${h.y}%`,
+                width: '32px',
+                height: '32px',
+                backgroundColor: color,
+                color: 'white',
+                fontSize: '14px',
+                boxShadow: `0 0 0 4px white, 0 0 0 6px ${color}, 0 6px 14px rgba(0,0,0,0.25)`,
+              }}
+            >
+              {i + 1}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* RIGHT column — callouts #1 (score) and #4 (annotations).
+          Callout #1 gets a small NEGATIVE top margin so it sits even
+          higher than the column edge, lining the arrow up with the
+          score badge that's pinned right at the top of the screenshot. */}
+      <div className="flex flex-col justify-between gap-6 py-2">
+        <div className="-mt-3 xl:-mt-5">
+          <DesktopCallout n={1} hotspot={hotspots[0]} color={color} arrow="left" />
+        </div>
+        <DesktopCallout n={4} hotspot={hotspots[3]} color={color} arrow="left" />
+      </div>
+    </div>
+  );
+}
+
+/* Single desktop callout card with a number badge, title, description,
+   optional colour-coded sample, and a dashed arrow on its inner edge
+   pointing toward the centre image. */
+function DesktopCallout({
+  n,
+  hotspot,
+  color,
+  arrow,
+}: {
+  n: number;
+  hotspot: { title: string; desc: string; sample?: { lead?: string; strong?: string; improve?: string; concern?: string } };
+  color: string;
+  arrow: 'left' | 'right';
+}) {
+  return (
+    <div className="relative">
+      {/* Arrow on the inner edge — extends into the column gap so it
+          visually "reaches" toward the image. */}
+      <svg
+        className="absolute top-1/2 -translate-y-1/2 pointer-events-none"
+        style={{
+          width: '40px',
+          height: '24px',
+          ...(arrow === 'right' ? { right: '-44px' } : { left: '-44px' }),
+        }}
+        viewBox="0 0 40 24"
+        aria-hidden
+      >
+        {arrow === 'right' ? (
+          <>
+            <path d="M 2 12 L 30 12" stroke={color} strokeWidth="2.5" strokeDasharray="5 4" strokeLinecap="round" fill="none" />
+            <path d="M 26 5 L 36 12 L 26 19" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          </>
+        ) : (
+          <>
+            <path d="M 38 12 L 10 12" stroke={color} strokeWidth="2.5" strokeDasharray="5 4" strokeLinecap="round" fill="none" />
+            <path d="M 14 5 L 4 12 L 14 19" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          </>
+        )}
+      </svg>
+
+      <div
+        className="rounded-2xl border-2 border-b-4 bg-white dark:bg-stone-900 p-4"
+        style={{ borderColor: color, boxShadow: `0 10px 26px -12px ${color}55` }}
+      >
+        <div className="flex items-start gap-2.5 mb-2">
+          <span
+            className="flex items-center justify-center rounded-full text-white font-extrabold shrink-0"
+            style={{ backgroundColor: color, width: '28px', height: '28px', fontSize: '14px' }}
+          >
+            {n}
+          </span>
+          <p className="text-sm xl:text-[15px] font-extrabold text-[#3C3C3C] dark:text-stone-100 leading-snug" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+            {hotspot.title}
+          </p>
+        </div>
+        <p className="text-[12px] xl:text-[13px] text-stone-600 dark:text-stone-400 leading-snug font-semibold">
+          {hotspot.desc}
+        </p>
+        {hotspot.sample && (
+          <div className="mt-2.5 rounded-lg bg-stone-50 dark:bg-stone-800/70 px-2.5 py-2 text-[12px] leading-relaxed font-semibold">
+            {hotspot.sample.lead && (
+              <p className="text-[9px] font-extrabold uppercase tracking-wider text-stone-400 mb-1">{hotspot.sample.lead}</p>
+            )}
+            <p className="leading-relaxed">
+              {hotspot.sample.strong && (
+                <span
+                  className="px-1 rounded"
+                  style={{ backgroundColor: '#E5F8D0', color: '#3C3C3C', borderBottom: '2px solid #58CC02' }}
+                  title="Strong — solid thesis move"
+                >
+                  {hotspot.sample.strong}
+                </span>
+              )}{' '}
+              {hotspot.sample.improve && (
+                <span
+                  className="px-1 rounded"
+                  style={{ backgroundColor: '#FFF4E0', color: '#3C3C3C', borderBottom: '2px solid #FF9600' }}
+                  title="Improve — too vague, try naming specific examples"
+                >
+                  {hotspot.sample.improve}
+                </span>
+              )}{' '}
+              {hotspot.sample.concern && (
+                <span
+                  className="px-1 rounded"
+                  style={{ backgroundColor: '#FFE8E8', color: '#3C3C3C', borderBottom: '2px solid #FF4B4B' }}
+                  title="Concern — needs a citation"
+                >
+                  {hotspot.sample.concern}
+                </span>
+              )}
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ─── Essay tour Page 2 — COMPREHENSIVE ANALYSIS ────────────────
+   Annotated /full-report.png screenshot showing the five sections
+   of WriteScholar's comprehensive analysis: overall assessment,
+   top suggestions, strengths, areas for improvement, and serious
+   concerns.  Mobile stacks the AnnotatedScreenshot; desktop uses
+   a custom 2-left / 3-right arrow callout layout (since 5 doesn't
+   split evenly into Page 1's 2/2 pattern). */
+function EssayDeepDiveVisual({ color, borderColor }: { color: string; borderColor: string }) {
+  // Non-crossing badge convention, adapted for 5 hotspots:
+  //   #1 = RIGHT column top    (y≈10) — overall assessment, top of report
+  //   #2 = LEFT  column top    (y≈25) — top suggestions, just below
+  //   #3 = RIGHT column middle (y≈50) — strengths, middle of report
+  //   #4 = LEFT  column bottom (y≈74) — areas for improvement
+  //   #5 = RIGHT column bottom (y≈88) — serious concerns, bottom
+  // Right column has 3 callouts (justify-between → top/mid/bot);
+  // left column has 2 (justify-around → ~25%/~75%) — those natural
+  // distribution percentages roughly match the badge y-positions.
+  const hotspots: { x: number; y: number; title: string; desc: string }[] = [
+    {
+      // #1 — RIGHT top — Overall assessment
+      x: 80, y: 20,
+      title: 'Overall assessment',
+      desc: 'Letter grade, /100 score, and a plain-English verdict at the top. The high-level read on where this draft sits before you dive into the details.',
+    },
+    {
+      // #2 — LEFT top — Top suggestions (sits lower to track the report layout)
+      x: 22, y: 32,
+      title: 'Top suggestions',
+      desc: 'The handful of changes that move your grade the most, ranked by impact. Fix these first if you only have 20 minutes before the deadline.',
+    },
+    {
+      // #3 — RIGHT middle — Strengths
+      x: 80, y: 50,
+      title: 'Strengths',
+      desc: 'The specific moves already earning marks: thesis framing, evidence handling, transitions. Each one surfaced with the actual sentence. Keep what works.',
+    },
+    {
+      // #4 — LEFT bottom — Areas for improvement
+      x: 22, y: 74,
+      title: 'Areas for improvement',
+      desc: 'Vague claims, weak signposting, sentences doing too much. Each one comes with a concrete "revise to" suggestion. No guessing what to change.',
+    },
+    {
+      // #5 — RIGHT bottom — Serious concerns
+      x: 80, y: 90,
+      title: 'Serious concerns',
+      desc: 'Missing citations, logic gaps, factual slips. The things professors actually deduct points for. Surfaced before submit, not after the red pen.',
+    },
+  ];
+
+  return (
+    <div className="space-y-3">
+      {/* MOBILE / TABLET — stacked annotated screenshot, no SVG arrows */}
+      <div className="lg:hidden">
+        <AnnotatedScreenshot
+          image="/full-report.png"
+          alt="WriteScholar comprehensive analysis — annotated walkthrough"
+          color={color}
+          borderColor={borderColor}
+          hotspots={hotspots}
+        />
+      </div>
+
+      {/* DESKTOP — image in centre, 2 callouts on the left (justify-around),
+          3 callouts on the right (justify-between). Their natural vertical
+          distribution lines up with the 5 badge y-positions on the image,
+          with mt-* offset wrappers used to fine-tune individual callouts. */}
+      <div className="hidden lg:grid lg:grid-cols-[1fr_minmax(0,1.7fr)_1fr] gap-10 xl:gap-14 items-stretch">
+        {/* LEFT — Top suggestions (#2) sits ~mid-column to track its
+            lower badge; Areas for improvement (#4) anchors near the
+            bottom for badge y=74. justify-around centres them in the
+            remaining space; mt-* on #2 nudges it down to align with
+            its badge. */}
+        <div className="flex flex-col justify-around gap-6 py-2">
+          <div className="mt-16 xl:mt-24">
+            <DesktopCallout n={2} hotspot={hotspots[1]} color={color} arrow="right" />
+          </div>
+          <DesktopCallout n={4} hotspot={hotspots[3]} color={color} arrow="right" />
+        </div>
+
+        {/* CENTRE — image with 5 numbered badges */}
+        <div className="relative pt-2">
+          <div className="absolute -inset-3 rounded-3xl blur-2xl opacity-25" style={{ backgroundColor: `${color}40` }} aria-hidden />
+          <div className="relative rounded-2xl overflow-hidden border-2 border-b-4 shadow-xl bg-white dark:bg-stone-900" style={{ borderColor }}>
+            <img
+              src="/full-report.png"
+              alt="WriteScholar comprehensive analysis — annotated walkthrough"
+              className="w-full h-auto block"
+              loading="eager"
+              decoding="async"
+            />
+            {hotspots.map((h, i) => (
+              <span
+                key={i}
+                aria-hidden
+                className="absolute -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-full font-extrabold"
+                style={{
+                  left: `${h.x}%`,
+                  top: `${h.y}%`,
+                  width: '32px',
+                  height: '32px',
+                  backgroundColor: color,
+                  color: 'white',
+                  fontSize: '14px',
+                  boxShadow: `0 0 0 4px white, 0 0 0 6px ${color}, 0 6px 14px rgba(0,0,0,0.25)`,
+                }}
+              >
+                {i + 1}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* RIGHT — Overall (#1) top, Strengths (#3) middle (y=50), Concerns
+            (#5) bottom (y=90). justify-between pins them top/middle/bottom;
+            small negative margin lifts #1 to align with badge y=20. */}
+        <div className="flex flex-col justify-between gap-6 py-2">
+          <div className="-mt-3 xl:-mt-5">
+            <DesktopCallout n={1} hotspot={hotspots[0]} color={color} arrow="left" />
+          </div>
+          <DesktopCallout n={3} hotspot={hotspots[2]} color={color} arrow="left" />
+          <DesktopCallout n={5} hotspot={hotspots[4]} color={color} arrow="left" />
+        </div>
+      </div>
+
+      {/* B → A revision flip — outcome card that seals the pitch */}
+      <div className="rounded-2xl border-2 border-b-4 px-4 py-4 relative overflow-hidden" style={{ borderColor: '#46A302', backgroundColor: '#E5F8D0' }}>
+        <div className="pointer-events-none absolute -top-10 -right-10 w-28 h-28 rounded-full bg-[#58CC02]/30 blur-2xl" aria-hidden />
+        <p className="relative text-[10px] sm:text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#46A302] mb-2">
+          After one revision pass
+        </p>
+        <div className="relative flex items-center justify-center gap-3">
+          <div className="text-center">
+            <p className="text-2xl sm:text-3xl font-extrabold tabular-nums text-stone-400 line-through decoration-2 decoration-[#FF4B4B]/70" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+              82
+            </p>
+            <p className="text-[9px] font-extrabold uppercase tracking-wider text-stone-400 mt-1">Original · B</p>
+          </div>
+          <svg className="w-6 h-6 text-[#46A302]" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+          <div className="text-center">
+            <p className="text-3xl sm:text-4xl font-extrabold tabular-nums text-[#46A302]" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+              91
+            </p>
+            <p className="text-[9px] font-extrabold uppercase tracking-wider text-[#46A302] mt-1">Revised · A</p>
+          </div>
+        </div>
+        <p className="relative mt-3 text-center text-[11px] sm:text-[12px] font-bold text-[#3C3C3C] leading-snug">
+          That's the difference between a B and the honor roll, built into every analysis you run.
+        </p>
+      </div>
+    </div>
   );
 }
 
@@ -838,6 +1385,14 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
     if (result.length < 3 && !result.includes('tour-review')) {
       result.push('tour-review');
     }
+    // Step 4 — Essay Analyzer is our flagship, so it gets a 2-page
+    // deep dive: page 1 pitches WHY ours is the best, page 2 walks
+    // through rubric + annotations + revision interactively. Splice
+    // tour-essays-2 in right after tour-essays whenever it appears.
+    const essaysIdx = result.indexOf('tour-essays');
+    if (essaysIdx !== -1 && !result.includes('tour-essays-2')) {
+      result.splice(essaysIdx + 1, 0, 'tour-essays-2');
+    }
     return result;
   }, [featureInterests]);
 
@@ -848,16 +1403,17 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
     trackEvent('onboarding_survey_complete', { source: referralSource, features: featureInterests.join(',') });
     // Jump to the FIRST slide in their personalised tour (essays if
     // selected, otherwise the highest-priority feature they picked).
-    goToPhase(tourSequence[0] ?? 'paywall');
+    goToPhase(tourSequence[0] ?? 'value-prop');
   };
 
   const handleTourContinue = () => {
     // Find current position in the personalised sequence and advance.
-    // When we run off the end of the sequence, the soft paywall takes
-    // over so users hit the conversion moment faster.
+    // When we run off the end of the sequence, we route to the
+    // "value-prop" page (everything-you-get + testimonials) which then
+    // hands the user off to the paywall.
     const idx = tourSequence.indexOf(phase as TourPhase);
     if (idx === -1 || idx >= tourSequence.length - 1) {
-      goToPhase('paywall');
+      goToPhase('value-prop');
     } else {
       goToPhase(tourSequence[idx + 1]);
     }
@@ -934,10 +1490,22 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
       } catch { /* assume not eligible */ }
       const successUrl = `${window.location.origin}/dashboard?payment=success`;
       const cancelUrl = `${window.location.origin}/onboarding?preview=aha`;
+      // Users coming from the hard paywall ("last chance" screen)
+      // get the 50%-off promo silently pre-applied to their checkout
+      // session.  The visible copy on that page implies the code is
+      // already on the order, so the Stripe page must match.
+      const promoCode = phase === 'paywall-hard' ? HARD_PAYWALL_PROMO_CODE : undefined;
       const res = await fetch(`${API_URL}/subscriptions/create-checkout-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ planType: 'pro', billingCycle: 'monthly', successUrl, cancelUrl, trialPeriodDays: eligibleForTrial ? TRIAL_DAYS : 0 }),
+        body: JSON.stringify({
+          planType: 'pro',
+          billingCycle: 'monthly',
+          successUrl,
+          cancelUrl,
+          trialPeriodDays: eligibleForTrial ? TRIAL_DAYS : 0,
+          ...(promoCode ? { promoCode } : {}),
+        }),
       });
       const data = await res.json().catch(() => null);
       const url = data?.data?.checkoutUrl;
@@ -959,37 +1527,26 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
   };
 
   // Called when the user clicks "Skip" / "Maybe later" on the SOFT
-  // paywall. Instead of dropping them straight into the dashboard, we
-  // route to the `paywall-hard` last-chance screen. New product rule:
-  // no user reaches the dashboard without starting a trial — so the
-  // hard paywall is the only branch left.
+  // paywall. We route to the `paywall-hard` last-chance screen which
+  // surfaces the 50%-off promo. If they decline THAT too, the hard
+  // paywall's own "No thanks, maybe later" hands them off to the
+  // dashboard via 'transition'.
   const handleSoftPaywallDecline = () => {
     trackEvent('onboarding_paywall_decline_soft');
     goToPhase('paywall-hard');
   };
 
-  // Sign-out from the hard paywall is the ONLY way out without a
-  // trial. Bulletproof version:
-  //   1. Fire the analytics event in a try/catch so it can never
-  //      block the sign-out path.
-  //   2. Clear auth tokens directly — guarantees the user is logged
-  //      out even if the parent's onLogout() callback has any issue.
-  //   3. Call the parent's onLogout() for its other side effects
-  //      (state reset, sessionStorage cleanup, analytics reset).
-  //   4. Force a hard navigation to `/` so React state shuffles
-  //      can't accidentally re-route the user back into onboarding
-  //      (the fresh page load re-bootstraps and lands on the
-  //      public landing page).
-  const handleHardPaywallSignOut = () => {
+  // Hard paywall decline — user picked "No thanks, maybe later".
+  // We still drop them into the dashboard (the hard paywall is now a
+  // soft last-chance offer, not a wall).  Critical UX detail: we mark
+  // the soft paywall as dismissed RIGHT NOW so the dashboard's
+  // "Let's level up your grades" soft paywall doesn't pop the second
+  // they land. The 7-day cooldown then keeps it quiet for a week
+  // before the next nudge.
+  const handleHardPaywallDecline = () => {
     try { trackEvent('onboarding_paywall_decline_hard'); } catch { /* ignore */ }
-    try {
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('user');
-    } catch { /* ignore */ }
-    try { onLogout?.(); } catch { /* ignore */ }
-    if (typeof window !== 'undefined') {
-      window.location.href = '/';
-    }
+    try { markSoftPaywallDismissedNow(); } catch { /* ignore */ }
+    goToPhase('transition');
   };
 
   /* ═══════════ RENDER ═══════════ */
@@ -1346,6 +1903,184 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
     );
   }
 
+  /* ─── VALUE-PROP — pre-paywall page that builds value: the full
+     8-tool grid, social proof, and student testimonials. Routes
+     to the paywall on Continue. ─── */
+  if (phase === 'value-prop') {
+    const testimonials: { quote: string; name: string; meta: string; emoji: string; accent: string; border: string; bg: string }[] = [
+      {
+        quote: "Went from a B to an A on two back-to-back essays. The line-by-line feedback reads like a TA actually marked my draft.",
+        name: 'Maya K.',
+        meta: 'College sophomore · Pre-law',
+        emoji: '📝',
+        accent: '#A560E8', border: '#8A48C7', bg: '#F3EAFF',
+      },
+      {
+        quote: "I used to spend hours making flashcards. Now my notes turn into a full deck in 30 seconds and I actually study them.",
+        name: 'Daniel R.',
+        meta: 'High school junior · AP Bio',
+        emoji: '🎴',
+        accent: '#58CC02', border: '#46A302', bg: '#E5F8D0',
+      },
+      {
+        quote: "Crater Blast made me look forward to reviewing for finals. My friends thought I was joking when I said studying was fun.",
+        name: 'Olivia M.',
+        meta: 'College freshman · Pre-med',
+        emoji: '🎮',
+        accent: '#FF9600', border: '#D97F00', bg: '#FFF4E0',
+      },
+      {
+        quote: "The citation finder saved me three all-nighters this semester. Real sources, formatted correctly, in seconds.",
+        name: 'Aiden T.',
+        meta: 'College senior · English',
+        emoji: '📚',
+        accent: '#1CB0F6', border: '#1899D6', bg: '#DDF4FF',
+      },
+    ];
+
+    return (
+      <div className="h-screen bg-[#F7F7F7] dark:bg-stone-950 flex flex-col overflow-hidden">
+        {/* Header — matches paywall page so the transition feels seamless */}
+        <div className="bg-white dark:bg-stone-900 border-b-2 border-[#E5E5E5] dark:border-stone-800 px-5 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-800">
+              <img src="/main-logo.png" alt="WriteScholar" className="w-full h-full object-contain" loading="eager" width="120" height="120" />
+            </div>
+            <span className="text-lg font-extrabold tracking-tight text-[#3C3C3C] dark:text-stone-100" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>WriteScholar</span>
+          </div>
+          <button type="button" onClick={handleSoftPaywallDecline} className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 font-bold underline underline-offset-4">
+            Skip
+          </button>
+        </div>
+        <div className="h-3 bg-[#E5E5E5] dark:bg-stone-800">
+          <div className="h-full bg-[#58CC02] rounded-r-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
+        </div>
+
+        <div className="flex-1 overflow-y-auto">
+          <div className="px-4 sm:px-6 py-6 sm:py-8 max-w-5xl mx-auto w-full ob-fade-in">
+            {/* Hero */}
+            <div className="text-center mb-6 sm:mb-8">
+              <div className="mb-4">
+                <MascotGif src="/mascot-dance.webp" alt="" size={130} bordered borderColor="#A560E8" bgColor="#F3EAFF" />
+              </div>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border-2 border-[#A560E8]/40 bg-[#F3EAFF] text-[#A560E8] text-[10px] font-extrabold uppercase tracking-wider mb-3">
+                <span aria-hidden>✨</span>
+                Everything you get
+              </span>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#3C3C3C] dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+                Eight tools. <span className="text-[#A560E8]">One paste of your notes.</span>
+              </h1>
+              <p className="mt-2 text-stone-500 dark:text-stone-400 font-bold text-sm sm:text-base max-w-xl mx-auto">
+                From essay feedback to study games, your full academic toolkit lives in one place.
+              </p>
+            </div>
+
+            {/* Trust strip — quick credibility hit before the grid */}
+            <div className="mb-6 sm:mb-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] sm:text-xs font-extrabold text-stone-500 dark:text-stone-400">
+              <span className="inline-flex items-center gap-1.5">
+                <span className="text-[#FF9600] text-base leading-none">★</span>
+                <span className="text-[#3C3C3C] dark:text-stone-100">4.9</span>
+                <span>from 12k+ reviews</span>
+              </span>
+              <span aria-hidden className="text-stone-300 dark:text-stone-600">·</span>
+              <span className="inline-flex items-center gap-1.5">
+                <span aria-hidden>👥</span>
+                <span>Loved by 50k+ students</span>
+              </span>
+              <span aria-hidden className="text-stone-300 dark:text-stone-600">·</span>
+              <span className="inline-flex items-center gap-1.5">
+                <span aria-hidden>📈</span>
+                <span>1.2M+ essays analyzed</span>
+              </span>
+            </div>
+
+            {/* 8-tool feature grid — reuse the paywall tool cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 mb-10">
+              {PAYWALL_TOOLS.map((tool, i) => (
+                <ToolCard key={tool.title} tool={tool} delayMs={i * 60} />
+              ))}
+            </div>
+
+            {/* Testimonials — real students, specific outcomes */}
+            <div className="mb-6">
+              <div className="text-center mb-5">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#58CC02] mb-2">Real students, real results</p>
+                <h2 className="text-xl sm:text-2xl font-extrabold text-[#3C3C3C] dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+                  Students are getting their grades back.
+                </h2>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                {testimonials.map((t, i) => (
+                  <div
+                    key={t.name}
+                    className="rounded-2xl border-2 border-b-4 bg-white dark:bg-stone-900 p-4 sm:p-5 ob-fade-in"
+                    style={{ borderColor: t.border, animationDelay: `${i * 80}ms` }}
+                  >
+                    <div className="flex items-center gap-1 mb-2">
+                      {[0,1,2,3,4].map((s) => (
+                        <span key={s} className="text-[#FF9600] text-sm" aria-hidden>★</span>
+                      ))}
+                    </div>
+                    <p className="text-[13px] sm:text-sm text-[#3C3C3C] dark:text-stone-200 font-semibold leading-snug mb-3">
+                      &ldquo;{t.quote}&rdquo;
+                    </p>
+                    <div className="flex items-center gap-2.5">
+                      <div
+                        className="w-9 h-9 rounded-full flex items-center justify-center border-2 shrink-0"
+                        style={{ borderColor: t.border, backgroundColor: t.bg }}
+                        aria-hidden
+                      >
+                        <span className="text-base">{t.emoji}</span>
+                      </div>
+                      <div>
+                        <p className="text-xs font-extrabold text-[#3C3C3C] dark:text-stone-100 leading-tight" style={{ color: t.accent }}>{t.name}</p>
+                        <p className="text-[10px] font-bold text-stone-500 dark:text-stone-400 leading-tight">{t.meta}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Closing reassurance — frames the next step without pressuring */}
+            <div className="rounded-2xl border-2 border-b-4 border-[#46A302] bg-[#E5F8D0] dark:bg-[#58CC02]/10 px-4 sm:px-5 py-4 sm:py-5 text-center mb-2">
+              <p className="text-sm sm:text-base font-extrabold text-[#3C3C3C] dark:text-stone-100" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+                Ready to unlock all 8 tools?
+              </p>
+              <p className="mt-1 text-xs sm:text-sm font-bold text-stone-600 dark:text-stone-400">
+                Try everything free for {TRIAL_DAYS} days. No charge today. Cancel anytime.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Sticky footer Continue — moves the user to the paywall */}
+        <div className="border-t-2 border-[#E5E5E5] dark:border-stone-800 bg-white dark:bg-stone-900 px-5 sm:px-8 py-4 sm:py-5">
+          <div className="max-w-2xl mx-auto flex justify-end">
+            <button
+              type="button"
+              onClick={() => goToPhase('paywall')}
+              className="w-full sm:w-auto sm:min-w-[220px] py-3.5 px-8 rounded-2xl bg-[#58CC02] text-white font-extrabold text-base uppercase tracking-wide border-2 border-b-4 border-[#46A302] hover:bg-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all flex items-center justify-center gap-2"
+            >
+              Continue
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <style>{`
+          @keyframes obFadeIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          .ob-fade-in { animation: obFadeIn 0.4s ease-out backwards; }
+        `}</style>
+      </div>
+    );
+  }
+
   /* ─── PAYWALL — full 8-tool showcase, Duolingo-styled ─── */
   if (phase === 'paywall') {
     return (
@@ -1376,11 +2111,11 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
               <span aria-hidden>⚡</span>
               Last step, {firstName}!
             </span>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#3C3C3C] dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-              Unlock all 8 tools — <span className="text-[#58CC02]">free for {TRIAL_DAYS} days</span>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#3C3C3C] dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+              You're now ready to <span className="text-[#58CC02]">ace school</span>.
             </h1>
-            <p className="mt-2 text-stone-500 dark:text-stone-400 font-bold text-sm sm:text-base">
-              See every tool in action. No charge today.
+            <p className="mt-3 text-stone-600 dark:text-stone-300 font-bold text-sm sm:text-base max-w-xl mx-auto">
+              You showed up, you set your goal, you sat through the tour. You've showed you take school seriously. Now it's time to make those grades improve.
             </p>
           </div>
 
@@ -1390,9 +2125,6 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
               <div className="pointer-events-none absolute -top-12 -right-12 w-32 h-32 rounded-full bg-[#58CC02]/20 blur-2xl" aria-hidden />
               <p className="relative text-lg font-extrabold text-[#3C3C3C] dark:text-stone-100" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                 Start your free {TRIAL_DAYS}-day trial
-              </p>
-              <p className="relative mt-1 text-sm font-bold text-stone-500 dark:text-stone-400">
-                Then $19.99/mo. Cancel anytime.
               </p>
               <button
                 type="button"
@@ -1410,7 +2142,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
                   </>
                 ) : (
                   <>
-                    {SKIP_ONBOARDING_STRIPE ? `Start my ${TRIAL_DAYS}-day trial` : `Start my ${TRIAL_DAYS}-day free trial`}
+                    Try for FREE
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
@@ -1425,6 +2157,9 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
                 <span aria-hidden>·</span>
                 <span className="inline-flex items-center gap-1"><span className="text-[#58CC02]">✓</span> Loved by 50k+ students</span>
               </div>
+              <p className="relative mt-2 text-[10px] font-bold text-stone-500 dark:text-stone-400">
+                Then $19.99/mo. Cancel anytime.
+              </p>
             </div>
           </div>
 
@@ -1627,26 +2362,29 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
               </ul>
             </div>
 
-            {/* PROMO BANNER — exclusive 50%-off code revealed on the
-                hard paywall. Yellow Duolingo "ticket" styling so it
-                reads as a one-time bonus, not a permanent discount. */}
+            {/* PROMO BANNER — 50%-off code is silently pre-applied to
+                the checkout session via HARD_PAYWALL_PROMO_CODE. The
+                copy below tells the user the code is already on their
+                order so they don't have to type anything at Stripe. */}
             <div className="relative rounded-2xl border-2 border-b-4 border-[#D4A300] bg-[#FFF4C2] dark:bg-[#FFC800]/10 p-4 sm:p-5 mb-4 overflow-hidden">
               <div className="pointer-events-none absolute -top-10 -right-10 w-28 h-28 rounded-full bg-[#FFC800]/30 blur-2xl" aria-hidden />
               <div className="relative flex items-center gap-3 sm:gap-4">
                 <span aria-hidden className="text-2xl sm:text-3xl shrink-0">🎟️</span>
                 <div className="flex-1 min-w-0 text-left">
                   <p className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#7A5C00]">
-                    Exclusive bonus
+                    <span className="inline-flex items-center gap-1">
+                      <span aria-hidden>✓</span> Code applied to your checkout
+                    </span>
                   </p>
                   <p className="mt-0.5 text-sm sm:text-base font-extrabold text-[#3C3C3C] dark:text-stone-100 leading-snug" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                    Save <span className="text-[#46A302]">50%</span> on your monthly plan after the trial
+                    Save <span className="text-[#46A302]">50%</span> on your first monthly plan after the trial
                   </p>
                   <p className="mt-1 text-[11px] sm:text-xs font-bold text-stone-700 dark:text-stone-300">
-                    Use code{' '}
+                    Code{' '}
                     <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-white dark:bg-stone-900 border-2 border-b-[3px] border-[#D4A300] text-[#7A5C00] font-extrabold tabular-nums tracking-wider">
                       MAY2026
                     </span>{' '}
-                    at billing — $19.99/mo becomes $9.99/mo.
+                    is already on your order. $19.99/mo becomes $9.99/mo at billing — nothing to type in.
                   </p>
                 </div>
               </div>
@@ -1662,8 +2400,8 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
               <p className="relative mt-1 text-sm font-bold text-stone-600 dark:text-stone-400">
                 $0 today ·{' '}
                 <span className="line-through decoration-2 decoration-[#FF4B4B] text-stone-400">$19.99/mo</span>{' '}
-                <span className="text-[#46A302] font-extrabold">$9.99/mo</span> after with{' '}
-                <span className="text-[#7A5C00] font-extrabold tabular-nums">MAY2026</span> code
+                <span className="text-[#46A302] font-extrabold">$9.99/mo</span> after{' '}
+                <span className="text-[#7A5C00] font-extrabold">(discount applied)</span>
               </p>
               <button
                 type="button"
@@ -1698,16 +2436,17 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
               </div>
             </div>
 
-            {/* Subtle, low-contrast escape hatch — only way to leave
-                without starting a trial (per product rule). Sign-out
-                drops them back to the login page; no dashboard access. */}
+            {/* Subtle, low-contrast escape hatch — routes the user
+                into the dashboard (via the 'transition' phase). The
+                hard paywall is no longer a wall; weekly-cooldown soft
+                paywalls + free-tier API limits take over from here. */}
             <div className="text-center pb-4">
               <button
                 type="button"
-                onClick={handleHardPaywallSignOut}
+                onClick={handleHardPaywallDecline}
                 className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 font-bold underline underline-offset-4"
               >
-                No thanks, sign me out
+                No thanks, maybe later
               </button>
             </div>
 
@@ -1811,7 +2550,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
           <div className="max-w-xl mx-auto flex justify-end">
             <button
               type="button"
-              onClick={() => goToPhase('paywall')}
+              onClick={() => goToPhase('value-prop')}
               className="w-full sm:w-auto sm:min-w-[200px] py-3.5 px-8 rounded-2xl bg-[#58CC02] text-white font-extrabold text-base uppercase tracking-wide border-2 border-b-4 border-[#46A302] hover:bg-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all"
             >
               Continue
@@ -2094,7 +2833,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
   }
 
   /* ─── TOUR SLIDES ─── */
-  if (phase === 'tour-essays' || phase === 'tour-review' || phase === 'tour-study' || phase === 'tour-citations' || phase === 'tour-games' || phase === 'tour-motivation') {
+  if (phase === 'tour-essays' || phase === 'tour-essays-2' || phase === 'tour-review' || phase === 'tour-study' || phase === 'tour-citations' || phase === 'tour-games' || phase === 'tour-motivation') {
     // Dynamic eyebrow: "TOOL X OF Y" — X is position in the user's
     // personalised tour, Y is total slides they'll see.
     const tourIdx = tourSequence.indexOf(phase as TourPhase);
@@ -2103,16 +2842,26 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
       const i = tourSequence.indexOf(slot);
       return i === -1 ? `TOOL ? OF ${totalTools}` : `TOOL ${i + 1} OF ${totalTools}`;
     };
-    const slideData: Record<string, { mascot: string; color: string; borderColor: string; bgColor: string; eyebrow: string; title: string; speech: string; visual: 'essay' | 'screenshot' | 'tools' | 'motivation' | 'citations' | 'games' }> = {
+    const slideData: Record<string, { mascot: string; color: string; borderColor: string; bgColor: string; eyebrow: string; title: string; speech: string; visual: 'essay' | 'essay-deep-dive' | 'screenshot' | 'tools' | 'motivation' | 'citations' | 'games' }> = {
       'tour-essays': {
         mascot: '/mascot-paper.webp',
         color: '#A560E8',
         borderColor: '#8A48C7',
         bgColor: '#F3EAFF',
         eyebrow: eyebrowFor('tour-essays'),
-        title: 'Get professor-level feedback',
-        speech: "Upload your essay and I'll give you professor style line-by-line feedback, rubric scores, and structure tips — see for yourself on the sample below!",
+        title: 'The world’s best essay analyzer',
+        speech: "We're not your average AI grader. Trained on thousands of graded papers. The feedback you get reads like a TA marked up your draft, not a chatbot. Everything you need to get a perfect grade.",
         visual: 'essay',
+      },
+      'tour-essays-2': {
+        mascot: '/mascot-laptop.webp',
+        color: '#A560E8',
+        borderColor: '#8A48C7',
+        bgColor: '#F3EAFF',
+        eyebrow: eyebrowFor('tour-essays-2'),
+        title: 'Comprehensive analysis',
+        speech: "Overall verdict, top suggestions, strengths, areas to improve, and serious concerns. Every angle of your draft covered in plain English so you know exactly what to fix next.",
+        visual: 'essay-deep-dive',
       },
       'tour-review': {
         mascot: '/mascot-study.webp',
@@ -2179,9 +2928,13 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
         <TopBar showBack onBack={() => goToPhase(prevMap[phase])} />
 
         <div className={`flex-1 overflow-y-auto transition-opacity duration-200 ${phaseVisible ? 'opacity-100' : 'opacity-0'}`}>
-          <div className="px-4 sm:px-6 py-5 max-w-2xl mx-auto">
-            {/* Mascot + speech bubble — top-left layout */}
-            <div className="flex items-start gap-3 mb-5">
+          {/* Essay tour pages need MUCH more horizontal room for the
+              4-callout arrow layout. Other tour slides stay narrow. */}
+          <div className={`px-4 sm:px-6 py-5 mx-auto ${(phase === 'tour-essays' || phase === 'tour-essays-2') ? 'max-w-2xl lg:max-w-6xl xl:max-w-7xl' : 'max-w-2xl'}`}>
+            {/* Mascot + speech bubble — centered in the original narrow
+                container so the chat header looks the same as on other
+                tour slides, even when the visual below is wider. */}
+            <div className="flex items-start gap-3 mb-5 max-w-2xl mx-auto">
               <img
                 src={slide.mascot}
                 alt=""
@@ -2201,71 +2954,28 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
               </div>
             </div>
 
-            {/* Title — left aligned, higher up */}
-            <h1 className="text-xl sm:text-2xl font-extrabold text-[#3C3C3C] dark:text-stone-50 leading-tight mb-5" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+            {/* Title — left aligned, also centred-block in the narrow
+                container so it lines up with the speech bubble. */}
+            <h1 className="text-xl sm:text-2xl font-extrabold text-[#3C3C3C] dark:text-stone-50 leading-tight mb-5 max-w-2xl mx-auto" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
               {slide.title}
             </h1>
 
             {/* Visual preview */}
             <div>
               {slide.visual === 'essay' && (
-                /* Real annotated essay screenshots — same images used on the
-                   landing page so users immediately see what "professor-level
-                   feedback" looks like. No interactive button — the value
-                   is the image itself. */
-                <div className="space-y-3">
-                  {/* Caption above the screenshot */}
-                  <div className="flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-wider" style={{ color: slide.color }}>
-                    <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: slide.color }} />
-                    Real WriteScholar feedback · live demo
-                  </div>
+                /* PAGE 1 — pitch. Why our Essay Analyzer is the best
+                   in the world: stat badges + 4 interactive pillar
+                   cards + social proof. Heavy on outcome language,
+                   light on screenshots (those live on page 2). */
+                <EssayPitchVisual color={slide.color} borderColor={slide.borderColor} />
+              )}
 
-                  {/* Screenshot 1: rubric & notes */}
-                  <div className="relative">
-                    <div className="absolute -inset-2 rounded-3xl blur-2xl opacity-25" style={{ backgroundColor: `${slide.color}40` }} aria-hidden />
-                    <div className="relative rounded-2xl overflow-hidden border-2 border-b-4 shadow-xl bg-white dark:bg-stone-900" style={{ borderColor: slide.borderColor }}>
-                      <img
-                        src="/rubric-and-notes.png"
-                        alt="Sample rubric and feedback notes from an analyzed essay"
-                        className="w-full h-auto block"
-                        loading="eager"
-                        decoding="async"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Screenshot 2: full report */}
-                  <div className="relative">
-                    <div className="relative rounded-2xl overflow-hidden border-2 border-b-4 shadow-xl bg-white dark:bg-stone-900" style={{ borderColor: slide.borderColor }}>
-                      <img
-                        src="/full-report.png"
-                        alt="Sample full written breakdown from an analyzed essay"
-                        className="w-full h-auto block"
-                        loading="eager"
-                        decoding="async"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Annotation key — matches the green/amber/red dots in the screenshots */}
-                  <div className="rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900 px-4 py-3">
-                    <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-stone-400 mb-2">Annotation key</p>
-                    <div className="grid grid-cols-3 gap-2">
-                      <div className="flex items-center gap-1.5">
-                        <span className="w-3 h-3 rounded-full bg-[#58CC02] shrink-0" aria-hidden />
-                        <span className="text-[11px] font-extrabold text-[#3C3C3C] dark:text-stone-200">Strong</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="w-3 h-3 rounded-full bg-[#FF9600] shrink-0" aria-hidden />
-                        <span className="text-[11px] font-extrabold text-[#3C3C3C] dark:text-stone-200">Improve</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="w-3 h-3 rounded-full bg-[#FF4B4B] shrink-0" aria-hidden />
-                        <span className="text-[11px] font-extrabold text-[#3C3C3C] dark:text-stone-200">Concern</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+              {slide.visual === 'essay-deep-dive' && (
+                /* PAGE 2 — comprehensive analysis walkthrough.
+                   Annotated /full-report.png with 4 arrow callouts
+                   on desktop (stacked on mobile), capped off with a
+                   colour key + B → A revision outcome card. */
+                <EssayDeepDiveVisual color={slide.color} borderColor={slide.borderColor} />
               )}
 
               {slide.visual === 'screenshot' && (
