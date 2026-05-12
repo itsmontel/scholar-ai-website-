@@ -428,17 +428,43 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
               {/* Price */}
               <div className="text-center mb-6">
                 {plan.id !== 'free' && billingCycle === 'monthly' && currentPlan === 'free' && isTrialEligible ? (
+                  /* Monthly price display:
+                     • Struck-through "was" price = plan.price + $20
+                       (Pro: $39.99 → $19.99 ; Premium: $59.99 → $39.99).
+                     • Active price = the real plan.price from the
+                       plans data ($19.99 Pro / $39.99 Premium).
+                     Matches the pricing-page treatment. The previous
+                     markup showed plan.price as struck-through and
+                     `plan.price - 10` as the active price, which
+                     displayed $9.99 / $29.99 as the headline. */
                   <div className="flex flex-col items-center gap-1">
                     <span className="text-2xl font-extrabold text-red-600 line-through decoration-2 decoration-red-500">
-                      ${plan.price.toFixed(2)}
+                      ${(plan.price + 20).toFixed(2)}
                     </span>
                     <span className="text-4xl font-extrabold text-stone-800">
-                      ${(plan.price - 10).toFixed(2)}
+                      ${plan.price.toFixed(2)}
                     </span>
                     <span className="text-stone-500 text-sm">
-                      /month <span className="text-[#1CB0F6] font-extrabold">first month only</span>
+                      /month
                     </span>
-                    <span className="text-xs text-stone-500">Then ${plan.price.toFixed(2)}/mo</span>
+                  </div>
+                ) : plan.id !== 'free' && billingCycle === 'yearly' ? (
+                  /* Yearly price display — mirrors the pricing page:
+                     • Struck-through "was" price = plan.price + $100
+                       (Pro: $299.99 → $199.99 ; Premium: $499.99 → $399.99).
+                     • Active price = the real plan.price (which the
+                       plan-data block above sets to the yearly value
+                       when billingCycle === 'yearly'). */
+                  <div className="flex flex-col items-center gap-1">
+                    <span className="text-2xl font-extrabold text-red-600 line-through decoration-2 decoration-red-500">
+                      ${(plan.price + 100).toFixed(2)}
+                    </span>
+                    <span className="text-4xl font-extrabold text-stone-800">
+                      ${plan.price.toFixed(2)}
+                    </span>
+                    <span className="text-stone-500 text-sm">
+                      /year
+                    </span>
                   </div>
                 ) : (
                   <>

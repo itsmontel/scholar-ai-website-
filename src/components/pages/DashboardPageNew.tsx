@@ -713,7 +713,14 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="dashboard" />
 
-      {isFree && (
+      {/* "50% off your first month on monthly plans · use code MAY2026"
+          promo banner — HIDDEN. The render block below is preserved
+          (gated by `false &&`) so this can be re-enabled in one step
+          when the next promo runs: change `false && isFree` to just
+          `isFree` to bring it back. The MAY2026 promo code is still
+          honoured by the onboarding hard-paywall route — only the
+          dashboard banner is suppressed. */}
+      {false && isFree && (
         <div
           role="region"
           aria-label="Limited time promotion"
@@ -868,10 +875,17 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
               )}
               {isFree ? (
                 <>
-                  <div className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl bg-white dark:bg-stone-800 border-2 border-b-4 border-stone-200 dark:border-stone-700">
-                    <span className="text-base leading-none" aria-hidden>✨</span>
-                    <span className="text-sm font-extrabold text-stone-700 dark:text-stone-200">Free plan</span>
-                  </div>
+                  {/* "Free plan" pill — HIDDEN. Kept in code (gated by
+                      `false &&`) so it can be brought back in one step
+                      if we want the plan status visible again. The
+                      Upgrade button beside it stays so free users can
+                      still see / act on the upgrade CTA. */}
+                  {false && (
+                    <div className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl bg-white dark:bg-stone-800 border-2 border-b-4 border-stone-200 dark:border-stone-700">
+                      <span className="text-base leading-none" aria-hidden>✨</span>
+                      <span className="text-sm font-extrabold text-stone-700 dark:text-stone-200">Free plan</span>
+                    </div>
+                  )}
                   <button
                     type="button"
                     onClick={() => onNavigate('pricing')}

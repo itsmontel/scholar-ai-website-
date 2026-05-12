@@ -2820,12 +2820,20 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               </div>
               <h3 className="font-semibold text-xl text-stone-900 dark:text-stone-100 mb-1 pt-1">Pro</h3>
               <p className="text-sm text-stone-500 dark:text-stone-400 mb-6">Most popular for students</p>
+              {/* Price block — struck-through "was" $39.99 sits above
+                  the active $19.99 (matches the pricing + billing pages
+                  so all three surfaces tell the same discount story). */}
               <div className="mb-1 flex flex-col items-start">
+                <span className="text-lg font-semibold text-stone-400 dark:text-stone-500 line-through decoration-2">
+                  $39.99
+                </span>
                 <div className="flex items-baseline flex-wrap gap-x-2 gap-y-1">
                   <span className="text-4xl font-bold text-stone-900 dark:text-stone-50">$19.99</span>
                   <span className="text-stone-500 dark:text-stone-400 text-sm">/month</span>
                 </div>
-                <span className="text-xs text-stone-500 dark:text-stone-500 mt-1">or $199.99/year (save 17%)</span>
+                <span className="text-xs text-stone-500 dark:text-stone-500 mt-1">
+                  or <span className="line-through decoration-1 text-stone-400 dark:text-stone-500">$299.99</span> <span className="font-bold text-stone-700 dark:text-stone-200">$199.99</span>/year
+                </span>
               </div>
               <ul className="space-y-2.5 mb-8 mt-5 flex-1 text-sm sm:text-[0.9375rem] text-stone-600 dark:text-stone-400">
                 <li className="flex gap-2">
@@ -2876,12 +2884,20 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               </div>
               <h3 className="font-semibold text-xl text-stone-900 dark:text-stone-100 mb-1 pt-1">Premium</h3>
               <p className="text-sm text-stone-500 dark:text-stone-400 mb-6">Heavy essays &amp; citations</p>
+              {/* Price block — struck-through "was" $59.99 sits above
+                  the active $39.99 (matches Pro card + pricing/billing
+                  pages). */}
               <div className="mb-1 flex flex-col items-start">
+                <span className="text-lg font-semibold text-stone-400 dark:text-stone-500 line-through decoration-2">
+                  $59.99
+                </span>
                 <div className="flex items-baseline flex-wrap gap-x-2 gap-y-1">
                   <span className="text-4xl font-bold text-stone-900 dark:text-stone-50">$39.99</span>
                   <span className="text-stone-500 dark:text-stone-400 text-sm">/month</span>
                 </div>
-                <span className="text-xs text-stone-500 dark:text-stone-500 mt-1">or $399.99/year (save 17%)</span>
+                <span className="text-xs text-stone-500 dark:text-stone-500 mt-1">
+                  or <span className="line-through decoration-1 text-stone-400 dark:text-stone-500">$499.99</span> <span className="font-bold text-stone-700 dark:text-stone-200">$399.99</span>/year
+                </span>
               </div>
               <ul className="space-y-2.5 mb-8 mt-5 flex-1 text-sm sm:text-[0.9375rem] text-stone-600 dark:text-stone-400">
                 <li className="flex gap-2">

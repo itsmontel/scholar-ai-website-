@@ -406,19 +406,44 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                 <div className="mb-4">
                   {plan.id !== 'free' && billingCycle === 'monthly' ? (
                     <>
+                      {/* Monthly price display:
+                          • Struck-through "was" price = monthlyPrice + $20
+                            (Pro: $39.99 → $19.99 ; Premium: $59.99 → $39.99).
+                          • Active price = the real plan.monthlyPrice from
+                            the plans data ($19.99 Pro / $39.99 Premium).
+                          The previous markup showed `monthlyPrice` as the
+                          struck-through value and `monthlyPrice - 10` as
+                          the active price, which incorrectly displayed
+                          $9.99 / $29.99 as the headline price. */}
                       <div className="flex flex-col items-center gap-1">
                         <span className="text-2xl font-semibold text-stone-400 dark:text-stone-500 line-through decoration-2">
-                          ${plan.monthlyPrice.toFixed(2)}
+                          ${(plan.monthlyPrice + 20).toFixed(2)}
                         </span>
                         <span className="text-4xl font-bold text-stone-800 dark:text-stone-100">
-                          ${(plan.monthlyPrice - 10).toFixed(2)}
+                          ${plan.monthlyPrice.toFixed(2)}
                         </span>
                         <span className="text-stone-500 dark:text-stone-400 text-sm">
-                          /month <span className="text-[#1CB0F6] font-extrabold">first month only</span>
+                          /month
                         </span>
-                        <span className="text-xs text-stone-500 dark:text-stone-400">Then ${plan.monthlyPrice.toFixed(2)}/mo</span>
                       </div>
                     </>
+                  ) : plan.id !== 'free' && billingCycle === 'yearly' ? (
+                    /* Yearly price display:
+                       • Struck-through "was" price = yearlyPrice + $100
+                         (Pro: $299.99 → $199.99 ; Premium: $499.99 → $399.99).
+                       • Active price = the real plan.yearlyPrice from
+                         the plans data. */
+                    <div className="flex flex-col items-center gap-1">
+                      <span className="text-2xl font-semibold text-stone-400 dark:text-stone-500 line-through decoration-2">
+                        ${(plan.yearlyPrice + 100).toFixed(2)}
+                      </span>
+                      <span className="text-4xl font-bold text-stone-800 dark:text-stone-100">
+                        ${plan.yearlyPrice.toFixed(2)}
+                      </span>
+                      <span className="text-stone-500 dark:text-stone-400 text-sm">
+                        /year
+                      </span>
+                    </div>
                   ) : (
                     <>
                       <span className="text-4xl font-bold text-stone-800 dark:text-stone-100">

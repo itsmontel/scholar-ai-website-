@@ -67,6 +67,13 @@ const SOCIAL_PROOF = [
 const TRIAL_DAYS = 7;
 const PRO_MONTHLY = '$19.99';
 const PREMIUM_MONTHLY = '$39.99';
+// Struck-through "was" prices shown next to the active price to make
+// the discount story explicit. Matches the strikethrough treatment on
+// the pricing / billing / landing pages so all four surfaces tell the
+// same story: Pro was $39.99 → now $19.99, Premium was $59.99 → now
+// $39.99.
+const PRO_MONTHLY_WAS = '$39.99';
+const PREMIUM_MONTHLY_WAS = '$59.99';
 
 const SoftPaywall = ({
   userName,
@@ -138,6 +145,7 @@ const SoftPaywall = ({
   }, []);
 
   const monthlyPrice = checkoutPlan === 'premium' ? PREMIUM_MONTHLY : PRO_MONTHLY;
+  const monthlyWas = checkoutPlan === 'premium' ? PREMIUM_MONTHLY_WAS : PRO_MONTHLY_WAS;
   const planName = checkoutPlan === 'premium' ? 'Premium' : 'Pro';
   const hardPaywallFeatures = checkoutPlan === 'premium' ? PREMIUM_FEATURES : FEATURES;
   const planAccent = checkoutPlan === 'premium'
@@ -243,8 +251,13 @@ const SoftPaywall = ({
             : 'border-transparent hover:bg-white/60 dark:hover:bg-stone-700/40'
         }`}
       >
+        {/* Pro / Premium pills now show only the plan name — per
+            user brief the strikethrough + active monthly price was
+            removed so the paywall sells on the free-trial value, not
+            price. The PRO_MONTHLY / PREMIUM_MONTHLY constants stay
+            available higher up so the big price display + post-trial
+            subcopy can still reference them. */}
         <div className="text-sm font-extrabold text-[#3C3C3C] dark:text-stone-100">Pro</div>
-        <div className="text-[10px] font-bold text-stone-500 dark:text-stone-400">{PRO_MONTHLY}/mo</div>
       </button>
       <button
         type="button"
@@ -256,7 +269,6 @@ const SoftPaywall = ({
         }`}
       >
         <div className="text-sm font-extrabold text-[#3C3C3C] dark:text-stone-100">Premium</div>
-        <div className="text-[10px] font-bold text-stone-500 dark:text-stone-400">{PREMIUM_MONTHLY}/mo</div>
       </button>
     </div>
   );
@@ -279,7 +291,7 @@ const SoftPaywall = ({
         </>
       ) : (
         <>
-          {showTrial ? `Start my ${TRIAL_DAYS}-day free trial` : `Upgrade to ${planName}`}
+          {showTrial ? 'Start for free' : `Upgrade to ${planName}`}
           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
             <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
           </svg>
@@ -294,10 +306,13 @@ const SoftPaywall = ({
         hard ? 'z-[250]' : 'z-[110]'
       } ${exiting ? 'animate-pwOut' : visible ? 'animate-pwIn' : 'opacity-0'}`}
     >
-      {/* Backdrop */}
+      {/* Backdrop — non-dismissive in both modes. Per user brief the
+          paywall must only close via the explicit dismiss controls
+          (corner X, "Maybe later", "No thanks"). Clicking the
+          backdrop is a no-op so accidental misclicks can't bounce the
+          user out of the upsell. */}
       <div
         className={`absolute inset-0 backdrop-blur-sm ${hard ? 'bg-black/60' : 'bg-black/50'}`}
-        onClick={hard ? undefined : handleDismiss}
         aria-hidden="true"
       />
 
@@ -308,14 +323,17 @@ const SoftPaywall = ({
         {/* Top accent — thick solid green bar */}
         <div className="h-1.5 bg-[#58CC02] rounded-t-2xl shrink-0" />
 
-        {/* Dismiss X — hidden in hard mode (checkout only) */}
+        {/* Dismiss X — hidden in hard mode (checkout only). Compact:
+            w-7 h-7 (28px hit area) with a 14px icon — same Duolingo
+            chip style, just half the visual weight of the old w-9 h-9
+            so the X doesn't pull focus from the CTA. */}
         {!hard && (
           <button
             onClick={handleDismiss}
-            className="absolute top-4 right-4 z-10 w-9 h-9 flex items-center justify-center rounded-xl bg-[#F7F7F7] dark:bg-stone-800 text-stone-500 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-200 dark:hover:bg-stone-700 transition-all border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 active:border-b-2 active:translate-y-0.5"
+            className="absolute top-3 right-3 z-10 w-7 h-7 flex items-center justify-center rounded-lg bg-[#F7F7F7] dark:bg-stone-800 text-stone-500 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-200 dark:hover:bg-stone-700 transition-all border-2 border-b-[3px] border-[#E5E5E5] dark:border-stone-700 active:border-b-2 active:translate-y-0.5"
             aria-label="Close"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -373,10 +391,15 @@ const SoftPaywall = ({
                 </div>
               )}
               <PrimaryCta />
-              <div className="flex justify-center">
+              {/* "No thanks" — demoted from a prominent orange button
+                  to a small underlined text link below the CTA, same
+                  treatment as the post-tutorial variant's "Maybe later"
+                  so dismissal is reachable but the green CTA stays
+                  the obvious choice. */}
+              <div className="text-center">
                 <button
                   onClick={handleDismiss}
-                  className="text-center text-sm py-2.5 px-8 rounded-xl border-2 border-b-4 border-[#D97F00] bg-[#FF9600] hover:bg-[#E58800] active:border-b-2 active:translate-y-0.5 text-white font-extrabold uppercase tracking-wide transition-all"
+                  className="text-[10px] sm:text-[11px] text-stone-400 dark:text-stone-500 font-bold underline underline-offset-2 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
                 >
                   No thanks
                 </button>
@@ -435,7 +458,7 @@ const SoftPaywall = ({
                     {planName}
                   </span>
                 </div>
-                <div className="pr-16 flex items-baseline gap-2 mb-0.5">
+                <div className="pr-16 flex items-baseline gap-2 mb-0.5 flex-wrap">
                   {showTrial ? (
                     <>
                       <span className="text-4xl sm:text-5xl font-extrabold text-[#58CC02] tabular-nums">$0</span>
@@ -443,6 +466,7 @@ const SoftPaywall = ({
                     </>
                   ) : (
                     <>
+                      <span className="text-2xl sm:text-3xl font-semibold text-stone-400 dark:text-stone-500 line-through decoration-2 tabular-nums">{monthlyWas}</span>
                       <span className="text-4xl sm:text-5xl font-extrabold tabular-nums" style={{ color: planAccent.color }}>{monthlyPrice}</span>
                       <span className="text-base text-[#3C3C3C] dark:text-stone-200 font-extrabold">first month</span>
                     </>
@@ -532,12 +556,12 @@ const SoftPaywall = ({
               <p className="text-stone-500 dark:text-stone-400 text-sm sm:text-[0.9375rem] font-bold leading-relaxed">
                 {variant === 'postTutorial' ? (
                   showTrial
-                    ? <>Start a <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{TRIAL_DAYS}-day free trial</span> on {planName}. Essay analysis, study packs, citations, and games — then <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{monthlyPrice}/mo</span> if you stay. Cancel anytime.</>
-                    : <>Upgrade to {planName} for essay analysis, study packs, citations, and games — <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{monthlyPrice}/mo</span>. Cancel anytime.</>
+                    ? <>Start a <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{TRIAL_DAYS}-day free trial</span> on {planName}. Essay analysis, study packs, citations, and games. Cancel anytime.</>
+                    : <>Upgrade to {planName} for essay analysis, study packs, citations, and games. Cancel anytime.</>
                 ) : showTrial ? (
-                  <>Try {planName} free for <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{TRIAL_DAYS} days</span>, then <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{monthlyPrice}/mo</span> if you continue. Cancel anytime.</>
+                  <>Try {planName} free for <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{TRIAL_DAYS} days</span>. Cancel anytime.</>
                 ) : (
-                  <>Subscribe to {planName}: <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{monthlyPrice}/mo</span>. Cancel anytime.</>
+                  <>Subscribe to {planName}. Cancel anytime.</>
                 )}
               </p>
             </div>
@@ -563,6 +587,7 @@ const SoftPaywall = ({
                   </>
                 ) : (
                   <>
+                    <span className="text-2xl sm:text-3xl font-semibold text-stone-400 dark:text-stone-500 line-through decoration-2 tabular-nums">{monthlyWas}</span>
                     <span className="text-4xl sm:text-5xl font-extrabold tabular-nums" style={{ color: planAccent.color }}>{monthlyPrice}</span>
                     <span className="text-base text-[#3C3C3C] dark:text-stone-200 font-extrabold">first month</span>
                   </>
@@ -643,12 +668,16 @@ const SoftPaywall = ({
               </p>
             )}
 
-            {/* Maybe later — orange secondary button, narrow & centered */}
-            <div className="flex justify-center">
+            {/* "Maybe later" — demoted from a prominent orange button
+                to a small underlined text link sitting just under the
+                Terms / Privacy line. Same dismiss handler, just much
+                lower visual weight so the primary CTA stays the
+                obvious choice. */}
+            <div className="text-center -mt-1">
               <button
                 type="button"
                 onClick={handleDismiss}
-                className="text-center text-sm py-2.5 px-8 rounded-xl border-2 border-b-4 border-[#D97F00] bg-[#FF9600] hover:bg-[#E58800] active:border-b-2 active:translate-y-0.5 text-white font-extrabold uppercase tracking-wide transition-all"
+                className="text-[10px] sm:text-[11px] text-stone-400 dark:text-stone-500 font-bold underline underline-offset-2 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
               >
                 Maybe later
               </button>

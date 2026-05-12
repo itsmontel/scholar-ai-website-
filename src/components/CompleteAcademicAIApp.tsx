@@ -693,15 +693,25 @@ const AcademicAIApp = () => {
 
   useEffect(() => {
     const onOpenPaywall = () => {
+      // [soft-paywall-debug] Temporary trace — see comment at
+      // handleOnboardingComplete dispatch site.
+      console.log('[soft-paywall] listener invoked');
       try {
         // If user already dismissed the soft paywall this session, don't re-open it
-        if (sessionStorage.getItem(SOFT_PAYWALL_DISMISSED_KEY) === '1') return;
+        if (sessionStorage.getItem(SOFT_PAYWALL_DISMISSED_KEY) === '1') {
+          console.log('[soft-paywall] silent: SOFT_PAYWALL_DISMISSED_KEY=1 (dismissed this session)');
+          return;
+        }
         // Weekly cooldown — silent if dismissed within the last 7 days.
-        if (isSoftPaywallOnCooldown()) return;
+        if (isSoftPaywallOnCooldown()) {
+          console.log('[soft-paywall] silent: weekly cooldown active (clear localStorage.writescholar_soft_paywall_dismissed_at to reset)');
+          return;
+        }
         sessionStorage.setItem(SOFT_PAYWALL_OPEN_KEY, '1');
       } catch {
         /* ignore */
       }
+      console.log('[soft-paywall] setApiLimitPaywallOpen(true) — paywall should now render');
       setApiLimitPaywallOpen(true);
       trackEvent('paywall_view', { trigger: 'api_limit_or_upgrade' });
     };
@@ -1085,6 +1095,34 @@ const AcademicAIApp = () => {
       localStorage.setItem('user', JSON.stringify(updatedUser));
     }
     navigateTo(destination);
+
+    // If the onboarding finish flow signalled it wants the dashboard's
+    // soft paywall to surface (handleFinishOnboarding in
+    // OnboardingPage.tsx sets SOFT_PAYWALL_OPEN_KEY = '1' for exactly
+    // this reason), actively dispatch the event the global paywall
+    // listener subscribes to. We can't rely on the restore-on-mount
+    // effect: the user was already logged in throughout the tour, so
+    // `isLoggedIn / user.id / user.plan` haven't changed and that
+    // effect won't re-fire. The listener checks dismissed/cooldown
+    // gates and opens `apiLimitPaywallOpen` in the same render tick
+    // as `navigateTo`, so the dashboard mounts with the paywall
+    // already visible.
+    try {
+      const flag = sessionStorage.getItem(SOFT_PAYWALL_OPEN_KEY);
+      // [soft-paywall-debug] Temporary trace — once we confirm the
+      // post-onboarding paywall fires reliably, drop these console
+      // calls. They report exactly which gate (open flag / dismissed
+      // / cooldown / plan) breaks the chain.
+      console.log('[soft-paywall] handleOnboardingComplete: SOFT_PAYWALL_OPEN_KEY =', flag);
+      if (flag === '1') {
+        console.log('[soft-paywall] dispatching writescholar-open-paywall');
+        window.dispatchEvent(new CustomEvent('writescholar-open-paywall'));
+      } else {
+        console.log('[soft-paywall] not dispatching — SOFT_PAYWALL_OPEN_KEY was not set by handleFinishOnboarding');
+      }
+    } catch (e) {
+      console.error('[soft-paywall] dispatch error', e);
+    }
   };
 
   const handleOnboardingUserUpdate = useCallback(
