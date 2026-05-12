@@ -86,6 +86,168 @@ const LANDING_FAQ_ITEMS: { question: string; answer: string }[] = [
   }
 ];
 
+/* ─── LandingEssayCallouts — desktop-only annotated essay block ───
+   A shrunken /rubric-and-notes.png screenshot with 4 numbered badges
+   on its corners and matching callout cards in the left/right gutters,
+   connected by dashed SVG arrows. Mirrors the onboarding tour's
+   EssayPitchVisual desktop layout (see OnboardingPage.tsx), restyled
+   with the landing page's purple accent so it slots in under the
+   "Analyze papers with feedback that thinks like a professor" hero.
+
+   Non-crossing convention: each numbered badge sits on the same side
+   of the image as its callout column, so the arrows never tangle.
+     #1 — RIGHT column top    (score badge, y≈6)
+     #2 — LEFT  column top    (rubric grid, y≈22)
+     #3 — LEFT  column bottom (color-coded text, y≈68)
+     #4 — RIGHT column bottom (annotations, y≈84) */
+function LandingEssayCallouts() {
+  const color = '#A560E8';
+  const borderColor = '#8A48C7';
+  const hotspots: { x: number; y: number; title: string; desc: string }[] = [
+    {
+      // #1 — score header
+      x: 82, y: 6,
+      title: 'Real /100 grade + letter score',
+      desc: 'Every essay graded out of 100 with a letter grade — using the same rubric weights real professors mark with. You always know how close you are to an A.',
+    },
+    {
+      // #2 — five-category rubric grid
+      x: 22, y: 22,
+      title: 'Five-category rubric breakdown',
+      desc: 'Thesis · Evidence · Structure · Clarity · Mechanics — each scored individually so you see exactly which category is costing you marks.',
+    },
+    {
+      // #3 — color-coded essay text
+      x: 22, y: 68,
+      title: 'Colour-coded essay text',
+      desc: 'Your sentences turn green (strong), amber (revise), or red (serious concern). Hover any highlight to read the AI\'s exact feedback for that line.',
+    },
+    {
+      // #4 — line-by-line annotations
+      x: 78, y: 84,
+      title: 'Line-by-line annotations',
+      desc: 'Every sentence gets a verdict plus a specific revise-to suggestion. Not "make it better" — actual rewritten lines you can copy straight in.',
+    },
+  ];
+
+  return (
+    <div className="hidden lg:grid lg:grid-cols-[1fr_minmax(0,1.6fr)_1fr] gap-10 xl:gap-14 items-stretch">
+      {/* LEFT column — #2 rubric (top), #3 color-coded text (bottom). */}
+      <div className="flex flex-col justify-between gap-6 py-2">
+        <div className="mt-10 xl:mt-14">
+          <LandingEssayCallout n={2} hotspot={hotspots[1]} color={color} arrow="right" />
+        </div>
+        <LandingEssayCallout n={3} hotspot={hotspots[2]} color={color} arrow="right" />
+      </div>
+
+      {/* CENTRE — screenshot with the 4 numbered badges. */}
+      <div className="relative pt-2">
+        <div className="absolute -inset-3 rounded-3xl blur-2xl opacity-25" style={{ backgroundColor: `${color}40` }} aria-hidden />
+        <div className="relative rounded-2xl overflow-hidden border-2 border-b-4 shadow-xl bg-white dark:bg-stone-900" style={{ borderColor }}>
+          <img
+            src="/rubric-and-notes.png"
+            alt="WriteScholar essay analyzer — rubric, score, and annotations"
+            className="w-full h-auto block"
+            loading="lazy"
+            decoding="async"
+          />
+          {hotspots.map((h, i) => (
+            <span
+              key={i}
+              aria-hidden
+              className="absolute -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-full font-extrabold"
+              style={{
+                left: `${h.x}%`,
+                top: `${h.y}%`,
+                width: '32px',
+                height: '32px',
+                backgroundColor: color,
+                color: 'white',
+                fontSize: '14px',
+                boxShadow: `0 0 0 4px white, 0 0 0 6px ${color}, 0 6px 14px rgba(0,0,0,0.25)`,
+              }}
+            >
+              {i + 1}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* RIGHT column — #1 score (top), #4 annotations (bottom). */}
+      <div className="flex flex-col justify-between gap-6 py-2">
+        <div className="-mt-3 xl:-mt-5">
+          <LandingEssayCallout n={1} hotspot={hotspots[0]} color={color} arrow="left" />
+        </div>
+        <LandingEssayCallout n={4} hotspot={hotspots[3]} color={color} arrow="left" />
+      </div>
+    </div>
+  );
+}
+
+/* Single landing-page callout card with a number badge, title,
+   description, and a dashed arrow on its inner edge pointing toward
+   the centre image. Same visual recipe as OnboardingPage's
+   DesktopCallout, kept inline here to keep the module self-contained
+   (no cross-component import gymnastics). */
+function LandingEssayCallout({
+  n,
+  hotspot,
+  color,
+  arrow,
+}: {
+  n: number;
+  hotspot: { title: string; desc: string };
+  color: string;
+  arrow: 'left' | 'right';
+}) {
+  return (
+    <div className="relative">
+      <svg
+        className="absolute top-1/2 -translate-y-1/2 pointer-events-none"
+        style={{
+          width: '40px',
+          height: '24px',
+          ...(arrow === 'right' ? { right: '-44px' } : { left: '-44px' }),
+        }}
+        viewBox="0 0 40 24"
+        aria-hidden
+      >
+        {arrow === 'right' ? (
+          <>
+            <path d="M 2 12 L 30 12" stroke={color} strokeWidth="2.5" strokeDasharray="5 4" strokeLinecap="round" fill="none" />
+            <path d="M 26 5 L 36 12 L 26 19" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          </>
+        ) : (
+          <>
+            <path d="M 38 12 L 10 12" stroke={color} strokeWidth="2.5" strokeDasharray="5 4" strokeLinecap="round" fill="none" />
+            <path d="M 14 5 L 4 12 L 14 19" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          </>
+        )}
+      </svg>
+
+      <div
+        className="rounded-2xl border-2 border-b-4 bg-white dark:bg-stone-900 p-4"
+        style={{ borderColor: color, boxShadow: `0 10px 26px -12px ${color}55` }}
+      >
+        <div className="flex items-start gap-2.5 mb-2">
+          <span
+            className="flex items-center justify-center rounded-full text-white font-extrabold shrink-0"
+            style={{ backgroundColor: color, width: '28px', height: '28px', fontSize: '14px' }}
+          >
+            {n}
+          </span>
+          <p className="text-sm xl:text-[15px] font-extrabold text-stone-900 dark:text-stone-100 leading-snug" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+            {hotspot.title}
+          </p>
+        </div>
+        <p className="text-[12px] xl:text-[13px] text-stone-600 dark:text-stone-400 leading-snug font-semibold">
+          {hotspot.desc}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { theme: _theme, toggleTheme: _toggleTheme } = useTheme();
@@ -569,8 +731,15 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
     document.getElementById('landing-tools')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
+  // The dedicated "Turn a Mid-B Essay Into an A" before/after block is
+  // currently hidden. Fall back to the analyzer demo (#landing-tools)
+  // so the "Rubric & grade" preview card still lands the user
+  // somewhere meaningful — the rubric/grade UI lives inside the demo.
   const scrollToBeforeAfter = () => {
-    document.getElementById('before-after')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const target =
+      document.getElementById('before-after') ??
+      document.getElementById('landing-tools');
+    target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   /** Hero preview cards: land on the embedded demo with Feedback open (annotations list). */
@@ -1343,15 +1512,54 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     className="text-2xl sm:text-3xl lg:text-[2.4rem] xl:text-[2.65rem] font-extrabold text-stone-900 dark:text-stone-50 tracking-tight leading-[1.05]"
                     style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                   >
-                    <span className="block">Analyze papers with feedback</span>
-                    <span className="block mt-1 sm:mt-1.5 text-[#A560E8] dark:text-[#A560E8]">that thinks like a professor</span>
+                    <span className="block">Upload your essay and</span>
+                    <span className="block mt-1 sm:mt-1.5 text-[#A560E8] dark:text-[#A560E8]">get professor style feedback</span>
                   </h2>
                   <p className="mt-3 sm:mt-4 text-sm sm:text-base lg:text-lg text-stone-600 dark:text-stone-400 leading-relaxed max-w-2xl mx-auto">
                     Drop in your essay or paper. Our AI grades structure, clarity, and citations with actionable feedback.
                   </p>
                 </div>
 
-                <div className="relative rounded-2xl sm:rounded-3xl border border-stone-200/70 dark:border-stone-700/60 bg-white/95 dark:bg-stone-900/80 shadow-[0_28px_72px_-28px_rgba(15,23,42,0.16)] dark:shadow-[0_36px_90px_-32px_rgba(0,0,0,0.55)]">
+                {/* MOBILE / TABLET — keep the full interactive live demo
+                    on smaller screens where there isn't horizontal room
+                    for callouts in the margins. */}
+                <div className="lg:hidden relative rounded-2xl sm:rounded-3xl border border-stone-200/70 dark:border-stone-700/60 bg-white/95 dark:bg-stone-900/80 shadow-[0_28px_72px_-28px_rgba(15,23,42,0.16)] dark:shadow-[0_36px_90px_-32px_rgba(0,0,0,0.55)]">
+                  <InteractiveDocumentAnalysis onNavigate={onNavigate} landingHeroEmbed />
+                </div>
+
+                {/* DESKTOP — shrunken annotated essay screenshot with 4
+                    arrow callouts in the corners, mirroring the onboarding
+                    tour's Page 1 EssayPitchVisual. Trades the live demo for
+                    a tighter "marketing" layout that fits more value-prop
+                    copy on a single eye-line. Numbered badges live on the
+                    same side as their callout column so the arrows never
+                    criss-cross.
+                      #1 = RIGHT top    (score badge, y=6)
+                      #2 = LEFT  top    (rubric grid, y=22)
+                      #3 = LEFT  bottom (color-coded text, y=68)
+                      #4 = RIGHT bottom (annotations, y=84) */}
+                <LandingEssayCallouts />
+
+                {/* Below the desktop arrow-callout block, a small "see
+                    the live demo" pointer so the desktop user still has a
+                    one-click path to the interactive analyzer (which now
+                    only renders inline on smaller viewports). */}
+                <div className="hidden lg:block mt-6 text-center">
+                  <a
+                    href="#interactive-essay-demo"
+                    className="inline-flex items-center gap-1.5 text-sm font-extrabold text-[#A560E8] hover:text-[#8A48C7] underline underline-offset-4 decoration-2"
+                  >
+                    Try the live interactive demo
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                    </svg>
+                  </a>
+                </div>
+
+                {/* Hidden anchor target — the interactive demo also
+                    renders below the callouts on lg+, but tucked away
+                    so the marketing layout stays clean above the fold. */}
+                <div id="interactive-essay-demo" className="hidden lg:block mt-10 rounded-2xl sm:rounded-3xl border border-stone-200/70 dark:border-stone-700/60 bg-white/95 dark:bg-stone-900/80 shadow-[0_28px_72px_-28px_rgba(15,23,42,0.16)] dark:shadow-[0_36px_90px_-32px_rgba(0,0,0,0.55)] scroll-mt-24">
                   <InteractiveDocumentAnalysis onNavigate={onNavigate} landingHeroEmbed />
                 </div>
                 <div className="text-center mt-8 sm:mt-10">
@@ -1434,15 +1642,18 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
               </div>
 
-              {/* ─── Before/After essay transformation — concrete visual
-                  proof right after the live demo. Visitors who just watched
-                  the analyzer grade an essay now see the actual transformation
-                  (rough draft → polished A-grade essay). This is the single
-                  strongest conversion signal because it answers the unspoken
-                  "but does it actually work?" objection. ─── */}
-              <div id="before-after" className="w-full mt-12 sm:mt-16">
-                <LandingBeforeAfterSection />
-              </div>
+              {/* ─── Before/After essay transformation — HIDDEN.
+                  The "Turn a Mid-B Essay Into an A" block is intentionally
+                  not rendered. Kept here (commented) so it's easy to flip
+                  back on if we ever want the concrete before→after proof
+                  back in the landing flow. Until then, the desktop arrow-
+                  callout block + the live interactive demo cover the same
+                  conversion job. */}
+              {false && (
+                <div id="before-after" className="w-full mt-12 sm:mt-16">
+                  <LandingBeforeAfterSection />
+                </div>
+              )}
 
               {/* Strong horizontal section break — full-width line with
                   labeled badge in the middle so users clearly see they're
