@@ -1061,15 +1061,15 @@ html.dark .landing-hero-grid-animate {
   75% { transform: translate(-10px, -2px); }
 }
 
-/* More dramatic drift used by the mobile (md:hidden) hero tile grid.
-   Larger ellipse + a small wobble rotation so the six small mobile
-   tiles read as "floating" rather than statically pinned. Desktop
-   tiles keep the subtle `hero-tile-drift` keyframe above. */
+/* Subtle drift used by the mobile (md:hidden) hero tile grid. Small
+   ellipse with a barely-there rotation wobble so the six small
+   mobile tiles read as "gently floating" without scattering. Desktop
+   tiles keep the even-subtler `hero-tile-drift` keyframe above. */
 @keyframes hero-tile-drift-mobile {
-  0%, 100% { transform: translate(0px, 0px)   rotate(0deg); }
-  25%      { transform: translate(16px, -10px) rotate(1.5deg); }
-  50%      { transform: translate(2px, -16px)  rotate(0deg); }
-  75%      { transform: translate(-16px, -10px) rotate(-1.5deg); }
+  0%, 100% { transform: translate(0px, 0px)  rotate(0deg); }
+  25%      { transform: translate(7px, -4px) rotate(0.5deg); }
+  50%      { transform: translate(1px, -7px) rotate(0deg); }
+  75%      { transform: translate(-7px, -4px) rotate(-0.5deg); }
 }
 
 @media (prefers-reduced-motion: reduce) {
