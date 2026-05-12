@@ -3090,7 +3090,13 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
         blockNavigationInteractions={activationCoachPointerGate}
       />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      {/* Scale the analysis-results body down to 80% so the dense
+          essay-text + annotations + rubric layout has more visual
+          breathing room. Site header above is left at 100% for nav
+          consistency. `zoom` is the simplest cross-browser way to
+          shrink content + its hit-targets together (vs `transform:
+          scale` which leaves a ghost-size layout box). */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10" style={{ zoom: 0.8 }}>
         {/* Header */}
         <div className="mb-10">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

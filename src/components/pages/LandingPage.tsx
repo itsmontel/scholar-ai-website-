@@ -7,12 +7,21 @@ import { FOCUS_MODE_CHROME_EXTENSION_URL } from '../../constants/focusMode';
 import { HIDE_FRIENDS } from '../../config/featureFlags';
 import ScholarMascot from '../common/ScholarMascot';
 import DualMascot from '../common/DualMascot';
-import InteractiveDocumentAnalysis, { LANDING_DEMO_FOCUS_FEEDBACK_EVENT } from '../landing/InteractiveDocumentAnalysis';
-import LandingCitationsShowcase from '../landing/LandingCitationsShowcase';
-import LandingStudyToolsHero from '../landing/LandingStudyToolsHero';
-import LandingTestimonialsSection from '../landing/LandingTestimonialsSection';
-import HeroEssayPreviewCard from '../landing/HeroEssayPreviewCard';
-import LandingBeforeAfterSection from '../landing/LandingBeforeAfterSection';
+// Below-the-fold landing sections are lazy-loaded so the hero paints
+// fast. Each chunk is hundreds-of-lines + transitive deps; loading
+// them on demand cuts initial JS for the landing page significantly.
+// `lazyWithRetry` adds chunk-load failure recovery (idle tab / deploy).
+import { lazyWithRetry } from '../../utils/lazyWithRetry';
+import { LANDING_DEMO_FOCUS_FEEDBACK_EVENT } from '../../constants/landingDemoEvents';
+const InteractiveDocumentAnalysis = lazyWithRetry(() => import('../landing/InteractiveDocumentAnalysis'));
+const LandingCitationsShowcase = lazyWithRetry(() => import('../landing/LandingCitationsShowcase'));
+const LandingStudyToolsHero = lazyWithRetry(() => import('../landing/LandingStudyToolsHero'));
+const LandingTestimonialsSection = lazyWithRetry(() => import('../landing/LandingTestimonialsSection'));
+// (HeroEssayPreviewCard & LandingBeforeAfterSection were imported but
+// never rendered — dead imports removed to shrink the eager landing
+// chunk. The Mid-B before/after block is hidden behind a `{false &&}`
+// guard further down; re-add the lazy import there if it's ever turned
+// back on.)
 import LandingScrollReveal from '../landing/LandingScrollReveal';
 import { DEMO_HERO_AFTER_PAPER, DEMO_PAPERS } from '../../data/landingPageDemoAnalysis';
 
@@ -1524,7 +1533,9 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     on smaller screens where there isn't horizontal room
                     for callouts in the margins. */}
                 <div className="lg:hidden relative rounded-2xl sm:rounded-3xl border border-stone-200/70 dark:border-stone-700/60 bg-white/95 dark:bg-stone-900/80 shadow-[0_28px_72px_-28px_rgba(15,23,42,0.16)] dark:shadow-[0_36px_90px_-32px_rgba(0,0,0,0.55)]">
-                  <InteractiveDocumentAnalysis onNavigate={onNavigate} landingHeroEmbed />
+                  <Suspense fallback={<div className="min-h-[520px] w-full" aria-hidden />}>
+                    <InteractiveDocumentAnalysis onNavigate={onNavigate} landingHeroEmbed />
+                  </Suspense>
                 </div>
 
                 {/* DESKTOP — shrunken annotated essay screenshot with 4
@@ -1560,7 +1571,9 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     renders below the callouts on lg+, but tucked away
                     so the marketing layout stays clean above the fold. */}
                 <div id="interactive-essay-demo" className="hidden lg:block mt-10 rounded-2xl sm:rounded-3xl border border-stone-200/70 dark:border-stone-700/60 bg-white/95 dark:bg-stone-900/80 shadow-[0_28px_72px_-28px_rgba(15,23,42,0.16)] dark:shadow-[0_36px_90px_-32px_rgba(0,0,0,0.55)] scroll-mt-24">
-                  <InteractiveDocumentAnalysis onNavigate={onNavigate} landingHeroEmbed />
+                  <Suspense fallback={<div className="min-h-[520px] w-full" aria-hidden />}>
+                    <InteractiveDocumentAnalysis onNavigate={onNavigate} landingHeroEmbed />
+                  </Suspense>
                 </div>
                 <div className="text-center mt-8 sm:mt-10">
                   <button
@@ -1643,17 +1656,12 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               </div>
 
               {/* ─── Before/After essay transformation — HIDDEN.
-                  The "Turn a Mid-B Essay Into an A" block is intentionally
-                  not rendered. Kept here (commented) so it's easy to flip
-                  back on if we ever want the concrete before→after proof
-                  back in the landing flow. Until then, the desktop arrow-
-                  callout block + the live interactive demo cover the same
-                  conversion job. */}
-              {false && (
-                <div id="before-after" className="w-full mt-12 sm:mt-16">
-                  <LandingBeforeAfterSection />
-                </div>
-              )}
+                  The "Turn a Mid-B Essay Into an A" block was removed
+                  from the landing flow. Re-enable by:
+                    1. `const LandingBeforeAfterSection =
+                        lazyWithRetry(() => import('../landing/LandingBeforeAfterSection'));`
+                    2. Render `<Suspense fallback={null}>
+                        <LandingBeforeAfterSection /></Suspense>` here. */}
 
               {/* Strong horizontal section break — full-width line with
                   labeled badge in the middle so users clearly see they're
@@ -1897,7 +1905,9 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
       </section>
 
       {/* Study tools sits above citations — flagship feature first. */}
-      <LandingStudyToolsHero onNavigate={onNavigate} />
+      <Suspense fallback={<div className="min-h-[640px] w-full" aria-hidden />}>
+        <LandingStudyToolsHero onNavigate={onNavigate} />
+      </Suspense>
 
       {/* Social proof: testimonial + universities — placed beneath the
           study-tools showcase so visitors see the "7 study tools" promise
@@ -2242,7 +2252,9 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           feature; on a phone it's just extra scroll. Desktop visitors who
           care about sources still see the full showcase. */}
       <div className="hidden md:block">
-        <LandingCitationsShowcase onNavigate={onNavigate} />
+        <Suspense fallback={<div className="min-h-[520px] w-full" aria-hidden />}>
+          <LandingCitationsShowcase onNavigate={onNavigate} />
+        </Suspense>
       </div>
 
       {/* H2 #2: Create Study Material, hidden (see More tools) */}
@@ -2407,7 +2419,9 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
       )}
 
 
-      <LandingTestimonialsSection />
+      <Suspense fallback={<div className="min-h-[280px] w-full" aria-hidden />}>
+        <LandingTestimonialsSection />
+      </Suspense>
 
 
       {/* ─── "Everything you need to ace school" — feature matrix that

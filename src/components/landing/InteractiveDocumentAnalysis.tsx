@@ -9,8 +9,11 @@ import {
 const REVISION_MARK_CLASS =
   'bg-[#F3EAFF] dark:bg-[#A560E8]/30 text-[#3C3C3C] dark:text-white px-0.5 rounded-sm ring-2 ring-[#A560E8] dark:ring-[#A560E8]/60 ring-offset-1 ring-offset-white dark:ring-offset-[#3C3C3C] [box-decoration-break:clone]';
 
-/** Landing hero: hero “Full interactive demo” CTA scrolls here and focuses the feedback column */
-export const LANDING_DEMO_FOCUS_FEEDBACK_EVENT = 'writescholar:landing-demo-focus-feedback';
+/** Landing hero: hero “Full interactive demo” CTA scrolls here and focuses the feedback column.
+ *  Re-exported from the tiny `constants/landingDemoEvents` module so callers that only need
+ *  the string can import it without pulling in this 775-line component. */
+export { LANDING_DEMO_FOCUS_FEEDBACK_EVENT } from '../../constants/landingDemoEvents';
+import { LANDING_DEMO_FOCUS_FEEDBACK_EVENT } from '../../constants/landingDemoEvents';
 
 /** Demo never applies revisions in-page — keeps highlights static. */
 const EMPTY_APPLIED_IDS = new Set<string>();
