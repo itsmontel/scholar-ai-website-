@@ -8,10 +8,23 @@ import { trackEvent } from '../../utils/analytics';
 // on first paint so the conversion event isn't racing the script load.
 import { trackTrialConversion } from '../../utils/gtag';
 import BadgeCreature from '../common/BadgeCreature';
-import { markSoftPaywallDismissedNow } from '../../constants/paywallSession';
+import { markSoftPaywallDismissedNow, SOFT_PAYWALL_OPEN_KEY } from '../../constants/paywallSession';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 const TRIAL_DAYS = 7;
+
+/**
+ * When true the onboarding tour ends on the `value-prop` screen
+ * ("Eight tools. One paste of your notes.") — the `paywall` and
+ * `paywall-hard` phases that used to follow are unreachable, and the
+ * dashboard's soft paywall pops instead. The render blocks for those
+ * phases are deliberately left in the file so the previous upsell
+ * sequence can be restored in one step:
+ *   • flip this flag to `false`
+ *   • that's it — the existing button onClick + decline handlers fall
+ *     back to the original `goToPhase('paywall' | 'paywall-hard')` paths.
+ */
+const HIDE_END_PAYWALLS = true;
 /* Promo code silently pre-applied to checkout when the user clicks the
    trial CTA from the hard paywall.  Surfaces a 50% lifetime discount
    ($19.99/mo → $9.99/mo) so the on-page copy and the Stripe session
@@ -1531,9 +1544,31 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
   // surfaces the 50%-off promo. If they decline THAT too, the hard
   // paywall's own "No thanks, maybe later" hands them off to the
   // dashboard via 'transition'.
+  //
+  // When HIDE_END_PAYWALLS is on, paywall-hard is hidden and we drop
+  // straight to the dashboard transition. The dashboard's own soft
+  // paywall surfaces from there (see handleFinishOnboarding below for
+  // the SOFT_PAYWALL_OPEN_KEY trigger details).
   const handleSoftPaywallDecline = () => {
     trackEvent('onboarding_paywall_decline_soft');
+    if (HIDE_END_PAYWALLS) {
+      goToPhase('transition');
+      return;
+    }
     goToPhase('paywall-hard');
+  };
+
+  // Exit onboarding from the value-prop screen via the "I'm ready to
+  // begin" button. Sets SOFT_PAYWALL_OPEN_KEY in sessionStorage so the
+  // dashboard's `Restore soft paywall after refresh` effect (see
+  // CompleteAcademicAIApp.tsx ~line 712) reopens the soft paywall the
+  // moment the user lands on the dashboard. This is the post-
+  // onboarding nudge that replaces the old `paywall` + `paywall-hard`
+  // upsell screens.
+  const handleFinishOnboarding = () => {
+    trackEvent('onboarding_complete_via_value_prop');
+    try { sessionStorage.setItem(SOFT_PAYWALL_OPEN_KEY, '1'); } catch { /* ignore */ }
+    goToPhase('transition');
   };
 
   // Hard paywall decline — user picked "No thanks, maybe later".
@@ -1975,23 +2010,51 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
               </p>
             </div>
 
-            {/* Trust strip — quick credibility hit before the grid */}
+            {/* Trust strip — quick credibility hit before the grid.
+                "4.9 from 12k+ reviews" and "1.2M+ essays analyzed" are
+                temporarily hidden via `{false && …}` so the metrics
+                aren't surfaced before they're truly accurate. The
+                "Loved by 50k+ students" item stays visible so the
+                strip still does its credibility job. Flip the gates
+                to `true` (or remove them) to bring the hidden items
+                back. */}
             <div className="mb-6 sm:mb-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] sm:text-xs font-extrabold text-stone-500 dark:text-stone-400">
-              <span className="inline-flex items-center gap-1.5">
-                <span className="text-[#FF9600] text-base leading-none">★</span>
-                <span className="text-[#3C3C3C] dark:text-stone-100">4.9</span>
-                <span>from 12k+ reviews</span>
-              </span>
-              <span aria-hidden className="text-stone-300 dark:text-stone-600">·</span>
-              <span className="inline-flex items-center gap-1.5">
-                <span aria-hidden>👥</span>
-                <span>Loved by 50k+ students</span>
-              </span>
-              <span aria-hidden className="text-stone-300 dark:text-stone-600">·</span>
-              <span className="inline-flex items-center gap-1.5">
-                <span aria-hidden>📈</span>
-                <span>1.2M+ essays analyzed</span>
-              </span>
+              {false && (
+                <>
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="text-[#FF9600] text-base leading-none">★</span>
+                    <span className="text-[#3C3C3C] dark:text-stone-100">4.9</span>
+                    <span>from 12k+ reviews</span>
+                  </span>
+                  <span aria-hidden className="text-stone-300 dark:text-stone-600">·</span>
+                </>
+              )}
+              {/* "Loved by 50,000+ students" — Duolingo-style trust
+                  pill. White rounded pill with a 2px border + 3px
+                  bottom-border lip and a soft drop shadow. 5 yellow
+                  stars sit above a bold headline with the count
+                  accented in brand green. */}
+              <div className="inline-flex items-center gap-3 rounded-full border-2 border-b-[3px] border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900 px-4 py-1.5 shadow-[0_6px_20px_-6px_rgba(0,0,0,0.18)]">
+                <div className="flex flex-col items-center leading-[1.15]">
+                  <span aria-hidden className="flex items-center gap-0.5">
+                    {[0, 1, 2, 3, 4].map((i) => (
+                      <span key={i} className="text-[#FF9600] text-xs">★</span>
+                    ))}
+                  </span>
+                  <span className="text-[12px] sm:text-[13px] font-extrabold text-[#3C3C3C] dark:text-stone-100 tracking-tight">
+                    Loved by <span className="text-[#58CC02] tabular-nums">50,000+</span> students
+                  </span>
+                </div>
+              </div>
+              {false && (
+                <>
+                  <span aria-hidden className="text-stone-300 dark:text-stone-600">·</span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <span aria-hidden>📈</span>
+                    <span>1.2M+ essays analyzed</span>
+                  </span>
+                </>
+              )}
             </div>
 
             {/* 8-tool feature grid — reuse the paywall tool cards */}
@@ -2059,10 +2122,10 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
           <div className="max-w-2xl mx-auto flex justify-end">
             <button
               type="button"
-              onClick={() => goToPhase('paywall')}
+              onClick={HIDE_END_PAYWALLS ? handleFinishOnboarding : () => goToPhase('paywall')}
               className="w-full sm:w-auto sm:min-w-[220px] py-3.5 px-8 rounded-2xl bg-[#58CC02] text-white font-extrabold text-base uppercase tracking-wide border-2 border-b-4 border-[#46A302] hover:bg-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all flex items-center justify-center gap-2"
             >
-              Continue
+              {HIDE_END_PAYWALLS ? "I'm ready to begin" : 'Continue'}
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
@@ -2082,6 +2145,16 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
   }
 
   /* ─── PAYWALL — full 8-tool showcase, Duolingo-styled ─── */
+  /* Hidden when HIDE_END_PAYWALLS is on. The render block below is
+     intentionally preserved so flipping the flag to `false` brings
+     this entire screen back without re-typing it. The defensive short-
+     circuit handles the edge case where some other code path sets
+     phase = 'paywall' while the flag is on — we just send the user
+     straight to the dashboard transition. */
+  if (phase === 'paywall' && HIDE_END_PAYWALLS) {
+    queueMicrotask(() => goToPhase('transition'));
+    return null;
+  }
   if (phase === 'paywall') {
     return (
       <div className="h-screen bg-[#F7F7F7] dark:bg-stone-950 flex flex-col overflow-hidden">
@@ -2228,6 +2301,13 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
        4. Social proof reminder — "50,000+ students already on Pro"
        5. The escape is a small low-contrast "Sign out instead" link
           so it's findable but not the obvious path. */
+  /* Hidden when HIDE_END_PAYWALLS is on. Same pattern as the soft-
+     paywall short-circuit above — render block stays intact for easy
+     re-enable. */
+  if (phase === 'paywall-hard' && HIDE_END_PAYWALLS) {
+    queueMicrotask(() => goToPhase('transition'));
+    return null;
+  }
   if (phase === 'paywall-hard') {
     return (
       <div className="h-screen bg-[#F7F7F7] dark:bg-stone-950 flex flex-col overflow-hidden">
@@ -2929,8 +3009,13 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
 
         <div className={`flex-1 overflow-y-auto transition-opacity duration-200 ${phaseVisible ? 'opacity-100' : 'opacity-0'}`}>
           {/* Essay tour pages need MUCH more horizontal room for the
-              4-callout arrow layout. Other tour slides stay narrow. */}
-          <div className={`px-4 sm:px-6 py-5 mx-auto ${(phase === 'tour-essays' || phase === 'tour-essays-2') ? 'max-w-2xl lg:max-w-6xl xl:max-w-7xl' : 'max-w-2xl'}`}>
+              4-callout arrow layout. The games slide also widens on
+              lg+ so the three Crater Blast / Word Blitz / Word Tower
+              videos can sit side-by-side. Speech bubble + title each
+              keep their own max-w-2xl wrapper below, so the wider
+              outer container only affects the visual area. Other tour
+              slides stay narrow. */}
+          <div className={`px-4 sm:px-6 py-5 mx-auto ${(phase === 'tour-essays' || phase === 'tour-essays-2' || phase === 'tour-games') ? 'max-w-2xl lg:max-w-6xl xl:max-w-7xl' : 'max-w-2xl'}`}>
             {/* Mascot + speech bubble — centered in the original narrow
                 container so the chat header looks the same as on other
                 tour slides, even when the visual below is wider. */}
@@ -3028,14 +3113,53 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
               )}
 
               {slide.visual === 'games' && (
-                <div className="grid grid-cols-1 gap-3">
-                  <ToolMiniDemo
-                    name="Crater Blast · Word Blitz · Word Tower"
-                    videos={['/writescholar-crater-blast-demo.mp4', '/hero-word-blitz.mp4', '/hero-word-tower.mp4']}
-                    color="#FF4B4B"
-                    borderColor="#E04343"
-                  />
-                </div>
+                <>
+                  {/* MOBILE / TABLET — single cycling tile. 3 tiles
+                      side-by-side would be too narrow on a phone; the
+                      cycling playlist (Crater Blast → Word Blitz →
+                      Word Tower → loop) lets the user see all three
+                      games in the same vertical footprint. */}
+                  <div className="lg:hidden grid grid-cols-1 gap-3">
+                    <ToolMiniDemo
+                      name="Crater Blast · Word Blitz · Word Tower"
+                      videos={['/writescholar-crater-blast-demo.mp4', '/hero-word-blitz.mp4', '/hero-word-tower.mp4']}
+                      color="#FF4B4B"
+                      borderColor="#E04343"
+                    />
+                  </div>
+
+                  {/* DESKTOP — 3 individual videos side-by-side, one
+                      per game. Each tile uses its own brand colour so
+                      the three games read as distinct titles. The
+                      outer container is widened on lg+ via the
+                      `phase === 'tour-games'` exception above so
+                      these tiles get real horizontal room. Stagger
+                      the pop-in animation by 80ms per tile (matches
+                      the rhythm used in the `tools` 2×2 grid). */}
+                  <div className="hidden lg:grid lg:grid-cols-3 gap-4 xl:gap-5">
+                    <ToolMiniDemo
+                      name="Crater Blast"
+                      video="/writescholar-crater-blast-demo.mp4"
+                      color="#FF4B4B"
+                      borderColor="#E04343"
+                      delayMs={0}
+                    />
+                    <ToolMiniDemo
+                      name="Word Blitz"
+                      video="/hero-word-blitz.mp4"
+                      color="#FF4B82"
+                      borderColor="#D63672"
+                      delayMs={80}
+                    />
+                    <ToolMiniDemo
+                      name="Word Tower"
+                      video="/hero-word-tower.mp4"
+                      color="#FF9600"
+                      borderColor="#D97F00"
+                      delayMs={160}
+                    />
+                  </div>
+                </>
               )}
 
               {slide.visual === 'motivation' && (

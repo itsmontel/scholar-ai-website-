@@ -14,7 +14,9 @@ import DualMascot from '../common/DualMascot';
 import { lazyWithRetry } from '../../utils/lazyWithRetry';
 import { LANDING_DEMO_FOCUS_FEEDBACK_EVENT } from '../../constants/landingDemoEvents';
 const InteractiveDocumentAnalysis = lazyWithRetry(() => import('../landing/InteractiveDocumentAnalysis'));
-const LandingCitationsShowcase = lazyWithRetry(() => import('../landing/LandingCitationsShowcase'));
+// LandingCitationsShowcase removed from landing (Nov 2026 — replaced
+// by the comprehensive-analysis arrow-callout block in the essay
+// section). Re-add the lazy import here if it's ever brought back.
 const LandingStudyToolsHero = lazyWithRetry(() => import('../landing/LandingStudyToolsHero'));
 const LandingTestimonialsSection = lazyWithRetry(() => import('../landing/LandingTestimonialsSection'));
 // (HeroEssayPreviewCard & LandingBeforeAfterSection were imported but
@@ -188,6 +190,120 @@ function LandingEssayCallouts() {
           <LandingEssayCallout n={1} hotspot={hotspots[0]} color={color} arrow="left" />
         </div>
         <LandingEssayCallout n={4} hotspot={hotspots[3]} color={color} arrow="left" />
+      </div>
+    </div>
+  );
+}
+
+/* ─── LandingComprehensiveCallouts — desktop annotated full-report ───
+   Second arrow-callout block on the landing essay section. Mirrors
+   the onboarding tour's Page 2 EssayDeepDiveVisual: a shrunken
+   /full-report.png screenshot with 5 numbered badges marking the
+   five sections of WriteScholar's comprehensive analysis report:
+
+     #1 — RIGHT top    (y≈20) — Overall assessment
+     #2 — LEFT  top    (y≈32) — Top suggestions
+     #3 — RIGHT mid    (y≈50) — Strengths
+     #4 — LEFT  bottom (y≈74) — Areas for improvement
+     #5 — RIGHT bottom (y≈90) — Serious concerns
+
+   5 badges → 3-right / 2-left split. RIGHT column uses
+   justify-between to space all three callouts; LEFT column uses
+   justify-around to centre its two between top and bottom. mt-*
+   offsets fine-tune individual rows so each callout sits next to
+   its badge on the image. */
+function LandingComprehensiveCallouts() {
+  const color = '#A560E8';
+  const borderColor = '#8A48C7';
+  const hotspots: { x: number; y: number; title: string; desc: string }[] = [
+    {
+      // #1 — RIGHT top — Overall assessment
+      x: 80, y: 20,
+      title: 'Overall assessment',
+      desc: 'Letter grade, /100 score, and a plain-English verdict at the top. The high-level read on where this draft sits before you dive into the details.',
+    },
+    {
+      // #2 — LEFT top — Top suggestions
+      x: 22, y: 32,
+      title: 'Top suggestions',
+      desc: 'The handful of changes that move your grade the most, ranked by impact. Fix these first if you only have 20 minutes before the deadline.',
+    },
+    {
+      // #3 — RIGHT middle — Strengths
+      x: 80, y: 50,
+      title: 'Strengths',
+      desc: 'The specific moves already earning marks: thesis framing, evidence handling, transitions. Each one surfaced with the actual sentence. Keep what works.',
+    },
+    {
+      // #4 — LEFT bottom — Areas for improvement
+      x: 22, y: 74,
+      title: 'Areas for improvement',
+      desc: 'Vague claims, weak signposting, sentences doing too much. Each one comes with a concrete "revise to" suggestion. No guessing what to change.',
+    },
+    {
+      // #5 — RIGHT bottom — Serious concerns
+      x: 80, y: 90,
+      title: 'Serious concerns',
+      desc: 'Missing citations, logic gaps, factual slips. The things professors actually deduct points for. Surfaced before submit, not after the red pen.',
+    },
+  ];
+
+  return (
+    <div className="hidden lg:grid lg:grid-cols-[1fr_minmax(0,1.7fr)_1fr] gap-10 xl:gap-14 items-stretch">
+      {/* LEFT — Top suggestions (#2) sits a touch below its badge
+          (badge y=32, callout lifted up); Areas for improvement (#4)
+          is pulled up off the column floor so it sits higher than
+          its badge y=74 anchor. mt-* on #2 / mb-* on #4 tune the
+          vertical alignment by hand. */}
+      <div className="flex flex-col justify-around gap-6 py-2">
+        <div className="mt-8 xl:mt-14">
+          <LandingEssayCallout n={2} hotspot={hotspots[1]} color={color} arrow="right" />
+        </div>
+        <div className="mb-8 xl:mb-12">
+          <LandingEssayCallout n={4} hotspot={hotspots[3]} color={color} arrow="right" />
+        </div>
+      </div>
+
+      {/* CENTRE — full-report screenshot with the 5 numbered badges. */}
+      <div className="relative pt-2">
+        <div className="absolute -inset-3 rounded-3xl blur-2xl opacity-25" style={{ backgroundColor: `${color}40` }} aria-hidden />
+        <div className="relative rounded-2xl overflow-hidden border-2 border-b-4 shadow-xl bg-white dark:bg-stone-900" style={{ borderColor }}>
+          <img
+            src="/full-report.png"
+            alt="WriteScholar comprehensive analysis — five-section professor-style report"
+            className="w-full h-auto block"
+            loading="lazy"
+            decoding="async"
+          />
+          {hotspots.map((h, i) => (
+            <span
+              key={i}
+              aria-hidden
+              className="absolute -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-full font-extrabold"
+              style={{
+                left: `${h.x}%`,
+                top: `${h.y}%`,
+                width: '32px',
+                height: '32px',
+                backgroundColor: color,
+                color: 'white',
+                fontSize: '14px',
+                boxShadow: `0 0 0 4px white, 0 0 0 6px ${color}, 0 6px 14px rgba(0,0,0,0.25)`,
+              }}
+            >
+              {i + 1}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* RIGHT — Overall assessment (#1) at top, Strengths (#3) in
+          the middle, Serious concerns (#5) at the bottom.
+          justify-between spaces all three evenly. */}
+      <div className="flex flex-col justify-between gap-6 py-2">
+        <LandingEssayCallout n={1} hotspot={hotspots[0]} color={color} arrow="left" />
+        <LandingEssayCallout n={3} hotspot={hotspots[2]} color={color} arrow="left" />
+        <LandingEssayCallout n={5} hotspot={hotspots[4]} color={color} arrow="left" />
       </div>
     </div>
   );
@@ -918,7 +1034,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
   return (
     <>
       <Header onNavigate={onNavigate} user={user} sticky={true} currentPage="landing" opaqueHeader />
-      <main className="min-h-screen relative transition-colors font-sans overflow-x-clip xl:overflow-x-visible" role="main">
+      <main className="landing-desktop-zoom min-h-screen relative transition-colors font-sans overflow-x-clip xl:overflow-x-visible" role="main">
       {/* Promo Banner — FULLY HIDDEN per redesign brief. The 50%-off
           May2026 promo no longer surfaces on landing; the new centred
           hero with floating feature tiles is the entire above-the-fold
@@ -967,7 +1083,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             phone hero stacks H1, CTA/Login, mobile tile grid, and the
             wrapping feature-icons row vertically. */}
         <div
-          className="absolute top-0 left-0 right-0 h-[820px] md:h-[660px] lg:h-[710px] xl:h-[740px] overflow-hidden pointer-events-none"
+          className="absolute top-0 left-0 right-0 h-[880px] md:h-[730px] lg:h-[790px] xl:h-[820px] overflow-hidden pointer-events-none"
           aria-hidden
         >
           {/* Base — rich purple gradient. Brand purple #A560E8 at the top
@@ -1066,8 +1182,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 {/* Tile 1 — Essay Analyzer — top-left — YELLOW border
                     (was purple, swapped because purple-on-purple disappeared).
                     PNG screenshot of the rubric-90 (A-grade) UI. */}
-                <div className="absolute top-[2%] left-[2%] lg:left-[4%] motion-safe:animate-[hero-tile-drift_8s_ease-in-out_infinite]">
-                  <div className="w-32 lg:w-36 xl:w-44">
+                <div className="absolute top-[2%] left-[-1%] lg:left-[0%] motion-safe:animate-[hero-tile-drift_8s_ease-in-out_infinite]">
+                  <div className="w-36 lg:w-40 xl:w-48">
                     <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_18px_42px_-12px_rgba(255,200,0,0.55)] bg-white">
                       <div className="relative aspect-[16/10] w-full bg-stone-100">
                         <img
@@ -1088,7 +1204,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     to the LEFT of it. Pairs with Word Blitz (now pushed to
                     the right) for a symmetric lower-row pair. */}
                 <div className="absolute bottom-[22%] left-[28%] -translate-x-1/2 motion-safe:animate-[hero-tile-drift_9s_ease-in-out_infinite]" style={{ animationDelay: '0.8s' }}>
-                  <div className="w-32 lg:w-36 xl:w-44">
+                  <div className="w-36 lg:w-40 xl:w-48">
                     <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_18px_42px_-12px_rgba(255,200,0,0.55)] bg-stone-950">
                       <div className="relative aspect-[16/10] w-full bg-black">
                         <video src="/hero-flashcards.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
@@ -1099,8 +1215,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 </div>
 
                 {/* Tile 3 — Quiz — top-right — green border */}
-                <div className="absolute top-[2%] right-[2%] lg:right-[4%] motion-safe:animate-[hero-tile-drift_8.4s_ease-in-out_infinite]" style={{ animationDelay: '1.6s' }}>
-                  <div className="w-32 lg:w-36 xl:w-44">
+                <div className="absolute top-[2%] right-[-1%] lg:right-[0%] motion-safe:animate-[hero-tile-drift_8.4s_ease-in-out_infinite]" style={{ animationDelay: '1.6s' }}>
+                  <div className="w-36 lg:w-40 xl:w-48">
                     <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_18px_42px_-12px_rgba(255,200,0,0.55)] bg-stone-950">
                       <div className="relative aspect-[16/10] w-full bg-black">
                         <video src="/hero-quiz.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
@@ -1113,8 +1229,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 {/* Tile 4 — Crater Blast — MID-LEFT — red border.
                     Slightly larger than top row (echoes Knowunity's larger
                     rocket tile on the left side). */}
-                <div className="absolute top-[42%] left-[-1%] lg:left-[0%] motion-safe:animate-[hero-tile-drift_8.6s_ease-in-out_infinite]" style={{ animationDelay: '2.4s' }}>
-                  <div className="w-32 lg:w-36 xl:w-44">
+                <div className="absolute top-[42%] left-[-3%] lg:left-[-2%] motion-safe:animate-[hero-tile-drift_8.6s_ease-in-out_infinite]" style={{ animationDelay: '2.4s' }}>
+                  <div className="w-36 lg:w-40 xl:w-48">
                     <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_22px_50px_-12px_rgba(255,200,0,0.55)] bg-stone-950">
                       <div className="relative aspect-[16/10] w-full bg-black">
                         <video src="/writescholar-crater-blast-demo.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
@@ -1126,8 +1242,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
                 {/* Tile 5 — Word Tower — MID-RIGHT — orange border.
                     Larger like Tile 4 (echoes Knowunity's graduation cap). */}
-                <div className="absolute top-[44%] right-[-1%] lg:right-[0%] motion-safe:animate-[hero-tile-drift_9.2s_ease-in-out_infinite]" style={{ animationDelay: '3.2s' }}>
-                  <div className="w-32 lg:w-36 xl:w-44">
+                <div className="absolute top-[44%] right-[-3%] lg:right-[-2%] motion-safe:animate-[hero-tile-drift_9.2s_ease-in-out_infinite]" style={{ animationDelay: '3.2s' }}>
+                  <div className="w-36 lg:w-40 xl:w-48">
                     <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_22px_50px_-12px_rgba(255,200,0,0.55)] bg-white">
                       <div className="relative aspect-[16/10] w-full bg-stone-100">
                         <video src="/hero-word-tower.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
@@ -1143,7 +1259,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     bleeding into the feature-icons row that follows the
                     inner hero wrapper. */}
                 <div className="absolute bottom-[22%] left-[62%] -translate-x-1/2 motion-safe:animate-[hero-tile-drift_7.8s_ease-in-out_infinite]" style={{ animationDelay: '4s' }}>
-                  <div className="w-32 lg:w-36 xl:w-44">
+                  <div className="w-36 lg:w-40 xl:w-48">
                     <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_18px_42px_-12px_rgba(255,200,0,0.55)] bg-white">
                       <div className="relative aspect-[16/10] w-full bg-stone-100">
                         <video src="/hero-word-blitz.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
@@ -1192,7 +1308,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     takes less vertical room and the feature-icons row
                     can sit above the fold on a 900px viewport. */}
                 <h1
-                  className="text-[1.5rem] xs:text-[1.7rem] sm:text-[2rem] md:text-[2.25rem] lg:text-[2.5rem] xl:text-[2.85rem] font-extrabold tracking-[-0.02em] leading-[1.05] text-white mb-5 sm:mb-6"
+                  className="text-[1.5rem] xs:text-[1.85rem] sm:text-[2.2rem] md:text-[2.55rem] lg:text-[2.9rem] xl:text-[3.35rem] font-extrabold tracking-[-0.02em] leading-[1.05] text-white mb-5 sm:mb-6"
                   style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                 >
                   <span className="block whitespace-nowrap">
@@ -1257,12 +1373,12 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     Secondary white "Log in" button keeps its Duolingo
                     structure (2px border + 4px bottom-border lip). On
                     mobile they stack; on sm+ they sit side by side. */}
-                <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
+                <div className="mt-3 sm:mt-4 flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
                   <button
                     type="button"
                     onClick={() => onNavigate('signup')}
                     aria-label="Start free, get the A"
-                    className="group/btn inline-flex items-center justify-center px-7 py-3.5 sm:px-8 sm:py-4 lg:px-9 lg:py-[18px] rounded-2xl bg-[#58CC02] hover:bg-[#61E002] text-white font-extrabold text-base sm:text-[17px] lg:text-lg border-2 border-b-4 border-[#46A302] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 whitespace-nowrap shadow-[0_8px_28px_-6px_rgba(88,204,2,0.55)] hover:shadow-[0_12px_36px_-6px_rgba(88,204,2,0.75)]"
+                    className="group/btn inline-flex items-center justify-center px-7 py-3.5 sm:px-9 sm:py-[18px] lg:px-11 lg:py-[22px] rounded-2xl bg-[#58CC02] hover:bg-[#61E002] text-white font-extrabold text-base sm:text-[18px] lg:text-xl border-2 border-b-4 border-[#46A302] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 whitespace-nowrap shadow-[0_8px_28px_-6px_rgba(88,204,2,0.55)] hover:shadow-[0_12px_36px_-6px_rgba(88,204,2,0.75)]"
                     style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                   >
                     Get started today
@@ -1275,7 +1391,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     type="button"
                     onClick={() => onNavigate('login')}
                     aria-label="Log in to WriteScholar"
-                    className="inline-flex items-center justify-center px-5 py-2.5 sm:px-8 sm:py-4 lg:px-9 lg:py-[18px] rounded-2xl bg-white text-[#6B27A3] font-extrabold text-sm sm:text-[17px] lg:text-lg border-2 border-b-4 border-stone-300 hover:bg-stone-50 hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 whitespace-nowrap shadow-[0_8px_28px_-6px_rgba(255,255,255,0.30)]"
+                    className="inline-flex items-center justify-center px-5 py-2.5 sm:px-9 sm:py-[18px] lg:px-11 lg:py-[22px] rounded-2xl bg-white text-[#6B27A3] font-extrabold text-sm sm:text-[18px] lg:text-xl border-2 border-b-4 border-stone-300 hover:bg-stone-50 hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 whitespace-nowrap shadow-[0_8px_28px_-6px_rgba(255,255,255,0.30)]"
                     style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                   >
                     Log in
@@ -1353,7 +1469,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   border, no background — pure icon + text floating on
                   the purple field. Custom-drawn so the hero feels unique
                   to WriteScholar instead of generic, per user brief. */}
-              <div className="relative z-10 w-full max-w-5xl mx-auto mt-1 sm:mt-7 lg:mt-28 pb-2 px-4">
+              <div className="relative z-10 w-full max-w-5xl mx-auto mt-3 sm:mt-11 lg:mt-36 pb-2 px-4">
                 <div className="flex flex-wrap items-start justify-center gap-x-5 gap-y-4 sm:gap-x-8 sm:gap-y-5">
                   {[
                     {
@@ -1550,6 +1666,41 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                       #3 = LEFT  bottom (color-coded text, y=68)
                       #4 = RIGHT bottom (annotations, y=84) */}
                 <LandingEssayCallouts />
+
+                {/* DESKTOP — second arrow-callout block: the
+                    comprehensive analysis report. The block above is
+                    the per-sentence rubric view; this one shows the
+                    section-by-section professor-style report that
+                    every essay also gets. Together they show the
+                    full depth of feedback (line level + report level)
+                    before the visitor scrolls past the fold. Same
+                    desktop-only treatment, separated by a sub-
+                    heading + thin divider so it reads as "and then
+                    you also get this." */}
+                <div className="hidden lg:block mt-16 xl:mt-20">
+                  <div className="flex items-center justify-center gap-4 mb-10 xl:mb-12">
+                    <span className="h-px flex-1 max-w-[140px] bg-gradient-to-r from-transparent to-stone-300 dark:to-stone-600" aria-hidden />
+                    <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#A560E8]/10 dark:bg-[#A560E8]/20 border-2 border-[#A560E8]/40 text-[11px] xl:text-xs font-extrabold uppercase tracking-[0.16em] text-[#8A48C7] dark:text-[#C390F2]" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
+                        <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8l-6.2 4.5 2.4-7.4L2 9.4h7.6z" />
+                      </svg>
+                      And a full professor-style report
+                    </span>
+                    <span className="h-px flex-1 max-w-[140px] bg-gradient-to-l from-transparent to-stone-300 dark:to-stone-600" aria-hidden />
+                  </div>
+                  <div className="text-center max-w-3xl mx-auto mb-10 xl:mb-14">
+                    <h3
+                      className="text-xl xl:text-2xl font-extrabold text-stone-900 dark:text-stone-50 tracking-tight leading-tight"
+                      style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+                    >
+                      Publish your essay, get back five sections of staff-style feedback
+                    </h3>
+                    <p className="mt-2 xl:mt-3 text-sm xl:text-base text-stone-600 dark:text-stone-400 font-semibold leading-relaxed">
+                      Every analysis comes with a full report — the same five buckets a TA writes up after marking your draft. Skim the verdict, jump to the fix list, then dig into the detail.
+                    </p>
+                  </div>
+                  <LandingComprehensiveCallouts />
+                </div>
 
                 {/* Below the desktop arrow-callout block, a small "see
                     the live demo" pointer so the desktop user still has a
@@ -2248,14 +2399,13 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           </LandingScrollReveal>
         </div>
       </section>
-      {/* Citations showcase — hidden on mobile. Citations are a tertiary
-          feature; on a phone it's just extra scroll. Desktop visitors who
-          care about sources still see the full showcase. */}
-      <div className="hidden md:block">
-        <Suspense fallback={<div className="min-h-[520px] w-full" aria-hidden />}>
-          <LandingCitationsShowcase onNavigate={onNavigate} />
-        </Suspense>
-      </div>
+      {/* (Citations showcase — "Find academic sources in seconds" —
+          removed from the landing flow. The essay-feedback section
+          now carries that conversion job with two stacked arrow-
+          callout blocks: the per-sentence rubric view and the
+          full five-section professor-style report. Re-enable via
+          `lazyWithRetry(() => import('../landing/LandingCitationsShowcase'))`
+          if it's ever brought back.) */}
 
       {/* H2 #2: Create Study Material, hidden (see More tools) */}
 

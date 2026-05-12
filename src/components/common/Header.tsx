@@ -337,20 +337,22 @@ const Header: React.FC<HeaderProps> = ({
   }
 
   // ── Logged-in header ───────────────────────────────────────────────────────
+  // Per user brief the authenticated header now uses the same brand-purple
+  // styling as the landing page hero header (`#A560E8` background, white
+  // logo/nav text with yellow `#FFC800` hover accents, white-translucent
+  // wash for active nav, yellow CTA for the Saved Materials pill). Mirrors
+  // the `isLandingPurple` branch of the logged-out header above so both
+  // states read as one visual identity.
   const navActiveCls =
-    'bg-[#DDF4FF] dark:bg-[#1CB0F6]/15 text-[#1CB0F6] font-bold border-2 border-[#1CB0F6]/30 dark:border-[#1CB0F6]/30';
+    'bg-white/25 text-white font-bold border-2 border-white/40';
   const navInactiveCls =
-    'text-stone-600 dark:text-stone-400 hover:text-[#1CB0F6] dark:hover:text-[#1CB0F6] hover:bg-[#DDF4FF]/50 dark:hover:bg-[#1CB0F6]/10 active:scale-[0.98]';
+    'text-white hover:text-[#FFC800] hover:bg-white/10 active:scale-[0.98]';
 
-  const loggedInHeaderBg = opaqueHeader
-    ? isScrolled
-      ? 'bg-white dark:bg-stone-950 shadow-sm border-stone-200 dark:border-stone-800'
-      : 'bg-white dark:bg-stone-950 border-stone-200 dark:border-stone-800'
-    : isScrolled
-      ? 'bg-white dark:bg-stone-950 shadow-sm border-stone-200 dark:border-stone-800'
-      : 'bg-white dark:bg-stone-950 border-stone-200 dark:border-stone-800';
+  const loggedInHeaderBg = isScrolled
+    ? 'bg-[#A560E8] shadow-[0_4px_24px_-4px_rgba(107,39,163,0.45)] border-[#7733B5]/40'
+    : 'bg-[#A560E8] border-[#7733B5]/30';
 
-  const headerRingOffsetCls = 'ring-offset-white dark:ring-offset-stone-950';
+  const headerRingOffsetCls = 'ring-offset-[#A560E8]';
 
   return (
     <header
@@ -358,10 +360,12 @@ const Header: React.FC<HeaderProps> = ({
         blockNavigationInteractions ? blockNavPointerCls : ''
       }`}
     >
-      <div
-        aria-hidden
-        className="absolute inset-x-0 top-0 h-[3px] bg-[#58CC02]"
-      />
+      {/* The previous 3px green accent stripe across the top of the
+          header was a visual cue specific to the logged-in state. Per
+          user brief, the logged-in header now matches the logged-out
+          header's style — plain white bar with a stone-coloured
+          bottom border. Re-add the green stripe here if you want to
+          differentiate the authenticated state again. */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="flex items-center justify-between h-[3.5rem] sm:h-[4.25rem]">
           {/* Logo */}
@@ -372,25 +376,28 @@ const Header: React.FC<HeaderProps> = ({
             aria-label="WriteScholar dashboard"
           >
             <div
-              className={`${dashboardLogoTileCls} w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center group-hover:border-[#58CC02]/40 transition-all duration-200 overflow-hidden shrink-0`}
+              className="relative w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-xl border-2 border-b-4 border-white/40 bg-white shadow-[0_4px_12px_-2px_rgba(0,0,0,0.20)] group-hover:border-white transition-all duration-200 shrink-0 overflow-hidden"
             >
               <img src="/main-logo.png" alt="" className="w-[85%] h-[85%] object-contain" fetchPriority="high" width="40" height="40" />
             </div>
             <span
-              className="text-[1.05rem] sm:text-lg font-extrabold tracking-tight text-stone-900 dark:text-stone-50 group-hover:text-[#58CC02] transition-all duration-200 truncate max-w-[120px] sm:max-w-none"
+              className="text-[1.05rem] sm:text-lg font-extrabold tracking-tight text-white group-hover:text-[#FFC800] transition-all duration-200 truncate max-w-[120px] sm:max-w-none"
               style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
             >
               WriteScholar
             </span>
           </button>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation — purple variant. The white capsule
+              wrapper used previously (dashboardNavRailOuterCls) was
+              removed because it clashed with the purple bar. Buttons
+              now sit inline with `gap-1`, mirroring the landing-purple
+              nav layout. */}
           <nav className="hidden lg:flex items-center gap-2 min-w-0">
-            <div className={dashboardNavRailOuterCls}>
-              <div aria-hidden className={dashboardNavRailWashCls} />
+            <div className="flex items-center gap-1">
               <button
                 onClick={() => onNavigate?.('dashboard')}
-                className={`relative z-[1] px-3 py-2 text-sm font-semibold rounded-xl transition-all duration-200 tracking-tight ${
+                className={`px-3.5 py-2 text-sm rounded-lg transition-all duration-200 font-bold ${
                   currentPage === 'dashboard' ? navActiveCls : navInactiveCls
                 }`}
               >
@@ -400,7 +407,7 @@ const Header: React.FC<HeaderProps> = ({
                 type="button"
                 onClick={() => onNavigate?.('library')}
                 data-activation-library-tab
-                className={`relative z-[1] px-3 py-2 text-sm font-semibold rounded-xl transition-all duration-200 tracking-tight ${
+                className={`px-3.5 py-2 text-sm rounded-lg transition-all duration-200 font-bold ${
                   currentPage === 'library' ? navActiveCls : navInactiveCls
                 } ${
                   libraryActivationHighlight
@@ -412,7 +419,7 @@ const Header: React.FC<HeaderProps> = ({
               </button>
               <button
                 onClick={() => onNavigate?.('upload')}
-                className={`relative z-[1] px-3 py-2 text-sm font-semibold rounded-xl transition-all duration-200 tracking-tight ${
+                className={`px-3.5 py-2 text-sm rounded-lg transition-all duration-200 font-bold ${
                   currentPage === 'upload' ? navActiveCls : navInactiveCls
                 }`}
               >
@@ -420,7 +427,7 @@ const Header: React.FC<HeaderProps> = ({
               </button>
               <button
                 onClick={() => onNavigate?.('analysis')}
-                className={`relative z-[1] px-3 py-2 text-sm font-semibold rounded-xl transition-all duration-200 tracking-tight ${
+                className={`px-3.5 py-2 text-sm rounded-lg transition-all duration-200 font-bold ${
                   currentPage === 'analysis' ? navActiveCls : navInactiveCls
                 }`}
               >
@@ -428,7 +435,7 @@ const Header: React.FC<HeaderProps> = ({
               </button>
               <button
                 onClick={() => onNavigate?.('citation-history')}
-                className={`relative z-[1] px-3 py-2 text-sm font-semibold rounded-xl transition-all duration-200 tracking-tight ${
+                className={`px-3.5 py-2 text-sm rounded-lg transition-all duration-200 font-bold ${
                   currentPage === 'citations' ? navActiveCls : navInactiveCls
                 }`}
               >
@@ -438,12 +445,12 @@ const Header: React.FC<HeaderProps> = ({
 
             <button
               onClick={() => onNavigate?.('quiz-history')}
-              className={`ml-1 px-3.5 py-2.5 text-sm font-extrabold uppercase tracking-wide rounded-xl transition-all duration-200 flex items-center gap-1.5 bg-[#FF9600] hover:bg-[#E88800] text-white border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 ${
-                currentPage === 'quiz-history' ? `ring-2 ring-[#FF9600]/60 ring-offset-2 ${headerRingOffsetCls}` : ''
+              className={`ml-1 px-3.5 py-2.5 text-sm font-extrabold uppercase tracking-wide rounded-xl transition-all duration-200 flex items-center gap-1.5 bg-[#FFC800] hover:bg-[#FFD52E] text-[#6B27A3] border-2 border-b-4 border-[#D4A300] active:border-b-2 active:translate-y-0.5 ${
+                currentPage === 'quiz-history' ? `ring-2 ring-[#FFC800]/70 ring-offset-2 ${headerRingOffsetCls}` : ''
               }`}
             >
               <span>Saved Materials</span>
-              <span className="px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-white/25 text-white rounded-md">Pro</span>
+              <span className="px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-[#6B27A3]/15 text-[#6B27A3] rounded-md">Pro</span>
             </button>
 
             {/* Friends button - emerald to match dashboard (hidden when HIDE_FRIENDS) */}
@@ -452,8 +459,8 @@ const Header: React.FC<HeaderProps> = ({
               onClick={() => onNavigate?.('friends')}
               className={`ml-1 px-3.5 py-2.5 text-sm font-bold rounded-xl transition-all duration-200 flex items-center gap-1.5 border-2 border-b-4 active:border-b-2 active:translate-y-0.5 ${
                 currentPage === 'friends'
-                  ? 'bg-[#EAFFD6] dark:bg-[#58CC02]/15 text-[#58CC02] border-[#58CC02]/40 dark:border-[#58CC02]/40'
-                  : 'bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-400 hover:border-[#58CC02]/40 hover:bg-[#EAFFD6]/50 dark:hover:bg-[#58CC02]/10'
+                  ? 'bg-white/25 text-white border-white/40'
+                  : 'bg-white/15 border-white/30 text-white hover:bg-white/25 hover:border-white/50'
               }`}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -483,10 +490,11 @@ const Header: React.FC<HeaderProps> = ({
               )}
             </button>*/}
 
-            {/* Mobile menu button - solid violet to match Sign up / Saved Materials */}
+            {/* Mobile menu button — white-translucent on the purple
+                bar, matching the landing-purple variant. */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="mobile-menu-button lg:hidden relative p-2 rounded-xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-800 active:border-b-2 active:translate-y-0.5 transition-all"
+              className="mobile-menu-button lg:hidden relative p-2 rounded-xl border-2 border-b-4 border-white/40 bg-white/15 text-white hover:bg-white/25 active:border-b-2 active:translate-y-0.5 transition-all"
               aria-label="Toggle menu"
               aria-expanded={isMobileMenuOpen}
             >
@@ -504,19 +512,19 @@ const Header: React.FC<HeaderProps> = ({
               <div className="relative dropdown-container">
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex items-center gap-2.5 p-1 pr-2.5 rounded-xl bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800 active:border-b-2 active:translate-y-0.5 transition-all duration-200"
+                  className="flex items-center gap-2.5 p-1 pr-2.5 rounded-xl bg-white/15 border-2 border-b-4 border-white/40 hover:bg-white/25 active:border-b-2 active:translate-y-0.5 transition-all duration-200"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-[#58CC02] border-2 border-[#46A302] flex items-center justify-center text-white font-bold text-sm">
+                  <div className="w-8 h-8 rounded-lg bg-[#FFC800] border-2 border-[#D4A300] flex items-center justify-center text-[#6B27A3] font-bold text-sm">
                     {String(user.username || user.name || user.email || 'U').charAt(0).toUpperCase()}
                   </div>
                   <div className="hidden md:block text-left">
-                    <div className="text-sm font-semibold text-stone-800 dark:text-stone-100 leading-tight">
+                    <div className="text-sm font-semibold text-white leading-tight">
                       {user.username ? `@${user.username}` : user.name || user.email?.split('@')?.[0] || 'User'}
                     </div>
-                    <div className="text-xs text-stone-500 dark:text-stone-400 capitalize">{usageStats?.plan || 'Free'}</div>
+                    <div className="text-xs text-white/75 capitalize">{usageStats?.plan || 'Free'}</div>
                   </div>
-                  <svg 
-                    className={`w-4 h-4 text-stone-400 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} 
+                  <svg
+                    className={`w-4 h-4 text-white/75 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`}
                     fill="none" 
                     stroke="currentColor" 
                     viewBox="0 0 24 24"
@@ -703,7 +711,7 @@ const Header: React.FC<HeaderProps> = ({
         isMobileMenuOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
       }`}>
         <div
-          className="px-4 py-4 border-t-2 border-stone-200 dark:border-stone-800 max-w-7xl mx-auto bg-white dark:bg-stone-950"
+          className="px-4 py-4 border-t-2 border-white/20 max-w-7xl mx-auto bg-[#A560E8]"
         >
           <div className="space-y-1">
             {[
@@ -723,11 +731,11 @@ const Header: React.FC<HeaderProps> = ({
                 {...(id === 'library' ? { 'data-activation-library-tab': true } : {})}
                 className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
                   currentPage === (page || id)
-                    ? 'bg-[#DDF4FF] dark:bg-[#1CB0F6]/15 text-[#1CB0F6] border-2 border-[#1CB0F6]/30 dark:border-[#1CB0F6]/30 font-bold'
-                    : 'text-stone-600 dark:text-stone-400 hover:bg-[#DDF4FF]/50 dark:hover:bg-[#1CB0F6]/10'
+                    ? 'bg-white/25 text-white border-2 border-white/40 font-bold'
+                    : 'text-white/85 hover:text-white hover:bg-white/15'
                 } ${
                   id === 'library' && libraryActivationHighlight
-                    ? `ring-2 ring-violet-500/85 ring-offset-2 ${headerRingOffsetCls}`
+                    ? `ring-2 ring-white/85 ring-offset-2 ${headerRingOffsetCls}`
                     : ''
                 }`}
               >
@@ -737,12 +745,12 @@ const Header: React.FC<HeaderProps> = ({
 
             <button
               onClick={() => { onNavigate?.('quiz-history'); setIsMobileMenuOpen(false); }}
-              className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-extrabold uppercase tracking-wide transition-all duration-200 flex items-center justify-between bg-[#FF9600] hover:bg-[#E88800] text-white border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 ${
-                currentPage === 'quiz-history' ? `ring-2 ring-[#FF9600]/60 ring-offset-2 ${headerRingOffsetCls}` : ''
+              className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-extrabold uppercase tracking-wide transition-all duration-200 flex items-center justify-between bg-[#FFC800] hover:bg-[#FFD52E] text-[#6B27A3] border-2 border-b-4 border-[#D4A300] active:border-b-2 active:translate-y-0.5 ${
+                currentPage === 'quiz-history' ? `ring-2 ring-[#FFC800]/70 ring-offset-2 ${headerRingOffsetCls}` : ''
               }`}
             >
               <span>Saved Materials</span>
-              <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-white/25 rounded-md">Pro</span>
+              <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-[#6B27A3]/15 text-[#6B27A3] rounded-md">Pro</span>
             </button>
 
             {!HIDE_FRIENDS && (
@@ -750,8 +758,8 @@ const Header: React.FC<HeaderProps> = ({
               onClick={() => { onNavigate?.('friends'); setIsMobileMenuOpen(false); }}
               className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 flex items-center gap-2 border-2 border-b-4 active:border-b-2 active:translate-y-0.5 ${
                 currentPage === 'friends'
-                  ? 'bg-[#EAFFD6] dark:bg-[#58CC02]/15 text-[#58CC02] border-[#58CC02]/40 dark:border-[#58CC02]/40'
-                  : 'text-stone-600 dark:text-stone-400 border-stone-200 dark:border-stone-700 hover:border-[#58CC02]/40 hover:bg-[#EAFFD6]/50 dark:hover:bg-[#58CC02]/10'
+                  ? 'bg-white/25 text-white border-white/40'
+                  : 'bg-white/15 border-white/30 text-white hover:bg-white/25 hover:border-white/50'
               }`}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -765,8 +773,8 @@ const Header: React.FC<HeaderProps> = ({
               onClick={() => { onNavigate?.('blog'); setIsMobileMenuOpen(false); }}
               className={`w-full text-left px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 ${
                 currentPage === 'blog'
-                  ? 'bg-[#DDF4FF] dark:bg-[#1CB0F6]/15 text-[#1CB0F6] border-2 border-[#1CB0F6]/30 dark:border-[#1CB0F6]/30'
-                  : 'text-stone-600 dark:text-stone-400 hover:bg-[#DDF4FF]/50 dark:hover:bg-[#1CB0F6]/10'
+                  ? 'bg-white/25 text-white border-2 border-white/40'
+                  : 'text-white/85 hover:text-white hover:bg-white/15'
               }`}
             >
               Blog
@@ -774,6 +782,12 @@ const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
       </div>
+      {/* Bottom 2px hairline — `white/15` matches the landing-purple
+          variant of the logged-out header. */}
+      <div
+        className="h-[2px] bg-white/15"
+        aria-hidden
+      />
     </header>
   );
 };

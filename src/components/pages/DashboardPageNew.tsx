@@ -788,7 +788,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                 {firstName ? (
                   <>
                     ,{' '}
-                    <span className="text-[#58CC02]">
+                    <span className="text-[#A560E8]">
                       {firstName}
                     </span>
                   </>
@@ -1262,35 +1262,39 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
             )}
             {dashboardTool === 'analyze' && analyzeView === 'create' && (
               <>
-                <button
-                  type="button"
-                  onClick={() => setAnalyzeView('hub')}
-                  className="mb-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-sm font-extrabold text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 active:border-b-2 active:translate-y-0.5 transition-all"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
-                  Back to recents
-                </button>
+                {/* Header row — "Back to recents" button drives the
+                    row height. The decorative mascot is absolute-
+                    positioned in the top-right corner so it doesn't
+                    inflate the row's height (which previously left a
+                    ~50-80px empty band below the button before the
+                    hero card). The mascot's tail visually overlaps
+                    into the top-right of the hero card below — that
+                    area is empty (the eyebrow chip and H2 are both
+                    centred), so the overlap reads as a tucked-in
+                    decoration rather than a collision. */}
+                <div className="mb-2 relative">
+                  <button
+                    type="button"
+                    onClick={() => setAnalyzeView('hub')}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-sm font-extrabold text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 active:border-b-2 active:translate-y-0.5 transition-all"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                    Back to recents
+                  </button>
+                  <img
+                    src="/mascot-study.webp"
+                    alt=""
+                    aria-hidden
+                    loading="lazy"
+                    decoding="async"
+                    className="hidden sm:block pointer-events-none absolute top-0 right-0 w-20 sm:w-28 lg:w-32 h-auto z-10"
+                  />
+                </div>
                 {/* Hero upload card */}
                 <section className="rounded-2xl overflow-hidden bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700">
 
-                  <div className="relative p-6 sm:p-8 lg:p-10">
-                    <img
-                      src="/mascot-study.webp"
-                      alt=""
-                      aria-hidden
-                      loading="lazy"
-                      decoding="async"
-                      className="hidden lg:block pointer-events-none absolute -top-2 -left-2 w-20 lg:w-24 h-auto z-10 opacity-90"
-                    />
-                    <img
-                      src="/mascot-dance.webp"
-                      alt=""
-                      aria-hidden
-                      loading="lazy"
-                      decoding="async"
-                      className="hidden lg:block pointer-events-none absolute -top-2 -right-2 w-20 lg:w-24 h-auto z-10 opacity-90"
-                    />
-                    <div className="text-center mb-5">
+                  <div className="relative px-6 sm:px-8 lg:px-10 pt-4 sm:pt-5 lg:pt-6 pb-6 sm:pb-8 lg:pb-10">
+                    <div className="text-center mb-3">
                       <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 text-[#FF4B4B] border-2 border-[#FF4B4B]/30 text-xs font-extrabold">
                         <span aria-hidden>✨</span>
                         {isNewUser ? 'Get started in under a minute' : 'Ready for your next analysis'}
