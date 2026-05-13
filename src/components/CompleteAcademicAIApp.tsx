@@ -91,6 +91,8 @@ import ErrorBoundary from './common/ErrorBoundary';
 import PageErrorBoundary from './common/PageErrorBoundary';
 import SoftPaywall from './common/SoftPaywall';
 import StripeCancelTrialChoiceModal from './common/StripeCancelTrialChoiceModal';
+import DashboardWelcomeToast from './common/DashboardWelcomeToast';
+import PaywallDebugPanel from './common/PaywallDebugPanel';
 import {
   CHECKOUT_FROM_TUTORIAL_PAYWALL_KEY,
   LAST_TUTORIAL_CHECKOUT_PLAN_KEY,
@@ -418,7 +420,12 @@ const AcademicAIApp = () => {
             if (u.paidConversionPending && !sessionStorage.getItem('ws_paid_conversion_fired')) {
               sessionStorage.setItem('ws_paid_conversion_fired', '1');
               const planPrice = u.subscriptionPlan === 'premium' ? 39.99 : 19.99;
-              trackPaidConversion(planPrice, `${u.id}-paid`);
+              // Pass the user email for Enhanced Conversions — recovers
+              // attribution when the trial→paid event happens on a
+              // different device or after cookies expired (trial→paid
+              // sometimes happens a full week after the original ad
+              // click, so cross-device is common here).
+              void trackPaidConversion(planPrice, `${u.id}-paid`, u.email);
               void BulletproofAPI.post('/users/mark-paid-conversion-fired', token, {}).catch(() => {
                 // Non-fatal — if the mark fails, paidConversionPending stays
                 // true and we'll fire again on the next session, which is
@@ -1045,9 +1052,13 @@ const AcademicAIApp = () => {
     void import('../utils/analytics').then((m) =>
       m.identifyUser(userData.id, { email: userData.email, signup: true })
     );
-    // Google Ads signup conversion. No-ops cleanly until the IDs in
-    // src/utils/gtag.ts are filled in, so this is safe to ship pre-launch.
-    trackSignupConversion();
+    // Google Ads signup conversion + Enhanced Conversions. Email is
+    // SHA-256 hashed inside the helper before leaving the browser, so
+    // Google can match this signup back to an ad click on a different
+    // device / after cookie loss / on iOS Safari. Helper returns a
+    // promise that resolves once the hash is computed — fire-and-forget
+    // is fine since the gtag dataLayer queues the event regardless.
+    void trackSignupConversion(userData.email);
   };
 
   const handleLogin = (userData: User) => {
@@ -1524,6 +1535,25 @@ const AcademicAIApp = () => {
       )}
       {/* Global study timer - floating in corner when logged in */}
       {user && <StudyTimerWidget currentPage={currentPage} />}
+      {/* Welcome toast — bottom-right Duolingo-style nudge after onboarding */}
+      {user && (
+        <DashboardWelcomeToast
+          currentPage={currentPage}
+          user={user}
+          paywallOpen={apiLimitPaywallOpen}
+          onNavigate={navigateTo}
+        />
+      )}
+      {/* Dev-only paywall flow inspector — hidden by default. To bring
+          it back, in DevTools run:
+            localStorage.setItem('writescholar_dev_paywall_panel', '1')
+          then refresh. Still gated on `import.meta.env.DEV` so it can
+          never render in a prod build. */}
+      {import.meta.env.DEV &&
+        typeof window !== 'undefined' &&
+        window.localStorage?.getItem('writescholar_dev_paywall_panel') === '1' && (
+          <PaywallDebugPanel user={user} paywallOpen={apiLimitPaywallOpen} currentPage={currentPage} />
+        )}
       {/* Mobile-only bottom Google sign-in popup (Quizlet-style) */}
       {!user && (
         <MobileGoogleSignInPopup

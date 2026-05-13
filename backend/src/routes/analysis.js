@@ -1839,18 +1839,16 @@ router.get('/history', authenticateToken, validateGetAnalysisHistory, async (req
     const userId = req.user.id;
     const limit = parseInt(req.query.limit) || 10;
 
-    const subscriptionDetails = await subscriptionService.getUserSubscriptionDetails(userId);
-    const plan = (subscriptionDetails.plan || 'free').toLowerCase();
-    const isPaid = subscriptionService.isPaidSubscriptionTier(plan);
-
-    if (!isPaid) {
-      return res.status(403).json({
-        success: false,
-        message: 'Analysis history is a paid feature. Upgrade to access your saved analyses.',
-        upgradeRequired: true
-      });
-    }
-
+    // NOTE: the plan check is intentionally NOT enforced at the API
+    // layer. The dashboard's analyze hub reads this endpoint to
+    // surface a user's recent papers on the Workspace (and to decide
+    // whether they're "new to analyse"), so free users need to be
+    // able to fetch their own rows. The standalone `/analysis-history`
+    // page still client-side paywalls (AnalysisHistoryPage shows the
+    // "Pro feature" upgrade screen when plan is free) — anyone who
+    // hits this endpoint directly only sees their own data, which
+    // they already own. If a stricter back-end gate is ever needed,
+    // restore the 403 block plus the `subscriptionService` lookup.
     const analysisHistory = await aiAnalysisService.getAnalysisHistory(userId, limit);
 
     res.json({

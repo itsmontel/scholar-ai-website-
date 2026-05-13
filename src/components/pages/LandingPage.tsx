@@ -60,14 +60,6 @@ const LANDING_FAQ_ITEMS: { question: string; answer: string }[] = [
     answer: "Yes. Upload PDF, DOCX, DOC, or TXT files directly. Or paste your text into the box. Both work for analysis. Files are processed securely and never shared."
   },
   {
-    question: "How does Focus Mode work?",
-    answer: "Focus Mode blocks distracting sites like YouTube, TikTok, and Instagram until you solve a puzzle (Sudoku, Memory, Pattern) or answer quiz questions from your own study notes. Pick the sites to block, add your material, and when you try to visit a blocked site you face a puzzle or short quiz. Pass it and the site unlocks. It's a Chrome extension."
-  },
-  {
-    question: "Can I block YouTube and TikTok until I study?",
-    answer: "Yes! Focus Mode lets you block any sites you choose. When you try to visit one, you solve a puzzle (Sudoku, Memory, Pattern) or answer a quiz from your own notes. Pass the puzzle or quiz and you earn access. Create a Study Pack or flashcards first, then connect the Chrome extension."
-  },
-  {
     question: "Can I create study quizzes from my notes?",
     answer: "Yes! The Study Pack turns any text into lessons, flashcards, quizzes, crosswords, Crater Blast & Word Tower. Paste your notes or upload a document. Free users get lesson and flashcards; quiz, crossword, Crater Blast & Word Tower unlock with Pro."
   },
@@ -1229,11 +1221,17 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </div>
                 </div>
 
-                {/* Tile 2 — Notes to Flashcards — sits at the SAME vertical
-                    line as the Word Blitz Game tile (bottom-[24%]) but well
-                    to the LEFT of it. Pairs with Word Blitz (now pushed to
-                    the right) for a symmetric lower-row pair. */}
-                <div className="absolute bottom-[22%] left-[28%] -translate-x-1/2 motion-safe:animate-[hero-tile-drift_9s_ease-in-out_infinite]" style={{ animationDelay: '0.8s' }}>
+                {/* Tile 2 — Notes to Flashcards — bottom-left of the lower
+                    row, mirrored by Tile 6 (Daily review) on the right.
+                    Visual centre sits at 35% (15% left of the cluster's
+                    midline) so the pair reads as "lower row" rather than
+                    "edges of the cluster". Uses the `-centered` drift
+                    keyframe so the `-translate-x-1/2` half-width centring
+                    stays applied throughout the drift (the plain
+                    `hero-tile-drift` keyframe sets `translate(0,0)` at 0%,
+                    which would override the Tailwind centring and cause
+                    the tile to jump right when the animation starts). */}
+                <div className="absolute bottom-[20%] left-[34%] -translate-x-1/2 motion-safe:animate-[hero-tile-drift-centered_9s_ease-in-out_infinite]" style={{ animationDelay: '0.8s' }}>
                   <div className="w-44 lg:w-52 xl:w-60">
                     <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_18px_42px_-12px_rgba(255,200,0,0.55)] bg-stone-950">
                       <div className="relative aspect-[16/10] w-full bg-black">
@@ -1294,12 +1292,16 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </div>
                 </div>
 
-                {/* Tile 6 — Daily review — BOTTOM-CENTRE. Reuses the
-                    old Word Blitz slot (`bottom-[22%] left-[55%]`).
-                    The daily-review-preview.png screenshot is the
-                    same asset the onboarding tour shows on its
-                    "Daily Review" slide. */}
-                <div className="absolute bottom-[22%] left-[55%] -translate-x-1/2 motion-safe:animate-[hero-tile-drift_7.8s_ease-in-out_infinite]" style={{ animationDelay: '4s' }}>
+                {/* Tile 6 — Daily review — bottom-right of the lower row,
+                    mirroring Tile 2 around the 50% midline. Tile 2's
+                    visual centre is at 35%, so this one sits at 65%
+                    (= 100% - 35%). The 15% offset from centre on each
+                    side keeps the lower pair tucked closer to the
+                    cluster's middle than the cluster-edge tiles. Uses the
+                    `-centered` drift keyframe (see Tile 2 comment) so
+                    the `-translate-x-1/2` centring isn't clobbered by
+                    the animation's `transform`. */}
+                <div className="absolute bottom-[20%] left-[66%] -translate-x-1/2 motion-safe:animate-[hero-tile-drift-centered_7.8s_ease-in-out_infinite]" style={{ animationDelay: '4s' }}>
                   <div className="w-44 lg:w-52 xl:w-60">
                     <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_18px_42px_-12px_rgba(255,200,0,0.55)] bg-white">
                       <div className="relative aspect-[16/10] w-full bg-stone-100">
@@ -1531,7 +1533,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   border, no background — pure icon + text floating on
                   the purple field. Custom-drawn so the hero feels unique
                   to WriteScholar instead of generic, per user brief. */}
-              <div className="relative z-10 w-full max-w-5xl mx-auto mt-3 sm:mt-11 lg:mt-36 pb-2 px-4">
+              <div className="relative z-10 w-full max-w-5xl mx-auto mt-4 sm:mt-12 lg:mt-36 pb-2 px-4">
                 <div className="flex flex-wrap items-start justify-center gap-x-5 gap-y-4 sm:gap-x-8 sm:gap-y-5">
                   {[
                     {
@@ -1700,7 +1702,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                   >
                     <span className="block">Upload your essay and</span>
-                    <span className="block mt-1 sm:mt-1.5 text-[#A560E8] dark:text-[#A560E8]">get professor style feedback</span>
+                    <span className="block mt-1 sm:mt-1.5 text-[#A560E8] dark:text-[#A560E8]">get professor style feedback in 60 seconds</span>
                   </h2>
                   <p className="mt-3 sm:mt-4 text-sm sm:text-base lg:text-lg text-stone-600 dark:text-stone-400 leading-relaxed max-w-2xl mx-auto">
                     Drop in your essay or paper. Our AI grades structure, clarity, and citations with actionable feedback.
@@ -2207,7 +2209,9 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
       {/* ─── "Study daily. Level up." — gamification showcase.
           Daily Review, XP, Levels, Streaks, Badges — the habit loop
-          that makes WriteScholar feel like Duolingo for academics. ─── */}
+          that makes WriteScholar feel like Duolingo for academics.
+          TEMPORARILY HIDDEN — re-enable by changing `false` below to `true`. ─── */}
+      {false && (
       <section id="motivation" className="relative py-10 sm:py-24 overflow-hidden border-t border-[#E5E5E5] dark:border-stone-800 bg-white dark:bg-stone-950 scroll-mt-20">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_-15%,rgba(255,150,0,0.06),transparent_55%)] dark:bg-[radial-gradient(ellipse_70%_50%_at_50%_-10%,rgba(255,150,0,0.10),transparent_55%)]" aria-hidden />
         <div
@@ -2461,6 +2465,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           </LandingScrollReveal>
         </div>
       </section>
+      )}
       {/* (Citations showcase — "Find academic sources in seconds" —
           removed from the landing flow. The essay-feedback section
           now carries that conversion job with two stacked arrow-
@@ -2642,7 +2647,9 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           Hidden on mobile (hidden md:block) because the same product breadth
           is already conveyed by the study-tools showcase, the gamification
           section, and the pricing teaser — on a phone the dense 3-column
-          comparison just adds scroll for low return. ─── */}
+          comparison just adds scroll for low return.
+          TEMPORARILY HIDDEN — re-enable by changing `false` below to `true`. ─── */}
+      {false && (
       <section className="relative hidden md:block py-16 sm:py-24 overflow-hidden border-t border-[#E5E5E5] dark:border-stone-800 bg-white dark:bg-stone-950">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_-15%,rgba(91,33,182,0.06),transparent_55%)] dark:bg-[radial-gradient(ellipse_70%_50%_at_50%_-10%,rgba(139,92,246,0.10),transparent_55%)]" aria-hidden />
 
@@ -2792,7 +2799,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   onClick={() => onNavigate('signup')}
                   className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-[#58CC02] text-white font-extrabold text-sm border-2 border-b-4 border-[#46A302] hover:bg-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all whitespace-nowrap"
                 >
-                  Try free for 7 days
+                  Get started free
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
@@ -2802,6 +2809,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           </LandingScrollReveal>
         </div>
       </section>
+      )}
 
       {/* Pricing — above FAQ, aligned with Pricing page */}
       <section className="relative py-16 sm:py-24 overflow-hidden border-t border-stone-200/90 dark:border-stone-800" aria-labelledby="landing-pricing-heading">
@@ -2992,7 +3000,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           </div>
 
           <p className="text-center text-sm text-stone-500 dark:text-stone-500 mt-8 max-w-xl mx-auto">
-            Eligible accounts can start a 7-day Pro or Premium trial; monthly or yearly billing after that.{' '}
+            Free to start. Pro and Premium upgrades available with monthly or yearly billing.{' '}
             <button
               type="button"
               onClick={() => onNavigate('pricing')}
@@ -3106,7 +3114,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               <span className="block sm:inline">All in one app.</span>
             </h2>
             <p className="relative text-base sm:text-lg text-white/90 mb-8 max-w-xl mx-auto leading-relaxed">
-              Join <span className="font-extrabold text-white">50,000+ students</span> earning XP, levelling up, and acing their coursework. 7-day free trial — no payment today.
+              Join <span className="font-extrabold text-white">50,000+ students</span> earning XP, levelling up, and acing their coursework. Free to start — no payment today.
             </p>
             <div className="relative flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center mb-6">
               <button
@@ -3114,7 +3122,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 onClick={() => onNavigate('signup')}
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-[#3C3C3C] font-extrabold rounded-2xl border-2 border-b-4 border-[#E5E5E5] hover:bg-stone-50 active:border-b-2 active:translate-y-0.5 transition-all text-base sm:text-[17px]"
               >
-                Start my 7-day free trial
+                Get started free
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>

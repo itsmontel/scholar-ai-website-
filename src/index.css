@@ -1061,6 +1061,21 @@ html.dark .landing-hero-grid-animate {
   75% { transform: translate(-10px, -2px); }
 }
 
+/* Variant for tiles that rely on `-translate-x-1/2` for centring. The
+   regular `hero-tile-drift` keyframe sets `transform: translate(0,0)`
+   at 0%, which silently overrides the Tailwind `-translate-x-1/2`
+   the moment the animation begins — making the tile jump right by
+   half its width on first paint. This variant bakes the half-width
+   left shift into every frame so the centred tile stays put as it
+   drifts. Used by Tile 2 (Notes to Flashcards) and Tile 6 (Daily
+   review) in the desktop hero. */
+@keyframes hero-tile-drift-centered {
+  0%, 100% { transform: translateX(-50%) translate(0px, 0px); }
+  25%      { transform: translateX(-50%) translate(10px, -2px); }
+  50%      { transform: translateX(-50%) translate(0px, -5px); }
+  75%      { transform: translateX(-50%) translate(-10px, -2px); }
+}
+
 /* Subtle drift used by the mobile (md:hidden) hero tile grid. Small
    ellipse with a barely-there rotation wobble so the six small
    mobile tiles read as "gently floating" without scattering. Desktop

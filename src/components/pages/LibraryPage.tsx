@@ -74,6 +74,37 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
   const [documentContent, setDocumentContent] = useState<string>('');
   const [loadingDocuments, setLoadingDocuments] = useState(true);
   const [loadingContent, setLoadingContent] = useState(false);
+
+  /**
+   * Pre-selected document id captured from sessionStorage on the very
+   * first render of this component instance. Set by:
+   *   • the Stripe-checkout-restore flow (AnalysisPage.tsx:1104)
+   *   • dashboard analyze recents clicks (DashboardPageNew.tsx)
+   *
+   * Captured here in a `useState` *initializer* (not inside the fetch
+   * effect) for one specific reason: React.StrictMode in dev double-
+   * invokes effects (mount → cleanup → mount), so `fetchDocuments` runs
+   * twice. The previous logic read+cleared sessionStorage inside the
+   * fetch, which meant the second run found the key empty and fell
+   * back to `docs[0]` — producing a brief flash of the correct doc
+   * before it flipped to the most-recent one. useState initialisers
+   * run exactly once per instance regardless of effect double-firing,
+   * so the captured id survives both StrictMode invocations and any
+   * future re-fetches.
+   */
+  const [restoreDocIdOnMount] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const id = sessionStorage.getItem('librarySelectDocumentAfterCheckout');
+      if (id) {
+        sessionStorage.removeItem('librarySelectDocumentAfterCheckout');
+        sessionStorage.removeItem('librarySelectAnalysisTypeAfterCheckout');
+      }
+      return id;
+    } catch {
+      return null;
+    }
+  });
   
   // State for analysis
   const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
@@ -221,33 +252,38 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
         const docs = result.data.documents || [];
         setDocuments(docs);
         setError(''); // Clear any previous errors
-        
-        // Prefer document to restore after Stripe checkout (Analysis page upgrade flow)
-        let restoreDocId: string | null = null;
-        try {
-          restoreDocId = sessionStorage.getItem('librarySelectDocumentAfterCheckout');
-          if (restoreDocId) {
-            sessionStorage.removeItem('librarySelectDocumentAfterCheckout');
-            sessionStorage.removeItem('librarySelectAnalysisTypeAfterCheckout');
-          }
-        } catch {
-          restoreDocId = null;
-        }
 
         if (docs.length > 0) {
-          const fromCheckout = restoreDocId ? docs.find((d) => d.id === restoreDocId) : null;
-          const docToShow = fromCheckout || docs[0];
+          // Use the doc id captured at first render (see
+          // `restoreDocIdOnMount` useState above). Reading it from state
+          // — not from sessionStorage here — means StrictMode's double
+          // effect run can't drop the value on the second invocation,
+          // which was causing the "correct doc → flash → most-recent
+          // doc" bug. Don't auto-override an existing selection either:
+          // if the user already manually picked a doc before this fetch
+          // resolved (unlikely but possible), respect their click.
+          const fromRestore = restoreDocIdOnMount
+            ? docs.find((d) => d.id === restoreDocIdOnMount)
+            : null;
+          const docToShow = fromRestore || selectedDocument || docs[0];
           console.log(
-            fromCheckout
-              ? 'Restoring document after checkout return:'
-              : 'Auto-selecting most recent document:',
+            fromRestore
+              ? 'Restoring requested document on Library load:'
+              : selectedDocument
+                ? 'Preserving already-selected document:'
+                : 'Auto-selecting most recent document:',
             docToShow.title
           );
-          setSelectedDocument(docToShow);
-          fetchDocumentContent(docToShow.id);
-          fetchDocumentAnalysis(docToShow.id);
-          // After returning from checkout, surface the analysis panel on small screens
-          if (fromCheckout && window.innerWidth < 768) {
+          if (!selectedDocument || (fromRestore && selectedDocument.id !== docToShow.id)) {
+            setSelectedDocument(docToShow);
+            fetchDocumentContent(docToShow.id);
+            fetchDocumentAnalysis(docToShow.id);
+          }
+          // Show the analysis panel on mobile when we restored a doc
+          // (deep-link case — usually means the user came from a tile
+          // that expects to see the analysis side, not the document
+          // body).
+          if (fromRestore && window.innerWidth < 768) {
             setMobileView('analysis');
           }
         }

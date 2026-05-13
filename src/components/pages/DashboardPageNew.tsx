@@ -94,19 +94,8 @@ interface RecentAnalysis {
 
 const DASHBOARD_TOOL_ITEMS = [
   {
-    id: 'daily_review' as const,
-    title: 'Daily Review',
-    desc: 'Quick daily practice session',
-    emoji: '🎯',
-    iconClass: 'bg-[#FF9600]',
-    activeBar: 'border-l-[#FF9600]',
-    titleClass: 'text-[#FF9600]',
-    activeBg: 'bg-[#FFF4E0] dark:bg-[#FF9600]/10',
-    accent: 'orange',
-  },
-  {
     id: 'analyze' as const,
-    title: 'Analyze',
+    title: 'Analyze Essay',
     desc: 'Professor-style essay feedback',
     emoji: '📝',
     iconClass: 'bg-[#FF4B4B]',
@@ -114,7 +103,7 @@ const DASHBOARD_TOOL_ITEMS = [
     titleClass: 'text-[#FF4B4B]',
     activeBg: 'bg-[#FFE8E8] dark:bg-[#FF4B4B]/10',
     accent: 'rose',
-    // Quality-anchored badge — Study Pack owns "Most popular," so Analyze
+    // Quality-anchored badge — Study Pack owns "Popular," so Analyze
     // leans into the AI-quality angle. Reinforces the "professor-style
     // feedback" USP without competing on popularity claims.
     badge: '✨ Smartest AI',
@@ -129,7 +118,18 @@ const DASHBOARD_TOOL_ITEMS = [
     titleClass: 'text-[#FF9600]',
     activeBg: 'bg-[#FFF4E0] dark:bg-[#FF9600]/10',
     accent: 'amber',
-    badge: '🔥 Most popular',
+    badge: '🔥 Popular',
+  },
+  {
+    id: 'daily_review' as const,
+    title: 'Daily Review',
+    desc: 'Quick daily practice session',
+    emoji: '🎯',
+    iconClass: 'bg-[#58CC02]',
+    activeBar: 'border-l-[#58CC02]',
+    titleClass: 'text-[#58CC02]',
+    activeBg: 'bg-[#E5F8D0] dark:bg-[#58CC02]/10',
+    accent: 'green',
   },
   {
     id: 'citations' as const,
@@ -169,7 +169,7 @@ const getWorkspaceSubtitle = (isNew: boolean, tool: DashboardTool): string => {
   if (!isNew) return 'Pick up where you left off.';
   switch (tool) {
     case 'daily_review':
-      return 'Your workspace is ready — complete your daily review to keep your streak alive.';
+      return 'Your workspace is ready — complete a quick daily review session below.';
     case 'analyze':
       return 'Your workspace is ready — drop in an essay to get started.';
     case 'citations':
@@ -250,8 +250,18 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
       if (!token) { setHubRecentsLoading(false); return; }
 
       // Run all three in parallel — hub renders fast even if one fails.
+      // `cache: 'no-cache'` on analyses specifically: free users who
+      // hit the dashboard BEFORE the /analysis/history gate was removed
+      // may still have a stale 403 in their HTTP cache, which would
+      // make the recents list silently stay empty even after the
+      // backend update. Forcing a revalidation guarantees we read the
+      // fresh response. The other two endpoints were never gated, so
+      // they can use the default cache strategy.
       const [analysesRes, quizRes, citesRes] = await Promise.allSettled([
-        fetch(`${API_URL}/analysis/history?limit=10`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API_URL}/analysis/history?limit=10`, {
+          headers: { Authorization: `Bearer ${token}` },
+          cache: 'no-cache',
+        }),
         fetch(`${API_URL}/analysis/quiz-history?limit=20`, { headers: { Authorization: `Bearer ${token}` } }),
         fetch(`${API_URL}/analysis/citation-history?limit=10`, { headers: { Authorization: `Bearer ${token}` } }),
       ]);
@@ -261,22 +271,61 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
       if (analysesRes.status === 'fulfilled' && analysesRes.value.ok) {
         try {
           const json = await analysesRes.value.json();
-          const items = (json?.data || json?.history || []) as Array<{ id: string; analysis_type?: string; created_at: string; documents?: { title?: string; original_filename?: string } | null }>;
-          setAnalyzeRecents(items.slice(0, 4).map((a) => ({
-            id: a.id,
-            title: a.documents?.title || a.documents?.original_filename || 'Untitled paper',
-            meta: `${timeAgoLabel(a.created_at)}${a.analysis_type ? ' · ' + a.analysis_type.replace(/_/g, ' ') : ''}`,
-            icon: '📝',
-            onOpen: () => {
-              if (typeof window !== 'undefined') {
-                const url = new URL(window.location.href);
-                url.pathname = '/analysis';
-                url.searchParams.set('id', a.id);
-                window.history.pushState({}, '', url);
-              }
-              onNavigate('analysis');
-            },
-          })));
+          const items = (json?.data || json?.history || []) as Array<{
+            id: string;
+            document_id?: string | null;
+            documentId?: string | null;
+            analysis_type?: string;
+            created_at: string;
+            documents?: { id?: string; title?: string; original_filename?: string } | null;
+          }>;
+          setAnalyzeRecents(items.slice(0, 4).map((a) => {
+            // Resolve the underlying document id from any field the
+            // backend might surface it as. Supabase joins normally keep
+            // snake_case (`document_id`), but we also fall back to the
+            // camelCased variant and to the joined `documents.id` so a
+            // schema tweak doesn't silently break the click handler.
+            const linkedDocId =
+              a.document_id || a.documentId || a.documents?.id || null;
+            return {
+              id: a.id,
+              title: a.documents?.title || a.documents?.original_filename || 'Untitled paper',
+              meta: `${timeAgoLabel(a.created_at)}${a.analysis_type ? ' · ' + a.analysis_type.replace(/_/g, ' ') : ''}`,
+              icon: '📝',
+              onOpen: () => {
+                // Recent analyses open in the Library (paid + free) so the
+                // user re-views their paper alongside its analysis panel.
+                // LibraryPage reads `librarySelectDocumentAfterCheckout`
+                // on mount (LibraryPage.tsx:228) and auto-selects the
+                // matching document via `docs.find(d => d.id === id)`.
+                // If the linked doc isn't in the library's first 100
+                // results (or the analysis is orphan / text-only), Library
+                // falls back to its newest doc — the trace below is what
+                // you check in DevTools when the wrong doc loads.
+                // eslint-disable-next-line no-console
+                console.log('[dashboard-recents] open in library', {
+                  analysisId: a.id,
+                  linkedDocId,
+                  title: a.documents?.title,
+                });
+                try {
+                  if (linkedDocId) {
+                    sessionStorage.setItem(
+                      'librarySelectDocumentAfterCheckout',
+                      linkedDocId,
+                    );
+                  } else {
+                    // No linked doc — clear the key so Library doesn't
+                    // try to restore a stale id from an earlier click.
+                    sessionStorage.removeItem('librarySelectDocumentAfterCheckout');
+                  }
+                } catch {
+                  /* ignore */
+                }
+                onNavigate('library');
+              },
+            };
+          }));
         } catch { /* silent */ }
       }
 
@@ -423,7 +472,82 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
   const firstName = getFirstName(user);
   const greeting = getTimeGreeting();
 
-  const isNewUser = analysisCount === 0 && !isLoading;
+  /* Per-tool "is this user new to THIS specific tool" flags.
+     A user who has analysed essays but never built a study pack is
+     still new for the Study Pack hero, and vice versa. Each tool's
+     conversion hero only shows while that tool's recents list is
+     empty — once the user creates their first item for the tool,
+     they see the hub view (with recents + previews) from then on.
+
+     Study pack + citations have ONE signal each (their respective
+     recents fetch), because /analysis/quiz-history and
+     /analysis/citation-history work for free + paid users alike.
+
+     Analyze is different because /analysis/history is PAID-ONLY
+     (backend returns 403 + `upgradeRequired: true` for free users)
+     — so for free users `analyzeRecents` is always empty regardless
+     of how many papers they've actually analysed. To match the
+     study-pack behaviour for free users, we OR a second signal:
+     `analysisCount` (sourced from /users/usage-stats, which is NOT
+     paid-gated). The user is "new" only when BOTH sources are zero
+     AND BOTH loading flags have settled — that catches paid users
+     via `analyzeRecents` and free users via `analysisCount`. */
+  const isNewForAnalyze =
+    analyzeRecents.length === 0 &&
+    analysisCount === 0 &&
+    !hubRecentsLoading &&
+    !isLoading;
+  const isNewForStudyPack = studyPackRecents.length === 0 && !hubRecentsLoading;
+  const isNewForCitations = citationsRecents.length === 0 && !hubRecentsLoading;
+
+  /** Workspace-wide "no analyses yet" flag — drives the big new-user
+   *  landing hero on the analyze create view and the mobile dashboard
+   *  empty-state subtitle. Now mirrors `isNewForAnalyze` exactly so
+   *  the two never diverge across paint frames. */
+  const isNewUser = isNewForAnalyze;
+
+  /* ─── NEW-USER CONVERSION OPTIMISATION ────────────────────────────
+     For each tool, if the user is brand new TO THAT TOOL, force them
+     straight into the create view (skipping the empty hub state).
+     Returning users on a tool they've already used see the normal hub
+     view with their recents + previews.
+
+     Reverse transition: once a brand-new user completes their first
+     item (isNewFor* flips true → false), they should land on the hub
+     view so they actually see the recent they just created — not stay
+     pinned to the landing-style create hero. The view-state deps stay
+     out of the array so manual "Back to recents" / "+ Analyze a new
+     essay" clicks aren't immediately reverted; the effect only fires
+     when isNewFor* or the active tab actually changes. */
+  useEffect(() => {
+    if (dashboardTool === 'analyze') {
+      if (isNewForAnalyze && analyzeView === 'hub') {
+        setAnalyzeView('create');
+      } else if (!isNewForAnalyze && analyzeView === 'create') {
+        setAnalyzeView('hub');
+      }
+    }
+    if (dashboardTool === 'study_pack') {
+      if (isNewForStudyPack && studyPackView === 'hub') {
+        setStudyPackView('create');
+      } else if (!isNewForStudyPack && studyPackView === 'create') {
+        setStudyPackView('hub');
+      }
+    }
+    if (dashboardTool === 'citations') {
+      if (isNewForCitations && citationsView === 'hub') {
+        setCitationsView('create');
+      } else if (!isNewForCitations && citationsView === 'create') {
+        setCitationsView('hub');
+      }
+    }
+    // View states intentionally not in deps — respect manual "Back to recents"
+    // and "+ Analyze a new" clicks. The effect only fires on isNewFor* /
+    // dashboardTool changes, so a returning user clicking "+ Analyze a new
+    // essay" stays on create (no isNewFor* change, no re-run).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isNewForAnalyze, isNewForStudyPack, isNewForCitations, dashboardTool]);
+
   /** Pro / Premium / Focus: analyses + citations + study packs share one monthly pool (backend). */
   const showCombinedUsage =
     (plan === 'pro' || plan === 'premium' || plan === 'focus') &&
@@ -812,58 +936,10 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
             </div>
 
             <div className="flex items-center gap-3 flex-wrap sm:justify-end sm:shrink-0">
-              {/* Level + XP bar — hidden on mobile (too crowded with tabs and
-                  greeting). Shows from sm+ where the layout has horizontal room. */}
-              <button
-                type="button"
-                onClick={() => onNavigate('badges')}
-                className="hidden sm:inline-flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 hover:border-stone-300 active:border-b-2 active:translate-y-0.5 transition-all cursor-pointer group"
-              >
-                <div
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm font-extrabold text-white border-b-2 group-hover:scale-105 transition-transform"
-                  style={{
-                    backgroundColor: levelInfo.level >= 80 ? '#FF9600' : levelInfo.level >= 60 ? '#A560E8' : levelInfo.level >= 40 ? '#FF4B4B' : levelInfo.level >= 20 ? '#1CB0F6' : '#58CC02',
-                    borderColor: levelInfo.level >= 80 ? '#D97F00' : levelInfo.level >= 60 ? '#8A48C7' : levelInfo.level >= 40 ? '#E04343' : levelInfo.level >= 20 ? '#1899D6' : '#46A302',
-                  }}
-                >
-                  {levelInfo.level}
-                </div>
-                <div className="min-w-0" style={{ width: '170px' }}>
-                  <div className="flex items-center justify-between gap-1.5 mb-1">
-                    <p className="dash-serif text-[13px] font-extrabold text-stone-700 dark:text-stone-200 truncate">
-                      {levelInfo.name}
-                    </p>
-                    <p className="text-[10px] font-extrabold text-stone-400 dark:text-stone-500 shrink-0">
-                      {levelInfo.progress < 1 ? `${totalXP}/${levelInfo.nextLevelXP}` : 'MAX'}
-                    </p>
-                  </div>
-                  <div className="h-2 rounded-full bg-stone-200 dark:bg-stone-700 overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all duration-700"
-                      style={{
-                        width: `${Math.max(3, levelInfo.progress * 100)}%`,
-                        backgroundColor: levelInfo.level >= 80 ? '#FF9600' : levelInfo.level >= 60 ? '#A560E8' : levelInfo.level >= 40 ? '#FF4B4B' : levelInfo.level >= 20 ? '#1CB0F6' : '#58CC02',
-                      }}
-                    />
-                  </div>
-                </div>
-              </button>
-
-              {/* Streak badge */}
-              <button
-                type="button"
-                onClick={() => setDashboardTool('daily_review')}
-                className={`inline-flex items-center gap-2 px-4 py-3 rounded-2xl border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all cursor-pointer ${
-                  streakInfo.currentStreak > 0
-                    ? 'bg-[#FFF4E0] dark:bg-[#FF9600]/10 border-[#FF9600]/40'
-                    : 'bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-700'
-                }`}
-              >
-                <span className="text-xl leading-none" aria-hidden>{streakInfo.currentStreak > 0 ? '🔥' : '❄️'}</span>
-                <span className={`text-sm font-extrabold ${streakInfo.currentStreak > 0 ? 'text-[#FF9600]' : 'text-stone-400'}`}>
-                  {streakInfo.currentStreak} day{streakInfo.currentStreak !== 1 ? 's' : ''}
-                </span>
-              </button>
+              {/* Level + XP bar and Streak badge — REMOVED per user brief.
+                  Both displays were unconditionally hidden across free
+                  and premium plans. Re-introduce by restoring the
+                  `<button>` blocks from git history if ever needed. */}
 
               {analysisCount > 0 && (
                 <div className="hidden sm:inline-flex items-center gap-2 px-4 py-3 rounded-2xl bg-[#E5F8D0] dark:bg-[#58CC02]/10 border-2 border-b-4 border-[#58CC02]/30">
@@ -996,7 +1072,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                       >
                         <div
                           className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-base text-white ${item.iconClass} border-2 border-b-4 ${
-                            item.id === 'daily_review' ? 'border-[#D97F00]' : item.id === 'analyze' ? 'border-[#E04343]' : item.id === 'study_pack' ? 'border-[#D97F00]' : item.id === 'citations' ? 'border-[#1899D6]' : 'border-[#8A48C7]'
+                            item.id === 'daily_review' ? 'border-[#46A302]' : item.id === 'analyze' ? 'border-[#E04343]' : item.id === 'study_pack' ? 'border-[#D97F00]' : item.id === 'citations' ? 'border-[#1899D6]' : 'border-[#8A48C7]'
                           } ${active ? 'scale-105' : 'group-hover:scale-105'} transition-transform`}
                         >
                           <span aria-hidden>{item.emoji}</span>
@@ -1287,14 +1363,20 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                     centred), so the overlap reads as a tucked-in
                     decoration rather than a collision. */}
                 <div className="mb-2 relative">
-                  <button
-                    type="button"
-                    onClick={() => setAnalyzeView('hub')}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-sm font-extrabold text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 active:border-b-2 active:translate-y-0.5 transition-all"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
-                    Back to recents
-                  </button>
+                  {/* "Back to recents" is hidden for new users — clicking
+                      it would dump them into the empty-state hub which is
+                      a dead end on first sign-in. Existing users (with
+                      analyses) keep the navigation. */}
+                  {!isNewUser && (
+                    <button
+                      type="button"
+                      onClick={() => setAnalyzeView('hub')}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-sm font-extrabold text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 active:border-b-2 active:translate-y-0.5 transition-all"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                      Back to recents
+                    </button>
+                  )}
                   <img
                     src="/mascot-study.webp"
                     alt=""
@@ -1305,32 +1387,102 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                   />
                 </div>
                 {/* Hero upload card */}
-                <section className="rounded-2xl overflow-hidden bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700">
+                <section className={`rounded-2xl overflow-hidden bg-white dark:bg-stone-900 border-2 border-b-4 ${isNewUser ? 'border-[#FF4B4B]/40 shadow-[0_18px_42px_-12px_rgba(255,75,75,0.25)]' : 'border-stone-200 dark:border-stone-700'}`}>
 
-                  <div className="relative px-6 sm:px-8 lg:px-10 pt-4 sm:pt-5 lg:pt-6 pb-6 sm:pb-8 lg:pb-10">
+                  {/* NEW USER HERO — extra-prominent banner above the form
+                      that pairs a trust signal + outcome-focused H1 + a
+                      4-tile "what you'll get" grid. Built per user brief
+                      to lift dashboard → essay-analysis conversion: the
+                      bigger card, stronger value prop, and concrete
+                      deliverables answer the "why upload right now?"
+                      question before the visitor scrolls. Returning users
+                      see the slimmer original header below. */}
+                  {isNewUser ? (
+                    <div className="relative px-6 sm:px-8 lg:px-10 pt-6 sm:pt-8 lg:pt-10 pb-2">
+                      {/* Trust pill — proof + social, sits above the H1 */}
+                      <div className="text-center mb-4">
+                        <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#E5F8D0] dark:bg-[#58CC02]/15 border-2 border-[#58CC02]/40 text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.14em] text-[#46A302] dark:text-[#9BE85C]">
+                          <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                          Trusted by 50,000+ students
+                        </span>
+                      </div>
+
+                      {/* Outcome-focused H1 — leads with the result, not the feature */}
+                      <h2 className="dash-serif text-center text-2xl sm:text-3xl lg:text-[2.4rem] font-extrabold leading-[1.05] tracking-tight text-stone-900 dark:text-stone-50">
+                        Turn your draft into an{' '}
+                        <span className="relative inline-flex items-center justify-center align-baseline rounded-2xl bg-[#58CC02] text-white font-extrabold leading-none w-[0.95em] h-[0.95em] border-2 border-b-[5px] border-[#46A302] rotate-[-4deg] shadow-[0_6px_18px_-2px_rgba(88,204,2,0.5)]" style={{ verticalAlign: '-0.06em' }} aria-hidden>
+                          A
+                        </span>
+                        <span className="sr-only">A</span>
+                        <span className="block mt-1.5">in <span className="text-[#FF4B4B]">60 seconds</span></span>
+                      </h2>
+
+                      <p className="mt-4 text-center text-sm sm:text-base text-stone-600 dark:text-stone-400 max-w-xl mx-auto leading-relaxed font-bold">
+                        Drop in your essay. Get a letter grade, rubric scores, and exactly what to fix — before you turn it in.
+                      </p>
+
+                      {/* WHAT YOU'LL GET — 4-up visual benefit grid.
+                          Concrete deliverables make the offer specific
+                          rather than abstract. Each tile mirrors a real
+                          part of the analysis output (rubric / annotations
+                          / revision / time-to-result). */}
+                      <div className="mt-6 grid grid-cols-2 lg:grid-cols-4 gap-2.5 max-w-3xl mx-auto">
+                        <div className="rounded-xl border-2 border-b-4 border-[#FF4B4B]/30 dark:border-[#FF4B4B]/40 bg-[#FFE8E8]/60 dark:bg-[#FF4B4B]/10 p-3 text-center">
+                          <div className="text-xl mb-1" aria-hidden>📊</div>
+                          <p className="text-[12px] sm:text-[13px] font-extrabold text-[#FF4B4B] leading-tight">Letter grade + rubric</p>
+                          <p className="text-[10px] sm:text-[11px] text-stone-500 dark:text-stone-400 font-bold mt-0.5">A–F with sub-scores</p>
+                        </div>
+                        <div className="rounded-xl border-2 border-b-4 border-[#FF9600]/30 dark:border-[#FF9600]/40 bg-[#FFF4E0]/60 dark:bg-[#FF9600]/10 p-3 text-center">
+                          <div className="text-xl mb-1" aria-hidden>🖍️</div>
+                          <p className="text-[12px] sm:text-[13px] font-extrabold text-[#FF9600] leading-tight">Line-by-line notes</p>
+                          <p className="text-[10px] sm:text-[11px] text-stone-500 dark:text-stone-400 font-bold mt-0.5">Exactly what to fix</p>
+                        </div>
+                        <div className="rounded-xl border-2 border-b-4 border-[#A560E8]/30 dark:border-[#A560E8]/40 bg-[#F3EAFF]/60 dark:bg-[#A560E8]/10 p-3 text-center">
+                          <div className="text-xl mb-1" aria-hidden>✍️</div>
+                          <p className="text-[12px] sm:text-[13px] font-extrabold text-[#A560E8] leading-tight">Polished revision</p>
+                          <p className="text-[10px] sm:text-[11px] text-stone-500 dark:text-stone-400 font-bold mt-0.5">Apply with one click</p>
+                        </div>
+                        <div className="rounded-xl border-2 border-b-4 border-[#58CC02]/30 dark:border-[#58CC02]/40 bg-[#E5F8D0]/60 dark:bg-[#58CC02]/10 p-3 text-center">
+                          <div className="text-xl mb-1" aria-hidden>⚡</div>
+                          <p className="text-[12px] sm:text-[13px] font-extrabold text-[#58CC02] leading-tight">60-second result</p>
+                          <p className="text-[10px] sm:text-[11px] text-stone-500 dark:text-stone-400 font-bold mt-0.5">No sign-up wait</p>
+                        </div>
+                      </div>
+
+                      {/* Big down-arrow nudge directing eye to the drop zone */}
+                      <div className="mt-6 flex flex-col items-center text-center">
+                        <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-stone-400 dark:text-stone-500 mb-1.5">
+                          Start here — drop or paste your essay
+                        </p>
+                        <svg className="w-5 h-5 text-[#FF4B4B] motion-safe:animate-bounce" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                        </svg>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  <div className={`relative px-6 sm:px-8 lg:px-10 ${isNewUser ? 'pt-4' : 'pt-4 sm:pt-5 lg:pt-6'} pb-6 sm:pb-8 lg:pb-10`}>
+                    {!isNewUser && (
                     <div className="text-center mb-3">
                       <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 text-[#FF4B4B] border-2 border-[#FF4B4B]/30 text-xs font-extrabold">
                         <span aria-hidden>✨</span>
-                        {isNewUser ? 'Get started in under a minute' : 'Ready for your next analysis'}
+                        Ready for your next analysis
                       </span>
                     </div>
+                    )}
 
-                    <h2 className="dash-serif text-center text-2xl sm:text-3xl lg:text-[2.4rem] font-extrabold leading-[1.1] tracking-tight text-stone-900 dark:text-stone-50">
-                      {isNewUser ? (
-                        <>
-                          Get <span className="text-[#FF4B4B]">professor-style feedback</span> on your essay
-                        </>
-                      ) : (
-                        <>
+                    {!isNewUser && (
+                      <>
+                        <h2 className="dash-serif text-center text-2xl sm:text-3xl lg:text-[2.4rem] font-extrabold leading-[1.1] tracking-tight text-stone-900 dark:text-stone-50">
                           Drop in your <span className="text-[#FF4B4B]">next essay</span>
-                        </>
-                      )}
-                    </h2>
-                    <p className="mt-3 text-center text-sm sm:text-base text-stone-500 dark:text-stone-400 max-w-2xl mx-auto leading-relaxed font-bold">
-                      {isNewUser
-                        ? 'Drop in your paper and see exactly what to improve — structure, arguments, clarity, and more.'
-                        : 'Detailed feedback on structure, arguments, and writing quality.'}
-                    </p>
+                        </h2>
+                        <p className="mt-3 text-center text-sm sm:text-base text-stone-500 dark:text-stone-400 max-w-2xl mx-auto leading-relaxed font-bold">
+                          Detailed feedback on structure, arguments, and writing quality.
+                        </p>
+                      </>
+                    )}
 
                     {/* Upload drop zone */}
                     <div
@@ -1814,21 +1966,130 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
             )}
             {dashboardTool === 'study_pack' && studyPackView === 'create' && (
               <>
-                <button
-                  type="button"
-                  onClick={() => setStudyPackView('hub')}
-                  className="mb-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-sm font-extrabold text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 active:border-b-2 active:translate-y-0.5 transition-all"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
-                  Back to recents
-                </button>
-                <StudyPackPage
-                  embedded
-                  onEmbeddedToolSwitch={switchEmbeddedTool}
-                  onNavigate={onNavigate}
-                  user={user}
-                  onLogout={onLogout}
-                />
+                {/* "Back to recents" hidden for users new to Study Pack
+                    (empty hub = dead end). Visible the moment they've
+                    built their first pack. */}
+                {!isNewForStudyPack && (
+                  <button
+                    type="button"
+                    onClick={() => setStudyPackView('hub')}
+                    className="mb-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-sm font-extrabold text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 active:border-b-2 active:translate-y-0.5 transition-all"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                    Back to recents
+                  </button>
+                )}
+
+                {/* NEW-USER FUSED CARD — Study Pack. The conversion hero
+                    (trust pill → outcome H1 → 4-tile benefit grid → down
+                    arrow) sits inside this same wrapper as the embedded
+                    StudyPackPage form, separated by a hairline divider.
+                    Wrapping both in ONE div neutralises the parent
+                    space-y-7 gap that previously forced them apart, so
+                    they render as a single continuous card with one
+                    orange border and one title.
+                    Shown ONLY when the user has zero study packs yet —
+                    once they've created their first, they see the regular
+                    embedded StudyPackPage. */}
+                {isNewForStudyPack ? (
+                  <div className="relative rounded-2xl overflow-hidden bg-white dark:bg-stone-900 border-2 border-b-4 border-[#FF9600]/30 dark:border-[#FF9600]/40 shadow-[0_18px_42px_-12px_rgba(255,150,0,0.25)]">
+                    {/* Mascots at the actual top corners of the fused
+                        card (not the form section's top). Positioned
+                        absolute on the outer wrapper so they sit above
+                        everything else in the card. */}
+                    <img
+                      src="/mascot-study.webp"
+                      alt=""
+                      aria-hidden
+                      loading="lazy"
+                      decoding="async"
+                      className="hidden sm:block pointer-events-none absolute top-3 left-3 sm:top-4 sm:left-4 w-20 sm:w-24 lg:w-28 h-auto z-20 drop-shadow-[0_12px_22px_rgba(217,119,6,0.30)]"
+                    />
+                    <img
+                      src="/mascot-dance.webp"
+                      alt=""
+                      aria-hidden
+                      loading="lazy"
+                      decoding="async"
+                      className="hidden sm:block pointer-events-none absolute top-3 right-3 sm:top-4 sm:right-4 w-20 sm:w-24 lg:w-28 h-auto z-20 drop-shadow-[0_12px_22px_rgba(217,119,6,0.30)]"
+                    />
+                    {/* Conversion hero half */}
+                    <div className="relative px-6 sm:px-8 lg:px-10 pt-6 sm:pt-8 lg:pt-10 pb-6 sm:pb-8 lg:pb-10">
+                      <div className="text-center mb-4">
+                        <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#E5F8D0] dark:bg-[#58CC02]/15 border-2 border-[#58CC02]/40 text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.14em] text-[#46A302] dark:text-[#9BE85C]">
+                          <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                          Trusted by 50,000+ students
+                        </span>
+                      </div>
+
+                      <h2 className="dash-serif text-center text-2xl sm:text-3xl lg:text-[2.4rem] font-extrabold leading-[1.05] tracking-tight text-stone-900 dark:text-stone-50">
+                        Turn any notes into a{' '}
+                        <span className="text-[#FF9600]">study pack</span>
+                        <span className="block mt-1.5">in <span className="text-[#FF9600]">60 seconds</span></span>
+                      </h2>
+
+                      <p className="mt-4 text-center text-sm sm:text-base text-stone-600 dark:text-stone-400 max-w-xl mx-auto leading-relaxed font-bold">
+                        Drop your notes. Get a lesson, flashcards, quizzes, and arcade games — all from your text.
+                      </p>
+
+                      <div className="mt-6 grid grid-cols-2 lg:grid-cols-4 gap-2.5 max-w-3xl mx-auto">
+                        <div className="rounded-xl border-2 border-b-4 border-[#1CB0F6]/30 dark:border-[#1CB0F6]/40 bg-[#DDF4FF]/60 dark:bg-[#1CB0F6]/10 p-3 text-center">
+                          <div className="text-xl mb-1" aria-hidden>📚</div>
+                          <p className="text-[12px] sm:text-[13px] font-extrabold text-[#1CB0F6] leading-tight">Step-by-step lesson</p>
+                          <p className="text-[10px] sm:text-[11px] text-stone-500 dark:text-stone-400 font-bold mt-0.5">Master the key ideas</p>
+                        </div>
+                        <div className="rounded-xl border-2 border-b-4 border-[#FF9600]/30 dark:border-[#FF9600]/40 bg-[#FFF4E0]/60 dark:bg-[#FF9600]/10 p-3 text-center">
+                          <div className="text-xl mb-1" aria-hidden>🎴</div>
+                          <p className="text-[12px] sm:text-[13px] font-extrabold text-[#FF9600] leading-tight">Auto flashcards</p>
+                          <p className="text-[10px] sm:text-[11px] text-stone-500 dark:text-stone-400 font-bold mt-0.5">Ready to study</p>
+                        </div>
+                        <div className="rounded-xl border-2 border-b-4 border-[#A560E8]/30 dark:border-[#A560E8]/40 bg-[#F3EAFF]/60 dark:bg-[#A560E8]/10 p-3 text-center">
+                          <div className="text-xl mb-1" aria-hidden>✅</div>
+                          <p className="text-[12px] sm:text-[13px] font-extrabold text-[#A560E8] leading-tight">Quizzes to test you</p>
+                          <p className="text-[10px] sm:text-[11px] text-stone-500 dark:text-stone-400 font-bold mt-0.5">Spot the gaps</p>
+                        </div>
+                        <div className="rounded-xl border-2 border-b-4 border-[#58CC02]/30 dark:border-[#58CC02]/40 bg-[#E5F8D0]/60 dark:bg-[#58CC02]/10 p-3 text-center">
+                          <div className="text-xl mb-1" aria-hidden>🎮</div>
+                          <p className="text-[12px] sm:text-[13px] font-extrabold text-[#58CC02] leading-tight">Crater Blast + games</p>
+                          <p className="text-[10px] sm:text-[11px] text-stone-500 dark:text-stone-400 font-bold mt-0.5">Make studying fun</p>
+                        </div>
+                      </div>
+
+                      <div className="mt-6 flex flex-col items-center text-center">
+                        <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-stone-400 dark:text-stone-500 mb-1.5">
+                          Paste your notes below
+                        </p>
+                        <svg className="w-5 h-5 text-[#FF9600] motion-safe:animate-bounce" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                        </svg>
+                      </div>
+                    </div>
+
+                    {/* Hairline divider between hero and form */}
+                    <div className="h-px bg-[#FF9600]/20 mx-6 sm:mx-8 lg:mx-10" aria-hidden />
+
+                    {/* Form half — StudyPackPage with hideHeader strips its
+                        own outer card border so it nests cleanly here. */}
+                    <StudyPackPage
+                      embedded
+                      hideHeader
+                      onEmbeddedToolSwitch={switchEmbeddedTool}
+                      onNavigate={onNavigate}
+                      user={user}
+                      onLogout={onLogout}
+                    />
+                  </div>
+                ) : (
+                  <StudyPackPage
+                    embedded
+                    onEmbeddedToolSwitch={switchEmbeddedTool}
+                    onNavigate={onNavigate}
+                    user={user}
+                    onLogout={onLogout}
+                  />
+                )}
               </>
             )}
 
@@ -1858,21 +2119,118 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
             )}
             {dashboardTool === 'citations' && citationsView === 'create' && (
               <>
-                <button
-                  type="button"
-                  onClick={() => setCitationsView('hub')}
-                  className="mb-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-sm font-extrabold text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 active:border-b-2 active:translate-y-0.5 transition-all"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
-                  Back to recents
-                </button>
-                <CitationsPage
-                  embedded
-                  onEmbeddedToolSwitch={switchEmbeddedTool}
-                  onNavigate={onNavigate}
-                  user={user}
-                  onLogout={onLogout}
-                />
+                {/* "Back to recents" hidden for users new to Citations
+                    (empty hub = dead end). Visible once they've done
+                    their first citation search. */}
+                {!isNewForCitations && (
+                  <button
+                    type="button"
+                    onClick={() => setCitationsView('hub')}
+                    className="mb-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-sm font-extrabold text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 active:border-b-2 active:translate-y-0.5 transition-all"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                    Back to recents
+                  </button>
+                )}
+
+                {/* NEW-USER FUSED CARD — Citations. One wrapper holds
+                    both the conversion hero AND the embedded form so the
+                    parent space-y-7 can't force a gap between them.
+                    Shown ONLY for users new to Citations. */}
+                {isNewForCitations ? (
+                  <div className="relative rounded-2xl overflow-hidden bg-white dark:bg-stone-900 border-2 border-b-4 border-[#1CB0F6]/30 dark:border-[#1CB0F6]/40 shadow-[0_18px_42px_-12px_rgba(28,176,246,0.25)]">
+                    {/* Mascots at top corners of the fused card */}
+                    <img
+                      src="/mascot-study.webp"
+                      alt=""
+                      aria-hidden
+                      loading="lazy"
+                      decoding="async"
+                      className="hidden sm:block pointer-events-none absolute top-3 left-3 sm:top-4 sm:left-4 w-20 sm:w-24 lg:w-28 h-auto z-20"
+                    />
+                    <img
+                      src="/mascot-dance.webp"
+                      alt=""
+                      aria-hidden
+                      loading="lazy"
+                      decoding="async"
+                      className="hidden sm:block pointer-events-none absolute top-3 right-3 sm:top-4 sm:right-4 w-20 sm:w-24 lg:w-28 h-auto z-20"
+                    />
+                    {/* Conversion hero half */}
+                    <div className="relative px-6 sm:px-8 lg:px-10 pt-6 sm:pt-8 lg:pt-10 pb-6 sm:pb-8 lg:pb-10">
+                      <div className="text-center mb-4">
+                        <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#E5F8D0] dark:bg-[#58CC02]/15 border-2 border-[#58CC02]/40 text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.14em] text-[#46A302] dark:text-[#9BE85C]">
+                          <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                          Trusted by 50,000+ students
+                        </span>
+                      </div>
+
+                      <h2 className="dash-serif text-center text-2xl sm:text-3xl lg:text-[2.4rem] font-extrabold leading-[1.05] tracking-tight text-stone-900 dark:text-stone-50">
+                        Find <span className="text-[#1CB0F6]">real sources</span> for your paper
+                        <span className="block mt-1.5">in <span className="text-[#1CB0F6]">60 seconds</span></span>
+                      </h2>
+
+                      <p className="mt-4 text-center text-sm sm:text-base text-stone-600 dark:text-stone-400 max-w-xl mx-auto leading-relaxed font-bold">
+                        Type your topic. Get real, citable journal sources formatted in any style — APA, MLA, Chicago, and more.
+                      </p>
+
+                      <div className="mt-6 grid grid-cols-2 lg:grid-cols-4 gap-2.5 max-w-3xl mx-auto">
+                        <div className="rounded-xl border-2 border-b-4 border-[#1CB0F6]/30 dark:border-[#1CB0F6]/40 bg-[#DDF4FF]/60 dark:bg-[#1CB0F6]/10 p-3 text-center">
+                          <div className="text-xl mb-1" aria-hidden>📚</div>
+                          <p className="text-[12px] sm:text-[13px] font-extrabold text-[#1CB0F6] leading-tight">Real journal sources</p>
+                          <p className="text-[10px] sm:text-[11px] text-stone-500 dark:text-stone-400 font-bold mt-0.5">Verified peer-reviewed</p>
+                        </div>
+                        <div className="rounded-xl border-2 border-b-4 border-[#FF9600]/30 dark:border-[#FF9600]/40 bg-[#FFF4E0]/60 dark:bg-[#FF9600]/10 p-3 text-center">
+                          <div className="text-xl mb-1" aria-hidden>🎯</div>
+                          <p className="text-[12px] sm:text-[13px] font-extrabold text-[#FF9600] leading-tight">Any citation style</p>
+                          <p className="text-[10px] sm:text-[11px] text-stone-500 dark:text-stone-400 font-bold mt-0.5">APA, MLA, Chicago…</p>
+                        </div>
+                        <div className="rounded-xl border-2 border-b-4 border-[#A560E8]/30 dark:border-[#A560E8]/40 bg-[#F3EAFF]/60 dark:bg-[#A560E8]/10 p-3 text-center">
+                          <div className="text-xl mb-1" aria-hidden>📝</div>
+                          <p className="text-[12px] sm:text-[13px] font-extrabold text-[#A560E8] leading-tight">Relevance notes</p>
+                          <p className="text-[10px] sm:text-[11px] text-stone-500 dark:text-stone-400 font-bold mt-0.5">Why each source fits</p>
+                        </div>
+                        <div className="rounded-xl border-2 border-b-4 border-[#58CC02]/30 dark:border-[#58CC02]/40 bg-[#E5F8D0]/60 dark:bg-[#58CC02]/10 p-3 text-center">
+                          <div className="text-xl mb-1" aria-hidden>⚡</div>
+                          <p className="text-[12px] sm:text-[13px] font-extrabold text-[#58CC02] leading-tight">60-second result</p>
+                          <p className="text-[10px] sm:text-[11px] text-stone-500 dark:text-stone-400 font-bold mt-0.5">No JSTOR digging</p>
+                        </div>
+                      </div>
+
+                      <div className="mt-6 flex flex-col items-center text-center">
+                        <p className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-stone-400 dark:text-stone-500 mb-1.5">
+                          Type your topic below
+                        </p>
+                        <svg className="w-5 h-5 text-[#1CB0F6] motion-safe:animate-bounce" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                        </svg>
+                      </div>
+                    </div>
+
+                    {/* Hairline divider */}
+                    <div className="h-px bg-[#1CB0F6]/20 mx-6 sm:mx-8 lg:mx-10" aria-hidden />
+
+                    {/* Form half */}
+                    <CitationsPage
+                      embedded
+                      hideHeader
+                      onEmbeddedToolSwitch={switchEmbeddedTool}
+                      onNavigate={onNavigate}
+                      user={user}
+                      onLogout={onLogout}
+                    />
+                  </div>
+                ) : (
+                  <CitationsPage
+                    embedded
+                    onEmbeddedToolSwitch={switchEmbeddedTool}
+                    onNavigate={onNavigate}
+                    user={user}
+                    onLogout={onLogout}
+                  />
+                )}
               </>
             )}
 

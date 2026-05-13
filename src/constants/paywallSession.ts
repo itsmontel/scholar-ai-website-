@@ -75,3 +75,25 @@ export function markSoftPaywallDismissedNow(): void {
 
 /** Post–activation tutorial hard paywall (Analysis page) — restore after refresh until checkout or dismiss. */
 export const POST_ACTIVATION_PAYWALL_PENDING_KEY = 'writescholar_post_activation_paywall_pending';
+
+/**
+ * localStorage: set when the user has seen the Last-chance branch of
+ * the soft paywall at least once. The Last-chance pitch is a one-shot
+ * goodwill offer tied to first-time onboarding — after the user has
+ * seen it (and either converted or dismissed), every subsequent
+ * dismissal of the regular soft paywall skips Last-chance and closes
+ * straight to the dashboard. Survives logout.
+ */
+export const LAST_CHANCE_PAYWALL_SHOWN_KEY = 'writescholar_last_chance_paywall_shown';
+
+/**
+ * localStorage: set once the user has been shown — and either
+ * dismissed or proceeded to checkout from — the first post-onboarding
+ * soft paywall with the MAY2026 welcome discount on it. Subsequent
+ * soft paywalls (e.g. the one that fires again after the 7-day
+ * cooldown expires) read this flag and render plain pricing only:
+ * Pro $19.99/mo, Premium $39.99/mo, no strike-through, no "Save $X
+ * today only" urgency badge, no MAY2026 coupon auto-applied at
+ * checkout. The discount is a one-shot welcome offer.
+ */
+export const FIRST_PAYWALL_DISCOUNT_SHOWN_KEY = 'writescholar_first_paywall_discount_shown';

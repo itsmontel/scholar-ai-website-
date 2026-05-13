@@ -1,5 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
-import { CHECKOUT_FROM_TUTORIAL_PAYWALL_KEY, LAST_TUTORIAL_CHECKOUT_PLAN_KEY } from '../../constants/paywallSession';
+import {
+  CHECKOUT_FROM_TUTORIAL_PAYWALL_KEY,
+  FIRST_PAYWALL_DISCOUNT_SHOWN_KEY,
+  LAST_CHANCE_PAYWALL_SHOWN_KEY,
+  LAST_TUTORIAL_CHECKOUT_PLAN_KEY,
+  SOFT_PAYWALL_DISMISSED_KEY,
+  SOFT_PAYWALL_OPEN_KEY,
+  markSoftPaywallDismissedNow,
+} from '../../constants/paywallSession';
 
 /* ═══════════════════════════════════════════════════════════════
    SoftPaywall — Duolingo-style upsell modal.
@@ -75,6 +83,34 @@ const PREMIUM_MONTHLY = '$39.99';
 const PRO_MONTHLY_WAS = '$39.99';
 const PREMIUM_MONTHLY_WAS = '$59.99';
 
+// ─── MAY2026 discount applied to both soft-paywall branches ──────────
+// Pricing is unified across both soft-paywall branches so a single
+// Stripe coupon honours every displayed price:
+//   Pro     — $9.99 first month  (vs $39.99 anchor → save $30)
+//   Premium — $19.99 first month (vs $59.99 anchor → save $40)
+//
+// CRITICAL: configure MAY2026 in Stripe as a 50% off coupon, duration
+// "once" (first invoice only). The math:
+//   Pro:     $19.99 standard intro × 0.5 = $9.99  ✓
+//   Premium: $39.99 standard intro × 0.5 = $19.99 ✓
+// After the first month, billing rolls over to the standard recurring
+// rate (PRO_MONTHLY / PREMIUM_MONTHLY). The "Save $N today only"
+// urgency badge on the first paywall derives N from the difference
+// between PRO_MONTHLY_WAS / PREMIUM_MONTHLY_WAS and the first-month
+// price, so Pro shows "Save $30" and Premium shows "Save $40"
+// automatically.
+const FIRST_PAYWALL_PRO_FIRST_MONTH = '$9.99';
+const FIRST_PAYWALL_PREMIUM_FIRST_MONTH = '$19.99';
+const LAST_CHANCE_PRO_FIRST_MONTH = '$9.99';
+const LAST_CHANCE_PREMIUM_FIRST_MONTH = '$19.99';
+const LAST_CHANCE_PRO_WAS = '$39.99';
+const LAST_CHANCE_PREMIUM_WAS = '$59.99';
+/** Stripe coupon ID applied at checkout from any non-hard soft-paywall
+ *  branch (first paywall + last-chance). `null` ⇒ no coupon sent;
+ *  checkout falls back to the standard intro price. The matching
+ *  coupon must exist in Stripe Dashboard → Products → Coupons. */
+const MAY2026_PROMO_CODE: string | null = 'MAY2026';
+
 const SoftPaywall = ({
   userName,
   onStartTrial,
@@ -93,6 +129,25 @@ const SoftPaywall = ({
   const [socialIndex, setSocialIndex] = useState(0);
   const [checkedFeatures, setCheckedFeatures] = useState<number[]>([]);
   const [showLastChance, setShowLastChance] = useState(false);
+  /**
+   * Captured at mount: whether the MAY2026 welcome discount has
+   * already been "consumed" (shown + dismissed or converted) on a
+   * previous paywall fire. Lives on `localStorage` via
+   * FIRST_PAYWALL_DISCOUNT_SHOWN_KEY. Reading it once at mount means
+   * the discount UI stays consistent for this paywall instance even
+   * if other code writes to the key mid-render — the user can't lose
+   * the discount mid-flow.
+   */
+  const [discountAlreadyConsumed] = useState(() => {
+    try {
+      return localStorage.getItem(FIRST_PAYWALL_DISCOUNT_SHOWN_KEY) === '1';
+    } catch {
+      return false;
+    }
+  });
+  /** Convenience: true ⇒ render strike-through + urgency badge +
+   *  apply MAY2026 promo at checkout. Hard variant always skips it. */
+  const showDiscount = !discountAlreadyConsumed && !hard;
   const intervalRef = useRef<ReturnType<typeof setInterval>>();
 
   useEffect(() => {
@@ -128,10 +183,15 @@ const SoftPaywall = ({
     };
   }, [canStartFreeTrialProp]);
 
-  const showTrial =
-    canStartFreeTrialProp !== undefined && canStartFreeTrialProp !== null
-      ? canStartFreeTrialProp === true
-      : fetchedTrialEligible === true;
+  // Free trial offering disabled site-wide — force the non-trial path so
+  // all downstream copy (CTAs, paywall body, last-chance modal) renders
+  // the subscribe-now variant. The fetched/prop eligibility values are
+  // still wired in case the offering is brought back later.
+  const showTrial = false;
+  // Silence unused-var: `fetchedTrialEligible` and `canStartFreeTrialProp`
+  // remain set by the effect/prop above so re-enabling is a one-line flip.
+  void fetchedTrialEligible;
+  void canStartFreeTrialProp;
 
   useEffect(() => {
     if (hard) setShowLastChance(false);
@@ -146,6 +206,24 @@ const SoftPaywall = ({
 
   const monthlyPrice = checkoutPlan === 'premium' ? PREMIUM_MONTHLY : PRO_MONTHLY;
   const monthlyWas = checkoutPlan === 'premium' ? PREMIUM_MONTHLY_WAS : PRO_MONTHLY_WAS;
+  // First soft paywall (BRANCH 3) — MAY2026 discount applied. Pro
+  // $9.99 first month (vs $39.99 anchor), Premium $29.99 first month
+  // (vs $59.99 anchor). Both save $30 vs the original "was" price.
+  const firstPaywallFirstMonth =
+    checkoutPlan === 'premium' ? FIRST_PAYWALL_PREMIUM_FIRST_MONTH : FIRST_PAYWALL_PRO_FIRST_MONTH;
+  const firstPaywallSavedUsd = (
+    parseFloat(monthlyWas.slice(1)) - parseFloat(firstPaywallFirstMonth.slice(1))
+  ).toFixed(0);
+  // Last-chance branch (BRANCH 1) — deeper one-shot discount. Anchored
+  // against the original "was" price for max savings impact. Pro saves
+  // $30, Premium saves $40 (vs the first-paywall $30 on Premium).
+  const lastChanceFirstMonth =
+    checkoutPlan === 'premium' ? LAST_CHANCE_PREMIUM_FIRST_MONTH : LAST_CHANCE_PRO_FIRST_MONTH;
+  const lastChanceWas =
+    checkoutPlan === 'premium' ? LAST_CHANCE_PREMIUM_WAS : LAST_CHANCE_PRO_WAS;
+  const lastChanceSavedUsd = (
+    parseFloat(lastChanceWas.slice(1)) - parseFloat(lastChanceFirstMonth.slice(1))
+  ).toFixed(0);
   const planName = checkoutPlan === 'premium' ? 'Premium' : 'Pro';
   const hardPaywallFeatures = checkoutPlan === 'premium' ? PREMIUM_FEATURES : FEATURES;
   const planAccent = checkoutPlan === 'premium'
@@ -170,6 +248,45 @@ const SoftPaywall = ({
   const handleDismiss = () => {
     if (hard) return;
     if (!showLastChance) {
+      // Burn the MAY2026 welcome-discount flag on every BRANCH-3
+      // dismissal. After this, future paywalls (after the 7-day
+      // cooldown) render the plain-price variant — no strike-through,
+      // no urgency badge, no coupon at checkout.
+      if (showDiscount) {
+        try {
+          localStorage.setItem(FIRST_PAYWALL_DISCOUNT_SHOWN_KEY, '1');
+        } catch {
+          /* ignore */
+        }
+      }
+
+      // Last-chance is a one-shot goodwill pop-up reserved for the
+      // first dismissal ever (i.e. right after the user finishes
+      // onboarding). It only ever shows on the welcome-discount
+      // paywall — never on the subsequent plain pitches — so we
+      // explicitly gate it by `showDiscount` as well as the existing
+      // LAST_CHANCE_PAYWALL_SHOWN_KEY belt-and-suspenders flag.
+      if (!showDiscount) {
+        setExiting(true);
+        setTimeout(onDismiss, 350);
+        return;
+      }
+      let alreadyShown = false;
+      try {
+        alreadyShown = localStorage.getItem(LAST_CHANCE_PAYWALL_SHOWN_KEY) === '1';
+      } catch {
+        /* ignore */
+      }
+      if (alreadyShown) {
+        setExiting(true);
+        setTimeout(onDismiss, 350);
+        return;
+      }
+      try {
+        localStorage.setItem(LAST_CHANCE_PAYWALL_SHOWN_KEY, '1');
+      } catch {
+        /* ignore */
+      }
       setShowLastChance(true);
       return;
     }
@@ -200,7 +317,6 @@ const SoftPaywall = ({
           billingCycle: 'monthly',
           successUrl,
           cancelUrl,
-          trialPeriodDays: showTrial ? TRIAL_DAYS : 0,
           ...(code ? { promoCode: code } : {}),
         }),
       });
@@ -218,6 +334,24 @@ const SoftPaywall = ({
             /* ignore */
           }
         }
+        // Treat clicking the green CTA as a soft-paywall dismissal so it
+        // doesn't pop back open if the user bails on Stripe checkout and
+        // lands back on the dashboard via cancelUrl. The "restore on
+        // mount" effect in CompleteAcademicAIApp checks both
+        // SOFT_PAYWALL_DISMISSED_KEY and the 7-day cooldown — we set
+        // both here. If they pay successfully instead, the plan-change
+        // effect closes the paywall anyway, so these flags are a no-op
+        // in the success path. Cooldown for the StripeCancelTrialChoice
+        // modal (controlled by a different key) is untouched, so the
+        // "Leave checkout without subscribing?" modal still appears on
+        // return from cancel.
+        try {
+          sessionStorage.removeItem(SOFT_PAYWALL_OPEN_KEY);
+          sessionStorage.setItem(SOFT_PAYWALL_DISMISSED_KEY, '1');
+        } catch {
+          /* ignore */
+        }
+        markSoftPaywallDismissedNow();
         window.location.href = url;
       } else {
         throw new Error('No checkout URL returned');
@@ -230,7 +364,34 @@ const SoftPaywall = ({
   };
 
   const startPrimaryCheckout = () => {
-    void handleStartTrial(undefined, checkoutPlan);
+    // Auto-apply MAY2026 only when the paywall is currently showing
+    // the discount UI — i.e. the first-ever post-onboarding pitch
+    // (BRANCH 3 with `showDiscount`) or the Last-chance pop-up
+    // (BRANCH 1), both of which display the discounted first-month
+    // price. The plain-pricing variant (BRANCH 3 after the 7-day
+    // cooldown re-fires) intentionally skips the coupon so Stripe
+    // charges the standard intro price ($19.99 Pro / $39.99 Premium)
+    // that the UI is showing. Hard paywall (BRANCH 2) also skips.
+    const discountActive = (showDiscount || showLastChance) && !hard;
+    const promo = discountActive && MAY2026_PROMO_CODE ? MAY2026_PROMO_CODE : undefined;
+    if (discountActive && !MAY2026_PROMO_CODE) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        '[SoftPaywall] Discount paywall shown but MAY2026_PROMO_CODE is unset — ' +
+          'Stripe will charge the regular intro price. Create the coupon in Stripe ' +
+          'Dashboard and set the constant in SoftPaywall.tsx before this ships.'
+      );
+    }
+    // Burn the welcome-discount flag if we're converting from a
+    // discounted branch. After this, future paywalls render plain.
+    if (discountActive) {
+      try {
+        localStorage.setItem(FIRST_PAYWALL_DISCOUNT_SHOWN_KEY, '1');
+      } catch {
+        /* ignore */
+      }
+    }
+    void handleStartTrial(promo, checkoutPlan);
   };
 
   const firstName = userName?.split(' ')[0] || 'there';
@@ -253,10 +414,10 @@ const SoftPaywall = ({
       >
         {/* Pro / Premium pills now show only the plan name — per
             user brief the strikethrough + active monthly price was
-            removed so the paywall sells on the free-trial value, not
+            removed so the paywall sells on the plan's value, not the
             price. The PRO_MONTHLY / PREMIUM_MONTHLY constants stay
-            available higher up so the big price display + post-trial
-            subcopy can still reference them. */}
+            available higher up so the big price display + subcopy
+            can still reference them. */}
         <div className="text-sm font-extrabold text-[#3C3C3C] dark:text-stone-100">Pro</div>
       </button>
       <button
@@ -291,7 +452,11 @@ const SoftPaywall = ({
         </>
       ) : (
         <>
-          {showTrial ? 'Start for free' : `Upgrade to ${planName}`}
+          {showTrial
+            ? 'Start for free'
+            : showLastChance
+              ? `Get ${planName} for a discounted ${lastChanceFirstMonth}`
+              : 'Get better grades'}
           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
             <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
           </svg>
@@ -340,68 +505,130 @@ const SoftPaywall = ({
         )}
 
         {/* ═══════════════════════════════════════════════════════════
-            BRANCH 1: "Last chance" — compact popup after first dismiss
+            BRANCH 1: "Last chance" — fuller pitch after first dismiss.
+            User already saw BRANCH 3 (the full pitch), so this round
+            stacks four persuasion levers they haven't seen yet:
+              • personalized urgency ("Wait, {firstName} …")
+              • loss framing (free limits return, intro price disappears)
+              • price anchor with explicit savings call-out
+              • stay-vs-leave visual contrast (2×2 Duolingo grid)
+            Plus the rotating social-proof line and trust pills already
+            used in BRANCH 3, so dismissing here feels like a real cost.
            ═══════════════════════════════════════════════════════════ */}
         {!hard && showLastChance ? (
           <>
-            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 sm:px-8 pt-6 sm:pt-8 pb-4 animate-pwIn">
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 sm:px-8 pt-6 sm:pt-7 pb-3 animate-pwIn">
               {/* Sad mascot pleading */}
-              <div className="flex justify-center mb-4">
-                <div className="inline-flex items-center justify-center w-28 h-28 sm:w-32 sm:h-32 rounded-full border-4 border-[#FF9600] bg-[#FFF4E0]" style={{ boxShadow: '0 0 30px rgba(255,150,0,0.25)' }}>
-                  <img src="/mascot-sad.webp" alt="" width={96} height={96} className="object-contain w-24 h-24 sm:w-28 sm:h-28" loading="eager" />
+              <div className="flex justify-center mb-3.5">
+                <div className="inline-flex items-center justify-center w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-[#FF9600] bg-[#FFF4E0]" style={{ boxShadow: '0 0 30px rgba(255,150,0,0.25)' }}>
+                  <img src="/mascot-sad.webp" alt="" width={96} height={96} className="object-contain w-20 h-20 sm:w-24 sm:h-24" loading="eager" />
                 </div>
               </div>
 
-              {/* Last chance badge */}
+              {/* Last chance badge — final offer urgency */}
               <div className="flex justify-center mb-4">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFE8E8] border-2 border-[#FF4B4B]/40 text-[#FF4B4B] text-[10px] font-extrabold uppercase tracking-[0.2em]">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFE8E8] border-2 border-[#FF4B4B]/40 text-[#FF4B4B] text-[10px] font-extrabold uppercase tracking-[0.18em]">
                   <span aria-hidden>⏳</span>
-                  Last chance
+                  Final offer · won&apos;t come back after this
                 </span>
               </div>
 
               {/* Plan toggle */}
-              <div className="mb-5">
+              <div className="mb-4">
                 <PlanToggle />
               </div>
 
-              {/* Headline */}
+              {/* Personalized urgent headline — leads with the price */}
               <h3
-                className="text-2xl sm:text-3xl font-extrabold text-center text-[#3C3C3C] dark:text-stone-50 leading-tight mb-3"
+                className="text-2xl sm:text-3xl font-extrabold text-center text-[#3C3C3C] dark:text-stone-50 leading-tight mb-2"
                 style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
               >
-                {showTrial
-                  ? <>Your <span className="text-[#58CC02]">{TRIAL_DAYS}-day free trial</span> is still here</>
-                  : <>Upgrade to <span style={{ color: planAccent.color }}>{planName}</span></>}
+                Wait, grab {planName} for a discounted <span style={{ color: planAccent.color }}>{lastChanceFirstMonth}</span> this month.
               </h3>
 
-              {/* Subcopy */}
-              <p className="text-center text-stone-500 dark:text-stone-400 text-sm font-bold leading-relaxed">
-                {showTrial
-                  ? <>Start your {planName} trial — then <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{monthlyPrice}/mo</span> if you continue. Cancel anytime.</>
-                  : <>Continue to checkout to subscribe. Cancel anytime — no free trial remaining.</>}
+              {/* Loss-framed subcopy — one-shot offer, regular prices after */}
+              <p className="text-center text-stone-500 dark:text-stone-400 text-sm sm:text-[15px] font-bold leading-relaxed mb-4 max-w-md mx-auto">
+                This is the last time you&apos;ll see this price. Close the window and {planName} goes back to the regular {monthlyPrice}/mo. Try it for {lastChanceFirstMonth} this month and get the grade you deserve.
               </p>
+
+              {/* Discount banner — anchored against the original "was" price */}
+              <div
+                className="relative rounded-2xl border-2 border-b-4 px-5 py-4 mb-4 mx-auto max-w-md"
+                style={{ backgroundColor: planAccent.bg, borderColor: planAccent.border }}
+              >
+                <div className="flex items-baseline justify-center gap-2 flex-wrap mb-1">
+                  <span className="text-xl sm:text-2xl font-semibold text-stone-400 dark:text-stone-500 line-through decoration-2 tabular-nums">{lastChanceWas}</span>
+                  <span className="text-3xl sm:text-4xl font-extrabold tabular-nums" style={{ color: planAccent.color }}>{lastChanceFirstMonth}</span>
+                  <span className="text-sm font-extrabold text-[#3C3C3C] dark:text-stone-200">/ first month</span>
+                </div>
+                <p className="text-center text-[11px] sm:text-xs font-extrabold text-[#46A302]">
+                  You save ${lastChanceSavedUsd} this month · After that, {monthlyPrice}/mo. Cancel anytime.
+                </p>
+              </div>
+
+              {/* Stay vs leave — visual contrast grid */}
+              <div className="grid grid-cols-2 gap-2.5 max-w-md mx-auto mb-3">
+                <div className="rounded-xl bg-[#E5F8D0] dark:bg-[#58CC02]/15 border-2 border-b-[3px] border-[#46A302] px-3 py-2.5">
+                  <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#46A302] mb-0.5">If you stay</p>
+                  <p className="text-[12px] font-extrabold text-[#3C3C3C] dark:text-stone-100 leading-tight">
+                    {checkoutPlan === 'premium' ? '499' : '99'} analyses, study packs &amp; citations every month
+                  </p>
+                </div>
+                <div className="rounded-xl bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-2 border-b-[3px] border-[#FF4B4B]/60 px-3 py-2.5">
+                  <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#FF4B4B] mb-0.5">If you leave</p>
+                  <p className="text-[12px] font-extrabold text-[#3C3C3C] dark:text-stone-100 leading-tight">
+                    Back to free limits. No full study packs, no unlimited focus mode.
+                  </p>
+                </div>
+                <div className="rounded-xl bg-[#DDF4FF] dark:bg-[#1CB0F6]/15 border-2 border-b-[3px] border-[#1CB0F6]/70 px-3 py-2.5">
+                  <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#1CB0F6] mb-0.5">Full toolkit</p>
+                  <p className="text-[12px] font-extrabold text-[#3C3C3C] dark:text-stone-100 leading-tight">
+                    Quizzes, flashcards, crosswords, Crater Blast &amp; Word Tower, all unlocked.
+                  </p>
+                </div>
+                <div className="rounded-xl bg-[#F3EAFF] dark:bg-[#A560E8]/15 border-2 border-b-[3px] border-[#8A48C7] px-3 py-2.5">
+                  <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#A560E8] mb-0.5">Zero risk</p>
+                  <p className="text-[12px] font-extrabold text-[#3C3C3C] dark:text-stone-100 leading-tight">
+                    One-click cancel anytime. No phone call, no email back-and-forth.
+                  </p>
+                </div>
+              </div>
+
+              {/* Rotating social proof — same ticker as the full pitch */}
+              <div className="text-center h-5 overflow-hidden">
+                <p
+                  key={socialIndex}
+                  className="text-xs font-extrabold text-[#A560E8] animate-pwSocialIn"
+                >
+                  {SOCIAL_PROOF[socialIndex]}
+                </p>
+              </div>
             </div>
 
-            {/* Sticky footer with CTA — always visible */}
-            <div className="flex-shrink-0 border-t-2 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900 px-6 sm:px-8 pt-4 pb-5 sm:pb-6 space-y-2">
+            {/* Sticky footer — CTA + trust pills + demoted dismiss */}
+            <div className="flex-shrink-0 border-t-2 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900 px-6 sm:px-8 pt-4 pb-5 sm:pb-6 space-y-2.5">
               {checkoutError && (
                 <div className="rounded-xl bg-[#FFE8E8] border-2 border-[#FF4B4B]/30 px-3 py-2 text-sm text-[#FF4B4B] font-bold">
                   {checkoutError}
                 </div>
               )}
               <PrimaryCta />
-              {/* "No thanks" — demoted from a prominent orange button
-                  to a small underlined text link below the CTA, same
-                  treatment as the post-tutorial variant's "Maybe later"
-                  so dismissal is reachable but the green CTA stays
-                  the obvious choice. */}
+
+              {/* Trust badges row */}
+              <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[11px] font-extrabold text-stone-400 dark:text-stone-500">
+                <span className="inline-flex items-center gap-1"><span className="text-[#58CC02]">✓</span> Secure checkout</span>
+                <span aria-hidden>·</span>
+                <span className="inline-flex items-center gap-1"><span className="text-[#58CC02]">✓</span> Cancel anytime</span>
+                <span aria-hidden>·</span>
+                <span className="inline-flex items-center gap-1"><span className="text-[#58CC02]">✓</span> Money-back guarantee</span>
+              </div>
+
               <div className="text-center">
                 <button
                   onClick={handleDismiss}
                   className="text-[10px] sm:text-[11px] text-stone-400 dark:text-stone-500 font-bold underline underline-offset-2 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
                 >
-                  No thanks
+                  No thanks, I&apos;ll stick to the free limits
                 </button>
               </div>
             </div>
@@ -417,9 +644,7 @@ const SoftPaywall = ({
                 <img src="/mascot-celebrating.webp" alt="" width={64} height={64} className="object-contain w-16 h-16 shrink-0" loading="eager" />
                 <div className="relative flex-1 min-w-0 rounded-2xl border-2 border-b-4 border-[#46A302] bg-[#E5F8D0] dark:bg-[#58CC02]/15 px-3.5 py-2.5 mt-2">
                   <p className="text-xs sm:text-sm font-extrabold text-[#3C3C3C] dark:text-stone-100 leading-snug">
-                    {showTrial
-                      ? `${TRIAL_DAYS}-day free trial — pick Pro or Premium below.`
-                      : 'Subscribe below — this account has already used its free trial.'}
+                    Subscribe below to keep going.
                   </p>
                   <div aria-hidden className="absolute -left-1.5 top-3 w-3 h-3 bg-[#E5F8D0] dark:bg-[#58CC02]/15 border-l-2 border-b-2 border-[#46A302] rotate-45" />
                 </div>
@@ -431,15 +656,11 @@ const SoftPaywall = ({
                   className="text-2xl sm:text-3xl font-extrabold text-[#3C3C3C] dark:text-stone-50 mb-1.5 leading-tight"
                   style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                 >
-                  {variant === 'postTutorial' ? <>Let&apos;s level up your grades, {firstName}.</> : <>Try WriteScholar free, {firstName}</>}
+                  {variant === 'postTutorial' ? <>Get the grade you actually deserve, {firstName}.</> : <>Upgrade WriteScholar, {firstName}</>}
                 </h2>
                 <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 font-bold leading-snug">
                   {variant === 'postTutorial' ? (
-                    showTrial
-                      ? <>{TRIAL_DAYS}-day {planName} trial, then {monthlyPrice}/mo if you continue. Cancel anytime.</>
-                      : <>{monthlyPrice}/mo. One free trial per account—yours was already used. Cancel anytime.</>
-                  ) : showTrial ? (
-                    <>Try {planName} free for {TRIAL_DAYS} days, then {monthlyPrice}/mo. Cancel anytime.</>
+                    <>{monthlyPrice}/mo. Cancel anytime.</>
                   ) : (
                     <>Upgrade to {planName}: {monthlyPrice}/mo. Cancel anytime.</>
                   )}
@@ -478,7 +699,7 @@ const SoftPaywall = ({
                 <p className="text-[11px] sm:text-xs text-stone-500 dark:text-stone-400 mb-2.5 font-bold leading-snug">
                   {showTrial
                     ? <>Then {monthlyPrice}/mo if you continue. Cancel before the trial ends to pay nothing.</>
-                    : <>{monthlyPrice}/mo. Cancel anytime. No free trial remaining on this account.</>}
+                    : <>{monthlyPrice}/mo. Cancel anytime.</>}
                 </p>
                 {checkoutPlan === 'premium' && (
                   <p className="text-[11px] sm:text-xs text-[#D97F00] font-extrabold mb-2.5 leading-snug">
@@ -523,24 +744,18 @@ const SoftPaywall = ({
              ═══════════════════════════════════════════════════════════ */
           <>
           <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 sm:px-10 pt-4 sm:pt-5 pb-3">
-            {/* Mascot + speech bubble — top-left layout, Duolingo style */}
-            <div className="flex items-start gap-3 sm:gap-4 mb-3">
+            {/* Celebrating mascot — speech bubble removed per user
+                brief; mascot kept as a Duolingo brand anchor so the
+                paywall doesn't feel naked above the headline. */}
+            <div className="flex justify-center mb-2 sm:mb-3">
               <img
                 src="/mascot-celebrating.webp"
                 alt=""
                 width={88}
                 height={88}
-                className="object-contain w-20 h-20 sm:w-24 sm:h-24 shrink-0"
+                className="object-contain w-20 h-20 sm:w-24 sm:h-24"
                 loading="eager"
               />
-              <div className="relative flex-1 min-w-0 mt-2 rounded-2xl border-2 border-b-4 border-[#46A302] bg-[#E5F8D0] dark:bg-[#58CC02]/15 px-4 py-3">
-                <p className="text-xs sm:text-sm font-extrabold text-[#3C3C3C] dark:text-stone-100 leading-snug">
-                  {showTrial
-                    ? `${TRIAL_DAYS}-day free trial available — choose Pro or Premium below.`
-                    : 'Subscribe to continue — this account has already used its free trial.'}
-                </p>
-                <div aria-hidden className="absolute -left-1.5 top-4 w-3 h-3 bg-[#E5F8D0] dark:bg-[#58CC02]/15 border-l-2 border-b-2 border-[#46A302] rotate-45" />
-              </div>
             </div>
 
             {/* Header */}
@@ -550,7 +765,7 @@ const SoftPaywall = ({
                 style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
               >
                 {variant === 'postTutorial'
-                  ? <>Let&apos;s level up your grades, {firstName}.</>
+                  ? <>Get the grade you actually deserve, {firstName}.</>
                   : showTrial ? <>Try WriteScholar <span className="text-[#58CC02]">free</span>, {firstName}</> : <>Upgrade to {planName}, {firstName}</>}
               </h2>
               <p className="text-stone-500 dark:text-stone-400 text-sm sm:text-[0.9375rem] font-bold leading-relaxed">
@@ -579,17 +794,36 @@ const SoftPaywall = ({
                 </span>
               </div>
 
+              {/* Urgency badge — "Save $X today only" red pill sitting
+                  above the big price. Shown only on the first-ever
+                  post-onboarding paywall (the MAY2026 welcome offer).
+                  Subsequent paywalls (after the 7-day cooldown
+                  re-fires) and the trial branch (disabled) skip it. */}
+              {!showTrial && showDiscount && (
+                <div className="mb-2.5">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#FF4B4B] text-white text-[10px] font-extrabold uppercase tracking-[0.14em] border-2 border-b-[3px] border-[#D93B3B] shadow-sm">
+                    <span aria-hidden>⏰</span>
+                    Save ${firstPaywallSavedUsd} today only
+                  </span>
+                </div>
+              )}
+
               <div className="flex items-baseline gap-2 mb-1 flex-wrap">
                 {showTrial ? (
                   <>
                     <span className="text-4xl sm:text-5xl font-extrabold text-[#58CC02] tabular-nums">$0</span>
                     <span className="text-base text-[#3C3C3C] dark:text-stone-200 font-extrabold">today</span>
                   </>
-                ) : (
+                ) : showDiscount ? (
                   <>
                     <span className="text-2xl sm:text-3xl font-semibold text-stone-400 dark:text-stone-500 line-through decoration-2 tabular-nums">{monthlyWas}</span>
-                    <span className="text-4xl sm:text-5xl font-extrabold tabular-nums" style={{ color: planAccent.color }}>{monthlyPrice}</span>
+                    <span className="text-4xl sm:text-5xl font-extrabold tabular-nums" style={{ color: planAccent.color }}>{firstPaywallFirstMonth}</span>
                     <span className="text-base text-[#3C3C3C] dark:text-stone-200 font-extrabold">first month</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-4xl sm:text-5xl font-extrabold tabular-nums" style={{ color: planAccent.color }}>{monthlyPrice}</span>
+                    <span className="text-base text-[#3C3C3C] dark:text-stone-200 font-extrabold">/ month</span>
                   </>
                 )}
               </div>
@@ -599,7 +833,9 @@ const SoftPaywall = ({
               <p className="text-xs text-stone-500 dark:text-stone-400 font-bold mb-4 leading-snug">
                 {showTrial
                   ? <>After your free trial: <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{monthlyPrice}/mo</span>. Cancel before the trial ends and you won&apos;t be charged.</>
-                  : <>{monthlyPrice}/mo. Cancel anytime. No free trial remaining on this account.</>}
+                  : showDiscount
+                    ? <>After first month: <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{monthlyPrice}/mo</span>. Cancel anytime.</>
+                    : <>Cancel anytime.</>}
               </p>
               {checkoutPlan === 'premium' && (
                 <p className="text-xs text-[#D97F00] font-extrabold mb-3 leading-snug">

@@ -40,7 +40,8 @@ const HEADLINES = [
 
 /**
  * Right-hand marketing column used on login, signup, and reset-password flows.
- * Duolingo-style design with 3D borders, Nunito font, and brand colors.
+ * Duolingo-style design with 3D borders, Nunito font, and brand colors — matches
+ * the rest of the WriteScholar app (landing page, dashboard, study tools).
  */
 export const AuthMarketingSide: React.FC = () => {
   const [headlineIdx, setHeadlineIdx] = useState(0);
@@ -68,14 +69,14 @@ export const AuthMarketingSide: React.FC = () => {
         background: 'linear-gradient(165deg, #F3EAFF 0%, #E8DAFF 35%, #DDF4FF 100%)',
       }}
     >
-      {/* Decorative background shapes */}
+      {/* Decorative background shapes — Duolingo pastel orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
         <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full opacity-30" style={{ background: 'radial-gradient(circle, #A560E8 0%, transparent 70%)' }} />
         <div className="absolute -bottom-24 -left-24 w-80 h-80 rounded-full opacity-20" style={{ background: 'radial-gradient(circle, #58CC02 0%, transparent 70%)' }} />
         <div className="absolute top-1/4 -left-8 w-48 h-48 rounded-full opacity-15" style={{ background: 'radial-gradient(circle, #1CB0F6 0%, transparent 70%)' }} />
         <div className="absolute bottom-1/3 -right-12 w-56 h-56 rounded-full opacity-15" style={{ background: 'radial-gradient(circle, #FF9600 0%, transparent 70%)' }} />
 
-        {/* Floating dots pattern */}
+        {/* Floating dot pattern */}
         {[
           { top: '8%', left: '15%', size: 8, color: '#A560E8', delay: 0 },
           { top: '18%', right: '20%', size: 6, color: '#58CC02', delay: 1 },
@@ -104,7 +105,7 @@ export const AuthMarketingSide: React.FC = () => {
       </div>
 
       <div className="relative z-10 max-w-md w-full px-6 xl:px-8 py-8">
-        {/* Mascot with decorative ring */}
+        {/* Mascot with sparkle + star badges */}
         <div className="flex justify-center mb-5">
           <div className="relative">
             <div className="absolute inset-0 -m-2 rounded-2xl bg-white/40 blur-xl" />
@@ -118,11 +119,9 @@ export const AuthMarketingSide: React.FC = () => {
                 className="w-[96px] h-[96px] object-contain"
               />
             </div>
-            {/* Sparkle badge */}
             <div className="absolute -top-1.5 -right-1.5 w-8 h-8 rounded-lg bg-[#58CC02] border-2 border-b-[3px] border-[#46A302] flex items-center justify-center text-sm shadow-lg shadow-[#58CC02]/30">
               ✨
             </div>
-            {/* Star badge */}
             <div className="absolute -bottom-1 -left-1.5 w-7 h-7 rounded-lg bg-[#FF9600] border-2 border-b-[3px] border-[#D97F00] flex items-center justify-center text-xs shadow-lg shadow-[#FF9600]/30">
               ⭐
             </div>
@@ -206,34 +205,20 @@ export const AuthMarketingSide: React.FC = () => {
           })}
         </div>
 
-        {/* Social proof */}
+        {/* Trust pill — same pattern as the landing-page hero */}
         <div className="mt-6 flex justify-center">
-          <div className="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white/80 border-2 border-b-4 border-stone-200/80 backdrop-blur-sm">
-            <div className="flex -space-x-1.5">
-              {[
-                { bg: '#A560E8', letter: 'A' },
-                { bg: '#1CB0F6', letter: 'B' },
-                { bg: '#58CC02', letter: 'C' },
-                { bg: '#FF9600', letter: 'D' },
-                { bg: '#FF4B4B', letter: 'E' },
-              ].map((a, i) => (
-                <div
-                  key={i}
-                  className="w-6 h-6 rounded-full border-2 border-white flex items-center justify-center text-[9px] text-white font-extrabold"
-                  style={{ backgroundColor: a.bg }}
-                >
-                  {a.letter}
-                </div>
-              ))}
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[12px] font-extrabold text-stone-700 leading-tight">
-                Trusted by students
-              </span>
-              <span className="text-[10px] font-bold text-stone-400 leading-tight">
-                across 120+ universities
-              </span>
-            </div>
+          <div className="inline-flex items-center gap-2.5 rounded-full border-2 border-b-[3px] border-[#E5E5E5] bg-white pl-1.5 pr-4 py-1 shadow-[0_8px_22px_-6px_rgba(0,0,0,0.20)]">
+            <span
+              className="flex h-7 w-7 items-center justify-center rounded-full bg-[#E5F8D0]"
+              aria-hidden
+            >
+              <svg className="w-[18px] h-[18px] text-[#46A302]" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
+              </svg>
+            </span>
+            <span className="text-[13px] font-bold text-stone-800">
+              Trusted by <span className="font-extrabold text-[#58CC02] tabular-nums">50,000+</span> students worldwide
+            </span>
           </div>
         </div>
       </div>

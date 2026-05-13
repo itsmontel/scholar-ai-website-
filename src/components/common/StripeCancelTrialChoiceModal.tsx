@@ -51,7 +51,6 @@ const StripeCancelTrialChoiceModal = ({
           billingCycle: 'monthly',
           successUrl,
           cancelUrl,
-          trialPeriodDays: TRIAL_DAYS,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -155,12 +154,11 @@ const StripeCancelTrialChoiceModal = ({
 
           {/* Body copy */}
           <p className="text-sm text-stone-500 dark:text-stone-400 font-bold leading-relaxed text-center mb-1.5">
-            Hi {first}, you haven&apos;t started your{' '}
-            <span className="font-extrabold text-[#58CC02]">{TRIAL_DAYS}-day free trial</span> yet.
+            Hi {first}, you haven&apos;t completed your{' '}
+            <span className="font-extrabold text-[#58CC02]">subscription</span> yet.
           </p>
           <p className="text-xs text-stone-400 dark:text-stone-500 font-bold leading-relaxed text-center mb-5">
-            If you leave now, you won&apos;t get this one-time trial again on this account.
-            You can subscribe later, but without the free trial.
+            Subscribe to Pro to keep your higher limits. Cancel anytime.
           </p>
 
           {/* Error */}
@@ -187,7 +185,7 @@ const StripeCancelTrialChoiceModal = ({
               </>
             ) : (
               <>
-                Start my {TRIAL_DAYS}-day free trial
+                Continue to checkout
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
@@ -203,7 +201,7 @@ const StripeCancelTrialChoiceModal = ({
               onClick={() => void forfeitTrial()}
               className="text-center text-sm py-2.5 px-8 rounded-xl border-2 border-b-4 border-[#D97F00] bg-[#FF9600] hover:bg-[#E58800] active:border-b-2 active:translate-y-0.5 text-white font-extrabold uppercase tracking-wide disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
-              {busy === 'forfeit' ? 'Updating...' : "I'll skip the trial"}
+              {busy === 'forfeit' ? 'Updating...' : 'Maybe later'}
             </button>
           </div>
         </div>

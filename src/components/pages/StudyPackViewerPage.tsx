@@ -490,25 +490,53 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
               >
                 Upgrade to Pro
               </button>
-              {(activeTab === 'crossword' || activeTab === 'craterBlast') && (
-                <div className="mt-8 w-full max-w-md md:max-w-2xl lg:max-w-3xl mx-auto">
-                  <p className="text-xs font-extrabold text-stone-500 dark:text-stone-400 mb-2 uppercase tracking-wide">See how it works</p>
-                  <div className="rounded-xl overflow-hidden border-2 border-b-4 border-stone-200 dark:border-stone-600 aspect-video bg-stone-100 dark:bg-stone-800">
-                    <video
-                      key={activeTab}
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      className="w-full h-full object-contain"
-                      title={activeTab === 'crossword' ? 'WriteScholar Crossword Generator — Create study puzzles from notes' : 'WriteScholar Crater Blast — Quiz game study mode'}
-                      aria-label={activeTab === 'crossword' ? 'WriteScholar Crossword Generator — Create study puzzles from notes' : 'WriteScholar Crater Blast — Quiz game study mode'}
-                    >
-                      <source src={activeTab === 'crossword' ? '/writescholar-crossword-demo.mp4' : '/writescholar-crater-blast-demo.mp4'} type="video/mp4" />
-                    </video>
+              {/* "See how it works" preview video — shown under the
+                  Upgrade CTA so a free user can see exactly what each
+                  locked Pro feature actually looks like before paying.
+                  Crossword & Crater Blast use the existing demo MP4s;
+                  Word Tower & Word Blitz reuse the hero clips from
+                  /public, which are short looping gameplay reels. */}
+              {(() => {
+                const TAB_DEMO_VIDEO: Partial<Record<TabKey, { src: string; label: string }>> = {
+                  crossword: {
+                    src: '/writescholar-crossword-demo.mp4',
+                    label: 'WriteScholar Crossword Generator — Create study puzzles from notes',
+                  },
+                  craterBlast: {
+                    src: '/writescholar-crater-blast-demo.mp4',
+                    label: 'WriteScholar Crater Blast — Quiz game study mode',
+                  },
+                  wordTower: {
+                    src: '/hero-word-tower.mp4',
+                    label: 'WriteScholar Word Tower — Stack the right words to climb the streak',
+                  },
+                  wordBlitz: {
+                    src: '/hero-word-blitz.mp4',
+                    label: 'WriteScholar Word Blitz — Fast-paced vocabulary arcade game',
+                  },
+                };
+                const demo = TAB_DEMO_VIDEO[activeTab];
+                if (!demo) return null;
+                return (
+                  <div className="mt-8 w-full max-w-md md:max-w-2xl lg:max-w-3xl mx-auto">
+                    <p className="text-xs font-extrabold text-stone-500 dark:text-stone-400 mb-2 uppercase tracking-wide">See how it works</p>
+                    <div className="rounded-xl overflow-hidden border-2 border-b-4 border-stone-200 dark:border-stone-600 aspect-video bg-stone-100 dark:bg-stone-800">
+                      <video
+                        key={activeTab}
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="w-full h-full object-contain"
+                        title={demo.label}
+                        aria-label={demo.label}
+                      >
+                        <source src={demo.src} type="video/mp4" />
+                      </video>
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
             </>
           ) : hasData(activeTab) ? (
             <>
