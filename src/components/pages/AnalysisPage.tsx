@@ -455,6 +455,102 @@ interface RubricAlignment {
   model: string;
 }
 
+/**
+ * Compute an overall rubric-alignment score (0–100) and a US letter grade
+ * from the per-criterion data returned by `analyzeRubricAlignment`.
+ *
+ * Why this exists: the backend's rubric-alignment service returns per-
+ * criterion `score_estimate` strings (e.g. "8/10", "85%", "N/A") plus a
+ * `status` field (met / partially_met / not_met) — but NO single overall
+ * numeric score. Without one, the rubric panel reads as a wall of
+ * checkboxes; users have no easy "did I pass?" signal. This helper
+ * normalises whatever the AI returned into one comparable score.
+ *
+ * Algorithm:
+ *  1. If the criterion has a parseable score_estimate (X/Y or N%), use
+ *     it directly — percentage = X/Y (or N). A small +5pt curve is
+ *     applied (capped at 100) so the AI's rigorous "rubric checker"
+ *     framing doesn't punish students who did most things right.
+ *  2. Otherwise fall back to status: met = 100%, partially_met = 78%,
+ *     not_met = 50%. (Was 100/60/0 — softened because zero credit for
+ *     a not-met criterion was unfairly harsh: the student usually
+ *     attempted the section, they just didn't hit the mark. Partial
+ *     credit of 50% reflects that effort. Partial-met bumps to 78%
+ *     (C+) instead of 60% (D-) because "partially met" should not
+ *     by itself drag a paper into D territory.)
+ *  3. Average the per-criterion percentages → overall score 0–100.
+ *  4. Map to a US letter grade (A 90+, B 80+, C 70+, D 60+, F <60).
+ */
+function computeRubricOverallScore(criteria: RubricCriterion[] | undefined): {
+  score: number;
+  grade: 'A' | 'A-' | 'B+' | 'B' | 'B-' | 'C+' | 'C' | 'C-' | 'D' | 'F';
+  source: 'estimates' | 'status' | 'mixed';
+} | null {
+  if (!criteria || criteria.length === 0) return null;
+
+  let parseableCount = 0;
+  let fallbackCount = 0;
+  let totalPct = 0;
+
+  for (const c of criteria) {
+    let pct: number | null = null;
+    const raw = (c.score_estimate || '').toString().trim();
+
+    // Try "X/Y" form (e.g. "8/10", "17 / 20")
+    const slashMatch = raw.match(/^(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)$/);
+    if (slashMatch) {
+      const num = parseFloat(slashMatch[1]);
+      const den = parseFloat(slashMatch[2]);
+      if (den > 0) pct = (num / den) * 100;
+    }
+    // Try "N%" or bare "N" (e.g. "85%", "85")
+    if (pct === null) {
+      const pctMatch = raw.match(/^(\d+(?:\.\d+)?)\s*%?$/);
+      if (pctMatch) {
+        const n = parseFloat(pctMatch[1]);
+        // If it's 0-100 we treat as percentage; if larger assume it's a raw point value out of itself, skip.
+        if (n >= 0 && n <= 100) pct = n;
+      }
+    }
+
+    if (pct !== null) {
+      parseableCount++;
+      // Apply a small +5pt curve so the AI's strict rubric framing
+      // doesn't dock points off a paper that genuinely earned them.
+      // Capped at 100 so an "8/10" criterion can't exceed 100%.
+      totalPct += Math.max(0, Math.min(100, pct + 5));
+    } else {
+      // Fall back to status mapping — softened so partial = C+ (not D)
+      // and not-met = 50% (not zero credit for attempt).
+      fallbackCount++;
+      const statusPct = c.status === 'met' ? 100 : c.status === 'partially_met' ? 78 : 50;
+      totalPct += statusPct;
+    }
+  }
+
+  const avg = totalPct / criteria.length;
+  const score = Math.round(avg);
+
+  let grade: 'A' | 'A-' | 'B+' | 'B' | 'B-' | 'C+' | 'C' | 'C-' | 'D' | 'F';
+  if (score >= 93) grade = 'A';
+  else if (score >= 90) grade = 'A-';
+  else if (score >= 87) grade = 'B+';
+  else if (score >= 83) grade = 'B';
+  else if (score >= 80) grade = 'B-';
+  else if (score >= 77) grade = 'C+';
+  else if (score >= 73) grade = 'C';
+  else if (score >= 70) grade = 'C-';
+  else if (score >= 60) grade = 'D';
+  else grade = 'F';
+
+  const source: 'estimates' | 'status' | 'mixed' =
+    parseableCount === criteria.length ? 'estimates'
+      : parseableCount === 0 ? 'status'
+        : 'mixed';
+
+  return { score, grade, source };
+}
+
 interface AnalysisResult {
   success: boolean;
   data: {
@@ -2766,7 +2862,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
               disabled={checkoutRedirecting}
               className="shrink-0 rounded-xl bg-[#FF9600] px-4 py-2 text-sm font-extrabold text-white border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 hover:bg-[#E08800] disabled:cursor-wait disabled:opacity-60 transition-all"
             >
-              {checkoutRedirecting ? 'Opening…' : canStartFreeTrial ? 'Unlock all — free trial' : 'Unlock all annotations'}
+              {checkoutRedirecting ? 'Opening…' : 'Unlock all annotations'}
             </button>
           </div>
         </div>
@@ -3768,7 +3864,10 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                       >
                         {checkoutRedirecting ? 'Opening checkout…' : 'Unlock full rubric'}
                       </button>
-                      <span className="text-sm text-[#FF9600] font-bold dark:text-[#FF9600]">$19.99/mo</span>
+                      <span className="text-sm font-bold">
+                        <span className="line-through decoration-2 decoration-[#FF4B4B] text-stone-400 mr-1.5">$39.99</span>
+                        <span className="text-[#FF9600] dark:text-[#FF9600]">$19.99/mo</span>
+                      </span>
                     </div>
                   </div>
                 ) : null}
@@ -3868,9 +3967,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                           Full paper shown · Annotations on first ~40%
                         </p>
                         <p className="text-[11px] text-stone-600 dark:text-stone-400 mt-1.5 leading-relaxed">
-                          {canStartFreeTrial
-                            ? `You can read your entire paper. Unlock Pro to see ${lockedAnnotationsForTeaser.length} more feedback points on the rest—same professor-level notes, rewrites, and grade-boosting fixes. Eligible: one 7-day free trial.`
-                            : `You can read your entire paper. Upgrade to Pro to unlock ${lockedAnnotationsForTeaser.length} more annotations—full feedback, rewrites, and grade-boosting fixes on the whole draft.`}
+                          {`You can read your entire paper. Upgrade to Pro to unlock ${lockedAnnotationsForTeaser.length} more annotations—full feedback, rewrites, and grade-boosting fixes on the whole draft.`}
                         </p>
                       </div>
                     )}
@@ -4236,9 +4333,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                         >
                           {checkoutRedirecting
                             ? 'Opening checkout…'
-                            : canStartFreeTrial
-                              ? `Unlock all ${lockedAnnotationsForTeaser.length} — start free trial`
-                              : `Unlock all ${lockedAnnotationsForTeaser.length} annotations`}
+                            : `Unlock all ${lockedAnnotationsForTeaser.length} annotations`}
                         </button>
                       </div>
                     )}
@@ -4298,7 +4393,10 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                           >
                             {checkoutRedirecting ? 'Opening checkout…' : 'Unlock full annotations'}
                           </button>
-                          <div className="text-sm text-[#FF9600] font-bold dark:text-[#FF9600]">$19.99/mo</div>
+                          <div className="text-sm font-bold">
+                            <span className="line-through decoration-2 decoration-[#FF4B4B] text-stone-400 mr-1.5">$39.99</span>
+                            <span className="text-[#FF9600] dark:text-[#FF9600]">$19.99/mo</span>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -4328,15 +4426,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                                     primaryLabel={
                                       checkoutRedirecting
                                         ? 'Opening checkout…'
-                                        : canStartFreeTrial
-                                          ? 'See every fix — start 7-day free trial'
-                                          : 'Upgrade to Pro — see every fix'
+                                        : 'Upgrade to Pro — see every fix'
                                     }
-                                    sublabel={
-                                      canStartFreeTrial
-                                        ? 'Full list + the rest of your analysis. One free trial per account; cancel anytime.'
-                                        : 'Upgrade to Pro for the full list and the rest of your analysis.'
-                                    }
+                                    sublabel={'Upgrade to Pro for the full list and the rest of your analysis.'}
                                   >
                                     <ul className="list-disc list-inside text-sm text-stone-600 dark:text-stone-400 space-y-0.5">
                                       {analysisSummary.top_suggestions.slice(1).map((s, i) => (
@@ -4395,7 +4487,10 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                               >
                                 {checkoutRedirecting ? 'Opening checkout…' : 'Upgrade'}
                               </button>
-                              <span className="text-sm text-[#FF9600] font-bold">$19.99/mo</span>
+                              <span className="text-sm font-bold">
+                                <span className="line-through decoration-2 decoration-[#FF4B4B] text-stone-400 mr-1.5">$39.99</span>
+                                <span className="text-[#FF9600]">$19.99/mo</span>
+                              </span>
                             </div>
                           </div>
                         </div>
@@ -4450,7 +4545,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                                 disabled={checkoutRedirecting}
                                 className="shrink-0 rounded-lg bg-[#FF9600] px-4 py-2 text-sm font-extrabold text-white border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 hover:bg-[#E08800] disabled:cursor-wait disabled:opacity-60 transition-all"
                               >
-                                {checkoutRedirecting ? 'Opening…' : canStartFreeTrial ? 'Unlock — free trial' : 'Unlock full analysis'}
+                                {checkoutRedirecting ? 'Opening…' : 'Unlock full analysis'}
                               </button>
                             </div>
                           </div>
@@ -4476,9 +4571,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                                   Your complete analysis is right here
                                 </p>
                                 <p className="text-sm text-stone-600 dark:text-stone-400 mb-4 max-w-sm mx-auto">
-                                  {canStartFreeTrial
-                                    ? 'Specific feedback on your thesis, evidence, and writing style. Start your free trial to read it all.'
-                                    : 'Specific feedback on your thesis, evidence, and writing style awaits you.'}
+                                  Specific feedback on your thesis, evidence, and writing style awaits you.
                                 </p>
                                 <button
                                   type="button"
@@ -4488,9 +4581,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                                 >
                                   {checkoutRedirecting
                                     ? 'Opening checkout…'
-                                    : canStartFreeTrial
-                                      ? 'Read the full analysis — start free trial'
-                                      : 'Upgrade to Pro — read full analysis'}
+                                    : 'Upgrade to Pro — read full analysis'}
                                 </button>
                               </div>
                             </div>
@@ -4545,11 +4636,12 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                     >
                       {checkoutRedirecting
                         ? 'Opening checkout…'
-                        : canStartFreeTrial
-                          ? 'Export full report — start free trial'
-                          : 'Export full report — upgrade to Pro'}
+                        : 'Export full report — upgrade to Pro'}
                     </button>
-                    <span className="text-sm text-stone-500">$19.99/mo</span>
+                    <span className="text-sm font-bold">
+                      <span className="line-through decoration-2 decoration-[#FF4B4B] text-stone-400 mr-1.5">$39.99</span>
+                      <span className="text-stone-700 dark:text-stone-300">$19.99/mo</span>
+                    </span>
                   </div>
                 )}
               </div>
@@ -4557,18 +4649,95 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
           </div>
 
           {/* Rubric Alignment Results */}
-          {rubricAlignment && (
+          {rubricAlignment && (() => {
+            /* Compute the overall rubric alignment score + grade once,
+               so both the header badge (right of title) and any
+               downstream display can reuse the same numbers. */
+            const rubricOverall = computeRubricOverallScore(rubricAlignment.criteria);
+            return (
             <div className="mt-8 bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700/40 overflow-hidden">
-              {/* Rubric Header - Duolingo style */}
+              {/* Rubric Header - Duolingo style + Score/Grade right-aligned */}
               <div className="bg-[#1CB0F6] text-white px-6 py-5" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                    <span className="text-xl sm:text-2xl">📋</span>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center space-x-3 min-w-0 flex-1">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
+                      <span className="text-xl sm:text-2xl">📋</span>
+                    </div>
+                    <div className="min-w-0">
+                      <h2 className="text-xl font-extrabold uppercase tracking-wide">Your Assignment Rubric</h2>
+                      <p className="text-white/80 text-sm mt-0.5 font-bold">
+                        Compared against the rubric you uploaded
+                        {rubricOverall && (
+                          <span className="ml-1 opacity-90">
+                            · scored from {rubricOverall.source === 'estimates' ? 'AI point estimates' : rubricOverall.source === 'status' ? 'criteria status (met / partial / not met)' : 'a mix of point estimates and status'}
+                          </span>
+                        )}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h2 className="text-xl font-extrabold uppercase tracking-wide">Your Assignment Rubric</h2>
-                    <p className="text-white/80 text-sm mt-0.5 font-bold">Compared against the rubric you uploaded</p>
-                  </div>
+
+                  {/* Score + Grade — right side. For free users the
+                      actual numbers are blurred behind a "?" placeholder
+                      so they see exactly what's locked behind Pro without
+                      seeing the answer for free. The `?` overlay is
+                      wrapped tight to the number itself (not the whole
+                      column) so it lands directly on top of the blur. */}
+                  {rubricOverall && (
+                    <div className="flex items-start gap-5 shrink-0">
+                      <div className="text-right">
+                        {currentPlan === 'free' ? (
+                          <div className="relative inline-block">
+                            <span className="block text-3xl font-extrabold tabular-nums blur-[6px] select-none" aria-hidden>
+                              {rubricOverall.score}/100
+                            </span>
+                            <span
+                              className="absolute inset-0 flex items-center justify-end text-3xl font-extrabold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.45)]"
+                              title="Upgrade to Pro to unlock your rubric score"
+                              aria-label="Rubric score — locked. Upgrade to Pro to see it."
+                            >
+                              ?/100
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="text-3xl font-extrabold tabular-nums">{rubricOverall.score}/100</div>
+                        )}
+                        <div className="text-white/70 text-xs font-bold uppercase tracking-wide flex items-center justify-end gap-1 mt-0.5">
+                          {currentPlan === 'free' && (
+                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+                              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                            </svg>
+                          )}
+                          Score
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        {currentPlan === 'free' ? (
+                          <div className="relative inline-block">
+                            <span className="block text-3xl font-extrabold blur-[6px] select-none" aria-hidden>
+                              {rubricOverall.grade}
+                            </span>
+                            <span
+                              className="absolute inset-0 flex items-center justify-center text-3xl font-extrabold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.45)]"
+                              title="Upgrade to Pro to unlock your rubric grade"
+                              aria-label="Rubric grade — locked. Upgrade to Pro to see it."
+                            >
+                              ?
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="text-3xl font-extrabold">{rubricOverall.grade}</div>
+                        )}
+                        <div className="text-white/70 text-xs font-bold uppercase tracking-wide flex items-center justify-end gap-1 mt-0.5">
+                          {currentPlan === 'free' && (
+                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+                              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                            </svg>
+                          )}
+                          Grade
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -4650,9 +4819,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                             Don&apos;t guess what your professor wants — see the full rubric map
                           </h3>
                           <p className="text-sm text-stone-600 dark:text-stone-400">
-                            {canStartFreeTrial
-                              ? 'Missing quotes, weak criteria, and priority fixes—unlocked on Pro. Improve your grade with the complete breakdown; eligible accounts get one 7-day free trial.'
-                              : 'Missing quotes, weak criteria, and priority fixes—upgrade to Pro for the complete rubric breakdown.'}
+                            Missing quotes, weak criteria, and priority fixes—upgrade to Pro for the complete rubric breakdown.
                           </p>
                         </div>
                       </div>
@@ -4664,12 +4831,13 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                       >
                         {checkoutRedirecting
                           ? 'Opening checkout…'
-                          : canStartFreeTrial
-                            ? 'See the full rubric analysis — start 7-day free trial'
-                            : 'Upgrade to Pro — full rubric analysis'}
+                          : 'Upgrade to Pro — full rubric analysis'}
                       </button>
                       <p className="text-xs text-stone-500 dark:text-stone-500 mt-2">
-                        Starting at $19.99/month · Cancel anytime
+                        Starting at{' '}
+                        <span className="line-through decoration-2 decoration-[#FF4B4B] text-stone-400 mx-0.5">$39.99</span>{' '}
+                        <span className="text-[#FF9600] font-extrabold">$19.99/month</span>
+                        {' · '}Cancel anytime
                       </p>
                     </div>
                   </div>
@@ -4790,7 +4958,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                 </div>
               )}
             </div>
-          )}
+            );
+          })()}
           </>
         )}
 

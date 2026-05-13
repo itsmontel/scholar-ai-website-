@@ -93,7 +93,7 @@ const PressKitPage = ({ onNavigate, user, onLogout }: PressKitPageProps) => {
               />
               <CopyableBlock
                 label="Long (~150 words)"
-                text="WriteScholar is an all-in-one AI study app built for college and university students. The platform combines a free AI essay grader (with rubric-based feedback, line-by-line annotations, and a polished revision) with a study-pack generator that turns any lecture notes into flashcards, multiple-choice quizzes, summaries, and crosswords in under 60 seconds. WriteScholar also includes a free citation generator (APA, MLA, Chicago, Harvard, IEEE, Vancouver), a Pomodoro timer, GPA calculator, and 7+ other free study tools. The product is a mobile-responsive web app with a free tier covering most casual student use cases. WriteScholar is used by students all over the world. Pro plans start at $19.99/month with a 7-day free trial."
+                text="WriteScholar is an all-in-one AI study app built for college and university students. The platform combines a free AI essay grader (with rubric-based feedback, line-by-line annotations, and a polished revision) with a study-pack generator that turns any lecture notes into flashcards, multiple-choice quizzes, summaries, and crosswords in under 60 seconds. WriteScholar also includes a free citation generator (APA, MLA, Chicago, Harvard, IEEE, Vancouver), a Pomodoro timer, GPA calculator, and 7+ other free study tools. The product is a mobile-responsive web app with a free tier covering most casual student use cases. WriteScholar is used by students all over the world. Pro plans start at $19.99/month."
               />
             </div>
           </Section>
@@ -129,7 +129,7 @@ const PressKitPage = ({ onNavigate, user, onLogout }: PressKitPageProps) => {
               <StatBlock value="6" label="Citation styles supported" />
               <StatBlock value="Web" label="Platform" />
               <StatBlock value="$19.99/mo" label="Pro plan starting price" />
-              <StatBlock value="7-day" label="Free trial" />
+              <StatBlock value="Free" label="Forever-free tier" />
             </div>
           </Section>
 

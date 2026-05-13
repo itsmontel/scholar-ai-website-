@@ -17,7 +17,7 @@ import {
  *
  * Layout (top to bottom):
  *   1. Greeting + streak chip
- *   2. 2×2 tool grid (with SMARTEST AI / MOST POPULAR badges)
+ *   2. 2×2 tool grid (with SMARTEST AI / 🔥 POPULAR badges)
  *   3. Active-tool form card — paste textarea OR daily-review status card,
  *      + primary submit button, + secondary "Or upload" file picker
  *   4. Preview screenshots of what the active tool generates
@@ -94,7 +94,7 @@ const TOOLS: ToolDef[] = [
     id: 'study_pack',
     label: 'Study Pack',
     emoji: '📦',
-    badge: { text: 'MOST POPULAR', bg: '#FFF4E0', color: '#FF9600' },
+    badge: { text: '🔥 POPULAR', bg: '#FFF4E0', color: '#FF9600' },
     accent: '#FF9600',
     accentBg: '#FFF4E0',
     accentBorder: '#D97F00',
@@ -105,21 +105,6 @@ const TOOLS: ToolDef[] = [
     submitPage: 'study-pack',
     draftKey: 'writescholar_studypack_draft',
     inputType: 'textarea',
-  },
-  {
-    id: 'citations',
-    label: 'Citations',
-    emoji: '📚',
-    accent: '#1CB0F6',
-    accentBg: '#DDF4FF',
-    accentBorder: '#1899D6',
-    formTitle: 'Find sources for your paper',
-    formSub: 'Type your topic. Get real, citable sources in APA, MLA, Chicago, and more.',
-    placeholder: 'What are you researching?',
-    submitLabel: 'Find citations',
-    submitPage: 'citations',
-    draftKey: 'writescholar_citations_draft',
-    inputType: 'input',
   },
   {
     id: 'daily_review',
@@ -134,6 +119,21 @@ const TOOLS: ToolDef[] = [
     submitLabel: 'Start today',
     submitPage: 'dashboard',
     draftKey: '',
+    inputType: 'input',
+  },
+  {
+    id: 'citations',
+    label: 'Citations',
+    emoji: '📚',
+    accent: '#1CB0F6',
+    accentBg: '#DDF4FF',
+    accentBorder: '#1899D6',
+    formTitle: 'Find sources for your paper',
+    formSub: 'Type your topic. Get real, citable sources in APA, MLA, Chicago, and more.',
+    placeholder: 'What are you researching?',
+    submitLabel: 'Find citations',
+    submitPage: 'citations',
+    draftKey: 'writescholar_citations_draft',
     inputType: 'input',
   },
 ];
@@ -443,9 +443,7 @@ const MobileDashboard = ({
 
   const subtitle = isNewUser
     ? "Let's start with your first essay."
-    : streakDays > 0
-      ? `Day ${streakDays} of your streak. Keep going.`
-      : "Let's turn that B into an A.";
+    : "Let's turn that B into an A.";
 
   const formCardRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -472,18 +470,9 @@ const MobileDashboard = ({
             {subtitle}
           </p>
 
-          {streakDays > 0 && (
-            <button
-              type="button"
-              onClick={() => setDashboardTool('daily_review')}
-              className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#FFF4E0] dark:bg-[#FF9600]/15 border-2 border-[#FF9600]/40 hover:border-[#FF9600] transition-colors"
-              aria-label={`${streakDays} day streak — open daily review`}
-            >
-              <span className="text-sm" aria-hidden>🔥</span>
-              <span className="text-[12px] font-extrabold text-[#FF9600] tabular-nums">{streakDays}</span>
-              <span className="text-[11px] font-bold text-[#FF9600]">day streak</span>
-            </button>
-          )}
+          {/* Streak chip — REMOVED per user brief. Was a button that
+              showed "X day streak" with a flame emoji when streakDays > 0;
+              removed unconditionally across free + premium users. */}
         </header>
 
         {/* ── TOOL GRID 2×2 with badges ───────────────────────── */}
@@ -538,6 +527,129 @@ const MobileDashboard = ({
             })}
           </div>
         </section>
+
+        {/* ── NEW-USER CONVERSION HERO ────────────────────────────
+            Compact mobile version of the desktop conversion hero.
+            Shown only on the first sign-in (no analyses yet) and
+            only when the active tool is Analyze / Study Pack /
+            Citations (Daily Review has its own onboarding).
+            Trust pill + outcome H1 + 2×2 benefit grid + down-arrow
+            nudge → the eye lands on the form card directly below. */}
+        {isNewUser && (activeTool.id === 'analyze' || activeTool.id === 'study_pack' || activeTool.id === 'citations') && (
+          <section
+            className="mb-5 rounded-[24px] overflow-hidden border-2 border-b-4 bg-white dark:bg-stone-900 px-5 py-5"
+            style={{ borderColor: `${activeTool.accent}66`, boxShadow: `0 10px 30px -10px ${activeTool.accent}40` }}
+          >
+            {/* Trust pill */}
+            <div className="text-center mb-3">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#E5F8D0] dark:bg-[#58CC02]/15 border-2 border-[#58CC02]/40 text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#46A302] dark:text-[#9BE85C]">
+                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+                50,000+ students
+              </span>
+            </div>
+
+            {/* Tool-specific outcome H1 */}
+            <h2 className="text-center text-[22px] font-extrabold leading-[1.1] tracking-tight text-stone-900 dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+              {activeTool.id === 'analyze' && (
+                <>
+                  Turn your draft into an{' '}
+                  <span className="relative inline-flex items-center justify-center align-baseline rounded-xl bg-[#58CC02] text-white font-extrabold leading-none w-[0.95em] h-[0.95em] border-2 border-b-[4px] border-[#46A302] rotate-[-4deg] shadow-[0_4px_12px_-2px_rgba(88,204,2,0.5)]" style={{ verticalAlign: '-0.06em' }} aria-hidden>A</span>
+                  <span className="sr-only">A</span>
+                  <span className="block mt-1">in <span className="text-[#FF4B4B]">60 seconds</span></span>
+                </>
+              )}
+              {activeTool.id === 'study_pack' && (
+                <>
+                  Turn any notes into a{' '}
+                  <span className="text-[#FF9600]">study pack</span>
+                  <span className="block mt-1">in <span className="text-[#FF4B4B]">60 seconds</span></span>
+                </>
+              )}
+              {activeTool.id === 'citations' && (
+                <>
+                  Find <span className="text-[#1CB0F6]">real sources</span>
+                  <span className="block mt-1">in <span className="text-[#FF4B4B]">60 seconds</span></span>
+                </>
+              )}
+            </h2>
+
+            {/* Tool-specific 2×2 benefit grid — compact for mobile */}
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              {activeTool.id === 'analyze' && (
+                <>
+                  <div className="rounded-xl border-2 border-b-[3px] border-[#FF4B4B]/30 bg-[#FFE8E8]/60 p-2.5 text-center">
+                    <div className="text-base mb-0.5" aria-hidden>📊</div>
+                    <p className="text-[11px] font-extrabold text-[#FF4B4B] leading-tight">Letter grade</p>
+                  </div>
+                  <div className="rounded-xl border-2 border-b-[3px] border-[#FF9600]/30 bg-[#FFF4E0]/60 p-2.5 text-center">
+                    <div className="text-base mb-0.5" aria-hidden>🖍️</div>
+                    <p className="text-[11px] font-extrabold text-[#FF9600] leading-tight">Line-by-line notes</p>
+                  </div>
+                  <div className="rounded-xl border-2 border-b-[3px] border-[#A560E8]/30 bg-[#F3EAFF]/60 p-2.5 text-center">
+                    <div className="text-base mb-0.5" aria-hidden>✍️</div>
+                    <p className="text-[11px] font-extrabold text-[#A560E8] leading-tight">Polished revision</p>
+                  </div>
+                  <div className="rounded-xl border-2 border-b-[3px] border-[#58CC02]/30 bg-[#E5F8D0]/60 p-2.5 text-center">
+                    <div className="text-base mb-0.5" aria-hidden>⚡</div>
+                    <p className="text-[11px] font-extrabold text-[#58CC02] leading-tight">60-second result</p>
+                  </div>
+                </>
+              )}
+              {activeTool.id === 'study_pack' && (
+                <>
+                  <div className="rounded-xl border-2 border-b-[3px] border-[#1CB0F6]/30 bg-[#DDF4FF]/60 p-2.5 text-center">
+                    <div className="text-base mb-0.5" aria-hidden>📚</div>
+                    <p className="text-[11px] font-extrabold text-[#1CB0F6] leading-tight">Lessons</p>
+                  </div>
+                  <div className="rounded-xl border-2 border-b-[3px] border-[#FF9600]/30 bg-[#FFF4E0]/60 p-2.5 text-center">
+                    <div className="text-base mb-0.5" aria-hidden>🎴</div>
+                    <p className="text-[11px] font-extrabold text-[#FF9600] leading-tight">Flashcards</p>
+                  </div>
+                  <div className="rounded-xl border-2 border-b-[3px] border-[#A560E8]/30 bg-[#F3EAFF]/60 p-2.5 text-center">
+                    <div className="text-base mb-0.5" aria-hidden>✅</div>
+                    <p className="text-[11px] font-extrabold text-[#A560E8] leading-tight">Quizzes</p>
+                  </div>
+                  <div className="rounded-xl border-2 border-b-[3px] border-[#58CC02]/30 bg-[#E5F8D0]/60 p-2.5 text-center">
+                    <div className="text-base mb-0.5" aria-hidden>🎮</div>
+                    <p className="text-[11px] font-extrabold text-[#58CC02] leading-tight">Games</p>
+                  </div>
+                </>
+              )}
+              {activeTool.id === 'citations' && (
+                <>
+                  <div className="rounded-xl border-2 border-b-[3px] border-[#1CB0F6]/30 bg-[#DDF4FF]/60 p-2.5 text-center">
+                    <div className="text-base mb-0.5" aria-hidden>📚</div>
+                    <p className="text-[11px] font-extrabold text-[#1CB0F6] leading-tight">Real sources</p>
+                  </div>
+                  <div className="rounded-xl border-2 border-b-[3px] border-[#FF9600]/30 bg-[#FFF4E0]/60 p-2.5 text-center">
+                    <div className="text-base mb-0.5" aria-hidden>🎯</div>
+                    <p className="text-[11px] font-extrabold text-[#FF9600] leading-tight">Any style</p>
+                  </div>
+                  <div className="rounded-xl border-2 border-b-[3px] border-[#A560E8]/30 bg-[#F3EAFF]/60 p-2.5 text-center">
+                    <div className="text-base mb-0.5" aria-hidden>📝</div>
+                    <p className="text-[11px] font-extrabold text-[#A560E8] leading-tight">Relevance notes</p>
+                  </div>
+                  <div className="rounded-xl border-2 border-b-[3px] border-[#58CC02]/30 bg-[#E5F8D0]/60 p-2.5 text-center">
+                    <div className="text-base mb-0.5" aria-hidden>⚡</div>
+                    <p className="text-[11px] font-extrabold text-[#58CC02] leading-tight">60-second result</p>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Down-arrow nudge → directs eye to the form card below */}
+            <div className="mt-4 flex flex-col items-center text-center">
+              <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-stone-400 dark:text-stone-500 mb-1">
+                Start here ↓
+              </p>
+              <svg className="w-4 h-4 motion-safe:animate-bounce" style={{ color: activeTool.accent }} fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              </svg>
+            </div>
+          </section>
+        )}
 
         {/* ── ACTIVE TOOL FORM CARD ───────────────────────────── */}
         <div
@@ -803,7 +915,7 @@ const MobileDashboard = ({
             <div className="flex items-start gap-3 mb-4">
               <span className="text-2xl" aria-hidden>⭐</span>
               <div>
-                <h3 className="font-extrabold text-[15px] mb-1">Try 7 days free</h3>
+                <h3 className="font-extrabold text-[15px] mb-1">Upgrade to Pro</h3>
                 <p className="text-[12.5px] opacity-90 leading-relaxed">
                   Unlock unlimited essay checks, study packs, and citations. Cancel anytime.
                 </p>
@@ -814,7 +926,7 @@ const MobileDashboard = ({
               onClick={() => onNavigate('pricing')}
               className="w-full bg-white text-[#A560E8] font-extrabold py-3 rounded-xl border-2 border-b-4 border-white/80 active:border-b-2 active:translate-y-0.5 transition-transform text-[14px]"
             >
-              Start free trial
+              See plans
             </button>
           </section>
         )}

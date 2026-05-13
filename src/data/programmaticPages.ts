@@ -468,7 +468,7 @@ const cheggAlt: ProgrammaticPageConfig = {
   metaDescription: 'Chegg charges $19.95/mo for textbook answers + tutoring. WriteScholar charges similar for AI essay feedback, flashcards, quizzes, and citations, and won\'t flag your account.',
   h1: 'A Chegg alternative students aren\'t scared to use',
   subtitle: 'Same price as Chegg Study, completely different value: AI essay feedback, flashcards from your notes, quiz generator, and citations, without the academic-integrity risk.',
-  eyebrow: 'Chegg alternative · Free trial',
+  eyebrow: 'Chegg alternative · Free to start',
   accent: '#58CC02',
   intro: 'Chegg has a brand problem. Universities now actively monitor Chegg accounts for evidence of homework-answer cheating, and many schools have expelled students whose Chegg activity matched test answers. WriteScholar is the opposite tool: it\'s an AI study coach that generates flashcards from your notes, gives essay feedback (without writing essays for you), and helps you understand material, none of which trips academic integrity sensors.',
   sections: [

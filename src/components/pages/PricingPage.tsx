@@ -12,14 +12,10 @@ interface PricingPageProps {
 const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
   const [billingCycle, setBillingCycle] = useState('monthly');
   const [currentPlan, setCurrentPlan] = useState<string>('free');
-  const [isTrialEligible, setIsTrialEligible] = useState<boolean>(true);
   const [processingPlan, setProcessingPlan] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user) {
-      setIsTrialEligible(true);
-      return;
-    }
+    if (!user) return;
     const token = localStorage.getItem('authToken');
     const base = `${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}`;
     const headers = { Authorization: `Bearer ${token}` } as const;
@@ -27,18 +23,11 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
 
     (async () => {
       try {
-        const [planRes, trialRes] = await Promise.all([
-          fetch(`${base}/subscriptions/current`, { headers }),
-          fetch(`${base}/subscriptions/trial-eligibility`, { headers }),
-        ]);
+        const planRes = await fetch(`${base}/subscriptions/current`, { headers });
         if (cancelled) return;
         if (planRes.ok) {
           const data = await planRes.json();
           setCurrentPlan(data.plan || 'free');
-        }
-        if (trialRes.ok) {
-          const data = await trialRes.json();
-          setIsTrialEligible(data.trialEligible === true);
         }
       } catch (error) {
         console.error('Error loading pricing subscription data:', error);
@@ -104,7 +93,6 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
             billingCycle: billingCycle as 'monthly' | 'yearly',
             successUrl: `${window.location.origin}/dashboard?payment=success`,
             cancelUrl: `${window.location.origin}/dashboard?payment=cancelled`,
-            trialPeriodDays: 7,
           })
         });
 
@@ -205,9 +193,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       buttonText: !user
         ? 'Start with Pro'
         : currentPlan === 'free'
-          ? isTrialEligible
-            ? 'Start 7-day free trial'
-            : 'Upgrade to Pro'
+          ? 'Upgrade to Pro'
           : 'Switch to Pro',
       buttonAction: () => handlePlanAction('pro'),
     },
@@ -228,20 +214,13 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       buttonText: !user
         ? 'Start with Premium'
         : currentPlan === 'free'
-          ? isTrialEligible
-            ? 'Start 7-day free trial'
-            : 'Upgrade to Premium'
+          ? 'Upgrade to Premium'
           : 'Switch to Premium',
       buttonAction: () => handlePlanAction('premium'),
     }
   ];
 
   const faqs = [
-    {
-      question: 'Is there a free trial?',
-      answer:
-        'Eligible first-time subscribers get a 7-day trial on Pro or Premium. After the trial, your plan continues at the regular monthly or yearly rate shown here unless you cancel.',
-    },
     {
       question: "What's included in the free plan?",
         answer: "The free plan includes 3 documents per month, 2 AI essay analyses, 2 study pack generations (lesson, flashcards & quiz included — crossword & Crater Blast unlock with Pro), 5,000 words for the Paper Summarizer, 2 citation searches, and 2MB document library storage. It's perfect for students just getting started."
@@ -582,7 +561,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
             <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 mb-8 max-w-xl mx-auto leading-relaxed">
               {user
                 ? 'Go to your dashboard to analyze documents, find citations, and use study tools.'
-                : 'Start with a 7-day trial on Pro or Premium when eligible, or subscribe anytime. Cancel anytime.'}
+                : 'Subscribe to Pro or Premium anytime. Cancel anytime.'}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center">
               {user ? (

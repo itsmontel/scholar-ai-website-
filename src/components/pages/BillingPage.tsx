@@ -40,7 +40,7 @@ interface UsageStats {
 const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout }) => {
   const [currentPlan, setCurrentPlan] = useState<string>('free');
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
-  const [isTrialEligible, setIsTrialEligible] = useState<boolean>(true);
+  // (Trial eligibility check removed — free trial offering retired.)
   const [usageStats, setUsageStats] = useState<UsageStats>({
     documentsUploaded: 0,
     documentsAnalyzed: 0,
@@ -109,26 +109,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
 
   useEffect(() => {
     fetchSubscriptionData();
-    checkTrialEligibility();
   }, []);
-
-  const checkTrialEligibility = async () => {
-    try {
-      const token = localStorage.getItem('authToken');
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/subscriptions/trial-eligibility`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setIsTrialEligible(data.trialEligible === true);
-      }
-    } catch (error) {
-      console.error('Error checking trial eligibility:', error);
-    }
-  };
 
   const fetchSubscriptionData = async () => {
     try {
@@ -205,7 +186,6 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
             billingCycle: billingCycle,
             successUrl: `${window.location.origin}/billing?success=true`,
             cancelUrl: `${window.location.origin}/dashboard?payment=cancelled`,
-            trialPeriodDays: 7,
           })
         });
 
@@ -427,7 +407,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
               
               {/* Price */}
               <div className="text-center mb-6">
-                {plan.id !== 'free' && billingCycle === 'monthly' && currentPlan === 'free' && isTrialEligible ? (
+                {plan.id !== 'free' && billingCycle === 'monthly' && currentPlan === 'free' ? (
                   /* Monthly price display:
                      • Struck-through "was" price = plan.price + $20
                        (Pro: $39.99 → $19.99 ; Premium: $59.99 → $39.99).
@@ -514,7 +494,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
                 ) : plan.id === 'free' ? (
                   'Stay Free'
                 ) : currentPlan === 'free' ? (
-                  isTrialEligible ? 'Start 7-day free trial' : `Upgrade to ${plan.name}`
+                  `Upgrade to ${plan.name}`
                 ) : (
                   `Switch to ${plan.name}`
                 )}

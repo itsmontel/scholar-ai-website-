@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>WriteScholar Reddit Images — Essay Analyzer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #1A1A1B; /* Reddit dark mode bg */
+      padding: 40px 20px;
+      color: white;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .section {
+      margin-bottom: 60px;
+    }
+    .section-header {
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .section-header h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 800;
+    }
+    .badge-tag {
+      background: #FF4500; /* Reddit orange */
+      color: white;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .badge-tag.size { background: #1976d2; }
+    .badge-tag.subreddit { background: #58CC02; color: #0e2c00; }
+    .tip {
+      color: #818384;
+      font-size: 13px;
+      margin: 0 0 12px 0;
+    }
+
+    /* ============================================ */
+    /* IMAGE 1 — "Reaction post" 1080x1080 square   */
+    /* ============================================ */
+    .img-1 {
+      width: 1080px;
+      height: 1080px;
+      background: #FFF4E0;
+      position: relative;
+      overflow: hidden;
+      font-family: 'Nunito', sans-serif;
+    }
+    .img-1 .speech-wrap {
+      position: absolute;
+      top: 70px;
+      left: 60px;
+      right: 60px;
+    }
+    .img-1 .speech {
+      background: white;
+      border: 4px solid #3C3C3C;
+      border-radius: 28px;
+      padding: 32px 36px;
+      font-size: 50px;
+      font-weight: 900;
+      line-height: 1.15;
+      color: #3C3C3C;
+      letter-spacing: -0.02em;
+      position: relative;
+      box-shadow: 0 8px 0 #3C3C3C;
+    }
+    .img-1 .speech::after {
+      content: '';
+      position: absolute;
+      bottom: -28px;
+      left: 80px;
+      width: 0;
+      height: 0;
+      border: 18px solid transparent;
+      border-top-color: #3C3C3C;
+    }
+    .img-1 .speech::before {
+      content: '';
+      position: absolute;
+      bottom: -20px;
+      left: 84px;
+      width: 0;
+      height: 0;
+      border: 14px solid transparent;
+      border-top-color: white;
+      z-index: 1;
+    }
+    .img-1 .speech .emoji {
+      font-size: 56px;
+      vertical-align: -8px;
+    }
+    .img-1 .speech .underline-red {
+      color: #FF4B4B;
+      text-decoration: underline;
+      text-decoration-thickness: 8px;
+      text-underline-offset: 6px;
+    }
+    .img-1 .screenshot-card {
+      position: absolute;
+      top: 400px;
+      left: 60px;
+      right: 60px;
+      background: white;
+      border-radius: 24px;
+      border: 4px solid #3C3C3C;
+      box-shadow: 0 10px 0 #3C3C3C;
+      padding: 28px 32px;
+    }
+    .img-1 .grade-row {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 22px;
+    }
+    .img-1 .grade-circle {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #FF4B4B, #D63333);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 70px;
+      font-weight: 900;
+      color: white;
+      box-shadow: 0 6px 0 #962020;
+      flex-shrink: 0;
+    }
+    .img-1 .grade-info .label {
+      font-size: 16px;
+      color: #8a8a8a;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 4px;
+    }
+    .img-1 .grade-info .heading {
+      font-size: 36px;
+      font-weight: 900;
+      color: #3C3C3C;
+      line-height: 1.1;
+    }
+    .img-1 .feedback-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .img-1 .feedback-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 2px dashed #F0E0C0;
+      font-size: 22px;
+      font-weight: 700;
+      color: #3C3C3C;
+      line-height: 1.35;
+    }
+    .img-1 .feedback-list li:last-child { border-bottom: none; }
+    .img-1 .feedback-list .pill {
+      background: #FF9600;
+      color: white;
+      font-weight: 900;
+      font-size: 14px;
+      padding: 4px 10px;
+      border-radius: 8px;
+      flex-shrink: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 4px;
+    }
+    .img-1 .feedback-list .pill.thesis { background: #FF4B4B; }
+    .img-1 .feedback-list .pill.evidence { background: #FF9600; }
+    .img-1 .feedback-list .pill.flow { background: #8856D6; }
+    .img-1 .mascot {
+      position: absolute;
+      bottom: 30px;
+      right: 40px;
+      width: 220px;
+      transform: rotate(-6deg);
+      filter: drop-shadow(0 8px 12px rgba(0,0,0,0.18));
+    }
+    .img-1 .footer-brand {
+      position: absolute;
+      bottom: 50px;
+      left: 70px;
+      font-size: 28px;
+      font-weight: 900;
+      color: #3C3C3C;
+    }
+    .img-1 .footer-brand .url {
+      color: #FF9600;
+    }
+
+    /* ============================================ */
+    /* IMAGE 2 — "Before vs After" 1080x1080         */
+    /* ============================================ */
+    .img-2 {
+      width: 1080px;
+      height: 1080px;
+      background: linear-gradient(135deg, #FFF4E0 0%, #FFE3B0 100%);
+      position: relative;
+      overflow: hidden;
+      font-family: 'Nunito', sans-serif;
+    }
+    .img-2 .top-text {
+      position: absolute;
+      top: 60px;
+      left: 60px;
+      right: 60px;
+      text-align: center;
+    }
+    .img-2 .top-text .small {
+      font-size: 22px;
+      font-weight: 800;
+      color: #6B6B6B;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      margin-bottom: 12px;
+    }
+    .img-2 .top-text h1 {
+      font-size: 72px;
+      font-weight: 900;
+      line-height: 1;
+      color: #3C3C3C;
+      letter-spacing: -0.03em;
+      margin: 0;
+    }
+    .img-2 .top-text h1 .highlight {
+      background: linear-gradient(180deg, transparent 60%, #FFD466 60%);
+      padding: 0 4px;
+    }
+    .img-2 .comparison {
+      position: absolute;
+      top: 290px;
+      left: 60px;
+      right: 60px;
+      display: grid;
+      grid-template-columns: 1fr 80px 1fr;
+      gap: 16px;
+      align-items: center;
+    }
+    .img-2 .grade-card {
+      background: white;
+      border-radius: 24px;
+      border: 4px solid #3C3C3C;
+      padding: 36px 24px;
+      text-align: center;
+      box-shadow: 0 8px 0 #3C3C3C;
+      position: relative;
+    }
+    .img-2 .grade-card.before {
+      transform: rotate(-2deg);
+    }
+    .img-2 .grade-card.after {
+      transform: rotate(2deg);
+    }
+    .img-2 .grade-card .tag {
+      position: absolute;
+      top: -16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #3C3C3C;
+      color: white;
+      font-size: 14px;
+      font-weight: 900;
+      padding: 6px 18px;
+      border-radius: 999px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .img-2 .grade-card.after .tag {
+      background: #58CC02;
+      border-bottom: 3px solid #46A302;
+    }
+    .img-2 .grade-card .big {
+      font-size: 160px;
+      font-weight: 900;
+      line-height: 0.9;
+      letter-spacing: -0.06em;
+      margin: 16px 0 12px;
+    }
+    .img-2 .grade-card.before .big { color: #FF4B4B; }
+    .img-2 .grade-card.after .big { color: #58CC02; }
+    .img-2 .grade-card .score {
+      font-size: 22px;
+      font-weight: 800;
+      color: #6B6B6B;
+    }
+    .img-2 .arrow {
+      width: 80px;
+      height: 80px;
+      background: #FF9600;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 50px;
+      font-weight: 900;
+      box-shadow: 0 6px 0 #D97F00;
+    }
+    .img-2 .what-changed {
+      position: absolute;
+      top: 660px;
+      left: 60px;
+      right: 60px;
+      background: white;
+      border-radius: 24px;
+      border: 4px solid #3C3C3C;
+      box-shadow: 0 8px 0 #3C3C3C;
+      padding: 28px 36px;
+    }
+    .img-2 .what-changed h3 {
+      font-size: 28px;
+      font-weight: 900;
+      color: #3C3C3C;
+      margin: 0 0 12px 0;
+    }
+    .img-2 .what-changed .items {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 22px;
+    }
+    .img-2 .what-changed .item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 19px;
+      font-weight: 700;
+      color: #3C3C3C;
+    }
+    .img-2 .what-changed .check {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #58CC02;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+    .img-2 .bottom-cta {
+      position: absolute;
+      bottom: 40px;
+      left: 60px;
+      right: 60px;
+      text-align: center;
+    }
+    .img-2 .bottom-cta .url {
+      font-size: 38px;
+      font-weight: 900;
+      color: #3C3C3C;
+    }
+    .img-2 .bottom-cta .url .dot {
+      color: #FF9600;
+    }
+    .img-2 .bottom-cta .sub {
+      font-size: 18px;
+      font-weight: 700;
+      color: #6B6B6B;
+      margin-top: 6px;
+    }
+
+    /* ============================================ */
+    /* IMAGE 3 — "5 things AI told me" 1080x1350    */
+    /* ============================================ */
+    .img-3 {
+      width: 1080px;
+      height: 1350px;
+      background: #FFF4E0;
+      position: relative;
+      overflow: hidden;
+      font-family: 'Nunito', sans-serif;
+    }
+    .img-3 .header {
+      position: absolute;
+      top: 50px;
+      left: 60px;
+      right: 60px;
+    }
+    .img-3 .header .kicker {
+      display: inline-block;
+      background: #3C3C3C;
+      color: white;
+      font-size: 18px;
+      font-weight: 900;
+      padding: 8px 18px;
+      border-radius: 999px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+    .img-3 .header h1 {
+      font-size: 78px;
+      font-weight: 900;
+      line-height: 1;
+      color: #3C3C3C;
+      letter-spacing: -0.03em;
+      margin: 0;
+    }
+    .img-3 .header h1 .num {
+      color: #FF4B4B;
+      font-size: 110px;
+      display: inline-block;
+      margin-right: 6px;
+    }
+    .img-3 .header .subline {
+      font-size: 22px;
+      font-weight: 700;
+      color: #6B6B6B;
+      margin-top: 14px;
+    }
+    .img-3 .list {
+      position: absolute;
+      top: 380px;
+      left: 60px;
+      right: 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .img-3 .list-item {
+      background: white;
+      border-radius: 20px;
+      border: 4px solid #3C3C3C;
+      box-shadow: 0 6px 0 #3C3C3C;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .img-3 .list-item .num-box {
+      width: 70px;
+      height: 70px;
+      border-radius: 16px;
+      background: #FF9600;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 42px;
+      font-weight: 900;
+      flex-shrink: 0;
+      box-shadow: 0 4px 0 #D97F00;
+    }
+    .img-3 .list-item:nth-child(1) .num-box { background: #FF4B4B; box-shadow: 0 4px 0 #962020; }
+    .img-3 .list-item:nth-child(2) .num-box { background: #FF9600; box-shadow: 0 4px 0 #D97F00; }
+    .img-3 .list-item:nth-child(3) .num-box { background: #58CC02; box-shadow: 0 4px 0 #46A302; }
+    .img-3 .list-item:nth-child(4) .num-box { background: #1CB0F6; box-shadow: 0 4px 0 #0E80B9; }
+    .img-3 .list-item:nth-child(5) .num-box { background: #8856D6; box-shadow: 0 4px 0 #6638AC; }
+    .img-3 .list-item .text {
+      flex: 1;
+    }
+    .img-3 .list-item .text .title {
+      font-size: 25px;
+      font-weight: 900;
+      color: #3C3C3C;
+      line-height: 1.15;
+      margin-bottom: 2px;
+    }
+    .img-3 .list-item .text .desc {
+      font-size: 17px;
+      font-weight: 700;
+      color: #6B6B6B;
+      line-height: 1.3;
+    }
+    .img-3 .bottom-cta {
+      position: absolute;
+      bottom: 50px;
+      left: 60px;
+      right: 60px;
+      background: #3C3C3C;
+      border-radius: 24px;
+      border-bottom: 8px solid #1A1A1A;
+      padding: 28px 36px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    .img-3 .bottom-cta .mascot-mini {
+      width: 90px;
+      height: auto;
+      flex-shrink: 0;
+    }
+    .img-3 .bottom-cta .text {
+      flex: 1;
+      color: white;
+    }
+    .img-3 .bottom-cta .text h3 {
+      margin: 0 0 4px 0;
+      font-size: 28px;
+      font-weight: 900;
+    }
+    .img-3 .bottom-cta .text p {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 700;
+      opacity: 0.85;
+    }
+    .img-3 .bottom-cta .pill {
+      background: #FF9600;
+      color: white;
+      font-size: 18px;
+      font-weight: 900;
+      padding: 14px 22px;
+      border-radius: 14px;
+      border-bottom: 4px solid #D97F00;
+      flex-shrink: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    /* ============================================ */
+    /* IMAGE 4 — "I built this" Side Project 1080x1350 */
+    /* ============================================ */
+    .img-4 {
+      width: 1080px;
+      height: 1350px;
+      background: #FFFFFF;
+      position: relative;
+      overflow: hidden;
+      font-family: 'Nunito', sans-serif;
+    }
+    .img-4 .bg-shape {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 600px;
+      background: #FFF4E0;
+      border-bottom-left-radius: 100% 50%;
+      border-bottom-right-radius: 100% 50%;
+    }
+    .img-4 .top-tag {
+      position: absolute;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #FF4500;
+      color: white;
+      font-size: 16px;
+      font-weight: 900;
+      padding: 10px 22px;
+      border-radius: 999px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      box-shadow: 0 4px 12px rgba(255,69,0,0.4);
+    }
+    .img-4 .headline-wrap {
+      position: absolute;
+      top: 130px;
+      left: 60px;
+      right: 60px;
+      text-align: center;
+    }
+    .img-4 .headline-wrap h1 {
+      font-size: 80px;
+      font-weight: 900;
+      line-height: 1;
+      color: #3C3C3C;
+      letter-spacing: -0.03em;
+      margin: 0;
+    }
+    .img-4 .headline-wrap h1 .accent {
+      color: #FF9600;
+    }
+    .img-4 .headline-wrap .quote {
+      font-size: 24px;
+      font-weight: 700;
+      color: #6B6B6B;
+      margin-top: 22px;
+      font-style: italic;
+      line-height: 1.4;
+    }
+    .img-4 .mascot-big {
+      position: absolute;
+      top: 360px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 280px;
+      filter: drop-shadow(0 12px 24px rgba(0,0,0,0.2));
+    }
+    .img-4 .features {
+      position: absolute;
+      top: 720px;
+      left: 60px;
+      right: 60px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .img-4 .feature {
+      background: white;
+      border: 4px solid #3C3C3C;
+      border-radius: 22px;
+      padding: 24px;
+      box-shadow: 0 6px 0 #3C3C3C;
+    }
+    .img-4 .feature .icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 14px;
+      background: #FF9600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      margin-bottom: 12px;
+    }
+    .img-4 .feature .title {
+      font-size: 24px;
+      font-weight: 900;
+      color: #3C3C3C;
+      margin-bottom: 4px;
+      line-height: 1.1;
+    }
+    .img-4 .feature .desc {
+      font-size: 16px;
+      font-weight: 700;
+      color: #6B6B6B;
+      line-height: 1.35;
+    }
+    .img-4 .footer {
+      position: absolute;
+      bottom: 40px;
+      left: 60px;
+      right: 60px;
+      text-align: center;
+    }
+    .img-4 .footer .url {
+      font-size: 44px;
+      font-weight: 900;
+      color: #3C3C3C;
+      letter-spacing: -0.02em;
+    }
+    .img-4 .footer .url .dot { color: #FF9600; }
+    .img-4 .footer .sub {
+      font-size: 18px;
+      font-weight: 700;
+      color: #6B6B6B;
+      margin-top: 6px;
+    }
+
+    /* ============================================ */
+    /* IMAGE 5 — Link preview 1200x630              */
+    /* ============================================ */
+    .img-5 {
+      width: 1200px;
+      height: 630px;
+      background: linear-gradient(135deg, #FFF4E0 0%, #FFE3B0 100%);
+      position: relative;
+      overflow: hidden;
+      font-family: 'Nunito', sans-serif;
+    }
+    .img-5 .left {
+      position: absolute;
+      top: 70px;
+      left: 70px;
+      width: 640px;
+    }
+    .img-5 .left .pill {
+      display: inline-block;
+      background: #58CC02;
+      color: white;
+      font-size: 14px;
+      font-weight: 900;
+      padding: 8px 18px;
+      border-radius: 999px;
+      border-bottom: 3px solid #46A302;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .img-5 .left h1 {
+      font-size: 64px;
+      font-weight: 900;
+      line-height: 1;
+      color: #3C3C3C;
+      letter-spacing: -0.03em;
+      margin: 0;
+    }
+    .img-5 .left h1 .highlight {
+      background: linear-gradient(180deg, transparent 60%, #FFD466 60%);
+      padding: 0 4px;
+    }
+    .img-5 .left .sub {
+      font-size: 22px;
+      font-weight: 700;
+      color: #6B6B6B;
+      line-height: 1.35;
+      margin-top: 20px;
+    }
+    .img-5 .left .url-block {
+      margin-top: 30px;
+      display: inline-block;
+      background: #3C3C3C;
+      color: white;
+      padding: 14px 24px;
+      border-radius: 16px;
+      border-bottom: 5px solid #1A1A1A;
+    }
+    .img-5 .left .url-block .arrow { color: #FF9600; margin-right: 6px; }
+    .img-5 .left .url-block .url { font-size: 22px; font-weight: 900; }
+    .img-5 .right {
+      position: absolute;
+      top: 60px;
+      right: 50px;
+      width: 380px;
+      height: 510px;
+      background: white;
+      border: 4px solid #3C3C3C;
+      border-radius: 26px;
+      box-shadow: 0 10px 0 #3C3C3C;
+      transform: rotate(3deg);
+      padding: 28px 28px;
+    }
+    .img-5 .right .grade-circle {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #58CC02, #46A302);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 88px;
+      font-weight: 900;
+      color: white;
+      margin: 0 auto 20px;
+      box-shadow: 0 6px 0 #2A6601;
+    }
+    .img-5 .right .grade-label {
+      text-align: center;
+      font-size: 18px;
+      font-weight: 800;
+      color: #8a8a8a;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .img-5 .right .grade-title {
+      text-align: center;
+      font-size: 26px;
+      font-weight: 900;
+      color: #3C3C3C;
+      margin: 4px 0 20px 0;
+      line-height: 1.1;
+    }
+    .img-5 .right .bars {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .img-5 .right .bar-row .name {
+      font-size: 14px;
+      font-weight: 800;
+      color: #3C3C3C;
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .img-5 .right .bar-row .name .score { color: #FF9600; }
+    .img-5 .right .bar-row .bar {
+      height: 10px;
+      background: #F0E0C0;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .img-5 .right .bar-row .fill {
+      height: 100%;
+      background: linear-gradient(90deg, #FF9600, #FF4B4B);
+      border-radius: 999px;
+    }
+
+    /* Print-friendly */
+    @media print {
+      body { background: white; padding: 0; }
+      .section-header, .tip { display: none; }
+      .section { page-break-after: always; margin: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- IMAGE 1 -->
+    <div class="section">
+      <div class="section-header">
+        <h2>1. Reaction-Style Post</h2>
+        <span class="badge-tag size">1080 × 1080</span>
+        <span class="badge-tag subreddit">r/college, r/APStudents, r/GetStudying</span>
+      </div>
+      <p class="tip">Hook: feels like a casual share, not an ad. "AI roasted my essay" lands on Reddit. Use with a self-text post: "I asked an AI to grade my essay before submitting — here's what it said (free tool I've been using)"</p>
+      <div class="img-1">
+        <div class="speech-wrap">
+          <div class="speech">
+            i asked AI to grade my essay <span class="emoji">💀</span><br/>
+            and it <span class="underline-red">cooked me</span>
+          </div>
+        </div>
+        <div class="screenshot-card">
+          <div class="grade-row">
+            <div class="grade-circle">C+</div>
+            <div class="grade-info">
+              <div class="label">YOUR GRADE</div>
+              <div class="heading">Needs Work — 3 issues found</div>
+            </div>
+          </div>
+          <ul class="feedback-list">
+            <li>
+              <span class="pill thesis">Thesis</span>
+              <span>Your thesis is too broad — narrow it to one specific claim</span>
+            </li>
+            <li>
+              <span class="pill evidence">Evidence</span>
+              <span>Paragraph 3 makes a claim but has no source backing it up</span>
+            </li>
+            <li>
+              <span class="pill flow">Flow</span>
+              <span>Transitions between paragraphs 2 and 3 feel abrupt</span>
+            </li>
+          </ul>
+        </div>
+        <div class="footer-brand">writescholar<span class="url">.com</span></div>
+        <img src="https://writescholar.com/mascot-cta.png" alt="" class="mascot" onerror="this.style.display='none'"/>
+      </div>
+    </div>
+
+    <!-- IMAGE 2 -->
+    <div class="section">
+      <div class="section-header">
+        <h2>2. Before vs After Grade Transformation</h2>
+        <span class="badge-tag size">1080 × 1080</span>
+        <span class="badge-tag subreddit">r/college, r/CollegeEssayHelp</span>
+      </div>
+      <p class="tip">Hook: classic "transformation" format that performs well. Pair with: "Went from a C+ to A- on the same essay after the AI told me what to fix"</p>
+      <div class="img-2">
+        <div class="top-text">
+          <div class="small">Same essay. 30 minutes apart.</div>
+          <h1>From <span class="highlight">C+ to A-</span><br/>after AI feedback</h1>
+        </div>
+        <div class="comparison">
+          <div class="grade-card before">
+            <div class="tag">Before</div>
+            <div class="big">C+</div>
+            <div class="score">72 / 100</div>
+          </div>
+          <div class="arrow">→</div>
+          <div class="grade-card after">
+            <div class="tag">After</div>
+            <div class="big">A-</div>
+            <div class="score">91 / 100</div>
+          </div>
+        </div>
+        <div class="what-changed">
+          <h3>What I fixed (the AI told me):</h3>
+          <div class="items">
+            <div class="item"><div class="check">✓</div> Sharpened thesis</div>
+            <div class="item"><div class="check">✓</div> Added 2 citations</div>
+            <div class="item"><div class="check">✓</div> Fixed weak transitions</div>
+            <div class="item"><div class="check">✓</div> Cut passive voice</div>
+            <div class="item"><div class="check">✓</div> Stronger conclusion</div>
+            <div class="item"><div class="check">✓</div> Tightened intro</div>
+          </div>
+        </div>
+        <div class="bottom-cta">
+          <div class="url">writescholar<span class="dot">.com</span></div>
+          <div class="sub">Free AI essay grader — no sign-up required</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- IMAGE 3 -->
+    <div class="section">
+      <div class="section-header">
+        <h2>3. Listicle ("5 things AI caught")</h2>
+        <span class="badge-tag size">1080 × 1350</span>
+        <span class="badge-tag subreddit">r/college, r/GetStudying, r/APStudents</span>
+      </div>
+      <p class="tip">Hook: lists perform 3x better on Reddit. Pair with: "5 things the AI essay grader caught in my paper that my professor would've marked off for"</p>
+      <div class="img-3">
+        <div class="header">
+          <div class="kicker">Free AI essay grader</div>
+          <h1><span class="num">5</span>things AI caught<br/>before I turned it in</h1>
+          <div class="subline">Mistakes my professor would've docked me for</div>
+        </div>
+        <div class="list">
+          <div class="list-item">
+            <div class="num-box">1</div>
+            <div class="text">
+              <div class="title">My thesis was a question, not a claim</div>
+              <div class="desc">Asked instead of argued — easy fix, big impact</div>
+            </div>
+          </div>
+          <div class="list-item">
+            <div class="num-box">2</div>
+            <div class="text">
+              <div class="title">3 paragraphs had zero evidence</div>
+              <div class="desc">Pure opinion — needed citations or examples</div>
+            </div>
+          </div>
+          <div class="list-item">
+            <div class="num-box">3</div>
+            <div class="text">
+              <div class="title">Used "very" and "really" 14 times</div>
+              <div class="desc">Weak intensifiers killing my word count</div>
+            </div>
+          </div>
+          <div class="list-item">
+            <div class="num-box">4</div>
+            <div class="text">
+              <div class="title">Conclusion just repeated the intro</div>
+              <div class="desc">Needed a "so what" — why this argument matters</div>
+            </div>
+          </div>
+          <div class="list-item">
+            <div class="num-box">5</div>
+            <div class="text">
+              <div class="title">Passive voice in 9 sentences</div>
+              <div class="desc">Sounded weaker — flipped to active for power</div>
+            </div>
+          </div>
+        </div>
+        <div class="bottom-cta">
+          <img src="https://writescholar.com/mascot-cta.png" alt="" class="mascot-mini" onerror="this.style.display='none'"/>
+          <div class="text">
+            <h3>writescholar.com</h3>
+            <p>Paste your essay → get a grade + fixes in 30 seconds</p>
+          </div>
+          <div class="pill">Free</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- IMAGE 4 -->
+    <div class="section">
+      <div class="section-header">
+        <h2>4. Side Project Launch Style</h2>
+        <span class="badge-tag size">1080 × 1350</span>
+        <span class="badge-tag subreddit">r/SideProject, r/InternetIsBeautiful, r/EntrepreneurRideAlong</span>
+      </div>
+      <p class="tip">Hook: founder narrative works on r/SideProject. Pair with: "I built a free AI essay grader because I was tired of submitting essays and hoping for the best — would love feedback"</p>
+      <div class="img-4">
+        <div class="bg-shape"></div>
+        <div class="top-tag">Just shipped 🚀</div>
+        <div class="headline-wrap">
+          <h1>I built an AI that grades essays <span class="accent">before you turn them in</span></h1>
+          <div class="quote">"Wish I had this in college"</div>
+        </div>
+        <img src="https://writescholar.com/mascot-cta.png" alt="" class="mascot-big" onerror="this.style.display='none'"/>
+        <div class="features">
+          <div class="feature">
+            <div class="icon">📝</div>
+            <div class="title">Letter grade + rubric</div>
+            <div class="desc">A–F grade with thesis, evidence, flow, and grammar scores</div>
+          </div>
+          <div class="feature">
+            <div class="icon">🎯</div>
+            <div class="title">Line-by-line fixes</div>
+            <div class="desc">Highlights exactly what to rewrite and why</div>
+          </div>
+          <div class="feature">
+            <div class="icon">⚡</div>
+            <div class="title">30 seconds</div>
+            <div class="desc">Paste essay → grade. No upload, no sign-up</div>
+          </div>
+          <div class="feature">
+            <div class="icon">🆓</div>
+            <div class="title">Actually free</div>
+            <div class="desc">No credit card. No paywall on grading.</div>
+          </div>
+        </div>
+        <div class="footer">
+          <div class="url">writescholar<span class="dot">.com</span></div>
+          <div class="sub">Roast me — feedback welcome</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- IMAGE 5 -->
+    <div class="section">
+      <div class="section-header">
+        <h2>5. Link Preview (OG image)</h2>
+        <span class="badge-tag size">1200 × 630</span>
+        <span class="badge-tag subreddit">When you post a URL as the link</span>
+      </div>
+      <p class="tip">Hook: shows in the preview card when you share a URL. Good for posts with a link instead of an image.</p>
+      <div class="img-5">
+        <div class="left">
+          <div class="pill">100% Free</div>
+          <h1>Get your essay <span class="highlight">graded by AI</span> in 30s</h1>
+          <div class="sub">Paste your essay. Get a letter grade, rubric scores, and exactly what to fix — before you turn it in.</div>
+          <div class="url-block">
+            <span class="arrow">→</span><span class="url">writescholar.com</span>
+          </div>
+        </div>
+        <div class="right">
+          <div class="grade-circle">A-</div>
+          <div class="grade-label">YOUR GRADE</div>
+          <div class="grade-title">Strong essay. 3 small fixes.</div>
+          <div class="bars">
+            <div class="bar-row">
+              <div class="name"><span>Thesis</span><span class="score">9/10</span></div>
+              <div class="bar"><div class="fill" style="width: 90%"></div></div>
+            </div>
+            <div class="bar-row">
+              <div class="name"><span>Evidence</span><span class="score">8/10</span></div>
+              <div class="bar"><div class="fill" style="width: 80%"></div></div>
+            </div>
+            <div class="bar-row">
+              <div class="name"><span>Flow</span><span class="score">9/10</span></div>
+              <div class="bar"><div class="fill" style="width: 90%"></div></div>
+            </div>
+            <div class="bar-row">
+              <div class="name"><span>Grammar</span><span class="score">10/10</span></div>
+              <div class="bar"><div class="fill" style="width: 100%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

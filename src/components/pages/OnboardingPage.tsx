@@ -15,7 +15,7 @@ const TRIAL_DAYS = 7;
 
 /**
  * When true the onboarding tour ends on the `value-prop` screen
- * ("Eight tools. One paste of your notes.") — the `paywall` and
+ * ("Eight tools. Designed for success.") — the `paywall` and
  * `paywall-hard` phases that used to follow are unreachable, and the
  * dashboard's soft paywall pops instead. The render blocks for those
  * phases are deliberately left in the file so the previous upsell
@@ -1144,10 +1144,11 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
           onUserUpdate?.({ plan: data.data.plan, subscription_status: data.data.subscriptionStatus });
           // Google Ads trial-started conversion. Plan price passed for
           // value-based bidding; sessionId acts as transaction_id so a
-          // page reload after Stripe return can't double-count. Helper
-          // is a no-op until IDs in src/utils/gtag.ts are configured.
+          // page reload after Stripe return can't double-count. Email
+          // is SHA-256 hashed inside the helper for Enhanced Conversions,
+          // recovering cross-device / cookie-cleared attribution.
           const planPrice = data.data.plan === 'premium' ? 39.99 : data.data.plan === 'pro' ? 19.99 : 0;
-          trackTrialConversion(planPrice, sessionId);
+          void trackTrialConversion(planPrice, sessionId, user?.email);
           window.history.replaceState({}, '', '/onboarding');
           setPhase('transition');
         } else if (SKIP_ONBOARDING_STRIPE) {
@@ -1223,7 +1224,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
         const res = await fetch(`${API_URL}/subscriptions/create-checkout-session`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ planType: 'pro', billingCycle: 'monthly', embedded: true, returnUrl, trialPeriodDays: trialEligible ? TRIAL_DAYS : 0 }),
+          body: JSON.stringify({ planType: 'pro', billingCycle: 'monthly', embedded: true, returnUrl }),
         });
         const data = await res.json();
         if (!res.ok) throw new UserFacingCheckoutError((typeof data?.message === 'string' && data.message) || 'We could not start checkout.');
@@ -1516,7 +1517,6 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
           billingCycle: 'monthly',
           successUrl,
           cancelUrl,
-          trialPeriodDays: eligibleForTrial ? TRIAL_DAYS : 0,
           ...(promoCode ? { promoCode } : {}),
         }),
       });
@@ -1638,65 +1638,209 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
     );
   }
 
-  /* ─── TRANSITION ─── */
+  /* ─── TRANSITION ───────────────────────────────────────────────
+     "Welcome to WriteScholar!" celebration screen — gamified
+     achievement-unlock moment:
+       • Animated radial gradient background that hue-cycles between
+         the 5 brand colours (purple / green / orange / blue / red)
+         — kept subtle (low opacity) so it doesn't feel rainbow-y.
+       • Two concentric pulsing rings around the mascot (Duolingo
+         "achievement earned" treatment) + soft green glow.
+       • Mascot bounces gently while the rings animate.
+       • H1 cascades in word by word — "WriteScholar" in brand purple.
+       • Confetti uses 4 shape variants (square, circle, sparkle
+         star, triangle) in 6 brand colours.
+       • Progress bar has a shimmer pass while it fills. */
   if (phase === 'transition' || phase === 'done') {
     return (
-      <div className="min-h-screen bg-white dark:bg-stone-950 flex items-center justify-center overflow-hidden relative">
-        {/* Confetti */}
+      <div className="min-h-screen flex items-center justify-center overflow-hidden relative bg-white dark:bg-stone-950">
+        {/* Animated radial gradient background — slow hue cycle */}
+        <div className="absolute inset-0 ob-bg-cycle" aria-hidden />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/70 via-white/40 to-white dark:from-stone-950/70 dark:via-stone-950/40 dark:to-stone-950 pointer-events-none" aria-hidden />
+
+        {/* Confetti — 4 shape variants in 6 colours */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
-          {Array.from({ length: 60 }, (_, i) => (
-            <div
-              key={i}
-              className="absolute ob-confetti-fall"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: '-5%',
-                animationDelay: `${Math.random() * 2}s`,
-                animationDuration: `${2 + Math.random() * 3}s`,
-              }}
-            >
+          {Array.from({ length: 90 }, (_, i) => {
+            const shape = i % 4; // 0=square, 1=circle, 2=sparkle, 3=triangle
+            const size = 6 + Math.random() * 10;
+            const color = CONFETTI_COLORS[i % CONFETTI_COLORS.length];
+            return (
               <div
+                key={i}
+                className="absolute ob-confetti-fall"
                 style={{
-                  width: 6 + Math.random() * 6,
-                  height: 6 + Math.random() * 6,
-                  backgroundColor: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
-                  borderRadius: i % 3 === 0 ? '50%' : 2,
-                  transform: `rotate(${Math.random() * 360}deg)`,
+                  left: `${Math.random() * 100}%`,
+                  top: '-5%',
+                  animationDelay: `${Math.random() * 2}s`,
+                  animationDuration: `${2.5 + Math.random() * 3}s`,
                 }}
-              />
-            </div>
-          ))}
+              >
+                {shape === 2 ? (
+                  /* Sparkle / 4-point star */
+                  <svg width={size + 4} height={size + 4} viewBox="0 0 24 24" style={{ filter: `drop-shadow(0 0 4px ${color}aa)` }}>
+                    <path d="M12 2 L14 10 L22 12 L14 14 L12 22 L10 14 L2 12 L10 10 Z" fill={color} />
+                  </svg>
+                ) : shape === 3 ? (
+                  /* Triangle */
+                  <div
+                    style={{
+                      width: 0,
+                      height: 0,
+                      borderLeft: `${size / 2}px solid transparent`,
+                      borderRight: `${size / 2}px solid transparent`,
+                      borderBottom: `${size}px solid ${color}`,
+                      transform: `rotate(${Math.random() * 360}deg)`,
+                    }}
+                  />
+                ) : (
+                  /* Square or circle */
+                  <div
+                    style={{
+                      width: size,
+                      height: size,
+                      backgroundColor: color,
+                      borderRadius: shape === 1 ? '50%' : 2,
+                      transform: `rotate(${Math.random() * 360}deg)`,
+                      boxShadow: `0 0 6px ${color}55`,
+                    }}
+                  />
+                )}
+              </div>
+            );
+          })}
         </div>
 
-        <div className="relative z-10 text-center px-6 max-w-md ob-scale-in">
-          <div className="mb-6">
-            <MascotGif src="/mascot-celebrating.webp" alt="Mascot celebrating" size={160} bordered borderColor="#58CC02" bgColor="#E5F8D0" />
+        {/* CENTRE — mascot in halo + heading + progress */}
+        <div className="relative z-10 text-center px-6 max-w-md">
+          {/* Mascot wrapped in pulsing halo + concentric rings */}
+          <div className="relative mb-6 ob-scale-in">
+            {/* Outer pulsing ring */}
+            <div
+              className="absolute inset-0 flex items-center justify-center pointer-events-none"
+              aria-hidden
+            >
+              <div className="w-56 h-56 rounded-full border-4 border-[#58CC02]/50 ob-ring-pulse" />
+            </div>
+            {/* Inner pulsing ring (offset delay) */}
+            <div
+              className="absolute inset-0 flex items-center justify-center pointer-events-none"
+              aria-hidden
+            >
+              <div className="w-44 h-44 rounded-full border-4 border-[#A560E8]/50 ob-ring-pulse" style={{ animationDelay: '0.6s' }} />
+            </div>
+            {/* Soft glow behind mascot */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden>
+              <div className="w-40 h-40 rounded-full bg-[#58CC02]/30 blur-2xl ob-glow-pulse" />
+            </div>
+            {/* The mascot — bounces */}
+            <div className="relative ob-mascot-bounce flex justify-center">
+              <MascotGif src="/mascot-celebrating.webp" alt="Mascot celebrating" size={160} bordered borderColor="#58CC02" bgColor="#E5F8D0" />
+            </div>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-[#3C3C3C] dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-            Welcome to WriteScholar!
+
+          {/* Cascading H1 — each word fades in on its own delay */}
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-[#3C3C3C] dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+            <span className="inline-block ob-word" style={{ animationDelay: '0.15s' }}>Welcome</span>{' '}
+            <span className="inline-block ob-word" style={{ animationDelay: '0.30s' }}>to</span>{' '}
+            <span className="inline-block ob-word text-[#A560E8]" style={{ animationDelay: '0.45s' }}>
+              WriteScholar
+            </span>
+            <span className="inline-block ob-word" style={{ animationDelay: '0.60s' }}>!</span>
           </h1>
-          <p className="mt-3 text-stone-500 dark:text-stone-400 font-bold text-base">
+          <p className="mt-3 text-stone-500 dark:text-stone-400 font-bold text-base ob-subtitle">
             Your journey starts now, {firstName} 🎉
           </p>
-          <div className="mt-8 w-52 mx-auto h-2.5 bg-stone-200 dark:bg-stone-700 rounded-full overflow-hidden">
-            <div className="h-full bg-[#58CC02] rounded-full ob-progress-fill" />
+
+          {/* Progress bar with shimmer pass */}
+          <div className="mt-8 w-60 mx-auto relative">
+            <div className="h-3 bg-stone-200 dark:bg-stone-700 rounded-full overflow-hidden border-2 border-stone-300 dark:border-stone-600">
+              <div className="h-full bg-gradient-to-r from-[#58CC02] via-[#46A302] to-[#58CC02] rounded-full ob-progress-fill relative overflow-hidden">
+                <div className="absolute inset-0 ob-shimmer" aria-hidden />
+              </div>
+            </div>
+            <p className="mt-2 text-[10px] font-extrabold uppercase tracking-[0.2em] text-stone-400 dark:text-stone-500">
+              Loading your dashboard…
+            </p>
           </div>
         </div>
 
         <style>{`
+          /* Animated brand-colour radial gradient background */
+          @keyframes obBgCycle {
+            0%, 100% { background: radial-gradient(ellipse at 30% 30%, rgba(165,96,232,0.18), transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(88,204,2,0.18), transparent 60%); }
+            33%      { background: radial-gradient(ellipse at 70% 30%, rgba(255,150,0,0.18), transparent 60%), radial-gradient(ellipse at 30% 70%, rgba(28,176,246,0.18), transparent 60%); }
+            66%      { background: radial-gradient(ellipse at 50% 80%, rgba(255,75,75,0.16), transparent 60%), radial-gradient(ellipse at 50% 20%, rgba(255,215,0,0.18), transparent 60%); }
+          }
+          .ob-bg-cycle { animation: obBgCycle 6s ease-in-out infinite; }
+
+          /* Confetti — varied shapes, longer fall, gentle spin */
           @keyframes obConfettiFall {
-            0% { transform: translateY(-10vh) rotate(0deg) scale(1); opacity: 1; }
-            50% { opacity: 1; }
+            0%   { transform: translateY(-10vh) rotate(0deg) scale(1);  opacity: 1; }
+            50%  { opacity: 1; }
             100% { transform: translateY(110vh) rotate(720deg) scale(0.5); opacity: 0; }
           }
           .ob-confetti-fall { animation: obConfettiFall var(--dur, 3s) ease-out forwards; }
+
+          /* Scale-in card entrance */
           @keyframes obScaleIn {
-            0% { transform: scale(0.7); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
+            0%   { transform: scale(0.6); opacity: 0; }
+            100% { transform: scale(1);   opacity: 1; }
           }
-          .ob-scale-in { animation: obScaleIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+          .ob-scale-in { animation: obScaleIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+
+          /* Pulsing concentric rings around the mascot */
+          @keyframes obRingPulse {
+            0%   { transform: scale(0.8);  opacity: 0.9; }
+            70%  { transform: scale(1.25); opacity: 0; }
+            100% { transform: scale(1.25); opacity: 0; }
+          }
+          .ob-ring-pulse { animation: obRingPulse 2.2s cubic-bezier(0.16, 1, 0.3, 1) infinite; }
+
+          /* Soft glow behind mascot pulses with the rings */
+          @keyframes obGlowPulse {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50%      { opacity: 0.85; transform: scale(1.08); }
+          }
+          .ob-glow-pulse { animation: obGlowPulse 2.4s ease-in-out infinite; }
+
+          /* Mascot gentle bounce */
+          @keyframes obMascotBounce {
+            0%, 100% { transform: translateY(0); }
+            50%      { transform: translateY(-8px); }
+          }
+          .ob-mascot-bounce { animation: obMascotBounce 1.6s ease-in-out infinite; }
+
+          /* Heading words cascade in */
+          @keyframes obWordIn {
+            0%   { transform: translateY(18px); opacity: 0; }
+            100% { transform: translateY(0);    opacity: 1; }
+          }
+          .ob-word { animation: obWordIn 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+
+          /* Subtitle fades in after the H1 finishes */
+          @keyframes obSubtitleIn {
+            0%   { transform: translateY(8px); opacity: 0; }
+            100% { transform: translateY(0);   opacity: 1; }
+          }
+          .ob-subtitle { animation: obSubtitleIn 0.5s ease-out 0.95s both; opacity: 0; }
+
+          /* Progress bar fill + shimmer pass */
           @keyframes obProgressFill { from { width: 0%; } to { width: 100%; } }
           .ob-progress-fill { animation: obProgressFill 2.4s linear forwards; }
+          @keyframes obShimmer {
+            0%   { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+          }
+          .ob-shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+            animation: obShimmer 1.4s ease-in-out infinite;
+          }
+
+          /* Respect reduced motion */
+          @media (prefers-reduced-motion: reduce) {
+            .ob-bg-cycle, .ob-ring-pulse, .ob-glow-pulse,
+            .ob-mascot-bounce, .ob-shimmer { animation: none !important; }
+          }
         `}</style>
       </div>
     );
@@ -1715,9 +1859,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
               You&apos;re in, {firstName}!
             </h1>
             <p className="mt-2 text-stone-600 dark:text-stone-400 text-sm font-bold">
-              {trialEligible === true
-                ? `Start your ${TRIAL_DAYS}-day free trial below — no charge today.`
-                : 'Unlock Pro below for stronger drafts and higher limits.'}
+              Unlock Pro below for stronger drafts and higher limits.
             </p>
           </div>
 
@@ -2003,7 +2145,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
                 Everything you get
               </span>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#3C3C3C] dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                Eight tools. <span className="text-[#A560E8]">One paste of your notes.</span>
+                Eight tools. <span className="text-[#A560E8]">Designed for success.</span>
               </h1>
               <p className="mt-2 text-stone-500 dark:text-stone-400 font-bold text-sm sm:text-base max-w-xl mx-auto">
                 From essay feedback to study games, your full academic toolkit lives in one place.
@@ -2111,7 +2253,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
                 Ready to unlock all 8 tools?
               </p>
               <p className="mt-1 text-xs sm:text-sm font-bold text-stone-600 dark:text-stone-400">
-                Try everything free for {TRIAL_DAYS} days. No charge today. Cancel anytime.
+                Unlock everything with Pro. Cancel anytime.
               </p>
             </div>
           </div>
@@ -2197,7 +2339,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
             <div className="rounded-2xl border-2 border-b-4 border-[#46A302] bg-[#E5F8D0] dark:bg-[#58CC02]/10 p-5 sm:p-6 text-center relative overflow-hidden">
               <div className="pointer-events-none absolute -top-12 -right-12 w-32 h-32 rounded-full bg-[#58CC02]/20 blur-2xl" aria-hidden />
               <p className="relative text-lg font-extrabold text-[#3C3C3C] dark:text-stone-100" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                Start your free {TRIAL_DAYS}-day trial
+                Upgrade to Pro
               </p>
               <button
                 type="button"
@@ -2241,7 +2383,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
             <div className="text-center mb-5">
               <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#A560E8] mb-2">EVERYTHING YOU GET</p>
               <h2 className="text-xl sm:text-2xl font-extrabold text-[#3C3C3C] dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                Eight tools. One paste of your notes.
+                Eight tools. Designed for success.
               </h2>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -2346,11 +2488,11 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
                 Last chance, {firstName}!
               </span>
               <h1 className="text-2xl sm:text-3xl lg:text-[2.25rem] font-extrabold text-[#3C3C3C] dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                Don&apos;t miss out on your{' '}
-                <span className="text-[#58CC02]">{TRIAL_DAYS}-day free trial</span>
+                Don&apos;t miss out on{' '}
+                <span className="text-[#58CC02]">50% off Pro</span>
               </h1>
               <p className="mt-3 text-base sm:text-lg text-stone-600 dark:text-stone-400 font-bold leading-snug max-w-md">
-                Plus an exclusive <em className="not-italic text-[#A560E8]">50% off</em> after your trial — only on this screen.
+                An exclusive <em className="not-italic text-[#A560E8]">50% off</em> — only on this screen.
               </p>
             </div>
 
@@ -2475,13 +2617,12 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
               <div className="pointer-events-none absolute -top-12 -right-12 w-32 h-32 rounded-full bg-[#58CC02]/20 blur-2xl" aria-hidden />
               <div className="pointer-events-none absolute -bottom-12 -left-12 w-32 h-32 rounded-full bg-[#58CC02]/15 blur-2xl" aria-hidden />
               <p className="relative text-lg sm:text-xl font-extrabold text-[#3C3C3C] dark:text-stone-100" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                Start your {TRIAL_DAYS}-day free trial
+                Upgrade to Pro
               </p>
               <p className="relative mt-1 text-sm font-bold text-stone-600 dark:text-stone-400">
-                $0 today ·{' '}
                 <span className="line-through decoration-2 decoration-[#FF4B4B] text-stone-400">$19.99/mo</span>{' '}
-                <span className="text-[#46A302] font-extrabold">$9.99/mo</span> after{' '}
-                <span className="text-[#7A5C00] font-extrabold">(discount applied)</span>
+                <span className="text-[#46A302] font-extrabold">$9.99/mo</span>{' '}
+                <span className="text-[#7A5C00] font-extrabold">(50% off applied)</span>
               </p>
               <button
                 type="button"
@@ -2499,7 +2640,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
                   </>
                 ) : (
                   <>
-                    Yes! Start my free trial
+                    Yes! Upgrade to Pro
                     <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>

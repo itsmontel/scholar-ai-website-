@@ -103,6 +103,28 @@ function bootstrap(): void {
     (window.dataLayer as unknown[]).push(args);
   };
 
+  // ─── CONSENT MODE V2 ──────────────────────────────────────────────
+  // Required for EEA/UK traffic since March 2024 — without explicit
+  // consent signals Google silently drops or aggregates conversion
+  // data from European users, which can wipe out a noticeable chunk
+  // of attribution for any UK-based campaign.
+  //
+  // We default everything to `granted` because the app currently has
+  // no cookie/CMP banner. This is the most permissive (and effective)
+  // setup: Google receives full conversion signals as if a user
+  // affirmatively consented. If we later add a CMP that asks the
+  // user to opt in/out, swap these to `denied` defaults and call
+  // gtag('consent', 'update', {...}) when the user picks.
+  //
+  // MUST run BEFORE the `config` call below so the first page-view
+  // hit is sent with consent already in scope.
+  window.gtag('consent', 'default', {
+    ad_storage: 'granted',
+    ad_user_data: 'granted',
+    ad_personalization: 'granted',
+    analytics_storage: 'granted',
+  });
+
   window.gtag('js', new Date());
   if (GOOGLE_ADS_ID) window.gtag('config', GOOGLE_ADS_ID);
   if (GA4_MEASUREMENT_ID) window.gtag('config', GA4_MEASUREMENT_ID);
@@ -113,16 +135,52 @@ function bootstrap(): void {
   document.head.appendChild(script);
 }
 
+/**
+ * SHA-256 hash of a string, hex-encoded. Used by Enhanced Conversions
+ * to send hashed user identifiers (email) to Google Ads without ever
+ * exposing the raw value. Google's spec is lowercase + trimmed input
+ * before hashing — we normalise here so callers can pass raw emails.
+ *
+ * Browser-only (uses WebCrypto API). Returns empty string on failure
+ * so callers can no-op gracefully rather than throwing.
+ */
+async function sha256Hex(value: string): Promise<string> {
+  try {
+    if (typeof crypto === 'undefined' || !crypto.subtle) return '';
+    const normalised = value.trim().toLowerCase();
+    if (!normalised) return '';
+    const buf = new TextEncoder().encode(normalised);
+    const digest = await crypto.subtle.digest('SHA-256', buf);
+    return Array.from(new Uint8Array(digest))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+  } catch {
+    return '';
+  }
+}
+
 bootstrap();
 
 /**
  * Fire a Google Ads conversion event. Internal — use the named
  * track* helpers below rather than calling this directly so that
  * unwired conversions stay obvious in code review.
+ *
+ * When `userData` is supplied (Enhanced Conversions), Google can
+ * match conversions back to ad clicks even when 1st-party cookies
+ * are cleared, the user is on iOS Safari, or the conversion happens
+ * on a different device than the click — typically recovers ~15-20%
+ * of attribution that would otherwise be lost.
  */
 function fireConversion(
   label: string,
-  options: { value?: number; currency?: string; transactionId?: string } = {},
+  options: {
+    value?: number;
+    currency?: string;
+    transactionId?: string;
+    /** Hashed user identifiers — see `sha256Hex`. */
+    userData?: { sha256_email_address?: string };
+  } = {},
 ): void {
   if (typeof window === 'undefined' || !window.gtag) return;
   if (!GOOGLE_ADS_ID || !label) return;
@@ -132,6 +190,7 @@ function fireConversion(
     value: options.value ?? 0,
     currency: options.currency ?? 'USD',
     ...(options.transactionId ? { transaction_id: options.transactionId } : {}),
+    ...(options.userData ? { user_data: options.userData } : {}),
   });
 }
 
@@ -141,9 +200,15 @@ function fireConversion(
  * Fire the "signup" conversion. Call after the user successfully creates
  * an account (frontend has the JWT in hand, backend has stored the user).
  * No value attached — signups are zero-revenue events.
+ *
+ * @param email Optional user email — when provided we hash it client-side
+ *              and pass `user_data.sha256_email_address` so Enhanced
+ *              Conversions can recover cross-device / cookie-cleared
+ *              attribution. Raw email never leaves the browser.
  */
-export function trackSignupConversion(): void {
-  fireConversion(CONVERSION_LABELS.signup);
+export async function trackSignupConversion(email?: string): Promise<void> {
+  const userData = email ? { sha256_email_address: await sha256Hex(email) } : undefined;
+  fireConversion(CONVERSION_LABELS.signup, { userData });
 }
 
 /**
@@ -155,21 +220,37 @@ export function trackSignupConversion(): void {
  *                  see which trials are higher-value.
  * @param sessionId Stripe checkout session ID, used as transaction_id to
  *                  prevent duplicate counting if the page reloads.
+ * @param email     Optional user email for Enhanced Conversions (see
+ *                  `trackSignupConversion`).
  */
-export function trackTrialConversion(planValue?: number, sessionId?: string): void {
+export async function trackTrialConversion(
+  planValue?: number,
+  sessionId?: string,
+  email?: string,
+): Promise<void> {
+  const userData = email ? { sha256_email_address: await sha256Hex(email) } : undefined;
   fireConversion(CONVERSION_LABELS.trial, {
     value: planValue,
     transactionId: sessionId,
+    userData,
   });
 }
 
 /**
  * Fire the "paid plan" conversion. Currently unwired — see module
  * docstring for why (Stripe webhook handles trial→paid on the server).
+ *
+ * @param email Optional user email for Enhanced Conversions.
  */
-export function trackPaidConversion(planValue?: number, sessionId?: string): void {
+export async function trackPaidConversion(
+  planValue?: number,
+  sessionId?: string,
+  email?: string,
+): Promise<void> {
+  const userData = email ? { sha256_email_address: await sha256Hex(email) } : undefined;
   fireConversion(CONVERSION_LABELS.paid, {
     value: planValue,
     transactionId: sessionId,
+    userData,
   });
 }

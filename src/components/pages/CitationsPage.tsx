@@ -18,6 +18,9 @@ interface CitationsPageProps {
   embedded?: boolean;
   /** When embedded, switch dashboard tool instead of navigating full-page routes */
   onEmbeddedToolSwitch?: (tool: EmbeddedDashboardTool) => void;
+  /** When true, hide the default eyebrow + H1 + subtitle block (the
+      dashboard's new-user conversion hero takes over the title role). */
+  hideHeader?: boolean;
 }
 
 const placeholders = [
@@ -37,7 +40,7 @@ const suggestedTopics: string[] = [
 // same row can also render on the dashboard's citations hub view (between
 // the FeatureHub recents and Quick Access).
 
-const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbeddedToolSwitch }: CitationsPageProps) => {
+const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbeddedToolSwitch, hideHeader = false }: CitationsPageProps) => {
   const [inputText, setInputText] = useState(() => {
     try { return sessionStorage.getItem('writescholar_citations_draft') || ''; } catch { return ''; }
   });
@@ -200,7 +203,11 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
             <div
               className={
                 embedded
-                  ? 'relative rounded-2xl overflow-hidden mb-3 sm:mb-4 scroll-mt-8 bg-white dark:bg-stone-900 border-2 border-b-4 border-[#1CB0F6]/30 dark:border-[#1CB0F6]/40'
+                  ? hideHeader
+                    /* All borders/corners dropped — the dashboard's fused
+                       wrapper provides the single shared border. */
+                    ? 'relative overflow-hidden bg-white dark:bg-stone-900 scroll-mt-8'
+                    : 'relative rounded-2xl overflow-hidden mb-3 sm:mb-4 scroll-mt-8 bg-white dark:bg-stone-900 border-2 border-b-4 border-[#1CB0F6]/30 dark:border-[#1CB0F6]/40'
                   : 'relative rounded-2xl overflow-hidden mb-6 sm:mb-10 scroll-mt-8 max-w-6xl mx-auto bg-white dark:bg-stone-900 border-2 border-b-4 border-[#1CB0F6]/30 dark:border-[#1CB0F6]/40'
               }
             >
@@ -210,26 +217,38 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                 className={`relative bg-white dark:bg-stone-900 rounded-b-2xl ${embedded ? 'p-4 sm:p-6 lg:p-8' : 'p-4 sm:p-8 lg:p-10'}`}
               >
 
-                {/* Studying mascot — top left, always playing */}
-                <img
-                  src="/mascot-study.webp"
-                  alt=""
-                  aria-hidden
-                  loading="lazy"
-                  decoding="async"
-                  className="hidden sm:block pointer-events-none absolute top-3 left-3 sm:top-4 sm:left-4 w-20 sm:w-24 lg:w-28 h-auto z-10"
-                />
-                {/* Dancing mascot — top right, always playing */}
-                <img
-                  src="/mascot-dance.webp"
-                  alt=""
-                  aria-hidden
-                  loading="lazy"
-                  decoding="async"
-                  className="hidden sm:block pointer-events-none absolute top-3 right-3 sm:top-4 sm:right-4 w-20 sm:w-24 lg:w-28 h-auto z-10"
-                />
+                {/* Mascots hidden when dashboard supplies its own
+                    new-user conversion hero — the dashboard renders fresh
+                    mascots at the top corners of the FUSED wrapper so they
+                    don't land on top of the search input. */}
+                {!hideHeader && (
+                  <>
+                    {/* Studying mascot — top left, always playing */}
+                    <img
+                      src="/mascot-study.webp"
+                      alt=""
+                      aria-hidden
+                      loading="lazy"
+                      decoding="async"
+                      className="hidden sm:block pointer-events-none absolute top-3 left-3 sm:top-4 sm:left-4 w-20 sm:w-24 lg:w-28 h-auto z-10"
+                    />
+                    {/* Dancing mascot — top right, always playing */}
+                    <img
+                      src="/mascot-dance.webp"
+                      alt=""
+                      aria-hidden
+                      loading="lazy"
+                      decoding="async"
+                      className="hidden sm:block pointer-events-none absolute top-3 right-3 sm:top-4 sm:right-4 w-20 sm:w-24 lg:w-28 h-auto z-10"
+                    />
+                  </>
+                )}
 
                 <div className="relative min-w-0">
+                  {/* Default eyebrow + H1 + subtitle. Hidden when the
+                      dashboard supplies its own new-user conversion hero
+                      above this card. */}
+                  {!hideHeader && (
                   <div className="text-center mb-3 sm:mb-4">
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#DDF4FF] dark:bg-[#1CB0F6]/10 border-2 border-[#1CB0F6]/30 text-[#1CB0F6] text-[10px] sm:text-[11px] font-extrabold tracking-[0.1em] uppercase" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                       <svg className="w-3.5 h-3.5 opacity-90 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
@@ -238,7 +257,10 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                       APA, MLA, Chicago & more
                     </span>
                   </div>
+                  )}
                   <div className="min-w-0 self-start">
+                    {!hideHeader && (
+                    <>
                     <h1
                       className={`relative font-extrabold text-stone-900 dark:text-stone-50 text-center tracking-tight text-2xl sm:text-3xl lg:text-[2.45rem] leading-[1.08] ${embedded ? 'mb-2' : 'mb-1.5 sm:mb-2'}`}
                       style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
@@ -252,6 +274,8 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                     <p className={`relative text-stone-500 dark:text-stone-400 text-sm sm:text-base text-center max-w-xl mx-auto leading-relaxed ${embedded ? 'mb-4' : 'mb-5 sm:mb-6'}`}>
                       APA, MLA & Chicago. Peer-reviewed sources. Filter by year.
                     </p>
+                    </>
+                    )}
                     {!embedded && (
                       <>
                         <div className="flex gap-2 mb-3 sm:mb-4 max-w-lg mx-auto" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>

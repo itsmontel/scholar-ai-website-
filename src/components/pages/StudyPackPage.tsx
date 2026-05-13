@@ -29,6 +29,11 @@ interface StudyPackPageProps {
   onLogout: () => void;
   embedded?: boolean;
   onEmbeddedToolSwitch?: (tool: EmbeddedDashboardTool) => void;
+  /** When true, hide the default eyebrow + H1 + subtitle block at the top
+      of the embedded view (e.g. when the dashboard renders its own
+      new-user conversion hero above this card and wants the two to fuse
+      into one continuous panel). */
+  hideHeader?: boolean;
 }
 
 const getWordCount = (text: string) =>
@@ -38,7 +43,7 @@ const getWordCount = (text: string) =>
 // same row can also render on the dashboard's study-pack hub view (between
 // the FeatureHub recents and Quick Access).
 
-const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbeddedToolSwitch }: StudyPackPageProps) => {
+const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbeddedToolSwitch, hideHeader = false }: StudyPackPageProps) => {
   const [inputText, setInputText] = useState(() => {
     try {
       return sessionStorage.getItem('writescholar_dashboard_draft') || '';
@@ -417,7 +422,13 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
             <div
               className={`relative overflow-hidden scroll-mt-8 ${
                 embedded
-                  ? 'rounded-2xl mb-3 sm:mb-4 bg-white dark:bg-stone-900 border-2 border-b-4 border-[#FF9600]/30 dark:border-[#FF9600]/40'
+                  ? hideHeader
+                    /* When the dashboard renders the new-user conversion hero
+                       directly above this content, drop ALL borders/corners
+                       and the bottom margin — the parent wrapper provides
+                       the single shared border for the fused card. */
+                    ? 'bg-white dark:bg-stone-900'
+                    : 'rounded-2xl mb-3 sm:mb-4 bg-white dark:bg-stone-900 border-2 border-b-4 border-[#FF9600]/30 dark:border-[#FF9600]/40'
                   : 'rounded-2xl mb-6 sm:mb-10 max-w-6xl mx-auto bg-white dark:bg-stone-900 border-2 border-b-4 border-[#FF9600]/30 dark:border-[#FF9600]/40'
               }`}
               style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
@@ -425,25 +436,38 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
               {/* accent strip removed — 3D border provides accent */}
               {/* blur blobs removed — clean solid background */}
               <div className={`relative ${embedded ? 'p-4 sm:p-6 lg:p-8' : 'p-4 sm:p-8 lg:p-10'}`}>
-                {/* Studying mascot — top left, always playing */}
-                <img
-                  src="/mascot-study.webp"
-                  alt=""
-                  aria-hidden
-                  loading="lazy"
-                  decoding="async"
-                  className="hidden sm:block pointer-events-none absolute top-3 left-3 sm:top-4 sm:left-4 w-20 sm:w-24 lg:w-28 h-auto z-10 drop-shadow-[0_12px_22px_rgba(217,119,6,0.30)]"
-                />
-                {/* Dancing mascot — top right, always playing */}
-                <img
-                  src="/mascot-dance.webp"
-                  alt=""
-                  aria-hidden
-                  loading="lazy"
-                  decoding="async"
-                  className="hidden sm:block pointer-events-none absolute top-3 right-3 sm:top-4 sm:right-4 w-20 sm:w-24 lg:w-28 h-auto z-10 drop-shadow-[0_12px_22px_rgba(217,119,6,0.30)]"
-                />
+                {/* Studying mascot — top left, always playing.
+                    Hidden when the dashboard renders its own new-user
+                    conversion hero above this card — the dashboard puts
+                    the mascots at the top corners of the FUSED card
+                    instead so they don't end up sitting on top of the
+                    notes textarea. */}
+                {!hideHeader && (
+                  <img
+                    src="/mascot-study.webp"
+                    alt=""
+                    aria-hidden
+                    loading="lazy"
+                    decoding="async"
+                    className="hidden sm:block pointer-events-none absolute top-3 left-3 sm:top-4 sm:left-4 w-20 sm:w-24 lg:w-28 h-auto z-10 drop-shadow-[0_12px_22px_rgba(217,119,6,0.30)]"
+                  />
+                )}
+                {/* Dancing mascot — top right, always playing (also hidden when fused) */}
+                {!hideHeader && (
+                  <img
+                    src="/mascot-dance.webp"
+                    alt=""
+                    aria-hidden
+                    loading="lazy"
+                    decoding="async"
+                    className="hidden sm:block pointer-events-none absolute top-3 right-3 sm:top-4 sm:right-4 w-20 sm:w-24 lg:w-28 h-auto z-10 drop-shadow-[0_12px_22px_rgba(217,119,6,0.30)]"
+                  />
+                )}
                 <div className="relative min-w-0">
+                  {/* Default header (eyebrow + H1 + subtitle). Hidden when
+                      the dashboard supplies its own new-user conversion
+                      hero above this card. */}
+                  {!hideHeader && (
                   <div className="text-center mb-3 sm:mb-4">
                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FFF4E0] dark:bg-[#FF9600]/10 border-2 border-[#FF9600]/30 text-[#FF9600] text-[10px] sm:text-[11px] font-extrabold tracking-[0.12em] uppercase">
                       <svg className="w-3.5 h-3.5 opacity-90 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
@@ -452,7 +476,10 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                       Six tools, one paste
                     </span>
                   </div>
+                  )}
                   <div className="min-w-0 self-start">
+                    {!hideHeader && (
+                    <>
                     <h1
                       className={`relative font-extrabold text-stone-900 dark:text-stone-50 text-center tracking-tight text-2xl sm:text-3xl lg:text-[2.4rem] leading-[1.1] px-1 ${embedded ? 'mb-2' : 'mb-1.5 sm:mb-2'}`}
                     >
@@ -464,6 +491,8 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                     <p className={`relative text-stone-500 dark:text-stone-400 text-sm sm:text-base text-center max-w-xl mx-auto leading-relaxed ${embedded ? 'mb-5' : 'mb-5 sm:mb-6'}`}>
                       Lesson, flashcards, quiz, crossword, Crater Blast & Word Tower — all from one paste
                     </p>
+                    </>
+                    )}
                     {!embedded && (
                       <>
                         <div className="relative flex gap-2 mb-2 sm:mb-4 max-w-lg mx-auto">
