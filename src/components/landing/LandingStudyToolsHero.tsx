@@ -242,23 +242,13 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
           </div>
         </LandingScrollReveal>
 
-        {/* ─── Pipeline: notes → AI → seven tools ─── */}
-        <LandingScrollReveal delayMs={120}>
-          <div className="relative mb-14 sm:mb-20">
-            {/* Study Pack–style input (tabs + textarea + actions) */}
-            <div className="max-w-3xl mx-auto">
-              <NotesPanel onNavigate={onNavigate} />
-            </div>
-
-            {/* Cue arrow into the bento grid below */}
-            <div className="mt-8 sm:mt-12 flex flex-col items-center gap-2 text-[#AFAFAF] dark:text-stone-400">
-              <span className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-[0.2em]">Each tool, in detail</span>
-              <svg className="w-4 h-4 lsth-bounce" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-                <path fillRule="evenodd" d="M10 3a1 1 0 011 1v9.586l3.293-3.293a1 1 0 111.414 1.414l-5 5a1 1 0 01-1.414 0l-5-5a1 1 0 111.414-1.414L9 13.586V4a1 1 0 011-1z" clipRule="evenodd" />
-              </svg>
-            </div>
-          </div>
-        </LandingScrollReveal>
+        {/* The Study-Pack-style input mock + "Each tool, in detail"
+            cue arrow that used to sit between the headline and the
+            bento grid have been removed per user brief. The bento
+            grid below is now the immediate follow-up to the section
+            headline. (The `NotesPanel` component definition lower in
+            this file is now dead code but kept in place in case the
+            input mock is ever brought back.) */}
 
         {/* ─── Bento grid wrapper ─── */}
         <div className="relative">

@@ -69,7 +69,6 @@ type Phase =
   | 'survey-features'
   | 'tour-essays'
   | 'tour-essays-2'
-  | 'tour-review'
   | 'tour-study'
   | 'tour-citations'
   | 'tour-games'
@@ -98,7 +97,6 @@ const PHASE_STEP: Record<string, number> = {
   // steady through the personalised tour. Only essays + final step bump.
   'tour-essays': 5,
   'tour-essays-2': 5,
-  'tour-review': 5,
   'tour-study': 5,
   'tour-citations': 5,
   'tour-games': 5,
@@ -194,10 +192,9 @@ const REFERRAL_SOURCES = [
    THIS priority order — so essays (if selected) is always first, then
    the rest fall in the predefined cadence (review → study → citations
    → games → motivation). Used at runtime to derive `tourSequence`. */
-type TourPhase = 'tour-essays' | 'tour-essays-2' | 'tour-review' | 'tour-study' | 'tour-citations' | 'tour-games' | 'tour-motivation';
+type TourPhase = 'tour-essays' | 'tour-essays-2' | 'tour-study' | 'tour-citations' | 'tour-games' | 'tour-motivation';
 const FEATURE_TOUR_ORDER: { id: string; phase: TourPhase }[] = [
   { id: 'essays',       phase: 'tour-essays' },
-  { id: 'daily_review', phase: 'tour-review' },
   { id: 'study_packs',  phase: 'tour-study' },
   { id: 'citations',    phase: 'tour-citations' },
   { id: 'games',        phase: 'tour-games' },
@@ -1373,19 +1370,17 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
   };
 
   // Personalised tour sequence with a baseline floor so every user
-  // sees AT LEAST 3 slides:
+  // sees AT LEAST 2 slides (essays + study):
   //   1. Their selected features come FIRST, in canonical priority
-  //      order (essays → review → study → citations → games → motivation).
+  //      order (essays → study → citations → games → motivation).
   //   2. `tour-essays` and `tour-study` are then appended if not
-  //      already present — they're our two "must-show" flagship tools.
-  //   3. If the list is still under 3 (i.e. user only picked one of
-  //      essays or study_packs, or nothing), `tour-review` (Daily
-  //      Review) fills the third slot.
+  //      already present — they're our two "must-show" flagship
+  //      tools and the only enforced floor.
   // Examples:
   //   • picks: [games]               → [games, essays, study]
-  //   • picks: [essays]              → [essays, study, review]
-  //   • picks: [study_packs]         → [study, essays, review]
-  //   • picks: [essays, study_packs] → [essays, study, review]
+  //   • picks: [essays]              → [essays, study]
+  //   • picks: [study_packs]         → [study, essays]
+  //   • picks: [essays, study_packs] → [essays, study]
   //   • picks: [games, motivation]   → [games, motivation, essays, study]
   const tourSequence = useMemo<TourPhase[]>(() => {
     const userPicks = FEATURE_TOUR_ORDER
@@ -1393,12 +1388,12 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
       .map((f) => f.phase);
     const result: TourPhase[] = [...userPicks];
     // Step 2 — append the two must-show flagship slides if missing.
+    // Previously a third slide (Daily Review, then citations) was
+    // force-added as a "minimum 3" floor; both were removed per user
+    // brief so the tour is now lean: essays + study, plus whatever
+    // the user opted into.
     if (!result.includes('tour-essays')) result.push('tour-essays');
     if (!result.includes('tour-study')) result.push('tour-study');
-    // Step 3 — backfill to a minimum of 3 with Daily Review.
-    if (result.length < 3 && !result.includes('tour-review')) {
-      result.push('tour-review');
-    }
     // Step 4 — Essay Analyzer is our flagship, so it gets a 2-page
     // deep dive: page 1 pitches WHY ours is the best, page 2 walks
     // through rubric + annotations + revision interactively. Splice
@@ -2148,7 +2143,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
                 Eight tools. <span className="text-[#A560E8]">Designed for success.</span>
               </h1>
               <p className="mt-2 text-stone-500 dark:text-stone-400 font-bold text-sm sm:text-base max-w-xl mx-auto">
-                From essay feedback to study games, your full academic toolkit lives in one place.
+                From our flagship essay feedback to study games, your full academic toolkit lives in one place.
               </p>
             </div>
 
@@ -3054,7 +3049,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
   }
 
   /* ─── TOUR SLIDES ─── */
-  if (phase === 'tour-essays' || phase === 'tour-essays-2' || phase === 'tour-review' || phase === 'tour-study' || phase === 'tour-citations' || phase === 'tour-games' || phase === 'tour-motivation') {
+  if (phase === 'tour-essays' || phase === 'tour-essays-2' || phase === 'tour-study' || phase === 'tour-citations' || phase === 'tour-games' || phase === 'tour-motivation') {
     // Dynamic eyebrow: "TOOL X OF Y" — X is position in the user's
     // personalised tour, Y is total slides they'll see.
     const tourIdx = tourSequence.indexOf(phase as TourPhase);
@@ -3070,7 +3065,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
         borderColor: '#8A48C7',
         bgColor: '#F3EAFF',
         eyebrow: eyebrowFor('tour-essays'),
-        title: 'The world’s best essay analyzer',
+        title: 'Our premium essay analyzer',
         speech: "We're not your average AI grader. Trained on thousands of graded papers. The feedback you get reads like a TA marked up your draft, not a chatbot. Everything you need to get a perfect grade.",
         visual: 'essay',
       },
@@ -3083,16 +3078,6 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
         title: 'Comprehensive analysis',
         speech: "Overall verdict, top suggestions, strengths, areas to improve, and serious concerns. Every angle of your draft covered in plain English so you know exactly what to fix next.",
         visual: 'essay-deep-dive',
-      },
-      'tour-review': {
-        mascot: '/mascot-study.webp',
-        color: '#58CC02',
-        borderColor: '#46A302',
-        bgColor: '#E5F8D0',
-        eyebrow: eyebrowFor('tour-review'),
-        title: 'Practice daily. Remember everything.',
-        speech: "Every day I'll build a quick quiz from your notes — flashcards and questions that lock in what you've learned.",
-        visual: 'screenshot',
       },
       'tour-study': {
         mascot: '/mascot-juggling.webp',

@@ -242,9 +242,18 @@ interface InteractiveDocumentAnalysisProps {
   onNavigate: (page: string) => void;
   /** When true (e.g. landing hero), show compact marketing lines inside the mock chrome */
   landingHeroEmbed?: boolean;
+  /** Fires whenever the user switches between the B/C/etc. demo samples.
+   *  Receives the uppercase grade letter ("B", "C", …). Used by the
+   *  landing hero to keep its floating grade pill in sync with the
+   *  active sample. */
+  onSampleChange?: (gradeLetter: string) => void;
 }
 
-export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmbed = false }: InteractiveDocumentAnalysisProps) {
+export default function InteractiveDocumentAnalysis({
+  onNavigate,
+  landingHeroEmbed = false,
+  onSampleChange,
+}: InteractiveDocumentAnalysisProps) {
   const [selectedDemoId, setSelectedDemoId] = useState<string>(DEMO_PAPERS.find((p) => p.id === 'b')?.id ?? DEMO_PAPERS[0].id);
   const [selectedAnnotation, setSelectedAnnotation] = useState<string | null>(null);
   const [hoveredAnnotation, setHoveredAnnotation] = useState<string | null>(null);
@@ -271,7 +280,15 @@ export default function InteractiveDocumentAnalysis({ onNavigate, landingHeroEmb
     });
   }, []);
 
-  /** Hero “Full interactive demo” CTA: open Feedback tab and select first annotation (document order). */
+  /** Sync the active sample's grade letter back up to the parent (e.g.
+   *  the landing hero's floating grade pill). Fires on mount with the
+   *  initial sample too, so the pill is correct on first paint. */
+  useEffect(() => {
+    if (!onSampleChange) return;
+    onSampleChange(selectedDemoId.toUpperCase());
+  }, [selectedDemoId, onSampleChange]);
+
+  /** Hero "Full interactive demo" CTA: open Feedback tab and select first annotation (document order). */
   useEffect(() => {
     if (!landingHeroEmbed) return;
 
