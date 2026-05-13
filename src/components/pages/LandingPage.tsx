@@ -1349,15 +1349,18 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
                 {/* Framed live demo — brand-yellow border + layered glow.
                     2px #FFC800 border (same yellow as the floating tile
-                    borders and the 60-sec badge) + three stacked shadows:
-                      • inner yellow glow  (30px,  alpha 0.5) — close halo
-                      • outer yellow glow  (70px,  alpha 0.25) — wider bloom
-                      • dark drop shadow   (60px,  alpha 0.4)  — depth so
-                        the surface still reads as floating, not flat.
-                    The glow + drop combo gives the demo a "premium
-                    product spotlight" feel against the dark violet hero
-                    bg without going over the top. */}
-                <div className="relative rounded-2xl sm:rounded-3xl border-2 border-[#FFC800] bg-white dark:bg-stone-900 shadow-[0_0_30px_rgba(255,200,0,0.5),0_0_70px_rgba(255,200,0,0.25),0_30px_60px_-15px_rgba(0,0,0,0.4)] overflow-hidden">
+                    borders and the 60-sec badge).
+                    Shadow stack varies by breakpoint:
+                      • Mobile (<sm): single 18px close yellow halo at
+                        0.28 alpha + a tighter depth shadow. The wider
+                        70px bloom from the desktop treatment was too
+                        loud on small viewports where the demo sits
+                        edge-to-edge.
+                      • sm+: full "premium product spotlight" — three
+                        stacked shadows (30px close glow, 70px outer
+                        bloom, 60px dark depth) so the demo reads as a
+                        floating focal point on the dark violet hero bg. */}
+                <div className="relative rounded-2xl sm:rounded-3xl border-2 border-[#FFC800] bg-white dark:bg-stone-900 shadow-[0_0_18px_rgba(255,200,0,0.28),0_18px_36px_-12px_rgba(0,0,0,0.35)] sm:shadow-[0_0_30px_rgba(255,200,0,0.5),0_0_70px_rgba(255,200,0,0.25),0_30px_60px_-15px_rgba(0,0,0,0.4)] overflow-hidden">
                   <Suspense fallback={<div className="min-h-[480px] sm:min-h-[560px] w-full" aria-hidden />}>
                     <InteractiveDocumentAnalysis
                       onNavigate={onNavigate}
@@ -1403,7 +1406,11 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 ].map((t) => (
                   <div
                     key={t.label}
-                    className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_18px_42px_-12px_rgba(255,200,0,0.55)] bg-stone-950"
+                    // Lighter yellow shadow than the lg+ floating tiles (which
+                    // sit alone in side margins with room to breathe). On
+                    // mobile the four tiles cluster in a 2x2 grid so a softer
+                    // shadow keeps the page from looking yellow-soaked.
+                    className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_10px_24px_-10px_rgba(255,200,0,0.32)] bg-stone-950"
                   >
                     <div className="relative aspect-[16/10] w-full bg-black">
                       {t.kind === 'cycle' ? (
