@@ -1249,16 +1249,63 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 </span>
               </div>
 
-              {/* ─── 2. EDITORIAL HEADLINE ─────────────────────────────
-                  Serif display face, two forced lines, white on violet.
-                  Line 2 italicises "serious" in yellow for visual rhythm
-                  and to land the promise on the right student segment. */}
+              {/* ─── 2. HEADLINE — two-line layout, ALL viewports ───────
+                  Restored to the pre-rebuild "B → A with WriteScholar"
+                  treatment per user brief.
+                  Line 1: "Turn your grades from B to [A-pill]"
+                  Line 2: "with WriteScholar" (yellow on purple).
+                  Forced 2-line layout via responsive font sizing tuned
+                  so line 1 always fits without wrapping, even on 360px
+                  phones. */}
               <h1
-                className="font-display font-semibold text-white tracking-tight leading-[1.04] mt-6 sm:mt-7 text-[2rem] sm:text-[2.625rem] md:text-[3.375rem] lg:text-[4rem] xl:text-[4.75rem]"
+                className="text-[1.5rem] xs:text-[1.85rem] sm:text-[2.2rem] md:text-[2.55rem] lg:text-[2.9rem] xl:text-[3.35rem] font-extrabold tracking-[-0.02em] leading-[1.05] text-white mt-6 sm:mt-7 mb-5 sm:mb-6"
+                style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
               >
-                <span className="block">The premium AI</span>
-                <span className="block">
-                  grader for <span className="italic text-[#FFC800]">serious</span> students
+                <span className="block whitespace-nowrap">
+                  Turn your grades from B to{' '}
+                  {/* A-grade pill — sits inline on the baseline, slight
+                      rotation + green Duolingo chip with white "A".
+                      Extra glow ring on purple background. */}
+                  <span
+                    className="relative inline-flex items-center justify-center align-baseline rounded-2xl bg-[#58CC02] text-white font-extrabold leading-none w-[0.95em] h-[0.95em] border-2 border-b-[5px] border-[#46A302] rotate-[-4deg] motion-safe:animate-[hero-a-wiggle_4.5s_ease-in-out_infinite] shadow-[0_10px_30px_-4px_rgba(88,204,2,0.75)] ring-4 ring-white/15"
+                    style={{ verticalAlign: '-0.06em' }}
+                    aria-hidden
+                  >
+                    A
+                    {/* Sparkle accent on the pill */}
+                    <span
+                      className="absolute -top-2 -right-2 text-[0.32em] text-[#FFC800] motion-safe:animate-pulse"
+                      aria-hidden
+                    >
+                      ✦
+                    </span>
+                  </span>
+                  <span className="sr-only">A</span>
+                </span>
+                <span className="block mt-1.5 sm:mt-2.5 whitespace-nowrap">
+                  with{' '}
+                  {/* "WriteScholar" — Duolingo-yellow on purple with a
+                      hand-drawn squiggle underline echoing the word
+                      colour for visual cohesion. */}
+                  <span className="relative inline-block text-[#FFC800]">
+                    WriteScholar
+                    <svg
+                      className="absolute -bottom-2 sm:-bottom-3 left-0 w-full h-3 sm:h-5 text-[#FFC800] overflow-visible"
+                      viewBox="0 0 300 24"
+                      preserveAspectRatio="none"
+                      aria-hidden
+                      style={{ overflow: 'visible' }}
+                    >
+                      <path
+                        d="M4 14 Q40 4 80 14 T156 14 T232 14 T296 14"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </span>
                 </span>
               </h1>
 
@@ -1360,7 +1407,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                         stacked shadows (30px close glow, 70px outer
                         bloom, 60px dark depth) so the demo reads as a
                         floating focal point on the dark violet hero bg. */}
-                <div className="relative rounded-2xl sm:rounded-3xl border-2 border-[#FFC800] bg-white dark:bg-stone-900 shadow-[0_0_18px_rgba(255,200,0,0.28),0_18px_36px_-12px_rgba(0,0,0,0.35)] sm:shadow-[0_0_22px_rgba(255,200,0,0.35),0_0_55px_rgba(255,200,0,0.16),0_30px_60px_-15px_rgba(0,0,0,0.4)] overflow-hidden">
+                <div className="relative rounded-2xl sm:rounded-3xl border-2 border-[#FFC800] bg-white dark:bg-stone-900 shadow-[0_0_18px_rgba(255,200,0,0.28),0_18px_36px_-12px_rgba(0,0,0,0.35)] sm:shadow-[0_0_14px_rgba(255,200,0,0.22),0_0_40px_rgba(255,200,0,0.1),0_30px_60px_-15px_rgba(0,0,0,0.4)] overflow-hidden">
                   <Suspense fallback={<div className="min-h-[480px] sm:min-h-[560px] w-full" aria-hidden />}>
                     <InteractiveDocumentAnalysis
                       onNavigate={onNavigate}
