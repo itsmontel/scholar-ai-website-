@@ -1360,7 +1360,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                         stacked shadows (30px close glow, 70px outer
                         bloom, 60px dark depth) so the demo reads as a
                         floating focal point on the dark violet hero bg. */}
-                <div className="relative rounded-2xl sm:rounded-3xl border-2 border-[#FFC800] bg-white dark:bg-stone-900 shadow-[0_0_18px_rgba(255,200,0,0.28),0_18px_36px_-12px_rgba(0,0,0,0.35)] sm:shadow-[0_0_30px_rgba(255,200,0,0.5),0_0_70px_rgba(255,200,0,0.25),0_30px_60px_-15px_rgba(0,0,0,0.4)] overflow-hidden">
+                <div className="relative rounded-2xl sm:rounded-3xl border-2 border-[#FFC800] bg-white dark:bg-stone-900 shadow-[0_0_18px_rgba(255,200,0,0.28),0_18px_36px_-12px_rgba(0,0,0,0.35)] sm:shadow-[0_0_22px_rgba(255,200,0,0.35),0_0_55px_rgba(255,200,0,0.16),0_30px_60px_-15px_rgba(0,0,0,0.4)] overflow-hidden">
                   <Suspense fallback={<div className="min-h-[480px] sm:min-h-[560px] w-full" aria-hidden />}>
                     <InteractiveDocumentAnalysis
                       onNavigate={onNavigate}
