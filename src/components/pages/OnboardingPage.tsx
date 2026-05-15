@@ -8,7 +8,7 @@ import { trackEvent } from '../../utils/analytics';
 // on first paint so the conversion event isn't racing the script load.
 import { trackTrialConversion } from '../../utils/gtag';
 import BadgeCreature from '../common/BadgeCreature';
-import { markSoftPaywallDismissedNow, SOFT_PAYWALL_OPEN_KEY } from '../../constants/paywallSession';
+import { markSoftPaywallDismissedNow } from '../../constants/paywallSession';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 const TRIAL_DAYS = 7;
@@ -1541,9 +1541,10 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
   // dashboard via 'transition'.
   //
   // When HIDE_END_PAYWALLS is on, paywall-hard is hidden and we drop
-  // straight to the dashboard transition. The dashboard's own soft
-  // paywall surfaces from there (see handleFinishOnboarding below for
-  // the SOFT_PAYWALL_OPEN_KEY trigger details).
+  // straight to the dashboard transition. The first post-onboarding
+  // soft paywall fires later from the dashboard — either on the first
+  // analysis / study pack, or 7 days after onboarding (whichever
+  // comes first). See DashboardPageNew for the trigger logic.
   const handleSoftPaywallDecline = () => {
     trackEvent('onboarding_paywall_decline_soft');
     if (HIDE_END_PAYWALLS) {
@@ -1554,15 +1555,17 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate }: Onboardi
   };
 
   // Exit onboarding from the value-prop screen via the "I'm ready to
-  // begin" button. Sets SOFT_PAYWALL_OPEN_KEY in sessionStorage so the
-  // dashboard's `Restore soft paywall after refresh` effect (see
-  // CompleteAcademicAIApp.tsx ~line 712) reopens the soft paywall the
-  // moment the user lands on the dashboard. This is the post-
-  // onboarding nudge that replaces the old `paywall` + `paywall-hard`
-  // upsell screens.
+  // begin" button. The old auto-fire of the soft paywall (setting
+  // SOFT_PAYWALL_OPEN_KEY here so the dashboard restore-effect would
+  // pick it up) has been removed per user brief. The first
+  // post-onboarding paywall now fires later — either the first time
+  // the user lands on the dashboard with a saved analysis or study
+  // pack, OR 7 days after onboarding, whichever comes first. The
+  // onboarding-completion timestamp used for the 7-day fallback is
+  // written by CompleteAcademicAIApp.handleOnboardingComplete; the
+  // trigger logic lives in DashboardPageNew.
   const handleFinishOnboarding = () => {
     trackEvent('onboarding_complete_via_value_prop');
-    try { sessionStorage.setItem(SOFT_PAYWALL_OPEN_KEY, '1'); } catch { /* ignore */ }
     goToPhase('transition');
   };
 

@@ -430,12 +430,18 @@ export default function InteractiveDocumentAnalysis({
           </div>
           <div className="flex items-center gap-6 ml-auto">
             <div className="text-right">
-              <div className="text-3xl font-extrabold">{demo.overallScore}/100</div>
-              <div className="text-white/80 text-xs font-extrabold">Score</div>
+              <div className="text-2xl sm:text-3xl font-extrabold">{demo.overallScore}/100</div>
+              <div className="text-white/80 text-[10px] sm:text-xs font-extrabold">Score</div>
             </div>
             <div className="text-right">
-              <div className="text-3xl font-extrabold">{demo.grade}</div>
-              <div className="text-white/80 text-xs font-extrabold">Grade</div>
+              {/* Grade letter — rendered as a yellow pill with deep
+                  purple text, matching the "Sign up free" CTA in the
+                  landing-purple header so the grade chip reads as a
+                  branded badge instead of plain inverse text. */}
+              <span className="inline-flex items-center justify-center px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-xl bg-[#FFC800] text-[#6B27A3] text-2xl sm:text-3xl font-extrabold leading-none border-2 border-b-[3px] border-[#D4A300]">
+                {demo.grade}
+              </span>
+              <div className="text-white/80 text-[10px] sm:text-xs font-extrabold mt-1">Grade</div>
             </div>
           </div>
         </div>
@@ -445,10 +451,10 @@ export default function InteractiveDocumentAnalysis({
           {demo.rubric.map((cat) => (
             <div key={cat.name} className="p-4 rounded-2xl bg-white dark:bg-stone-700/50 border-2 border-b-4 border-[#E5E5E5] dark:border-stone-600 min-w-0">
               <div className="flex justify-between items-start gap-2 mb-2">
-                <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200 text-sm break-words flex-1 min-w-0" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>{cat.name}</span>
-                <span className="font-extrabold text-[#3C3C3C] dark:text-stone-100 text-sm flex-shrink-0">{cat.score}/{cat.maxScore}</span>
+                <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200 text-[12px] sm:text-sm break-words flex-1 min-w-0" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>{cat.name}</span>
+                <span className="font-extrabold text-[#3C3C3C] dark:text-stone-100 text-[12px] sm:text-sm flex-shrink-0">{cat.score}/{cat.maxScore}</span>
               </div>
-              <p className="text-xs text-[#AFAFAF] dark:text-stone-400 break-words leading-snug">{cat.feedback}</p>
+              <p className="text-[10px] sm:text-xs text-[#AFAFAF] dark:text-stone-400 break-words leading-snug">{cat.feedback}</p>
             </div>
           ))}
         </div>
@@ -680,8 +686,8 @@ export default function InteractiveDocumentAnalysis({
                       onMouseEnter={() => setHoveredAnnotation(ann.id)}
                       onMouseLeave={() => setHoveredAnnotation(null)}
                     >
-                      <p className="text-[13px] text-[#3C3C3C] dark:text-stone-300 font-extrabold mb-1 break-words leading-snug">{ann.comment}</p>
-                      <p className="text-[12px] text-[#AFAFAF] dark:text-stone-400 italic break-words leading-snug">{ann.suggestion}</p>
+                      <p className="text-[11px] sm:text-[13px] text-[#3C3C3C] dark:text-stone-300 font-extrabold mb-1 break-words leading-snug">{ann.comment}</p>
+                      <p className="text-[10px] sm:text-[12px] text-[#AFAFAF] dark:text-stone-400 italic break-words leading-snug">{ann.suggestion}</p>
                     </div>
                   ))}
                 </div>
@@ -707,14 +713,14 @@ export default function InteractiveDocumentAnalysis({
                       onMouseEnter={() => setHoveredAnnotation(ann.id)}
                       onMouseLeave={() => setHoveredAnnotation(null)}
                     >
-                      <p className="text-[13px] text-[#3C3C3C] dark:text-stone-300 font-extrabold mb-1 break-words leading-snug">{ann.comment}</p>
-                      <p className="text-[12px] text-[#AFAFAF] dark:text-stone-400 italic break-words leading-snug">{ann.suggestion}</p>
+                      <p className="text-[11px] sm:text-[13px] text-[#3C3C3C] dark:text-stone-300 font-extrabold mb-1 break-words leading-snug">{ann.comment}</p>
+                      <p className="text-[10px] sm:text-[12px] text-[#AFAFAF] dark:text-stone-400 italic break-words leading-snug">{ann.suggestion}</p>
                       {ann.demoRevisedText && (
                         <div className="mt-2.5 pt-2 border-t-2 border-[#E5E5E5] dark:border-[#FF9600]/30">
                           <p className="text-[10px] font-extrabold uppercase tracking-wide text-[#AFAFAF] dark:text-stone-500 mb-1">
                             Suggested revision
                           </p>
-                          <p className="text-[12px] text-stone-700 dark:text-stone-300 leading-snug">{ann.demoRevisedText}</p>
+                          <p className="text-[10px] sm:text-[12px] text-stone-700 dark:text-stone-300 leading-snug">{ann.demoRevisedText}</p>
                         </div>
                       )}
                     </div>
@@ -742,14 +748,14 @@ export default function InteractiveDocumentAnalysis({
                       onMouseEnter={() => setHoveredAnnotation(ann.id)}
                       onMouseLeave={() => setHoveredAnnotation(null)}
                     >
-                      <p className="text-[13px] text-[#3C3C3C] dark:text-stone-300 font-extrabold mb-1 break-words leading-snug">{ann.comment}</p>
-                      <p className="text-[12px] text-[#AFAFAF] dark:text-stone-400 italic break-words leading-snug">{ann.suggestion}</p>
+                      <p className="text-[11px] sm:text-[13px] text-[#3C3C3C] dark:text-stone-300 font-extrabold mb-1 break-words leading-snug">{ann.comment}</p>
+                      <p className="text-[10px] sm:text-[12px] text-[#AFAFAF] dark:text-stone-400 italic break-words leading-snug">{ann.suggestion}</p>
                       {ann.demoRevisedText && (
                         <div className="mt-2.5 pt-2 border-t-2 border-[#E5E5E5] dark:border-[#FF4B4B]/30">
                           <p className="text-[10px] font-extrabold uppercase tracking-wide text-[#AFAFAF] dark:text-stone-500 mb-1">
                             Suggested revision
                           </p>
-                          <p className="text-[12px] text-stone-700 dark:text-stone-300 leading-snug">{ann.demoRevisedText}</p>
+                          <p className="text-[10px] sm:text-[12px] text-stone-700 dark:text-stone-300 leading-snug">{ann.demoRevisedText}</p>
                         </div>
                       )}
                     </div>

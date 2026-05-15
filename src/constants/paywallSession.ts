@@ -97,3 +97,25 @@ export const LAST_CHANCE_PAYWALL_SHOWN_KEY = 'writescholar_last_chance_paywall_s
  * checkout. The discount is a one-shot welcome offer.
  */
 export const FIRST_PAYWALL_DISCOUNT_SHOWN_KEY = 'writescholar_first_paywall_discount_shown';
+
+/**
+ * localStorage: ms-since-epoch timestamp recorded when the user
+ * finishes onboarding. Used by the dashboard's post-onboarding
+ * soft-paywall trigger to compute "has 7 days elapsed since
+ * onboarding?" — the fallback fire condition if the user never
+ * creates an analysis or study pack.
+ */
+export const ONBOARDING_COMPLETED_AT_KEY = 'writescholar_onboarding_completed_at';
+
+/**
+ * localStorage: set when the first post-onboarding soft paywall
+ * has fired (via either the "first analysis/study pack" trigger or
+ * the 7-day fallback). After this is set, the dashboard's trigger
+ * effect stays silent — all subsequent soft-paywall fires go
+ * through the existing weekly-cooldown / restore-on-refresh paths.
+ */
+export const FIRST_SOFT_PAYWALL_FIRED_KEY = 'writescholar_first_soft_paywall_fired';
+
+/** 7 days in ms — fallback window for the post-onboarding paywall
+ *  trigger when the user hasn't actually used the product yet. */
+export const POST_ONBOARDING_PAYWALL_FALLBACK_MS = 7 * 24 * 60 * 60 * 1000;

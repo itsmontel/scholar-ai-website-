@@ -97,6 +97,7 @@ import {
   CHECKOUT_FROM_TUTORIAL_PAYWALL_KEY,
   LAST_TUTORIAL_CHECKOUT_PLAN_KEY,
   MANDATORY_CHECKOUT_PENDING_KEY,
+  ONBOARDING_COMPLETED_AT_KEY,
   POST_ACTIVATION_PAYWALL_PENDING_KEY,
   SOFT_PAYWALL_OPEN_KEY,
   SOFT_PAYWALL_DISMISSED_KEY,
@@ -1105,35 +1106,19 @@ const AcademicAIApp = () => {
       setUser(updatedUser);
       localStorage.setItem('user', JSON.stringify(updatedUser));
     }
-    navigateTo(destination);
-
-    // If the onboarding finish flow signalled it wants the dashboard's
-    // soft paywall to surface (handleFinishOnboarding in
-    // OnboardingPage.tsx sets SOFT_PAYWALL_OPEN_KEY = '1' for exactly
-    // this reason), actively dispatch the event the global paywall
-    // listener subscribes to. We can't rely on the restore-on-mount
-    // effect: the user was already logged in throughout the tour, so
-    // `isLoggedIn / user.id / user.plan` haven't changed and that
-    // effect won't re-fire. The listener checks dismissed/cooldown
-    // gates and opens `apiLimitPaywallOpen` in the same render tick
-    // as `navigateTo`, so the dashboard mounts with the paywall
-    // already visible.
+    // Stamp the moment onboarding completed. The dashboard uses this to
+    // decide when to fire the first soft paywall — either when the user
+    // creates their first analysis / study pack, or, as a fallback, 7
+    // days after this timestamp. No paywall dispatch here.
     try {
-      const flag = sessionStorage.getItem(SOFT_PAYWALL_OPEN_KEY);
-      // [soft-paywall-debug] Temporary trace — once we confirm the
-      // post-onboarding paywall fires reliably, drop these console
-      // calls. They report exactly which gate (open flag / dismissed
-      // / cooldown / plan) breaks the chain.
-      console.log('[soft-paywall] handleOnboardingComplete: SOFT_PAYWALL_OPEN_KEY =', flag);
-      if (flag === '1') {
-        console.log('[soft-paywall] dispatching writescholar-open-paywall');
-        window.dispatchEvent(new CustomEvent('writescholar-open-paywall'));
-      } else {
-        console.log('[soft-paywall] not dispatching — SOFT_PAYWALL_OPEN_KEY was not set by handleFinishOnboarding');
+      if (!localStorage.getItem(ONBOARDING_COMPLETED_AT_KEY)) {
+        localStorage.setItem(ONBOARDING_COMPLETED_AT_KEY, String(Date.now()));
       }
-    } catch (e) {
-      console.error('[soft-paywall] dispatch error', e);
+    } catch {
+      /* ignore */
     }
+
+    navigateTo(destination);
   };
 
   const handleOnboardingUserUpdate = useCallback(

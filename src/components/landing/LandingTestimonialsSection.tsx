@@ -123,19 +123,20 @@ function StarRating() {
 export default function LandingTestimonialsSection() {
   return (
     <section
-      className="relative py-16 sm:py-24 overflow-hidden border-t-2 border-[#E5E5E5] dark:border-stone-800 scroll-mt-20 bg-[#FCFBF7] dark:bg-stone-950"
+      className="relative py-16 sm:py-24 overflow-hidden border-t-2 border-[#E5E5E5] dark:border-stone-800 scroll-mt-20 bg-[#FAF7FF] dark:bg-stone-950"
       aria-labelledby="landing-testimonials-heading"
       style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
     >
-      {/* Soft brand-coloured atmospheric orbs, same low-opacity treatment
-          as the hero so the testimonials section reads as part of the
-          same visual world rather than a separate slab. */}
+      {/* Soft brand-purple atmospheric orbs (was: one purple + one
+          green) — single-colour wash matching the new hero so the
+          testimonials section reads as part of the same purple
+          visual world. */}
       <div
-        className="pointer-events-none absolute -top-20 -left-[5%] h-[min(60vw,28rem)] w-[min(60vw,28rem)] rounded-full bg-[#A560E8]/[0.05] blur-[100px]"
+        className="pointer-events-none absolute -top-20 -left-[5%] h-[min(60vw,28rem)] w-[min(60vw,28rem)] rounded-full bg-[#A560E8]/[0.07] blur-[100px]"
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute -bottom-32 -right-[5%] h-[min(60vw,28rem)] w-[min(60vw,28rem)] rounded-full bg-[#58CC02]/[0.05] blur-[100px]"
+        className="pointer-events-none absolute -bottom-32 -right-[5%] h-[min(60vw,28rem)] w-[min(60vw,28rem)] rounded-full bg-[#A560E8]/[0.07] blur-[100px]"
         aria-hidden
       />
 
@@ -154,7 +155,7 @@ export default function LandingTestimonialsSection() {
               style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
             >
               Trusted by{' '}
-              <span className="text-[#58CC02]">50,000+ students</span>
+              <span className="text-[#A560E8]">50,000+ students</span>
             </h2>
           </div>
 
@@ -169,7 +170,13 @@ export default function LandingTestimonialsSection() {
               splitting across columns). `inline-block w-full` makes
               each card behave as a block-level item within the
               column flow. */}
-          <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 sm:gap-5 lg:gap-6 [column-fill:_balance]">
+          {/* `[&>blockquote:nth-of-type(n+4)]:hidden sm:[&>blockquote:nth-of-type(n+4)]:inline-block`
+              hides the 4th-onwards testimonial on phones (so mobile
+              visitors see just 3 quick proofs instead of all 8) and
+              re-shows them at sm+ where there's column room. Same
+              effect as a JS slice but server-rendered and no extra
+              renders. */}
+          <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 sm:gap-5 lg:gap-6 [column-fill:_balance] [&>blockquote:nth-of-type(n+4)]:hidden sm:[&>blockquote:nth-of-type(n+4)]:inline-block">
             {TESTIMONIALS.map((t, idx) => (
               <blockquote
                 key={t.name}

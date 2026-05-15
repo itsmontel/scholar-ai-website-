@@ -6,6 +6,9 @@ import {
   SOFT_PAYWALL_COOLDOWN_MS,
   LAST_CHANCE_PAYWALL_SHOWN_KEY,
   FIRST_PAYWALL_DISCOUNT_SHOWN_KEY,
+  FIRST_SOFT_PAYWALL_FIRED_KEY,
+  ONBOARDING_COMPLETED_AT_KEY,
+  POST_ONBOARDING_PAYWALL_FALLBACK_MS,
   isSoftPaywallOnCooldown,
 } from '../../constants/paywallSession';
 
@@ -133,6 +136,29 @@ export const PaywallDebugPanel: React.FC<PaywallDebugPanelProps> = ({ user, payw
     console.log('[paywall-debug] welcome-discount flag cleared — next paywall renders the discount UI');
   };
 
+  const resetFirstFired = () => {
+    try {
+      localStorage.removeItem(FIRST_SOFT_PAYWALL_FIRED_KEY);
+    } catch {
+      /* ignore */
+    }
+    setTick((n) => n + 1);
+    console.log('[paywall-debug] first-fired flag cleared — dashboard trigger can fire again');
+  };
+
+  const backdateOnboarding = () => {
+    try {
+      const eightDaysAgo = Date.now() - 8 * 24 * 60 * 60 * 1000;
+      localStorage.setItem(ONBOARDING_COMPLETED_AT_KEY, String(eightDaysAgo));
+      // Also clear the one-shot fired flag so the 7-day fallback can fire.
+      localStorage.removeItem(FIRST_SOFT_PAYWALL_FIRED_KEY);
+    } catch {
+      /* ignore */
+    }
+    setTick((n) => n + 1);
+    console.log('[paywall-debug] onboarding timestamp backdated 8 days — 7-day fallback now eligible');
+  };
+
   // ─── One-click preview helpers ────────────────────────────────────
   // Both clear the cooldown + dismissal gates so the paywall actually
   // opens, then dispatch the listener event after a 50ms beat so the
@@ -208,12 +234,15 @@ export const PaywallDebugPanel: React.FC<PaywallDebugPanelProps> = ({ user, payw
       Object.keys(localStorage)
         .filter((k) => k.startsWith('writescholar_welcome_toast_seen_'))
         .forEach((k) => localStorage.removeItem(k));
-      // Reset Last-chance + welcome-discount so the user can replay
-      // the full onboarding → soft paywall (with discount) →
-      // Last-chance → dashboard sequence end-to-end.
+      // Reset Last-chance + welcome-discount + first-fired + onboarding
+      // timestamp so the user can replay the full onboarding → first
+      // analysis/study pack → soft paywall (with discount) → Last-chance
+      // → dashboard sequence end-to-end.
       try {
         localStorage.removeItem(LAST_CHANCE_PAYWALL_SHOWN_KEY);
         localStorage.removeItem(FIRST_PAYWALL_DISCOUNT_SHOWN_KEY);
+        localStorage.removeItem(FIRST_SOFT_PAYWALL_FIRED_KEY);
+        localStorage.removeItem(ONBOARDING_COMPLETED_AT_KEY);
       } catch {
         /* ignore */
       }
@@ -254,14 +283,23 @@ export const PaywallDebugPanel: React.FC<PaywallDebugPanelProps> = ({ user, payw
   let openFlag = false;
   let lastChanceShown = false;
   let welcomeDiscountConsumed = false;
+  let firstFired = false;
+  let onboardedAt = 0;
   try {
     dismissedThisSession = sessionStorage.getItem(SOFT_PAYWALL_DISMISSED_KEY) === '1';
     openFlag = sessionStorage.getItem(SOFT_PAYWALL_OPEN_KEY) === '1';
     lastChanceShown = localStorage.getItem(LAST_CHANCE_PAYWALL_SHOWN_KEY) === '1';
     welcomeDiscountConsumed = localStorage.getItem(FIRST_PAYWALL_DISCOUNT_SHOWN_KEY) === '1';
+    firstFired = localStorage.getItem(FIRST_SOFT_PAYWALL_FIRED_KEY) === '1';
+    const rawOnboarded = localStorage.getItem(ONBOARDING_COMPLETED_AT_KEY);
+    if (rawOnboarded) onboardedAt = Number(rawOnboarded) || 0;
   } catch {
     /* ignore */
   }
+  const fallbackRemainingMs = onboardedAt > 0
+    ? Math.max(0, POST_ONBOARDING_PAYWALL_FALLBACK_MS - (Date.now() - onboardedAt))
+    : 0;
+  const fallbackEligible = onboardedAt > 0 && fallbackRemainingMs === 0;
   const plan = (user.plan || 'free').toLowerCase();
   const planIsPaid = plan === 'pro' || plan === 'premium';
 
@@ -352,6 +390,33 @@ export const PaywallDebugPanel: React.FC<PaywallDebugPanelProps> = ({ user, payw
           value={welcomeDiscountConsumed ? 'consumed' : 'available'}
           valueClass={welcomeDiscountConsumed ? 'text-[#FF4B4B]' : 'text-[#58CC02]'}
         />
+        <Row
+          label="First fired"
+          value={firstFired ? 'yes' : 'no'}
+          valueClass={firstFired ? 'text-[#FF4B4B]' : 'text-[#58CC02]'}
+        />
+        <Row
+          label="Onboarded"
+          value={onboardedAt > 0 ? `${fmtRemaining(Date.now() - onboardedAt)} ago` : '—'}
+          valueClass={onboardedAt > 0 ? 'text-stone-700 dark:text-stone-200' : 'text-stone-500'}
+        />
+        <Row
+          label="7-day fallback"
+          value={
+            onboardedAt === 0
+              ? '—'
+              : fallbackEligible
+                ? 'eligible'
+                : `${fmtRemaining(fallbackRemainingMs)} left`
+          }
+          valueClass={
+            onboardedAt === 0
+              ? 'text-stone-500'
+              : fallbackEligible
+                ? 'text-[#58CC02]'
+                : 'text-[#FF9600]'
+          }
+        />
       </div>
 
       <div className="px-3 pb-3 grid grid-cols-2 gap-2">
@@ -365,6 +430,8 @@ export const PaywallDebugPanel: React.FC<PaywallDebugPanelProps> = ({ user, payw
         <DebugBtn label="Reset welcome" tone="blue" onClick={resetWelcomeToast} />
         <DebugBtn label="Reset last-chance" tone="orange" onClick={resetLastChance} />
         <DebugBtn label="Reset MAY2026" tone="green" onClick={resetWelcomeDiscount} />
+        <DebugBtn label="Reset first fired" tone="violet" onClick={resetFirstFired} />
+        <DebugBtn label="Backdate onboarding -8d" tone="blue" onClick={backdateOnboarding} />
         <DebugBtn
           label="Reset onboarding (full replay)"
           tone="red"

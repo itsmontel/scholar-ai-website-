@@ -25,6 +25,13 @@ import {
   BADGES,
   type Badge,
 } from '../../data/achievements';
+import {
+  ONBOARDING_COMPLETED_AT_KEY,
+  FIRST_SOFT_PAYWALL_FIRED_KEY,
+  POST_ONBOARDING_PAYWALL_FALLBACK_MS,
+  SOFT_PAYWALL_OPEN_KEY,
+  isSoftPaywallOnCooldown,
+} from '../../constants/paywallSession';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -548,6 +555,72 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isNewForAnalyze, isNewForStudyPack, isNewForCitations, dashboardTool]);
 
+  /* First soft paywall trigger.
+     Fires once per user when EITHER:
+       (a) they have at least one completed analysis OR study pack — i.e.
+           the dashboard loaded with something in their recents, OR
+       (b) 7 days have elapsed since onboarding finished (the fallback
+           for users who never actually generate anything).
+     Whichever comes first wins; FIRST_SOFT_PAYWALL_FIRED_KEY then locks
+     out further automatic fires from this trigger. Subsequent soft
+     paywalls go through the existing weekly-cooldown / API-limit paths.
+
+     Skip conditions, in order:
+       — hub recents / usage stats still loading (would misread "no items")
+       — not signed in
+       — paid plan (don't paywall paying users)
+       — already fired (one-shot)
+       — within the 7-day soft-paywall dismissal cooldown */
+  useEffect(() => {
+    if (hubRecentsLoading) return;
+    if (loadingUsage) return;
+    if (!user?.id) return;
+    const userPlan = (user?.plan || usageStats.plan || 'free').toLowerCase();
+    if (userPlan !== 'free') return;
+
+    try {
+      if (localStorage.getItem(FIRST_SOFT_PAYWALL_FIRED_KEY) === '1') return;
+    } catch {
+      /* ignore */
+    }
+    if (isSoftPaywallOnCooldown()) return;
+
+    const hasFirstItem =
+      analyzeRecents.length > 0 ||
+      analysisCount > 0 ||
+      studyPackRecents.length > 0;
+
+    let sevenDaysElapsed = false;
+    try {
+      const raw = localStorage.getItem(ONBOARDING_COMPLETED_AT_KEY);
+      const ts = raw ? Number(raw) : 0;
+      if (Number.isFinite(ts) && ts > 0) {
+        sevenDaysElapsed = Date.now() - ts >= POST_ONBOARDING_PAYWALL_FALLBACK_MS;
+      }
+    } catch {
+      /* ignore */
+    }
+
+    if (!hasFirstItem && !sevenDaysElapsed) return;
+
+    try {
+      localStorage.setItem(FIRST_SOFT_PAYWALL_FIRED_KEY, '1');
+      sessionStorage.setItem(SOFT_PAYWALL_OPEN_KEY, '1');
+    } catch {
+      /* ignore */
+    }
+    window.dispatchEvent(new CustomEvent('writescholar-open-paywall'));
+  }, [
+    hubRecentsLoading,
+    loadingUsage,
+    user?.id,
+    user?.plan,
+    usageStats.plan,
+    analyzeRecents.length,
+    analysisCount,
+    studyPackRecents.length,
+  ]);
+
   /** Pro / Premium / Focus: analyses + citations + study packs share one monthly pool (backend). */
   const showCombinedUsage =
     (plan === 'pro' || plan === 'premium' || plan === 'focus') &&
@@ -814,7 +887,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
   })();
 
   return (
-    <div className="min-h-screen relative font-sans overflow-x-clip bg-stone-50 dark:bg-stone-950">
+    <div className="min-h-screen relative font-sans overflow-x-clip bg-[#FAF7FF] dark:bg-stone-950">
       {/* ─── MOBILE-ONLY DASHBOARD ─── completely separate component
           from the desktop layout below. Renders its own Header + content
           designed for one-handed phone use. Hidden at md+ where the
@@ -834,7 +907,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
 
       {/* ─── TABLET + DESKTOP DASHBOARD (existing layout) ─── */}
       <div className="hidden md:block">
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
+      <WriteScholarEditorialBackgroundLayers position="fixed" purpleWash />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="dashboard" />
 
       {/* "50% off your first month on monthly plans · use code MAY2026"

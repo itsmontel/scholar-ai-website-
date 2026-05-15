@@ -356,7 +356,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                 plan.popular
                   ? 'border-2 border-b-4 border-[#1CB0F6] dark:border-[#1CB0F6]'
                   : plan.id === 'premium'
-                  ? 'border-2 border-b-4 border-[#FF9600] dark:border-[#FF9600] bg-[#FFF4E0] dark:bg-stone-900 sm:col-span-2 lg:col-span-1'
+                  ? 'border-2 border-b-4 border-[#FFC800] dark:border-[#FFC800] bg-[#FFFAE5] dark:bg-stone-900 sm:col-span-2 lg:col-span-1'
                   : 'border-2 border-b-4 border-stone-200 dark:border-stone-700'
               }`}
             >
@@ -369,7 +369,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
               )}
               {plan.id === 'premium' && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-[#FF9600] text-white px-3 py-1 rounded-xl text-xs font-extrabold border-2 border-[#D97F00]">
+                  <span className="bg-[#FFC800] text-[#6B27A3] px-3 py-1 rounded-xl text-xs font-extrabold border-2 border-[#D4A300]">
                     5× usage
                   </span>
                 </div>
@@ -449,7 +449,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                       <svg
                         className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
                           plan.id === 'premium'
-                            ? 'text-[#FF9600]'
+                            ? 'text-[#D4A300]'
                             : 'text-[#58CC02]'
                         }`}
                         fill="none"
@@ -485,7 +485,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                     : plan.popular
                       ? 'bg-[#1CB0F6] hover:bg-[#1899D6] text-white font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#1899D6] active:border-b-2 active:translate-y-0.5'
                       : plan.id === 'premium'
-                        ? 'bg-[#FF9600] hover:bg-[#D97F00] text-white font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5'
+                        ? 'bg-[#FFC800] hover:bg-[#FFD52E] text-[#6B27A3] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#D4A300] active:border-b-2 active:translate-y-0.5'
                         : 'bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-900 dark:text-stone-100 border-2 border-b-4 border-stone-200 dark:border-stone-600 font-extrabold active:border-b-2 active:translate-y-0.5'
                 }`}
               >
