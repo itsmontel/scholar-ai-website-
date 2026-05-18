@@ -17,6 +17,7 @@ const PORT = 34567;
 const staticRoutes = [
   '/',
   '/features',
+  '/ai-essay-editor',
   '/pricing',
   '/about',
   '/why-students-choose',

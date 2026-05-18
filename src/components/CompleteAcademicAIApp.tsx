@@ -41,6 +41,7 @@ const UploadPage = lazyWithRetry(() => import('./pages/UploadPage'));
 const AccountPage = lazyWithRetry(() => import('./pages/AccountPage'));
 const PricingPage = lazyWithRetry(() => import('./pages/PricingPage'));
 const FeaturesPage = lazyWithRetry(() => import('./pages/FeaturesPage'));
+const AiEssayEditorPage = lazyWithRetry(() => import('./pages/AiEssayEditorPage'));
 const FocusModePage = lazyWithRetry(() => import('./pages/FocusModePage'));
 const ProfilePage = lazyWithRetry(() => import('./pages/ProfilePage'));
 const LibraryPage = lazyWithRetry(() => import('./pages/LibraryPage'));
@@ -200,6 +201,7 @@ function getPageFromPath(pathname: string): string {
   if (p === '/study-tools') return 'study-tools';
   if (p === '/pricing') return 'pricing';
   if (p === '/features') return 'features';
+  if (p === '/ai-essay-editor' || p === '/essay-grader' || p === '/ai-essay-grader' || p === '/grade-my-essay') return 'ai-essay-editor';
   if (p === '/focus-mode' || p === '/focus') return 'focus-mode';
   if (p === '/why-students-choose' || p === '/compare') return 'why-students-choose';
   if (p === '/vs-quizlet-knowt' || p === '/study-tools-comparison' || p === '/compare-study-tools') return 'study-tools-comparison';
@@ -503,6 +505,7 @@ const AcademicAIApp = () => {
   > = {
     landing: { title: LANDING_PAGE_TITLE, description: LANDING_META_DESCRIPTION },
     analyze: { title: 'AI Essay Checker — Professor-Level Feedback in Seconds | WriteScholar', description: 'Paste or upload your paper for professor-level feedback on thesis, evidence, structure, and citations. Choose your education level for rubrics that match your course. Free to try.' },
+    'ai-essay-editor': { title: 'AI Essay Grader & Editor — Grade & Fix Your Essay | WriteScholar', description: 'Write your essay in a real editor and get an estimated professor-style grade, a full rubric, and line-by-line fixes you apply in one click. Word in, Word out. Free to try.' },
     citations: { title: 'Citation Finder for College Papers — APA, MLA, Chicago | WriteScholar', description: 'Find peer-reviewed sources for research papers. Search by topic; export APA, MLA, Chicago, or Harvard citations. Built for bibliographies and lit reviews.' },
     'study-pack': { title: 'AI Study Pack — Lesson, Flashcards, Quiz, Crossword & More | WriteScholar', description: 'Turn notes into a lesson, flashcards, quiz, crossword, Crater Blast & Word Tower from one paste. Same study pack flow as the dashboard.' },
     features: { title: 'AI Essay Editor & Grader for College Students | WriteScholar', description: 'Write in a real editor and get a professor-style grade with a full rubric and one-click line-by-line fixes. Plus citations, summarizer, and study tools, one workspace.' },
@@ -1025,6 +1028,7 @@ const AcademicAIApp = () => {
     'why-students-choose': '/why-students-choose',
     'study-tools-comparison': '/vs-quizlet-knowt',
     'study-tools': '/study-tools',
+    'ai-essay-editor': '/ai-essay-editor',
   };
 
   const navigateTo = (page: string, slug?: string, options?: { quizHistoryFilter?: 'all' | 'quiz' | 'flashcards' | 'crossword' | 'crater_blast'; studyPack?: { data: any; title?: string }; unlockQuizQuery?: string }) => {
@@ -1287,6 +1291,8 @@ const AcademicAIApp = () => {
         return <PricingPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'features':
         return <FeaturesPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'ai-essay-editor':
+        return <AiEssayEditorPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'focus-mode': {
         const plan = (user?.plan || user?.subscription_plan || 'free').toLowerCase();
         const isPaidFocus = plan === 'pro' || plan === 'premium';

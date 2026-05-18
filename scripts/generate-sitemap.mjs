@@ -29,6 +29,7 @@ const today = new Date().toISOString().slice(0, 10);
 const staticRoutes = [
   { loc: '/',                                 priority: '1.0',  changefreq: 'weekly',  lastmod: today },
   { loc: '/features',                         priority: '0.9',  changefreq: 'monthly', lastmod: today },
+  { loc: '/ai-essay-editor',                  priority: '0.97', changefreq: 'weekly',  lastmod: today },
   { loc: '/pricing',                          priority: '0.9',  changefreq: 'monthly', lastmod: today },
   { loc: '/about',                            priority: '0.6',  changefreq: 'monthly', lastmod: today },
   { loc: '/why-students-choose',              priority: '0.7',  changefreq: 'monthly', lastmod: today },
