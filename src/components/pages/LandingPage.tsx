@@ -138,7 +138,7 @@ function NumberedPoints({
   points,
   cols,
 }: {
-  points: { n: number; title: string; desc: string }[];
+  points: { n: number; title: string; desc: string; icon?: ReactNode }[];
   cols: string;
 }) {
   return (
@@ -146,20 +146,44 @@ function NumberedPoints({
       {points.map((p) => (
         <div
           key={p.n}
-          className="relative rounded-2xl border border-[#A560E8]/45 dark:border-[#8A48C7]/45 bg-white dark:bg-stone-900 p-5 shadow-[0_10px_28px_-18px_rgba(96,48,140,0.5)]"
+          className="group relative overflow-hidden rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900 p-6 transition-all duration-300 shadow-[0_1px_2px_rgba(40,30,60,0.04),0_18px_38px_-26px_rgba(96,48,140,0.45)] hover:-translate-y-1 hover:border-[#A560E8]/45 hover:shadow-[0_1px_2px_rgba(40,30,60,0.04),0_30px_55px_-24px_rgba(96,48,140,0.55)]"
         >
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#A560E8] text-white text-sm font-extrabold mb-3 shadow-[0_4px_10px_-3px_rgba(165,96,232,0.6)]">
+          {/* Soft brand wash that warms on hover */}
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -top-12 -right-12 h-28 w-28 rounded-full bg-[#A560E8]/[0.06] blur-2xl transition-opacity duration-300 opacity-0 group-hover:opacity-100"
+          />
+          {/* Corner feature icon, faint */}
+          {p.icon && (
+            <span
+              aria-hidden
+              className="pointer-events-none absolute top-5 right-5 text-[#A560E8]/20 dark:text-[#A560E8]/25 transition-colors duration-300 group-hover:text-[#A560E8]/40"
+            >
+              {p.icon}
+            </span>
+          )}
+          {/* Number badge — kept prominent (it maps to the dot on the
+              screenshot above) but elevated: gradient + ring + glow. */}
+          <span
+            className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#A560E8] to-[#8A48C7] text-white text-base font-extrabold ring-1 ring-[#A560E8]/30 shadow-[0_8px_18px_-6px_rgba(165,96,232,0.65)]"
+            style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+          >
             {p.n}
           </span>
           <h3
-            className="text-[15px] font-extrabold text-stone-900 dark:text-stone-50 leading-snug mb-1"
+            className="relative mt-4 text-base font-extrabold text-stone-900 dark:text-stone-50 leading-snug"
             style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
           >
             {p.title}
           </h3>
-          <p className="text-[13px] text-stone-600 dark:text-stone-400 leading-relaxed">
+          <p className="relative mt-1.5 text-[13px] sm:text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
             {p.desc}
           </p>
+          {/* Accent underline that sweeps in on hover */}
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-[3px] w-full origin-left scale-x-0 bg-gradient-to-r from-[#A560E8] to-[#8A48C7] transition-transform duration-300 group-hover:scale-x-100"
+          />
         </div>
       ))}
     </div>
@@ -1173,13 +1197,12 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 </span>
               </div>
 
-              {/* ─── 2. HEADLINE — two-line, dark-on-light per screenshot
+              {/* ─── 2. HEADLINE — two-line, dark-on-light ────────────
                   Line 1: "Turn your grades"
-                  Line 2: "from B to A" with handwritten italic purple
-                          A (Crimson Text serif), hand-drawn underline
-                          beneath it, and a small sparkle accent. Text
-                          is dark stone-900 since the hero bg is now
-                          a soft white-purple wash. */}
+                  Line 2: "from B to A" where the A is a clean bold red
+                          letter ringed by a hand-drawn red ink circle —
+                          a teacher's grade mark. (Replaces the old
+                          italic-serif A + underline + sparkle.) */}
               <h1
                 className="text-[2rem] xs:text-[2.4rem] sm:text-[3rem] md:text-[3.6rem] lg:text-[4.2rem] xl:text-[4.85rem] font-extrabold tracking-[-0.02em] leading-[1.05] text-stone-900 dark:text-stone-50 mt-6 sm:mt-7 mb-5 sm:mb-6"
                 style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
@@ -1187,38 +1210,22 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 <span className="block">Turn your grades</span>
                 <span className="block mt-1.5 sm:mt-2.5">
                   from B to{' '}
-                  {/* Handwritten italic purple A with hand-drawn
-                      underline + sparkle. Crimson Text serif gives the
-                      loose script feel from the reference; the
-                      rotation + underline read as marker-on-paper. */}
-                  <span className="relative inline-block align-baseline" aria-hidden>
-                    <span
-                      className="relative inline-block text-[#A560E8] rotate-[-6deg]"
-                      style={{ fontFamily: '"Crimson Text", Georgia, serif', fontStyle: 'italic' }}
+                  <span className="relative inline-block">
+                    <span className="text-[#E5484D]">A</span>
+                    <svg
+                      aria-hidden
+                      viewBox="0 0 120 108"
+                      className="pointer-events-none absolute left-1/2 top-1/2 h-[1.85em] w-[1.85em] -translate-x-1/2 -translate-y-1/2 overflow-visible text-[#E5484D]"
                     >
-                      A
-                      {/* Hand-drawn underline */}
-                      <svg
-                        className="absolute -bottom-2 sm:-bottom-3 left-0 w-full h-2 sm:h-3 text-[#A560E8] overflow-visible"
-                        viewBox="0 0 40 8"
-                        preserveAspectRatio="none"
-                        aria-hidden
-                        style={{ overflow: 'visible' }}
-                      >
-                        <path
-                          d="M2 5 Q12 2 22 4 T38 5"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </span>
-                    {/* Sparkle */}
-                    <span className="absolute -top-2 -right-3 sm:-top-3 sm:-right-4 text-[0.4em] text-[#A560E8] motion-safe:animate-pulse">✦</span>
+                      <path
+                        d="M92 22C74 8 40 5 23 21 6 38 9 73 33 89c26 17 68 12 83-9 11-15 8-39-9-52"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                        strokeLinecap="round"
+                      />
+                    </svg>
                   </span>
-                  <span className="sr-only">A</span>
                 </span>
               </h1>
 
@@ -1230,28 +1237,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 Write in a real editor, get a professor-style grade with
                 line-by-line fixes, then apply them in one click.
               </p>
-
-              {/* ─── 4. FEATURE PILLS ROW ─────────────────────────────
-                  Four feature chips matching the screenshot reference:
-                  AI Essay Grader · Study Notes & Flashcards ·
-                  Professor-Style Feedback · Writing Coach. (Plagiarism
-                  Checker was swapped for Professor-Style Feedback per
-                  user brief — we don't ship a plagiarism checker yet.) */}
-              <div className="mt-6 flex flex-wrap justify-center gap-x-2.5 gap-y-2 max-w-3xl mx-auto">
-                {[
-                  'AI Essay Grader',
-                  'Study Notes & Flashcards',
-                  'Professor-Style Feedback',
-                  'Write & Auto-Fix',
-                ].map((label) => (
-                  <span
-                    key={label}
-                    className="inline-flex items-center px-3 py-1 rounded-full border-2 border-b-[3px] border-[#E5E5E5] bg-white text-stone-800 text-[11px] sm:text-xs font-bold shadow-[0_6px_16px_-6px_rgba(0,0,0,0.25)]"
-                  >
-                    {label}
-                  </span>
-                ))}
-              </div>
 
               {/* ─── 5. CTA PAIR ──────────────────────────────────────
                   Primary green Duolingo button + secondary text link.
@@ -1639,10 +1624,10 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     <NumberedPoints
                       cols="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
                       points={[
-                        { n: 1, title: 'Live grade & rubric', desc: 'An estimated grade band and a full professor-style rubric, updating as you write — no copy-paste loop.' },
-                        { n: 2, title: 'One-click apply', desc: 'Accept a suggested rewrite and it drops straight into your draft, exactly where it belongs.' },
-                        { n: 3, title: 'Built for real essays', desc: 'Write the actual paper here — tables, images, citations and footnotes are built in, not bolted on.' },
-                        { n: 4, title: 'Word in, Word out', desc: 'Import a .docx and your bold, italics and headings carry over. Export and it comes back perfectly formatted.' },
+                        { n: 1, title: 'Live grade & rubric', desc: 'An estimated grade band and a full professor-style rubric, updating as you write — no copy-paste loop.', icon: (<svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M9 5h6m-6 0a2 2 0 00-2 2v12a2 2 0 002 2h6a2 2 0 002-2V7a2 2 0 00-2-2m-6 0a2 2 0 012-2h2a2 2 0 012 2M9 14l2 2 4-4" /></svg>) },
+                        { n: 2, title: 'One-click apply', desc: 'Accept a suggested rewrite and it drops straight into your draft, exactly where it belongs.', icon: (<svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M13 3L4 14h6l-1 7 9-11h-6z" /></svg>) },
+                        { n: 3, title: 'Built for real essays', desc: 'Write the actual paper here — tables, images, citations and footnotes are built in, not bolted on.', icon: (<svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M7 3h7l5 5v11a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2zM14 3v5h5M9 13h6M9 17h6" /></svg>) },
+                        { n: 4, title: 'Word in, Word out', desc: 'Import a .docx and your bold, italics and headings carry over. Export and it comes back perfectly formatted.', icon: (<svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M9 16V4m0 0L5.5 7.5M9 4l3.5 3.5M15 8v12m0 0l3.5-3.5M15 20l-3.5-3.5" /></svg>) },
                       ]}
                     />
                   </div>
