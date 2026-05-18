@@ -12,22 +12,22 @@ const FEATURES = [
     emoji: '📖',
     title: 'Smart Summaries',
     desc: 'Condense any text or paper in seconds',
-    color: '#1CB0F6',
-    tint: '#DDF4FF',
+    color: '#8A48C7',
+    tint: '#F3EAFF',
   },
   {
     emoji: '🎮',
     title: 'Study Games',
     desc: 'Crater Blast, Word Tower & more',
-    color: '#FF4B4B',
-    tint: '#FFE8E8',
+    color: '#A560E8',
+    tint: '#F3EAFF',
   },
   {
     emoji: '📚',
     title: 'Citations & Study Packs',
     desc: 'Auto-generate APA, MLA, flashcards & quizzes',
-    color: '#FF9600',
-    tint: '#FFF4E0',
+    color: '#8A48C7',
+    tint: '#F3EAFF',
   },
 ] as const;
 
@@ -66,25 +66,25 @@ export const AuthMarketingSide: React.FC = () => {
       className="hidden lg:flex lg:w-1/2 min-h-screen min-h-[100dvh] flex-col items-center justify-center relative overflow-hidden"
       style={{
         fontFamily: '"Nunito", system-ui, sans-serif',
-        background: 'linear-gradient(165deg, #F3EAFF 0%, #E8DAFF 35%, #DDF4FF 100%)',
+        background: 'linear-gradient(165deg, #F3EAFF 0%, #E8DAFF 45%, #F3EAFF 100%)',
       }}
     >
-      {/* Decorative background shapes — Duolingo pastel orbs */}
+      {/* Decorative background shapes — soft single-hue purple orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
         <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full opacity-30" style={{ background: 'radial-gradient(circle, #A560E8 0%, transparent 70%)' }} />
-        <div className="absolute -bottom-24 -left-24 w-80 h-80 rounded-full opacity-20" style={{ background: 'radial-gradient(circle, #58CC02 0%, transparent 70%)' }} />
-        <div className="absolute top-1/4 -left-8 w-48 h-48 rounded-full opacity-15" style={{ background: 'radial-gradient(circle, #1CB0F6 0%, transparent 70%)' }} />
-        <div className="absolute bottom-1/3 -right-12 w-56 h-56 rounded-full opacity-15" style={{ background: 'radial-gradient(circle, #FF9600 0%, transparent 70%)' }} />
+        <div className="absolute -bottom-24 -left-24 w-80 h-80 rounded-full opacity-20" style={{ background: 'radial-gradient(circle, #8A48C7 0%, transparent 70%)' }} />
+        <div className="absolute top-1/4 -left-8 w-48 h-48 rounded-full opacity-[0.13]" style={{ background: 'radial-gradient(circle, #A560E8 0%, transparent 70%)' }} />
+        <div className="absolute bottom-1/3 -right-12 w-56 h-56 rounded-full opacity-[0.13]" style={{ background: 'radial-gradient(circle, #8A48C7 0%, transparent 70%)' }} />
 
-        {/* Floating dot pattern */}
+        {/* Floating dot pattern — purple shades only */}
         {[
           { top: '8%', left: '15%', size: 8, color: '#A560E8', delay: 0 },
-          { top: '18%', right: '20%', size: 6, color: '#58CC02', delay: 1 },
-          { top: '45%', left: '8%', size: 10, color: '#1CB0F6', delay: 0.5 },
-          { top: '72%', right: '12%', size: 7, color: '#FF9600', delay: 1.5 },
-          { top: '85%', left: '22%', size: 5, color: '#FF4B4B', delay: 2 },
+          { top: '18%', right: '20%', size: 6, color: '#8A48C7', delay: 1 },
+          { top: '45%', left: '8%', size: 10, color: '#A560E8', delay: 0.5 },
+          { top: '72%', right: '12%', size: 7, color: '#8A48C7', delay: 1.5 },
+          { top: '85%', left: '22%', size: 5, color: '#7733B5', delay: 2 },
           { top: '30%', right: '8%', size: 9, color: '#A560E8', delay: 0.8 },
-          { top: '60%', left: '18%', size: 6, color: '#58CC02', delay: 1.2 },
+          { top: '60%', left: '18%', size: 6, color: '#8A48C7', delay: 1.2 },
         ].map((dot, i) => (
           <div
             key={i}
@@ -119,10 +119,10 @@ export const AuthMarketingSide: React.FC = () => {
                 className="w-[96px] h-[96px] object-contain"
               />
             </div>
-            <div className="absolute -top-1.5 -right-1.5 w-8 h-8 rounded-lg bg-[#58CC02] border-2 border-b-[3px] border-[#46A302] flex items-center justify-center text-sm shadow-lg shadow-[#58CC02]/30">
+            <div className="absolute -top-1.5 -right-1.5 w-8 h-8 rounded-lg bg-[#A560E8] border-2 border-b-[3px] border-[#8A48C7] flex items-center justify-center text-sm shadow-lg shadow-[#A560E8]/30">
               ✨
             </div>
-            <div className="absolute -bottom-1 -left-1.5 w-7 h-7 rounded-lg bg-[#FF9600] border-2 border-b-[3px] border-[#D97F00] flex items-center justify-center text-xs shadow-lg shadow-[#FF9600]/30">
+            <div className="absolute -bottom-1 -left-1.5 w-7 h-7 rounded-lg bg-[#8A48C7] border-2 border-b-[3px] border-[#7733B5] flex items-center justify-center text-xs shadow-lg shadow-[#8A48C7]/30">
               ⭐
             </div>
           </div>
@@ -209,15 +209,15 @@ export const AuthMarketingSide: React.FC = () => {
         <div className="mt-6 flex justify-center">
           <div className="inline-flex items-center gap-2.5 rounded-full border-2 border-b-[3px] border-[#E5E5E5] bg-white pl-1.5 pr-4 py-1 shadow-[0_8px_22px_-6px_rgba(0,0,0,0.20)]">
             <span
-              className="flex h-7 w-7 items-center justify-center rounded-full bg-[#E5F8D0]"
+              className="flex h-7 w-7 items-center justify-center rounded-full bg-[#F3EAFF]"
               aria-hidden
             >
-              <svg className="w-[18px] h-[18px] text-[#46A302]" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-[18px] h-[18px] text-[#8A48C7]" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
               </svg>
             </span>
             <span className="text-[13px] font-bold text-stone-800">
-              Trusted by <span className="font-extrabold text-[#58CC02] tabular-nums">50,000+</span> students worldwide
+              Trusted by <span className="font-extrabold text-[#A560E8] tabular-nums">50,000+</span> students worldwide
             </span>
           </div>
         </div>

@@ -174,7 +174,7 @@ const Header: React.FC<HeaderProps> = ({
   const getUsageColor = (percentage: number): string => {
     if (percentage >= 90) return 'text-red-600';
     if (percentage >= 70) return 'text-yellow-600';
-    return 'text-green-600';
+    return 'text-[#8A48C7]';
   };
 
   // ── Logged-out (public) header - matches landing page nav ───────────────────
@@ -193,10 +193,10 @@ const Header: React.FC<HeaderProps> = ({
 
     const publicNavActiveCls = isLandingPurple
       ? 'bg-white/25 text-white font-bold border-2 border-white/40'
-      : 'bg-[#DDF4FF] dark:bg-[#1CB0F6]/15 text-[#1CB0F6] font-bold border-2 border-[#1CB0F6]/30 dark:border-[#1CB0F6]/30';
+      : 'bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#A560E8] font-bold border-2 border-[#A560E8]/30 dark:border-[#A560E8]/30';
     const publicNavInactiveCls = isLandingPurple
       ? 'text-white hover:text-[#FFC800] hover:bg-white/10'
-      : 'text-stone-600 dark:text-stone-400 hover:text-[#1CB0F6] dark:hover:text-[#1CB0F6] hover:bg-[#DDF4FF]/50 dark:hover:bg-[#1CB0F6]/10';
+      : 'text-stone-600 dark:text-stone-400 hover:text-[#A560E8] dark:hover:text-[#A560E8] hover:bg-[#F3EAFF]/50 dark:hover:bg-[#A560E8]/10';
     const publicHeaderBg = isLandingPurple
       ? isScrolled
         ? 'bg-[#A560E8] shadow-[0_4px_24px_-4px_rgba(107,39,163,0.45)] border-[#7733B5]/40'
@@ -225,11 +225,11 @@ const Header: React.FC<HeaderProps> = ({
               className="flex items-center gap-2.5 sm:gap-3 group min-w-0 shrink"
               aria-label="WriteScholar home"
             >
-              <div className={`relative w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-xl border-2 border-b-4 ${isLandingPurple ? 'border-white/40 bg-white shadow-[0_4px_12px_-2px_rgba(0,0,0,0.20)] group-hover:border-white' : 'border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 group-hover:border-[#58CC02]/40'} transition-all duration-200 shrink-0 overflow-hidden`}>
+              <div className={`relative w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center rounded-xl border-2 border-b-4 ${isLandingPurple ? 'border-white/40 bg-white shadow-[0_4px_12px_-2px_rgba(0,0,0,0.20)] group-hover:border-white' : 'border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 group-hover:border-[#A560E8]/40'} transition-all duration-200 shrink-0 overflow-hidden`}>
                 <img src="/main-logo.png" alt="" className="w-[85%] h-[85%] object-contain" fetchPriority="high" width="40" height="40" />
               </div>
               <span
-                className={`text-[1.05rem] sm:text-lg font-extrabold tracking-tight transition-colors duration-200 truncate max-w-[130px] sm:max-w-none ${isLandingPurple ? 'text-white group-hover:text-[#FFC800]' : 'text-stone-900 dark:text-stone-50 group-hover:text-[#58CC02]'}`}
+                className={`text-[1.05rem] sm:text-lg font-extrabold tracking-tight transition-colors duration-200 truncate max-w-[130px] sm:max-w-none ${isLandingPurple ? 'text-white group-hover:text-[#FFC800]' : 'text-stone-900 dark:text-stone-50 group-hover:text-[#A560E8]'}`}
                 style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
               >
                 WriteScholar
@@ -302,8 +302,8 @@ const Header: React.FC<HeaderProps> = ({
                         ? 'text-white bg-white/25 border-2 border-white/40 font-bold'
                         : 'text-white/85 hover:text-white hover:bg-white/15'
                       : currentPage === id
-                        ? 'text-[#1CB0F6] bg-[#DDF4FF] dark:bg-[#1CB0F6]/15 border-2 border-[#1CB0F6]/30 dark:border-[#1CB0F6]/30 font-bold'
-                        : 'text-stone-600 dark:text-stone-400 hover:text-[#1CB0F6] hover:bg-[#DDF4FF]/50 dark:hover:bg-[#1CB0F6]/10'
+                        ? 'text-[#A560E8] bg-[#F3EAFF] dark:bg-[#A560E8]/15 border-2 border-[#A560E8]/30 dark:border-[#A560E8]/30 font-bold'
+                        : 'text-stone-600 dark:text-stone-400 hover:text-[#A560E8] hover:bg-[#F3EAFF]/50 dark:hover:bg-[#A560E8]/10'
                   }`}
                 >
                   {label}
@@ -395,35 +395,30 @@ const Header: React.FC<HeaderProps> = ({
               nav layout. */}
           <nav className="hidden lg:flex items-center gap-2 min-w-0">
             <div className="flex items-center gap-1">
-              <button
-                onClick={() => onNavigate?.('dashboard')}
-                className={`px-3.5 py-2 text-sm rounded-lg transition-all duration-200 font-bold ${
-                  currentPage === 'dashboard' ? navActiveCls : navInactiveCls
-                }`}
-              >
-                Dashboard
-              </button>
+              {/* Dashboard tab hidden — Documents is the home/workspace
+                  now (the logo still navigates there). */}
+              {/* Unified Documents tab — replaces the previous
+                  three-link group (Library + Upload + Write) per
+                  the Documents refactor. The activation tour's
+                  Library highlight still targets this button via
+                  the same data-attribute so onboarding flows keep
+                  working. */}
               <button
                 type="button"
-                onClick={() => onNavigate?.('library')}
+                onClick={() => onNavigate?.('documents')}
                 data-activation-library-tab
-                className={`px-3.5 py-2 text-sm rounded-lg transition-all duration-200 font-bold ${
-                  currentPage === 'library' ? navActiveCls : navInactiveCls
+                className={`px-3.5 py-2 text-sm rounded-lg transition-all duration-200 font-bold inline-flex items-center gap-1 ${
+                  currentPage === 'documents' ? navActiveCls : navInactiveCls
                 } ${
                   libraryActivationHighlight
-                    ? `ring-2 ring-violet-500/90 ring-offset-2 ${headerRingOffsetCls} z-[210] relative`
+                    ? `ring-2 ring-[#A560E8]/90 ring-offset-2 ${headerRingOffsetCls} z-[210] relative`
                     : ''
                 }`}
               >
-                Library
-              </button>
-              <button
-                onClick={() => onNavigate?.('upload')}
-                className={`px-3.5 py-2 text-sm rounded-lg transition-all duration-200 font-bold ${
-                  currentPage === 'upload' ? navActiveCls : navInactiveCls
-                }`}
-              >
-                Upload
+                Documents
+                <span className="ml-1 px-1.5 py-0.5 text-[8px] font-extrabold uppercase tracking-wider bg-[#A560E8] text-white rounded-md leading-none">
+                  New
+                </span>
               </button>
               <button
                 onClick={() => onNavigate?.('analysis')}
@@ -539,7 +534,7 @@ const Header: React.FC<HeaderProps> = ({
                     {/* User Info Section - glass style like dashboard greeting */}
                     <div className="px-4 py-4 bg-stone-50/90 dark:bg-stone-800/50 border-b border-stone-200/80 dark:border-stone-700/80">
                       <div className="flex items-center gap-3">
-                        <div className="w-11 h-11 rounded-xl bg-[#58CC02] border-2 border-[#46A302] flex items-center justify-center text-white font-bold text-base">
+                        <div className="w-11 h-11 rounded-xl bg-[#A560E8] border-2 border-[#8A48C7] flex items-center justify-center text-white font-bold text-base">
                           {String(user.username || user.name || user.email || 'U').charAt(0).toUpperCase()}
                         </div>
                         <div>
@@ -549,7 +544,7 @@ const Header: React.FC<HeaderProps> = ({
                           <div className="flex items-center gap-1.5 mt-0.5">
                             <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-bold border ${
                               usageStats?.plan === 'pro' || usageStats?.plan === 'premium' || usageStats?.plan === 'focus'
-                                ? 'bg-[#EAFFD6] border-[#58CC02]/30 text-[#58CC02]'
+                                ? 'bg-[#F3EAFF] border-[#A560E8]/30 text-[#A560E8]'
                                 : 'bg-stone-100 dark:bg-stone-700 border-stone-200 dark:border-stone-600 text-stone-600 dark:text-stone-400'
                             }`}>
                               {usageStats?.plan === 'pro' || usageStats?.plan === 'premium' || usageStats?.plan === 'focus'
@@ -563,7 +558,7 @@ const Header: React.FC<HeaderProps> = ({
                       {/* Usage Statistics */}
                       {loadingUsage ? (
                         <div className="mt-4 flex items-center justify-center py-2">
-                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-[#1CB0F6] border-t-transparent"></div>
+                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-[#A560E8] border-t-transparent"></div>
                           <span className="ml-2 text-xs text-stone-500 dark:text-stone-400">Loading usage...</span>
                         </div>
                       ) : usageStats ? (
@@ -581,7 +576,7 @@ const Header: React.FC<HeaderProps> = ({
                                 <div 
                                   className={`h-1.5 rounded-full transition-all duration-500 ${
                                     getUsagePercentage(usageStats.storageUsed, usageStats.storageLimit) >= 90 ? 'bg-red-500' :
-                                    getUsagePercentage(usageStats.storageUsed, usageStats.storageLimit) >= 70 ? 'bg-yellow-500' : 'bg-lime-500'
+                                    getUsagePercentage(usageStats.storageUsed, usageStats.storageLimit) >= 70 ? 'bg-yellow-500' : 'bg-[#A560E8]'
                                   }`}
                                   style={{ width: `${getUsagePercentage(usageStats.storageUsed, usageStats.storageLimit)}%` }}
                                 ></div>
@@ -600,7 +595,7 @@ const Header: React.FC<HeaderProps> = ({
                             {(usageStats.plan === 'pro' || usageStats.plan === 'premium') && usageStats.combinedActionsRemaining != null ? (
                               <div className="bg-stone-50 dark:bg-stone-700/50 rounded-lg p-2 col-span-2">
                                 <span className="text-[10px] text-stone-500 dark:text-stone-400 uppercase tracking-wide">Combined (analyses, study packs, citations)</span>
-                                <div className={`text-sm font-semibold ${usageStats.combinedActionsRemaining === -1 ? 'text-lime-600' : usageStats.combinedActionsRemaining <= 0 ? 'text-red-600' : usageStats.combinedActionsRemaining <= 10 ? 'text-yellow-600' : 'text-green-600'}`}>
+                                <div className={`text-sm font-semibold ${usageStats.combinedActionsRemaining === -1 ? 'text-[#8A48C7]' : usageStats.combinedActionsRemaining <= 0 ? 'text-red-600' : usageStats.combinedActionsRemaining <= 10 ? 'text-yellow-600' : 'text-[#8A48C7]'}`}>
                                   {usageStats.combinedActionsRemaining === -1 ? '∞' : usageStats.combinedActionsRemaining} left
                                 </div>
                               </div>
@@ -661,7 +656,7 @@ const Header: React.FC<HeaderProps> = ({
                     <div className="py-2">
                       <button 
                         onClick={() => { onNavigate?.('pricing'); setIsDropdownOpen(false); }}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-[#FF9600] hover:bg-[#FFF4E0] dark:hover:bg-[#FF9600]/10 transition-colors"
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-[#A560E8] hover:bg-[#F3EAFF] dark:hover:bg-[#A560E8]/10 transition-colors"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -715,9 +710,10 @@ const Header: React.FC<HeaderProps> = ({
         >
           <div className="space-y-1">
             {[
-              { id: 'dashboard', label: 'Dashboard' },
-              { id: 'library', label: 'Library' },
-              { id: 'upload', label: 'Upload' },
+              // Dashboard entry hidden — Documents is the home now.
+              // Library + Upload + Write collapsed into the
+              // unified Documents hub.
+              { id: 'documents', label: 'Documents' },
               { id: 'analysis', label: 'AI Analysis' },
               { id: 'citation-history', label: 'Citations', page: 'citations' },
             ].map(({ id, label, page }) => (

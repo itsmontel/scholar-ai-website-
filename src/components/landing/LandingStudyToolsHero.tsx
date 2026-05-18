@@ -126,55 +126,32 @@ const TOOLS: ToolCard[] = [
   },
 ];
 
+// All tones are now purple (was blue/green/orange/red). Two shades —
+// primary #A560E8 and a deeper #8A48C7 — alternate across the bento
+// grid so the cards keep a visual rhythm without leaving the brand.
+const TONE_A = {
+  border: 'border-[#8A48C7]',
+  accent: 'bg-[#A560E8]',
+  badge: 'bg-[#F3EAFF] text-[#A560E8]',
+  ring: 'ring-[#A560E8]/30',
+  numBg: 'bg-[#A560E8]',
+  tint: 'bg-[#F3EAFF]',
+};
+const TONE_B = {
+  border: 'border-[#7733B5]',
+  accent: 'bg-[#8A48C7]',
+  badge: 'bg-[#F3EAFF] text-[#8A48C7]',
+  ring: 'ring-[#8A48C7]/30',
+  numBg: 'bg-[#8A48C7]',
+  tint: 'bg-[#F3EAFF]',
+};
 const TONE_STYLES: Record<Tone, { border: string; accent: string; badge: string; ring: string; numBg: string; tint: string }> = {
-  blue: {
-    border: 'border-[#1899D6]',
-    accent: 'bg-[#1CB0F6]',
-    badge: 'bg-[#DDF4FF] text-[#1CB0F6]',
-    ring: 'ring-[#1CB0F6]/30',
-    numBg: 'bg-[#1CB0F6]',
-    tint: 'bg-[#DDF4FF]',
-  },
-  green: {
-    border: 'border-[#46A302]',
-    accent: 'bg-[#58CC02]',
-    badge: 'bg-[#E5F8D0] text-[#58CC02]',
-    ring: 'ring-[#58CC02]/30',
-    numBg: 'bg-[#58CC02]',
-    tint: 'bg-[#E5F8D0]',
-  },
-  orange: {
-    border: 'border-[#D97F00]',
-    accent: 'bg-[#FF9600]',
-    badge: 'bg-[#FFF4E0] text-[#FF9600]',
-    ring: 'ring-[#FF9600]/30',
-    numBg: 'bg-[#FF9600]',
-    tint: 'bg-[#FFF4E0]',
-  },
-  purple: {
-    border: 'border-[#8A48C7]',
-    accent: 'bg-[#A560E8]',
-    badge: 'bg-[#F3EAFF] text-[#A560E8]',
-    ring: 'ring-[#A560E8]/30',
-    numBg: 'bg-[#A560E8]',
-    tint: 'bg-[#F3EAFF]',
-  },
-  red: {
-    border: 'border-[#E04343]',
-    accent: 'bg-[#FF4B4B]',
-    badge: 'bg-[#FFE8E8] text-[#FF4B4B]',
-    ring: 'ring-[#FF4B4B]/30',
-    numBg: 'bg-[#FF4B4B]',
-    tint: 'bg-[#FFE8E8]',
-  },
-  duoBlue: {
-    border: 'border-[#1899D6]',
-    accent: 'bg-[#1CB0F6]',
-    badge: 'bg-[#DDF4FF] text-[#1CB0F6]',
-    ring: 'ring-[#1CB0F6]/30',
-    numBg: 'bg-[#1CB0F6]',
-    tint: 'bg-[#DDF4FF]',
-  },
+  blue: TONE_A,
+  green: TONE_B,
+  orange: TONE_A,
+  purple: TONE_A,
+  red: TONE_B,
+  duoBlue: TONE_A,
 };
 
 export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsHeroProps) {
@@ -185,7 +162,7 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
       id="study-tools"
     >
       {/* ─── Clean background ─── */}
-      <div className="absolute inset-0 bg-[#F7F7F7] dark:bg-[#3C3C3C]" aria-hidden />
+      <div className="absolute inset-0 bg-[#FAF7FF] dark:bg-[#3C3C3C]" aria-hidden />
 
       {/* Studying mascot — large, positioned in the top-right of the section
           so it draws the eye while the headline reads. */}
@@ -204,8 +181,8 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
           <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14 lg:mb-16">
             <div className="inline-flex items-center gap-2 mb-5 rounded-full border-2 border-b-4 border-[#E5E5E5] bg-white dark:bg-[#3C3C3C] dark:border-[#4A4A4A] px-3.5 py-1.5">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#58CC02] opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#58CC02]" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#A560E8] opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#A560E8]" />
               </span>
               <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.18em] text-[#3C3C3C] dark:text-white">
                 Study tools · live in dashboard
@@ -217,10 +194,10 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
               style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
             >
               <span className="block">Transform your notes into</span>
-              <span className="relative inline-block mt-1 sm:mt-1.5 text-[#FF9600]">
+              <span className="relative inline-block mt-1 sm:mt-1.5 text-[#A560E8]">
                 7 powerful study tools
                 <svg
-                  className="absolute -bottom-1.5 left-0 w-full h-2 text-[#FF9600]"
+                  className="absolute -bottom-1.5 left-0 w-full h-2 text-[#A560E8]"
                   viewBox="0 0 200 8"
                   preserveAspectRatio="none"
                   aria-hidden
@@ -274,7 +251,7 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
               <button
                 type="button"
                 onClick={() => onNavigate('study-pack')}
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-[#58CC02] text-white font-extrabold text-base border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-[#A560E8] text-white font-extrabold text-base border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all"
                 style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
               >
                 Try Study Pack free
@@ -294,7 +271,7 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
             </div>
             <p className="text-xs sm:text-sm text-[#777] dark:text-stone-400 font-bold flex flex-wrap items-center justify-center gap-x-2 gap-y-1" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
               <span className="inline-flex items-center gap-1">
-                <svg className="w-3.5 h-3.5 text-[#58CC02]" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+                <svg className="w-3.5 h-3.5 text-[#A560E8]" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
                 Free plan included
@@ -410,13 +387,13 @@ function BentoCard({ tool, onNavigate }: { tool: ToolCard; onNavigate: (page: st
         className={`relative mx-2.5 sm:mx-3 mb-2.5 sm:mb-3 rounded-xl sm:rounded-2xl overflow-hidden border-2 border-[#E5E5E5] dark:border-[#4A4A4A] ${
           tool.dark
             ? 'bg-[#3C3C3C]'
-            : 'bg-[#F7F7F7] dark:bg-[#2C2C2C]'
+            : 'bg-[#FAF7FF] dark:bg-[#2C2C2C]'
         } ${mediaAspectClass}`}
       >
         {/* Skeleton shimmer until loaded */}
         {!loaded && (
           <div className="absolute inset-0 overflow-hidden" aria-hidden>
-            <div className="absolute inset-0 bg-[#F7F7F7] dark:bg-[#2C2C2C]" />
+            <div className="absolute inset-0 bg-[#FAF7FF] dark:bg-[#2C2C2C]" />
             <div className="absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-white/60 dark:via-white/10 to-transparent lsth-shimmer" />
           </div>
         )}
@@ -425,15 +402,15 @@ function BentoCard({ tool, onNavigate }: { tool: ToolCard; onNavigate: (page: st
         <div
           className={`relative z-10 flex ${MEDIA_CHROME_H} shrink-0 items-center gap-1 px-2.5 border-b-2 border-[#E5E5E5] dark:border-[#4A4A4A] bg-white dark:bg-[#3C3C3C]`}
         >
-          <span className="h-2 w-2 rounded-full bg-[#FF4B4B]" />
-          <span className="h-2 w-2 rounded-full bg-[#FF9600]" />
-          <span className="h-2 w-2 rounded-full bg-[#58CC02]" />
+          <span className="h-2 w-2 rounded-full bg-[#A560E8]" />
+          <span className="h-2 w-2 rounded-full bg-[#A560E8]" />
+          <span className="h-2 w-2 rounded-full bg-[#A560E8]" />
           <span className="ml-2 text-[10px] text-[#AFAFAF] dark:text-stone-500 font-bold truncate">
             writescholar.com · {tool.title.toLowerCase()}
           </span>
           {tool.video && (
-            <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-[#FFE8E8] px-1.5 py-0.5 text-[9px] font-extrabold text-[#FF4B4B] uppercase tracking-wider">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#FF4B4B] motion-safe:animate-pulse" aria-hidden />
+            <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-[#F3EAFF] px-1.5 py-0.5 text-[9px] font-extrabold text-[#A560E8] uppercase tracking-wider">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#A560E8] motion-safe:animate-pulse" aria-hidden />
               Live
             </span>
           )}
@@ -478,7 +455,7 @@ function BentoCard({ tool, onNavigate }: { tool: ToolCard; onNavigate: (page: st
 
         {/* Featured ribbon */}
         {tool.featured && (
-          <div className="absolute top-9 right-2.5 sm:right-3 z-20 inline-flex items-center gap-1.5 rounded-full bg-[#FF9600] border-2 border-[#D97F00] px-2.5 py-0.5 text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider text-white">
+          <div className="absolute top-9 right-2.5 sm:right-3 z-20 inline-flex items-center gap-1.5 rounded-full bg-[#A560E8] border-2 border-[#8A48C7] px-2.5 py-0.5 text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider text-white">
             <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
               <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.367 2.446a1 1 0 00-.364 1.118l1.287 3.958c.3.922-.755 1.688-1.54 1.118l-3.366-2.446a1 1 0 00-1.176 0l-3.366 2.446c-.784.57-1.838-.196-1.539-1.118l1.287-3.958a1 1 0 00-.364-1.118L2.05 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69l1.286-3.957z" />
             </svg>
@@ -493,11 +470,11 @@ function BentoCard({ tool, onNavigate }: { tool: ToolCard; onNavigate: (page: st
 /* ─────────────────── Sticker annotation ─────────────────── */
 
 const STICKER_TONES: Record<string, string> = {
-  green: 'bg-[#E5F8D0] text-[#58CC02] border-2 border-b-[3px] border-[#58CC02]/30',
-  orange: 'bg-[#FFF4E0] text-[#FF9600] border-2 border-b-[3px] border-[#FF9600]/30',
-  blue: 'bg-[#DDF4FF] text-[#1CB0F6] border-2 border-b-[3px] border-[#1CB0F6]/30',
+  green: 'bg-[#F3EAFF] text-[#A560E8] border-2 border-b-[3px] border-[#A560E8]/30',
+  orange: 'bg-[#F3EAFF] text-[#A560E8] border-2 border-b-[3px] border-[#A560E8]/30',
+  blue: 'bg-[#F3EAFF] text-[#A560E8] border-2 border-b-[3px] border-[#A560E8]/30',
   purple: 'bg-[#F3EAFF] text-[#A560E8] border-2 border-b-[3px] border-[#A560E8]/30',
-  red: 'bg-[#FFE8E8] text-[#FF4B4B] border-2 border-b-[3px] border-[#FF4B4B]/30',
+  red: 'bg-[#F3EAFF] text-[#A560E8] border-2 border-b-[3px] border-[#A560E8]/30',
 };
 
 function Sticker({
@@ -776,7 +753,7 @@ function NotesPanel({ onNavigate }: LandingStudyToolsHeroProps) {
               onClick={() => handleTabClick(id)}
               className={`relative flex-1 min-w-[4.5rem] sm:min-w-0 rounded-xl px-3 py-2 text-center text-[13px] font-extrabold transition-colors ${
                 active
-                  ? 'bg-[#DDF4FF] text-[#1CB0F6] border-2 border-[#1CB0F6]/30'
+                  ? 'bg-[#F3EAFF] text-[#A560E8] border-2 border-[#A560E8]/30'
                   : 'text-[#AFAFAF] dark:text-stone-400 hover:text-[#3C3C3C] dark:hover:text-white'
               }`}
               style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
@@ -801,7 +778,7 @@ function NotesPanel({ onNavigate }: LandingStudyToolsHeroProps) {
                 className="inline-flex items-center gap-2 rounded-xl border-2 border-b-4 border-[#E5E5E5] dark:border-[#4A4A4A] bg-white dark:bg-[#3C3C3C] px-5 py-2.5 text-sm font-extrabold text-[#3C3C3C] dark:text-white active:border-b-2 active:translate-y-0.5 transition-all"
                 style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
               >
-                <svg className="w-4 h-4 text-[#1CB0F6]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden>
+                <svg className="w-4 h-4 text-[#A560E8]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
                 Go to upload
@@ -826,10 +803,10 @@ function NotesPanel({ onNavigate }: LandingStudyToolsHeroProps) {
               />
               {/* Live "is typing" indicator while demo is animating */}
               {inDemoMode && phase === 'typing' && (
-                <div className="pointer-events-none absolute top-4 right-5 inline-flex items-center gap-1.5 rounded-full bg-[#DDF4FF] border-2 border-[#1CB0F6]/30 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-[#1CB0F6]">
+                <div className="pointer-events-none absolute top-4 right-5 inline-flex items-center gap-1.5 rounded-full bg-[#F3EAFF] border-2 border-[#A560E8]/30 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-[#A560E8]">
                   <span className="relative flex h-1.5 w-1.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#1CB0F6] opacity-75" />
-                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#1CB0F6]" />
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#A560E8] opacity-75" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#A560E8]" />
                   </span>
                   Typing...
                 </div>
@@ -858,7 +835,7 @@ function NotesPanel({ onNavigate }: LandingStudyToolsHeroProps) {
           className="inline-flex sm:flex-none items-center justify-center gap-2 rounded-xl border-2 border-b-4 border-[#E5E5E5] dark:border-[#4A4A4A] bg-white dark:bg-[#3C3C3C] px-5 py-3.5 text-sm font-extrabold text-[#3C3C3C] dark:text-white active:border-b-2 active:translate-y-0.5 transition-all"
           style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
         >
-          <svg className="w-4 h-4 text-[#1CB0F6] shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden>
+          <svg className="w-4 h-4 text-[#A560E8] shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden>
             <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
           </svg>
           Upload file
@@ -871,19 +848,19 @@ function NotesPanel({ onNavigate }: LandingStudyToolsHeroProps) {
             demoGenerating
               ? 'bg-[#A560E8] border-[#8A48C7] text-white'
               : demoDone
-                ? 'bg-[#58CC02] border-[#46A302] text-white'
+                ? 'bg-[#A560E8] border-[#8A48C7] text-white'
                 : canGenerate || demoPulsing
                   ? 'bg-[#3C3C3C] border-[#2C2C2C] text-white'
                   : 'bg-[#E5E5E5] border-[#CCCCCC] text-white/90 cursor-not-allowed'
           } ${
             demoPulsing
-              ? 'ring-2 ring-[#1CB0F6]/60 ring-offset-2 ring-offset-white dark:ring-offset-[#3C3C3C]'
+              ? 'ring-2 ring-[#A560E8]/60 ring-offset-2 ring-offset-white dark:ring-offset-[#3C3C3C]'
               : ''
           }`}
           style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
         >
           {demoPulsing && (
-            <span className="absolute inset-0 bg-[#1CB0F6]/20 motion-safe:animate-ping rounded-xl opacity-50" aria-hidden />
+            <span className="absolute inset-0 bg-[#A560E8]/20 motion-safe:animate-ping rounded-xl opacity-50" aria-hidden />
           )}
           {demoGenerating ? (
             <>

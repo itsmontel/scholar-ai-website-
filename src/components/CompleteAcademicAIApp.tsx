@@ -27,7 +27,9 @@ const OnboardingPage = lazyWithRetry(() => import('./pages/OnboardingPage'));
 // Pre-signup Duolingo-style funnel — every "Sign up" CTA on the marketing
 // pages now routes through this 6-screen flow before the signup form.
 const AuthCallbackPage = lazyWithRetry(() => import('./pages/AuthCallbackPage'));
-const DashboardPage = lazyWithRetry(() => import('./pages/DashboardPageNew'));
+// DashboardPageNew (the old tool-grid dashboard) is retired — every
+// tool now lives inside the Documents workspace. The file is kept on
+// disk for reference/rollback but is no longer routed anywhere.
 const DashboardPageLegacy = lazyWithRetry(() => import('./pages/DashboardPage'));
 const AnalysisPage = lazyWithRetry(() => import('./pages/AnalysisPage'));
 const AnalysisHistoryPage = lazyWithRetry(() => import('./pages/AnalysisHistoryPage'));
@@ -85,10 +87,18 @@ const StudyPackHubPage = lazyWithRetry(() => import('./pages/StudyPackHubPage'))
 const AnalyzeHubPage = lazyWithRetry(() => import('./pages/AnalyzeHubPage'));
 const CitationsHubPage = lazyWithRetry(() => import('./pages/CitationsHubPage'));
 const UnlockQuizPage = lazyWithRetry(() => import('./pages/UnlockQuizPage'));
+// New "Write" tool — Word-style in-app editor (Phase 1: editor +
+// autosave + DOCX import. Analyzer integration follows in Phase 2.)
+const WritePage = lazyWithRetry(() => import('./write/WritePage'));
+// Unified Documents hub — replaces Library + Upload + Write surfaces.
+// Hub view lists every doc (uploaded OR written) with per-row Open /
+// Analyze / Download / Delete actions; editor view reuses WriteEditor.
+const DocumentsPage = lazyWithRetry(() => import('./documents/DocumentsPage'));
 
 // Import common components
 import ErrorBoundary from './common/ErrorBoundary';
 import PageErrorBoundary from './common/PageErrorBoundary';
+import Header from './common/Header';
 import SoftPaywall from './common/SoftPaywall';
 import StripeCancelTrialChoiceModal from './common/StripeCancelTrialChoiceModal';
 import DashboardWelcomeToast from './common/DashboardWelcomeToast';
@@ -184,6 +194,10 @@ function getPageFromPath(pathname: string): string {
   if (p === '/login') return 'login';
   if (p === '/reset-password') return 'reset-password';
   if (p === '/dashboard') return 'dashboard';
+  // The old tool-grid dashboard (Daily Review / Games / Study Packs
+  // tabs) lives on here now that /dashboard is the Documents
+  // workspace. Kept so those tab-only surfaces stay reachable.
+  if (p === '/study-tools') return 'study-tools';
   if (p === '/pricing') return 'pricing';
   if (p === '/features') return 'features';
   if (p === '/focus-mode' || p === '/focus') return 'focus-mode';
@@ -198,11 +212,19 @@ function getPageFromPath(pathname: string): string {
   if (p === '/quiz-history') return 'quiz-history';
   if (p === '/friends') return HIDE_FRIENDS ? 'dashboard' : 'friends';
   if (p === '/share-friends') return HIDE_FRIENDS ? 'dashboard' : 'share-friends';
-  if (p === '/upload') return 'upload';
+  if (p === '/upload') return 'documents';
+  if (p === '/write') return 'documents';
   if (p === '/settings') return 'account';
   if (p === '/unlock-quiz' || p.startsWith('/unlock-quiz?')) return 'unlock-quiz';
   if (p === '/profile') return 'profile';
-  if (p === '/library') return 'library';
+  // ─── Unified Documents hub ──────────────────────────────────
+  // /documents          → hub (list of all docs)
+  // /documents/<id>     → editor for that doc
+  // Legacy URLs Library + Upload + Write all redirect here so
+  // existing bookmarks / external links still land somewhere
+  // useful instead of 404'ing.
+  if (p === '/documents' || p.startsWith('/documents/')) return 'documents';
+  if (p === '/library') return 'documents';
   if (p === '/account') return 'account';
   if (p === '/billing') return 'billing';
   if (p === '/help' || p === '/help-center') return 'help';
@@ -336,6 +358,14 @@ const AcademicAIApp = () => {
   );
   const [isLoggedIn, setIsLoggedIn] = useState(initialAuth.isLoggedIn);
   const [user, setUser] = useState<User | null>(initialAuth.user);
+  // True while the Documents workspace is in its full-screen editor.
+  // Reported up by DocumentsPage; used to drop the global site header
+  // so the editor gets the full viewport height. Initialised from the
+  // path so a hard load of /documents/<id> hides the header with no
+  // flash of the header on first paint.
+  const [documentsEditorActive, setDocumentsEditorActive] = useState(
+    () => typeof window !== 'undefined' && /^\/documents\/[\w-]+/.test(window.location.pathname)
+  );
   const [studyPackInitialData, setStudyPackInitialData] = useState<{ data: any; title?: string } | null>(null);
   /** Opened when API returns upgrade/limit (403/429) so user can subscribe after canceling Stripe */
   const [apiLimitPaywallOpen, setApiLimitPaywallOpen] = useState(() => readInitialSoftPaywallOpen(initialAuth.user));
@@ -464,7 +494,7 @@ const AcademicAIApp = () => {
   }, [currentPage]);
 
   // Route protection for authenticated pages
-  const protectedRoutes = ['dashboard', 'analysis', 'analysis-history', 'citation-results', 'citation-history', 'quiz-history', 'friends', 'upload', 'profile', 'library', 'account', 'billing', 'badges'];
+  const protectedRoutes = ['dashboard', 'documents', 'write', 'study-tools', 'analysis', 'analysis-history', 'citation-results', 'citation-history', 'quiz-history', 'friends', 'upload', 'profile', 'library', 'account', 'billing', 'badges'];
 
   // SEO: dynamic title, description, canonical, and OG/Twitter per page (SPA)
   const pageMeta: Record<
@@ -994,6 +1024,7 @@ const AcademicAIApp = () => {
     'badges': '/badges',
     'why-students-choose': '/why-students-choose',
     'study-tools-comparison': '/vs-quizlet-knowt',
+    'study-tools': '/study-tools',
   };
 
   const navigateTo = (page: string, slug?: string, options?: { quizHistoryFilter?: 'all' | 'quiz' | 'flashcards' | 'crossword' | 'crater_blast'; studyPack?: { data: any; title?: string }; unlockQuizQuery?: string }) => {
@@ -1018,6 +1049,10 @@ const AcademicAIApp = () => {
     // Update URL to canonical form
     if (page === 'blog-post' && slug) {
       window.history.pushState({}, '', `/blog/${slug}`);
+    } else if (page === 'documents' && slug) {
+      // Open a specific document straight into the editor view
+      // (used when closing the full report — return to the paper).
+      window.history.pushState({}, '', `/documents/${slug}`);
     } else if (page === 'quiz-history' && options?.quizHistoryFilter) {
       window.history.pushState({}, '', `/quiz-history?filter=${options.quizHistoryFilter}`);
     } else if (page === 'unlock-quiz' && options?.unlockQuizQuery) {
@@ -1192,6 +1227,31 @@ const AcademicAIApp = () => {
       );
     }
 
+    // The flagship workspace — "Documents IS the dashboard". Shared
+    // by /dashboard, /documents(/:id), and the legacy library/upload/
+    // write routes so there's one mental model + one render path.
+    const renderDocumentsWorkspace = () => {
+      const m = typeof window !== 'undefined' ? window.location.pathname.match(/^\/documents\/([\w-]+)/) : null;
+      const initialDocumentId = m ? m[1] : undefined;
+      return (
+        <div className="min-h-screen bg-[#FAF7FF] dark:bg-stone-950">
+          {/* Header is hidden while the full-screen editor is open so
+              the writing surface gets the whole viewport. The slim
+              editor chrome (back-to-Documents, title, save status,
+              export) + the workspace rail keep orientation/escape. */}
+          {!documentsEditorActive && (
+            <Header onNavigate={navigateTo} user={user} onLogout={handleLogout} currentPage="documents" />
+          )}
+          <DocumentsPage
+            initialDocumentId={initialDocumentId}
+            onNavigate={navigateTo}
+            user={user}
+            onEditorActiveChange={setDocumentsEditorActive}
+          />
+        </div>
+      );
+    };
+
     switch (currentPage) {
       case 'landing':
         return <LandingPage onNavigate={navigateTo} user={user} />;
@@ -1257,9 +1317,13 @@ const AcademicAIApp = () => {
         return <UnsubscribePage onNavigate={navigateTo} />;
       case 'unlock-quiz':
         return <UnlockQuizPage />;
-      case 'dashboard':
+      case 'study-tools':
+        // The old tool-grid dashboard is retired — every tool now
+        // lives inside the Documents workspace (Analyze / Daily
+        // Review / Study Packs / Citations / Games as in-page
+        // panels). Any old /study-tools link lands in the workspace.
         if (needsOnboarding) return renderOnboarding('dashboard');
-        return <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} onUserUpdate={handleDashboardUserUpdate} />;
+        return renderDocumentsWorkspace();
       case 'analyze':
         if (needsOnboarding) return renderOnboarding('analyze');
         return <AnalyzeEssayPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
@@ -1333,15 +1397,29 @@ const AcademicAIApp = () => {
       case 'friends':
         if (HIDE_FRIENDS) {
           if (needsOnboarding) return renderOnboarding('dashboard');
-          return <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} onUserUpdate={handleDashboardUserUpdate} />;
+          return renderDocumentsWorkspace();
         }
         return <FriendsPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      // ─── Documents workspace — the flagship dashboard ──────
+      // "Documents IS the dashboard": /dashboard now lands here.
+      // The legacy 'library', 'upload' and 'write' surfaces all
+      // collapse into the single Documents page too. Their cases
+      // fall through to keep stale callers (and any code paths
+      // that still call navigateTo('library') etc.) working.
+      // The old tool-grid dashboard moved to /study-tools; the
+      // old <LibraryPage /> and <UploadPage /> are now dead code
+      // reachable only by editing this switch — safe to delete in
+      // a follow-up cleanup pass.
+      case 'dashboard':
+      case 'library':
       case 'upload':
-        return <UploadPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
+      case 'write':
+      case 'documents': {
+        if (needsOnboarding) return renderOnboarding('dashboard');
+        return renderDocumentsWorkspace();
+      }
       case 'profile':
         return <ProfilePage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
-      case 'library':
-        return <LibraryPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'account':
         return (
           <AccountPage
@@ -1382,13 +1460,13 @@ const AcademicAIApp = () => {
       case 'badges':
         if (HIDE_STREAK_AND_BADGES) {
           if (needsOnboarding) return renderOnboarding('dashboard');
-          return <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} onUserUpdate={handleDashboardUserUpdate} />;
+          return renderDocumentsWorkspace();
         }
         return <BadgesPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'share-friends':
         if (HIDE_FRIENDS) {
           if (needsOnboarding) return renderOnboarding('dashboard');
-          return <DashboardPage onNavigate={navigateTo} user={user} onLogout={handleLogout} onUserUpdate={handleDashboardUserUpdate} />;
+          return renderDocumentsWorkspace();
         }
         return <ShareFriendsPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       // Free Tools

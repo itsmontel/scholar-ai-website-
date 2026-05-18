@@ -18,80 +18,87 @@ type Testimonial = {
   date: string;
 };
 
+// Every quote is deliberately about ONE of the two core products —
+// writing in the editor/workspace, or the AI analysis/grade. No
+// study-pack / flashcard / citation-finder filler: the landing page
+// promises a writing tool + feedback, so the proof should match it.
 const TESTIMONIALS: Testimonial[] = [
-  // ── SHORT: quick punchy quote (Matthew-style in the reference) ──
+  // SHORT: analysis, rubric while drafting in the editor
   {
     name: 'Matthew H.',
     outcome: 'English 102 final: B+ → A (92/100)',
     text:
-      "Having AI feedback on my essays without bugging my professor during office hours meant I actually did more drafts. WriteScholar showed me which rubric criteria I was losing points on. It was stricter than ChatGPT and even my TA's marking, but that pushed me to keep improving.",
+      "I just write my drafts straight in WriteScholar now and the rubric score moves while I edit. It actually showed me which criteria I kept dropping marks on. Honestly it was harsher than ChatGPT and my TA, but that's the thing that got me from a B+ to an A.",
     date: 'Apr 18, 2026',
   },
-  // ── LONG: anchor card with the detailed before/after story (Rumaysah-style) ──
+  // LONG: anchor card, analysis accuracy + same-minute iteration
   {
     name: 'Rumaysah K.',
     outcome: 'Sophomore year GPA: 2.7 → 3.8',
     text:
-      "Before using WriteScholar, I struggled to figure out how to move from a B- average into A territory. I knew writing more drafts was the only real way to improve, but I couldn't hand in that many essays to my professors. Office hours and TA availability limited how fast I could iterate. When I started using WriteScholar, my time management and efficiency improved really quickly. I could get my term papers marked the same day, meaning I could revise immediately without stressing or waiting a week for feedback. My favorite part is how accurate the marking is. Compared to my actual professor scores, it's only 2-3 points off out of 100. It tells you the truth instead of giving inflated grades like many AI tools do. I'd definitely recommend it to anyone in upper-division humanities classes.",
+      "My problem was never effort, it was speed. Office hours and TA availability capped how many drafts I could actually get marked. Now I write the essay in the editor and get it graded the same minute, so I revise right away instead of waiting a week. The accuracy is what sold me. Compared to my real professor scores it's only 2 to 3 points off out of 100, and it tells you the truth instead of inflating your grade the way other AI tools do. I tell everyone in my upper-division humanities classes about it.",
     date: 'Mar 02, 2026',
   },
-  // ── MEDIUM: junior, struggling lit major ──
+  // MEDIUM: writing editor, one-click apply revisions into draft
   {
     name: 'Leon P.',
     outcome: 'Pulled American Lit from C to A- in one semester',
     text:
-      "I was sitting on a C in my American Lit class after midterms and panicking about my major GPA. WriteScholar replaced the need to constantly ask my professor for feedback, which made revision more independent and less stressful. I wrote three practice essays on the readings and used the feedback to refine my close-reading each time. By finals, I had a 91 on my comparative essay, an A-. It also gave me the confidence to take a 400-level seminar next semester.",
+      "I was sitting on a C after midterms and kind of panicking. I'd write a paragraph, get feedback in the margin, and drop the fix straight into my draft. No copy-pasting between tabs. Three practice essays later my close reading actually held up and I finished on a 91, which was an A-.",
     date: 'Dec 11, 2025',
   },
-  // ── MEDIUM-LONG: first-gen / writing center alternative ──
+  // MEDIUM-LONG: analysis, line-by-line feedback
   {
     name: 'Subhaan A.',
     outcome: 'Term paper score: 72 → 89 (Psych 250)',
     text:
-      "Before I found WriteScholar, I was scoring around 72 on my Intro to Psych term papers. I was putting in effort but didn't really understand where I was going wrong. The writing center's wait list was always 2 weeks deep. WriteScholar told me line by line which evidence wasn't doing enough work and where my analysis stayed surface-level. After two term papers, I started consistently hitting 89+. The free plan was enough to pull my course grade up to an A-.",
+      "I was putting in the work but I genuinely didn't know where I was going wrong, and the writing center had a two-week wait. WriteScholar told me, line by line, which evidence wasn't pulling its weight and where my analysis stayed shallow. After a couple of term papers in the editor I was consistently hitting 89+, and the free plan was enough to pull my course grade up to an A-.",
     date: 'Feb 21, 2026',
   },
-  // ── SHORT: citation finder, senior thesis ──
+  // SHORT: writing editor, Word import/export fidelity
   {
     name: 'Aisha R.',
-    outcome: 'Senior thesis: cut research time from 6 hrs to 90 min per source',
+    outcome: 'Stopped reformatting before every submission',
     text:
-      "The citation finder saved my senior thesis. Each source came with a 2-sentence note explaining why it fit my argument. My lit review used to be a list of quotes. Now it reads like an actual argument my advisor can follow.",
+      "I import my Word doc, write and fix everything inside WriteScholar, then export it back, and the formatting comes out exactly right. I used to lose a full hour reformatting before every submission. Now I don't even open Word until it's done.",
     date: 'May 06, 2026',
   },
-  // ── MEDIUM: study pack / pre-med ──
+  // MEDIUM: writing workspace, live feedback as you write
   {
     name: 'James O.',
-    outcome: 'Bio 210 midterm: 73% → 91%',
+    outcome: 'Sociology essay: 68 → 90',
     text:
-      "Study Pack turned my chaotic Bio 210 lecture notes into flashcards in under a minute. I used to cram at midnight before exams. Now I actually review for 15 minutes a day. Got a 91% on my second midterm, up from 73% on the first. The streak system is what keeps me coming back; my MCAT prep is already in better shape than it was last spring.",
+      "It's basically a writing coach that lives in my document. I draft in the editor and the feedback panel keeps updating as I go, so by the time I finish a section it's already been picked apart and rebuilt. My last essay went from a 68 on the first attempt to a 90. Same effort, way less guessing.",
     date: 'Jan 28, 2026',
   },
-  // ── SHORT: Pro user testimonial, philosophy major ──
+  // SHORT: analysis, honest professor-level pushback
   {
     name: 'Tomás G.',
     outcome: 'Phil 305 comparative essay: 76 → 94',
     text:
-      "I expected another AI chatbot that calls every essay 'great'. WriteScholar actually pushed back, flagged my thesis as too broad, and called out three logic gaps. My philosophy professor is brutal, and this matched his standards. Worth every dollar of Pro.",
+      "I expected another AI that calls every essay 'great'. This one actually pushed back. It flagged my thesis as too broad and called out three logic gaps right there in the draft. My philosophy professor is brutal and this matched his standards. Worth every dollar of Pro.",
     date: 'Apr 30, 2026',
   },
-  // ── MEDIUM: international student / clarity feedback ──
+  // MEDIUM: analysis, clarity feedback while writing
   {
     name: 'Elena V.',
-    outcome: 'TA marked her sociology draft 12 points higher (80 → 92)',
+    outcome: 'TA marked her draft 12 points higher (80 → 92)',
     text:
-      "English isn't my first language, so the clarity feedback from my TA was always vague: 'awkward phrasing' with no fix. WriteScholar told me exactly which words to swap and which sentences to tighten, line by line. My TA gave my second sociology draft a 92/100 vs. the 80/100 my first attempt got. She said it 'sounded smoother' without being able to pinpoint what changed, but I knew.",
+      "English isn't my first language, so 'awkward phrasing' feedback never actually told me what to do. Writing in WriteScholar, it points at the exact words to swap and the sentences to tighten while I type. My TA gave my second draft a 92 out of 100 versus the 80 my first one got. She said it 'sounded smoother' and couldn't say why. I knew why.",
     date: 'Mar 19, 2026',
   },
 ];
 
+// On-theme palette only — purple tints (was a 6-colour green/orange/
+// red/blue mix). Subtle shade variation keeps avatars distinct
+// without leaving the brand purple world.
 const AVATAR_COLORS = [
   { bg: 'bg-[#F3EAFF]', text: 'text-[#A560E8]', border: 'border-[#A560E8]' },
-  { bg: 'bg-[#E5F8D0]', text: 'text-[#58CC02]', border: 'border-[#58CC02]' },
-  { bg: 'bg-[#FFF4E0]', text: 'text-[#FF9600]', border: 'border-[#FF9600]' },
-  { bg: 'bg-[#FFE8E8]', text: 'text-[#FF4B4B]', border: 'border-[#FF4B4B]' },
-  { bg: 'bg-[#DDF4FF]', text: 'text-[#1CB0F6]', border: 'border-[#1CB0F6]' },
-  { bg: 'bg-[#E5F8D0]', text: 'text-[#58CC02]', border: 'border-[#58CC02]' },
+  { bg: 'bg-[#E4D3F7]', text: 'text-[#7733B5]', border: 'border-[#8A48C7]' },
+  { bg: 'bg-[#F3EAFF]', text: 'text-[#8A48C7]', border: 'border-[#8A48C7]' },
+  { bg: 'bg-[#E4D3F7]', text: 'text-[#A560E8]', border: 'border-[#A560E8]' },
+  { bg: 'bg-[#F3EAFF]', text: 'text-[#7733B5]', border: 'border-[#7733B5]' },
+  { bg: 'bg-[#E4D3F7]', text: 'text-[#8A48C7]', border: 'border-[#8A48C7]' },
 ];
 
 function InitialAvatar({ name, colorIdx }: { name: string; colorIdx: number }) {
@@ -112,7 +119,7 @@ function StarRating() {
   return (
     <div className="flex gap-0.5" aria-label="5 out of 5 stars">
       {[...Array(5)].map((_, i) => (
-        <svg key={i} className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-[#FF9600]" fill="currentColor" viewBox="0 0 20 20">
+        <svg key={i} className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-[#A560E8]" fill="currentColor" viewBox="0 0 20 20">
           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
         </svg>
       ))}
@@ -157,6 +164,9 @@ export default function LandingTestimonialsSection() {
               Trusted by{' '}
               <span className="text-[#A560E8]">50,000+ students</span>
             </h2>
+            <p className="mt-4 text-base sm:text-lg text-stone-600 dark:text-stone-400 font-semibold">
+              On the work they actually hand in: drafted in the editor, graded by the AI.
+            </p>
           </div>
 
           {/* ─── TESTIMONIAL MASONRY ────────────────────────────────

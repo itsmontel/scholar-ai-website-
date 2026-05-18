@@ -1,9 +1,10 @@
 const express = require('express');
 const multer = require('multer');
 const { authenticateToken } = require('../middleware/auth');
-const { 
+const {
   validateUploadDocument,
   validateUpdateDocument,
+  validateUpdateDocumentContent,
   validateGetDocuments,
   validateDocumentId
 } = require('../middleware/validation');
@@ -90,6 +91,31 @@ router.post('/upload', authenticateToken, upload.single('document'), async (req,
       }
     } catch (error) {
       console.error('Error checking upload limits, allowing upload:', error);
+    }
+
+    // Hard cap on TOTAL documents owned (Free 3, Pro/Premium 99).
+    // Distinct from the monthly counter above: this is "how many
+    // documents you can keep at once" and powers the X/cap pill.
+    try {
+      const maxDocs = planLimits.maxDocuments;
+      if (typeof maxDocs === 'number' && maxDocs > 0) {
+        const ownedPromise = documentService.countUserDocuments(userId);
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Document count timeout')), 5000);
+        });
+        const owned = await Promise.race([ownedPromise, timeoutPromise]);
+        if (owned >= maxDocs) {
+          return res.status(429).json({
+            success: false,
+            message: `You've reached your ${planLimits.name} plan limit of ${maxDocs} documents. Delete one${planLimits.name === 'Free' ? ', or upgrade for up to 99' : ''} to add another.`,
+            code: 'DOCUMENT_LIMIT_REACHED',
+            limit: maxDocs,
+            used: owned
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error checking total document cap, allowing create:', error);
     }
 
     // Check file size against plan limits
@@ -322,6 +348,22 @@ router.get('/', authenticateToken, validateGetDocuments, async (req, res) => {
       });
     }
 
+    // Plan-aware usage so the hub can show the "X / cap" pill.
+    // Best-effort — never let this break the document list.
+    let usage = null;
+    try {
+      const [owned, planLimits] = await Promise.all([
+        documentService.countUserDocuments(userId),
+        subscriptionService.getPlanLimits(userId),
+      ]);
+      const cap = (planLimits && typeof planLimits.maxDocuments === 'number' && planLimits.maxDocuments > 0)
+        ? planLimits.maxDocuments
+        : null;
+      usage = { documents: { used: owned, limit: cap, plan: planLimits?.name || 'Free' } };
+    } catch (e) {
+      console.error('Error computing document usage:', e.message);
+    }
+
     res.json({
       success: true,
       data: {
@@ -338,6 +380,7 @@ router.get('/', authenticateToken, validateGetDocuments, async (req, res) => {
           updatedAt: doc.updated_at,
           analysisStatus: analysisStatusMap[doc.id] || { hasAnalysis: false, lastAnalyzed: null }
         })),
+        usage,
         pagination: {
           limit: parseInt(limit),
           offset: parseInt(offset),
@@ -387,7 +430,9 @@ router.get('/:id', authenticateToken, validateDocumentId, async (req, res) => {
           uploadStatus: document.upload_status,
           createdAt: document.created_at,
           updatedAt: document.updated_at,
-          content_text: document.content_text
+          lastEditedAt: document.last_edited_at,
+          content_text: document.content_text,
+          contentHtml: document.content_html
         }
       }
     });
@@ -451,6 +496,49 @@ router.get('/:id/download', authenticateToken, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to generate download URL',
+      error: error.message
+    });
+  }
+});
+
+// @route   PUT /api/documents/:id
+// @route   PUT /api/documents/:id/content
+// @desc    Persist a save from the in-app rich-text editor.
+//          Accepts contentHtml (TipTap output), contentText
+//          (analyzer-friendly plain text) and wordCount. All
+//          fields optional but at least one must be present.
+//          Sets last_edited_at on every successful save so the
+//          UI can show an accurate "Saved Xs ago" indicator
+//          without confusing it with metadata-only updates.
+// @access  Private
+router.put('/:id/content', authenticateToken, validateDocumentId, validateUpdateDocumentContent, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const { contentHtml, contentText, wordCount } = req.body;
+
+    const updateData = { last_edited_at: new Date().toISOString() };
+    if (contentHtml !== undefined) updateData.content_html = contentHtml;
+    if (contentText !== undefined) updateData.content_text = contentText;
+    if (wordCount !== undefined) updateData.word_count = wordCount;
+
+    const document = await documentService.updateDocument(id, userId, updateData);
+
+    res.json({
+      success: true,
+      message: 'Document content saved',
+      data: {
+        id: document.id,
+        wordCount: document.word_count,
+        lastEditedAt: document.last_edited_at,
+        updatedAt: document.updated_at
+      }
+    });
+  } catch (error) {
+    console.error('Save document content error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to save document content',
       error: error.message
     });
   }

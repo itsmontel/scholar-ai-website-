@@ -19,6 +19,7 @@ const supabaseServiceRole = createClient(
 const PLAN_LIMITS = {
   free: {
     documentsPerMonth: 3,
+    maxDocuments: 3, // hard cap on TOTAL documents owned (not monthly)
     analysesPerMonth: 2,
     citationSearchesPerMonth: 2,
     humanizeWordsPerMonth: 5000,
@@ -39,6 +40,7 @@ const PLAN_LIMITS = {
   },
   pro: {
     documentsPerMonth: -1,
+    maxDocuments: 99, // hard cap on TOTAL documents owned
     combinedActionsPerMonth: 99, // analyses + study packs + citations share this pool
     combinedWordsPerMonth: 999999, // Paper Summarizer word pool
     analysesPerMonth: 99, // used for combined check
@@ -63,6 +65,7 @@ const PLAN_LIMITS = {
   },
   premium: {
     documentsPerMonth: -1,
+    maxDocuments: 99, // hard cap on TOTAL documents owned
     combinedActionsPerMonth: 499,
     combinedWordsPerMonth: 4999999,
     analysesPerMonth: 499,

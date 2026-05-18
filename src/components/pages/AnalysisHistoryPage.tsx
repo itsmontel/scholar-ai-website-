@@ -243,9 +243,9 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
   const getAnalysisTypeColor = (type: string): { bg: string; text: string; border: string; tint: string } => {
     const colors: { [key: string]: { bg: string; text: string; border: string; tint: string } } = {
       general: { bg: 'bg-[#A560E8]', text: 'text-[#A560E8]', border: 'border-[#8A48C7]', tint: 'bg-[#F3EAFF]' },
-      citation: { bg: 'bg-[#58CC02]', text: 'text-[#58CC02]', border: 'border-[#46A302]', tint: 'bg-[#EAFFD6]' },
-      grammar: { bg: 'bg-[#FF9600]', text: 'text-[#FF9600]', border: 'border-[#D97F00]', tint: 'bg-[#FFF4E0]' },
-      comprehensive: { bg: 'bg-[#1CB0F6]', text: 'text-[#1CB0F6]', border: 'border-[#1899D6]', tint: 'bg-[#DDF4FF]' },
+      citation: { bg: 'bg-[#A560E8]', text: 'text-[#A560E8]', border: 'border-[#8A48C7]', tint: 'bg-[#F3EAFF]' },
+      grammar: { bg: 'bg-[#A560E8]', text: 'text-[#A560E8]', border: 'border-[#8A48C7]', tint: 'bg-[#F3EAFF]' },
+      comprehensive: { bg: 'bg-[#A560E8]', text: 'text-[#A560E8]', border: 'border-[#8A48C7]', tint: 'bg-[#F3EAFF]' },
     };
     return colors[type] || { bg: 'bg-stone-400', text: 'text-stone-600', border: 'border-stone-500', tint: 'bg-stone-100' };
   };
@@ -269,7 +269,7 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
 
   if (isLoading) {
     return (
-      <div className="relative min-h-screen flex items-center justify-center overflow-x-clip bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+      <div className="relative min-h-screen flex items-center justify-center overflow-x-clip bg-[#FAF7FF] dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-stone-200 border-t-[#A560E8] mx-auto"></div>
           <p className="mt-4 text-stone-500 dark:text-stone-400 font-extrabold">Loading analysis history...</p>
@@ -280,7 +280,7 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
 
   if (!isPaidUser) {
     return (
-      <div className={showHeader ? 'relative min-h-screen overflow-x-clip bg-stone-50 dark:bg-stone-950' : 'bg-stone-50 dark:bg-stone-950'} style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+      <div className={showHeader ? 'relative min-h-screen overflow-x-clip bg-[#FAF7FF] dark:bg-stone-950' : 'bg-[#FAF7FF] dark:bg-stone-950'} style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
         {showHeader && <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="analysis-history" />}
         <div className={showHeader ? 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10' : 'p-6'}>
           <div className="max-w-md mx-auto text-center py-16">
@@ -312,15 +312,21 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
   }
 
   return (
-    <div className={showHeader ? 'relative min-h-screen overflow-x-clip bg-stone-50 dark:bg-stone-950' : 'bg-stone-50 dark:bg-stone-950'} style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+    <div className={showHeader ? 'relative min-h-screen overflow-x-clip bg-[#FAF7FF] dark:bg-stone-950' : 'bg-[#FAF7FF] dark:bg-stone-950'} style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       {showHeader && <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="analysis-history" />}
 
       <div className={showHeader ? "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10" : "p-6"}>
         {/* Header */}
-        <div className="mb-10">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-900 dark:text-stone-100 mb-4">Analysis History</h1>
-          <p className="text-lg text-stone-500 dark:text-stone-400">
-            View all your previous document analyses and results
+        <div className="mb-8 sm:mb-10">
+          <div className="flex items-center gap-2.5">
+            <span className="h-px w-7 bg-[#A560E8]/50" aria-hidden />
+            <p className="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.22em] text-[#A560E8]">Your history</p>
+          </div>
+          <h1 className="dash-serif mt-3 text-[2rem] sm:text-[2.6rem] lg:text-[3rem] font-extrabold leading-[1.03] tracking-tight text-stone-900 dark:text-stone-50">
+            Analysis history
+          </h1>
+          <p className="mt-3 text-sm sm:text-base text-stone-600 dark:text-stone-400 font-medium leading-relaxed max-w-2xl">
+            Every analysis you've run, kept in one place. Reopen, copy, or export any of them.
           </p>
         </div>
 
@@ -341,8 +347,8 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
 
         {analyses.length === 0 ? (
           <div className="text-center py-16">
-            <div className="w-20 h-20 bg-[#DDF4FF] border-2 border-b-4 border-[#1CB0F6]/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <svg className="w-10 h-10 text-[#1CB0F6]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="w-20 h-20 bg-[#F3EAFF] border-2 border-b-4 border-[#A560E8]/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <svg className="w-10 h-10 text-[#A560E8]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
@@ -352,7 +358,7 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
             </p>
             <button
               onClick={() => onNavigate?.('analysis')}
-              className="px-6 py-3 bg-[#58CC02] text-white border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all font-extrabold uppercase tracking-wide rounded-xl hover:brightness-105"
+              className="px-6 py-3 bg-[#A560E8] text-white border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all font-extrabold uppercase tracking-wide rounded-xl hover:brightness-105"
             >
               Start Your First Analysis
             </button>
@@ -361,7 +367,7 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Analysis List */}
             <div className="lg:col-span-1">
-              <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl p-6">
+              <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-3xl shadow-[0_12px_34px_-22px_rgba(0,0,0,0.18)] p-6">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 bg-[#A560E8] border-2 border-[#8A48C7] rounded-xl flex items-center justify-center">
@@ -374,7 +380,7 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
                   <select
                     value={timeFilter}
                     onChange={(e) => setTimeFilter(e.target.value)}
-                    className="bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 rounded-xl px-3 py-2 text-sm font-extrabold text-stone-700 dark:text-stone-300 focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 focus:outline-none"
+                    className="bg-stone-50 dark:bg-stone-800 border-2 border-b-[3px] border-stone-200 dark:border-stone-600 rounded-xl px-3 py-2 text-sm font-extrabold text-stone-700 dark:text-stone-300 focus:border-[#A560E8] focus:ring-2 focus:ring-[#A560E8]/30 focus:outline-none"
                   >
                     <option value="last3">Last 3</option>
                     <option value="lastWeek">Last Week</option>
@@ -391,8 +397,8 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
                     ))
                   ) : filteredAnalyses.length === 0 ? (
                     <div className="text-center py-10">
-                      <div className="w-16 h-16 bg-[#FFF4E0] border-2 border-b-4 border-[#FF9600]/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                        <svg className="w-8 h-8 text-[#FF9600]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="w-16 h-16 bg-[#F3EAFF] border-2 border-b-4 border-[#A560E8]/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-8 h-8 text-[#A560E8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                         </svg>
                       </div>
@@ -405,10 +411,10 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
                       return (
                         <div
                           key={analysis.id}
-                          className={`group p-4 border-2 border-b-4 rounded-xl cursor-pointer transition-all ${
+                          className={`group p-4 border-2 border-b-4 rounded-2xl cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 ${
                             selectedAnalysis?.id === analysis.id
-                              ? `border-[#1CB0F6] ${typeColor.tint}`
-                              : 'border-stone-200 dark:border-stone-700 hover:border-stone-300 dark:hover:border-stone-600 bg-white dark:bg-stone-900'
+                              ? 'border-[#A560E8] bg-[#F3EAFF] dark:bg-[#A560E8]/15 shadow-[0_12px_30px_-18px_rgba(165,96,232,0.5)]'
+                              : 'border-stone-200 dark:border-stone-700 hover:border-[#A560E8]/40 bg-white dark:bg-stone-900 shadow-[0_8px_22px_-18px_rgba(0,0,0,0.18)]'
                           }`}
                           onClick={() => setSelectedAnalysis(analysis)}
                         >
@@ -452,7 +458,7 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
                                   onNavigate?.('analysis');
                                 }
                               }}
-                              className="flex-1 px-3 py-2 bg-[#EAFFD6] text-[#46A302] border-2 border-b-4 border-[#58CC02]/30 active:border-b-2 active:translate-y-0.5 transition-all rounded-xl text-sm font-extrabold hover:brightness-95"
+                              className="flex-1 px-3 py-2 bg-[#F3EAFF] text-[#8A48C7] border-2 border-b-4 border-[#A560E8]/30 active:border-b-2 active:translate-y-0.5 transition-all rounded-xl text-sm font-extrabold hover:brightness-95"
                             >
                               View Analysis
                             </button>
@@ -487,7 +493,7 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
             {/* Analysis Details */}
             <div className="lg:col-span-2">
               {selectedAnalysis ? (
-                <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl overflow-hidden">
+                <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-3xl shadow-[0_12px_34px_-22px_rgba(0,0,0,0.18)] overflow-hidden">
                   {/* Header */}
                   <div className={`${getAnalysisTypeColor(selectedAnalysis.analysis_type).bg} px-6 py-5`}>
                     <div className="flex items-center justify-between">
@@ -537,7 +543,7 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
                         onClick={() => handleCopyText(cleanAnalysisText(selectedAnalysis.analysis_results?.result || ''))}
                         className={`px-4 py-2.5 rounded-xl text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all ${
                           copySuccess
-                            ? 'bg-[#EAFFD6] text-[#46A302] border-[#58CC02]/30'
+                            ? 'bg-[#F3EAFF] text-[#8A48C7] border-[#A560E8]/30'
                             : 'bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-600 hover:border-stone-300'
                         }`}
                       >
@@ -567,10 +573,10 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
                   </div>
                 </div>
               ) : (
-                <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl p-10">
+                <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-3xl shadow-[0_12px_34px_-22px_rgba(0,0,0,0.18)] p-10">
                   <div className="text-center">
-                    <div className="w-20 h-20 bg-[#DDF4FF] border-2 border-b-4 border-[#1CB0F6]/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                      <svg className="w-10 h-10 text-[#1CB0F6]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="w-20 h-20 bg-[#F3EAFF] border-2 border-b-4 border-[#A560E8]/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <svg className="w-10 h-10 text-[#A560E8]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                     </div>

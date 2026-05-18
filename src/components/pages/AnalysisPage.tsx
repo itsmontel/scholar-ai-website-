@@ -184,7 +184,7 @@ function FreeAnalysisProBlur({
       </div>
       {/* CTA — centered over blur; z-index so it always wins stacking */}
       <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 px-3 py-4 sm:gap-2.5 sm:px-4">
-        <div className="flex items-center gap-2 rounded-full border-2 border-[#FF9600] bg-[#FFF4E0] px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#FF9600] dark:border-[#D97F00] dark:bg-[#FF9600]/20 dark:text-[#FF9600]">
+        <div className="flex items-center gap-2 rounded-full border-2 border-[#A560E8] bg-[#F3EAFF] px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#A560E8] dark:border-[#8A48C7] dark:bg-[#A560E8]/20 dark:text-[#A560E8]">
           <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>
@@ -203,7 +203,7 @@ function FreeAnalysisProBlur({
           type="button"
           onClick={onUpgrade}
           disabled={upgradeDisabled}
-          className="relative px-5 py-2.5 text-sm font-extrabold text-white transition-all active:border-b-2 active:translate-y-0.5 disabled:cursor-wait disabled:opacity-60 rounded-xl bg-[#FF9600] border-2 border-b-4 border-[#D97F00] hover:bg-[#E08800]"
+          className="relative px-5 py-2.5 text-sm font-extrabold text-white transition-all active:border-b-2 active:translate-y-0.5 disabled:cursor-wait disabled:opacity-60 rounded-xl bg-[#A560E8] border-2 border-b-4 border-[#8A48C7] hover:bg-[#8A48C7]"
         >
           {primaryLabel}
         </button>
@@ -216,7 +216,7 @@ function FreeAnalysisProBlur({
 }
 
 interface AnalysisPageProps {
-  onNavigate?: (page: string) => void;
+  onNavigate?: (page: string, slug?: string) => void;
   user?: { 
     id: string; 
     name: string; 
@@ -872,6 +872,13 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
     if (cameFromLibraryFlag === 'true') {
       setCameFromLibrary(true);
       localStorage.removeItem('cameFromLibrary');
+      // Library and editor are mutually exclusive entry modes. If a
+      // previous editor-opened report was abandoned via browser Back
+      // (so handleCloseAnalysis never ran), its return flag would
+      // still be in localStorage and could wrongly teleport this
+      // library session into an unrelated document's editor. Opening
+      // from the library is authoritative — drop the stale flag.
+      try { localStorage.removeItem('analysisReturnToEditorDocId'); } catch { /* noop */ }
     }
 
   }, []);
@@ -1786,8 +1793,21 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
     setShowCompareOriginalModal(false);
     setCachedWsRevisionByAnnotationId({});
     
-    // If user came from Library, navigate back to Library
-    if (cameFromLibrary && onNavigate) {
+    // Returning from the full report: if it was opened from the
+    // editor, go straight back to THAT document in the editor.
+    // Otherwise fall back to the library (legacy entry points).
+    let returnDocId: string | null = null;
+    try { returnDocId = localStorage.getItem('analysisReturnToEditorDocId'); } catch { /* noop */ }
+    // Always consume the flag here so it can never linger and hijack
+    // a later session.
+    try { localStorage.removeItem('analysisReturnToEditorDocId'); } catch { /* noop */ }
+    // Only honour it if this report is actually the editor-opened
+    // one: not a library entry, and (when known) the flag's doc
+    // matches the document being analysed. Otherwise it's stale.
+    const flagIsForThisDoc = !!returnDocId && (!selectedDocument || returnDocId === selectedDocument);
+    if (returnDocId && !cameFromLibrary && flagIsForThisDoc && onNavigate) {
+      onNavigate('documents', returnDocId);
+    } else if (cameFromLibrary && onNavigate) {
       onNavigate('library');
     }
   };
@@ -2058,21 +2078,38 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
         citationStyle: selectedCitationStyle,
       });
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/analyze`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          documentId: selectedDocument || null,
-          content: content,
-          analysisType: selectedAnalysisType,
-          citationStyle: selectedCitationStyle,
-          gradingStyle: selectedGradingStyle,
-          rubricContent: rubricContent.trim() || undefined,
-        }),
-      });
+      // Hard timeout so a hung/stalled request can't leave the
+      // analysis stuck at 99% forever with no way out. 120s is
+      // generous for a large doc + the AI pass; on timeout we abort
+      // and surface a retryable error via the existing catch.
+      const abort = new AbortController();
+      const timeoutId = window.setTimeout(() => abort.abort(), 120000);
+      let response: Response;
+      try {
+        response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/analyze`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            documentId: selectedDocument || null,
+            content: content,
+            analysisType: selectedAnalysisType,
+            citationStyle: selectedCitationStyle,
+            gradingStyle: selectedGradingStyle,
+            rubricContent: rubricContent.trim() || undefined,
+          }),
+          signal: abort.signal,
+        });
+      } catch (e) {
+        if (e instanceof DOMException && e.name === 'AbortError') {
+          throw new Error('Analysis timed out. Your connection may be slow — please try again.');
+        }
+        throw new Error('Network error — check your connection and try again.');
+      } finally {
+        window.clearTimeout(timeoutId);
+      }
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -2830,14 +2867,14 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
     /** Inline banner shown at the 40% mark where annotations stop (free users see full paper, annotations only on first 40%) */
     const freeAnnotationCutoffBanner =
       isFreePreview && freePreviewCharCutoff != null && freePreviewCharCutoff < displayContent.length ? (
-        <div className="my-6 relative overflow-hidden rounded-2xl border-2 border-dashed border-[#FF9600]/50 bg-[#FFF4E0] dark:border-[#D97F00]/50 dark:bg-[#FF9600]/10">
+        <div className="my-6 relative overflow-hidden rounded-2xl border-2 border-dashed border-[#A560E8]/50 bg-[#F3EAFF] dark:border-[#8A48C7]/50 dark:bg-[#A560E8]/10">
           <div className="relative z-10 flex flex-col sm:flex-row items-center gap-4 px-5 py-5 sm:py-4">
             {/* Left: Visual indicator showing annotation colors */}
             <div className="flex items-center gap-1.5 shrink-0">
-              <div className="w-3 h-3 rounded-full bg-[#58CC02] ring-2 ring-[#58CC02]/30" title="Strengths" />
-              <div className="w-3 h-3 rounded-full bg-[#FF9600] ring-2 ring-[#FF9600]/30" title="Improvements" />
+              <div className="w-3 h-3 rounded-full bg-[#A560E8] ring-2 ring-[#A560E8]/30" title="Strengths" />
+              <div className="w-3 h-3 rounded-full bg-[#A560E8] ring-2 ring-[#A560E8]/30" title="Improvements" />
               <div className="w-3 h-3 rounded-full bg-[#FF4B4B] ring-2 ring-[#FF4B4B]/30" title="Concerns" />
-              <svg className="w-5 h-5 text-[#FF9600] ml-1" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-[#A560E8] ml-1" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
@@ -2851,7 +2888,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
               </p>
               <p className="text-xs text-stone-600 dark:text-stone-400 mt-0.5">
                 {Math.round((1 - (freePreviewCharCutoff / displayContent.length)) * 100)}% of your paper has{' '}
-                <span className="font-bold text-[#D97F00] dark:text-[#FFB347]">{annotations.filter(a => a.startIndex >= freePreviewCharCutoff).length} more feedback points</span>{' '}
+                <span className="font-bold text-[#8A48C7] dark:text-[#FFB347]">{annotations.filter(a => a.startIndex >= freePreviewCharCutoff).length} more feedback points</span>{' '}
                 hidden below. Upgrade to Pro to unlock them.
               </p>
             </div>
@@ -2860,7 +2897,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
               type="button"
               onClick={startProMonthlyCheckout}
               disabled={checkoutRedirecting}
-              className="shrink-0 rounded-xl bg-[#FF9600] px-4 py-2 text-sm font-extrabold text-white border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 hover:bg-[#E08800] disabled:cursor-wait disabled:opacity-60 transition-all"
+              className="shrink-0 rounded-xl bg-[#A560E8] px-4 py-2 text-sm font-extrabold text-white border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 hover:bg-[#8A48C7] disabled:cursor-wait disabled:opacity-60 transition-all"
             >
               {checkoutRedirecting ? 'Opening…' : 'Unlock all annotations'}
             </button>
@@ -2978,7 +3015,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
             console.log(`Annotation ${annotation.id} (${annotation.type}): "${actualText.substring(0, 50)}..." (${relativeStart}-${relativeEnd} in paragraph ${paragraphIndex})`);
 
             const highlightClasses = {
-              strong: 'bg-green-100 text-green-900 border-b-2 border-green-400 hover:bg-green-200',
+              strong: 'bg-emerald-100 text-emerald-900 border-b-2 border-emerald-400 hover:bg-emerald-200',
               improve: 'bg-amber-100 text-amber-900 border-b-2 border-amber-400 hover:bg-amber-200',
               concern: 'bg-red-100 text-red-900 border-b-2 border-red-400 hover:bg-red-200'
             };
@@ -2990,7 +3027,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                 key={`${annotation.id}-p${paragraphIndex}`}
                 data-doc-annotation={annotation.id}
                 className={`inline px-0.5 cursor-pointer transition-all duration-200 ${
-                  selectedAnnotation === annotation.id ? 'ring-2 ring-offset-2 ring-[#1CB0F6] rounded-sm' : ''
+                  selectedAnnotation === annotation.id ? 'ring-2 ring-offset-2 ring-[#A560E8] rounded-sm' : ''
                 } ${activationTourShouldGlowCard(annotation) ? 'activation-tour-doc-glow' : ''}`}
                 onMouseEnter={(e) => handleAnnotationHover(e, annotation.id)}
                 onMouseLeave={() => setHoveredAnnotation(null)}
@@ -3089,7 +3126,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
     switch (type) {
       case 'strong':
         return (
-          <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+          <svg className="w-5 h-5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
           </svg>
         );
@@ -3115,7 +3152,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
       <div className="relative min-h-screen flex items-center justify-center overflow-x-clip">
         <WriteScholarEditorialBackgroundLayers position="fixed" />
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1CB0F6] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#A560E8] mx-auto"></div>
           <p className="mt-4 text-stone-600">Loading analysis tools...</p>
         </div>
       </div>
@@ -3198,8 +3235,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-4">
               {/* Animated study-mascot WebP — replaces the SVG mascot for a more lively page header. */}
-              <div className="relative p-2 sm:p-3 bg-[#DDF4FF] dark:bg-[#1CB0F6]/20 rounded-2xl border-2 border-b-4 border-[#1CB0F6]/30 dark:border-[#1899D6]/40">
-                <div className="absolute -top-1 -right-1 w-6 h-6 bg-[#1CB0F6] rounded-full flex items-center justify-center z-10">
+              <div className="relative p-2 sm:p-3 bg-[#F3EAFF] dark:bg-[#A560E8]/20 rounded-2xl border-2 border-b-4 border-[#A560E8]/30 dark:border-[#8A48C7]/40">
+                <div className="absolute -top-1 -right-1 w-6 h-6 bg-[#A560E8] rounded-full flex items-center justify-center z-10">
                   <span className="text-white text-xs">🔍</span>
                 </div>
                 <img
@@ -3212,7 +3249,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                 />
               </div>
               <div>
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-900 dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+                <h1 className="dash-serif text-[2rem] sm:text-[2.6rem] lg:text-[3rem] font-extrabold leading-[1.05] tracking-tight text-stone-900 dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                   {analysisPageTitle}
                 </h1>
                 <p className="mt-3 text-lg font-bold text-stone-500 dark:text-stone-400" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
@@ -3222,7 +3259,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
             </div>
             <button
               onClick={() => onNavigate?.('analysis-history')}
-              className="flex items-center space-x-2 px-5 py-3 bg-[#1CB0F6] text-white rounded-xl border-2 border-b-4 border-[#1899D6] hover:bg-[#1899D6] active:border-b-2 active:translate-y-0.5 transition-all"
+              className="flex items-center space-x-2 px-5 py-3 bg-[#A560E8] text-white rounded-xl border-2 border-b-4 border-[#8A48C7] hover:bg-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all"
               style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3254,7 +3291,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
               <button
                 onClick={startProMonthlyCheckout}
                 disabled={checkoutRedirecting}
-                className="flex-shrink-0 px-5 py-2.5 bg-[#FF9600] hover:bg-[#E08800] disabled:opacity-60 disabled:cursor-wait text-white font-extrabold rounded-xl border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all"
+                className="flex-shrink-0 px-5 py-2.5 bg-[#A560E8] hover:bg-[#8A48C7] disabled:opacity-60 disabled:cursor-wait text-white font-extrabold rounded-xl border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all"
               >
                 {checkoutRedirecting ? 'Opening checkout…' : 'Upgrade for more'}
               </button>
@@ -3278,18 +3315,18 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
         )}
 
         {successMessage && (
-          <div className="mb-8 p-5 bg-[#E5F8D0] border-2 border-b-4 border-[#58CC02]/30 rounded-2xl">
+          <div className="mb-8 p-5 bg-[#F3EAFF] border-2 border-b-4 border-[#A560E8]/30 rounded-2xl">
             <div className="flex items-start">
-              <div className="w-10 h-10 bg-[#58CC02] rounded-xl flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 bg-[#A560E8] rounded-xl flex items-center justify-center flex-shrink-0">
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
               <div className="ml-4">
-                <p className="text-[#46A302] font-extrabold">{successMessage}</p>
+                <p className="text-[#8A48C7] font-extrabold">{successMessage}</p>
                 <button
                   onClick={() => onNavigate?.('library')}
-                  className="mt-3 px-4 py-2 bg-[#58CC02] hover:bg-[#46A302] text-white text-sm font-extrabold rounded-lg border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all"
+                  className="mt-3 px-4 py-2 bg-[#A560E8] hover:bg-[#8A48C7] text-white text-sm font-extrabold rounded-lg border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all"
                 >
                   View in Library
                 </button>
@@ -3305,7 +3342,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
             data-activation-scroll-pass={activationScrollPassConfigure ? true : undefined}
           >
             {/* Analysis Configuration - left column */}
-            <div className="bg-white border-2 border-b-4 border-[#E5E5E5] rounded-2xl p-6 sm:p-8 min-h-0" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+            <div className="bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 rounded-3xl p-6 sm:p-8 shadow-[0_12px_34px_-22px_rgba(0,0,0,0.16)] min-h-0" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
               <h2 className="text-xl font-extrabold text-stone-900 mb-6">Configure Analysis</h2>
               
               {/* Document Selection */}
@@ -3317,7 +3354,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                   <select
                     value={selectedDocument}
                     onChange={(e) => handleDocumentSelection(e.target.value)}
-                    className="w-full px-4 py-3.5 text-base border-2 border-[#E5E5E5] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1CB0F6] focus:border-[#1CB0F6] transition-colors"
+                    className="w-full px-4 py-3.5 text-base border-2 border-[#E5E5E5] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#A560E8] focus:border-[#A560E8] transition-colors"
                     disabled={isAnalyzing}
                   >
                     <option value="">Choose a document...</option>
@@ -3332,14 +3369,14 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
               
               {/* Text Content Notice */}
               {documentContent && !selectedDocument && (
-                <div className="mb-6 p-4 bg-[#DDF4FF] border-2 border-[#1CB0F6]/30 rounded-xl">
+                <div className="mb-6 p-4 bg-[#F3EAFF] border-2 border-[#A560E8]/30 rounded-xl">
                   <div className="flex items-center space-x-2">
-                    <svg className="w-5 h-5 text-[#1CB0F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-[#A560E8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span className="font-extrabold text-[#1899D6]">Text Analysis Mode</span>
+                    <span className="font-extrabold text-[#8A48C7]">Text Analysis Mode</span>
                   </div>
-                  <p className="text-sm text-[#1899D6] mt-2">
+                  <p className="text-sm text-[#8A48C7] mt-2">
                     Analyzing text content from dashboard. Select citation style and run analysis.
                   </p>
                 </div>
@@ -3356,7 +3393,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                       key={type.id}
                       className={`p-4 border-2 border-b-4 rounded-xl cursor-pointer transition-all ${
                         selectedAnalysisType === type.id
-                          ? 'border-[#1CB0F6] bg-[#DDF4FF]'
+                          ? 'border-[#A560E8] bg-[#F3EAFF]'
                           : 'border-[#E5E5E5] hover:border-stone-300'
                       }`}
                       onClick={() => setSelectedAnalysisType(type.id)}
@@ -3370,7 +3407,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                         </div>
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                           selectedAnalysisType === type.id
-                            ? 'border-[#1CB0F6] bg-[#1CB0F6]'
+                            ? 'border-[#A560E8] bg-[#A560E8]'
                             : 'border-stone-300'
                         }`}>
                           {selectedAnalysisType === type.id && (
@@ -3396,9 +3433,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                   onChange={(e) => setSelectedCitationStyle(e.target.value)}
                   data-activation-citation-select
                   data-activation-focus={activationCoachStep === 'mla' ? true : undefined}
-                  className={`w-full px-4 py-3.5 text-base border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1CB0F6] focus:border-[#1CB0F6] transition-all duration-300 ease-out ${
+                  className={`w-full px-4 py-3.5 text-base border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#A560E8] focus:border-[#A560E8] transition-all duration-300 ease-out ${
                     activationCoachStep === 'mla'
-                      ? 'border-[#1CB0F6]/90 shadow-[0_0_0_3px_rgba(28,176,246,0.35),0_0_24px_rgba(28,176,246,0.25)]'
+                      ? 'border-[#A560E8]/90 shadow-[0_0_0_3px_rgba(165,96,232,0.35),0_0_24px_rgba(165,96,232,0.25)]'
                       : 'border-[#E5E5E5] dark:border-stone-600'
                   }`}
                   disabled={isAnalyzing}
@@ -3427,7 +3464,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                     onClick={() => setSelectedGradingStyle('us')}
                     className={`px-5 py-2.5 rounded-lg text-sm font-extrabold transition-all duration-200 ${
                       selectedGradingStyle === 'us'
-                        ? 'bg-white dark:bg-stone-700 text-[#1CB0F6] dark:text-[#1CB0F6] shadow-sm border-2 border-[#1CB0F6]'
+                        ? 'bg-white dark:bg-stone-700 text-[#A560E8] dark:text-[#A560E8] shadow-sm border-2 border-[#A560E8]'
                         : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                     }`}
                   >
@@ -3439,7 +3476,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                     onClick={() => setSelectedGradingStyle('uk')}
                     className={`px-5 py-2.5 rounded-lg text-sm font-extrabold transition-all duration-200 ${
                       selectedGradingStyle === 'uk'
-                        ? 'bg-white dark:bg-stone-700 text-[#1CB0F6] dark:text-[#1CB0F6] shadow-sm border-2 border-[#1CB0F6]'
+                        ? 'bg-white dark:bg-stone-700 text-[#A560E8] dark:text-[#A560E8] shadow-sm border-2 border-[#A560E8]'
                         : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                     }`}
                   >
@@ -3465,9 +3502,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                   isAnalyzing ||
                   (activationCoachStep === 'mla' && selectedCitationStyle !== 'MLA')
                 }
-                className={`w-full bg-[#58CC02] hover:bg-[#46A302] text-white py-3.5 px-4 rounded-xl font-extrabold text-lg border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 ease-out ${
+                className={`w-full bg-[#A560E8] hover:bg-[#8A48C7] text-white py-3.5 px-4 rounded-xl font-extrabold text-lg border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 ease-out ${
                   activationCoachStep === 'analyze'
-                    ? 'shadow-[0_0_0_3px_rgba(88,204,2,0.45),0_0_32px_rgba(88,204,2,0.3)]'
+                    ? 'shadow-[0_0_0_3px_rgba(165,96,232,0.45),0_0_32px_rgba(165,96,232,0.3)]'
                     : ''
                 }`}
               >
@@ -3484,7 +3521,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
             </div>
 
             {/* Document Preview - right column, row 1 */}
-            <div className="bg-white border-2 border-b-4 border-[#E5E5E5] rounded-2xl p-6 sm:p-8 min-h-[700px]" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+            <div className="bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 rounded-3xl p-6 sm:p-8 shadow-[0_12px_34px_-22px_rgba(0,0,0,0.16)] min-h-[700px]" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
               <h2 className="text-xl font-extrabold text-stone-900 mb-6">Document Preview</h2>
               
               {!selectedDocument && !documentContent ? (
@@ -3501,7 +3538,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                 </div>
               ) : selectedDocument && isLoadingPreview ? (
                 <div className="text-center py-16">
-                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#1CB0F6] mx-auto"></div>
+                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#A560E8] mx-auto"></div>
                   <p className="mt-4 text-stone-600">Loading document preview...</p>
                 </div>
               ) : previewContent || documentContent ? (
@@ -3548,7 +3585,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0 ml-2">
                         {rubricContent && (
-                          <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded-full">Added</span>
+                          <span className="px-2 py-0.5 bg-[#F3EAFF] text-[#8A48C7] text-xs font-medium rounded-full">Added</span>
                         )}
                         <svg className={`w-5 h-5 text-stone-500 transition-transform ${showRubricSection ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -3564,7 +3601,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                             onClick={() => setRubricInputMode('paste')}
                             className={`flex-1 px-3 py-2 text-sm font-extrabold rounded-lg transition-colors ${
                               rubricInputMode === 'paste'
-                                ? 'bg-[#DDF4FF] text-[#1CB0F6] border-2 border-[#1CB0F6]'
+                                ? 'bg-[#F3EAFF] text-[#A560E8] border-2 border-[#A560E8]'
                                 : 'bg-white text-stone-600 border-2 border-[#E5E5E5] hover:bg-stone-50'
                             }`}
                           >
@@ -3575,7 +3612,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                             onClick={() => setRubricInputMode('upload')}
                             className={`flex-1 px-3 py-2 text-sm font-extrabold rounded-lg transition-colors ${
                               rubricInputMode === 'upload'
-                                ? 'bg-[#DDF4FF] text-[#1CB0F6] border-2 border-[#1CB0F6]'
+                                ? 'bg-[#F3EAFF] text-[#A560E8] border-2 border-[#A560E8]'
                                 : 'bg-white text-stone-600 border-2 border-[#E5E5E5] hover:bg-stone-50'
                             }`}
                           >
@@ -3588,7 +3625,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                             value={rubricContent}
                             onChange={(e) => setRubricContent(e.target.value)}
                             placeholder="Paste your rubric, essay question, or assignment requirements here..."
-                            className="w-full px-4 py-3 text-sm border-2 border-[#E5E5E5] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1CB0F6]/40 focus:border-[#1CB0F6] transition-colors resize-y min-h-[120px] bg-white text-stone-900 placeholder-stone-400"
+                            className="w-full px-4 py-3 text-sm border-2 border-[#E5E5E5] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#A560E8]/40 focus:border-[#A560E8] transition-colors resize-y min-h-[120px] bg-white text-stone-900 placeholder-stone-400"
                             rows={5}
                             disabled={isAnalyzing}
                           />
@@ -3606,11 +3643,11 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                               type="button"
                               onClick={() => rubricFileInputRef.current?.click()}
                               disabled={isAnalyzing || isParsingRubric}
-                              className="w-full px-4 py-6 border-2 border-dashed border-stone-300 rounded-xl text-stone-500 hover:border-[#1CB0F6] hover:text-[#1CB0F6] hover:bg-[#DDF4FF] transition-colors disabled:opacity-50"
+                              className="w-full px-4 py-6 border-2 border-dashed border-stone-300 rounded-xl text-stone-500 hover:border-[#A560E8] hover:text-[#A560E8] hover:bg-[#F3EAFF] transition-colors disabled:opacity-50"
                             >
                               {isParsingRubric ? (
                                 <div className="flex items-center justify-center space-x-2">
-                                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#1CB0F6]"></div>
+                                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#A560E8]"></div>
                                   <span className="text-sm">Parsing rubric file...</span>
                                 </div>
                               ) : (
@@ -3626,12 +3663,12 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                         )}
 
                         {rubricContent && (
-                          <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                          <div className="flex items-center justify-between p-3 bg-[#F3EAFF] border border-[#A560E8]/30 rounded-lg">
                             <div className="flex items-center space-x-2">
-                              <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <svg className="w-4 h-4 text-[#8A48C7]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                               </svg>
-                              <span className="text-sm text-green-700 font-medium">
+                              <span className="text-sm text-[#8A48C7] font-medium">
                                 Rubric loaded ({rubricContent.split(/\s+/).filter(Boolean).length} words)
                               </span>
                             </div>
@@ -3690,7 +3727,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                     data-activation-focus={isActivationTutorial && activationCoachStep === 'copyText' ? true : undefined}
                     className={`px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg border border-white/20 transition-colors flex items-center space-x-2 text-sm font-extrabold ${
                       isActivationTutorial && activationCoachStep === 'copyText'
-                        ? 'ring-2 ring-[#1CB0F6]/95 ring-offset-2 ring-offset-[#3C3C3C] z-[5] relative'
+                        ? 'ring-2 ring-[#A560E8]/95 ring-offset-2 ring-offset-[#3C3C3C] z-[5] relative'
                         : ''
                     }`}
                     title="Copy the full essay — paste into Word or Google Docs; auto-italics (titles, Latin phrases, etc.) are preserved where supported"
@@ -3730,7 +3767,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                       ) : (
                         <button 
                           onClick={() => onNavigate?.('pricing')}
-                          className="px-4 py-2 bg-[#FF9600]/20 hover:bg-[#FF9600]/30 rounded-lg border border-[#FF9600]/40 transition-colors flex items-center space-x-2 text-sm font-extrabold text-[#FF9600]"
+                          className="px-4 py-2 bg-[#A560E8]/20 hover:bg-[#A560E8]/30 rounded-lg border border-[#A560E8]/40 transition-colors flex items-center space-x-2 text-sm font-extrabold text-[#A560E8]"
                           title="Export your full report — PDF or Word (Pro)"
                         >
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -3760,18 +3797,18 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
               data-activation-target="rubric"
               className={`mx-6 mt-6 mb-4 bg-white dark:bg-stone-800 rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-600 overflow-hidden transition-shadow duration-300 ${
                 isActivationTutorial && activationCoachStep === 'rubric'
-                  ? 'ring-4 ring-[#58CC02]/75 ring-offset-2 ring-offset-stone-50 dark:ring-offset-stone-900 shadow-[0_0_48px_rgba(88,204,2,0.28)] z-[5] relative'
+                  ? 'ring-4 ring-[#A560E8]/75 ring-offset-2 ring-offset-stone-50 dark:ring-offset-stone-900 shadow-[0_0_48px_rgba(165,96,232,0.28)] z-[5] relative'
                   : ''
               }`}
             >
-              <div className="bg-[#58CC02] text-white px-6 py-5" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+              <div className="bg-[#A560E8] text-white px-6 py-5" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                 <div className="flex flex-wrap items-center gap-6">
                   <div>
-                    <h2 className="text-xl font-extrabold uppercase tracking-wide">General Academic Assessment</h2>
+                    <h2 className="text-xl font-extrabold uppercase tracking-wide">Estimated Academic Assessment</h2>
                     <p className="text-white/80 text-sm mt-0.5 max-w-xl font-bold">
                       {isFreePreview ? (
                         <>
-                          Real scores above — you&apos;re seeing how professors grade you. Unlock the rest of your paper and the full write-up to squeeze out every point before you submit.
+                          An AI estimate of how a professor might grade this — use it to squeeze out every point before you submit. Unlock the rest of your paper and the full write-up.
                         </>
                       ) : (
                         <>Standard college rubric: thesis, evidence, structure, and clarity</>
@@ -3783,17 +3820,20 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                       {analysisSummary.overall_score != null && (
                         <div className="text-right">
                           <div className="text-3xl font-extrabold">{Math.round(Number(analysisSummary.overall_score))}/100</div>
-                          <div className="text-white/70 text-xs font-bold uppercase tracking-wide">Score</div>
+                          <div className="text-white/70 text-xs font-bold uppercase tracking-wide">Estimated score</div>
                         </div>
                       )}
                       {analysisSummary.grade_estimate && (
                         <div className="text-right">
                           <div className="text-3xl font-extrabold">{analysisSummary.grade_estimate}</div>
-                          <div className="text-white/70 text-xs font-bold uppercase tracking-wide">Grade</div>
+                          <div className="text-white/70 text-xs font-bold uppercase tracking-wide">Estimated grade</div>
                         </div>
                       )}
                     </div>
                   )}
+                  <p className="w-full text-white/70 text-[11px] font-bold mt-1 leading-snug">
+                    WriteScholar&apos;s grade is an AI estimate to guide your revision — not your official or guaranteed grade.
+                  </p>
                 </div>
               </div>
               <div className="p-6">
@@ -3839,7 +3879,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                               ?/{row.maxScore}
                             </span>
                           </div>
-                          <div className="relative min-h-[4.5rem] rounded-lg overflow-hidden border border-stone-200/90 bg-gradient-to-b from-stone-50 to-stone-100/90 dark:border-stone-600/50 dark:from-stone-700/30 dark:to-stone-800/50 ring-1 ring-[#FF9600]/10">
+                          <div className="relative min-h-[4.5rem] rounded-lg overflow-hidden border border-stone-200/90 bg-gradient-to-b from-stone-50 to-stone-100/90 dark:border-stone-600/50 dark:from-stone-700/30 dark:to-stone-800/50 ring-1 ring-[#A560E8]/10">
                             <div
                               className="absolute inset-0 p-3 text-xs leading-relaxed text-stone-600 opacity-[0.72] contrast-[0.92] blur-[8px] select-none dark:text-stone-400 dark:opacity-[0.65] sm:blur-[9px]"
                               aria-hidden
@@ -3847,7 +3887,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                               Your personalized feedback for this category—what you did well, what to fix, and how—unlocks on Pro.
                             </div>
                             <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-white/88 via-white/45 to-transparent dark:from-stone-900/88 dark:via-stone-900/40">
-                              <span className="rounded-full border-2 border-[#FF9600] bg-[#FFF4E0] px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-[#FF9600] dark:border-[#D97F00] dark:bg-[#FF9600]/20 dark:text-[#FF9600]">
+                              <span className="rounded-full border-2 border-[#A560E8] bg-[#F3EAFF] px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-[#A560E8] dark:border-[#8A48C7] dark:bg-[#A560E8]/20 dark:text-[#A560E8]">
                                 Pro
                               </span>
                             </div>
@@ -3860,13 +3900,13 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                         type="button"
                         onClick={startProMonthlyCheckout}
                         disabled={checkoutRedirecting}
-                        className="px-4 py-2 text-sm bg-[#FF9600] hover:bg-[#E08800] disabled:opacity-60 disabled:cursor-wait text-white rounded-lg font-extrabold border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all"
+                        className="px-4 py-2 text-sm bg-[#A560E8] hover:bg-[#8A48C7] disabled:opacity-60 disabled:cursor-wait text-white rounded-lg font-extrabold border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all"
                       >
                         {checkoutRedirecting ? 'Opening checkout…' : 'Unlock full rubric'}
                       </button>
                       <span className="text-sm font-bold">
                         <span className="line-through decoration-2 decoration-[#FF4B4B] text-stone-400 mr-1.5">$39.99</span>
-                        <span className="text-[#FF9600] dark:text-[#FF9600]">$19.99/mo</span>
+                        <span className="text-[#A560E8] dark:text-[#A560E8]">$19.99/mo</span>
                       </span>
                     </div>
                   </div>
@@ -3884,11 +3924,11 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
               <div className="flex flex-wrap items-center justify-between gap-y-2 gap-x-4 text-sm">
                 <div className="flex flex-wrap items-center gap-6">
                   <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-[#58CC02] rounded-full"></div>
+                    <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
                     <span className="text-stone-600 font-bold text-xs">Strong sections</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-[#FF9600] rounded-full"></div>
+                    <div className="w-3 h-3 bg-amber-400 rounded-full"></div>
                     <span className="text-stone-600 font-bold text-xs">Needs improvement</span>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -3910,7 +3950,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                     data-activation-focus={isActivationTutorial && activationCoachStep === 'copyText' ? true : undefined}
                     className={`inline-flex items-center gap-1.5 rounded-lg border-2 border-b-4 border-[#E5E5E5] bg-white px-3 py-1.5 text-xs font-extrabold text-stone-700 hover:bg-stone-50 active:border-b-2 active:translate-y-0.5 dark:border-stone-600 dark:bg-stone-800 dark:text-stone-200 dark:hover:bg-stone-700/80 ${
                       isActivationTutorial && activationCoachStep === 'copyText'
-                        ? 'ring-2 ring-[#1CB0F6]/85 ring-offset-2 ring-offset-stone-50 dark:ring-offset-stone-900 z-[5] relative'
+                        ? 'ring-2 ring-[#A560E8]/85 ring-offset-2 ring-offset-stone-50 dark:ring-offset-stone-900 z-[5] relative'
                         : ''
                     }`}
                     title="Copy full essay — Word/Docs keep italics for detected titles and Latin phrases"
@@ -3956,13 +3996,13 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                     {(!lockedFeatures.includes('full_annotations') || isFreePreview) && (
                     <>
                     <h3 className="text-lg font-extrabold text-stone-900 mb-2 flex items-center">
-                      <svg className="w-5 h-5 mr-2 text-[#1CB0F6]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className="w-5 h-5 mr-2 text-[#A560E8]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                       </svg>
                       Annotations
                     </h3>
                     {isFreePreview && (
-                      <div className="mb-4 rounded-xl border-2 border-[#1CB0F6]/30 bg-[#DDF4FF] dark:bg-[#1CB0F6]/10 dark:border-[#1899D6]/40 px-3 py-2.5">
+                      <div className="mb-4 rounded-xl border-2 border-[#A560E8]/30 bg-[#F3EAFF] dark:bg-[#A560E8]/10 dark:border-[#8A48C7]/40 px-3 py-2.5">
                         <p className="text-xs font-semibold text-stone-800 dark:text-stone-100 leading-snug">
                           Full paper shown · Annotations on first ~40%
                         </p>
@@ -4053,18 +4093,18 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                     {/* Strong Points */}
                     <div>
                       <div className="flex items-center space-x-2 mb-3">
-                      <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-xl">
+                      <div className="flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-xl">
                         {getAnnotationIcon('strong')}
                       </div>
-                      <h4 className="font-extrabold text-[#58CC02]">Strong Points ({getFilteredAnnotations('strong').length})</h4>
+                      <h4 className="font-extrabold text-emerald-700">Strong Points ({getFilteredAnnotations('strong').length})</h4>
                       </div>
                       <div className="space-y-2">
                         {getFilteredAnnotations('strong').map((annotation) => (
                           <div
                             key={annotation.id}
                             id={`annotation-panel-${annotation.id}`}
-                            className={`bg-white rounded-xl p-4 border-l-4 border-green-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
-                              selectedAnnotation === annotation.id ? 'ring-2 ring-[#1CB0F6]' : ''
+                            className={`bg-white rounded-xl p-4 border-l-4 border-emerald-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
+                              selectedAnnotation === annotation.id ? 'ring-2 ring-emerald-400' : ''
                             }`}
                             onClick={() => scrollDocumentToHighlight(annotation.id)}
                             onMouseEnter={() => setHoveredAnnotation(annotation.id)}
@@ -4087,7 +4127,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                         <div className="flex items-center justify-center w-8 h-8 bg-amber-100 rounded-xl">
                           {getAnnotationIcon('improve')}
                         </div>
-                        <h4 className="font-extrabold text-[#FF9600]">Areas to Improve ({getFilteredAnnotations('improve').length})</h4>
+                        <h4 className="font-extrabold text-amber-700">Areas to Improve ({getFilteredAnnotations('improve').length})</h4>
                       </div>
                       <div className="space-y-2">
                         {getFilteredAnnotations('improve').map((annotation) => (
@@ -4098,7 +4138,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                               annotation.id === ACTIVATION_TUTORIAL_IMPROVE_REVISION_ID ? 'improve' : undefined
                             }
                             className={`bg-white rounded-xl p-4 border-l-4 border-amber-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
-                              selectedAnnotation === annotation.id ? 'ring-2 ring-[#1CB0F6]' : ''
+                              selectedAnnotation === annotation.id ? 'ring-2 ring-amber-400' : ''
                             } ${activationTourShouldGlowCard(annotation) ? 'activation-tour-rewrite-card-glow' : ''}`}
                             onClick={() => scrollDocumentToHighlight(annotation.id)}
                             onMouseEnter={() => setHoveredAnnotation(annotation.id)}
@@ -4166,7 +4206,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                                   e.stopPropagation();
                                   onNavigate?.('pricing');
                                 }}
-                                className="mt-3 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-extrabold bg-[#FFF4E0] dark:bg-[#FF9600]/20 hover:bg-[#FF9600]/20 text-[#FF9600] border-2 border-b-4 border-[#FF9600]/40 active:border-b-2 active:translate-y-0.5 dark:text-[#FF9600] dark:border-[#D97F00]/40 transition-all"
+                                className="mt-3 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-extrabold bg-[#F3EAFF] dark:bg-[#A560E8]/20 hover:bg-[#A560E8]/20 text-[#A560E8] border-2 border-b-4 border-[#A560E8]/40 active:border-b-2 active:translate-y-0.5 dark:text-[#A560E8] dark:border-[#8A48C7]/40 transition-all"
                               >
                                 Pro: apply revisions ($19.99/mo)
                               </button>
@@ -4193,7 +4233,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                               annotation.id === ACTIVATION_TUTORIAL_CONCERN_REVISION_ID ? 'concern' : undefined
                             }
                             className={`bg-white rounded-xl p-4 border-l-4 border-red-400 shadow-sm hover:shadow-md transition-all cursor-pointer ${
-                              selectedAnnotation === annotation.id ? 'ring-2 ring-[#1CB0F6]' : ''
+                              selectedAnnotation === annotation.id ? 'ring-2 ring-red-400' : ''
                             } ${activationTourShouldGlowCard(annotation) ? 'activation-tour-rewrite-card-glow' : ''}`}
                             onClick={() => scrollDocumentToHighlight(annotation.id)}
                             onMouseEnter={() => setHoveredAnnotation(annotation.id)}
@@ -4261,7 +4301,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                                   e.stopPropagation();
                                   onNavigate?.('pricing');
                                 }}
-                                className="mt-3 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-extrabold bg-[#FFF4E0] dark:bg-[#FF9600]/20 hover:bg-[#FF9600]/20 text-[#FF9600] border-2 border-b-4 border-[#FF9600]/40 active:border-b-2 active:translate-y-0.5 dark:text-[#FF9600] dark:border-[#D97F00]/40 transition-all"
+                                className="mt-3 w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-extrabold bg-[#F3EAFF] dark:bg-[#A560E8]/20 hover:bg-[#A560E8]/20 text-[#A560E8] border-2 border-b-4 border-[#A560E8]/40 active:border-b-2 active:translate-y-0.5 dark:text-[#A560E8] dark:border-[#8A48C7]/40 transition-all"
                               >
                                 Pro: apply revisions ($19.99/mo)
                               </button>
@@ -4276,9 +4316,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
 
                     {/* Locked annotations teaser — show free users what they're missing (annotations beyond 40%) */}
                     {isFreePreview && lockedAnnotationsForTeaser.length > 0 && (
-                      <div className="mt-6 pt-5 border-t-2 border-dashed border-[#FF9600]/40 dark:border-[#D97F00]/50">
+                      <div className="mt-6 pt-5 border-t-2 border-dashed border-[#A560E8]/40 dark:border-[#8A48C7]/50">
                         <div className="flex items-center gap-2 mb-4">
-                          <svg className="w-5 h-5 text-[#FF9600]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                          <svg className="w-5 h-5 text-[#A560E8]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                           </svg>
                           <h4 className="font-bold text-stone-900 dark:text-stone-100">
@@ -4291,12 +4331,12 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                         <div className="space-y-2">
                           {lockedAnnotationsForTeaser.slice(0, 4).map((annotation) => {
                             const borderColor = {
-                              strong: 'border-green-400',
+                              strong: 'border-emerald-400',
                               improve: 'border-amber-400',
                               concern: 'border-red-400',
                             }[annotation.type];
                             const iconBg = {
-                              strong: 'bg-green-100 dark:bg-green-900/40',
+                              strong: 'bg-emerald-100 dark:bg-emerald-900/40',
                               improve: 'bg-amber-100 dark:bg-amber-900/40',
                               concern: 'bg-red-100 dark:bg-red-900/40',
                             }[annotation.type];
@@ -4329,7 +4369,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                           type="button"
                           onClick={startProMonthlyCheckout}
                           disabled={checkoutRedirecting}
-                          className="mt-4 w-full rounded-xl bg-[#FF9600] px-4 py-2.5 text-sm font-extrabold text-white border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 hover:bg-[#E08800] disabled:cursor-wait disabled:opacity-60 transition-all"
+                          className="mt-4 w-full rounded-xl bg-[#A560E8] px-4 py-2.5 text-sm font-extrabold text-white border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 hover:bg-[#8A48C7] disabled:cursor-wait disabled:opacity-60 transition-all"
                         >
                           {checkoutRedirecting
                             ? 'Opening checkout…'
@@ -4343,7 +4383,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                       <div className="space-y-5">
                         <div>
                           <h3 className="text-lg font-extrabold text-stone-900 dark:text-stone-100 mb-1 flex items-center">
-                            <svg className="w-5 h-5 mr-2 text-[#1CB0F6]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="w-5 h-5 mr-2 text-[#A560E8]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                             </svg>
                             Annotations
@@ -4354,7 +4394,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                         </div>
                         {(
                           [
-                            { type: 'strong' as const, label: 'Strong points', border: 'border-green-400', iconBg: 'bg-green-100', heading: 'text-green-800 dark:text-green-200' },
+                            { type: 'strong' as const, label: 'Strong points', border: 'border-emerald-400', iconBg: 'bg-emerald-100', heading: 'text-emerald-800 dark:text-emerald-200' },
                             { type: 'improve' as const, label: 'Areas to improve', border: 'border-amber-400', iconBg: 'bg-amber-100', heading: 'text-amber-800 dark:text-amber-200' },
                             { type: 'concern' as const, label: 'Serious concerns', border: 'border-red-400', iconBg: 'bg-red-100', heading: 'text-red-800 dark:text-red-200' },
                           ] as const
@@ -4376,7 +4416,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                                     <p className="font-medium">Professor-style feedback for a highlighted sentence in your draft.</p>
                                     <p className="text-xs italic text-gray-500">Specific rewrite or example would appear here on Pro.</p>
                                   </div>
-                                  <div className="absolute bottom-2 right-2 rounded-full border-2 border-[#FF9600] bg-[#FFF4E0] px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-[#FF9600] dark:border-[#D97F00] dark:bg-[#FF9600]/20 dark:text-[#FF9600]">
+                                  <div className="absolute bottom-2 right-2 rounded-full border-2 border-[#A560E8] bg-[#F3EAFF] px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-[#A560E8] dark:border-[#8A48C7] dark:bg-[#A560E8]/20 dark:text-[#A560E8]">
                                     Pro
                                   </div>
                                 </div>
@@ -4389,13 +4429,13 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                             type="button"
                             onClick={startProMonthlyCheckout}
                             disabled={checkoutRedirecting}
-                            className="px-5 py-2.5 bg-[#FF9600] hover:bg-[#E08800] disabled:opacity-60 disabled:cursor-wait text-white rounded-xl font-extrabold border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all text-sm"
+                            className="px-5 py-2.5 bg-[#A560E8] hover:bg-[#8A48C7] disabled:opacity-60 disabled:cursor-wait text-white rounded-xl font-extrabold border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all text-sm"
                           >
                             {checkoutRedirecting ? 'Opening checkout…' : 'Unlock full annotations'}
                           </button>
                           <div className="text-sm font-bold">
                             <span className="line-through decoration-2 decoration-[#FF4B4B] text-stone-400 mr-1.5">$39.99</span>
-                            <span className="text-[#FF9600] dark:text-[#FF9600]">$19.99/mo</span>
+                            <span className="text-[#A560E8] dark:text-[#A560E8]">$19.99/mo</span>
                           </div>
                         </div>
                       </div>
@@ -4458,7 +4498,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                           {specificRewrites.map((rw, i) => (
                             <div key={i} className="p-3 rounded-lg bg-stone-50 dark:bg-stone-700/50 space-y-1">
                               <p className="text-xs text-stone-500 dark:text-stone-400">Original: &quot;{rw.original}&quot;</p>
-                              <p className="text-sm text-emerald-700 dark:text-emerald-400">→ {rw.rewritten}</p>
+                              <p className="text-sm text-[#8A48C7] dark:text-[#C9A0F0]">→ {rw.rewritten}</p>
                               <p className="text-xs text-stone-600 dark:text-stone-400 italic">{rw.reason}</p>
                             </div>
                           ))}
@@ -4468,28 +4508,28 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                     {currentPlan !== 'free' &&
                       lockedFeatures.includes('specific_rewrites') &&
                       (!specificRewrites || specificRewrites.length === 0) && (
-                      <div className="mt-6 p-5 bg-[#FFF4E0] dark:bg-[#FF9600]/10 border-2 border-b-4 border-[#FF9600]/30 dark:border-[#D97F00]/40 rounded-2xl">
+                      <div className="mt-6 p-5 bg-[#F3EAFF] dark:bg-[#A560E8]/10 border-2 border-b-4 border-[#A560E8]/30 dark:border-[#8A48C7]/40 rounded-2xl">
                         <div className="flex items-start gap-4">
-                          <div className="flex-shrink-0 w-10 h-10 bg-[#FF9600] rounded-xl flex items-center justify-center">
+                          <div className="flex-shrink-0 w-10 h-10 bg-[#A560E8] rounded-xl flex items-center justify-center">
                             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                             </svg>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-extrabold text-[#D97F00] dark:text-[#FF9600]">Unlock rewrite suggestions with Pro</h4>
-                            <p className="text-sm text-[#D97F00] dark:text-[#FF9600]/80 mt-0.5">Get 3-5 specific sentence rewrites that improve your grade</p>
+                            <h4 className="font-extrabold text-[#8A48C7] dark:text-[#A560E8]">Unlock rewrite suggestions with Pro</h4>
+                            <p className="text-sm text-[#8A48C7] dark:text-[#A560E8]/80 mt-0.5">Get 3-5 specific sentence rewrites that improve your grade</p>
                             <div className="mt-3 flex flex-wrap items-center gap-2">
                               <button
                                 type="button"
                                 onClick={startProMonthlyCheckout}
                                 disabled={checkoutRedirecting}
-                                className="px-4 py-2 text-sm bg-[#FF9600] hover:bg-[#E08800] disabled:opacity-60 disabled:cursor-wait text-white rounded-lg font-extrabold border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all"
+                                className="px-4 py-2 text-sm bg-[#A560E8] hover:bg-[#8A48C7] disabled:opacity-60 disabled:cursor-wait text-white rounded-lg font-extrabold border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all"
                               >
                                 {checkoutRedirecting ? 'Opening checkout…' : 'Upgrade'}
                               </button>
                               <span className="text-sm font-bold">
                                 <span className="line-through decoration-2 decoration-[#FF4B4B] text-stone-400 mr-1.5">$39.99</span>
-                                <span className="text-[#FF9600]">$19.99/mo</span>
+                                <span className="text-[#A560E8]">$19.99/mo</span>
                               </span>
                             </div>
                           </div>
@@ -4526,9 +4566,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                       {freeComprehensiveAnalysisHasLockedRemainder && (
                         <>
                           {/* Inline upgrade banner */}
-                          <div className="my-6 relative overflow-hidden rounded-xl border-2 border-dashed border-[#FF9600]/50 bg-[#FFF4E0] dark:border-[#D97F00]/50 dark:bg-[#FF9600]/10">
+                          <div className="my-6 relative overflow-hidden rounded-xl border-2 border-dashed border-[#A560E8]/50 bg-[#F3EAFF] dark:border-[#8A48C7]/50 dark:bg-[#A560E8]/10">
                             <div className="relative z-10 flex flex-col sm:flex-row items-center gap-3 px-4 py-4">
-                              <svg className="w-5 h-5 text-[#FF9600] shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                              <svg className="w-5 h-5 text-[#A560E8] shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                               </svg>
                               <div className="flex-1 text-center sm:text-left">
@@ -4543,7 +4583,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                                 type="button"
                                 onClick={startProMonthlyCheckout}
                                 disabled={checkoutRedirecting}
-                                className="shrink-0 rounded-lg bg-[#FF9600] px-4 py-2 text-sm font-extrabold text-white border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 hover:bg-[#E08800] disabled:cursor-wait disabled:opacity-60 transition-all"
+                                className="shrink-0 rounded-lg bg-[#A560E8] px-4 py-2 text-sm font-extrabold text-white border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 hover:bg-[#8A48C7] disabled:cursor-wait disabled:opacity-60 transition-all"
                               >
                                 {checkoutRedirecting ? 'Opening…' : 'Unlock full analysis'}
                               </button>
@@ -4561,7 +4601,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                             {/* Floating CTA overlay */}
                             <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-white/20 via-white/60 to-white/90 dark:from-stone-800/20 dark:via-stone-800/60 dark:to-stone-800/90">
                               <div className="text-center px-4 py-6">
-                                <div className="inline-flex items-center gap-2 rounded-full border-2 border-[#FF9600] bg-[#FFF4E0] px-3 py-1.5 text-xs font-extrabold uppercase tracking-wider text-[#FF9600] dark:border-[#D97F00] dark:bg-[#FF9600]/20 dark:text-[#FF9600] mb-3">
+                                <div className="inline-flex items-center gap-2 rounded-full border-2 border-[#A560E8] bg-[#F3EAFF] px-3 py-1.5 text-xs font-extrabold uppercase tracking-wider text-[#A560E8] dark:border-[#8A48C7] dark:bg-[#A560E8]/20 dark:text-[#A560E8] mb-3">
                                   <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                   </svg>
@@ -4577,7 +4617,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                                   type="button"
                                   onClick={startProMonthlyCheckout}
                                   disabled={checkoutRedirecting}
-                                  className="rounded-xl bg-[#FF9600] px-6 py-2.5 text-sm font-extrabold text-white border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 hover:bg-[#E08800] disabled:cursor-wait disabled:opacity-60 transition-all"
+                                  className="rounded-xl bg-[#A560E8] px-6 py-2.5 text-sm font-extrabold text-white border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 hover:bg-[#8A48C7] disabled:cursor-wait disabled:opacity-60 transition-all"
                                 >
                                   {checkoutRedirecting
                                     ? 'Opening checkout…'
@@ -4621,7 +4661,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                   <button 
                     onClick={exportToPDF}
                     disabled={isExporting}
-                    className="px-5 py-2.5 text-sm font-extrabold text-white bg-[#1CB0F6] rounded-lg border-2 border-b-4 border-[#1899D6] hover:bg-[#1899D6] active:border-b-2 active:translate-y-0.5 transition-all disabled:opacity-50"
+                    className="px-5 py-2.5 text-sm font-extrabold text-white bg-[#A560E8] rounded-lg border-2 border-b-4 border-[#8A48C7] hover:bg-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all disabled:opacity-50"
                   >
                     Export Report
                   </button>
@@ -4631,7 +4671,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                       type="button"
                       onClick={startProMonthlyCheckout}
                       disabled={checkoutRedirecting}
-                      className="px-5 py-2.5 text-sm font-extrabold text-white bg-[#FF9600] hover:bg-[#E08800] rounded-lg border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 disabled:opacity-60 disabled:cursor-wait transition-all"
+                      className="px-5 py-2.5 text-sm font-extrabold text-white bg-[#A560E8] hover:bg-[#8A48C7] rounded-lg border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 disabled:opacity-60 disabled:cursor-wait transition-all"
                       title="Download your full marked-up report — PDF or Word"
                     >
                       {checkoutRedirecting
@@ -4655,9 +4695,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                downstream display can reuse the same numbers. */
             const rubricOverall = computeRubricOverallScore(rubricAlignment.criteria);
             return (
-            <div className="mt-8 bg-white dark:bg-stone-800 rounded-2xl sm:rounded-3xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700/40 overflow-hidden">
+            <div className="mt-8 bg-white dark:bg-stone-900 rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 overflow-hidden shadow-[0_12px_34px_-22px_rgba(0,0,0,0.16)]">
               {/* Rubric Header - Duolingo style + Score/Grade right-aligned */}
-              <div className="bg-[#1CB0F6] text-white px-6 py-5" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+              <div className="bg-[#A560E8] text-white px-6 py-5" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                 <div className="flex items-center gap-4">
                   <div className="flex items-center space-x-3 min-w-0 flex-1">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
@@ -4672,6 +4712,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                             · scored from {rubricOverall.source === 'estimates' ? 'AI point estimates' : rubricOverall.source === 'status' ? 'criteria status (met / partial / not met)' : 'a mix of point estimates and status'}
                           </span>
                         )}
+                        <span className="block mt-1 opacity-80">An AI estimate to guide revision — not your official or guaranteed grade.</span>
                       </p>
                     </div>
                   </div>
@@ -4707,7 +4748,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                               <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                             </svg>
                           )}
-                          Score
+                          Estimated score
                         </div>
                       </div>
                       <div className="text-right">
@@ -4733,7 +4774,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                               <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                             </svg>
                           )}
-                          Grade
+                          Estimated grade
                         </div>
                       </div>
                     </div>
@@ -4746,8 +4787,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                 <div className="p-6 relative">
                   {/* Overall Assessment - truncated to ~40% */}
                   {rubricAlignment.overallAssessment && (
-                    <div className="mb-6 p-4 sm:p-5 bg-[#DDF4FF] dark:bg-[#1CB0F6]/10 border-2 border-[#1CB0F6]/30 dark:border-[#1899D6]/40 rounded-2xl">
-                      <h3 className="font-extrabold text-[#1899D6] dark:text-[#1CB0F6] mb-2">Overall Assessment</h3>
+                    <div className="mb-6 p-4 sm:p-5 bg-[#F3EAFF] dark:bg-[#A560E8]/10 border-2 border-[#A560E8]/30 dark:border-[#8A48C7]/40 rounded-2xl">
+                      <h3 className="font-extrabold text-[#8A48C7] dark:text-[#A560E8] mb-2">Overall Assessment</h3>
                       <p className="text-sm text-stone-700 dark:text-stone-300 leading-relaxed">
                         {rubricAlignment.overallAssessment.length > 1
                           ? rubricAlignment.overallAssessment.substring(0, Math.floor(rubricAlignment.overallAssessment.length * 0.4)) + '...'
@@ -4759,13 +4800,13 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                   {/* Score Summary */}
                   {rubricAlignment.criteria && rubricAlignment.criteria.length > 0 && (
                     <div className="flex flex-wrap gap-4 mb-6">
-                      <div className="flex-1 min-w-[100px] p-3 bg-[#E5F8D0] dark:bg-[#58CC02]/10 border-2 border-b-4 border-[#58CC02]/30 dark:border-[#46A302]/40 rounded-2xl text-center">
-                        <span className="text-xl font-bold text-[#58CC02] dark:text-[#58CC02]">{rubricAlignment.criteria.filter((c: any) => c.status === 'met').length}</span>
-                        <p className="text-xs text-[#46A302] dark:text-[#58CC02]/80 font-medium mt-1">Criteria Met</p>
+                      <div className="flex-1 min-w-[100px] p-3 bg-[#F3EAFF] dark:bg-[#A560E8]/10 border-2 border-b-4 border-[#A560E8]/30 dark:border-[#8A48C7]/40 rounded-2xl text-center">
+                        <span className="text-xl font-bold text-[#A560E8] dark:text-[#A560E8]">{rubricAlignment.criteria.filter((c: any) => c.status === 'met').length}</span>
+                        <p className="text-xs text-[#8A48C7] dark:text-[#A560E8]/80 font-medium mt-1">Criteria Met</p>
                       </div>
-                      <div className="flex-1 min-w-[100px] p-3 bg-[#FFF4E0] dark:bg-[#FF9600]/10 border-2 border-b-4 border-[#FF9600]/30 dark:border-[#D97F00]/40 rounded-2xl text-center">
-                        <span className="text-xl font-bold text-[#FF9600] dark:text-[#FF9600]">{rubricAlignment.criteria.filter((c: any) => c.status === 'partially_met').length}</span>
-                        <p className="text-xs text-[#D97F00] dark:text-[#FF9600]/80 font-medium mt-1">Partially Met</p>
+                      <div className="flex-1 min-w-[100px] p-3 bg-[#F3EAFF] dark:bg-[#A560E8]/10 border-2 border-b-4 border-[#A560E8]/30 dark:border-[#8A48C7]/40 rounded-2xl text-center">
+                        <span className="text-xl font-bold text-[#A560E8] dark:text-[#A560E8]">{rubricAlignment.criteria.filter((c: any) => c.status === 'partially_met').length}</span>
+                        <p className="text-xs text-[#8A48C7] dark:text-[#A560E8]/80 font-medium mt-1">Partially Met</p>
                       </div>
                       <div className="flex-1 min-w-[100px] p-3 bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-2 border-b-4 border-[#FF4B4B]/30 dark:border-[#E04343]/40 rounded-2xl text-center">
                         <span className="text-xl font-extrabold text-[#FF4B4B] dark:text-[#FF4B4B]">{rubricAlignment.criteria.filter((c: any) => c.status === 'not_met').length}</span>
@@ -4781,8 +4822,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                       <div className="space-y-4">
                         {rubricAlignment.criteria.slice(0, Math.max(1, Math.ceil(rubricAlignment.criteria.length * 0.4))).map((criterion: any, index: number) => {
                           const statusConfig: Record<string, { bg: string; border: string; icon: string; label: string; textColor: string }> = {
-                            met: { bg: 'bg-[#E5F8D0] dark:bg-[#58CC02]/10', border: 'border-2 border-b-4 border-[#58CC02]/30 dark:border-[#46A302]/40', icon: '✅', label: 'Met', textColor: 'text-[#58CC02] dark:text-[#58CC02]' },
-                            partially_met: { bg: 'bg-[#FFF4E0] dark:bg-[#FF9600]/10', border: 'border-2 border-b-4 border-[#FF9600]/30 dark:border-[#D97F00]/40', icon: '⚠️', label: 'Partially Met', textColor: 'text-[#FF9600] dark:text-[#FF9600]' },
+                            met: { bg: 'bg-[#F3EAFF] dark:bg-[#A560E8]/10', border: 'border-2 border-b-4 border-[#A560E8]/30 dark:border-[#8A48C7]/40', icon: '✅', label: 'Met', textColor: 'text-[#A560E8] dark:text-[#A560E8]' },
+                            partially_met: { bg: 'bg-[#F3EAFF] dark:bg-[#A560E8]/10', border: 'border-2 border-b-4 border-[#A560E8]/30 dark:border-[#8A48C7]/40', icon: '⚠️', label: 'Partially Met', textColor: 'text-[#A560E8] dark:text-[#A560E8]' },
                             not_met: { bg: 'bg-[#FFE8E8] dark:bg-[#FF4B4B]/10', border: 'border-2 border-b-4 border-[#FF4B4B]/30 dark:border-[#E04343]/40', icon: '❌', label: 'Not Met', textColor: 'text-[#FF4B4B] dark:text-[#FF4B4B]' }
                           };
                           const config = statusConfig[criterion.status] || statusConfig.partially_met;
@@ -4807,9 +4848,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                   {/* Gradient overlay + CTA - like document preview */}
                   <div className="relative mt-6 pt-8 -mb-2">
                     <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-stone-800 via-white/90 dark:via-stone-800/90 to-transparent pointer-events-none" style={{ marginTop: '-120px', height: '140px' }} />
-                    <div className="relative p-6 bg-[#FFF4E0] dark:bg-[#FF9600]/10 border-2 border-b-4 border-[#FF9600]/30 dark:border-[#D97F00]/40 rounded-2xl">
+                    <div className="relative p-6 bg-[#F3EAFF] dark:bg-[#A560E8]/10 border-2 border-b-4 border-[#A560E8]/30 dark:border-[#8A48C7]/40 rounded-2xl">
                       <div className="flex items-center space-x-3 mb-3">
-                        <div className="p-2 bg-[#FF9600] rounded-full">
+                        <div className="p-2 bg-[#A560E8] rounded-full">
                           <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v2m0-2h2m-2 0H9m12-9V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-9z" />
                           </svg>
@@ -4827,7 +4868,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                         type="button"
                         onClick={startProMonthlyCheckout}
                         disabled={checkoutRedirecting}
-                        className="px-6 py-2.5 bg-[#FF9600] hover:bg-[#E08800] disabled:opacity-60 disabled:cursor-wait text-white rounded-xl font-extrabold border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all"
+                        className="px-6 py-2.5 bg-[#A560E8] hover:bg-[#8A48C7] disabled:opacity-60 disabled:cursor-wait text-white rounded-xl font-extrabold border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all"
                       >
                         {checkoutRedirecting
                           ? 'Opening checkout…'
@@ -4836,7 +4877,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                       <p className="text-xs text-stone-500 dark:text-stone-500 mt-2">
                         Starting at{' '}
                         <span className="line-through decoration-2 decoration-[#FF4B4B] text-stone-400 mx-0.5">$39.99</span>{' '}
-                        <span className="text-[#FF9600] font-extrabold">$19.99/month</span>
+                        <span className="text-[#A560E8] font-extrabold">$19.99/month</span>
                         {' · '}Cancel anytime
                       </p>
                     </div>
@@ -4847,8 +4888,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                 <div className="p-6">
                   {/* Overall Assessment - dashboard card style */}
                   {rubricAlignment.overallAssessment && (
-                    <div className="mb-6 p-4 sm:p-5 bg-[#DDF4FF] dark:bg-[#1CB0F6]/10 border-2 border-[#1CB0F6]/30 dark:border-[#1899D6]/40 rounded-2xl">
-                      <h3 className="font-extrabold text-[#1899D6] dark:text-[#1CB0F6] mb-2">Overall Assessment</h3>
+                    <div className="mb-6 p-4 sm:p-5 bg-[#F3EAFF] dark:bg-[#A560E8]/10 border-2 border-[#A560E8]/30 dark:border-[#8A48C7]/40 rounded-2xl">
+                      <h3 className="font-extrabold text-[#8A48C7] dark:text-[#A560E8] mb-2">Overall Assessment</h3>
                       <p className="text-sm text-stone-700 dark:text-stone-300 leading-relaxed">{rubricAlignment.overallAssessment}</p>
                     </div>
                   )}
@@ -4856,13 +4897,13 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                   {/* Score Summary - dashboard card style */}
                   {rubricAlignment.criteria && rubricAlignment.criteria.length > 0 && (
                     <div className="flex flex-wrap gap-4 mb-6">
-                      <div className="flex-1 min-w-[120px] p-4 bg-[#E5F8D0] dark:bg-[#58CC02]/10 border-2 border-b-4 border-[#58CC02]/30 dark:border-[#46A302]/40 rounded-2xl text-center">
-                        <span className="text-2xl font-bold text-[#58CC02] dark:text-[#58CC02]">{rubricAlignment.criteria.filter((c: any) => c.status === 'met').length}</span>
-                        <p className="text-sm text-[#46A302] dark:text-[#58CC02]/80 font-medium mt-1">Criteria Met</p>
+                      <div className="flex-1 min-w-[120px] p-4 bg-[#F3EAFF] dark:bg-[#A560E8]/10 border-2 border-b-4 border-[#A560E8]/30 dark:border-[#8A48C7]/40 rounded-2xl text-center">
+                        <span className="text-2xl font-bold text-[#A560E8] dark:text-[#A560E8]">{rubricAlignment.criteria.filter((c: any) => c.status === 'met').length}</span>
+                        <p className="text-sm text-[#8A48C7] dark:text-[#A560E8]/80 font-medium mt-1">Criteria Met</p>
                       </div>
-                      <div className="flex-1 min-w-[120px] p-4 bg-[#FFF4E0] dark:bg-[#FF9600]/10 border-2 border-b-4 border-[#FF9600]/30 dark:border-[#D97F00]/40 rounded-2xl text-center">
-                        <span className="text-2xl font-bold text-[#FF9600] dark:text-[#FF9600]">{rubricAlignment.criteria.filter((c: any) => c.status === 'partially_met').length}</span>
-                        <p className="text-sm text-[#D97F00] dark:text-[#FF9600]/80 font-medium mt-1">Partially Met</p>
+                      <div className="flex-1 min-w-[120px] p-4 bg-[#F3EAFF] dark:bg-[#A560E8]/10 border-2 border-b-4 border-[#A560E8]/30 dark:border-[#8A48C7]/40 rounded-2xl text-center">
+                        <span className="text-2xl font-bold text-[#A560E8] dark:text-[#A560E8]">{rubricAlignment.criteria.filter((c: any) => c.status === 'partially_met').length}</span>
+                        <p className="text-sm text-[#8A48C7] dark:text-[#A560E8]/80 font-medium mt-1">Partially Met</p>
                       </div>
                       <div className="flex-1 min-w-[120px] p-4 bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-2 border-b-4 border-[#FF4B4B]/30 dark:border-[#E04343]/40 rounded-2xl text-center">
                         <span className="text-2xl font-extrabold text-[#FF4B4B] dark:text-[#FF4B4B]">{rubricAlignment.criteria.filter((c: any) => c.status === 'not_met').length}</span>
@@ -4878,8 +4919,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                       <div className="space-y-4">
                         {rubricAlignment.criteria.map((criterion: any, index: number) => {
                           const statusConfig = {
-                            met: { bg: 'bg-[#E5F8D0] dark:bg-[#58CC02]/10', border: 'border-2 border-b-4 border-[#58CC02]/30 dark:border-[#46A302]/40', icon: '✅', label: 'Met', textColor: 'text-[#58CC02] dark:text-[#58CC02]' },
-                            partially_met: { bg: 'bg-[#FFF4E0] dark:bg-[#FF9600]/10', border: 'border-2 border-b-4 border-[#FF9600]/30 dark:border-[#D97F00]/40', icon: '⚠️', label: 'Partially Met', textColor: 'text-[#FF9600] dark:text-[#FF9600]' },
+                            met: { bg: 'bg-[#F3EAFF] dark:bg-[#A560E8]/10', border: 'border-2 border-b-4 border-[#A560E8]/30 dark:border-[#8A48C7]/40', icon: '✅', label: 'Met', textColor: 'text-[#A560E8] dark:text-[#A560E8]' },
+                            partially_met: { bg: 'bg-[#F3EAFF] dark:bg-[#A560E8]/10', border: 'border-2 border-b-4 border-[#A560E8]/30 dark:border-[#8A48C7]/40', icon: '⚠️', label: 'Partially Met', textColor: 'text-[#A560E8] dark:text-[#A560E8]' },
                             not_met: { bg: 'bg-[#FFE8E8] dark:bg-[#FF4B4B]/10', border: 'border-2 border-b-4 border-[#FF4B4B]/30 dark:border-[#E04343]/40', icon: '❌', label: 'Not Met', textColor: 'text-[#FF4B4B] dark:text-[#FF4B4B]' }
                           };
                           const config = statusConfig[criterion.status as keyof typeof statusConfig] || statusConfig.partially_met;
@@ -4911,7 +4952,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                                   <ul className="space-y-1">
                                     {criterion.suggestions.map((suggestion: string, sIdx: number) => (
                                       <li key={sIdx} className="text-sm text-stone-600 dark:text-stone-400 flex items-start space-x-2">
-                                        <span className="text-[#1CB0F6] dark:text-[#1CB0F6] mt-0.5">•</span>
+                                        <span className="text-[#A560E8] dark:text-[#A560E8] mt-0.5">•</span>
                                         <span>{suggestion}</span>
                                       </li>
                                     ))}
@@ -4943,12 +4984,12 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
 
                   {/* Priority Improvements - dashboard card style */}
                   {rubricAlignment.priorityImprovements && rubricAlignment.priorityImprovements.length > 0 && (
-                    <div className="p-4 sm:p-5 bg-[#DDF4FF] dark:bg-[#1CB0F6]/10 border-2 border-b-4 border-[#1CB0F6]/30 dark:border-[#1899D6]/40 rounded-2xl">
-                      <h3 className="font-extrabold text-[#1899D6] dark:text-[#1CB0F6] mb-3">Priority Improvements</h3>
+                    <div className="p-4 sm:p-5 bg-[#F3EAFF] dark:bg-[#A560E8]/10 border-2 border-b-4 border-[#A560E8]/30 dark:border-[#8A48C7]/40 rounded-2xl">
+                      <h3 className="font-extrabold text-[#8A48C7] dark:text-[#A560E8] mb-3">Priority Improvements</h3>
                       <ol className="space-y-2">
                         {rubricAlignment.priorityImprovements.map((improvement: string, index: number) => (
                           <li key={index} className="flex items-start space-x-3 text-sm text-stone-700 dark:text-stone-300">
-                            <span className="flex-shrink-0 w-6 h-6 bg-[#1CB0F6] text-white rounded-full flex items-center justify-center text-xs font-extrabold">{index + 1}</span>
+                            <span className="flex-shrink-0 w-6 h-6 bg-[#A560E8] text-white rounded-full flex items-center justify-center text-xs font-extrabold">{index + 1}</span>
                             <span>{improvement}</span>
                           </li>
                         ))}
@@ -4991,9 +5032,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                 <div className={`relative rounded-xl px-3 py-2 shadow-xl mb-2 ${
                   isLimitedTooltip
                     ? annotation.type === 'strong'
-                      ? 'bg-[#58CC02] text-white border-2 border-b-4 border-[#46A302]'
+                      ? 'bg-emerald-500 text-white border-2 border-b-4 border-emerald-700'
                       : annotation.type === 'improve'
-                        ? 'bg-[#FF9600] text-white border-2 border-b-4 border-[#D97F00]'
+                        ? 'bg-amber-500 text-white border-2 border-b-4 border-amber-600'
                         : 'bg-[#FF4B4B] text-white border-2 border-b-4 border-[#E04343]'
                     : 'bg-[#3C3C3C] text-white border-2 border-b-4 border-[#2A2A2A]'
                 } ${isMobileDevice() ? 'text-sm max-w-xs w-72' : 'text-xs max-w-xs'}`} style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
@@ -5024,7 +5065,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                   )}
                   {!isMobileDevice() && (
                     <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full">
-                      <div className={`border-8 border-transparent ${isLimitedTooltip ? (annotation.type === 'strong' ? 'border-t-[#58CC02]' : annotation.type === 'improve' ? 'border-t-[#FF9600]' : 'border-t-[#FF4B4B]') : 'border-t-[#3C3C3C]'}`}></div>
+                      <div className={`border-8 border-transparent ${isLimitedTooltip ? (annotation.type === 'strong' ? 'border-t-emerald-500' : annotation.type === 'improve' ? 'border-t-amber-500' : 'border-t-[#FF4B4B]') : 'border-t-[#3C3C3C]'}`}></div>
                     </div>
                   )}
                 </div>

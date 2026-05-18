@@ -154,6 +154,24 @@ const validationSchemas = {
     title: commonSchemas.title
   }),
 
+  // Editor save — separate from updateDocument so the in-app
+  // editor can autosave content frequently without conflicting
+  // with title rename validation. All fields optional so partial
+  // saves (e.g. text-only) work, but at least one must be present.
+  updateDocumentContent: Joi.object({
+    // contentHtml carries inline images as base64 data URIs. A single
+    // 4 MB image is ~5.5 M chars, so the old 2 M cap silently rejected
+    // every save that contained an image. Raised well above that
+    // (still far under the 50 MB Express body limit) so images persist.
+    contentHtml: Joi.string().max(24_000_000).allow('').optional().messages({
+      'string.max': 'Document content is too large. Try smaller / fewer images.'
+    }),
+    contentText: Joi.string().max(4_000_000).allow('').optional().messages({
+      'string.max': 'Document text is too large'
+    }),
+    wordCount: Joi.number().integer().min(0).max(1_000_000).optional()
+  }).or('contentHtml', 'contentText'),
+
   // Analysis endpoints
   // documentId is optional: when pasting text from dashboard, we send content without documentId
   createAnalysis: Joi.object({
@@ -232,6 +250,7 @@ module.exports = {
   // Document validations
   validateUploadDocument: validate(validationSchemas.uploadDocument),
   validateUpdateDocument: validate(validationSchemas.updateDocument),
+  validateUpdateDocumentContent: validate(validationSchemas.updateDocumentContent),
   
   // Analysis validations
   validateCreateAnalysis: validate(validationSchemas.createAnalysis),

@@ -40,272 +40,136 @@ interface LandingPageProps {
 /** Source list for landing FAQ UI + FAQPage JSON-LD (order must match). */
 const LANDING_FAQ_ITEMS: { question: string; answer: string }[] = [
   {
-    question: "What kind of feedback will I get on my essay?",
-    answer: "You get section-by-section annotations (green for strong, yellow for improve, red for concerns), an overall grade-level rubric, and actionable improvement suggestions. It covers structure, argument quality, clarity, citations, and academic style."
+    question: "Can I actually write my essay in WriteScholar?",
+    answer: "Yes, that's the main thing it does. You write, paste, or import a Word doc into a real editor with headings, bold, italics, tables and images. As you write, professor-style feedback shows up next to your draft, and you can drop a suggested fix straight into the text with one click. It autosaves as you go, and you export a clean Word document when you're done."
   },
   {
-    question: "How does the essay analyzer work?",
-    answer: "Paste your essay (200+ words) or upload a PDF/DOCX/TXT file. Our AI analyzes structure, clarity, argument, citations, and academic tone the way a professor would. You get detailed feedback with specific suggestions in under 60 seconds."
+    question: "What kind of feedback will I get on my essay?",
+    answer: "Line-by-line notes colour-coded green for strong, amber for needs work, and red for serious concerns, plus an estimated grade with a full rubric covering thesis, evidence, structure, clarity and academic style, and specific rewrite suggestions you can apply. It reads your draft the way a marker would."
+  },
+  {
+    question: "How does the analyzer work?",
+    answer: "Write in the editor, paste your essay, or upload a PDF, DOCX or TXT. The AI grades structure, argument, clarity, citations and academic tone the way a professor would and gives you an estimated grade out of 100 with a letter band and detailed notes, usually in under a minute."
+  },
+  {
+    question: "How accurate is the grade? Is it my real grade?",
+    answer: "It's an AI estimate, not your official grade. It uses the same rubric weights professors mark with and in practice lands within a few points of real scores. Use it to find and fix the weak spots before you hand in, not as a guarantee of what you'll get."
+  },
+  {
+    question: "Can I import a Word or PDF, and export it back?",
+    answer: "Yes. Import a .docx and your bold, italics, headings and paragraphs carry over. PDF and TXT come in as clean text. When you're finished, export back to a properly formatted Word document with no reformatting on your end."
   },
   {
     question: "Is WriteScholar for college and university students?",
-    answer: "Yes. WriteScholar is for undergrads and postgrads worldwide, whether you're writing essays in the UK, the US, or elsewhere. Set your education level in the analyzer for feedback that fits your course. We support major citation styles (APA, MLA, Chicago, Harvard, and more). High school options are available too."
+    answer: "Yes, it's built for undergrad and postgrad coursework worldwide, UK or US. Set your education level so the feedback fits your course. We support the major citation styles (APA, MLA, Chicago, Harvard, IEEE, Vancouver), and there are high school options too."
   },
   {
-    question: "How long does essay analysis take?",
-    answer: "Usually under 60 seconds. Paste your essay, click Analyze Text, and you'll see professor-style feedback with a full rubric and improvement tips. Free plan includes 2 analyses per month."
+    question: "How long does an analysis take?",
+    answer: "Usually under 60 seconds. Write or paste your essay, hit Analyze, and you get the rubric, the estimated grade and a ranked fix list. The free plan includes 2 analyses a month."
   },
   {
-    question: "Can I upload a Word or PDF file?",
-    answer: "Yes. Upload PDF, DOCX, DOC, or TXT files directly. Or paste your text into the box. Both work for analysis. Files are processed securely and never shared."
-  },
-  {
-    question: "Can I create study quizzes from my notes?",
-    answer: "Yes! The Study Pack turns any text into lessons, flashcards, quizzes, crosswords, Crater Blast & Word Tower. Paste your notes or upload a document. Free users get lesson and flashcards; quiz, crossword, Crater Blast & Word Tower unlock with Pro."
-  },
-  {
-    question: "What is Daily Review?",
-    answer: "Daily Review is your personalised daily practice session, like Duolingo but for your coursework. Each day you get a short session based on your saved study materials — flashcard drills, quiz questions, and vocabulary checks. Complete it to earn XP and keep your streak alive. It's the default tab when you open your dashboard."
-  },
-  {
-    question: "What are XP, levels, streaks, and badges?",
-    answer: "WriteScholar has a full progression system to keep you motivated. Earn XP for completing daily reviews, analysing essays, creating study packs, and more. XP fills your level bar — there are 100 levels to climb, from Scholar Seedling to Supreme Grandmaster. Streaks track how many days in a row you've studied. And there are 80+ badges to unlock across categories like writing, studying, and consistency. It's designed to make studying feel rewarding."
+    question: "Can I also turn my notes into study tools?",
+    answer: "Yes. Alongside the writing workspace, Study Pack turns any notes into flashcards, quizzes, crosswords and revision games. Free users get lessons and flashcards; the rest unlocks with Pro."
   },
   {
     question: "What citation styles are supported?",
-    answer: "We support APA 7th edition, MLA 9th edition, Chicago (notes-bibliography and author-date), Harvard, IEEE, and Vancouver. The citation finder searches academic databases for relevant sources."
+    answer: "APA 7th, MLA 9th, Chicago (notes-bibliography and author-date), Harvard, IEEE and Vancouver. There's also a citation finder that pulls relevant academic sources for your topic."
   },
   {
     question: "Is my content private and secure?",
-    answer: "Yes. We use enterprise-grade encryption. Your content is never shared with third parties or used to train AI models. You can delete your documents at any time."
+    answer: "Yes. Your work is encrypted, never sold or used to train AI models, and you can delete any document whenever you want."
   },
   {
-    question: "What's the difference between Free and Pro?",
-    answer: "Free: 3 documents, 2 analyses, 2 study packs, 5k words, 2 citations per month, 2MB library storage, Focus Mode (3 sites). Pro: 99 combined analyses, study packs and citations per month, 999,999 words for the Paper Summarizer, Apply WriteScholar revisions into your draft, all citation styles, PDF/Word export, Focus Mode with unlimited blocked sites, uploads up to 100MB per file, and full quiz & study tools. Premium: 5× usage versus Pro—499 combined actions per month, unlimited research-paper summarisation, and 1GB library storage."
+    question: "What's the difference between Free, Pro and Premium?",
+    answer: "Free: 3 documents, 2 analyses and 2 study packs a month. Pro: 99 combined analyses, study packs and citations a month, apply WriteScholar revisions into your draft, all citation styles, PDF and Word export, uploads up to 100MB, and the full study tools. Premium: 5x the Pro usage at 499 actions a month, unlimited research-paper summarising, and 1GB of library storage."
   },
   {
     question: "How do I add friends and share my study materials?",
-    answer: "Every account gets a unique friend code. Share your code with friends so they can add you. Once connected, you can share flashcards, quizzes, crosswords, or notes with one tap. They tap Accept and it's in their library. Core sharing is free."
+    answer: "Every account gets a unique friend code. Share it so people can add you. Once connected, you can send flashcards, quizzes, crosswords or notes with one tap, they tap Accept, and it lands in their library. Core sharing is free."
   }
 ];
 
-/* ─── LandingEssayCallouts — desktop-only annotated essay block ───
-   A shrunken /rubric-and-notes.png screenshot with 4 numbered badges
-   on its corners and matching callout cards in the left/right gutters,
-   connected by dashed SVG arrows. Mirrors the onboarding tour's
-   EssayPitchVisual desktop layout (see OnboardingPage.tsx), restyled
-   with the landing page's purple accent so it slots in under the
-   "Analyze papers with feedback that thinks like a professor" hero.
-
-   Non-crossing convention: each numbered badge sits on the same side
-   of the image as its callout column, so the arrows never tangle.
-     #1 — RIGHT column top    (score badge, y≈6)
-     #2 — LEFT  column top    (rubric grid, y≈22)
-     #3 — LEFT  column bottom (color-coded text, y≈68)
-     #4 — RIGHT column bottom (annotations, y≈84) */
-function LandingEssayCallouts() {
-  const color = '#A560E8';
-  const borderColor = '#8A48C7';
-  const hotspots: { x: number; y: number; title: string; desc: string }[] = [
-    {
-      // #1 — score header
-      x: 82, y: 6,
-      title: 'Real /100 grade + letter score',
-      desc: 'Every essay graded out of 100 with a letter grade — using the same rubric weights real professors mark with. You always know how close you are to an A.',
-    },
-    {
-      // #2 — five-category rubric grid
-      x: 22, y: 22,
-      title: 'Five-category rubric breakdown',
-      desc: 'Thesis · Evidence · Structure · Clarity · Mechanics — each scored individually so you see exactly which category is costing you marks.',
-    },
-    {
-      // #3 — color-coded essay text
-      x: 22, y: 68,
-      title: 'Colour-coded essay text',
-      desc: 'Your sentences turn green (strong), amber (revise), or red (serious concern). Hover any highlight to read the AI\'s exact feedback for that line.',
-    },
-    {
-      // #4 — line-by-line annotations
-      x: 78, y: 84,
-      title: 'Line-by-line annotations',
-      desc: 'Every sentence gets a verdict plus a specific revise-to suggestion. Not "make it better" — actual rewritten lines you can copy straight in.',
-    },
-  ];
-
+/* ─── DottedShot — big focal product screenshot ──────────────────
+   The image is the hero; numbered dot badges sit on the regions
+   they describe. The explanations live in <NumberedPoints> right
+   below (no flanking arrow-callouts — the screenshot stays the
+   focal point and reads at every viewport). */
+function DottedShot({
+  src,
+  alt,
+  badges,
+}: {
+  src: string;
+  alt: string;
+  badges: { n: number; x: number; y: number }[];
+}) {
   return (
-    <div className="hidden lg:grid lg:grid-cols-[1fr_minmax(0,1.6fr)_1fr] gap-10 xl:gap-14 items-stretch">
-      {/* LEFT column — #2 rubric (top), #3 color-coded text (bottom). */}
-      <div className="flex flex-col justify-between gap-6 py-2">
-        <div className="mt-10 xl:mt-14">
-          <LandingEssayCallout n={2} hotspot={hotspots[1]} color={color} arrow="right" />
-        </div>
-        <LandingEssayCallout n={3} hotspot={hotspots[2]} color={color} arrow="right" />
-      </div>
-
-      {/* CENTRE — screenshot with the 4 numbered badges. */}
-      <div className="relative pt-2">
-        <div className="absolute -inset-3 rounded-3xl blur-2xl opacity-25" style={{ backgroundColor: `${color}40` }} aria-hidden />
-        <div className="relative rounded-2xl overflow-hidden border-2 border-b-4 shadow-xl bg-white dark:bg-stone-900" style={{ borderColor }}>
-          <img
-            src="/rubric-and-notes.png"
-            alt="WriteScholar essay analyzer — rubric, score, and annotations"
-            className="w-full h-auto block"
-            loading="lazy"
-            decoding="async"
-          />
-          {hotspots.map((h, i) => (
-            <span
-              key={i}
-              aria-hidden
-              className="absolute -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-full font-extrabold"
-              style={{
-                left: `${h.x}%`,
-                top: `${h.y}%`,
-                width: '32px',
-                height: '32px',
-                backgroundColor: color,
-                color: 'white',
-                fontSize: '14px',
-                boxShadow: `0 0 0 4px white, 0 0 0 6px ${color}, 0 6px 14px rgba(0,0,0,0.25)`,
-              }}
-            >
-              {i + 1}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* RIGHT column — #1 score (top), #4 annotations (bottom). */}
-      <div className="flex flex-col justify-between gap-6 py-2">
-        <div className="-mt-3 xl:-mt-5">
-          <LandingEssayCallout n={1} hotspot={hotspots[0]} color={color} arrow="left" />
-        </div>
-        <LandingEssayCallout n={4} hotspot={hotspots[3]} color={color} arrow="left" />
+    <div className="relative">
+      <div aria-hidden className="pointer-events-none absolute -inset-3 rounded-[2.5rem] bg-gradient-to-br from-[#A560E8]/18 via-[#A560E8]/8 to-[#58CC02]/10 blur-3xl -z-10" />
+      <div className="relative rounded-2xl sm:rounded-3xl border-2 border-[#A560E8] bg-white dark:bg-stone-900 shadow-[0_0_18px_rgba(165,96,232,0.22),0_24px_48px_-16px_rgba(0,0,0,0.38)] overflow-hidden">
+        <img src={src} alt={alt} loading="lazy" decoding="async" className="w-full h-auto block" />
+        {badges.map((b) => (
+          <span
+            key={b.n}
+            aria-hidden
+            className="absolute -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-full font-extrabold text-white"
+            style={{
+              left: `${b.x}%`,
+              top: `${b.y}%`,
+              width: 'clamp(24px,2.4vw,36px)',
+              height: 'clamp(24px,2.4vw,36px)',
+              fontSize: 'clamp(12px,1.1vw,16px)',
+              backgroundColor: '#A560E8',
+              boxShadow: '0 0 0 4px #fff, 0 0 0 6px #A560E8, 0 6px 14px rgba(0,0,0,0.28)',
+            }}
+          >
+            {b.n}
+          </span>
+        ))}
       </div>
     </div>
   );
 }
 
-/* ─── LandingComprehensiveCallouts — desktop annotated full-report ───
-   Second arrow-callout block on the landing essay section. Mirrors
-   the onboarding tour's Page 2 EssayDeepDiveVisual: a shrunken
-   /full-report.png screenshot with 5 numbered badges marking the
-   five sections of WriteScholar's comprehensive analysis report:
-
-     #1 — RIGHT top    (y≈20) — Overall assessment
-     #2 — LEFT  top    (y≈32) — Top suggestions
-     #3 — RIGHT mid    (y≈50) — Strengths
-     #4 — LEFT  bottom (y≈74) — Areas for improvement
-     #5 — RIGHT bottom (y≈90) — Serious concerns
-
-   5 badges → 3-right / 2-left split. RIGHT column uses
-   justify-between to space all three callouts; LEFT column uses
-   justify-around to centre its two between top and bottom. mt-*
-   offsets fine-tune individual rows so each callout sits next to
-   its badge on the image. */
-function LandingComprehensiveCallouts() {
-  const color = '#A560E8';
-  const borderColor = '#8A48C7';
-  const hotspots: { x: number; y: number; title: string; desc: string }[] = [
-    {
-      // #1 — RIGHT top — Overall assessment
-      x: 80, y: 20,
-      title: 'Overall assessment',
-      desc: 'Letter grade, /100 score, and a plain-English verdict at the top. The high-level read on where this draft sits before you dive into the details.',
-    },
-    {
-      // #2 — LEFT top — Top suggestions
-      x: 22, y: 32,
-      title: 'Top suggestions',
-      desc: 'The handful of changes that move your grade the most, ranked by impact. Fix these first if you only have 20 minutes before the deadline.',
-    },
-    {
-      // #3 — RIGHT middle — Strengths
-      x: 80, y: 50,
-      title: 'Strengths',
-      desc: 'The specific moves already earning marks: thesis framing, evidence handling, transitions. Each one surfaced with the actual sentence. Keep what works.',
-    },
-    {
-      // #4 — LEFT bottom — Areas for improvement
-      x: 22, y: 74,
-      title: 'Areas for improvement',
-      desc: 'Vague claims, weak signposting, sentences doing too much. Each one comes with a concrete "revise to" suggestion. No guessing what to change.',
-    },
-    {
-      // #5 — RIGHT bottom — Serious concerns
-      x: 80, y: 90,
-      title: 'Serious concerns',
-      desc: 'Missing citations, logic gaps, factual slips. The things professors actually deduct points for. Surfaced before submit, not after the red pen.',
-    },
-  ];
-
+/* ─── NumberedPoints — explanation cards beneath the screenshot ──
+   Each card carries the number of the dot it maps to, so the eye
+   connects "card 3 → dot ③ on the image" without tangled arrows. */
+function NumberedPoints({
+  points,
+  cols,
+}: {
+  points: { n: number; title: string; desc: string }[];
+  cols: string;
+}) {
   return (
-    <div className="hidden lg:grid lg:grid-cols-[1fr_minmax(0,1.7fr)_1fr] gap-10 xl:gap-14 items-stretch">
-      {/* LEFT — Top suggestions (#2) sits a touch below its badge
-          (badge y=32, callout lifted up); Areas for improvement (#4)
-          is pulled up off the column floor so it sits higher than
-          its badge y=74 anchor. mt-* on #2 / mb-* on #4 tune the
-          vertical alignment by hand. */}
-      <div className="flex flex-col justify-around gap-6 py-2">
-        <div className="mt-8 xl:mt-14">
-          <LandingEssayCallout n={2} hotspot={hotspots[1]} color={color} arrow="right" />
+    <div className={`grid ${cols} gap-4 sm:gap-5`}>
+      {points.map((p) => (
+        <div
+          key={p.n}
+          className="relative rounded-2xl border border-[#A560E8]/45 dark:border-[#8A48C7]/45 bg-white dark:bg-stone-900 p-5 shadow-[0_10px_28px_-18px_rgba(96,48,140,0.5)]"
+        >
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#A560E8] text-white text-sm font-extrabold mb-3 shadow-[0_4px_10px_-3px_rgba(165,96,232,0.6)]">
+            {p.n}
+          </span>
+          <h3
+            className="text-[15px] font-extrabold text-stone-900 dark:text-stone-50 leading-snug mb-1"
+            style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+          >
+            {p.title}
+          </h3>
+          <p className="text-[13px] text-stone-600 dark:text-stone-400 leading-relaxed">
+            {p.desc}
+          </p>
         </div>
-        <div className="mb-8 xl:mb-12">
-          <LandingEssayCallout n={4} hotspot={hotspots[3]} color={color} arrow="right" />
-        </div>
-      </div>
-
-      {/* CENTRE — full-report screenshot with the 5 numbered badges. */}
-      <div className="relative pt-2">
-        <div className="absolute -inset-3 rounded-3xl blur-2xl opacity-25" style={{ backgroundColor: `${color}40` }} aria-hidden />
-        <div className="relative rounded-2xl overflow-hidden border-2 border-b-4 shadow-xl bg-white dark:bg-stone-900" style={{ borderColor }}>
-          <img
-            src="/full-report.png"
-            alt="WriteScholar comprehensive analysis — five-section professor-style report"
-            className="w-full h-auto block"
-            loading="lazy"
-            decoding="async"
-          />
-          {hotspots.map((h, i) => (
-            <span
-              key={i}
-              aria-hidden
-              className="absolute -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-full font-extrabold"
-              style={{
-                left: `${h.x}%`,
-                top: `${h.y}%`,
-                width: '32px',
-                height: '32px',
-                backgroundColor: color,
-                color: 'white',
-                fontSize: '14px',
-                boxShadow: `0 0 0 4px white, 0 0 0 6px ${color}, 0 6px 14px rgba(0,0,0,0.25)`,
-              }}
-            >
-              {i + 1}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* RIGHT — Overall assessment (#1) at top, Strengths (#3) in
-          the middle, Serious concerns (#5) at the bottom.
-          justify-between spaces all three evenly. */}
-      <div className="flex flex-col justify-between gap-6 py-2">
-        <LandingEssayCallout n={1} hotspot={hotspots[0]} color={color} arrow="left" />
-        <LandingEssayCallout n={3} hotspot={hotspots[2]} color={color} arrow="left" />
-        <LandingEssayCallout n={5} hotspot={hotspots[4]} color={color} arrow="left" />
-      </div>
+      ))}
     </div>
   );
 }
 
-/* Single landing-page callout card with a number badge, title,
-   description, and a dashed arrow on its inner edge pointing toward
-   the centre image. Same visual recipe as OnboardingPage's
-   DesktopCallout, kept inline here to keep the module self-contained
-   (no cross-component import gymnastics). */
+/* Single flanking callout card: number badge + title + desc, with a
+   dashed arrow on its inner edge pointing toward the centre image.
+   The original landing recipe — restored for the combined analyzer
+   block per request. */
 function LandingEssayCallout({
   n,
   hotspot,
@@ -362,6 +226,91 @@ function LandingEssayCallout({
         </p>
       </div>
     </div>
+  );
+}
+
+/* ─── LandingCombinedAnalyzerCallouts ────────────────────────────
+   The two analyzer screenshots JOINED into one photo (rubric view
+   on top, full report below — single bordered frame) with the
+   original sideways arrow-callouts flanking it: 9 numbered badges,
+   cards split left (#2,3,6,8) / right (#1,4,5,7,9) so the dashed
+   arrows never cross. Desktop keeps the exact prior style; <lg
+   falls back to the stacked photo + a numbered grid (so phones
+   aren't left blank). */
+function LandingCombinedAnalyzerCallouts() {
+  const color = '#A560E8';
+  const borderColor = '#8A48C7';
+  const pts: { n: number; img: 0 | 1; side: 'left' | 'right'; x: number; y: number; title: string; desc: string }[] = [
+    { n: 1, img: 0, side: 'right', x: 84, y: 5,  title: 'Real /100 grade + letter score', desc: 'Every essay graded out of 100 with a letter grade — the same rubric weights professors mark with. You always know how close you are to an A.' },
+    { n: 2, img: 0, side: 'left',  x: 22, y: 22, title: 'Five-category rubric breakdown', desc: 'Thesis · Evidence · Structure · Clarity · Mechanics — each scored on its own so you see exactly which category is costing you marks.' },
+    { n: 3, img: 0, side: 'left',  x: 22, y: 73, title: 'Colour-coded essay text', desc: 'Your sentences turn green (strong), amber (revise) or red (serious concern). Hover any highlight to read the exact feedback for that line.' },
+    { n: 4, img: 0, side: 'right', x: 78, y: 86, title: 'Line-by-line annotations', desc: 'Every sentence gets a verdict plus a specific revise-to suggestion — actual rewritten lines, not "make it better".' },
+    { n: 5, img: 1, side: 'right', x: 80, y: 27, title: 'Overall assessment', desc: 'Letter grade, /100 score and a plain-English verdict up top — the high-level read before you dive into the detail.' },
+    { n: 6, img: 1, side: 'left',  x: 22, y: 40, title: 'Top suggestions', desc: 'The handful of changes that move your grade the most, ranked by impact. Fix these first if you only have 20 minutes.' },
+    { n: 7, img: 1, side: 'right', x: 80, y: 58, title: 'Strengths', desc: 'The specific moves already earning marks — thesis framing, evidence handling, transitions — each with the actual sentence.' },
+    { n: 8, img: 1, side: 'left',  x: 22, y: 74, title: 'Areas for improvement', desc: 'Vague claims, weak signposting, sentences doing too much — each with a concrete "revise to" suggestion.' },
+    { n: 9, img: 1, side: 'right', x: 80, y: 95, title: 'Serious concerns', desc: 'Missing citations, logic gaps, factual slips — the things professors actually deduct for, surfaced before you submit.' },
+  ];
+  // Combined-photo Y for a badge: image-0 (rubric-and-notes,
+  // 1216×1166) takes the top 51.3% of the stacked height, image-1
+  // (full-report, 1216×1106) the bottom 48.7%. Pinning each callout
+  // to this exact %, its arrow lines up with its dot — no guessing.
+  const combinedY = (p: { img: 0 | 1; y: number }) =>
+    p.img === 0 ? p.y * 0.5132 : 51.32 + p.y * 0.4868;
+  const Badge = ({ n, x, y }: { n: number; x: number; y: number }) => (
+    <span
+      aria-hidden
+      className="absolute -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-full font-extrabold text-white"
+      style={{
+        left: `${x}%`, top: `${y}%`, width: '32px', height: '32px', fontSize: '14px',
+        backgroundColor: color, boxShadow: `0 0 0 4px white, 0 0 0 6px ${color}, 0 6px 14px rgba(0,0,0,0.25)`,
+      }}
+    >
+      {n}
+    </span>
+  );
+  const Shot = ({ src, alt, img }: { src: string; alt: string; img: 0 | 1 }) => (
+    <div className="relative">
+      <img src={src} alt={alt} className="w-full h-auto block" loading="lazy" decoding="async" />
+      {pts.filter((p) => p.img === img).map((p) => <Badge key={p.n} n={p.n} x={p.x} y={p.y} />)}
+    </div>
+  );
+  const a1 = 'WriteScholar essay analyzer — /100 score, five-category rubric, colour-coded text and line-by-line annotations';
+  const a2 = 'WriteScholar comprehensive report — overall assessment, top suggestions, strengths, areas to improve and serious concerns';
+  return (
+    <>
+      {/* Desktop: ONE combined photo centred, every callout pinned
+          absolutely to its dot's exact vertical position so the
+          arrows always point at the right spot. */}
+      <div className="hidden lg:block relative mx-auto max-w-[1120px]">
+        <div className="relative mx-auto w-[46%]">
+          <div className="absolute -inset-3 rounded-3xl blur-2xl opacity-25" style={{ backgroundColor: `${color}40` }} aria-hidden />
+          <div className="relative rounded-2xl overflow-hidden border-2 border-b-4 shadow-xl bg-white dark:bg-stone-900" style={{ borderColor }}>
+            <Shot src="/rubric-and-notes.png" alt={a1} img={0} />
+            <Shot src="/full-report.png" alt={a2} img={1} />
+          </div>
+        </div>
+        {pts.map((p) => (
+          <div
+            key={p.n}
+            className={`absolute w-[25%] -translate-y-1/2 ${p.side === 'left' ? 'left-0' : 'right-0'}`}
+            style={{ top: `${combinedY(p)}%` }}
+          >
+            <LandingEssayCallout n={p.n} hotspot={p} color={color} arrow={p.side === 'left' ? 'right' : 'left'} />
+          </div>
+        ))}
+      </div>
+
+      <div className="lg:hidden">
+        <div className="max-w-xl mx-auto rounded-2xl overflow-hidden border-2 border-b-4 shadow-xl bg-white dark:bg-stone-900" style={{ borderColor }}>
+          <Shot src="/rubric-and-notes.png" alt={a1} img={0} />
+          <Shot src="/full-report.png" alt={a2} img={1} />
+        </div>
+        <div className="mt-8">
+          <NumberedPoints cols="grid-cols-1 sm:grid-cols-2" points={pts.map((p) => ({ n: p.n, title: p.title, desc: p.desc }))} />
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -1278,8 +1227,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   "Letter grade" and "polished revision" are bolded white
                   so the most concrete benefits jump out of a scan. */}
               <p className="mt-6 sm:mt-7 max-w-2xl mx-auto text-base sm:text-lg lg:text-xl text-stone-600 dark:text-stone-300 font-bold leading-relaxed">
-                Write better essays, get instant feedback, and ace your classes.
-                All-in-one AI writing assistant built for students.
+                Write in a real editor, get a professor-style grade with
+                line-by-line fixes, then apply them in one click.
               </p>
 
               {/* ─── 4. FEATURE PILLS ROW ─────────────────────────────
@@ -1293,7 +1242,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   'AI Essay Grader',
                   'Study Notes & Flashcards',
                   'Professor-Style Feedback',
-                  'Writing Coach',
+                  'Write & Auto-Fix',
                 ].map((label) => (
                   <span
                     key={label}
@@ -1322,13 +1271,13 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 <button
                   type="button"
                   onClick={() => {
-                    document.getElementById('motivation')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    document.getElementById('hero-interactive-demo')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                   }}
-                  className="inline-flex items-center gap-1.5 text-sm sm:text-base font-extrabold text-[#A560E8] hover:text-[#7733B5] transition-colors px-2 py-3"
+                  className="group inline-flex items-center gap-1.5 text-sm sm:text-base font-extrabold text-[#A560E8] hover:text-[#7733B5] transition-colors px-2 py-3"
                 >
-                  Explore Study Tools
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  See interactive demo
+                  <svg className="w-4 h-4 transition-transform duration-200 group-hover:translate-y-0.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14M5 12l7 7 7-7" />
                   </svg>
                 </button>
               </div>
@@ -1399,6 +1348,22 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 {/* "60 sec" floating badge removed per user brief. */}
               </div>
 
+              {/* Demo-to-workspace bridge — the live demo above is the
+                  paste-and-grade slice; this line tells visitors there's
+                  a full editor so the hero promise matches what they get
+                  after signup. Scrolls to the new workspace section. */}
+              <p className="mt-5 sm:mt-6 text-center text-[13px] sm:text-sm font-bold text-stone-600 dark:text-stone-300">
+                That&apos;s the instant grade. You also get a{' '}
+                <button
+                  type="button"
+                  onClick={() => document.getElementById('writing-workspace')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                  className="underline decoration-2 underline-offset-2 text-[#A560E8] hover:text-[#7733B5] transition-colors"
+                >
+                  full writing workspace
+                </button>{' '}
+                where the AI fixes your draft as you write.
+              </p>
+
               {/* ─── 8. PRODUCT-BREADTH VIDEO STRIP — mobile/tablet fallback ──
                   On lg+ the four tiles float around the H1 above (see
                   block #2-tiles). This horizontal strip is the smaller
@@ -1464,217 +1429,35 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 closed alongside the section's downstream closers. */}
             <div className="flex flex-col items-stretch w-full">
 
-              {/* Analysis preview — restored eyebrow + h2 + subhead
-                  block (was removed in the Knowunity hero rebuild). The
-                  copy is the same one shipped on the pre-rebuild landing
-                  (commit 4763c37), restyled to the current cream-section
-                  language. Two-line H1, paper-mascot floating to the
-                  left on lg+, and floating ✦/📝 sparkles in the corners
-                  on xl+ — restores the "Analyze papers" decorative feel
-                  from the older 4763c37 / aec4bd3 commits. */}
-              <div
-                id="landing-tools"
-                className="relative w-full max-w-6xl mx-auto mt-4 sm:mt-8 lg:mt-10 scroll-mt-24 px-1.5 sm:px-2 lg:px-1"
-              >
-                {/* Floating decorations — visible at xl+ only so they
-                    don't compete on smaller screens. Echoes commit
-                    4763c37 which had 📝 + ✨ in the same corners. */}
-                <div
-                  className="hidden xl:block pointer-events-none absolute top-[2%] left-[3%] text-4xl opacity-40 motion-safe:animate-[hero-tile-drift_5s_ease-in-out_infinite]"
-                  aria-hidden
-                >📝</div>
-                <div
-                  className="hidden xl:block pointer-events-none absolute top-[8%] right-[4%] text-3xl opacity-35 motion-safe:animate-[hero-tile-drift_6s_ease-in-out_infinite]"
-                  style={{ animationDelay: '1.4s' }}
-                  aria-hidden
-                >✨</div>
-
-                <div className="relative text-center max-w-[34rem] lg:max-w-[40rem] xl:max-w-[46rem] mx-auto mb-8 sm:mb-10 lg:mb-12 px-2">
-                  {/* Paper-themed mascot — gently floats on lg+. Now
-                      positioned ABSOLUTELY to the RIGHT of the heading
-                      block (was left). `left-full ml-6` mirrors the
-                      previous `right-full mr-6` so the heading stays
-                      centred and the mascot sits in the right margin. */}
-                  <img
-                    src="/mascot-paper.webp"
-                    alt=""
-                    aria-hidden
-                    loading="lazy"
-                    decoding="async"
-                    className="hidden lg:block absolute left-full top-1/2 -translate-y-1/2 ml-6 w-24 xl:w-28 h-auto shrink-0 motion-safe:animate-[hero-tile-drift_4.5s_ease-in-out_infinite] [filter:drop-shadow(0_14px_24px_rgba(165,96,232,0.30))]"
-                  />
-
-                  <span className="inline-flex items-center gap-2 rounded-full border-2 border-[#E5E5E5] dark:border-stone-700 bg-white/80 dark:bg-stone-900/70 backdrop-blur px-3.5 py-1.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.2em] text-[#A560E8] dark:text-[#A560E8] mb-4">
-                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-                      <path d="M9 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H5a1 1 0 110-2h2V6.477L5.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 014 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L8 4.323V3a1 1 0 011-1z" />
-                    </svg>
-                    Feedback that grades like a professor
-                  </span>
-                  {/* Explicit 2-line layout — each phrase on its own
-                      block element so the wrap is predictable on any
-                      viewport instead of relying on the browser to
-                      choose the right break point. */}
-                  <h2
-                    className="text-[1.35rem] sm:text-[1.7rem] lg:text-[2.15rem] xl:text-[2.4rem] font-extrabold text-stone-900 dark:text-stone-50 tracking-tight leading-[1.05]"
-                    style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                  >
-                    <span className="block">Upload your essay and</span>
-                    <span className="block mt-1 sm:mt-1.5 text-[#A560E8] dark:text-[#A560E8]">get professor style feedback in 60 seconds</span>
-                  </h2>
-                  <p className="mt-3 sm:mt-4 text-sm sm:text-base lg:text-lg text-stone-600 dark:text-stone-400 leading-relaxed max-w-2xl mx-auto">
-                    Drop in your essay or paper. Our AI grades structure, clarity, and citations with actionable feedback.
+              {/* ─── UNIVERSITIES TRUST STRIP ─────────────────────────
+                  Clean, airy logo-wall (no panel/border/shadow) — an
+                  understated heading over a single auto-scrolling row.
+                  Each name uses its institution's `.university-*`
+                  typographic treatment (real wordmark fonts, muted
+                  grey, uppercase) so it reads like an actual logo wall.
+                  Tripled list + .animate-scroll-slow loops seamlessly
+                  and pauses on hover; edges fade via a CSS mask. ─── */}
+              <div className="relative w-full mt-14 sm:mt-20 mb-2 px-0">
+                <LandingScrollReveal>
+                  <p className="text-center text-[13px] sm:text-sm font-semibold tracking-wide text-stone-400 dark:text-stone-500 mb-9 sm:mb-12">
+                    Trusted by students at top universities worldwide
                   </p>
-                </div>
 
-                {/* The mobile/tablet interactive demo that used to sit
-                    here was removed once the hero gained its own live
-                    `#hero-interactive-demo` showcase — no need to
-                    surface the same heavy component twice on a single
-                    landing page. The marketing copy + callouts below
-                    still pitch the analyzer for visitors who scroll
-                    past the hero. */}
-
-                {/* DESKTOP — shrunken annotated essay screenshot with 4
-                    arrow callouts in the corners, mirroring the onboarding
-                    tour's Page 1 EssayPitchVisual. Trades the live demo for
-                    a tighter "marketing" layout that fits more value-prop
-                    copy on a single eye-line. Numbered badges live on the
-                    same side as their callout column so the arrows never
-                    criss-cross.
-                      #1 = RIGHT top    (score badge, y=6)
-                      #2 = LEFT  top    (rubric grid, y=22)
-                      #3 = LEFT  bottom (color-coded text, y=68)
-                      #4 = RIGHT bottom (annotations, y=84) */}
-                <LandingEssayCallouts />
-
-                {/* DESKTOP — second arrow-callout block: the
-                    comprehensive analysis report. The block above is
-                    the per-sentence rubric view; this one shows the
-                    section-by-section professor-style report that
-                    every essay also gets. Together they show the
-                    full depth of feedback (line level + report level)
-                    before the visitor scrolls past the fold. Same
-                    desktop-only treatment, separated by a sub-
-                    heading + thin divider so it reads as "and then
-                    you also get this." */}
-                <div className="hidden lg:block mt-16 xl:mt-20">
-                  <div className="flex items-center justify-center gap-4 mb-10 xl:mb-12">
-                    <span className="h-px flex-1 max-w-[140px] bg-gradient-to-r from-transparent to-stone-300 dark:to-stone-600" aria-hidden />
-                    <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#A560E8]/10 dark:bg-[#A560E8]/20 border-2 border-[#A560E8]/40 text-[11px] xl:text-xs font-extrabold uppercase tracking-[0.16em] text-[#8A48C7] dark:text-[#C390F2]" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
-                        <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8l-6.2 4.5 2.4-7.4L2 9.4h7.6z" />
-                      </svg>
-                      And a full professor-style report
-                    </span>
-                    <span className="h-px flex-1 max-w-[140px] bg-gradient-to-l from-transparent to-stone-300 dark:to-stone-600" aria-hidden />
-                  </div>
-                  <div className="text-center max-w-3xl mx-auto mb-10 xl:mb-14">
-                    <h3
-                      className="text-xl xl:text-2xl font-extrabold text-stone-900 dark:text-stone-50 tracking-tight leading-tight"
-                      style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                    >
-                      Publish your essay, get back five sections of staff-style feedback
-                    </h3>
-                    <p className="mt-2 xl:mt-3 text-sm xl:text-base text-stone-600 dark:text-stone-400 font-semibold leading-relaxed">
-                      Every analysis comes with a full report — the same five buckets a TA writes up after marking your draft. Skim the verdict, jump to the fix list, then dig into the detail.
-                    </p>
-                  </div>
-                  <LandingComprehensiveCallouts />
-                </div>
-
-                {/* The "Try the live interactive demo" link + the
-                    `#interactive-essay-demo` anchor that used to sit
-                    here both pointed at a copy of the analyzer that's
-                    now redundant — the hero's `#hero-interactive-demo`
-                    is the canonical place to try it. Removed for that
-                    reason. */}
-                <div className="text-center mt-8 sm:mt-10">
-                  <button
-                    type="button"
-                    onClick={() => onNavigate('signup')}
-                    className="inline-flex items-center px-8 py-3.5 bg-[#58CC02] hover:bg-[#61E002] dark:bg-[#58CC02] dark:hover:bg-[#61E002] text-white font-extrabold rounded-2xl border-2 border-b-4 border-[#46A302] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all duration-200 text-base"
-                  >
-                    Try your first analysis
-                    <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                  </button>
-                  <p className="mt-4 text-sm text-stone-500 dark:text-stone-400">
-                    Free plan includes 2 analyses per month
-                  </p>
-                </div>
-
-                {/* ─── "And it doesn't stop at essays" bridge — directs the
-                    visitor's eye to the second big product (study tools) so it
-                    isn't buried below the fold. ─── */}
-                <div className="hidden sm:block mt-12 sm:mt-16 mb-2 max-w-5xl mx-auto px-1">
-                  <a
-                    href="#study-tools"
-                    className="group relative block rounded-3xl border-2 border-b-4 border-[#A560E8]/40 dark:border-[#8A48C7]/40 bg-[#F3EAFF] dark:bg-stone-900/60 p-6 sm:p-8 hover:-translate-y-0.5 transition-all overflow-hidden"
-                  >
-                    <div className="pointer-events-none absolute -top-12 -right-12 w-48 h-48 rounded-full bg-[#58CC02]/15 dark:bg-[#58CC02]/12 blur-3xl" aria-hidden />
-                    <div className="pointer-events-none absolute -bottom-16 -left-12 w-44 h-44 rounded-full bg-[#1CB0F6]/15 dark:bg-[#1CB0F6]/12 blur-3xl" aria-hidden />
-
-                    <div className="relative grid grid-cols-1 sm:grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-5 sm:gap-6">
-                      {/* Juggling mascot — "Scholar juggles 7 study tools so you don't have to" */}
-                      <img
-                        src="/mascot-juggling.webp"
-                        alt=""
-                        aria-hidden
-                        loading="lazy"
-                        decoding="async"
-                        className="hidden sm:block w-28 lg:w-36 h-auto justify-self-center drop-shadow-[0_14px_24px_rgba(217,70,239,0.35)]"
-                      />
-
-                      <div className="text-center sm:text-left">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#F3EAFF] dark:bg-[#A560E8]/20 text-[#A560E8] dark:text-[#A560E8] text-[10px] font-bold uppercase tracking-wider mb-2">
-                          <span aria-hidden>▸</span>
-                          And it doesn&apos;t stop at essays
+                  <div className="relative overflow-hidden [mask-image:linear-gradient(to_right,transparent,#000_3%,#000_97%,transparent)]">
+                    <div className="flex w-max items-center animate-scroll-slow" style={{ animationDuration: '30s' }}>
+                      {[...universities, ...universities, ...universities].map((uni, idx) => (
+                        <span key={`uni-${idx}`} className="shrink-0 px-7 sm:px-11 lg:px-16">
+                          <span
+                            className={`text-lg sm:text-xl lg:text-2xl whitespace-nowrap opacity-60 hover:opacity-100 transition-opacity duration-300 ${uni.className} dark:!text-stone-400`}
+                          >
+                            {uni.name}
+                          </span>
                         </span>
-                        <h3
-                          className="text-xl sm:text-2xl lg:text-[1.65rem] font-extrabold text-stone-900 dark:text-stone-50 tracking-tight leading-tight"
-                          style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                        >
-                          Paste any notes,{' '}
-                          <span className="text-[#A560E8] dark:text-[#A560E8]">
-                            get 7 study tools
-                          </span>{' '}
-                          in 60 seconds
-                        </h3>
-                        <p className="mt-2 text-sm sm:text-[15px] text-stone-600 dark:text-stone-400 leading-relaxed">
-                          Lessons, flashcards, quizzes, crosswords, plus arcade games like{' '}
-                          <span className="font-semibold text-stone-800 dark:text-stone-200">Crater Blast</span> and{' '}
-                          <span className="font-semibold text-stone-800 dark:text-stone-200">Word Tower</span>.
-                        </p>
-                      </div>
-
-                      <span className="hidden sm:inline-flex items-center gap-1.5 self-center justify-self-end rounded-full bg-[#A560E8] px-4 py-2.5 text-sm font-extrabold text-white border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-colors">
-                        See study tools
-                        <svg className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                      </span>
-
-                      {/* Mobile-only chevron under the text */}
-                      <span className="sm:hidden inline-flex items-center justify-center gap-1.5 mt-2 rounded-full bg-[#A560E8] px-4 py-2.5 text-sm font-extrabold text-white border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5">
-                        See study tools
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                      </span>
+                      ))}
                     </div>
-                  </a>
-                </div>
-
+                  </div>
+                </LandingScrollReveal>
               </div>
-
-              {/* ─── Before/After essay transformation — HIDDEN.
-                  The "Turn a Mid-B Essay Into an A" block was removed
-                  from the landing flow. Re-enable by:
-                    1. `const LandingBeforeAfterSection =
-                        lazyWithRetry(() => import('../landing/LandingBeforeAfterSection'));`
-                    2. Render `<Suspense fallback={null}>
-                        <LandingBeforeAfterSection /></Suspense>` here. */}
 
               {/* Strong horizontal section break — full-width line with
                   labeled badge in the middle so users clearly see they're
@@ -1786,6 +1569,370 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </div>
                 </LandingScrollReveal>
               </div>
+
+              {/* ─── WRITING WORKSPACE SHOWCASE ───────────────────────
+                  The product is no longer just an essay grader — it's a
+                  full editor where the AI coaches + rewrites your draft
+                  and exports a clean Word doc. This section makes that
+                  differentiator visible: a real screenshot of the 3-col
+                  workspace + four proof points (live rubric, one-click
+                  apply, real-essay objects, Word round-trip). Matches
+                  the page's purple/Nunito/Duolingo conventions. ─── */}
+              <section
+                id="writing-workspace"
+                className="relative w-full max-w-7xl mx-auto mt-2 sm:mt-4 pb-16 sm:pb-20 lg:pb-28 px-1 sm:px-2 lg:px-4 scroll-mt-24"
+                aria-labelledby="writing-workspace-heading"
+              >
+                <div className="pointer-events-none absolute -top-8 left-[6%] w-32 h-32 rounded-full bg-[#A560E8]/15 dark:bg-[#A560E8]/12 blur-3xl" aria-hidden />
+                <div className="pointer-events-none absolute -bottom-4 right-[8%] w-36 h-36 rounded-full bg-[#A560E8]/15 dark:bg-[#A560E8]/12 blur-3xl" aria-hidden />
+
+                <div className="relative w-full max-w-6xl mx-auto mb-8 sm:mb-10 flex items-center gap-4 sm:gap-6 px-1" aria-hidden>
+                  <div className="flex-1 h-px bg-gradient-to-r from-transparent via-stone-300/80 to-stone-300/80 dark:via-stone-700/60 dark:to-stone-700/60" />
+                  <span className="inline-flex items-center gap-2 rounded-full border-2 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900 px-4 py-1.5 text-[11px] sm:text-xs font-bold uppercase tracking-[0.18em] text-[#A560E8] dark:text-[#A560E8] whitespace-nowrap">
+                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M17.414 2.586a2 2 0 010 2.828l-9.5 9.5a2 2 0 01-.878.505l-3.5 1a1 1 0 01-1.237-1.237l1-3.5a2 2 0 01.505-.878l9.5-9.5a2 2 0 012.828 0z" />
+                    </svg>
+                    Your writing workspace
+                  </span>
+                  <div className="flex-1 h-px bg-gradient-to-l from-transparent via-stone-300/80 to-stone-300/80 dark:via-stone-700/60 dark:to-stone-700/60" />
+                </div>
+
+                <LandingScrollReveal>
+                  <div className="relative text-center mb-8 sm:mb-10 lg:mb-12 max-w-2xl mx-auto">
+                    <h2
+                      id="writing-workspace-heading"
+                      className="text-2xl sm:text-3xl lg:text-[2.4rem] font-extrabold text-stone-900 dark:text-stone-50 tracking-tight leading-[1.05]"
+                      style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+                    >
+                      Not just a grader —{' '}
+                      <span className="text-[#A560E8] dark:text-[#A560E8]">a full writing workspace.</span>
+                    </h2>
+                    <p className="mt-3 text-sm sm:text-base text-stone-600 dark:text-stone-400 leading-relaxed">
+                      Write your essay in a real editor with live, professor-style feedback in the margin. Apply suggested fixes straight into your draft — then export a perfectly formatted Word doc.
+                    </p>
+                  </div>
+
+                  {/* Big focal screenshot — the image is the star.
+                      Numbered dots sit on the regions; the four proof
+                      points sit in a row right below, each numbered to
+                      its dot (no flanking arrow-callouts). */}
+                  <div className="relative max-w-6xl mx-auto">
+                    <DottedShot
+                      src="/WriterPic.png"
+                      alt="WriteScholar writing workspace — study tools rail, the draft in a real editor, a live rubric with an estimated grade, and one-click revision suggestions"
+                      badges={[
+                        { n: 1, x: 84, y: 29 },
+                        { n: 2, x: 84, y: 82 },
+                        { n: 3, x: 42, y: 55 },
+                        { n: 4, x: 55, y: 8 },
+                      ]}
+                    />
+                    <div
+                      aria-hidden
+                      className="hidden sm:flex absolute -top-4 -right-4 lg:-top-5 lg:-right-5 items-center justify-center px-3.5 h-11 lg:h-13 rounded-2xl bg-[#58CC02] text-white text-sm lg:text-base font-extrabold rotate-[6deg] border-2 border-b-4 border-[#46A302] shadow-[0_18px_32px_-8px_rgba(88,204,2,0.5)] z-10"
+                    >
+                      B · 80–89%
+                    </div>
+                  </div>
+
+                  <div className="mt-10 sm:mt-12 max-w-6xl mx-auto">
+                    <NumberedPoints
+                      cols="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+                      points={[
+                        { n: 1, title: 'Live grade & rubric', desc: 'An estimated grade band and a full professor-style rubric, updating as you write — no copy-paste loop.' },
+                        { n: 2, title: 'One-click apply', desc: 'Accept a suggested rewrite and it drops straight into your draft, exactly where it belongs.' },
+                        { n: 3, title: 'Built for real essays', desc: 'Write the actual paper here — tables, images, citations and footnotes are built in, not bolted on.' },
+                        { n: 4, title: 'Word in, Word out', desc: 'Import a .docx and your bold, italics and headings carry over. Export and it comes back perfectly formatted.' },
+                      ]}
+                    />
+                  </div>
+
+                  <div className="mt-10 sm:mt-12 flex justify-center">
+                    <button
+                      type="button"
+                      onClick={() => onNavigate('signup')}
+                      className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-[#A560E8] hover:bg-[#8A48C7] text-white text-base sm:text-lg font-extrabold uppercase tracking-wide px-7 sm:px-9 py-4 border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_18px_32px_-12px_rgba(165,96,232,0.55)]"
+                    >
+                      Start writing free
+                      <svg className="w-5 h-5 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </button>
+                  </div>
+                </LandingScrollReveal>
+              </section>
+
+              {/* ─── WHY WRITESCHOLAR vs ChatGPT ──────────────────────
+                  Students' default alternative is "just use ChatGPT".
+                  This head-to-head makes the difference explicit:
+                  WriteScholar grades to a rubric and edits in a real
+                  workspace; ChatGPT is a generic chat box. On-theme
+                  (brand-purple WriteScholar card vs neutral GPT card). */}
+              <section className="relative w-full max-w-5xl mx-auto mt-4 sm:mt-8 pb-16 sm:pb-20 px-3 sm:px-4">
+                <LandingScrollReveal>
+                  <div className="relative text-center max-w-2xl mx-auto mb-10 sm:mb-12">
+                    <span className="inline-flex items-center gap-1.5 mb-4 rounded-full border border-[#A560E8]/25 dark:border-[#A560E8]/30 bg-[#F3EAFF] dark:bg-[#A560E8]/12 px-3 py-1 text-[10px] sm:text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#8A48C7] dark:text-[#C9A0F0]">
+                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24" aria-hidden><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8l-6.2 4.5 2.4-7.4L2 9.4h7.6z" /></svg>
+                      Why WriteScholar
+                    </span>
+                    <h2
+                      className="text-3xl sm:text-4xl lg:text-[2.85rem] font-extrabold text-stone-900 dark:text-stone-50 tracking-tight leading-[1.05]"
+                      style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+                    >
+                      Not another AI chatbot
+                    </h2>
+                    <p className="mt-3 text-sm sm:text-base text-stone-600 dark:text-stone-400 leading-relaxed">
+                      Most students just paste into ChatGPT. Here&apos;s why a tool built to mark essays beats a general chat box.
+                    </p>
+                  </div>
+
+                  <div className="relative rounded-[1.75rem] sm:rounded-[2.25rem] border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-[0_30px_80px_-40px_rgba(96,48,140,0.45)] p-3 sm:p-5">
+                    {/* Center "VS" pip — bridges the two cards. */}
+                    <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 hidden lg:flex">
+                      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white dark:bg-stone-900 border-2 border-[#A560E8]/40 text-[#8A48C7] dark:text-[#C9A0F0] text-sm font-extrabold shadow-[0_8px_22px_-8px_rgba(96,48,140,0.5)]">VS</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
+                      {/* WriteScholar — the winner: elevated, glowing. */}
+                      <div className="relative rounded-[1.5rem] bg-gradient-to-br from-[#A560E8] to-[#7733B5] text-white p-6 sm:p-8 shadow-[0_24px_50px_-20px_rgba(165,96,232,0.65)] lg:scale-[1.015]">
+                        <div aria-hidden className="pointer-events-none absolute -top-px left-6 right-6 h-px bg-white/30" />
+                        <div className="flex items-center justify-between gap-3 mb-6">
+                          <div className="flex items-center gap-2.5">
+                            <div className="w-10 h-10 rounded-xl overflow-hidden bg-white/15 border border-white/25 flex items-center justify-center">
+                              <img src="/main-logo.png" alt="" aria-hidden className="w-full h-full object-contain" />
+                            </div>
+                            <span className="text-xl font-extrabold tracking-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>WriteScholar</span>
+                          </div>
+                          <span className="shrink-0 rounded-full bg-white/20 border border-white/25 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider">Built for essays</span>
+                        </div>
+                        <ul className="space-y-0">
+                          {[
+                            'Graded to a real rubric — /100, letter band, every category scored',
+                            'Line-by-line feedback mapped to your exact sentences',
+                            'A real editor: apply fixes into your draft, export clean Word',
+                            'Built for academic essays — citations, structure, a professor lens',
+                          ].map((t, i) => (
+                            <li key={i} className={`flex items-start gap-3 py-3.5 ${i > 0 ? 'border-t border-white/15' : ''}`}>
+                              <span className="shrink-0 mt-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-white/20">
+                                <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                              </span>
+                              <span className="text-[15px] font-bold leading-snug">{t}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      {/* ChatGPT — muted, secondary. */}
+                      <div className="rounded-[1.5rem] bg-stone-50 dark:bg-stone-950/40 border border-stone-200/70 dark:border-stone-800 p-6 sm:p-8">
+                        <div className="flex items-center gap-2.5 mb-6 opacity-90">
+                          <div className="w-10 h-10 rounded-xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 flex items-center justify-center">
+                            <svg className="w-5 h-5 text-stone-500 dark:text-stone-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                              <path d="M22.28 9.82a5.99 5.99 0 0 0-.52-4.91 6.05 6.05 0 0 0-6.52-2.9A6 6 0 0 0 4.98 4.18a5.99 5.99 0 0 0-4 2.9 6.05 6.05 0 0 0 .74 7.1 5.99 5.99 0 0 0 .52 4.91 6.05 6.05 0 0 0 6.52 2.9A6 6 0 0 0 19.02 19.8a5.99 5.99 0 0 0 4-2.9 6.05 6.05 0 0 0-.74-7.08Zm-9.02 12.6a4.48 4.48 0 0 1-2.88-1.04l.14-.08 4.78-2.76a.78.78 0 0 0 .4-.68v-6.74l2.02 1.17a.07.07 0 0 1 .04.06v5.58a4.5 4.5 0 0 1-4.5 4.49ZM3.6 18.2a4.47 4.47 0 0 1-.54-3.01l.14.09 4.78 2.76a.78.78 0 0 0 .78 0l5.84-3.37v2.33a.08.08 0 0 1-.03.07l-4.83 2.79a4.5 4.5 0 0 1-6.14-1.65ZM2.34 7.9a4.49 4.49 0 0 1 2.34-1.97v5.68a.77.77 0 0 0 .39.68l5.81 3.35-2.02 1.17a.08.08 0 0 1-.07 0L3.96 14a4.5 4.5 0 0 1-1.62-6.1Zm16.6 3.86-5.84-3.39 2.02-1.16a.07.07 0 0 1 .07 0l4.83 2.79a4.49 4.49 0 0 1-.68 8.1v-5.67a.78.78 0 0 0-.4-.67Zm2.01-3.03-.14-.08-4.77-2.78a.78.78 0 0 0-.79 0L9.43 9.24V6.91a.07.07 0 0 1 .03-.07l4.83-2.78a4.5 4.5 0 0 1 6.68 4.66ZM8.33 12.86 6.3 11.7a.08.08 0 0 1-.04-.06V6.07a4.5 4.5 0 0 1 7.38-3.45l-.14.08L8.72 5.46a.78.78 0 0 0-.4.68ZM9.43 10.5 12.03 9l2.6 1.5v3l-2.6 1.5-2.6-1.5Z" />
+                            </svg>
+                          </div>
+                          <span className="text-xl font-extrabold tracking-tight text-stone-700 dark:text-stone-200" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>ChatGPT</span>
+                        </div>
+                        <ul className="space-y-0">
+                          {[
+                            'Generic praise — no consistent rubric, score, or grade',
+                            'One block of advice you re-find in your draft yourself',
+                            'Copy-paste back and forth between a chat box and your doc',
+                            'A general chat model — not built for marking essays',
+                          ].map((t, i) => (
+                            <li key={i} className={`flex items-start gap-3 py-3.5 ${i > 0 ? 'border-t border-stone-200 dark:border-stone-800' : ''}`}>
+                              <span className="shrink-0 mt-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-stone-200/70 dark:bg-stone-800">
+                                <svg className="w-3.5 h-3.5 text-stone-400 dark:text-stone-500" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </span>
+                              <span className="text-[15px] font-semibold leading-snug text-stone-500 dark:text-stone-400">{t}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-9 sm:mt-11 flex flex-col items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => onNavigate('signup')}
+                      className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-[#A560E8] hover:bg-[#8A48C7] text-white text-base sm:text-lg font-extrabold uppercase tracking-wide px-7 sm:px-9 py-4 border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_18px_32px_-12px_rgba(165,96,232,0.55)]"
+                    >
+                      Start writing free
+                      <svg className="w-5 h-5 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </button>
+                    <p className="text-[12px] sm:text-xs font-bold text-stone-400 dark:text-stone-500">No credit card · Free plan included</p>
+                  </div>
+                </LandingScrollReveal>
+              </section>
+
+              {/* Analysis preview — restored eyebrow + h2 + subhead
+                  block (was removed in the Knowunity hero rebuild). The
+                  copy is the same one shipped on the pre-rebuild landing
+                  (commit 4763c37), restyled to the current cream-section
+                  language. Two-line H1, paper-mascot floating to the
+                  left on lg+, and floating ✦/📝 sparkles in the corners
+                  on xl+ — restores the "Analyze papers" decorative feel
+                  from the older 4763c37 / aec4bd3 commits. */}
+              <div
+                id="landing-tools"
+                className="relative w-full max-w-6xl mx-auto mt-4 sm:mt-8 lg:mt-10 scroll-mt-24 px-1.5 sm:px-2 lg:px-1"
+              >
+                {/* Floating decorations — visible at xl+ only so they
+                    don't compete on smaller screens. Echoes commit
+                    4763c37 which had 📝 + ✨ in the same corners. */}
+                <div
+                  className="hidden xl:block pointer-events-none absolute top-[2%] left-[3%] text-4xl opacity-40 motion-safe:animate-[hero-tile-drift_5s_ease-in-out_infinite]"
+                  aria-hidden
+                >📝</div>
+                <div
+                  className="hidden xl:block pointer-events-none absolute top-[8%] right-[4%] text-3xl opacity-35 motion-safe:animate-[hero-tile-drift_6s_ease-in-out_infinite]"
+                  style={{ animationDelay: '1.4s' }}
+                  aria-hidden
+                >✨</div>
+
+                <div className="relative text-center max-w-[34rem] lg:max-w-[40rem] xl:max-w-[46rem] mx-auto mb-8 sm:mb-10 lg:mb-12 px-2">
+                  {/* Paper-themed mascot — gently floats on lg+. Now
+                      positioned ABSOLUTELY to the RIGHT of the heading
+                      block (was left). `left-full ml-6` mirrors the
+                      previous `right-full mr-6` so the heading stays
+                      centred and the mascot sits in the right margin. */}
+                  <img
+                    src="/mascot-paper.webp"
+                    alt=""
+                    aria-hidden
+                    loading="lazy"
+                    decoding="async"
+                    className="hidden lg:block absolute left-full top-1/2 -translate-y-1/2 ml-6 w-24 xl:w-28 h-auto shrink-0 motion-safe:animate-[hero-tile-drift_4.5s_ease-in-out_infinite] [filter:drop-shadow(0_14px_24px_rgba(165,96,232,0.30))]"
+                  />
+
+                  <span className="inline-flex items-center gap-2 rounded-full border-2 border-[#E5E5E5] dark:border-stone-700 bg-white/80 dark:bg-stone-900/70 backdrop-blur px-3.5 py-1.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.2em] text-[#A560E8] dark:text-[#A560E8] mb-4">
+                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+                      <path d="M9 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H5a1 1 0 110-2h2V6.477L5.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 014 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L8 4.323V3a1 1 0 011-1z" />
+                    </svg>
+                    Feedback that grades like a professor
+                  </span>
+                  {/* Explicit 2-line layout — each phrase on its own
+                      block element so the wrap is predictable on any
+                      viewport instead of relying on the browser to
+                      choose the right break point. */}
+                  <h2
+                    className="text-[1.35rem] sm:text-[1.7rem] lg:text-[2.15rem] xl:text-[2.4rem] font-extrabold text-stone-900 dark:text-stone-50 tracking-tight leading-[1.05]"
+                    style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+                  >
+                    <span className="block">Upload your essay and</span>
+                    <span className="block mt-1 sm:mt-1.5 text-[#A560E8] dark:text-[#A560E8]">get professor style feedback in 60 seconds</span>
+                  </h2>
+                  <p className="mt-3 sm:mt-4 text-sm sm:text-base lg:text-lg text-stone-600 dark:text-stone-400 leading-relaxed max-w-2xl mx-auto">
+                    Drop in your essay. Get a /100 grade, colour-coded line-by-line feedback, and a full professor-style report — in under a minute.
+                  </p>
+                </div>
+
+                {/* Original sideways arrow-callout style — the two
+                    analyzer screenshots joined into ONE photo (rubric
+                    view + full report in a single frame) with 9
+                    numbered badges and flanking callout cards. */}
+                <LandingCombinedAnalyzerCallouts />
+
+                {/* The "Try the live interactive demo" link + the
+                    `#interactive-essay-demo` anchor that used to sit
+                    here both pointed at a copy of the analyzer that's
+                    now redundant — the hero's `#hero-interactive-demo`
+                    is the canonical place to try it. Removed for that
+                    reason. */}
+                <div className="text-center mt-8 sm:mt-10">
+                  <button
+                    type="button"
+                    onClick={() => onNavigate('signup')}
+                    className="inline-flex items-center px-8 py-3.5 bg-[#58CC02] hover:bg-[#61E002] dark:bg-[#58CC02] dark:hover:bg-[#61E002] text-white font-extrabold rounded-2xl border-2 border-b-4 border-[#46A302] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all duration-200 text-base"
+                  >
+                    Try your first analysis
+                    <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </button>
+                  <p className="mt-4 text-sm text-stone-500 dark:text-stone-400">
+                    Free plan includes 2 analyses per month
+                  </p>
+                </div>
+
+                {/* ─── "And it doesn't stop at essays" bridge — directs the
+                    visitor's eye to the second big product (study tools) so it
+                    isn't buried below the fold. ─── */}
+                <div className="hidden sm:block mt-12 sm:mt-16 mb-20 sm:mb-28 lg:mb-32 max-w-5xl mx-auto px-1">
+                  <a
+                    href="#study-tools"
+                    className="group relative block rounded-3xl border-2 border-b-4 border-[#A560E8]/40 dark:border-[#8A48C7]/40 bg-[#F3EAFF] dark:bg-stone-900/60 p-6 sm:p-8 hover:-translate-y-0.5 transition-all overflow-hidden"
+                  >
+                    <div className="pointer-events-none absolute -top-12 -right-12 w-48 h-48 rounded-full bg-[#58CC02]/15 dark:bg-[#58CC02]/12 blur-3xl" aria-hidden />
+                    <div className="pointer-events-none absolute -bottom-16 -left-12 w-44 h-44 rounded-full bg-[#1CB0F6]/15 dark:bg-[#1CB0F6]/12 blur-3xl" aria-hidden />
+
+                    <div className="relative grid grid-cols-1 sm:grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-5 sm:gap-6">
+                      {/* Juggling mascot — "Scholar juggles 7 study tools so you don't have to" */}
+                      <img
+                        src="/mascot-juggling.webp"
+                        alt=""
+                        aria-hidden
+                        loading="lazy"
+                        decoding="async"
+                        className="hidden sm:block w-28 lg:w-36 h-auto justify-self-center drop-shadow-[0_14px_24px_rgba(217,70,239,0.35)]"
+                      />
+
+                      <div className="text-center sm:text-left">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#F3EAFF] dark:bg-[#A560E8]/20 text-[#A560E8] dark:text-[#A560E8] text-[10px] font-bold uppercase tracking-wider mb-2">
+                          <span aria-hidden>▸</span>
+                          And it doesn&apos;t stop at essays
+                        </span>
+                        <h3
+                          className="text-xl sm:text-2xl lg:text-[1.65rem] font-extrabold text-stone-900 dark:text-stone-50 tracking-tight leading-tight"
+                          style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+                        >
+                          Paste any notes,{' '}
+                          <span className="text-[#A560E8] dark:text-[#A560E8]">
+                            get 7 study tools
+                          </span>{' '}
+                          in 60 seconds
+                        </h3>
+                        <p className="mt-2 text-sm sm:text-[15px] text-stone-600 dark:text-stone-400 leading-relaxed">
+                          Lessons, flashcards, quizzes, crosswords, plus arcade games like{' '}
+                          <span className="font-semibold text-stone-800 dark:text-stone-200">Crater Blast</span> and{' '}
+                          <span className="font-semibold text-stone-800 dark:text-stone-200">Word Tower</span>.
+                        </p>
+                      </div>
+
+                      <span className="hidden sm:inline-flex items-center gap-1.5 self-center justify-self-end rounded-full bg-[#A560E8] px-4 py-2.5 text-sm font-extrabold text-white border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-colors">
+                        See study tools
+                        <svg className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                      </span>
+
+                      {/* Mobile-only chevron under the text */}
+                      <span className="sm:hidden inline-flex items-center justify-center gap-1.5 mt-2 rounded-full bg-[#A560E8] px-4 py-2.5 text-sm font-extrabold text-white border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5">
+                        See study tools
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                      </span>
+                    </div>
+                  </a>
+                </div>
+
+              </div>
+
+              {/* ─── Before/After essay transformation — HIDDEN.
+                  The "Turn a Mid-B Essay Into an A" block was removed
+                  from the landing flow. Re-enable by:
+                    1. `const LandingBeforeAfterSection =
+                        lazyWithRetry(() => import('../landing/LandingBeforeAfterSection'));`
+                    2. Render `<Suspense fallback={null}>
+                        <LandingBeforeAfterSection /></Suspense>` here. */}
+
 
 
               {/* ─── How your draft is reviewed — modernized to match the
@@ -2011,7 +2158,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           TEMPORARILY HIDDEN — re-enable by changing `false` below to `true`. ─── */}
       {false && (
       <section id="motivation" className="relative py-10 sm:py-24 overflow-hidden border-t border-[#E5E5E5] dark:border-stone-800 bg-white dark:bg-stone-950 scroll-mt-20">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_-15%,rgba(255,150,0,0.06),transparent_55%)] dark:bg-[radial-gradient(ellipse_70%_50%_at_50%_-10%,rgba(255,150,0,0.10),transparent_55%)]" aria-hidden />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_-15%,rgba(165,96,232,0.06),transparent_55%)] dark:bg-[radial-gradient(ellipse_70%_50%_at_50%_-10%,rgba(165,96,232,0.10),transparent_55%)]" aria-hidden />
         <div
           className="absolute inset-0 opacity-[0.4] dark:opacity-[0.15] pointer-events-none bg-[length:32px_32px] bg-[linear-gradient(to_right,rgba(148,163,184,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.07)_1px,transparent_1px)]"
           aria-hidden
@@ -2021,7 +2168,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           <LandingScrollReveal>
             {/* Header */}
             <div className="text-center mb-10 sm:mb-14 max-w-2xl mx-auto">
-              <span className="inline-flex items-center gap-2 mb-4 rounded-full border border-orange-200/80 dark:border-orange-700/55 bg-[#FFF4E0]/80 dark:bg-[#FF9600]/10 backdrop-blur px-3.5 py-1.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.2em] text-[#FF9600] dark:text-[#FF9600] shadow-sm">
+              <span className="inline-flex items-center gap-2 mb-4 rounded-full border border-[#A560E8]/30 dark:border-[#8A48C7]/40 bg-[#F3EAFF]/80 dark:bg-[#A560E8]/10 backdrop-blur px-3.5 py-1.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.2em] text-[#A560E8] dark:text-[#A560E8] shadow-sm">
                 <span aria-hidden>🔥</span>
                 The habit loop that keeps grades up
               </span>
@@ -2030,7 +2177,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
               >
                 Studying that{' '}
-                <span className="text-[#FF9600]">
+                <span className="text-[#A560E8]">
                   actually sticks.
                 </span>
               </h2>
@@ -2042,10 +2189,10 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             {/* 4 feature cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
               {/* Daily Review */}
-              <div className="relative rounded-2xl border-2 border-b-4 border-[#46A302] bg-white dark:bg-stone-900 p-5 sm:p-6 hover:-translate-y-1 transition-all overflow-hidden">
-                <div className="pointer-events-none absolute -top-12 -right-12 w-36 h-36 rounded-full bg-[#58CC02]/15 dark:bg-[#58CC02]/10 blur-3xl" aria-hidden />
+              <div className="relative rounded-2xl border-2 border-b-4 border-[#8A48C7] bg-white dark:bg-stone-900 p-5 sm:p-6 hover:-translate-y-1 transition-all overflow-hidden">
+                <div className="pointer-events-none absolute -top-12 -right-12 w-36 h-36 rounded-full bg-[#A560E8]/15 dark:bg-[#A560E8]/10 blur-3xl" aria-hidden />
                 <div className="relative">
-                  <div className="w-12 h-12 rounded-2xl bg-[#58CC02] flex items-center justify-center mb-4 border-2 border-b-4 border-[#46A302]">
+                  <div className="w-12 h-12 rounded-2xl bg-[#A560E8] flex items-center justify-center mb-4 border-2 border-b-4 border-[#8A48C7]">
                     <span className="text-xl" aria-hidden>📚</span>
                   </div>
                   <h3
@@ -2059,15 +2206,15 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </p>
                   {/* Mini visual — lesson card mockup. Hidden on mobile to
                       cut card height; the description already tells the story. */}
-                  <div className="hidden sm:block rounded-xl bg-[#E5F8D0]/60 dark:bg-[#58CC02]/10 border border-[#58CC02]/30 p-3">
+                  <div className="hidden sm:block rounded-xl bg-[#F3EAFF]/60 dark:bg-[#A560E8]/10 border border-[#A560E8]/30 p-3">
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="w-6 h-6 rounded-lg bg-[#58CC02] flex items-center justify-center">
+                      <div className="w-6 h-6 rounded-lg bg-[#A560E8] flex items-center justify-center">
                         <span className="text-white text-[10px] font-extrabold">1</span>
                       </div>
                       <span className="text-xs font-bold text-[#3C3C3C] dark:text-stone-200">Today&apos;s Session</span>
                     </div>
-                    <div className="h-1.5 rounded-full bg-[#58CC02]/20 overflow-hidden">
-                      <div className="h-full w-[65%] rounded-full bg-[#58CC02]" />
+                    <div className="h-1.5 rounded-full bg-[#A560E8]/20 overflow-hidden">
+                      <div className="h-full w-[65%] rounded-full bg-[#A560E8]" />
                     </div>
                     <p className="text-[10px] text-stone-500 dark:text-stone-400 mt-1.5 font-medium">3 of 5 questions done</p>
                   </div>
@@ -2075,10 +2222,10 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               </div>
 
               {/* XP & Levels */}
-              <div className="relative rounded-2xl border-2 border-b-4 border-[#1899D6] bg-white dark:bg-stone-900 p-5 sm:p-6 hover:-translate-y-1 transition-all overflow-hidden">
-                <div className="pointer-events-none absolute -top-12 -right-12 w-36 h-36 rounded-full bg-[#1CB0F6]/15 dark:bg-[#1CB0F6]/10 blur-3xl" aria-hidden />
+              <div className="relative rounded-2xl border-2 border-b-4 border-[#7733B5] bg-white dark:bg-stone-900 p-5 sm:p-6 hover:-translate-y-1 transition-all overflow-hidden">
+                <div className="pointer-events-none absolute -top-12 -right-12 w-36 h-36 rounded-full bg-[#8A48C7]/15 dark:bg-[#8A48C7]/10 blur-3xl" aria-hidden />
                 <div className="relative">
-                  <div className="w-12 h-12 rounded-2xl bg-[#1CB0F6] flex items-center justify-center mb-4 border-2 border-b-4 border-[#1899D6]">
+                  <div className="w-12 h-12 rounded-2xl bg-[#8A48C7] flex items-center justify-center mb-4 border-2 border-b-4 border-[#7733B5]">
                     <span className="text-xl" aria-hidden>⭐</span>
                   </div>
                   <h3
@@ -2091,16 +2238,16 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     Every essay reviewed, every quiz aced, every streak day — they all stack into XP. Levels you actually want to chase.
                   </p>
                   {/* Mini visual — level badge + XP bar. Hidden on mobile. */}
-                  <div className="hidden sm:block rounded-xl bg-[#DDF4FF]/60 dark:bg-[#1CB0F6]/10 border border-[#1CB0F6]/30 p-3">
+                  <div className="hidden sm:block rounded-xl bg-[#F3EAFF]/60 dark:bg-[#8A48C7]/10 border border-[#8A48C7]/30 p-3">
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-[#1CB0F6] flex items-center justify-center border-b-2 border-[#1899D6]">
+                      <div className="w-7 h-7 rounded-lg bg-[#8A48C7] flex items-center justify-center border-b-2 border-[#7733B5]">
                         <span className="text-white text-[11px] font-extrabold">12</span>
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-[10px] font-extrabold text-[#3C3C3C] dark:text-stone-200 truncate">Knowledge Keeper III</p>
                         <div className="flex items-center gap-1">
-                          <div className="flex-1 h-1.5 rounded-full bg-[#1CB0F6]/20 overflow-hidden">
-                            <div className="h-full w-[42%] rounded-full bg-[#1CB0F6]" />
+                          <div className="flex-1 h-1.5 rounded-full bg-[#8A48C7]/20 overflow-hidden">
+                            <div className="h-full w-[42%] rounded-full bg-[#8A48C7]" />
                           </div>
                           <span className="text-[8px] text-stone-500 dark:text-stone-400 font-bold tabular-nums">1,340 XP</span>
                         </div>
@@ -2111,10 +2258,10 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               </div>
 
               {/* Streaks */}
-              <div className="relative rounded-2xl border-2 border-b-4 border-[#D97F00] bg-white dark:bg-stone-900 p-5 sm:p-6 hover:-translate-y-1 transition-all overflow-hidden">
-                <div className="pointer-events-none absolute -top-12 -right-12 w-36 h-36 rounded-full bg-[#FF9600]/15 dark:bg-[#FF9600]/10 blur-3xl" aria-hidden />
+              <div className="relative rounded-2xl border-2 border-b-4 border-[#8A48C7] bg-white dark:bg-stone-900 p-5 sm:p-6 hover:-translate-y-1 transition-all overflow-hidden">
+                <div className="pointer-events-none absolute -top-12 -right-12 w-36 h-36 rounded-full bg-[#A560E8]/15 dark:bg-[#A560E8]/10 blur-3xl" aria-hidden />
                 <div className="relative">
-                  <div className="w-12 h-12 rounded-2xl bg-[#FF9600] flex items-center justify-center mb-4 border-2 border-b-4 border-[#D97F00]">
+                  <div className="w-12 h-12 rounded-2xl bg-[#A560E8] flex items-center justify-center mb-4 border-2 border-b-4 border-[#8A48C7]">
                     <span className="text-xl" aria-hidden>🔥</span>
                   </div>
                   <h3
@@ -2127,12 +2274,12 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     Your streak is your accountability. Miss a day and you'll feel it — that's the point. It's how casual users become 4.0 students.
                   </p>
                   {/* Mini visual — streak counter. Hidden on mobile. */}
-                  <div className="hidden sm:block rounded-xl bg-[#FFF4E0]/60 dark:bg-[#FF9600]/10 border border-[#FF9600]/30 p-3">
+                  <div className="hidden sm:block rounded-xl bg-[#F3EAFF]/60 dark:bg-[#A560E8]/10 border border-[#A560E8]/30 p-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="text-2xl" aria-hidden>🔥</span>
                         <div>
-                          <p className="text-lg font-extrabold text-[#FF9600]">14</p>
+                          <p className="text-lg font-extrabold text-[#A560E8]">14</p>
                           <p className="text-[10px] font-bold text-stone-500 dark:text-stone-400 -mt-0.5">day streak</p>
                         </div>
                       </div>
@@ -2142,7 +2289,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                             key={d + i}
                             className={`w-4 h-4 rounded-full flex items-center justify-center text-[7px] font-bold ${
                               i < 6
-                                ? 'bg-[#FF9600] text-white'
+                                ? 'bg-[#A560E8] text-white'
                                 : 'bg-stone-200 dark:bg-stone-700 text-stone-400 dark:text-stone-500'
                             }`}
                           >
@@ -2207,14 +2354,14 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             {/* Daily Review screenshot — real product preview */}
             <div className="mt-10 sm:mt-14 max-w-4xl mx-auto">
               <div className="text-center mb-5 sm:mb-6">
-                <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#E5F8D0]/80 dark:bg-[#58CC02]/15 text-[#58CC02] dark:text-[#58CC02] text-[10px] sm:text-xs font-extrabold uppercase tracking-wider border border-[#58CC02]/30">
+                <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#F3EAFF]/80 dark:bg-[#A560E8]/15 text-[#A560E8] dark:text-[#A560E8] text-[10px] sm:text-xs font-extrabold uppercase tracking-wider border border-[#A560E8]/30">
                   <span aria-hidden>📚</span>
                   Daily Review in action
                 </span>
               </div>
               <div className="relative group">
-                <div className="absolute -inset-2 bg-[#58CC02]/20 rounded-3xl blur-2xl opacity-30 group-hover:opacity-50 transition-opacity duration-500" aria-hidden />
-                <div className="relative rounded-2xl overflow-hidden border-2 border-b-4 border-[#46A302] dark:border-[#46A302] shadow-2xl">
+                <div className="absolute -inset-2 bg-[#A560E8]/20 rounded-3xl blur-2xl opacity-30 group-hover:opacity-50 transition-opacity duration-500" aria-hidden />
+                <div className="relative rounded-2xl overflow-hidden border-2 border-b-4 border-[#8A48C7] dark:border-[#8A48C7] shadow-2xl">
                   <img
                     src="/daily-review-preview.png"
                     alt="WriteScholar Daily Review: personalised daily practice with multiple choice questions, progress tracking, and instant feedback"
@@ -2233,11 +2380,11 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             <div className="mt-10 sm:mt-12 rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700/60 bg-white dark:bg-stone-900 p-5 sm:p-6 max-w-4xl mx-auto">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#58CC02] flex items-center justify-center border-4 border-[#E5F8D0] dark:border-[#58CC02]/30" style={{ boxShadow: '0 0 20px rgba(88,204,2,0.3)' }}>
+                  <div className="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#A560E8] flex items-center justify-center border-4 border-[#F3EAFF] dark:border-[#A560E8]/30" style={{ boxShadow: '0 0 20px rgba(165,96,232,0.3)' }}>
                     <span className="text-2xl sm:text-3xl font-extrabold text-white">7</span>
                   </div>
                   <div>
-                    <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#58CC02] dark:text-[#58CC02] mb-0.5">
+                    <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#A560E8] dark:text-[#A560E8] mb-0.5">
                       Level up!
                     </p>
                     <p className="text-lg sm:text-xl font-extrabold text-[#3C3C3C] dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
@@ -2251,7 +2398,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 <button
                   type="button"
                   onClick={() => onNavigate('signup')}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-[#58CC02] text-white font-extrabold text-sm border-2 border-b-4 border-[#46A302] hover:bg-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all whitespace-nowrap"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-[#A560E8] text-white font-extrabold text-sm border-2 border-b-4 border-[#8A48C7] hover:bg-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all whitespace-nowrap"
                 >
                   Start earning XP
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
@@ -2611,23 +2758,18 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
       {/* Pricing — above FAQ, aligned with Pricing page */}
       <section className="relative py-16 sm:py-24 overflow-hidden border-t border-stone-200/90 dark:border-stone-800" aria-labelledby="landing-pricing-heading">
-        <div className="absolute inset-0 bg-[#f8fafc] dark:bg-[#0c0a09]" aria-hidden />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#f1f5f9] via-white to-[#f8fafc] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 pointer-events-none" aria-hidden />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_85%_55%_at_50%_-12%,rgba(91,33,182,0.08),transparent_55%)] dark:bg-[radial-gradient(ellipse_85%_50%_at_50%_-8%,rgba(109,40,217,0.12),transparent_58%)] pointer-events-none" aria-hidden />
-        <div
-          className="absolute inset-0 opacity-[0.4] dark:opacity-[0.15] pointer-events-none bg-[length:32px_32px] bg-[linear-gradient(to_right,rgba(148,163,184,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.07)_1px,transparent_1px)]"
-          aria-hidden
-        />
+        <div className="absolute inset-0 bg-[#FAF7FF] dark:bg-stone-950" aria-hidden />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_85%_55%_at_50%_-12%,rgba(165,96,232,0.10),transparent_55%)] dark:bg-[radial-gradient(ellipse_85%_50%_at_50%_-8%,rgba(165,96,232,0.14),transparent_58%)] pointer-events-none" aria-hidden />
         <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <LandingScrollReveal>
           <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-14">
-            <p className="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.22em] text-[#FF9600] dark:text-[#FF9600] mb-3">
+            <p className="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.22em] text-[#A560E8] dark:text-[#A560E8] mb-3">
               Pricing
             </p>
-            <div className="mx-auto mb-4 h-1 w-16 rounded-full bg-[#58CC02]" aria-hidden />
+            <div className="mx-auto mb-4 h-1.5 w-16 rounded-full bg-gradient-to-r from-[#A560E8] to-[#8A48C7]" aria-hidden />
             <h2
               id="landing-pricing-heading"
-              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-[#3C3C3C] dark:text-stone-100 mb-4 tracking-tight leading-tight"
+              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-stone-900 dark:text-stone-50 mb-4 tracking-tight leading-tight"
               style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
             >
               Simple, transparent pricing
@@ -2638,7 +2780,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto">
-            <div className="rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900 p-6 sm:p-8 flex flex-col">
+            <div className="rounded-3xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-[0_24px_60px_-32px_rgba(96,48,140,0.30)] p-6 sm:p-8 flex flex-col">
               <h3 className="font-semibold text-xl text-stone-900 dark:text-stone-100 mb-1">Free</h3>
               <p className="text-sm text-stone-500 dark:text-stone-400 mb-6">Perfect for getting started</p>
               <div className="mb-6">
@@ -2647,25 +2789,25 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               </div>
               <ul className="space-y-2.5 mb-8 flex-1 text-sm sm:text-[0.9375rem] text-stone-600 dark:text-stone-400">
                 <li className="flex gap-2">
-                  <svg className="w-5 h-5 flex-shrink-0 text-[#58CC02] dark:text-[#58CC02] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <svg className="w-5 h-5 flex-shrink-0 text-[#A560E8] dark:text-[#A560E8] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   <span>3 documents, 2 analyses, 2 study packs per month</span>
                 </li>
                 <li className="flex gap-2">
-                  <svg className="w-5 h-5 flex-shrink-0 text-[#58CC02] dark:text-[#58CC02] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <svg className="w-5 h-5 flex-shrink-0 text-[#A560E8] dark:text-[#A560E8] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   <span>5,000 words Paper Summarizer, 2 citation searches</span>
                 </li>
                 <li className="flex gap-2">
-                  <svg className="w-5 h-5 flex-shrink-0 text-[#58CC02] dark:text-[#58CC02] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <svg className="w-5 h-5 flex-shrink-0 text-[#A560E8] dark:text-[#A560E8] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   <span>Focus Mode (3 blocked sites)</span>
                 </li>
                 <li className="flex gap-2">
-                  <svg className="w-5 h-5 flex-shrink-0 text-[#58CC02] dark:text-[#58CC02] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <svg className="w-5 h-5 flex-shrink-0 text-[#A560E8] dark:text-[#A560E8] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   <span>Basic grammar and citation styles</span>
@@ -2674,15 +2816,15 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               <button
                 type="button"
                 onClick={() => onNavigate('signup')}
-                className="w-full py-3 px-6 rounded-2xl font-extrabold bg-white dark:bg-stone-800 hover:bg-stone-50 dark:hover:bg-stone-700 text-[#3C3C3C] dark:text-stone-100 transition-colors border-2 border-b-4 border-[#E5E5E5] dark:border-stone-600 active:border-b-2 active:translate-y-0.5"
+                className="w-full py-3 px-6 rounded-2xl font-extrabold bg-white dark:bg-stone-800 hover:bg-[#F3EAFF] dark:hover:bg-stone-700 text-stone-700 dark:text-stone-100 transition-colors border-2 border-b-4 border-stone-200 dark:border-stone-700 hover:border-[#A560E8]/40 active:border-b-2 active:translate-y-0.5"
               >
                 Start free
               </button>
             </div>
 
-            <div className="relative rounded-2xl border-2 border-b-4 border-[#46A302] bg-white dark:bg-stone-900 p-6 sm:p-8 flex flex-col">
+            <div className="relative rounded-3xl border-2 border-[#A560E8] bg-white dark:bg-stone-900 ring-1 ring-[#A560E8]/30 shadow-[0_28px_70px_-30px_rgba(165,96,232,0.5)] lg:scale-[1.02] p-6 sm:p-8 flex flex-col">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <span className="bg-[#58CC02] text-white px-3 py-1 rounded-full text-xs font-extrabold border-2 border-[#46A302]">
+                <span className="bg-[#A560E8] text-white px-3 py-1 rounded-full text-xs font-extrabold border-2 border-[#7733B5]">
                   Most popular
                 </span>
               </div>
@@ -2705,31 +2847,31 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               </div>
               <ul className="space-y-2.5 mb-8 mt-5 flex-1 text-sm sm:text-[0.9375rem] text-stone-600 dark:text-stone-400">
                 <li className="flex gap-2">
-                  <svg className="w-5 h-5 flex-shrink-0 text-[#58CC02] dark:text-[#58CC02] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <svg className="w-5 h-5 flex-shrink-0 text-[#A560E8] dark:text-[#A560E8] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   <span>99 combined analyses, study packs &amp; citations/mo</span>
                 </li>
                 <li className="flex gap-2">
-                  <svg className="w-5 h-5 flex-shrink-0 text-[#58CC02] dark:text-[#58CC02] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <svg className="w-5 h-5 flex-shrink-0 text-[#A560E8] dark:text-[#A560E8] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   <span>999,999 words Paper Summarizer; uploads up to 100MB</span>
                 </li>
                 <li className="flex gap-2">
-                  <svg className="w-5 h-5 flex-shrink-0 text-[#58CC02] dark:text-[#58CC02] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <svg className="w-5 h-5 flex-shrink-0 text-[#A560E8] dark:text-[#A560E8] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   <span>Quiz, flashcards, crossword, Crater Blast &amp; Word Tower</span>
                 </li>
                 <li className="flex gap-2">
-                  <svg className="w-5 h-5 flex-shrink-0 text-[#58CC02] dark:text-[#58CC02] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <svg className="w-5 h-5 flex-shrink-0 text-[#A560E8] dark:text-[#A560E8] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   <span>All citation styles, PDF/Word export, unlimited Focus Mode sites</span>
                 </li>
                 <li className="flex gap-2">
-                  <svg className="w-5 h-5 flex-shrink-0 text-[#58CC02] dark:text-[#58CC02] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <svg className="w-5 h-5 flex-shrink-0 text-[#A560E8] dark:text-[#A560E8] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   <span>Apply WriteScholar revisions into your draft</span>
@@ -2738,15 +2880,15 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               <button
                 type="button"
                 onClick={() => onNavigate('pricing')}
-                className="w-full py-3 px-6 rounded-2xl font-extrabold bg-[#58CC02] hover:bg-[#46A302] text-white border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-colors"
+                className="w-full py-3 px-6 rounded-2xl font-extrabold bg-[#A560E8] hover:bg-[#8A48C7] text-white border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-colors"
               >
                 View Pro pricing
               </button>
             </div>
 
-            <div className="relative rounded-2xl border-2 border-b-4 border-[#D97F00] bg-[#FFF4E0]/50 dark:bg-[#FF9600]/10 p-6 sm:p-8 flex flex-col sm:col-span-2 lg:col-span-1">
+            <div className="relative rounded-3xl border-2 border-[#E0AC00]/70 dark:border-[#D4A300]/60 bg-[#FFF7DB]/70 dark:bg-[#FFC800]/10 shadow-[0_24px_60px_-30px_rgba(160,120,0,0.40)] p-6 sm:p-8 flex flex-col sm:col-span-2 lg:col-span-1">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <span className="bg-[#FF9600] text-white px-3 py-1 rounded-full text-xs font-extrabold border-2 border-[#D97F00]">
+                <span className="bg-[#FFC800] text-[#5A4500] px-3 py-1 rounded-full text-xs font-extrabold border-2 border-[#D4A300]">
                   5× usage
                 </span>
               </div>
@@ -2769,19 +2911,19 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               </div>
               <ul className="space-y-2.5 mb-8 mt-5 flex-1 text-sm sm:text-[0.9375rem] text-stone-600 dark:text-stone-400">
                 <li className="flex gap-2">
-                  <svg className="w-5 h-5 flex-shrink-0 text-[#FF9600] dark:text-[#FF9600] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <svg className="w-5 h-5 flex-shrink-0 text-[#E0AC00] dark:text-[#F0C419] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   <span>Everything in Pro</span>
                 </li>
                 <li className="flex gap-2">
-                  <svg className="w-5 h-5 flex-shrink-0 text-[#FF9600] dark:text-[#FF9600] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <svg className="w-5 h-5 flex-shrink-0 text-[#E0AC00] dark:text-[#F0C419] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   <span>499 combined analyses, study packs &amp; citations/mo—ideal for citation-heavy work</span>
                 </li>
                 <li className="flex gap-2">
-                  <svg className="w-5 h-5 flex-shrink-0 text-[#FF9600] dark:text-[#FF9600] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <svg className="w-5 h-5 flex-shrink-0 text-[#E0AC00] dark:text-[#F0C419] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   <span>Summarise unlimited research papers; 1GB library storage</span>
@@ -2790,9 +2932,9 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               <button
                 type="button"
                 onClick={() => onNavigate('pricing')}
-                className="w-full py-3 px-6 rounded-2xl font-extrabold bg-[#FF9600] hover:bg-[#D97F00] text-white border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-colors"
+                className="w-full py-3 px-6 rounded-2xl font-extrabold bg-[#FFC800] hover:bg-[#F0BC00] text-[#5A4500] border-2 border-b-4 border-[#D4A300] active:border-b-2 active:translate-y-0.5 transition-colors"
               >
-                View Premium pricing
+                Go Premium
               </button>
             </div>
           </div>
@@ -2802,7 +2944,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             <button
               type="button"
               onClick={() => onNavigate('pricing')}
-              className="text-[#1CB0F6] dark:text-[#1CB0F6] font-extrabold underline underline-offset-2 hover:text-[#1899D6] dark:hover:text-[#1899D6]"
+              className="text-[#A560E8] dark:text-[#A560E8] font-extrabold underline underline-offset-2 hover:text-[#8A48C7] dark:hover:text-[#8A48C7]"
             >
               Full pricing &amp; billing options
             </button>
@@ -2813,23 +2955,18 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
       {/* FAQ — matches hero editorial theme */}
       <section className="relative py-16 sm:py-24 overflow-hidden border-t border-stone-200/90 dark:border-stone-800">
-        <div className="absolute inset-0 bg-[#f8fafc] dark:bg-[#0c0a09]" aria-hidden />
-        <div className="absolute inset-0 bg-gradient-to-b from-white via-[#f8fafc] to-[#f1f5f9] dark:from-stone-950 dark:via-stone-950 dark:to-stone-950 pointer-events-none" aria-hidden />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_90%_60%_at_50%_-15%,rgba(91,33,182,0.07),transparent_55%)] dark:bg-[radial-gradient(ellipse_90%_55%_at_50%_-10%,rgba(109,40,217,0.12),transparent_58%)] pointer-events-none" aria-hidden />
-        <div
-          className="absolute inset-0 opacity-[0.4] dark:opacity-[0.15] pointer-events-none bg-[length:32px_32px] bg-[linear-gradient(to_right,rgba(148,163,184,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.07)_1px,transparent_1px)]"
-          aria-hidden
-        />
+        <div className="absolute inset-0 bg-[#FAF7FF] dark:bg-stone-950" aria-hidden />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_90%_60%_at_50%_-15%,rgba(165,96,232,0.09),transparent_55%)] dark:bg-[radial-gradient(ellipse_90%_55%_at_50%_-10%,rgba(165,96,232,0.13),transparent_58%)] pointer-events-none" aria-hidden />
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <LandingScrollReveal>
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8 lg:gap-10 mb-10 sm:mb-14">
             <div className="text-center lg:text-left flex-1 max-w-2xl mx-auto lg:mx-0">
-              <p className="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.22em] text-[#1CB0F6] dark:text-[#1CB0F6] mb-3">
+              <p className="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.22em] text-[#A560E8] dark:text-[#A560E8] mb-3">
                 Help
               </p>
-              <div className="mx-auto lg:mx-0 mb-4 h-1 w-16 rounded-full bg-[#1CB0F6]" aria-hidden />
+              <div className="mx-auto lg:mx-0 mb-4 h-1.5 w-16 rounded-full bg-gradient-to-r from-[#A560E8] to-[#8A48C7]" aria-hidden />
               <h2
-                className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-[#3C3C3C] dark:text-stone-100 mb-4 tracking-tight leading-tight"
+                className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-stone-900 dark:text-stone-50 mb-4 tracking-tight leading-tight"
                 style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
               >
                 Frequently Asked Questions
@@ -2855,7 +2992,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             {faqs.map((faq, idx) => (
               <div
                 key={idx}
-                className="rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900 overflow-hidden transition-all duration-200 hover:border-[#1899D6] dark:hover:border-[#1899D6]"
+                className="rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900 overflow-hidden transition-all duration-200 hover:border-[#A560E8]/50 dark:hover:border-[#A560E8]/50 shadow-[0_10px_30px_-20px_rgba(96,48,140,0.4)]"
               >
                 <button
                   type="button"
@@ -2864,7 +3001,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 >
                   <span className="font-semibold text-stone-900 dark:text-stone-100 text-base sm:text-[1.05rem] leading-snug pr-2 min-w-0 flex-1 text-left">{faq.question}</span>
                   <svg
-                    className={`w-5 h-5 flex-shrink-0 transition-transform duration-200 ${openFAQ === idx ? 'rotate-180 text-[#1CB0F6] dark:text-[#1CB0F6]' : 'text-stone-400 dark:text-stone-500'}`}
+                    className={`w-5 h-5 flex-shrink-0 transition-transform duration-200 ${openFAQ === idx ? 'rotate-180 text-[#A560E8] dark:text-[#A560E8]' : 'text-stone-400 dark:text-stone-500'}`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -2961,8 +3098,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           </LandingScrollReveal>
         </div>
       </section>
-
-      <Footer onNavigate={onNavigate} />
 
       {/* Loading Animations */}
       {showFakeAnimation && mode === 'citations' && (
@@ -3391,6 +3526,10 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
         </div>
       )}
     </main>
+
+      {/* Footer sits OUTSIDE <main> so the desktop landing-zoom
+          (0.81) leaves it at 100% — same treatment as the header. */}
+      <Footer onNavigate={onNavigate} />
     </>
   );
 };

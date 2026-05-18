@@ -893,18 +893,14 @@ CRITICAL REQUIREMENTS:
     
     // Calculate expected annotations based on document length and user plan
     const wordCount = content.split(/\s+/).length;
-    let targetAnnotations = 12; // Default for free/short documents
-    
-    if (subscriptionService.isPaidSubscriptionTier(userPlan || 'free')) {
-      if (wordCount > 5000) targetAnnotations = 35;
-      else if (wordCount > 3000) targetAnnotations = 30;
-      else if (wordCount > 1500) targetAnnotations = 25;
-      else targetAnnotations = 20;
-    } else {
-      if (wordCount > 3000) targetAnnotations = 20;
-      else if (wordCount > 1500) targetAnnotations = 17;
-      else targetAnnotations = 15;
-    }
+    // Same annotation count for every plan — free is asked for just
+    // as many as Pro/Premium (matches ensureMinimumAnnotations) so
+    // free users get genuine notes, not padded filler.
+    let targetAnnotations;
+    if (wordCount > 5000) targetAnnotations = 35;
+    else if (wordCount > 3000) targetAnnotations = 30;
+    else if (wordCount > 1500) targetAnnotations = 25;
+    else targetAnnotations = 20;
 
     // Always grade using US scale (90 = A). UK display conversion happens in parseStructuredAnalysis.
     const gradingScaleInstruction = `GRADING SCALE — US: Use US college standards. 90+ = A, 80-89 = B, 70-79 = C, 60-69 = D, <60 = F. Score each category using full range: A work = 18-20/20, 14-15/15, 9-10/10.`;
@@ -1496,19 +1492,15 @@ CRITICAL REQUIREMENTS:
     // Calculate minimum total annotations based on document length and user plan
     // No minimum for strong points - let AI decide naturally
     const wordCount = content.split(/\s+/).length;
-    let minTotal = 12;
-    
-    if (subscriptionService.isPaidSubscriptionTier(userPlan || 'free')) {
-      if (wordCount > 5000) minTotal = 35;
-      else if (wordCount > 3000) minTotal = 30;
-      else if (wordCount > 1500) minTotal = 25;
-      else minTotal = 20;
-    } else {
-      // Free plan: limited scaling
-      if (wordCount > 3000) minTotal = 20;
-      else if (wordCount > 1500) minTotal = 17;
-      else minTotal = 15;
-    }
+    // Annotation COUNT is the same for every plan — free users get
+    // just as many margin notes as Pro/Premium. (Paid differentiation
+    // is kept elsewhere: premium model quality, grade rubric,
+    // specific rewrites, Apply-revisions, quota, export/history.)
+    let minTotal;
+    if (wordCount > 5000) minTotal = 35;
+    else if (wordCount > 3000) minTotal = 30;
+    else if (wordCount > 1500) minTotal = 25;
+    else minTotal = 20;
     
     console.log(`Document: ${wordCount} words, Plan: ${userPlan}`);
     console.log(`Target: ${minTotal} total annotations (no minimum for strong points - AI decides)`);

@@ -136,15 +136,15 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
   };
 
   return (
-    <div className="relative isolate min-h-screen min-h-[100dvh] overflow-x-clip bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
+    <div className="relative isolate min-h-screen min-h-[100dvh] overflow-x-clip bg-[#FAF7FF] dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+      <WriteScholarEditorialBackgroundLayers position="fixed" purpleWash />
       <div className="relative z-10 flex min-h-screen min-h-[100dvh] w-full flex-col lg:flex-row">
       {/* Back Button */}
       <button
         onClick={() => onNavigate('landing')}
         className="fixed top-4 left-4 sm:top-6 sm:left-6 z-50 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors group"
       >
-        <div className="w-10 h-10 bg-white dark:bg-stone-800 rounded-xl border-2 border-b-4 border-stone-200 dark:border-stone-700 flex items-center justify-center group-hover:border-[#58CC02]/40 transition-all">
+        <div className="w-10 h-10 bg-white dark:bg-stone-800 rounded-xl border-2 border-b-4 border-stone-200 dark:border-stone-700 flex items-center justify-center group-hover:border-[#A560E8]/40 transition-all">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
@@ -165,7 +165,7 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
 
         {/* Form Container */}
         <div className="flex-1 flex items-center justify-center px-6 pb-12">
-          <div className="relative w-full max-w-sm rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 px-6 py-8 sm:px-8 sm:py-9">
+          <div className="relative w-full max-w-sm rounded-3xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-[0_24px_70px_-34px_rgba(96,48,140,0.30)] px-6 py-8 sm:px-8 sm:py-9">
             {/* Dancing mascot — top-right of the form card, welcoming you back */}
             <img
               src="/mascot-dance.webp"
@@ -173,9 +173,9 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
               aria-hidden
               loading="lazy"
               decoding="async"
-              className="pointer-events-none absolute -top-10 -right-3 sm:-top-12 sm:-right-4 w-20 sm:w-24 h-auto z-10 drop-shadow-[0_14px_24px_rgba(88,204,2,0.35)]"
+              className="pointer-events-none absolute -top-10 -right-3 sm:-top-12 sm:-right-4 w-20 sm:w-24 h-auto z-10 drop-shadow-[0_14px_24px_rgba(165,96,232,0.35)]"
             />
-            <div className="h-1 w-16 bg-[#58CC02] rounded-full mb-6" aria-hidden />
+            <div className="h-1.5 w-16 rounded-full bg-gradient-to-r from-[#A560E8] to-[#8A48C7] mb-6" aria-hidden />
             <div className="mb-8">
               <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-800 dark:text-stone-100 mb-2">Welcome back</h1>
               <p className="text-stone-500 dark:text-stone-400">Sign in to continue to WriteScholar</p>
@@ -194,7 +194,7 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   onKeyDown={handleKeyDown}
                   placeholder="you@example.com"
-                  className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 focus:bg-white dark:focus:bg-stone-800 transition-all text-sm text-stone-800 dark:text-stone-100"
+                  className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:border-[#A560E8] focus:ring-2 focus:ring-[#A560E8]/25 focus:bg-white dark:focus:bg-stone-800 transition-all text-sm text-stone-800 dark:text-stone-100"
                 />
               </div>
               
@@ -207,7 +207,7 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
                       setShowForgotPassword(true);
                       setForgotPasswordEmail(formData.email);
                     }}
-                    className="text-sm text-[#1CB0F6] hover:text-[#1899D6] font-bold"
+                    className="text-sm text-[#A560E8] hover:text-[#8A48C7] font-bold"
                   >
                     Forgot?
                   </button>
@@ -218,14 +218,14 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   onKeyDown={handleKeyDown}
                   placeholder="••••••••"
-                  className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 focus:bg-white dark:focus:bg-stone-800 transition-all text-sm text-stone-800 dark:text-stone-100"
+                  className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:border-[#A560E8] focus:ring-2 focus:ring-[#A560E8]/25 focus:bg-white dark:focus:bg-stone-800 transition-all text-sm text-stone-800 dark:text-stone-100"
                 />
               </div>
 
               <button
                 onClick={handleSubmit}
                 disabled={isLoading}
-                className="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 bg-[#A560E8] hover:bg-[#9450D8] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 bg-[#A560E8] hover:bg-[#8A48C7] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center">
@@ -269,7 +269,7 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
               Don't have an account?{' '}
               <button
                 onClick={() => onNavigate('signup')}
-                className="text-[#1CB0F6] hover:text-[#1899D6] font-bold"
+                className="text-[#A560E8] hover:text-[#8A48C7] font-bold"
               >
                 Sign up
               </button>
@@ -284,7 +284,7 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
       {/* Forgot Password Modal */}
       {showForgotPassword && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-stone-800 rounded-2xl p-6 max-w-md w-full border-2 border-b-4 border-stone-200 dark:border-stone-700">
+          <div className="bg-white dark:bg-stone-900 rounded-3xl p-6 max-w-md w-full border border-stone-200/80 dark:border-stone-800 shadow-[0_30px_80px_-30px_rgba(96,48,140,0.45)]">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-extrabold text-stone-800 dark:text-stone-100">Reset password</h3>
               <button
@@ -326,7 +326,7 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
                   value={forgotPasswordEmail}
                   onChange={(e) => setForgotPasswordEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-700 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 text-sm text-stone-800 dark:text-stone-100"
+                  className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-700 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:border-[#A560E8] focus:ring-2 focus:ring-[#A560E8]/25 text-sm text-stone-800 dark:text-stone-100"
                 />
               </div>
 
@@ -345,7 +345,7 @@ const LoginPage = ({ onNavigate, onLogin }: LoginPageProps) => {
                 <button
                   onClick={handleForgotPassword}
                   disabled={forgotPasswordLoading}
-                  className="flex-1 bg-[#A560E8] hover:bg-[#9450D8] text-white py-3 rounded-xl font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 bg-[#A560E8] hover:bg-[#8A48C7] text-white py-3 rounded-xl font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {forgotPasswordLoading ? (
                     <div className="flex items-center justify-center">

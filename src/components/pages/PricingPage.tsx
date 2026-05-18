@@ -273,7 +273,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-clip" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+    <div className="relative min-h-screen overflow-x-clip bg-[#FAF7FF] dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="pricing" />
 
@@ -282,7 +282,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
         className="relative py-16 sm:py-24 overflow-hidden"
         aria-labelledby="pricing-page-heading"
       >
-        <div className="absolute inset-0 bg-stone-50 dark:bg-stone-950" aria-hidden />
+        <div className="absolute inset-0 bg-[#FAF7FF] dark:bg-stone-950" aria-hidden />
 
         {/* Mascot working on a laptop — top-right of the pricing hero. Tells
             users "this is what you'll be doing on Pro". Hidden on small screens. */}
@@ -297,17 +297,17 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
 
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
-            <p className="text-xs font-extrabold uppercase tracking-wider text-[#58CC02] dark:text-[#58CC02] mb-3">
+            <p className="text-xs font-extrabold uppercase tracking-wider text-[#A560E8] dark:text-[#A560E8] mb-3">
               Pricing
             </p>
-            <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-[#58CC02]" aria-hidden />
+            <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-[#A560E8]" aria-hidden />
             <h1
               id="pricing-page-heading"
-              className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-stone-900 dark:text-stone-100 mb-4 tracking-tight leading-tight"
+              className="dash-serif text-[2rem] sm:text-[2.6rem] lg:text-[3rem] font-extrabold text-stone-900 dark:text-stone-50 mb-4 tracking-tight leading-[1.05]"
             >
               Simple, transparent pricing
             </h1>
-            <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed">
+            <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed font-medium">
               Start free, upgrade when you need more analyses, citations, and study tools.
             </p>
           </div>
@@ -319,7 +319,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                 onClick={() => setBillingCycle('monthly')}
                 className={`px-5 sm:px-6 py-2.5 rounded-[0.65rem] text-sm sm:text-base font-semibold transition-all ${
                   billingCycle === 'monthly'
-                    ? 'bg-[#58CC02] text-white border-2 border-b-4 border-[#46A302] font-extrabold'
+                    ? 'bg-[#A560E8] text-white border-2 border-b-4 border-[#8A48C7] font-extrabold'
                     : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'
                 }`}
               >
@@ -330,7 +330,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                 onClick={() => setBillingCycle('yearly')}
                 className={`px-5 sm:px-6 py-2.5 rounded-[0.65rem] text-sm sm:text-base font-semibold transition-all flex items-center gap-2 ${
                   billingCycle === 'yearly'
-                    ? 'bg-[#58CC02] text-white border-2 border-b-4 border-[#46A302] font-extrabold'
+                    ? 'bg-[#A560E8] text-white border-2 border-b-4 border-[#8A48C7] font-extrabold'
                     : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'
                 }`}
               >
@@ -339,7 +339,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                   className={`px-2 py-0.5 text-[10px] sm:text-xs font-bold rounded-full ${
                     billingCycle === 'yearly'
                       ? 'bg-white/20 text-white'
-                      : 'bg-[#EAFFD6] dark:bg-[#58CC02]/20 text-[#58CC02] dark:text-[#58CC02]'
+                      : 'bg-[#F3EAFF] dark:bg-[#A560E8]/20 text-[#A560E8] dark:text-[#A560E8]'
                   }`}
                 >
                   Save 17%
@@ -352,17 +352,17 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
           {plans.map((plan) => (
             <div
               key={plan.id}
-              className={`relative rounded-2xl p-6 sm:p-8 flex flex-col transition-all bg-white dark:bg-stone-900 ${
+              className={`relative rounded-3xl p-6 sm:p-8 flex flex-col transition-all duration-200 bg-white dark:bg-stone-900 hover:-translate-y-1 ${
                 plan.popular
-                  ? 'border-2 border-b-4 border-[#1CB0F6] dark:border-[#1CB0F6]'
+                  ? 'border-2 border-b-4 border-[#A560E8] dark:border-[#A560E8] ring-2 ring-[#A560E8]/20 shadow-[0_26px_54px_-24px_rgba(165,96,232,0.5)]'
                   : plan.id === 'premium'
-                  ? 'border-2 border-b-4 border-[#FFC800] dark:border-[#FFC800] bg-[#FFFAE5] dark:bg-stone-900 sm:col-span-2 lg:col-span-1'
-                  : 'border-2 border-b-4 border-stone-200 dark:border-stone-700'
+                  ? 'border-2 border-b-4 border-[#FFC800] dark:border-[#FFC800] bg-[#FFFAE5] dark:bg-stone-900 sm:col-span-2 lg:col-span-1 shadow-[0_18px_44px_-24px_rgba(255,200,0,0.40)]'
+                  : 'border-2 border-b-4 border-stone-200 dark:border-stone-700 shadow-[0_12px_34px_-22px_rgba(0,0,0,0.16)]'
               }`}
             >
               {plan.popular && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-[#1CB0F6] text-white px-3 py-1 rounded-xl text-xs font-extrabold border-2 border-[#1899D6]">
+                  <span className="bg-[#A560E8] text-white px-3 py-1 rounded-xl text-xs font-extrabold border-2 border-[#8A48C7]">
                     Most popular
                   </span>
                 </div>
@@ -436,7 +436,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                 </div>
 
                 {getSavings(plan) > 0 && (
-                  <div className="text-[#58CC02] text-sm font-extrabold mb-4">
+                  <div className="text-[#A560E8] text-sm font-extrabold mb-4">
                     Save {getSavings(plan)}% with yearly billing
                   </div>
                 )}
@@ -450,7 +450,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                         className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
                           plan.id === 'premium'
                             ? 'text-[#D4A300]'
-                            : 'text-[#58CC02]'
+                            : 'text-[#A560E8]'
                         }`}
                         fill="none"
                         stroke="currentColor"
@@ -483,7 +483,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                   isCurrentPlanId(plan.id)
                     ? 'bg-stone-100 dark:bg-stone-800 text-stone-400 border-2 border-stone-200 dark:border-stone-700 cursor-not-allowed font-extrabold'
                     : plan.popular
-                      ? 'bg-[#1CB0F6] hover:bg-[#1899D6] text-white font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#1899D6] active:border-b-2 active:translate-y-0.5'
+                      ? 'bg-[#A560E8] hover:bg-[#8A48C7] text-white font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5'
                       : plan.id === 'premium'
                         ? 'bg-[#FFC800] hover:bg-[#FFD52E] text-[#6B27A3] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#D4A300] active:border-b-2 active:translate-y-0.5'
                         : 'bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-900 dark:text-stone-100 border-2 border-b-4 border-stone-200 dark:border-stone-600 font-extrabold active:border-b-2 active:translate-y-0.5'
@@ -515,10 +515,10 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
 
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
-            <p className="text-xs font-extrabold uppercase tracking-wider text-[#58CC02] dark:text-[#58CC02] mb-3">
+            <p className="text-xs font-extrabold uppercase tracking-wider text-[#A560E8] dark:text-[#A560E8] mb-3">
               FAQ
             </p>
-            <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-[#58CC02]" aria-hidden />
+            <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-[#A560E8]" aria-hidden />
             <h2
               id="pricing-faq-heading"
               className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-stone-900 dark:text-stone-100 mb-4 tracking-tight leading-tight"
@@ -530,7 +530,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
             </p>
           </div>
 
-          <div className="rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-6 sm:p-8">
+          <div className="rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 shadow-[0_12px_34px_-22px_rgba(0,0,0,0.16)] p-6 sm:p-8">
             <div className="grid md:grid-cols-2 gap-6 sm:gap-8">
               {faqs.map((faq, index) => (
                 <div key={index} className="space-y-2">
@@ -545,14 +545,14 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
 
       {/* CTA — same glass card feel as landing “Get started” */}
       <section className="relative py-16 sm:py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-stone-50 dark:bg-stone-950" aria-hidden />
+        <div className="absolute inset-0 bg-[#FAF7FF] dark:bg-stone-950" aria-hidden />
 
         <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 px-6 py-10 sm:px-10 sm:py-12">
-            <p className="text-xs font-extrabold uppercase tracking-wider text-[#58CC02] dark:text-[#58CC02] mb-3">
+          <div className="text-center rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 shadow-[0_12px_34px_-22px_rgba(0,0,0,0.16)] px-6 py-10 sm:px-10 sm:py-12">
+            <p className="text-xs font-extrabold uppercase tracking-wider text-[#A560E8] dark:text-[#A560E8] mb-3">
               Get started
             </p>
-            <div className="mx-auto mb-5 h-1 w-12 rounded-full bg-[#58CC02]" aria-hidden />
+            <div className="mx-auto mb-5 h-1 w-12 rounded-full bg-[#A560E8]" aria-hidden />
             <h2
               className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-stone-900 dark:text-stone-50 mb-4 tracking-tight leading-[1.15]"
             >
@@ -569,7 +569,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                   <button
                     type="button"
                     onClick={() => onNavigate('dashboard')}
-                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#58CC02] hover:bg-[#4CAF00] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all duration-150 text-base"
+                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#A560E8] hover:bg-[#4CAF00] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all duration-150 text-base"
                   >
                     Go to dashboard
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
@@ -589,7 +589,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                   <button
                     type="button"
                     onClick={() => onNavigate('signup')}
-                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#58CC02] hover:bg-[#4CAF00] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all duration-150 text-base"
+                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#A560E8] hover:bg-[#4CAF00] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all duration-150 text-base"
                   >
                     Sign up free
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>

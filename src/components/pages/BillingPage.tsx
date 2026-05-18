@@ -259,7 +259,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
         />
         <div className="flex items-center justify-center min-h-[60vh] relative z-10">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1CB0F6] mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#A560E8] mx-auto mb-4"></div>
             <p className="text-stone-600 dark:text-stone-400">Loading billing information...</p>
           </div>
         </div>
@@ -298,7 +298,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
             <span className={`px-3 py-1 text-sm font-extrabold rounded-xl ${
               currentPlan === 'free'
                 ? 'bg-stone-200 dark:bg-stone-700 text-stone-800 dark:text-stone-200'
-                : 'bg-[#EAFFD6] text-[#58CC02] border border-[#58CC02]/30'
+                : 'bg-[#F3EAFF] text-[#A560E8] border border-[#A560E8]/30'
             }`}>
               {plans.find(p => p.id === currentPlan)?.name ?? currentPlan}
             </span>
@@ -313,7 +313,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
             <button
               onClick={handleManageBilling}
               disabled={processing === 'billing'}
-              className="bg-[#1CB0F6] text-white font-extrabold uppercase tracking-wide py-3 px-6 rounded-xl border-2 border-b-4 border-[#1899D6] active:border-b-2 active:translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-[#A560E8] text-white font-extrabold uppercase tracking-wide py-3 px-6 rounded-xl border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {processing === 'billing' ? (
                 <div className="flex items-center justify-center">
@@ -339,7 +339,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
               onClick={() => setBillingCycle('monthly')}
               className={`px-6 py-2.5 rounded-lg text-sm font-extrabold transition-all ${
                 billingCycle === 'monthly'
-                  ? 'bg-[#DDF4FF] dark:bg-[#1CB0F6]/10 text-[#1CB0F6] border-2 border-[#1CB0F6]/30'
+                  ? 'bg-[#F3EAFF] dark:bg-[#A560E8]/10 text-[#A560E8] border-2 border-[#A560E8]/30'
                   : 'border-2 border-transparent text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'
               }`}
             >
@@ -349,12 +349,12 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
               onClick={() => setBillingCycle('yearly')}
               className={`px-6 py-2.5 rounded-lg text-sm font-extrabold transition-all flex items-center ${
                 billingCycle === 'yearly'
-                  ? 'bg-[#DDF4FF] dark:bg-[#1CB0F6]/10 text-[#1CB0F6] border-2 border-[#1CB0F6]/30'
+                  ? 'bg-[#F3EAFF] dark:bg-[#A560E8]/10 text-[#A560E8] border-2 border-[#A560E8]/30'
                   : 'border-2 border-transparent text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'
               }`}
             >
               Bill Yearly
-              <span className="ml-2 px-2 py-0.5 bg-[#EAFFD6] text-[#58CC02] border border-[#58CC02]/30 text-xs font-extrabold rounded-xl">
+              <span className="ml-2 px-2 py-0.5 bg-[#F3EAFF] text-[#A560E8] border border-[#A560E8]/30 text-xs font-extrabold rounded-xl">
                 Save 17%
               </span>
             </button>
@@ -379,22 +379,22 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
               key={plan.id}
               className={`relative bg-white dark:bg-stone-800 rounded-2xl p-6 transition-all ${
                 plan.popular
-                  ? 'border-2 border-b-4 border-[#1CB0F6]'
+                  ? 'border-2 border-b-4 border-[#A560E8]'
                   : plan.id === 'premium'
-                  ? 'border-2 border-b-4 border-[#FF9600]'
+                  ? 'border-2 border-b-4 border-[#A560E8]'
                   : 'border-2 border-b-4 border-stone-200 dark:border-stone-700'
               }`}
             >
               {plan.popular && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-[#1CB0F6] text-white px-4 py-1 rounded-xl text-xs font-extrabold border-b-2 border-[#1899D6]">
+                  <span className="bg-[#A560E8] text-white px-4 py-1 rounded-xl text-xs font-extrabold border-b-2 border-[#8A48C7]">
                     Most Popular
                   </span>
                 </div>
               )}
               {plan.id === 'premium' && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-[#FF9600] text-white px-4 py-1 rounded-xl text-xs font-extrabold border-b-2 border-[#D97F00]">
+                  <span className="bg-[#A560E8] text-white px-4 py-1 rounded-xl text-xs font-extrabold border-b-2 border-[#8A48C7]">
                     5× usage
                   </span>
                 </div>
@@ -463,7 +463,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
                 <ul className="space-y-3">
                   {plan.features.map((feature, index) => (
                     <li key={index} className="flex items-start text-sm">
-                      <svg className="w-5 h-5 text-[#58CC02] mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 text-[#A560E8] mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                       <span className="text-stone-600 dark:text-stone-400">{feature}</span>
@@ -480,7 +480,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
                   isBillingCurrentPlan(plan.id)
                     ? 'bg-stone-100 dark:bg-stone-800 text-stone-400 border-2 border-stone-200 dark:border-stone-700 rounded-xl cursor-not-allowed'
                     : plan.popular
-                    ? 'bg-[#58CC02] text-white uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5'
+                    ? 'bg-[#A560E8] text-white uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5'
                     : 'bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-200 border-2 border-b-4 border-stone-200 dark:border-stone-600 active:border-b-2 active:translate-y-0.5 rounded-xl'
                 }`}
               >
@@ -554,12 +554,12 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
             </div>
 
             {/* Combined Actions (Pro/Premium) or Analyses (Free) */}
-            <div className="bg-[#DDF4FF] dark:bg-[#1CB0F6]/10 border-2 border-[#1CB0F6]/30 rounded-2xl p-5">
+            <div className="bg-[#F3EAFF] dark:bg-[#A560E8]/10 border-2 border-[#A560E8]/30 rounded-2xl p-5">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-extrabold text-stone-800 dark:text-stone-200 text-sm">
                   {currentPlan === 'pro' || currentPlan === 'premium' ? 'Combined actions' : 'Analyses'}
                 </h3>
-                <div className="w-8 h-8 bg-[#1CB0F6] rounded-xl border-b-2 border-[#1899D6] flex items-center justify-center">
+                <div className="w-8 h-8 bg-[#A560E8] rounded-xl border-b-2 border-[#8A48C7] flex items-center justify-center">
                   <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
@@ -576,10 +576,10 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
             </div>
 
             {/* Documents Analyzed */}
-            <div className="bg-[#FFF4E0] dark:bg-[#FF9600]/10 border-2 border-[#FF9600]/30 rounded-2xl p-5">
+            <div className="bg-[#F3EAFF] dark:bg-[#A560E8]/10 border-2 border-[#A560E8]/30 rounded-2xl p-5">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-extrabold text-stone-800 dark:text-stone-200 text-sm">Documents</h3>
-                <div className="w-8 h-8 bg-[#FF9600] rounded-xl border-b-2 border-[#D97F00] flex items-center justify-center">
+                <div className="w-8 h-8 bg-[#A560E8] rounded-xl border-b-2 border-[#8A48C7] flex items-center justify-center">
                   <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
@@ -609,7 +609,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-[#58CC02] rounded-xl border-b-2 border-[#46A302] flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 bg-[#A560E8] rounded-xl border-b-2 border-[#8A48C7] flex items-center justify-center flex-shrink-0">
                 <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
@@ -620,7 +620,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-[#1CB0F6] rounded-xl border-b-2 border-[#1899D6] flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 bg-[#A560E8] rounded-xl border-b-2 border-[#8A48C7] flex items-center justify-center flex-shrink-0">
                 <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>

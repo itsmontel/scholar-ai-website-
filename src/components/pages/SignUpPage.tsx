@@ -70,8 +70,8 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
   };
 
   return (
-    <div className="relative isolate min-h-screen min-h-[100dvh] overflow-x-clip bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
+    <div className="relative isolate min-h-screen min-h-[100dvh] overflow-x-clip bg-[#FAF7FF] dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+      <WriteScholarEditorialBackgroundLayers position="fixed" purpleWash />
       <div className="relative z-10 flex min-h-screen min-h-[100dvh] w-full flex-col lg:flex-row">
       {/* Back Button */}
       <button
@@ -79,7 +79,7 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
         onClick={() => onNavigate('landing')}
         className="fixed top-4 left-4 sm:top-6 sm:left-6 z-50 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition-colors group"
       >
-        <div className="w-10 h-10 bg-white dark:bg-stone-800 rounded-xl border-2 border-b-4 border-stone-200 dark:border-stone-700 flex items-center justify-center group-hover:border-[#58CC02]/40 transition-all">
+        <div className="w-10 h-10 bg-white dark:bg-stone-800 rounded-xl border-2 border-b-4 border-stone-200 dark:border-stone-700 flex items-center justify-center group-hover:border-[#A560E8]/40 transition-all">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
@@ -100,7 +100,7 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
 
         {/* Form Container — align start on mobile so primary CTA (Google) stays in view */}
         <div className="flex-1 flex items-start sm:items-center justify-center px-4 pb-8 sm:px-6 sm:pb-12 min-h-0">
-          <div className="relative w-full max-w-sm rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 px-4 py-5 sm:px-8 sm:py-9">
+          <div className="relative w-full max-w-sm rounded-3xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-[0_24px_70px_-34px_rgba(96,48,140,0.30)] px-4 py-5 sm:px-8 sm:py-9">
             {/* Dancing mascot — top-right of the form card, celebrates the new signup */}
             <img
               src="/mascot-dance.webp"
@@ -108,9 +108,9 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
               aria-hidden
               loading="lazy"
               decoding="async"
-              className="pointer-events-none absolute -top-10 -right-3 sm:-top-12 sm:-right-4 w-20 sm:w-24 h-auto z-10 drop-shadow-[0_14px_24px_rgba(88,204,2,0.35)]"
+              className="pointer-events-none absolute -top-10 -right-3 sm:-top-12 sm:-right-4 w-20 sm:w-24 h-auto z-10 drop-shadow-[0_14px_24px_rgba(165,96,232,0.35)]"
             />
-            <div className="h-1 w-16 bg-[#58CC02] rounded-full mb-4 sm:mb-6" aria-hidden />
+            <div className="h-1.5 w-16 rounded-full bg-gradient-to-r from-[#A560E8] to-[#8A48C7] mb-4 sm:mb-6" aria-hidden />
             <div className="mb-4 sm:mb-5">
               <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-800 dark:text-stone-100 mb-1.5">Create your account</h1>
               <p className="text-sm text-stone-500 dark:text-stone-400">Unlock your full academic toolkit</p>
@@ -182,7 +182,7 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   onKeyDown={handleKeyDown}
                   placeholder="you@example.com"
-                  className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 focus:bg-white dark:focus:bg-stone-800 transition-all text-sm text-stone-800 dark:text-stone-100"
+                  className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:border-[#A560E8] focus:ring-2 focus:ring-[#A560E8]/25 focus:bg-white dark:focus:bg-stone-800 transition-all text-sm text-stone-800 dark:text-stone-100"
                 />
               </div>
               
@@ -194,7 +194,7 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   onKeyDown={handleKeyDown}
                   placeholder="••••••••"
-                  className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 focus:bg-white dark:focus:bg-stone-800 transition-all text-sm text-stone-800 dark:text-stone-100"
+                  className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:border-[#A560E8] focus:ring-2 focus:ring-[#A560E8]/25 focus:bg-white dark:focus:bg-stone-800 transition-all text-sm text-stone-800 dark:text-stone-100"
                 />
                 <p className="mt-1.5 text-xs text-stone-400 dark:text-stone-500">
                   At least 8 characters with uppercase, lowercase, number, and special character
@@ -209,14 +209,14 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
                   onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                   onKeyDown={handleKeyDown}
                   placeholder="••••••••"
-                  className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:border-[#1CB0F6] focus:ring-2 focus:ring-[#1CB0F6]/20 focus:bg-white dark:focus:bg-stone-800 transition-all text-sm text-stone-800 dark:text-stone-100"
+                  className="w-full px-4 py-3 bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-600 rounded-xl focus:border-[#A560E8] focus:ring-2 focus:ring-[#A560E8]/25 focus:bg-white dark:focus:bg-stone-800 transition-all text-sm text-stone-800 dark:text-stone-100"
                 />
               </div>
 
               <button
                 onClick={handleSubmit}
                 disabled={isLoading || success}
-                className="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 bg-[#A560E8] hover:bg-[#9450D8] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full inline-flex items-center justify-center gap-2 px-4 py-3.5 bg-[#A560E8] hover:bg-[#8A48C7] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center">
@@ -235,7 +235,7 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
               Already have an account?{' '}
               <button
                 onClick={() => onNavigate('login')}
-                className="text-[#1CB0F6] hover:text-[#1899D6] font-bold"
+                className="text-[#A560E8] hover:text-[#8A48C7] font-bold"
               >
                 Sign in
               </button>
@@ -243,11 +243,11 @@ const SignUpPage = ({ onNavigate, onSignUp }: SignUpPageProps) => {
 
             <p className="text-center text-xs text-stone-400 dark:text-stone-500 mt-4">
               By creating an account, you agree to our{' '}
-              <button onClick={() => onNavigate('terms')} className="text-[#1CB0F6] hover:underline">
+              <button onClick={() => onNavigate('terms')} className="text-[#A560E8] hover:underline">
                 Terms
               </button>{' '}
               and{' '}
-              <button onClick={() => onNavigate('privacy')} className="text-[#1CB0F6] hover:underline">
+              <button onClick={() => onNavigate('privacy')} className="text-[#A560E8] hover:underline">
                 Privacy Policy
               </button>
             </p>

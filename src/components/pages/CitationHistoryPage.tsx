@@ -194,13 +194,13 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
 
   if (isLoading) {
     return (
-      <div className="relative min-h-screen overflow-x-clip bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+      <div className="relative min-h-screen overflow-x-clip bg-[#FAF7FF] dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
         <WriteScholarEditorialBackgroundLayers position="fixed" />
         <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="citations" />
         <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
           <div className="flex items-center justify-center min-h-64">
             <div className="text-center">
-              <div className="animate-spin w-12 h-12 border-4 border-[#1CB0F6] border-t-transparent rounded-full mx-auto mb-4"></div>
+              <div className="animate-spin w-12 h-12 border-4 border-[#A560E8] border-t-transparent rounded-full mx-auto mb-4"></div>
               <p className="text-stone-500 font-bold">Loading citation history...</p>
             </div>
           </div>
@@ -211,7 +211,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
 
   if (error) {
     return (
-      <div className="relative min-h-screen overflow-x-clip bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+      <div className="relative min-h-screen overflow-x-clip bg-[#FAF7FF] dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
         <WriteScholarEditorialBackgroundLayers position="fixed" />
         <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="citations" />
         <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
@@ -225,7 +225,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
             <p className="text-stone-500 font-bold mb-6">{error}</p>
             <button
               onClick={fetchCitationHistory}
-              className="px-6 py-3 bg-[#1CB0F6] text-white rounded-xl font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#1899D6] active:border-b-2 active:translate-y-0.5 transition-all"
+              className="px-6 py-3 bg-[#A560E8] text-white rounded-xl font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all"
             >
               Try Again
             </button>
@@ -279,31 +279,28 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
   ];
 
   return (
-    <div className="relative min-h-screen overflow-x-clip bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+    <div className="relative min-h-screen overflow-x-clip bg-[#FAF7FF] dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="citations" />
 
       <main className="max-w-6xl mx-auto px-3 sm:px-6 py-8 sm:py-12 w-full min-w-0 overflow-x-clip">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 mb-10">
           <div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl bg-[#1CB0F6] border-2 border-b-4 border-[#1899D6]">
-                📚
-              </div>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-900 dark:text-stone-50 tracking-tight">
-                  Citation History
-                </h1>
-                <p className="text-sm text-stone-500 mt-0.5 font-bold">
-                  {filteredSearches.length} {filteredSearches.length === 1 ? 'search' : 'searches'}
-                </p>
-              </div>
+            <div className="flex items-center gap-2.5">
+              <span className="h-px w-7 bg-[#A560E8]/50" aria-hidden />
+              <p className="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.22em] text-[#A560E8]">Your history</p>
             </div>
+            <h1 className="dash-serif mt-3 text-[2rem] sm:text-[2.6rem] lg:text-[3rem] font-extrabold leading-[1.03] tracking-tight text-stone-900 dark:text-stone-50">
+              Citation history
+            </h1>
+            <p className="mt-2.5 text-sm sm:text-base text-stone-600 dark:text-stone-400 font-medium">
+              {filteredSearches.length} {filteredSearches.length === 1 ? 'search' : 'searches'} saved. Reopen or export any of them.
+            </p>
           </div>
 
           <button
             onClick={startNewSearch}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-extrabold uppercase tracking-wide text-white bg-[#1CB0F6] border-2 border-b-4 border-[#1899D6] active:border-b-2 active:translate-y-0.5 transition-all"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-extrabold uppercase tracking-wide text-white bg-[#A560E8] border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -316,17 +313,17 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
           const expiringSoonCount = getExpiringSoonCount(searches, 7);
           const urgencyText = getExpiringSoonUrgencyText(expiringSoonCount);
           return expiringSoonCount > 0 && urgencyText && (
-            <div className={`mb-6 p-4 rounded-xl border-2 border-b-4 ${expiringSoonCount <= 2 ? 'bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-[#FF4B4B]/40' : 'bg-[#FFF4E0] dark:bg-[#FF9600]/10 border-[#FF9600]/40'}`}>
+            <div className={`mb-6 p-4 rounded-xl border-2 border-b-4 ${expiringSoonCount <= 2 ? 'bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-[#FF4B4B]/40' : 'bg-[#F3EAFF] dark:bg-[#A560E8]/10 border-[#A560E8]/40'}`}>
               <div className="flex items-start sm:items-center gap-3">
                 <span className="text-xl flex-shrink-0">{expiringSoonCount <= 2 ? '⚠️' : '⏰'}</span>
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-extrabold ${expiringSoonCount <= 2 ? 'text-[#FF4B4B]' : 'text-[#FF9600]'}`}>
+                  <p className={`text-sm font-extrabold ${expiringSoonCount <= 2 ? 'text-[#FF4B4B]' : 'text-[#A560E8]'}`}>
                     {urgencyText}
                   </p>
                 </div>
                 <button
                   onClick={() => onNavigate('pricing')}
-                  className={`flex-shrink-0 px-4 py-1.5 text-xs font-extrabold uppercase tracking-wide rounded-xl text-white border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all ${expiringSoonCount <= 2 ? 'bg-[#FF4B4B] border-[#E04343]' : 'bg-[#FF9600] border-[#D97F00]'}`}
+                  className={`flex-shrink-0 px-4 py-1.5 text-xs font-extrabold uppercase tracking-wide rounded-xl text-white border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all ${expiringSoonCount <= 2 ? 'bg-[#FF4B4B] border-[#E04343]' : 'bg-[#A560E8] border-[#8A48C7]'}`}
                 >
                   Upgrade Now
                 </button>
@@ -338,7 +335,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
         {/* Filter Controls - Browse by month + Quick period + Style (match Saved Materials) */}
         {searches.length > 0 && (
           <div className="mb-8 space-y-3">
-            <div className="bg-white dark:bg-stone-900 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 overflow-hidden">
+            <div className="bg-white dark:bg-stone-900 rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 overflow-hidden shadow-[0_12px_34px_-22px_rgba(0,0,0,0.18)]">
               <div className="flex items-stretch">
                 <button
                   onClick={goToPrevMonth}
@@ -390,7 +387,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
                       if (option.key === 'month') setSelectedMonthStart(getFirstOfMonth(new Date()));
                     }}
                     className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all ${
-                      timePeriod === option.key ? 'bg-[#1CB0F6] text-white border-2 border-b-4 border-[#1899D6]' : 'bg-white dark:bg-stone-800 border-2 border-b-4 border-stone-200 dark:border-stone-700 text-stone-500 hover:border-stone-300 active:border-b-2 active:translate-y-0.5'
+                      timePeriod === option.key ? 'bg-[#A560E8] text-white border-2 border-b-4 border-[#8A48C7]' : 'bg-white dark:bg-stone-800 border-2 border-b-4 border-stone-200 dark:border-stone-700 text-stone-500 hover:border-stone-300 active:border-b-2 active:translate-y-0.5'
                     }`}
                   >
                     {option.label}
@@ -444,7 +441,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
               <div className="ml-4">
                 <h3 className="font-extrabold text-[#A560E8] mb-1">Free Plan Storage</h3>
                 <p className="text-sm text-stone-600 dark:text-stone-300 font-bold">
-                  Citation searches expire 30 days after creation. <button onClick={() => onNavigate('pricing')} className="text-[#FF9600] font-extrabold hover:underline">Upgrade</button> to keep your citations forever!
+                  Citation searches expire 30 days after creation. <button onClick={() => onNavigate('pricing')} className="text-[#A560E8] font-extrabold hover:underline">Upgrade</button> to keep your citations forever!
                 </p>
               </div>
             </div>
@@ -454,7 +451,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
         {/* Search History */}
         {searches.length === 0 ? (
           <div className="text-center py-16">
-            <div className="w-20 h-20 bg-[#1CB0F6] rounded-2xl flex items-center justify-center mx-auto mb-4 border-2 border-b-4 border-[#1899D6]">
+            <div className="w-20 h-20 bg-[#A560E8] rounded-2xl flex items-center justify-center mx-auto mb-4 border-2 border-b-4 border-[#8A48C7]">
               <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
@@ -463,7 +460,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
             <p className="text-stone-500 font-bold mb-6">Start your first citation search to build your research library</p>
             <button
               onClick={startNewSearch}
-              className="px-6 py-3 bg-[#58CC02] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all"
+              className="px-6 py-3 bg-[#A560E8] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all"
             >
               Find Citations Now
             </button>
@@ -485,7 +482,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
             </button>
             <button
               onClick={startNewSearch}
-              className="px-6 py-3 bg-[#58CC02] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all"
+              className="px-6 py-3 bg-[#A560E8] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all"
             >
               Find Citations Now
             </button>
@@ -496,7 +493,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
             {paginatedSearches.map((search) => (
               <div
                 key={search.id}
-                className="bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 rounded-2xl p-6 hover:border-stone-300 transition-all"
+                className="bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 rounded-3xl p-6 hover:-translate-y-0.5 hover:border-[#A560E8]/40 transition-all duration-200 shadow-[0_10px_28px_-20px_rgba(0,0,0,0.18)] hover:shadow-[0_22px_44px_-24px_rgba(165,96,232,0.38)]"
               >
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                   <div className="flex-1">
@@ -515,18 +512,18 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
                       </span>
                       {(search.year_range || search.search_results?.yearRange) &&
                        (search.year_range !== 'all' && search.search_results?.yearRange !== 'all') && (
-                        <span className="px-2.5 py-1 bg-[#FFF4E0] dark:bg-[#FF9600]/10 text-[#FF9600] rounded-lg text-xs font-extrabold border border-[#FF9600]/20">
+                        <span className="px-2.5 py-1 bg-[#F3EAFF] dark:bg-[#A560E8]/10 text-[#A560E8] rounded-lg text-xs font-extrabold border border-[#A560E8]/20">
                           Last {search.year_range || search.search_results?.yearRange} years
                         </span>
                       )}
-                      <span className="px-2.5 py-1 bg-[#DDF4FF] dark:bg-[#1CB0F6]/10 text-[#1CB0F6] rounded-lg text-xs font-extrabold border border-[#1CB0F6]/20">
+                      <span className="px-2.5 py-1 bg-[#F3EAFF] dark:bg-[#A560E8]/10 text-[#A560E8] rounded-lg text-xs font-extrabold border border-[#A560E8]/20">
                         {search.search_results?.citations?.length || 0} Citations
                       </span>
                       {!isPaidUser && (() => {
                         const daysRemaining = getDaysUntilExpiration(search.expires_at ?? null);
                         if (daysRemaining === null) return null;
                         return (
-                          <span className={`px-2.5 py-1 rounded-lg text-xs font-extrabold border ${daysRemaining <= 2 ? 'bg-[#FFE8E8] text-[#FF4B4B] border-[#FF4B4B]/20' : 'bg-[#FFF4E0] text-[#FF9600] border-[#FF9600]/20'}`}>
+                          <span className={`px-2.5 py-1 rounded-lg text-xs font-extrabold border ${daysRemaining <= 2 ? 'bg-[#FFE8E8] text-[#FF4B4B] border-[#FF4B4B]/20' : 'bg-[#F3EAFF] text-[#A560E8] border-[#A560E8]/20'}`}>
                             {daysRemaining <= 0 ? 'Expires today' : `${daysRemaining}d left`}
                           </span>
                         );
@@ -537,7 +534,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => viewSearchResults(search)}
-                      className="px-4 py-2.5 bg-[#1CB0F6] text-white rounded-xl font-extrabold text-sm border-2 border-b-4 border-[#1899D6] active:border-b-2 active:translate-y-0.5 transition-all"
+                      className="px-4 py-2.5 bg-[#A560E8] text-white rounded-xl font-extrabold text-sm border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all"
                     >
                       View Results
                     </button>
@@ -596,7 +593,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
                     onClick={() => setCurrentPage(page)}
                     className={`w-10 h-10 rounded-xl font-extrabold transition-all ${
                       currentPage === page
-                        ? 'bg-[#1CB0F6] text-white border-2 border-b-4 border-[#1899D6]'
+                        ? 'bg-[#A560E8] text-white border-2 border-b-4 border-[#8A48C7]'
                         : 'bg-white dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:border-stone-300 active:border-b-2 active:translate-y-0.5'
                     }`}
                   >

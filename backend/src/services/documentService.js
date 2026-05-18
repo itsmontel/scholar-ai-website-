@@ -116,6 +116,22 @@ class DocumentService {
   }
 
   /**
+   * Total number of documents a user owns (for the hard cap +
+   * the "X / cap" usage indicator). Uses a HEAD count so we
+   * don't pull rows just to count them.
+   * @param {string} userId
+   * @returns {Promise<number>}
+   */
+  async countUserDocuments(userId) {
+    const { count, error } = await this.getSupabaseClient()
+      .from('documents')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId);
+    if (error) throw error;
+    return count || 0;
+  }
+
+  /**
    * Get a specific document by ID
    * @param {string} documentId - Document ID
    * @param {string} userId - User ID (for security)
@@ -149,20 +165,51 @@ class DocumentService {
    * @returns {Promise<Object>} Updated document
    */
   async updateDocument(documentId, userId, updateData) {
-    try {
+    const runUpdate = async (payload) => {
       const { data, error } = await this.getSupabaseClient()
         .from('documents')
-        .update({
-          ...updateData,
-          updated_at: new Date().toISOString()
-        })
+        .update({ ...payload, updated_at: new Date().toISOString() })
         .eq('id', documentId)
         .eq('user_id', userId)
         .select()
         .single();
+      return { data, error };
+    };
 
-      if (error) throw error;
-      return data;
+    try {
+      const { data, error } = await runUpdate(updateData);
+      if (!error) return data;
+
+      // Resilience: the editor autosave writes content_html /
+      // last_edited_at. If that migration hasn't been applied to
+      // this environment's DB yet, Postgres rejects the WHOLE
+      // update and the user's draft would be lost on every save.
+      // Detect the missing-column error and retry WITHOUT those
+      // newer columns so the core fields (content_text, word_count)
+      // still persist — degraded, but never silent data loss.
+      const msg = `${error.message || ''} ${error.details || ''} ${error.hint || ''}`.toLowerCase();
+      const looksLikeMissingColumn =
+        error.code === 'PGRST204' ||
+        /column .* does not exist/.test(msg) ||
+        ((msg.includes('content_html') || msg.includes('last_edited_at')) &&
+          (msg.includes('schema cache') || msg.includes('could not find') || msg.includes('does not exist')));
+
+      const hasNewerColumns =
+        updateData && (('content_html' in updateData) || ('last_edited_at' in updateData));
+
+      if (looksLikeMissingColumn && hasNewerColumns) {
+        // eslint-disable-next-line no-unused-vars
+        const { content_html, last_edited_at, ...safe } = updateData;
+        console.warn(
+          '[documentService] content_html/last_edited_at column missing — ' +
+          'saving without them. Run the documents_content_html migration.'
+        );
+        const retry = await runUpdate(safe);
+        if (retry.error) throw retry.error;
+        return retry.data;
+      }
+
+      throw error;
     } catch (error) {
       console.error('Error updating document:', error);
       throw error;
