@@ -1096,7 +1096,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   label: 'Essay Analyzer',
                   kind: 'image' as const,
                   src: '/rubric-and-notes.png',
-                  pos: 'top-[2rem] xl:top-[3rem] left-0 xl:-left-[2rem]',
+                  pos: 'top-[2rem] xl:top-[3rem] -left-[1rem] xl:-left-[4rem]',
                   // Subtle 8s drift; reuses the existing `hero-tile-drift`
                   // keyframe (src/index.css:1057). Each tile gets a slightly
                   // different duration + delay so they fall out of phase
@@ -1109,7 +1109,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   label: 'Premium essay analysis',
                   kind: 'image' as const,
                   src: '/full-report.png',
-                  pos: 'top-[2rem] xl:top-[3rem] right-0 xl:-right-[2rem]',
+                  pos: 'top-[2rem] xl:top-[3rem] -right-[1rem] xl:-right-[4rem]',
                   anim: 'motion-safe:animate-[hero-tile-drift_9s_ease-in-out_infinite]',
                   delay: '2.5s',
                 },
@@ -1609,7 +1609,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                         { n: 1, x: 84, y: 29 },
                         { n: 2, x: 84, y: 82 },
                         { n: 3, x: 42, y: 55 },
-                        { n: 4, x: 55, y: 8 },
+                        { n: 4, x: 34, y: 3 },
                       ]}
                     />
                     <div
@@ -1655,7 +1655,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   (brand-purple WriteScholar card vs neutral GPT card). */}
               <section className="relative w-full max-w-5xl mx-auto mt-4 sm:mt-8 pb-16 sm:pb-20 px-3 sm:px-4">
                 <LandingScrollReveal>
-                  <div className="relative text-center max-w-2xl mx-auto mb-10 sm:mb-12">
+                  <div className="relative text-center max-w-2xl mx-auto mb-8 sm:mb-12 px-1">
                     <span className="inline-flex items-center gap-1.5 mb-4 rounded-full border border-[#A560E8]/25 dark:border-[#A560E8]/30 bg-[#F3EAFF] dark:bg-[#A560E8]/12 px-3 py-1 text-[10px] sm:text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#8A48C7] dark:text-[#C9A0F0]">
                       <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24" aria-hidden><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8l-6.2 4.5 2.4-7.4L2 9.4h7.6z" /></svg>
                       Why WriteScholar
@@ -1671,7 +1671,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     </p>
                   </div>
 
-                  <div className="relative rounded-[1.75rem] sm:rounded-[2.25rem] border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-[0_30px_80px_-40px_rgba(96,48,140,0.45)] p-3 sm:p-5">
+                  <div className="relative rounded-2xl sm:rounded-[2.25rem] border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-[0_30px_80px_-40px_rgba(96,48,140,0.45)] p-2 sm:p-5">
                     {/* Center "VS" pip — bridges the two cards. */}
                     <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 hidden lg:flex">
                       <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white dark:bg-stone-900 border-2 border-[#A560E8]/40 text-[#8A48C7] dark:text-[#C9A0F0] text-sm font-extrabold shadow-[0_8px_22px_-8px_rgba(96,48,140,0.5)]">VS</span>
@@ -1679,16 +1679,16 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
                       {/* WriteScholar — the winner: elevated, glowing. */}
-                      <div className="relative rounded-[1.5rem] bg-gradient-to-br from-[#A560E8] to-[#7733B5] text-white p-6 sm:p-8 shadow-[0_24px_50px_-20px_rgba(165,96,232,0.65)] lg:scale-[1.015]">
+                      <div className="relative rounded-[1.25rem] sm:rounded-[1.5rem] bg-gradient-to-br from-[#A560E8] to-[#7733B5] text-white p-5 sm:p-8 shadow-[0_24px_50px_-20px_rgba(165,96,232,0.65)] lg:scale-[1.015]">
                         <div aria-hidden className="pointer-events-none absolute -top-px left-6 right-6 h-px bg-white/30" />
-                        <div className="flex items-center justify-between gap-3 mb-6">
+                        <div className="flex items-center justify-between gap-3 mb-5 sm:mb-6">
                           <div className="flex items-center gap-2.5">
                             <div className="w-10 h-10 rounded-xl overflow-hidden bg-white/15 border border-white/25 flex items-center justify-center">
                               <img src="/main-logo.png" alt="" aria-hidden className="w-full h-full object-contain" />
                             </div>
                             <span className="text-xl font-extrabold tracking-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>WriteScholar</span>
                           </div>
-                          <span className="shrink-0 rounded-full bg-white/20 border border-white/25 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider">Built for essays</span>
+                          <span className="hidden sm:inline-flex shrink-0 rounded-full bg-white/20 border border-white/25 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider">Built for essays</span>
                         </div>
                         <ul className="space-y-0">
                           {[
@@ -1697,21 +1697,21 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                             'A real editor: apply fixes into your draft, export clean Word',
                             'Built for academic essays — citations, structure, a professor lens',
                           ].map((t, i) => (
-                            <li key={i} className={`flex items-start gap-3 py-3.5 ${i > 0 ? 'border-t border-white/15' : ''}`}>
+                            <li key={i} className={`flex items-start gap-3 py-2.5 sm:py-3.5 ${i > 0 ? 'border-t border-white/15' : ''}`}>
                               <span className="shrink-0 mt-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-white/20">
                                 <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                                 </svg>
                               </span>
-                              <span className="text-[15px] font-bold leading-snug">{t}</span>
+                              <span className="text-[13.5px] sm:text-[15px] font-bold leading-snug">{t}</span>
                             </li>
                           ))}
                         </ul>
                       </div>
 
                       {/* ChatGPT — muted, secondary. */}
-                      <div className="rounded-[1.5rem] bg-stone-50 dark:bg-stone-950/40 border border-stone-200/70 dark:border-stone-800 p-6 sm:p-8">
-                        <div className="flex items-center gap-2.5 mb-6 opacity-90">
+                      <div className="rounded-[1.25rem] sm:rounded-[1.5rem] bg-stone-50 dark:bg-stone-950/40 border border-stone-200/70 dark:border-stone-800 p-5 sm:p-8">
+                        <div className="flex items-center gap-2.5 mb-5 sm:mb-6 opacity-90">
                           <div className="w-10 h-10 rounded-xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 flex items-center justify-center">
                             <svg className="w-5 h-5 text-stone-500 dark:text-stone-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
                               <path d="M22.28 9.82a5.99 5.99 0 0 0-.52-4.91 6.05 6.05 0 0 0-6.52-2.9A6 6 0 0 0 4.98 4.18a5.99 5.99 0 0 0-4 2.9 6.05 6.05 0 0 0 .74 7.1 5.99 5.99 0 0 0 .52 4.91 6.05 6.05 0 0 0 6.52 2.9A6 6 0 0 0 19.02 19.8a5.99 5.99 0 0 0 4-2.9 6.05 6.05 0 0 0-.74-7.08Zm-9.02 12.6a4.48 4.48 0 0 1-2.88-1.04l.14-.08 4.78-2.76a.78.78 0 0 0 .4-.68v-6.74l2.02 1.17a.07.07 0 0 1 .04.06v5.58a4.5 4.5 0 0 1-4.5 4.49ZM3.6 18.2a4.47 4.47 0 0 1-.54-3.01l.14.09 4.78 2.76a.78.78 0 0 0 .78 0l5.84-3.37v2.33a.08.08 0 0 1-.03.07l-4.83 2.79a4.5 4.5 0 0 1-6.14-1.65ZM2.34 7.9a4.49 4.49 0 0 1 2.34-1.97v5.68a.77.77 0 0 0 .39.68l5.81 3.35-2.02 1.17a.08.08 0 0 1-.07 0L3.96 14a4.5 4.5 0 0 1-1.62-6.1Zm16.6 3.86-5.84-3.39 2.02-1.16a.07.07 0 0 1 .07 0l4.83 2.79a4.49 4.49 0 0 1-.68 8.1v-5.67a.78.78 0 0 0-.4-.67Zm2.01-3.03-.14-.08-4.77-2.78a.78.78 0 0 0-.79 0L9.43 9.24V6.91a.07.07 0 0 1 .03-.07l4.83-2.78a4.5 4.5 0 0 1 6.68 4.66ZM8.33 12.86 6.3 11.7a.08.08 0 0 1-.04-.06V6.07a4.5 4.5 0 0 1 7.38-3.45l-.14.08L8.72 5.46a.78.78 0 0 0-.4.68ZM9.43 10.5 12.03 9l2.6 1.5v3l-2.6 1.5-2.6-1.5Z" />
@@ -1726,13 +1726,13 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                             'Copy-paste back and forth between a chat box and your doc',
                             'A general chat model — not built for marking essays',
                           ].map((t, i) => (
-                            <li key={i} className={`flex items-start gap-3 py-3.5 ${i > 0 ? 'border-t border-stone-200 dark:border-stone-800' : ''}`}>
+                            <li key={i} className={`flex items-start gap-3 py-2.5 sm:py-3.5 ${i > 0 ? 'border-t border-stone-200 dark:border-stone-800' : ''}`}>
                               <span className="shrink-0 mt-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-stone-200/70 dark:bg-stone-800">
                                 <svg className="w-3.5 h-3.5 text-stone-400 dark:text-stone-500" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
                                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                               </span>
-                              <span className="text-[15px] font-semibold leading-snug text-stone-500 dark:text-stone-400">{t}</span>
+                              <span className="text-[13.5px] sm:text-[15px] font-semibold leading-snug text-stone-500 dark:text-stone-400">{t}</span>
                             </li>
                           ))}
                         </ul>
@@ -3034,7 +3034,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               <span className="block sm:inline">All in one app.</span>
             </h2>
             <p className="relative text-base sm:text-lg text-white/90 mb-8 max-w-xl mx-auto leading-relaxed">
-              Join <span className="font-extrabold text-white">50,000+ students</span> earning XP, levelling up, and acing their coursework. Free to start — no payment today.
+              Join <span className="font-extrabold text-white">50,000+ students</span> writing sharper essays and acing their coursework. Free to start — no payment today.
             </p>
             <div className="relative flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center mb-6">
               <button

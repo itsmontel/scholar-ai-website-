@@ -46,14 +46,14 @@ const EmailVerificationPage = ({ onNavigate }: EmailVerificationPageProps) => {
       <div className="relative min-h-screen flex items-center justify-center p-4 overflow-x-clip">
         <WriteScholarEditorialBackgroundLayers position="fixed" />
         <div className="max-w-md w-full">
-          <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 text-center">
-            <div className="animate-spin mx-auto w-16 h-16 bg-violet-100 rounded-full flex items-center justify-center mb-6">
-              <svg className="w-8 h-8 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          <div className="bg-white dark:bg-stone-900 rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 shadow-[0_18px_44px_-18px_rgba(96,48,140,0.35)] p-8 text-center">
+            <div className="mx-auto w-16 h-16 bg-[#F3EAFF] dark:bg-[#A560E8]/15 rounded-2xl flex items-center justify-center mb-6">
+              <svg className="w-8 h-8 text-[#A560E8] animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Verifying Email...</h1>
-            <p className="text-gray-600">Please wait while we verify your email address.</p>
+            <h1 className="text-2xl font-extrabold text-stone-900 dark:text-stone-50 mb-3" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Verifying email…</h1>
+            <p className="text-stone-600 dark:text-stone-400 font-medium">Please wait while we verify your email address.</p>
           </div>
         </div>
       </div>
@@ -65,36 +65,36 @@ const EmailVerificationPage = ({ onNavigate }: EmailVerificationPageProps) => {
       <div className="relative min-h-screen flex items-center justify-center p-4 overflow-x-clip">
         <WriteScholarEditorialBackgroundLayers position="fixed" />
         <div className="max-w-md w-full">
-          <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 text-center">
+          <div className="bg-white dark:bg-stone-900 rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 shadow-[0_18px_44px_-18px_rgba(96,48,140,0.35)] p-8 text-center">
             {/* Error Icon */}
-            <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-6">
-              <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <div className="mx-auto w-16 h-16 bg-[#FFE8E8] dark:bg-[#FF4B4B]/15 rounded-2xl flex items-center justify-center mb-6">
+              <svg className="w-8 h-8 text-[#E04343]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </div>
 
             {/* Error Message */}
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">
-              Verification Failed
+            <h1 className="text-2xl font-extrabold text-stone-900 dark:text-stone-50 mb-3" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+              Verification failed
             </h1>
-            
-            <p className="text-gray-600 mb-6">
-              Sorry, we couldn't verify your email address. The link may be invalid or expired.
+
+            <p className="text-stone-600 dark:text-stone-400 font-medium mb-7">
+              Sorry, we couldn&apos;t verify your email address. The link may be invalid or expired.
             </p>
 
             {/* Action buttons */}
             <div className="space-y-3">
               <button
                 onClick={() => onNavigate('signup')}
-                className="w-full bg-violet-600 hover:bg-violet-700 text-white py-3 rounded-lg font-semibold hover:shadow-lg transform hover:scale-[1.02] transition-all duration-300"
+                className="w-full inline-flex items-center justify-center rounded-2xl bg-[#A560E8] hover:bg-[#8A48C7] text-white py-3.5 font-extrabold border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
               >
-                Try Again
+                Try again
               </button>
               <button
                 onClick={() => onNavigate('login')}
-                className="w-full bg-gray-100 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-all duration-300"
+                className="w-full inline-flex items-center justify-center rounded-2xl bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-200 py-3.5 font-extrabold border-2 border-b-4 border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800 active:border-b-2 active:translate-y-0.5 transition-all"
               >
-                Back to Login
+                Back to login
               </button>
             </div>
           </div>
@@ -107,11 +107,11 @@ const EmailVerificationPage = ({ onNavigate }: EmailVerificationPageProps) => {
     <div className="relative min-h-screen flex items-center justify-center p-4 overflow-x-clip">
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       <div className="max-w-md w-full">
-        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 text-center">
+        <div className="bg-white dark:bg-stone-900 rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 shadow-[0_18px_44px_-18px_rgba(96,48,140,0.35)] p-8 text-center">
           {/* Success Icon */}
-          <div className="mx-auto w-16 h-16 bg-violet-100 rounded-full flex items-center justify-center mb-6">
+          <div className="mx-auto w-16 h-16 bg-[#F3EAFF] dark:bg-[#A560E8]/15 rounded-2xl flex items-center justify-center mb-6">
             <svg
-              className="w-8 h-8 text-violet-600"
+              className="w-8 h-8 text-[#A560E8]"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -119,37 +119,37 @@ const EmailVerificationPage = ({ onNavigate }: EmailVerificationPageProps) => {
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth={2}
+                strokeWidth={2.5}
                 d="M5 13l4 4L19 7"
               />
             </svg>
           </div>
 
           {/* Success Message */}
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            Email Verified Successfully!
+          <h1 className="text-2xl font-extrabold text-stone-900 dark:text-stone-50 mb-3" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+            Email verified!
           </h1>
-          
-          <p className="text-gray-600 mb-2">
-            Your email has been successfully verified. Welcome to WriteScholar!
+
+          <p className="text-stone-600 dark:text-stone-400 font-medium mb-2">
+            Your email has been verified. Welcome to WriteScholar!
           </p>
-          <p className="text-gray-500 text-sm mb-6">
+          <p className="text-stone-500 dark:text-stone-500 text-sm mb-6">
             Please log in to continue. You&apos;ll then complete a quick onboarding to set up your account.
           </p>
 
           {/* Countdown */}
-          <div className="bg-violet-50 border border-violet-200 rounded-lg p-4 mb-6">
-            <p className="text-violet-800 text-sm">
-              Redirecting to login in {countdown} seconds...
+          <div className="bg-[#F3EAFF] dark:bg-[#A560E8]/10 border border-[#A560E8]/25 dark:border-[#A560E8]/30 rounded-2xl p-4 mb-6">
+            <p className="text-[#7733B5] dark:text-[#C9A0F0] text-sm font-bold">
+              Redirecting to login in {countdown} second{countdown === 1 ? '' : 's'}…
             </p>
           </div>
 
           {/* Manual redirect button */}
           <button
             onClick={() => onNavigate('login')}
-            className="w-full bg-stone-900 text-white py-3 rounded-full font-semibold hover:bg-stone-800 transition-all"
+            className="w-full inline-flex items-center justify-center rounded-2xl bg-[#A560E8] hover:bg-[#8A48C7] text-white py-3.5 font-extrabold border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
           >
-            Continue to Login
+            Continue to login
           </button>
         </div>
       </div>

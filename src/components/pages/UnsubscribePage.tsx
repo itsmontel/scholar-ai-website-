@@ -60,16 +60,16 @@ const UnsubscribePage = ({ onNavigate }: UnsubscribePageProps) => {
     <div className="relative min-h-screen flex flex-col overflow-x-clip">
       <WriteScholarEditorialBackgroundLayers position="fixed" />
       {/* Navigation */}
-      <nav className="relative z-10 flex items-center justify-between px-2 sm:px-8 md:px-16 py-4 sm:py-6 backdrop-blur-sm bg-white/80 border-b border-white/20">
-        <div className="flex items-center space-x-2 sm:space-x-3">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-violet-500 to-violet-500 rounded-xl flex items-center justify-center shadow-lg">
-            <span className="text-white font-bold text-xl sm:text-2xl">W</span>
+      <nav className="relative z-10 flex items-center justify-between px-2 sm:px-8 md:px-16 py-4 sm:py-6 backdrop-blur-sm bg-white/80 dark:bg-stone-950/70 border-b border-stone-200/70 dark:border-stone-800">
+        <button onClick={() => onNavigate('landing')} className="flex items-center gap-2.5 group">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 flex items-center justify-center shrink-0">
+            <img src="/main-logo.png" alt="" aria-hidden className="w-[85%] h-[85%] object-contain" />
           </div>
-          <span className="text-lg sm:text-2xl font-bold text-gray-900">WriteScholar</span>
-        </div>
-        <button 
+          <span className="text-lg sm:text-2xl font-extrabold tracking-tight text-[#A560E8]" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>WriteScholar</span>
+        </button>
+        <button
           onClick={() => onNavigate('landing')}
-          className="text-gray-600 hover:text-gray-900 transition-colors font-medium px-2 sm:px-4 py-2 rounded-lg hover:bg-gray-100/50 text-sm sm:text-base"
+          className="text-stone-600 dark:text-stone-300 hover:text-[#8A48C7] dark:hover:text-[#C9A0F0] transition-colors font-bold px-2 sm:px-4 py-2 rounded-xl hover:bg-stone-100/60 dark:hover:bg-stone-800/60 text-sm sm:text-base"
         >
           Back to Home
         </button>
@@ -78,30 +78,30 @@ const UnsubscribePage = ({ onNavigate }: UnsubscribePageProps) => {
       {/* Main Content */}
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="max-w-md w-full">
-          <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-100">
+          <div className="bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 shadow-[0_18px_44px_-18px_rgba(96,48,140,0.35)] p-6 sm:p-8">
             <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-gradient-to-br from-violet-600 via-violet-600 to-violet-700 rounded-2xl flex items-center justify-center shadow-lg mx-auto mb-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-[#A560E8] to-[#7733B5] rounded-2xl flex items-center justify-center shadow-[0_12px_26px_-10px_rgba(165,96,232,0.6)] mx-auto mb-4">
                 <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-                Unsubscribe from Emails
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-900 dark:text-stone-50 mb-2" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+                Unsubscribe from emails
               </h1>
-              <p className="text-gray-600 text-sm sm:text-base">
-                We're sorry to see you go. Enter your email address to unsubscribe from our marketing emails.
+              <p className="text-stone-600 dark:text-stone-400 text-sm sm:text-base font-medium">
+                We&apos;re sorry to see you go. Enter your email address to unsubscribe from our marketing emails.
               </p>
             </div>
 
             {success ? (
               <div className="text-center py-6">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                <div className="w-16 h-16 bg-[#E8F8DD] dark:bg-[#58CC02]/15 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-[#3E8E00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <h2 className="text-xl font-bold text-gray-900 mb-2">Successfully Unsubscribed</h2>
-                <p className="text-gray-600 mb-6">
+                <h2 className="text-xl font-extrabold text-stone-900 dark:text-stone-50 mb-2" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Successfully unsubscribed</h2>
+                <p className="text-stone-600 dark:text-stone-400 font-medium mb-6">
                   You have been unsubscribed from our marketing emails. You will no longer receive promotional emails from WriteScholar.
                 </p>
                 <button
@@ -109,7 +109,7 @@ const UnsubscribePage = ({ onNavigate }: UnsubscribePageProps) => {
                     setSuccess(false);
                     setEmail('');
                   }}
-                  className="text-violet-600 hover:text-violet-700 font-medium"
+                  className="text-[#A560E8] hover:text-[#7733B5] font-extrabold"
                 >
                   Unsubscribe another email
                 </button>
@@ -117,14 +117,14 @@ const UnsubscribePage = ({ onNavigate }: UnsubscribePageProps) => {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 {error && (
-                  <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                    <p className="text-red-600 text-sm">{error}</p>
+                  <div className="p-4 bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border border-[#FF4B4B]/30 rounded-2xl">
+                    <p className="text-[#E04343] text-sm font-bold">{error}</p>
                   </div>
                 )}
 
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address
+                  <label htmlFor="email" className="block text-sm font-bold text-stone-700 dark:text-stone-300 mb-2">
+                    Email address
                   </label>
                   <input
                     type="email"
@@ -132,7 +132,7 @@ const UnsubscribePage = ({ onNavigate }: UnsubscribePageProps) => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="your.email@example.com"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-all"
+                    className="w-full px-4 py-3 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 border-2 border-stone-200 dark:border-stone-700 rounded-2xl focus:ring-4 focus:ring-[#A560E8]/30 focus:border-[#A560E8] outline-none transition-all"
                     required
                     disabled={isLoading}
                   />
@@ -141,7 +141,7 @@ const UnsubscribePage = ({ onNavigate }: UnsubscribePageProps) => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3 px-6 rounded-xl hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  className="w-full inline-flex items-center justify-center rounded-2xl bg-[#A560E8] hover:bg-[#8A48C7] text-white py-3.5 px-6 font-extrabold border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:active:translate-y-0"
                 >
                   {isLoading ? (
                     <span className="flex items-center justify-center">
@@ -149,7 +149,7 @@ const UnsubscribePage = ({ onNavigate }: UnsubscribePageProps) => {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      Unsubscribing...
+                      Unsubscribing…
                     </span>
                   ) : (
                     'Unsubscribe'
@@ -158,9 +158,9 @@ const UnsubscribePage = ({ onNavigate }: UnsubscribePageProps) => {
               </form>
             )}
 
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <p className="text-xs text-gray-500 text-center">
-                By unsubscribing, you will no longer receive promotional emails from WriteScholar. 
+            <div className="mt-6 pt-6 border-t border-stone-200 dark:border-stone-800">
+              <p className="text-xs text-stone-500 dark:text-stone-500 text-center leading-relaxed">
+                By unsubscribing, you will no longer receive promotional emails from WriteScholar.
                 You may still receive important account-related emails.
               </p>
             </div>
