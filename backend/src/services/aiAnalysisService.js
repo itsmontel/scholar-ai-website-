@@ -897,10 +897,10 @@ CRITICAL REQUIREMENTS:
     // as many as Pro/Premium (matches ensureMinimumAnnotations) so
     // free users get genuine notes, not padded filler.
     let targetAnnotations;
-    if (wordCount > 5000) targetAnnotations = 35;
-    else if (wordCount > 3000) targetAnnotations = 30;
-    else if (wordCount > 1500) targetAnnotations = 25;
-    else targetAnnotations = 20;
+    if (wordCount > 5000) targetAnnotations = 45;
+    else if (wordCount > 3000) targetAnnotations = 40;
+    else if (wordCount > 1500) targetAnnotations = 35;
+    else targetAnnotations = 30;
 
     // Always grade using US scale (90 = A). UK display conversion happens in parseStructuredAnalysis.
     const gradingScaleInstruction = `GRADING SCALE — US: Use US college standards. 90+ = A, 80-89 = B, 70-79 = C, 60-69 = D, <60 = F. Score each category using full range: A work = 18-20/20, 14-15/15, 9-10/10.`;
@@ -1497,10 +1497,10 @@ CRITICAL REQUIREMENTS:
     // is kept elsewhere: premium model quality, grade rubric,
     // specific rewrites, Apply-revisions, quota, export/history.)
     let minTotal;
-    if (wordCount > 5000) minTotal = 35;
-    else if (wordCount > 3000) minTotal = 30;
-    else if (wordCount > 1500) minTotal = 25;
-    else minTotal = 20;
+    if (wordCount > 5000) minTotal = 45;
+    else if (wordCount > 3000) minTotal = 40;
+    else if (wordCount > 1500) minTotal = 35;
+    else minTotal = 30;
     
     console.log(`Document: ${wordCount} words, Plan: ${userPlan}`);
     console.log(`Target: ${minTotal} total annotations (no minimum for strong points - AI decides)`);
@@ -1586,8 +1586,15 @@ CRITICAL REQUIREMENTS:
         types = ['improve', 'concern', 'improve', 'improve', 'concern', 'improve'];
       }
       
-      for (let i = 0; i < Math.min(minTotal - currentTotal, remainingSentences.length); i++) {
-        const sentence = remainingSentences[i].trim();
+      const toAdd = Math.min(minTotal - currentTotal, remainingSentences.length);
+      // Spread synthetic annotations EVENLY across the document
+      // (remainingSentences is in document order). Taking the first N
+      // piled every padded note onto the introduction — the reason
+      // every paper showed a wall of concerns/improvements up top.
+      const stride = toAdd > 0 ? remainingSentences.length / toAdd : 1;
+      for (let i = 0; i < toAdd; i++) {
+        const pickIdx = Math.min(remainingSentences.length - 1, Math.floor(i * stride));
+        const sentence = remainingSentences[pickIdx].trim();
         const startIndex = content.indexOf(sentence);
         if (startIndex !== -1) {
           const type = types[i % types.length];
@@ -1683,8 +1690,23 @@ CRITICAL REQUIREMENTS:
         console.log(`⚠️ No more unique sentences available. Stopping at ${finalAnnotations.length} annotations.`);
         break;
       } else {
-        const sentence = availableSentences[0].trim();
-        const startIndex = content.indexOf(sentence);
+        // Pick the available sentence sitting in the LARGEST uncovered
+        // region (farthest from existing annotations) so emergency
+        // fills reach the conclusion instead of stacking on the intro.
+        let chosen = availableSentences[0];
+        let startIndex = content.indexOf(chosen.trim());
+        let bestDist = -1;
+        for (const s of availableSentences) {
+          const st = content.indexOf(s.trim());
+          if (st === -1) continue;
+          let minDist = Infinity;
+          for (const a of finalAnnotations) {
+            const d = Math.abs(st - a.startIndex);
+            if (d < minDist) minDist = d;
+          }
+          if (minDist > bestDist) { bestDist = minDist; chosen = s; startIndex = st; }
+        }
+        const sentence = chosen.trim();
         if (startIndex !== -1) {
           // Determine paper quality for emergency annotations
           const emergencyStrong = finalAnnotations.filter(a => a.type === 'strong').length;
@@ -1978,79 +2000,122 @@ CRITICAL REQUIREMENTS:
   }
 
   /**
+   * Build a match-normalized copy of `s` plus an index map back to the
+   * ORIGINAL string. Normalization: lowercase, collapse whitespace
+   * runs to one space, unify smart quotes / dashes / ellipsis / nbsp.
+   * `map[i]` = index in `s` of normalized char i.
+   *
+   * This lets a loosely-quoted snippet be located at its TRUE position
+   * instead of failing the exact match and falling through to a
+   * start-biased heuristic — the reason later-essay / conclusion notes
+   * were sparse while the intro was over-annotated.
+   */
+  normalizeForMatch(s) {
+    let norm = '';
+    const map = [];
+    let prevSpace = false;
+    for (let i = 0; i < s.length; i++) {
+      let ch = s[i];
+      const code = ch.charCodeAt(0);
+      if (code === 0x2018 || code === 0x2019 || code === 0x201B || code === 0x2032) ch = "'";
+      else if (code === 0x201C || code === 0x201D || code === 0x201F || code === 0x2033) ch = '"';
+      else if (code === 0x2013 || code === 0x2014 || code === 0x2212) ch = '-';
+      else if (code === 0x00A0) ch = ' ';
+      else if (code === 0x2026) { norm += '...'; map.push(i, i, i); prevSpace = false; continue; }
+      if (/\s/.test(ch)) {
+        if (prevSpace) continue;
+        norm += ' '; map.push(i); prevSpace = true; continue;
+      }
+      norm += ch.toLowerCase(); map.push(i); prevSpace = false;
+    }
+    return { norm, map };
+  }
+
+  /**
    * Find exact text match in content
    */
   findTextInContent(content, quotedText) {
     // Remove quotes and clean the text
     const cleanText = quotedText.replace(/^["']|["']$/g, '').trim();
-    
-    // Skip if text is too short or too long
-    if (cleanText.length < 5 || cleanText.length > 500) {
-      return null;
-    }
-    
-    // Try exact match first (most reliable)
+    if (cleanText.length < 5) return null;
+
+    // 1. Exact match (fastest, most reliable)
     const exactIndex = content.indexOf(cleanText);
     if (exactIndex !== -1) {
+      return { text: cleanText, startIndex: exactIndex, endIndex: exactIndex + cleanText.length };
+    }
+
+    // 2. Case-insensitive (preserve original casing in the result)
+    const ciIndex = content.toLowerCase().indexOf(cleanText.toLowerCase());
+    if (ciIndex !== -1) {
       return {
-        text: cleanText,
-        startIndex: exactIndex,
-        endIndex: exactIndex + cleanText.length
+        text: content.slice(ciIndex, ciIndex + cleanText.length),
+        startIndex: ciIndex,
+        endIndex: ciIndex + cleanText.length,
       };
     }
 
-    // Try case-insensitive match (but preserve original case)
-    const lowerContent = content.toLowerCase();
-    const lowerText = cleanText.toLowerCase();
-    const caseInsensitiveIndex = lowerContent.indexOf(lowerText);
-    if (caseInsensitiveIndex !== -1) {
-      const originalText = content.slice(caseInsensitiveIndex, caseInsensitiveIndex + cleanText.length);
-      return {
-        text: originalText,
-        startIndex: caseInsensitiveIndex,
-        endIndex: caseInsensitiveIndex + cleanText.length
-      };
-    }
-
-    // Try to find the text within sentence boundaries (more conservative approach)
-    const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 0);
-    for (const sentence of sentences) {
-      const sentenceTrimmed = sentence.trim();
-      const sentenceLower = sentenceTrimmed.toLowerCase();
-      
-      // Check if the quoted text appears in this sentence
-      if (sentenceLower.includes(lowerText)) {
-        const startIndex = content.indexOf(sentenceTrimmed);
-        if (startIndex !== -1) {
-          return {
-            text: sentenceTrimmed,
-            startIndex: startIndex,
-            endIndex: startIndex + sentenceTrimmed.length
-          };
+    // 3. Whitespace / punctuation-tolerant search, index-mapped back
+    //    to the ORIGINAL position. This keeps a loosely-quoted
+    //    conclusion sentence anchored at the END of the doc instead of
+    //    failing over to the start-biased heuristics below.
+    const C = this.normalizeForMatch(content);
+    const Q = this.normalizeForMatch(cleanText);
+    const qn = Q.norm.trim();
+    if (qn.length >= 5) {
+      const ni = C.norm.indexOf(qn);
+      if (ni !== -1) {
+        const startIndex = C.map[ni];
+        const endIndex = Math.min(content.length, C.map[ni + qn.length - 1] + 1);
+        if (endIndex > startIndex) {
+          return { text: content.slice(startIndex, endIndex), startIndex, endIndex };
         }
       }
-    }
-
-    // Last resort: try to find key words from the quoted text
-    const words = cleanText.split(' ').filter(word => word.length > 4);
-    if (words.length >= 2) {
-      // Look for sentences that contain at least 2 key words
-      for (const sentence of sentences) {
-        const sentenceLower = sentence.toLowerCase();
-        const matchingWords = words.filter(word => sentenceLower.includes(word.toLowerCase()));
-        
-        if (matchingWords.length >= 2) {
-          const sentenceTrimmed = sentence.trim();
-          const startIndex = content.indexOf(sentenceTrimmed);
-          if (startIndex !== -1 && sentenceTrimmed.length > 10 && sentenceTrimmed.length < 300) {
-            return {
-              text: sentenceTrimmed,
-              startIndex: startIndex,
-              endIndex: startIndex + sentenceTrimmed.length
-            };
+      // Long quote (e.g. a whole conclusion sentence the model padded
+      // or trimmed): anchor on the head, bound with the tail. A
+      // slightly loose span at the RIGHT place beats a dropped note —
+      // long conclusion quotes used to be discarded entirely.
+      if (qn.length > 80) {
+        const head = qn.slice(0, 60);
+        const hi = C.norm.indexOf(head);
+        if (hi !== -1) {
+          const startIndex = C.map[hi];
+          const tail = qn.slice(-40);
+          const ti = C.norm.indexOf(tail, hi + head.length);
+          const endIndex = ti !== -1
+            ? Math.min(content.length, C.map[ti + tail.length - 1] + 1)
+            : Math.min(content.length, startIndex + cleanText.length);
+          if (endIndex > startIndex) {
+            return { text: content.slice(startIndex, endIndex), startIndex, endIndex };
           }
         }
       }
+    }
+
+    // 4. Keyword fallback — pick the BEST-scoring sentence ANYWHERE in
+    //    the doc, not the first that shares ≥2 words (the old behaviour
+    //    that dragged later annotations toward the introduction).
+    if (cleanText.length > 800) return null;
+    const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 0);
+    const words = cleanText.split(/\s+/).filter(w => w.length > 4).map(w => w.toLowerCase());
+    if (words.length >= 2) {
+      let best = null;
+      let bestScore = 1; // require at least 2 matching keywords
+      for (const sentence of sentences) {
+        const st = sentence.trim();
+        if (st.length <= 10 || st.length >= 300) continue;
+        const sl = st.toLowerCase();
+        let score = 0;
+        for (const w of words) if (sl.includes(w)) score++;
+        if (score > bestScore) {
+          const startIndex = content.indexOf(st);
+          if (startIndex !== -1) {
+            best = { text: st, startIndex, endIndex: startIndex + st.length };
+            bestScore = score;
+          }
+        }
+      }
+      if (best) return best;
     }
 
     return null;
