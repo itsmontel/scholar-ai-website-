@@ -39,6 +39,10 @@ export interface AnnotatorAnnotation {
   comment?: string;
   /** Optional — analyzer suggestion, surfaced as the tooltip footer + Apply target. */
   suggestion?: string;
+  /** Free tier — true when this annotation sits in the locked
+   *  (second-half) region: comment blurred, suggestion hidden, Apply
+   *  gated. Computed by the host from document position. */
+  locked?: boolean;
 }
 
 export interface AnalyzerHighlightsOptions {
@@ -50,6 +54,14 @@ export interface AnalyzerHighlightsOptions {
   onAnnotationClick?: (annotationId: string) => void;
   /** Fires when the user hovers over a decorated span (with bounding rect for tooltip positioning). */
   onAnnotationHover?: (annotationId: string | null, rect: DOMRect | null) => void;
+  /** Free-tier divider: a "you've seen 50% — upgrade" marker is
+   *  injected into the doc at this fraction (e.g. 0.5 = halfway).
+   *  Highlights are NOT hidden — the second half stays visible but
+   *  locked (handled per-annotation via `annotation.locked`).
+   *  null/undefined = no divider (paid). */
+  previewRatio?: number | null;
+  /** Click handler for the divider's "Upgrade to Pro" button. */
+  onUpgrade?: () => void;
 }
 
 const PLUGIN_KEY = new PluginKey<{
@@ -126,16 +138,49 @@ function decorationsFromAnnotations(
   doc: PmNode,
   annotations: AnnotatorAnnotation[],
   selectedAnnotationId: string | null,
+  previewRatio: number | null = null,
+  onUpgrade?: () => void,
 ): DecorationSet {
   if (!annotations.length) return DecorationSet.empty;
   const spans = buildPlainOffsetIndex(doc);
+  // Total plain length of the CURRENT doc — used only to place the
+  // free-tier "50% preview" divider. Highlights are NOT hidden; the
+  // second half stays visible but locked per-annotation downstream.
+  const totalPlain = spans.length ? spans[spans.length - 1].plainTo : 0;
+  const norm = (s: string) => s.replace(/\s+/g, ' ').trim().toLowerCase();
   const decorations: Decoration[] = [];
   for (const ann of annotations) {
-    const from = plainToPm(spans, ann.startIndex);
-    const to = plainToPm(spans, ann.endIndex);
+    // Free tier: second-half ("locked") annotations get NO inline
+    // highlight in the editor. They still appear in the side panel
+    // (blurred) and the 50% divider below marks the boundary.
+    if (ann.locked) continue;
+    let from = plainToPm(spans, ann.startIndex);
+    let to = plainToPm(spans, ann.endIndex);
+    // The stored offsets drift: nested blocks (lists / blockquotes)
+    // over-count block separators, analyzer-vs-editor whitespace can
+    // differ, and any edit shifts everything after it. So only trust
+    // the offset range when the text it covers EXACTLY matches the
+    // annotation snippet; otherwise relocate by searching for the
+    // snippet itself (the source of truth for what to highlight).
+    // Without this the highlight lands short or misses part of the
+    // span entirely.
+    let trusted = false;
+    if (from != null && to != null && to > from) {
+      const here = doc.textBetween(from, Math.min(to, doc.content.size), '\n\n');
+      const a = norm(here);
+      const b = norm(ann.text || '');
+      trusted = !!b && a === b;
+    }
+    if (!trusted && ann.text) {
+      const found = findTextRangeInDoc(doc, ann.text, from ?? undefined);
+      if (found) {
+        from = found.from;
+        to = found.to;
+      }
+    }
     if (from == null || to == null || to <= from) continue;
     decorations.push(
-      Decoration.inline(from, to, {
+      Decoration.inline(from, Math.min(to, doc.content.size), {
         class: classFor(ann.type, ann.id === selectedAnnotationId),
         // Stash the id on the DOM so handleClick can recover it
         // without needing a separate per-decoration callback table.
@@ -143,6 +188,67 @@ function decorationsFromAnnotations(
       }),
     );
   }
+
+  // Free-tier "you've reached 50%" divider, injected into the doc at
+  // the preview boundary. Highlights past it stay visible but locked.
+  if (
+    previewRatio != null &&
+    previewRatio > 0 &&
+    previewRatio < 1 &&
+    totalPlain > 0
+  ) {
+    const cut = Math.floor(totalPlain * previewRatio);
+    let markerPos = plainToPm(spans, cut);
+    if (markerPos == null) {
+      const s = spans.find((sp) => sp.plainFrom >= cut);
+      markerPos = s ? s.pmFrom : spans.length ? spans[spans.length - 1].pmTo : null;
+    }
+    if (markerPos != null) {
+      const pos = Math.max(0, Math.min(markerPos, doc.content.size));
+      decorations.push(
+        Decoration.widget(
+          pos,
+          () => {
+            const wrap = document.createElement('div');
+            wrap.contentEditable = 'false';
+            wrap.className = 'ws-preview-divider my-7 select-none';
+            const inner = document.createElement('div');
+            inner.className =
+              'relative rounded-2xl border-2 border-dashed border-[#A560E8]/50 bg-[#F3EAFF]/70 dark:bg-[#A560E8]/10 px-5 py-4 text-center';
+            const h = document.createElement('p');
+            h.className =
+              'text-[13px] font-extrabold text-[#7733B5] dark:text-[#C9A0F0]';
+            h.textContent = "You've reached the 50% free preview";
+            const sub = document.createElement('p');
+            sub.className =
+              'mt-1 text-[12px] font-bold text-stone-500 dark:text-stone-400';
+            sub.textContent =
+              'Feedback and one-click fixes for the rest of your paper are locked. Upgrade to Pro to unlock them all.';
+            inner.appendChild(h);
+            inner.appendChild(sub);
+            if (onUpgrade) {
+              const btn = document.createElement('button');
+              btn.type = 'button';
+              btn.textContent = 'Upgrade to Pro';
+              btn.className =
+                'mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] text-white text-[12px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all';
+              btn.addEventListener('mousedown', (e) => e.preventDefault());
+              btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onUpgrade();
+              });
+              inner.appendChild(btn);
+            }
+            wrap.appendChild(inner);
+            return wrap;
+          },
+          { side: 1, key: 'ws-preview-divider' },
+        ),
+      );
+    }
+  }
+
   return DecorationSet.create(doc, decorations);
 }
 
@@ -153,6 +259,8 @@ export const AnalyzerHighlights = Extension.create<AnalyzerHighlightsOptions>({
       annotations: [],
       selectedAnnotationId: null,
       onAnnotationClick: undefined,
+      previewRatio: null,
+      onUpgrade: undefined,
     };
   },
   addProseMirrorPlugins() {
@@ -164,7 +272,7 @@ export const AnalyzerHighlights = Extension.create<AnalyzerHighlightsOptions>({
           init: (_, { doc }) => ({
             annotations: optsRef.annotations,
             selectedAnnotationId: optsRef.selectedAnnotationId,
-            decorations: decorationsFromAnnotations(doc, optsRef.annotations, optsRef.selectedAnnotationId),
+            decorations: decorationsFromAnnotations(doc, optsRef.annotations, optsRef.selectedAnnotationId, optsRef.previewRatio ?? null, optsRef.onUpgrade),
           }),
           apply(tr, prev) {
             // Allow imperative refresh via meta — we trigger this
@@ -177,14 +285,14 @@ export const AnalyzerHighlights = Extension.create<AnalyzerHighlightsOptions>({
               };
               return {
                 ...next,
-                decorations: decorationsFromAnnotations(tr.doc, next.annotations, next.selectedAnnotationId),
+                decorations: decorationsFromAnnotations(tr.doc, next.annotations, next.selectedAnnotationId, optsRef.previewRatio ?? null, optsRef.onUpgrade),
               };
             }
             // Doc changed → re-map decorations against the new doc.
             if (tr.docChanged) {
               return {
                 ...prev,
-                decorations: decorationsFromAnnotations(tr.doc, prev.annotations, prev.selectedAnnotationId),
+                decorations: decorationsFromAnnotations(tr.doc, prev.annotations, prev.selectedAnnotationId, optsRef.previewRatio ?? null, optsRef.onUpgrade),
               };
             }
             return prev;
@@ -293,27 +401,46 @@ function findTextRangeInDoc(
     return true;
   });
 
-  // Collect every occurrence, then pick the one nearest nearPmFrom.
-  const hits: number[] = [];
+  // Collect occurrences as { index, length }. Try an exact match
+  // first; if none, retry with a whitespace-tolerant regex so a
+  // snippet that differs from the editor copy only by spacing or
+  // line breaks still resolves (otherwise its highlight silently
+  // vanishes / clips). Then pick the hit nearest nearPmFrom.
+  const hits: { index: number; length: number }[] = [];
   let idx = plain.indexOf(needle);
   while (idx !== -1) {
-    hits.push(idx);
+    hits.push({ index: idx, length: needle.length });
     idx = plain.indexOf(needle, idx + 1);
+  }
+  if (hits.length === 0) {
+    const flexible = needle
+      .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      .replace(/\s+/g, '\\s+');
+    try {
+      const re = new RegExp(flexible, 'g');
+      let m: RegExpExecArray | null;
+      while ((m = re.exec(plain)) !== null) {
+        hits.push({ index: m.index, length: m[0].length });
+        if (m.index === re.lastIndex) re.lastIndex++;
+      }
+    } catch {
+      /* malformed regex — fall through to "not found" */
+    }
   }
   if (hits.length === 0) return null;
 
-  let bestPlain = hits[0];
+  let best = hits[0];
   if (nearPmFrom != null && hits.length > 1) {
     let bestDist = Infinity;
     for (const h of hits) {
-      const pm = plainToPm(spans, h);
+      const pm = plainToPm(spans, h.index);
       if (pm == null) continue;
       const dist = Math.abs(pm - nearPmFrom);
-      if (dist < bestDist) { bestDist = dist; bestPlain = h; }
+      if (dist < bestDist) { bestDist = dist; best = h; }
     }
   }
-  const from = plainToPm(spans, bestPlain);
-  const to = plainToPm(spans, bestPlain + needle.length);
+  const from = plainToPm(spans, best.index);
+  const to = plainToPm(spans, best.index + best.length);
   if (from == null || to == null || to <= from) return null;
   return { from, to };
 }

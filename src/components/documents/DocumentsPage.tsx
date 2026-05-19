@@ -10,6 +10,7 @@ import CitationsPanel from './panels/CitationsPanel';
 import StudyPacksPanel from './panels/StudyPacksPanel';
 import GamesPanel from './panels/GamesPanel';
 import PreviewStrip from './panels/PreviewStrip';
+import SoftPaywall from '../common/SoftPaywall';
 import { FREE_EDITOR_WORD_LIMIT } from '../../config/featureFlags';
 
 /* ═══════════════════════════════════════════════════════════════
@@ -780,39 +781,68 @@ function DocumentsHub({
           }}
         />
 
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-          {/* Primary — write new */}
+        <style>{`
+          @keyframes wsUploadGlow {
+            0%, 100% { box-shadow: 0 20px 44px -18px rgba(165,96,232,0.55), 0 0 0 0 rgba(165,96,232,0); }
+            50%      { box-shadow: 0 24px 50px -16px rgba(165,96,232,0.85), 0 0 28px 2px rgba(165,96,232,0.45); }
+          }
+          .ws-upload-glow { box-shadow: 0 20px 44px -18px rgba(165,96,232,0.6); animation: wsUploadGlow 2.4s ease-in-out infinite; }
+          @keyframes wsStartHereBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
+          .ws-start-here-arrow { animation: wsStartHereBob 1.6s ease-in-out infinite; }
+          @media (prefers-reduced-motion: reduce) {
+            .ws-upload-glow, .ws-start-here-arrow { animation: none; }
+          }
+        `}</style>
+
+        {!loading && docs.length === 0 && (
+          <div className="mt-6 -mb-1 flex items-end gap-2 pl-1 select-none" aria-hidden>
+            <span
+              className="text-[13px] sm:text-sm font-extrabold text-[#8A48C7] dark:text-[#C9A0F0]"
+              style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+            >
+              New here? Start by uploading your paper
+            </span>
+            <svg className="ws-start-here-arrow w-10 h-12 shrink-0 -mb-1 ml-8 text-[#A560E8]" viewBox="0 0 40 48" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M31 5C36 18 34 32 18 42" />
+              <path d="M18 42l9-2" />
+              <path d="M18 42l3-9" />
+            </svg>
+          </div>
+        )}
+
+        <div className={`${!loading && docs.length === 0 ? 'mt-2' : 'mt-6'} grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4`}>
+          {/* Primary — upload existing (feeds the analyse flow) */}
           <button
             type="button"
-            onClick={onNew}
-            className="group relative overflow-hidden rounded-3xl border-2 border-b-4 border-[#7733B5] bg-gradient-to-br from-[#A560E8] to-[#7733B5] text-white p-6 text-left hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_20px_44px_-18px_rgba(165,96,232,0.6)]"
+            onClick={() => fileInputRef.current?.click()}
+            className="group relative overflow-hidden rounded-3xl border-2 border-b-4 border-[#7733B5] bg-gradient-to-br from-[#A560E8] to-[#7733B5] text-white p-6 text-left hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all ws-upload-glow"
           >
             <div className="pointer-events-none absolute -top-12 -right-12 w-40 h-40 rounded-full bg-white/10 blur-2xl" aria-hidden />
             <div className="relative flex items-center gap-4">
               <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/20 border-2 border-white/30">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16" /></svg>
               </span>
               <div className="min-w-0">
-                <p className="text-lg sm:text-xl font-extrabold leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Start a new draft</p>
-                <p className="text-[13px] font-bold text-white/80 mt-1">Begin with a blank page</p>
+                <p className="text-lg sm:text-xl font-extrabold leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Upload a paper</p>
+                <p className="text-[13px] font-bold text-white/80 mt-1">Bring in a PDF, .docx or .txt file</p>
               </div>
               <svg className="ml-auto w-5 h-5 shrink-0 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
             </div>
           </button>
 
-          {/* Secondary — upload existing */}
+          {/* Secondary — write new */}
           <button
             type="button"
-            onClick={() => fileInputRef.current?.click()}
+            onClick={onNew}
             className="group relative overflow-hidden rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-6 text-left hover:-translate-y-0.5 hover:border-[#A560E8]/40 active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_12px_30px_-18px_rgba(0,0,0,0.18)]"
           >
             <div className="flex items-center gap-4">
               <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#A560E8] border-2 border-[#A560E8]/25">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16" /></svg>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
               </span>
               <div className="min-w-0">
-                <p className="text-lg sm:text-xl font-extrabold leading-tight text-stone-900 dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Upload a paper</p>
-                <p className="text-[13px] font-bold text-stone-500 dark:text-stone-400 mt-1">Bring in a PDF, .docx or .txt file</p>
+                <p className="text-lg sm:text-xl font-extrabold leading-tight text-stone-900 dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Start a new draft</p>
+                <p className="text-[13px] font-bold text-stone-500 dark:text-stone-400 mt-1">Begin with a blank page</p>
               </div>
               <svg className="ml-auto w-5 h-5 shrink-0 text-stone-400 group-hover:text-[#A560E8] transition-colors" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
             </div>
@@ -820,29 +850,17 @@ function DocumentsHub({
         </div>
       </div>
 
-      {/* ─── Library section header + search + filters ──────────── */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
-        <div>
-          <h2 className="text-xl sm:text-2xl font-extrabold text-stone-900 dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-            Your documents
-            <span className="ml-2 text-sm font-bold text-stone-400 tabular-nums align-middle">{docs.length}</span>
-          </h2>
-          <p className="mt-0.5 text-[13px] font-bold text-stone-500 dark:text-stone-400">Pick up where you left off, or open one to analyze it.</p>
-        </div>
-        <div className="relative w-full sm:max-w-xs">
-          <span aria-hidden className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400">
-            <I.Search />
-          </span>
-          <input
-            type="search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search documents…"
-            className="w-full pl-10 pr-3 py-2.5 rounded-2xl border-2 border-b-[3px] border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/60 text-sm font-medium text-stone-800 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:bg-white dark:focus:bg-stone-900 focus:ring-2 focus:ring-[#A560E8]/40 focus:border-[#A560E8]/40 transition-colors"
-          />
-        </div>
+      {/* ─── Library section header ─────────────────────────────── */}
+      <div className="mb-4">
+        <h2 className="text-xl sm:text-2xl font-extrabold text-stone-900 dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+          Your documents
+          <span className="ml-2 text-sm font-bold text-stone-400 tabular-nums align-middle">{docs.length}</span>
+        </h2>
+        <p className="mt-0.5 text-[13px] font-bold text-stone-500 dark:text-stone-400">Pick up where you left off, or open one to analyze it.</p>
       </div>
-      <div className="flex flex-wrap items-center gap-1.5 mb-4">
+
+      {/* ─── Filter chips ───────────────────────────────────────── */}
+      <div className="flex flex-wrap items-center gap-1.5 mb-3">
         {filterChips.map((c) => {
           const active = filter === c.key;
           return (
@@ -861,6 +879,20 @@ function DocumentsHub({
             </button>
           );
         })}
+      </div>
+
+      {/* ─── Search ─────────────────────────────────────────────── */}
+      <div className="relative w-full sm:max-w-xs mb-4">
+        <span aria-hidden className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400">
+          <I.Search />
+        </span>
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search documents…"
+          className="w-full pl-10 pr-3 py-2.5 rounded-2xl border-2 border-b-[3px] border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/60 text-sm font-medium text-stone-800 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:bg-white dark:focus:bg-stone-900 focus:ring-2 focus:ring-[#A560E8]/40 focus:border-[#A560E8]/40 transition-colors"
+        />
       </div>
 
       {/* ─── Document grid ──────────────────────────────────────── */}
@@ -921,12 +953,40 @@ function DocsEmptyState({ hasAnyDocs, hasSearch, onNew, onUpload }: { hasAnyDocs
         <p className="text-sm font-extrabold text-stone-700 dark:text-stone-200">No documents yet</p>
         <p className="mt-1 text-xs text-stone-500 dark:text-stone-400 mb-4">Start a new draft or upload an essay you've already written.</p>
         <div className="inline-flex items-center gap-2">
-          <button type="button" onClick={onNew} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] text-white text-xs font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all">
-            <I.Plus /> New document
-          </button>
-          <button type="button" onClick={onUpload} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-stone-900 border-2 border-b-[3px] border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-200 text-xs font-extrabold hover:bg-stone-50 dark:hover:bg-stone-800 active:border-b-2 active:translate-y-0.5 transition-all">
+          <button type="button" onClick={onUpload} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] text-white text-xs font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all">
             <I.Upload /> Upload paper
           </button>
+          <button type="button" onClick={onNew} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-stone-900 border-2 border-b-[3px] border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-200 text-xs font-extrabold hover:bg-stone-50 dark:hover:bg-stone-800 active:border-b-2 active:translate-y-0.5 transition-all">
+            <I.Plus /> New document
+          </button>
+        </div>
+
+        <div className="mt-10 pt-8 border-t border-stone-200/70 dark:border-stone-800">
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-stone-400 mb-4">Here's what your editor looks like</p>
+          <div className="relative mx-auto max-w-3xl">
+            <div
+              aria-hidden
+              className="absolute -inset-x-6 -bottom-6 top-10 -z-10 bg-[radial-gradient(ellipse_60%_60%_at_50%_60%,rgba(165,96,232,0.16),transparent_70%)] blur-2xl"
+            />
+            <div className="overflow-hidden rounded-2xl border-2 border-[#A560E8] bg-white dark:bg-stone-900 shadow-[0_2px_8px_rgba(40,30,60,0.06),0_36px_70px_-30px_rgba(40,30,60,0.32)]">
+              <div className="flex items-center gap-3 px-4 py-2.5 border-b border-stone-200/70 dark:border-stone-800 bg-gradient-to-b from-stone-50 to-white dark:from-stone-900 dark:to-stone-900">
+                <span className="flex gap-1.5" aria-hidden>
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#FF5F57] ring-1 ring-black/5" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#FEBC2E] ring-1 ring-black/5" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#28C840] ring-1 ring-black/5" />
+                </span>
+                <span className="mx-auto hidden sm:block text-[11px] font-semibold text-stone-400 dark:text-stone-500">writescholar.com — your essay, graded</span>
+                <span className="w-10 shrink-0" aria-hidden />
+              </div>
+              <img
+                src="/WriterPic.png"
+                alt="The WriteScholar editor: an essay draft with a live professor-style rubric, an estimated grade, and one-click line-by-line fixes"
+                loading="lazy"
+                decoding="async"
+                className="w-full h-auto block"
+              />
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -1153,6 +1213,7 @@ function DocumentEditorView({
       text: a.text,
       comment: a.comment,
       suggestion: a.suggestion,
+      locked: a.locked,
     })),
     [analyzerResult],
   );
@@ -1189,9 +1250,16 @@ function DocumentEditorView({
   // the feedback comfortably on phones / tablets without the editor
   // shrinking to nothing.
   const showSplit = analyzerOpen && (analyzerResult || analyzerLoading || analyzerError);
+  // Before the first analysis, surface a promo rail in the exact same
+  // slot as the feedback panel so new users discover analysis (and
+  // free users see the upgrade path) before they've ever run it.
+  // Mutually exclusive with showSplit (which needs a result/loading/
+  // error — all negated here).
+  const showAnalyzePromo = !analyzerResult && !analyzerLoading && !analyzerError;
+  const splitLayout = showSplit || showAnalyzePromo;
 
   return (
-    <div className={`mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 transition-[max-width] duration-200 ${showSplit ? 'max-w-[1600px]' : 'max-w-6xl'}`}>
+    <div className={`mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 transition-[max-width] duration-200 ${splitLayout ? 'max-w-[1600px]' : 'max-w-6xl'}`}>
       <div className="flex items-center gap-3 mb-3 sm:mb-4">
         <button
           type="button"
@@ -1203,7 +1271,7 @@ function DocumentEditorView({
         </button>
       </div>
 
-      <div className={`grid gap-4 lg:gap-6 ${showSplit ? 'lg:grid-cols-[minmax(0,1fr)_min(360px,31%)]' : 'grid-cols-1'}`}>
+      <div className={`grid gap-4 lg:gap-6 ${splitLayout ? 'lg:grid-cols-[minmax(0,1fr)_min(360px,31%)]' : 'grid-cols-1'}`}>
         {/* overflow-clip (not -hidden): clips the rounded corners the
             same way visually, but unlike -hidden it does NOT create a
             scroll container — so the editor toolbar's `sticky top-0`
@@ -1227,6 +1295,7 @@ function DocumentEditorView({
           initialHtml={initialHtml}
           onSave={handleContentSave}
           annotations={editorAnnotations}
+          annotationPreviewRatio={revisionsLocked ? 0.5 : null}
           selectedAnnotationId={selectedAnnotationId}
           onAnnotationClick={(id) => onSelectAnnotation(id)}
           onAnnotationHover={onAnnotationHover}
@@ -1356,7 +1425,61 @@ function DocumentEditorView({
               appliedAnnotationIds={appliedAnnotationIds}
               applyingAnnotationId={applyingAnnotationId}
               revisionsLocked={revisionsLocked}
+              onUpgrade={onUpgrade}
             />
+          </aside>
+        )}
+
+        {/* Pre-analysis promo rail — same slot/shell as the feedback
+            panel, shown until the user runs their first analysis. */}
+        {showAnalyzePromo && (
+          <aside className="hidden lg:flex flex-col rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 overflow-hidden self-start sticky top-4 h-[calc(100dvh-2rem)]">
+            <div className="relative flex-1 flex flex-col items-center justify-center text-center px-7 py-8 overflow-y-auto">
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 top-1/4 h-56 bg-[radial-gradient(ellipse_60%_50%_at_50%_42%,rgba(165,96,232,0.08),transparent_72%)]"
+              />
+              <div className="relative w-full">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#A560E8] to-[#7733B5] text-white ring-1 ring-black/5 shadow-[0_10px_22px_-12px_rgba(60,40,90,0.4)]">
+                  <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24" aria-hidden><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8l-6.2 4.5 2.4-7.4L2 9.4h7.6z" /></svg>
+                </div>
+
+                <h3 className="mt-6 text-[1.35rem] font-extrabold tracking-tight text-stone-900 dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+                  Grade this essay
+                </h3>
+                <p className="mx-auto mt-2 max-w-[15rem] text-[13px] font-medium text-stone-500 dark:text-stone-400 leading-relaxed">
+                  Professor-style feedback, an estimated grade and one-click fixes, right beside your draft.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() => (noAnalysesLeft ? onUpgrade() : setConfirmAnalyze(true))}
+                  className="group mt-7 w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-gradient-to-br from-[#A560E8] to-[#7733B5] text-white text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_12px_26px_-14px_rgba(122,51,181,0.5)]"
+                >
+                  <I.Sparkle />
+                  {noAnalysesLeft ? 'Upgrade to analyze' : 'Run full analysis'}
+                  <svg className="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                </button>
+
+                {revisionsLocked && !noAnalysesLeft && (
+                  <p className="mx-auto mt-4 max-w-[16rem] text-[11.5px] font-medium text-stone-400 dark:text-stone-500 leading-relaxed">
+                    Free plan shows your grade and a rubric preview.{' '}
+                    <button
+                      type="button"
+                      onClick={onUpgrade}
+                      className="font-extrabold text-[#8A48C7] dark:text-[#C9A0F0] underline decoration-[#A560E8]/40 underline-offset-2 hover:decoration-[#A560E8] transition-colors"
+                    >
+                      Unlock the full report
+                    </button>
+                  </p>
+                )}
+                {typeof analysesLeft === 'number' && !noAnalysesLeft && (
+                  <p className="mt-3 text-[11px] font-bold text-stone-400 dark:text-stone-500 tabular-nums">
+                    {analysesLeft} {analysesLeft === 1 ? 'analysis' : 'analyses'} left this month
+                  </p>
+                )}
+              </div>
+            </div>
           </aside>
         )}
       </div>
@@ -1378,7 +1501,7 @@ function DocumentEditorView({
             <p className="text-[12px] font-bold leading-snug">{hoveredAnnotation.comment}</p>
           )}
           {hoveredAnnotation.suggestion && (
-            revisionsLocked ? (
+            hoveredAnnotation.locked ? (
               <p className="mt-1.5 pt-1.5 border-t border-white/15 inline-flex items-center gap-1.5 text-[11px] font-extrabold text-[#FFC800] leading-snug">
                 <svg className="w-3 h-3 shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
                   <rect x="5" y="11" width="14" height="9" rx="2" />
@@ -1423,6 +1546,7 @@ function DocumentEditorView({
               appliedAnnotationIds={appliedAnnotationIds}
               applyingAnnotationId={applyingAnnotationId}
               revisionsLocked={revisionsLocked}
+              onUpgrade={onUpgrade}
             />
           </div>
         </div>
@@ -1601,6 +1725,12 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
   // A PDF the user picked, held until they acknowledge that PDFs
   // come in as plain text (formatting/structure isn't recoverable).
   const [pdfNoticeFile, setPdfNoticeFile] = useState<File | null>(null);
+  // Full-screen "importing your paper…" animation while a file is
+  // parsed + the doc is created (esp. the PDF server round-trip).
+  const [importing, setImporting] = useState(false);
+  // After a plain upload lands in the editor, nudge the user to run
+  // an analysis (upload-and-analyse already auto-runs it, so skip).
+  const [showAnalyzeNudge, setShowAnalyzeNudge] = useState(false);
   // Plan-aware document usage for the "X / cap" pill (Free 3 / Pro+Premium 99).
   const [docUsage, setDocUsage] = useState<{ used: number; limit: number | null; plan: string } | null>(null);
 
@@ -1653,6 +1783,10 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
   // what they're missing (blurred rewrite + upgrade) instead of a
   // dead 403. Holds the annotation being teased, or null.
   const [revisionPaywallAnn, setRevisionPaywallAnn] = useState<{ text: string; suggestion: string } | null>(null);
+  // Soft paywall shown once after a free user's first editor analysis
+  // finishes. Dismissible — they keep the (gated) editor afterwards.
+  const [showSoftPaywall, setShowSoftPaywall] = useState(false);
+  const softPaywallSeenRef = useRef(false);
   // Editor instance handed up from <WriteEditor /> via onEditorReady.
   // Lets us run imperative ops like applyAnnotationRevision from the
   // page level (where the analyzer state lives).
@@ -1822,6 +1956,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
 
   const handleNewDoc = useCallback(async () => {
     analyzeOnOpenRef.current = false; // write-from-scratch never auto-analyses
+    setShowAnalyzeNudge(false);
     const id = await createNewDoc({ title: 'Untitled', html: '', text: '' });
     if (id) {
       setOpenDocId(id);
@@ -1837,6 +1972,8 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
   }, [createNewDoc]);
 
   const runUpload = useCallback(async (file: File) => {
+    setShowAnalyzeNudge(false);
+    setImporting(true);
     try {
       let html = '';
       let text = '';
@@ -1903,11 +2040,16 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
           contentHtml: html, contentText: text,
         });
         setView('editor');
+        // Plain upload → push them toward an analysis. The
+        // upload-and-analyse path auto-runs it, so skip the nudge.
+        if (!analyzeOnOpenRef.current) setShowAnalyzeNudge(true);
       }
     } catch (e) {
       console.error('[Documents] import error', e);
       analyzeOnOpenRef.current = false; // failed import: drop any analyse intent
       setError('Could not read that file. Try a .pdf, .docx or .txt — or paste the text in.');
+    } finally {
+      setImporting(false);
     }
   }, [createNewDoc]);
 
@@ -1943,6 +2085,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
 
   const handleBackToHub = useCallback(() => {
     analyzeOnOpenRef.current = false;
+    setShowAnalyzeNudge(false);
     setView('hub');
     setOpenDocId(null);
     setOpenDoc(null);
@@ -2122,15 +2265,25 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
       // path. Normalise into the AnalyzerResult shape the panel
       // wants.
       const payload = json?.data ?? json;
-      const annotations = (payload?.annotations ?? []).map((a: Record<string, unknown>) => ({
-        id: String(a.id ?? Math.random()),
-        type: (a.type as 'strong' | 'improve' | 'concern') ?? 'improve',
-        startIndex: Number(a.startIndex ?? a.start_index ?? 0),
-        endIndex: Number(a.endIndex ?? a.end_index ?? 0),
-        text: String(a.text ?? ''),
-        comment: String(a.comment ?? ''),
-        suggestion: String(a.suggestion ?? ''),
-      }));
+      // Free tier: everything from the document midpoint onward is
+      // locked (blurred comment, hidden fix, gated Apply, locked
+      // tooltip). Paid users lock nothing.
+      const lockFromIndex = isPaidPlan(user)
+        ? Number.POSITIVE_INFINITY
+        : Math.floor((text?.length || 0) / 2);
+      const annotations = (payload?.annotations ?? []).map((a: Record<string, unknown>) => {
+        const startIndex = Number(a.startIndex ?? a.start_index ?? 0);
+        return {
+          id: String(a.id ?? Math.random()),
+          type: (a.type as 'strong' | 'improve' | 'concern') ?? 'improve',
+          startIndex,
+          endIndex: Number(a.endIndex ?? a.end_index ?? 0),
+          text: String(a.text ?? ''),
+          comment: String(a.comment ?? ''),
+          suggestion: String(a.suggestion ?? ''),
+          locked: startIndex >= lockFromIndex,
+        };
+      });
       const rubricRaw = payload?.grade_rubric ?? payload?.rubric ?? [];
       setAnalyzerResult({
         annotations,
@@ -2147,6 +2300,12 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
             }))
           : [],
       });
+      // Soft paywall — once, after a free user's first analysis lands.
+      // Non-blocking: they dismiss and keep the gated editor.
+      if (!isPaidPlan(user) && !softPaywallSeenRef.current) {
+        softPaywallSeenRef.current = true;
+        setShowSoftPaywall(true);
+      }
     } catch (e) {
       console.error('[Documents] analyze error', e);
       const aborted = e instanceof DOMException && e.name === 'AbortError';
@@ -2180,7 +2339,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
 
     // Free users: don't hit the (Pro-gated) endpoint or eat a 403 —
     // show a teased upgrade moment with what the rewrite would do.
-    // No API call, no cost.
+    // Apply revision is a Pro feature for the whole document.
     if (!isPaidPlan(user)) {
       setRevisionPaywallAnn({ text: ann.text || '', suggestion: ann.suggestion || '' });
       return;
@@ -2384,15 +2543,26 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
         if (!row || cancelled) return;
         const ar = row.analysis_results || row.analysisResults;
         if (!ar) return;
-        const annotations = (ar.annotations ?? []).map((a: Record<string, unknown>) => ({
-          id: String(a.id ?? Math.random()),
-          type: (a.type as 'strong' | 'improve' | 'concern') ?? 'improve',
-          startIndex: Number(a.startIndex ?? a.start_index ?? 0),
-          endIndex: Number(a.endIndex ?? a.end_index ?? 0),
-          text: String(a.text ?? ''),
-          comment: String(a.comment ?? ''),
-          suggestion: String(a.suggestion ?? ''),
-        }));
+        // Recompute the free-tier positional lock on restore too —
+        // otherwise closing the full report (which re-hydrates from
+        // the saved row) un-gated every annotation for free users.
+        const restoreText = latestTextRef.current || openDoc?.contentText || '';
+        const restoreLockFromIndex = isPaidPlan(user)
+          ? Number.POSITIVE_INFINITY
+          : Math.floor((restoreText.length || 0) / 2);
+        const annotations = (ar.annotations ?? []).map((a: Record<string, unknown>) => {
+          const startIndex = Number(a.startIndex ?? a.start_index ?? 0);
+          return {
+            id: String(a.id ?? Math.random()),
+            type: (a.type as 'strong' | 'improve' | 'concern') ?? 'improve',
+            startIndex,
+            endIndex: Number(a.endIndex ?? a.end_index ?? 0),
+            text: String(a.text ?? ''),
+            comment: String(a.comment ?? ''),
+            suggestion: String(a.suggestion ?? ''),
+            locked: startIndex >= restoreLockFromIndex,
+          };
+        });
         const rubricRaw = ar.grade_rubric ?? ar.gradeRubric ?? [];
         // grade_rubric stored as either an object keyed by category
         // or already-flattened array — normalise to array shape.
@@ -2511,6 +2681,36 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
           revisionPaywallAnn={revisionPaywallAnn}
           onCloseRevisionPaywall={() => setRevisionPaywallAnn(null)}
         />
+        {/* Post-upload nudge — pushes a freshly imported paper toward
+            an analysis. Auto-hides once they engage the analyzer. */}
+        {showAnalyzeNudge && !analyzerResult && !analyzerLoading && !analyzerError && (
+          <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-[120] w-[min(92vw,30rem)] ws-nudge-in">
+            <div className="flex items-center gap-3 rounded-2xl border-2 border-b-4 border-[#7733B5] bg-gradient-to-br from-[#A560E8] to-[#7733B5] text-white px-4 py-3 shadow-[0_22px_50px_-18px_rgba(165,96,232,0.7)]">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/20 border-2 border-white/30" aria-hidden>
+                <I.Sparkle />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-[13px] font-extrabold leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Paper imported — get it graded</p>
+                <p className="text-[11px] font-bold text-white/85 leading-tight mt-0.5">See your estimated grade and line-by-line fixes.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => { setShowAnalyzeNudge(false); void handleAnalyzeInEditor(); }}
+                className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white text-[#7733B5] text-[11px] font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-white/70 hover:bg-stone-50 active:border-b-2 active:translate-y-0.5 transition-all"
+              >
+                Analyze
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowAnalyzeNudge(false)}
+                aria-label="Dismiss"
+                className="shrink-0 -mr-1 inline-flex h-7 w-7 items-center justify-center rounded-lg text-white/70 hover:text-white hover:bg-white/15 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+          </div>
+        )}
         {/* Tooltip fade keyframes — hosted at the page level so the
             tooltip's portal'd rendering never loses its animation. */}
         <style>{`
@@ -2519,7 +2719,20 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
             100% { opacity: 1; transform: translateY(-100%) translateY(0)    scale(1); }
           }
           .ws-tooltip-in { animation: wsTooltipIn 140ms cubic-bezier(0.34, 1.56, 0.64, 1); transform-origin: 50% 100%; }
+          @keyframes wsNudgeIn {
+            0%   { opacity: 0; transform: translateX(-50%) translateY(16px) scale(0.97); }
+            100% { opacity: 1; transform: translateX(-50%) translateY(0)    scale(1); }
+          }
+          .ws-nudge-in { animation: wsNudgeIn 260ms cubic-bezier(0.34, 1.56, 0.64, 1); }
         `}</style>
+        {showSoftPaywall && !isPaidPlan(user) && (
+          <SoftPaywall
+            userName={firstNameOf(user)}
+            onStartTrial={() => {}}
+            onDismiss={() => setShowSoftPaywall(false)}
+            onNavigate={onNavigate}
+          />
+        )}
       </WorkspaceShell>
     );
   }
@@ -2608,6 +2821,35 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
           </>
         )}
       </WorkspaceShell>
+      {importing && (
+        <div className="fixed inset-0 z-[210] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" role="status" aria-live="polite" aria-label="Importing your paper">
+          <div className="relative flex flex-col items-center gap-4 rounded-3xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900 px-9 py-8 shadow-[0_24px_60px_-28px_rgba(96,48,140,0.45)]">
+            <div className="relative h-14 w-14">
+              <svg className="absolute inset-0 h-14 w-14 animate-spin text-[#A560E8]" viewBox="0 0 24 24" fill="none" aria-hidden>
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity={0.18} strokeWidth={3} />
+                <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth={3} strokeLinecap="round" />
+              </svg>
+              <span className="absolute inset-0 flex items-center justify-center text-[#A560E8]">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h4m-7 4h12a2 2 0 002-2V8.83a2 2 0 00-.59-1.42l-3.83-3.83A2 2 0 0014.17 3H6a2 2 0 00-2 2v15a2 2 0 002 2z" /></svg>
+              </span>
+            </div>
+            <div className="text-center">
+              <p className="text-sm font-extrabold text-stone-900 dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Importing your paper…</p>
+              <p className="mt-1 text-[12px] font-bold text-stone-500 dark:text-stone-400">Reading the text and setting up your editor.</p>
+            </div>
+            <div className="h-1.5 w-52 overflow-hidden rounded-full bg-stone-100 dark:bg-stone-800">
+              <div className="h-full w-1/3 rounded-full bg-gradient-to-r from-[#A560E8] to-[#7733B5] ws-import-bar" />
+            </div>
+          </div>
+          <style>{`
+            @keyframes wsImportBar {
+              0%   { transform: translateX(-120%); }
+              100% { transform: translateX(420%); }
+            }
+            .ws-import-bar { animation: wsImportBar 1.1s ease-in-out infinite; }
+          `}</style>
+        </div>
+      )}
       {error && (
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 rounded-2xl border-2 border-[#FF4B4B] bg-white dark:bg-stone-900 px-4 py-2 text-sm font-extrabold text-[#FF4B4B] shadow-lg">
           {error}

@@ -51,6 +51,9 @@ interface AnalyzerPanelProps {
   /** Free tier — show a lock cue on Apply; the click is intercepted
    *  upstream to open the teased upgrade modal. */
   revisionsLocked?: boolean;
+  /** Upgrade CTA — used by the free-tier "highlights limited to the
+   *  first half" banner. */
+  onUpgrade?: () => void;
 }
 
 const TYPE_META: Record<AnnotationType, { label: string; chip: string; bar: string; dot: string }> = {
@@ -149,18 +152,15 @@ function ScoreCard({
             </span>
           )}
           {gradeEstimate && (
-            <span className="ml-auto inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-[#FFC800] text-[#6B27A3] leading-none border-2 border-b-[3px] border-[#D4A300]">
-              {locked && (
-                <span className="text-[10px] font-extrabold uppercase tracking-wide">Estimated grade</span>
-              )}
-              <span className="text-lg font-extrabold">{locked ? '?' : gradeEstimate}</span>
+            <span className="ml-auto inline-flex items-center justify-center px-2.5 py-1 rounded-xl bg-[#FFC800] text-[#6B27A3] text-lg font-extrabold leading-none border-2 border-b-[3px] border-[#D4A300]">
+              {gradeEstimate}
             </span>
           )}
         </div>
         {(typeof overallScore === 'number' || gradeEstimate) && (
           <p className="mt-1.5 text-[10px] font-bold text-white/70 leading-snug">
             {locked
-              ? 'Upgrade to Pro to reveal your estimated grade, score and full rubric.'
+              ? 'Your estimated grade. Upgrade to Pro for the full score and rubric breakdown.'
               : 'Estimated grade & score — an AI guide for revision, not your official grade.'}
           </p>
         )}
@@ -209,6 +209,7 @@ function AnnotationCard({
   onApply,
   onRevert,
   locked = false,
+  applyLocked = false,
 }: {
   ann: AnalyzerResult['annotations'][number];
   selected: boolean;
@@ -217,7 +218,12 @@ function AnnotationCard({
   onClick: () => void;
   onApply?: () => void;
   onRevert?: () => void;
+  /** Positional free gate (second half) — blurs comment + hides the
+   *  suggestion. */
   locked?: boolean;
+  /** Global free gate — Apply revision is Pro-only for the whole
+   *  document regardless of position. */
+  applyLocked?: boolean;
 }) {
   const meta = TYPE_META[ann.type];
   // Only "improve" / "concern" cards have an Apply button — strong
@@ -296,7 +302,7 @@ function AnnotationCard({
               type="button"
               onClick={(e) => { e.stopPropagation(); onApply?.(); }}
               disabled={applying}
-              title={locked ? 'Pro feature — see what one-click revisions do' : undefined}
+              title={applyLocked ? 'Pro feature — see what one-click revisions do' : undefined}
               className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase tracking-wider border-2 border-b-[3px] active:border-b-2 active:translate-y-0.5 transition-all ${
                 applying
                   ? 'bg-[#A560E8]/70 text-white border-[#7733B5] cursor-wait'
@@ -311,7 +317,7 @@ function AnnotationCard({
                   </svg>
                   Revising…
                 </>
-              ) : locked ? (
+              ) : applyLocked ? (
                 <>
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
                     <rect x="5" y="11" width="14" height="9" rx="2" />
@@ -348,6 +354,7 @@ export default function AnalyzerPanel({
   appliedAnnotationIds,
   applyingAnnotationId,
   revisionsLocked = false,
+  onUpgrade,
 }: AnalyzerPanelProps) {
   // Group annotations by type for the three sections.
   const grouped = useMemo(() => {
@@ -390,27 +397,55 @@ export default function AnalyzerPanel({
         </div>
       </div>
 
-      {/* Re-analyze toast — shown ONLY while a re-analysis is in
-          flight on top of an already-loaded result. The empty-state
-          loading skeleton handles the first-ever analysis case. */}
-      {loading && result && (
-        <div className="sticky top-[57px] z-10 mx-3 mt-2 mb-1 px-3 py-2 rounded-xl bg-gradient-to-r from-[#A560E8]/95 to-[#7733B5]/95 text-white shadow-[0_8px_22px_-8px_rgba(165,96,232,0.55)] flex items-center gap-2 ws-toast-in">
-          <svg className="w-3.5 h-3.5 animate-spin shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden>
-            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity={0.3} strokeWidth={3} />
-            <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth={3} strokeLinecap="round" />
-          </svg>
-          <span className="text-[11px] font-extrabold uppercase tracking-wider">Re-analyzing your draft…</span>
-        </div>
-      )}
-
       <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-4 space-y-4">
-        {/* Loading state — show skeleton so the panel doesn't pop */}
-        {loading && !result && (
-          <div className="space-y-3">
-            <div className="h-32 rounded-2xl bg-stone-100 dark:bg-stone-800 animate-pulse" />
-            {[0, 1, 2].map((i) => (
-              <div key={i} className="h-20 rounded-xl bg-stone-100 dark:bg-stone-800 animate-pulse" />
-            ))}
+        {/* Loading state — the full animated treatment, shown for
+            EVERY analysis (first run and re-analyze alike). */}
+        {loading && (
+          <div className="ws-analyzing-pop flex flex-col items-center text-center px-2 pt-6 pb-1">
+            <div className="relative h-20 w-20">
+              <span className="absolute inset-0 rounded-full border-2 border-[#A560E8]/40 ws-radar" />
+              <span className="absolute inset-0 rounded-full border-2 border-[#A560E8]/30 ws-radar ws-radar-2" />
+              <svg className="ws-spin absolute inset-0 h-20 w-20" viewBox="0 0 80 80" fill="none" aria-hidden>
+                <defs>
+                  <linearGradient id="wsAnalyzeRing" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#A560E8" />
+                    <stop offset="100%" stopColor="#7733B5" />
+                  </linearGradient>
+                </defs>
+                <circle cx="40" cy="40" r="34" className="text-stone-200 dark:text-stone-700" stroke="currentColor" strokeWidth={5} />
+                <circle cx="40" cy="40" r="34" stroke="url(#wsAnalyzeRing)" strokeWidth={5} strokeLinecap="round" strokeDasharray="62 200" />
+              </svg>
+              <span className="absolute inset-[18px] flex items-center justify-center rounded-2xl bg-gradient-to-br from-[#A560E8] to-[#7733B5] text-white shadow-[0_8px_22px_-6px_rgba(165,96,232,0.7)] ws-badge-pulse">
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8l-6.2 4.5 2.4-7.4L2 9.4h7.6z" />
+                </svg>
+              </span>
+            </div>
+
+            <p className="mt-5 text-[15px] font-extrabold text-stone-900 dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+              Analyzing your essay
+            </p>
+            <div className="mt-1 h-5 overflow-hidden text-[12px] font-bold text-[#8A48C7] dark:text-[#C9A0F0]">
+              <div className="ws-phrase-ticker">
+                <div className="h-5 leading-5">Reading your draft…</div>
+                <div className="h-5 leading-5">Weighing the thesis &amp; argument…</div>
+                <div className="h-5 leading-5">Checking structure &amp; evidence…</div>
+                <div className="h-5 leading-5">Scoring the rubric…</div>
+                <div className="h-5 leading-5">Writing line-by-line fixes…</div>
+                <div className="h-5 leading-5">Reading your draft…</div>
+              </div>
+            </div>
+
+            <div className="mt-4 h-1.5 w-44 overflow-hidden rounded-full bg-stone-100 dark:bg-stone-800">
+              <div className="h-full w-1/3 rounded-full bg-gradient-to-r from-[#A560E8] to-[#7733B5] ws-scan-bar" />
+            </div>
+
+            <div className="mt-7 w-full space-y-3">
+              <div className="h-28 rounded-2xl ws-shimmer" />
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="h-16 rounded-xl ws-shimmer" />
+              ))}
+            </div>
           </div>
         )}
 
@@ -424,10 +459,11 @@ export default function AnalyzerPanel({
           </div>
         )}
 
-        {/* Result */}
-        {result && (
+        {/* Result — hidden while (re)analyzing so the animation owns
+            the panel; the prior result returns once it lands. */}
+        {result && !loading && (
           <>
-            <div className={loading ? 'ws-pulse-soft' : undefined}>
+            <div>
               <ScoreCard
                 overallScore={result.overallScore}
                 gradeEstimate={result.gradeEstimate}
@@ -438,6 +474,30 @@ export default function AnalyzerPanel({
                 locked={revisionsLocked}
               />
             </div>
+
+            {revisionsLocked && (
+              <div className="rounded-2xl border-2 border-[#A560E8]/30 bg-gradient-to-br from-[#F3EAFF] to-white dark:from-[#A560E8]/12 dark:to-stone-900 px-4 py-3">
+                <p className="inline-flex items-center gap-1.5 text-[12px] font-extrabold text-[#7733B5] dark:text-[#C9A0F0]">
+                  <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+                    <rect x="5" y="11" width="14" height="9" rx="2" />
+                    <path strokeLinecap="round" d="M8 11V8a4 4 0 0 1 8 0v3" />
+                  </svg>
+                  Highlights end halfway
+                </p>
+                <p className="mt-1 text-[11.5px] font-bold text-stone-600 dark:text-stone-300 leading-snug">
+                  Free shows highlights for the first half of your paper. Upgrade to Pro to reveal every highlight through the conclusion.
+                </p>
+                {onUpgrade && (
+                  <button
+                    type="button"
+                    onClick={onUpgrade}
+                    className="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] text-white text-[11px] font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
+                  >
+                    Upgrade to Pro
+                  </button>
+                )}
+              </div>
+            )}
 
             {result.topSuggestions && result.topSuggestions.length > 0 && (
               <div className="rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 px-4 py-3">
@@ -489,7 +549,8 @@ export default function AnalyzerPanel({
                         onClick={() => onAnnotationClick(ann.id)}
                         onApply={onApplyRevision ? () => onApplyRevision(ann.id) : undefined}
                         onRevert={onRevertRevision ? () => onRevertRevision(ann.id) : undefined}
-                        locked={revisionsLocked}
+                        locked={!!ann.locked}
+                        applyLocked={revisionsLocked}
                       />
                     ))}
                   </div>
@@ -522,17 +583,59 @@ export default function AnalyzerPanel({
       {/* Locally-scoped animations — keeps the polish self-contained
           rather than polluting the global stylesheet. */}
       <style>{`
-        @keyframes wsToastIn {
-          0%   { opacity: 0; transform: translateY(-6px) scale(0.97); }
-          60%  { opacity: 1; transform: translateY(0)    scale(1.02); }
-          100% { opacity: 1; transform: translateY(0)    scale(1); }
+        @keyframes wsAnalyzingPop {
+          0%   { opacity: 0; transform: scale(0.92) translateY(8px); }
+          60%  { opacity: 1; transform: scale(1.02) translateY(0); }
+          100% { opacity: 1; transform: scale(1)    translateY(0); }
         }
-        .ws-toast-in { animation: wsToastIn 280ms cubic-bezier(0.34, 1.56, 0.64, 1); }
-        @keyframes wsPulseSoft {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(165, 96, 232, 0); }
-          50%      { box-shadow: 0 0 0 6px rgba(165, 96, 232, 0.15); }
+        .ws-analyzing-pop { animation: wsAnalyzingPop 420ms cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+        @keyframes wsAnalyzeSpin { to { transform: rotate(360deg); } }
+        .ws-spin { transform-origin: 50% 50%; animation: wsAnalyzeSpin 1.8s linear infinite; }
+
+        @keyframes wsRadar {
+          0%   { transform: scale(0.55); opacity: 0.7; }
+          100% { transform: scale(1.6);  opacity: 0; }
         }
-        .ws-pulse-soft { border-radius: 16px; animation: wsPulseSoft 1.4s ease-in-out infinite; }
+        .ws-radar { animation: wsRadar 1.9s ease-out infinite; }
+        .ws-radar-2 { animation-delay: 0.95s; }
+
+        @keyframes wsBadgePulse {
+          0%, 100% { transform: scale(1); }
+          50%      { transform: scale(1.08); }
+        }
+        .ws-badge-pulse { animation: wsBadgePulse 1.5s ease-in-out infinite; }
+
+        @keyframes wsPhraseTicker {
+          0%,  15% { transform: translateY(0); }
+          20%, 35% { transform: translateY(-1.25rem); }
+          40%, 55% { transform: translateY(-2.5rem); }
+          60%, 75% { transform: translateY(-3.75rem); }
+          80%, 95% { transform: translateY(-5rem); }
+          100%     { transform: translateY(-6.25rem); }
+        }
+        .ws-phrase-ticker { animation: wsPhraseTicker 11s cubic-bezier(0.7, 0, 0.3, 1) infinite; }
+
+        @keyframes wsScanBar {
+          0%   { transform: translateX(-120%); }
+          100% { transform: translateX(420%); }
+        }
+        .ws-scan-bar { animation: wsScanBar 1.15s ease-in-out infinite; }
+
+        @keyframes wsShimmer {
+          0%   { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+        .ws-shimmer {
+          background: linear-gradient(90deg, rgba(165,96,232,0.07) 25%, rgba(165,96,232,0.18) 37%, rgba(165,96,232,0.07) 63%);
+          background-size: 200% 100%;
+          animation: wsShimmer 1.6s linear infinite;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .ws-analyzing-pop, .ws-spin, .ws-radar, .ws-badge-pulse,
+          .ws-phrase-ticker, .ws-scan-bar, .ws-shimmer { animation: none; }
+        }
       `}</style>
     </div>
   );

@@ -3014,10 +3014,13 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
             const actualText = paragraph.slice(relativeStart, relativeEnd);
             console.log(`Annotation ${annotation.id} (${annotation.type}): "${actualText.substring(0, 50)}..." (${relativeStart}-${relativeEnd} in paragraph ${paragraphIndex})`);
 
+            // Match the editor's inline highlight palette exactly
+            // (analyzerExtension classFor): green #58CC02, amber
+            // #FF9600, red #FF4B4B — soft tint + coloured underline.
             const highlightClasses = {
-              strong: 'bg-emerald-100 text-emerald-900 border-b-2 border-emerald-400 hover:bg-emerald-200',
-              improve: 'bg-amber-100 text-amber-900 border-b-2 border-amber-400 hover:bg-amber-200',
-              concern: 'bg-red-100 text-red-900 border-b-2 border-red-400 hover:bg-red-200'
+              strong: 'bg-[#E5F8D0]/70 text-stone-900 dark:text-stone-100 border-b-2 border-[#58CC02] hover:bg-[#E5F8D0]',
+              improve: 'bg-[#FFF4E0]/80 text-stone-900 dark:text-stone-100 border-b-2 border-[#FF9600] hover:bg-[#FFF4E0]',
+              concern: 'bg-[#FFE8E8]/80 text-stone-900 dark:text-stone-100 border-b-2 border-[#FF4B4B] hover:bg-[#FFE8E8]'
             };
 
             const annoSegments = splitSegmentByRevisionRanges(actualText, annotationStart, revisedDraftRanges);
