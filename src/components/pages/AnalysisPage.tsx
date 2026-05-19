@@ -2993,8 +2993,17 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
             const annotationStart = Math.max(annotation.startIndex, paragraphStart);
             const annotationEnd = Math.min(annotation.endIndex, effectiveParagraphEnd);
 
-            const relativeStart = Math.max(0, annotationStart - paragraphStart);
+            let relativeStart = Math.max(0, annotationStart - paragraphStart);
             const relativeEnd = Math.min(paragraph.length, annotationEnd - paragraphStart);
+
+            // Annotations can overlap (more annotations + tolerant /
+            // sentence-level matching). Without this guard the
+            // overlapped span is emitted twice and the paragraph text
+            // visibly duplicates. Skip annotations fully inside an
+            // already-rendered region; clamp partial overlaps so every
+            // character is rendered exactly once.
+            if (relativeEnd <= lastIndex) return;
+            if (relativeStart < lastIndex) relativeStart = lastIndex;
 
             if (relativeStart > lastIndex) {
               const textBefore = paragraph.slice(lastIndex, relativeStart);
@@ -3831,7 +3840,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                       {analysisSummary.grade_estimate && (
                         <div className="text-right">
                           <div className="text-3xl font-extrabold">
-                            {lockedFeatures.includes('grade_rubric') ? '?' : analysisSummary.grade_estimate}
+                            {analysisSummary.grade_estimate}
                           </div>
                           <div className="text-white/70 text-xs font-bold uppercase tracking-wide">Estimated grade</div>
                         </div>

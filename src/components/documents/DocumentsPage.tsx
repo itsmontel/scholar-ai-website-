@@ -1179,6 +1179,23 @@ function DocumentEditorView({
   // Analysis is a deliberate, quota-consuming action — confirm
   // before running so it's never an accidental click.
   const [confirmAnalyze, setConfirmAnalyze] = useState(false);
+  // Citation style + grading scale for a more personal analysis —
+  // chosen in the confirm modal, persisted so it sticks per browser
+  // and is what handleAnalyzeInEditor sends to the backend.
+  const [citationStyle, setCitationStyle] = useState<string>(() => {
+    try { return localStorage.getItem('writescholar_editor_citation_style') || 'None'; } catch { return 'None'; }
+  });
+  const [gradingStyle, setGradingStyle] = useState<'us' | 'uk'>(() => {
+    try { return (localStorage.getItem('writescholar_editor_grading_style') as 'us' | 'uk') === 'uk' ? 'uk' : 'us'; } catch { return 'us'; }
+  });
+  const changeCitationStyle = useCallback((v: string) => {
+    setCitationStyle(v);
+    try { localStorage.setItem('writescholar_editor_citation_style', v); } catch { /* noop */ }
+  }, []);
+  const changeGradingStyle = useCallback((v: 'us' | 'uk') => {
+    setGradingStyle(v);
+    try { localStorage.setItem('writescholar_editor_grading_style', v); } catch { /* noop */ }
+  }, []);
   const isReanalyze = !!analyzerResult;
   const noAnalysesLeft = typeof analysesLeft === 'number' && analysesLeft === 0;
 
@@ -1595,6 +1612,48 @@ function DocumentEditorView({
                   </span></li>
                 </ul>
               </>
+            )}
+
+            {!noAnalysesLeft && (
+              <div className="mt-4 grid gap-3 rounded-xl border-2 border-stone-200 dark:border-stone-700 bg-stone-50/70 dark:bg-stone-800/40 p-3">
+                <div>
+                  <label htmlFor="ws-cite-style" className="block text-[11px] font-extrabold uppercase tracking-[0.16em] text-stone-400 mb-1.5">Citation style</label>
+                  <select
+                    id="ws-cite-style"
+                    value={citationStyle}
+                    onChange={(e) => changeCitationStyle(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-sm font-bold text-stone-800 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-[#A560E8]/40 focus:border-[#A560E8]/40 transition-colors"
+                  >
+                    <option value="None">None (no citations required)</option>
+                    <option value="APA">APA</option>
+                    <option value="Harvard">Harvard</option>
+                    <option value="Chicago">Chicago</option>
+                    <option value="MLA">MLA</option>
+                    <option value="IEEE">IEEE</option>
+                    <option value="Vancouver">Vancouver</option>
+                  </select>
+                </div>
+                <div>
+                  <span className="block text-[11px] font-extrabold uppercase tracking-[0.16em] text-stone-400 mb-1.5">Grade format</span>
+                  <div className="grid grid-cols-2 gap-2">
+                    {(['us', 'uk'] as const).map((g) => (
+                      <button
+                        key={g}
+                        type="button"
+                        onClick={() => changeGradingStyle(g)}
+                        className={`px-3 py-2 rounded-lg text-sm font-extrabold border-2 transition-all ${
+                          gradingStyle === g
+                            ? 'bg-[#A560E8] text-white border-[#7733B5]'
+                            : 'bg-white dark:bg-stone-900 text-stone-600 dark:text-stone-300 border-stone-200 dark:border-stone-700 hover:border-[#A560E8]/40'
+                        }`}
+                      >
+                        {g === 'us' ? 'US (A–F · /100)' : 'UK (class · %)'}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <p className="text-[11px] font-bold text-stone-400 leading-snug">Tailors the rubric &amp; grade to your institution. Saved for next time.</p>
+              </div>
             )}
 
             <div className="mt-6 flex items-center justify-end gap-2">
@@ -2233,6 +2292,14 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
     // panel in its loading state forever.
     const abort = new AbortController();
     const timeoutId = window.setTimeout(() => abort.abort(), 120000);
+    // Personalise the analysis with the citation style + grade scale
+    // the user picked in the confirm modal (persisted per browser).
+    let citationStyle = 'None';
+    let gradingStyle: 'us' | 'uk' = 'us';
+    try {
+      citationStyle = localStorage.getItem('writescholar_editor_citation_style') || 'None';
+      gradingStyle = localStorage.getItem('writescholar_editor_grading_style') === 'uk' ? 'uk' : 'us';
+    } catch { /* defaults */ }
     try {
       const res = await fetch(`${API_URL}/analysis/analyze`, {
         method: 'POST',
@@ -2246,7 +2313,8 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
           // returns annotations + scores + top suggestions.
           documentId: openDocId,
           analysisType: 'comprehensive',
-          citationStyle: 'None',
+          citationStyle,
+          gradingStyle,
           // The Joi validator marks `content` as required even when
           // a documentId is sent. Pass the editor's current text so
           // the analyzer indexes annotations against the SAME plain
@@ -2300,12 +2368,9 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
             }))
           : [],
       });
-      // Soft paywall — once, after a free user's first analysis lands.
-      // Non-blocking: they dismiss and keep the gated editor.
-      if (!isPaidPlan(user) && !softPaywallSeenRef.current) {
-        softPaywallSeenRef.current = true;
-        setShowSoftPaywall(true);
-      }
+      // Soft paywall is NOT shown here — it fires once a free user
+      // has scrolled ~65% through their paper after an analysis
+      // (see the scroll-progress effect below), capped to once a day.
     } catch (e) {
       console.error('[Documents] analyze error', e);
       const aborted = e instanceof DOMException && e.name === 'AbortError';
@@ -2506,8 +2571,14 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
     onNavigate('analysis');
   }, [onNavigate, openDocId, openDoc]);
 
-  // Reset analyzer state when switching documents so the previous
-  // doc's annotations don't leak across.
+  // Reset analyzer state ONLY on a real document switch (openDocId) —
+  // keyed identically to the restore effect below so the two stay
+  // coordinated. Previously this also keyed on openDoc.contentText,
+  // which wiped a freshly-restored analysis the instant the doc's
+  // content arrived/reloaded (e.g. returning from the full report or
+  // a slow first load) while the restore effect — keyed only on
+  // openDocId — never re-ran. That left the editor saying "not
+  // analyzed" with no highlights until a hard refresh.
   useEffect(() => {
     setAnalyzerResult(null);
     setAnalyzerOpen(false);
@@ -2518,8 +2589,14 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
     setApplyingAnnotationId(null);
     setHoverAnnotationId(null);
     setHoverRect(null);
+  }, [openDocId]);
+
+  // Keep the analyzer's text snapshot in sync with the loaded doc
+  // WITHOUT resetting analysis — so content load / report-return
+  // never nukes restored annotations.
+  useEffect(() => {
     latestTextRef.current = openDoc?.contentText ?? '';
-  }, [openDocId, openDoc?.contentText]);
+  }, [openDoc?.contentText]);
 
   // ─── Restore previously-saved analysis on open ───────────────
   // GET /api/analysis/document/:id returns the most recent
@@ -2624,6 +2701,47 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
     analyzeOnOpenRef.current = false;
     void handleAnalyzeInEditor();
   }, [view, openDocId, openDoc, priorAnalysisChecked, analyzerResult, analyzerLoading, handleAnalyzeInEditor]);
+
+  // Soft paywall — fire when a free user, after an analysis, has
+  // scrolled ~65% of the way through their paper (NOT at the 50%
+  // divider — that popped too early and startled people). Capped to
+  // once per calendar day per browser so it never nags. Dismissible;
+  // they keep the (gated) editor afterwards.
+  useEffect(() => {
+    if (isPaidPlan(user)) return;
+    if (softPaywallSeenRef.current) return;
+    if (!analyzerResult) return;
+    const todayKey = new Date().toISOString().slice(0, 10);
+    try {
+      if (localStorage.getItem('ws_editor_softpaywall_day') === todayKey) return;
+    } catch { /* localStorage unavailable — fall through, ref still caps it */ }
+    const root = editorRef.current?.view?.dom as HTMLElement | undefined;
+    if (!root) return;
+    const SCROLL_THRESHOLD = 0.65; // ~65% of the paper scrolled past the fold
+    let ticking = false;
+    const check = () => {
+      ticking = false;
+      if (softPaywallSeenRef.current) return;
+      const rect = root.getBoundingClientRect();
+      if (rect.height <= 0) return;
+      // Fraction of the prose that has scrolled above the viewport top.
+      const scrolled = -rect.top / rect.height;
+      if (scrolled >= SCROLL_THRESHOLD) {
+        softPaywallSeenRef.current = true;
+        try { localStorage.setItem('ws_editor_softpaywall_day', todayKey); } catch { /* ignore */ }
+        setShowSoftPaywall(true);
+        window.removeEventListener('scroll', onScroll);
+      }
+    };
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(check);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll(); // in case the doc is already scrolled past the threshold
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [analyzerResult, user]);
 
   // Pull the remaining-analyses count whenever a document opens so
   // the editor's top-right chip is accurate before they analyze.
