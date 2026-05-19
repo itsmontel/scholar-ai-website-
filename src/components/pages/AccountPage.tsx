@@ -558,7 +558,6 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                       <div>• 99 combined (analyses, study packs & citations) per month</div>
                       <div>• 100MB total library storage</div>
                       <div>• 999,999 Paper Summarizer words per month</div>
-                      <div>• Focus Mode with unlimited blocked sites</div>
                       <div>• Uploads up to 100MB per file</div>
                       <div>• Long-document summarization</div>
                       <div>• PDF & Word export</div>
@@ -572,7 +571,6 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                       <div>• 499 combined (analyses, study packs & citations) per month</div>
                       <div>• Summarise unlimited research papers</div>
                       <div>• 1GB total library storage</div>
-                      <div>• Focus Mode with unlimited blocked sites</div>
                       <div>• Uploads up to 100MB per file</div>
                       <div>• PDF & Word export</div>
                       <div>• All quiz types & difficulty levels</div>

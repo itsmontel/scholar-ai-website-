@@ -2032,7 +2032,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
                 <LandingScrollReveal className="w-full" delayMs={420}>
                   <p className="mt-6 sm:mt-8 text-center text-xs text-stone-500 dark:text-stone-400 leading-relaxed max-w-2xl mx-auto">
-                    Free plan includes 2 essay analyses per month · Encrypted in transit · Cancel anytime · Quizzes, flashcards &amp; Focus Mode live under{' '}
+                    Free plan includes 2 essay analyses per month · Encrypted in transit · Cancel anytime · Quizzes &amp; flashcards live under{' '}
                     <button type="button" onClick={() => onNavigate('more-tools')} className="text-[#1CB0F6] dark:text-[#1CB0F6] font-extrabold hover:underline transition-colors">
                       More tools
                     </button>
@@ -2789,12 +2789,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   <svg className="w-5 h-5 flex-shrink-0 text-[#A560E8] dark:text-[#A560E8] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>Focus Mode (3 blocked sites)</span>
-                </li>
-                <li className="flex gap-2">
-                  <svg className="w-5 h-5 flex-shrink-0 text-[#A560E8] dark:text-[#A560E8] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
                   <span>Basic grammar and citation styles</span>
                 </li>
               </ul>
@@ -2853,7 +2847,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   <svg className="w-5 h-5 flex-shrink-0 text-[#A560E8] dark:text-[#A560E8] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>All citation styles, PDF/Word export, unlimited Focus Mode sites</span>
+                  <span>All citation styles, PDF/Word export</span>
                 </li>
                 <li className="flex gap-2">
                   <svg className="w-5 h-5 flex-shrink-0 text-[#A560E8] dark:text-[#A560E8] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>

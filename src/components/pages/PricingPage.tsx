@@ -160,13 +160,11 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
         '5,000 words Paper Summarizer',
         '2 citation searches',
         '2MB document library storage',
-        'Basic grammar & citation styles',
-        'Focus Mode (3 sites)'
+        'Basic grammar & citation styles'
       ],
       limitations: [
         'Quiz & crossword locked (Pro)',
         '3 documents max',
-        '3 sites in Focus Mode',
         'Basic AI model'
       ],
       popular: false,
@@ -183,7 +181,6 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
         '99 combined analyses, study packs & citations/mo',
         '999,999 words Paper Summarizer',
         'All citation styles, PDF/Word export',
-        'Focus Mode (unlimited blocked sites)',
         'Quiz, flashcards, crossword & Crater Blast',
         '100MB total library storage; uploads up to 100MB per file',
         'Full annotations & feedback; Apply WriteScholar revisions into your draft'
@@ -227,7 +224,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
     },
     {
       question: "What does Pro include?",
-      answer: "Pro includes 99 combined actions per month (analyses, study packs & citations), 999,999 words for the Paper Summarizer, unlimited Focus Mode blocked sites, uploads up to 100MB per file, 100MB total library storage, all citation styles, full annotations and feedback, Apply WriteScholar revisions into your draft, and full access to quizzes, flashcards, crossword & Crater Blast."
+      answer: "Pro includes 99 combined actions per month (analyses, study packs & citations), 999,999 words for the Paper Summarizer, uploads up to 100MB per file, 100MB total library storage, all citation styles, full annotations and feedback, Apply WriteScholar revisions into your draft, and full access to quizzes, flashcards, crossword & Crater Blast."
     },
     {
       question: "What does Premium add?",

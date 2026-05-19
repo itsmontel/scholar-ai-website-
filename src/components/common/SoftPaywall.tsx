@@ -49,8 +49,8 @@ interface SoftPaywallProps {
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 const FEATURES = [
+  { text: 'Unlock full annotations, one-click revisions, your whole paper & rubric score', icon: '🔓', color: '#A560E8' },
   { text: '99 combined analyses, study packs & citations/mo', icon: '📝', color: '#A560E8' },
-  { text: 'Unlimited Focus Mode sites: block distractions until you study', icon: '🔒', color: '#1CB0F6' },
   { text: 'Full study tools: quiz, flashcards, crossword, Crater Blast & Word Tower', icon: '🎯', color: '#FF9600' },
   { text: 'Summarise unlimited research papers', icon: '📚', color: '#58CC02' },
   { text: 'Export to PDF & Word', icon: '📄', color: '#FF4B4B' },
@@ -62,7 +62,7 @@ const PREMIUM_FEATURES = [
   { text: '499 combined analyses, study packs & citations/mo', icon: '📝', color: '#A560E8' },
   { text: 'Summarise unlimited research papers', icon: '📚', color: '#58CC02' },
   { text: '1GB document library storage (100MB max per upload)', icon: '💾', color: '#1CB0F6' },
-  { text: 'Unlimited Focus Mode; full quiz, flashcards & study tools', icon: '🎯', color: '#FF9600' },
+  { text: 'Full quiz, flashcards & study tools', icon: '🎯', color: '#FF9600' },
   { text: 'Export PDF & Word; Apply WriteScholar revisions', icon: '📄', color: '#FF4B4B' },
 ];
 
@@ -577,7 +577,7 @@ const SoftPaywall = ({
                 <div className="rounded-xl bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-2 border-b-[3px] border-[#FF4B4B]/60 px-3 py-2.5">
                   <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#FF4B4B] mb-0.5">If you leave</p>
                   <p className="text-[12px] font-extrabold text-[#3C3C3C] dark:text-stone-100 leading-tight">
-                    Back to free limits. No full study packs, no unlimited focus mode.
+                    Back to free limits. No full study packs, no one-click revisions.
                   </p>
                 </div>
                 <div className="rounded-xl bg-[#DDF4FF] dark:bg-[#1CB0F6]/15 border-2 border-b-[3px] border-[#1CB0F6]/70 px-3 py-2.5">

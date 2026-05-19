@@ -80,7 +80,6 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
         '99 combined analyses, study packs & citations/mo',
         '999,999 words Paper Summarizer',
         'All citation styles, PDF/Word export',
-        'Focus Mode (unlimited blocked sites)',
         'Quiz, flashcards, crossword & Crater Blast',
         '100MB total library storage; uploads up to 100MB per file',
         'Full annotations; Apply WriteScholar revisions into your draft'
