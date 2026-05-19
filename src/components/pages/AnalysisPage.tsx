@@ -3831,10 +3831,17 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                     <div className="flex items-center gap-6 ml-auto">
                       {analysisSummary.overall_score != null && (
                         <div className="text-right">
-                          <div className="text-3xl font-extrabold">
-                            {lockedFeatures.includes('grade_rubric') ? '?' : Math.round(Number(analysisSummary.overall_score))}/100
-                          </div>
-                          <div className="text-white/70 text-xs font-bold uppercase tracking-wide">Estimated score</div>
+                          {lockedFeatures.includes('grade_rubric') ? (
+                            <>
+                              <div className="text-lg font-extrabold leading-tight">Upgrade to see</div>
+                              <div className="text-white/70 text-xs font-bold uppercase tracking-wide">your score /100</div>
+                            </>
+                          ) : (
+                            <>
+                              <div className="text-3xl font-extrabold">{Math.round(Number(analysisSummary.overall_score))}/100</div>
+                              <div className="text-white/70 text-xs font-bold uppercase tracking-wide">Estimated score</div>
+                            </>
+                          )}
                         </div>
                       )}
                       {analysisSummary.grade_estimate && (

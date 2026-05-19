@@ -1156,6 +1156,7 @@ function DocumentEditorView({
   revisionsLocked,
   revisionPaywallAnn,
   onCloseRevisionPaywall,
+  analyzeConfirmSignal,
 }: {
   docId: string;
   initialTitle: string;
@@ -1187,6 +1188,9 @@ function DocumentEditorView({
   revisionsLocked: boolean;
   revisionPaywallAnn: { text: string; suggestion: string } | null;
   onCloseRevisionPaywall: () => void;
+  /** Bump to open the analyze-confirm modal from outside the editor
+   *  (e.g. the post-upload nudge) so the citation/grade picker shows. */
+  analyzeConfirmSignal: number;
 }) {
   const [title, setTitle] = useState(initialTitle || 'Untitled');
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
@@ -1214,6 +1218,13 @@ function DocumentEditorView({
   }, []);
   const isReanalyze = !!analyzerResult;
   const noAnalysesLeft = typeof analysesLeft === 'number' && analysesLeft === 0;
+
+  // External request (e.g. the post-upload nudge) to open the
+  // analyze-confirm modal — so the citation style + grade picker
+  // shows instead of analysis firing straight away.
+  useEffect(() => {
+    if (analyzeConfirmSignal > 0) setConfirmAnalyze(true);
+  }, [analyzeConfirmSignal]);
 
   useEffect(() => {
     if (title === initialTitle) return;
@@ -1862,6 +1873,9 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
   // finishes. Dismissible — they keep the (gated) editor afterwards.
   const [showSoftPaywall, setShowSoftPaywall] = useState(false);
   const softPaywallSeenRef = useRef(false);
+  // Bumped to ask DocumentEditorView to open its analyze-confirm
+  // modal (with the citation/grade picker) from the upload nudge.
+  const [analyzeConfirmSignal, setAnalyzeConfirmSignal] = useState(0);
   // Editor instance handed up from <WriteEditor /> via onEditorReady.
   // Lets us run imperative ops like applyAnnotationRevision from the
   // page level (where the analyzer state lives).
@@ -2828,6 +2842,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
           revisionsLocked={!isPaidPlan(user)}
           revisionPaywallAnn={revisionPaywallAnn}
           onCloseRevisionPaywall={() => setRevisionPaywallAnn(null)}
+          analyzeConfirmSignal={analyzeConfirmSignal}
         />
         {/* Post-upload nudge — pushes a freshly imported paper toward
             an analysis. Auto-hides once they engage the analyzer. */}
@@ -2843,7 +2858,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
               </div>
               <button
                 type="button"
-                onClick={() => { setShowAnalyzeNudge(false); void handleAnalyzeInEditor(); }}
+                onClick={() => { setShowAnalyzeNudge(false); setAnalyzeConfirmSignal((s) => s + 1); }}
                 className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white text-[#7733B5] text-[11px] font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-white/70 hover:bg-stone-50 active:border-b-2 active:translate-y-0.5 transition-all"
               >
                 Analyze

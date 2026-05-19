@@ -146,10 +146,16 @@ function ScoreCard({
         </div>
         <div className="mt-2 flex items-baseline gap-3">
           {typeof overallScore === 'number' && (
-            <span className="text-2xl sm:text-3xl font-extrabold tabular-nums leading-none">
-              {locked ? '?' : overallScore}
-              <span className="text-xs font-extrabold text-white/75">/100</span>
-            </span>
+            locked ? (
+              <span className="text-[13px] font-extrabold uppercase tracking-wide text-white/90 leading-tight">
+                Upgrade to see your score /100
+              </span>
+            ) : (
+              <span className="text-2xl sm:text-3xl font-extrabold tabular-nums leading-none">
+                {overallScore}
+                <span className="text-xs font-extrabold text-white/75">/100</span>
+              </span>
+            )
           )}
           {gradeEstimate && (
             <span className="ml-auto inline-flex items-center justify-center px-2.5 py-1 rounded-xl bg-[#FFC800] text-[#6B27A3] text-lg font-extrabold leading-none border-2 border-b-[3px] border-[#D4A300]">
