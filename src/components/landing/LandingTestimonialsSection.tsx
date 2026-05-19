@@ -231,7 +231,7 @@ export default function LandingTestimonialsSection() {
 
           {/* Disclaimer: kept but de-emphasised; nests inside the
               section visual frame rather than floating below. */}
-          <p className="mt-10 text-center text-[11px] sm:text-xs text-stone-400 dark:text-stone-500 max-w-2xl mx-auto">
+          <p className="mt-10 text-center text-[9px] sm:text-[10px] text-stone-400 dark:text-stone-500 max-w-2xl mx-auto">
             Sample quotes shown to illustrate typical outcomes. Not from real customers.
           </p>
         </LandingScrollReveal>
