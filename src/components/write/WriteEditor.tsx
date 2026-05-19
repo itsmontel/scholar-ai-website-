@@ -300,6 +300,7 @@ function FontDropdown({ value, onChange }: { value: string; onChange: (css: stri
 
 /* ─── Font size picker ──────────────────────────────────────── */
 const EDITOR_FONT_SIZES: { key: string; label: string }[] = [
+  { key: 'xs', label: 'Extra small' },
   { key: 'sm', label: 'Small' },
   { key: 'base', label: 'Default' },
   { key: 'lg', label: 'Large' },
@@ -325,10 +326,11 @@ function cssFontToDocx(css: string): string {
 }
 function sizeKeyToHalfPt(key: string): number {
   switch (key) {
+    case 'xs': return 18; // 9pt
     case 'sm': return 20; // 10pt
     case 'lg': return 26; // 13pt
     case 'xl': return 30; // 15pt
-    default: return 22;   // 11pt — Word's modern default
+    default: return 24;   // 12pt — standard academic essay size (MLA/APA/Chicago)
   }
 }
 // Set once at the top of every export so inlineRunsFromHtml() stamps
@@ -336,7 +338,7 @@ function sizeKeyToHalfPt(key: string): number {
 // belt-and-braces: Google Docs and some viewers ignore
 // <w:docDefaults>, so the document-default font alone isn't enough.
 let EXPORT_FONT = 'Calibri';
-let EXPORT_SIZE = 22;
+let EXPORT_SIZE = 24;
 
 function FontSizeDropdown({ value, onChange }: { value: string; onChange: (key: string) => void }) {
   const [open, setOpen] = useState(false);
@@ -347,7 +349,10 @@ function FontSizeDropdown({ value, onChange }: { value: string; onChange: (key: 
     document.addEventListener('mousedown', h);
     return () => document.removeEventListener('mousedown', h);
   }, [open]);
-  const current = EDITOR_FONT_SIZES.find((s) => s.key === value) ?? EDITOR_FONT_SIZES[1];
+  const current =
+    EDITOR_FONT_SIZES.find((s) => s.key === value) ??
+    EDITOR_FONT_SIZES.find((s) => s.key === 'base') ??
+    EDITOR_FONT_SIZES[0];
   return (
     <div className="relative" ref={ref}>
       <button
@@ -1350,6 +1355,7 @@ export default function WriteEditor({
            wins over the editor root's text-[15px]/sm:text-base
            utilities (0,1,0). Headings are em-based so they scale
            proportionally. */
+        [data-fs="xs"]   .ProseMirror { font-size: 12px; }
         [data-fs="sm"]   .ProseMirror { font-size: 14px; }
         [data-fs="base"] .ProseMirror { font-size: 16px; }
         [data-fs="lg"]   .ProseMirror { font-size: 19px; }

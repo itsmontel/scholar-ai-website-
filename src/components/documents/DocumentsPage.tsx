@@ -191,6 +191,8 @@ function WorkspaceSidebar({
   headerless = false,
   collapsed = false,
   onToggle,
+  usage,
+  onUpgrade,
 }: {
   activeView: WorkspaceView;
   onSelect: (v: WorkspaceView) => void;
@@ -202,6 +204,10 @@ function WorkspaceSidebar({
   collapsed?: boolean;
   /** Toggle collapsed ⇄ expanded. When omitted the rail is static. */
   onToggle?: () => void;
+  /** Plan/usage for the footer CTA (pinned to the bottom of the rail).
+      Replaces the old standalone right rail. */
+  usage?: { used: number; limit: number | null; plan: string } | null;
+  onUpgrade?: () => void;
 }) {
   // The editor is a doc context — keep "Documents" lit while in it.
   const docsActive = activeView === 'hub' || activeView === 'editor';
@@ -259,10 +265,38 @@ function WorkspaceSidebar({
           <Item key={t.view} active={activeView === t.view} icon={t.icon} label={t.label} hint={t.hint} onClick={() => onSelect(t.view)} />
         ))}
       </div>
-      {!collapsed && (
-        <p className="px-3 mt-auto pt-6 text-[11px] font-bold text-stone-400 leading-snug">
-          It all lives here. No tabs, no detours. Just your work.
-        </p>
+      {!collapsed && usage && (
+        <div className="mt-auto">
+          <div className="mx-3 mb-4 mt-6 border-t border-stone-200 dark:border-stone-800" />
+          <div className="px-3">
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <span className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-stone-400">{usage.plan} plan</span>
+              {usage.limit != null && (
+                <span className="text-[11px] font-extrabold tabular-nums text-stone-500 dark:text-stone-400">{usage.used}/{usage.limit}</span>
+              )}
+            </div>
+            {usage.limit != null && (
+              <div className="h-1.5 w-full rounded-full bg-stone-100 dark:bg-stone-800 overflow-hidden mb-3">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-[#A560E8] to-[#8A48C7]"
+                  style={{ width: `${Math.min(100, Math.round((usage.used / Math.max(1, usage.limit)) * 100))}%` }}
+                />
+              </div>
+            )}
+            <p className="text-[11px] font-bold text-stone-400 leading-snug mb-3">
+              {usage.plan === 'Free' ? 'More documents, analyses and study tools on Pro.' : 'Thanks for being on a paid plan.'}
+            </p>
+            {usage.plan === 'Free' && onUpgrade && (
+              <button
+                type="button"
+                onClick={onUpgrade}
+                className="w-full py-2.5 rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] text-white text-[12px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
+              >
+                Upgrade
+              </button>
+            )}
+          </div>
+        </div>
       )}
     </aside>
   );
@@ -366,7 +400,8 @@ function WorkspaceShell({
   headerless = false,
   collapsed = false,
   onToggle,
-  rightRail,
+  usage,
+  onUpgrade,
 }: {
   activeView: WorkspaceView;
   onSelect: (v: WorkspaceView) => void;
@@ -381,14 +416,13 @@ function WorkspaceShell({
   collapsed?: boolean;
   /** Toggle the rail collapsed ⇄ expanded. */
   onToggle?: () => void;
-  /** Optional far-right rail (hub/dashboard only). Rendered as the
-      last flex sibling so it sits flush to the page edge and runs
-      full-height, mirroring the left workspace sidebar. */
-  rightRail?: React.ReactNode;
+  /** Plan/usage for the sidebar footer CTA. */
+  usage?: { used: number; limit: number | null; plan: string } | null;
+  onUpgrade?: () => void;
 }) {
   return (
     <div className="flex w-full items-stretch">
-      <WorkspaceSidebar activeView={activeView} onSelect={onSelect} headerless={headerless} collapsed={collapsed} onToggle={onToggle} />
+      <WorkspaceSidebar activeView={activeView} onSelect={onSelect} headerless={headerless} collapsed={collapsed} onToggle={onToggle} usage={usage} onUpgrade={onUpgrade} />
       <WorkspaceMobileNav activeView={activeView} onSelect={onSelect} />
       <div className="flex-1 min-w-0">
         {bare ? (
@@ -399,7 +433,6 @@ function WorkspaceShell({
           </div>
         )}
       </div>
-      {rightRail}
     </div>
   );
 }
@@ -632,90 +665,6 @@ function AnalyzePanel({
         )}
       </div>
     </div>
-  );
-}
-
-/* ─── Hub right rail (dashboard only) ────────────────────────
-   A rotating professor-style writing tip + a compact plan/usage
-   block. Desktop-only (xl+); the editor + tool panels never render
-   it (the shell only passes it for the hub view). */
-const WRITING_TIPS: string[] = [
-  'Run Analyze before you hand anything in. Clear the red flags first. That is the fastest jump from a B to an A.',
-  'Your thesis should be one arguable sentence. If nobody could disagree with it, it is not a thesis yet.',
-  'Open each paragraph with the point, not the build-up. Your marker should know the claim by the first line.',
-  'Evidence then analysis, every time. A quote with no reasoning after it earns nothing on its own.',
-  'Read the draft out loud. The sentence you trip over is the one your marker trips over too.',
-  'One idea per paragraph. If it splits cleanly in two, it probably should.',
-  'Answer the actual question in your intro. Restating the prompt is not the same as responding to it.',
-  'Swap vague verbs like shows, impacts and relates to for something precise. Weak verbs hide weak arguments.',
-  'Your conclusion should say what changed, not repeat the intro. Land on the so what.',
-  'Apply the analyzer fixes one at a time in the editor. Small corrections stack into a whole grade.',
-];
-
-function HubRightRail({
-  usage,
-  onUpgrade,
-}: {
-  usage: { used: number; limit: number | null; plan: string } | null;
-  onUpgrade: () => void;
-}) {
-  // Stable for the visit, rotates day to day so it always feels fresh
-  // without flickering on re-render.
-  const tip = useMemo(
-    () => WRITING_TIPS[Math.floor(Date.now() / 86_400_000) % WRITING_TIPS.length],
-    [],
-  );
-
-  return (
-    <aside className="hidden xl:flex xl:flex-col w-[208px] shrink-0 self-stretch sticky top-[3.5rem] sm:top-[4.25rem] h-[calc(100dvh-3.5rem)] sm:h-[calc(100dvh-4.25rem)] overflow-y-auto border-l-2 border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 px-3 py-5">
-      {/* Tip to get an A */}
-      <div className="flex items-center gap-2 px-3 pb-2.5">
-        <span className="text-[#A560E8] shrink-0">
-          <svg className="w-[15px] h-[15px]" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24" aria-hidden>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 18h6m-5 3h4M12 3a6 6 0 00-3.6 10.8c.5.4.8.9.9 1.5l.1.7h5.2l.1-.7c.1-.6.4-1.1.9-1.5A6 6 0 0012 3z" />
-          </svg>
-        </span>
-        <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-stone-400">Tip to get an A</p>
-      </div>
-      <p className="px-3 text-[13px] font-bold text-stone-600 dark:text-stone-300 leading-relaxed">
-        {tip}
-      </p>
-
-      {/* Plan / usage — flush, no purple chip, mirrors the sidebar footer */}
-      {usage && (
-        <div className="mt-auto">
-          <div className="mx-3 mb-4 border-t border-stone-200 dark:border-stone-800" />
-          <div className="px-3">
-            <div className="flex items-center justify-between gap-2 mb-2">
-              <span className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-stone-400">{usage.plan} plan</span>
-              {usage.limit != null && (
-                <span className="text-[11px] font-extrabold tabular-nums text-stone-500 dark:text-stone-400">{usage.used}/{usage.limit}</span>
-              )}
-            </div>
-            {usage.limit != null && (
-              <div className="h-1.5 w-full rounded-full bg-stone-100 dark:bg-stone-800 overflow-hidden mb-3">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-[#A560E8] to-[#8A48C7]"
-                  style={{ width: `${Math.min(100, Math.round((usage.used / Math.max(1, usage.limit)) * 100))}%` }}
-                />
-              </div>
-            )}
-            <p className="text-[11px] font-bold text-stone-400 leading-snug mb-3">
-              {usage.plan === 'Free' ? 'More documents, analyses and study tools on Pro.' : 'Thanks for being on a paid plan.'}
-            </p>
-            {usage.plan === 'Free' && (
-              <button
-                type="button"
-                onClick={onUpgrade}
-                className="w-full py-2.5 rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] text-white text-[12px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
-              >
-                Upgrade
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-    </aside>
   );
 }
 
@@ -1640,10 +1589,10 @@ function DocumentEditorView({
 export default function DocumentsPage({ initialDocumentId, onNavigate, user, onEditorActiveChange }: DocumentsPageProps) {
   const [view, setView] = useState<WorkspaceView>(initialDocumentId ? 'editor' : 'hub');
   const [openDocId, setOpenDocId] = useState<string | null>(initialDocumentId ?? null);
-  // Editor opens with the rail minimized so the paper gets the full
-  // width; the « / » button on the rail expands it back. Resets to
-  // minimized each time you enter the editor (per request).
-  const [railCollapsed, setRailCollapsed] = useState(true);
+  // Editor opens with the rail expanded; the « / » button on the rail
+  // collapses it to a slim icon-only strip when the paper needs the
+  // full width.
+  const [railCollapsed, setRailCollapsed] = useState(false);
   const [openDoc, setOpenDoc] = useState<DocFull | null>(null);
   const [docList, setDocList] = useState<DocSummary[]>([]);
   const [listLoading, setListLoading] = useState(false);
@@ -1717,6 +1666,17 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
   // reads what the editor most-recently saved (rather than whatever
   // openDoc.contentText was at first load). Updated by handleContentSave.
   const latestTextRef = useRef<string>('');
+
+  // Analyse-intent flow: set true by the "Analyze a paper" entries
+  // (Analyze on a hub doc, paste-to-analyse, upload-to-analyse). When
+  // set, opening the editor auto-runs the analyzer so the journey is
+  // upload/paste → graded → fix, not editor → hunt for Analyze → fix.
+  // Write-from-scratch leaves it false (no auto-analyse on a blank doc).
+  const analyzeOnOpenRef = useRef(false);
+  // Gate so the auto-analyse waits until the "restore prior analysis"
+  // lookup has settled — otherwise a fresh analysis could fire while
+  // a cached one is still loading and double-spend an analysis credit.
+  const [priorAnalysisChecked, setPriorAnalysisChecked] = useState(false);
 
   // ─── List load ────────────────────────────────────────────────
   const refreshList = useCallback(async () => {
@@ -1861,6 +1821,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
   }, []);
 
   const handleNewDoc = useCallback(async () => {
+    analyzeOnOpenRef.current = false; // write-from-scratch never auto-analyses
     const id = await createNewDoc({ title: 'Untitled', html: '', text: '' });
     if (id) {
       setOpenDocId(id);
@@ -1945,6 +1906,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
       }
     } catch (e) {
       console.error('[Documents] import error', e);
+      analyzeOnOpenRef.current = false; // failed import: drop any analyse intent
       setError('Could not read that file. Try a .pdf, .docx or .txt — or paste the text in.');
     }
   }, [createNewDoc]);
@@ -1960,7 +1922,17 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
     void runUpload(file);
   }, [runUpload]);
 
-  const handleOpenDoc = useCallback((id: string) => {
+  // Upload-to-analyse: same import, but it lands in the editor with
+  // the analyzer already running (vs. plain import = write/edit).
+  const handleUploadAndAnalyze = useCallback((file: File) => {
+    analyzeOnOpenRef.current = true;
+    handleUpload(file);
+  }, [handleUpload]);
+
+  const handleOpenDoc = useCallback((id: string, analyze = false) => {
+    // Explicitly set per open so a stale analyse-intent can't leak
+    // onto a plain "open to edit" click.
+    analyzeOnOpenRef.current = analyze;
     setOpenDocId(id);
     setOpenDoc(null);
     setView('editor');
@@ -1970,6 +1942,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
   }, []);
 
   const handleBackToHub = useCallback(() => {
+    analyzeOnOpenRef.current = false;
     setView('hub');
     setOpenDocId(null);
     setOpenDoc(null);
@@ -2013,7 +1986,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
   // considered action, not something that fires every time a doc
   // opens.
   const handleAnalyzeFromHub = useCallback((id: string) => {
-    handleOpenDoc(id);
+    handleOpenDoc(id, true); // open in editor AND auto-run the analyzer
   }, [handleOpenDoc]);
 
   // Bring pasted text in as a new document and open it in the
@@ -2034,6 +2007,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
         lastEditedAt: null, isDraft: false, isUpload: false,
         contentHtml: html, contentText: text,
       });
+      analyzeOnOpenRef.current = true; // pasted to analyse → auto-run on open
       setView('editor');
       try { window.history.pushState({}, '', `/documents/${id}`); } catch { /* ignore */ }
     }
@@ -2397,6 +2371,9 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
   // refresh against the latest text.
   useEffect(() => {
     if (!openDocId) return;
+    // Reset synchronously (effect is keyed to openDocId) so the
+    // auto-analyse gate below only opens once this lookup settles.
+    setPriorAnalysisChecked(false);
     let cancelled = false;
     (async () => {
       try {
@@ -2451,14 +2428,32 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
       } catch (e) {
         // Non-fatal — user can run a fresh analysis instead.
         console.warn('[Documents] restore prior analysis skipped:', e);
+      } finally {
+        if (!cancelled) setPriorAnalysisChecked(true);
       }
     })();
     return () => { cancelled = true; };
   }, [openDocId]);
 
-  // Analysis is never auto-run. It only happens when the user
-  // explicitly presses "Analyze" in the editor — a deliberate,
-  // considered action, not a side effect of opening a document.
+  // ─── Auto-analyse on analyse-intent entries ──────────────────
+  // When the user came in via an "Analyze a paper" door (Analyze on
+  // a hub doc, paste-to-analyse, upload-to-analyse), drop them into
+  // the editor with the analyzer already running, so the flow is
+  // upload/paste → graded → apply fixes, not editor → hunt for
+  // Analyze → fix. Gated on priorAnalysisChecked so a cached result
+  // (restored above, which also opens the panel) wins and we never
+  // double-spend an analysis credit. Plain open/edit and
+  // write-from-scratch leave analyzeOnOpenRef false → never fires.
+  useEffect(() => {
+    if (view !== 'editor' || !openDocId || !openDoc) return;
+    if (!analyzeOnOpenRef.current) return;
+    if (!priorAnalysisChecked) return; // wait for the cached-analysis lookup
+    if (analyzerResult || analyzerLoading) return; // cached restored, or already running
+    const hasText = (latestTextRef.current || openDoc.contentText || '').trim().length > 0;
+    if (!hasText) return; // wait until the doc's text is loaded
+    analyzeOnOpenRef.current = false;
+    void handleAnalyzeInEditor();
+  }, [view, openDocId, openDoc, priorAnalysisChecked, analyzerResult, analyzerLoading, handleAnalyzeInEditor]);
 
   // Pull the remaining-analyses count whenever a document opens so
   // the editor's top-right chip is accurate before they analyze.
@@ -2477,13 +2472,13 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
   if (view === 'editor' && openDocId) {
     if (!openDoc) {
       return (
-        <WorkspaceShell activeView={view} onSelect={handleRailSelect} bare headerless collapsed={railCollapsed} onToggle={() => setRailCollapsed((v) => !v)}>
+        <WorkspaceShell activeView={view} onSelect={handleRailSelect} bare headerless collapsed={railCollapsed} onToggle={() => setRailCollapsed((v) => !v)} usage={docUsage} onUpgrade={() => onNavigate('pricing')}>
           <div className="px-4 py-16 text-center text-sm font-bold text-stone-500">Loading document…</div>
         </WorkspaceShell>
       );
     }
     return (
-      <WorkspaceShell activeView={view} onSelect={handleRailSelect} bare headerless collapsed={railCollapsed} onToggle={() => setRailCollapsed((v) => !v)}>
+      <WorkspaceShell activeView={view} onSelect={handleRailSelect} bare headerless collapsed={railCollapsed} onToggle={() => setRailCollapsed((v) => !v)} usage={docUsage} onUpgrade={() => onNavigate('pricing')}>
         <DocumentEditorView
           docId={openDoc.id}
           initialTitle={openDoc.title}
@@ -2534,14 +2529,8 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
       <WorkspaceShell
         activeView={view}
         onSelect={handleRailSelect}
-        rightRail={
-          view === 'hub' ? (
-            <HubRightRail
-              usage={docUsage}
-              onUpgrade={() => onNavigate('pricing')}
-            />
-          ) : undefined
-        }
+        usage={docUsage}
+        onUpgrade={() => onNavigate('pricing')}
       >
         {view === 'hub' && (
           <DocumentsHub
@@ -2569,7 +2558,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
               loading={listLoading}
               onPickDoc={handleAnalyzeFromHub}
               onPasteAnalyze={handlePasteAnalyze}
-              onUploadFile={handleUpload}
+              onUploadFile={handleUploadAndAnalyze}
               onNew={handleNewDoc}
             />
           </>

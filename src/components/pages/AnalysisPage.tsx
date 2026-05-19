@@ -3815,22 +3815,26 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                       )}
                     </p>
                   </div>
-                  {(analysisSummary.overall_score != null || analysisSummary.grade_estimate) && (
+                  {(analysisSummary.overall_score != null || analysisSummary.grade_estimate) ? (
                     <div className="flex items-center gap-6 ml-auto">
                       {analysisSummary.overall_score != null && (
                         <div className="text-right">
-                          <div className="text-3xl font-extrabold">{Math.round(Number(analysisSummary.overall_score))}/100</div>
+                          <div className="text-3xl font-extrabold">
+                            {lockedFeatures.includes('grade_rubric') ? '?' : Math.round(Number(analysisSummary.overall_score))}/100
+                          </div>
                           <div className="text-white/70 text-xs font-bold uppercase tracking-wide">Estimated score</div>
                         </div>
                       )}
                       {analysisSummary.grade_estimate && (
                         <div className="text-right">
-                          <div className="text-3xl font-extrabold">{analysisSummary.grade_estimate}</div>
+                          <div className="text-3xl font-extrabold">
+                            {lockedFeatures.includes('grade_rubric') ? '?' : analysisSummary.grade_estimate}
+                          </div>
                           <div className="text-white/70 text-xs font-bold uppercase tracking-wide">Estimated grade</div>
                         </div>
                       )}
                     </div>
-                  )}
+                  ) : null}
                   <p className="w-full text-white/70 text-[11px] font-bold mt-1 leading-snug">
                     WriteScholar&apos;s grade is an AI estimate to guide your revision — not your official or guaranteed grade.
                   </p>

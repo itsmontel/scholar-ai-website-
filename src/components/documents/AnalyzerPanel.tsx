@@ -113,6 +113,7 @@ function ScoreCard({
   rubric,
   onRerun,
   loading,
+  locked = false,
 }: {
   overallScore?: number | null;
   gradeEstimate?: string | null;
@@ -120,6 +121,10 @@ function ScoreCard({
   rubric?: AnalyzerResult['rubric'];
   onRerun: () => void;
   loading: boolean;
+  /** Free plan — show the full paid layout but mask the numbers
+      (grade, /100 score, per-category rubric scores, clarity) with
+      "?" so free users get a feel for the paid breakdown. */
+  locked?: boolean;
 }) {
   return (
     <div className="rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 overflow-hidden">
@@ -139,19 +144,24 @@ function ScoreCard({
         <div className="mt-2 flex items-baseline gap-3">
           {typeof overallScore === 'number' && (
             <span className="text-2xl sm:text-3xl font-extrabold tabular-nums leading-none">
-              {overallScore}
+              {locked ? '?' : overallScore}
               <span className="text-xs font-extrabold text-white/75">/100</span>
             </span>
           )}
           {gradeEstimate && (
-            <span className="ml-auto inline-flex items-center justify-center px-2.5 py-1 rounded-xl bg-[#FFC800] text-[#6B27A3] text-lg font-extrabold leading-none border-2 border-b-[3px] border-[#D4A300]">
-              {gradeEstimate}
+            <span className="ml-auto inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-[#FFC800] text-[#6B27A3] leading-none border-2 border-b-[3px] border-[#D4A300]">
+              {locked && (
+                <span className="text-[10px] font-extrabold uppercase tracking-wide">Estimated grade</span>
+              )}
+              <span className="text-lg font-extrabold">{locked ? '?' : gradeEstimate}</span>
             </span>
           )}
         </div>
         {(typeof overallScore === 'number' || gradeEstimate) && (
           <p className="mt-1.5 text-[10px] font-bold text-white/70 leading-snug">
-            Estimated grade &amp; score — an AI guide for revision, not your official grade.
+            {locked
+              ? 'Upgrade to Pro to reveal your estimated grade, score and full rubric.'
+              : 'Estimated grade & score — an AI guide for revision, not your official grade.'}
           </p>
         )}
       </div>
@@ -164,7 +174,9 @@ function ScoreCard({
               <div key={r.category}>
                 <div className="flex justify-between text-[11px] font-bold text-stone-700 dark:text-stone-300 mb-1">
                   <span>{humanizeLabel(r.category)}</span>
-                  {typeof r.score === 'number' && <span className="tabular-nums">{r.score}/{max}</span>}
+                  {typeof r.score === 'number' && (
+                    <span className="tabular-nums">{locked ? '?' : r.score}/{max}</span>
+                  )}
                 </div>
                 {typeof r.score === 'number' && (
                   <div className="h-1.5 rounded-full bg-stone-100 dark:bg-stone-700 overflow-hidden">
@@ -181,7 +193,7 @@ function ScoreCard({
       )}
       {typeof clarityRating === 'number' && (
         <div className="px-4 py-2 border-t border-stone-100 dark:border-stone-800 text-[11px] font-bold text-stone-500 dark:text-stone-400">
-          Clarity rating: <span className="tabular-nums text-stone-700 dark:text-stone-200">{clarityRating}/10</span>
+          Clarity rating: <span className="tabular-nums text-stone-700 dark:text-stone-200">{locked ? '?' : clarityRating}/10</span>
         </div>
       )}
     </div>
@@ -237,7 +249,17 @@ function AnnotationCard({
         {ann.text && (
           <p className="text-[11px] italic text-stone-500 dark:text-stone-400 mb-1.5 line-clamp-2 leading-snug">"{ann.text}"</p>
         )}
-        <p className="text-[12px] font-bold text-stone-800 dark:text-stone-100 leading-snug">{ann.comment}</p>
+        {(() => {
+          const blurC = locked && (ann.type === 'improve' || ann.type === 'concern');
+          return (
+            <p
+              className={`text-[12px] font-bold text-stone-800 dark:text-stone-100 leading-snug ${blurC ? 'blur-[4px] select-none' : ''}`}
+              aria-hidden={blurC || undefined}
+            >
+              {ann.comment}
+            </p>
+          );
+        })()}
         {ann.suggestion && (
           locked ? (
             <p className="mt-1.5 inline-flex items-center gap-1.5 text-[11px] font-extrabold text-[#8A48C7] dark:text-[#C9A0F0]">
@@ -413,6 +435,7 @@ export default function AnalyzerPanel({
                 rubric={result.rubric}
                 onRerun={onRerun}
                 loading={loading}
+                locked={revisionsLocked}
               />
             </div>
 
@@ -420,7 +443,7 @@ export default function AnalyzerPanel({
               <div className="rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 px-4 py-3">
                 <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#A560E8] mb-2">Top suggestions</p>
                 <ul className="space-y-1.5">
-                  {result.topSuggestions.map((s, i) => (
+                  {(revisionsLocked ? result.topSuggestions.slice(0, 3) : result.topSuggestions).map((s, i) => (
                     <li key={i} className="flex gap-2 text-[12px] font-bold text-stone-700 dark:text-stone-300 leading-snug">
                       <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-md bg-[#A560E8] text-white text-[9px] font-extrabold mt-0.5" aria-hidden>
                         {i + 1}
@@ -429,6 +452,15 @@ export default function AnalyzerPanel({
                     </li>
                   ))}
                 </ul>
+                {revisionsLocked && result.topSuggestions.length > 3 && (
+                  <p className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-extrabold text-[#8A48C7] dark:text-[#C9A0F0]">
+                    <svg className="w-3 h-3 shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+                      <rect x="5" y="11" width="14" height="9" rx="2" />
+                      <path strokeLinecap="round" d="M8 11V8a4 4 0 0 1 8 0v3" />
+                    </svg>
+                    +{result.topSuggestions.length - 3} more with Pro
+                  </p>
+                )}
               </div>
             )}
 
