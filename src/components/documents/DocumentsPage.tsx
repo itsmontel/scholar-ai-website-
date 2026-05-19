@@ -787,48 +787,64 @@ function DocumentsHub({
             50%      { box-shadow: 0 24px 50px -16px rgba(165,96,232,0.85), 0 0 28px 2px rgba(165,96,232,0.45); }
           }
           .ws-upload-glow { box-shadow: 0 20px 44px -18px rgba(165,96,232,0.6); animation: wsUploadGlow 2.4s ease-in-out infinite; }
-          @keyframes wsStartHereBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
-          .ws-start-here-arrow { animation: wsStartHereBob 1.6s ease-in-out infinite; }
+          @keyframes wsStartHereBob { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(6px) rotate(-3deg); } }
+          .ws-start-here-arrow { animation: wsStartHereBob 1.5s ease-in-out infinite; transform-origin: 70% 30%; }
           @media (prefers-reduced-motion: reduce) {
             .ws-upload-glow, .ws-start-here-arrow { animation: none; }
           }
         `}</style>
 
         {!loading && docs.length === 0 && (
-          <div className="mt-6 -mb-1 flex items-end gap-2 pl-1 select-none" aria-hidden>
+          <div className="mt-6 -mb-1 pl-1 select-none" aria-hidden>
             <span
               className="text-[13px] sm:text-sm font-extrabold text-[#8A48C7] dark:text-[#C9A0F0]"
               style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
             >
               New here? Start by uploading your paper
             </span>
-            <svg className="ws-start-here-arrow w-10 h-12 shrink-0 -mb-1 ml-8 text-[#A560E8]" viewBox="0 0 40 48" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-              <path d="M31 5C36 18 34 32 18 42" />
-              <path d="M18 42l9-2" />
-              <path d="M18 42l3-9" />
-            </svg>
           </div>
         )}
 
-        <div className={`${!loading && docs.length === 0 ? 'mt-2' : 'mt-6'} grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4`}>
+        <div className={`${!loading && docs.length === 0 ? 'mt-9 sm:mt-10' : 'mt-6'} grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4`}>
           {/* Primary — upload existing (feeds the analyse flow) */}
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="group relative overflow-hidden rounded-3xl border-2 border-b-4 border-[#7733B5] bg-gradient-to-br from-[#A560E8] to-[#7733B5] text-white p-6 text-left hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all ws-upload-glow"
-          >
-            <div className="pointer-events-none absolute -top-12 -right-12 w-40 h-40 rounded-full bg-white/10 blur-2xl" aria-hidden />
-            <div className="relative flex items-center gap-4">
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/20 border-2 border-white/30">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16" /></svg>
-              </span>
-              <div className="min-w-0">
-                <p className="text-lg sm:text-xl font-extrabold leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Upload a paper</p>
-                <p className="text-[13px] font-bold text-white/80 mt-1">Bring in a PDF, .docx or .txt file</p>
+          <div className="relative h-full">
+            {!loading && docs.length === 0 && (
+              <>
+                {/* Big "click here" arrow into the tile's top-right */}
+                <svg
+                  aria-hidden
+                  className="ws-start-here-arrow pointer-events-none absolute -top-12 right-6 z-20 w-16 h-16 text-[#FFC800] drop-shadow-[0_2px_6px_rgba(255,200,0,0.6)]"
+                  viewBox="0 0 64 64"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={5}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M52 6C60 24 55 44 28 55" />
+                  <path d="M28 55l14-2" />
+                  <path d="M28 55l3-14" />
+                </svg>
+              </>
+            )}
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="group relative w-full h-full overflow-hidden rounded-3xl border-2 border-b-4 border-[#7733B5] bg-gradient-to-br from-[#A560E8] to-[#7733B5] text-white p-6 text-left hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all ws-upload-glow"
+            >
+              <div className="pointer-events-none absolute -top-12 -right-12 w-40 h-40 rounded-full bg-white/10 blur-2xl" aria-hidden />
+              <div className="relative flex items-center gap-4">
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/20 border-2 border-white/30">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16" /></svg>
+                </span>
+                <div className="min-w-0">
+                  <p className="text-lg sm:text-xl font-extrabold leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Upload a paper</p>
+                  <p className="text-[13px] font-bold text-white/80 mt-1">Bring in a PDF, .docx or .txt file</p>
+                </div>
+                <svg className="ml-auto w-5 h-5 shrink-0 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
               </div>
-              <svg className="ml-auto w-5 h-5 shrink-0 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-            </div>
-          </button>
+            </button>
+          </div>
 
           {/* Secondary — write new */}
           <button
@@ -2704,16 +2720,27 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
 
   // Soft paywall — fire when a free user, after an analysis, has
   // scrolled ~65% of the way through their paper (NOT at the 50%
-  // divider — that popped too early and startled people). Capped to
-  // once per calendar day per browser so it never nags. Dismissible;
-  // they keep the (gated) editor afterwards.
+  // divider — that popped too early and startled people).
+  //
+  //   • FIRST time ever they cross 65%: always show — this is the
+  //     welcome-discount moment. SoftPaywall itself renders the
+  //     $9.99 first-month offer + the one-shot "last chance" pop-up
+  //     (its FIRST_PAYWALL_DISCOUNT_SHOWN_KEY logic), so the daily
+  //     cap must NOT swallow it.
+  //   • After that: plain $19.99 (SoftPaywall's discount flag is
+  //     spent), capped to once per calendar day per browser.
+  // Dismissible; they keep the (gated) editor afterwards.
   useEffect(() => {
     if (isPaidPlan(user)) return;
     if (softPaywallSeenRef.current) return;
     if (!analyzerResult) return;
     const todayKey = new Date().toISOString().slice(0, 10);
+    let firstTime = true;
     try {
-      if (localStorage.getItem('ws_editor_softpaywall_day') === todayKey) return;
+      firstTime = localStorage.getItem('ws_editor_softpaywall_first') !== '1';
+      // Subsequent times only: at most once per day. The first ever
+      // crossing always shows (the discount moment).
+      if (!firstTime && localStorage.getItem('ws_editor_softpaywall_day') === todayKey) return;
     } catch { /* localStorage unavailable — fall through, ref still caps it */ }
     const root = editorRef.current?.view?.dom as HTMLElement | undefined;
     if (!root) return;
@@ -2728,7 +2755,10 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
       const scrolled = -rect.top / rect.height;
       if (scrolled >= SCROLL_THRESHOLD) {
         softPaywallSeenRef.current = true;
-        try { localStorage.setItem('ws_editor_softpaywall_day', todayKey); } catch { /* ignore */ }
+        try {
+          localStorage.setItem('ws_editor_softpaywall_first', '1');
+          localStorage.setItem('ws_editor_softpaywall_day', todayKey);
+        } catch { /* ignore */ }
         setShowSoftPaywall(true);
         window.removeEventListener('scroll', onScroll);
       }
