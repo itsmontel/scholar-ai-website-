@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from '../common/Header';
 import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
+import CancelRetentionModal from '../common/CancelRetentionModal';
 
 interface BillingPageProps {
   onNavigate?: (page: string) => void;
@@ -39,6 +40,12 @@ interface UsageStats {
 
 const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout }) => {
   const [currentPlan, setCurrentPlan] = useState<string>('free');
+  // Stripe subscription status (trialing / active / past_due / …) —
+  // CancelRetentionModal uses 'trialing' to skip the pause + discount
+  // steps and jump straight to the confirm-cancel screen.
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
+  // Cancellation retention modal visibility.
+  const [cancelOpen, setCancelOpen] = useState(false);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   // (Trial eligibility check removed — free trial offering retired.)
   const [usageStats, setUsageStats] = useState<UsageStats>({
@@ -110,9 +117,14 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
     fetchSubscriptionData();
   }, []);
 
-  const fetchSubscriptionData = async () => {
+  // `silent` skips the fullscreen-spinner state swap. Pass `true` for
+  // re-fetches triggered by user actions (cancel / pause / discount)
+  // so the loading screen doesn't unmount in-flight modals — the
+  // initial mount call still uses the default `false` to show the
+  // spinner while the first data load happens.
+  const fetchSubscriptionData = async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       const token = localStorage.getItem('authToken');
       const base = `${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}`;
       const headers = {
@@ -128,6 +140,10 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       if (subscriptionResponse.ok) {
         const subscriptionData = await subscriptionResponse.json();
         setCurrentPlan(subscriptionData.plan || 'free');
+        // Pull status off the embedded Stripe subscription if present.
+        // /subscriptions/current returns { plan, stripeSubscription }; for
+        // free users stripeSubscription is null.
+        setSubscriptionStatus(subscriptionData?.stripeSubscription?.status ?? null);
       }
 
       if (usageResponse.ok) {
@@ -138,7 +154,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       console.error('Error fetching subscription data:', error);
       setError('Failed to load subscription information');
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -309,20 +325,32 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
           <div className="bg-white dark:bg-stone-800 border-2 border-b-4 border-stone-200 dark:border-stone-700 rounded-2xl p-6 sm:p-8 mb-8">
             <h2 className="text-xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">Billing Management</h2>
             <p className="text-stone-600 dark:text-stone-400 text-sm font-bold mb-6">Manage your payment methods, view invoices, and update billing details.</p>
-            <button
-              onClick={handleManageBilling}
-              disabled={processing === 'billing'}
-              className="bg-[#A560E8] text-white font-extrabold uppercase tracking-wide py-3 px-6 rounded-xl border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {processing === 'billing' ? (
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  Opening...
-                </div>
-              ) : (
-                'Manage Billing & Invoices'
-              )}
-            </button>
+            <div className="flex flex-wrap items-center gap-4">
+              <button
+                onClick={handleManageBilling}
+                disabled={processing === 'billing'}
+                className="bg-[#A560E8] text-white font-extrabold uppercase tracking-wide py-3 px-6 rounded-xl border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {processing === 'billing' ? (
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                    Opening...
+                  </div>
+                ) : (
+                  'Manage Billing & Invoices'
+                )}
+              </button>
+              {/* Cancel link — opens the shared retention modal (pause
+                  → discount → confirm for active subs; jumps straight
+                  to the confirm step for trial users). */}
+              <button
+                type="button"
+                onClick={() => setCancelOpen(true)}
+                className="text-sm font-extrabold text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 underline underline-offset-4 decoration-stone-300 dark:decoration-stone-600 hover:decoration-[#FF4B4B] transition-colors"
+              >
+                Cancel subscription
+              </button>
+            </div>
             {error && (
               <div className="mt-4 p-4 bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-2 border-[#FF4B4B]/30 rounded-2xl">
                 <p className="text-red-800 text-sm">{error}</p>
@@ -635,6 +663,19 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
 
       {/* Footer */}
       <Footer onNavigate={onNavigate} />
+
+      {/* Cancellation retention modal — shared component used here
+          and on AccountPage. Skips pause + discount for trial users. */}
+      <CancelRetentionModal
+        open={cancelOpen}
+        onClose={() => setCancelOpen(false)}
+        apiUrl={`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}`}
+        // Silent refetch — without `silent=true`, fetchSubscriptionData
+        // would flip `loading` true and unmount the modal mid-flow,
+        // wiping the success-step state the modal just set.
+        onMutate={() => fetchSubscriptionData(true)}
+        subscriptionStatus={subscriptionStatus}
+      />
     </div>
   );
 };

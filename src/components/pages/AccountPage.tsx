@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import CancelRetentionModal from '../common/CancelRetentionModal';
 import Header from '../common/Header';
 import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import { FOCUS_MODE_COMING_SOON, FOCUS_MODE_CHROME_EXTENSION_URL } from '../../constants/focusMode';
@@ -76,18 +77,11 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
   const [focusModeLoading, setFocusModeLoading] = useState(false);
   const [focusModeSaving, setFocusModeSaving] = useState(false);
 
-  // Cancellation retention flow — multi-step modal that offers pause
-  // then a discount before letting the user finally confirm cancel.
-  //   'pause'    → step 1: "Need a break? Pause for 30 days?"
-  //   'discount' → step 2: "Stay for 50% off next month?"
-  //   'confirm'  → step 3: final "Are you sure?" before cancel
-  //   'success'  → terminal: shows what we did (paused / discounted / cancelled)
-  //   null       → modal closed
-  type RetentionStep = 'pause' | 'discount' | 'confirm' | 'success' | null;
-  const [retentionStep, setRetentionStep] = useState<RetentionStep>(null);
-  const [retentionBusy, setRetentionBusy] = useState(false);
-  const [retentionError, setRetentionError] = useState<string | null>(null);
-  const [retentionSuccessMsg, setRetentionSuccessMsg] = useState<string | null>(null);
+  // Cancellation retention modal — multi-step pause / discount /
+  // confirm flow lives in CancelRetentionModal as a shared component
+  // (also used on BillingPage). All the wiring + API calls live in
+  // there; we just toggle visibility here.
+  const [cancelOpen, setCancelOpen] = useState(false);
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -377,87 +371,6 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
   };
 
   // Handle account deletion
-  /* ─── Cancellation retention flow ─── */
-  const openRetentionFlow = () => {
-    setRetentionError(null);
-    setRetentionSuccessMsg(null);
-    setRetentionStep('pause');
-  };
-  const closeRetentionFlow = () => {
-    if (retentionBusy) return;
-    setRetentionStep(null);
-    setRetentionError(null);
-    setRetentionSuccessMsg(null);
-  };
-  const acceptPause = async () => {
-    setRetentionBusy(true);
-    setRetentionError(null);
-    try {
-      const token = localStorage.getItem('authToken');
-      const res = await fetch(`${API_URL}/subscriptions/pause`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ days: 30 }),
-      });
-      const data = await res.json().catch(() => null);
-      if (!res.ok) {
-        throw new Error((data && typeof data.message === 'string' && data.message) || 'Could not pause subscription');
-      }
-      setRetentionSuccessMsg("You're paused for 30 days. We'll see you when you're back.");
-      setRetentionStep('success');
-      // Refresh the page-level subscription status so the UI reflects the change.
-      fetchUserData();
-    } catch (e) {
-      setRetentionError(e instanceof Error ? e.message : 'Could not pause subscription');
-    } finally {
-      setRetentionBusy(false);
-    }
-  };
-  const acceptDiscount = async () => {
-    setRetentionBusy(true);
-    setRetentionError(null);
-    try {
-      const token = localStorage.getItem('authToken');
-      const res = await fetch(`${API_URL}/subscriptions/apply-retention-discount`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json().catch(() => null);
-      if (!res.ok) {
-        throw new Error((data && typeof data.message === 'string' && data.message) || 'Could not apply discount');
-      }
-      setRetentionSuccessMsg("50% off applied to your next invoice. Enjoy the half-price month on us.");
-      setRetentionStep('success');
-      fetchUserData();
-    } catch (e) {
-      setRetentionError(e instanceof Error ? e.message : 'Could not apply discount');
-    } finally {
-      setRetentionBusy(false);
-    }
-  };
-  const confirmFinalCancel = async () => {
-    setRetentionBusy(true);
-    setRetentionError(null);
-    try {
-      const token = localStorage.getItem('authToken');
-      const res = await fetch(`${API_URL}/subscriptions/cancel`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json().catch(() => null);
-      if (!res.ok) {
-        throw new Error((data && typeof data.message === 'string' && data.message) || 'Could not cancel subscription');
-      }
-      setRetentionSuccessMsg("Subscription cancelled. You'll keep Pro access until the end of your current billing period.");
-      setRetentionStep('success');
-      fetchUserData();
-    } catch (e) {
-      setRetentionError(e instanceof Error ? e.message : 'Could not cancel subscription');
-    } finally {
-      setRetentionBusy(false);
-    }
-  };
-
   const handleDeleteAccount = async () => {
     if (deleteConfirmation !== 'DELETE') {
       return;
@@ -674,12 +587,13 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
               </div>
 
               {/* Discrete cancel link for paid users — opens the
-                  retention modal (pause → discount → confirm cancel). */}
+                  retention modal (pause → discount → confirm cancel
+                  for active subs; jumps to confirm for trialers). */}
               {isPaidUser && (
                 <div className="mt-4 text-right">
                   <button
                     type="button"
-                    onClick={openRetentionFlow}
+                    onClick={() => setCancelOpen(true)}
                     className="text-xs font-extrabold text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-200 underline underline-offset-4 decoration-stone-300 dark:decoration-stone-600 hover:decoration-[#FF4B4B] transition-colors"
                   >
                     Cancel subscription
@@ -996,170 +910,13 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
         </div>
       )}
 
-      {/* ─── Cancellation retention modal ───
-          Three-step recovery flow before the actual cancel: pause →
-          discount → confirm. Each step has Accept / Decline buttons;
-          declining advances to the next step, accepting performs the
-          action and ends in a success state. */}
-      {retentionStep && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="retention-modal-title"
-          className="fixed inset-0 z-50 flex items-center justify-center px-4 sm:px-6 py-6 bg-black/55 backdrop-blur-sm"
-          onClick={(e) => { if (e.target === e.currentTarget) closeRetentionFlow(); }}
-        >
-          <div className="relative w-full max-w-md rounded-3xl border-2 border-b-4 border-[#A560E8]/45 bg-white dark:bg-stone-900 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.4)] overflow-hidden">
-            {/* Soft brand glows */}
-            <div className="pointer-events-none absolute -top-16 -right-16 h-40 w-40 rounded-full bg-[#A560E8]/18 blur-3xl" aria-hidden />
-            <div className="pointer-events-none absolute -bottom-16 -left-16 h-40 w-40 rounded-full bg-[#FFC800]/18 blur-3xl" aria-hidden />
-
-            <div className="relative px-6 sm:px-7 pt-7 pb-6">
-              {/* Step indicator dots — only on the 3 retention steps */}
-              {retentionStep !== 'success' && (
-                <div className="flex items-center justify-center gap-1.5 mb-4" aria-hidden>
-                  {(['pause', 'discount', 'confirm'] as const).map((s) => (
-                    <span
-                      key={s}
-                      className={`h-1.5 rounded-full transition-all ${
-                        s === retentionStep ? 'w-6 bg-[#A560E8]' : 'w-1.5 bg-stone-300 dark:bg-stone-700'
-                      }`}
-                    />
-                  ))}
-                </div>
-              )}
-
-              {/* ─── Step 1: Pause for 30 days ─── */}
-              {retentionStep === 'pause' && (
-                <div className="text-center">
-                  <div className="text-5xl mb-3" aria-hidden>⏸️</div>
-                  <h2 id="retention-modal-title" className="text-[1.45rem] sm:text-[1.6rem] font-extrabold leading-tight tracking-tight text-[#3C3C3C] dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                    Need a break?
-                  </h2>
-                  <p className="mt-2 text-[13.5px] sm:text-sm font-bold text-stone-600 dark:text-stone-300 leading-relaxed">
-                    Pause WriteScholar Pro for <span className="text-[#A560E8]">30 days</span>. No charges during the pause — you keep all your work and pick up right where you left off.
-                  </p>
-                  {retentionError && (
-                    <div className="mt-4 rounded-xl bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-2 border-[#FF4B4B]/30 px-3 py-2 text-[12px] text-[#FF4B4B] font-bold">
-                      {retentionError}
-                    </div>
-                  )}
-                  <div className="mt-5 space-y-2.5">
-                    <button
-                      type="button"
-                      onClick={acceptPause}
-                      disabled={retentionBusy}
-                      className="w-full py-3 px-4 rounded-2xl bg-[#58CC02] hover:bg-[#46A302] disabled:opacity-60 disabled:cursor-not-allowed text-white text-[13px] sm:text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all"
-                    >
-                      {retentionBusy ? 'Pausing…' : 'Yes, pause for 30 days'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => { setRetentionError(null); setRetentionStep('discount'); }}
-                      disabled={retentionBusy}
-                      className="w-full py-3 px-4 rounded-2xl bg-white dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-300 text-[12.5px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-stone-200 dark:border-stone-700 active:border-b-2 active:translate-y-0.5 transition-all"
-                    >
-                      No thanks
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* ─── Step 2: 50% off next month ─── */}
-              {retentionStep === 'discount' && (
-                <div className="text-center">
-                  <div className="text-5xl mb-3" aria-hidden>🎁</div>
-                  <h2 id="retention-modal-title" className="text-[1.45rem] sm:text-[1.6rem] font-extrabold leading-tight tracking-tight text-[#3C3C3C] dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                    Stay for <span className="text-[#A560E8]">50% off</span> next month?
-                  </h2>
-                  <p className="mt-2 text-[13.5px] sm:text-sm font-bold text-stone-600 dark:text-stone-300 leading-relaxed">
-                    We&apos;ll knock 50% off your next invoice. Same Pro, half the price — on us.
-                  </p>
-                  {retentionError && (
-                    <div className="mt-4 rounded-xl bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-2 border-[#FF4B4B]/30 px-3 py-2 text-[12px] text-[#FF4B4B] font-bold">
-                      {retentionError}
-                    </div>
-                  )}
-                  <div className="mt-5 space-y-2.5">
-                    <button
-                      type="button"
-                      onClick={acceptDiscount}
-                      disabled={retentionBusy}
-                      className="w-full py-3 px-4 rounded-2xl bg-[#58CC02] hover:bg-[#46A302] disabled:opacity-60 disabled:cursor-not-allowed text-white text-[13px] sm:text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all"
-                    >
-                      {retentionBusy ? 'Applying…' : 'Yes, apply 50% off'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => { setRetentionError(null); setRetentionStep('confirm'); }}
-                      disabled={retentionBusy}
-                      className="w-full py-3 px-4 rounded-2xl bg-white dark:bg-stone-900 hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-300 text-[12.5px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-stone-200 dark:border-stone-700 active:border-b-2 active:translate-y-0.5 transition-all"
-                    >
-                      No thanks
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* ─── Step 3: Final confirm ─── */}
-              {retentionStep === 'confirm' && (
-                <div className="text-center">
-                  <div className="text-5xl mb-3" aria-hidden>👋</div>
-                  <h2 id="retention-modal-title" className="text-[1.45rem] sm:text-[1.6rem] font-extrabold leading-tight tracking-tight text-[#3C3C3C] dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                    Cancel subscription?
-                  </h2>
-                  <p className="mt-2 text-[13.5px] sm:text-sm font-bold text-stone-600 dark:text-stone-300 leading-relaxed">
-                    You&apos;ll keep Pro access until the end of your current billing period, then drop back to the free plan. You can resubscribe anytime.
-                  </p>
-                  {retentionError && (
-                    <div className="mt-4 rounded-xl bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-2 border-[#FF4B4B]/30 px-3 py-2 text-[12px] text-[#FF4B4B] font-bold">
-                      {retentionError}
-                    </div>
-                  )}
-                  <div className="mt-5 space-y-2.5">
-                    <button
-                      type="button"
-                      onClick={closeRetentionFlow}
-                      disabled={retentionBusy}
-                      className="w-full py-3 px-4 rounded-2xl bg-[#58CC02] hover:bg-[#46A302] disabled:opacity-60 disabled:cursor-not-allowed text-white text-[13px] sm:text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all"
-                    >
-                      Keep my plan
-                    </button>
-                    <button
-                      type="button"
-                      onClick={confirmFinalCancel}
-                      disabled={retentionBusy}
-                      className="w-full py-3 px-4 rounded-2xl bg-white dark:bg-stone-900 hover:bg-[#FFE8E8] dark:hover:bg-[#FF4B4B]/10 text-[#FF4B4B] text-[12.5px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#FF4B4B]/50 hover:border-[#FF4B4B] disabled:opacity-60 disabled:cursor-not-allowed active:border-b-2 active:translate-y-0.5 transition-all"
-                    >
-                      {retentionBusy ? 'Cancelling…' : 'Yes, cancel anyway'}
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* ─── Success — terminal state ─── */}
-              {retentionStep === 'success' && (
-                <div className="text-center">
-                  <div className="text-5xl mb-3" aria-hidden>✅</div>
-                  <h2 id="retention-modal-title" className="text-[1.4rem] sm:text-[1.55rem] font-extrabold leading-tight tracking-tight text-[#3C3C3C] dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                    All set
-                  </h2>
-                  <p className="mt-2 text-[13.5px] sm:text-sm font-bold text-stone-600 dark:text-stone-300 leading-relaxed">
-                    {retentionSuccessMsg}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={closeRetentionFlow}
-                    className="mt-5 w-full py-3 px-4 rounded-2xl bg-[#A560E8] hover:bg-[#8A48C7] text-white text-[13px] sm:text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
-                  >
-                    Done
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      <CancelRetentionModal
+        open={cancelOpen}
+        onClose={() => setCancelOpen(false)}
+        apiUrl={API_URL}
+        onMutate={fetchUserData}
+        subscriptionStatus={userStats.subscriptionStatus}
+      />
     </div>
   );
 };
