@@ -1234,6 +1234,49 @@ const syncCheckoutSessionForUser = async (sessionId, appUserId) => {
   }
 };
 
+/**
+ * Create a trialing Subscription for use with Stripe Elements
+ * (PaymentElement). The subscription is created with payment_behavior
+ * = default_incomplete so Stripe automatically generates a
+ * pending_setup_intent — the frontend confirms that with the
+ * PaymentElement to attach the card. The free trial begins
+ * immediately; the saved card is charged on day trialPeriodDays+1.
+ */
+const createElementsTrialSubscription = async (customerId, userId, options = {}) => {
+  const planType = options.planType || 'pro';
+  const billingCycle = options.billingCycle || 'monthly';
+  const trialPeriodDays = Number(options.trialPeriodDays || 3);
+  try {
+    const priceId = getPriceId(planType, billingCycle);
+    const sub = await stripe.subscriptions.create({
+      customer: customerId,
+      items: [{ price: priceId }],
+      trial_period_days: trialPeriodDays,
+      payment_behavior: 'default_incomplete',
+      payment_settings: {
+        save_default_payment_method: 'on_subscription',
+        payment_method_types: ['card'],
+      },
+      trial_settings: { end_behavior: { missing_payment_method: 'cancel' } },
+      expand: ['pending_setup_intent'],
+      metadata: {
+        userId: String(userId),
+        planType,
+        billingCycle,
+        source: 'writescholar_onboarding_elements',
+      },
+    });
+    const clientSecret = sub?.pending_setup_intent?.client_secret;
+    if (!clientSecret) {
+      return { success: false, error: new Error('Subscription created without pending_setup_intent') };
+    }
+    return { success: true, subscriptionId: sub.id, clientSecret };
+  } catch (error) {
+    console.error('createElementsTrialSubscription error:', error);
+    return { success: false, error };
+  }
+};
+
 module.exports = {
   supabase,
   PLAN_LIMITS,
@@ -1254,6 +1297,7 @@ module.exports = {
   recordTrialUsage,
   recordTrialDecline,
   createStripeCustomer,
+  createElementsTrialSubscription,
   createCheckoutSession,
   syncCheckoutSessionForUser,
   getStripeSubscription,

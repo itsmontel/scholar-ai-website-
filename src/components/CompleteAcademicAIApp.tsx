@@ -24,6 +24,10 @@ const EmbedPage = lazyWithRetry(() => import('./pages/EmbedPage'));
 const PressKitPage = lazyWithRetry(() => import('./pages/PressKitPage'));
 const EmailVerificationPage = lazyWithRetry(() => import('./pages/EmailVerificationPage'));
 const OnboardingPage = lazyWithRetry(() => import('./pages/OnboardingPage'));
+// Fullscreen "Welcome to WriteScholar!" celebration that replays the
+// onboarding `transition` animation when the user lands on /dashboard
+// after Stripe's hard redirect from the trial-checkout step.
+const PostCheckoutWelcomeOverlay = lazyWithRetry(() => import('./common/PostCheckoutWelcomeOverlay'));
 // Pre-signup Duolingo-style funnel — every "Sign up" CTA on the marketing
 // pages now routes through this 6-screen flow before the signup form.
 const AuthCallbackPage = lazyWithRetry(() => import('./pages/AuthCallbackPage'));
@@ -145,6 +149,7 @@ const NOINDEX_PAGES = new Set<string>([
   'embed', // /embed/* are iframe widgets; the host site's embedded version is what we want indexed
   'dashboard',
   'onboarding',
+  'onboarding-test',
   'auth-callback',
   'email-verification',
   'reset-password',
@@ -188,6 +193,7 @@ function getPageFromPath(pathname: string): string {
   if (/^\/(study|alternatives|guides|best)\//.test(p)) return 'programmatic';
   if (p === '/email-verification') return 'email-verification';
   if (p === '/onboarding') return 'onboarding';
+  if (p === '/onboarding-test') return 'onboarding-test';
   if (p === '/auth/callback') return 'auth-callback';
   /* Pre-signup welcome funnel was removed — redirect old URLs to signup. */
   if (p === '/get-started' || p === '/welcome') return 'signup';
@@ -1205,7 +1211,82 @@ const AcademicAIApp = () => {
     );
   };
 
-  const needsOnboarding = isLoggedIn && user?.id && !user.onboardingCompleted;
+  // Stripe (and other checkout flows) redirect users to
+  // `/dashboard?payment=success` after a successful trial start. At
+  // that point the SPA hasn't yet learned that onboardingCompleted
+  // flipped to true on the server, so the cached `user` object still
+  // has it as false — which would normally re-trigger the
+  // `needsOnboarding` bounce below and send the user straight back to
+  // onboarding.
+  //
+  // Captured ONCE on mount as state — the URL-strip effect at ~line
+  // 704 wipes `?payment=success` right after the first render, so
+  // reading `window.location.search` on every render would flip this
+  // back to false after the strip and re-arm the bounce. The state
+  // flag stays true for the lifetime of the SPA so the routing layer
+  // keeps treating them as onboarded until the effect below catches
+  // up the cached user object.
+  const [sawStripeSuccessOnLoad] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return new URLSearchParams(window.location.search).get('payment') === 'success';
+  });
+  // Drives the fullscreen welcome-celebration overlay. Seeded from
+  // sawStripeSuccessOnLoad and flipped off when the animation finishes.
+  const [showPostCheckoutWelcome, setShowPostCheckoutWelcome] = useState<boolean>(sawStripeSuccessOnLoad);
+
+  const needsOnboarding =
+    isLoggedIn && user?.id && !user.onboardingCompleted && !sawStripeSuccessOnLoad;
+
+  /* ─── Post-Stripe-success recovery ───
+     When Stripe redirects to /dashboard?payment=success after the user
+     submits their card during onboarding, refresh /auth/me so the
+     cached user picks up subscription_plan='pro' and
+     subscription_status='trialing' that the create-elements-trial
+     route just wrote to Supabase. The onboardingCompleted flag is
+     also set in that same backend route, so the routing layer
+     stops bouncing this user. */
+  const syncStripeSubscriptionRanRef = useRef(false);
+  useEffect(() => {
+    if (!sawStripeSuccessOnLoad) return;
+    if (!isLoggedIn || !user?.id) return;
+    if (syncStripeSubscriptionRanRef.current) return;
+    syncStripeSubscriptionRanRef.current = true;
+
+    (async () => {
+      try {
+        const token = localStorage.getItem('authToken');
+        if (!token) return;
+        const { BulletproofAPI } = await import('../config/api');
+        const meRes = await BulletproofAPI.get('/auth/me', token);
+        if (!meRes || !meRes.ok) return;
+        const meData = await meRes.json().catch(() => null);
+        const u = meData?.data?.user;
+        if (!u || !u.email) return;
+        const refreshed = {
+          id: u.id,
+          email: u.email,
+          username: u.username,
+          name: u.name || (u.firstName && u.lastName ? `${u.firstName} ${u.lastName}` : null) || u.email,
+          firstName: u.firstName,
+          lastName: u.lastName,
+          plan: u.subscriptionPlan || 'free',
+          subscription_status: u.subscriptionStatus,
+          email_verified: u.emailVerified,
+          onboardingCompleted: u.onboardingCompleted === true,
+          welcomeTutorialCompleted: u.welcomeTutorialCompleted === true,
+        };
+        setUser(refreshed);
+        try { localStorage.setItem('user', JSON.stringify(refreshed)); } catch { /* ignore */ }
+        try {
+          if (!localStorage.getItem(ONBOARDING_COMPLETED_AT_KEY)) {
+            localStorage.setItem(ONBOARDING_COMPLETED_AT_KEY, String(Date.now()));
+          }
+        } catch { /* ignore */ }
+      } catch (e) {
+        console.warn('Post-Stripe /auth/me refresh failed (non-fatal):', e);
+      }
+    })();
+  }, [sawStripeSuccessOnLoad, isLoggedIn, user?.id]);
 
   const handleDashboardUserUpdate = (u: { welcomeTutorialCompleted?: boolean }) => {
     if (user && u.welcomeTutorialCompleted) {
@@ -1285,6 +1366,20 @@ const AcademicAIApp = () => {
           return <LoginPage onNavigate={navigateTo} onLogin={handleLogin} />;
         }
         return renderOnboarding('dashboard');
+      case 'onboarding-test':
+        // Preview the onboarding flow on demand. testMode skips every
+        // API call; onComplete returns to the dashboard. Available to
+        // anyone who knows the URL (linked from the Account page).
+        return (
+          <OnboardingPage
+            onNavigate={navigateTo}
+            user={user}
+            onLogout={handleLogout}
+            onUserUpdate={handleOnboardingUserUpdate}
+            onComplete={() => navigateTo('dashboard')}
+            testMode
+          />
+        );
       case 'auth-callback':
         return <AuthCallbackPage onNavigate={navigateTo} onLogin={handleLogin} />;
       case 'pricing':
@@ -1551,6 +1646,24 @@ const AcademicAIApp = () => {
           {renderCurrentPage()}
         </PageErrorBoundary>
       </Suspense>
+      {/* Post-Stripe-success welcome celebration — replays the
+          onboarding `transition` animation as a fullscreen overlay
+          when the user lands on /dashboard after Stripe's hard
+          redirect from the trial-checkout step. Auto-dismisses when
+          the animation finishes so the dashboard becomes interactive. */}
+      {showPostCheckoutWelcome && (
+        <Suspense fallback={null}>
+          <PostCheckoutWelcomeOverlay
+            firstName={
+              user?.firstName?.trim() ||
+              (user?.name?.trim() && !user.name.includes('@')
+                ? user.name.trim().split(/\s+/)[0]
+                : undefined)
+            }
+            onDone={() => setShowPostCheckoutWelcome(false)}
+          />
+        </Suspense>
+      )}
       {/* Global achievement popup */}
       {user && !HIDE_STREAK_AND_BADGES && <BadgeNotificationToast onNavigate={navigateTo} />}
       {apiLimitPaywallOpen && isLoggedIn && user && (

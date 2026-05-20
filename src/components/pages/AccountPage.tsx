@@ -663,6 +663,21 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
             </div>
           </div>
 
+          {/* Preview / developer */}
+          <div className="bg-[#F3EAFF] dark:bg-[#A560E8]/10 border-2 border-b-4 border-[#A560E8]/30 rounded-2xl p-6 sm:p-8 mb-6">
+            <h2 className="text-xl text-[#7733B5] dark:text-[#C9A0F0] font-extrabold mb-2">Preview onboarding flow</h2>
+            <p className="text-sm font-bold text-stone-600 dark:text-stone-300 mb-4 leading-snug">
+              Walk through the 7-step onboarding and the post-tutorial paywall without touching your real account. Nothing is saved.
+            </p>
+            <button
+              type="button"
+              onClick={() => onNavigate('onboarding-test')}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] text-white text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
+            >
+              Open onboarding (test)
+            </button>
+          </div>
+
           {/* Danger Zone */}
           <div className="bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-2 border-b-4 border-[#FF4B4B]/30 rounded-2xl p-6 sm:p-8">
             <h2 className="text-xl text-[#FF4B4B] font-extrabold mb-6">Danger Zone</h2>
