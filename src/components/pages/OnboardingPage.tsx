@@ -1575,6 +1575,11 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
         elementsRef.current = elements;
         paymentElementRef.current = paymentEl;
       } catch (e) {
+        // Log the real error so production failures are debuggable
+        // from the browser console. The user-facing message stays
+        // generic so we don't leak Stripe / API internals.
+        // eslint-disable-next-line no-console
+        console.error('[checkout] failed to initialise Stripe Elements:', e);
         if (!destroyed) {
           setEmbeddedError(e instanceof UserFacingCheckoutError ? e.message : EMBEDDED_CHECKOUT_FALLBACK);
         }
