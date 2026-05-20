@@ -817,6 +817,60 @@ const cancelStripeSubscription = async (subscriptionId) => {
   }
 };
 
+/* ─── Pause a subscription for N days ───
+ *  Used by the cancellation retention flow ("Need a break? Pause for
+ *  30 days?"). Uses Stripe's pause_collection with behavior='void',
+ *  which stops billing during the pause window — Stripe still tracks
+ *  the subscription as active, and resumes collecting on resumes_at.
+ *
+ *  We DON'T toggle the user's access during the pause — the user
+ *  keeps Pro features for the duration. That's the deal: pause = no
+ *  charge, keep using the product, come back to billing later. If you
+ *  want to revoke access during a pause, switch behavior='void' to
+ *  'keep_as_draft' and gate access on subscription_status.
+ */
+const pauseStripeSubscription = async (subscriptionId, days = 30) => {
+  try {
+    const resumesAt = Math.floor(Date.now() / 1000) + days * 24 * 60 * 60;
+    const subscription = await stripe.subscriptions.update(subscriptionId, {
+      pause_collection: {
+        behavior: 'void',
+        resumes_at: resumesAt,
+      },
+    });
+    return { success: true, subscription, resumesAt };
+  } catch (error) {
+    console.error('Error pausing Stripe subscription:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+/* ─── Apply a retention discount coupon ───
+ *  Used by the cancellation retention flow ("Stay for 50% off next
+ *  month?"). Attaches a coupon to the subscription which Stripe
+ *  applies to the next invoice. The coupon's own `duration` field
+ *  controls how many cycles the discount lasts — set the coupon to
+ *  duration='once' in the Stripe Dashboard for a single-month
+ *  retention discount.
+ *
+ *  couponId is the Stripe coupon's ID (e.g. 'retention50'), not a
+ *  promotion code. Configure STRIPE_RETENTION_COUPON_ID in env.
+ */
+const applyRetentionDiscount = async (subscriptionId, couponId) => {
+  try {
+    if (!couponId) {
+      return { success: false, error: 'No retention coupon configured' };
+    }
+    const subscription = await stripe.subscriptions.update(subscriptionId, {
+      coupon: couponId,
+    });
+    return { success: true, subscription };
+  } catch (error) {
+    console.error('Error applying retention discount:', error);
+    return { success: false, error: error.message };
+  }
+};
+
 // Get customer's payment methods
 const getPaymentMethods = async (customerId) => {
   try {
@@ -1027,6 +1081,123 @@ function resolveEffectivePlan(subscription) {
 }
 
 /**
+ * Hourly: find every trialing subscription whose trial expires roughly
+ * 24 hours from now and hasn't been emailed yet, then send the
+ * "trial ends in 24h" reminder and stamp `trial_ending_email_sent_at`
+ * so subsequent cron ticks skip it.
+ *
+ * Eligibility window is 22–25h before trial_end so we still catch
+ * trials if a cron tick is dropped (Node process restart, etc.). The
+ * idempotency column ensures a single email per subscription
+ * regardless of how many cron ticks fall inside the window.
+ *
+ * Stripe's `customer.subscription.trial_will_end` webhook fires 3 days
+ * before, which is the wrong window for the 24h reminder — hence this
+ * cron rather than just a webhook handler.
+ *
+ * Returns { sent, errors, candidates }.
+ */
+const notifyTrialsEndingSoon = async () => {
+  const emailService = require('./emailService');
+  let sent = 0;
+  let errors = 0;
+  try {
+    const supabaseAdmin = supabaseServiceRole;
+    const nowMs = Date.now();
+    // 22h → 25h from now. Slightly wider than 24h±0.5h so a missed
+    // tick (e.g. server restart) still catches the subscription on
+    // the next run.
+    const windowStartIso = new Date(nowMs + 22 * 60 * 60 * 1000).toISOString();
+    const windowEndIso = new Date(nowMs + 25 * 60 * 60 * 1000).toISOString();
+
+    const { data: candidates, error: queryError } = await supabaseAdmin
+      .from('subscriptions')
+      .select('id, user_id, plan, status, current_period_end, trial_ending_email_sent_at')
+      .eq('status', 'trialing')
+      .is('trial_ending_email_sent_at', null)
+      .gte('current_period_end', windowStartIso)
+      .lte('current_period_end', windowEndIso);
+
+    if (queryError) {
+      console.error('🔔 trial-ending: failed to query candidates:', queryError);
+      return { sent: 0, errors: 1, candidates: 0 };
+    }
+
+    const candidateCount = candidates?.length || 0;
+    if (candidateCount === 0) return { sent: 0, errors: 0, candidates: 0 };
+
+    console.log(`🔔 trial-ending: ${candidateCount} subscription(s) entering the 24h window`);
+
+    for (const row of candidates) {
+      try {
+        // Pull the user's email + name for personalisation. Done per
+        // row rather than as a join because Supabase JS doesn't infer
+        // FK joins on this schema.
+        const { data: user, error: userErr } = await supabaseAdmin
+          .from('users')
+          .select('email, first_name, name')
+          .eq('id', row.user_id)
+          .single();
+        if (userErr || !user?.email) {
+          console.warn(`🔔 trial-ending: skipping sub ${row.id} — user lookup failed`, userErr?.message);
+          continue;
+        }
+
+        const firstName =
+          (user.first_name && String(user.first_name).trim()) ||
+          (user.name && !String(user.name).includes('@')
+            ? String(user.name).trim().split(/\s+/)[0]
+            : '') ||
+          '';
+
+        // Compose the post-trial charge label. For the onboarding
+        // flow, NEWCUSTOMER 50% off is auto-applied, so the actual
+        // first charge is half the plan's headline price.
+        //   yearly: pro $199 → $99 ; premium $399.99 → $199.99
+        //   monthly: pro $19.99 → $9.99 ; premium $39.99 → $19.99
+        const planLabel = row.plan === 'premium' ? 'Premium' : 'Pro';
+
+        const emailResult = await emailService.sendTrialEndingEmail(user.email, {
+          firstName,
+          planName: planLabel,
+          billingLabel: 'plan',
+          firstChargeAt: row.current_period_end,
+        });
+
+        if (!emailResult.success) {
+          console.error(`🔔 trial-ending: send failed for sub ${row.id}:`, emailResult.error);
+          errors += 1;
+          continue;
+        }
+
+        // Mark sent so the next cron tick (and any subsequent re-run
+        // within the window) doesn't email this user again.
+        const { error: stampErr } = await supabaseAdmin
+          .from('subscriptions')
+          .update({ trial_ending_email_sent_at: new Date().toISOString() })
+          .eq('id', row.id);
+        if (stampErr) {
+          console.error(`🔔 trial-ending: stamp failed for sub ${row.id}:`, stampErr.message);
+          errors += 1;
+          continue;
+        }
+
+        sent += 1;
+      } catch (rowErr) {
+        console.error(`🔔 trial-ending: error for sub ${row.id}:`, rowErr.message);
+        errors += 1;
+      }
+    }
+
+    console.log(`🔔 trial-ending: complete — sent ${sent}, errors ${errors}, candidates ${candidateCount}`);
+    return { sent, errors, candidates: candidateCount };
+  } catch (error) {
+    console.error('🔔 trial-ending: fatal error:', error);
+    return { sent, errors: errors + 1, candidates: 0 };
+  }
+};
+
+/**
  * Daily reconciliation: walk every paid user in our DB, compare against
  * Stripe, and downgrade anyone whose Stripe subscription is no longer in an
  * access state. Safety net for missed/failed webhooks and silent trial expiry.
@@ -1234,49 +1405,6 @@ const syncCheckoutSessionForUser = async (sessionId, appUserId) => {
   }
 };
 
-/**
- * Create a trialing Subscription for use with Stripe Elements
- * (PaymentElement). The subscription is created with payment_behavior
- * = default_incomplete so Stripe automatically generates a
- * pending_setup_intent — the frontend confirms that with the
- * PaymentElement to attach the card. The free trial begins
- * immediately; the saved card is charged on day trialPeriodDays+1.
- */
-const createElementsTrialSubscription = async (customerId, userId, options = {}) => {
-  const planType = options.planType || 'pro';
-  const billingCycle = options.billingCycle || 'monthly';
-  const trialPeriodDays = Number(options.trialPeriodDays || 3);
-  try {
-    const priceId = getPriceId(planType, billingCycle);
-    const sub = await stripe.subscriptions.create({
-      customer: customerId,
-      items: [{ price: priceId }],
-      trial_period_days: trialPeriodDays,
-      payment_behavior: 'default_incomplete',
-      payment_settings: {
-        save_default_payment_method: 'on_subscription',
-        payment_method_types: ['card'],
-      },
-      trial_settings: { end_behavior: { missing_payment_method: 'cancel' } },
-      expand: ['pending_setup_intent'],
-      metadata: {
-        userId: String(userId),
-        planType,
-        billingCycle,
-        source: 'writescholar_onboarding_elements',
-      },
-    });
-    const clientSecret = sub?.pending_setup_intent?.client_secret;
-    if (!clientSecret) {
-      return { success: false, error: new Error('Subscription created without pending_setup_intent') };
-    }
-    return { success: true, subscriptionId: sub.id, clientSecret };
-  } catch (error) {
-    console.error('createElementsTrialSubscription error:', error);
-    return { success: false, error };
-  }
-};
-
 module.exports = {
   supabase,
   PLAN_LIMITS,
@@ -1297,12 +1425,13 @@ module.exports = {
   recordTrialUsage,
   recordTrialDecline,
   createStripeCustomer,
-  createElementsTrialSubscription,
   createCheckoutSession,
   syncCheckoutSessionForUser,
   getStripeSubscription,
   updateStripeSubscription,
   cancelStripeSubscription,
+  pauseStripeSubscription,
+  applyRetentionDiscount,
   getPaymentMethods,
   createSetupIntent,
   createBillingPortalSession,
@@ -1310,6 +1439,7 @@ module.exports = {
   validatePromoCode,
   cleanupOldCitations,
   reconcileSubscriptions,
+  notifyTrialsEndingSoon,
   STRIPE_ACCESS_STATUSES,
   mapPriceIdToPlan,
   resolveEffectivePlan,

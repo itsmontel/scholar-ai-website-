@@ -1,6 +1,4 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { loadStripe } from '@stripe/stripe-js';
-import type { Stripe, StripeElements, StripePaymentElement, StripeExpressCheckoutElement } from '@stripe/stripe-js';
 import { SKIP_ONBOARDING_STRIPE } from '../../config/featureFlags';
 import { trackEvent } from '../../utils/analytics';
 // Static import: see CompleteAcademicAIApp.tsx for why we don't dynamic-
@@ -11,7 +9,7 @@ import BadgeCreature from '../common/BadgeCreature';
 import { markSoftPaywallDismissedNow, SOFT_PAYWALL_OPEN_KEY } from '../../constants/paywallSession';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-const TRIAL_DAYS = 3;
+const TRIAL_DAYS = 7;
 
 /**
  * When true the onboarding tour ends on the `value-prop` screen
@@ -235,19 +233,96 @@ const XP_PER_QUESTION = 10;
 
 const CONFETTI_COLORS = ['#58CC02', '#1CB0F6', '#FF9600', '#FF4B4B', '#A560E8', '#FFD700'];
 
-const EMBEDDED_CHECKOUT_FALLBACK =
-  "We couldn't load secure checkout. Please refresh the page in a moment. If this keeps happening, contact support so we can help.";
-
-class UserFacingCheckoutError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'UserFacingCheckoutError';
-  }
+/* ─── Subscription plans shown on the onboarding checkout step ───
+   Backend's getPriceId() maps these IDs to env-var-configured Stripe
+   price IDs (STRIPE_STARTER_*, STRIPE_PREMIUM_*). The yearly display
+   prices are the headline /month figure shown to the user; the real
+   total charged matches `yearlyTotal`. */
+type PlanId = 'pro' | 'premium';
+type BillingCycle = 'monthly' | 'yearly';
+interface PlanCycle {
+  /** Discounted price for the first billing cycle after the 7-day
+   *  trial (NEWCUSTOMER 50% off is auto-applied at checkout). */
+  firstCyclePrice: string;
+  /** Full price after the first cycle renews. */
+  rolloverPrice: string;
+  /** "first year" / "first month" — used in the sub-line copy. */
+  firstCycleLabel: string;
+  /** "/yr after" / "/mo after" — used in the sub-line copy. */
+  rolloverSuffix: string;
 }
+interface Plan {
+  id: PlanId;
+  name: string;
+  emoji: string;
+  popular?: boolean;
+  features: string[];
+  monthly: PlanCycle;
+  yearly: PlanCycle;
+}
+const PLANS: Record<PlanId, Plan> = {
+  pro: {
+    id: 'pro',
+    name: 'Pro',
+    emoji: '⭐',
+    popular: true,
+    features: [
+      'Full annotations on every paper',
+      'One-click apply revisions',
+      'Estimated grade + full rubric',
+      '99 analyses · 100MB uploads',
+    ],
+    monthly: {
+      firstCyclePrice: '$9.99',
+      rolloverPrice: '$19.99',
+      firstCycleLabel: 'first month',
+      rolloverSuffix: '/mo after',
+    },
+    yearly: {
+      firstCyclePrice: '$99',
+      rolloverPrice: '$199',
+      firstCycleLabel: 'first year',
+      rolloverSuffix: '/yr after',
+    },
+  },
+  premium: {
+    id: 'premium',
+    name: 'Premium',
+    emoji: '💎',
+    features: [
+      'Everything in Pro',
+      '5× monthly usage (499 actions)',
+      'Unlimited paper summarisation',
+      '1GB library storage',
+    ],
+    monthly: {
+      firstCyclePrice: '$19.99',
+      rolloverPrice: '$39.99',
+      firstCycleLabel: 'first month',
+      rolloverSuffix: '/mo after',
+    },
+    yearly: {
+      firstCyclePrice: '$199.99',
+      rolloverPrice: '$399.99',
+      firstCycleLabel: 'first year',
+      rolloverSuffix: '/yr after',
+    },
+  },
+};
+
+/** Stripe promo code surfaced by the "Maybe later" reconsider modal —
+ *  must exist in the Stripe Dashboard for the discount to actually
+ *  apply on the hosted checkout page. */
+const NEW_CUSTOMER_PROMO_CODE = 'NEWCUSTOMER';
 
 function getInitialPhase(): Phase {
   if (typeof window === 'undefined') return 'intro';
   const params = new URLSearchParams(window.location.search);
+  // ?preview=value-prop is what Stripe's hosted-checkout cancel URL
+  // lands on — drops the user back at the 8-tools "Eight tools.
+  // Designed for success." page they came from, NOT the hidden
+  // "you're now ready to ace school" end-paywall.
+  if (params.get('preview') === 'value-prop') return 'value-prop';
   if (params.get('preview') === 'aha') return 'paywall';
   if (params.get('preview') === 'profile') return 'profile';
   const sid = params.get('session_id');
@@ -1231,31 +1306,21 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
     return () => { clearInterval(streakTimer); clearInterval(xpTimer); clearInterval(feedTimer); };
   }, [phase]);
 
-  /* Stripe state */
+  /* Stripe state — Stripe-hosted Checkout (redirect flow).
+     The Subscribe button calls handleSubscribeChoice → POSTs to
+     /subscriptions/create-checkout-session → redirects the user to
+     Stripe's hosted page (which handles Apple Pay / Google Pay /
+     Link automatically). Stripe redirects back to
+     /dashboard?payment=success on success. */
   const [trialEligible, setTrialEligible] = useState<boolean | null>(null);
-  const [embeddedError, setEmbeddedError] = useState<string | null>(null);
-  const [embeddedLoading, setEmbeddedLoading] = useState(true);
-  const checkoutHostRef = useRef<HTMLDivElement>(null);
-  // Express Checkout Element mount host — renders the Apple Pay,
-  // Google Pay and Stripe Link one-click buttons above the regular
-  // card form. The browser decides which wallets to show (Apple Pay
-  // only appears in supported browsers, Google Pay only in Chrome
-  // and Android, Link shows everywhere).
-  const expressCheckoutHostRef = useRef<HTMLDivElement>(null);
-  // Stripe Elements (PaymentElement) — fully themeable via appearance,
-  // unlike the locked-down Stripe Embedded Checkout iframe.
-  const stripeRef = useRef<Stripe | null>(null);
-  const elementsRef = useRef<StripeElements | null>(null);
-  const paymentElementRef = useRef<StripePaymentElement | null>(null);
-  const expressCheckoutElementRef = useRef<StripeExpressCheckoutElement | null>(null);
-  // Whether ECE rendered any wallet buttons. When false (e.g. an
-  // older browser with no Apple Pay or Google Pay) we hide the
-  // "Or pay with card" divider and the empty wallet slot.
-  const [hasExpressWallets, setHasExpressWallets] = useState(false);
-  const [submittingTrial, setSubmittingTrial] = useState(false);
-  const [trialSubmitError, setTrialSubmitError] = useState<string | null>(null);
   const [startingTrial, setStartingTrial] = useState(false);
   const [trialError, setTrialError] = useState<string | null>(null);
+  // Onboarding plan picker — Pro yearly is the default both because
+  // it's the highest LTV option and because it's the cheaper per-month
+  // headline that anchors the discussion. The yearly/monthly toggle
+  // defaults to yearly so the saved-17% figure leads.
+  const [selectedPlanId, setSelectedPlanId] = useState<PlanId>('pro');
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>('yearly');
   // Confirmation modal shown when the user clicks "Maybe later" on the
   // checkout page — gives them one chance to reconsider before we route
   // them away from the free trial offer. "I will miss the free
@@ -1381,255 +1446,6 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
     })();
     return () => { cancelled = true; };
   }, [phase, testMode]);
-
-  /* ─── Stripe Elements (PaymentElement) — themed to WriteScholar ───
-     We use PaymentElement instead of Stripe's Embedded Checkout
-     iframe specifically because Embedded Checkout's form CSS is
-     locked down. PaymentElement honours the `appearance` API, so the
-     fields below match our brand (Nunito, #A560E8, the Duolingo
-     border-2 border-b-4 inputs) instead of looking like Stripe. */
-  useEffect(() => {
-    if (phase !== 'checkout') return;
-    if (testMode) {
-      setEmbeddedError(null);
-      setEmbeddedLoading(false);
-      return;
-    }
-    const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '';
-    if (!publishableKey) {
-      setEmbeddedError(EMBEDDED_CHECKOUT_FALLBACK);
-      setEmbeddedLoading(false);
-      return;
-    }
-    const mountEl = checkoutHostRef.current;
-    if (!mountEl) return;
-
-    let destroyed = false;
-
-    (async () => {
-      try {
-        setEmbeddedError(null);
-        setEmbeddedLoading(true);
-        paymentElementRef.current?.unmount();
-        paymentElementRef.current = null;
-        expressCheckoutElementRef.current?.unmount();
-        expressCheckoutElementRef.current = null;
-        elementsRef.current = null;
-        stripeRef.current = null;
-        mountEl.innerHTML = '';
-        if (expressCheckoutHostRef.current) expressCheckoutHostRef.current.innerHTML = '';
-        setHasExpressWallets(false);
-
-        const token = localStorage.getItem('authToken');
-        if (!token) throw new UserFacingCheckoutError('Sign in again to continue.');
-
-        const res = await fetch(`${API_URL}/subscriptions/create-elements-trial`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ trialPeriodDays: TRIAL_DAYS }),
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          throw new UserFacingCheckoutError(
-            (typeof data?.message === 'string' && data.message) || 'We could not start your trial.',
-          );
-        }
-        const clientSecret = data?.data?.clientSecret as string | undefined;
-        if (!clientSecret) throw new UserFacingCheckoutError('We could not start your trial.');
-
-        const stripe = await loadStripe(publishableKey);
-        if (!stripe || destroyed) return;
-
-        const elements = stripe.elements({
-          clientSecret,
-          appearance: {
-            theme: 'flat',
-            variables: {
-              colorPrimary: '#A560E8',
-              colorBackground: '#FFFFFF',
-              colorText: '#3C3C3C',
-              colorTextSecondary: '#737373',
-              colorTextPlaceholder: '#A8A8A8',
-              colorDanger: '#FF4B4B',
-              fontFamily: '"Nunito", system-ui, sans-serif',
-              fontSizeBase: '15px',
-              fontWeightNormal: '600',
-              fontWeightMedium: '700',
-              fontWeightBold: '800',
-              borderRadius: '12px',
-              spacingUnit: '5px',
-            },
-            rules: {
-              '.Input': {
-                border: '2px solid #E5E5E5',
-                borderBottomWidth: '4px',
-                padding: '12px 14px',
-                fontWeight: '700',
-                boxShadow: 'none',
-                backgroundColor: '#FAFAFA',
-                transition: 'border-color 120ms ease, background-color 120ms ease',
-              },
-              '.Input:hover': { borderColor: '#A560E8' },
-              '.Input:focus': {
-                borderColor: '#A560E8',
-                boxShadow: '0 0 0 3px rgba(165,96,232,0.20)',
-                backgroundColor: '#FFFFFF',
-              },
-              '.Input--invalid': { borderColor: '#FF4B4B' },
-              '.Label': {
-                fontWeight: '800',
-                fontSize: '10px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.18em',
-                color: '#737373',
-                marginBottom: '6px',
-              },
-              '.Tab': {
-                border: '2px solid #E5E5E5',
-                borderBottomWidth: '4px',
-                borderRadius: '12px',
-                padding: '10px',
-                fontWeight: '800',
-                color: '#737373',
-              },
-              '.Tab:hover': { borderColor: '#A560E8', color: '#7733B5' },
-              '.Tab--selected': {
-                borderColor: '#A560E8',
-                backgroundColor: '#F3EAFF',
-                color: '#7733B5',
-              },
-              '.TabIcon--selected': { fill: '#A560E8' },
-              '.Error': { fontWeight: '700', color: '#FF4B4B' },
-            },
-          },
-        });
-
-        // ─── Express Checkout — Apple Pay / Google Pay / Link ───
-        // Renders the one-click wallet buttons above the card form
-        // (mobile: Apple Pay on iOS Safari, Google Pay on Android
-        // Chrome; desktop: Link everywhere, plus the wallet buttons
-        // the browser supports). The `wallets` config uses 'auto'
-        // so Stripe decides what to show based on the browser, the
-        // user's signed-in state and the connected Stripe account.
-        // On `confirm` we hand off to the same confirmSetup flow
-        // the card form uses so success goes to the same return_url.
-        const expressMount = expressCheckoutHostRef.current;
-        if (expressMount && !destroyed) {
-          try {
-            const expressEl = elements.create('expressCheckout', {
-              wallets: { applePay: 'auto', googlePay: 'auto' },
-              buttonHeight: 48,
-              buttonTheme: { applePay: 'black', googlePay: 'black' },
-              buttonType: { applePay: 'plain', googlePay: 'plain' },
-            });
-            // `ready` fires once Stripe knows which (if any) wallets
-            // the browser supports. `availablePaymentMethods` lists
-            // the wallets that actually rendered; if empty we hide
-            // the "Or pay with card" divider so the layout doesn't
-            // look broken in browsers that show none.
-            expressEl.on('ready', (event: { availablePaymentMethods?: Record<string, boolean> | undefined }) => {
-              const available = event?.availablePaymentMethods || {};
-              const anyWallet =
-                !!available.applePay || !!available.googlePay || !!available.link;
-              setHasExpressWallets(anyWallet);
-            });
-            expressEl.on('confirm', async () => {
-              if (submittingTrial) return;
-              setTrialSubmitError(null);
-              setSubmittingTrial(true);
-              try {
-                trackEvent('onboarding_choose_trial', { variant: 'elements_express' });
-                const { error } = await stripe.confirmSetup({
-                  elements,
-                  confirmParams: {
-                    return_url: `${window.location.origin}/dashboard?payment=success`,
-                  },
-                });
-                if (error) {
-                  setTrialSubmitError(error.message || 'Something went wrong. Please try again.');
-                  setSubmittingTrial(false);
-                }
-              } catch (err) {
-                setTrialSubmitError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
-                setSubmittingTrial(false);
-              }
-            });
-            expressEl.mount(expressMount);
-            expressCheckoutElementRef.current = expressEl;
-          } catch {
-            // ECE failed to initialise (e.g. publishable key in test
-            // mode without wallets configured) — silently fall back
-            // to the card-only flow. The card PaymentElement below
-            // still works on its own.
-            setHasExpressWallets(false);
-          }
-        }
-
-        const paymentEl = elements.create('payment', {
-          layout: { type: 'tabs', defaultCollapsed: false },
-        });
-        if (destroyed) return;
-        paymentEl.mount(mountEl);
-
-        stripeRef.current = stripe;
-        elementsRef.current = elements;
-        paymentElementRef.current = paymentEl;
-      } catch (e) {
-        // Log the real error so production failures are debuggable
-        // from the browser console. The user-facing message stays
-        // generic so we don't leak Stripe / API internals.
-        // eslint-disable-next-line no-console
-        console.error('[checkout] failed to initialise Stripe Elements:', e);
-        if (!destroyed) {
-          setEmbeddedError(e instanceof UserFacingCheckoutError ? e.message : EMBEDDED_CHECKOUT_FALLBACK);
-        }
-      } finally {
-        if (!destroyed) setEmbeddedLoading(false);
-      }
-    })();
-
-    return () => {
-      destroyed = true;
-      paymentElementRef.current?.unmount();
-      paymentElementRef.current = null;
-      expressCheckoutElementRef.current?.unmount();
-      expressCheckoutElementRef.current = null;
-      elementsRef.current = null;
-      stripeRef.current = null;
-    };
-  }, [phase, testMode]);
-
-  /* ─── Confirm the trial — submits the PaymentElement and starts
-     the 3-day trial. Stripe redirects to return_url on success. */
-  const handleSubmitTrial = async () => {
-    if (submittingTrial) return;
-    setTrialSubmitError(null);
-    if (testMode) { handleStartTrial(); return; }
-    const stripe = stripeRef.current;
-    const elements = elementsRef.current;
-    if (!stripe || !elements) {
-      setTrialSubmitError('Checkout isn’t ready yet. Give it a second and try again.');
-      return;
-    }
-    setSubmittingTrial(true);
-    try {
-      trackEvent('onboarding_choose_trial', { variant: 'elements' });
-      const { error } = await stripe.confirmSetup({
-        elements,
-        confirmParams: {
-          return_url: `${window.location.origin}/dashboard?payment=success`,
-        },
-      });
-      if (error) {
-        setTrialSubmitError(error.message || 'Something went wrong. Please try again.');
-        setSubmittingTrial(false);
-      }
-      // On success Stripe redirects to return_url — no further action.
-    } catch (e) {
-      setTrialSubmitError(e instanceof Error ? e.message : 'Something went wrong. Please try again.');
-      setSubmittingTrial(false);
-    }
-  };
 
   /* ─── Profile save ─── */
   const saveProfile = async (): Promise<boolean> => {
@@ -1929,6 +1745,61 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
   const handleContinueFree = () => {
     trackEvent('onboarding_choose_free');
     goToPhase('transition');
+  };
+
+  /* ─── Start trial → Stripe-hosted Checkout ───
+     Called by the Subscribe CTA. Always opens checkout with:
+       • 7-day free trial (trialPeriodDays = TRIAL_DAYS)
+       • NEWCUSTOMER promo code auto-applied so the first cycle after
+         the trial is 50% off (then the plan rolls over to full price)
+     Cancel from Stripe lands the user back on the 8-tools page (the
+     same place they came from), NOT the hidden end-paywall. */
+  const handleSubscribeChoice = async () => {
+    if (startingTrial) return;
+    setTrialError(null);
+    trackEvent('onboarding_choose_subscription', {
+      plan: selectedPlanId,
+      cycle: billingCycle,
+      trialDays: TRIAL_DAYS,
+      promo: NEW_CUSTOMER_PROMO_CODE,
+    });
+    if (testMode) {
+      onComplete?.();
+      return;
+    }
+    setStartingTrial(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) { onNavigate('login'); return; }
+      const successUrl = `${window.location.origin}/dashboard?payment=success`;
+      const cancelUrl = `${window.location.origin}/onboarding?preview=value-prop`;
+      const res = await fetch(`${API_URL}/subscriptions/create-checkout-session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          planType: selectedPlanId,
+          billingCycle,
+          successUrl,
+          cancelUrl,
+          trialPeriodDays: TRIAL_DAYS,
+          promoCode: NEW_CUSTOMER_PROMO_CODE,
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      const url = data?.data?.checkoutUrl;
+      if (!res.ok || !url) {
+        setTrialError(
+          (data && typeof data.message === 'string' && data.message) ||
+            'We could not open checkout. Please try again.',
+        );
+        setStartingTrial(false);
+        return;
+      }
+      window.location.href = url;
+    } catch {
+      setTrialError('We could not open checkout. Please try again.');
+      setStartingTrial(false);
+    }
   };
 
   // Called when the user clicks "Skip" / "Maybe later" on the SOFT
@@ -2265,13 +2136,13 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
                   </div>
                   <div className="flex-1 min-w-0">
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFC800]/15 border-2 border-[#FFC800]/45 text-[#7A5C00] text-[10px] font-extrabold uppercase tracking-[0.18em] mb-2 shadow-[0_4px_14px_-4px_rgba(255,200,0,0.5)]">
-                      <span aria-hidden>✨</span> 3-day free trial
+                      <span aria-hidden>✨</span> {TRIAL_DAYS}-day free trial · 50% off your first cycle
                     </span>
                     <h1 className="text-[1.6rem] sm:text-[1.85rem] lg:text-[2rem] xl:text-[2.2rem] font-extrabold leading-[1.05] tracking-tight text-[#3C3C3C] dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                      Try Pro free for 3 days on us{firstName ? `, ${firstName}` : ''}
+                      Try Pro free for {TRIAL_DAYS} days{firstName ? `, ${firstName}` : ''}
                     </h1>
                     <p className="mt-2 text-stone-600 dark:text-stone-400 text-[13px] sm:text-sm font-bold">
-                      $0 today · Cancel anytime · No charge until day 4
+                      $0 today · Cancel anytime · Apple Pay · Google Pay · all major cards
                     </p>
                   </div>
                 </div>
@@ -2324,136 +2195,192 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
                 </ul>
               </div>
 
-              {/* ─── RIGHT — payment column ─── */}
-              <div className="space-y-3">
-                {/* Compact pricing summary — one horizontal row */}
-                <div className="rounded-2xl border-2 border-b-4 border-[#A560E8]/40 bg-gradient-to-br from-white via-white to-[#FAF5FF] dark:from-stone-900 dark:via-stone-900 dark:to-stone-900 px-4 py-3 flex items-center justify-between gap-3 shadow-[0_18px_42px_-22px_rgba(165,96,232,0.45)] relative overflow-hidden">
-                  <div className="pointer-events-none absolute -top-10 -right-10 h-24 w-24 rounded-full bg-[#A560E8]/12 blur-2xl" aria-hidden />
-                  <div className="relative">
-                    <p className="inline-flex items-center gap-1.5 text-[9.5px] font-extrabold uppercase tracking-[0.18em] text-[#A560E8]">
-                      <span aria-hidden>⭐</span> WriteScholar Pro
-                    </p>
-                    <p className="mt-0.5 text-[1.5rem] font-extrabold leading-none text-[#3C3C3C] dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                      $0<span className="ml-1 text-xs font-bold text-stone-400">/today</span>
-                    </p>
-                  </div>
-                  <div className="relative text-right text-[11px] font-bold text-stone-500 dark:text-stone-400 leading-tight">
-                    Then <span className="font-extrabold text-stone-800 dark:text-stone-100">$19.99/mo</span><br />
-                    Cancel anytime
-                  </div>
+              {/* ─── RIGHT — plan picker + Subscribe CTA ───
+                  Annual/Monthly toggle on top (Annual default, leads
+                  with the cheaper /month figure). Two plan cards
+                  below: Pro (selected by default, "Most popular") and
+                  Premium. Single big Subscribe button at the bottom
+                  redirects to Stripe-hosted Checkout for the selected
+                  plan + cycle. */}
+              <div className="space-y-4">
+                {/* Annual / Monthly billing toggle */}
+                <div
+                  role="tablist"
+                  aria-label="Billing cycle"
+                  className="flex items-center gap-1 p-1 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900"
+                >
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={billingCycle === 'yearly'}
+                    onClick={() => setBillingCycle('yearly')}
+                    className={`flex-1 py-2.5 px-3 rounded-xl text-[12px] font-extrabold uppercase tracking-wide transition-all flex items-center justify-center gap-2 ${
+                      billingCycle === 'yearly'
+                        ? 'bg-[#A560E8] text-white shadow-[0_4px_12px_-4px_rgba(165,96,232,0.6)]'
+                        : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'
+                    }`}
+                  >
+                    Annual
+                    <span
+                      className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wider ${
+                        billingCycle === 'yearly'
+                          ? 'bg-white/25 text-white'
+                          : 'bg-[#FFC800]/20 text-[#7A5C00]'
+                      }`}
+                    >
+                      Save 17%
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={billingCycle === 'monthly'}
+                    onClick={() => setBillingCycle('monthly')}
+                    className={`flex-1 py-2.5 px-3 rounded-xl text-[12px] font-extrabold uppercase tracking-wide transition-all ${
+                      billingCycle === 'monthly'
+                        ? 'bg-[#A560E8] text-white shadow-[0_4px_12px_-4px_rgba(165,96,232,0.6)]'
+                        : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'
+                    }`}
+                  >
+                    Monthly
+                  </button>
                 </div>
 
-                {/* Stripe form card — green secure header + themed PaymentElement */}
-                <div className="rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 overflow-hidden shadow-[0_22px_56px_-22px_rgba(0,0,0,0.20)]">
-                  <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#58CC02] to-[#46A302] text-white">
-                    <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden><path fillRule="evenodd" d="M5 9V7a5 5 0 0 1 10 0v2h.5A1.5 1.5 0 0 1 17 10.5v6A1.5 1.5 0 0 1 15.5 18h-11A1.5 1.5 0 0 1 3 16.5v-6A1.5 1.5 0 0 1 4.5 9H5Zm2 0V7a3 3 0 1 1 6 0v2H7Z" clipRule="evenodd" /></svg>
-                    <p className="text-[10.5px] font-extrabold uppercase tracking-[0.16em]">Secure checkout · Powered by Stripe</p>
-                  </div>
-                  <div className="p-4 sm:p-5 relative">
-                    {testMode ? (
-                      /* Friendly preview placeholder — mock Stripe-style form */
-                      <div className="rounded-2xl border-2 border-dashed border-[#A560E8]/40 bg-[#F3EAFF]/40 dark:bg-[#A560E8]/10 p-4 flex flex-col">
-                        <span className="inline-flex items-center gap-1.5 self-start px-2.5 py-1 rounded-full bg-[#A560E8]/15 text-[#7733B5] dark:text-[#C9A0F0] text-[10px] font-extrabold uppercase tracking-[0.16em] border border-[#A560E8]/30">
-                          <span aria-hidden>👀</span> Preview mode
-                        </span>
-                        <p className="mt-2.5 text-[12.5px] font-bold text-stone-600 dark:text-stone-300 leading-relaxed">
-                          In production, Stripe&apos;s secure card form renders here — number, expiry, CVC and the 3-day trial summary.
-                        </p>
-                        <div className="mt-3 space-y-2.5">
-                          {[
-                            { label: 'Email', w: 'w-2/3' },
-                            { label: 'Card number', w: 'w-3/4' },
-                            { label: 'Expiry  ·  CVC', w: 'w-1/2' },
-                            { label: 'Country', w: 'w-1/3' },
-                          ].map((f) => (
-                            <div key={f.label} className="rounded-xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900/60 px-3.5 py-2">
-                              <p className="text-[9.5px] font-extrabold uppercase tracking-[0.18em] text-stone-400 mb-1">{f.label}</p>
-                              <div className={`h-2.5 ${f.w} rounded-full bg-stone-100 dark:bg-stone-800`} />
-                            </div>
-                          ))}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={handleStartTrial}
-                          className="mt-4 w-full inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-[#58CC02] hover:bg-[#46A302] text-white text-base font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all"
+                {/* Plan cards — radio-style, click to select.
+                    Every plan starts with a 7-day free trial and a
+                    50%-off first cycle (NEWCUSTOMER auto-applied by
+                    handleSubscribeChoice), so the headline is "$0
+                    today" and the sub-line spells out the post-trial
+                    price ladder. */}
+                <div className="space-y-2.5" role="radiogroup" aria-label="Subscription plan">
+                  {(['pro', 'premium'] as const).map((planId) => {
+                    const plan = PLANS[planId];
+                    const cycleData = plan[billingCycle];
+                    const isSelected = selectedPlanId === planId;
+                    return (
+                      <button
+                        key={planId}
+                        type="button"
+                        role="radio"
+                        aria-checked={isSelected}
+                        onClick={() => setSelectedPlanId(planId)}
+                        className={`w-full text-left rounded-2xl border-2 border-b-4 p-4 transition-all relative overflow-hidden ${
+                          isSelected
+                            ? 'border-[#A560E8] bg-gradient-to-br from-[#F3EAFF] via-white to-white dark:from-[#A560E8]/15 dark:via-stone-900 dark:to-stone-900 shadow-[0_18px_40px_-20px_rgba(165,96,232,0.5)]'
+                            : 'border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 hover:border-[#A560E8]/40'
+                        }`}
+                      >
+                        {/* Selected checkmark — top-right corner */}
+                        <span
+                          aria-hidden
+                          className={`absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center transition-all ${
+                            isSelected ? 'bg-[#A560E8]' : 'border-2 border-stone-300 dark:border-stone-600'
+                          }`}
                         >
-                          Start for free (preview)
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                        </button>
-                      </div>
-                    ) : (
-                      <>
-                        {embeddedLoading && (
-                          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white/95 dark:bg-stone-900/95 z-10 rounded-2xl">
-                            <span className="w-10 h-10 border-[5px] border-[#A560E8] border-t-transparent rounded-full animate-spin" />
-                            <p className="text-sm text-stone-500 dark:text-stone-400 font-bold">Loading secure checkout…</p>
-                          </div>
-                        )}
-                        {embeddedError && !embeddedLoading && (
-                          <div className="mb-3 rounded-xl bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-2 border-[#FF4B4B]/30 px-4 py-3 text-sm text-[#FF4B4B] font-bold">
-                            {embeddedError}
-                          </div>
-                        )}
-                        {/* Express Checkout — Apple Pay / Google Pay /
-                            Link buttons. Hidden when the browser shows
-                            zero wallets so the divider below doesn't
-                            float over empty space. */}
-                        <div
-                          ref={expressCheckoutHostRef}
-                          id="onboarding-express-checkout"
-                          className={hasExpressWallets ? 'mb-3' : 'hidden'}
-                        />
-                        {hasExpressWallets && (
-                          <div className="relative flex items-center my-3" aria-hidden>
-                            <div className="flex-1 h-px bg-stone-200 dark:bg-stone-700" />
-                            <span className="px-3 text-[10px] font-extrabold uppercase tracking-[0.18em] text-stone-400 dark:text-stone-500">
-                              Or pay with card
-                            </span>
-                            <div className="flex-1 h-px bg-stone-200 dark:bg-stone-700" />
-                          </div>
-                        )}
-                        {/* PaymentElement mounts here. Themed via the
-                            appearance config in the effect above so it
-                            renders in WriteScholar's brand language. */}
-                        <div ref={checkoutHostRef} className="min-h-[240px]" id="onboarding-payment-element" />
-
-                        {trialSubmitError && (
-                          <div className="mt-3 rounded-xl bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-2 border-[#FF4B4B]/30 px-4 py-3 text-sm text-[#FF4B4B] font-bold">
-                            {trialSubmitError}
-                          </div>
-                        )}
-                        <button
-                          type="button"
-                          onClick={handleSubmitTrial}
-                          disabled={submittingTrial || embeddedLoading || !!embeddedError}
-                          className="mt-4 w-full inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-[#58CC02] hover:bg-[#46A302] disabled:opacity-60 disabled:cursor-not-allowed text-white text-base font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all"
-                        >
-                          {submittingTrial ? (
-                            <>
-                              <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden>
-                                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-25" />
-                                <path fill="currentColor" className="opacity-90" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                              </svg>
-                              Starting your trial…
-                            </>
-                          ) : (
-                            <>
-                              Start for free
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                              </svg>
-                            </>
+                          {isSelected && (
+                            <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
                           )}
-                        </button>
-                      </>
-                    )}
-                  </div>
+                        </span>
+
+                        {/* Plan name + "Most popular" pill */}
+                        <div className="flex items-center gap-2 pr-8">
+                          <span
+                            className="text-base font-extrabold text-[#3C3C3C] dark:text-stone-50"
+                            style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+                          >
+                            <span className="mr-1" aria-hidden>{plan.emoji}</span>
+                            {plan.name}
+                          </span>
+                          {plan.popular && (
+                            <span className="px-1.5 py-0.5 rounded-md bg-[#FFC800]/25 text-[#7A5C00] text-[9px] font-extrabold uppercase tracking-wide">
+                              Most popular
+                            </span>
+                          )}
+                        </div>
+
+                        {/* $0 today — the headline figure. The actual
+                            price ladder is in the sub-line below. */}
+                        <div className="mt-1.5 flex items-baseline gap-1">
+                          <span
+                            className="text-[1.85rem] sm:text-[2rem] font-extrabold leading-none text-[#58CC02]"
+                            style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+                          >
+                            $0
+                          </span>
+                          <span className="text-xs font-bold text-stone-500 dark:text-stone-400">today</span>
+                        </div>
+
+                        {/* Trial + post-trial pricing ladder. The
+                            green "first cycle" price is the
+                            NEWCUSTOMER-discounted rate; rollover is
+                            the regular renewal price. */}
+                        <p className="mt-1 text-[11.5px] font-bold text-stone-500 dark:text-stone-400 leading-snug">
+                          {TRIAL_DAYS} days free, then{' '}
+                          <span className="font-extrabold text-[#46A302]">
+                            {cycleData.firstCyclePrice}
+                          </span>{' '}
+                          {cycleData.firstCycleLabel}{' '}
+                          <span className="text-stone-400 dark:text-stone-500">
+                            ({cycleData.rolloverPrice}{cycleData.rolloverSuffix})
+                          </span>
+                        </p>
+
+                        {/* Top 2 features — compact */}
+                        <ul className="mt-2.5 space-y-1">
+                          {plan.features.slice(0, 2).map((f) => (
+                            <li key={f} className="flex items-start gap-1.5 text-[12px] font-bold text-stone-600 dark:text-stone-300">
+                              <svg className="w-3.5 h-3.5 mt-0.5 shrink-0 text-[#58CC02]" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                              </svg>
+                              <span>{f}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </button>
+                    );
+                  })}
                 </div>
 
-                <p className="text-center text-[11px] font-bold text-stone-400 dark:text-stone-500">
-                  🔒 Encrypted by Stripe · WriteScholar never sees your card number
+                {/* Error from create-checkout-session call */}
+                {trialError && (
+                  <div className="rounded-xl bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-2 border-[#FF4B4B]/30 px-3 py-2.5 text-[12.5px] text-[#FF4B4B] font-bold">
+                    {trialError}
+                  </div>
+                )}
+
+                {/* Subscribe CTA — opens Stripe's hosted Checkout page
+                    with the 7-day trial and 50% off auto-applied. */}
+                <button
+                  type="button"
+                  onClick={() => handleSubscribeChoice()}
+                  disabled={startingTrial}
+                  className="w-full inline-flex items-center justify-center gap-2 py-4 rounded-2xl bg-[#58CC02] hover:bg-[#46A302] disabled:opacity-60 disabled:cursor-not-allowed text-white text-base sm:text-[17px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_14px_30px_-14px_rgba(70,163,2,0.6)]"
+                >
+                  {startingTrial ? (
+                    <>
+                      <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden>
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-25" />
+                        <path fill="currentColor" className="opacity-90" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      Opening secure checkout…
+                    </>
+                  ) : (
+                    <>
+                      Start my {TRIAL_DAYS}-day free trial
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </>
+                  )}
+                </button>
+
+                <p className="text-center text-[10.5px] font-bold text-stone-400 dark:text-stone-500">
+                  🔒 $0 today · We&apos;ll email you 24h before any charge · Secure checkout by Stripe
                 </p>
 
+                {/* Maybe later — opens the NEWCUSTOMER 50% off reconsider modal */}
                 <div className="text-center">
                   <button
                     type="button"
@@ -2472,11 +2399,12 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
           </div>
         </div>
 
-        {/* ─── "Are you sure?" confirmation modal ───
-            Shown only after the user clicks "Maybe later" on the
-            checkout form. Last-chance friction before the user walks
-            away from the free trial. Red CTA = continue declining;
-            green CTA = stay on the checkout form. */}
+        {/* ─── "Are you sure?" reconsider modal ───
+            Light recovery prompt after "Maybe later". The 50% off is
+            already auto-applied to everyone's checkout, so this is
+            just a soft "you'll lose the trial" reminder, not a
+            discount-bait offer. Green CTA = start the trial; red
+            secondary CTA = skip checkout and finish onboarding. */}
         {showCheckoutDeclineConfirm && (
           <div
             role="dialog"
@@ -2498,40 +2426,41 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
 
                 <h2
                   id="checkout-decline-title"
-                  className="text-[1.4rem] sm:text-[1.55rem] font-extrabold leading-tight tracking-tight text-[#3C3C3C] dark:text-stone-50"
+                  className="text-[1.55rem] sm:text-[1.7rem] font-extrabold leading-tight tracking-tight text-[#3C3C3C] dark:text-stone-50"
                   style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                 >
                   Are you sure?
                 </h2>
                 <p className="mt-2.5 text-[13.5px] sm:text-sm font-bold text-stone-600 dark:text-stone-300 leading-relaxed">
-                  Once you&apos;ve passed onboarding you will miss out on our <span className="text-[#A560E8]">free Pro features</span>.
+                  You&apos;ll miss the <span className="text-[#A560E8]">{TRIAL_DAYS}-day free trial</span> and the half-price first cycle. $0 due today and you can cancel anytime in one click.
                 </p>
 
-                {/* CTAs — green (stay on trial) primary, red (leave) secondary */}
+                {/* CTAs */}
                 <div className="mt-6 space-y-2.5">
                   <button
                     type="button"
                     onClick={() => {
-                      trackEvent('onboarding_paywall_decline_reconsider');
+                      trackEvent('onboarding_paywall_decline_reconsider', { source: 'checkout_confirm_modal' });
                       setShowCheckoutDeclineConfirm(false);
+                      handleSubscribeChoice();
                     }}
-                    className="w-full py-3 px-4 rounded-2xl bg-[#58CC02] hover:bg-[#46A302] text-white text-[13px] sm:text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all"
+                    disabled={startingTrial}
+                    className="w-full py-3 px-4 rounded-2xl bg-[#58CC02] hover:bg-[#46A302] disabled:opacity-60 disabled:cursor-not-allowed text-white text-[13px] sm:text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all"
                   >
-                    You&apos;re right, I want my free Pro trial
+                    You&apos;re right, start my free trial
                   </button>
                   <button
                     type="button"
                     onClick={() => {
                       trackEvent('onboarding_paywall_decline_soft', { source: 'checkout_confirm_modal' });
                       setShowCheckoutDeclineConfirm(false);
-                      // Skip the paywall-hard "50% off" upsell entirely
-                      // — finish onboarding and drop straight to the
+                      // Skip checkout entirely — drop straight to the
                       // dashboard via the transition screen.
                       handleContinueFree();
                     }}
                     className="w-full py-3 px-4 rounded-2xl bg-white dark:bg-stone-900 hover:bg-[#FFE8E8] dark:hover:bg-[#FF4B4B]/10 text-[#FF4B4B] text-[12px] sm:text-[12.5px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#FF4B4B]/50 hover:border-[#FF4B4B] active:border-b-2 active:translate-y-0.5 transition-all"
                   >
-                    I will miss the free opportunity
+                    No thanks, take me to the dashboard
                   </button>
                 </div>
               </div>

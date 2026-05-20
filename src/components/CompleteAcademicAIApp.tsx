@@ -1238,13 +1238,13 @@ const AcademicAIApp = () => {
     isLoggedIn && user?.id && !user.onboardingCompleted && !sawStripeSuccessOnLoad;
 
   /* ─── Post-Stripe-success recovery ───
-     When Stripe redirects to /dashboard?payment=success after the user
-     submits their card during onboarding, refresh /auth/me so the
-     cached user picks up subscription_plan='pro' and
-     subscription_status='trialing' that the create-elements-trial
-     route just wrote to Supabase. The onboardingCompleted flag is
-     also set in that same backend route, so the routing layer
-     stops bouncing this user. */
+     When Stripe-hosted Checkout redirects to /dashboard?payment=success
+     after the user enters their card, refresh /auth/me so the cached
+     user picks up subscription_plan='pro' and subscription_status=
+     'trialing' that the `customer.subscription.created` webhook just
+     wrote to Supabase. The webhook also sets onboarding_completed=true
+     in the same UPDATE, so the routing layer stops bouncing this user
+     to /onboarding on the next render. */
   const syncStripeSubscriptionRanRef = useRef(false);
   useEffect(() => {
     if (!sawStripeSuccessOnLoad) return;

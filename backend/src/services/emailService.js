@@ -583,6 +583,165 @@ class EmailService {
       return { success: false, error: error.message };
     }
   }
+
+  /* ─── Trial-ending reminder ───
+   *  Fired by the hourly `notifyTrialsEndingSoon` cron in
+   *  subscriptionService when a user's 7-day free trial has roughly
+   *  24 hours left. Lets them either continue with the auto-renewing
+   *  paid plan (no action) or cancel from their account before they
+   *  get charged.
+   *
+   *  @param {string} email     recipient
+   *  @param {Object} opts      { firstName, planName, billingLabel,
+   *                              firstChargeAmount, firstChargeAt }
+   */
+  async sendTrialEndingEmail(email, opts = {}) {
+    if (!this.transporter) {
+      console.log('📧 Trial-ending email would be sent to:', email, opts);
+      return { success: true, message: 'Email service not configured - trial-ending email logged to console' };
+    }
+
+    try {
+      const fromAddress = process.env.EMAIL_FROM || process.env.EMAIL_USER;
+      const replyToAddress = process.env.EMAIL_REPLY_TO || 'support@writescholar.com';
+      const { frontendUrl, mascotUrl } = getEmailAssets();
+      const accountUrl = `${frontendUrl}/account`;
+
+      const firstName = (opts.firstName || '').trim();
+      const greetingName = firstName ? `, ${firstName}` : '';
+      const planName = opts.planName || 'Pro';
+      const billingLabel = opts.billingLabel || 'plan';
+      const firstChargeAmount = opts.firstChargeAmount || '';
+      const firstChargeAt = opts.firstChargeAt
+        ? new Date(opts.firstChargeAt).toLocaleDateString('en-US', {
+            weekday: 'long',
+            month: 'short',
+            day: 'numeric',
+          })
+        : null;
+
+      // Friendly subject — leads with value, not the charge. The
+      // billing detail is in the footer block so it's visible without
+      // dominating the message.
+      const subjectLine = firstName
+        ? `One day left, ${firstName} — let's keep your streak going`
+        : `One day left — let's keep your streak going`;
+
+      const dashboardUrl = `${frontendUrl}/dashboard`;
+
+      // What they keep with Pro — short list, all benefits-framed.
+      const valueRows = [
+        { emoji: '📝', title: 'Full essay rubric',     desc: 'Every analysis stays unlocked — annotations, grade, the lot.', color: EMAIL_COLORS.purple, soft: EMAIL_COLORS.purpleSoft, dark: EMAIL_COLORS.purpleDark },
+        { emoji: '🔁', title: 'One-click revisions',   desc: 'Accept a suggested rewrite and it lands in your draft.',       color: EMAIL_COLORS.green,  soft: EMAIL_COLORS.greenSoft,  dark: EMAIL_COLORS.greenDark },
+        { emoji: '📚', title: 'Unlimited study packs', desc: 'Notes → flashcards, quizzes and crosswords on tap.',           color: EMAIL_COLORS.blue,   soft: EMAIL_COLORS.blueSoft,   dark: EMAIL_COLORS.blueDark },
+      ];
+      const valueRowsHtml = valueRows.map((f) => `
+                          <tr>
+                            <td style="padding: 5px 0;">
+                              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: ${EMAIL_COLORS.white}; border-radius: 14px; border: 2px solid ${EMAIL_COLORS.border}; border-bottom: 4px solid ${EMAIL_COLORS.border};">
+                                <tr>
+                                  <td width="48" style="padding: 10px 12px;">
+                                    <table role="presentation" cellspacing="0" cellpadding="0">
+                                      <tr>
+                                        <td style="background-color: ${f.soft}; border: 2px solid ${f.color}; border-bottom: 3px solid ${f.dark}; border-radius: 12px; width: 44px; height: 44px; text-align: center; font-size: 22px; line-height: 44px; vertical-align: middle;">
+                                          ${f.emoji}
+                                        </td>
+                                      </tr>
+                                    </table>
+                                  </td>
+                                  <td style="padding: 10px 14px 10px 4px;">
+                                    <p style="margin: 0 0 2px 0; font-family: ${NUNITO_STACK}; font-size: 14px; font-weight: 800; color: ${EMAIL_COLORS.text};">${f.title}</p>
+                                    <p style="margin: 0; font-size: 12px; font-weight: 600; color: ${EMAIL_COLORS.textMuted}; line-height: 1.45;">${f.desc}</p>
+                                  </td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>`).join('');
+
+      const mailOptions = {
+        from: `"WriteScholar" <${fromAddress}>`,
+        to: email,
+        replyTo: replyToAddress,
+        subject: subjectLine,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <meta name="color-scheme" content="light">
+            <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+          </head>
+          <body style="margin: 0; padding: 0; background-color: ${EMAIL_COLORS.bg}; font-family: ${NUNITO_STACK};">
+            <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
+              One day left of your WriteScholar trial — keep your full rubric, one-click revisions, and study packs going. Manage or pause anytime.
+            </div>
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: ${EMAIL_COLORS.bg};">
+              <tr>
+                <td align="center" style="padding: 36px 16px;">
+                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 520px; background-color: ${EMAIL_COLORS.white}; border-radius: 18px; overflow: hidden; border: 2px solid ${EMAIL_COLORS.border}; border-bottom: 4px solid ${EMAIL_COLORS.border};">
+                    ${emailHeaderBlock('A note about your trial', { mascotUrl, accentColor: EMAIL_COLORS.purple, accentSoft: EMAIL_COLORS.purpleSoft })}
+
+                    <tr>
+                      <td style="padding: 8px 32px 26px;">
+                        <h1 style="margin: 0 0 10px 0; font-family: ${NUNITO_STACK}; font-size: 28px; font-weight: 900; color: ${EMAIL_COLORS.text}; text-align: center; letter-spacing: -0.02em; line-height: 1.2;">
+                          One more day${greetingName} 🎉
+                        </h1>
+                        <p style="margin: 0 0 22px 0; font-size: 15px; font-weight: 600; color: ${EMAIL_COLORS.textMuted}; text-align: center; line-height: 1.55;">
+                          You&apos;ve been on Pro for almost a week — nice work. Here&apos;s what stays unlocked when your ${planName} ${billingLabel} kicks in tomorrow:
+                        </p>
+
+                        <!-- Value-focused rows — what they KEEP, not what we charge -->
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-bottom: 22px;">
+                          ${valueRowsHtml}
+                        </table>
+
+                        <!-- Primary CTA — drives them back into the product -->
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                          <tr>
+                            <td align="center" style="padding: 0 0 18px 0;">
+                              ${ctaButton(dashboardUrl, 'Open WriteScholar')}
+                            </td>
+                          </tr>
+                        </table>
+
+                        <!-- Quiet billing line — legally required notice + reassurance,
+                             but framed as info you control, not a demand. -->
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                          <tr>
+                            <td style="background-color: ${EMAIL_COLORS.bg}; border: 2px solid ${EMAIL_COLORS.border}; border-radius: 14px; padding: 14px 16px;">
+                              <p style="margin: 0; font-size: 12.5px; font-weight: 600; color: ${EMAIL_COLORS.textMuted}; line-height: 1.55; text-align: center;">
+                                Just so you know: your trial wraps up in 24 hours${firstChargeAmount ? `, and your ${billingLabel} renews at <strong style="color: ${EMAIL_COLORS.text};">${firstChargeAmount}</strong>` : ''}${firstChargeAt ? ` on <strong style="color: ${EMAIL_COLORS.text};">${firstChargeAt}</strong>` : ''}. Want a break instead? <a href="${accountUrl}" style="color: ${EMAIL_COLORS.purple}; font-weight: 800; text-decoration: underline;">Pause or cancel in one click</a> — no hard feelings.
+                              </p>
+                            </td>
+                          </tr>
+                        </table>
+
+                        <p style="margin: 16px 0 0 0; font-size: 12px; font-weight: 600; color: ${EMAIL_COLORS.textMuted}; text-align: center; line-height: 1.5;">
+                          Got a question? Just hit reply — a real person will get back to you.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                  <p style="margin: 16px 0 0 0; font-size: 11px; font-weight: 600; color: ${EMAIL_COLORS.textMuted}; text-align: center;">
+                    WriteScholar · You received this because you started a free trial.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </body>
+          </html>
+        `,
+      };
+
+      const result = await this.transporter.sendMail(mailOptions);
+      console.log('✅ Trial-ending email sent to:', email);
+      return { success: true, messageId: result.messageId };
+    } catch (error) {
+      console.error('❌ Failed to send trial-ending email:', error);
+      return { success: false, error: error.message };
+    }
+  }
 }
 
 module.exports = new EmailService();

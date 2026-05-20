@@ -152,136 +152,6 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
   }
 });
 
-// @route   POST /api/subscriptions/create-elements-trial
-// @desc    Create a trialing Pro subscription for Stripe Elements
-//          PaymentElement. Returns a SetupIntent client_secret the
-//          frontend confirms with the user's card. The trial begins
-//          immediately; the saved card is charged after the trial.
-// @access  Private
-router.post('/create-elements-trial', authenticateToken, async (req, res) => {
-  try {
-    const user = req.user;
-    let customerId = user.stripe_customer_id;
-
-    // Auto-create Stripe customer for brand-new accounts (mirrors
-    // create-checkout-session behaviour).
-    if (!customerId) {
-      const customerResult = await subscriptionService.createStripeCustomer(
-        user.email,
-        user.name || user.email,
-      );
-      if (!customerResult.success) {
-        console.error('create-elements-trial: createStripeCustomer failed:', customerResult.error);
-        return res.status(500).json({
-          success: false,
-          message: 'We could not start your trial. Please refresh and try again.',
-          error: devOnlyErrorDetail(customerResult.error),
-        });
-      }
-      customerId = customerResult.customerId;
-      const { error: updateError } = await getSupabase()
-        .from('users')
-        .update({ stripe_customer_id: customerId })
-        .eq('id', user.id);
-      if (updateError) {
-        console.error('Error updating user with Stripe customer ID:', updateError);
-      }
-    }
-
-    const rawTrialDays = req.body?.trialPeriodDays;
-    const trialPeriodDays =
-      Number.isFinite(Number(rawTrialDays)) && Number(rawTrialDays) > 0
-        ? Math.floor(Number(rawTrialDays))
-        : 3;
-
-    const result = await subscriptionService.createElementsTrialSubscription(
-      customerId,
-      user.id,
-      { trialPeriodDays },
-    );
-
-    if (!result.success) {
-      console.error('create-elements-trial: subscription create failed:', result.error);
-      return res.status(500).json({
-        success: false,
-        message: 'We could not start your trial. Please refresh and try again.',
-        error: devOnlyErrorDetail(result.error),
-      });
-    }
-
-    // ─── Immediate Supabase flip ───
-    // Stripe just created the subscription with status='trialing'
-    // (because trial_period_days > 0), so we mark the user as Pro
-    // RIGHT NOW — no waiting for webhooks, no waiting for the
-    // post-redirect sync round-trip. This is the source of truth
-    // the dashboard reads. If the user abandons before confirming
-    // their card, Stripe's `missing_payment_method: cancel` on the
-    // trial settings cancels the sub at trial end and the
-    // `customer.subscription.deleted` webhook downgrades them.
-    try {
-      const { error: planUpdateError } = await getSupabase()
-        .from('users')
-        .update({
-          subscription_plan: 'pro',
-          subscription_status: 'trialing',
-          onboarding_completed: true,
-        })
-        .eq('id', user.id);
-      if (planUpdateError) {
-        console.error('create-elements-trial: user plan update failed:', planUpdateError);
-      }
-    } catch (planErr) {
-      console.error('create-elements-trial: user plan update threw:', planErr);
-    }
-
-    // Best-effort upsert into the subscriptions table so
-    // /subscriptions/current returns the row immediately. Webhook
-    // will refine current_period_start/end when it fires.
-    try {
-      const nowIso = new Date().toISOString();
-      const trialEnds = new Date(Date.now() + trialPeriodDays * 24 * 60 * 60 * 1000).toISOString();
-      const { error: subUpsertError } = await getSupabase()
-        .from('subscriptions')
-        .upsert(
-          {
-            user_id: user.id,
-            stripe_subscription_id: result.subscriptionId,
-            stripe_customer_id: customerId,
-            plan: 'pro',
-            status: 'trialing',
-            current_period_start: nowIso,
-            current_period_end: trialEnds,
-            cancel_at_period_end: false,
-            created_at: nowIso,
-            updated_at: nowIso,
-          },
-          { onConflict: 'stripe_subscription_id' },
-        );
-      if (subUpsertError) {
-        console.error('create-elements-trial: subscriptions upsert failed:', subUpsertError);
-      }
-    } catch (subErr) {
-      console.error('create-elements-trial: subscriptions upsert threw:', subErr);
-    }
-
-    return res.status(200).json({
-      success: true,
-      data: {
-        subscriptionId: result.subscriptionId,
-        clientSecret: result.clientSecret,
-        trialPeriodDays,
-      },
-    });
-  } catch (error) {
-    console.error('create-elements-trial error:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'We could not start your trial. Please refresh and try again.',
-      error: devOnlyErrorDetail(error.message),
-    });
-  }
-});
-
 // @route   POST /api/subscriptions/sync-checkout-session
 // @desc    Confirm Embedded Checkout session and sync subscription to DB (webhook may lag)
 // @access  Private
@@ -591,6 +461,133 @@ router.post('/cancel', authenticateToken, async (req, res) => {
       success: false,
       message: 'Failed to cancel subscription',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// @route   POST /api/subscriptions/pause
+// @desc    Pause the user's subscription for N days (cancellation
+//          retention flow — "Need a break? Pause for 30 days"). Uses
+//          Stripe's pause_collection so no charges fire during the
+//          pause window; user keeps Pro features for the duration.
+// @access  Private
+router.post('/pause', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const rawDays = Number(req.body?.days);
+    const days =
+      Number.isFinite(rawDays) && rawDays > 0 && rawDays <= 90
+        ? Math.floor(rawDays)
+        : 30;
+
+    const { data: subscription, error: subError } = await getSupabase()
+      .from('subscriptions')
+      .select('stripe_subscription_id')
+      .eq('user_id', userId)
+      .in('status', ['active', 'trialing'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (subError || !subscription) {
+      return res.status(404).json({
+        success: false,
+        message: 'No active subscription to pause',
+      });
+    }
+
+    const pauseResult = await subscriptionService.pauseStripeSubscription(
+      subscription.stripe_subscription_id,
+      days,
+    );
+
+    if (!pauseResult.success) {
+      console.error('pause subscription: Stripe failed:', pauseResult.error);
+      return res.status(500).json({
+        success: false,
+        message: 'We could not pause your subscription. Please try again.',
+        error: devOnlyErrorDetail(pauseResult.error),
+      });
+    }
+
+    res.json({
+      success: true,
+      message: `Subscription paused for ${days} days`,
+      resumesAt: pauseResult.resumesAt
+        ? new Date(pauseResult.resumesAt * 1000).toISOString()
+        : null,
+      days,
+    });
+  } catch (error) {
+    console.error('Error pausing subscription:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to pause subscription',
+      error: devOnlyErrorDetail(error.message),
+    });
+  }
+});
+
+// @route   POST /api/subscriptions/apply-retention-discount
+// @desc    Apply the retention coupon (50% off next invoice) when the
+//          user accepts the "Stay for 50% off next month?" offer in
+//          the cancellation retention flow. Coupon ID comes from the
+//          STRIPE_RETENTION_COUPON_ID env var — create the coupon in
+//          the Stripe Dashboard with duration='once' for a single-
+//          month discount.
+// @access  Private
+router.post('/apply-retention-discount', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const couponId = process.env.STRIPE_RETENTION_COUPON_ID;
+    if (!couponId) {
+      console.error('apply-retention-discount: STRIPE_RETENTION_COUPON_ID not set');
+      return res.status(500).json({
+        success: false,
+        message: 'Retention discount is not configured. Please contact support.',
+      });
+    }
+
+    const { data: subscription, error: subError } = await getSupabase()
+      .from('subscriptions')
+      .select('stripe_subscription_id')
+      .eq('user_id', userId)
+      .in('status', ['active', 'trialing'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (subError || !subscription) {
+      return res.status(404).json({
+        success: false,
+        message: 'No active subscription found',
+      });
+    }
+
+    const result = await subscriptionService.applyRetentionDiscount(
+      subscription.stripe_subscription_id,
+      couponId,
+    );
+
+    if (!result.success) {
+      console.error('apply-retention-discount: Stripe failed:', result.error);
+      return res.status(500).json({
+        success: false,
+        message: 'We could not apply the discount. Please try again.',
+        error: devOnlyErrorDetail(result.error),
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Retention discount applied to next invoice',
+    });
+  } catch (error) {
+    console.error('Error applying retention discount:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to apply discount',
+      error: devOnlyErrorDetail(error.message),
     });
   }
 });

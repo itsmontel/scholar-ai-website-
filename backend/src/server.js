@@ -196,6 +196,18 @@ const startServer = async () => {
         console.log('🔄 Running scheduled subscription reconciliation...');
         await subscriptionService.reconcileSubscriptions();
       }, 24 * 60 * 60 * 1000); // 24 hours in milliseconds
+
+      // Trial-ending reminder — every hour, find trialing users whose
+      // trial expires in roughly 24h and hasn't been emailed yet,
+      // then send the reminder. Idempotent (each subscription fires
+      // at most once thanks to trial_ending_email_sent_at column).
+      subscriptionService.notifyTrialsEndingSoon()
+        .then((result) => console.log('✅ Initial trial-ending sweep completed:', result))
+        .catch((error) => console.error('❌ Initial trial-ending sweep failed:', error));
+
+      setInterval(async () => {
+        await subscriptionService.notifyTrialsEndingSoon();
+      }, 60 * 60 * 1000); // 1 hour in milliseconds
     });
   } catch (error) {
     console.error('❌ Failed to start server:', error);

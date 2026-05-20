@@ -196,9 +196,13 @@ async function handleSubscriptionCreated(subscription) {
     // Determine plan based on Stripe status + price ID
     const plan = resolveEffectivePlan(subscription);
 
-    // Update user's subscription plan using PostgreSQL
+    // Update user's subscription plan + flip onboarding_completed.
+    // The latter is also set by checkout.session.completed, but the
+    // two webhooks can fire in either order, so set it here too —
+    // belt-and-suspenders ensures the user is never bounced back to
+    // /onboarding after their trial activates.
     await query(
-      'UPDATE users SET subscription_plan = $1, subscription_status = $2 WHERE id = $3',
+      'UPDATE users SET subscription_plan = $1, subscription_status = $2, onboarding_completed = true WHERE id = $3',
       [plan, subscription.status, user.id]
     );
 
