@@ -1,8 +1,10 @@
 /* ═══════════════════════════════════════════════════════════════
    PreviewStrip — a row of "here's what this creates / how it
-   works" media (videos auto-loop, images), each in a purple
+   works" media (videos auto-loop, images), each in a brand-tinted
    bordered frame. Used at the top of the tool panels so users
-   immediately see the payoff. Media lives in /public.
+   immediately see the payoff. Border colour is themable per call
+   site (Study Packs = orange, Citations = blue, default = purple).
+   Media lives in /public.
    ═══════════════════════════════════════════════════════════════ */
 
 export type PreviewItem = {
@@ -16,11 +18,19 @@ export default function PreviewStrip({
   subtitle,
   items,
   aspect = 'aspect-[16/11]',
+  tint = '#A560E8',
+  tintShadowRgb = '165,96,232',
 }: {
   title: string;
   subtitle?: string;
   items: PreviewItem[];
   aspect?: string;
+  /** Border + accent colour for every frame. Defaults to brand purple. */
+  tint?: string;
+  /** Same colour as `tint` but expressed as comma-separated R,G,B for use
+   *  inside rgba() — Tailwind's arbitrary-value class strings can't
+   *  parse hex inside box-shadow rgba(), so we keep both forms. */
+  tintShadowRgb?: string;
 }) {
   return (
     <section className="mb-7">
@@ -34,7 +44,8 @@ export default function PreviewStrip({
         {items.map((it, i) => (
           <figure
             key={i}
-            className="snap-center shrink-0 w-[min(70vw,240px)] sm:w-[min(32vw,240px)] lg:w-auto lg:min-w-0 rounded-2xl overflow-hidden bg-stone-950 border-2 border-b-4 border-[#A560E8] flex flex-col shadow-[0_12px_30px_-18px_rgba(165,96,232,0.5)]"
+            className="snap-center shrink-0 w-[min(70vw,240px)] sm:w-[min(32vw,240px)] lg:w-auto lg:min-w-0 rounded-2xl overflow-hidden bg-stone-950 border-2 border-b-4 flex flex-col"
+            style={{ borderColor: tint, boxShadow: `0 12px 30px -18px rgba(${tintShadowRgb},0.5)` }}
           >
             <div className={`relative ${aspect} w-full bg-black/80`}>
               {it.kind === 'video' ? (
@@ -59,7 +70,10 @@ export default function PreviewStrip({
                 />
               )}
             </div>
-            <figcaption className="px-2 py-1.5 text-center text-[11px] font-extrabold text-stone-600 dark:text-stone-300 border-t-2 border-[#A560E8]/40 bg-white dark:bg-stone-900">
+            <figcaption
+              className="px-2 py-1.5 text-center text-[11px] font-extrabold text-stone-600 dark:text-stone-300 border-t-2 bg-white dark:bg-stone-900"
+              style={{ borderTopColor: `${tint}66` }}
+            >
               {it.label}
             </figcaption>
           </figure>

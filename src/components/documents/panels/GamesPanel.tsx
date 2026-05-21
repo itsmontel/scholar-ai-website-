@@ -51,7 +51,7 @@ export default function GamesPanel({
         {GAMES.map((g) => (
           <div
             key={g.key}
-            className="group flex flex-col rounded-3xl overflow-hidden border-2 border-b-4 border-[#A560E8] bg-white dark:bg-stone-900 hover:-translate-y-1 transition-all shadow-[0_12px_30px_-18px_rgba(165,96,232,0.5)] hover:shadow-[0_26px_50px_-20px_rgba(165,96,232,0.55)]"
+            className="group flex flex-col rounded-3xl overflow-hidden border-2 border-b-4 border-[#FF4B82] bg-white dark:bg-stone-900 hover:-translate-y-1 transition-all shadow-[0_12px_30px_-18px_rgba(255,75,130,0.5)] hover:shadow-[0_26px_50px_-20px_rgba(255,75,130,0.55)]"
           >
             <div className="relative aspect-[16/11] w-full bg-stone-950">
               {g.media.kind === 'video' ? (
@@ -76,13 +76,13 @@ export default function GamesPanel({
                 />
               )}
             </div>
-            <div className="flex-1 flex flex-col p-5 border-t-2 border-[#A560E8]/30">
+            <div className="flex-1 flex flex-col p-5 border-t-2 border-[#FF4B82]/30">
               <p className="text-lg font-extrabold text-stone-900 dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>{g.name}</p>
               <p className="mt-1 text-[13px] font-bold text-stone-500 dark:text-stone-400 leading-snug flex-1">{g.tagline}</p>
               <button
                 type="button"
                 onClick={() => onNavigate(g.page)}
-                className="mt-4 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] text-white text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
+                className="mt-4 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#FF4B82] hover:bg-[#A82754] text-white text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#A82754] active:border-b-2 active:translate-y-0.5 transition-all"
               >
                 Play
                 <svg className="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
@@ -92,9 +92,9 @@ export default function GamesPanel({
         ))}
       </div>
 
-      <div className="mt-5 rounded-3xl border-2 border-[#A560E8]/25 bg-[#F3EAFF] dark:bg-[#A560E8]/10 p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4">
+      <div className="mt-5 rounded-3xl border-2 border-[#FF4B82]/25 bg-[#FFE8EE] dark:bg-[#FF4B82]/10 p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4">
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-extrabold text-[#8A48C7] dark:text-[#C9A0F0]">Play with your own material</p>
+          <p className="text-sm font-extrabold text-[#A82754] dark:text-[#FFA0BC]">Play with your own material</p>
           <p className="mt-1 text-[13px] font-bold text-stone-600 dark:text-stone-300 leading-snug">
             Generate a study pack from your notes and every game is automatically loaded with questions from your content.
           </p>
@@ -102,7 +102,7 @@ export default function GamesPanel({
         <button
           type="button"
           onClick={onOpenStudyPacks}
-          className="shrink-0 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] text-white text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
+          className="shrink-0 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#FF4B82] hover:bg-[#A82754] text-white text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#A82754] active:border-b-2 active:translate-y-0.5 transition-all"
         >
           Make a study pack
         </button>

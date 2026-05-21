@@ -67,7 +67,6 @@ type DocFull = DocSummary & {
 };
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
-type FilterKey = 'all' | 'drafts' | 'uploads' | 'analyzed';
 
 /* The whole product is now one page. The left rail swaps the main
    area between these views — no route changes, no page jumps. The
@@ -178,12 +177,28 @@ const I = {
    item swaps the in-page view — it never leaves the page, so the
    workspace always feels like one app. Documents is the home base;
    every study tool lives one click away in the same shell. */
-const SIDEBAR_TOOLS: { view: WorkspaceView; label: string; icon: React.ReactNode; hint: string }[] = [
-  { view: 'analyze',      label: 'Analyze',      icon: <I.Sparkle />, hint: 'Professor-style feedback' },
-  { view: 'daily-review', label: 'Daily review', icon: <I.Review />,  hint: 'Quick recall session' },
-  { view: 'study-packs',  label: 'Study packs',  icon: <I.Pack />,    hint: 'Notes → lessons & quizzes' },
-  { view: 'citations',    label: 'Citations',    icon: <I.Cite />,    hint: 'Find & format sources' },
-  { view: 'games',        label: 'Games',        icon: <I.Game />,    hint: 'Learn by playing' },
+/* Each tool gets its own brand colour. Used by WorkspaceSidebar +
+ * WorkspaceMobileNav when the user is NOT in the editor view — gives
+ * the rail the same colourful feel as the dashboard. When in the
+ * editor, the rail stays neutral so it doesn't compete with the
+ * writing surface. `tint` is the base colour, `tintBg` is the active
+ * background, `tintFg` is the text + icon tone on the active row. */
+const SIDEBAR_TOOLS: {
+  view: WorkspaceView;
+  label: string;
+  icon: React.ReactNode;
+  hint: string;
+  tint: string;
+  tintBg: string;
+  tintBgDark: string;
+  tintFg: string;
+  tintFgDark: string;
+}[] = [
+  { view: 'analyze',      label: 'Analyze',      icon: <I.Sparkle />, hint: 'Professor-style feedback', tint: '#A560E8', tintBg: '#F3EAFF', tintBgDark: 'rgba(165,96,232,0.15)', tintFg: '#8A48C7', tintFgDark: '#C9A0F0' },
+  { view: 'daily-review', label: 'Daily review', icon: <I.Review />,  hint: 'Quick recall session',     tint: '#58CC02', tintBg: '#E5F8D0', tintBgDark: 'rgba(88,204,2,0.15)',  tintFg: '#46A302', tintFgDark: '#A6E66E' },
+  { view: 'study-packs',  label: 'Study packs',  icon: <I.Pack />,    hint: 'Notes → lessons & quizzes', tint: '#FF9600', tintBg: '#FFF4E0', tintBgDark: 'rgba(255,150,0,0.15)', tintFg: '#B85F00', tintFgDark: '#FFBD5C' },
+  { view: 'citations',    label: 'Citations',    icon: <I.Cite />,    hint: 'Find & format sources',     tint: '#1CB0F6', tintBg: '#DDF4FF', tintBgDark: 'rgba(28,176,246,0.15)', tintFg: '#1486B5', tintFgDark: '#7DD3FC' },
+  { view: 'games',        label: 'Games',        icon: <I.Game />,    hint: 'Learn by playing',          tint: '#FF4B82', tintBg: '#FFE8EE', tintBgDark: 'rgba(255,75,130,0.15)', tintFg: '#A82754', tintFgDark: '#FFA0BC' },
 ];
 
 function WorkspaceSidebar({
@@ -212,36 +227,82 @@ function WorkspaceSidebar({
 }) {
   // The editor is a doc context — keep "Documents" lit while in it.
   const docsActive = activeView === 'hub' || activeView === 'editor';
+  // The colourful per-tool palette only fires outside the editor —
+  // when the user is writing, the rail stays neutral so it doesn't
+  // compete with the document surface.
+  const colourful = activeView !== 'editor';
+
+  /** Render a tool row with optional per-tool tinting. When `tint`
+   *  is omitted (Documents row) OR the rail isn't in colourful mode
+   *  (editor view), falls back to the neutral purple palette. We
+   *  use `tint`-with-opacity for active / hover so a SINGLE style
+   *  works in both light AND dark mode (no Tailwind dark: variant
+   *  needed since the colours are inline). */
   const Item = ({
     active,
     icon,
     label,
     hint,
     onClick,
-  }: { active: boolean; icon: React.ReactNode; label: string; hint?: string; onClick: () => void }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-current={active ? 'page' : undefined}
-      title={collapsed ? label : undefined}
-      className={`group w-full flex items-center rounded-2xl text-left transition-all ${
-        collapsed ? 'justify-center px-0 py-2.5' : 'gap-2.5 px-3 py-2.5'
-      } ${
-        active
-          ? 'bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#8A48C7] dark:text-[#C9A0F0] border-2 border-[#A560E8]/25'
-          : 'text-stone-600 dark:text-stone-300 border-2 border-transparent hover:bg-stone-50 dark:hover:bg-stone-800 hover:text-[#8A48C7] dark:hover:text-[#C9A0F0]'
-      }`}
-    >
-      <span className={`shrink-0 ${active ? 'text-[#A560E8]' : 'text-stone-400 group-hover:text-[#A560E8]'} transition-colors`}>{icon}</span>
-      {!collapsed && (
-        <span className="min-w-0">
-          <span className="block text-[13px] font-extrabold leading-tight">{label}</span>
-          {hint && <span className="block text-[10.5px] font-bold text-stone-400 dark:text-stone-500 leading-tight mt-0.5 truncate">{hint}</span>}
+    tint,
+  }: { active: boolean; icon: React.ReactNode; label: string; hint?: string; onClick: () => void; tint?: typeof SIDEBAR_TOOLS[number] }) => {
+    const accent = (tint && colourful) ? tint.tint : '#A560E8';
+    // In colourful mode the icon always sits in a brand-coloured chip
+    // (like the dashboard tiles) so each tool reads by colour at a
+    // glance. In editor (neutral) mode the chip is muted stone.
+    const chipColoured = colourful;
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        aria-current={active ? 'page' : undefined}
+        title={collapsed ? label : undefined}
+        className={`group w-full flex items-center rounded-2xl text-left transition-all border-2 border-b-[3px] ${
+          collapsed ? 'justify-center px-0 py-2' : 'gap-2.5 px-2.5 py-2'
+        }`}
+        style={
+          active
+            ? { backgroundColor: `${accent}1A`, borderColor: `${accent}66`, color: accent }
+            : { borderColor: 'transparent' }
+        }
+        onMouseEnter={(e) => {
+          if (!active) {
+            e.currentTarget.style.backgroundColor = `${accent}0F`;
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!active) {
+            e.currentTarget.style.backgroundColor = '';
+          }
+        }}
+      >
+        {/* Coloured icon chip — always shows the tool's brand colour */}
+        <span
+          className="shrink-0 flex h-9 w-9 items-center justify-center rounded-xl border-2 transition-all group-hover:scale-105"
+          style={
+            chipColoured
+              ? { backgroundColor: `${accent}1F`, borderColor: `${accent}45`, color: accent }
+              : { backgroundColor: 'rgba(120,113,108,0.08)', borderColor: 'rgba(120,113,108,0.2)', color: active ? accent : '#78716c' }
+          }
+        >
+          {icon}
         </span>
-      )}
-      {!collapsed && active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[#A560E8] shrink-0" aria-hidden />}
-    </button>
-  );
+        {!collapsed && (
+          <span className="min-w-0 flex-1">
+            <span className="block text-[13px] font-extrabold leading-tight" style={{ color: active ? accent : undefined }}>{label}</span>
+            {hint && <span className="block text-[10px] font-bold text-stone-400 dark:text-stone-500 leading-tight mt-0.5 truncate">{hint}</span>}
+          </span>
+        )}
+        {!collapsed && active && (
+          <span
+            className="ml-auto h-2 w-2 rounded-full shrink-0"
+            style={{ backgroundColor: accent }}
+            aria-hidden
+          />
+        )}
+      </button>
+    );
+  };
   return (
     <aside className={`hidden lg:flex lg:flex-col shrink-0 self-stretch sticky overflow-y-auto border-r-2 border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 py-5 transition-[width] duration-200 ${collapsed ? 'w-[60px] px-2 items-center' : 'w-[208px] px-3'} ${headerless ? 'top-0 h-dvh' : 'top-[3.5rem] sm:top-[4.25rem] h-[calc(100dvh-3.5rem)] sm:h-[calc(100dvh-4.25rem)]'}`}>
       {/* Collapse / expand toggle */}
@@ -263,7 +324,7 @@ function WorkspaceSidebar({
       {!collapsed && <p className="px-3 pt-5 pb-2 text-[10px] font-extrabold uppercase tracking-[0.18em] text-stone-400">Study tools</p>}
       <div className={`flex flex-col gap-0.5 w-full ${collapsed ? 'mt-2' : ''}`}>
         {SIDEBAR_TOOLS.map((t) => (
-          <Item key={t.view} active={activeView === t.view} icon={t.icon} label={t.label} hint={t.hint} onClick={() => onSelect(t.view)} />
+          <Item key={t.view} active={activeView === t.view} icon={t.icon} label={t.label} hint={t.hint} tint={t} onClick={() => onSelect(t.view)} />
         ))}
       </div>
       {!collapsed && usage && (
@@ -325,24 +386,56 @@ function WorkspaceMobileNav({
   }, [open]);
   const docsActive = activeView === 'hub' || activeView === 'editor';
   const pick = (v: WorkspaceView) => { setOpen(false); onSelect(v); };
-  const Row = ({ active, icon, label, hint, onClick }: { active: boolean; icon: React.ReactNode; label: string; hint: string; onClick: () => void }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-current={active ? 'page' : undefined}
-      className={`w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left transition-all border-2 ${
-        active
-          ? 'bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#8A48C7] dark:text-[#C9A0F0] border-[#A560E8]/25'
-          : 'text-stone-600 dark:text-stone-300 border-transparent hover:bg-stone-50 dark:hover:bg-stone-800'
-      }`}
-    >
-      <span className={`shrink-0 ${active ? 'text-[#A560E8]' : 'text-stone-400'}`}>{icon}</span>
-      <span className="min-w-0">
-        <span className="block text-sm font-extrabold leading-tight">{label}</span>
-        <span className="block text-[11px] font-bold text-stone-400 dark:text-stone-500 leading-tight mt-0.5 truncate">{hint}</span>
-      </span>
-    </button>
-  );
+  // Mobile drawer uses the same colourful palette as the desktop
+  // sidebar — gated to "not editor" so writing surface stays clean.
+  const colourful = activeView !== 'editor';
+  const Row = ({
+    active,
+    icon,
+    label,
+    hint,
+    onClick,
+    tint,
+  }: {
+    active: boolean;
+    icon: React.ReactNode;
+    label: string;
+    hint: string;
+    onClick: () => void;
+    tint?: typeof SIDEBAR_TOOLS[number];
+  }) => {
+    const accent = (tint && colourful) ? tint.tint : '#A560E8';
+    const chipColoured = colourful;
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        aria-current={active ? 'page' : undefined}
+        className="w-full flex items-center gap-3 px-2.5 py-2.5 rounded-2xl text-left transition-all border-2 border-b-[3px]"
+        style={
+          active
+            ? { backgroundColor: `${accent}1A`, borderColor: `${accent}66`, color: accent }
+            : { borderColor: 'transparent' }
+        }
+      >
+        <span
+          className="shrink-0 flex h-10 w-10 items-center justify-center rounded-xl border-2"
+          style={
+            chipColoured
+              ? { backgroundColor: `${accent}1F`, borderColor: `${accent}45`, color: accent }
+              : { backgroundColor: 'rgba(120,113,108,0.08)', borderColor: 'rgba(120,113,108,0.2)', color: active ? accent : '#78716c' }
+          }
+        >
+          {icon}
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-extrabold leading-tight" style={{ color: active ? accent : undefined }}>{label}</span>
+          <span className="block text-[11px] font-bold text-stone-400 dark:text-stone-500 leading-tight mt-0.5 truncate">{hint}</span>
+        </span>
+        {active && <span className="ml-auto h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: accent }} aria-hidden />}
+      </button>
+    );
+  };
   return (
     <div className="lg:hidden">
       {/* Floating menu button — bottom-left, thumb-reachable, never
@@ -379,7 +472,7 @@ function WorkspaceMobileNav({
             <p className="px-1 pt-4 pb-2 text-[10px] font-extrabold uppercase tracking-[0.18em] text-stone-400">Study tools</p>
             <div className="flex flex-col gap-1">
               {SIDEBAR_TOOLS.map((t) => (
-                <Row key={t.view} active={activeView === t.view} icon={t.icon} label={t.label} hint={t.hint} onClick={() => pick(t.view)} />
+                <Row key={t.view} active={activeView === t.view} icon={t.icon} label={t.label} hint={t.hint} tint={t} onClick={() => pick(t.view)} />
               ))}
             </div>
           </div>
@@ -441,28 +534,114 @@ function WorkspaceShell({
 /* ─── Shared panel chrome ────────────────────────────────────
    Every tool panel opens with the same header so the workspace
    feels cohesive no matter which tool you're in. */
+/* ─── PanelHeader — colourful banner above each sub-page ────────
+ *
+ * When given a `tint` (one of the SIDEBAR_TOOLS palette entries),
+ * renders as a full-width gradient banner in the tool's brand
+ * colour, with a mascot tucked in the right side. Matches the
+ * dashboard hero aesthetic so the workspace feels consistent.
+ *
+ * Without a tint, falls back to the original plain header for
+ * backwards compatibility.
+ */
 function PanelHeader({
   eyebrow,
   title,
   subtitle,
   right,
-}: { eyebrow: string; title: string; subtitle?: string; right?: React.ReactNode }) {
+  tint,
+  mascotSrc,
+}: {
+  eyebrow: string;
+  title: string;
+  subtitle?: string;
+  right?: React.ReactNode;
+  /** Brand palette — usually one entry from SIDEBAR_TOOLS. When
+   *  omitted, falls back to the neutral original layout. */
+  tint?: { tint: string; tintBg: string; border?: string };
+  /** Optional mascot image shown in the banner's right side. */
+  mascotSrc?: string;
+}) {
+  if (!tint) {
+    // Fallback — original neutral layout.
+    return (
+      <div className="mb-6 sm:mb-7 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
+          <p className="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.22em] text-[#A560E8]">{eyebrow}</p>
+          <h1 className="dash-serif mt-1.5 text-[1.75rem] sm:text-3xl lg:text-[2.25rem] font-extrabold leading-[1.05] tracking-tight text-stone-900 dark:text-stone-50">
+            {title}
+          </h1>
+          {subtitle && (
+            <p className="mt-2 text-sm sm:text-[15px] text-stone-600 dark:text-stone-400 font-medium leading-snug max-w-2xl">
+              {subtitle}
+            </p>
+          )}
+        </div>
+        {right && <div className="shrink-0">{right}</div>}
+      </div>
+    );
+  }
+
+  // Colourful gradient banner. Reuses the same "border-2 border-b-4"
+  // language as the dashboard tiles so the workspace feels unified.
   return (
-    <div className="mb-6 sm:mb-7 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-      <div className="min-w-0">
-        <p className="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.22em] text-[#A560E8]">{eyebrow}</p>
-        <h1 className="dash-serif mt-1.5 text-[1.75rem] sm:text-3xl lg:text-[2.25rem] font-extrabold leading-[1.05] tracking-tight text-stone-900 dark:text-stone-50">
-          {title}
-        </h1>
-        {subtitle && (
-          <p className="mt-2 text-sm sm:text-[15px] text-stone-600 dark:text-stone-400 font-medium leading-snug max-w-2xl">
-            {subtitle}
+    <div
+      className="mb-6 sm:mb-7 relative overflow-hidden rounded-3xl border-2 border-b-4 text-white p-5 sm:p-6 lg:p-7"
+      style={{
+        backgroundImage: `linear-gradient(135deg, ${tint.tint} 0%, ${tint.tint} 50%, ${shadeColor(tint.tint, -22)} 100%)`,
+        borderColor: shadeColor(tint.tint, -28),
+      }}
+    >
+      <div className="pointer-events-none absolute -top-20 -right-20 w-60 h-60 rounded-full bg-white/10 blur-3xl" aria-hidden />
+      <div className="pointer-events-none absolute -bottom-16 -left-16 w-48 h-48 rounded-full bg-white/8 blur-3xl" aria-hidden />
+      <div className="relative flex items-center gap-4 sm:gap-6">
+        <div className="flex-1 min-w-0">
+          <p className="text-[10.5px] sm:text-xs font-extrabold uppercase tracking-[0.22em] text-white/85">
+            {eyebrow}
           </p>
+          <h1
+            className="mt-1.5 text-[1.65rem] sm:text-[2rem] lg:text-[2.25rem] font-extrabold leading-[1.05] tracking-tight"
+            style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+          >
+            {title}
+          </h1>
+          {subtitle && (
+            <p className="mt-2 text-[13px] sm:text-sm font-bold text-white/90 leading-snug max-w-2xl">
+              {subtitle}
+            </p>
+          )}
+          {right && <div className="mt-4 sm:mt-5">{right}</div>}
+        </div>
+        {mascotSrc && (
+          <img
+            src={mascotSrc}
+            alt=""
+            aria-hidden
+            className="hidden sm:block relative w-20 h-20 lg:w-28 lg:h-28 object-contain shrink-0 ws-bento-bob"
+            loading="eager"
+            decoding="async"
+          />
         )}
       </div>
-      {right && <div className="shrink-0">{right}</div>}
     </div>
   );
+}
+
+/** Lighten or darken a hex colour by `percent` (negative darkens).
+ *  Used by PanelHeader to derive a gradient end-stop + border tone
+ *  from a single brand colour, so we don't have to hand-pick a full
+ *  palette for every PanelHeader call. */
+function shadeColor(hex: string, percent: number): string {
+  const n = parseInt(hex.replace('#', ''), 16);
+  const r = (n >> 16) & 0xff;
+  const g = (n >> 8) & 0xff;
+  const b = n & 0xff;
+  const adj = (c: number) => {
+    const v = Math.round(c + (percent / 100) * (percent < 0 ? c : 255 - c));
+    return Math.max(0, Math.min(255, v));
+  };
+  const toHex = (c: number) => c.toString(16).padStart(2, '0');
+  return `#${toHex(adj(r))}${toHex(adj(g))}${toHex(adj(b))}`;
 }
 
 /* ─── Analyze panel ──────────────────────────────────────────
@@ -496,6 +675,36 @@ function AnalyzePanel({
     .sort((a, b) => new Date(b.lastEditedAt || b.updatedAt).getTime() - new Date(a.lastEditedAt || a.updatedAt).getTime())
     .slice(0, 6);
 
+  /* ─── Citation + grading picker ─────────────────────────────
+   * When the user drops, pastes or picks a doc to analyse, we
+   * show a small modal first so they can tailor the citation
+   * style (APA / Harvard / etc.) and grade format (US / UK)
+   * before the actual analysis runs. Selections are persisted
+   * to the same localStorage keys the analyzer service reads,
+   * so the editor's flow picks them up automatically. */
+  const [optionsOpen, setOptionsOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
+  const [citationStyle, setCitationStyleState] = useState<string>(() => {
+    try { return localStorage.getItem('writescholar_editor_citation_style') || 'None'; } catch { return 'None'; }
+  });
+  const [gradingStyle, setGradingStyleState] = useState<'us' | 'uk'>(() => {
+    try { return (localStorage.getItem('writescholar_editor_grading_style') as 'us' | 'uk') === 'uk' ? 'uk' : 'us'; } catch { return 'us'; }
+  });
+  const updateCitationStyle = (v: string) => {
+    setCitationStyleState(v);
+    try { localStorage.setItem('writescholar_editor_citation_style', v); } catch { /* noop */ }
+  };
+  const updateGradingStyle = (v: 'us' | 'uk') => {
+    setGradingStyleState(v);
+    try { localStorage.setItem('writescholar_editor_grading_style', v); } catch { /* noop */ }
+  };
+  /** Wraps any analyze trigger so the picker shows first. The
+   *  `action` is captured in state and invoked on confirm. */
+  const askThenRun = (action: () => void) => {
+    setPendingAction(() => action);
+    setOptionsOpen(true);
+  };
+
   const handleFile = async (file: File) => {
     setFileError(null);
     // .docx / .txt keep their formatting — route through the same
@@ -505,7 +714,7 @@ function AnalyzePanel({
     // text (no rich structure to recover anyway).
     const lower = file.name.toLowerCase();
     if (lower.endsWith('.docx') || lower.endsWith('.txt')) {
-      onUploadFile(file);
+      askThenRun(() => onUploadFile(file));
       return;
     }
     setParsing(true);
@@ -521,7 +730,7 @@ function AnalyzePanel({
       if (!res.ok || json?.success === false) throw new Error(json?.message || 'Could not read that file.');
       const content = String(json?.data?.content ?? '').trim();
       if (!content) throw new Error('That file looks empty. Try another, or paste the text instead.');
-      onPasteAnalyze(content);
+      askThenRun(() => onPasteAnalyze(content));
     } catch (e) {
       setFileError(e instanceof Error ? e.message : 'Could not read that file.');
     } finally {
@@ -606,7 +815,7 @@ function AnalyzePanel({
           {words > 0 && words < 50 && <p className="text-[11px] font-bold text-stone-400">Add {50 - words} more words.</p>}
           <button
             type="button"
-            onClick={() => onPasteAnalyze(text)}
+            onClick={() => askThenRun(() => onPasteAnalyze(text))}
             disabled={words < 50}
             className="ml-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
           >
@@ -651,7 +860,7 @@ function AnalyzePanel({
               <button
                 key={d.id}
                 type="button"
-                onClick={() => onPickDoc(d.id)}
+                onClick={() => askThenRun(() => onPickDoc(d.id))}
                 className="group w-full flex items-center gap-3 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-4 text-left hover:-translate-y-0.5 hover:border-[#A560E8]/40 active:border-b-2 active:translate-y-0.5 transition-all"
               >
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#A560E8]"><I.Sparkle /></span>
@@ -665,11 +874,118 @@ function AnalyzePanel({
           </div>
         )}
       </div>
+
+      {/* ─── Citation + grading picker ──────────────────────────
+          Always shown before the analyser actually runs, so the
+          user can tailor it to their assignment (APA / Harvard /
+          IEEE etc., and US A-F vs UK class) before we burn an
+          analysis. Saved to localStorage so the same choices
+          carry over to the editor flow. */}
+      {optionsOpen && (
+        <div
+          className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setOptionsOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-md rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-2.5 mb-3">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#A560E8]">
+                <I.Sparkle />
+              </span>
+              <h3 className="text-lg font-extrabold text-stone-900 dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+                Tailor your analysis
+              </h3>
+            </div>
+            <p className="text-[13px] text-stone-600 dark:text-stone-300 font-medium leading-snug mb-3">
+              Pick your citation style and grade format so the rubric and feedback match your assignment.
+            </p>
+
+            <div className="grid gap-3 rounded-xl border-2 border-stone-200 dark:border-stone-700 bg-stone-50/70 dark:bg-stone-800/40 p-3">
+              <div>
+                <label htmlFor="ws-ap-cite-style" className="block text-[11px] font-extrabold uppercase tracking-[0.16em] text-stone-400 mb-1.5">Citation style</label>
+                <select
+                  id="ws-ap-cite-style"
+                  value={citationStyle}
+                  onChange={(e) => updateCitationStyle(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-sm font-bold text-stone-800 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-[#A560E8]/40 focus:border-[#A560E8]/40 transition-colors"
+                >
+                  <option value="None">None (no citations required)</option>
+                  <option value="APA">APA</option>
+                  <option value="Harvard">Harvard</option>
+                  <option value="Chicago">Chicago</option>
+                  <option value="MLA">MLA</option>
+                  <option value="IEEE">IEEE</option>
+                  <option value="Vancouver">Vancouver</option>
+                </select>
+              </div>
+              <div>
+                <span className="block text-[11px] font-extrabold uppercase tracking-[0.16em] text-stone-400 mb-1.5">Grade format</span>
+                <div className="grid grid-cols-2 gap-2">
+                  {(['us', 'uk'] as const).map((g) => (
+                    <button
+                      key={g}
+                      type="button"
+                      onClick={() => updateGradingStyle(g)}
+                      className={`px-3 py-2 rounded-lg text-sm font-extrabold border-2 transition-all ${
+                        gradingStyle === g
+                          ? 'bg-[#A560E8] text-white border-[#7733B5]'
+                          : 'bg-white dark:bg-stone-900 text-stone-600 dark:text-stone-300 border-stone-200 dark:border-stone-700 hover:border-[#A560E8]/40'
+                      }`}
+                    >
+                      {g === 'us' ? 'US (A–F · /100)' : 'UK (class · %)'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <p className="text-[11px] font-bold text-stone-400 leading-snug">Tailors the rubric &amp; grade to your institution. Saved for next time.</p>
+            </div>
+
+            <div className="mt-6 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => { setOptionsOpen(false); setPendingAction(null); }}
+                className="px-4 py-2 rounded-xl border-2 border-b-[3px] border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-sm font-extrabold text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-800 active:border-b-2 active:translate-y-0.5 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setOptionsOpen(false);
+                  // Defer to next tick so the modal close animation
+                  // doesn't jank the underlying action's transition.
+                  const fn = pendingAction;
+                  setPendingAction(null);
+                  if (fn) setTimeout(fn, 0);
+                }}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] text-white text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
+              >
+                <I.Sparkle />
+                Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 /* ─── HUB view (list + filters + actions) ───────────────────── */
+/* ─── DocumentsHub — bento-grid "home" view ──────────────────────
+ *
+ * The landing surface for /dashboard. Designed to feel like the
+ * welcoming Duolingo / Quizlet home: greeting + mascot, a streak
+ * chip, a "today's daily review" prompt, four colourful quick-action
+ * tiles, a recent-study-packs section, and a mascot tip — all in a
+ * responsive bento grid up top. The full document library (with
+ * search + filter + grid) lives below so users who came to manage
+ * docs can still scroll right to it.
+ */
 function DocumentsHub({
   docs,
   loading,
@@ -680,7 +996,9 @@ function DocumentsHub({
   onDownload,
   onDelete,
   userName,
+  user,
   usage,
+  onSwitchView,
 }: {
   docs: DocSummary[];
   loading: boolean;
@@ -691,54 +1009,489 @@ function DocumentsHub({
   onDownload: (id: string) => void;
   onDelete: (id: string) => void;
   userName: string;
+  user: { id?: string } | null | undefined;
   usage: { used: number; limit: number | null; plan: string } | null;
+  onSwitchView: (v: WorkspaceView) => void;
 }) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState<FilterKey>('all');
+
+  /* ─── Bento data fetches ──────────────────────────────────────
+   * - studyPacks: last few packs the user generated, for the
+   *   "Your study packs" tile. Endpoint is the quiz-history one
+   *   filtered to study_pack rows.
+   * - streak: current daily-review streak (number + whether today
+   *   is already done) for the streak chip + "Today's review is
+   *   ready" prompt. We read straight from the same localStorage
+   *   key DailyReviewTab uses to avoid an extra network hop. */
+  interface StudyPackPreview { id: string; title: string; createdAt: string; questionCount: number }
+  const [studyPacks, setStudyPacks] = useState<StudyPackPreview[]>([]);
+  const [streak, setStreak] = useState<{ currentStreak: number; lastCompletedDate: string | null } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const token = localStorage.getItem('authToken');
+        if (!token) return;
+        const res = await fetch(`${API_URL}/analysis/quiz-history?limit=20`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) return;
+        const data = await res.json().catch(() => null);
+        const rows: unknown[] = Array.isArray(data) ? data : (data?.data ?? data?.quizzes ?? []);
+        if (cancelled) return;
+        const packs: StudyPackPreview[] = rows
+          .filter((r): r is Record<string, unknown> => !!r && typeof r === 'object')
+          .filter((r) => (r as { quiz_type?: string }).quiz_type === 'study_pack')
+          .slice(0, 4)
+          .map((r) => ({
+            id: String((r as { id?: unknown }).id ?? ''),
+            title: String((r as { title?: unknown }).title ?? 'Untitled study pack'),
+            createdAt: String((r as { created_at?: unknown }).created_at ?? ''),
+            questionCount: Array.isArray((r as { questions?: unknown }).questions)
+              ? ((r as { questions: unknown[] }).questions.length)
+              : 0,
+          }));
+        setStudyPacks(packs);
+      } catch { /* network blip — empty state handles it */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    // Daily-review streak — same localStorage key DailyReviewTab writes to.
+    try {
+      const uid = user?.id || 'anon';
+      const raw = localStorage.getItem(`writescholar_daily_review_streak_${uid}`);
+      if (!raw) { setStreak({ currentStreak: 0, lastCompletedDate: null }); return; }
+      const parsed = JSON.parse(raw);
+      setStreak({
+        currentStreak: Number(parsed?.currentStreak ?? 0),
+        lastCompletedDate: parsed?.lastCompletedDate ?? null,
+      });
+    } catch {
+      setStreak({ currentStreak: 0, lastCompletedDate: null });
+    }
+  }, [user?.id]);
+
+  const isReviewReady = (() => {
+    if (!streak) return false;
+    if (!streak.lastCompletedDate) return true; // never done one
+    const today = new Date().toISOString().slice(0, 10);
+    return streak.lastCompletedDate !== today;
+  })();
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return docs
       .filter((d) => {
-        if (q) {
-          const inTitle = d.title.toLowerCase().includes(q);
-          const inFilename = (d.originalFilename || '').toLowerCase().includes(q);
-          if (!inTitle && !inFilename) return false;
-        }
-        if (filter === 'drafts') return d.isDraft;
-        if (filter === 'uploads') return d.isUpload;
-        // 'analyzed' would require a join with analyses; defer to a
-        // future enhancement. For now treat it as "show all" with a
-        // visible chip so the surface area is set up.
-        return true;
+        if (!q) return true;
+        const inTitle = d.title.toLowerCase().includes(q);
+        const inFilename = (d.originalFilename || '').toLowerCase().includes(q);
+        return inTitle || inFilename;
       })
       .sort((a, b) => {
         const ta = a.lastEditedAt || a.updatedAt;
         const tb = b.lastEditedAt || b.updatedAt;
         return new Date(tb).getTime() - new Date(ta).getTime();
       });
-  }, [docs, search, filter]);
-
-  const filterChips: { key: FilterKey; label: string; count: number }[] = [
-    { key: 'all',      label: 'All',       count: docs.length },
-    { key: 'drafts',   label: 'Drafts',    count: docs.filter((d) => d.isDraft).length },
-    { key: 'uploads',  label: 'Uploads',   count: docs.filter((d) => d.isUpload).length },
-    { key: 'analyzed', label: 'Analyzed',  count: docs.length /* TODO wire to analysis count */ },
-  ];
+  }, [docs, search]);
 
   return (
     <>
-      {/* ─── HERO — the flagship "start writing" moment ───────────
-          Big editorial headline + two oversized action tiles that
-          ARE the primary call to action (write a new draft OR pull
-          in an existing paper). This is the centre of gravity for
-          the whole product now. */}
-      <div className="mb-8 sm:mb-10">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <span className="h-px w-7 bg-[#A560E8]/50 shrink-0" aria-hidden />
-            <p className="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.22em] text-[#A560E8] truncate">{todayLabel()}</p>
+      {/* Hidden file input — reused by the Upload tile in the bento. */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".pdf,.doc,.docx,.txt"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) onUpload(f);
+          e.target.value = '';
+        }}
+      />
+
+      {/* ─── BENTO GRID ─────────────────────────────────────────
+          Mobile (1 col): everything stacks
+          sm   (2 cols): hero + streak, then 4 quick actions 2x2
+          lg   (4 cols): bento layout below */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 auto-rows-min gap-3 sm:gap-4 mb-8">
+        {/* ─── HERO TILE (col-span-3, row-span-2 on desktop) ────
+            Watery purple — same soft tinted treatment as the Streak
+            and Daily Review chips, so Upload paper (which keeps the
+            deep purple gradient) stands out as the only saturated
+            element on the page. Dark text on the light bg keeps the
+            greeting readable. */}
+        <div className="sm:col-span-2 lg:col-span-3 lg:row-span-2 relative overflow-hidden rounded-3xl border-2 border-b-4 border-[#A560E8]/55 bg-gradient-to-br from-[#F3EAFF] via-white to-white dark:from-[#A560E8]/15 dark:via-stone-900 dark:to-stone-900 p-5 sm:p-6 lg:p-7">
+          <div className="pointer-events-none absolute -top-20 -right-20 w-64 h-64 rounded-full bg-[#A560E8]/15 blur-3xl" aria-hidden />
+          <div className="pointer-events-none absolute -bottom-16 -left-16 w-56 h-56 rounded-full bg-[#FFC800]/15 blur-3xl" aria-hidden />
+          <div className="relative h-full flex items-center gap-5 sm:gap-6">
+            <div className="flex-1 min-w-0">
+              <p className="text-[10.5px] sm:text-xs font-extrabold uppercase tracking-[0.22em] text-[#A560E8] mb-2">
+                {todayLabel()}
+              </p>
+              <h1
+                className="text-[1.65rem] sm:text-[2rem] lg:text-[2.4rem] font-extrabold leading-[1.05] tracking-tight text-stone-900 dark:text-stone-50"
+                style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+              >
+                {greetingFor()}{userName ? <>, <span className="text-[#A560E8]">{userName}</span></> : ''} <span aria-hidden>👋</span>
+              </h1>
+              <p className="mt-2.5 text-[13px] sm:text-sm font-bold text-stone-600 dark:text-stone-300 leading-relaxed max-w-md">
+                Let&apos;s turn today into a productive one. Pick where you want to start.
+              </p>
+            </div>
+            {/* Mascot — hidden on mobile (saves space), visible from sm up */}
+            <img
+              src="/mascot-walking.webp"
+              alt=""
+              aria-hidden
+              className="hidden sm:block relative w-24 h-24 lg:w-36 lg:h-36 object-contain shrink-0 ws-bento-bob"
+              loading="eager"
+              decoding="async"
+            />
+          </div>
+        </div>
+
+        {/* ─── STREAK CHIP — compact, row 1 col 4 on desktop ────
+            Half the height of before. Pairs with the Daily Review
+            chip below to fit two short tiles in the top-right
+            alongside the tall hero. */}
+        <div className="sm:col-span-1 relative overflow-hidden rounded-3xl border-2 border-b-4 border-[#FFC800]/60 bg-gradient-to-br from-[#FFF8E0] via-white to-white dark:from-[#FFC800]/15 dark:via-stone-900 dark:to-stone-900 p-3.5 sm:p-4">
+          <div className="pointer-events-none absolute -top-6 -right-6 w-20 h-20 rounded-full bg-[#FFC800]/20 blur-2xl" aria-hidden />
+          <div className="relative flex items-center gap-2.5">
+            <span className="text-3xl shrink-0 leading-none" aria-hidden>🔥</span>
+            <div className="min-w-0">
+              <p className="text-[9.5px] font-extrabold uppercase tracking-[0.18em] text-[#7A5C00] dark:text-[#FFD66B] leading-tight">
+                Your streak
+              </p>
+              <p
+                className="text-[1.5rem] sm:text-[1.65rem] font-extrabold leading-none tabular-nums text-stone-900 dark:text-stone-50 mt-0.5"
+                style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+              >
+                {streak?.currentStreak ?? 0}
+                <span className="ml-1 text-[10.5px] font-extrabold uppercase tracking-wider text-stone-500 dark:text-stone-400">
+                  {(streak?.currentStreak ?? 0) === 1 ? 'day' : 'days'}
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* ─── DAILY REVIEW — compact chip, sits under the Streak
+            chip in col 4. Same vertical size as the Streak chip so
+            together they fill the right column alongside the tall
+            hero. Must render BEFORE the quick-action tiles so CSS
+            Grid auto-flow places it in row 2 col 4 (not after the
+            tall tiles). */}
+        <button
+          type="button"
+          onClick={() => onSwitchView('daily-review')}
+          className={`group sm:col-span-1 relative overflow-hidden rounded-3xl border-2 border-b-4 p-3.5 sm:p-4 text-left hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all ${
+            isReviewReady
+              ? 'border-[#46A302] bg-gradient-to-br from-[#E5F8D0] via-white to-white dark:from-[#58CC02]/15 dark:via-stone-900 dark:to-stone-900'
+              : 'border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900'
+          }`}
+        >
+          <div className={`pointer-events-none absolute -top-6 -right-6 w-20 h-20 rounded-full blur-2xl ${isReviewReady ? 'bg-[#58CC02]/20' : 'bg-stone-300/20'}`} aria-hidden />
+          <div className="relative flex items-center gap-2.5">
+            <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white text-base border-2 border-b-2 ${
+              isReviewReady ? 'bg-[#58CC02] border-[#46A302]' : 'bg-stone-300 dark:bg-stone-600 border-stone-400 dark:border-stone-500'
+            }`} aria-hidden>
+              {isReviewReady ? '🎯' : '✅'}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className={`text-[9.5px] font-extrabold uppercase tracking-[0.18em] leading-tight ${isReviewReady ? 'text-[#46A302]' : 'text-stone-400 dark:text-stone-500'}`}>
+                Daily review
+              </p>
+              <p
+                className="text-[13.5px] sm:text-sm font-extrabold leading-tight text-stone-900 dark:text-stone-50 mt-0.5 truncate"
+                style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+              >
+                {isReviewReady ? 'Ready · 2 min' : 'Done today ✨'}
+              </p>
+            </div>
+            <svg className={`w-3.5 h-3.5 shrink-0 ${isReviewReady ? 'text-[#46A302]' : 'text-stone-300 dark:text-stone-600'} group-hover:translate-x-0.5 transition-transform`} fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </div>
+        </button>
+
+        {/* ─── 4 QUICK-ACTION TILES ──────────────────────────────
+            Upload paper keeps its bold purple gradient + white text
+            because it's the flagship CTA — the visual anchor of the
+            dashboard. The other three use the soft "watery" treatment
+            from the Streak / Daily Review chips: pastel tinted bg
+            fading to white, coloured border, brand-coloured icon +
+            eyebrow + dark text. They still pop against the page but
+            don't compete with Upload for attention. */}
+        {([
+          {
+            key: 'upload',
+            variant: 'bold' as const,
+            eyebrow: 'Start here',
+            title: 'Upload a paper',
+            desc: "PDF, .docx or .txt — we'll analyse it line by line.",
+            cta: 'Choose file',
+            tint: '#A560E8',
+            border: '#7733B5',
+            softBg: '',
+            haloBg: '',
+            arrow: true,
+            onClick: () => fileInputRef.current?.click(),
+            iconPath: 'M12 4v12m0 0l-4-4m4 4l4-4M4 20h16',
+          },
+          {
+            key: 'write',
+            variant: 'soft' as const,
+            eyebrow: 'Blank canvas',
+            title: 'Write an essay',
+            desc: 'Start a fresh draft and write with live feedback.',
+            cta: 'Open editor',
+            tint: '#1CB0F6',
+            border: '#1CB0F6',
+            // Soft watery blue → fades to white, like the Streak chip
+            softBg: 'from-[#DDF4FF] via-white to-white dark:from-[#1CB0F6]/15 dark:via-stone-900 dark:to-stone-900',
+            haloBg: 'bg-[#1CB0F6]/20',
+            arrow: false,
+            onClick: onNew,
+            iconPath: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z',
+          },
+          {
+            key: 'study',
+            variant: 'soft' as const,
+            eyebrow: 'Learn faster',
+            title: 'Make a study pack',
+            desc: 'Paste notes — get flashcards, quizzes, crosswords.',
+            cta: 'Open packs',
+            tint: '#FF9600',
+            border: '#FF9600',
+            softBg: 'from-[#FFF4E0] via-white to-white dark:from-[#FF9600]/15 dark:via-stone-900 dark:to-stone-900',
+            haloBg: 'bg-[#FF9600]/20',
+            arrow: false,
+            onClick: () => onSwitchView('study-packs'),
+            iconPath: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253',
+          },
+          {
+            key: 'games',
+            variant: 'soft' as const,
+            eyebrow: 'Have fun',
+            title: 'Play a game',
+            desc: 'Drill recall the fun way — Word Blitz, Crossword & more.',
+            cta: 'Pick a game',
+            tint: '#FF4B82',
+            border: '#FF4B82',
+            softBg: 'from-[#FFE8EE] via-white to-white dark:from-[#FF4B82]/15 dark:via-stone-900 dark:to-stone-900',
+            haloBg: 'bg-[#FF4B82]/20',
+            arrow: false,
+            onClick: () => onSwitchView('games'),
+            iconPath: 'M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+          },
+        ] as const).map((tile) => (
+          <div key={tile.key} className="sm:col-span-1 lg:col-span-1 lg:row-span-2 relative">
+            {/* Bobbing yellow "click here" arrow — Upload only, so
+                new users know exactly which tile to start with. */}
+            {tile.arrow && (
+              <svg
+                aria-hidden
+                className="ws-start-here-arrow pointer-events-none absolute -top-10 right-4 z-20 w-14 h-14 text-[#FFC800] drop-shadow-[0_2px_6px_rgba(255,200,0,0.6)]"
+                viewBox="0 0 64 64"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M52 6C60 24 55 44 28 55" />
+                <path d="M28 55l14-2" />
+                <path d="M28 55l3-14" />
+              </svg>
+            )}
+
+            {tile.variant === 'bold' ? (
+              /* ─── BOLD VARIANT — Upload paper only ─── */
+              <button
+                type="button"
+                onClick={tile.onClick}
+                className="group ws-upload-glow relative w-full h-full min-h-[200px] sm:min-h-[230px] overflow-hidden rounded-3xl border-2 border-b-4 bg-gradient-to-br from-[#A560E8] via-[#9355D9] to-[#7733B5] p-5 sm:p-6 text-left text-white hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all"
+                style={{ borderColor: tile.border }}
+              >
+                <div className="pointer-events-none absolute -top-20 -right-20 w-60 h-60 rounded-full bg-white/10 blur-3xl" aria-hidden />
+                <div className="pointer-events-none absolute -bottom-16 -left-16 w-48 h-48 rounded-full bg-[#FFC800]/15 blur-3xl" aria-hidden />
+                <div className="relative h-full flex flex-col">
+                  <span className="flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-2xl bg-white/20 border-2 border-white/30 mb-3 sm:mb-4">
+                    <svg className="w-7 h-7 sm:w-8 sm:h-8" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" d={tile.iconPath} />
+                    </svg>
+                  </span>
+                  <p className="text-[10.5px] font-extrabold uppercase tracking-[0.22em] text-white/75">
+                    {tile.eyebrow}
+                  </p>
+                  <p className="mt-1 text-xl sm:text-[1.4rem] font-extrabold leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+                    {tile.title}
+                  </p>
+                  <p className="mt-1.5 text-[12.5px] sm:text-[13px] font-bold text-white/85 leading-relaxed">
+                    {tile.desc}
+                  </p>
+                  <span className="mt-auto inline-flex items-center gap-1.5 self-start px-3 py-1.5 rounded-xl bg-white/20 backdrop-blur-sm text-white text-[11.5px] sm:text-[12px] font-extrabold uppercase tracking-wide border-2 border-white/30 group-hover:bg-white/30 transition-colors">
+                    {tile.cta}
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </span>
+                </div>
+              </button>
+            ) : (
+              /* ─── SOFT VARIANT — Write / Study / Games ─── */
+              <button
+                type="button"
+                onClick={tile.onClick}
+                className={`group relative w-full h-full min-h-[200px] sm:min-h-[230px] overflow-hidden rounded-3xl border-2 border-b-4 bg-gradient-to-br ${tile.softBg} p-5 sm:p-6 text-left hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all`}
+                style={{ borderColor: `${tile.tint}60` }}
+              >
+                <div className={`pointer-events-none absolute -top-16 -right-16 w-48 h-48 rounded-full ${tile.haloBg} blur-3xl`} aria-hidden />
+                <div className="relative h-full flex flex-col">
+                  <span
+                    className="flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-2xl border-2 mb-3 sm:mb-4"
+                    style={{
+                      backgroundColor: `${tile.tint}22`,
+                      borderColor: `${tile.tint}55`,
+                      color: tile.tint,
+                    }}
+                  >
+                    <svg className="w-7 h-7 sm:w-8 sm:h-8" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" d={tile.iconPath} />
+                    </svg>
+                  </span>
+                  <p className="text-[10.5px] font-extrabold uppercase tracking-[0.22em]" style={{ color: tile.tint }}>
+                    {tile.eyebrow}
+                  </p>
+                  <p
+                    className="mt-1 text-xl sm:text-[1.4rem] font-extrabold leading-tight text-stone-900 dark:text-stone-50"
+                    style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+                  >
+                    {tile.title}
+                  </p>
+                  <p className="mt-1.5 text-[12.5px] sm:text-[13px] font-bold text-stone-600 dark:text-stone-300 leading-relaxed">
+                    {tile.desc}
+                  </p>
+                  <span
+                    className="mt-auto inline-flex items-center gap-1.5 self-start px-3 py-1.5 rounded-xl text-white text-[11.5px] sm:text-[12px] font-extrabold uppercase tracking-wide border-2 border-b-4 group-hover:translate-y-px transition-transform"
+                    style={{ backgroundColor: tile.tint, borderColor: `${tile.tint}` }}
+                  >
+                    {tile.cta}
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </span>
+                </div>
+              </button>
+            )}
+          </div>
+        ))}
+
+        {/* ─── YOUR STUDY PACKS (col-span-3) ─── */}
+        <div className="sm:col-span-2 lg:col-span-3 relative overflow-hidden rounded-3xl border-2 border-b-4 border-[#FF9600]/40 bg-gradient-to-br from-[#FFF4E0] via-white to-white dark:from-[#FF9600]/10 dark:via-stone-900 dark:to-stone-900 p-5 sm:p-6">
+          <div className="flex items-center justify-between mb-3 gap-3">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#FF9600] text-white text-base border-2 border-b-2 border-[#D97F00]" aria-hidden>📚</span>
+              <div className="min-w-0">
+                <h3
+                  className="text-base sm:text-lg font-extrabold text-stone-900 dark:text-stone-50 leading-tight truncate"
+                  style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+                >
+                  Your study packs
+                </h3>
+                <p className="text-[11.5px] font-bold text-stone-500 dark:text-stone-400 leading-tight truncate">
+                  Flashcards, quizzes & games from your notes
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => onSwitchView('study-packs')}
+              className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-extrabold uppercase tracking-wider text-[#D97F00] dark:text-[#FF9600] hover:bg-[#FFF4E0] dark:hover:bg-[#FF9600]/10 transition-colors"
+            >
+              View all <span aria-hidden>→</span>
+            </button>
+          </div>
+          {studyPacks.length === 0 ? (
+            <div className="flex flex-col sm:flex-row items-center gap-4 py-3">
+              <img src="/mascot-juggling.webp" alt="" aria-hidden className="w-20 h-20 object-contain shrink-0" loading="lazy" decoding="async" />
+              <div className="flex-1 min-w-0 text-center sm:text-left">
+                <p className="text-sm font-extrabold text-stone-700 dark:text-stone-200">No study packs yet</p>
+                <p className="text-[12px] font-bold text-stone-500 dark:text-stone-400 mt-0.5">
+                  Paste any notes and Scholar turns them into a lesson, flashcards, a quiz and games — in under a minute.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => onSwitchView('study-packs')}
+                  className="mt-3 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#FF9600] hover:bg-[#D97F00] text-white text-[12.5px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all"
+                >
+                  Make my first one
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {studyPacks.slice(0, 4).map((pack) => (
+                <button
+                  key={pack.id}
+                  type="button"
+                  onClick={() => onSwitchView('study-packs')}
+                  className="text-left rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 px-3.5 py-3 hover:border-[#FF9600]/50 hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all"
+                >
+                  <p className="text-[13.5px] font-extrabold text-stone-900 dark:text-stone-50 leading-snug line-clamp-2" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+                    {pack.title}
+                  </p>
+                  <p className="mt-1 text-[10.5px] font-bold text-stone-500 dark:text-stone-400">
+                    {pack.questionCount > 0 ? `${pack.questionCount} questions` : 'Open pack'}
+                  </p>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* ─── MASCOT TIP CARD (col-span-1) ─── */}
+        <div className="relative overflow-hidden rounded-3xl border-2 border-b-4 border-[#1CB0F6]/45 bg-gradient-to-br from-[#DDF4FF] via-white to-white dark:from-[#1CB0F6]/15 dark:via-stone-900 dark:to-stone-900 p-5">
+          <div className="flex flex-col items-center text-center gap-2">
+            <img src="/mascot-pointing.webp" alt="" aria-hidden className="w-20 h-20 object-contain ws-bento-bob" loading="lazy" decoding="async" />
+            <p className="text-[10.5px] font-extrabold uppercase tracking-[0.18em] text-[#1899D6] dark:text-[#7DD3FC]">
+              Tip from Scholar
+            </p>
+            <p className="text-[12.5px] font-bold text-stone-700 dark:text-stone-200 leading-snug">
+              Even 5 minutes a day beats a 2-hour cram. Keep your streak alive.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ─── FULL DOCUMENTS LIBRARY ─────────────────────────────
+          Wrapped in a purple-tinted bento container so the section
+          feels like a destination rather than an afterthought. Each
+          filter chip gets a meaningful colour (drafts = blue WIP,
+          uploads = orange imported, analyzed = green done). */}
+      <div className="relative overflow-hidden rounded-3xl border-2 border-b-4 border-[#A560E8]/35 bg-gradient-to-br from-[#FAF5FF] via-white to-white dark:from-[#A560E8]/10 dark:via-stone-900 dark:to-stone-900 p-5 sm:p-6">
+        <div className="pointer-events-none absolute -top-16 -right-16 w-48 h-48 rounded-full bg-[#A560E8]/15 blur-3xl" aria-hidden />
+
+        {/* Header — icon + title + count + usage chip */}
+        <div className="relative mb-5 flex items-end justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <span className="hidden sm:inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#A560E8] text-white border-2 border-b-4 border-[#7733B5] shadow-[0_8px_20px_-10px_rgba(165,96,232,0.7)]" aria-hidden>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h4m-7 4h12a2 2 0 002-2V8.83a2 2 0 00-.59-1.42l-3.83-3.83A2 2 0 0014.17 3H6a2 2 0 00-2 2v15a2 2 0 002 2z" />
+              </svg>
+            </span>
+            <div className="min-w-0">
+              <h2 className="text-xl sm:text-2xl font-extrabold text-stone-900 dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+                Your documents
+                <span className="ml-2 text-sm font-bold text-stone-400 tabular-nums align-middle">{docs.length}</span>
+              </h2>
+              <p className="mt-0.5 text-[13px] font-bold text-stone-500 dark:text-stone-400">Pick up where you left off, or open one to analyze it.</p>
+            </div>
           </div>
           {usage && usage.limit != null && (() => {
             const atCap = usage.used >= usage.limit;
@@ -754,196 +1507,86 @@ function DocumentsHub({
                       : 'border-[#A560E8]/30 bg-[#F3EAFF] text-[#8A48C7] dark:bg-[#A560E8]/15 dark:text-[#C9A0F0]'
                 }`}
               >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.4} viewBox="0 0 24 24" aria-hidden>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h10M7 12h10M7 17h6M5 3h14a1 1 0 011 1v16a1 1 0 01-1 1H5a1 1 0 01-1-1V4a1 1 0 011-1z" />
-                </svg>
                 {usage.used}/{usage.limit}
               </span>
             );
           })()}
         </div>
-        <h1 className="dash-serif mt-3 text-[2.1rem] sm:text-[2.7rem] lg:text-[3.1rem] font-extrabold leading-[1.03] tracking-tight text-stone-900 dark:text-stone-50">
-          {greetingFor()}{userName ? <>, <span className="text-[#A560E8]">{userName}</span></> : ''}.
-        </h1>
-        <p className="mt-3 text-sm sm:text-base text-stone-600 dark:text-stone-400 font-medium leading-relaxed max-w-2xl">
-          {userName ? 'Welcome back. ' : ''}Pick up a draft, start something new, or get professor-style feedback whenever you're ready. Everything in one place.
-        </p>
 
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".pdf,.doc,.docx,.txt"
-          className="hidden"
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) onUpload(f);
-            e.target.value = '';
-          }}
-        />
+        {/* Search — full-width on mobile, capped on tablet+ */}
+        <div className="relative w-full sm:max-w-xs mb-4">
+          <span aria-hidden className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#A560E8]/70">
+            <I.Search />
+          </span>
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search documents…"
+            className="w-full pl-10 pr-3 py-2.5 rounded-2xl border-2 border-b-[3px] border-[#A560E8]/25 dark:border-[#A560E8]/30 bg-white dark:bg-stone-900 text-sm font-medium text-stone-800 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#A560E8]/40 focus:border-[#A560E8] transition-colors"
+          />
+        </div>
 
-        <style>{`
-          @keyframes wsUploadGlow {
-            0%, 100% { box-shadow: 0 20px 44px -18px rgba(165,96,232,0.55), 0 0 0 0 rgba(165,96,232,0); }
-            50%      { box-shadow: 0 24px 50px -16px rgba(165,96,232,0.85), 0 0 28px 2px rgba(165,96,232,0.45); }
-          }
-          .ws-upload-glow { box-shadow: 0 20px 44px -18px rgba(165,96,232,0.6); animation: wsUploadGlow 2.4s ease-in-out infinite; }
-          @keyframes wsStartHereBob { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(6px) rotate(-3deg); } }
-          .ws-start-here-arrow { animation: wsStartHereBob 1.5s ease-in-out infinite; transform-origin: 70% 30%; }
-          @media (prefers-reduced-motion: reduce) {
-            .ws-upload-glow, .ws-start-here-arrow { animation: none; }
-          }
-        `}</style>
-
-        {!loading && docs.length === 0 && (
-          <div className="mt-6 -mb-1 pl-1 select-none" aria-hidden>
-            <span
-              className="text-[13px] sm:text-sm font-extrabold text-[#8A48C7] dark:text-[#C9A0F0]"
-              style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-            >
-              New here? Start by uploading your paper
-            </span>
+        {/* Document grid — sits inside the section container */}
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
+            {[0, 1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="rounded-[1.5rem] border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 overflow-hidden animate-pulse">
+                <div className="h-44 bg-stone-100 dark:bg-stone-800 px-5 pt-7">
+                  <div className="h-full rounded-t-2xl bg-white/70 dark:bg-stone-900/60" />
+                </div>
+                <div className="px-5 py-4 space-y-2.5">
+                  <div className="h-2.5 w-2/3 rounded-full bg-stone-100 dark:bg-stone-800" />
+                  <div className="h-7 w-24 rounded-xl bg-stone-100 dark:bg-stone-800" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="rounded-3xl border-2 border-b-4 border-[#A560E8]/25 bg-white dark:bg-stone-900 overflow-hidden">
+            <DocsEmptyState hasAnyDocs={docs.length > 0} hasSearch={search.trim().length > 0} onNew={onNew} onUpload={() => fileInputRef.current?.click()} />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
+            {filtered.map((d) => (
+              <DocumentCard
+                key={d.id}
+                doc={d}
+                onOpen={() => onOpen(d.id)}
+                onAnalyze={() => onAnalyze(d.id)}
+                onDownload={() => onDownload(d.id)}
+                onDelete={() => onDelete(d.id)}
+              />
+            ))}
           </div>
         )}
-
-        <div className={`${!loading && docs.length === 0 ? 'mt-9 sm:mt-10' : 'mt-6'} grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4`}>
-          {/* Primary — upload existing (feeds the analyse flow) */}
-          <div className="relative h-full">
-            {!loading && docs.length === 0 && (
-              <>
-                {/* Big "click here" arrow into the tile's top-right */}
-                <svg
-                  aria-hidden
-                  className="ws-start-here-arrow pointer-events-none absolute -top-12 right-6 z-20 w-16 h-16 text-[#FFC800] drop-shadow-[0_2px_6px_rgba(255,200,0,0.6)]"
-                  viewBox="0 0 64 64"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={5}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M52 6C60 24 55 44 28 55" />
-                  <path d="M28 55l14-2" />
-                  <path d="M28 55l3-14" />
-                </svg>
-              </>
-            )}
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="group relative w-full h-full overflow-hidden rounded-3xl border-2 border-b-4 border-[#7733B5] bg-gradient-to-br from-[#A560E8] to-[#7733B5] text-white p-6 text-left hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all ws-upload-glow"
-            >
-              <div className="pointer-events-none absolute -top-12 -right-12 w-40 h-40 rounded-full bg-white/10 blur-2xl" aria-hidden />
-              <div className="relative flex items-center gap-4">
-                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/20 border-2 border-white/30">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16" /></svg>
-                </span>
-                <div className="min-w-0">
-                  <p className="text-lg sm:text-xl font-extrabold leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Upload a paper</p>
-                  <p className="text-[13px] font-bold text-white/80 mt-1">Bring in a PDF, .docx or .txt file</p>
-                </div>
-                <svg className="ml-auto w-5 h-5 shrink-0 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-              </div>
-            </button>
-          </div>
-
-          {/* Secondary — write new */}
-          <button
-            type="button"
-            onClick={onNew}
-            className="group relative overflow-hidden rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-6 text-left hover:-translate-y-0.5 hover:border-[#A560E8]/40 active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_12px_30px_-18px_rgba(0,0,0,0.18)]"
-          >
-            <div className="flex items-center gap-4">
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#A560E8] border-2 border-[#A560E8]/25">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-              </span>
-              <div className="min-w-0">
-                <p className="text-lg sm:text-xl font-extrabold leading-tight text-stone-900 dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Start a new draft</p>
-                <p className="text-[13px] font-bold text-stone-500 dark:text-stone-400 mt-1">Begin with a blank page</p>
-              </div>
-              <svg className="ml-auto w-5 h-5 shrink-0 text-stone-400 group-hover:text-[#A560E8] transition-colors" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-            </div>
-          </button>
-        </div>
       </div>
 
-      {/* ─── Library section header ─────────────────────────────── */}
-      <div className="mb-4">
-        <h2 className="text-xl sm:text-2xl font-extrabold text-stone-900 dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-          Your documents
-          <span className="ml-2 text-sm font-bold text-stone-400 tabular-nums align-middle">{docs.length}</span>
-        </h2>
-        <p className="mt-0.5 text-[13px] font-bold text-stone-500 dark:text-stone-400">Pick up where you left off, or open one to analyze it.</p>
-      </div>
+      {/* Bento animations — mascot bob, upload-tile glow pulse,
+          and the bobbing "click here" arrow that points at Upload. */}
+      <style>{`
+        @keyframes wsBentoBob {
+          0%, 100% { transform: translateY(0); }
+          50%      { transform: translateY(-5px); }
+        }
+        .ws-bento-bob { animation: wsBentoBob 2.6s ease-in-out infinite; }
 
-      {/* ─── Filter chips ───────────────────────────────────────── */}
-      <div className="flex flex-wrap items-center gap-1.5 mb-3">
-        {filterChips.map((c) => {
-          const active = filter === c.key;
-          return (
-            <button
-              key={c.key}
-              type="button"
-              onClick={() => setFilter(c.key)}
-              className={`inline-flex items-center gap-1.5 pl-3 pr-2.5 py-1.5 rounded-full text-[12px] font-extrabold transition-all ${
-                active
-                  ? 'bg-[#A560E8] text-white border-2 border-[#7733B5] shadow-[0_6px_16px_-8px_rgba(165,96,232,0.7)]'
-                  : 'bg-stone-50 dark:bg-stone-800/60 text-stone-600 dark:text-stone-300 border-2 border-stone-200 dark:border-stone-700 hover:border-[#A560E8]/40 hover:text-[#8A48C7] dark:hover:text-[#C9A0F0]'
-              }`}
-            >
-              {c.label}
-              <span className={`min-w-[1.1rem] text-center text-[10px] tabular-nums px-1 py-px rounded-full ${active ? 'bg-white/25 text-white' : 'bg-stone-200/70 dark:bg-stone-700 text-stone-500 dark:text-stone-400'}`}>{c.count}</span>
-            </button>
-          );
-        })}
-      </div>
+        @keyframes wsUploadGlow {
+          0%, 100% { box-shadow: 0 22px 50px -18px rgba(165,96,232,0.55), 0 0 0 0 rgba(165,96,232,0); }
+          50%      { box-shadow: 0 28px 60px -16px rgba(165,96,232,0.85), 0 0 36px 4px rgba(165,96,232,0.50); }
+        }
+        .ws-upload-glow { box-shadow: 0 22px 50px -18px rgba(165,96,232,0.6); animation: wsUploadGlow 2.6s ease-in-out infinite; }
 
-      {/* ─── Search ─────────────────────────────────────────────── */}
-      <div className="relative w-full sm:max-w-xs mb-4">
-        <span aria-hidden className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400">
-          <I.Search />
-        </span>
-        <input
-          type="search"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search documents…"
-          className="w-full pl-10 pr-3 py-2.5 rounded-2xl border-2 border-b-[3px] border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/60 text-sm font-medium text-stone-800 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:bg-white dark:focus:bg-stone-900 focus:ring-2 focus:ring-[#A560E8]/40 focus:border-[#A560E8]/40 transition-colors"
-        />
-      </div>
+        @keyframes wsStartHereBob {
+          0%, 100% { transform: translateY(0) rotate(0deg); }
+          50%      { transform: translateY(6px) rotate(-3deg); }
+        }
+        .ws-start-here-arrow { animation: wsStartHereBob 1.6s ease-in-out infinite; transform-origin: 70% 30%; }
 
-      {/* ─── Document grid ──────────────────────────────────────── */}
-      {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
-          {[0, 1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="rounded-[1.5rem] border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 overflow-hidden animate-pulse">
-              <div className="h-44 bg-stone-100 dark:bg-stone-800 px-5 pt-7">
-                <div className="h-full rounded-t-2xl bg-white/70 dark:bg-stone-900/60" />
-              </div>
-              <div className="px-5 py-4 space-y-2.5">
-                <div className="h-2.5 w-2/3 rounded-full bg-stone-100 dark:bg-stone-800" />
-                <div className="h-7 w-24 rounded-xl bg-stone-100 dark:bg-stone-800" />
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : filtered.length === 0 ? (
-        <div className="rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 overflow-hidden">
-          <DocsEmptyState hasAnyDocs={docs.length > 0} hasSearch={search.trim().length > 0} onNew={onNew} onUpload={() => fileInputRef.current?.click()} />
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
-          {filtered.map((d) => (
-            <DocumentCard
-              key={d.id}
-              doc={d}
-              onOpen={() => onOpen(d.id)}
-              onAnalyze={() => onAnalyze(d.id)}
-              onDownload={() => onDownload(d.id)}
-              onDelete={() => onDelete(d.id)}
-            />
-          ))}
-        </div>
-      )}
+        @media (prefers-reduced-motion: reduce) {
+          .ws-bento-bob, .ws-upload-glow, .ws-start-here-arrow { animation: none; }
+        }
+      `}</style>
     </>
   );
 }
@@ -2919,7 +3562,9 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
             onDownload={handleDownload}
             onDelete={(id) => setConfirmDeleteId(id)}
             userName={firstNameOf(user)}
+            user={user}
             usage={docUsage}
+            onSwitchView={handleRailSelect}
           />
         )}
         {view === 'analyze' && (
@@ -2928,6 +3573,8 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
               eyebrow="Feedback"
               title="Analyze a paper"
               subtitle="Get professor-style feedback marked up right inside the document: strengths, fixes, and a grade estimate."
+              tint={SIDEBAR_TOOLS.find((t) => t.view === 'analyze')}
+              mascotSrc="/mascot-thinking.webp"
             />
             <AnalyzePanel
               docs={docList}
@@ -2945,6 +3592,8 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
               eyebrow="Review"
               title="Daily review"
               subtitle="A quick recall session pulled from everything you've studied. Keep your streak alive."
+              tint={SIDEBAR_TOOLS.find((t) => t.view === 'daily-review')}
+              mascotSrc="/mascot-celebrating.webp"
             />
             <DailyReviewTab
               user={user}
@@ -2959,6 +3608,8 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
               eyebrow="Study"
               title="Study packs"
               subtitle="Turn any notes into a lesson, flashcards, a quiz, a crossword and arcade games."
+              tint={SIDEBAR_TOOLS.find((t) => t.view === 'study-packs')}
+              mascotSrc="/mascot-juggling.webp"
             />
             <StudyPacksPanel onNavigate={onNavigate} />
           </>
@@ -2969,6 +3620,8 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
               eyebrow="Research"
               title="Citations"
               subtitle="Describe your topic and get real, citable sources with ready-to-use sentences in your style."
+              tint={SIDEBAR_TOOLS.find((t) => t.view === 'citations')}
+              mascotSrc="/mascot-pointing.webp"
             />
             <CitationsPanel onNavigate={onNavigate} />
           </>
@@ -2979,6 +3632,8 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, user, onE
               eyebrow="Play"
               title="Games"
               subtitle="Drill recall the fun way. Load them with your own notes via Study Packs."
+              tint={SIDEBAR_TOOLS.find((t) => t.view === 'games')}
+              mascotSrc="/mascot-jumping-joy.webp"
             />
             <GamesPanel onNavigate={onNavigate} onOpenStudyPacks={() => setView('study-packs')} />
           </>

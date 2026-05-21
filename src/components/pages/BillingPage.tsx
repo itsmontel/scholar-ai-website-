@@ -404,12 +404,12 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
           {plans.map((plan) => (
             <div
               key={plan.id}
-              className={`relative bg-white dark:bg-stone-800 rounded-2xl p-6 transition-all ${
+              className={`relative rounded-2xl p-6 transition-all ${
                 plan.popular
-                  ? 'border-2 border-b-4 border-[#A560E8]'
+                  ? 'bg-white dark:bg-stone-800 border-2 border-b-4 border-[#A560E8] shadow-[0_18px_44px_-24px_rgba(165,96,232,0.4)]'
                   : plan.id === 'premium'
-                  ? 'border-2 border-b-4 border-[#A560E8]'
-                  : 'border-2 border-b-4 border-stone-200 dark:border-stone-700'
+                  ? 'bg-[#FFFAE5] dark:bg-stone-800 border-2 border-b-4 border-[#FFC800] shadow-[0_18px_44px_-24px_rgba(255,200,0,0.4)]'
+                  : 'bg-white dark:bg-stone-800 border-2 border-b-4 border-stone-200 dark:border-stone-700'
               }`}
             >
               {plan.popular && (
@@ -421,7 +421,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
               )}
               {plan.id === 'premium' && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-[#A560E8] text-white px-4 py-1 rounded-xl text-xs font-extrabold border-b-2 border-[#8A48C7]">
+                  <span className="bg-[#FFC800] text-[#6B27A3] px-4 py-1 rounded-xl text-xs font-extrabold border-2 border-[#D4A300]">
                     5× usage
                   </span>
                 </div>
@@ -508,6 +508,8 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
                     ? 'bg-stone-100 dark:bg-stone-800 text-stone-400 border-2 border-stone-200 dark:border-stone-700 rounded-xl cursor-not-allowed'
                     : plan.popular
                     ? 'bg-[#A560E8] text-white uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5'
+                    : plan.id === 'premium'
+                    ? 'bg-[#FFC800] hover:bg-[#FFD52E] text-[#6B27A3] uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#D4A300] active:border-b-2 active:translate-y-0.5'
                     : 'bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-200 border-2 border-b-4 border-stone-200 dark:border-stone-600 active:border-b-2 active:translate-y-0.5 rounded-xl'
                 }`}
               >

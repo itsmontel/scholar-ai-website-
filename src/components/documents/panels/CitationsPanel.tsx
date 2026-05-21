@@ -115,7 +115,7 @@ export default function CitationsPanel({ onNavigate }: { onNavigate: (page: stri
           }}
           rows={3}
           placeholder="e.g. the effect of social media on adolescent sleep quality"
-          className="w-full px-4 py-3 rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-sm text-stone-800 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#A560E8]/40 focus:border-[#A560E8]/40 resize-none"
+          className="w-full px-4 py-3 rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-sm text-stone-800 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#1CB0F6]/40 focus:border-[#1CB0F6]/40 resize-none"
         />
         <div className="mt-3 flex flex-col sm:flex-row sm:items-center gap-3">
           <div className="flex items-center gap-2">
@@ -123,7 +123,7 @@ export default function CitationsPanel({ onNavigate }: { onNavigate: (page: stri
             <select
               value={style}
               onChange={(e) => setStyle(e.target.value)}
-              className="px-3 py-2 rounded-xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-[13px] font-bold text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-2 focus:ring-[#A560E8]/40"
+              className="px-3 py-2 rounded-xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-[13px] font-bold text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-2 focus:ring-[#1CB0F6]/40"
             >
               {STYLES.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
@@ -133,7 +133,7 @@ export default function CitationsPanel({ onNavigate }: { onNavigate: (page: stri
             <select
               value={yearRange}
               onChange={(e) => setYearRange(e.target.value)}
-              className="px-3 py-2 rounded-xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-[13px] font-bold text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-2 focus:ring-[#A560E8]/40"
+              className="px-3 py-2 rounded-xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-[13px] font-bold text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-2 focus:ring-[#1CB0F6]/40"
             >
               {YEARS.map((y) => <option key={y.v} value={y.v}>{y.label}</option>)}
             </select>
@@ -142,7 +142,7 @@ export default function CitationsPanel({ onNavigate }: { onNavigate: (page: stri
             type="button"
             onClick={search}
             disabled={loading || !topic.trim()}
-            className="sm:ml-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
+            className="sm:ml-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#1CB0F6] hover:bg-[#1486B5] disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#1486B5] active:border-b-2 active:translate-y-0.5 transition-all"
           >
             {loading ? (
               <>
@@ -161,6 +161,8 @@ export default function CitationsPanel({ onNavigate }: { onNavigate: (page: stri
         <PreviewStrip
           title="What your sources look like"
           subtitle="Real, citable references with ready-to-use sentences and in-text citations in your style."
+          tint="#1CB0F6"
+          tintShadowRgb="28,176,246"
           items={[
             { kind: 'video', src: '/writescholar-citation-finder-demo.mp4', label: 'Finding sources' },
             { kind: 'image', src: '/citations-preview.png', label: 'Formatted citations' },
@@ -169,13 +171,13 @@ export default function CitationsPanel({ onNavigate }: { onNavigate: (page: stri
       </div>
 
       {error && (
-        <div className={`mt-4 rounded-2xl border-2 p-4 ${upgrade ? 'border-[#A560E8]/40 bg-[#F3EAFF] dark:bg-[#A560E8]/10' : 'border-[#FF4B4B]/40 bg-[#FFF0F0] dark:bg-[#FF4B4B]/10'}`}>
-          <p className={`text-sm font-extrabold ${upgrade ? 'text-[#8A48C7]' : 'text-[#D63A3A]'}`}>{error}</p>
+        <div className={`mt-4 rounded-2xl border-2 p-4 ${upgrade ? 'border-[#1CB0F6]/40 bg-[#DDF4FF] dark:bg-[#1CB0F6]/10' : 'border-[#FF4B4B]/40 bg-[#FFF0F0] dark:bg-[#FF4B4B]/10'}`}>
+          <p className={`text-sm font-extrabold ${upgrade ? 'text-[#1486B5]' : 'text-[#D63A3A]'}`}>{error}</p>
           {upgrade && (
             <button
               type="button"
               onClick={() => onNavigate('pricing')}
-              className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] text-white text-xs font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
+              className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1CB0F6] hover:bg-[#1486B5] text-white text-xs font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#1486B5] active:border-b-2 active:translate-y-0.5 transition-all"
             >
               See plans
             </button>
@@ -213,7 +215,7 @@ export default function CitationsPanel({ onNavigate }: { onNavigate: (page: stri
               {results.map((c, i) => (
                 <div key={i} className="rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-4 sm:p-5">
                   <div className="flex items-start gap-3">
-                    <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#A560E8] text-[11px] font-extrabold">{i + 1}</span>
+                    <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#DDF4FF] dark:bg-[#1CB0F6]/15 text-[#1CB0F6] text-[11px] font-extrabold">{i + 1}</span>
                     <div className="min-w-0 flex-1">
                       <p
                         className="text-[13.5px] leading-relaxed text-stone-800 dark:text-stone-100 [&_i]:italic"
@@ -225,7 +227,7 @@ export default function CitationsPanel({ onNavigate }: { onNavigate: (page: stri
                         {c.accessibility && <span className="px-2 py-0.5 rounded-full bg-[#E5F8D0] text-[10px] font-extrabold text-[#46A302]">{c.accessibility}</span>}
                       </div>
                       {c.ready_to_use_sentence && (
-                        <p className="mt-2.5 text-[12.5px] italic text-stone-600 dark:text-stone-300 border-l-2 border-[#A560E8]/30 pl-3">
+                        <p className="mt-2.5 text-[12.5px] italic text-stone-600 dark:text-stone-300 border-l-2 border-[#1CB0F6]/30 pl-3">
                           {c.ready_to_use_sentence}
                         </p>
                       )}
@@ -233,7 +235,7 @@ export default function CitationsPanel({ onNavigate }: { onNavigate: (page: stri
                         <ul className="mt-2.5 space-y-1">
                           {c.key_points.slice(0, 3).map((p, k) => (
                             <li key={k} className="flex gap-2 text-[12px] text-stone-600 dark:text-stone-300">
-                              <span className="text-[#A560E8] font-extrabold">•</span>
+                              <span className="text-[#1CB0F6] font-extrabold">•</span>
                               <span>{p}</span>
                             </li>
                           ))}
@@ -243,7 +245,7 @@ export default function CitationsPanel({ onNavigate }: { onNavigate: (page: stri
                         <button
                           type="button"
                           onClick={() => copy(strip(c.citation), i)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 border-stone-200 dark:border-stone-700 text-[11px] font-extrabold text-stone-600 dark:text-stone-300 hover:border-[#A560E8]/40 hover:text-[#8A48C7] transition-colors"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 border-stone-200 dark:border-stone-700 text-[11px] font-extrabold text-stone-600 dark:text-stone-300 hover:border-[#1CB0F6]/40 hover:text-[#1486B5] transition-colors"
                         >
                           {copiedIdx === i ? 'Copied ✓' : 'Copy citation'}
                         </button>
@@ -251,7 +253,7 @@ export default function CitationsPanel({ onNavigate }: { onNavigate: (page: stri
                           <button
                             type="button"
                             onClick={() => copy(c.in_text_citation as string, 1000 + i)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 border-stone-200 dark:border-stone-700 text-[11px] font-extrabold text-stone-600 dark:text-stone-300 hover:border-[#A560E8]/40 hover:text-[#8A48C7] transition-colors"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 border-stone-200 dark:border-stone-700 text-[11px] font-extrabold text-stone-600 dark:text-stone-300 hover:border-[#1CB0F6]/40 hover:text-[#1486B5] transition-colors"
                           >
                             {copiedIdx === 1000 + i ? 'Copied ✓' : `In-text: ${c.in_text_citation}`}
                           </button>

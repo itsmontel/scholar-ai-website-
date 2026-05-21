@@ -126,7 +126,7 @@ export default function StudyPacksPanel({ onNavigate }: { onNavigate: (page: str
       <div className="rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-5 sm:p-6">
         <div className="flex items-center justify-between mb-2">
           <label className="text-[13px] font-extrabold text-stone-700 dark:text-stone-200">Paste your notes or lecture material</label>
-          <span className={`text-[11px] font-bold tabular-nums ${wordCount < 50 ? 'text-stone-400' : 'text-[#8A48C7]'}`}>{wordCount} words</span>
+          <span className={`text-[11px] font-bold tabular-nums ${wordCount < 50 ? 'text-stone-400' : 'text-[#B85F00]'}`}>{wordCount} words</span>
         </div>
         <textarea
           value={notes}
@@ -136,7 +136,7 @@ export default function StudyPacksPanel({ onNavigate }: { onNavigate: (page: str
           }}
           rows={8}
           placeholder="Drop in a chapter, your class notes, an article… at least 50 words. We'll turn it into a lesson, flashcards, a quiz, a crossword and arcade games."
-          className="w-full px-4 py-3 rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-sm text-stone-800 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#A560E8]/40 focus:border-[#A560E8]/40 resize-y"
+          className="w-full px-4 py-3 rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-sm text-stone-800 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#FF9600]/40 focus:border-[#FF9600]/40 resize-y"
         />
         <input
           ref={fileRef}
@@ -149,7 +149,7 @@ export default function StudyPacksPanel({ onNavigate }: { onNavigate: (page: str
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-b-[3px] border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-sm font-extrabold text-stone-700 dark:text-stone-200 hover:border-[#A560E8]/40 active:border-b-2 active:translate-y-0.5 transition-all"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-b-[3px] border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-sm font-extrabold text-stone-700 dark:text-stone-200 hover:border-[#FF9600]/40 active:border-b-2 active:translate-y-0.5 transition-all"
           >
             Upload a file
           </button>
@@ -157,7 +157,7 @@ export default function StudyPacksPanel({ onNavigate }: { onNavigate: (page: str
             type="button"
             onClick={generate}
             disabled={loading || wordCount < 50}
-            className="sm:ml-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
+            className="sm:ml-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#FF9600] hover:bg-[#B85F00] disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#B85F00] active:border-b-2 active:translate-y-0.5 transition-all"
           >
             {loading ? (
               <>
@@ -176,13 +176,13 @@ export default function StudyPacksPanel({ onNavigate }: { onNavigate: (page: str
       </div>
 
       {error && (
-        <div className={`mt-4 rounded-2xl border-2 p-4 ${upgrade ? 'border-[#A560E8]/40 bg-[#F3EAFF] dark:bg-[#A560E8]/10' : 'border-[#FF4B4B]/40 bg-[#FFF0F0] dark:bg-[#FF4B4B]/10'}`}>
-          <p className={`text-sm font-extrabold ${upgrade ? 'text-[#8A48C7]' : 'text-[#D63A3A]'}`}>{error}</p>
+        <div className={`mt-4 rounded-2xl border-2 p-4 ${upgrade ? 'border-[#FF9600]/40 bg-[#FFF4E0] dark:bg-[#FF9600]/10' : 'border-[#FF4B4B]/40 bg-[#FFF0F0] dark:bg-[#FF4B4B]/10'}`}>
+          <p className={`text-sm font-extrabold ${upgrade ? 'text-[#B85F00]' : 'text-[#D63A3A]'}`}>{error}</p>
           {upgrade && (
             <button
               type="button"
               onClick={() => onNavigate('pricing')}
-              className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] text-white text-xs font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
+              className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#FF9600] hover:bg-[#B85F00] text-white text-xs font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#B85F00] active:border-b-2 active:translate-y-0.5 transition-all"
             >
               See plans
             </button>
@@ -195,6 +195,8 @@ export default function StudyPacksPanel({ onNavigate }: { onNavigate: (page: str
           title="Everything a study pack creates"
           subtitle="One paste of notes becomes a full lesson, flashcards, a quiz, a crossword and arcade games."
           aspect="aspect-[4/5]"
+          tint="#FF9600"
+          tintShadowRgb="255,150,0"
           items={[
             { kind: 'image', src: '/study-pack-previews/lesson-plan.png', label: 'Lesson' },
             { kind: 'video', src: '/writescholar-flashcards-demo.mp4', label: 'Flashcards' },
@@ -228,16 +230,16 @@ export default function StudyPacksPanel({ onNavigate }: { onNavigate: (page: str
                 key={r.id}
                 type="button"
                 onClick={() => openViewer(r.questions, r.title)}
-                className="group flex items-center gap-3 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-4 text-left hover:-translate-y-0.5 hover:border-[#A560E8]/40 active:border-b-2 active:translate-y-0.5 transition-all"
+                className="group flex items-center gap-3 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-4 text-left hover:-translate-y-0.5 hover:border-[#FF9600]/40 active:border-b-2 active:translate-y-0.5 transition-all"
               >
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#A560E8]">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#FFF4E0] dark:bg-[#FF9600]/15 text-[#FF9600]">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.1} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 3l9 4.5-9 4.5-9-4.5L12 3zM3 12l9 4.5L21 12M3 16.5L12 21l9-4.5" /></svg>
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-extrabold text-stone-800 dark:text-stone-100 truncate">{r.title}</span>
                   <span className="block text-[11px] font-bold text-stone-400 mt-0.5">{timeAgo(r.created_at)}</span>
                 </span>
-                <span className="text-stone-300 group-hover:text-[#A560E8] transition-colors">
+                <span className="text-stone-300 group-hover:text-[#FF9600] transition-colors">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
                 </span>
               </button>
