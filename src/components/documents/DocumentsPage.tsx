@@ -975,16 +975,17 @@ function AnalyzePanel({
   );
 }
 
-/* ─── HUB view (list + filters + actions) ───────────────────── */
-/* ─── DocumentsHub — bento-grid "home" view ──────────────────────
+/* ─── HUB view (list + actions) ─────────────────────────────── */
+/* ─── DocumentsHub — colourful "home" view ───────────────────────
  *
  * The landing surface for /dashboard. Designed to feel like the
- * welcoming Duolingo / Quizlet home: greeting + mascot, a streak
- * chip, a "today's daily review" prompt, four colourful quick-action
- * tiles, a recent-study-packs section, and a mascot tip — all in a
- * responsive bento grid up top. The full document library (with
- * search + filter + grid) lives below so users who came to manage
- * docs can still scroll right to it.
+ * welcoming Duolingo / Quizlet home, stacked top to bottom:
+ *   1. Full-width greeting hero (mascot + date).
+ *   2. Three soft quick-action tiles — Write / Study / Games.
+ *   3. The MASSIVE Upload-paper banner — the flagship CTA.
+ *   4. A recent-study-packs section.
+ * The full document library (search + grid) lives below for users
+ * who came to manage their docs.
  */
 function DocumentsHub({
   docs,
@@ -1019,14 +1020,9 @@ function DocumentsHub({
   /* ─── Bento data fetches ──────────────────────────────────────
    * - studyPacks: last few packs the user generated, for the
    *   "Your study packs" tile. Endpoint is the quiz-history one
-   *   filtered to study_pack rows.
-   * - streak: current daily-review streak (number + whether today
-   *   is already done) for the streak chip + "Today's review is
-   *   ready" prompt. We read straight from the same localStorage
-   *   key DailyReviewTab uses to avoid an extra network hop. */
+   *   filtered to study_pack rows, for the "Your study packs" tile. */
   interface StudyPackPreview { id: string; title: string; createdAt: string; questionCount: number }
   const [studyPacks, setStudyPacks] = useState<StudyPackPreview[]>([]);
-  const [streak, setStreak] = useState<{ currentStreak: number; lastCompletedDate: string | null } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -1059,29 +1055,6 @@ function DocumentsHub({
     return () => { cancelled = true; };
   }, []);
 
-  useEffect(() => {
-    // Daily-review streak — same localStorage key DailyReviewTab writes to.
-    try {
-      const uid = user?.id || 'anon';
-      const raw = localStorage.getItem(`writescholar_daily_review_streak_${uid}`);
-      if (!raw) { setStreak({ currentStreak: 0, lastCompletedDate: null }); return; }
-      const parsed = JSON.parse(raw);
-      setStreak({
-        currentStreak: Number(parsed?.currentStreak ?? 0),
-        lastCompletedDate: parsed?.lastCompletedDate ?? null,
-      });
-    } catch {
-      setStreak({ currentStreak: 0, lastCompletedDate: null });
-    }
-  }, [user?.id]);
-
-  const isReviewReady = (() => {
-    if (!streak) return false;
-    if (!streak.lastCompletedDate) return true; // never done one
-    const today = new Date().toISOString().slice(0, 10);
-    return streak.lastCompletedDate !== today;
-  })();
-
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return docs
@@ -1113,21 +1086,18 @@ function DocumentsHub({
         }}
       />
 
-      {/* ─── BENTO GRID ─────────────────────────────────────────
-          Mobile (1 col): everything stacks
-          sm   (2 cols): hero + streak, then 4 quick actions 2x2
-          lg   (4 cols): bento layout below */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 auto-rows-min gap-3 sm:gap-4 mb-8">
-        {/* ─── HERO TILE (col-span-3, row-span-2 on desktop) ────
-            Watery purple — same soft tinted treatment as the Streak
-            and Daily Review chips, so Upload paper (which keeps the
-            deep purple gradient) stands out as the only saturated
-            element on the page. Dark text on the light bg keeps the
-            greeting readable. */}
-        <div className="sm:col-span-2 lg:col-span-3 lg:row-span-2 relative overflow-hidden rounded-3xl border-2 border-b-4 border-[#A560E8]/55 bg-gradient-to-br from-[#F3EAFF] via-white to-white dark:from-[#A560E8]/15 dark:via-stone-900 dark:to-stone-900 p-5 sm:p-6 lg:p-7">
+      {/* ─── DASHBOARD STACK ────────────────────────────────────
+          Top to bottom: full-width greeting hero → a row of three
+          soft quick-action tiles (Write / Study / Games) → the
+          MASSIVE Upload-paper banner (the flagship CTA, deliberately
+          oversized so it's the centre of gravity) → your study
+          packs. Streak + daily-review chips were removed. */}
+      <div className="space-y-4 sm:space-y-5 mb-8">
+        {/* ─── HERO — full-width watery-purple greeting ─── */}
+        <div className="relative overflow-hidden rounded-3xl border-2 border-b-4 border-[#A560E8]/55 bg-gradient-to-br from-[#F3EAFF] via-white to-white dark:from-[#A560E8]/15 dark:via-stone-900 dark:to-stone-900 p-5 sm:p-6 lg:p-7">
           <div className="pointer-events-none absolute -top-20 -right-20 w-64 h-64 rounded-full bg-[#A560E8]/15 blur-3xl" aria-hidden />
           <div className="pointer-events-none absolute -bottom-16 -left-16 w-56 h-56 rounded-full bg-[#FFC800]/15 blur-3xl" aria-hidden />
-          <div className="relative h-full flex items-center gap-5 sm:gap-6">
+          <div className="relative flex items-center gap-5 sm:gap-6">
             <div className="flex-1 min-w-0">
               <p className="text-[10.5px] sm:text-xs font-extrabold uppercase tracking-[0.22em] text-[#A560E8] mb-2">
                 {todayLabel()}
@@ -1142,257 +1112,168 @@ function DocumentsHub({
                 Let&apos;s turn today into a productive one. Pick where you want to start.
               </p>
             </div>
-            {/* Mascot — hidden on mobile (saves space), visible from sm up */}
             <img
               src="/mascot-walking.webp"
               alt=""
               aria-hidden
-              className="hidden sm:block relative w-24 h-24 lg:w-36 lg:h-36 object-contain shrink-0 ws-bento-bob"
+              className="hidden sm:block relative w-24 h-24 lg:w-32 lg:h-32 object-contain shrink-0 ws-bento-bob"
               loading="eager"
               decoding="async"
             />
           </div>
         </div>
 
-        {/* ─── STREAK CHIP — compact, row 1 col 4 on desktop ────
-            Half the height of before. Pairs with the Daily Review
-            chip below to fit two short tiles in the top-right
-            alongside the tall hero. */}
-        <div className="sm:col-span-1 relative overflow-hidden rounded-3xl border-2 border-b-4 border-[#FFC800]/60 bg-gradient-to-br from-[#FFF8E0] via-white to-white dark:from-[#FFC800]/15 dark:via-stone-900 dark:to-stone-900 p-3.5 sm:p-4">
-          <div className="pointer-events-none absolute -top-6 -right-6 w-20 h-20 rounded-full bg-[#FFC800]/20 blur-2xl" aria-hidden />
-          <div className="relative flex items-center gap-2.5">
-            <span className="text-3xl shrink-0 leading-none" aria-hidden>🔥</span>
-            <div className="min-w-0">
-              <p className="text-[9.5px] font-extrabold uppercase tracking-[0.18em] text-[#7A5C00] dark:text-[#FFD66B] leading-tight">
-                Your streak
-              </p>
-              <p
-                className="text-[1.5rem] sm:text-[1.65rem] font-extrabold leading-none tabular-nums text-stone-900 dark:text-stone-50 mt-0.5"
-                style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-              >
-                {streak?.currentStreak ?? 0}
-                <span className="ml-1 text-[10.5px] font-extrabold uppercase tracking-wider text-stone-500 dark:text-stone-400">
-                  {(streak?.currentStreak ?? 0) === 1 ? 'day' : 'days'}
+        {/* ─── 3 SOFT QUICK-ACTION TILES — Write / Study / Games ─── */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {([
+            {
+              key: 'write',
+              eyebrow: 'Blank canvas',
+              title: 'Write an essay',
+              desc: 'Start a fresh draft and write with live feedback.',
+              cta: 'Open editor',
+              tint: '#1CB0F6',
+              softBg: 'from-[#DDF4FF] via-white to-white dark:from-[#1CB0F6]/15 dark:via-stone-900 dark:to-stone-900',
+              haloBg: 'bg-[#1CB0F6]/20',
+              onClick: onNew,
+              iconPath: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z',
+            },
+            {
+              key: 'study',
+              eyebrow: 'Learn faster',
+              title: 'Make a study pack',
+              desc: 'Paste notes — get flashcards, quizzes, crosswords.',
+              cta: 'Open packs',
+              tint: '#FF9600',
+              softBg: 'from-[#FFF4E0] via-white to-white dark:from-[#FF9600]/15 dark:via-stone-900 dark:to-stone-900',
+              haloBg: 'bg-[#FF9600]/20',
+              onClick: () => onSwitchView('study-packs'),
+              iconPath: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253',
+            },
+            {
+              key: 'games',
+              eyebrow: 'Have fun',
+              title: 'Play a game',
+              desc: 'Drill recall the fun way — Word Blitz, Crossword & more.',
+              cta: 'Pick a game',
+              tint: '#FF4B82',
+              softBg: 'from-[#FFE8EE] via-white to-white dark:from-[#FF4B82]/15 dark:via-stone-900 dark:to-stone-900',
+              haloBg: 'bg-[#FF4B82]/20',
+              onClick: () => onSwitchView('games'),
+              iconPath: 'M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+            },
+          ] as const).map((tile) => (
+            <button
+              key={tile.key}
+              type="button"
+              onClick={tile.onClick}
+              className={`group relative overflow-hidden rounded-3xl border-2 border-b-4 bg-gradient-to-br ${tile.softBg} p-5 sm:p-6 text-left hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all`}
+              style={{ borderColor: `${tile.tint}60` }}
+            >
+              <div className={`pointer-events-none absolute -top-16 -right-16 w-48 h-48 rounded-full ${tile.haloBg} blur-3xl`} aria-hidden />
+              <div className="relative flex flex-col">
+                <span
+                  className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-2xl border-2 mb-3"
+                  style={{ backgroundColor: `${tile.tint}22`, borderColor: `${tile.tint}55`, color: tile.tint }}
+                >
+                  <svg className="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" d={tile.iconPath} />
+                  </svg>
                 </span>
-              </p>
-            </div>
-          </div>
+                <p className="text-[10.5px] font-extrabold uppercase tracking-[0.22em]" style={{ color: tile.tint }}>
+                  {tile.eyebrow}
+                </p>
+                <p
+                  className="mt-1 text-lg sm:text-xl font-extrabold leading-tight text-stone-900 dark:text-stone-50"
+                  style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+                >
+                  {tile.title}
+                </p>
+                <p className="mt-1.5 text-[12.5px] font-bold text-stone-600 dark:text-stone-300 leading-relaxed">
+                  {tile.desc}
+                </p>
+                <span
+                  className="mt-4 inline-flex items-center gap-1.5 self-start px-3 py-1.5 rounded-xl text-white text-[11.5px] font-extrabold uppercase tracking-wide border-2 border-b-4 group-hover:translate-y-px transition-transform"
+                  style={{ backgroundColor: tile.tint, borderColor: tile.tint }}
+                >
+                  {tile.cta}
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </span>
+              </div>
+            </button>
+          ))}
         </div>
 
-        {/* ─── DAILY REVIEW — compact chip, sits under the Streak
-            chip in col 4. Same vertical size as the Streak chip so
-            together they fill the right column alongside the tall
-            hero. Must render BEFORE the quick-action tiles so CSS
-            Grid auto-flow places it in row 2 col 4 (not after the
-            tall tiles). */}
-        <button
-          type="button"
-          onClick={() => onSwitchView('daily-review')}
-          className={`group sm:col-span-1 relative overflow-hidden rounded-3xl border-2 border-b-4 p-3.5 sm:p-4 text-left hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all ${
-            isReviewReady
-              ? 'border-[#46A302] bg-gradient-to-br from-[#E5F8D0] via-white to-white dark:from-[#58CC02]/15 dark:via-stone-900 dark:to-stone-900'
-              : 'border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900'
-          }`}
-        >
-          <div className={`pointer-events-none absolute -top-6 -right-6 w-20 h-20 rounded-full blur-2xl ${isReviewReady ? 'bg-[#58CC02]/20' : 'bg-stone-300/20'}`} aria-hidden />
-          <div className="relative flex items-center gap-2.5">
-            <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white text-base border-2 border-b-2 ${
-              isReviewReady ? 'bg-[#58CC02] border-[#46A302]' : 'bg-stone-300 dark:bg-stone-600 border-stone-400 dark:border-stone-500'
-            }`} aria-hidden>
-              {isReviewReady ? '🎯' : '✅'}
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className={`text-[9.5px] font-extrabold uppercase tracking-[0.18em] leading-tight ${isReviewReady ? 'text-[#46A302]' : 'text-stone-400 dark:text-stone-500'}`}>
-                Daily review
-              </p>
-              <p
-                className="text-[13.5px] sm:text-sm font-extrabold leading-tight text-stone-900 dark:text-stone-50 mt-0.5 truncate"
-                style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-              >
-                {isReviewReady ? 'Ready · 2 min' : 'Done today ✨'}
-              </p>
-            </div>
-            <svg className={`w-3.5 h-3.5 shrink-0 ${isReviewReady ? 'text-[#46A302]' : 'text-stone-300 dark:text-stone-600'} group-hover:translate-x-0.5 transition-transform`} fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-          </div>
-        </button>
-
-        {/* ─── 4 QUICK-ACTION TILES ──────────────────────────────
-            Upload paper keeps its bold purple gradient + white text
-            because it's the flagship CTA — the visual anchor of the
-            dashboard. The other three use the soft "watery" treatment
-            from the Streak / Daily Review chips: pastel tinted bg
-            fading to white, coloured border, brand-coloured icon +
-            eyebrow + dark text. They still pop against the page but
-            don't compete with Upload for attention. */}
-        {([
-          {
-            key: 'upload',
-            variant: 'bold' as const,
-            eyebrow: 'Start here',
-            title: 'Upload a paper',
-            desc: "PDF, .docx or .txt — we'll analyse it line by line.",
-            cta: 'Choose file',
-            tint: '#A560E8',
-            border: '#7733B5',
-            softBg: '',
-            haloBg: '',
-            arrow: true,
-            onClick: () => fileInputRef.current?.click(),
-            iconPath: 'M12 4v12m0 0l-4-4m4 4l4-4M4 20h16',
-          },
-          {
-            key: 'write',
-            variant: 'soft' as const,
-            eyebrow: 'Blank canvas',
-            title: 'Write an essay',
-            desc: 'Start a fresh draft and write with live feedback.',
-            cta: 'Open editor',
-            tint: '#1CB0F6',
-            border: '#1CB0F6',
-            // Soft watery blue → fades to white, like the Streak chip
-            softBg: 'from-[#DDF4FF] via-white to-white dark:from-[#1CB0F6]/15 dark:via-stone-900 dark:to-stone-900',
-            haloBg: 'bg-[#1CB0F6]/20',
-            arrow: false,
-            onClick: onNew,
-            iconPath: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z',
-          },
-          {
-            key: 'study',
-            variant: 'soft' as const,
-            eyebrow: 'Learn faster',
-            title: 'Make a study pack',
-            desc: 'Paste notes — get flashcards, quizzes, crosswords.',
-            cta: 'Open packs',
-            tint: '#FF9600',
-            border: '#FF9600',
-            softBg: 'from-[#FFF4E0] via-white to-white dark:from-[#FF9600]/15 dark:via-stone-900 dark:to-stone-900',
-            haloBg: 'bg-[#FF9600]/20',
-            arrow: false,
-            onClick: () => onSwitchView('study-packs'),
-            iconPath: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253',
-          },
-          {
-            key: 'games',
-            variant: 'soft' as const,
-            eyebrow: 'Have fun',
-            title: 'Play a game',
-            desc: 'Drill recall the fun way — Word Blitz, Crossword & more.',
-            cta: 'Pick a game',
-            tint: '#FF4B82',
-            border: '#FF4B82',
-            softBg: 'from-[#FFE8EE] via-white to-white dark:from-[#FF4B82]/15 dark:via-stone-900 dark:to-stone-900',
-            haloBg: 'bg-[#FF4B82]/20',
-            arrow: false,
-            onClick: () => onSwitchView('games'),
-            iconPath: 'M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
-          },
-        ] as const).map((tile) => (
-          <div key={tile.key} className="sm:col-span-1 lg:col-span-1 lg:row-span-2 relative">
-            {/* Bobbing yellow "click here" arrow — Upload only, so
-                new users know exactly which tile to start with. */}
-            {tile.arrow && (
-              <svg
+        {/* ─── MASSIVE UPLOAD PAPER — the flagship CTA ─────────────
+            Full-width, oversized banner (≈2× the height of the tiles
+            above). Deep purple gradient, glow + "click here" arrow,
+            big icon + headline on the left and a laptop mascot on the
+            right. This is unmistakably the main thing to do. */}
+        <div className="relative">
+          <svg
+            aria-hidden
+            className="ws-start-here-arrow pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2 sm:left-auto sm:right-10 sm:translate-x-0 z-20 w-14 h-14 text-[#FFC800] drop-shadow-[0_2px_6px_rgba(255,200,0,0.6)]"
+            viewBox="0 0 64 64"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M52 6C60 24 55 44 28 55" />
+            <path d="M28 55l14-2" />
+            <path d="M28 55l3-14" />
+          </svg>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="group ws-upload-glow relative w-full overflow-hidden rounded-[2rem] border-2 border-b-4 border-[#7733B5] bg-gradient-to-br from-[#A560E8] via-[#9355D9] to-[#7733B5] px-6 py-8 sm:px-10 sm:py-12 lg:py-14 text-left text-white hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all"
+          >
+            <div className="pointer-events-none absolute -top-24 -right-24 w-80 h-80 rounded-full bg-white/10 blur-3xl" aria-hidden />
+            <div className="pointer-events-none absolute -bottom-24 -left-24 w-72 h-72 rounded-full bg-[#FFC800]/15 blur-3xl" aria-hidden />
+            <div className="relative flex items-center gap-6 sm:gap-10">
+              <div className="flex-1 min-w-0">
+                <span className="inline-flex h-16 w-16 sm:h-20 sm:w-20 shrink-0 items-center justify-center rounded-3xl bg-white/20 border-2 border-white/30 mb-4 sm:mb-5">
+                  <svg className="w-8 h-8 sm:w-10 sm:h-10" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16" />
+                  </svg>
+                </span>
+                <p className="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.24em] text-white/75">
+                  Start here
+                </p>
+                <p
+                  className="mt-2 text-[2rem] sm:text-[2.6rem] lg:text-[3rem] font-extrabold leading-[1.02] tracking-tight"
+                  style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+                >
+                  Upload a paper
+                </p>
+                <p className="mt-3 text-sm sm:text-base font-bold text-white/85 leading-relaxed max-w-lg">
+                  Drop in a PDF, .docx or .txt and we&apos;ll analyse it line by line — professor-style feedback, a rubric breakdown and a grade estimate.
+                </p>
+                <span className="mt-6 inline-flex items-center gap-2 self-start px-5 py-3 rounded-2xl bg-white text-[#7733B5] text-sm sm:text-base font-extrabold uppercase tracking-wide border-2 border-b-4 border-white/70 group-hover:bg-white/90 active:border-b-2 active:translate-y-0.5 transition-all">
+                  Choose file
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </span>
+              </div>
+              {/* Laptop mascot — big, anchors the right side on desktop */}
+              <img
+                src="/mascot-laptop.webp"
+                alt=""
                 aria-hidden
-                className="ws-start-here-arrow pointer-events-none absolute -top-10 right-4 z-20 w-14 h-14 text-[#FFC800] drop-shadow-[0_2px_6px_rgba(255,200,0,0.6)]"
-                viewBox="0 0 64 64"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={5}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M52 6C60 24 55 44 28 55" />
-                <path d="M28 55l14-2" />
-                <path d="M28 55l3-14" />
-              </svg>
-            )}
+                className="hidden md:block relative w-40 lg:w-56 h-auto object-contain shrink-0 ws-bento-bob"
+                loading="eager"
+                decoding="async"
+              />
+            </div>
+          </button>
+        </div>
 
-            {tile.variant === 'bold' ? (
-              /* ─── BOLD VARIANT — Upload paper only ─── */
-              <button
-                type="button"
-                onClick={tile.onClick}
-                className="group ws-upload-glow relative w-full h-full min-h-[200px] sm:min-h-[230px] overflow-hidden rounded-3xl border-2 border-b-4 bg-gradient-to-br from-[#A560E8] via-[#9355D9] to-[#7733B5] p-5 sm:p-6 text-left text-white hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all"
-                style={{ borderColor: tile.border }}
-              >
-                <div className="pointer-events-none absolute -top-20 -right-20 w-60 h-60 rounded-full bg-white/10 blur-3xl" aria-hidden />
-                <div className="pointer-events-none absolute -bottom-16 -left-16 w-48 h-48 rounded-full bg-[#FFC800]/15 blur-3xl" aria-hidden />
-                <div className="relative h-full flex flex-col">
-                  <span className="flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-2xl bg-white/20 border-2 border-white/30 mb-3 sm:mb-4">
-                    <svg className="w-7 h-7 sm:w-8 sm:h-8" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24" aria-hidden>
-                      <path strokeLinecap="round" strokeLinejoin="round" d={tile.iconPath} />
-                    </svg>
-                  </span>
-                  <p className="text-[10.5px] font-extrabold uppercase tracking-[0.22em] text-white/75">
-                    {tile.eyebrow}
-                  </p>
-                  <p className="mt-1 text-xl sm:text-[1.4rem] font-extrabold leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                    {tile.title}
-                  </p>
-                  <p className="mt-1.5 text-[12.5px] sm:text-[13px] font-bold text-white/85 leading-relaxed">
-                    {tile.desc}
-                  </p>
-                  <span className="mt-auto inline-flex items-center gap-1.5 self-start px-3 py-1.5 rounded-xl bg-white/20 backdrop-blur-sm text-white text-[11.5px] sm:text-[12px] font-extrabold uppercase tracking-wide border-2 border-white/30 group-hover:bg-white/30 transition-colors">
-                    {tile.cta}
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                  </span>
-                </div>
-              </button>
-            ) : (
-              /* ─── SOFT VARIANT — Write / Study / Games ─── */
-              <button
-                type="button"
-                onClick={tile.onClick}
-                className={`group relative w-full h-full min-h-[200px] sm:min-h-[230px] overflow-hidden rounded-3xl border-2 border-b-4 bg-gradient-to-br ${tile.softBg} p-5 sm:p-6 text-left hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all`}
-                style={{ borderColor: `${tile.tint}60` }}
-              >
-                <div className={`pointer-events-none absolute -top-16 -right-16 w-48 h-48 rounded-full ${tile.haloBg} blur-3xl`} aria-hidden />
-                <div className="relative h-full flex flex-col">
-                  <span
-                    className="flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-2xl border-2 mb-3 sm:mb-4"
-                    style={{
-                      backgroundColor: `${tile.tint}22`,
-                      borderColor: `${tile.tint}55`,
-                      color: tile.tint,
-                    }}
-                  >
-                    <svg className="w-7 h-7 sm:w-8 sm:h-8" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24" aria-hidden>
-                      <path strokeLinecap="round" strokeLinejoin="round" d={tile.iconPath} />
-                    </svg>
-                  </span>
-                  <p className="text-[10.5px] font-extrabold uppercase tracking-[0.22em]" style={{ color: tile.tint }}>
-                    {tile.eyebrow}
-                  </p>
-                  <p
-                    className="mt-1 text-xl sm:text-[1.4rem] font-extrabold leading-tight text-stone-900 dark:text-stone-50"
-                    style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                  >
-                    {tile.title}
-                  </p>
-                  <p className="mt-1.5 text-[12.5px] sm:text-[13px] font-bold text-stone-600 dark:text-stone-300 leading-relaxed">
-                    {tile.desc}
-                  </p>
-                  <span
-                    className="mt-auto inline-flex items-center gap-1.5 self-start px-3 py-1.5 rounded-xl text-white text-[11.5px] sm:text-[12px] font-extrabold uppercase tracking-wide border-2 border-b-4 group-hover:translate-y-px transition-transform"
-                    style={{ backgroundColor: tile.tint, borderColor: `${tile.tint}` }}
-                  >
-                    {tile.cta}
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                  </span>
-                </div>
-              </button>
-            )}
-          </div>
-        ))}
-
-        {/* ─── YOUR STUDY PACKS (col-span-3) ─── */}
-        <div className="sm:col-span-2 lg:col-span-3 relative overflow-hidden rounded-3xl border-2 border-b-4 border-[#FF9600]/40 bg-gradient-to-br from-[#FFF4E0] via-white to-white dark:from-[#FF9600]/10 dark:via-stone-900 dark:to-stone-900 p-5 sm:p-6">
+        {/* ─── YOUR STUDY PACKS — full width ─── */}
+        <div className="relative overflow-hidden rounded-3xl border-2 border-b-4 border-[#FF9600]/40 bg-gradient-to-br from-[#FFF4E0] via-white to-white dark:from-[#FF9600]/10 dark:via-stone-900 dark:to-stone-900 p-5 sm:p-6">
           <div className="flex items-center justify-between mb-3 gap-3">
             <div className="flex items-center gap-2.5 min-w-0">
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#FF9600] text-white text-base border-2 border-b-2 border-[#D97F00]" aria-hidden>📚</span>
@@ -1435,7 +1316,7 @@ function DocumentsHub({
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
               {studyPacks.slice(0, 4).map((pack) => (
                 <button
                   key={pack.id}
@@ -1453,19 +1334,6 @@ function DocumentsHub({
               ))}
             </div>
           )}
-        </div>
-
-        {/* ─── MASCOT TIP CARD (col-span-1) ─── */}
-        <div className="relative overflow-hidden rounded-3xl border-2 border-b-4 border-[#1CB0F6]/45 bg-gradient-to-br from-[#DDF4FF] via-white to-white dark:from-[#1CB0F6]/15 dark:via-stone-900 dark:to-stone-900 p-5">
-          <div className="flex flex-col items-center text-center gap-2">
-            <img src="/mascot-pointing.webp" alt="" aria-hidden className="w-20 h-20 object-contain ws-bento-bob" loading="lazy" decoding="async" />
-            <p className="text-[10.5px] font-extrabold uppercase tracking-[0.18em] text-[#1899D6] dark:text-[#7DD3FC]">
-              Tip from Scholar
-            </p>
-            <p className="text-[12.5px] font-bold text-stone-700 dark:text-stone-200 leading-snug">
-              Even 5 minutes a day beats a 2-hour cram. Keep your streak alive.
-            </p>
-          </div>
         </div>
       </div>
 
