@@ -22,14 +22,15 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import Header from '../../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../../common/WriteScholarEditorialBackground';
+import LoggedInPageShell from '../../workspace/LoggedInPageShell';
 import Footer from '../../common/Footer';
+import { WriteScholarEditorialBackgroundLayers } from '../../common/WriteScholarEditorialBackground';
 import { WORD_BLITZ_TRIVIA_BANK } from '../../../data/wordBlitzTriviaBank';
 import { WORD_BLITZ_VOCAB_BANK } from '../../../data/wordBlitzVocabBank';
 import { WORD_BLITZ_QUOTES_BANK } from '../../../data/wordBlitzQuotesBank';
 import { WORD_BLITZ_MENTAL_MATH_BANK } from '../../../data/wordBlitzMentalMathBank';
 import type { WordBlitzBankQuestion } from '../../../data/wordBlitzTriviaBank';
+import { trackWordBlitzGame } from '../../../data/achievements';
 
 /* ────────────────────── Types ────────────────────── */
 
@@ -542,6 +543,7 @@ const WordBlitzPage = ({ onNavigate, user, onLogout }: WordBlitzPageProps) => {
     if (advanceTimerRef.current) { clearTimeout(advanceTimerRef.current); advanceTimerRef.current = null; }
     if (correctRevealTimerRef.current) { clearTimeout(correctRevealTimerRef.current); correctRevealTimerRef.current = null; }
     setFlashState('none');
+    try { trackWordBlitzGame(scoreRef.current); } catch { /* ignore */ }
     // 400ms freeze before transition so the last popup can finish.
     setTimeout(() => setGameState('gameover'), 400);
   }, []);
@@ -1359,10 +1361,8 @@ const WordBlitzPage = ({ onNavigate, user, onLogout }: WordBlitzPageProps) => {
 
   /* ═══════════════════ FRAME ═══════════════════ */
 
-  return (
-    <div className="relative min-h-screen flex flex-col overflow-x-clip" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
-      {!showMinimalUI && <Header onNavigate={onNavigate} user={user} onLogout={onLogout || (() => {})} currentPage="word-blitz" />}
+  const pageContent = (
+    <>
       {showMinimalUI && (gameState === 'menu' || gameState === 'loading' || gameState === 'ready' || gameState === 'gameover') && (
         <div className="sticky top-0 z-10 flex items-center justify-between px-3 py-2 bg-white/95 backdrop-blur border-b border-stone-200">
           <button
@@ -1389,7 +1389,17 @@ const WordBlitzPage = ({ onNavigate, user, onLogout }: WordBlitzPageProps) => {
       {gameState === 'playing' && renderGame()}
       {gameState === 'gameover' && renderGameOver()}
       {!showMinimalUI && gameState !== 'playing' && <Footer onNavigate={onNavigate} />}
-    </div>
+    </>
+  );
+
+  if (showMinimalUI) {
+    return <div className="relative min-h-screen flex flex-col overflow-x-clip">{pageContent}</div>;
+  }
+
+  return (
+    <LoggedInPageShell className="relative min-h-screen flex flex-col overflow-x-clip" user={user} onNavigate={onNavigate} onLogout={onLogout || (() => {})} currentPage="word-blitz">
+      {pageContent}
+    </LoggedInPageShell>
   );
 };
 

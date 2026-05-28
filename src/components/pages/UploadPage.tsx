@@ -1,6 +1,5 @@
 import { useState, useRef } from 'react';
-import Header from '../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
+import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
 import LoadingSpinner from '../common/LoadingSpinner';
 
@@ -192,10 +191,7 @@ const UploadPage = ({ onNavigate, user, onLogout }: UploadPageProps) => {
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-clip bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="upload" />
-
+    <LoggedInPageShell className="relative min-h-screen overflow-x-clip bg-stone-50 dark:bg-stone-950" user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="upload">
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
         {/* Header */}
         <div className="text-center mb-10">
@@ -437,7 +433,7 @@ const UploadPage = ({ onNavigate, user, onLogout }: UploadPageProps) => {
       </main>
 
       <Footer onNavigate={onNavigate} />
-    </div>
+    </LoggedInPageShell>
   );
 };
 

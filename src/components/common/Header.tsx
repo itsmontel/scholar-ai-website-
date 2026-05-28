@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { HIDE_FRIENDS } from '../../config/featureFlags';
 import { getResetsInText } from '../../utils/usageReset';
+import { useWorkspaceChrome, shouldHideLegacyHeader, isSessionAuthenticated } from '../workspace/workspaceChrome';
 
 interface HeaderProps {
   onNavigate?: (page: string, slug?: string) => void;
@@ -77,6 +78,8 @@ const Header: React.FC<HeaderProps> = ({
   libraryActivationHighlight = false,
   blockNavigationInteractions = false,
 }) => {
+  const inWorkspaceChrome = useWorkspaceChrome();
+
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [usageStats, setUsageStats] = useState<UsageStats | null>(null);
@@ -176,6 +179,8 @@ const Header: React.FC<HeaderProps> = ({
     if (percentage >= 70) return 'text-yellow-600';
     return 'text-[#8A48C7]';
   };
+
+  if (shouldHideLegacyHeader(currentPage, isSessionAuthenticated(!!user), inWorkspaceChrome)) return null;
 
   // ── Logged-out (public) header - matches landing page nav ───────────────────
   if (!user) {

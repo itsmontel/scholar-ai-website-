@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import Header from '../../common/Header';
+import LoggedInPageShell from '../../workspace/LoggedInPageShell';
 import Footer from '../../common/Footer';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 import ToolPageSeoContent from '../../common/ToolPageSeoContent';
@@ -203,9 +203,7 @@ const ConverterPage = ({ onNavigate, user, onLogout }: ConverterPageProps) => {
   const colors = categoryColors[category];
 
   return (
-    <div className="min-h-screen bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="converter" />
-
+    <LoggedInPageShell className="min-h-screen bg-stone-50 dark:bg-stone-950" user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="converter">
       <section className="py-12 sm:py-16">
         <div className="max-w-2xl mx-auto px-4 sm:px-6">
           {/* Page heading */}
@@ -340,7 +338,7 @@ const ConverterPage = ({ onNavigate, user, onLogout }: ConverterPageProps) => {
       <ToolPageSeoContent {...converterSeo} onNavigate={onNavigate} />
 
       <Footer onNavigate={onNavigate} />
-    </div>
+    </LoggedInPageShell>
   );
 };
 

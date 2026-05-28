@@ -20,17 +20,18 @@
   }
 }
 
-/* Landing page only — zoom the whole desktop body to 81% so the
-   hero, callout blocks, and study-tools showcase don't feel
-   oversized / zoomed-in on large monitors. Both the site header
-   AND the footer are left at 100% (they sit outside <main>) for
-   nav/chrome consistency. Mobile/tablet stays at 100% because the
-   content there is already designed compactly and zooming out on a
-   360px viewport makes hit-targets too small. Threshold matches
-   Tailwind's `lg` breakpoint. */
+/* Landing page only — desktop body zoom. Sized so the hero, callout
+   blocks, and study-tools showcase don't feel cramped or oversized on
+   large monitors. Both the site header AND the footer are left at
+   100% (they sit outside <main>) for nav/chrome consistency. Mobile/
+   tablet stays at 100% because the content there is already designed
+   compactly and zooming a 360px viewport makes hit-targets too small.
+   Threshold matches Tailwind's `lg` breakpoint.
+   2026-05-26: Bumped 0.81 → 0.891 (+10%) per user brief — the previous
+   value made everything read a touch small on standard 1440px monitors. */
 @media (min-width: 1024px) {
   .landing-desktop-zoom {
-    zoom: 0.81;
+    zoom: 0.891;
   }
 }
 

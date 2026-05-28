@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import Header from '../../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../../common/WriteScholarEditorialBackground';
+import LoggedInPageShell from '../../workspace/LoggedInPageShell';
 import Footer from '../../common/Footer';
+import { WriteScholarEditorialBackgroundLayers } from '../../common/WriteScholarEditorialBackground';
 import { CRATER_BLAST_WORD_BANK } from '../../../data/craterBlastWordBank';
 import { CRATER_BLAST_MENTAL_MATH_BANK } from '../../../data/craterBlastMentalMathBank';
 import { buildCapitalQuestions, buildCapitalAnswers } from '../../../data/craterBlastCapitalCitiesBank';
 import { buildFlagQuestions, buildFlagAnswers } from '../../../data/craterBlastFlagsBank';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
+import { trackCraterBlastGame } from '../../../data/achievements';
 
 /* ────────────────────── Types ────────────────────── */
 
@@ -354,6 +355,9 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
     setCraters([]);
     setProjPos(null);
     projDataRef.current = null;
+    // Record the game in achievements. Perfect = no lives lost.
+    const isPerfect = livesRef.current >= INITIAL_LIVES && correctCountRef.current > 0;
+    try { trackCraterBlastGame(isPerfect, scoreRef.current); } catch { /* ignore */ }
     setGameState('gameover');
   }, []);
 
@@ -1450,10 +1454,8 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
     );
   };
 
-  return (
-    <div className="relative min-h-screen flex flex-col overflow-x-clip" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
-      {!showMinimalUI && <Header onNavigate={onNavigate} user={user} onLogout={onLogout || (() => {})} currentPage="crater-blast" />}
+  const pageContent = (
+    <>
       {showMinimalUI && (gameState === 'menu' || gameState === 'loading' || gameState === 'ready' || gameState === 'gameover') && (
         <div className="sticky top-0 z-10 flex items-center justify-between px-3 py-2 bg-white/95 backdrop-blur border-b border-stone-200">
           <button onClick={() => {
@@ -1476,7 +1478,17 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
       {gameState === 'playing' && renderGame()}
       {gameState === 'gameover' && renderGameOver()}
       {!showMinimalUI && gameState !== 'playing' && <Footer onNavigate={onNavigate} />}
-    </div>
+    </>
+  );
+
+  if (showMinimalUI) {
+    return <div className="relative min-h-screen flex flex-col overflow-x-clip">{pageContent}</div>;
+  }
+
+  return (
+    <LoggedInPageShell className="relative min-h-screen flex flex-col overflow-x-clip" user={user} onNavigate={onNavigate} onLogout={onLogout || (() => {})} currentPage="crater-blast">
+      {pageContent}
+    </LoggedInPageShell>
   );
 };
 

@@ -78,7 +78,7 @@ const FeatureHub = ({
           alt=""
           width={88}
           height={88}
-          className="object-contain w-20 h-20 sm:w-24 sm:h-24 shrink-0 fh-mascot-bob"
+          className="object-contain w-16 h-16 sm:w-20 sm:h-20 shrink-0 fh-mascot-bob"
           loading="eager"
         />
         <div className="flex-1 min-w-0 mt-2">

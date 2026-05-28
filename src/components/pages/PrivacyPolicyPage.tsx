@@ -1,5 +1,5 @@
 import React from 'react';
-import Header from '../common/Header';
+import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
 
 interface PrivacyPolicyPageProps {
@@ -16,9 +16,7 @@ const sectionIcon = (emoji: string) => (
 
 const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate, user, onLogout }) => {
   return (
-    <div className="min-h-screen bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="privacy" />
-
+    <LoggedInPageShell className="min-h-screen bg-stone-50 dark:bg-stone-950" user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="privacy">
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
         {/* Page title card */}
         <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl p-6 sm:p-8 md:p-10 mb-8 text-center">
@@ -314,7 +312,7 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate, user,
       </main>
 
       <Footer onNavigate={onNavigate} />
-    </div>
+    </LoggedInPageShell>
   );
 };
 

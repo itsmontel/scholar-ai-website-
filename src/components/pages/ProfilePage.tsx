@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import Header from '../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
+import LoggedInPageShell from '../workspace/LoggedInPageShell';
 
 interface ProfilePageProps {
   onNavigate: (page: string) => void;
@@ -207,10 +206,7 @@ const ProfilePage = ({ onNavigate, user, onLogout }: ProfilePageProps) => {
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-clip">
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="profile" />
-
+    <LoggedInPageShell user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="profile">
       <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Profile Header */}
         <div className="bg-white/90 backdrop-blur-xl border border-stone-200/60 rounded-2xl p-8 shadow-lg mb-8">
@@ -253,7 +249,7 @@ const ProfilePage = ({ onNavigate, user, onLogout }: ProfilePageProps) => {
           {renderTabContent()}
         </div>
       </div>
-    </div>
+    </LoggedInPageShell>
   );
 };
 

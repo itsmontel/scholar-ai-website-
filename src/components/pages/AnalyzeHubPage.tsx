@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import Header from '../common/Header';
+import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
 import FeatureHub, { type HubItem } from '../common/FeatureHub';
 
@@ -88,8 +88,7 @@ const AnalyzeHubPage: React.FC<AnalyzeHubPageProps> = ({ onNavigate, user, onLog
   }));
 
   return (
-    <div className="relative min-h-screen overflow-x-clip bg-[#FAFAFA] dark:bg-stone-950">
-      <Header onNavigate={onNavigate} user={user as User} onLogout={onLogout} currentPage="analyze" />
+    <LoggedInPageShell className="relative min-h-screen overflow-x-clip bg-[#FAFAFA] dark:bg-stone-950" user={user as User} onNavigate={onNavigate} onLogout={onLogout} currentPage="analyze">
       <FeatureHub
         title="Essay analysis"
         subtitle="Paste an essay — get professor-level feedback, line-by-line."
@@ -106,7 +105,7 @@ const AnalyzeHubPage: React.FC<AnalyzeHubPageProps> = ({ onNavigate, user, onLog
         emptyStateMessage="Your analyzed papers will appear here. Run your first analysis above."
       />
       <Footer onNavigate={onNavigate} />
-    </div>
+    </LoggedInPageShell>
   );
 };
 

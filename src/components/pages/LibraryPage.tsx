@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import Header from '../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
+import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
 import LoadingSpinner from '../common/LoadingSpinner';
 
@@ -536,10 +535,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-clip" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="library" />
-
+    <LoggedInPageShell user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="library">
       {/* Mobile Navigation Tabs */}
       <div className="md:hidden bg-white border-b-2 border-stone-200 sticky top-0 z-10 p-2">
         <div className="flex gap-2">
@@ -1172,7 +1168,7 @@ const LibraryPage: React.FC<LibraryPageProps> = ({ onNavigate, user, onLogout })
 
       {/* Footer */}
       <Footer onNavigate={onNavigate} />
-    </div>
+    </LoggedInPageShell>
   );
 };
 

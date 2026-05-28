@@ -1,7 +1,6 @@
 import { useState } from 'react';
+import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import DOMPurify from 'dompurify';
-import Header from '../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
 import { trackCopy } from '../../data/achievements';
 
@@ -121,10 +120,7 @@ const CitationResultsPage = ({
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-clip">
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="dashboard" />
-
+    <LoggedInPageShell user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="dashboard">
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
         {/* Old Data Warning */}
         {showOldDataWarning && (
@@ -425,7 +421,7 @@ const CitationResultsPage = ({
       </main>
 
       <Footer onNavigate={onNavigate} />
-    </div>
+    </LoggedInPageShell>
   );
 };
 

@@ -107,6 +107,12 @@ import Header from './common/Header';
 import SoftPaywall from './common/SoftPaywall';
 import StripeCancelTrialChoiceModal from './common/StripeCancelTrialChoiceModal';
 import DashboardWelcomeToast from './common/DashboardWelcomeToast';
+import DailyReviewReadyModal, {
+  hasCompletedDailyReviewToday,
+  markDailyReviewPromptShown,
+  userHasStudyPacks,
+  wasDailyReviewPromptShownToday,
+} from './common/DailyReviewReadyModal';
 import PaywallDebugPanel from './common/PaywallDebugPanel';
 import {
   CHECKOUT_FROM_TUTORIAL_PAYWALL_KEY,
@@ -126,6 +132,10 @@ import {
 import BadgeNotificationToast from './common/BadgeNotificationToast';
 import StudyTimerWidget from './common/StudyTimerWidget';
 import MobileGoogleSignInPopup from './common/MobileGoogleSignInPopup';
+import LoggedInWorkspaceLayout from './workspace/LoggedInWorkspaceLayout';
+import { navigateWorkspaceView } from './workspace/workspaceNavigate';
+import { shouldUseWorkspaceChromeApp } from './workspace/workspaceChrome';
+import { getPageFromPath } from '../utils/appRouting';
 import {
   absoluteCanonicalUrl,
   applyNoIndex,
@@ -180,116 +190,6 @@ const NOINDEX_PAGES = new Set<string>([
   'game-launcher-crater-blast',
   'game-launcher-word-tower',
 ]);
-
-/** Derive page from pathname - used for initial state and URL sync */
-function getPageFromPath(pathname: string): string {
-  const p = pathname.replace(/\/$/, '') || '/'; // normalize trailing slash
-  // Embed widgets — /embed/[slug]. Standalone iframe-friendly pages, no header
-  // or footer chrome. Always noindex (the host site's embed is what gets indexed).
-  if (/^\/embed\//.test(p)) return 'embed';
-  // Programmatic SEO landing pages — /study/[slug], /alternatives/[slug],
-  // /guides/[slug], /best/[slug]. Single 'programmatic' page name; the
-  // actual config is looked up by path inside the render branch.
-  if (/^\/(study|alternatives|guides|best)\//.test(p)) return 'programmatic';
-  if (p === '/email-verification') return 'email-verification';
-  if (p === '/onboarding') return 'onboarding';
-  if (p === '/onboarding-test') return 'onboarding-test';
-  if (p === '/auth/callback') return 'auth-callback';
-  /* Pre-signup welcome funnel was removed — redirect old URLs to signup. */
-  if (p === '/get-started' || p === '/welcome') return 'signup';
-  if (p === '/signup') return 'signup';
-  if (p === '/login') return 'login';
-  if (p === '/reset-password') return 'reset-password';
-  if (p === '/dashboard') return 'dashboard';
-  // The old tool-grid dashboard (Daily Review / Games / Study Packs
-  // tabs) lives on here now that /dashboard is the Documents
-  // workspace. Kept so those tab-only surfaces stay reachable.
-  if (p === '/study-tools') return 'study-tools';
-  if (p === '/pricing') return 'pricing';
-  if (p === '/features') return 'features';
-  if (p === '/ai-essay-editor' || p === '/essay-grader' || p === '/ai-essay-grader' || p === '/grade-my-essay') return 'ai-essay-editor';
-  if (p === '/focus-mode' || p === '/focus') return 'focus-mode';
-  if (p === '/why-students-choose' || p === '/compare') return 'why-students-choose';
-  if (p === '/vs-quizlet-knowt' || p === '/study-tools-comparison' || p === '/compare-study-tools') return 'study-tools-comparison';
-  if (p === '/contact') return 'contact';
-  if (p === '/about') return 'about';
-  if (p === '/analysis') return 'analysis';
-  if (p === '/analysis-history') return 'analysis-history';
-  if (p === '/citation-results') return 'citation-results';
-  if (p === '/citation-history') return 'citation-history';
-  if (p === '/quiz-history') return 'quiz-history';
-  if (p === '/friends') return HIDE_FRIENDS ? 'dashboard' : 'friends';
-  if (p === '/share-friends') return HIDE_FRIENDS ? 'dashboard' : 'share-friends';
-  if (p === '/upload') return 'documents';
-  if (p === '/write') return 'documents';
-  if (p === '/settings') return 'account';
-  if (p === '/unlock-quiz' || p.startsWith('/unlock-quiz?')) return 'unlock-quiz';
-  if (p === '/profile') return 'profile';
-  // ─── Unified Documents hub ──────────────────────────────────
-  // /documents          → hub (list of all docs)
-  // /documents/<id>     → editor for that doc
-  // Legacy URLs Library + Upload + Write all redirect here so
-  // existing bookmarks / external links still land somewhere
-  // useful instead of 404'ing.
-  if (p === '/documents' || p.startsWith('/documents/')) return 'documents';
-  if (p === '/library') return 'documents';
-  if (p === '/account') return 'account';
-  if (p === '/billing') return 'billing';
-  if (p === '/help' || p === '/help-center') return 'help';
-  if (p === '/press' || p === '/media-kit' || p === '/press-kit') return 'press';
-  if (p === '/privacy' || p === '/privacy-policy') return 'privacy';
-  if (p === '/terms' || p === '/terms-of-service') return 'terms';
-  if (p === '/unsubscribe') return 'unsubscribe';
-  if (p === '/blog' || p === '/blog') return 'blog';
-  if (p.startsWith('/blog/')) {
-    const slug = p.replace(/^\/blog\/?/, '').split('/')[0]?.trim() ?? '';
-    return slug ? 'blog-post' : 'blog';
-  }
-  if (p === '/tools/word-counter' || p === '/word-counter') return 'word-counter';
-  if (p === '/tools/citation-generator' || p === '/citation-generator-tool') return 'citation-generator-tool';
-  if (p === '/tools/readability-score' || p === '/readability-score') return 'readability-score';
-  if (p === '/tools/paraphrasing-tips' || p === '/paraphrasing-tips') return 'paraphrasing-tips';
-  if (p === '/tools/essay-outline' || p === '/essay-outline') return 'essay-outline';
-  if (p === '/tools/text-case-converter' || p === '/text-case-converter') return 'text-case-converter';
-  if (p === '/tools/thesis-generator' || p === '/thesis-generator') return 'thesis-generator';
-  if (p === '/tools/grammar-checker' || p === '/grammar-checker') return 'grammar-checker';
-  if (p === '/tools/humanizer' || p === '/humanizer') return 'dashboard';
-  if (p === '/tools/summarizer' || p === '/summarizer') return 'summarizer';
-  if (p === '/tools/quiz-generator' || p === '/quiz-generator') return 'quiz-generator';
-  if (p === '/tools/flashcard-generator' || p === '/flashcard-generator') return 'create-flashcards';
-  if (p === '/tools/create-flashcards' || p === '/create-flashcards') return 'create-flashcards';
-  if (p === '/tools/crossword-generator' || p === '/crossword-generator') {
-    try {
-      const s = typeof window !== 'undefined' ? localStorage.getItem('savedCrossword') : null;
-      if (!s) return 'dashboard';
-      const parsed = JSON.parse(s);
-      const q = parsed?.questions || parsed;
-      if (q?.grid && q?.placedWords) return 'crossword-generator';
-    } catch (_) {}
-    return 'dashboard';
-  }
-  if (p === '/tools/gpa-calculator' || p === '/gpa-calculator') return 'gpa-calculator';
-  if (p === '/tools/pomodoro-timer' || p === '/pomodoro-timer') return 'pomodoro-timer';
-  if (p === '/tools/calculator' || p === '/calculator') return 'calculator';
-  if (p === '/tools/converter' || p === '/converter') return 'converter';
-  if (p === '/tools/crater-blast' || p === '/crater-blast' || p === '/tools/lightning-reflex-quiz' || p === '/lightning-reflex-quiz') return 'crater-blast';
-  if (p === '/tools/word-tower' || p === '/word-tower' || p === '/games/word-tower') return 'word-tower';
-  if (p === '/word-blitz' || p === '/tools/word-blitz' || p === '/games/word-blitz') return 'word-blitz';
-  if (p === '/games/crater-blast-launcher' || p === '/game-launcher-crater-blast') return 'game-launcher-crater-blast';
-  if (p === '/games/word-tower-launcher' || p === '/game-launcher-word-tower') return 'game-launcher-word-tower';
-  if (p === '/tools/interactive-lesson' || p === '/interactive-lesson' || p === '/lesson-generator') return 'dashboard';
-  if (p === '/study-pack-viewer' || p === '/tools/study-pack-viewer') return 'study-pack-viewer';
-  if (p === '/tools/more' || p === '/more-tools' || p === '/view-more-tools') return 'more-tools';
-  if (p === '/badges' || p === '/achievements') return HIDE_STREAK_AND_BADGES ? 'dashboard' : 'badges';
-  if (p === '/tools/analyze' || p === '/analyze') return 'analyze';
-  if (p === '/tools/citations' || p === '/citations') return 'citations';
-  if (p === '/tools/study-pack' || p === '/study-pack') return 'study-pack';
-  /* Hub pages — friendlier landing screens that show recents + a "Create new" CTA. */
-  if (p === '/study-packs' || p === '/study-pack-hub' || p === '/tools/study-pack-hub') return 'study-pack-hub';
-  if (p === '/papers' || p === '/analyze-hub' || p === '/tools/analyze-hub') return 'analyze-hub';
-  if (p === '/citations-hub' || p === '/tools/citations-hub') return 'citations-hub';
-  return 'landing';
-}
 
 // Type definitions
 interface User {
@@ -357,6 +257,19 @@ function readInitialSoftPaywallOpen(u: User | null): boolean {
     return false;
   }
 }
+
+const DAILY_REVIEW_PROMPT_EXCLUDED_PAGES = new Set([
+  'login',
+  'signup',
+  'onboarding',
+  'onboarding-test',
+  'email-verification',
+  'auth-callback',
+  'reset-password',
+  'embed',
+  'unlock-quiz',
+  'landing',
+]);
 
 // Main Application Component
 const AcademicAIApp = () => {
@@ -1233,6 +1146,7 @@ const AcademicAIApp = () => {
   // Drives the fullscreen welcome-celebration overlay. Seeded from
   // sawStripeSuccessOnLoad and flipped off when the animation finishes.
   const [showPostCheckoutWelcome, setShowPostCheckoutWelcome] = useState<boolean>(sawStripeSuccessOnLoad);
+  const [showDailyReviewPrompt, setShowDailyReviewPrompt] = useState(false);
 
   const needsOnboarding =
     isLoggedIn && user?.id && !user.onboardingCompleted && !sawStripeSuccessOnLoad;
@@ -1288,6 +1202,62 @@ const AcademicAIApp = () => {
     })();
   }, [sawStripeSuccessOnLoad, isLoggedIn, user?.id]);
 
+  /** Once per day — nudge logged-in users that their daily review is ready. */
+  useEffect(() => {
+    if (!isLoggedIn || !user?.id || !user.onboardingCompleted) {
+      setShowDailyReviewPrompt(false);
+      return;
+    }
+    if (showPostCheckoutWelcome || apiLimitPaywallOpen || stripeCancelTrialModalOpen) {
+      setShowDailyReviewPrompt(false);
+      return;
+    }
+    if (DAILY_REVIEW_PROMPT_EXCLUDED_PAGES.has(currentPage)) {
+      setShowDailyReviewPrompt(false);
+      return;
+    }
+    if (hasCompletedDailyReviewToday(user.id) || wasDailyReviewPromptShownToday(user.id)) {
+      setShowDailyReviewPrompt(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const timer = window.setTimeout(() => {
+      void (async () => {
+        if (cancelled || !user?.id || hasCompletedDailyReviewToday(user.id)) return;
+
+        const hasPacks = await userHasStudyPacks();
+        if (cancelled || !hasPacks) return;
+
+        markDailyReviewPromptShown(user.id);
+        setShowDailyReviewPrompt(true);
+      })();
+    }, 1000);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [
+    isLoggedIn,
+    user?.id,
+    user?.onboardingCompleted,
+    showPostCheckoutWelcome,
+    apiLimitPaywallOpen,
+    stripeCancelTrialModalOpen,
+    currentPage,
+  ]);
+
+  const handleDailyReviewPromptStart = useCallback(() => {
+    setShowDailyReviewPrompt(false);
+    navigateWorkspaceView(navigateTo, 'daily-review');
+  }, [navigateTo]);
+
+  const handleDailyReviewPromptDismiss = useCallback(() => {
+    setShowDailyReviewPrompt(false);
+  }, []);
+
   const handleDashboardUserUpdate = (u: { welcomeTutorialCompleted?: boolean }) => {
     if (user && u.welcomeTutorialCompleted) {
       const updated = { ...user, welcomeTutorialCompleted: true };
@@ -1320,16 +1290,17 @@ const AcademicAIApp = () => {
       const initialDocumentId = m ? m[1] : undefined;
       return (
         <div className="min-h-screen bg-[#FAF7FF] dark:bg-stone-950">
-          {/* Header is hidden while the full-screen editor is open so
-              the writing surface gets the whole viewport. The slim
-              editor chrome (back-to-Documents, title, save status,
-              export) + the workspace rail keep orientation/escape. */}
-          {!documentsEditorActive && (
-            <Header onNavigate={navigateTo} user={user} onLogout={handleLogout} currentPage="documents" />
-          )}
+          {/* The global site Header is intentionally NOT rendered for
+              the Documents workspace. Logged-in users live in this
+              page all day — the left workspace sidebar already covers
+              navigation, and DocumentsPage renders its own slim
+              top-right `DashboardTopBar` (Upgrade · Feedback ·
+              Pomodoro · Avatar) so the workspace gets the full
+              viewport height with no duplicate chrome. */}
           <DocumentsPage
             initialDocumentId={initialDocumentId}
             onNavigate={navigateTo}
+            onLogout={handleLogout}
             user={user}
             onEditorActiveChange={setDocumentsEditorActive}
           />
@@ -1633,6 +1604,9 @@ const AcademicAIApp = () => {
     </div>
   );
 
+  const pageContent = renderCurrentPage();
+  const showWorkspaceChrome = shouldUseWorkspaceChromeApp(currentPage, isLoggedIn);
+
   return (
     <ErrorBoundary>
     {/* overflow-x-clip (not -hidden) is intentional: -hidden turns this div
@@ -1641,11 +1615,26 @@ const AcademicAIApp = () => {
         horizontal overflow the same way visually but doesn't create a
         scroll context, so sticky behaviour works app-wide. */}
     <div className="relative min-h-screen overflow-x-clip transition-colors">
-      <Suspense fallback={pageFallback}>
-        <PageErrorBoundary key={currentPage} onGoBack={() => navigateTo('dashboard')}>
-          {renderCurrentPage()}
-        </PageErrorBoundary>
-      </Suspense>
+      {showWorkspaceChrome ? (
+        <LoggedInWorkspaceLayout
+          user={user ?? readCachedUserForSession()}
+          onNavigate={navigateTo}
+          onLogout={handleLogout}
+          topBarVariant="compact"
+        >
+          <Suspense fallback={pageFallback}>
+            <PageErrorBoundary key={currentPage} onGoBack={() => navigateTo('dashboard')}>
+              {pageContent}
+            </PageErrorBoundary>
+          </Suspense>
+        </LoggedInWorkspaceLayout>
+      ) : (
+        <Suspense fallback={pageFallback}>
+          <PageErrorBoundary key={currentPage} onGoBack={() => navigateTo('dashboard')}>
+            {pageContent}
+          </PageErrorBoundary>
+        </Suspense>
+      )}
       {/* Post-Stripe-success welcome celebration — replays the
           onboarding `transition` animation as a fullscreen overlay
           when the user lands on /dashboard after Stripe's hard
@@ -1663,6 +1652,19 @@ const AcademicAIApp = () => {
             onDone={() => setShowPostCheckoutWelcome(false)}
           />
         </Suspense>
+      )}
+      {showDailyReviewPrompt && user?.id && (
+        <DailyReviewReadyModal
+          userId={user.id}
+          userName={
+            user.firstName?.trim() ||
+            (user.name?.trim() && !user.name.includes('@')
+              ? user.name.trim().split(/\s+/)[0]
+              : undefined)
+          }
+          onStart={handleDailyReviewPromptStart}
+          onDismiss={handleDailyReviewPromptDismiss}
+        />
       )}
       {/* Global achievement popup */}
       {user && !HIDE_STREAK_AND_BADGES && <BadgeNotificationToast onNavigate={navigateTo} />}

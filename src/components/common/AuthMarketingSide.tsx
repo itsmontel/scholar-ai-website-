@@ -17,7 +17,7 @@ const FEATURES = [
   },
   {
     emoji: '🎮',
-    title: 'Study Games',
+    title: 'Arcade mode',
     desc: 'Crater Blast, Word Tower & more',
     color: '#A560E8',
     tint: '#F3EAFF',

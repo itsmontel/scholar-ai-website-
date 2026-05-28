@@ -33,8 +33,7 @@ function shuffleQuestionOptions(question: QuizQuestion): QuizQuestion {
   });
   return { ...question, options: relabeled, correctAnswer: newCorrectLetter };
 }
-import Header from '../../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../../common/WriteScholarEditorialBackground';
+import LoggedInPageShell from '../../workspace/LoggedInPageShell';
 import Footer from '../../common/Footer';
 // ScholarMascot replaced with mascot GIFs
 import AnalysisAnimation from '../../common/AnalysisAnimation';
@@ -1630,11 +1629,11 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
     );
   };
 
-  return (
-    <div className="relative min-h-screen flex flex-col overflow-x-clip">
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
-      {!showMinimalUI && <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage={studyToolMode === 'quiz' ? 'quiz-generator' : studyToolMode === 'flashcards' ? 'quiz-generator' : 'crossword-generator'} />}
-      
+  const quizCurrentPage =
+    studyToolMode === 'quiz' ? 'quiz-generator' : studyToolMode === 'flashcards' ? 'quiz-generator' : 'crossword-generator';
+
+  const pageContent = (
+    <>
       <main className="flex-1 w-full min-w-0 overflow-x-clip relative max-w-full">
         <input
           ref={fileInputRef}
@@ -2655,7 +2654,17 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
       {!showMinimalUI && <ToolPageSeoContent {...quizGenSeo} onNavigate={onNavigate} />}
 
       {!showMinimalUI && <Footer onNavigate={onNavigate} />}
-    </div>
+    </>
+  );
+
+  if (showMinimalUI) {
+    return <div className="relative min-h-screen flex flex-col overflow-x-clip">{pageContent}</div>;
+  }
+
+  return (
+    <LoggedInPageShell className="relative min-h-screen flex flex-col overflow-x-clip" user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage={quizCurrentPage}>
+      {pageContent}
+    </LoggedInPageShell>
   );
 };
 

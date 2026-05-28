@@ -1,5 +1,4 @@
-import Header from '../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
+import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
 // ScholarMascot replaced with mascot GIFs
 import LandingSectionLayers from '../common/LandingSectionLayers';
@@ -19,11 +18,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
   ];
 
   return (
-    <div className="min-h-screen relative transition-colors font-sans overflow-x-clip">
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
-
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="about" />
-
+    <LoggedInPageShell className="min-h-screen relative transition-colors font-sans overflow-x-clip" user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="about">
       <section
         className="relative py-16 sm:py-24 overflow-hidden border-b border-stone-200/90 dark:border-stone-800"
         aria-labelledby="about-page-heading"
@@ -304,7 +299,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
       </section>
 
       <Footer onNavigate={onNavigate} />
-    </div>
+    </LoggedInPageShell>
   );
 };
 

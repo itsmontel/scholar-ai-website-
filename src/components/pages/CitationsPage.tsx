@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import Header from '../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
+import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
 import ScholarMascot from '../common/ScholarMascot';
 import AnalysisAnimation from '../common/AnalysisAnimation';
@@ -179,18 +178,8 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
   const goStudyPack = () =>
     embedded && onEmbeddedToolSwitch ? onEmbeddedToolSwitch('study_pack') : onNavigate('study-pack');
 
-  return (
-    <div
-      className={
-        embedded
-          ? 'relative w-full min-w-0'
-          : 'min-h-screen relative transition-colors font-sans overflow-x-clip'
-      }
-    >
-      {!embedded && <WriteScholarEditorialBackgroundLayers position="fixed" />}
-
-      {!embedded && <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="citations" />}
-
+  const inner = (
+    <>
       <main
         className={
           embedded
@@ -487,7 +476,23 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
       )}
 
       {!embedded && <Footer onNavigate={onNavigate} />}
-    </div>
+    </>
+  );
+
+  if (embedded) {
+    return <div className="relative w-full min-w-0">{inner}</div>;
+  }
+
+  return (
+    <LoggedInPageShell
+      className="min-h-screen relative transition-colors font-sans overflow-x-clip"
+      user={user}
+      onNavigate={onNavigate}
+      onLogout={onLogout}
+      currentPage="citations"
+    >
+      {inner}
+    </LoggedInPageShell>
   );
 };
 

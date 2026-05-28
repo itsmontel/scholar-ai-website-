@@ -771,8 +771,8 @@ const SoftPaywall = ({
               <p className="text-stone-500 dark:text-stone-400 text-sm sm:text-[0.9375rem] font-bold leading-relaxed">
                 {variant === 'postTutorial' ? (
                   showTrial
-                    ? <>Start a <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{TRIAL_DAYS}-day free trial</span> on {planName}. Essay analysis, study packs, citations, and games. Cancel anytime.</>
-                    : <>Upgrade to {planName} for essay analysis, study packs, citations, and games. Cancel anytime.</>
+                    ? <>Start a <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{TRIAL_DAYS}-day free trial</span> on {planName}. Essay analysis, study packs, citations, and arcade mode. Cancel anytime.</>
+                    : <>Upgrade to {planName} for essay analysis, study packs, citations, and arcade mode. Cancel anytime.</>
                 ) : showTrial ? (
                   <>Try {planName} free for <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{TRIAL_DAYS} days</span>. Cancel anytime.</>
                 ) : (

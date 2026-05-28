@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { HIDE_FRIENDS } from '../../config/featureFlags';
-import Header from '../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
+import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
 import { jsPDF } from 'jspdf';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
@@ -150,7 +149,6 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
   const [shareError, setShareError] = useState<string | null>(null);
   const [loadingFriends, setLoadingFriends] = useState(false);
   const [exportDropdownToolId, setExportDropdownToolId] = useState<string | null>(null);
-  const [createDropdownOpen, setCreateDropdownOpen] = useState(false);
   const [exportFormatModalTool, setExportFormatModalTool] = useState<StudyTool | null>(null);
   const [exportFormatTarget, setExportFormatTarget] = useState<'pdf' | 'docx' | 'json' | null>(null);
 
@@ -177,14 +175,6 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
     document.addEventListener('click', handleClick);
     return () => document.removeEventListener('click', handleClick);
   }, [exportDropdownToolId]);
-
-  // Close create dropdown when clicking outside
-  useEffect(() => {
-    if (!createDropdownOpen) return;
-    const handleClick = () => setCreateDropdownOpen(false);
-    document.addEventListener('click', handleClick);
-    return () => document.removeEventListener('click', handleClick);
-  }, [createDropdownOpen]);
 
   const fetchStudyToolHistory = async () => {
     try {
@@ -330,14 +320,6 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
       onNavigate('quiz-generator');
     }
   };
-
-  const createOptions = [
-    { id: 'quiz', label: 'Quiz', icon: '📝', page: 'quiz-generator' as const },
-    { id: 'flashcards', label: 'Flashcards', icon: '🃏', page: 'create-flashcards' as const },
-    { id: 'crossword', label: 'Crosswords', icon: '🧩', page: 'dashboard' as const },
-    { id: 'blast', label: 'Blast', icon: '💥', page: 'crater-blast' as const },
-    { id: 'lessons', label: 'Lessons', icon: '🎓', page: 'dashboard' as const },
-  ];
 
   const handleDeleteClick = (quizId: string) => {
     setDeleteConfirmId(quizId);
@@ -514,8 +496,8 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'easy': return 'bg-[#F3EAFF] text-[#8A48C7] font-extrabold border-2 border-[#A560E8]/30';
-      case 'medium': return 'bg-[#F3EAFF] text-[#8A48C7] font-extrabold border-2 border-[#A560E8]/30';
+      case 'easy': return 'bg-[#FFF4E0] text-[#B85F00] font-extrabold border-2 border-[#FF9600]/30';
+      case 'medium': return 'bg-[#FFF4E0] text-[#B85F00] font-extrabold border-2 border-[#FF9600]/30';
       case 'hard': return 'bg-[#FFE8E8] text-[#E04343] font-extrabold border-2 border-[#FF4B4B]/30';
       default: return 'bg-stone-50 text-stone-700 font-extrabold';
     }
@@ -533,6 +515,72 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
       case 'crossword': return 'Crossword';
       case 'crater_blast': return 'Crater Blast';
       default: return type;
+    }
+  };
+
+  /** Per-type gradient palette for saved material cards. */
+  const getSavedMaterialStyle = (type: string) => {
+    switch (type) {
+      case 'study_pack':
+        return {
+          tint: '#FF9600',
+          tintDark: '#E88800',
+          cardBg: 'bg-gradient-to-br from-[#FFF4E0]/90 via-white to-[#FFFBF5] dark:from-[#FF9600]/15 dark:via-stone-900 dark:to-stone-900',
+          borderAccent: 'border-[#FF9600]/50',
+          badge: 'bg-[#FFF4E0] text-[#B85F00] font-extrabold border-2 border-[#FF9600]/40',
+          buttonBorder: '#D97F00',
+          hoverShadow: 'hover:shadow-[0_22px_44px_-24px_rgba(255,150,0,0.4)]',
+        };
+      case 'flashcards':
+        return {
+          tint: '#FFC107',
+          tintDark: '#E0A800',
+          cardBg: 'bg-gradient-to-br from-[#FFF7CC]/90 via-white to-[#FFFCEC] dark:from-[#FFC107]/15 dark:via-stone-900 dark:to-stone-900',
+          borderAccent: 'border-[#FFC107]/55',
+          badge: 'bg-[#FFF7CC] text-[#8A6200] font-extrabold border-2 border-[#FFC107]/45',
+          buttonBorder: '#B58400',
+          hoverShadow: 'hover:shadow-[0_22px_44px_-24px_rgba(255,193,7,0.42)]',
+        };
+      case 'crossword':
+        return {
+          tint: '#1CB0F6',
+          tintDark: '#1486B5',
+          cardBg: 'bg-gradient-to-br from-[#DDF4FF]/90 via-white to-[#F0FAFF] dark:from-[#1CB0F6]/12 dark:via-stone-900 dark:to-stone-900',
+          borderAccent: 'border-[#1CB0F6]/45',
+          badge: 'bg-[#DDF4FF] text-[#1486B5] font-extrabold border-2 border-[#1CB0F6]/35',
+          buttonBorder: '#0F6F99',
+          hoverShadow: 'hover:shadow-[0_22px_44px_-24px_rgba(28,176,246,0.38)]',
+        };
+      case 'crater_blast':
+        return {
+          tint: '#FF4B82',
+          tintDark: '#ED4070',
+          cardBg: 'bg-gradient-to-br from-[#FFE8EE]/90 via-white to-[#FFF5F8] dark:from-[#FF4B82]/12 dark:via-stone-900 dark:to-stone-900',
+          borderAccent: 'border-[#FF4B82]/45',
+          badge: 'bg-[#FFE8EE] text-[#A82754] font-extrabold border-2 border-[#FF4B82]/35',
+          buttonBorder: '#C93562',
+          hoverShadow: 'hover:shadow-[0_22px_44px_-24px_rgba(255,75,130,0.38)]',
+        };
+      case 'lesson':
+        return {
+          tint: '#58CC02',
+          tintDark: '#46A302',
+          cardBg: 'bg-gradient-to-br from-[#E5F8D0]/90 via-white to-[#F6FFF0] dark:from-[#58CC02]/12 dark:via-stone-900 dark:to-stone-900',
+          borderAccent: 'border-[#58CC02]/45',
+          badge: 'bg-[#E5F8D0] text-[#46A302] font-extrabold border-2 border-[#58CC02]/35',
+          buttonBorder: '#3D8B00',
+          hoverShadow: 'hover:shadow-[0_22px_44px_-24px_rgba(88,204,2,0.38)]',
+        };
+      default:
+        return {
+          tint: '#FF9600',
+          tintDark: '#E88800',
+          cardBg: 'bg-gradient-to-br from-[#FFF4E0]/90 via-white to-[#FFFBF5] dark:from-[#FF9600]/15 dark:via-stone-900 dark:to-stone-900',
+          borderAccent: 'border-[#FF9600]/50',
+          badge: 'bg-[#FFF4E0] text-[#B85F00] font-extrabold border-2 border-[#FF9600]/40',
+          buttonBorder: '#D97F00',
+          hoverShadow: 'hover:shadow-[0_22px_44px_-24px_rgba(255,150,0,0.4)]',
+        };
     }
   };
 
@@ -1200,26 +1248,22 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
 
   if (isLoading) {
     return (
-      <div className="relative min-h-screen overflow-x-clip bg-[#FAF7FF] dark:bg-stone-950">
-        <WriteScholarEditorialBackgroundLayers position="fixed" />
-        <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="quiz-history" />
+      <LoggedInPageShell user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="quiz-history">
         <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
           <div className="flex items-center justify-center min-h-64">
             <div className="text-center">
-              <div className="animate-spin w-10 h-10 border-2 border-stone-300 border-t-[#A560E8] rounded-full mx-auto mb-4"></div>
+              <div className="animate-spin w-10 h-10 border-2 border-stone-300 border-t-[#FF9600] rounded-full mx-auto mb-4"></div>
               <p className="text-sm text-stone-500">Loading study tools...</p>
             </div>
           </div>
         </main>
-      </div>
+      </LoggedInPageShell>
     );
   }
 
   if (error) {
     return (
-      <div className="relative min-h-screen overflow-x-clip bg-[#FAF7FF] dark:bg-stone-950">
-        <WriteScholarEditorialBackgroundLayers position="fixed" />
-        <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="quiz-history" />
+      <LoggedInPageShell user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="quiz-history">
         <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
           <div className="bg-white dark:bg-stone-900 rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 p-12 text-center max-w-md mx-auto shadow-[0_12px_34px_-22px_rgba(0,0,0,0.18)]">
             <div className="w-14 h-14 bg-[#FFE8E8] rounded-xl flex items-center justify-center mx-auto mb-4">
@@ -1231,13 +1275,13 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
             <p className="text-sm text-stone-500 font-bold mb-6">{error}</p>
             <button
               onClick={fetchStudyToolHistory}
-              className="px-5 py-2.5 rounded-xl font-extrabold text-white bg-[#A560E8] border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 text-sm transition-all uppercase tracking-wide"
+              className="px-5 py-2.5 rounded-xl font-extrabold text-white bg-[#FF9600] border-2 border-b-4 border-[#B85F00] active:border-b-2 active:translate-y-0.5 text-sm transition-all uppercase tracking-wide"
             >
               Try Again
             </button>
           </div>
         </main>
-      </div>
+      </LoggedInPageShell>
     );
   }
 
@@ -1275,24 +1319,35 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-clip bg-[#FAF7FF] dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="quiz-history" />
-
+    <LoggedInPageShell user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="quiz-history">
       <main className="max-w-6xl mx-auto px-3 sm:px-6 py-8 sm:py-12 w-full min-w-0 overflow-x-clip">
         {/* Hero - compact and sleek */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 mb-10">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <span className="h-px w-7 bg-[#A560E8]/50" aria-hidden />
-              <p className="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.22em] text-[#A560E8]">Your history</p>
+          <div className="flex items-start gap-4 sm:gap-5 min-w-0">
+            {/* Circular animated logo — same as dashboard welcome */}
+            <div className="shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-[3px] border-[#FF9600]/40 shadow-[0_6px_20px_-8px_rgba(165,96,232,0.4)] bg-[#FFF4E0] dark:bg-[#FF9600]/15">
+              <video
+                src="/dashboardlogo.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-full object-cover"
+                aria-hidden
+              />
             </div>
-            <h1 className="dash-serif mt-3 text-[2rem] sm:text-[2.6rem] lg:text-[3rem] font-extrabold leading-[1.03] tracking-tight text-stone-900 dark:text-stone-50">
-              Saved materials
-            </h1>
-            <p className="mt-2.5 text-sm sm:text-base text-stone-600 dark:text-stone-400 font-medium">
-              {filteredTools.length} {filteredTools.length === 1 ? 'item' : 'items'} saved. Replay, export, or manage them.
-            </p>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2.5">
+                <span className="h-px w-7 bg-[#FF9600]/50" aria-hidden />
+                <p className="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.22em] text-[#FF9600]">Your history</p>
+              </div>
+              <h1 className="dash-serif mt-3 text-[2rem] sm:text-[2.6rem] lg:text-[3rem] font-extrabold leading-[1.03] tracking-tight text-stone-900 dark:text-stone-50">
+                Saved materials
+              </h1>
+              <p className="mt-2.5 text-sm sm:text-base text-stone-600 dark:text-stone-400 font-medium">
+                {filteredTools.length} {filteredTools.length === 1 ? 'item' : 'items'} saved. Replay, export, or manage them.
+              </p>
+            </div>
           </div>
 
           {/* Urgency warning when items are expiring soon (≤7 days) */}
@@ -1310,7 +1365,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                   </div>
                   <button
                     onClick={() => onNavigate('pricing')}
-                    className={`flex-shrink-0 px-4 py-1.5 text-xs font-extrabold rounded-xl border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all ${expiringSoonCount <= 2 ? 'bg-[#FF4B4B] border-[#E04343] text-white' : 'bg-[#A560E8] border-[#8A48C7] text-white'}`}
+                    className={`flex-shrink-0 px-4 py-1.5 text-xs font-extrabold rounded-xl border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all ${expiringSoonCount <= 2 ? 'bg-[#FF4B4B] border-[#E04343] text-white' : 'bg-[#FF9600] border-[#B85F00] text-white'}`}
                   >
                     Upgrade Now
                   </button>
@@ -1318,32 +1373,16 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
               </div>
             );
           })()}
-          <div className="relative w-full sm:w-auto sm:shrink-0" onClick={(e) => e.stopPropagation()}>
-            <button
-              onClick={() => setCreateDropdownOpen(!createDropdownOpen)}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#A560E8] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Create New
-              <svg className={`w-4 h-4 transition-transform ${createDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-            </button>
-            {createDropdownOpen && (
-              <div className="absolute right-0 top-full mt-1.5 w-48 py-1 bg-white dark:bg-stone-900 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 z-[100]">
-                {createOptions.map((opt) => (
-                  <button
-                    key={opt.id}
-                    onClick={() => { setCreateDropdownOpen(false); onNavigate(opt.page); }}
-                    className="w-full px-4 py-2.5 text-left text-sm font-bold text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700 flex items-center gap-2 rounded-lg transition-colors"
-                  >
-                    <span>{opt.icon}</span>
-                    <span>{opt.label}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          <button
+            type="button"
+            onClick={() => onNavigate('study-pack')}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#FF9600] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#B85F00] active:border-b-2 active:translate-y-0.5 transition-all shrink-0"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Create New
+          </button>
         </div>
 
         {/* Filter Controls */}
@@ -1414,7 +1453,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                 }}
                 className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all ${
                   timePeriod === option.key
-                    ? 'bg-[#A560E8] text-white border-2 border-b-4 border-[#8A48C7]'
+                    ? 'bg-[#FF9600] text-white border-2 border-b-4 border-[#B85F00]'
                     : 'bg-white text-stone-500 border-2 border-b-4 border-stone-200 active:border-b-2 active:translate-y-0.5'
                 }`}
               >
@@ -1448,11 +1487,11 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
         )}
 
         {/* Storage notice - compact inline */}
-        <div className={`mb-8 px-3 sm:px-4 py-2.5 sm:py-3 rounded-2xl flex items-center gap-3 sm:gap-4 min-w-0 border-2 border-b-4 ${isPaidUser ? 'bg-[#F3EAFF] border-[#8A48C7]/30 dark:bg-[#F3EAFF]/10 dark:border-[#8A48C7]/40' : 'bg-[#F3EAFF] border-[#8A48C7]/30'}`}>
+        <div className={`mb-8 px-3 sm:px-4 py-2.5 sm:py-3 rounded-2xl flex items-center gap-3 sm:gap-4 min-w-0 border-2 border-b-4 ${isPaidUser ? 'bg-[#FFF4E0] border-[#B85F00]/30 dark:bg-[#FFF4E0]/10 dark:border-[#B85F00]/40' : 'bg-[#FFF4E0] border-[#B85F00]/30'}`}>
           {isPaidUser ? (
             <>
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-[#A560E8]/20 flex items-center justify-center shrink-0">
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-[#A560E8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-[#FF9600]/20 flex items-center justify-center shrink-0">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-[#FF9600]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
@@ -1462,14 +1501,14 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
             </>
           ) : (
             <>
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-[#A560E8]/20 flex items-center justify-center shrink-0">
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-[#A560E8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-[#FF9600]/20 flex items-center justify-center shrink-0">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-[#FF9600]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <p className="text-xs sm:text-sm text-stone-800 font-bold flex-1 min-w-0">
                 Free plan: tools expire in 30 days.{' '}
-                <button onClick={() => onNavigate('pricing')} className="font-extrabold underline underline-offset-2 hover:text-[#8A48C7]">
+                <button onClick={() => onNavigate('pricing')} className="font-extrabold underline underline-offset-2 hover:text-[#B85F00]">
                   Upgrade
                 </button>{' '}
                 <span className="hidden sm:inline">for permanent storage & export.</span>
@@ -1481,7 +1520,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
         {/* Study Tool Grid */}
         {filteredTools.length === 0 ? (
           <div className="bg-white dark:bg-stone-900 rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 p-12 sm:p-16 text-center shadow-[0_12px_34px_-22px_rgba(0,0,0,0.18)]">
-            <div className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-4xl bg-[#F3EAFF]">
+            <div className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-4xl bg-[#FFF4E0]">
               🧠
             </div>
             <h2 className="text-xl font-extrabold text-stone-900 mb-2">
@@ -1490,112 +1529,44 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
             <p className="text-stone-500 mb-8 max-w-sm mx-auto">
               Generate a study pack from your notes to see it here.
             </p>
-            <div className="relative inline-block" onClick={(e) => e.stopPropagation()}>
-              <button
-                onClick={() => setCreateDropdownOpen(!createDropdownOpen)}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-[#A560E8] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                Create New
-                <svg className={`w-4 h-4 transition-transform ${createDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-              </button>
-              {createDropdownOpen && (
-                <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1.5 w-48 py-1 bg-white dark:bg-stone-900 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 z-[100]">
-                  {createOptions.map((opt) => (
-                    <button
-                      key={opt.id}
-                      onClick={() => { setCreateDropdownOpen(false); onNavigate(opt.page); }}
-                      className="w-full px-4 py-2.5 text-left text-sm font-bold text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700 flex items-center gap-2 rounded-lg transition-colors"
-                    >
-                      <span>{opt.icon}</span>
-                      <span>{opt.label}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            <button
+              type="button"
+              onClick={() => onNavigate('study-pack')}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[#FF9600] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#B85F00] active:border-b-2 active:translate-y-0.5 transition-all"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Create New
+            </button>
           </div>
         ) : (
           <>
-          <div className="grid gap-4 sm:gap-5 w-full min-w-0">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 w-full min-w-0">
             {paginatedTools.map((tool) => {
               const daysRemaining = getDaysRemaining(tool.expires_at);
               const isQuiz = !['flashcards', 'crossword', 'crater_blast', 'lesson'].includes(tool.quiz_type);
               const toolIcon = getToolIcon(tool.quiz_type);
-              
-              const getToolStyles = (type: string) => {
-                switch (type) {
-                  case 'study_pack':
-                    return {
-                      border: 'border-l-4 border-l-[#A560E8]',
-                      iconBg: 'bg-[#F3EAFF]',
-                      iconText: 'text-[#A560E8]',
-                      badge: 'bg-[#F3EAFF] text-[#A560E8] font-extrabold border-2 border-[#A560E8]/30',
-                      preview: 'bg-[#F3EAFF] text-[#A560E8]',
-                      button: 'bg-[#A560E8] border-2 border-b-4 border-[#8A48C7]',
-                    };
-                  case 'flashcards':
-                    return {
-                      border: 'border-l-4 border-l-[#A560E8]',
-                      iconBg: 'bg-[#F3EAFF]',
-                      iconText: 'text-[#A560E8]',
-                      badge: 'bg-[#F3EAFF] text-[#A560E8] font-extrabold border-2 border-[#A560E8]/30',
-                      preview: 'bg-[#F3EAFF] text-[#8A48C7]',
-                      button: 'bg-[#A560E8] border-2 border-b-4 border-[#8A48C7]',
-                    };
-                  case 'crossword':
-                    return {
-                      border: 'border-l-4 border-l-[#A560E8]',
-                      iconBg: 'bg-[#F3EAFF]',
-                      iconText: 'text-[#A560E8]',
-                      badge: 'bg-[#F3EAFF] text-[#8A48C7] font-extrabold border-2 border-[#A560E8]/30',
-                      preview: 'bg-[#F3EAFF] text-[#8A48C7]',
-                      button: 'bg-[#A560E8] border-2 border-b-4 border-[#8A48C7]',
-                    };
-                  case 'crater_blast':
-                    return {
-                      border: 'border-l-4 border-l-[#A560E8]',
-                      iconBg: 'bg-[#F3EAFF]',
-                      iconText: 'text-[#A560E8]',
-                      badge: 'bg-[#F3EAFF] text-[#8A48C7] font-extrabold border-2 border-[#A560E8]/30',
-                      preview: 'bg-[#F3EAFF] text-[#8A48C7]',
-                      button: 'bg-[#A560E8] border-2 border-b-4 border-[#8A48C7]',
-                    };
-                  case 'lesson':
-                    return {
-                      border: 'border-l-4 border-l-[#A560E8]',
-                      iconBg: 'bg-[#F3EAFF]',
-                      iconText: 'text-[#A560E8]',
-                      badge: 'bg-[#F3EAFF] text-[#A560E8] font-extrabold border-2 border-[#A560E8]/30',
-                      preview: 'bg-[#F3EAFF] text-[#A560E8]',
-                      button: 'bg-[#A560E8] border-2 border-b-4 border-[#8A48C7]',
-                    };
-                  default:
-                    return {
-                      border: 'border-l-4 border-l-[#A560E8]',
-                      iconBg: 'bg-[#F3EAFF]',
-                      iconText: 'text-[#A560E8]',
-                      badge: 'bg-[#F3EAFF] text-[#A560E8] font-extrabold border-2 border-[#A560E8]/30',
-                      preview: 'bg-[#F3EAFF] text-[#8A48C7]',
-                      button: 'bg-[#A560E8] border-2 border-b-4 border-[#8A48C7]',
-                    };
-                }
-              };
-              
-              const styles = getToolStyles(tool.quiz_type);
+              const styles = getSavedMaterialStyle(tool.quiz_type);
               
               return (
                 <div
                   key={tool.id}
-                  className={`bg-white dark:bg-stone-900 rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 hover:-translate-y-0.5 hover:border-[#A560E8]/40 transition-all duration-200 shadow-[0_10px_28px_-20px_rgba(0,0,0,0.18)] hover:shadow-[0_22px_44px_-24px_rgba(165,96,232,0.38)] ${styles.border} ${exportDropdownToolId === tool.id ? 'relative z-20 overflow-visible' : 'overflow-hidden'}`}
+                  className={`relative rounded-3xl border-2 border-b-4 ${styles.cardBg} ${styles.borderAccent} hover:-translate-y-0.5 transition-all duration-200 shadow-[0_10px_28px_-20px_rgba(0,0,0,0.18)] ${styles.hoverShadow} ${exportDropdownToolId === tool.id ? 'z-20 overflow-visible' : 'overflow-hidden'} flex flex-col`}
                 >
-                  <div className="p-4 sm:p-6 min-w-0">
-                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 min-w-0">
+                  <div
+                    className="pointer-events-none absolute -top-10 -right-10 w-32 h-32 rounded-full blur-3xl opacity-35"
+                    style={{ backgroundColor: styles.tint }}
+                    aria-hidden
+                  />
+                  <div className="p-4 sm:p-5 min-w-0 flex-1 flex flex-col relative">
+                    <div className="flex flex-col gap-3 min-w-0 flex-1">
                       <div className="flex-1 min-w-0 overflow-hidden">
-                        <div className="flex items-start gap-3 sm:gap-4 min-w-0">
-                          <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-lg sm:text-xl shrink-0 ${styles.iconBg} ${styles.iconText}`}>
+                        <div className="flex items-start gap-3 min-w-0">
+                          <div
+                            className="w-11 h-11 rounded-xl flex items-center justify-center text-xl shrink-0 text-white shadow-[0_6px_16px_-6px_rgba(0,0,0,0.35)] border-2 border-white/25"
+                            style={{ background: `linear-gradient(168deg, ${styles.tint} 0%, ${styles.tintDark} 100%)` }}
+                          >
                             {toolIcon}
                           </div>
                           <div className="min-w-0 flex-1">
@@ -1610,13 +1581,13 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                                     if (e.key === 'Enter') saveRename(tool.id);
                                     if (e.key === 'Escape') cancelRename();
                                   }}
-                                  className="flex-1 min-w-0 px-3 py-1.5 rounded-lg border-2 border-[#A560E8] bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 text-base font-extrabold focus:outline-none focus:ring-2 focus:ring-[#A560E8]/40 focus:border-[#A560E8]"
+                                  className="flex-1 min-w-0 px-3 py-1.5 rounded-lg border-2 border-[#FF9600] bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 text-sm font-extrabold focus:outline-none focus:ring-2 focus:ring-[#FF9600]/40 focus:border-[#FF9600]"
                                   maxLength={200}
                                 />
                                 <button
                                   onClick={() => saveRename(tool.id)}
                                   disabled={isRenaming || !renameValue.trim()}
-                                  className="p-1.5 rounded-lg bg-[#A560E8] text-white border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 disabled:opacity-50 transition-all"
+                                  className="p-1.5 rounded-lg bg-[#FF9600] text-white border-2 border-b-4 border-[#B85F00] active:border-b-2 active:translate-y-0.5 disabled:opacity-50 transition-all"
                                   title="Save"
                                 >
                                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
@@ -1631,48 +1602,47 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                               </div>
                             ) : (
                               <div className="flex items-center gap-2 group/title min-w-0">
-                                <h3 className="text-base sm:text-lg font-extrabold text-stone-900 dark:text-stone-100 truncate min-w-0 flex-1">
+                                <h3 className="text-sm sm:text-base font-extrabold text-stone-900 dark:text-stone-100 line-clamp-2 min-w-0 flex-1 leading-snug">
                                   {tool.title}
                                 </h3>
                                 <button
                                   onClick={() => startRename(tool)}
-                                  className="opacity-70 group-hover/title:opacity-100 flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 py-1 rounded-lg text-stone-500 hover:text-[#A560E8] hover:bg-[#F3EAFF] dark:hover:bg-[#A560E8]/10 dark:text-stone-400 dark:hover:text-[#A560E8] transition-all shrink-0 text-xs sm:text-sm font-bold"
+                                  className="opacity-0 group-hover/title:opacity-100 p-1 rounded-lg text-stone-400 hover:text-[#FF9600] hover:bg-[#FFF4E0] dark:hover:bg-[#FF9600]/10 transition-all shrink-0"
                                   title="Rename"
                                 >
-                                  <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                                  <span className="hidden sm:inline">Rename</span>
+                                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                                 </button>
                               </div>
                             )}
-                            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-2">
-                              <span className="text-[10px] sm:text-xs text-stone-500 flex items-center gap-1">
-                                <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                              <span className="text-[10px] text-stone-500 flex items-center gap-1">
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                                 {formatDate(tool.created_at)}
                               </span>
                               {isQuiz && (
-                                <span className={`px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] sm:text-xs ${getDifficultyColor(tool.difficulty)}`}>
+                                <span className={`px-1.5 py-0.5 rounded-lg text-[10px] ${getDifficultyColor(tool.difficulty)}`}>
                                   {tool.difficulty}
                                 </span>
                               )}
-                              <span className={`px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] sm:text-xs ${styles.badge}`}>
+                              <span className={`px-1.5 py-0.5 rounded-lg text-[10px] ${styles.badge}`}>
                                 {getTypeLabel(tool.quiz_type)}
                               </span>
-                              <span className="px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] sm:text-xs font-bold bg-stone-100 text-stone-600 border-2 border-stone-200/50">
+                              <span className="px-1.5 py-0.5 rounded-lg text-[10px] font-bold bg-stone-100 text-stone-600 border-2 border-stone-200/50">
                                 {tool.quiz_type === 'study_pack' ? '7 formats' : `${tool.question_count} ${tool.quiz_type === 'flashcards' ? 'cards' : tool.quiz_type === 'crossword' ? 'words' : tool.quiz_type === 'crater_blast' || tool.quiz_type === 'word_tower' || tool.quiz_type === 'word_blitz' ? 'questions' : tool.quiz_type === 'lesson' ? 'slides' : 'questions'}`}
                               </span>
                               {tool.quiz_type === 'lesson' && tool.quiz_bank && tool.quiz_bank.length > 0 && (
-                                <span className="px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] sm:text-xs font-extrabold bg-[#F3EAFF] text-[#8A48C7] border-2 border-[#A560E8]/30">
+                                <span className="px-1.5 py-0.5 rounded-lg text-[10px] font-extrabold bg-[#FFF4E0] text-[#B85F00] border-2 border-[#FF9600]/30">
                                   🎯 Quiz
                                 </span>
                               )}
                               {daysRemaining === null ? (
-                                <span className="px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] sm:text-xs font-extrabold bg-[#F3EAFF] text-[#8A48C7] border-2 border-[#A560E8]/30">
+                                <span className="px-1.5 py-0.5 rounded-lg text-[10px] font-extrabold bg-purple-100 text-purple-700 border-2 border-purple-400/40">
                                   Permanent
                                 </span>
                               ) : (
-                                <span className={`px-1.5 sm:px-2 py-0.5 rounded-lg text-[10px] sm:text-xs font-extrabold ${daysRemaining <= 2 ? 'bg-[#FFE8E8] text-[#E04343] border-2 border-[#FF4B4B]/30' : 'bg-[#F3EAFF] text-[#8A48C7] border-2 border-[#A560E8]/30'}`}>
+                                <span className={`px-1.5 py-0.5 rounded-lg text-[10px] font-extrabold ${daysRemaining <= 2 ? 'bg-[#FFE8E8] text-[#E04343] border-2 border-[#FF4B4B]/30' : 'bg-[#FFF4E0] text-[#B85F00] border-2 border-[#FF9600]/30'}`}>
                                   {daysRemaining <= 0 ? 'Expires today' : `${daysRemaining}d left`}
                                 </span>
                               )}
@@ -1680,11 +1650,16 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                           </div>
                         </div>
                       </div>
-                      
-                      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 sm:justify-end">
+
+                      <div className="flex flex-wrap items-center gap-1.5 mt-auto pt-3 border-t border-stone-200/60 dark:border-stone-700/60">
                         <button
                           onClick={() => startStudyTool(tool)}
-                          className={`px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-xl font-extrabold text-xs sm:text-sm text-white ${styles.button} active:border-b-2 active:translate-y-0.5 transition-all flex items-center gap-1 sm:gap-2 shrink-0`}
+                          className="px-3 py-2 rounded-xl font-extrabold text-xs sm:text-sm text-white border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all flex items-center gap-1.5 shrink-0 shadow-[0_6px_14px_-8px_rgba(0,0,0,0.35)]"
+                          style={{
+                            background: `linear-gradient(168deg, ${styles.tint} 0%, ${styles.tintDark} 100%)`,
+                            borderColor: styles.buttonBorder,
+                            borderBottomColor: styles.buttonBorder,
+                          }}
                         >
                           Open
                           <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1696,7 +1671,8 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                           <div className="relative" onClick={(e) => e.stopPropagation()}>
                             <button
                               onClick={() => setExportDropdownToolId(exportDropdownToolId === tool.id ? null : tool.id)}
-                              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 rounded-xl bg-white text-stone-600 border-2 border-b-4 border-stone-200 hover:bg-stone-50 active:border-b-2 active:translate-y-0.5 transition-all text-xs sm:text-sm font-bold shrink-0"
+                              className="flex items-center gap-1 px-2.5 py-2 rounded-xl bg-white/80 dark:bg-stone-900/80 text-stone-600 dark:text-stone-300 border-2 border-b-4 hover:bg-white active:border-b-2 active:translate-y-0.5 transition-all text-xs sm:text-sm font-bold shrink-0"
+                              style={{ borderColor: `${styles.tint}55`, borderBottomColor: `${styles.tint}88` }}
                               title="Export"
                             >
                               <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
@@ -1742,7 +1718,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                                       }}
                                       className={`w-full px-4 py-2.5 text-left text-sm text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700 flex items-center gap-2 ${(tool.quiz_type === 'flashcards' || tool.quiz_type === 'study_pack') ? '' : 'rounded-b-xl'}`}
                                     >
-                                      <svg className="w-4 h-4 text-[#8A48C7]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                      <svg className="w-4 h-4 text-[#B85F00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                                       Word
                                     </button>
                                   </>
@@ -1761,7 +1737,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                                     }}
                                     className={`w-full px-4 py-2.5 text-left text-sm text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700 flex items-center gap-2 ${!isPaidUser ? 'rounded-t-xl rounded-b-xl' : 'rounded-b-xl'}`}
                                   >
-                                    <svg className="w-4 h-4 text-[#8A48C7]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+                                    <svg className="w-4 h-4 text-[#B85F00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
                                     JSON
                                   </button>
                                 )}
@@ -1782,7 +1758,12 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                         {!HIDE_FRIENDS && (
                         <button
                           onClick={() => openShareModal(tool.id)}
-                          className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 rounded-xl bg-[#A560E8] text-white font-extrabold border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 text-xs sm:text-sm transition-all shrink-0"
+                          className="flex items-center gap-1 px-2.5 py-2 rounded-xl text-white font-extrabold border-2 border-b-4 active:border-b-2 active:translate-y-0.5 text-xs sm:text-sm transition-all shrink-0"
+                          style={{
+                            background: `linear-gradient(168deg, ${styles.tint} 0%, ${styles.tintDark} 100%)`,
+                            borderColor: styles.buttonBorder,
+                            borderBottomColor: styles.buttonBorder,
+                          }}
                           title="Share with friends"
                         >
                           <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1794,66 +1775,15 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
 
                         <button
                           onClick={() => handleDeleteClick(tool.id)}
-                          className="p-2 sm:p-2.5 rounded-xl text-stone-400 hover:text-red-600 hover:bg-red-50 transition-colors shrink-0"
+                          className="p-2 rounded-xl text-stone-400 hover:text-red-600 hover:bg-red-50 transition-colors shrink-0 ml-auto"
                           title="Delete"
                         >
-                          <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
                         </button>
                       </div>
                     </div>
-
-                    {/* Preview strip */}
-                    {(isQuiz && Array.isArray(tool.questions) && tool.questions.length > 0) || (tool.quiz_type === 'flashcards' && Array.isArray(tool.questions) && tool.questions.length > 0) || tool.quiz_type === 'crossword' || (tool.quiz_type === 'crater_blast' && (tool.questions as any)?.questions?.length > 0) ? (
-                      <div className="mt-4 pt-4 border-t border-stone-100 flex flex-wrap items-center gap-1.5 sm:gap-2 overflow-hidden">
-                        {isQuiz && (
-                          <>
-                            <span className="text-[10px] sm:text-xs text-stone-500 font-bold shrink-0">Preview:</span>
-                            {(tool.questions as QuizQuestion[]).slice(0, 2).map((q, i) => (
-                              <span key={i} className={`px-1.5 sm:px-2 py-0.5 sm:py-1 ${styles.preview} rounded-lg text-[10px] sm:text-xs max-w-[120px] sm:max-w-[200px] truncate`}>
-                                {q.question.length > 30 ? q.question.substring(0, 30) + '…' : q.question}
-                              </span>
-                            ))}
-                            {(tool.questions as QuizQuestion[]).length > 2 && (
-                              <span className="text-[10px] sm:text-xs text-stone-400 shrink-0">+{(tool.questions as QuizQuestion[]).length - 2} more</span>
-                            )}
-                          </>
-                        )}
-                        {tool.quiz_type === 'flashcards' && (
-                          <>
-                            <span className="text-[10px] sm:text-xs text-stone-500 font-bold shrink-0">Preview:</span>
-                            {(tool.questions as FlashCard[]).slice(0, 2).map((card, i) => (
-                              <span key={i} className={`px-1.5 sm:px-2 py-0.5 sm:py-1 ${styles.preview} rounded-lg text-[10px] sm:text-xs max-w-[120px] sm:max-w-[200px] truncate`}>
-                                {card.front.length > 25 ? card.front.substring(0, 25) + '…' : card.front}
-                              </span>
-                            ))}
-                            {(tool.questions as FlashCard[]).length > 2 && (
-                              <span className="text-[10px] sm:text-xs text-stone-400 shrink-0">+{(tool.questions as FlashCard[]).length - 2} more</span>
-                            )}
-                          </>
-                        )}
-                        {tool.quiz_type === 'crossword' && (
-                          <>
-                            <span className="text-[10px] sm:text-xs text-stone-500 font-bold shrink-0">Puzzle:</span>
-                            <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 ${styles.preview} rounded-lg text-[10px] sm:text-xs`}>
-                              {((tool.questions as CrosswordData)?.clues?.across?.length || 0)} across
-                            </span>
-                            <span className={`px-1.5 sm:px-2 py-0.5 sm:py-1 ${styles.preview} rounded-lg text-[10px] sm:text-xs`}>
-                              {((tool.questions as CrosswordData)?.clues?.down?.length || 0)} down
-                            </span>
-                          </>
-                        )}
-                        {tool.quiz_type === 'crater_blast' && (
-                          <>
-                            <span className="text-xs text-stone-500 font-bold">Game:</span>
-                            <span className={`px-2 py-1 ${styles.preview} rounded-lg text-xs`}>
-                              {((tool.questions as any)?.questions?.length || 0)} questions
-                            </span>
-                          </>
-                        )}
-                      </div>
-                    ) : null}
                   </div>
                 </div>
               );
@@ -1880,7 +1810,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                     onClick={() => setCurrentPage(page)}
                     className={`w-10 h-10 rounded-lg font-extrabold transition-all ${
                       currentPage === page
-                        ? 'bg-[#A560E8] text-white border-2 border-b-4 border-[#8A48C7]'
+                        ? 'bg-[#FF9600] text-white border-2 border-b-4 border-[#B85F00]'
                         : 'bg-white text-stone-600 border-2 border-b-4 border-stone-200 active:border-b-2 active:translate-y-0.5'
                     }`}
                   >
@@ -1960,8 +1890,8 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
         <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm flex items-center justify-center z-50 px-4">
           <div className="bg-white dark:bg-stone-900 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 max-w-md w-full p-6">
             <div className="text-center mb-6">
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-[#F3EAFF]">
-                <svg className="w-7 h-7 text-[#A560E8]" fill="currentColor" viewBox="0 0 20 20">
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-[#FFF4E0]">
+                <svg className="w-7 h-7 text-[#FF9600]" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                 </svg>
               </div>
@@ -1973,7 +1903,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
             <ul className="space-y-3 mb-6">
               {['Export to PDF & Word', 'Permanent storage', 'Unlimited generations', 'All question types'].map((item, i) => (
                 <li key={i} className="flex items-center gap-3 text-sm text-stone-700">
-                  <svg className="w-4 h-4 text-[#A560E8] shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-4 h-4 text-[#FF9600] shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                   {item}
@@ -1989,7 +1919,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
               </button>
               <button
                 onClick={() => { setShowUpgradeModal(false); onNavigate('pricing'); }}
-                className="flex-1 px-4 py-2.5 text-white bg-[#A560E8] font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 text-sm transition-all"
+                className="flex-1 px-4 py-2.5 text-white bg-[#FF9600] font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#B85F00] active:border-b-2 active:translate-y-0.5 text-sm transition-all"
               >
                 View Plans
               </button>
@@ -2004,8 +1934,8 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
           <div className="bg-white dark:bg-stone-900 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 max-w-md w-full p-6">
             <div className="flex items-start justify-between mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 bg-[#F3EAFF] rounded-xl flex items-center justify-center">
-                  <svg className="w-5 h-5 text-[#A560E8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-11 h-11 bg-[#FFF4E0] rounded-xl flex items-center justify-center">
+                  <svg className="w-5 h-5 text-[#FF9600]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
                   </svg>
                 </div>
@@ -2026,8 +1956,8 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
 
             {shareSuccess ? (
               <div className="text-center py-8">
-                <div className="w-16 h-16 bg-[#F3EAFF] rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-[#A560E8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-16 h-16 bg-[#FFF4E0] rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-[#FF9600]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
@@ -2043,7 +1973,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
 
                 {loadingFriends ? (
                   <div className="flex items-center justify-center py-8">
-                    <div className="animate-spin w-8 h-8 border-2 border-stone-300 border-t-[#A560E8] rounded-full"></div>
+                    <div className="animate-spin w-8 h-8 border-2 border-stone-300 border-t-[#FF9600] rounded-full"></div>
                   </div>
                 ) : friends.length === 0 ? (
                   <div className="text-center py-8">
@@ -2056,7 +1986,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                     <p className="text-sm text-stone-500 mb-4">Add friends to share study tools with them</p>
                     <button
                       onClick={() => { closeShareModal(); onNavigate('friends'); }}
-                      className="px-4 py-2 bg-[#A560E8] text-white text-sm font-extrabold rounded-xl border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all uppercase tracking-wide"
+                      className="px-4 py-2 bg-[#FF9600] text-white text-sm font-extrabold rounded-xl border-2 border-b-4 border-[#B85F00] active:border-b-2 active:translate-y-0.5 transition-all uppercase tracking-wide"
                     >
                       Add Friends
                     </button>
@@ -2072,15 +2002,15 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                             onClick={() => setSelectedFriendId(friend.id)}
                             className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${
                               selectedFriendId === friend.id
-                                ? 'border-[#A560E8] bg-[#F3EAFF]'
+                                ? 'border-[#FF9600] bg-[#FFF4E0]'
                                 : 'border-stone-200 hover:border-stone-300 hover:bg-stone-50'
                             }`}
                           >
                             <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                              selectedFriendId === friend.id ? 'bg-[#A560E8]/20' : 'bg-stone-200'
+                              selectedFriendId === friend.id ? 'bg-[#FF9600]/20' : 'bg-stone-200'
                             }`}>
                               <span className={`font-extrabold ${
-                                selectedFriendId === friend.id ? 'text-[#8A48C7]' : 'text-stone-600'
+                                selectedFriendId === friend.id ? 'text-[#B85F00]' : 'text-stone-600'
                               }`}>
                                 {(friend.username?.[0] || friend.first_name?.[0] || friend.email?.[0] || '?').toUpperCase()}
                               </span>
@@ -2090,7 +2020,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                               <p className="text-xs text-stone-500">{friend.friend_code}</p>
                             </div>
                             {selectedFriendId === friend.id && (
-                              <svg className="w-5 h-5 text-[#A560E8]" fill="currentColor" viewBox="0 0 20 20">
+                              <svg className="w-5 h-5 text-[#FF9600]" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                               </svg>
                             )}
@@ -2106,7 +2036,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                         value={shareMessage}
                         onChange={(e) => setShareMessage(e.target.value)}
                         placeholder="e.g. Check out these flashcards!"
-                        className="w-full px-4 py-3 border-2 border-stone-200 rounded-xl focus:ring-2 focus:ring-[#A560E8]/40 focus:border-[#A560E8] focus:outline-none text-sm font-bold"
+                        className="w-full px-4 py-3 border-2 border-stone-200 rounded-xl focus:ring-2 focus:ring-[#FF9600]/40 focus:border-[#FF9600] focus:outline-none text-sm font-bold"
                         maxLength={200}
                       />
                     </div>
@@ -2121,7 +2051,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                       <button
                         onClick={handleShare}
                         disabled={!selectedFriendId || isSharing}
-                        className="flex-1 px-4 py-2.5 text-white bg-[#A560E8] font-extrabold rounded-xl border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 disabled:bg-stone-300 disabled:border-stone-400 text-sm transition-all flex items-center justify-center gap-2"
+                        className="flex-1 px-4 py-2.5 text-white bg-[#FF9600] font-extrabold rounded-xl border-2 border-b-4 border-[#B85F00] active:border-b-2 active:translate-y-0.5 disabled:bg-stone-300 disabled:border-stone-400 text-sm transition-all flex items-center justify-center gap-2"
                       >
                         {isSharing ? (
                           <>
@@ -2147,7 +2077,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
       )}
 
       <Footer onNavigate={onNavigate} />
-    </div>
+    </LoggedInPageShell>
   );
 };
 

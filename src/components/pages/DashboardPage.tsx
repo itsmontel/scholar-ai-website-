@@ -4,8 +4,7 @@ function shuffleAndTake<T>(arr: T[], count: number): T[] {
   const shuffled = [...arr].sort(() => Math.random() - 0.5);
   return shuffled.slice(0, Math.min(count, shuffled.length));
 }
-import Header from '../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
+import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
 import AnalysisAnimation from '../common/AnalysisAnimation';
 import LoadingSpinner from '../common/LoadingSpinner';
@@ -1821,8 +1820,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
   };
 
   return (
-    <div className="min-h-screen relative transition-colors font-sans overflow-x-clip">
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
+    <LoggedInPageShell className="min-h-screen relative transition-colors font-sans overflow-x-clip" user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="dashboard">
 
       <div
         className={
@@ -1831,7 +1829,6 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
             : undefined
         }
       >
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="dashboard" />
 
       {/* First analysis onboarding banner — dismissible; upload/library nudges use showFirstAnalysisOnboarding only */}
       {showFirstAnalysisBanner && (
@@ -4803,7 +4800,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
         />
       )}
 
-    </div>
+    </LoggedInPageShell>
   );
 };
 

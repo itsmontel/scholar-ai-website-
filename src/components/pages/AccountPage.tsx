@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
 import CancelRetentionModal from '../common/CancelRetentionModal';
-import Header from '../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import { FOCUS_MODE_COMING_SOON, FOCUS_MODE_CHROME_EXTENSION_URL } from '../../constants/focusMode';
 
 interface User {
@@ -412,12 +410,8 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-clip">
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="account" />
-
-      {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-14 relative z-10" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+    <>
+    <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-14" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
         {/* Page Header */}
         <div className="text-center mb-10">
           <h1 className="text-3xl sm:text-4xl font-extrabold text-stone-800 dark:text-stone-100 mb-4">
@@ -917,7 +911,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
         onMutate={fetchUserData}
         subscriptionStatus={userStats.subscriptionStatus}
       />
-    </div>
+    </>
   );
 };
 

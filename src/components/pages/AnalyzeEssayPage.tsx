@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import Header from '../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
+import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
 import AnalysisAnimation from '../common/AnalysisAnimation';
 import { trackAction } from '../../data/achievements';
@@ -175,15 +174,8 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout, embedded = false }: Anal
     }, 7500);
   };
 
-  return (
-    <div
-      className={`relative transition-colors font-sans overflow-x-clip ${embedded ? '' : 'min-h-screen'}`}
-      style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-    >
-      {!embedded && <WriteScholarEditorialBackgroundLayers position="fixed" />}
-
-      {!embedded && <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="analyze" />}
-
+  const inner = (
+    <>
       <main
         className={`relative w-full min-w-0 overflow-x-clip ${embedded ? '' : 'max-w-[1360px] mx-auto px-3 sm:px-6 lg:px-8 pt-3 sm:pt-6 pb-24 sm:pb-16'}`}
       >
@@ -624,7 +616,23 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout, embedded = false }: Anal
       )}
 
       {!embedded && <Footer onNavigate={onNavigate} />}
-    </div>
+    </>
+  );
+
+  if (embedded) {
+    return <div className="relative w-full min-w-0">{inner}</div>;
+  }
+
+  return (
+    <LoggedInPageShell
+      className="relative min-h-screen transition-colors font-sans overflow-x-clip"
+      user={user}
+      onNavigate={onNavigate}
+      onLogout={onLogout}
+      currentPage="analyze"
+    >
+      {inner}
+    </LoggedInPageShell>
   );
 };
 

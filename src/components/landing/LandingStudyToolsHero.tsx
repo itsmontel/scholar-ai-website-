@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import LandingScrollReveal from './LandingScrollReveal';
+import LandingSectionBackdrop from './LandingSectionBackdrop';
 
 interface LandingStudyToolsHeroProps {
   onNavigate: (page: string) => void;
@@ -25,23 +26,26 @@ interface ToolCard {
   minH?: string;
   /** Object position when image is cover-cropped. */
   objectPos?: string;
+  /** How video fills the preview frame — contain avoids upscaling blur on low-res clips. */
+  videoFit?: 'cover' | 'contain';
   featured?: boolean;
   dark?: boolean;
 }
 
-const TOOLS: ToolCard[] = [
+const STUDY_TOOLS: ToolCard[] = [
   {
     num: '01',
     title: 'Flashcards',
     subtitle: 'Adaptive recall',
     desc: 'AI-built flashcards with click-to-flip, mark-as-known, and PDF/DOCX export.',
-    image: '/flashcard pic.png',
+    video: '/hero-flashcards-hq.mp4',
     alt: 'WriteScholar flashcard interface showing a Piaget question card with flip and navigation controls',
     tone: 'blue',
     badge: 'Core',
     navTo: 'create-flashcards',
     span: 'lg:col-span-7',
     objectPos: 'object-center',
+    videoFit: 'contain',
     featured: true,
   },
   {
@@ -49,13 +53,14 @@ const TOOLS: ToolCard[] = [
     title: 'Quizzes',
     subtitle: 'Mixed-format · auto-graded',
     desc: 'Multiple choice, true/false and fill-in-the-blank. Adjust difficulty and length.',
-    image: '/quiz pic.png',
+    video: '/hero-quiz-hq.mp4',
     alt: 'WriteScholar quiz showing question 3 of 10 with four multiple-choice options',
     tone: 'green',
     badge: 'Core',
     navTo: 'quiz-generator',
     span: 'lg:col-span-5',
     objectPos: 'object-top',
+    videoFit: 'contain',
   },
   {
     num: '03',
@@ -72,33 +77,6 @@ const TOOLS: ToolCard[] = [
   },
   {
     num: '04',
-    title: 'Crater Blast',
-    subtitle: 'AI quiz arcade game',
-    desc: 'Blast the right answer before the asteroid lands. A boss-battle take on revision.',
-    video: '/writescholar-crater-blast-demo.mp4',
-    alt: 'WriteScholar Crater Blast game demo — answer asteroids fall toward a planet and you blast the correct one',
-    tone: 'duoBlue',
-    badge: 'Game',
-    navTo: 'crater-blast',
-    span: 'lg:col-span-6',
-    dark: true,
-  },
-  {
-    num: '05',
-    title: 'Word Tower',
-    subtitle: 'Arcade vocab game',
-    desc: 'Stack the right words, beat your streak.',
-    image: '/study-pack-previews/word-tower.png',
-    alt: 'WriteScholar Word Tower arcade game with starfield background and word blocks',
-    tone: 'purple',
-    badge: 'Game',
-    navTo: 'word-tower',
-    span: 'lg:col-span-6',
-    objectPos: 'object-center',
-    dark: true,
-  },
-  {
-    num: '06',
     title: 'Lessons',
     subtitle: 'Interactive walk-throughs',
     desc: 'Notes turn into bite-size lessons with key terms, examples and check-points.',
@@ -110,59 +88,157 @@ const TOOLS: ToolCard[] = [
     span: 'lg:col-span-6',
     objectPos: 'object-top',
   },
+];
+
+const ARCADE_GAMES: ToolCard[] = [
   {
-    num: '07',
+    num: '01',
+    title: 'Crater Blast',
+    subtitle: 'AI quiz arcade game',
+    desc: 'Blast the right answer before the asteroid lands. A boss-battle take on revision.',
+    video: '/writescholar-crater-blast-demo.mp4',
+    alt: 'WriteScholar Crater Blast game demo — answer asteroids fall toward a planet and you blast the correct one',
+    tone: 'duoBlue',
+    badge: 'Game',
+    navTo: 'crater-blast',
+    span: 'lg:col-span-4',
+    dark: true,
+  },
+  {
+    num: '02',
+    title: 'Word Tower',
+    subtitle: 'Arcade vocab game',
+    desc: 'Stack the right words, beat your streak before the tower collapses.',
+    video: '/hero-word-tower-hq.mp4',
+    alt: 'WriteScholar Word Tower arcade game with starfield background and word blocks',
+    tone: 'duoBlue',
+    badge: 'Game',
+    navTo: 'word-tower',
+    span: 'lg:col-span-4',
+    objectPos: 'object-center',
+    videoFit: 'contain',
+    dark: true,
+  },
+  {
+    num: '03',
     title: 'Word Blitz',
     subtitle: '60-second cloze speedrun',
     desc: 'Read the sentence, tap the missing word. Speed bonus rewards fast answers — beat the clock.',
-    image: '/study-pack-previews/word-blitz.png',
+    video: '/hero-word-blitz-hq.mp4',
     alt: 'WriteScholar Word Blitz fill-in-the-blank speedrun game with a 60-second timer and four answer choices',
-    tone: 'orange',
+    tone: 'duoBlue',
     badge: 'Game',
     navTo: 'word-blitz',
-    span: 'lg:col-span-12',
+    span: 'lg:col-span-4',
     objectPos: 'object-center',
-    featured: true,
+    videoFit: 'contain',
+    dark: true,
   },
 ];
 
-// All tones are now purple (was blue/green/orange/red). Two shades —
-// primary #A560E8 and a deeper #8A48C7 — alternate across the bento
-// grid so the cards keep a visual rhythm without leaving the brand.
-const TONE_A = {
-  border: 'border-[#8A48C7]',
-  accent: 'bg-[#A560E8]',
-  badge: 'bg-[#F3EAFF] text-[#A560E8]',
-  ring: 'ring-[#A560E8]/30',
-  numBg: 'bg-[#A560E8]',
-  tint: 'bg-[#F3EAFF]',
+// Each tone now has a distinct colour so study-tool cards feel varied
+// and game cards have a consistent hot-pink identity.
+type ToneStyle = {
+  border: string;       // card outer border
+  borderInner: string;  // media-area inner border
+  accent: string;       // top accent stripe
+  badge: string;        // badge pill
+  numBg: string;        // number badge bg
+  cardBg: string;       // card background tint
+  shadow: string;       // box shadow
+  chromeDot: string;    // browser-chrome dot colour
+  livePill: string;     // "Live" pill (video cards)
 };
-const TONE_B = {
-  border: 'border-[#7733B5]',
-  accent: 'bg-[#8A48C7]',
-  badge: 'bg-[#F3EAFF] text-[#8A48C7]',
-  ring: 'ring-[#8A48C7]/30',
-  numBg: 'bg-[#8A48C7]',
-  tint: 'bg-[#F3EAFF]',
-};
-const TONE_STYLES: Record<Tone, { border: string; accent: string; badge: string; ring: string; numBg: string; tint: string }> = {
-  blue: TONE_A,
-  green: TONE_B,
-  orange: TONE_A,
-  purple: TONE_A,
-  red: TONE_B,
-  duoBlue: TONE_A,
+
+const TONE_STYLES: Record<Tone, ToneStyle> = {
+  // Flashcards — purple
+  blue: {
+    border:      'border-[#A560E8]',
+    borderInner: 'border-[#D8B4FE]',
+    accent:      'bg-gradient-to-r from-[#A560E8] to-[#8A48C7]',
+    badge:       'bg-[#F3EAFF] text-[#7733B5]',
+    numBg:       'bg-[#A560E8]',
+    cardBg:      'bg-white',
+    shadow:      'shadow-[0_8px_28px_-10px_rgba(165,96,232,0.45)] hover:shadow-[0_16px_40px_-12px_rgba(165,96,232,0.60)]',
+    chromeDot:   'bg-[#A560E8]',
+    livePill:    'bg-[#F3EAFF] text-[#A560E8]',
+  },
+  // Quizzes — green
+  green: {
+    border:      'border-[#46A302]',
+    borderInner: 'border-[#A8E06B]',
+    accent:      'bg-gradient-to-r from-[#58CC02] to-[#46A302]',
+    badge:       'bg-[#E5F8D0] text-[#2E7200]',
+    numBg:       'bg-[#58CC02]',
+    cardBg:      'bg-white',
+    shadow:      'shadow-[0_8px_28px_-10px_rgba(88,204,2,0.40)] hover:shadow-[0_16px_40px_-12px_rgba(88,204,2,0.55)]',
+    chromeDot:   'bg-[#58CC02]',
+    livePill:    'bg-[#E5F8D0] text-[#46A302]',
+  },
+  // Crosswords — orange/amber
+  orange: {
+    border:      'border-[#D97F00]',
+    borderInner: 'border-[#FFCF70]',
+    accent:      'bg-gradient-to-r from-[#FF9600] to-[#D97F00]',
+    badge:       'bg-[#FFF4E0] text-[#9A5500]',
+    numBg:       'bg-[#FF9600]',
+    cardBg:      'bg-white',
+    shadow:      'shadow-[0_8px_28px_-10px_rgba(255,150,0,0.40)] hover:shadow-[0_16px_40px_-12px_rgba(255,150,0,0.55)]',
+    chromeDot:   'bg-[#FF9600]',
+    livePill:    'bg-[#FFF4E0] text-[#D97F00]',
+  },
+  // Lessons — teal/cyan
+  red: {
+    border:      'border-[#0891B2]',
+    borderInner: 'border-[#67E8F9]',
+    accent:      'bg-gradient-to-r from-[#06B6D4] to-[#0891B2]',
+    badge:       'bg-[#CFFAFE] text-[#0E7490]',
+    numBg:       'bg-[#06B6D4]',
+    cardBg:      'bg-white',
+    shadow:      'shadow-[0_8px_28px_-10px_rgba(6,182,212,0.40)] hover:shadow-[0_16px_40px_-12px_rgba(6,182,212,0.55)]',
+    chromeDot:   'bg-[#06B6D4]',
+    livePill:    'bg-[#CFFAFE] text-[#0891B2]',
+  },
+  // (unused — kept for type safety)
+  purple: {
+    border:      'border-[#A560E8]',
+    borderInner: 'border-[#D8B4FE]',
+    accent:      'bg-gradient-to-r from-[#A560E8] to-[#8A48C7]',
+    badge:       'bg-[#F3EAFF] text-[#7733B5]',
+    numBg:       'bg-[#A560E8]',
+    cardBg:      'bg-white',
+    shadow:      'shadow-[0_8px_28px_-10px_rgba(165,96,232,0.45)] hover:shadow-[0_16px_40px_-12px_rgba(165,96,232,0.60)]',
+    chromeDot:   'bg-[#A560E8]',
+    livePill:    'bg-[#F3EAFF] text-[#A560E8]',
+  },
+  // Arcade / game cards — hot pink
+  duoBlue: {
+    border:      'border-[#FF4B82]',
+    borderInner: 'border-[#FFB3CB]',
+    accent:      'bg-gradient-to-r from-[#FF4B82] to-[#C73968]',
+    badge:       'bg-[#FFE8EE] text-[#A82754]',
+    numBg:       'bg-[#FF4B82]',
+    cardBg:      'bg-white',
+    shadow:      'shadow-[0_8px_28px_-10px_rgba(255,75,130,0.50)] hover:shadow-[0_16px_40px_-12px_rgba(255,75,130,0.70)]',
+    chromeDot:   'bg-[#FF4B82]',
+    livePill:    'bg-[#FFE8EE] text-[#A82754]',
+  },
 };
 
 export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsHeroProps) {
   return (
     <section
-      className="relative py-20 sm:py-28 lg:py-32 overflow-hidden border-t-2 border-[#E5E5E5] dark:border-[#4A4A4A] scroll-mt-20"
+      className="relative py-20 sm:py-28 lg:py-32 overflow-hidden scroll-mt-20"
       aria-labelledby="landing-study-tools-heading"
       id="study-tools"
     >
-      {/* ─── Clean background ─── */}
-      <div className="absolute inset-0 bg-[#FAF7FF] dark:bg-[#3C3C3C]" aria-hidden />
+      <LandingSectionBackdrop
+        base="bg-[#FFF4E0] dark:bg-[#2A1800]"
+        topFrom="from-[#F3EAFF]/80 dark:from-[#1A0B2E]/80"
+        bottomTo="from-[#FCFBF7]/80 dark:from-stone-950/80"
+        radial="bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(255,150,0,0.14),transparent_60%)]"
+      />
+      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-1/2 bg-[radial-gradient(ellipse_70%_60%_at_50%_100%,rgba(255,75,130,0.10),transparent_70%)]" aria-hidden />
 
       {/* Studying mascot — large, positioned in the top-right of the section
           so it draws the eye while the headline reads. */}
@@ -179,12 +255,12 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
         {/* ─── Headline ─── */}
         <LandingScrollReveal>
           <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14 lg:mb-16">
-            <div className="inline-flex items-center gap-2 mb-5 rounded-full border-2 border-b-4 border-[#E5E5E5] bg-white dark:bg-[#3C3C3C] dark:border-[#4A4A4A] px-3.5 py-1.5">
+            <div className="inline-flex items-center gap-2 mb-5 rounded-full border-2 border-[#FF9600]/40 bg-[#FFF4E0] dark:bg-[#FF9600]/15 px-3.5 py-1.5 shadow-[0_0_12px_rgba(255,150,0,0.25)]">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#A560E8] opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#A560E8]" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF9600] opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FF9600]" />
               </span>
-              <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.18em] text-[#3C3C3C] dark:text-white">
+              <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.18em] text-[#B85F00] dark:text-[#FFBD5C]">
                 Study tools · live in dashboard
               </span>
             </div>
@@ -194,10 +270,10 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
               style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
             >
               <span className="block">Transform your notes into</span>
-              <span className="relative inline-block mt-1 sm:mt-1.5 text-[#A560E8]">
-                7 powerful study tools
+              <span className="relative inline-block mt-1 sm:mt-1.5 text-[#FF9600]">
+                powerful study tools
                 <svg
-                  className="absolute -bottom-1.5 left-0 w-full h-2 text-[#A560E8]"
+                  className="absolute -bottom-1.5 left-0 w-full h-2 text-[#FF9600]"
                   viewBox="0 0 200 8"
                   preserveAspectRatio="none"
                   aria-hidden
@@ -213,8 +289,7 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
               </span>
             </h2>
             <p className="text-base sm:text-xl text-[#777] dark:text-stone-300 leading-relaxed max-w-2xl mx-auto font-normal" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-              Flashcards, quizzes, crosswords, lessons and arcade games — all generated from your own notes in under 60
-              seconds.
+              Flashcards, quizzes, crosswords, lessons <span className="font-bold text-[#FF9600]">plus three arcade games</span> — all generated from your own notes in under 60 seconds.
             </p>
           </div>
         </LandingScrollReveal>
@@ -227,16 +302,81 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
             this file is now dead code but kept in place in case the
             input mock is ever brought back.) */}
 
-        {/* ─── Bento grid wrapper ─── */}
-        <div className="relative">
-          {/* The four floating sticker annotations ("Free plan included",
-              "Built in <60s", "92% recall rate", "Boss-battle revision")
-              were removed per user feedback — they added visual noise and
-              the trust signals are already covered by the CTA strip below
-              ("Free plan included · No credit card · Cancel anytime"). */}
+        {/* ─── Study tools bento (top half) — orange ambient panel ─── */}
+        <div className="relative rounded-3xl border-2 border-[#FFCF70]/70 bg-white/70 dark:bg-[#2A1800]/40 shadow-[0_0_60px_-20px_rgba(255,150,0,0.35)] p-4 sm:p-5 lg:p-6 backdrop-blur-sm">
+          {/* Subtle corner glow */}
+          <div className="pointer-events-none absolute -top-10 -left-10 w-48 h-48 rounded-full bg-[#FF9600]/15 blur-3xl" aria-hidden />
+          <div className="pointer-events-none absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-[#D97F00]/12 blur-3xl" aria-hidden />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 auto-rows-min">
+            {STUDY_TOOLS.map((tool, i) => (
+              <LandingScrollReveal key={tool.title} className={tool.span} delayMs={i * 90}>
+                <BentoCard tool={tool} onNavigate={onNavigate} />
+              </LandingScrollReveal>
+            ))}
+          </div>
+        </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 lg:gap-6 auto-rows-min">
-            {TOOLS.map((tool, i) => (
+        {/* ─── Bridge band — visually carries the eye from study tools
+                 into the arcade games sub-section. Pink gradient ribbon
+                 echoes the in-app GamesPanel banner. ─── */}
+        <LandingScrollReveal delayMs={120}>
+          <div className="relative mt-14 sm:mt-20 mb-8 sm:mb-10" id="landing-arcade">
+            <div
+              className="relative overflow-hidden rounded-3xl border-2 border-b-4 text-white p-6 sm:p-8 lg:p-9"
+              style={{
+                backgroundImage:
+                  'linear-gradient(135deg, #FF4B82 0%, #FF4B82 50%, #C73968 100%)',
+                borderColor: '#A82754',
+              }}
+            >
+              <div
+                className="pointer-events-none absolute -top-24 -right-24 w-72 h-72 rounded-full bg-white/15 blur-3xl"
+                aria-hidden
+              />
+              <div
+                className="pointer-events-none absolute -bottom-20 -left-20 w-60 h-60 rounded-full bg-white/10 blur-3xl"
+                aria-hidden
+              />
+              <div className="relative flex items-center gap-4 sm:gap-6">
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10.5px] sm:text-xs font-extrabold uppercase tracking-[0.22em] text-white/85">
+                    Plus · Arcade mode
+                  </p>
+                  <h3
+                    className="mt-1.5 text-2xl sm:text-3xl lg:text-4xl font-extrabold leading-[1.05] tracking-tight"
+                    style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+                  >
+                    Make revision feel like a game
+                  </h3>
+                  <p className="mt-2 text-[13px] sm:text-base font-bold text-white/90 leading-snug max-w-2xl">
+                    Every Study Pack also unlocks three arcade games — built from the same notes you just pasted in.
+                  </p>
+                </div>
+                <img
+                  src="/mascot-jumping-joy.webp"
+                  alt=""
+                  aria-hidden
+                  loading="lazy"
+                  decoding="async"
+                  className="hidden sm:block relative w-20 h-20 lg:w-28 lg:h-28 object-contain shrink-0 drop-shadow-[0_8px_18px_rgba(0,0,0,0.25)]"
+                />
+              </div>
+            </div>
+            {/* Down chevron — visually leads the eye to the games grid */}
+            <div className="pointer-events-none absolute -bottom-4 left-1/2 -translate-x-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white border-2 border-[#A82754] shadow-[0_6px_14px_-4px_rgba(168,39,84,0.45)]">
+              <svg className="w-4 h-4 text-[#A82754]" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
+        </LandingScrollReveal>
+
+        {/* ─── Arcade games bento (bottom half) — pink ambient panel ─── */}
+        <div className="relative rounded-3xl border-2 border-[#FF4B82]/50 bg-[#FFE8EE]/80 dark:bg-[#FF4B82]/10 shadow-[0_0_60px_-20px_rgba(255,75,130,0.40)] p-4 sm:p-5 lg:p-6 backdrop-blur-sm">
+          <div className="pointer-events-none absolute -top-10 -left-10 w-48 h-48 rounded-full bg-[#FF4B82]/15 blur-3xl" aria-hidden />
+          <div className="pointer-events-none absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-[#A82754]/20 blur-3xl" aria-hidden />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 auto-rows-min">
+            {ARCADE_GAMES.map((tool, i) => (
               <LandingScrollReveal key={tool.title} className={tool.span} delayMs={i * 90}>
                 <BentoCard tool={tool} onNavigate={onNavigate} />
               </LandingScrollReveal>
@@ -251,7 +391,7 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
               <button
                 type="button"
                 onClick={() => onNavigate('study-pack')}
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-[#A560E8] text-white font-extrabold text-base border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-[#FF9600] hover:bg-[#E88700] text-white font-extrabold text-base border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_8px_24px_-8px_rgba(255,150,0,0.50)]"
                 style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
               >
                 Try Study Pack free
@@ -271,7 +411,7 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
             </div>
             <p className="text-xs sm:text-sm text-[#777] dark:text-stone-400 font-bold flex flex-wrap items-center justify-center gap-x-2 gap-y-1" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
               <span className="inline-flex items-center gap-1">
-                <svg className="w-3.5 h-3.5 text-[#A560E8]" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+                <svg className="w-3.5 h-3.5 text-[#FF9600]" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
                 Free plan included
@@ -344,26 +484,31 @@ function BentoCard({ tool, onNavigate }: { tool: ToolCard; onNavigate: (page: st
     return () => obs.disconnect();
   }, [tool.video]);
 
+  const isGame = tool.tone === 'duoBlue';
+
   return (
     <button
       type="button"
       onClick={() => onNavigate(tool.navTo)}
-      className={`group relative w-full h-full text-left rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-[#4A4A4A] bg-white dark:bg-[#3C3C3C] overflow-hidden transition-all duration-200 hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 ${tool.minH ?? ''}`}
+      className={`group relative w-full h-full text-left rounded-2xl border-2 border-b-4 ${styles.border} ${styles.cardBg} overflow-hidden transition-all duration-200 hover:-translate-y-1 active:border-b-2 active:translate-y-0.5 ${styles.shadow} ${tool.minH ?? ''}`}
     >
-      {/* Top accent line */}
+      {/* Top accent stripe — gradient per tone */}
       <span
-        className={`absolute top-0 inset-x-0 h-1 ${styles.accent}`}
+        className={`absolute top-0 inset-x-0 h-1.5 ${styles.accent}`}
         aria-hidden
       />
 
-      {/* Card chrome / header */}
+      {/* Card header */}
       <div className="relative px-4 sm:px-5 pt-4 sm:pt-5 pb-2 flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2.5 mb-1">
-            <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-white text-[10px] font-extrabold tabular-nums border-2 border-b-[3px] ${styles.border} ${styles.numBg}`} aria-hidden>
+            <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-white text-[10px] font-extrabold tabular-nums ${styles.numBg}`} aria-hidden>
               {tool.num}
             </span>
-            <h3 className="text-lg sm:text-xl font-extrabold text-[#3C3C3C] dark:text-white leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+            <h3
+              className="text-lg sm:text-xl font-extrabold leading-tight text-[#3C3C3C] dark:text-white"
+              style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+            >
               {tool.title}
             </h3>
           </div>
@@ -377,40 +522,41 @@ function BentoCard({ tool, onNavigate }: { tool: ToolCard; onNavigate: (page: st
       </div>
 
       {/* Description */}
-      <p className="relative px-4 sm:px-5 pb-3 text-sm text-[#777] dark:text-stone-300 leading-snug" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+      <p
+        className="relative px-4 sm:px-5 pb-3 text-sm leading-snug text-[#777] dark:text-stone-300"
+        style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+      >
         {tool.desc}
       </p>
 
-      {/* Image area */}
+      {/* Media area */}
       <div
         ref={mediaWrapRef}
-        className={`relative mx-2.5 sm:mx-3 mb-2.5 sm:mb-3 rounded-xl sm:rounded-2xl overflow-hidden border-2 border-[#E5E5E5] dark:border-[#4A4A4A] ${
-          tool.dark
-            ? 'bg-[#3C3C3C]'
-            : 'bg-[#FAF7FF] dark:bg-[#2C2C2C]'
+        className={`relative mx-2.5 sm:mx-3 mb-2.5 sm:mb-3 rounded-xl sm:rounded-2xl overflow-hidden border-2 ${styles.borderInner} ${
+          isGame ? 'bg-[#FFF0F4] dark:bg-[#2C2C2C]' : 'bg-[#FAF7FF] dark:bg-[#2C2C2C]'
         } ${mediaAspectClass}`}
       >
-        {/* Skeleton shimmer until loaded */}
+        {/* Skeleton shimmer */}
         {!loaded && (
           <div className="absolute inset-0 overflow-hidden" aria-hidden>
-            <div className="absolute inset-0 bg-[#FAF7FF] dark:bg-[#2C2C2C]" />
+            <div className={`absolute inset-0 ${isGame ? 'bg-[#FFF0F4] dark:bg-[#2C2C2C]' : 'bg-[#FAF7FF] dark:bg-[#2C2C2C]'}`} />
             <div className="absolute inset-y-0 -left-1/3 w-1/3 bg-gradient-to-r from-transparent via-white/60 dark:via-white/10 to-transparent lsth-shimmer" />
           </div>
         )}
 
-        {/* Browser chrome strip on top */}
+        {/* Browser chrome strip */}
         <div
-          className={`relative z-10 flex ${MEDIA_CHROME_H} shrink-0 items-center gap-1 px-2.5 border-b-2 border-[#E5E5E5] dark:border-[#4A4A4A] bg-white dark:bg-[#3C3C3C]`}
+          className={`relative z-10 flex ${MEDIA_CHROME_H} shrink-0 items-center gap-1 px-2.5 border-b-2 ${styles.borderInner} bg-white dark:bg-[#3C3C3C]`}
         >
-          <span className="h-2 w-2 rounded-full bg-[#A560E8]" />
-          <span className="h-2 w-2 rounded-full bg-[#A560E8]" />
-          <span className="h-2 w-2 rounded-full bg-[#A560E8]" />
-          <span className="ml-2 text-[10px] text-[#AFAFAF] dark:text-stone-500 font-bold truncate">
+          <span className={`h-2 w-2 rounded-full ${styles.chromeDot}`} />
+          <span className={`h-2 w-2 rounded-full ${styles.chromeDot} opacity-60`} />
+          <span className={`h-2 w-2 rounded-full ${styles.chromeDot} opacity-30`} />
+          <span className="ml-2 text-[10px] font-bold truncate text-[#AFAFAF] dark:text-stone-500">
             writescholar.com · {tool.title.toLowerCase()}
           </span>
           {tool.video && (
-            <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-[#F3EAFF] px-1.5 py-0.5 text-[9px] font-extrabold text-[#A560E8] uppercase tracking-wider">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#A560E8] motion-safe:animate-pulse" aria-hidden />
+            <span className={`ml-auto inline-flex items-center gap-1 rounded-full ${styles.livePill} px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider`}>
+              <span className={`h-1.5 w-1.5 rounded-full ${styles.chromeDot} motion-safe:animate-pulse`} aria-hidden />
               Live
             </span>
           )}
@@ -425,10 +571,12 @@ function BentoCard({ tool, onNavigate }: { tool: ToolCard; onNavigate: (page: st
             muted
             loop
             playsInline
-            preload="metadata"
+            preload="auto"
             aria-label={tool.alt}
             onLoadedData={() => setLoaded(true)}
-            className={`absolute inset-0 ${MEDIA_TOP} w-full h-[calc(100%-1.75rem)] object-cover ${tool.objectPos || 'object-center'} transition-all duration-500 group-hover:scale-[1.02] ${
+            className={`absolute inset-0 ${MEDIA_TOP} w-full h-[calc(100%-1.75rem)] ${
+              tool.videoFit === 'contain' ? 'object-contain' : 'object-cover'
+            } ${tool.objectPos || 'object-center'} transition-opacity duration-500 ${
               loaded ? 'opacity-100' : 'opacity-0'
             }`}
           />

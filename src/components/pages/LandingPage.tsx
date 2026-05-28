@@ -13,21 +13,24 @@ import DualMascot from '../common/DualMascot';
 // `lazyWithRetry` adds chunk-load failure recovery (idle tab / deploy).
 import { lazyWithRetry } from '../../utils/lazyWithRetry';
 import { LANDING_DEMO_FOCUS_FEEDBACK_EVENT } from '../../constants/landingDemoEvents';
-const InteractiveDocumentAnalysis = lazyWithRetry(() => import('../landing/InteractiveDocumentAnalysis'));
+const LandingInteractiveDemoSection = lazyWithRetry(() => import('../landing/LandingInteractiveDemoSection'));
 // LandingCitationsShowcase removed from landing (Nov 2026 — replaced
 // by the comprehensive-analysis arrow-callout block in the essay
 // section). Re-add the lazy import here if it's ever brought back.
 const LandingStudyToolsHero = lazyWithRetry(() => import('../landing/LandingStudyToolsHero'));
+const LandingHowItWorksSection = lazyWithRetry(() => import('../landing/LandingHowItWorksSection'));
+const LandingWritingWorkspaceSection = lazyWithRetry(() => import('../landing/LandingWritingWorkspaceSection'));
+const LandingChatGPTComparisonSection = lazyWithRetry(() => import('../landing/LandingChatGPTComparisonSection'));
+const LandingMotivationSection = lazyWithRetry(() => import('../landing/LandingMotivationSection'));
 const LandingTestimonialsSection = lazyWithRetry(() => import('../landing/LandingTestimonialsSection'));
+const LandingFAQSection = lazyWithRetry(() => import('../landing/LandingFAQSection'));
+const LandingFinalCTASection = lazyWithRetry(() => import('../landing/LandingFinalCTASection'));
 // (HeroEssayPreviewCard & LandingBeforeAfterSection were imported but
 // never rendered — dead imports removed to shrink the eager landing
 // chunk. The Mid-B before/after block is hidden behind a `{false &&}`
 // guard further down; re-add the lazy import there if it's ever turned
 // back on.)
 import LandingScrollReveal from '../landing/LandingScrollReveal';
-import { DEMO_HERO_AFTER_PAPER, DEMO_PAPERS } from '../../data/landingPageDemoAnalysis';
-
-const BadgeCreature = lazy(() => import('../common/BadgeCreature'));
 
 /** Hide study packs, Focus Mode, and friends blocks on landing (papers + citations first). */
 const LANDING_HIDE_SECONDARY_SECTIONS = true;
@@ -36,58 +39,6 @@ interface LandingPageProps {
   onNavigate: (page: string, slug?: string) => void;
   user?: { plan?: string; subscription_plan?: string } | null;
 }
-
-/** Source list for landing FAQ UI + FAQPage JSON-LD (order must match). */
-const LANDING_FAQ_ITEMS: { question: string; answer: string }[] = [
-  {
-    question: "Can I actually write my essay in WriteScholar?",
-    answer: "Yes, that's the main thing it does. You write, paste, or import a Word doc into a real editor with headings, bold, italics, tables and images. As you write, professor-style feedback shows up next to your draft, and you can drop a suggested fix straight into the text with one click. It autosaves as you go, and you export a clean Word document when you're done."
-  },
-  {
-    question: "What kind of feedback will I get on my essay?",
-    answer: "Line-by-line notes colour-coded green for strong, amber for needs work, and red for serious concerns, plus an estimated grade with a full rubric covering thesis, evidence, structure, clarity and academic style, and specific rewrite suggestions you can apply. It reads your draft the way a marker would."
-  },
-  {
-    question: "How does the analyzer work?",
-    answer: "Write in the editor, paste your essay, or upload a PDF, DOCX or TXT. The AI grades structure, argument, clarity, citations and academic tone the way a professor would and gives you an estimated grade out of 100 with a letter band and detailed notes, usually in under a minute."
-  },
-  {
-    question: "How accurate is the grade? Is it my real grade?",
-    answer: "It's an AI estimate, not your official grade. It uses the same rubric weights professors mark with and in practice lands within a few points of real scores. Use it to find and fix the weak spots before you hand in, not as a guarantee of what you'll get."
-  },
-  {
-    question: "Can I import a Word or PDF, and export it back?",
-    answer: "Yes. Import a .docx and your bold, italics, headings and paragraphs carry over. PDF and TXT come in as clean text. When you're finished, export back to a properly formatted Word document with no reformatting on your end."
-  },
-  {
-    question: "Is WriteScholar for college and university students?",
-    answer: "Yes, it's built for undergrad and postgrad coursework worldwide, UK or US. Set your education level so the feedback fits your course. We support the major citation styles (APA, MLA, Chicago, Harvard, IEEE, Vancouver), and there are high school options too."
-  },
-  {
-    question: "How long does an analysis take?",
-    answer: "Usually under 60 seconds. Write or paste your essay, hit Analyze, and you get the rubric, the estimated grade and a ranked fix list. The free plan includes 2 analyses a month."
-  },
-  {
-    question: "Can I also turn my notes into study tools?",
-    answer: "Yes. Alongside the writing workspace, Study Pack turns any notes into flashcards, quizzes, crosswords and revision games. Free users get lessons and flashcards; the rest unlocks with Pro."
-  },
-  {
-    question: "What citation styles are supported?",
-    answer: "APA 7th, MLA 9th, Chicago (notes-bibliography and author-date), Harvard, IEEE and Vancouver. There's also a citation finder that pulls relevant academic sources for your topic."
-  },
-  {
-    question: "Is my content private and secure?",
-    answer: "Yes. Your work is encrypted, never sold or used to train AI models, and you can delete any document whenever you want."
-  },
-  {
-    question: "What's the difference between Free, Pro and Premium?",
-    answer: "Free: 3 documents, 2 analyses and 2 study packs a month. Pro: 99 combined analyses, study packs and citations a month, apply WriteScholar revisions into your draft, all citation styles, PDF and Word export, uploads up to 100MB, and the full study tools. Premium: 5x the Pro usage at 499 actions a month, unlimited research-paper summarising, and 1GB of library storage."
-  },
-  {
-    question: "How do I add friends and share my study materials?",
-    answer: "Every account gets a unique friend code. Share it so people can add you. Once connected, you can send flashcards, quizzes, crosswords or notes with one tap, they tap Accept, and it lands in their library. Core sharing is free."
-  }
-];
 
 /* ─── DottedShot — big focal product screenshot ──────────────────
    The image is the hero; numbered dot badges sit on the regions
@@ -384,12 +335,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
   const [pipDismissed, setPipDismissed] = useState(false);
   const [pipMuted, setPipMuted] = useState(true);
   const [pipExpanded, setPipExpanded] = useState(false);
-  // Hero's floating grade pill — mirrors which demo sample the user
-  // currently has selected inside the interactive analyser. The demo
-  // starts on the B sample (see InteractiveDocumentAnalysis.tsx:248),
-  // so the pill renders "B" on first paint and flips to "C" the
-  // moment the user toggles the C-grade sample tab.
-  const [heroDemoGrade, setHeroDemoGrade] = useState<string>('B');
   // PiP is now pinned static to the bottom-right corner (no drag-to-
   // move). The previous drag handler + pipPos/pipDragging state was
   // removed per user brief — the floating demo video stays where it
@@ -412,7 +357,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
   const [inputText, setInputText] = useState('');
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [isFocused, setIsFocused] = useState(false);
-  const [openFAQ, setOpenFAQ] = useState<number | null>(null);
   const [mode, setMode] = useState<'analyze' | 'citations' | 'summarize' | 'quiz'>('analyze');
   const [studyToolMode, setStudyToolMode] = useState<'quiz' | 'flashcards' | 'crossword'>('quiz');
   const [citationStyle, setCitationStyle] = useState('APA');
@@ -527,33 +471,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
     "Remote work and productivity",
     "Blockchain in supply chain"
   ];
-
-  const faqs = useMemo(
-    () => LANDING_FAQ_ITEMS.filter(faq => !HIDE_FRIENDS || !faq.question.toLowerCase().includes('friends')),
-    [HIDE_FRIENDS]
-  );
-
-  /* FAQPage JSON-LD — matches visible FAQ list for rich results */
-  useEffect(() => {
-    const faqSchema = {
-      '@context': 'https://schema.org',
-      '@type': 'FAQPage',
-      mainEntity: faqs.map(faq => ({
-        '@type': 'Question',
-        name: faq.question,
-        acceptedAnswer: { '@type': 'Answer', text: faq.answer }
-      }))
-    };
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.textContent = JSON.stringify(faqSchema);
-    script.id = 'faq-schema-landing-writescholar';
-    document.head.appendChild(script);
-    return () => {
-      const el = document.getElementById('faq-schema-landing-writescholar');
-      if (el) el.remove();
-    };
-  }, [faqs]);
 
   const universities = [
     { name: 'Harvard', className: 'university-harvard' },
@@ -809,23 +726,22 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
   );
 
   const scrollToLandingTools = () => {
-    document.getElementById('landing-tools')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('interactive-demo')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   // The dedicated "Turn a Mid-B Essay Into an A" before/after block is
-  // currently hidden. Fall back to the analyzer demo (#landing-tools)
-  // so the "Rubric & grade" preview card still lands the user
-  // somewhere meaningful — the rubric/grade UI lives inside the demo.
+  // currently hidden. Fall back to the interactive demo so preview cards
+  // still land somewhere meaningful.
   const scrollToBeforeAfter = () => {
     const target =
       document.getElementById('before-after') ??
-      document.getElementById('landing-tools');
+      document.getElementById('interactive-demo');
     target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   /** Hero preview cards: land on the embedded demo with Feedback open (annotations list). */
   const scrollToInteractiveDemoFeedback = () => {
-    document.getElementById('landing-tools')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('interactive-demo')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     window.setTimeout(() => {
       window.dispatchEvent(new CustomEvent(LANDING_DEMO_FOCUS_FEEDBACK_EVENT));
     }, 420);
@@ -1025,41 +941,41 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           sits on the standard light-theme background. The purple hero
           area is now scoped to a fixed-height wrapper at the top. */}
       <section className="relative flex flex-col overflow-x-clip overflow-hidden border-b border-stone-200/90 dark:border-stone-800 xl:overflow-visible bg-[#FCFBF7] dark:bg-[#0c0a09]">
-        {/* ─── HERO BACKGROUND — SOFT WHITE WITH PURPLE WASH ─────────
-            Reworked per user brief: the previous solid purple hero is
-            replaced with a near-white field tinted by the brand
-            purple #A560E8. Header stays purple (a deliberate hard
-            colour break above the trust pill); below the header, the
-            hero reads bright and light like the reference design.
-            The atmospheric orbs are kept at very low opacity so the
-            page still feels on-brand without overwhelming the H1. */}
+        {/* ─── HERO BACKGROUND — SINGLE-COLOUR PURPLE (BOUNDED) ─────
+            Restored dark-purple hero (per user brief — bring back the
+            "few weeks ago" look). Brand purple #A560E8 → deeper
+            #6B27A3 gradient, bounded to a fixed-height wrapper that
+            clips at the bottom of the feature-icons row, then the
+            section reverts to cream for downstream content. White
+            headline + light atmospheric orbs + starry sparkles. */}
         <div
-          className="absolute top-0 left-0 right-0 h-[1180px] md:h-[1050px] lg:h-[1100px] xl:h-[1180px] overflow-hidden pointer-events-none"
+          className="absolute top-0 left-0 right-0 h-[880px] md:h-[730px] lg:h-[790px] xl:h-[820px] overflow-hidden pointer-events-none"
           aria-hidden
         >
-          {/* Base — purple-tinted white. Just enough purple in the
-              base to read warm against the existing site cream. */}
-          <div className="absolute inset-0 bg-[#FAF7FF] dark:bg-stone-950" />
+          {/* Base — rich purple gradient (top #A560E8 → bottom #6B27A3). */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#A560E8] via-[#8A48C7] to-[#6B27A3] dark:from-[#4A1B70] dark:via-[#3A1457] dark:to-[#2A0E40]" />
 
-          {/* Soft purple atmospheric orbs — same #A560E8 brand purple,
-              dropped to 6-10% opacity so they read as a warm glow
-              instead of solid colour. */}
-          <div className="pointer-events-none absolute -top-40 -left-[10%] h-[min(95vw,40rem)] w-[min(95vw,40rem)] rounded-full bg-[#A560E8]/[0.10] blur-[110px] animate-landing-hero-blob" />
-          <div className="pointer-events-none absolute -top-40 -right-[10%] h-[min(95vw,38rem)] w-[min(95vw,38rem)] rounded-full bg-[#A560E8]/[0.08] blur-[110px] animate-landing-hero-blob-delayed" />
-          <div className="pointer-events-none absolute -bottom-20 -left-[8%] h-[min(90vw,36rem)] w-[min(90vw,36rem)] rounded-full bg-[#A560E8]/[0.07] blur-[110px] animate-landing-hero-blob" />
-          <div className="pointer-events-none absolute -bottom-20 -right-[10%] h-[min(95vw,40rem)] w-[min(95vw,40rem)] rounded-full bg-[#A560E8]/[0.09] blur-[110px] animate-landing-hero-blob-delayed" />
+          {/* Lighter-purple atmospheric orbs — top-left / top-right. */}
+          <div className="pointer-events-none absolute -top-40 -left-[10%] h-[min(95vw,40rem)] w-[min(95vw,40rem)] rounded-full bg-[#D4A8F5]/[0.22] blur-[110px] dark:bg-[#C589FF]/[0.14] animate-landing-hero-blob" />
+          <div className="pointer-events-none absolute -top-40 -right-[10%] h-[min(95vw,38rem)] w-[min(95vw,38rem)] rounded-full bg-[#E2C2FA]/[0.20] blur-[110px] dark:bg-[#B873F0]/[0.14] animate-landing-hero-blob-delayed" />
 
-          {/* Sparkle dots — purple now (used to be white on purple bg
-              which obviously won't read on a light field). */}
-          <div className="hidden md:block pointer-events-none absolute top-[12%] left-[18%] h-1 w-1 rounded-full bg-[#A560E8]/35 motion-safe:animate-pulse" />
-          <div className="hidden md:block pointer-events-none absolute top-[22%] right-[14%] h-1.5 w-1.5 rounded-full bg-[#A560E8]/40 motion-safe:animate-pulse" style={{ animationDelay: '0.8s' }} />
-          <div className="hidden md:block pointer-events-none absolute top-[38%] left-[7%] h-1 w-1 rounded-full bg-[#A560E8]/30 motion-safe:animate-pulse" style={{ animationDelay: '1.6s' }} />
-          <div className="hidden md:block pointer-events-none absolute top-[44%] right-[6%] h-1 w-1 rounded-full bg-[#A560E8]/30 motion-safe:animate-pulse" style={{ animationDelay: '2.4s' }} />
-          <div className="hidden md:block pointer-events-none absolute bottom-[28%] left-[24%] h-1.5 w-1.5 rounded-full bg-[#A560E8]/35 motion-safe:animate-pulse" style={{ animationDelay: '0.4s' }} />
-          <div className="hidden md:block pointer-events-none absolute bottom-[22%] right-[22%] h-1 w-1 rounded-full bg-[#A560E8]/30 motion-safe:animate-pulse" style={{ animationDelay: '1.2s' }} />
+          {/* Deeper-purple shadow orbs — bottom corners, add depth. */}
+          <div className="pointer-events-none absolute -bottom-20 -left-[8%] h-[min(90vw,36rem)] w-[min(90vw,36rem)] rounded-full bg-[#5A1B8E]/[0.30] blur-[110px] dark:bg-[#3A0F66]/[0.45] animate-landing-hero-blob" />
+          <div className="pointer-events-none absolute -bottom-20 -right-[10%] h-[min(95vw,40rem)] w-[min(95vw,40rem)] rounded-full bg-[#6B27A3]/[0.32] blur-[110px] dark:bg-[#3A0F66]/[0.45] animate-landing-hero-blob-delayed" />
 
-          {/* Bottom fade — keeps the existing fade-into-cream so the
-              hero blends into the section below without a hard seam. */}
+          {/* Centre spotlight — soft white radial behind the H1 for a halo lift. */}
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_55%_50%_at_50%_42%,rgba(255,255,255,0.10),transparent_70%)]" />
+
+          {/* Starry sparkle dots — white pinpricks on the purple field. */}
+          <div className="hidden md:block pointer-events-none absolute top-[12%] left-[18%] h-1 w-1 rounded-full bg-white/60 shadow-[0_0_8px_2px_rgba(255,255,255,0.5)] motion-safe:animate-pulse" />
+          <div className="hidden md:block pointer-events-none absolute top-[22%] right-[14%] h-1.5 w-1.5 rounded-full bg-white/70 shadow-[0_0_10px_3px_rgba(255,255,255,0.5)] motion-safe:animate-pulse" style={{ animationDelay: '0.8s' }} />
+          <div className="hidden md:block pointer-events-none absolute top-[38%] left-[7%] h-1 w-1 rounded-full bg-white/55 shadow-[0_0_8px_2px_rgba(255,255,255,0.45)] motion-safe:animate-pulse" style={{ animationDelay: '1.6s' }} />
+          <div className="hidden md:block pointer-events-none absolute top-[44%] right-[6%] h-1 w-1 rounded-full bg-white/55 shadow-[0_0_8px_2px_rgba(255,255,255,0.45)] motion-safe:animate-pulse" style={{ animationDelay: '2.4s' }} />
+          <div className="hidden md:block pointer-events-none absolute bottom-[28%] left-[24%] h-1.5 w-1.5 rounded-full bg-white/65 shadow-[0_0_10px_3px_rgba(255,255,255,0.5)] motion-safe:animate-pulse" style={{ animationDelay: '0.4s' }} />
+          <div className="hidden md:block pointer-events-none absolute bottom-[22%] right-[22%] h-1 w-1 rounded-full bg-white/60 shadow-[0_0_8px_2px_rgba(255,255,255,0.45)] motion-safe:animate-pulse" style={{ animationDelay: '1.2s' }} />
+
+          {/* Internal fade → cream, pinned to the bottom of the purple
+              wrapper so it blends into the section below without a seam. */}
           <div
             className="absolute inset-x-0 bottom-0 h-44 sm:h-48 lg:h-52 xl:h-56 bg-gradient-to-b from-transparent from-65% to-[#FCFBF7] dark:to-[#0c0a09] pointer-events-none"
             aria-hidden
@@ -1068,705 +984,518 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
         <div className="relative z-10 flex flex-col items-center justify-start px-4 sm:px-6 lg:px-8 pt-10 sm:pt-12 lg:pt-8 pb-8 sm:pb-0 min-w-0">
           <div className="w-full min-w-0 max-w-[1240px] xl:mx-auto">
-            {/* ─── PREMIUM HERO — essay-analyzer-first conversion landing ─────
-                Single focused funnel: trust pill → editorial headline →
-                subhead → primary CTA pair → product UI screenshot. Study Pack
-                / Citations / Focus Mode get one secondary mention beneath.
-                Drops the previous floating-tile cluster + 6-icon feature row
-                in favour of one strong product showcase, per user brief to make
-                essay analysis the unmistakable hero. */}
-            <div className="relative z-10 w-full max-w-6xl xl:max-w-[88rem] mx-auto px-5 sm:px-8 lg:px-10 pt-0 pb-8 sm:pt-4 sm:pb-14 lg:pt-6 lg:pb-20 text-center opacity-0 animate-hero-card-enter">
-              {/* ─── HERO MARGIN TILES — flank the H1 on lg+ ─────────
-                  Two tiles per side at staggered vertical positions,
-                  absolutely positioned to the (relative) hero column
-                  so they float in the margins beside the editorial
-                  headline. Hidden on smaller screens — the
-                  mobile/tablet 2x2 strip below the demo (block #8)
-                  picks them up there. Yellow Duolingo border matches
-                  the pre-rebuild hero aesthetic. */}
-              {[
-                {
-                  // Top-left, mirrored with Premium essay analysis (same
-                  // top, same offset). On xl+ the negative offset pushes
-                  // the tile past the hero column edge into the side
-                  // margin (section uses `xl:overflow-visible` so this is
-                  // safe). The essay-analysis pair sits up top closer to
-                  // the H1 ("premium AI grader…"), study-tool pair sits
-                  // below.
-                  label: 'Essay Analyzer',
-                  kind: 'image' as const,
-                  src: '/rubric-and-notes.png',
-                  pos: 'top-[2rem] xl:top-[3rem] -left-[1rem] xl:-left-[4rem]',
-                  // Subtle 8s drift; reuses the existing `hero-tile-drift`
-                  // keyframe (src/index.css:1057). Each tile gets a slightly
-                  // different duration + delay so they fall out of phase
-                  // and the cluster never sits in lock-step.
-                  anim: 'motion-safe:animate-[hero-tile-drift_8s_ease-in-out_infinite]',
-                  delay: '0s',
-                },
-                {
-                  // Top-right, mirror of Essay Analyzer.
-                  label: 'Premium essay analysis',
-                  kind: 'image' as const,
-                  src: '/full-report.png',
-                  pos: 'top-[2rem] xl:top-[3rem] -right-[1rem] xl:-right-[4rem]',
-                  anim: 'motion-safe:animate-[hero-tile-drift_9s_ease-in-out_infinite]',
-                  delay: '2.5s',
-                },
-                {
-                  // Bottom-left, mirrored with Notes to Quiz (same top,
-                  // same offset). Pulled in slightly from the column edge
-                  // so the bottom pair sits a touch closer to the H1
-                  // centreline than the top pair.
-                  label: 'Notes to Flashcards',
-                  kind: 'video' as const,
-                  src: '/hero-flashcards.mp4',
-                  pos: 'top-[18rem] xl:top-[20rem] left-[2rem] xl:left-0',
-                  anim: 'motion-safe:animate-[hero-tile-drift_8.5s_ease-in-out_infinite]',
-                  delay: '1.2s',
-                },
-                {
-                  // Bottom-right, mirror of Notes to Flashcards.
-                  label: 'Notes to Quiz',
-                  kind: 'video' as const,
-                  src: '/hero-quiz.mp4',
-                  pos: 'top-[18rem] xl:top-[20rem] right-[2rem] xl:right-0',
-                  anim: 'motion-safe:animate-[hero-tile-drift_9.4s_ease-in-out_infinite]',
-                  delay: '3.8s',
-                },
-              ].map((t) => (
-                <div
-                  key={`margin-${t.label}`}
-                  className={`hidden lg:block absolute z-10 w-48 xl:w-56 ${t.anim} ${t.pos}`}
-                  style={{ animationDelay: t.delay }}
-                >
-                  <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#A560E8] shadow-[0_18px_42px_-12px_rgba(165,96,232,0.55)] bg-stone-950">
-                    <div className="relative aspect-[16/10] w-full bg-black">
-                      {t.kind === 'cycle' ? (
-                        <HeroStudyGamesVideo />
-                      ) : t.kind === 'image' ? (
+            {/* ─── DARK-PURPLE KNOWUNITY HERO (restored from git ca4bf8d) ──
+                Per user brief ("make it look like previous git"): the
+                hero is the pre-StudyFetch dark-violet layout — six
+                feature tiles (videos + screenshots) floating around a
+                centred H1 + CTA, with the icon+title feature row at the
+                bottom of the purple band. Verbatim restore of the
+                2026-05-13 hero-inner block. */}
+            <div className="relative w-full max-w-6xl xl:max-w-7xl mx-auto px-4 sm:px-6 pt-3 pb-6 sm:pt-4 sm:pb-8 lg:pt-6 lg:pb-10 md:min-h-[560px] lg:min-h-[600px] xl:min-h-[640px]">
+
+              {/* ─── SIX FLOATING FEATURE TILES ──────────────────────
+                  Each tile = rounded card with Duolingo-style brand-colour
+                  border, holding a real feature video or screenshot.
+                  The outer div animates translateY (float keyframe from
+                  tailwind.config.js) with staggered delays so the tiles
+                  bob out of sync. The inner div carries the rotation so
+                  the float transform doesn't conflict with rotate().
+                  Hidden entirely on mobile — phones get a clean centred
+                  hero so the H1 + CTA dominate the viewport. */}
+              <div className="hidden md:block absolute inset-0 pointer-events-none" aria-hidden>
+
+                {/* SIX-TILE KNOWUNITY-STYLE SCATTER — md+ only.
+                    Layout (matching the reference image):
+                      Tile 1 (top-left)    Tile 2 (top-center)   Tile 3 (top-right)
+                      Tile 4 (mid-left)              [H1+CTA]              Tile 5 (mid-right)
+                                          Tile 6 (bottom-center, below CTA)
+                    Tiles are now SMALLER and 16:10 landscape (was 4:3).
+                    Borders use 6 different Duolingo brand colours so each
+                    tile pops against the purple background. White label
+                    strip at the bottom of each tile auto-separates the
+                    rounded card from the purple field. */}
+
+                {/* Tile 1 — Essay Analyzer — top-left — YELLOW border
+                    (was purple, swapped because purple-on-purple disappeared).
+                    PNG screenshot of the rubric-90 (A-grade) UI. */}
+                <div className="absolute top-[2%] left-[-3%] lg:left-[-2%] motion-safe:animate-[hero-tile-drift_8s_ease-in-out_infinite]">
+                  <div className="w-44 lg:w-52 xl:w-60">
+                    <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_18px_42px_-12px_rgba(255,200,0,0.55)] bg-white">
+                      <div className="relative aspect-[16/10] w-full bg-stone-100">
                         <img
-                          src={t.src}
+                          src="/rubric-and-notes.png"
                           alt=""
-                          aria-hidden
-                          loading="lazy"
+                          loading="eager"
                           decoding="async"
                           className="absolute inset-0 w-full h-full object-cover object-top"
                         />
-                      ) : (
-                        <video
-                          src={t.src}
-                          autoPlay
-                          muted
-                          loop
-                          playsInline
-                          preload="metadata"
-                          className="absolute inset-0 w-full h-full object-cover"
-                        />
-                      )}
+                      </div>
+                      <p className="px-2 py-1 text-center text-[9px] lg:text-[10px] font-extrabold text-stone-800 bg-white border-t-2 border-[#FFC800]/40">Essay Analyzer</p>
                     </div>
-                    <p className="px-2 py-1 text-center text-[10px] xl:text-[11px] font-extrabold text-stone-800 bg-white border-t-2 border-[#A560E8]/40">
-                      {t.label}
-                    </p>
                   </div>
                 </div>
-              ))}
 
-              {/* ─── 1. TRUST PILL ────────────────────────────────────
-                  Restored to the old white-pill / black-text style:
-                  white background, soft Duolingo border, green users-
-                  icon avatar, green tabular "50,000+". Same pattern
-                  the pre-rebuild hero shipped on commit 40f28b3. The
-                  white pill reads cleanly against the dark violet hero
-                  bg without needing translucency. */}
-              {/* Trust pill — white pill with brand-purple "50,000+
-                  students" highlight per user brief. Avatar circle is a
-                  soft purple tint so the user-icon still reads on
-                  white. */}
-              <div className="inline-flex items-center gap-2.5 rounded-full border-2 border-b-[3px] border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900 pl-1.5 pr-4 py-1 shadow-[0_8px_22px_-6px_rgba(0,0,0,0.15)]">
-                <span
-                  className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-[#F3EAFF]"
-                  aria-hidden
-                >
-                  <svg className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-[#A560E8]" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
-                  </svg>
-                </span>
-                <span className="text-[12px] sm:text-[13px] font-bold text-stone-700 dark:text-stone-300">
-                  Trusted by <span className="font-extrabold text-[#A560E8] tabular-nums">50,000+ students</span> worldwide
-                </span>
+                {/* Tile 2 — Notes to Flashcards — bottom-left of the lower
+                    row, mirrored by Tile 6 (Daily review) on the right.
+                    Visual centre sits at 35% (15% left of the cluster's
+                    midline) so the pair reads as "lower row" rather than
+                    "edges of the cluster". Uses the `-centered` drift
+                    keyframe so the `-translate-x-1/2` half-width centring
+                    stays applied throughout the drift (the plain
+                    `hero-tile-drift` keyframe sets `translate(0,0)` at 0%,
+                    which would override the Tailwind centring and cause
+                    the tile to jump right when the animation starts). */}
+                <div className="absolute bottom-[20%] left-[34%] -translate-x-1/2 motion-safe:animate-[hero-tile-drift-centered_9s_ease-in-out_infinite]" style={{ animationDelay: '0.8s' }}>
+                  <div className="w-44 lg:w-52 xl:w-60">
+                    <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_18px_42px_-12px_rgba(255,200,0,0.55)] bg-stone-950">
+                      <div className="relative aspect-[16/10] w-full bg-black">
+                        <video src="/hero-flashcards.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
+                      </div>
+                      <p className="px-2 py-1 text-center text-[9px] lg:text-[10px] font-extrabold text-stone-800 bg-white border-t-2 border-[#FFC800]/40">Notes to Flashcards</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tile 3 — Quiz — top-right — green border */}
+                <div className="absolute top-[2%] right-[-3%] lg:right-[-2%] motion-safe:animate-[hero-tile-drift_8.4s_ease-in-out_infinite]" style={{ animationDelay: '1.6s' }}>
+                  <div className="w-44 lg:w-52 xl:w-60">
+                    <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_18px_42px_-12px_rgba(255,200,0,0.55)] bg-stone-950">
+                      <div className="relative aspect-[16/10] w-full bg-black">
+                        <video src="/hero-quiz.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
+                      </div>
+                      <p className="px-2 py-1 text-center text-[9px] lg:text-[10px] font-extrabold text-stone-800 bg-white border-t-2 border-[#FFC800]/40">Notes to Quiz</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tile 4 — Study Games — MID-LEFT. Combines Word
+                    Blitz / Word Tower / Crater Blast into one looping
+                    cycler (see HeroStudyGamesVideo) so we surface all
+                    three arcade games from a single slot. */}
+                <div className="absolute top-[42%] left-[-6%] lg:left-[-5%] motion-safe:animate-[hero-tile-drift_8.6s_ease-in-out_infinite]" style={{ animationDelay: '2.4s' }}>
+                  <div className="w-44 lg:w-52 xl:w-60">
+                    <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_22px_50px_-12px_rgba(255,200,0,0.55)] bg-stone-950">
+                      <div className="relative aspect-[16/10] w-full bg-black">
+                        <HeroStudyGamesVideo />
+                      </div>
+                      <p className="px-2 py-1 text-center text-[10px] lg:text-[11px] font-extrabold text-stone-800 bg-white border-t-2 border-[#FFC800]/40">Arcade mode</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tile 5 — Full writing workspace — MID-RIGHT.
+                    Screenshot of the WriteScholar editor with its
+                    live rubric + one-click fixes (/WriterPic.png),
+                    the same asset the onboarding "Smart editor" slide
+                    uses. Replaced the comprehensive-report image so
+                    the hero advertises the flagship writing surface
+                    (where most session time is actually spent). */}
+                <div className="absolute top-[44%] right-[-6%] lg:right-[-5%] motion-safe:animate-[hero-tile-drift_9.2s_ease-in-out_infinite]" style={{ animationDelay: '3.2s' }}>
+                  <div className="w-44 lg:w-52 xl:w-60">
+                    <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_22px_50px_-12px_rgba(255,200,0,0.55)] bg-white">
+                      <div className="relative aspect-[16/10] w-full bg-stone-100">
+                        <img
+                          src="/WriterPic.png"
+                          alt=""
+                          loading="eager"
+                          decoding="async"
+                          className="absolute inset-0 w-full h-full object-cover object-top"
+                        />
+                      </div>
+                      <p className="px-2 py-1 text-center text-[10px] lg:text-[11px] font-extrabold text-stone-800 bg-white border-t-2 border-[#FFC800]/40">Full writing workspace</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tile 6 — Daily review — bottom-right of the lower row,
+                    mirroring Tile 2 around the 50% midline. Tile 2's
+                    visual centre is at 35%, so this one sits at 65%
+                    (= 100% - 35%). The 15% offset from centre on each
+                    side keeps the lower pair tucked closer to the
+                    cluster's middle than the cluster-edge tiles. Uses the
+                    `-centered` drift keyframe (see Tile 2 comment) so
+                    the `-translate-x-1/2` centring isn't clobbered by
+                    the animation's `transform`. */}
+                <div className="absolute bottom-[20%] left-[66%] -translate-x-1/2 motion-safe:animate-[hero-tile-drift-centered_7.8s_ease-in-out_infinite]" style={{ animationDelay: '4s' }}>
+                  <div className="w-44 lg:w-52 xl:w-60">
+                    <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_18px_42px_-12px_rgba(255,200,0,0.55)] bg-white">
+                      <div className="relative aspect-[16/10] w-full bg-stone-100">
+                        <img
+                          src="/daily-review-preview.png"
+                          alt=""
+                          loading="eager"
+                          decoding="async"
+                          className="absolute inset-0 w-full h-full object-cover object-top"
+                        />
+                      </div>
+                      <p className="px-2 py-1 text-center text-[9px] lg:text-[10px] font-extrabold text-stone-800 bg-white border-t-2 border-[#FFC800]/40">Daily review</p>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              {/* ─── 2. HEADLINE — two-line, dark-on-light ────────────
-                  Line 1: "Turn your grades"
-                  Line 2: "from B to A" where the A is a clean bold red
-                          letter ringed by a hand-drawn red ink circle —
-                          a teacher's grade mark. (Replaces the old
-                          italic-serif A + underline + sparkle.) */}
-              <h1
-                className="text-[2rem] xs:text-[2.4rem] sm:text-[3rem] md:text-[3.6rem] lg:text-[4.2rem] xl:text-[4.85rem] font-extrabold tracking-[-0.02em] leading-[1.05] text-stone-900 dark:text-stone-50 mt-6 sm:mt-7 mb-5 sm:mb-6"
-                style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-              >
-                <span className="block">Turn your grades</span>
-                <span className="block mt-1.5 sm:mt-2.5">
-                  from B to{' '}
-                  <span className="relative inline-block">
-                    <span className="text-[#E5484D]">A</span>
-                    <svg
-                      aria-hidden
-                      viewBox="0 0 120 108"
-                      className="pointer-events-none absolute left-1/2 top-1/2 h-[1.85em] w-[1.85em] -translate-x-1/2 -translate-y-1/2 overflow-visible text-[#E5484D]"
-                    >
-                      <path
-                        d="M92 22C74 8 40 5 23 21 6 38 9 73 33 89c26 17 68 12 83-9 11-15 8-39-9-52"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                        strokeLinecap="round"
-                      />
+              {/* ─── CENTERED H1 + CTA ────────────────────────────────
+                  Everything else previously stacked here — H2 subheadline,
+                  trust pill, login link, mobile video, mascots, risk
+                  reversal — has been intentionally removed per user brief
+                  to match Knowunity's minimal centred-hero pattern. The
+                  six floating tiles around this column do the
+                  "what does the product do?" job those elements used to
+                  share. */}
+              <div className="relative z-10 flex flex-col items-center text-center w-full mx-auto pt-6 pb-8 sm:pt-10 sm:pb-10 md:pt-2 md:pb-20 lg:pt-0 lg:pb-24 opacity-0 animate-hero-card-enter">
+                {/* ─── TRUST PILL — 50,000+ students worldwide ─────────
+                    Sits ABOVE the H1 as a credibility eyebrow on every
+                    viewport (desktop + mobile). Restored from commit
+                    40f28b3. White pill on purple hero bg with a green
+                    user-icon avatar + green "50,000+" accent to tie back
+                    to the green A-pill and Start-Free CTA. */}
+                <div className="mb-5 sm:mb-6 inline-flex items-center gap-2.5 rounded-full border-2 border-b-[3px] border-[#E5E5E5] bg-white pl-1.5 pr-4 py-1 shadow-[0_8px_22px_-6px_rgba(0,0,0,0.30)]">
+                  <span
+                    className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-[#E5F8D0]"
+                    aria-hidden
+                  >
+                    <svg className="w-4 h-4 sm:w-[18px] sm:h-[18px] text-[#46A302]" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
                     </svg>
                   </span>
-                </span>
-              </h1>
+                  <span className="text-[12px] sm:text-[13px] font-bold text-stone-800">
+                    Trusted by <span className="font-extrabold text-[#58CC02] tabular-nums">50,000+</span> students worldwide
+                  </span>
+                </div>
 
-              {/* ─── 3. SUBHEAD ───────────────────────────────────────
-                  Single tight paragraph clarifying the product promise.
-                  "Letter grade" and "polished revision" are bolded white
-                  so the most concrete benefits jump out of a scan. */}
-              <p className="mt-6 sm:mt-7 max-w-2xl mx-auto text-base sm:text-lg lg:text-xl text-stone-600 dark:text-stone-300 font-bold leading-relaxed">
-                Write in a real editor, get a professor-style grade with
-                line-by-line fixes, then apply them in one click.
-              </p>
+                {/* ─── HEADLINE — two-line layout, ALL viewports ─────────
+                    Line 1: "Turn your grades from B to [A-pill]"
+                    Line 2: "with WriteScholar" (yellow on purple).
+                    Forced 2-line layout via responsive font sizing tuned
+                    so line 1 always fits without wrapping, even on 360px
+                    phones. Sizes reduced ~20% per user brief so the H1
+                    takes less vertical room and the feature-icons row
+                    can sit above the fold on a 900px viewport. */}
+                <h1
+                  className="text-[1.5rem] xs:text-[1.85rem] sm:text-[2.2rem] md:text-[2.55rem] lg:text-[2.9rem] xl:text-[3.35rem] font-extrabold tracking-[-0.02em] leading-[1.05] text-white mb-5 sm:mb-6"
+                  style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+                >
+                  <span className="block whitespace-nowrap">
+                    Turn your grades from B to{' '}
+                    {/* A-grade pill — sits inline on the baseline, slight
+                        rotation + green Duolingo chip with white "A".
+                        Extra glow ring on purple background. */}
+                    <span
+                      className="relative inline-flex items-center justify-center align-baseline rounded-2xl bg-[#58CC02] text-white font-extrabold leading-none w-[0.95em] h-[0.95em] border-2 border-b-[5px] border-[#46A302] rotate-[-4deg] motion-safe:animate-[hero-a-wiggle_4.5s_ease-in-out_infinite] shadow-[0_10px_30px_-4px_rgba(88,204,2,0.75)] ring-4 ring-white/15"
+                      style={{ verticalAlign: '-0.06em' }}
+                      aria-hidden
+                    >
+                      A
+                      {/* Sparkle accent on the pill */}
+                      <span
+                        className="absolute -top-2 -right-2 text-[0.32em] text-[#FFC800] motion-safe:animate-pulse"
+                        aria-hidden
+                      >
+                        ✦
+                      </span>
+                    </span>
+                    <span className="sr-only">A</span>
+                  </span>
+                  <span className="block mt-1.5 sm:mt-2.5 whitespace-nowrap">
+                    with{' '}
+                    {/* "WriteScholar" — Duolingo-yellow on purple. The
+                        yellow/purple pairing is the highest-contrast,
+                        most-attention-grabbing colour combo on Duolingo
+                        itself, so it pops without leaving brand. */}
+                    <span className="relative inline-block text-[#FFC800]">
+                      WriteScholar
+                      {/* Yellow squiggle underline echoing the word
+                          colour for visual cohesion. */}
+                      <svg
+                        className="absolute -bottom-2 sm:-bottom-3 left-0 w-full h-3 sm:h-5 text-[#FFC800] overflow-visible"
+                        viewBox="0 0 300 24"
+                        preserveAspectRatio="none"
+                        aria-hidden
+                        style={{ overflow: 'visible' }}
+                      >
+                        <path
+                          d="M4 14 Q40 4 80 14 T156 14 T232 14 T296 14"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </span>
+                  </span>
+                </h1>
 
-              {/* ─── 5. CTA PAIR ──────────────────────────────────────
-                  Primary green Duolingo button + secondary text link.
-                  Stacks on mobile, sits side-by-side on sm+. */}
-              <div className="mt-8 sm:mt-9 flex flex-col sm:flex-row gap-3 sm:gap-4 items-center justify-center">
+                {/* ─── CTA ROW ─────────────────────────────────────────
+                    Primary CTA is a hand-built Duolingo-style GREEN
+                    button (#58CC02) so it pops against the purple hero —
+                    green/purple is the highest-contrast brand pair on the
+                    site and it visually pairs with the green "A" pill in
+                    the headline, completing the "B → A" story.
+                    Secondary "See interactive demo" is a plain underlined
+                    text link (not a button) that smooth-scrolls to the
+                    live demo section below the hero. On mobile they stack;
+                    on sm+ they sit side by side, vertically centred. */}
+                <div className="mt-3 sm:mt-4 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5">
+                  <button
+                    type="button"
+                    onClick={() => onNavigate('signup')}
+                    aria-label="Start free, get the A"
+                    className="group/btn inline-flex items-center justify-center px-7 py-3.5 sm:px-9 sm:py-[18px] lg:px-11 lg:py-[22px] rounded-2xl bg-[#58CC02] hover:bg-[#61E002] text-white font-extrabold text-base sm:text-[18px] lg:text-xl border-2 border-b-4 border-[#46A302] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 whitespace-nowrap shadow-[0_8px_28px_-6px_rgba(88,204,2,0.55)] hover:shadow-[0_12px_36px_-6px_rgba(88,204,2,0.75)]"
+                    style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+                  >
+                    Get started today
+                    <svg className="ml-2 w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 group-hover/btn:translate-x-1" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </button>
+
+                  <a
+                    href="#interactive-demo"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const el = document.getElementById('interactive-demo');
+                      if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      }
+                    }}
+                    aria-label="Scroll down to the interactive demo"
+                    className="group/demo inline-flex items-center gap-1.5 text-sm sm:text-base font-bold text-white underline underline-offset-4 decoration-white/90 hover:decoration-white hover:text-white/90 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 rounded-sm whitespace-nowrap"
+                    style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+                  >
+                    See interactive demo
+                    <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 transition-transform duration-200 group-hover/demo:translate-y-0.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </a>
+                </div>
+
+                {/* Reassurance line below the CTA row — tells visitors
+                    the action is fast + free of payment friction. White
+                    text reads cleanly on the purple hero bg. */}
+                <p className="mt-3 sm:mt-4 text-[10px] sm:text-[11px] font-semibold text-white/85">
+                  About 30 seconds to get started. No payment today.
+                </p>
+
+                {/* ─── MOBILE TILE GRID — 6 tiles, md:hidden ─────────
+                    On phones the desktop scatter would overlap the H1,
+                    so we instead show a compact 3-col grid right under
+                    the CTA button. Mirrors the desktop content exactly:
+                    Essay · Flashcards · Quiz on row 1, then Fun Study
+                    Games (the same cycling Word Blitz → Word Tower →
+                    Crater Blast video used on desktop), Premium essay
+                    analysis, and Daily review on row 2. */}
+                <div className="md:hidden mt-10 grid grid-cols-3 gap-2.5 w-full max-w-[20rem] mx-auto">
+                  {[
+                    { label: 'Essay', src: '/rubric-and-notes.png', isImg: true, color: '#FFC800' },
+                    { label: 'Flashcards', src: '/hero-flashcards.mp4', isImg: false, color: '#FFC800' },
+                    { label: 'Quiz', src: '/hero-quiz.mp4', isImg: false, color: '#FFC800' },
+                    { label: 'Arcade mode', src: '', isImg: false, isCycle: true, color: '#FFC800' },
+                    { label: 'Writing workspace', src: '/WriterPic.png', isImg: true, color: '#FFC800' },
+                    { label: 'Daily review', src: '/daily-review-preview.png', isImg: true, color: '#FFC800' },
+                  ].map((t, i) => (
+                    /* `hero-tile-drift-mobile` is the gentle-drift
+                       keyframe (defined in src/index.css). Per-tile
+                       duration + delay arrays stagger the six tiles
+                       so they float out of sync with one another.
+                       Durations live in the 10-13s range — slow
+                       enough that each tile reads as a smooth glide
+                       rather than scatter. `motion-safe:` keeps
+                       reduced-motion users static. */
+                    <div
+                      key={t.label}
+                      className="rounded-xl overflow-hidden border-2 border-b-[3px] bg-white shadow-[0_10px_22px_-8px_rgba(0,0,0,0.35)] motion-safe:animate-[hero-tile-drift-mobile_11s_ease-in-out_infinite]"
+                      style={{
+                        borderColor: t.color,
+                        animationDuration: ['10s', '11.5s', '12.5s', '10.8s', '11.8s', '13s'][i % 6],
+                        animationDelay: ['0s', '1.2s', '2.4s', '3.6s', '4.8s', '6s'][i % 6],
+                      }}
+                    >
+                      <div className="relative aspect-[16/10] w-full bg-stone-100">
+                        {t.isCycle ? (
+                          <HeroStudyGamesVideo />
+                        ) : t.isImg ? (
+                          <img src={t.src} alt="" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover object-top" />
+                        ) : (
+                          <video src={t.src} autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
+                        )}
+                      </div>
+                      <p
+                        className="px-1 py-0.5 text-center text-[8px] font-extrabold text-stone-800 bg-white border-t"
+                        style={{ borderColor: `${t.color}66` }}
+                      >
+                        {t.label}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* "Plus many more to choose from" — mobile-only teaser
+                    line sitting right below the 3×2 tile grid, signalling
+                    to phone visitors that the six tiles above are just a
+                    sample of the full toolkit. Hidden at md+ where the
+                    desktop scatter already implies abundance. Tapping it
+                    routes to signup so it doubles as a soft secondary
+                    CTA. */}
                 <button
                   type="button"
                   onClick={() => onNavigate('signup')}
-                  className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-[#A560E8] hover:bg-[#8A48C7] text-white text-base sm:text-lg font-extrabold uppercase tracking-wide px-7 sm:px-9 py-4 border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_18px_32px_-12px_rgba(165,96,232,0.55)]"
+                  className="md:hidden mt-4 mx-auto block text-xs sm:text-sm text-white/85 font-semibold tracking-wide hover:text-white transition-colors"
                 >
-                  Grade My Essay Now
-                  <svg className="w-5 h-5 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    document.getElementById('hero-interactive-demo')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }}
-                  className="group inline-flex items-center gap-1.5 text-sm sm:text-base font-extrabold text-[#A560E8] hover:text-[#7733B5] transition-colors px-2 py-3"
-                >
-                  See interactive demo
-                  <svg className="w-4 h-4 transition-transform duration-200 group-hover:translate-y-0.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14M5 12l7 7 7-7" />
-                  </svg>
+                  Plus many more to choose from{' '}
+                  <span aria-hidden className="inline-block ml-0.5">&rarr;</span>
                 </button>
               </div>
 
-              {/* ─── 6. RISK-REVERSAL MICROCOPY ───────────────────────
-                  Tiny line below CTAs killing the three classic objections
-                  in sequence: price, payment friction, perceived limit. */}
-              <p className="mt-3 text-[11px] sm:text-xs text-stone-500 dark:text-stone-400 font-bold tracking-wide">
-                No credit card required · Get started in a few seconds
-              </p>
-
-              {/* ─── 7. PRODUCT UI SHOWCASE — LIVE INTERACTIVE DEMO ───
-                  Swapped the static AiAnalysisHero.png screenshot for
-                  the real <InteractiveDocumentAnalysis /> component so
-                  visitors can paste an essay + see the AI grade it
-                  without leaving the hero. Same lazy-load + Suspense
-                  fallback pattern used further down at L1405. Halo
-                  glow + Duolingo "A" pill and "60 sec" badge are kept
-                  as the visual punch around the live frame. */}
-              <div
-                id="hero-interactive-demo"
-                className="mt-12 sm:mt-14 lg:mt-16 relative max-w-6xl xl:max-w-[88rem] mx-auto scroll-mt-24"
-              >
-                {/* Halo glow — sits BEHIND the framed demo via -z-10 so
-                    the colour bloom appears to radiate from the surface
-                    itself. */}
-                <div
-                  aria-hidden
-                  className="absolute inset-0 rounded-[2.5rem] bg-gradient-to-br from-[#FFC800]/25 via-[#A560E8]/10 to-[#58CC02]/15 blur-3xl scale-[1.05] -z-10"
-                />
-
-                {/* Framed live demo — brand-yellow border + layered glow.
-                    2px #FFC800 border (same yellow as the floating tile
-                    borders and the 60-sec badge).
-                    Shadow stack varies by breakpoint:
-                      • Mobile (<sm): single 18px close yellow halo at
-                        0.28 alpha + a tighter depth shadow. The wider
-                        70px bloom from the desktop treatment was too
-                        loud on small viewports where the demo sits
-                        edge-to-edge.
-                      • sm+: full "premium product spotlight" — three
-                        stacked shadows (30px close glow, 70px outer
-                        bloom, 60px dark depth) so the demo reads as a
-                        floating focal point on the dark violet hero bg. */}
-                <div className="relative rounded-2xl sm:rounded-3xl border-2 border-[#A560E8] bg-white dark:bg-stone-900 shadow-[0_0_18px_rgba(165,96,232,0.28),0_18px_36px_-12px_rgba(0,0,0,0.35)] sm:shadow-[0_0_14px_rgba(165,96,232,0.22),0_0_40px_rgba(165,96,232,0.1),0_30px_60px_-15px_rgba(0,0,0,0.4)] overflow-hidden">
-                  <Suspense fallback={<div className="min-h-[480px] sm:min-h-[560px] w-full" aria-hidden />}>
-                    <InteractiveDocumentAnalysis
-                      onNavigate={onNavigate}
-                      landingHeroEmbed
-                      onSampleChange={setHeroDemoGrade}
-                    />
-                  </Suspense>
-                </div>
-
-                {/* Floating grade pill — top-RIGHT. Letter mirrors the
-                    sample the user currently has selected inside the
-                    live demo (B by default, C when toggled). Reverted
-                    to the original green Duolingo style per user brief
-                    so the grade chip pops against the new purple trust
-                    pill / purple borders elsewhere in the hero. */}
-                <div
-                  aria-hidden
-                  className="hidden sm:flex absolute -top-4 -right-4 lg:-top-6 lg:-right-6 items-center justify-center w-16 h-16 lg:w-20 lg:h-20 rounded-2xl bg-[#58CC02] text-white text-3xl lg:text-4xl font-extrabold rotate-[6deg] border-2 border-b-4 border-[#46A302] shadow-[0_18px_32px_-8px_rgba(88,204,2,0.5)] z-10"
-                >
-                  {heroDemoGrade}
-                </div>
-
-                {/* "60 sec" floating badge removed per user brief. */}
-              </div>
-
-              {/* Demo-to-workspace bridge — the live demo above is the
-                  paste-and-grade slice; this line tells visitors there's
-                  a full editor so the hero promise matches what they get
-                  after signup. Scrolls to the new workspace section. */}
-              <p className="mt-5 sm:mt-6 text-center text-[13px] sm:text-sm font-bold text-stone-600 dark:text-stone-300">
-                That&apos;s the instant grade. You also get a{' '}
-                <button
-                  type="button"
-                  onClick={() => document.getElementById('writing-workspace')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-                  className="underline decoration-2 underline-offset-2 text-[#A560E8] hover:text-[#7733B5] transition-colors"
-                >
-                  full writing workspace
-                </button>{' '}
-                where the AI fixes your draft as you write.
-              </p>
-
-              {/* ─── 8. PRODUCT-BREADTH VIDEO STRIP — mobile/tablet fallback ──
-                  On lg+ the four tiles float around the H1 above (see
-                  block #2-tiles). This horizontal strip is the smaller
-                  -screen fallback where there isn't room in the margins
-                  to flank the headline. Same four tiles, same yellow
-                  Duolingo border. 2x2 grid on mobile, 4-up on sm. */}
-              {/* Mobile tile cluster — every tile is now a tappable
-                  <button> that routes to /signup so the four product
-                  thumbnails double as conversion entry points. The
-                  outer .lg:hidden grid stays the same; only the inner
-                  card is now interactive (active:translate effect on
-                  press, focus-visible ring for keyboard users). */}
-              <div className="mt-10 sm:mt-12 lg:hidden grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-5xl mx-auto">
-                {[
-                  { label: 'Essay Analyzer', kind: 'image' as const, src: '/rubric-and-notes.png' },
-                  { label: 'Premium essay analysis', kind: 'image' as const, src: '/full-report.png' },
-                  { label: 'Notes to Flashcards', kind: 'video' as const, src: '/hero-flashcards.mp4' },
-                  { label: 'Notes to Quiz', kind: 'video' as const, src: '/hero-quiz.mp4' },
-                ].map((t) => (
-                  <button
-                    key={t.label}
-                    type="button"
-                    onClick={() => onNavigate('signup')}
-                    aria-label={`Sign up to try ${t.label}`}
-                    className="group rounded-2xl overflow-hidden border-2 border-b-4 border-[#A560E8] shadow-[0_10px_24px_-10px_rgba(165,96,232,0.32)] bg-stone-950 active:border-b-2 active:translate-y-0.5 transition-transform duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#A560E8]/40 text-left"
-                  >
-                    <div className="relative aspect-[16/10] w-full bg-black">
-                      {t.kind === 'cycle' ? (
-                        <HeroStudyGamesVideo />
-                      ) : t.kind === 'image' ? (
-                        <img
-                          src={t.src}
-                          alt=""
-                          aria-hidden
-                          loading="lazy"
-                          decoding="async"
-                          className="absolute inset-0 w-full h-full object-cover object-top"
-                        />
-                      ) : (
-                        <video
-                          src={t.src}
-                          autoPlay
-                          muted
-                          loop
-                          playsInline
-                          preload="metadata"
-                          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-                        />
-                      )}
-                    </div>
-                    <p className="px-2 py-1 text-center text-[10px] sm:text-[11px] font-extrabold text-stone-800 bg-white border-t-2 border-[#A560E8]/40">
-                      {t.label}
-                    </p>
-                  </button>
-                ))}
-              </div>
-
-            </div>
-
-            {/* Downstream-content wrapper (preserved from pre-redesign
-                tree as `flex flex-col items-stretch w-full`). Holds the
-                analyzer-demo section + everything else below the hero;
-                closed alongside the section's downstream closers. */}
-            <div className="flex flex-col items-stretch w-full">
-
-              {/* ─── UNIVERSITIES TRUST STRIP ─────────────────────────
-                  Clean, airy logo-wall (no panel/border/shadow) — an
-                  understated heading over a single auto-scrolling row.
-                  Each name uses its institution's `.university-*`
-                  typographic treatment (real wordmark fonts, muted
-                  grey, uppercase) so it reads like an actual logo wall.
-                  Tripled list + .animate-scroll-slow loops seamlessly
-                  and pauses on hover; edges fade via a CSS mask. ─── */}
-              <div className="relative w-full mt-14 sm:mt-20 mb-2 px-0">
-                <LandingScrollReveal>
-                  <p className="text-center text-[13px] sm:text-sm font-semibold tracking-wide text-stone-400 dark:text-stone-500 mb-9 sm:mb-12">
-                    Trusted by students at top universities worldwide
-                  </p>
-
-                  <div className="relative overflow-hidden [mask-image:linear-gradient(to_right,transparent,#000_3%,#000_97%,transparent)]">
-                    <div className="flex w-max items-center animate-scroll-slow" style={{ animationDuration: '30s' }}>
-                      {[...universities, ...universities, ...universities].map((uni, idx) => (
-                        <span key={`uni-${idx}`} className="shrink-0 px-7 sm:px-11 lg:px-16">
-                          <span
-                            className={`text-lg sm:text-xl lg:text-2xl whitespace-nowrap opacity-60 hover:opacity-100 transition-opacity duration-300 ${uni.className} dark:!text-stone-400`}
-                          >
-                            {uni.name}
-                          </span>
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </LandingScrollReveal>
-              </div>
-
-              {/* Strong horizontal section break — full-width line with
-                  labeled badge in the middle so users clearly see they're
-                  entering the "how it works" 3-step explainer below. */}
-              <div className="relative w-full max-w-6xl mx-auto mt-12 sm:mt-16 mb-4 sm:mb-6 flex items-center gap-4 sm:gap-6 px-1" aria-hidden>
-                <div className="flex-1 h-px bg-gradient-to-r from-transparent via-stone-300/80 to-stone-300/80 dark:via-stone-700/60 dark:to-stone-700/60" />
-                <span className="inline-flex items-center gap-2 rounded-full border-2 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900 px-4 py-1.5 text-[11px] sm:text-xs font-bold uppercase tracking-[0.18em] text-[#A560E8] dark:text-[#A560E8] whitespace-nowrap">
-                  <svg className="w-3 h-3 motion-safe:animate-bounce" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 3a1 1 0 011 1v9.586l3.293-3.293a1 1 0 111.414 1.414l-5 5a1 1 0 01-1.414 0l-5-5a1 1 0 111.414-1.414L9 13.586V4a1 1 0 011-1z" clipRule="evenodd" />
-                  </svg>
-                  Here&apos;s how it works
-                </span>
-                <div className="flex-1 h-px bg-gradient-to-l from-transparent via-stone-300/80 to-stone-300/80 dark:via-stone-700/60 dark:to-stone-700/60" />
-              </div>
-
-              {/* ─── How WriteScholar works — 3-step flow connects essay
-                  analysis and study tools into one mental model. Sits AFTER
-                  the live analyzer demo so visitors first see the product in
-                  action, then understand the mental model. ─── */}
-              <div className="relative w-full max-w-7xl mx-auto mt-12 sm:mt-16 lg:mt-24 pb-16 sm:pb-20 lg:pb-28 px-1 sm:px-2 lg:px-4">
-                <div className="pointer-events-none absolute -top-8 left-[6%] w-32 h-32 rounded-full bg-[#A560E8]/15 dark:bg-[#A560E8]/12 blur-3xl" aria-hidden />
-                <div className="pointer-events-none absolute -bottom-4 right-[8%] w-36 h-36 rounded-full bg-[#A560E8]/15 dark:bg-[#A560E8]/12 blur-3xl" aria-hidden />
-
-                <LandingScrollReveal>
-                  <div className="relative text-center mb-10 sm:mb-12 lg:mb-14 max-w-2xl mx-auto">
-                    <h2
-                      className="text-2xl sm:text-3xl lg:text-[2.4rem] font-extrabold text-stone-900 dark:text-stone-50 tracking-tight leading-[1.05]"
-                      style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+              {/* ─── FEATURE ICONS ROW — bottom of hero (Knowunity-style)
+                  Each entry is a custom SVG illustration (NOT a generic
+                  emoji) with the label sitting directly underneath. No
+                  border, no background — pure icon + text floating on
+                  the purple field. Custom-drawn so the hero feels unique
+                  to WriteScholar instead of generic, per user brief. */}
+              <div className="relative z-10 w-full max-w-5xl mx-auto mt-4 sm:mt-12 lg:mt-36 pb-2 px-4">
+                <div className="flex flex-wrap items-start justify-center gap-x-5 gap-y-4 sm:gap-x-8 sm:gap-y-5">
+                  {[
+                    {
+                      label: 'Essay Analyzer',
+                      svg: (
+                        // FLAT-SOLID: RED document silhouette with folded
+                        // corner + crisp white ruled lines + bold white check
+                        // mark (Knowunity-standard: one solid colour shape,
+                        // simple white interior details, no outlines).
+                        <svg viewBox="0 0 64 64" fill="none" aria-hidden>
+                          <path d="M14 6 Q12 6 12 8 L12 56 Q12 58 14 58 L50 58 Q52 58 52 56 L52 22 L36 6 Z" fill="#FF4B4B" />
+                          <path d="M36 6 L52 22 L38 22 Q36 22 36 20 Z" fill="#C13030" />
+                          <rect x="20" y="30" width="22" height="3" rx="1.5" fill="white" />
+                          <rect x="20" y="37" width="18" height="3" rx="1.5" fill="white" opacity="0.7" />
+                          <path d="M22 48 L28 54 L40 41" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      ),
+                    },
+                    {
+                      label: 'Study Pack',
+                      svg: (
+                        // FLAT-SOLID: three orange books stacked, white spine
+                        // lines as the only inner detail.
+                        <svg viewBox="0 0 64 64" fill="none" aria-hidden>
+                          <rect x="6" y="44" width="52" height="14" rx="3" fill="#FF9600" />
+                          <rect x="14" y="44" width="3" height="14" fill="white" opacity="0.65" />
+                          <rect x="10" y="28" width="44" height="14" rx="3" fill="#FF9600" />
+                          <rect x="18" y="28" width="3" height="14" fill="white" opacity="0.65" />
+                          <rect x="14" y="12" width="36" height="14" rx="3" fill="#FF9600" />
+                          <rect x="22" y="12" width="3" height="14" fill="white" opacity="0.65" />
+                          <path d="M44 8 L45 11 L48 12 L45 13 L44 16 L43 13 L40 12 L43 11 Z" fill="#FFC800" />
+                        </svg>
+                      ),
+                    },
+                    {
+                      label: 'Citations',
+                      svg: (
+                        // FLAT-SOLID: two BLUE quotation-mark blobs — the
+                        // universal "this is a cited source" pictogram.
+                        <svg viewBox="0 0 64 64" fill="none" aria-hidden>
+                          <path d="M10 18 Q10 12 16 12 L24 12 Q28 12 28 16 L28 32 Q28 44 16 50 Q12 50 12 46 Q12 44 14 42 Q20 38 20 32 L16 32 Q10 32 10 26 Z" fill="#1CB0F6" />
+                          <path d="M36 18 Q36 12 42 12 L50 12 Q54 12 54 16 L54 32 Q54 44 42 50 Q38 50 38 46 Q38 44 40 42 Q46 38 46 32 L42 32 Q36 32 36 26 Z" fill="#1CB0F6" />
+                        </svg>
+                      ),
+                    },
+                    {
+                      label: 'Quizzes',
+                      svg: (
+                        // FLAT-SOLID: chunky pink question mark — silhouette
+                        // only, no outline, no badge. The single sparkle
+                        // accent stays as a tiny gold flourish.
+                        <svg viewBox="0 0 64 64" fill="none" aria-hidden>
+                          <path d="M20 22 Q20 8 32 8 Q44 8 44 22 Q44 30 32 34 L32 44" stroke="#FF4B82" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                          <circle cx="32" cy="55" r="5.5" fill="#FF4B82" />
+                          <path d="M52 10 L53.5 13 L56.5 14.5 L53.5 16 L52 19 L50.5 16 L47.5 14.5 L50.5 13 Z" fill="#FFC800" />
+                        </svg>
+                      ),
+                    },
+                    {
+                      label: 'Flashcards',
+                      svg: (
+                        // FLAT-SOLID: two YELLOW cards (back tilted, front
+                        // bold) with white text bars. No outlines.
+                        <svg viewBox="0 0 64 64" fill="none" aria-hidden>
+                          <rect x="20" y="14" width="34" height="42" rx="5" fill="#FFC800" opacity="0.55" transform="rotate(10 37 35)" />
+                          <rect x="10" y="10" width="34" height="42" rx="5" fill="#FFC800" />
+                          <rect x="16" y="20" width="22" height="3.5" rx="1.5" fill="white" />
+                          <rect x="16" y="28" width="18" height="3" rx="1.5" fill="white" opacity="0.75" />
+                          <rect x="16" y="35" width="20" height="3" rx="1.5" fill="white" opacity="0.75" />
+                          <rect x="16" y="42" width="14" height="3" rx="1.5" fill="white" opacity="0.75" />
+                        </svg>
+                      ),
+                    },
+                    {
+                      label: 'Arcade mode',
+                      svg: (
+                        // FLAT-SOLID: green gamepad silhouette. Top now has
+                        // two raised shoulder humps (where L/R bumpers sit
+                        // on a real controller) with a gentle center dip
+                        // between them — replaces the previous flat top.
+                        // D-pad + 4 white buttons stay the same.
+                        <svg viewBox="0 0 64 64" fill="none" aria-hidden>
+                          <path d="M14 22 Q6 22 6 30 L6 44 Q6 56 18 56 Q23 56 26 50 L28 46 L36 46 L38 50 Q41 56 46 56 Q58 56 58 44 L58 30 Q58 22 50 22 Q46 17 40 21 Q36 24 32 24 Q28 24 24 21 Q18 17 14 22 Z" fill="#58CC02" />
+                          <rect x="14" y="32" width="12" height="3.5" rx="1.5" fill="white" />
+                          <rect x="18.25" y="27.75" width="3.5" height="12" rx="1.5" fill="white" />
+                          <circle cx="46" cy="30" r="3.2" fill="white" />
+                          <circle cx="52" cy="36" r="3.2" fill="white" />
+                          <circle cx="40" cy="36" r="3.2" fill="white" />
+                          <circle cx="46" cy="42" r="3.2" fill="white" />
+                        </svg>
+                      ),
+                    },
+                  ].map((f) => (
+                    <button
+                      key={f.label}
+                      type="button"
+                      onClick={() => onNavigate('signup')}
+                      className="group flex flex-col items-center gap-1.5 sm:gap-2 px-1 py-1 hover:-translate-y-1 transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 rounded-md"
                     >
-                      Drop in your work.{' '}
-                      <span className="text-[#A560E8] dark:text-[#A560E8]">We do the rest.</span>
-                    </h2>
-                    <p className="mt-2 text-sm sm:text-base text-stone-600 dark:text-stone-400">
-                      One paste. Three steps. Better grades.
-                    </p>
-                  </div>
-
-                  {/* 3-step grid */}
-                  <div className="relative grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto">
-                    {/* All three step cards now share the brand-purple
-                        accent (was: blue · purple · orange). Single-
-                        colour treatment per user brief — keeps the
-                        section visually consistent with the rest of
-                        the new purple-themed hero. */}
-                    {[
-                      {
-                        step: '1',
-                        title: 'Paste your work',
-                        desc: 'Drop in an essay draft for feedback, or paste any notes / textbook chapter for study tools.',
-                        mascot: '/mascot-paper.webp',
-                      },
-                      {
-                        step: '2',
-                        title: 'AI does the heavy lifting',
-                        desc: 'In under 60 seconds, get rubric-graded essay feedback or 7 study tools generated from your notes.',
-                        mascot: '/mascot-laptop.webp',
-                      },
-                      {
-                        step: '3',
-                        title: 'Submit & ace it',
-                        desc: 'Hand in stronger essays. Walk into exams ready. Crush your next semester.',
-                        mascot: '/mascot-celebrating.webp',
-                      },
-                    ].map((s, i) => {
-                      // Single shared purple accent for all 3 steps.
-                      const accentBorder = 'border-[#A560E8]/60 dark:border-[#8A48C7]/50';
-                      const accentRing = 'ring-[#A560E8]/30';
-                      const accentGlow = 'from-[#A560E8]/30 via-[#A560E8]/15 to-[#A560E8]/15';
-                      const badge = 'bg-[#A560E8]';
-                      return (
-                      <div
-                        key={s.step}
-                        className={`relative rounded-3xl border ${accentBorder} bg-white dark:bg-stone-900 p-5 sm:p-6 shadow-none hover:-translate-y-1 transition-all duration-500 overflow-hidden`}
-                        style={{ animationDelay: `${i * 120}ms` }}
+                      <span
+                        aria-hidden
+                        className="block w-7 h-7 sm:w-8 sm:h-8 lg:w-10 lg:h-10 [filter:drop-shadow(0_6px_14px_rgba(0,0,0,0.30))] group-hover:[filter:drop-shadow(0_10px_18px_rgba(255,200,0,0.55))] transition-[filter] duration-300"
                       >
-                        <div className={`pointer-events-none absolute -top-16 -right-16 w-48 h-48 rounded-full bg-gradient-to-br ${accentGlow} blur-3xl opacity-70`} aria-hidden />
-                        <div className="relative flex items-start gap-3 mb-3">
-                          <span className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white text-sm font-bold shadow-md ring-2 ring-white dark:ring-stone-900 ${badge}`}>
-                            {s.step}
-                          </span>
-                          <div className="min-w-0">
-                            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#A560E8] dark:text-[#A560E8] mb-0.5">
-                              Step {s.step}
-                            </p>
-                            <h3
-                              className="text-lg sm:text-xl font-extrabold text-stone-900 dark:text-stone-50 leading-tight"
-                              style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                            >
-                              {s.title}
-                            </h3>
-                          </div>
-                        </div>
-                        <div className={`relative rounded-2xl border ${accentBorder} bg-gradient-to-br from-stone-50 to-white dark:from-stone-800/60 dark:to-stone-900 ring-1 ${accentRing} aspect-[16/10] overflow-hidden flex items-center justify-center`}>
-                          <img
-                            src={s.mascot}
-                            alt=""
-                            aria-hidden
-                            loading="lazy"
-                            decoding="async"
-                            className="w-32 sm:w-40 h-auto"
-                          />
-                        </div>
-                        <p className="relative mt-4 text-[14px] text-stone-600 dark:text-stone-400 leading-relaxed">
-                          {s.desc}
-                        </p>
-                      </div>
-                      );
-                    })}
-                  </div>
-                </LandingScrollReveal>
-              </div>
-
-              {/* ─── WRITING WORKSPACE SHOWCASE ───────────────────────
-                  The product is no longer just an essay grader — it's a
-                  full editor where the AI coaches + rewrites your draft
-                  and exports a clean Word doc. This section makes that
-                  differentiator visible: a real screenshot of the 3-col
-                  workspace + four proof points (live rubric, one-click
-                  apply, real-essay objects, Word round-trip). Matches
-                  the page's purple/Nunito/Duolingo conventions. ─── */}
-              <section
-                id="writing-workspace"
-                className="relative w-full max-w-7xl mx-auto mt-2 sm:mt-4 pb-16 sm:pb-20 lg:pb-28 px-1 sm:px-2 lg:px-4 scroll-mt-24"
-                aria-labelledby="writing-workspace-heading"
-              >
-                <div className="pointer-events-none absolute -top-8 left-[6%] w-32 h-32 rounded-full bg-[#A560E8]/15 dark:bg-[#A560E8]/12 blur-3xl" aria-hidden />
-                <div className="pointer-events-none absolute -bottom-4 right-[8%] w-36 h-36 rounded-full bg-[#A560E8]/15 dark:bg-[#A560E8]/12 blur-3xl" aria-hidden />
-
-                <div className="relative w-full max-w-6xl mx-auto mb-8 sm:mb-10 flex items-center gap-4 sm:gap-6 px-1" aria-hidden>
-                  <div className="flex-1 h-px bg-gradient-to-r from-transparent via-stone-300/80 to-stone-300/80 dark:via-stone-700/60 dark:to-stone-700/60" />
-                  <span className="inline-flex items-center gap-2 rounded-full border-2 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900 px-4 py-1.5 text-[11px] sm:text-xs font-bold uppercase tracking-[0.18em] text-[#A560E8] dark:text-[#A560E8] whitespace-nowrap">
-                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M17.414 2.586a2 2 0 010 2.828l-9.5 9.5a2 2 0 01-.878.505l-3.5 1a1 1 0 01-1.237-1.237l1-3.5a2 2 0 01.505-.878l9.5-9.5a2 2 0 012.828 0z" />
-                    </svg>
-                    Your writing workspace
-                  </span>
-                  <div className="flex-1 h-px bg-gradient-to-l from-transparent via-stone-300/80 to-stone-300/80 dark:via-stone-700/60 dark:to-stone-700/60" />
+                        {f.svg}
+                      </span>
+                      <span className="text-[11px] sm:text-xs lg:text-sm font-bold text-white/90 group-hover:text-white whitespace-nowrap tracking-wide">
+                        {f.label}
+                      </span>
+                    </button>
+                  ))}
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-                <LandingScrollReveal>
-                  <div className="relative text-center mb-8 sm:mb-10 lg:mb-12 max-w-2xl mx-auto">
-                    <h2
-                      id="writing-workspace-heading"
-                      className="text-2xl sm:text-3xl lg:text-[2.4rem] font-extrabold text-stone-900 dark:text-stone-50 tracking-tight leading-[1.05]"
-                      style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                    >
-                      Not just a grader —{' '}
-                      <span className="text-[#A560E8] dark:text-[#A560E8]">a full writing workspace.</span>
-                    </h2>
-                    <p className="mt-3 text-sm sm:text-base text-stone-600 dark:text-stone-400 leading-relaxed">
-                      Write your essay in a real editor with live, professor-style feedback in the margin. Apply suggested fixes straight into your draft — then export a perfectly formatted Word doc.
-                    </p>
-                  </div>
+      {/* Downstream-content wrapper — sits outside the hero section so
+          section backgrounds span the full viewport width (not clipped by
+          the hero's max-width / horizontal padding containers). */}
+      <div className="flex flex-col items-stretch w-full">
 
-                  {/* Big focal screenshot — the image is the star.
-                      Numbered dots sit on the regions; the four proof
-                      points sit in a row right below, each numbered to
-                      its dot (no flanking arrow-callouts). */}
-                  <div className="relative max-w-6xl mx-auto">
-                    <DottedShot
-                      src="/WriterPic.png"
-                      alt="WriteScholar writing workspace — study tools rail, the draft in a real editor, a live rubric with an estimated grade, and one-click revision suggestions"
-                      badges={[
-                        { n: 1, x: 84, y: 29 },
-                        { n: 2, x: 84, y: 82 },
-                        { n: 3, x: 42, y: 55 },
-                        { n: 4, x: 34, y: 3 },
-                      ]}
-                    />
-                    <div
-                      aria-hidden
-                      className="hidden sm:flex absolute -top-4 -right-4 lg:-top-5 lg:-right-5 items-center justify-center px-3.5 h-11 lg:h-13 rounded-2xl bg-[#58CC02] text-white text-sm lg:text-base font-extrabold rotate-[6deg] border-2 border-b-4 border-[#46A302] shadow-[0_18px_32px_-8px_rgba(88,204,2,0.5)] z-10"
-                    >
-                      B · 80–89%
-                    </div>
-                  </div>
+              <Suspense fallback={<div className="min-h-[720px] w-full" aria-hidden />}>
+                <LandingInteractiveDemoSection onNavigate={onNavigate} />
+              </Suspense>
 
-                  <div className="mt-10 sm:mt-12 max-w-6xl mx-auto">
-                    <NumberedPoints
-                      cols="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
-                      points={[
-                        { n: 1, title: 'Live grade & rubric', desc: 'An estimated grade band and a full professor-style rubric, updating as you write — no copy-paste loop.', icon: (<svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M9 5h6m-6 0a2 2 0 00-2 2v12a2 2 0 002 2h6a2 2 0 002-2V7a2 2 0 00-2-2m-6 0a2 2 0 012-2h2a2 2 0 012 2M9 14l2 2 4-4" /></svg>) },
-                        { n: 2, title: 'One-click apply', desc: 'Accept a suggested rewrite and it drops straight into your draft, exactly where it belongs.', icon: (<svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M13 3L4 14h6l-1 7 9-11h-6z" /></svg>) },
-                        { n: 3, title: 'Built for real essays', desc: 'Write the actual paper here — tables, images, citations and footnotes are built in, not bolted on.', icon: (<svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M7 3h7l5 5v11a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2zM14 3v5h5M9 13h6M9 17h6" /></svg>) },
-                        { n: 4, title: 'Word in, Word out', desc: 'Import a .docx and your bold, italics and headings carry over. Export and it comes back perfectly formatted.', icon: (<svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M9 16V4m0 0L5.5 7.5M9 4l3.5 3.5M15 8v12m0 0l3.5-3.5M15 20l-3.5-3.5" /></svg>) },
-                      ]}
-                    />
-                  </div>
+              <Suspense fallback={<div className="min-h-[520px] w-full" aria-hidden />}>
+                <LandingHowItWorksSection onNavigate={onNavigate} />
+              </Suspense>
 
-                  <div className="mt-10 sm:mt-12 flex justify-center">
-                    <button
-                      type="button"
-                      onClick={() => onNavigate('signup')}
-                      className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-[#A560E8] hover:bg-[#8A48C7] text-white text-base sm:text-lg font-extrabold uppercase tracking-wide px-7 sm:px-9 py-4 border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_18px_32px_-12px_rgba(165,96,232,0.55)]"
-                    >
-                      Start writing free
-                      <svg className="w-5 h-5 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                      </svg>
-                    </button>
-                  </div>
-                </LandingScrollReveal>
-              </section>
+              <Suspense fallback={<div className="min-h-[640px] w-full" aria-hidden />}>
+                <LandingWritingWorkspaceSection onNavigate={onNavigate} />
+              </Suspense>
 
-              {/* ─── WHY WRITESCHOLAR vs ChatGPT ──────────────────────
-                  Students' default alternative is "just use ChatGPT".
-                  This head-to-head makes the difference explicit:
-                  WriteScholar grades to a rubric and edits in a real
-                  workspace; ChatGPT is a generic chat box. On-theme
-                  (brand-purple WriteScholar card vs neutral GPT card). */}
-              <section className="relative w-full max-w-5xl mx-auto mt-4 sm:mt-8 pb-16 sm:pb-20 px-3 sm:px-4">
-                <LandingScrollReveal>
-                  <div className="relative text-center max-w-2xl mx-auto mb-8 sm:mb-12 px-1">
-                    <span className="inline-flex items-center gap-1.5 mb-4 rounded-full border border-[#A560E8]/25 dark:border-[#A560E8]/30 bg-[#F3EAFF] dark:bg-[#A560E8]/12 px-3 py-1 text-[10px] sm:text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#8A48C7] dark:text-[#C9A0F0]">
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24" aria-hidden><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8l-6.2 4.5 2.4-7.4L2 9.4h7.6z" /></svg>
-                      Why WriteScholar
-                    </span>
-                    <h2
-                      className="text-3xl sm:text-4xl lg:text-[2.85rem] font-extrabold text-stone-900 dark:text-stone-50 tracking-tight leading-[1.05]"
-                      style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                    >
-                      Not another AI chatbot
-                    </h2>
-                    <p className="mt-3 text-sm sm:text-base text-stone-600 dark:text-stone-400 leading-relaxed">
-                      Most students just paste into ChatGPT. Here&apos;s why a tool built to mark essays beats a general chat box.
-                    </p>
-                  </div>
-
-                  <div className="relative rounded-2xl sm:rounded-[2.25rem] border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-[0_30px_80px_-40px_rgba(96,48,140,0.45)] p-2 sm:p-5">
-                    {/* Center "VS" pip — bridges the two cards. */}
-                    <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 hidden lg:flex">
-                      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white dark:bg-stone-900 border-2 border-[#A560E8]/40 text-[#8A48C7] dark:text-[#C9A0F0] text-sm font-extrabold shadow-[0_8px_22px_-8px_rgba(96,48,140,0.5)]">VS</span>
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
-                      {/* WriteScholar — the winner: elevated, glowing. */}
-                      <div className="relative rounded-[1.25rem] sm:rounded-[1.5rem] bg-gradient-to-br from-[#A560E8] to-[#7733B5] text-white p-5 sm:p-8 shadow-[0_24px_50px_-20px_rgba(165,96,232,0.65)] lg:scale-[1.015]">
-                        <div aria-hidden className="pointer-events-none absolute -top-px left-6 right-6 h-px bg-white/30" />
-                        <div className="flex items-center justify-between gap-3 mb-5 sm:mb-6">
-                          <div className="flex items-center gap-2.5">
-                            <div className="w-10 h-10 rounded-xl overflow-hidden bg-white/15 border border-white/25 flex items-center justify-center">
-                              <img src="/main-logo.png" alt="" aria-hidden className="w-full h-full object-contain" />
-                            </div>
-                            <span className="text-xl font-extrabold tracking-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>WriteScholar</span>
-                          </div>
-                          <span className="hidden sm:inline-flex shrink-0 rounded-full bg-white/20 border border-white/25 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider">Built for essays</span>
-                        </div>
-                        <ul className="space-y-0">
-                          {[
-                            'Graded to a real rubric — /100, letter band, every category scored',
-                            'Line-by-line feedback mapped to your exact sentences',
-                            'A real editor: apply fixes into your draft, export clean Word',
-                            'Built for academic essays — citations, structure, a professor lens',
-                          ].map((t, i) => (
-                            <li key={i} className={`flex items-start gap-3 py-2.5 sm:py-3.5 ${i > 0 ? 'border-t border-white/15' : ''}`}>
-                              <span className="shrink-0 mt-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-white/20">
-                                <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                </svg>
-                              </span>
-                              <span className="text-[13.5px] sm:text-[15px] font-bold leading-snug">{t}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      {/* ChatGPT — muted, secondary. */}
-                      <div className="rounded-[1.25rem] sm:rounded-[1.5rem] bg-stone-50 dark:bg-stone-950/40 border border-stone-200/70 dark:border-stone-800 p-5 sm:p-8">
-                        <div className="flex items-center gap-2.5 mb-5 sm:mb-6 opacity-90">
-                          <div className="w-10 h-10 rounded-xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 flex items-center justify-center">
-                            <svg className="w-5 h-5 text-stone-500 dark:text-stone-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                              <path d="M22.28 9.82a5.99 5.99 0 0 0-.52-4.91 6.05 6.05 0 0 0-6.52-2.9A6 6 0 0 0 4.98 4.18a5.99 5.99 0 0 0-4 2.9 6.05 6.05 0 0 0 .74 7.1 5.99 5.99 0 0 0 .52 4.91 6.05 6.05 0 0 0 6.52 2.9A6 6 0 0 0 19.02 19.8a5.99 5.99 0 0 0 4-2.9 6.05 6.05 0 0 0-.74-7.08Zm-9.02 12.6a4.48 4.48 0 0 1-2.88-1.04l.14-.08 4.78-2.76a.78.78 0 0 0 .4-.68v-6.74l2.02 1.17a.07.07 0 0 1 .04.06v5.58a4.5 4.5 0 0 1-4.5 4.49ZM3.6 18.2a4.47 4.47 0 0 1-.54-3.01l.14.09 4.78 2.76a.78.78 0 0 0 .78 0l5.84-3.37v2.33a.08.08 0 0 1-.03.07l-4.83 2.79a4.5 4.5 0 0 1-6.14-1.65ZM2.34 7.9a4.49 4.49 0 0 1 2.34-1.97v5.68a.77.77 0 0 0 .39.68l5.81 3.35-2.02 1.17a.08.08 0 0 1-.07 0L3.96 14a4.5 4.5 0 0 1-1.62-6.1Zm16.6 3.86-5.84-3.39 2.02-1.16a.07.07 0 0 1 .07 0l4.83 2.79a4.49 4.49 0 0 1-.68 8.1v-5.67a.78.78 0 0 0-.4-.67Zm2.01-3.03-.14-.08-4.77-2.78a.78.78 0 0 0-.79 0L9.43 9.24V6.91a.07.07 0 0 1 .03-.07l4.83-2.78a4.5 4.5 0 0 1 6.68 4.66ZM8.33 12.86 6.3 11.7a.08.08 0 0 1-.04-.06V6.07a4.5 4.5 0 0 1 7.38-3.45l-.14.08L8.72 5.46a.78.78 0 0 0-.4.68ZM9.43 10.5 12.03 9l2.6 1.5v3l-2.6 1.5-2.6-1.5Z" />
-                            </svg>
-                          </div>
-                          <span className="text-xl font-extrabold tracking-tight text-stone-700 dark:text-stone-200" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>ChatGPT</span>
-                        </div>
-                        <ul className="space-y-0">
-                          {[
-                            'Generic praise — no consistent rubric, score, or grade',
-                            'One block of advice you re-find in your draft yourself',
-                            'Copy-paste back and forth between a chat box and your doc',
-                            'A general chat model — not built for marking essays',
-                          ].map((t, i) => (
-                            <li key={i} className={`flex items-start gap-3 py-2.5 sm:py-3.5 ${i > 0 ? 'border-t border-stone-200 dark:border-stone-800' : ''}`}>
-                              <span className="shrink-0 mt-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-stone-200/70 dark:bg-stone-800">
-                                <svg className="w-3.5 h-3.5 text-stone-400 dark:text-stone-500" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                              </span>
-                              <span className="text-[13.5px] sm:text-[15px] font-semibold leading-snug text-stone-500 dark:text-stone-400">{t}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-9 sm:mt-11 flex flex-col items-center gap-3">
-                    <button
-                      type="button"
-                      onClick={() => onNavigate('signup')}
-                      className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-[#A560E8] hover:bg-[#8A48C7] text-white text-base sm:text-lg font-extrabold uppercase tracking-wide px-7 sm:px-9 py-4 border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_18px_32px_-12px_rgba(165,96,232,0.55)]"
-                    >
-                      Start writing free
-                      <svg className="w-5 h-5 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                      </svg>
-                    </button>
-                    <p className="text-[12px] sm:text-xs font-bold text-stone-400 dark:text-stone-500">No credit card · Free plan included</p>
-                  </div>
-                </LandingScrollReveal>
-              </section>
-
-              {/* Analysis preview — restored eyebrow + h2 + subhead
-                  block (was removed in the Knowunity hero rebuild). The
-                  copy is the same one shipped on the pre-rebuild landing
-                  (commit 4763c37), restyled to the current cream-section
-                  language. Two-line H1, paper-mascot floating to the
-                  left on lg+, and floating ✦/📝 sparkles in the corners
-                  on xl+ — restores the "Analyze papers" decorative feel
-                  from the older 4763c37 / aec4bd3 commits. */}
+              {/* Analysis preview — "Upload your essay…" block.
+                  TEMPORARILY HIDDEN — remove `hidden` from className to
+                  re-enable. Hero scroll targets now fall back to
+                  #interactive-demo instead of #landing-tools. */}
               <div
                 id="landing-tools"
-                className="relative w-full max-w-6xl mx-auto mt-4 sm:mt-8 lg:mt-10 scroll-mt-24 px-1.5 sm:px-2 lg:px-1"
+                className="hidden relative w-full max-w-6xl mx-auto mt-4 sm:mt-8 lg:mt-10 scroll-mt-24 px-1.5 sm:px-2 lg:px-1"
+                aria-hidden="true"
               >
                 {/* Floating decorations — visible at xl+ only so they
                     don't compete on smaller screens. Echoes commit
@@ -1824,12 +1553,9 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     numbered badges and flanking callout cards. */}
                 <LandingCombinedAnalyzerCallouts />
 
-                {/* The "Try the live interactive demo" link + the
-                    `#interactive-essay-demo` anchor that used to sit
-                    here both pointed at a copy of the analyzer that's
-                    now redundant — the hero's `#hero-interactive-demo`
-                    is the canonical place to try it. Removed for that
-                    reason. */}
+                {/* The analyzer showcase above is the static callout
+                    version; the live "paste & grade" demo is reached via
+                    the CTA below (routes to signup). */}
                 <div className="text-center mt-8 sm:mt-10">
                   <button
                     type="button"
@@ -1884,7 +1610,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                           in 60 seconds
                         </h3>
                         <p className="mt-2 text-sm sm:text-[15px] text-stone-600 dark:text-stone-400 leading-relaxed">
-                          Lessons, flashcards, quizzes, crosswords, plus arcade games like{' '}
+                          Lessons, flashcards, quizzes, crosswords, plus arcade mode with{' '}
                           <span className="font-semibold text-stone-800 dark:text-stone-200">Crater Blast</span> and{' '}
                           <span className="font-semibold text-stone-800 dark:text-stone-200">Word Tower</span>.
                         </p>
@@ -2043,15 +1769,19 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     fine-print line doesn't jam into the study tools showcase. */}
                 <div className="h-12 sm:h-20 lg:h-24" aria-hidden />
               </section>
-            </div>
+      </div>
 
-          </div>
-        </div>
-      </section>
-
-      {/* Study tools sits above citations — flagship feature first. */}
+      {/* Study tools sits above citations — flagship feature first.
+          Includes both the study-tool bento (flashcards, quizzes,
+          crosswords, lessons) and the arcade games sub-section
+          (Crater Blast, Word Tower, Word Blitz) joined by a pink
+          bridge band, so the page tells one cohesive story. */}
       <Suspense fallback={<div className="min-h-[640px] w-full" aria-hidden />}>
         <LandingStudyToolsHero onNavigate={onNavigate} />
+      </Suspense>
+
+      <Suspense fallback={<div className="min-h-[720px] w-full" aria-hidden />}>
+        <LandingChatGPTComparisonSection onNavigate={onNavigate} />
       </Suspense>
 
       {/* Social proof: testimonial + universities — placed beneath the
@@ -2137,265 +1867,9 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
         </div>
       </div>
 
-      {/* ─── "Study daily. Level up." — gamification showcase.
-          Daily Review, XP, Levels, Streaks, Badges — the habit loop
-          that makes WriteScholar feel like Duolingo for academics.
-          TEMPORARILY HIDDEN — re-enable by changing `false` below to `true`. ─── */}
-      {false && (
-      <section id="motivation" className="relative py-10 sm:py-24 overflow-hidden border-t border-[#E5E5E5] dark:border-stone-800 bg-white dark:bg-stone-950 scroll-mt-20">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_-15%,rgba(165,96,232,0.06),transparent_55%)] dark:bg-[radial-gradient(ellipse_70%_50%_at_50%_-10%,rgba(165,96,232,0.10),transparent_55%)]" aria-hidden />
-        <div
-          className="absolute inset-0 opacity-[0.4] dark:opacity-[0.15] pointer-events-none bg-[length:32px_32px] bg-[linear-gradient(to_right,rgba(148,163,184,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.07)_1px,transparent_1px)]"
-          aria-hidden
-        />
-
-        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <LandingScrollReveal>
-            {/* Header */}
-            <div className="text-center mb-10 sm:mb-14 max-w-2xl mx-auto">
-              <span className="inline-flex items-center gap-2 mb-4 rounded-full border border-[#A560E8]/30 dark:border-[#8A48C7]/40 bg-[#F3EAFF]/80 dark:bg-[#A560E8]/10 backdrop-blur px-3.5 py-1.5 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.2em] text-[#A560E8] dark:text-[#A560E8] shadow-sm">
-                <span aria-hidden>🔥</span>
-                The habit loop that keeps grades up
-              </span>
-              <h2
-                className="text-3xl sm:text-4xl lg:text-[2.75rem] font-extrabold text-[#3C3C3C] dark:text-stone-50 tracking-tight leading-[1.05]"
-                style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-              >
-                Studying that{' '}
-                <span className="text-[#A560E8]">
-                  actually sticks.
-                </span>
-              </h2>
-              <p className="mt-3 text-base sm:text-lg text-stone-600 dark:text-stone-400">
-                Most students give up after week two. WriteScholar's streak + XP system makes studying the easy choice — so you actually show up the day before the test.
-              </p>
-            </div>
-
-            {/* 4 feature cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-              {/* Daily Review */}
-              <div className="relative rounded-2xl border-2 border-b-4 border-[#8A48C7] bg-white dark:bg-stone-900 p-5 sm:p-6 hover:-translate-y-1 transition-all overflow-hidden">
-                <div className="pointer-events-none absolute -top-12 -right-12 w-36 h-36 rounded-full bg-[#A560E8]/15 dark:bg-[#A560E8]/10 blur-3xl" aria-hidden />
-                <div className="relative">
-                  <div className="w-12 h-12 rounded-2xl bg-[#A560E8] flex items-center justify-center mb-4 border-2 border-b-4 border-[#8A48C7]">
-                    <span className="text-xl" aria-hidden>📚</span>
-                  </div>
-                  <h3
-                    className="text-lg font-extrabold text-[#3C3C3C] dark:text-stone-50 mb-2"
-                    style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                  >
-                    Daily Review
-                  </h3>
-                  <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed mb-4">
-                    10 minutes a day beats 4 hours of cramming. Your personalised drill from saved notes — built around what you keep getting wrong.
-                  </p>
-                  {/* Mini visual — lesson card mockup. Hidden on mobile to
-                      cut card height; the description already tells the story. */}
-                  <div className="hidden sm:block rounded-xl bg-[#F3EAFF]/60 dark:bg-[#A560E8]/10 border border-[#A560E8]/30 p-3">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-6 h-6 rounded-lg bg-[#A560E8] flex items-center justify-center">
-                        <span className="text-white text-[10px] font-extrabold">1</span>
-                      </div>
-                      <span className="text-xs font-bold text-[#3C3C3C] dark:text-stone-200">Today&apos;s Session</span>
-                    </div>
-                    <div className="h-1.5 rounded-full bg-[#A560E8]/20 overflow-hidden">
-                      <div className="h-full w-[65%] rounded-full bg-[#A560E8]" />
-                    </div>
-                    <p className="text-[10px] text-stone-500 dark:text-stone-400 mt-1.5 font-medium">3 of 5 questions done</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* XP & Levels */}
-              <div className="relative rounded-2xl border-2 border-b-4 border-[#7733B5] bg-white dark:bg-stone-900 p-5 sm:p-6 hover:-translate-y-1 transition-all overflow-hidden">
-                <div className="pointer-events-none absolute -top-12 -right-12 w-36 h-36 rounded-full bg-[#8A48C7]/15 dark:bg-[#8A48C7]/10 blur-3xl" aria-hidden />
-                <div className="relative">
-                  <div className="w-12 h-12 rounded-2xl bg-[#8A48C7] flex items-center justify-center mb-4 border-2 border-b-4 border-[#7733B5]">
-                    <span className="text-xl" aria-hidden>⭐</span>
-                  </div>
-                  <h3
-                    className="text-lg font-extrabold text-[#3C3C3C] dark:text-stone-50 mb-2"
-                    style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                  >
-                    XP & 100 Levels
-                  </h3>
-                  <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed mb-4">
-                    Every essay reviewed, every quiz aced, every streak day — they all stack into XP. Levels you actually want to chase.
-                  </p>
-                  {/* Mini visual — level badge + XP bar. Hidden on mobile. */}
-                  <div className="hidden sm:block rounded-xl bg-[#F3EAFF]/60 dark:bg-[#8A48C7]/10 border border-[#8A48C7]/30 p-3">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-[#8A48C7] flex items-center justify-center border-b-2 border-[#7733B5]">
-                        <span className="text-white text-[11px] font-extrabold">12</span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[10px] font-extrabold text-[#3C3C3C] dark:text-stone-200 truncate">Knowledge Keeper III</p>
-                        <div className="flex items-center gap-1">
-                          <div className="flex-1 h-1.5 rounded-full bg-[#8A48C7]/20 overflow-hidden">
-                            <div className="h-full w-[42%] rounded-full bg-[#8A48C7]" />
-                          </div>
-                          <span className="text-[8px] text-stone-500 dark:text-stone-400 font-bold tabular-nums">1,340 XP</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Streaks */}
-              <div className="relative rounded-2xl border-2 border-b-4 border-[#8A48C7] bg-white dark:bg-stone-900 p-5 sm:p-6 hover:-translate-y-1 transition-all overflow-hidden">
-                <div className="pointer-events-none absolute -top-12 -right-12 w-36 h-36 rounded-full bg-[#A560E8]/15 dark:bg-[#A560E8]/10 blur-3xl" aria-hidden />
-                <div className="relative">
-                  <div className="w-12 h-12 rounded-2xl bg-[#A560E8] flex items-center justify-center mb-4 border-2 border-b-4 border-[#8A48C7]">
-                    <span className="text-xl" aria-hidden>🔥</span>
-                  </div>
-                  <h3
-                    className="text-lg font-extrabold text-[#3C3C3C] dark:text-stone-50 mb-2"
-                    style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                  >
-                    Daily Streaks
-                  </h3>
-                  <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed mb-4">
-                    Your streak is your accountability. Miss a day and you'll feel it — that's the point. It's how casual users become 4.0 students.
-                  </p>
-                  {/* Mini visual — streak counter. Hidden on mobile. */}
-                  <div className="hidden sm:block rounded-xl bg-[#F3EAFF]/60 dark:bg-[#A560E8]/10 border border-[#A560E8]/30 p-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="text-2xl" aria-hidden>🔥</span>
-                        <div>
-                          <p className="text-lg font-extrabold text-[#A560E8]">14</p>
-                          <p className="text-[10px] font-bold text-stone-500 dark:text-stone-400 -mt-0.5">day streak</p>
-                        </div>
-                      </div>
-                      <div className="flex gap-0.5">
-                        {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => (
-                          <div
-                            key={d + i}
-                            className={`w-4 h-4 rounded-full flex items-center justify-center text-[7px] font-bold ${
-                              i < 6
-                                ? 'bg-[#A560E8] text-white'
-                                : 'bg-stone-200 dark:bg-stone-700 text-stone-400 dark:text-stone-500'
-                            }`}
-                          >
-                            {d}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Badges */}
-              <div className="relative rounded-2xl border-2 border-b-4 border-[#8A48C7] bg-white dark:bg-stone-900 p-5 sm:p-6 hover:-translate-y-1 transition-all overflow-hidden">
-                <div className="pointer-events-none absolute -top-12 -right-12 w-36 h-36 rounded-full bg-[#A560E8]/15 dark:bg-[#A560E8]/10 blur-3xl" aria-hidden />
-                <div className="relative">
-                  <div className="w-12 h-12 rounded-2xl bg-[#A560E8] flex items-center justify-center mb-4 border-2 border-b-4 border-[#8A48C7]">
-                    <span className="text-xl" aria-hidden>🏅</span>
-                  </div>
-                  <h3
-                    className="text-lg font-extrabold text-[#3C3C3C] dark:text-stone-50 mb-2"
-                    style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                  >
-                    80+ Badges
-                  </h3>
-                  <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed mb-4">
-                    Visible milestones turn "I should study" into "I want my next badge." It works because it's stupid and you can't help it.
-                  </p>
-                  {/* Mini visual — badge grid. Hidden on mobile to cut height. */}
-                  <div className="hidden sm:block rounded-xl bg-[#F3EAFF]/60 dark:bg-[#A560E8]/10 border border-[#A560E8]/30 p-3">
-                    <div className="grid grid-cols-4 gap-1.5">
-                      {[
-                        { badgeId: 'first_login', unlocked: true },
-                        { badgeId: 'brain_spark', unlocked: true },
-                        { badgeId: 'citation_hunter', unlocked: true },
-                        { badgeId: 'streak_starter', unlocked: false },
-                        { badgeId: 'premium_pioneer', unlocked: true },
-                        { badgeId: 'streak_legend', unlocked: false },
-                        { badgeId: 'monthly_master', unlocked: true },
-                        { badgeId: 'night_owl', unlocked: false },
-                      ].map((b) => (
-                        <div
-                          key={b.badgeId}
-                          className={`w-full aspect-square rounded-lg flex items-center justify-center ${
-                            b.unlocked
-                              ? 'bg-[#A560E8]/20 dark:bg-[#A560E8]/25'
-                              : 'bg-stone-200/60 dark:bg-stone-700/40 opacity-40'
-                          }`}
-                        >
-                          <Suspense fallback={<span className="text-sm">🏅</span>}>
-                            <BadgeCreature badgeId={b.badgeId} unlocked={b.unlocked} size={36} />
-                          </Suspense>
-                        </div>
-                      ))}
-                    </div>
-                    <p className="text-[10px] text-stone-500 dark:text-stone-400 mt-2 text-center font-medium">5 of 80+ unlocked</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Daily Review screenshot — real product preview */}
-            <div className="mt-10 sm:mt-14 max-w-4xl mx-auto">
-              <div className="text-center mb-5 sm:mb-6">
-                <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#F3EAFF]/80 dark:bg-[#A560E8]/15 text-[#A560E8] dark:text-[#A560E8] text-[10px] sm:text-xs font-extrabold uppercase tracking-wider border border-[#A560E8]/30">
-                  <span aria-hidden>📚</span>
-                  Daily Review in action
-                </span>
-              </div>
-              <div className="relative group">
-                <div className="absolute -inset-2 bg-[#A560E8]/20 rounded-3xl blur-2xl opacity-30 group-hover:opacity-50 transition-opacity duration-500" aria-hidden />
-                <div className="relative rounded-2xl overflow-hidden border-2 border-b-4 border-[#8A48C7] dark:border-[#8A48C7] shadow-2xl">
-                  <img
-                    src="/daily-review-preview.png"
-                    alt="WriteScholar Daily Review: personalised daily practice with multiple choice questions, progress tracking, and instant feedback"
-                    className="w-full h-auto"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-              </div>
-              <p className="mt-4 text-center text-sm text-stone-500 dark:text-stone-400">
-                Your daily practice session — questions pulled from your own study materials, with instant feedback and XP rewards.
-              </p>
-            </div>
-
-            {/* Level-up celebration preview */}
-            <div className="mt-10 sm:mt-12 rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700/60 bg-white dark:bg-stone-900 p-5 sm:p-6 max-w-4xl mx-auto">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  <div className="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#A560E8] flex items-center justify-center border-4 border-[#F3EAFF] dark:border-[#A560E8]/30" style={{ boxShadow: '0 0 20px rgba(165,96,232,0.3)' }}>
-                    <span className="text-2xl sm:text-3xl font-extrabold text-white">7</span>
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#A560E8] dark:text-[#A560E8] mb-0.5">
-                      Level up!
-                    </p>
-                    <p className="text-lg sm:text-xl font-extrabold text-[#3C3C3C] dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                      Curious Cat II
-                    </p>
-                    <p className="text-sm text-stone-500 dark:text-stone-400">
-                      Confetti, celebrations, and a new title every time you level up.
-                    </p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => onNavigate('signup')}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-[#A560E8] text-white font-extrabold text-sm border-2 border-b-4 border-[#8A48C7] hover:bg-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all whitespace-nowrap"
-                >
-                  Start earning XP
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </LandingScrollReveal>
-        </div>
-      </section>
-      )}
+      <Suspense fallback={<div className="min-h-[720px] w-full" aria-hidden />}>
+        <LandingMotivationSection onNavigate={onNavigate} />
+      </Suspense>
       {/* (Citations showcase — "Find academic sources in seconds" —
           removed from the landing flow. The essay-feedback section
           now carries that conversion job with two stacked arrow-
@@ -2409,8 +1883,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
       {/* Study Better Together (from Share Friends page; hidden when HIDE_FRIENDS) */}
       {!HIDE_FRIENDS && !LANDING_HIDE_SECONDARY_SECTIONS && (
-      <section className="relative py-12 sm:py-20 overflow-hidden bg-white dark:bg-stone-900">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_50%,rgba(99,102,241,0.07),transparent)] dark:bg-[radial-gradient(ellipse_70%_60%_at_50%_50%,rgba(139,92,246,0.06),transparent)]" />
+      <section className="relative py-12 sm:py-20 overflow-hidden bg-[#FAF7FF] dark:bg-stone-900">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_50%,rgba(165,96,232,0.08),transparent)] dark:bg-[radial-gradient(ellipse_70%_60%_at_50%_50%,rgba(165,96,232,0.06),transparent)]" />
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Mobile layout: badge, title, video, share instructions */}
           <div className="lg:hidden flex flex-col items-center text-center">
@@ -2693,7 +2167,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                       'XP & 100 levels — from Seedling to Grandmaster',
                       'Streaks — track your daily consistency',
                       '80+ badges — unlock achievements as you learn',
-                      'Crater Blast & Word Tower — quiz arcade games',
+                      'Crater Blast & Word Tower — arcade mode classics',
                     ].map((item) => (
                       <li key={item} className="flex items-start gap-2 text-[14px] text-stone-700 dark:text-stone-300">
                         <svg className="w-4 h-4 mt-0.5 shrink-0 text-[#58CC02] dark:text-[#58CC02]" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
@@ -2741,8 +2215,9 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
       </section>
       )}
 
-      {/* Pricing — above FAQ, aligned with Pricing page */}
-      <section className="relative py-16 sm:py-24 overflow-hidden border-t border-stone-200/90 dark:border-stone-800" aria-labelledby="landing-pricing-heading">
+      {/* Pricing — above FAQ, aligned with Pricing page.
+          TEMPORARILY HIDDEN — remove `hidden` from className to re-enable. */}
+      <section className="hidden relative py-16 sm:py-24 overflow-hidden border-t border-stone-200/90 dark:border-stone-800" aria-labelledby="landing-pricing-heading" aria-hidden="true">
         <div className="absolute inset-0 bg-[#FAF7FF] dark:bg-stone-950" aria-hidden />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_85%_55%_at_50%_-12%,rgba(165,96,232,0.10),transparent_55%)] dark:bg-[radial-gradient(ellipse_85%_50%_at_50%_-8%,rgba(165,96,232,0.14),transparent_58%)] pointer-events-none" aria-hidden />
         <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -2932,151 +2407,13 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
         </div>
       </section>
 
-      {/* FAQ — matches hero editorial theme */}
-      <section className="relative py-16 sm:py-24 overflow-hidden border-t border-stone-200/90 dark:border-stone-800">
-        <div className="absolute inset-0 bg-[#FAF7FF] dark:bg-stone-950" aria-hidden />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_90%_60%_at_50%_-15%,rgba(165,96,232,0.09),transparent_55%)] dark:bg-[radial-gradient(ellipse_90%_55%_at_50%_-10%,rgba(165,96,232,0.13),transparent_58%)] pointer-events-none" aria-hidden />
-        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <LandingScrollReveal>
-          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8 lg:gap-10 mb-10 sm:mb-14">
-            <div className="text-center lg:text-left flex-1 max-w-2xl mx-auto lg:mx-0">
-              <p className="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.22em] text-[#A560E8] dark:text-[#A560E8] mb-3">
-                Help
-              </p>
-              <div className="mx-auto lg:mx-0 mb-4 h-1.5 w-16 rounded-full bg-gradient-to-r from-[#A560E8] to-[#8A48C7]" aria-hidden />
-              <h2
-                className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-stone-900 dark:text-stone-50 mb-4 tracking-tight leading-tight"
-                style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-              >
-                Frequently Asked Questions
-              </h2>
-              <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed">
-                Essay feedback, citations, and study tools for college and university coursework.
-              </p>
-            </div>
-            <div className="hidden lg:flex flex-shrink-0 items-center justify-center pt-1">
-              {/* Animated thinking mascot — "Scholar pondering your question" */}
-              <img
-                src="/mascot-thinking.webp"
-                alt=""
-                aria-hidden
-                loading="lazy"
-                decoding="async"
-                className="w-40 xl:w-48 h-auto drop-shadow-[0_18px_30px_rgba(124,58,237,0.40)]"
-              />
-            </div>
-          </div>
+      <Suspense fallback={<div className="min-h-[480px] w-full" aria-hidden />}>
+        <LandingFAQSection />
+      </Suspense>
 
-          <div className="max-w-3xl mx-auto space-y-3 sm:space-y-4">
-            {faqs.map((faq, idx) => (
-              <div
-                key={idx}
-                className="rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900 overflow-hidden transition-all duration-200 hover:border-[#A560E8]/50 dark:hover:border-[#A560E8]/50 shadow-[0_10px_30px_-20px_rgba(96,48,140,0.4)]"
-              >
-                <button
-                  type="button"
-                  onClick={() => setOpenFAQ(openFAQ === idx ? null : idx)}
-                  className="w-full min-w-0 px-5 sm:px-6 py-4 sm:py-5 text-left flex items-center justify-between gap-3 sm:gap-4 hover:bg-stone-50/90 dark:hover:bg-stone-800/50 transition-colors duration-200"
-                >
-                  <span className="font-semibold text-stone-900 dark:text-stone-100 text-base sm:text-[1.05rem] leading-snug pr-2 min-w-0 flex-1 text-left">{faq.question}</span>
-                  <svg
-                    className={`w-5 h-5 flex-shrink-0 transition-transform duration-200 ${openFAQ === idx ? 'rotate-180 text-[#A560E8] dark:text-[#A560E8]' : 'text-stone-400 dark:text-stone-500'}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    aria-hidden
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                <div className={`overflow-hidden transition-all duration-300 ease-out ${openFAQ === idx ? 'max-h-[min(28rem,70vh)]' : 'max-h-0'}`}>
-                  <div className="px-5 sm:px-6 pb-5 pt-0 text-stone-600 dark:text-stone-400 text-sm sm:text-base leading-relaxed border-t border-stone-100/90 dark:border-stone-800/80">
-                    <div className="pt-4">{faq.answer}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          </LandingScrollReveal>
-        </div>
-      </section>
-
-      {/* Final CTA — gradient hero panel with dancing mascot to close the deal */}
-      <section className="relative py-16 sm:py-24 overflow-hidden border-t border-stone-200/90 dark:border-stone-800">
-        <div className="absolute inset-0 bg-[#f8fafc] dark:bg-[#0c0a09]" aria-hidden />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#f1f5f9] via-white to-[#f8fafc] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 pointer-events-none" aria-hidden />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_20%,rgba(91,33,182,0.06),transparent_50%)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_15%,rgba(109,40,217,0.1),transparent_55%)] pointer-events-none" aria-hidden />
-        <div
-          className="absolute inset-0 opacity-[0.35] dark:opacity-[0.12] pointer-events-none bg-[length:32px_32px] bg-[linear-gradient(to_right,rgba(148,163,184,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.07)_1px,transparent_1px)]"
-          aria-hidden
-        />
-        <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <LandingScrollReveal>
-          <div className="relative text-center rounded-2xl bg-[#A560E8] dark:bg-[#A560E8] px-6 py-10 sm:px-10 sm:py-14 border-2 border-b-4 border-[#8A48C7] overflow-hidden">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_0%,rgba(255,255,255,0.12),transparent_70%)]" aria-hidden />
-            <div className="pointer-events-none absolute -bottom-16 -right-12 w-56 h-56 rounded-full bg-[#8A48C7]/30 blur-3xl" aria-hidden />
-            <div className="pointer-events-none absolute -top-12 -left-10 w-48 h-48 rounded-full bg-[#A560E8]/30 blur-3xl" aria-hidden />
-
-            <p className="relative text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.22em] text-white/90 mb-3">
-              ⚡ Ready when you are
-            </p>
-            <h2
-              className="relative text-2xl sm:text-3xl lg:text-[2.5rem] font-extrabold text-white mb-4 tracking-tight leading-[1.1]"
-              style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-            >
-              Better essays. Smarter studying.{' '}
-              <span className="block sm:inline">All in one app.</span>
-            </h2>
-            <p className="relative text-base sm:text-lg text-white/90 mb-8 max-w-xl mx-auto leading-relaxed">
-              Join <span className="font-extrabold text-white">50,000+ students</span> writing sharper essays and acing their coursework. Free to start — no payment today.
-            </p>
-            <div className="relative flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center mb-6">
-              <button
-                type="button"
-                onClick={() => onNavigate('signup')}
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-[#3C3C3C] font-extrabold rounded-2xl border-2 border-b-4 border-[#E5E5E5] hover:bg-stone-50 active:border-b-2 active:translate-y-0.5 transition-all text-base sm:text-[17px]"
-              >
-                Get started free
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </button>
-              <button
-                type="button"
-                onClick={() => onNavigate('pricing')}
-                className="inline-flex items-center justify-center px-7 py-4 border-2 border-b-4 border-white/40 text-white font-extrabold rounded-2xl hover:bg-white/10 active:border-b-2 active:translate-y-0.5 transition-colors text-base"
-              >
-                View pricing
-              </button>
-            </div>
-
-            {/* Trust badges row */}
-            <div className="relative flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-[11px] sm:text-xs text-white/85">
-              <span className="inline-flex items-center gap-1">
-                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.7-9.3a1 1 0 00-1.4-1.4L9 10.6 7.7 9.3a1 1 0 00-1.4 1.4l2 2a1 1 0 001.4 0l4-4z" clipRule="evenodd" />
-                </svg>
-                No payment today
-              </span>
-              <span className="text-white/30" aria-hidden>·</span>
-              <span className="inline-flex items-center gap-1">
-                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.7-9.3a1 1 0 00-1.4-1.4L9 10.6 7.7 9.3a1 1 0 00-1.4 1.4l2 2a1 1 0 001.4 0l4-4z" clipRule="evenodd" />
-                </svg>
-                Cancel anytime
-              </span>
-              <span className="text-white/30" aria-hidden>·</span>
-              <span className="inline-flex items-center gap-1">
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24" aria-hidden>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m0 4h.01M5 11h14a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2zm10-4V7a3 3 0 00-6 0v4" />
-                </svg>
-                Secure checkout via Stripe
-              </span>
-            </div>
-          </div>
-          </LandingScrollReveal>
-        </div>
-      </section>
+      <Suspense fallback={<div className="min-h-[420px] w-full" aria-hidden />}>
+        <LandingFinalCTASection onNavigate={onNavigate} />
+      </Suspense>
 
       {/* Loading Animations */}
       {showFakeAnimation && mode === 'citations' && (

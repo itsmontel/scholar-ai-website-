@@ -1,5 +1,4 @@
-import Header from '../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
+import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
 
 interface MoreToolsPageProps {
@@ -107,10 +106,7 @@ export function MoreToolsGrid({
 
 const MoreToolsPage = ({ onNavigate, user, onLogout }: MoreToolsPageProps) => {
   return (
-    <div className="relative min-h-screen overflow-x-clip">
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="more-tools" />
-
+    <LoggedInPageShell user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="more-tools">
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
         <button
           onClick={() => onNavigate('dashboard')}
@@ -150,7 +146,7 @@ const MoreToolsPage = ({ onNavigate, user, onLogout }: MoreToolsPageProps) => {
       </main>
 
       <Footer onNavigate={onNavigate} />
-    </div>
+    </LoggedInPageShell>
   );
 };
 

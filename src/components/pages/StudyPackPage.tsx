@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import Header from '../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
+import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
 import { trackStudyPackGenerated, getStats } from '../../data/achievements';
 import { trackEvent } from '../../utils/analytics';
@@ -290,14 +289,8 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
   const goCitations = () =>
     embedded && onEmbeddedToolSwitch ? onEmbeddedToolSwitch('citations') : onNavigate('citations');
 
-  return (
-    <div
-      className={
-        embedded
-          ? 'relative w-full min-w-0'
-          : 'min-h-screen relative transition-colors font-sans overflow-x-clip'
-      }
-    >
+  const inner = (
+    <>
       {/* Study pack generation overlay — mascot popup with cycling progress
           steps. Mirrors the same animation shown on DashboardPage so users
           generating a study pack from /study-pack get the same feedback
@@ -310,10 +303,6 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
           isComplete={false}
         />
       )}
-
-      {!embedded && <WriteScholarEditorialBackgroundLayers position="fixed" />}
-
-      {!embedded && <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="study-pack" />}
 
       <main
         className={
@@ -350,38 +339,28 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
           </div>
         )}
 
-        {!quizExhausted && user && !embedded && (
+        {!quizExhausted && user && !embedded && isFreeUser && (
           <div className="mb-4 sm:mb-6 bg-[#FFF4E0] dark:bg-[#FF9600]/10 border-2 border-b-4 border-[#FF9600]/30 rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3">
             <div className="flex items-start sm:items-center gap-2 sm:gap-3">
               <span className="text-xl sm:text-2xl">🧠</span>
               <div className="min-w-0">
-                {isFreeUser ? (
-                  <>
-                    <p className="text-[#FF9600] font-extrabold text-xs sm:text-sm">
-                      Free: {quizUsage.generationsRemaining}/{quizUsage.generationLimit} study packs •{' '}
-                      {(quizUsage.maxWordsPerGeneration || 5000).toLocaleString()} words max •{' '}
-                      {getResetsInText(usageStats.daysUntilReset ?? quizUsage.daysUntilReset)}
-                    </p>
-                    <p className="text-amber-600 dark:text-amber-400 text-[10px] sm:text-xs mt-0.5 line-clamp-2">
-                      Lesson, flashcards & quiz included • Crossword, Crater Blast & Word Tower unlock with Pro
-                    </p>
-                  </>
-                ) : (
-                  <p className="text-[#FF9600] font-extrabold text-xs sm:text-sm">
-                    Pro: {quizUsage.generationsRemaining}/{quizUsage.generationLimit} study packs remaining
-                  </p>
-                )}
+                <p className="text-[#FF9600] font-extrabold text-xs sm:text-sm">
+                  Free: {quizUsage.generationsRemaining}/{quizUsage.generationLimit} study packs •{' '}
+                  {(quizUsage.maxWordsPerGeneration || 5000).toLocaleString()} words max •{' '}
+                  {getResetsInText(usageStats.daysUntilReset ?? quizUsage.daysUntilReset)}
+                </p>
+                <p className="text-amber-600 dark:text-amber-400 text-[10px] sm:text-xs mt-0.5 line-clamp-2">
+                  Lesson, flashcards & quiz included • Crossword, Crater Blast & Word Tower unlock with Pro
+                </p>
               </div>
             </div>
-            {isFreeUser && (
-              <button
-                type="button"
-                onClick={() => onNavigate('pricing')}
-                className="w-full sm:w-auto px-3 sm:px-4 py-1.5 bg-[#FF9600] text-white text-xs font-extrabold rounded-xl border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all flex-shrink-0"
-              >
-                Upgrade
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={() => onNavigate('pricing')}
+              className="w-full sm:w-auto px-3 sm:px-4 py-1.5 bg-[#FF9600] text-white text-xs font-extrabold rounded-xl border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all flex-shrink-0"
+            >
+              Upgrade
+            </button>
           </div>
         )}
 
@@ -643,7 +622,23 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
       </main>
 
       {!embedded && <Footer onNavigate={onNavigate} />}
-    </div>
+    </>
+  );
+
+  if (embedded) {
+    return <div className="relative w-full min-w-0">{inner}</div>;
+  }
+
+  return (
+    <LoggedInPageShell
+      className="min-h-screen relative transition-colors font-sans overflow-x-clip"
+      user={user}
+      onNavigate={onNavigate}
+      onLogout={onLogout}
+      currentPage="study-pack"
+    >
+      {inner}
+    </LoggedInPageShell>
   );
 };
 

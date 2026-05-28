@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
+import LoggedInPageShell from '../../workspace/LoggedInPageShell';
 import DOMPurify from 'dompurify';
-import Header from '../../common/Header';
 import Footer from '../../common/Footer';
 import ScholarMascot from '../../common/ScholarMascot';
 import { trackCopy } from '../../../data/achievements';
@@ -1270,9 +1270,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-clip bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="citation-generator-tool" />
-
+    <LoggedInPageShell className="relative min-h-screen overflow-x-clip bg-stone-50 dark:bg-stone-950" user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="citation-generator-tool">
       {user && (
         <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4">
           <button
@@ -1603,7 +1601,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
       <ToolPageSeoContent {...citationGeneratorSeo} onNavigate={onNavigate} />
 
       <Footer onNavigate={onNavigate} />
-    </div>
+    </LoggedInPageShell>
   );
 };
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import Header from '../../common/Header';
+import LoggedInPageShell from '../../workspace/LoggedInPageShell';
 import Footer from '../../common/Footer';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 import ToolPageSeoContent from '../../common/ToolPageSeoContent';
@@ -80,9 +80,7 @@ const TextCaseConverterPage = ({ onNavigate, user, onLogout }: TextCaseConverter
   ];
 
   return (
-    <div className="relative min-h-screen overflow-x-clip bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="text-case-converter" />
-
+    <LoggedInPageShell className="relative min-h-screen overflow-x-clip bg-stone-50 dark:bg-stone-950" user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="text-case-converter">
       {/* Hero Section */}
       <section className="py-16 sm:py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -209,7 +207,7 @@ const TextCaseConverterPage = ({ onNavigate, user, onLogout }: TextCaseConverter
       <ToolPageSeoContent {...textCaseSeo} onNavigate={onNavigate} />
 
       <Footer onNavigate={onNavigate} />
-    </div>
+    </LoggedInPageShell>
   );
 };
 

@@ -26,6 +26,27 @@ const subscriptionService = require('../services/subscriptionService');
 
 const router = express.Router();
 
+/** Plain-text snippet for document cards — strips HTML when needed. */
+function buildContentPreview(doc, maxLen = 180) {
+  let text = typeof doc.content_text === 'string' ? doc.content_text : '';
+  if (!text.trim() && typeof doc.content_html === 'string' && doc.content_html.trim()) {
+    text = doc.content_html
+      .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+      .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&nbsp;/gi, ' ')
+      .replace(/&amp;/gi, '&')
+      .replace(/&lt;/gi, '<')
+      .replace(/&gt;/gi, '>')
+      .replace(/&quot;/gi, '"')
+      .replace(/&#39;/gi, "'");
+  }
+  text = text.replace(/\s+/g, ' ').trim();
+  if (!text) return '';
+  if (text.length <= maxLen) return text;
+  return `${text.slice(0, maxLen).trim()}…`;
+}
+
 // Configure multer for file uploads
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -378,6 +399,8 @@ router.get('/', authenticateToken, validateGetDocuments, async (req, res) => {
           uploadStatus: doc.upload_status,
           createdAt: doc.created_at,
           updatedAt: doc.updated_at,
+          lastEditedAt: doc.last_edited_at,
+          contentPreview: buildContentPreview(doc),
           analysisStatus: analysisStatusMap[doc.id] || { hasAnalysis: false, lastAnalyzed: null }
         })),
         usage,

@@ -207,7 +207,7 @@ const FEATURE_INTERESTS = [
   { id: 'essays',       emoji: '📝', label: 'Essay analysis',       desc: 'Get instant feedback & rubric scores', color: '#A560E8', borderColor: '#8A48C7', bgColor: '#F3EAFF' },
   { id: 'daily_review', emoji: '📚', label: 'Daily Review',         desc: 'Practice every day, like Duolingo',    color: '#58CC02', borderColor: '#46A302', bgColor: '#E5F8D0' },
   { id: 'study_packs',  emoji: '🃏', label: 'Flashcards & quizzes', desc: 'Turn your notes into study tools',     color: '#1CB0F6', borderColor: '#1899D6', bgColor: '#DDF4FF' },
-  { id: 'games',        emoji: '🎮', label: 'Quiz games',           desc: 'Crater Blast, Word Tower & more',      color: '#FF4B4B', borderColor: '#E04343', bgColor: '#FFE8E8' },
+  { id: 'games',        emoji: '🎮', label: 'Arcade mode',          desc: 'Crater Blast, Word Tower & more',      color: '#FF4B4B', borderColor: '#E04343', bgColor: '#FFE8E8' },
 ];
 
 /* ─── Demo quiz questions — easy and universal ─── */
@@ -1315,12 +1315,11 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
   const [trialEligible, setTrialEligible] = useState<boolean | null>(null);
   const [startingTrial, setStartingTrial] = useState(false);
   const [trialError, setTrialError] = useState<string | null>(null);
-  // Onboarding plan picker — Pro yearly is the default both because
-  // it's the highest LTV option and because it's the cheaper per-month
-  // headline that anchors the discussion. The yearly/monthly toggle
-  // defaults to yearly so the saved-17% figure leads.
+  // Onboarding plan picker — monthly is the default so the free trial
+  // checkout shows the lower-commitment option first. Users can still
+  // switch to yearly for the per-month savings.
   const [selectedPlanId, setSelectedPlanId] = useState<PlanId>('pro');
-  const [billingCycle, setBillingCycle] = useState<BillingCycle>('yearly');
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
   // Confirmation modal shown when the user clicks "Maybe later" on the
   // checkout page — gives them one chance to reconsider before we route
   // them away from the free trial offer. "I will miss the free
@@ -2157,7 +2156,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
                     { src: '/rubric-and-notes.png',      label: 'Live grade + rubric',  tint: '#58CC02' },
                     { src: '/full-report.png',           label: 'Full report + fixes',  tint: '#FF9600' },
                     { src: '/flashcard pic.png',         label: 'Flashcards + quizzes', tint: '#1CB0F6' },
-                    { src: '/crosssword pic.png',        label: 'Word games',           tint: '#FF4B4B' },
+                    { src: '/crosssword pic.png',        label: 'Arcade mode',           tint: '#FF4B4B' },
                     { src: '/daily-review-preview.png',  label: 'Daily review',         tint: '#FFC800' },
                   ].map((tile) => (
                     <div
@@ -2712,7 +2711,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
                 Eight tools. <span className="text-[#A560E8]">Designed for success.</span>
               </h1>
               <p className="mt-2 text-stone-500 dark:text-stone-400 font-bold text-sm sm:text-base max-w-xl mx-auto">
-                From our flagship essay feedback to study games, your full academic toolkit lives in one place.
+                From our flagship essay feedback to arcade mode, your full academic toolkit lives in one place.
               </p>
             </div>
 
@@ -3674,7 +3673,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
         borderColor: '#E04343',
         bgColor: '#FFE8E8',
         eyebrow: eyebrowFor('tour-games'),
-        title: 'Study with arcade games',
+        title: 'Study with arcade mode',
         speech: "Crater Blast, Word Blitz, and Word Tower turn your notes into quick boss-battles — learning that actually feels like play.",
         visual: 'games',
       },
@@ -3782,7 +3781,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
                     // Games — cycles through the three arcade games
                     // (Crater Blast → Word Blitz → Word Tower) by switching
                     // src on each video's `ended` event.
-                    { name: 'Games', videos: ['/writescholar-crater-blast-demo.mp4', '/hero-word-blitz.mp4', '/hero-word-tower.mp4'], color: '#FF4B4B', borderColor: '#E04343' },
+                    { name: 'Arcade mode', videos: ['/writescholar-crater-blast-demo.mp4', '/hero-word-blitz.mp4', '/hero-word-tower.mp4'], color: '#FF4B4B', borderColor: '#E04343' },
                   ].map((tool, i) => (
                     <ToolMiniDemo
                       key={tool.name}

@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Header from '../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
 import CancelRetentionModal from '../common/CancelRetentionModal';
 
@@ -264,21 +262,12 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
 
   if (loading) {
     return (
-      <div className="relative min-h-screen overflow-x-clip">
-        <WriteScholarEditorialBackgroundLayers position="fixed" />
-        <Header 
-          onNavigate={onNavigate} 
-          user={user} 
-          onLogout={onLogout}
-          currentPage="billing"
-        />
-        <div className="flex items-center justify-center min-h-[60vh] relative z-10">
+        <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#A560E8] mx-auto mb-4"></div>
             <p className="text-stone-600 dark:text-stone-400">Loading billing information...</p>
           </div>
         </div>
-      </div>
     );
   }
 
@@ -288,16 +277,8 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
     (id === 'premium' && currentPlan === 'premium');
 
   return (
-    <div className="relative min-h-screen overflow-x-clip" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
-      <Header
-        onNavigate={onNavigate}
-        user={user}
-        onLogout={onLogout}
-        currentPage="billing"
-      />
-
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14 relative z-10">
+    <>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
         {/* Hero Section */}
         <div className="text-center mb-10">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-stone-800 dark:text-stone-100 mb-4">
@@ -678,7 +659,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
         onMutate={() => fetchSubscriptionData(true)}
         subscriptionStatus={subscriptionStatus}
       />
-    </div>
+    </>
   );
 };
 

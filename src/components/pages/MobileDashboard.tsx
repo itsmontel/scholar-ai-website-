@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import Header from '../common/Header';
+import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
 import AnalysisAnimation from '../common/AnalysisAnimation';
 import { BulletproofAPI } from '../../config/api';
@@ -454,8 +454,7 @@ const MobileDashboard = ({
   }, [dashboardTool]);
 
   return (
-    <div className="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col">
-      <Header onNavigate={onNavigate} user={user as any} onLogout={onLogout} currentPage="dashboard" />
+    <LoggedInPageShell className="min-h-screen bg-stone-50 dark:bg-stone-950 flex flex-col" user={user as any} onNavigate={onNavigate} onLogout={onLogout} currentPage="dashboard">
 
       <main className="flex-1 px-5 pt-4 pb-24 max-w-md mx-auto w-full">
         {/* ── Greeting block ──────────────────────────────────── */}
@@ -613,7 +612,7 @@ const MobileDashboard = ({
                   </div>
                   <div className="rounded-xl border-2 border-b-[3px] border-[#58CC02]/30 bg-[#E5F8D0]/60 p-2.5 text-center">
                     <div className="text-base mb-0.5" aria-hidden>🎮</div>
-                    <p className="text-[11px] font-extrabold text-[#58CC02] leading-tight">Games</p>
+                    <p className="text-[11px] font-extrabold text-[#58CC02] leading-tight">Arcade mode</p>
                   </div>
                 </>
               )}
@@ -861,7 +860,7 @@ const MobileDashboard = ({
         {/* ── GAMES ROW ───────────────────────────────────────── */}
         <section className="mb-7">
           <h3 className="text-[11px] font-extrabold uppercase tracking-[0.18em] text-stone-400 dark:text-stone-500 mb-3 pl-1">
-            Quick games
+            Arcade mode
           </h3>
           <div className="grid grid-cols-3 gap-2.5">
             {GAMES.map((g) => (
@@ -945,7 +944,7 @@ const MobileDashboard = ({
           onComplete={() => { /* nav handled inline by handleSubmit's timeouts */ }}
         />
       )}
-    </div>
+    </LoggedInPageShell>
   );
 };
 

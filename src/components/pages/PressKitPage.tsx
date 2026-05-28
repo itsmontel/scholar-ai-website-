@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import Header from '../common/Header';
+import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
 import { applyPageSeoTags } from '../../utils/seo';
 
@@ -32,8 +32,7 @@ const PressKitPage = ({ onNavigate, user, onLogout }: PressKitPageProps) => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-stone-50 dark:bg-stone-950">
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} />
+    <LoggedInPageShell className="min-h-screen flex flex-col bg-stone-50 dark:bg-stone-950" user={user} onNavigate={onNavigate} onLogout={onLogout}>
 
       {/* Hero */}
       <section className="relative pt-14 sm:pt-20 pb-10 sm:pb-12 border-b border-stone-200 dark:border-stone-800 overflow-hidden">
@@ -197,7 +196,7 @@ const PressKitPage = ({ onNavigate, user, onLogout }: PressKitPageProps) => {
       </main>
 
       <Footer onNavigate={onNavigate} />
-    </div>
+    </LoggedInPageShell>
   );
 };
 

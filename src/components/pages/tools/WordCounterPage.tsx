@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import Header from '../../common/Header';
+import LoggedInPageShell from '../../workspace/LoggedInPageShell';
 import Footer from '../../common/Footer';
 import ScholarMascot from '../../common/ScholarMascot';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
@@ -68,9 +68,7 @@ const WordCounterPage = ({ onNavigate, user, onLogout }: WordCounterPageProps) =
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-clip bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="word-counter" />
-
+    <LoggedInPageShell className="relative min-h-screen overflow-x-clip bg-stone-50 dark:bg-stone-950" user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="word-counter">
       {/* Hero Section */}
       <section className="py-16 sm:py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -275,7 +273,7 @@ const WordCounterPage = ({ onNavigate, user, onLogout }: WordCounterPageProps) =
       <EmbedCodeBlock slug="word-counter" toolName="Word Counter" height={500} accent="#1CB0F6" />
 
       <Footer onNavigate={onNavigate} />
-    </div>
+    </LoggedInPageShell>
   );
 };
 

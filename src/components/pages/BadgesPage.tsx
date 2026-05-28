@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import Header from '../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
 import BadgeCreature from '../common/BadgeCreature';
 import {
@@ -65,6 +63,7 @@ const CATEGORY_STYLES: Record<string, { emoji: string; color: string; borderColo
   mastery: { emoji: '⭐', color: '#1CB0F6', borderColor: '#1899D6', bg: 'bg-[#DDF4FF] dark:bg-[#1CB0F6]/10' },
   subscription: { emoji: '👑', color: '#FF9600', borderColor: '#D97F00', bg: 'bg-[#FFF4E0] dark:bg-[#FF9600]/10' },
   special: { emoji: '✨', color: '#FF4B4B', borderColor: '#E04343', bg: 'bg-[#FFE8E8] dark:bg-[#FF4B4B]/10' },
+  games: { emoji: '🎮', color: '#A560E8', borderColor: '#8A48C7', bg: 'bg-[#F3EAFF] dark:bg-[#A560E8]/10' },
 };
 
 const getLevelColor = (level: number) => {
@@ -76,7 +75,7 @@ const getLevelColor = (level: number) => {
 };
 
 const BadgesPage = ({ onNavigate, user, onLogout }: BadgesPageProps) => {
-  const [filter, setFilter] = useState<'all' | 'getting-started' | 'streak' | 'mastery' | 'subscription' | 'special'>('all');
+  const [filter, setFilter] = useState<'all' | 'getting-started' | 'streak' | 'mastery' | 'subscription' | 'special' | 'games'>('all');
   const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null);
   const [unlocked, setUnlocked] = useState<Record<string, string>>({});
   const [totalXP, setTotalXP] = useState(0);
@@ -94,13 +93,10 @@ const BadgesPage = ({ onNavigate, user, onLogout }: BadgesPageProps) => {
   const levelColors = getLevelColor(levelInfo.level);
 
   const filteredBadges = filter === 'all' ? BADGES : BADGES.filter(b => b.category === filter);
-  const categories: Array<'all' | 'getting-started' | 'streak' | 'mastery' | 'subscription' | 'special'> = ['all', 'getting-started', 'streak', 'mastery', 'subscription', 'special'];
+  const categories: Array<'all' | 'getting-started' | 'streak' | 'mastery' | 'subscription' | 'special' | 'games'> = ['all', 'getting-started', 'streak', 'mastery', 'games', 'subscription', 'special'];
 
   return (
-    <div className="relative min-h-screen overflow-x-clip bg-stone-50 dark:bg-stone-950 font-sans">
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="badges" />
-
+    <>
       <style>{`
         @keyframes badgeFadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes badgePop { 0% { transform: scale(0.85); } 60% { transform: scale(1.05); } 100% { transform: scale(1); } }
@@ -345,13 +341,14 @@ const BadgesPage = ({ onNavigate, user, onLogout }: BadgesPageProps) => {
               Stats from your WriteScholar journey
             </p>
           </div>
-          <div className="p-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+          <div className="p-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
             {[
               { label: 'Documents', value: stats.uploads_count, emoji: '📄', color: '#58CC02' },
               { label: 'Analyses', value: stats.analyses_count, emoji: '📝', color: '#FF4B4B' },
               { label: 'Study Packs', value: (stats as any).study_packs_count || 0, emoji: '📦', color: '#FF9600' },
               { label: 'Citations', value: stats.citations_count, emoji: '📚', color: '#1CB0F6' },
               { label: 'Summaries', value: stats.summaries_count, emoji: '📋', color: '#A560E8' },
+              { label: 'Arcade mode', value: (stats as any).total_games_played || 0, emoji: '🎮', color: '#A560E8' },
             ].map((stat) => (
               <div
                 key={stat.label}
@@ -473,7 +470,7 @@ const BadgesPage = ({ onNavigate, user, onLogout }: BadgesPageProps) => {
         </div>,
         document.body
       )}
-    </div>
+    </>
   );
 };
 

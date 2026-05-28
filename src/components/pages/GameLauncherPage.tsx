@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Header from '../common/Header';
+import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
 
 interface GameLauncherPageProps {
@@ -228,8 +228,7 @@ const GameLauncherPage: React.FC<GameLauncherPageProps> = ({ gameType, onNavigat
         `}</style>
       </div>
 
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} />
-
+      <LoggedInPageShell user={user} onNavigate={onNavigate} onLogout={onLogout}>
       <main className="relative max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Back */}
         <button
@@ -446,7 +445,8 @@ const GameLauncherPage: React.FC<GameLauncherPageProps> = ({ gameType, onNavigat
       </main>
 
       <Footer onNavigate={onNavigate} />
-    </div>
+    </LoggedInPageShell>
+  </div>
   );
 };
 

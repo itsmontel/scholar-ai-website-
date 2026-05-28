@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import Header from '../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
+import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
 import NewsletterSubscription from '../common/NewsletterSubscription';
 import { BLOG_DEFAULT_AUTHOR_BIO, BLOG_DEFAULT_AUTHOR_ROLE, getPostBySlug, getBlogPostsSortedDesc } from '../../data/blogPosts';
@@ -133,9 +132,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
       return null;
     }
     return (
-      <div className="relative min-h-screen overflow-x-clip">
-        <WriteScholarEditorialBackgroundLayers position="fixed" />
-        <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="blog" />
+    <LoggedInPageShell user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="blog">
         <main className="max-w-4xl mx-auto px-4 py-16 text-center">
           <h1 className="text-2xl font-bold text-stone-800 dark:text-stone-100 mb-4">Post not found</h1>
           <a
@@ -150,7 +147,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
           </a>
         </main>
         <Footer onNavigate={onNavigate} />
-      </div>
+      </LoggedInPageShell>
     );
   }
 
@@ -164,10 +161,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
   const updatedLabel = new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 
   return (
-    <div className="relative min-h-screen overflow-x-clip">
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="blog" />
-
+    <LoggedInPageShell user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="blog">
       <main className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-14">
         {/* Hero */}
         <header className="max-w-3xl mb-10 md:mb-12">
@@ -323,7 +317,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
       </main>
 
       <Footer onNavigate={onNavigate} />
-    </div>
+    </LoggedInPageShell>
   );
 };
 

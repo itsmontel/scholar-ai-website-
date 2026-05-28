@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import Header from '../common/Header';
+import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
 import { applyPageSeoTags, injectJsonLd, removeJsonLd, absoluteCanonicalUrl } from '../../utils/seo';
 
@@ -453,8 +453,7 @@ const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) 
   }, [config]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-stone-50 dark:bg-stone-950">
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} />
+    <LoggedInPageShell className="min-h-screen flex flex-col bg-stone-50 dark:bg-stone-950" user={user} onNavigate={onNavigate} onLogout={onLogout}>
 
       {/* Hero, with mascot GIF in a coloured ring above the H1 so the page
           feels like part of the WriteScholar product. Decorative dot pattern
@@ -784,7 +783,7 @@ const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) 
       </main>
 
       <Footer onNavigate={onNavigate} />
-    </div>
+    </LoggedInPageShell>
   );
 };
 

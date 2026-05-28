@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import Header from '../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
+import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
 import { getExpiringSoonCount, getExpiringSoonUrgencyText, getDaysUntilExpiration } from '../../utils/usageReset';
 
@@ -194,9 +193,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
 
   if (isLoading) {
     return (
-      <div className="relative min-h-screen overflow-x-clip bg-[#FAF7FF] dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-        <WriteScholarEditorialBackgroundLayers position="fixed" />
-        <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="citations" />
+      <LoggedInPageShell user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="citations">
         <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
           <div className="flex items-center justify-center min-h-64">
             <div className="text-center">
@@ -205,15 +202,13 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
             </div>
           </div>
         </main>
-      </div>
+      </LoggedInPageShell>
     );
   }
 
   if (error) {
     return (
-      <div className="relative min-h-screen overflow-x-clip bg-[#FAF7FF] dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-        <WriteScholarEditorialBackgroundLayers position="fixed" />
-        <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="citations" />
+      <LoggedInPageShell user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="citations">
         <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
           <div className="text-center py-16">
             <div className="w-16 h-16 bg-[#FF4B4B] rounded-2xl flex items-center justify-center mx-auto mb-4 border-2 border-b-4 border-[#E04343]">
@@ -231,7 +226,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
             </button>
           </div>
         </main>
-      </div>
+      </LoggedInPageShell>
     );
   }
 
@@ -279,9 +274,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
   ];
 
   return (
-    <div className="relative min-h-screen overflow-x-clip bg-[#FAF7FF] dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="citations" />
+    <LoggedInPageShell user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="citations">
 
       <main className="max-w-6xl mx-auto px-3 sm:px-6 py-8 sm:py-12 w-full min-w-0 overflow-x-clip">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 mb-10">
@@ -662,7 +655,7 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
       )}
 
       <Footer onNavigate={onNavigate} />
-    </div>
+    </LoggedInPageShell>
   );
 };
 

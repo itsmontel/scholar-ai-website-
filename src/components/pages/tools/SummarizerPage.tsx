@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import Header from '../../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../../common/WriteScholarEditorialBackground';
+import LoggedInPageShell from '../../workspace/LoggedInPageShell';
 import Footer from '../../common/Footer';
 // ScholarMascot replaced with mascot GIF
 import AnalysisAnimation from '../../common/AnalysisAnimation';
@@ -225,9 +224,7 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
 
   if (showFakeAnimation) {
     return (
-      <div className="relative min-h-screen flex flex-col overflow-x-clip">
-        <WriteScholarEditorialBackgroundLayers position="fixed" />
-        <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="summarizer" />
+      <LoggedInPageShell className="relative min-h-screen flex flex-col overflow-x-clip" user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="summarizer">
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <AnalysisAnimation message="Preparing your summary..." />
@@ -235,15 +232,13 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
           </div>
         </main>
         <Footer onNavigate={onNavigate} />
-      </div>
+      </LoggedInPageShell>
     );
   }
 
   if (showSignupPrompt) {
     return (
-      <div className="relative min-h-screen flex flex-col overflow-x-clip">
-        <WriteScholarEditorialBackgroundLayers position="fixed" />
-        <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="summarizer" />
+      <LoggedInPageShell className="relative min-h-screen flex flex-col overflow-x-clip" user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="summarizer">
         <main className="flex-1 flex items-center justify-center px-4">
           <div className="max-w-md w-full bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 rounded-2xl p-8 text-center">
             <div className="w-16 h-16 mx-auto mb-4 bg-[#58CC02] rounded-2xl flex items-center justify-center border-2 border-b-4 border-[#46A302]">
@@ -274,14 +269,12 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
           </div>
         </main>
         <Footer onNavigate={onNavigate} />
-      </div>
+      </LoggedInPageShell>
     );
   }
 
   return (
-    <div className="relative min-h-screen flex flex-col overflow-x-clip" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="summarizer" />
+    <LoggedInPageShell className="relative min-h-screen flex flex-col overflow-x-clip" user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="summarizer">
 
       <main className="flex-1 w-full min-w-0 overflow-x-clip">
         {/* Hero Section */}
@@ -642,7 +635,7 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
       <ToolPageSeoContent {...summarizerSeo} onNavigate={onNavigate} />
 
       <Footer onNavigate={onNavigate} />
-    </div>
+    </LoggedInPageShell>
   );
 };
 

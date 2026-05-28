@@ -1685,7 +1685,45 @@ function getCreatureSVG(id: string, alive: boolean) {
       );
 
     // ═══════════════════════════════════════
-    // FOCUS MODE (5 creatures)
+    // GAMES — Word Tower, Word Blitz, and combined Arcade.
+    // Re-uses thematically-matched existing creatures so the new
+    // badges ship without bespoke artwork. Tower → builder/library
+    // theme. Blitz → spark/speed/streak theme. Arcade → tool /
+    // mastery theme.
+    // ═══════════════════════════════════════
+    case 'tower_rookie':
+      return getCreatureSVG('first_steps', alive);
+    case 'tower_climber':
+      return getCreatureSVG('library_keeper', alive);
+    case 'tower_champion':
+      return getCreatureSVG('library_builder', alive);
+    case 'tower_master':
+      return getCreatureSVG('library_hoarder', alive);
+
+    case 'blitz_rookie':
+      return getCreatureSVG('brain_spark', alive);
+    case 'blitz_typist':
+      return getCreatureSVG('quick_starter', alive);
+    case 'blitz_champion':
+      return getCreatureSVG('streak_legend', alive);
+    case 'blitz_master':
+      return getCreatureSVG('streak_immortal', alive);
+
+    case 'arcade_curious':
+      return getCreatureSVG('tool_tryer', alive);
+    case 'arcade_regular':
+      return getCreatureSVG('tool_explorer', alive);
+    case 'arcade_devoted':
+      return getCreatureSVG('tool_adventurer', alive);
+    case 'arcade_master':
+      return getCreatureSVG('study_tool_centurion', alive);
+    case 'arcade_triathlete':
+      return getCreatureSVG('all_rounder', alive);
+
+    // ═══════════════════════════════════════
+    // FOCUS MODE (legacy — these badges have been removed but
+    // the SVGs are kept so older user data with these IDs still
+    // renders. New code never references them).
     // ═══════════════════════════════════════
 
     // Keyley - key creature

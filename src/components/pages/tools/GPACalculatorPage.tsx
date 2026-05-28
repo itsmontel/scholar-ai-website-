@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import Header from '../../common/Header';
+import LoggedInPageShell from '../../workspace/LoggedInPageShell';
 import Footer from '../../common/Footer';
 import ScholarMascot from '../../common/ScholarMascot';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
@@ -116,9 +116,7 @@ const GPACalculatorPage = ({ onNavigate, user, onLogout }: GPACalculatorPageProp
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-clip bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="gpa-calculator" />
-
+    <LoggedInPageShell className="relative min-h-screen overflow-x-clip bg-stone-50 dark:bg-stone-950" user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="gpa-calculator">
       {/* Hero Section */}
       <section className="pt-16 pb-10 sm:pt-20 sm:pb-12">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -358,7 +356,7 @@ const GPACalculatorPage = ({ onNavigate, user, onLogout }: GPACalculatorPageProp
       <EmbedCodeBlock slug="gpa-calculator" toolName="GPA Calculator" height={550} accent="#58CC02" />
 
       <Footer onNavigate={onNavigate} />
-    </div>
+    </LoggedInPageShell>
   );
 };
 

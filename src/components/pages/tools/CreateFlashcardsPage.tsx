@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import Header from '../../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../../common/WriteScholarEditorialBackground';
+import LoggedInPageShell from '../../workspace/LoggedInPageShell';
 import Footer from '../../common/Footer';
 import FlashcardViewer from '../../common/FlashcardViewer';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
@@ -308,9 +307,8 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
       onNavigate('dashboard');
     };
 
-    return (
-      <div className="relative min-h-screen overflow-x-clip" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-        <WriteScholarEditorialBackgroundLayers position="fixed" />
+    const studyContent = (
+      <>
         {isMinimalUI ? (
           <div className="sticky top-0 z-50 bg-white/95 dark:bg-stone-900/95 backdrop-blur-sm border-b-2 border-stone-200 dark:border-stone-700 px-4 py-3 flex items-center gap-3">
             <button
@@ -321,9 +319,7 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
             </button>
             <h1 className="text-base font-extrabold uppercase tracking-wide text-stone-800 dark:text-stone-100 truncate" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>{studyMode.title}</h1>
           </div>
-        ) : (
-          <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="create-flashcards" sticky />
-        )}
+        ) : null}
         <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
           {!isMinimalUI && (
             <div className="flex items-center justify-between mb-6">
@@ -345,14 +341,22 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
           />
         </main>
         {!isMinimalUI && <Footer onNavigate={onNavigate} />}
-      </div>
+      </>
+    );
+
+    if (isMinimalUI) {
+      return <div className="relative min-h-screen overflow-x-clip">{studyContent}</div>;
+    }
+
+    return (
+      <LoggedInPageShell user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="create-flashcards" headerProps={{ sticky: true }}>
+        {studyContent}
+      </LoggedInPageShell>
     );
   }
 
   return (
-    <div className="relative min-h-screen overflow-x-clip" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="create-flashcards" sticky />
+    <LoggedInPageShell user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="create-flashcards" headerProps={{ sticky: true }}>
 
       {/* Hero */}
       <section className="pt-8 sm:pt-14 pb-6 sm:pb-10">
@@ -859,7 +863,7 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
       <ToolPageSeoContent {...flashcardsSeo} onNavigate={onNavigate} />
 
       <Footer onNavigate={onNavigate} />
-    </div>
+    </LoggedInPageShell>
   );
 };
 

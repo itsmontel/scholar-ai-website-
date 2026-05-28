@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import jsPDF from 'jspdf';
-import Header from '../common/Header';
+import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
 import { AnalysisCardSkeleton } from '../common/LoadingSpinner';
 
@@ -269,20 +269,18 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
 
   if (isLoading) {
     return (
-      <div className="relative min-h-screen flex items-center justify-center overflow-x-clip bg-[#FAF7FF] dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+      <LoggedInPageShell user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="analysis-history" className="relative min-h-screen flex items-center justify-center overflow-x-clip bg-[#FAF7FF] dark:bg-stone-950">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-stone-200 border-t-[#A560E8] mx-auto"></div>
           <p className="mt-4 text-stone-500 dark:text-stone-400 font-extrabold">Loading analysis history...</p>
         </div>
-      </div>
+      </LoggedInPageShell>
     );
   }
 
   if (!isPaidUser) {
-    return (
-      <div className={showHeader ? 'relative min-h-screen overflow-x-clip bg-[#FAF7FF] dark:bg-stone-950' : 'bg-[#FAF7FF] dark:bg-stone-950'} style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-        {showHeader && <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="analysis-history" />}
-        <div className={showHeader ? 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10' : 'p-6'}>
+    const upgradeContent = (
+      <div className={showHeader ? 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10' : 'p-6'}>
           <div className="max-w-md mx-auto text-center py-16">
             <div className="w-20 h-20 bg-[#F3EAFF] border-2 border-b-4 border-[#A560E8]/30 rounded-2xl flex items-center justify-center mx-auto mb-6">
               <svg className="w-10 h-10 text-[#A560E8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -307,15 +305,21 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
             </button>
           </div>
         </div>
-      </div>
     );
+
+    if (showHeader) {
+      return (
+        <LoggedInPageShell user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="analysis-history">
+          {upgradeContent}
+        </LoggedInPageShell>
+      );
+    }
+
+    return <div className="bg-[#FAF7FF] dark:bg-stone-950">{upgradeContent}</div>;
   }
 
-  return (
-    <div className={showHeader ? 'relative min-h-screen overflow-x-clip bg-[#FAF7FF] dark:bg-stone-950' : 'bg-[#FAF7FF] dark:bg-stone-950'} style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-      {showHeader && <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="analysis-history" />}
-
-      <div className={showHeader ? "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10" : "p-6"}>
+  const historyContent = (
+    <div className={showHeader ? 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10' : 'p-6'}>
         {/* Header */}
         <div className="mb-8 sm:mb-10">
           <div className="flex items-center gap-2.5">
@@ -590,11 +594,20 @@ const AnalysisHistoryPage: React.FC<AnalysisHistoryPageProps> = ({ onNavigate, u
             </div>
           </div>
         )}
-      </div>
 
       {showHeader && <Footer onNavigate={onNavigate} />}
     </div>
   );
+
+  if (showHeader) {
+    return (
+      <LoggedInPageShell user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="analysis-history">
+        {historyContent}
+      </LoggedInPageShell>
+    );
+  }
+
+  return <div className="bg-[#FAF7FF] dark:bg-stone-950">{historyContent}</div>;
 };
 
 export default AnalysisHistoryPage;

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import Header from '../common/Header';
+import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
 import FeatureHub, { type HubItem } from '../common/FeatureHub';
 
@@ -96,8 +96,7 @@ const StudyPackHubPage: React.FC<StudyPackHubPageProps> = ({ onNavigate, user, o
   }));
 
   return (
-    <div className="relative min-h-screen overflow-x-clip bg-[#FAFAFA] dark:bg-stone-950">
-      <Header onNavigate={onNavigate} user={user as User} onLogout={onLogout} currentPage="study-pack" />
+    <LoggedInPageShell className="relative min-h-screen overflow-x-clip bg-[#FAFAFA] dark:bg-stone-950" user={user as User} onNavigate={onNavigate} onLogout={onLogout} currentPage="study-pack">
       <FeatureHub
         title="Study packs"
         subtitle="Turn your notes into flashcards, quizzes, crosswords & more."
@@ -114,7 +113,7 @@ const StudyPackHubPage: React.FC<StudyPackHubPageProps> = ({ onNavigate, user, o
         emptyStateMessage="Your first study pack will live here. Create one above to get started."
       />
       <Footer onNavigate={onNavigate} />
-    </div>
+    </LoggedInPageShell>
   );
 };
 

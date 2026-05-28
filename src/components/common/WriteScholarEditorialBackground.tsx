@@ -8,6 +8,8 @@
  * hero. Default stays the cool stone-50 wash so other pages (login,
  * help, etc.) are unaffected.
  */
+import { useWorkspaceChrome } from '../workspace/workspaceChrome';
+
 export function WriteScholarEditorialBackgroundLayers({
   position = 'fixed',
   className = '',
@@ -19,6 +21,8 @@ export function WriteScholarEditorialBackgroundLayers({
   /** Switch base + gradient to the purple-tinted white used by the landing hero. */
   purpleWash?: boolean;
 }) {
+  const inWorkspaceChrome = useWorkspaceChrome();
+  if (inWorkspaceChrome) return null;
   const pos = position === 'fixed' ? 'fixed' : 'absolute';
   const baseBg = purpleWash ? 'bg-[#FAF7FF]' : 'bg-[#f8fafc]';
   const gradient = purpleWash

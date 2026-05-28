@@ -242,6 +242,12 @@ interface InteractiveDocumentAnalysisProps {
   onNavigate: (page: string) => void;
   /** When true (e.g. landing hero), show compact marketing lines inside the mock chrome */
   landingHeroEmbed?: boolean;
+  /** Controlled sample id ("b", "c", …). When set, parent owns sample selection. */
+  selectedDemoId?: string;
+  /** Called when the user picks a different sample (controlled or uncontrolled). */
+  onSelectedDemoIdChange?: (demoId: string) => void;
+  /** Hide the in-chrome B/C tab row — use when floating grade pills sit outside the frame. */
+  hideSampleSwitcher?: boolean;
   /** Fires whenever the user switches between the B/C/etc. demo samples.
    *  Receives the uppercase grade letter ("B", "C", …). Used by the
    *  landing hero to keep its floating grade pill in sync with the
@@ -252,9 +258,24 @@ interface InteractiveDocumentAnalysisProps {
 export default function InteractiveDocumentAnalysis({
   onNavigate,
   landingHeroEmbed = false,
+  selectedDemoId: selectedDemoIdProp,
+  onSelectedDemoIdChange,
+  hideSampleSwitcher = false,
   onSampleChange,
 }: InteractiveDocumentAnalysisProps) {
-  const [selectedDemoId, setSelectedDemoId] = useState<string>(DEMO_PAPERS.find((p) => p.id === 'b')?.id ?? DEMO_PAPERS[0].id);
+  const defaultDemoId = DEMO_PAPERS.find((p) => p.id === 'b')?.id ?? DEMO_PAPERS[0].id;
+  const [internalDemoId, setInternalDemoId] = useState<string>(defaultDemoId);
+  const selectedDemoId = selectedDemoIdProp ?? internalDemoId;
+
+  const selectDemoId = useCallback(
+    (id: string) => {
+      if (selectedDemoIdProp === undefined) {
+        setInternalDemoId(id);
+      }
+      onSelectedDemoIdChange?.(id);
+    },
+    [selectedDemoIdProp, onSelectedDemoIdChange]
+  );
   const [selectedAnnotation, setSelectedAnnotation] = useState<string | null>(null);
   const [hoveredAnnotation, setHoveredAnnotation] = useState<string | null>(null);
   const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null);
@@ -279,6 +300,14 @@ export default function InteractiveDocumentAnalysis({
       requestAnimationFrame(fn);
     });
   }, []);
+
+  /** When the sample changes (floating pills or in-chrome tabs), reset
+   *  selection state so feedback cards match the new draft. */
+  useEffect(() => {
+    setSelectedAnnotation(null);
+    setHoveredAnnotation(null);
+    setMobileTab('document');
+  }, [selectedDemoId]);
 
   /** Sync the active sample's grade letter back up to the parent (e.g.
    *  the landing hero's floating grade pill). Fires on mount with the
@@ -483,29 +512,27 @@ export default function InteractiveDocumentAnalysis({
         {/* Thin brand-purple accent strip at the very top edge —
             the "tab" detail that makes the chrome feel like a folder. */}
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#A560E8] via-[#8A48C7] to-[#A560E8]" aria-hidden />
-        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-3 sm:gap-y-2 mb-4">
-          <div className="flex flex-wrap gap-2">
-            {DEMO_PAPERS.map((d) => (
-              <button
-                key={d.id}
-                onClick={() => {
-                  setSelectedDemoId(d.id);
-                  setSelectedAnnotation(null);
-                  setHoveredAnnotation(null);
-                  setMobileTab('document');
-                }}
-                className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all ${
-                  selectedDemoId === d.id
-                    ? 'bg-[#58CC02] text-white border-2 border-b-4 border-[#46A302]'
-                    : 'bg-white text-stone-700 hover:bg-stone-50 border-2 border-b-4 border-stone-200 active:border-b-2 active:translate-y-0.5'
-                }`}
-                style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-              >
-                {d.label}
-              </button>
-            ))}
-          </div>
-          <p className="text-[11px] sm:text-xs text-stone-500 dark:text-stone-400 text-left sm:text-right leading-snug sm:ml-auto max-w-none sm:max-w-[min(100%,22rem)]">
+        <div className={`flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-3 sm:gap-y-2 ${hideSampleSwitcher ? '' : 'mb-4'}`}>
+          {!hideSampleSwitcher && (
+            <div className="flex flex-wrap gap-2">
+              {DEMO_PAPERS.map((d) => (
+                <button
+                  key={d.id}
+                  type="button"
+                  onClick={() => selectDemoId(d.id)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all ${
+                    selectedDemoId === d.id
+                      ? 'bg-[#58CC02] text-white border-2 border-b-4 border-[#46A302]'
+                      : 'bg-white text-stone-700 hover:bg-stone-50 border-2 border-b-4 border-stone-200 active:border-b-2 active:translate-y-0.5'
+                  }`}
+                  style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+                >
+                  {d.label}
+                </button>
+              ))}
+            </div>
+          )}
+          <p className={`text-[11px] sm:text-xs text-stone-500 dark:text-stone-400 leading-snug ${hideSampleSwitcher ? '' : 'text-left sm:text-right sm:ml-auto max-w-none sm:max-w-[min(100%,22rem)]'}`}>
             Professor-style review · sample draft (not your work)
           </p>
         </div>

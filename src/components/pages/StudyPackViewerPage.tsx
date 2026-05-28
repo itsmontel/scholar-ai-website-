@@ -1,6 +1,5 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
-import Header from '../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
+import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import FlashcardViewer from '../common/FlashcardViewer';
 import LessonViewer from '../common/LessonViewer';
 import QuizViewer from '../common/QuizViewer';
@@ -239,9 +238,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
 
   if (!pack?.data) {
     return (
-      <div className="relative min-h-screen overflow-x-clip" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-        <WriteScholarEditorialBackgroundLayers position="fixed" />
-        <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="study-pack-viewer" />
+      <LoggedInPageShell user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="study-pack-viewer">
         <div className="max-w-2xl mx-auto px-4 py-20 text-center">
           <ScholarMascot size={100} animated={true} pose="studying" />
           <h2 className="text-xl font-extrabold text-stone-800 dark:text-stone-100 mt-6 uppercase tracking-wide">No study pack loaded</h2>
@@ -253,7 +250,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
             Go to Dashboard
           </button>
         </div>
-      </div>
+      </LoggedInPageShell>
     );
   }
 
@@ -570,9 +567,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
   );
 
   return (
-    <div className="relative min-h-screen flex flex-col overflow-x-clip" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="study-pack-viewer" />
+    <LoggedInPageShell className="relative min-h-screen flex flex-col overflow-x-clip" user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="study-pack-viewer">
 
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-6">
         {/* Back + Title */}
@@ -649,7 +644,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
           onClose={() => setExportFormatTarget(null)}
         />
       )}
-    </div>
+    </LoggedInPageShell>
   );
 };
 

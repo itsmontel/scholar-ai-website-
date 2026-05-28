@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import Header from '../../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../../common/WriteScholarEditorialBackground';
+import LoggedInPageShell from '../../workspace/LoggedInPageShell';
 import Footer from '../../common/Footer';
+import { WriteScholarEditorialBackgroundLayers } from '../../common/WriteScholarEditorialBackground';
 import { WORD_TOWER_WORD_BANK, WordTowerQuestion as BankQuestion } from '../../../data/wordTowerWordBank';
 import { WORD_TOWER_MENTAL_MATH_BANK } from '../../../data/wordTowerMentalMathBank';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
+import { trackWordTowerGame } from '../../../data/achievements';
 
 /* ────────────────────── Types ────────────────────── */
 
@@ -407,6 +408,7 @@ const WordTowerPage = ({ onNavigate, user, onLogout }: WordTowerPageProps) => {
     vibrate([100, 50, 200]);
 
     setTimeout(() => {
+      try { trackWordTowerGame(scoreRef.current); } catch { /* ignore */ }
       setGameState('gameover');
       setCollapsingBlocks([]);
     }, 1600);
@@ -1413,10 +1415,8 @@ const WordTowerPage = ({ onNavigate, user, onLogout }: WordTowerPageProps) => {
     );
   };
 
-  return (
-    <div className="relative min-h-screen flex flex-col overflow-x-clip" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
-      {!showMinimalUI && <Header onNavigate={onNavigate} user={user} onLogout={onLogout || (() => {})} currentPage="word-tower" />}
+  const pageContent = (
+    <>
       {showMinimalUI && (gameState === 'menu' || gameState === 'loading' || gameState === 'ready' || gameState === 'gameover') && (
         <div className="sticky top-0 z-10 flex items-center justify-between px-3 py-2 bg-white/95 backdrop-blur border-b border-stone-200">
           <button onClick={() => {
@@ -1439,7 +1439,17 @@ const WordTowerPage = ({ onNavigate, user, onLogout }: WordTowerPageProps) => {
       {(gameState === 'playing' || gameState === 'collapsing') && renderGame()}
       {gameState === 'gameover' && renderGameOver()}
       {!showMinimalUI && gameState !== 'playing' && gameState !== 'collapsing' && <Footer onNavigate={onNavigate} />}
-    </div>
+    </>
+  );
+
+  if (showMinimalUI) {
+    return <div className="relative min-h-screen flex flex-col overflow-x-clip">{pageContent}</div>;
+  }
+
+  return (
+    <LoggedInPageShell className="relative min-h-screen flex flex-col overflow-x-clip" user={user} onNavigate={onNavigate} onLogout={onLogout || (() => {})} currentPage="word-tower">
+      {pageContent}
+    </LoggedInPageShell>
   );
 };
 

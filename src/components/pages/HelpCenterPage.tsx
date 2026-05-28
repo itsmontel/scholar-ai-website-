@@ -272,11 +272,8 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
     }
   };
 
-  return (
-    <div className="relative min-h-screen overflow-x-clip" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="help" />
-
+  const helpContent = (
+    <>
       {/* Hero Section */}
       <section className="py-16 sm:py-20 bg-stone-50 dark:bg-stone-950 relative z-10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -506,6 +503,18 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
       </section>
 
       <Footer onNavigate={onNavigate} />
+    </>
+  );
+
+  if (user) {
+    return <div style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>{helpContent}</div>;
+  }
+
+  return (
+    <div className="relative min-h-screen overflow-x-clip" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+      <WriteScholarEditorialBackgroundLayers position="fixed" />
+      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="help" />
+      {helpContent}
     </div>
   );
 };

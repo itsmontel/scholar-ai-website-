@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import Header from '../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
+import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
 
 interface FriendsPageProps {
@@ -500,10 +499,7 @@ const FriendsPage = ({ onNavigate, user, onLogout }: FriendsPageProps) => {
   const pendingCount = pendingRequests.length + incomingShares.length;
 
   return (
-    <div className="relative min-h-screen flex flex-col overflow-x-clip">
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="friends" />
-
+    <LoggedInPageShell className="relative min-h-screen flex flex-col overflow-x-clip" user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="friends">
       <main className="flex-1 max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 w-full">
         {/* Page Header */}
         <div className="text-center mb-8">
@@ -1022,7 +1018,7 @@ const FriendsPage = ({ onNavigate, user, onLogout }: FriendsPageProps) => {
       </main>
 
       <Footer onNavigate={onNavigate} />
-    </div>
+    </LoggedInPageShell>
   );
 };
 

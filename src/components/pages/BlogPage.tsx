@@ -1,6 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import Header from '../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
+import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
 import LandingSectionLayers from '../common/LandingSectionLayers';
 import NewsletterSubscription from '../common/NewsletterSubscription';
@@ -339,10 +338,7 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-clip">
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="blog" />
-
+    <LoggedInPageShell user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="blog">
       <main>
         <section
           className="relative overflow-hidden border-b border-stone-200/90 dark:border-stone-800"
@@ -505,7 +501,7 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
       </main>
 
       <Footer onNavigate={onNavigate} />
-    </div>
+    </LoggedInPageShell>
   );
 };
 

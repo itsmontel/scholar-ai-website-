@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback } from 'react';
 import DOMPurify from 'dompurify';
 import { diffWordsWithSpace } from 'diff';
-import Header from '../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
+import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
 import LoadingSpinner from '../common/LoadingSpinner';
 import AnalysisAnimation from '../common/AnalysisAnimation';
@@ -3161,13 +3160,12 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
 
   if (isLoading) {
     return (
-      <div className="relative min-h-screen flex items-center justify-center overflow-x-clip">
-        <WriteScholarEditorialBackgroundLayers position="fixed" />
+      <LoggedInPageShell user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="analysis" className="relative min-h-screen flex items-center justify-center overflow-x-clip">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#A560E8] mx-auto"></div>
           <p className="mt-4 text-stone-600">Loading analysis tools...</p>
         </div>
-      </div>
+      </LoggedInPageShell>
     );
   }
 
@@ -3211,8 +3209,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
     isActivationTutorial && (activationCoachStep === 'mla' || activationCoachStep === 'analyze');
 
   return (
-    <div className="relative min-h-screen overflow-x-clip">
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
+    <LoggedInPageShell user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="analysis" headerProps={{ libraryActivationHighlight: isActivationTutorial && activationCoachStep === 'library', blockNavigationInteractions: activationCoachPointerGate }}>
       <div
         className={
           activationCoachPointerGate
@@ -3226,14 +3223,6 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
           aria-hidden
         />
       )}
-      <Header
-        onNavigate={onNavigate}
-        user={user}
-        onLogout={onLogout}
-        currentPage="analysis"
-        libraryActivationHighlight={isActivationTutorial && activationCoachStep === 'library'}
-        blockNavigationInteractions={activationCoachPointerGate}
-      />
 
       {/* Scale the analysis-results body down to 80% so the dense
           essay-text + annotations + rubric layout has more visual
@@ -5214,7 +5203,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
           }}
         />
       )}
-    </div>
+    </LoggedInPageShell>
   );
 };
 

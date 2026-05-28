@@ -135,7 +135,7 @@ export default function StudyPacksPanel({ onNavigate }: { onNavigate: (page: str
             try { sessionStorage.setItem(DRAFT_KEY, e.target.value); } catch { /* noop */ }
           }}
           rows={8}
-          placeholder="Drop in a chapter, your class notes, an article… at least 50 words. We'll turn it into a lesson, flashcards, a quiz, a crossword and arcade games."
+          placeholder="Drop in a chapter, your class notes, an article… at least 50 words. We'll turn it into a lesson, flashcards, a quiz, a crossword and arcade mode."
           className="w-full px-4 py-3 rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-sm text-stone-800 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#FF9600]/40 focus:border-[#FF9600]/40 resize-y"
         />
         <input
@@ -193,7 +193,7 @@ export default function StudyPacksPanel({ onNavigate }: { onNavigate: (page: str
       <div className="mt-8">
         <PreviewStrip
           title="Everything a study pack creates"
-          subtitle="One paste of notes becomes a full lesson, flashcards, a quiz, a crossword and arcade games."
+          subtitle="One paste of notes becomes a full lesson, flashcards, a quiz, a crossword and arcade mode."
           aspect="aspect-[4/5]"
           tint="#FF9600"
           tintShadowRgb="255,150,0"

@@ -1,4 +1,4 @@
-import Header from '../common/Header';
+import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
 
 interface User {
@@ -19,9 +19,7 @@ const ContactPage = ({ onNavigate, user, onLogout }: ContactPageProps) => {
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-clip transition-colors bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="contact" />
-
+    <LoggedInPageShell className="relative min-h-screen overflow-x-clip transition-colors bg-stone-50 dark:bg-stone-950" user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="contact">
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
         {/* Page Header */}
@@ -236,7 +234,7 @@ Best regards,
       </main>
 
       <Footer onNavigate={onNavigate} />
-    </div>
+    </LoggedInPageShell>
   );
 };
 

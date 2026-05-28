@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import Header from '../common/Header';
+import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
 import FeatureHub, { type HubItem } from '../common/FeatureHub';
 
@@ -107,8 +107,7 @@ const CitationsHubPage: React.FC<CitationsHubPageProps> = ({ onNavigate, user, o
   });
 
   return (
-    <div className="relative min-h-screen overflow-x-clip bg-[#FAFAFA] dark:bg-stone-950">
-      <Header onNavigate={onNavigate} user={user as User} onLogout={onLogout} currentPage="citations" />
+    <LoggedInPageShell className="relative min-h-screen overflow-x-clip bg-[#FAFAFA] dark:bg-stone-950" user={user as User} onNavigate={onNavigate} onLogout={onLogout} currentPage="citations">
       <FeatureHub
         title="Citations"
         subtitle="Find peer-reviewed sources in APA, MLA, Chicago & more."
@@ -125,7 +124,7 @@ const CitationsHubPage: React.FC<CitationsHubPageProps> = ({ onNavigate, user, o
         emptyStateMessage="Your citation searches will live here. Run your first search above."
       />
       <Footer onNavigate={onNavigate} />
-    </div>
+    </LoggedInPageShell>
   );
 };
 

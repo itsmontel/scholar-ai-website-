@@ -269,11 +269,8 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
     return 0;
   };
 
-  return (
-    <div className="relative min-h-screen overflow-x-clip bg-[#FAF7FF] dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-      <WriteScholarEditorialBackgroundLayers position="fixed" />
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="pricing" />
-
+  const pricingContent = (
+    <>
       {/* Hero + plans — same surface treatment as landing pricing section */}
       <section
         className="relative py-16 sm:py-24 overflow-hidden"
@@ -608,6 +605,22 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       </section>
 
       <Footer onNavigate={onNavigate} />
+    </>
+  );
+
+  if (user) {
+    return (
+      <div className="bg-[#FAF7FF] dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+        {pricingContent}
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative min-h-screen overflow-x-clip bg-[#FAF7FF] dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+      <WriteScholarEditorialBackgroundLayers position="fixed" />
+      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="pricing" />
+      {pricingContent}
     </div>
   );
 };

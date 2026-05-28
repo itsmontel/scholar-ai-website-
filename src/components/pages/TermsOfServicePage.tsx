@@ -1,5 +1,5 @@
 import React from 'react';
-import Header from '../common/Header';
+import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
 
 interface TermsOfServicePageProps {
@@ -19,9 +19,7 @@ interface TermsOfServicePageProps {
 
 const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, user, onLogout }) => {
   return (
-    <div className="min-h-screen bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="terms" />
-
+    <LoggedInPageShell className="min-h-screen bg-stone-50 dark:bg-stone-950" user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="terms">
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
         {/* Hero / Title Card */}
         <div className="border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 rounded-2xl p-6 sm:p-8 md:p-10 mb-8">
@@ -66,7 +64,7 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
               <ul className="list-disc list-inside space-y-2 ml-4">
                 <li><strong className="text-stone-700 dark:text-stone-300">Essay Analyzer</strong> — professor-style AI feedback on structure, grammar, argument, citations, and tone</li>
                 <li><strong className="text-stone-700 dark:text-stone-300">Citation Finder</strong> — discovers and formats academic sources in APA, MLA, Chicago, Harvard, and other styles</li>
-                <li><strong className="text-stone-700 dark:text-stone-300">Study Pack</strong> — generates interactive lessons, flashcards, quizzes, crosswords, Crater Blast & Word Tower (quiz games) from your notes in one go</li>
+                <li><strong className="text-stone-700 dark:text-stone-300">Study Pack</strong> — generates interactive lessons, flashcards, quizzes, crosswords, and arcade mode (Crater Blast & Word Tower) from your notes in one go</li>
                 <li><strong className="text-stone-700 dark:text-stone-300">Paper Summarizer</strong> — condenses documents into bullet points or paragraph summaries</li>
                 <li><strong className="text-stone-700 dark:text-stone-300">Focus Mode</strong> — Chrome extension that blocks distracting sites until you complete study goals</li>
                 <li><strong className="text-stone-700 dark:text-stone-300">Document Upload &amp; Library</strong> — upload and manage PDF, DOCX, and TXT files</li>
@@ -327,7 +325,7 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
         </div>
       </main>
       <Footer onNavigate={onNavigate} />
-    </div>
+    </LoggedInPageShell>
   );
 };
 

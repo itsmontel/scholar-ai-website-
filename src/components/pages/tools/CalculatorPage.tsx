@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import Header from '../../common/Header';
+import LoggedInPageShell from '../../workspace/LoggedInPageShell';
 import Footer from '../../common/Footer';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 import ToolPageSeoContent from '../../common/ToolPageSeoContent';
@@ -194,9 +194,7 @@ const CalculatorPage = ({ onNavigate, user, onLogout }: CalculatorPageProps) => 
   ];
 
   return (
-    <div className="min-h-screen bg-stone-50 dark:bg-stone-950" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="calculator" />
-
+    <LoggedInPageShell className="min-h-screen bg-stone-50 dark:bg-stone-950" user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="calculator">
       <section className="py-12 sm:py-16">
         <div className="max-w-2xl mx-auto px-4 sm:px-6">
           {/* Page heading */}
@@ -285,7 +283,7 @@ const CalculatorPage = ({ onNavigate, user, onLogout }: CalculatorPageProps) => 
       <ToolPageSeoContent {...calcSeo} onNavigate={onNavigate} />
 
       <Footer onNavigate={onNavigate} />
-    </div>
+    </LoggedInPageShell>
   );
 };
 

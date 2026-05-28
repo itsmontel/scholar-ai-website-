@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Header from '../common/Header';
+import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
 import DualMascot from '../common/DualMascot';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -98,9 +98,8 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
   ];
 
   return (
-    <>
+    <LoggedInPageShell user={user} onNavigate={onNavigate} onLogout={onLogout}>
       <main className="min-h-screen font-sans overflow-x-clip transition-colors" role="main">
-        <Header onNavigate={onNavigate} user={user} onLogout={onLogout} sticky />
 
         {/* ══════════════════════════════════════════ */}
         {/* HERO SECTION                              */}
@@ -478,7 +477,7 @@ const ShareFriendsPage = ({ onNavigate, user, onLogout }: ShareFriendsPageProps)
 
         <Footer onNavigate={onNavigate} />
       </main>
-    </>
+    </LoggedInPageShell>
   );
 };
 

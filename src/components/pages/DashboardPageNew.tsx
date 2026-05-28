@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import Header from '../common/Header';
-import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
+import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
 import AnalysisAnimation from '../common/AnalysisAnimation';
 import LoadingSpinner from '../common/LoadingSpinner';
@@ -907,9 +906,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
 
       {/* ─── TABLET + DESKTOP DASHBOARD (existing layout) ─── */}
       <div className="hidden md:block">
-      <WriteScholarEditorialBackgroundLayers position="fixed" purpleWash />
-      <Header onNavigate={onNavigate} user={user} onLogout={onLogout} currentPage="dashboard" />
-
+      <LoggedInPageShell user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="dashboard">
       {/* "50% off your first month on monthly plans · use code MAY2026"
           promo banner — HIDDEN. The render block below is preserved
           (gated by `false &&`) so this can be re-enabled in one step
@@ -1180,11 +1177,11 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                   <div className="flex items-center gap-2 mb-0.5">
                     <span aria-hidden className="text-[11px]">🎮</span>
                     <p className="text-[10px] font-extrabold uppercase tracking-[0.22em] text-[#FF4B4B]">
-                      Games
+                      Arcade mode
                     </p>
                   </div>
                 </div>
-                <nav className="px-2 pb-2 pt-0.5 flex flex-col gap-0.5" aria-label="Study games">
+                <nav className="px-2 pb-2 pt-0.5 flex flex-col gap-0.5" aria-label="Arcade mode">
                   {([
                     { id: 'crater_blast', label: 'Crater Blast', hint: 'Blast the right answers', emoji: '💥', page: 'game-launcher-crater-blast', color: '#FF4B4B', borderColor: '#E04343' },
                     { id: 'word_tower', label: 'Word Tower', hint: 'Build your knowledge tower', emoji: '🗼', page: 'game-launcher-word-tower', color: '#58CC02', borderColor: '#46A302' },
@@ -2104,7 +2101,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                       </h2>
 
                       <p className="mt-4 text-center text-sm sm:text-base text-stone-600 dark:text-stone-400 max-w-xl mx-auto leading-relaxed font-bold">
-                        Drop your notes. Get a lesson, flashcards, quizzes, and arcade games — all from your text.
+                        Drop your notes. Get a lesson, flashcards, quizzes, and arcade mode — all from your text.
                       </p>
 
                       <div className="mt-6 grid grid-cols-2 lg:grid-cols-4 gap-2.5 max-w-3xl mx-auto">
@@ -2125,7 +2122,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                         </div>
                         <div className="rounded-xl border-2 border-b-4 border-[#58CC02]/30 dark:border-[#58CC02]/40 bg-[#E5F8D0]/60 dark:bg-[#58CC02]/10 p-3 text-center">
                           <div className="text-xl mb-1" aria-hidden>🎮</div>
-                          <p className="text-[12px] sm:text-[13px] font-extrabold text-[#58CC02] leading-tight">Crater Blast + games</p>
+                          <p className="text-[12px] sm:text-[13px] font-extrabold text-[#58CC02] leading-tight">Crater Blast + arcade mode</p>
                           <p className="text-[10px] sm:text-[11px] text-stone-500 dark:text-stone-400 font-bold mt-0.5">Make studying fun</p>
                         </div>
                       </div>
@@ -2384,7 +2381,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
 
       <Footer onNavigate={onNavigate} />
       </div>
-    </div>
+    </LoggedInPageShell>
   );
 };
 
