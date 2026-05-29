@@ -38,7 +38,7 @@ export default function LandingChatGPTComparisonSection({ onNavigate }: LandingC
       />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <LandingScrollReveal>
+        <LandingScrollReveal className="hidden" aria-hidden>
           <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
             <div className="inline-flex items-center gap-2 mb-5 rounded-full border-2 border-[#A560E8]/40 bg-[#F3EAFF] dark:bg-[#A560E8]/15 px-3.5 py-1.5 shadow-[0_0_12px_rgba(165,96,232,0.25)]">
               <svg className="w-3.5 h-3.5 text-[#A560E8]" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
@@ -149,6 +149,72 @@ export default function LandingChatGPTComparisonSection({ onNavigate }: LandingC
               </svg>
             </button>
             <p className="text-[12px] sm:text-xs font-bold text-[#AFAFAF] dark:text-stone-500">No credit card · Free plan included</p>
+          </div>
+        </LandingScrollReveal>
+
+        <LandingScrollReveal delayMs={160}>
+          <div className="relative overflow-hidden rounded-[32px] border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-[0_40px_100px_-50px_rgba(0,0,0,0.35)]">
+            <div className="grid grid-cols-1 lg:grid-cols-2 items-stretch">
+              {/* Visual side */}
+              <div className="relative min-h-[340px] sm:min-h-[420px] lg:min-h-full overflow-hidden bg-gradient-to-br from-[#A560E8] via-[#8A48C7] to-[#6B27A3]">
+                {/* Ambient orbs + dotted texture */}
+                <div className="pointer-events-none absolute -top-16 -left-16 w-64 h-64 rounded-full bg-white/15 blur-3xl" aria-hidden />
+                <div className="pointer-events-none absolute -bottom-20 -right-10 w-72 h-72 rounded-full bg-[#FFC800]/20 blur-3xl" aria-hidden />
+                <div
+                  className="pointer-events-none absolute inset-0 opacity-[0.18]"
+                  style={{ backgroundImage: 'radial-gradient(rgba(255,255,255,0.7) 1px, transparent 1px)', backgroundSize: '22px 22px' }}
+                  aria-hidden
+                />
+                <img src="/mascot-study.webp" alt="WriteScholar mascot studying" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-contain object-bottom p-6 sm:p-8 motion-safe:animate-float" />
+                <div className="absolute bottom-6 left-6 right-6 flex items-center gap-3">
+                  <span className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-white/95 text-stone-900 text-sm font-extrabold shadow-lg" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+                    <img src="/main-logo.png" alt="" className="w-5 h-5 object-contain" />
+                    WriteScholar
+                  </span>
+                  <span className="text-white text-xl font-bold opacity-80">×</span>
+                  <span className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-white/95 text-stone-900 text-sm font-extrabold shadow-lg" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+                    Schools
+                  </span>
+                </div>
+              </div>
+
+              {/* Copy side */}
+              <div className="p-7 sm:p-10 lg:p-12 flex flex-col justify-center">
+                <span className="inline-flex w-fit items-center gap-2 rounded-full border-2 border-[#1CB0F6]/30 bg-[#DDF4FF] dark:bg-[#1CB0F6]/15 px-3.5 py-1.5 mb-4">
+                  <svg className="w-3.5 h-3.5 text-[#1899D6]" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
+                    <path d="M12 3 1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z" />
+                  </svg>
+                  <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.18em] text-[#0E84BD] dark:text-[#7FD3FF]">Educators &amp; schools</span>
+                </span>
+                <h3 className="text-3xl sm:text-4xl lg:text-[2.6rem] font-extrabold text-stone-900 dark:text-stone-50 tracking-tight leading-[1.05]" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Expanding access</h3>
+                <p className="mt-5 text-base sm:text-lg text-stone-600 dark:text-stone-300 leading-relaxed">
+                  WriteScholar works with educators, writing centres and schools to give students free professor-style feedback at scale — plus a focus-mode browser extension that turns scrolling into study time.
+                </p>
+
+                <ul className="mt-6 space-y-3">
+                  {[
+                    'Professor-style rubric feedback for every student',
+                    'Focus-mode extension that blocks distractions',
+                    'Free for classrooms and writing centres',
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-3">
+                      <span className="shrink-0 mt-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-[#E5F8D0] border-2 border-[#46A302]/40" aria-hidden>
+                        <svg className="w-3.5 h-3.5 text-[#46A302]" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                      </span>
+                      <span className="text-sm sm:text-[15px] font-semibold text-stone-700 dark:text-stone-300 leading-snug">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="mt-8 flex flex-wrap items-center gap-3">
+                  <button type="button" onClick={() => onNavigate('signup')} className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-[#58CC02] hover:bg-[#61E002] text-white font-extrabold text-sm border-2 border-b-4 border-[#46A302] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_12px_28px_-10px_rgba(88,204,2,0.6)]" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+                    Get Started for Free
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                  </button>
+                  <button type="button" onClick={() => onNavigate('about')} className="inline-flex items-center justify-center px-6 py-3 rounded-full bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-50 font-extrabold text-sm border-2 border-stone-200 dark:border-stone-700 hover:-translate-y-0.5 transition-all" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Learn more</button>
+                </div>
+              </div>
+            </div>
           </div>
         </LandingScrollReveal>
       </div>

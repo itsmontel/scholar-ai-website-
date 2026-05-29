@@ -1,9 +1,308 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import LandingScrollReveal from './LandingScrollReveal';
 import LandingSectionBackdrop from './LandingSectionBackdrop';
 
 interface LandingStudyToolsHeroProps {
   onNavigate: (page: string) => void;
+}
+
+type FeatureTabId = 'analyzer' | 'editor' | 'study-pack' | 'flashcards' | 'quiz' | 'arcade';
+
+type FeatureTab = {
+  id: FeatureTabId;
+  label: string;
+  eyebrow: string;
+  title: ReactNode;
+  body: string;
+  accent: string;
+  preview: ReactNode;
+  primaryCta: { label: string; target: string };
+};
+
+const FEATURE_TABS: FeatureTab[] = [
+  {
+    id: 'analyzer',
+    label: 'Essay Analyzer',
+    eyebrow: 'Analyzer',
+    title: <>Get a /100 grade and <span className="text-[#A560E8]">line-by-line feedback</span> in seconds.</>,
+    body: 'Drop in your essay for rubric scores, colour-coded annotations, and a five-section professor-style report.',
+    accent: '#A560E8',
+    primaryCta: { label: 'Try the analyzer', target: 'analyze-essay' },
+    preview: <img src="/rubric-and-notes.png" alt="Essay analyzer rubric view" loading="lazy" decoding="async" className="w-full h-auto block" />,
+  },
+  {
+    id: 'editor',
+    label: 'Smart Editor',
+    eyebrow: 'Editor',
+    title: <>Write, revise and <span className="text-[#1CB0F6]">fix your draft in one workspace</span>.</>,
+    body: 'Distraction-free editor with the rubric, citations and one-click fixes right next to your draft.',
+    accent: '#1CB0F6',
+    primaryCta: { label: 'Open the editor', target: 'ai-essay-editor' },
+    preview: <img src="/WriterPic.png" alt="WriteScholar editor workspace" loading="lazy" decoding="async" className="w-full h-auto block" />,
+  },
+  {
+    id: 'study-pack',
+    label: 'Study Pack',
+    eyebrow: 'Study Pack',
+    title: <>Turn any notes into a <span className="text-[#FF9600]">complete study pack</span>.</>,
+    body: 'Upload PDFs, slides or notes once. Get summarised notes, flashcards, a quiz, crossword and lesson plan in 60 seconds.',
+    accent: '#FF9600',
+    primaryCta: { label: 'Build a study pack', target: 'study-pack-hub' },
+    preview: <img src="/studypack.png" alt="Study pack preview" loading="lazy" decoding="async" className="w-full h-auto block" />,
+  },
+  {
+    id: 'flashcards',
+    label: 'Flashcards',
+    eyebrow: 'Flashcards',
+    title: <>Make <span className="text-[#FFC800]">flashcards that actually stick</span>.</>,
+    body: 'Auto-generated cards with spaced repetition, daily review streaks, and share-with-friends built in.',
+    accent: '#FFC800',
+    primaryCta: { label: 'Try flashcards', target: 'study-pack-hub' },
+    preview: (
+      <div className="relative aspect-[16/10] w-full bg-black">
+        <video src="/hero-flashcards-hq.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
+      </div>
+    ),
+  },
+  {
+    id: 'quiz',
+    label: 'Quiz',
+    eyebrow: 'Quiz',
+    title: <>Quiz yourself before the test <span className="text-[#FF4B82]">with questions from your notes</span>.</>,
+    body: 'Multiple choice, true/false and fill-in-the-blank with explanations on every answer.',
+    accent: '#FF4B82',
+    primaryCta: { label: 'Generate a quiz', target: 'study-pack-hub' },
+    preview: (
+      <div className="relative aspect-[16/10] w-full bg-black">
+        <video src="/hero-quiz-hq.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
+      </div>
+    ),
+  },
+  {
+    id: 'arcade',
+    label: 'Arcade',
+    eyebrow: 'Arcade mode',
+    title: <>Study habits, gamified — <span className="text-[#58CC02]">Word Tower, Word Blitz, Crater Blast</span>.</>,
+    body: 'Three arcade games seeded with your subject content. Earn XP and keep showing up the day before the test.',
+    accent: '#58CC02',
+    primaryCta: { label: 'Play arcade', target: 'more-tools' },
+    preview: (
+      <div className="relative aspect-[16/10] w-full bg-black">
+        <video src="/hero-word-tower-hq.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
+      </div>
+    ),
+  },
+];
+
+function FeaturesTabPanel({ tab, onNavigate }: { tab: FeatureTab; onNavigate: (page: string) => void }) {
+  return (
+    <div key={tab.id} className="grid grid-cols-1 lg:grid-cols-[1.05fr_1fr] gap-6 sm:gap-8 lg:gap-10 motion-safe:animate-fade-slide-in">
+      <div className="min-w-0 order-2 lg:order-1">
+        <div
+          className="relative rounded-2xl p-5 sm:p-7 lg:p-8 h-full overflow-hidden"
+          style={{ background: `linear-gradient(135deg, ${tab.accent}24 0%, ${tab.accent}0D 100%)` }}
+        >
+          {/* Soft ambient glow keyed to the tab accent */}
+          <div
+            className="pointer-events-none absolute -top-12 -right-12 w-44 h-44 rounded-full blur-3xl opacity-50"
+            style={{ backgroundColor: `${tab.accent}40` }}
+            aria-hidden
+          />
+          {/* App-window frame with faux browser chrome for a premium product feel */}
+          <div className="relative rounded-2xl bg-white shadow-[0_24px_60px_-24px_rgba(0,0,0,0.30)] ring-1 ring-black/[0.05] overflow-hidden">
+            <div className="flex items-center gap-1.5 px-4 py-2.5 border-b border-stone-100 bg-white/80 backdrop-blur">
+              <span className="h-2.5 w-2.5 rounded-full bg-[#FF5F57]" aria-hidden />
+              <span className="h-2.5 w-2.5 rounded-full bg-[#FEBC2E]" aria-hidden />
+              <span className="h-2.5 w-2.5 rounded-full bg-[#28C840]" aria-hidden />
+              <span className="ml-3 inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[10px] font-bold" style={{ color: tab.accent, backgroundColor: `${tab.accent}1A` }}>
+                {tab.eyebrow}
+              </span>
+            </div>
+            {tab.preview}
+          </div>
+        </div>
+      </div>
+      <div className="min-w-0 order-1 lg:order-2 flex flex-col justify-center">
+        <span
+          className="inline-flex w-fit items-center gap-2 rounded-full px-3 py-1 text-[11px] sm:text-[12px] font-extrabold uppercase tracking-[0.16em] mb-4"
+          style={{ color: tab.accent, backgroundColor: `${tab.accent}1A` }}
+        >
+          <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: tab.accent }} aria-hidden />
+          {tab.eyebrow}
+        </span>
+        <h3 className="text-2xl sm:text-3xl lg:text-[2.1rem] font-extrabold text-stone-900 dark:text-stone-50 leading-[1.1] tracking-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+          {tab.title}
+        </h3>
+        <p className="mt-4 text-sm sm:text-base text-stone-600 dark:text-stone-400 leading-relaxed">{tab.body}</p>
+        <div className="mt-7 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() => onNavigate(tab.primaryCta.target)}
+            className="inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3 sm:py-3.5 rounded-full text-white font-extrabold text-sm sm:text-[15px] border-2 border-b-4 hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all"
+            style={{
+              fontFamily: '"Nunito", system-ui, sans-serif',
+              backgroundColor: tab.accent,
+              borderColor: `${tab.accent}`,
+              boxShadow: `0 12px 28px -10px ${tab.accent}B3`,
+            }}
+          >
+            {tab.primaryCta.label}
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            onClick={() => onNavigate('features')}
+            className="group inline-flex items-center gap-1.5 text-sm sm:text-[15px] font-bold text-stone-700 dark:text-stone-200 hover:text-stone-900 dark:hover:text-white transition-colors"
+          >
+            Explore
+            <svg className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Annotated callouts for the Essay Analyzer showcase. */
+const ANALYZER_NOTES = [
+  {
+    n: 1,
+    color: '#A560E8',
+    hotspot: 'top-[2.5%] right-[4%]',
+    title: 'Instant /100 grade',
+    desc: 'A score out of 100 with a clear letter-grade band the second you submit.',
+  },
+  {
+    n: 2,
+    color: '#FF9600',
+    hotspot: 'top-[13%] left-[3%]',
+    title: 'Rubric breakdown',
+    desc: 'Thesis, evidence, structure and style — each criterion scored on its own.',
+  },
+  {
+    n: 3,
+    color: '#1CB0F6',
+    hotspot: 'top-[54%] left-[24%]',
+    title: 'Line-by-line feedback',
+    desc: 'Colour-coded highlights mapped to the exact sentences that cost you marks.',
+  },
+  {
+    n: 4,
+    color: '#58CC02',
+    hotspot: 'top-[58%] right-[6%]',
+    title: 'One-click revisions',
+    desc: 'An "Areas to improve" list with fixes you can apply straight into your draft.',
+  },
+];
+
+function AnalyzerWindow() {
+  return (
+    <div className="relative rounded-2xl bg-white shadow-[0_28px_70px_-28px_rgba(165,96,232,0.45)] ring-1 ring-black/[0.05] overflow-hidden">
+      <div className="flex items-center gap-1.5 px-4 py-2.5 border-b border-stone-100 bg-white/80">
+        <span className="h-2.5 w-2.5 rounded-full bg-[#FF5F57]" aria-hidden />
+        <span className="h-2.5 w-2.5 rounded-full bg-[#FEBC2E]" aria-hidden />
+        <span className="h-2.5 w-2.5 rounded-full bg-[#28C840]" aria-hidden />
+        <span className="ml-3 inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-bold text-[#A560E8] bg-[#A560E81A]">Essay report</span>
+      </div>
+      <img src="/rubric-and-notes.png" alt="Essay analyzer rubric view" loading="lazy" decoding="async" className="w-full h-auto block" />
+    </div>
+  );
+}
+
+function AnalyzerShowcase({ onNavigate }: { onNavigate: (page: string) => void }) {
+  return (
+    <div>
+      <div className="max-w-2xl mb-8 sm:mb-10">
+        <span
+          className="inline-flex w-fit items-center gap-2 rounded-full px-3 py-1 text-[11px] sm:text-[12px] font-extrabold uppercase tracking-[0.16em] mb-4"
+          style={{ color: '#A560E8', backgroundColor: '#A560E81A' }}
+        >
+          <span className="h-1.5 w-1.5 rounded-full bg-[#A560E8]" aria-hidden />
+          Analyzer
+        </span>
+        <h3 className="text-2xl sm:text-3xl lg:text-[2.1rem] font-extrabold text-stone-900 dark:text-stone-50 leading-[1.1] tracking-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+          Get a /100 grade and <span className="text-[#A560E8]">line-by-line feedback</span> in seconds.
+        </h3>
+        <p className="mt-3 text-sm sm:text-base text-stone-600 dark:text-stone-400 leading-relaxed">
+          Drop in your essay and watch every part of the report do a job — here's what each section gives you.
+        </p>
+      </div>
+
+      {/* Image left · annotations right (lg+) */}
+      <div className="grid lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] gap-7 lg:gap-10 xl:gap-12 items-center">
+        {/* Image with numbered circle hotspots */}
+        <div className="relative">
+          <AnalyzerWindow />
+          {ANALYZER_NOTES.map((note) => (
+            <span
+              key={note.n}
+              className={`absolute ${note.hotspot} hidden lg:flex h-9 w-9 items-center justify-center rounded-full bg-white text-[13px] font-extrabold shadow-[0_8px_20px_-6px_rgba(0,0,0,0.35)] motion-safe:animate-pulse`}
+              style={{ color: note.color, border: `2px dashed ${note.color}` }}
+              aria-hidden
+            >
+              {note.n}
+            </span>
+          ))}
+        </div>
+
+        {/* Annotation cards — arrows point left toward the image */}
+        <div className="flex flex-col gap-4 sm:gap-5">
+          {ANALYZER_NOTES.map((note) => (
+            <div key={note.n} className="flex items-center gap-3">
+              <svg
+                className="hidden lg:block w-8 h-8 shrink-0"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden
+                style={{ color: note.color, transform: 'scaleX(-1)' }}
+              >
+                <path d="M4 12c4.5 0 9-1.5 15-1.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeDasharray="1.5 3" opacity="0.6" />
+                <path d="M14 5.5l5.5 5-5.5 5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <div
+                className="min-w-0 flex-1 rounded-2xl bg-white dark:bg-stone-900 border-2 border-b-4 p-4 sm:p-5 shadow-[0_14px_34px_-18px_rgba(0,0,0,0.30)] hover:-translate-y-0.5 transition-transform"
+                style={{ borderColor: `${note.color}66` }}
+              >
+                <div className="flex items-center gap-2.5 mb-1.5">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white text-xs font-extrabold" style={{ backgroundColor: note.color }} aria-hidden>
+                    {note.n}
+                  </span>
+                  <p className="text-[15px] sm:text-base font-extrabold text-stone-900 dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+                    {note.title}
+                  </p>
+                </div>
+                <p className="text-[13px] sm:text-[13.5px] text-stone-600 dark:text-stone-400 leading-snug pl-[2.375rem]">{note.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-8 sm:mt-10 flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={() => onNavigate('analyze-essay')}
+          className="inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3 sm:py-3.5 rounded-full text-white font-extrabold text-sm sm:text-[15px] border-2 border-b-4 hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all"
+          style={{ fontFamily: '"Nunito", system-ui, sans-serif', backgroundColor: '#A560E8', borderColor: '#A560E8', boxShadow: '0 12px 28px -10px #A560E8B3' }}
+        >
+          Try the analyzer
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+        </button>
+        <button
+          type="button"
+          onClick={() => onNavigate('features')}
+          className="group inline-flex items-center gap-1.5 text-sm sm:text-[15px] font-bold text-stone-700 dark:text-stone-200 hover:text-stone-900 dark:hover:text-white transition-colors"
+        >
+          Explore
+          <svg className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+        </button>
+      </div>
+    </div>
+  );
 }
 
 type Tone = 'blue' | 'green' | 'orange' | 'purple' | 'red' | 'duoBlue';
@@ -226,6 +525,9 @@ const TONE_STYLES: Record<Tone, ToneStyle> = {
 };
 
 export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsHeroProps) {
+  const [activeTab, setActiveTab] = useState<FeatureTabId>('analyzer');
+  const currentTab = FEATURE_TABS.find((t) => t.id === activeTab) ?? FEATURE_TABS[0];
+
   return (
     <section
       className="relative py-20 sm:py-28 lg:py-32 overflow-hidden scroll-mt-20"
@@ -233,74 +535,74 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
       id="study-tools"
     >
       <LandingSectionBackdrop
-        base="bg-[#FFF4E0] dark:bg-[#2A1800]"
-        topFrom="from-[#F3EAFF]/80 dark:from-[#1A0B2E]/80"
-        bottomTo="from-[#FCFBF7]/80 dark:from-stone-950/80"
-        radial="bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(255,150,0,0.14),transparent_60%)]"
-      />
-      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-1/2 bg-[radial-gradient(ellipse_70%_60%_at_50%_100%,rgba(255,75,130,0.10),transparent_70%)]" aria-hidden />
-
-      {/* Studying mascot — large, positioned in the top-right of the section
-          so it draws the eye while the headline reads. */}
-      <img
-        src="/mascot-study.webp"
-        alt=""
-        aria-hidden
-        loading="lazy"
-        decoding="async"
-        className="hidden lg:block pointer-events-none absolute top-12 right-6 xl:right-12 w-44 xl:w-56 h-auto z-10 drop-shadow-[0_12px_24px_rgba(0,0,0,0.15)]"
+        base="bg-[#FCFBF7] dark:bg-stone-950"
+        topFrom="from-[#FCFBF7]/90 dark:from-stone-950/90"
+        bottomTo="from-[#FFF4E0]/80 dark:from-[#2A1800]/80"
+        radial="bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(165,96,232,0.08),transparent_60%)]"
       />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* ─── Headline ─── */}
         <LandingScrollReveal>
-          <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14 lg:mb-16">
-            <div className="inline-flex items-center gap-2 mb-5 rounded-full border-2 border-[#FF9600]/40 bg-[#FFF4E0] dark:bg-[#FF9600]/15 px-3.5 py-1.5 shadow-[0_0_12px_rgba(255,150,0,0.25)]">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF9600] opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FF9600]" />
-              </span>
-              <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.18em] text-[#B85F00] dark:text-[#FFBD5C]">
-                Study tools · live in dashboard
-              </span>
-            </div>
+          <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-12">
+            <span className="inline-flex items-center gap-2 rounded-full border-2 border-[#A560E8]/30 bg-[#F3EAFF] dark:bg-[#A560E8]/15 px-4 py-1.5 mb-5 shadow-[0_0_12px_rgba(165,96,232,0.20)]">
+              <svg className="w-3.5 h-3.5 text-[#A560E8]" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
+                <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8l-6.2 4.5 2.4-7.4L2 9.4h7.6z" />
+              </svg>
+              <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.18em] text-[#7733B5] dark:text-[#C9A0F0]">Features</span>
+            </span>
             <h2
               id="landing-study-tools-heading"
-              className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-[#3C3C3C] dark:text-white tracking-tight leading-[1.1] mb-5"
+              className="text-3xl sm:text-4xl lg:text-[2.85rem] font-extrabold text-stone-900 dark:text-white tracking-tight leading-[1.08]"
               style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
             >
-              <span className="block">Transform your notes into</span>
-              <span className="relative inline-block mt-1 sm:mt-1.5 text-[#FF9600]">
-                powerful study tools
-                <svg
-                  className="absolute -bottom-1.5 left-0 w-full h-2 text-[#FF9600]"
-                  viewBox="0 0 200 8"
-                  preserveAspectRatio="none"
-                  aria-hidden
-                >
-                  <path
-                    d="M2 6 Q50 1 100 5 T198 4"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </span>
+              Unleash the power of your <span className="text-[#A560E8]">course materials</span>.
             </h2>
-            <p className="text-base sm:text-xl text-[#777] dark:text-stone-300 leading-relaxed max-w-2xl mx-auto font-normal" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-              Flashcards, quizzes, crosswords, lessons <span className="font-bold text-[#FF9600]">plus three arcade games</span> — all generated from your own notes in under 60 seconds.
+            <p className="mt-4 text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed">
+              Upload your materials once and unlock a suite of tools designed to help you understand faster, retain longer, and stress less.
             </p>
           </div>
         </LandingScrollReveal>
 
-        {/* The Study-Pack-style input mock + "Each tool, in detail"
-            cue arrow that used to sit between the headline and the
-            bento grid have been removed per user brief. The bento
-            grid below is now the immediate follow-up to the section
-            headline. (The `NotesPanel` component definition lower in
-            this file is now dead code but kept in place in case the
-            input mock is ever brought back.) */}
+        <LandingScrollReveal delayMs={100}>
+          <div className="rounded-[28px] border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-[0_40px_100px_-50px_rgba(0,0,0,0.35)] overflow-hidden mb-12 sm:mb-16">
+            <div role="tablist" aria-label="WriteScholar features" className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden border-b border-stone-200/80 dark:border-stone-800 px-3 sm:px-4 py-3">
+              {FEATURE_TABS.map((tab) => {
+                const isActive = tab.id === activeTab;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`relative whitespace-nowrap rounded-full px-4 sm:px-5 py-2.5 sm:py-3 text-sm sm:text-[15px] font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#A560E8]/60 ${
+                      isActive ? '' : 'text-stone-500 hover:text-stone-800 hover:bg-stone-100/70 dark:text-stone-400 dark:hover:text-stone-200 dark:hover:bg-stone-800'
+                    }`}
+                    style={isActive ? { color: tab.accent, backgroundColor: `${tab.accent}1A` } : undefined}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+            <div role="tabpanel" className="p-5 sm:p-7 lg:p-10">
+              {currentTab.id === 'analyzer' ? (
+                <AnalyzerShowcase onNavigate={onNavigate} />
+              ) : (
+                <FeaturesTabPanel tab={currentTab} onNavigate={onNavigate} />
+              )}
+            </div>
+          </div>
+        </LandingScrollReveal>
+
+        <LandingScrollReveal delayMs={180}>
+          <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
+            <p className="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.18em] text-[#FF9600] mb-2">Every tool, in detail</p>
+            <h3 className="text-2xl sm:text-3xl font-extrabold text-stone-900 dark:text-white tracking-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+              Transform your notes into powerful study tools
+            </h3>
+          </div>
+        </LandingScrollReveal>
 
         {/* ─── Study tools bento (top half) — orange ambient panel ─── */}
         <div className="relative rounded-3xl border-2 border-[#FFCF70]/70 bg-white/70 dark:bg-[#2A1800]/40 shadow-[0_0_60px_-20px_rgba(255,150,0,0.35)] p-4 sm:p-5 lg:p-6 backdrop-blur-sm">

@@ -905,7 +905,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
   return (
     <>
-      <Header onNavigate={onNavigate} user={user} sticky={true} currentPage="landing" opaqueHeader />
+      <Header onNavigate={onNavigate} user={user} sticky={true} currentPage="landing" opaqueHeader={false} />
       <main className="landing-desktop-zoom min-h-screen relative transition-colors font-sans overflow-x-clip xl:overflow-x-visible" role="main">
       {/* Promo Banner — FULLY HIDDEN per redesign brief. The 50%-off
           May2026 promo no longer surfaces on landing; the new centred
@@ -949,7 +949,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             section reverts to cream for downstream content. White
             headline + light atmospheric orbs + starry sparkles. */}
         <div
-          className="absolute top-0 left-0 right-0 h-[880px] md:h-[730px] lg:h-[790px] xl:h-[820px] overflow-hidden pointer-events-none"
+          className="absolute top-0 left-0 right-0 h-[940px] md:h-[820px] lg:h-[880px] xl:h-[920px] overflow-hidden pointer-events-none"
           aria-hidden
         >
           {/* Base — rich purple gradient (top #A560E8 → bottom #6B27A3). */}
@@ -991,7 +991,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 centred H1 + CTA, with the icon+title feature row at the
                 bottom of the purple band. Verbatim restore of the
                 2026-05-13 hero-inner block. */}
-            <div className="relative w-full max-w-6xl xl:max-w-7xl mx-auto px-4 sm:px-6 pt-3 pb-6 sm:pt-4 sm:pb-8 lg:pt-6 lg:pb-10 md:min-h-[560px] lg:min-h-[600px] xl:min-h-[640px]">
+            <div className="relative w-full max-w-6xl xl:max-w-7xl mx-auto px-4 sm:px-6 pt-3 pb-6 sm:pt-4 sm:pb-8 lg:pt-6 lg:pb-10 md:min-h-[640px] lg:min-h-[720px] xl:min-h-[760px]">
 
               {/* ─── SIX FLOATING FEATURE TILES ──────────────────────
                   Each tile = rounded card with Duolingo-style brand-colour
@@ -1015,9 +1015,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     strip at the bottom of each tile auto-separates the
                     rounded card from the purple field. */}
 
-                {/* Tile 1 — Essay Analyzer — top-left — YELLOW border
-                    (was purple, swapped because purple-on-purple disappeared).
-                    PNG screenshot of the rubric-90 (A-grade) UI. */}
+                {/* Tile 1 — Essay Analyzer — top-left — YELLOW border */}
                 <div className="absolute top-[2%] left-[-3%] lg:left-[-2%] motion-safe:animate-[hero-tile-drift_8s_ease-in-out_infinite]">
                   <div className="w-44 lg:w-52 xl:w-60">
                     <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_18px_42px_-12px_rgba(255,200,0,0.55)] bg-white">
@@ -1035,16 +1033,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </div>
                 </div>
 
-                {/* Tile 2 — Notes to Flashcards — bottom-left of the lower
-                    row, mirrored by Tile 6 (Daily review) on the right.
-                    Visual centre sits at 35% (15% left of the cluster's
-                    midline) so the pair reads as "lower row" rather than
-                    "edges of the cluster". Uses the `-centered` drift
-                    keyframe so the `-translate-x-1/2` half-width centring
-                    stays applied throughout the drift (the plain
-                    `hero-tile-drift` keyframe sets `translate(0,0)` at 0%,
-                    which would override the Tailwind centring and cause
-                    the tile to jump right when the animation starts). */}
+                {/* Tile 2 — Notes to Flashcards */}
                 <div className="absolute bottom-[20%] left-[34%] -translate-x-1/2 motion-safe:animate-[hero-tile-drift-centered_9s_ease-in-out_infinite]" style={{ animationDelay: '0.8s' }}>
                   <div className="w-44 lg:w-52 xl:w-60">
                     <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_18px_42px_-12px_rgba(255,200,0,0.55)] bg-stone-950">
@@ -1056,7 +1045,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </div>
                 </div>
 
-                {/* Tile 3 — Quiz — top-right — green border */}
+                {/* Tile 3 — Quiz — top-right */}
                 <div className="absolute top-[2%] right-[-3%] lg:right-[-2%] motion-safe:animate-[hero-tile-drift_8.4s_ease-in-out_infinite]" style={{ animationDelay: '1.6s' }}>
                   <div className="w-44 lg:w-52 xl:w-60">
                     <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_18px_42px_-12px_rgba(255,200,0,0.55)] bg-stone-950">
@@ -1068,10 +1057,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </div>
                 </div>
 
-                {/* Tile 4 — Study Games — MID-LEFT. Combines Word
-                    Blitz / Word Tower / Crater Blast into one looping
-                    cycler (see HeroStudyGamesVideo) so we surface all
-                    three arcade games from a single slot. */}
+                {/* Tile 4 — Study Games — MID-LEFT */}
                 <div className="absolute top-[42%] left-[-6%] lg:left-[-5%] motion-safe:animate-[hero-tile-drift_8.6s_ease-in-out_infinite]" style={{ animationDelay: '2.4s' }}>
                   <div className="w-44 lg:w-52 xl:w-60">
                     <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_22px_50px_-12px_rgba(255,200,0,0.55)] bg-stone-950">
@@ -1083,13 +1069,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </div>
                 </div>
 
-                {/* Tile 5 — Full writing workspace — MID-RIGHT.
-                    Screenshot of the WriteScholar editor with its
-                    live rubric + one-click fixes (/WriterPic.png),
-                    the same asset the onboarding "Smart editor" slide
-                    uses. Replaced the comprehensive-report image so
-                    the hero advertises the flagship writing surface
-                    (where most session time is actually spent). */}
+                {/* Tile 5 — Full writing workspace — MID-RIGHT */}
                 <div className="absolute top-[44%] right-[-6%] lg:right-[-5%] motion-safe:animate-[hero-tile-drift_9.2s_ease-in-out_infinite]" style={{ animationDelay: '3.2s' }}>
                   <div className="w-44 lg:w-52 xl:w-60">
                     <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_22px_50px_-12px_rgba(255,200,0,0.55)] bg-white">
@@ -1107,15 +1087,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </div>
                 </div>
 
-                {/* Tile 6 — Daily review — bottom-right of the lower row,
-                    mirroring Tile 2 around the 50% midline. Tile 2's
-                    visual centre is at 35%, so this one sits at 65%
-                    (= 100% - 35%). The 15% offset from centre on each
-                    side keeps the lower pair tucked closer to the
-                    cluster's middle than the cluster-edge tiles. Uses the
-                    `-centered` drift keyframe (see Tile 2 comment) so
-                    the `-translate-x-1/2` centring isn't clobbered by
-                    the animation's `transform`. */}
+                {/* Tile 6 — Daily review */}
                 <div className="absolute bottom-[20%] left-[66%] -translate-x-1/2 motion-safe:animate-[hero-tile-drift-centered_7.8s_ease-in-out_infinite]" style={{ animationDelay: '4s' }}>
                   <div className="w-44 lg:w-52 xl:w-60">
                     <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_18px_42px_-12px_rgba(255,200,0,0.55)] bg-white">
@@ -1163,30 +1135,19 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </span>
                 </div>
 
-                {/* ─── HEADLINE — two-line layout, ALL viewports ─────────
-                    Line 1: "Turn your grades from B to [A-pill]"
-                    Line 2: "with WriteScholar" (yellow on purple).
-                    Forced 2-line layout via responsive font sizing tuned
-                    so line 1 always fits without wrapping, even on 360px
-                    phones. Sizes reduced ~20% per user brief so the H1
-                    takes less vertical room and the feature-icons row
-                    can sit above the fold on a 900px viewport. */}
+                {/* ─── HEADLINE — two-line layout, ALL viewports ───────── */}
                 <h1
                   className="text-[1.5rem] xs:text-[1.85rem] sm:text-[2.2rem] md:text-[2.55rem] lg:text-[2.9rem] xl:text-[3.35rem] font-extrabold tracking-[-0.02em] leading-[1.05] text-white mb-5 sm:mb-6"
                   style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                 >
                   <span className="block whitespace-nowrap">
                     Turn your grades from B to{' '}
-                    {/* A-grade pill — sits inline on the baseline, slight
-                        rotation + green Duolingo chip with white "A".
-                        Extra glow ring on purple background. */}
                     <span
                       className="relative inline-flex items-center justify-center align-baseline rounded-2xl bg-[#58CC02] text-white font-extrabold leading-none w-[0.95em] h-[0.95em] border-2 border-b-[5px] border-[#46A302] rotate-[-4deg] motion-safe:animate-[hero-a-wiggle_4.5s_ease-in-out_infinite] shadow-[0_10px_30px_-4px_rgba(88,204,2,0.75)] ring-4 ring-white/15"
                       style={{ verticalAlign: '-0.06em' }}
                       aria-hidden
                     >
                       A
-                      {/* Sparkle accent on the pill */}
                       <span
                         className="absolute -top-2 -right-2 text-[0.32em] text-[#FFC800] motion-safe:animate-pulse"
                         aria-hidden
@@ -1198,14 +1159,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </span>
                   <span className="block mt-1.5 sm:mt-2.5 whitespace-nowrap">
                     with{' '}
-                    {/* "WriteScholar" — Duolingo-yellow on purple. The
-                        yellow/purple pairing is the highest-contrast,
-                        most-attention-grabbing colour combo on Duolingo
-                        itself, so it pops without leaving brand. */}
                     <span className="relative inline-block text-[#FFC800]">
                       WriteScholar
-                      {/* Yellow squiggle underline echoing the word
-                          colour for visual cohesion. */}
                       <svg
                         className="absolute -bottom-2 sm:-bottom-3 left-0 w-full h-3 sm:h-5 text-[#FFC800] overflow-visible"
                         viewBox="0 0 300 24"
@@ -1226,16 +1181,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </span>
                 </h1>
 
-                {/* ─── CTA ROW ─────────────────────────────────────────
-                    Primary CTA is a hand-built Duolingo-style GREEN
-                    button (#58CC02) so it pops against the purple hero —
-                    green/purple is the highest-contrast brand pair on the
-                    site and it visually pairs with the green "A" pill in
-                    the headline, completing the "B → A" story.
-                    Secondary "See interactive demo" is a plain underlined
-                    text link (not a button) that smooth-scrolls to the
-                    live demo section below the hero. On mobile they stack;
-                    on sm+ they sit side by side, vertically centred. */}
+                {/* ─── CTA ROW ───────────────────────────────────────── */}
                 <div className="mt-3 sm:mt-4 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5">
                   <button
                     type="button"
@@ -1476,12 +1422,16 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           the hero's max-width / horizontal padding containers). */}
       <div className="flex flex-col items-stretch w-full">
 
-              <Suspense fallback={<div className="min-h-[720px] w-full" aria-hidden />}>
-                <LandingInteractiveDemoSection onNavigate={onNavigate} />
+              <Suspense fallback={<div className="min-h-[640px] w-full" aria-hidden />}>
+                <LandingStudyToolsHero onNavigate={onNavigate} />
               </Suspense>
 
               <Suspense fallback={<div className="min-h-[520px] w-full" aria-hidden />}>
                 <LandingHowItWorksSection onNavigate={onNavigate} />
+              </Suspense>
+
+              <Suspense fallback={<div className="min-h-[720px] w-full" aria-hidden />}>
+                <LandingInteractiveDemoSection onNavigate={onNavigate} />
               </Suspense>
 
               <Suspense fallback={<div className="min-h-[640px] w-full" aria-hidden />}>
@@ -1770,15 +1720,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 <div className="h-12 sm:h-20 lg:h-24" aria-hidden />
               </section>
       </div>
-
-      {/* Study tools sits above citations — flagship feature first.
-          Includes both the study-tool bento (flashcards, quizzes,
-          crosswords, lessons) and the arcade games sub-section
-          (Crater Blast, Word Tower, Word Blitz) joined by a pink
-          bridge band, so the page tells one cohesive story. */}
-      <Suspense fallback={<div className="min-h-[640px] w-full" aria-hidden />}>
-        <LandingStudyToolsHero onNavigate={onNavigate} />
-      </Suspense>
 
       <Suspense fallback={<div className="min-h-[720px] w-full" aria-hidden />}>
         <LandingChatGPTComparisonSection onNavigate={onNavigate} />

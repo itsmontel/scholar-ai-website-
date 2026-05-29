@@ -202,7 +202,12 @@ const Header: React.FC<HeaderProps> = ({
     const publicNavInactiveCls = isLandingPurple
       ? 'text-white hover:text-[#FFC800] hover:bg-white/10'
       : 'text-stone-600 dark:text-stone-400 hover:text-[#A560E8] dark:hover:text-[#A560E8] hover:bg-[#F3EAFF]/50 dark:hover:bg-[#A560E8]/10';
-    const publicHeaderBg = isLandingPurple
+    const isLandingPage = currentPage === 'landing';
+    const publicHeaderBg = isLandingPage
+      ? isScrolled
+        ? 'bg-[#A560E8]/95 backdrop-blur-md shadow-[0_4px_24px_-4px_rgba(107,39,163,0.45)] border-[#7733B5]/40'
+        : 'bg-[#A560E8] border-[#7733B5]/30'
+      : isLandingPurple
       ? isScrolled
         ? 'bg-[#A560E8] shadow-[0_4px_24px_-4px_rgba(107,39,163,0.45)] border-[#7733B5]/40'
         : 'bg-[#A560E8] border-[#7733B5]/30'
