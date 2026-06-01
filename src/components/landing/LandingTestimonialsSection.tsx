@@ -128,6 +128,17 @@ export default function LandingTestimonialsSection() {
       aria-labelledby="landing-testimonials-heading"
       style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
     >
+      {/* Decorative mascot — floats near the section heading on lg+. */}
+      <div aria-hidden className="pointer-events-none select-none hidden lg:block absolute top-10 right-[3%] xl:right-[7%] z-20 w-32 xl:w-40 -rotate-[6deg]">
+        <div className="absolute -inset-6 rounded-full bg-[#A560E8]/25 blur-2xl" />
+        <img
+          src="/mascot-celebrating.webp"
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="relative w-full h-auto motion-safe:animate-float-delayed drop-shadow-[0_22px_36px_rgba(165,96,232,0.42)]"
+        />
+      </div>
       <LandingSectionBackdrop
         base="bg-[#FCFBF7] dark:bg-stone-950"
         topFrom="from-[#FFF4E0]/70 dark:from-[#2A1800]/70"

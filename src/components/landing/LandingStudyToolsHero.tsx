@@ -21,16 +21,6 @@ type FeatureTab = {
 
 const FEATURE_TABS: FeatureTab[] = [
   {
-    id: 'analyzer',
-    label: 'Essay Analyzer',
-    eyebrow: 'Analyzer',
-    title: <>Get a /100 grade and <span className="text-[#A560E8]">line-by-line feedback</span> in seconds.</>,
-    body: 'Drop in your essay for rubric scores, colour-coded annotations, and a five-section professor-style report.',
-    accent: '#A560E8',
-    primaryCta: { label: 'Try the analyzer', target: 'analyze-essay' },
-    preview: <img src="/rubric-and-notes.png" alt="Essay analyzer rubric view" loading="lazy" decoding="async" className="w-full h-auto block" />,
-  },
-  {
     id: 'editor',
     label: 'Smart Editor',
     eyebrow: 'Editor',
@@ -39,6 +29,16 @@ const FEATURE_TABS: FeatureTab[] = [
     accent: '#1CB0F6',
     primaryCta: { label: 'Open the editor', target: 'ai-essay-editor' },
     preview: <img src="/WriterPic.png" alt="WriteScholar editor workspace" loading="lazy" decoding="async" className="w-full h-auto block" />,
+  },
+  {
+    id: 'analyzer',
+    label: 'Essay Analyzer',
+    eyebrow: 'Analyzer',
+    title: <>Get a /100 grade and <span className="text-[#A560E8]">line-by-line feedback</span> in seconds.</>,
+    body: 'Drop in your essay for rubric scores, colour-coded annotations, and a five-section professor-style report.',
+    accent: '#A560E8',
+    primaryCta: { label: 'Try the analyzer', target: 'analyze-essay' },
+    preview: <img src="/rubric-and-notes.png" alt="Essay analyzer rubric view" loading="lazy" decoding="async" className="w-full h-auto block" />,
   },
   {
     id: 'study-pack',
@@ -525,7 +525,7 @@ const TONE_STYLES: Record<Tone, ToneStyle> = {
 };
 
 export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsHeroProps) {
-  const [activeTab, setActiveTab] = useState<FeatureTabId>('analyzer');
+  const [activeTab, setActiveTab] = useState<FeatureTabId>('editor');
   const currentTab = FEATURE_TABS.find((t) => t.id === activeTab) ?? FEATURE_TABS[0];
 
   return (
@@ -534,6 +534,17 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
       aria-labelledby="landing-study-tools-heading"
       id="study-tools"
     >
+      {/* Decorative mascot — floats near the section heading on lg+. */}
+      <div aria-hidden className="pointer-events-none select-none hidden lg:block absolute top-10 right-[3%] xl:right-[7%] z-20 w-32 xl:w-40 -rotate-[6deg]">
+        <div className="absolute -inset-6 rounded-full bg-[#A560E8]/25 blur-2xl" />
+        <img
+          src="/mascot-laptop.webp"
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="relative w-full h-auto motion-safe:animate-float drop-shadow-[0_22px_36px_rgba(165,96,232,0.42)]"
+        />
+      </div>
       <LandingSectionBackdrop
         base="bg-[#FCFBF7] dark:bg-stone-950"
         topFrom="from-[#FCFBF7]/90 dark:from-stone-950/90"
@@ -552,10 +563,22 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
             </span>
             <h2
               id="landing-study-tools-heading"
-              className="text-3xl sm:text-4xl lg:text-[2.85rem] font-extrabold text-stone-900 dark:text-white tracking-tight leading-[1.08]"
+              className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-stone-900 dark:text-white tracking-tight leading-[1.1]"
               style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
             >
-              Unleash the power of your <span className="text-[#A560E8]">course materials</span>.
+              Unleash the power of your{' '}
+              <span className="relative inline-block text-[#A560E8]">
+                course materials
+                <svg
+                  className="absolute -bottom-1.5 left-0 w-full h-2 text-[#A560E8]"
+                  viewBox="0 0 200 8"
+                  preserveAspectRatio="none"
+                  aria-hidden
+                >
+                  <path d="M2 6 Q50 1 100 5 T198 4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                </svg>
+              </span>
+              .
             </h2>
             <p className="mt-4 text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed">
               Upload your materials once and unlock a suite of tools designed to help you understand faster, retain longer, and stress less.

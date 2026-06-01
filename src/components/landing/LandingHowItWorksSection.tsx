@@ -6,15 +6,6 @@ interface LandingHowItWorksSectionProps {
   onNavigate: (page: string) => void;
 }
 
-const ROTATING_WORDS = [
-  'study packs',
-  'flashcards',
-  'quizzes',
-  'essay feedback',
-  'lessons',
-  'arcade games',
-] as const;
-
 const HERO_STUDY_GAMES_PLAYLIST = [
   '/hero-word-blitz.mp4',
   '/hero-word-tower.mp4',
@@ -55,8 +46,13 @@ const SPOKES = [
 /** Large preview tiles — positioned at the six outer slots (red rectangles in mock). */
 const TILE_WIDTH_DEFAULT = 'w-36 sm:w-40 lg:w-44 xl:w-48';
 
+// Ordered CLOCKWISE around the hub (top-left → top-right → right →
+// bottom-right → bottom-left → left). The heading word + the glowing
+// tile both step through this list in order, so the spotlight travels
+// clockwise. `word` is the lowercase phrase shown in the sub-heading.
 const OUTER_TILES: ReadonlyArray<{
   label: string;
+  word: string;
   color: string;
   shadow: string;
   position: string;
@@ -67,6 +63,7 @@ const OUTER_TILES: ReadonlyArray<{
 }> = [
   {
     label: 'Daily review',
+    word: 'daily review',
     color: '#A560E8',
     shadow: 'rgba(165,96,232,0.55)',
     position: 'top-[5%] left-[6%] lg:left-[8%]',
@@ -74,25 +71,8 @@ const OUTER_TILES: ReadonlyArray<{
     media: { type: 'image', src: '/daily-review-preview.png' },
   },
   {
-    label: 'Flashcards',
-    color: '#FFC800',
-    shadow: 'rgba(255,200,0,0.55)',
-    position: 'top-[36%] left-[-3%] lg:left-[-2%]',
-    drift: 'hero-tile-drift_8.6s_ease-in-out_infinite',
-    delay: '0.8s',
-    media: { type: 'video', src: '/hero-flashcards.mp4' },
-  },
-  {
-    label: 'Essay grade',
-    color: '#FF9600',
-    shadow: 'rgba(255,150,0,0.55)',
-    position: 'bottom-[7%] left-[6%] lg:left-[8%]',
-    drift: 'hero-tile-drift_9s_ease-in-out_infinite',
-    delay: '1.6s',
-    media: { type: 'image', src: '/WriterPic.png' },
-  },
-  {
     label: 'Quizzes',
+    word: 'quizzes',
     color: '#FF4B82',
     shadow: 'rgba(255,75,130,0.55)',
     position: 'top-[5%] right-[6%] lg:right-[8%]',
@@ -102,6 +82,7 @@ const OUTER_TILES: ReadonlyArray<{
   },
   {
     label: 'Arcade',
+    word: 'arcade games',
     color: '#58CC02',
     shadow: 'rgba(88,204,2,0.55)',
     position: 'top-[36%] right-[-3%] lg:right-[-2%]',
@@ -111,12 +92,33 @@ const OUTER_TILES: ReadonlyArray<{
   },
   {
     label: 'Editor',
+    word: 'smart editing',
     color: '#1CB0F6',
     shadow: 'rgba(28,176,246,0.55)',
     position: 'bottom-[7%] right-[6%] lg:right-[8%]',
     drift: 'hero-tile-drift_9.2s_ease-in-out_infinite',
     delay: '4s',
     media: { type: 'image', src: '/rubric-and-notes.png' },
+  },
+  {
+    label: 'Essay grade',
+    word: 'essay feedback',
+    color: '#FF9600',
+    shadow: 'rgba(255,150,0,0.55)',
+    position: 'bottom-[7%] left-[6%] lg:left-[8%]',
+    drift: 'hero-tile-drift_9s_ease-in-out_infinite',
+    delay: '1.6s',
+    media: { type: 'image', src: '/WriterPic.png' },
+  },
+  {
+    label: 'Flashcards',
+    word: 'flashcards',
+    color: '#FFC800',
+    shadow: 'rgba(255,200,0,0.55)',
+    position: 'top-[36%] left-[-3%] lg:left-[-2%]',
+    drift: 'hero-tile-drift_8.6s_ease-in-out_infinite',
+    delay: '0.8s',
+    media: { type: 'video', src: '/hero-flashcards.mp4' },
   },
 ];
 
@@ -163,24 +165,49 @@ function driftClass(drift: string) {
   }
 }
 
-function OuterTile({ tile }: { tile: (typeof OUTER_TILES)[number] }) {
+function OuterTile({ tile, active }: { tile: (typeof OUTER_TILES)[number]; active: boolean }) {
   const isVideo = tile.media.type === 'video' || tile.media.type === 'cycle';
   return (
     <div
-      className={`absolute ${tile.position} ${driftClass(tile.drift)}`}
+      className={`absolute ${tile.position} ${driftClass(tile.drift)} ${active ? 'z-30' : 'z-10'}`}
       style={tile.delay ? { animationDelay: tile.delay } : undefined}
     >
-      <div className={tile.width ?? TILE_WIDTH_DEFAULT}>
+      <div
+        className={`${tile.width ?? TILE_WIDTH_DEFAULT} transition-transform duration-500 ease-out ${
+          active ? 'scale-[1.14] lg:scale-[1.24]' : 'scale-100'
+        }`}
+      >
         <div
-          className="rounded-2xl overflow-hidden border-2 border-b-4 bg-white"
-          style={{ borderColor: tile.color, boxShadow: `0 18px 42px -12px ${tile.shadow}` }}
+          className="relative rounded-2xl overflow-hidden border-2 border-b-4 bg-white transition-[box-shadow] duration-500"
+          style={{
+            borderColor: tile.color,
+            boxShadow: active
+              ? `0 0 0 4px ${tile.color}66, 0 0 28px 2px ${tile.shadow}, 0 28px 60px -10px ${tile.shadow}`
+              : `0 18px 42px -12px ${tile.shadow}`,
+          }}
         >
+          {/* Sparkle badge — only on the spotlighted tile. */}
+          {active && (
+            <span
+              className="absolute -top-3 -right-3 z-30 flex h-8 w-8 items-center justify-center rounded-full bg-white border-2 shadow-[0_6px_16px_-4px_rgba(0,0,0,0.35)] motion-safe:animate-bounce"
+              style={{ borderColor: tile.color }}
+              aria-hidden
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill={tile.color}>
+                <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8l-6.2 4.5 2.4-7.4L2 9.4h7.6z" />
+              </svg>
+            </span>
+          )}
           <div className={`relative aspect-[16/10] w-full ${isVideo ? 'bg-stone-950' : 'bg-stone-100'}`}>
             <TileMediaContent media={tile.media} />
           </div>
           <p
-            className="px-2 py-1 text-center text-[9px] lg:text-[10px] font-extrabold text-stone-800 bg-white border-t-2"
-            style={{ borderColor: `${tile.color}66` }}
+            className="px-2 py-1 text-center text-[9px] lg:text-[10px] font-extrabold border-t-2 transition-colors duration-500"
+            style={{
+              borderColor: `${tile.color}66`,
+              backgroundColor: active ? tile.color : '#ffffff',
+              color: active ? '#ffffff' : '#292524',
+            }}
           >
             {tile.label}
           </p>
@@ -191,12 +218,16 @@ function OuterTile({ tile }: { tile: (typeof OUTER_TILES)[number] }) {
 }
 
 export default function LandingHowItWorksSection({ onNavigate }: LandingHowItWorksSectionProps) {
-  const [wordIdx, setWordIdx] = useState(0);
+  // One index drives BOTH the rotating heading word and the glowing
+  // tile — they step clockwise through OUTER_TILES together.
+  const [activeIdx, setActiveIdx] = useState(0);
 
   useEffect(() => {
-    const id = window.setInterval(() => setWordIdx((i) => (i + 1) % ROTATING_WORDS.length), 2400);
+    const id = window.setInterval(() => setActiveIdx((i) => (i + 1) % OUTER_TILES.length), 2200);
     return () => window.clearInterval(id);
   }, []);
+
+  const activeTile = OUTER_TILES[activeIdx];
 
   return (
     <section
@@ -216,20 +247,30 @@ export default function LandingHowItWorksSection({ onNavigate }: LandingHowItWor
           <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
             <h2
               id="how-it-works-heading"
-              className="text-3xl sm:text-4xl lg:text-[2.85rem] font-extrabold text-stone-900 dark:text-white tracking-tight leading-[1.08]"
+              className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-stone-900 dark:text-white tracking-tight leading-[1.1]"
               style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
             >
               How your notes become a complete{' '}
-              <span className="text-[#A560E8]">study system</span>
+              <span className="relative inline-block text-[#A560E8]">
+                study system
+                <svg
+                  className="absolute -bottom-1.5 left-0 w-full h-2 text-[#A560E8]"
+                  viewBox="0 0 200 8"
+                  preserveAspectRatio="none"
+                  aria-hidden
+                >
+                  <path d="M2 6 Q50 1 100 5 T198 4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                </svg>
+              </span>
             </h2>
             <p className="mt-5 text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed">
               Into personalized, AI-powered{' '}
               <span
-                key={ROTATING_WORDS[wordIdx]}
-                className="inline-block font-extrabold text-stone-900 dark:text-white motion-safe:animate-fade-slide-in"
-                style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+                key={activeIdx}
+                className="inline-block font-extrabold motion-safe:animate-fade-slide-in"
+                style={{ fontFamily: '"Nunito", system-ui, sans-serif', color: activeTile.color }}
               >
-                {ROTATING_WORDS[wordIdx]}
+                {activeTile.word}
               </span>
               .
             </p>
@@ -241,8 +282,8 @@ export default function LandingHowItWorksSection({ onNavigate }: LandingHowItWor
           <div className="relative mx-auto w-full min-h-[560px] sm:min-h-[620px] lg:min-h-[680px] max-w-5xl lg:max-w-none">
             {/* ─── Outer preview tiles (red-rectangle slots) ─── */}
             <div className="hidden md:block absolute inset-0 pointer-events-none" aria-hidden>
-              {OUTER_TILES.map((tile) => (
-                <OuterTile key={tile.label} tile={tile} />
+              {OUTER_TILES.map((tile, i) => (
+                <OuterTile key={tile.label} tile={tile} active={i === activeIdx} />
               ))}
             </div>
 
@@ -269,6 +310,9 @@ export default function LandingHowItWorksSection({ onNavigate }: LandingHowItWor
                   const r = 42;
                   const left = 50 + r * Math.cos(radians);
                   const top = 50 + r * Math.sin(radians);
+                  // A spoke lights up when its category is the one the
+                  // loop is currently spotlighting (matched by label).
+                  const spokeActive = spoke.label === activeTile.label;
                   return (
                     <div
                       key={spoke.label}
@@ -276,10 +320,29 @@ export default function LandingHowItWorksSection({ onNavigate }: LandingHowItWor
                       style={{ left: `${left}%`, top: `${top}%`, animationDelay: `${i * 0.4}s` }}
                     >
                       <span
-                        className="flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full text-white shadow-[0_18px_36px_-12px_rgba(0,0,0,0.35)] ring-4 ring-white dark:ring-stone-950"
-                        style={{ backgroundColor: spoke.color }}
+                        className={`relative flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full text-white ring-4 ring-white dark:ring-stone-950 transition-transform duration-500 ease-out ${
+                          spokeActive ? 'scale-125 z-30' : 'scale-100'
+                        }`}
+                        style={{
+                          backgroundColor: spoke.color,
+                          boxShadow: spokeActive
+                            ? `0 0 0 4px ${spoke.color}55, 0 0 26px 4px ${spoke.color}80, 0 18px 36px -10px ${spoke.color}`
+                            : '0 18px 36px -12px rgba(0,0,0,0.35)',
+                        }}
                         aria-hidden
                       >
+                        {/* Sparkle badge — only on the spotlighted spoke. */}
+                        {spokeActive && (
+                          <span
+                            className="absolute -top-2.5 -right-2.5 z-30 flex h-6 w-6 items-center justify-center rounded-full bg-white border-2 shadow-[0_6px_16px_-4px_rgba(0,0,0,0.35)] motion-safe:animate-bounce"
+                            style={{ borderColor: spoke.color }}
+                            aria-hidden
+                          >
+                            <svg className="w-3 h-3" viewBox="0 0 24 24" fill={spoke.color}>
+                              <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8l-6.2 4.5 2.4-7.4L2 9.4h7.6z" />
+                            </svg>
+                          </span>
+                        )}
                         {spoke.label === 'Arcade' ? (
                           <svg viewBox="0 0 24 24" className="w-6 h-6 sm:w-7 sm:h-7" fill="currentColor" aria-hidden>
                             <path d="M7 8a4 4 0 00-4 4v2a3 3 0 003 3h.5L8 14h8l1.5 3H18a3 3 0 003-3v-2a4 4 0 00-4-4H7z" />
@@ -290,7 +353,12 @@ export default function LandingHowItWorksSection({ onNavigate }: LandingHowItWor
                           </svg>
                         )}
                       </span>
-                      <span className="text-[11px] sm:text-xs font-extrabold text-stone-700 dark:text-stone-200 whitespace-nowrap">
+                      <span
+                        className={`text-[11px] sm:text-xs font-extrabold whitespace-nowrap transition-colors duration-500 ${
+                          spokeActive ? '' : 'text-stone-700 dark:text-stone-200'
+                        }`}
+                        style={spokeActive ? { color: spoke.color } : undefined}
+                      >
                         {spoke.label}
                       </span>
                     </div>
@@ -301,20 +369,32 @@ export default function LandingHowItWorksSection({ onNavigate }: LandingHowItWor
 
             {/* Mobile: 2×3 grid of preview tiles below hub */}
             <div className="md:hidden mt-8 grid grid-cols-2 gap-3 max-w-md mx-auto">
-              {OUTER_TILES.map((tile) => {
+              {OUTER_TILES.map((tile, i) => {
                 const isVideo = tile.media.type === 'video' || tile.media.type === 'cycle';
+                const active = i === activeIdx;
                 return (
                   <div
                     key={tile.label}
-                    className="rounded-xl overflow-hidden border-2 border-b-[3px] bg-white shadow-[0_10px_22px_-8px_rgba(0,0,0,0.25)]"
-                    style={{ borderColor: tile.color }}
+                    className={`relative rounded-xl overflow-hidden border-2 border-b-[3px] bg-white transition-transform duration-500 ${
+                      active ? 'scale-[1.06] z-10' : 'scale-100'
+                    }`}
+                    style={{
+                      borderColor: tile.color,
+                      boxShadow: active
+                        ? `0 0 0 3px ${tile.color}66, 0 14px 30px -8px ${tile.shadow}`
+                        : '0 10px 22px -8px rgba(0,0,0,0.25)',
+                    }}
                   >
                     <div className={`relative aspect-[16/10] w-full ${isVideo ? 'bg-stone-950' : 'bg-stone-100'}`}>
                       <TileMediaContent media={tile.media} />
                     </div>
                     <p
-                      className="px-1.5 py-1 text-center text-[10px] font-extrabold text-stone-800 bg-white border-t"
-                      style={{ borderColor: `${tile.color}66` }}
+                      className="px-1.5 py-1 text-center text-[10px] font-extrabold border-t transition-colors duration-500"
+                      style={{
+                        borderColor: `${tile.color}66`,
+                        backgroundColor: active ? tile.color : '#ffffff',
+                        color: active ? '#ffffff' : '#292524',
+                      }}
                     >
                       {tile.label}
                     </p>

@@ -25,6 +25,17 @@ export default function LandingMotivationSection({ onNavigate }: LandingMotivati
       id="motivation"
       className="relative py-16 sm:py-24 lg:py-28 overflow-hidden scroll-mt-20"
     >
+      {/* Decorative mascot — floats near the section heading on lg+. */}
+      <div aria-hidden className="pointer-events-none select-none hidden lg:block absolute top-10 right-[3%] xl:right-[7%] z-20 w-32 xl:w-40 rotate-[6deg]">
+        <div className="absolute -inset-6 rounded-full bg-[#FF9600]/30 blur-2xl" />
+        <img
+          src="/mascot-jumping-joy.webp"
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="relative w-full h-auto motion-safe:animate-float drop-shadow-[0_22px_36px_rgba(255,150,0,0.42)]"
+        />
+      </div>
       <LandingSectionBackdrop
         base="bg-[#FFF4E0] dark:bg-[#2A1800]"
         topFrom="from-[#FCFBF7]/80 dark:from-stone-950/80"

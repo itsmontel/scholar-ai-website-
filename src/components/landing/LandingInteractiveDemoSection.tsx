@@ -68,7 +68,19 @@ export default function LandingInteractiveDemoSection({ onNavigate }: LandingInt
 
         {/* ─── Demo header ─── */}
         <LandingScrollReveal delayMs={80}>
-          <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
+          <div className="relative text-center max-w-2xl mx-auto mb-8 sm:mb-10">
+            {/* Decorative mascot — sits beside the heading on lg+ so it's
+                in the action, not lost in the section corner. */}
+            <div aria-hidden className="pointer-events-none select-none hidden lg:block absolute top-1/2 -translate-y-1/2 -right-36 xl:-right-52 z-20 w-32 xl:w-40 rotate-[8deg]">
+              <div className="absolute -inset-6 rounded-full bg-[#A560E8]/25 blur-2xl" />
+              <img
+                src="/mascot-pointing.webp"
+                alt=""
+                loading="lazy"
+                decoding="async"
+                className="relative w-full h-auto -scale-x-100 motion-safe:animate-float-delayed drop-shadow-[0_22px_36px_rgba(165,96,232,0.42)]"
+              />
+            </div>
             <div className="inline-flex items-center gap-2 mb-4 rounded-full border-2 border-[#A560E8]/40 bg-[#F3EAFF] dark:bg-[#A560E8]/15 px-3.5 py-1.5 shadow-[0_0_12px_rgba(165,96,232,0.25)]">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#A560E8] opacity-75" />
@@ -80,14 +92,14 @@ export default function LandingInteractiveDemoSection({ onNavigate }: LandingInt
             </div>
             <h2
               id="interactive-demo-heading"
-              className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#3C3C3C] dark:text-white tracking-tight leading-[1.15] mb-3"
+              className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-[#3C3C3C] dark:text-white tracking-tight leading-[1.1] mb-3"
               style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
             >
               See how WriteScholar{' '}
               <span className="relative inline-block text-[#A560E8]">
                 grades a real essay
                 <svg
-                  className="absolute -bottom-1 left-0 w-full h-2 text-[#A560E8]"
+                  className="absolute -bottom-1.5 left-0 w-full h-2 text-[#A560E8]"
                   viewBox="0 0 200 8"
                   preserveAspectRatio="none"
                   aria-hidden

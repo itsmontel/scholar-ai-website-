@@ -33,6 +33,13 @@
   .landing-desktop-zoom {
     zoom: 0.891;
   }
+  /* Everything below the hero gets an extra ~10% zoom-out (nests on top
+     of the 0.891 above → ~0.80 effective). The hero stays at 0.891 since
+     it sits outside this wrapper. Per user brief: hero felt right, the
+     rest read a touch too zoomed-in. */
+  .landing-downstream-zoom {
+    zoom: 0.9;
+  }
 }
 
 /* University Carousel Animation - 3 sets; w-max makes track width = content so -33.33% = one set */

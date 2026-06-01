@@ -152,7 +152,8 @@ export default function LandingChatGPTComparisonSection({ onNavigate }: LandingC
           </div>
         </LandingScrollReveal>
 
-        <LandingScrollReveal delayMs={160}>
+        {/* Educators & schools / Expanding access — hidden per brief. */}
+        <LandingScrollReveal delayMs={160} className="hidden">
           <div className="relative overflow-hidden rounded-[32px] border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-[0_40px_100px_-50px_rgba(0,0,0,0.35)]">
             <div className="grid grid-cols-1 lg:grid-cols-2 items-stretch">
               {/* Visual side */}

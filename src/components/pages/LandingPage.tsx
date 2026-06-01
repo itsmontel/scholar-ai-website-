@@ -1420,7 +1420,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
       {/* Downstream-content wrapper — sits outside the hero section so
           section backgrounds span the full viewport width (not clipped by
           the hero's max-width / horizontal padding containers). */}
-      <div className="flex flex-col items-stretch w-full">
+      <div className="landing-downstream-zoom flex flex-col items-stretch w-full">
 
               <Suspense fallback={<div className="min-h-[640px] w-full" aria-hidden />}>
                 <LandingStudyToolsHero onNavigate={onNavigate} />
@@ -2668,7 +2668,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           Dismissal is sticky for the session (sessionStorage) so it never
           feels like a popup ad. Hidden on small phones (<480px) where it
           would dominate the viewport. */}
-      {!pipDismissed && pipVisible && (
+      {false && !pipDismissed && pipVisible && (
         <div
           role="region"
           aria-label="Product demo video"
