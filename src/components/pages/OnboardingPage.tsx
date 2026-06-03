@@ -985,10 +985,24 @@ function DesktopCallout({
   );
 }
 
+/** Discreet sign-out — shown on every onboarding screen when logged in. */
+function OnboardingSignOutButton({ onLogout }: { onLogout?: () => void }) {
+  if (!onLogout) return null;
+  return (
+    <button
+      type="button"
+      onClick={onLogout}
+      className="shrink-0 text-[12px] sm:text-[13px] font-bold text-stone-500 dark:text-stone-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+    >
+      Sign out
+    </button>
+  );
+}
+
 /* ═══════════════════════════════════════════════════════════════
    Main component
    ═══════════════════════════════════════════════════════════════ */
-const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode = false }: OnboardingPageProps) => {
+const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, testMode = false }: OnboardingPageProps) => {
   const [phase, setPhase] = useState<Phase>(getInitialPhase);
   const [displayName, setDisplayName] = useState(user?.name || '');
   const [username, setUsername] = useState(user?.username || '');
@@ -1534,18 +1548,21 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
   /* Reusable top bar with logo + progress bar */
   const TopBar = ({ showProgress = true, showBack = false, onBack }: { showProgress?: boolean; showBack?: boolean; onBack?: () => void }) => (
     <>
-      <div className="bg-white dark:bg-stone-900 border-b-2 border-[#E5E5E5] dark:border-stone-800 px-5 py-3 flex items-center gap-4">
-        {showBack && (
-          <button type="button" onClick={onBack} className="text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-300" aria-label="Back">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
-          </button>
-        )}
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-800">
-            <img src="/main-logo.png" alt="WriteScholar" className="w-full h-full object-contain" loading="eager" width="120" height="120" />
+      <div className="bg-white dark:bg-stone-900 border-b-2 border-[#E5E5E5] dark:border-stone-800 px-5 py-3 flex items-center gap-4 justify-between">
+        <div className="flex items-center gap-4 min-w-0">
+          {showBack && (
+            <button type="button" onClick={onBack} className="text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-300" aria-label="Back">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+            </button>
+          )}
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-800">
+              <img src="/main-logo.png" alt="WriteScholar" className="w-full h-full object-contain" loading="eager" width="120" height="120" />
+            </div>
+            <span className="text-lg font-extrabold tracking-tight text-[#3C3C3C] dark:text-stone-100" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>WriteScholar</span>
           </div>
-          <span className="text-lg font-extrabold tracking-tight text-[#3C3C3C] dark:text-stone-100" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>WriteScholar</span>
         </div>
+        <OnboardingSignOutButton onLogout={onLogout} />
       </div>
       {showProgress && (
         <div className="h-3 bg-[#E5E5E5] dark:bg-stone-800 overflow-hidden">
@@ -2105,6 +2122,9 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
         <OnboardingAura />
         {/* Top accent line — brand gradient, matches dashboard's header rule */}
         <div className="relative z-10 h-1.5 bg-gradient-to-r from-[#A560E8] via-[#1CB0F6] to-[#58CC02]" aria-hidden />
+        <div className="relative z-10 flex justify-end px-5 pt-3">
+          <OnboardingSignOutButton onLogout={onLogout} />
+        </div>
 
         <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
           <div className={`flex flex-col items-center transition-all duration-500 ${phaseVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
@@ -2176,6 +2196,9 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
       <div className="h-screen bg-gradient-to-br from-[#FAF7FF] via-[#FBF7FF] to-[#F3EAFF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 flex flex-col relative overflow-hidden">
         <OnboardingAura />
         <div className="relative z-10 h-1.5 bg-gradient-to-r from-[#A560E8] via-[#1CB0F6] to-[#58CC02]" aria-hidden />
+        <div className="relative z-10 flex justify-end px-5 pt-3">
+          <OnboardingSignOutButton onLogout={onLogout} />
+        </div>
 
         {/* Mini confetti — light celebration, not full burst */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
@@ -2318,6 +2341,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
             </div>
             <span className="text-lg font-extrabold tracking-tight text-[#3C3C3C] dark:text-stone-100" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>WriteScholar</span>
           </div>
+          <OnboardingSignOutButton onLogout={onLogout} />
         </div>
         <div className="h-3 bg-[#E5E5E5] dark:bg-stone-800">
           <div className="h-full bg-[#58CC02] rounded-r-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
@@ -2488,7 +2512,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
     return (
       <div className="relative h-screen bg-gradient-to-br from-[#FAF7FF] via-[#FBF7FF] to-[#F3EAFF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 flex flex-col overflow-hidden">
         <OnboardingAura />
-        {/* Top bar — NO skip button, NO escape from the header */}
+        {/* Top bar — hard paywall (sign out only; no skip) */}
         <div className="bg-white dark:bg-stone-900 border-b-2 border-[#E5E5E5] dark:border-stone-800 px-5 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-800">
@@ -2496,6 +2520,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
             </div>
             <span className="text-lg font-extrabold tracking-tight text-[#3C3C3C] dark:text-stone-100" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>WriteScholar</span>
           </div>
+          <OnboardingSignOutButton onLogout={onLogout} />
         </div>
         <div className="h-3 bg-[#E5E5E5] dark:bg-stone-800">
           <div className="h-full bg-[#58CC02] rounded-r-full transition-all duration-500" style={{ width: `100%` }} />
@@ -2938,7 +2963,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
               style={{ width: `${((quizIndex + (answerChecked ? 1 : 0)) / DEMO_QUESTIONS.length) * 100}%` }}
             />
           </div>
-          <div className="relative flex items-center gap-1 text-sm font-extrabold text-[#FF9600]">
+          <div className="relative flex items-center gap-1 text-sm font-extrabold text-[#FF9600] shrink-0">
             <span aria-hidden>⭐</span>
             <span>{xpEarned}</span>
             {showXpFloat && (
@@ -2947,6 +2972,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
               </span>
             )}
           </div>
+          <OnboardingSignOutButton onLogout={onLogout} />
         </div>
 
         <div className="flex-1 flex flex-col px-4 sm:px-6 pt-6 sm:pt-8 pb-4 max-w-lg mx-auto w-full">

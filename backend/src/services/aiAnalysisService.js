@@ -722,7 +722,8 @@ ${citationStyle === 'None'
 
       CRITICAL — INLINE ANNOTATIONS:
       - Strengths: Say what works in the quoted words (logic, evidence, clarity), not stock praise. Do not repeat the same phrase across items. Avoid filler like "appropriate complexity", "well suited for academic work", "sophisticated academic discourse" as the main point.
-      - Improvements/concerns: Tie every suggestion to this document. No [X]/[Y] placeholders. Give a revision, a sentence to add, or before/after using their topic — never generic "add evidence" without naming what claim.`,
+      - Improvements/concerns: Tie every suggestion to this document. No [X]/[Y] placeholders. Give a revision, a sentence to add, or before/after using their topic — never generic "add evidence" without naming what claim.
+      - References/bibliography: If a reference list / bibliography / works-cited section is present, do NOT annotate or rewrite its entries as sentences — leave reference entries alone (citation formatting is reviewed separately).`,
       
       citation: `You are a citation and referencing expert. Analyze the provided document for:
       - Proper citation format and style
@@ -764,7 +765,8 @@ ${citationStyle === 'None'
 
       CRITICAL — INLINE ANNOTATIONS:
       - Strengths: Each strength must describe what is strong in that exact quote (word choice, structure, evidence). Do not reuse boilerplate across strengths. Ban empty praise: "appropriate complexity", "well suited for academic work", "sophisticated academic discourse" as filler.
-      - Improvements/concerns: Every suggestion must reference their draft — revised wording, a clause to insert, or a named element from their essay. Never [X]/[Y] placeholders or template advice without a concrete fix.`,
+      - Improvements/concerns: Every suggestion must reference their draft — revised wording, a clause to insert, or a named element from their essay. Never [X]/[Y] placeholders or template advice without a concrete fix.
+      - References/bibliography: If a reference list / bibliography / works-cited section is present, do NOT annotate or rewrite its entries as sentences — leave reference entries alone (citation formatting is reviewed separately).`,
       
       citation_review: `You are an expert academic citation and referencing specialist with deep knowledge of all major citation styles (APA, MLA, Chicago, Harvard, etc.).
 
@@ -946,6 +948,11 @@ CRITICAL REQUIREMENTS:
     return `Please perform a comprehensive academic analysis of the following document ${citationInstruction}
 
 IMPORTANT: For each feedback point, you must include the EXACT text from the document that you're referring to, enclosed in double quotes. All quoted text must appear verbatim in the document.
+
+REFERENCES / BIBLIOGRAPHY — DO NOT REVISE AS PROSE:
+- If the document contains a reference list, bibliography, or works-cited section (usually at the end — often after a heading like "References", "Bibliography", "Works Cited", or "Reference List", and made up of source entries with authors, years, titles, publishers/URLs), treat those entries as CITATIONS, not sentences.
+- NEVER create an annotation, a "specific_rewrite", or a grammar/clarity/style/structure suggestion for a reference-list entry, and never quote reference-list text in your output. Do not "rewrite" a reference as if it were a sentence.
+- Only annotate and revise the essay's BODY prose. (Citation/reference formatting is checked in a separate pass — ignore it here.)
 
 ADAPTIVE ANNOTATION GUIDELINES:
 - Aim for approximately ${targetAnnotations} total annotations spread across the essay
