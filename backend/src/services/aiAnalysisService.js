@@ -2,6 +2,27 @@ const OpenAI = require('openai');
 const subscriptionService = require('./subscriptionService');
 
 /**
+ * Build chat.completions params for either a reasoning model (GPT-5 /
+ * o-series) or a classic model.
+ *  - Reasoning models reject a custom `temperature`, bill "thinking"
+ *    tokens against `max_completion_tokens`, and accept a
+ *    `reasoning_effort` knob (minimal | low | medium | high | xhigh).
+ *  - Classic models (gpt-4o-mini, gpt-4.1-*) use `temperature` +
+ *    `max_tokens` and have no reasoning effort.
+ * Sending the wrong shape 400s the request (which then silently falls
+ * back to gpt-4o-mini), so we branch on the model id here.
+ */
+function buildChatParams(model, messages, maxTokens, reasoningEffort = null, temperature = 0.3) {
+  const isReasoning = /^(gpt-5|o[0-9])/i.test(model);
+  if (isReasoning) {
+    const params = { model, messages, max_completion_tokens: maxTokens };
+    if (reasoningEffort) params.reasoning_effort = reasoningEffort;
+    return params;
+  }
+  return { model, messages, max_tokens: maxTokens, temperature };
+}
+
+/**
  * Get 30 days from now (used for free user data expiration)
  * Free user data (citations, quizzes, flashcards, crosswords) expires 30 days after creation
  */
@@ -249,67 +270,54 @@ class AIAnalysisService {
         return await this.mockAnalysis(documentId, content, analysisType, userId);
       }
 
-      // Get user's subscription plan for model and token selection
+      // Model ladder (overridable via env):
+      //   Free          → gpt-4o-mini       (classic, no reasoning effort)
+      //   Pro + Premium → gpt-5.4-mini      at medium reasoning effort
       let userPlan = 'free';
-      let selectedModel = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+      let selectedModel = process.env.OPENAI_STANDARD_MODEL || 'gpt-4o-mini';
       let maxTokens = 5000; // Default for free
-      
+      let reasoningEffort = null; // only set for reasoning models (paid)
+
       try {
         const { plan } = await subscriptionService.getUserSubscriptionDetails(userId);
         const effPlan = subscriptionService.normalizePlanForLimits(plan);
         userPlan = subscriptionService.isPaidSubscriptionTier(plan) ? effPlan : 'free';
 
         if (subscriptionService.isPaidSubscriptionTier(plan)) {
-          selectedModel = process.env.OPENAI_PREMIUM_MODEL || 'gpt-5-mini';
-          maxTokens = 15000;
+          selectedModel = process.env.OPENAI_PREMIUM_MODEL || 'gpt-5.4-mini';
+          reasoningEffort = process.env.OPENAI_REASONING_EFFORT || 'medium';
+          maxTokens = 15000; // reasoning tokens share this budget
         } else {
           selectedModel = process.env.OPENAI_STANDARD_MODEL || 'gpt-4o-mini';
+          reasoningEffort = null;
           maxTokens = 5000;
         }
       } catch (planErr) {
-        // If plan lookup fails, keep defaults
+        // If plan lookup fails, keep free defaults
         console.log('Could not fetch plan, using defaults');
       }
 
       const analysisPrompt = this.getAnalysisPrompt(analysisType, content, citationStyle, userPlan, gradingStyle);
 
+      const messages = [
+        { role: 'system', content: this.getSystemPrompt(analysisType) },
+        { role: 'user', content: analysisPrompt },
+      ];
+
       let completion;
       try {
-        completion = await this.openai.chat.completions.create({
-          model: selectedModel,
-        messages: [
-          {
-              role: 'system',
-              content: this.getSystemPrompt(analysisType)
-          },
-          {
-              role: 'user',
-            content: analysisPrompt
-          }
-        ],
-        max_tokens: maxTokens,
-          temperature: 0.3,
-        });
+        completion = await this.openai.chat.completions.create(
+          buildChatParams(selectedModel, messages, maxTokens, reasoningEffort)
+        );
       } catch (modelErr) {
-        // If premium/unknown model fails, retry with reliable default
+        // If the premium/reasoning model fails (bad model id, param
+        // mismatch, quota…), retry with the reliable classic default.
         if (selectedModel !== 'gpt-4o-mini') {
           console.log(`Model ${selectedModel} failed, falling back to gpt-4o-mini`);
           selectedModel = 'gpt-4o-mini';
-          completion = await this.openai.chat.completions.create({
-            model: selectedModel,
-            messages: [
-              {
-                role: 'system',
-                content: this.getSystemPrompt(analysisType)
-              },
-              {
-                role: 'user',
-                content: analysisPrompt
-              }
-            ],
-            max_tokens: maxTokens,
-            temperature: 0.3,
-          });
+          completion = await this.openai.chat.completions.create(
+            buildChatParams('gpt-4o-mini', messages, maxTokens, null)
+          );
         } else {
           throw modelErr;
         }
@@ -357,12 +365,15 @@ class AIAnalysisService {
 
       let selectedModel = process.env.OPENAI_STANDARD_MODEL || 'gpt-4o-mini';
       let maxTokens = 6000;
+      let reasoningEffort = null;
 
       try {
         const { plan } = await subscriptionService.getUserSubscriptionDetails(userId);
         if (subscriptionService.isPaidSubscriptionTier(plan)) {
-          selectedModel = process.env.OPENAI_PREMIUM_MODEL || 'gpt-5-mini';
-          maxTokens = 8000;
+          // Pro + Premium → gpt-5.4-mini at medium reasoning effort.
+          selectedModel = process.env.OPENAI_PREMIUM_MODEL || 'gpt-5.4-mini';
+          reasoningEffort = process.env.OPENAI_REASONING_EFFORT || 'medium';
+          maxTokens = 12000; // headroom so reasoning tokens don't truncate the JSON
         }
       } catch (planErr) {
         console.log('Could not fetch plan for rubric analysis, using defaults');
@@ -402,30 +413,23 @@ IMPORTANT:
 - Be constructive and specific in suggestions — tell the student exactly what to add or change and where.
 - If the rubric includes a grading scale or point breakdown, estimate scores for each criterion.`;
 
+      const messages = [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ];
+
       let completion;
       try {
-        completion = await this.openai.chat.completions.create({
-          model: selectedModel,
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt }
-          ],
-          max_tokens: maxTokens,
-          temperature: 0.3,
-        });
+        completion = await this.openai.chat.completions.create(
+          buildChatParams(selectedModel, messages, maxTokens, reasoningEffort)
+        );
       } catch (modelErr) {
         if (selectedModel !== 'gpt-4o-mini') {
           console.log(`Model ${selectedModel} failed for rubric analysis, falling back to gpt-4o-mini`);
           selectedModel = 'gpt-4o-mini';
-          completion = await this.openai.chat.completions.create({
-            model: selectedModel,
-            messages: [
-              { role: 'system', content: systemPrompt },
-              { role: 'user', content: userPrompt }
-            ],
-            max_tokens: maxTokens,
-            temperature: 0.3,
-          });
+          completion = await this.openai.chat.completions.create(
+            buildChatParams('gpt-4o-mini', messages, maxTokens, null)
+          );
         } else {
           throw modelErr;
         }

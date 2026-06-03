@@ -287,9 +287,13 @@ export default function LandingHowItWorksSection({ onNavigate }: LandingHowItWor
               ))}
             </div>
 
-            {/* ─── Centre hub — mascot + icon spokes (first edit) ─── */}
-            <div className="relative mx-auto w-full max-w-[480px] aspect-square lg:absolute lg:inset-0 lg:max-w-none lg:aspect-auto lg:flex lg:items-center lg:justify-center">
-              <div className="relative w-full max-w-[480px] aspect-square mx-auto">
+            {/* ─── Centre hub — mascot + icon spokes.
+                On phones the hub is capped to the viewport width and the
+                spoke text labels are hidden (the 2×3 grid below already
+                labels every tool), so the icon ring stays centred and never
+                clips. Labels return at sm+ where the ring is wide enough. ─── */}
+            <div className="relative mx-auto w-full max-w-[min(20rem,calc(100vw-2.5rem))] sm:max-w-[26rem] md:max-w-[480px] aspect-square lg:absolute lg:inset-0 lg:max-w-none lg:aspect-auto lg:flex lg:items-center lg:justify-center">
+              <div className="relative w-full max-w-[min(20rem,calc(100vw-2.5rem))] sm:max-w-[26rem] md:max-w-[480px] aspect-square mx-auto">
                 <div className="absolute inset-[12%] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(165,96,232,0.16),transparent_70%)]" aria-hidden />
                 <div className="absolute inset-[10%] rounded-full border-2 border-dashed border-[#D8B4FE]/70 dark:border-[#A560E8]/30 motion-safe:animate-[spin_50s_linear_infinite]" aria-hidden />
 
@@ -354,7 +358,7 @@ export default function LandingHowItWorksSection({ onNavigate }: LandingHowItWor
                         )}
                       </span>
                       <span
-                        className={`text-[11px] sm:text-xs font-extrabold whitespace-nowrap transition-colors duration-500 ${
+                        className={`hidden sm:block text-[11px] sm:text-xs font-extrabold whitespace-nowrap transition-colors duration-500 ${
                           spokeActive ? '' : 'text-stone-700 dark:text-stone-200'
                         }`}
                         style={spokeActive ? { color: spoke.color } : undefined}

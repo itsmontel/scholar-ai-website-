@@ -6,21 +6,14 @@ import { trackEvent } from '../../utils/analytics';
 // on first paint so the conversion event isn't racing the script load.
 import { trackTrialConversion } from '../../utils/gtag';
 import BadgeCreature from '../common/BadgeCreature';
-import { markSoftPaywallDismissedNow, SOFT_PAYWALL_OPEN_KEY } from '../../constants/paywallSession';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 const TRIAL_DAYS = 7;
 
 /**
- * When true the onboarding tour ends on the `value-prop` screen
- * ("Eight tools. Designed for success.") — the `paywall` and
- * `paywall-hard` phases that used to follow are unreachable, and the
- * dashboard's soft paywall pops instead. The render blocks for those
- * phases are deliberately left in the file so the previous upsell
- * sequence can be restored in one step:
- *   • flip this flag to `false`
- *   • that's it — the existing button onClick + decline handlers fall
- *     back to the original `goToPhase('paywall' | 'paywall-hard')` paths.
+ * When true, `paywall-hard` and `checkout` short-circuit to the dashboard
+ * transition (dev / A-B bypass). Default `false` — tour ends at value-prop
+ * → checkout (hard paywall, no "maybe later").
  */
 const HIDE_END_PAYWALLS = false;
 /* Promo code silently pre-applied to checkout when the user clicks the
@@ -69,7 +62,6 @@ type Phase =
   | 'survey-goal'
   | 'survey-features'
   | 'tour-essays'
-  | 'tour-essays-2'
   | 'tour-study'
   | 'tour-citations'
   | 'tour-games'
@@ -78,7 +70,6 @@ type Phase =
   | 'daily-review-demo'
   | 'daily-review-results'
   | 'value-prop'
-  | 'paywall'
   | 'paywall-hard'
   | 'checkout'
   | 'verifying'
@@ -97,7 +88,6 @@ const PHASE_STEP: Record<string, number> = {
   // All tour phases share the same step "5" — the progress bar holds
   // steady through the personalised tour. Only essays + final step bump.
   'tour-essays': 5,
-  'tour-essays-2': 5,
   'tour-study': 5,
   'tour-citations': 5,
   'tour-games': 5,
@@ -110,10 +100,7 @@ const PHASE_STEP: Record<string, number> = {
   // up the "everything you get" pitch + social proof so the paywall
   // doesn't land cold.
   'value-prop': 9,
-  paywall: 10,
-  // Hard paywall is the "last chance" interception that fires when a
-  // user declines the soft paywall. Same step index — the progress bar
-  // stays at 100% so the page still reads as the final beat of the flow.
+  checkout: 10,
   'paywall-hard': 10,
 };
 const TOTAL_STEPS = 10;
@@ -193,7 +180,7 @@ const REFERRAL_SOURCES = [
    THIS priority order — so essays (if selected) is always first, then
    the rest fall in the predefined cadence (review → study → citations
    → games → motivation). Used at runtime to derive `tourSequence`. */
-type TourPhase = 'tour-essays' | 'tour-essays-2' | 'tour-study' | 'tour-citations' | 'tour-games' | 'tour-motivation';
+type TourPhase = 'tour-essays' | 'tour-study' | 'tour-citations' | 'tour-games' | 'tour-motivation';
 const FEATURE_TOUR_ORDER: { id: string; phase: TourPhase }[] = [
   { id: 'essays',       phase: 'tour-essays' },
   { id: 'study_packs',  phase: 'tour-study' },
@@ -270,7 +257,8 @@ const PLANS: Record<PlanId, Plan> = {
       'Full annotations on every paper',
       'One-click apply revisions',
       'Estimated grade + full rubric',
-      '99 analyses · 100MB uploads',
+      'Flashcards, quizzes & study packs',
+      'Citation finder — APA, MLA & Chicago',
     ],
     monthly: {
       firstCyclePrice: '$9.99',
@@ -319,11 +307,9 @@ function getInitialPhase(): Phase {
   if (typeof window === 'undefined') return 'intro';
   const params = new URLSearchParams(window.location.search);
   // ?preview=value-prop is what Stripe's hosted-checkout cancel URL
-  // lands on — drops the user back at the 8-tools "Eight tools.
-  // Designed for success." page they came from, NOT the hidden
-  // "you're now ready to ace school" end-paywall.
+  // lands on — drops the user back at checkout (plan picker + trial CTA).
   if (params.get('preview') === 'value-prop') return 'value-prop';
-  if (params.get('preview') === 'aha') return 'paywall';
+  if (params.get('preview') === 'aha') return 'checkout';
   if (params.get('preview') === 'profile') return 'profile';
   const sid = params.get('session_id');
   return sid ? 'verifying' : 'intro';
@@ -487,6 +473,96 @@ function ToolCard({ tool, delayMs = 0 }: { tool: typeof PAYWALL_TOOLS[number]; d
         <p className="text-sm font-extrabold text-[#3C3C3C] dark:text-stone-100 leading-tight">{tool.title}</p>
         <p className="mt-1 text-[11px] text-stone-500 dark:text-stone-400 font-bold leading-snug line-clamp-2">{tool.desc}</p>
       </div>
+    </div>
+  );
+}
+
+/* ─── Checkout preview tile — compact mosaic cell that shows either a
+   static screenshot OR live, autoplay-on-visible demo footage. When a
+   `videos` playlist is supplied the clips cycle on `ended` (so the
+   Flashcards+Quizzes and Arcade tiles play real product video instead
+   of a flat image). ─── */
+function CheckoutPreviewTile({
+  tile,
+}: {
+  tile: { label: string; tint: string; src?: string; videos?: string[] };
+}) {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const wrapRef = useRef<HTMLDivElement | null>(null);
+  const playlist = tile.videos && tile.videos.length > 0 ? tile.videos : [];
+  const isCycle = playlist.length > 1;
+  const [clipIdx, setClipIdx] = useState(0);
+  const [inView, setInView] = useState(false);
+  const currentSrc = playlist[clipIdx];
+
+  useEffect(() => {
+    const w = wrapRef.current;
+    if (!w || typeof IntersectionObserver === 'undefined') return;
+    const obs = new IntersectionObserver(
+      (entries) => entries.forEach((e) => setInView(e.isIntersecting)),
+      { threshold: 0.25 }
+    );
+    obs.observe(w);
+    return () => obs.disconnect();
+  }, []);
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (inView) v.play().catch(() => {}); else v.pause();
+  }, [inView, currentSrc]);
+
+  return (
+    <div
+      ref={wrapRef}
+      className="group relative overflow-hidden rounded-2xl border-2 border-b-4 bg-white dark:bg-stone-900 shadow-[0_10px_30px_-14px_rgba(40,30,60,0.30)]"
+      style={{ borderColor: `${tile.tint}55` }}
+    >
+      <div className="aspect-[4/3] overflow-hidden bg-stone-50 dark:bg-stone-900">
+        {playlist.length > 0 ? (
+          <video
+            ref={videoRef}
+            key={currentSrc}
+            src={currentSrc}
+            muted
+            loop={!isCycle}
+            playsInline
+            preload="metadata"
+            aria-label={`${tile.label} demo`}
+            onEnded={() => {
+              if (isCycle) setClipIdx((i) => (i + 1) % playlist.length);
+            }}
+            className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <img
+            src={tile.src}
+            alt={tile.label}
+            loading="lazy"
+            decoding="async"
+            className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+          />
+        )}
+      </div>
+      <div className="px-2 py-1.5 text-center bg-white dark:bg-stone-900 border-t" style={{ borderColor: `${tile.tint}33` }}>
+        <p className="text-[10px] sm:text-[10.5px] font-extrabold text-stone-700 dark:text-stone-200 leading-tight">
+          {tile.label}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Ambient brand backdrop — soft, blurred colour orbs that give the
+   flat onboarding phases the same depth-y, glowy feel as the dashboard
+   and the checkout page. Rendered behind content (pointer-events-none),
+   so drop it in as the first child of a `relative overflow-hidden`
+   root. ─── */
+function OnboardingAura() {
+  return (
+    <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden>
+      <div className="absolute -top-32 left-1/2 -translate-x-1/2 h-72 w-[44rem] max-w-full rounded-full bg-[#A560E8]/14 dark:bg-[#A560E8]/15 blur-3xl" />
+      <div className="absolute -bottom-40 -right-24 h-80 w-80 rounded-full bg-[#FFC800]/18 dark:bg-[#FFC800]/12 blur-3xl" />
+      <div className="absolute top-1/3 -left-24 h-72 w-72 rounded-full bg-[#58CC02]/10 dark:bg-[#58CC02]/10 blur-3xl" />
     </div>
   );
 }
@@ -727,24 +803,13 @@ function EssayPitchVisual({ color, borderColor }: { color: string; borderColor: 
         />
       </div>
 
-      {/* DESKTOP — image in centre, callouts in corners, SVG arrows
-          connecting each callout to its hotspot. The viewBox is a
-          fixed 1000×640 frame that matches the container's
-          aspect-[1000/640] so arrow coordinates line up consistently. */}
+      {/* DESKTOP — image in centre, callouts in corners (numbered badges only, no connector lines) */}
       <DesktopArrowCallouts image="/WriterPic.png" color={color} borderColor={borderColor} hotspots={hotspots} />
     </>
   );
 }
 
-/* ─── Desktop arrow-callout layout (lg+) ─────────────────────────
-   Flexible 3-column CSS grid: callouts | image | callouts. The grid
-   GROWS with content — no fixed aspect ratio — so longer callout
-   text or a taller screenshot won't break the layout.
-
-   Each callout has a small inline arrow icon on its INNER edge
-   pointing toward the image. Combined with the matching numbered
-   badge on the image itself, the eye reads it as "this callout is
-   connected to that badge". */
+/* ─── Desktop callout layout (lg+) — 3-column grid: callouts | image | callouts */
 function DesktopArrowCallouts({
   image,
   color,
@@ -756,93 +821,14 @@ function DesktopArrowCallouts({
   borderColor: string;
   hotspots: { x: number; y: number; title: string; desc: string; sample?: { lead?: string; strong?: string; improve?: string; concern?: string } }[];
 }) {
-  // Hotspot-array indexing for the column layout:
-  //   LEFT column  → hotspots[1] (#2 top), hotspots[2] (#3 bottom)
-  //   RIGHT column → hotspots[0] (#1 top), hotspots[3] (#4 bottom)
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const imageRef = useRef<HTMLDivElement | null>(null);
-  const calloutRefs = useRef<Array<HTMLDivElement | null>>([null, null, null, null]);
-  const [lines, setLines] = useState<Array<{ x1: number; y1: number; x2: number; y2: number; cx: number; cy: number }>>([]);
-
-  // Compute real connector geometry from each callout's inner edge to
-  // its badge's ring on the screenshot. Re-runs on resize and on
-  // image load so the dashed arcs actually meet the numbered circles
-  // instead of dangling in the column gap.
-  useEffect(() => {
-    const compute = () => {
-      const c = containerRef.current?.getBoundingClientRect();
-      const img = imageRef.current?.getBoundingClientRect();
-      if (!c || !img || img.width === 0 || img.height === 0) return;
-      const BADGE_R = 16; // 32px badge → radius 16; +3px gap so the arrow doesn't tuck under
-      const next: Array<{ x1: number; y1: number; x2: number; y2: number; cx: number; cy: number }> = [];
-      hotspots.forEach((h, i) => {
-        const cb = calloutRefs.current[i]?.getBoundingClientRect();
-        if (!cb) return;
-        const isRight = h.x > 50;
-        const x1 = isRight ? cb.left - c.left - 2 : cb.right - c.left + 2;
-        const y1 = cb.top + cb.height / 2 - c.top;
-        const bcx = img.left - c.left + (h.x / 100) * img.width;
-        const bcy = img.top - c.top + (h.y / 100) * img.height;
-        const dx = bcx - x1;
-        const dy = bcy - y1;
-        const len = Math.max(1, Math.hypot(dx, dy));
-        const ux = dx / len;
-        const uy = dy / len;
-        const x2 = bcx - ux * (BADGE_R + 3);
-        const y2 = bcy - uy * (BADGE_R + 3);
-        // Gentle bow toward the image side so the line reads as a soft
-        // arc, not a straight diagonal that crosses other elements.
-        const mx = (x1 + x2) / 2;
-        const my = (y1 + y2) / 2;
-        const bow = Math.min(26, Math.abs(dy) * 0.16);
-        const cx = mx + -uy * bow * (isRight ? 1 : -1);
-        const cy = my + ux * bow * (isRight ? 1 : -1);
-        next.push({ x1, y1, x2, y2, cx, cy });
-      });
-      setLines(next);
-    };
-    compute();
-    const raf = requestAnimationFrame(compute);
-    const ro = new ResizeObserver(() => compute());
-    if (containerRef.current) ro.observe(containerRef.current);
-    if (imageRef.current) ro.observe(imageRef.current);
-    window.addEventListener('resize', compute);
-    return () => {
-      cancelAnimationFrame(raf);
-      ro.disconnect();
-      window.removeEventListener('resize', compute);
-    };
-  }, [hotspots, image]);
-
   return (
-    <div ref={containerRef} className="relative hidden lg:grid lg:grid-cols-[1fr_minmax(0,1.7fr)_1fr] gap-10 xl:gap-14 items-stretch">
-      {/* Parent SVG overlay — real connector arcs that meet each badge */}
-      <svg
-        className="pointer-events-none absolute inset-0 z-20"
-        width="100%"
-        height="100%"
-        style={{ overflow: 'visible' }}
-        aria-hidden
-      >
-        {lines.map((ln, i) => (
-          <path
-            key={i}
-            d={`M ${ln.x1} ${ln.y1} Q ${ln.cx} ${ln.cy} ${ln.x2} ${ln.y2}`}
-            stroke={color}
-            strokeWidth="2.25"
-            strokeDasharray="4 4"
-            strokeLinecap="round"
-            fill="none"
-          />
-        ))}
-      </svg>
-
+    <div className="hidden lg:grid lg:grid-cols-[1fr_minmax(0,1.7fr)_1fr] gap-10 xl:gap-14 items-stretch">
       {/* LEFT column */}
       <div className="flex flex-col justify-between gap-6 py-2">
-        <div className="mt-10 xl:mt-14" ref={(el) => { calloutRefs.current[1] = el; }}>
+        <div className="mt-10 xl:mt-14">
           <DesktopCallout n={2} hotspot={hotspots[1]} color={color} arrow="right" hideArrow />
         </div>
-        <div ref={(el) => { calloutRefs.current[2] = el; }}>
+        <div>
           <DesktopCallout n={3} hotspot={hotspots[2]} color={color} arrow="right" hideArrow />
         </div>
       </div>
@@ -850,14 +836,13 @@ function DesktopArrowCallouts({
       {/* CENTRE — image with hotspot badges */}
       <div className="relative pt-2">
         <div className="absolute -inset-3 rounded-3xl blur-2xl opacity-25" style={{ backgroundColor: `${color}40` }} aria-hidden />
-        <div ref={imageRef} className="relative rounded-2xl overflow-hidden border-2 border-b-4 shadow-xl bg-white dark:bg-stone-900" style={{ borderColor }}>
+        <div className="relative rounded-2xl overflow-hidden border-2 border-b-4 shadow-xl bg-white dark:bg-stone-900" style={{ borderColor }}>
           <img
             src={image}
             alt="WriteScholar rubric and feedback notes — annotated breakdown"
             className="w-full h-auto block"
             loading="eager"
             decoding="async"
-            onLoad={() => { window.dispatchEvent(new Event('resize')); }}
           />
           {hotspots.map((h, i) => (
             <span
@@ -883,10 +868,10 @@ function DesktopArrowCallouts({
 
       {/* RIGHT column */}
       <div className="flex flex-col justify-between gap-6 py-2">
-        <div className="-mt-3 xl:-mt-5" ref={(el) => { calloutRefs.current[0] = el; }}>
+        <div className="-mt-3 xl:-mt-5">
           <DesktopCallout n={1} hotspot={hotspots[0]} color={color} arrow="left" hideArrow />
         </div>
-        <div ref={(el) => { calloutRefs.current[3] = el; }}>
+        <div>
           <DesktopCallout n={4} hotspot={hotspots[3]} color={color} arrow="left" hideArrow />
         </div>
       </div>
@@ -894,9 +879,7 @@ function DesktopArrowCallouts({
   );
 }
 
-/* Single desktop callout card with a number badge, title, description,
-   optional colour-coded sample, and a dashed arrow on its inner edge
-   pointing toward the centre image. */
+/* Single desktop callout card with a number badge, title, and description. */
 function DesktopCallout({
   n,
   hotspot,
@@ -1002,250 +985,6 @@ function DesktopCallout({
   );
 }
 
-/* ─── Essay tour Page 2 — COMPREHENSIVE ANALYSIS ────────────────
-   Annotated /full-report.png screenshot showing the five sections
-   of WriteScholar's comprehensive analysis: overall assessment,
-   top suggestions, strengths, areas for improvement, and serious
-   concerns.  Mobile stacks the AnnotatedScreenshot; desktop uses
-   a custom 2-left / 3-right arrow callout layout (since 5 doesn't
-   split evenly into Page 1's 2/2 pattern). */
-function EssayDeepDiveVisual({ color, borderColor }: { color: string; borderColor: string }) {
-  // Refs + computed-arrow overlay — identical pattern to
-  // DesktopArrowCallouts. The deep-dive layout has 5 callouts instead
-  // of 4 so the overlay is wired here directly rather than going
-  // through DesktopArrowCallouts.
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const imageRef = useRef<HTMLDivElement | null>(null);
-  const calloutRefs = useRef<Array<HTMLDivElement | null>>([null, null, null, null, null]);
-  const [lines, setLines] = useState<Array<{ x1: number; y1: number; x2: number; y2: number; cx: number; cy: number }>>([]);
-
-  useEffect(() => {
-    const compute = () => {
-      const c = containerRef.current?.getBoundingClientRect();
-      const img = imageRef.current?.getBoundingClientRect();
-      if (!c || !img || img.width === 0 || img.height === 0) return;
-      const BADGE_R = 16;
-      const next: Array<{ x1: number; y1: number; x2: number; y2: number; cx: number; cy: number }> = [];
-      // The hotspots array is in scope below — we read it via closure
-      // by deferring the actual coordinates until inside compute().
-      // (Same pattern works because the hotspots constant doesn't move.)
-      const arr = HOTSPOTS_REF.current;
-      arr.forEach((h, i) => {
-        const cb = calloutRefs.current[i]?.getBoundingClientRect();
-        if (!cb) return;
-        const isRight = h.x > 50;
-        const x1 = isRight ? cb.left - c.left - 2 : cb.right - c.left + 2;
-        const y1 = cb.top + cb.height / 2 - c.top;
-        const bcx = img.left - c.left + (h.x / 100) * img.width;
-        const bcy = img.top - c.top + (h.y / 100) * img.height;
-        const dx = bcx - x1;
-        const dy = bcy - y1;
-        const len = Math.max(1, Math.hypot(dx, dy));
-        const ux = dx / len;
-        const uy = dy / len;
-        const x2 = bcx - ux * (BADGE_R + 3);
-        const y2 = bcy - uy * (BADGE_R + 3);
-        const mx = (x1 + x2) / 2;
-        const my = (y1 + y2) / 2;
-        const bow = Math.min(26, Math.abs(dy) * 0.16);
-        const cx = mx + -uy * bow * (isRight ? 1 : -1);
-        const cy = my + ux * bow * (isRight ? 1 : -1);
-        next.push({ x1, y1, x2, y2, cx, cy });
-      });
-      setLines(next);
-    };
-    compute();
-    const raf = requestAnimationFrame(compute);
-    const ro = new ResizeObserver(() => compute());
-    if (containerRef.current) ro.observe(containerRef.current);
-    if (imageRef.current) ro.observe(imageRef.current);
-    window.addEventListener('resize', compute);
-    return () => {
-      cancelAnimationFrame(raf);
-      ro.disconnect();
-      window.removeEventListener('resize', compute);
-    };
-  }, []);
-
-  // Stable ref to the hotspots array so the effect can read it
-  // without rerunning every render (the array literal below is a new
-  // reference each render).
-  const HOTSPOTS_REF = useRef<Array<{ x: number; y: number }>>([]);
-  // Non-crossing badge convention, adapted for 5 hotspots:
-  //   #1 = RIGHT column top    (y≈10) — overall assessment, top of report
-  //   #2 = LEFT  column top    (y≈25) — top suggestions, just below
-  //   #3 = RIGHT column middle (y≈50) — strengths, middle of report
-  //   #4 = LEFT  column bottom (y≈74) — areas for improvement
-  //   #5 = RIGHT column bottom (y≈88) — serious concerns, bottom
-  // Right column has 3 callouts (justify-between → top/mid/bot);
-  // left column has 2 (justify-around → ~25%/~75%) — those natural
-  // distribution percentages roughly match the badge y-positions.
-  const hotspots: { x: number; y: number; title: string; desc: string }[] = [
-    {
-      // #1 — RIGHT top — Overall assessment
-      x: 80, y: 20,
-      title: 'Overall assessment',
-      desc: 'Letter grade, /100 score, and a plain-English verdict at the top. The high-level read on where this draft sits before you dive into the details.',
-    },
-    {
-      // #2 — LEFT top — Top suggestions (sits lower to track the report layout)
-      x: 22, y: 32,
-      title: 'Top suggestions',
-      desc: 'The handful of changes that move your grade the most, ranked by impact. Fix these first if you only have 20 minutes before the deadline.',
-    },
-    {
-      // #3 — RIGHT middle — Strengths
-      x: 80, y: 50,
-      title: 'Strengths',
-      desc: 'The specific moves already earning marks: thesis framing, evidence handling, transitions. Each one surfaced with the actual sentence. Keep what works.',
-    },
-    {
-      // #4 — LEFT bottom — Areas for improvement
-      x: 22, y: 74,
-      title: 'Areas for improvement',
-      desc: 'Vague claims, weak signposting, sentences doing too much. Each one comes with a concrete "revise to" suggestion. No guessing what to change.',
-    },
-    {
-      // #5 — RIGHT bottom — Serious concerns
-      x: 80, y: 90,
-      title: 'Serious concerns',
-      desc: 'Missing citations, logic gaps, factual slips. The things professors actually deduct points for. Surfaced before submit, not after the red pen.',
-    },
-  ];
-  // Sync the latest hotspots array into the closure-ref the effect
-  // reads from, so the connector geometry stays current without
-  // re-running the effect on every render (the literal above is a new
-  // array reference each render).
-  HOTSPOTS_REF.current = hotspots;
-
-  return (
-    <div className="space-y-3">
-      {/* MOBILE / TABLET — stacked annotated screenshot, no SVG arrows */}
-      <div className="lg:hidden">
-        <AnnotatedScreenshot
-          image="/full-report.png"
-          alt="WriteScholar comprehensive analysis — annotated walkthrough"
-          color={color}
-          borderColor={borderColor}
-          hotspots={hotspots}
-        />
-      </div>
-
-      {/* DESKTOP — image in centre, 2 callouts on the left, 3 on the
-          right. A parent SVG overlay draws real connector arcs from
-          each callout's inner edge to its badge ring (computed from
-          live bounding rects in the effect above), so the arrows
-          actually meet the numbered circles. */}
-      <div ref={containerRef} className="relative hidden lg:grid lg:grid-cols-[1fr_minmax(0,1.7fr)_1fr] gap-10 xl:gap-14 items-stretch">
-        <svg
-          className="pointer-events-none absolute inset-0 z-20"
-          width="100%"
-          height="100%"
-          style={{ overflow: 'visible' }}
-          aria-hidden
-        >
-          {lines.map((ln, i) => (
-            <path
-              key={i}
-              d={`M ${ln.x1} ${ln.y1} Q ${ln.cx} ${ln.cy} ${ln.x2} ${ln.y2}`}
-              stroke={color}
-              strokeWidth="2.25"
-              strokeDasharray="4 4"
-              strokeLinecap="round"
-              fill="none"
-            />
-          ))}
-        </svg>
-
-        {/* LEFT — #2 top, #4 bottom */}
-        <div className="flex flex-col justify-around gap-6 py-2">
-          <div className="mt-16 xl:mt-24" ref={(el) => { calloutRefs.current[1] = el; }}>
-            <DesktopCallout n={2} hotspot={hotspots[1]} color={color} arrow="right" hideArrow />
-          </div>
-          <div ref={(el) => { calloutRefs.current[3] = el; }}>
-            <DesktopCallout n={4} hotspot={hotspots[3]} color={color} arrow="right" hideArrow />
-          </div>
-        </div>
-
-        {/* CENTRE — image with 5 numbered badges */}
-        <div className="relative pt-2">
-          <div className="absolute -inset-3 rounded-3xl blur-2xl opacity-25" style={{ backgroundColor: `${color}40` }} aria-hidden />
-          <div ref={imageRef} className="relative rounded-2xl overflow-hidden border-2 border-b-4 shadow-xl bg-white dark:bg-stone-900" style={{ borderColor }}>
-            <img
-              src="/full-report.png"
-              alt="WriteScholar comprehensive analysis — annotated walkthrough"
-              className="w-full h-auto block"
-              loading="eager"
-              decoding="async"
-              onLoad={() => { window.dispatchEvent(new Event('resize')); }}
-            />
-            {hotspots.map((h, i) => (
-              <span
-                key={i}
-                aria-hidden
-                className="absolute -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-full font-extrabold z-30"
-                style={{
-                  left: `${h.x}%`,
-                  top: `${h.y}%`,
-                  width: '32px',
-                  height: '32px',
-                  backgroundColor: color,
-                  color: 'white',
-                  fontSize: '14px',
-                  boxShadow: `0 0 0 4px white, 0 0 0 6px ${color}, 0 6px 14px rgba(0,0,0,0.25)`,
-                }}
-              >
-                {i + 1}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* RIGHT — #1 top, #3 middle, #5 bottom */}
-        <div className="flex flex-col justify-between gap-6 py-2">
-          <div className="-mt-3 xl:-mt-5" ref={(el) => { calloutRefs.current[0] = el; }}>
-            <DesktopCallout n={1} hotspot={hotspots[0]} color={color} arrow="left" hideArrow />
-          </div>
-          <div ref={(el) => { calloutRefs.current[2] = el; }}>
-            <DesktopCallout n={3} hotspot={hotspots[2]} color={color} arrow="left" hideArrow />
-          </div>
-          <div ref={(el) => { calloutRefs.current[4] = el; }}>
-            <DesktopCallout n={5} hotspot={hotspots[4]} color={color} arrow="left" hideArrow />
-          </div>
-        </div>
-      </div>
-
-      {/* B → A revision flip — outcome card that seals the pitch */}
-      <div className="rounded-2xl border-2 border-b-4 px-4 py-4 relative overflow-hidden" style={{ borderColor: '#46A302', backgroundColor: '#E5F8D0' }}>
-        <div className="pointer-events-none absolute -top-10 -right-10 w-28 h-28 rounded-full bg-[#58CC02]/30 blur-2xl" aria-hidden />
-        <p className="relative text-[10px] sm:text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#46A302] mb-2">
-          After one revision pass
-        </p>
-        <div className="relative flex items-center justify-center gap-3">
-          <div className="text-center">
-            <p className="text-2xl sm:text-3xl font-extrabold tabular-nums text-stone-400 line-through decoration-2 decoration-[#FF4B4B]/70" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-              82
-            </p>
-            <p className="text-[9px] font-extrabold uppercase tracking-wider text-stone-400 mt-1">Original · B</p>
-          </div>
-          <svg className="w-6 h-6 text-[#46A302]" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-          </svg>
-          <div className="text-center">
-            <p className="text-3xl sm:text-4xl font-extrabold tabular-nums text-[#46A302]" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-              91
-            </p>
-            <p className="text-[9px] font-extrabold uppercase tracking-wider text-[#46A302] mt-1">Revised · A</p>
-          </div>
-        </div>
-        <p className="relative mt-3 text-center text-[11px] sm:text-[12px] font-bold text-[#3C3C3C] leading-snug">
-          That's the difference between a B and the honor roll, built into every analysis you run.
-        </p>
-      </div>
-    </div>
-  );
-}
-
 /* ═══════════════════════════════════════════════════════════════
    Main component
    ═══════════════════════════════════════════════════════════════ */
@@ -1320,14 +1059,9 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
   // switch to yearly for the per-month savings.
   const [selectedPlanId, setSelectedPlanId] = useState<PlanId>('pro');
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
-  // Confirmation modal shown when the user clicks "Maybe later" on the
-  // checkout page — gives them one chance to reconsider before we route
-  // them away from the free trial offer. "I will miss the free
-  // opportunity" calls the real decline handler (drops to dashboard /
-  // paywall-hard); "You're right…" just closes the modal and leaves
-  // them on the checkout form.
-  const [showCheckoutDeclineConfirm, setShowCheckoutDeclineConfirm] = useState(false);
-
+  // Checkout starts with just the recommended Pro plan to minimise choice
+  // friction at the point of trial start; Premium is revealed on demand.
+  const [showPremium, setShowPremium] = useState(false);
   /* Animation */
   const [phaseVisible, setPhaseVisible] = useState(true);
 
@@ -1599,14 +1333,6 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
     // the user opted into.
     if (!result.includes('tour-essays')) result.push('tour-essays');
     if (!result.includes('tour-study')) result.push('tour-study');
-    // Step 4 — Essay Analyzer is our flagship, so it gets a 2-page
-    // deep dive: page 1 pitches WHY ours is the best, page 2 walks
-    // through rubric + annotations + revision interactively. Splice
-    // tour-essays-2 in right after tour-essays whenever it appears.
-    const essaysIdx = result.indexOf('tour-essays');
-    if (essaysIdx !== -1 && !result.includes('tour-essays-2')) {
-      result.splice(essaysIdx + 1, 0, 'tour-essays-2');
-    }
     return result;
   }, [featureInterests]);
 
@@ -1709,7 +1435,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
         if (eligRes.ok) { const e = await eligRes.json(); eligibleForTrial = e.trialEligible === true; }
       } catch { /* assume not eligible */ }
       const successUrl = `${window.location.origin}/dashboard?payment=success`;
-      const cancelUrl = `${window.location.origin}/onboarding?preview=aha`;
+      const cancelUrl = `${window.location.origin}/onboarding?preview=checkout`;
       // Users coming from the hard paywall ("last chance" screen)
       // get the 50%-off promo silently pre-applied to their checkout
       // session.  The visible copy on that page implies the code is
@@ -1799,51 +1525,6 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
       setTrialError('We could not open checkout. Please try again.');
       setStartingTrial(false);
     }
-  };
-
-  // Called when the user clicks "Skip" / "Maybe later" on the SOFT
-  // paywall. We route to the `paywall-hard` last-chance screen which
-  // surfaces the 50%-off promo. If they decline THAT too, the hard
-  // paywall's own "No thanks, maybe later" hands them off to the
-  // dashboard via 'transition'.
-  //
-  // When HIDE_END_PAYWALLS is on, paywall-hard is hidden and we drop
-  // straight to the dashboard transition. The dashboard's own soft
-  // paywall surfaces from there (see handleFinishOnboarding below for
-  // the SOFT_PAYWALL_OPEN_KEY trigger details).
-  const handleSoftPaywallDecline = () => {
-    trackEvent('onboarding_paywall_decline_soft');
-    if (HIDE_END_PAYWALLS) {
-      goToPhase('transition');
-      return;
-    }
-    goToPhase('paywall-hard');
-  };
-
-  // Exit onboarding from the value-prop screen via the "I'm ready to
-  // begin" button. Sets SOFT_PAYWALL_OPEN_KEY in sessionStorage so the
-  // dashboard's `Restore soft paywall after refresh` effect (see
-  // CompleteAcademicAIApp.tsx ~line 712) reopens the soft paywall the
-  // moment the user lands on the dashboard. This is the post-
-  // onboarding nudge that replaces the old `paywall` + `paywall-hard`
-  // upsell screens.
-  const handleFinishOnboarding = () => {
-    trackEvent('onboarding_complete_via_value_prop');
-    try { sessionStorage.setItem(SOFT_PAYWALL_OPEN_KEY, '1'); } catch { /* ignore */ }
-    goToPhase('transition');
-  };
-
-  // Hard paywall decline — user picked "No thanks, maybe later".
-  // We still drop them into the dashboard (the hard paywall is now a
-  // soft last-chance offer, not a wall).  Critical UX detail: we mark
-  // the soft paywall as dismissed RIGHT NOW so the dashboard's
-  // "Let's level up your grades" soft paywall doesn't pop the second
-  // they land. The 7-day cooldown then keeps it quiet for a week
-  // before the next nudge.
-  const handleHardPaywallDecline = () => {
-    try { trackEvent('onboarding_paywall_decline_hard'); } catch { /* ignore */ }
-    try { markSoftPaywallDismissedNow(); } catch { /* ignore */ }
-    goToPhase('transition');
   };
 
   /* ═══════════ RENDER ═══════════ */
@@ -2120,8 +1801,8 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
         <div className="relative flex-1 overflow-y-auto">
           <div className="px-4 sm:px-6 lg:px-8 py-5 lg:py-6 max-w-6xl mx-auto w-full">
             {/* TWO-COLUMN layout — pitch (mascot, headline, preview tiles,
-                bullets) on the LEFT, payment (price summary + Stripe form +
-                Maybe later) on the RIGHT. On desktop both columns fit in
+                bullets) on the LEFT, payment (price summary + Stripe form)
+                on the RIGHT. On desktop both columns fit in
                 the viewport so users can pay without scrolling. On mobile
                 it stacks: pitch first, then payment. */}
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.05fr] gap-6 lg:gap-10 xl:gap-14 items-start">
@@ -2135,7 +1816,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
                   </div>
                   <div className="flex-1 min-w-0">
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFC800]/15 border-2 border-[#FFC800]/45 text-[#7A5C00] text-[10px] font-extrabold uppercase tracking-[0.18em] mb-2 shadow-[0_4px_14px_-4px_rgba(255,200,0,0.5)]">
-                      <span aria-hidden>✨</span> {TRIAL_DAYS}-day free trial · 50% off your first cycle
+                      <span aria-hidden>✨</span> {TRIAL_DAYS}-day free trial
                     </span>
                     <h1 className="text-[1.6rem] sm:text-[1.85rem] lg:text-[2rem] xl:text-[2.2rem] font-extrabold leading-[1.05] tracking-tight text-[#3C3C3C] dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                       Try Pro free for {TRIAL_DAYS} days{firstName ? `, ${firstName}` : ''}
@@ -2152,33 +1833,18 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
                     user a quick mosaic of what Pro actually unlocks. */}
                 <div className="grid grid-cols-3 gap-2 sm:gap-3">
                   {[
-                    { src: '/WriterPic.png',             label: 'Smart editor',         tint: '#A560E8' },
-                    { src: '/rubric-and-notes.png',      label: 'Live grade + rubric',  tint: '#58CC02' },
-                    { src: '/full-report.png',           label: 'Full report + fixes',  tint: '#FF9600' },
-                    { src: '/flashcard pic.png',         label: 'Flashcards + quizzes', tint: '#1CB0F6' },
-                    { src: '/crosssword pic.png',        label: 'Arcade mode',           tint: '#FF4B4B' },
-                    { src: '/daily-review-preview.png',  label: 'Daily review',         tint: '#FFC800' },
+                    { src: '/WriterPic.png',            label: 'Smart editor',         tint: '#A560E8' },
+                    { src: '/rubric-and-notes.png',     label: 'Live grade + rubric',  tint: '#58CC02' },
+                    { src: '/full-report.png',          label: 'Full report + fixes',  tint: '#FF9600' },
+                    // Live product footage instead of flat screenshots — the
+                    // flashcards/quizzes tile cycles the two study demos, and
+                    // Arcade mode plays the actual games (Crater Blast → Word
+                    // Blitz → Word Tower) rather than the old crossword still.
+                    { videos: ['/hero-flashcards.mp4', '/hero-quiz.mp4'], label: 'Flashcards + quizzes', tint: '#1CB0F6' },
+                    { videos: ['/writescholar-crater-blast-demo.mp4', '/hero-word-blitz.mp4', '/hero-word-tower.mp4'], label: 'Arcade mode', tint: '#FF4B4B' },
+                    { src: '/daily-review-preview.png', label: 'Daily review',         tint: '#FFC800' },
                   ].map((tile) => (
-                    <div
-                      key={tile.label}
-                      className="group relative overflow-hidden rounded-2xl border-2 border-b-4 bg-white dark:bg-stone-900 shadow-[0_10px_30px_-14px_rgba(40,30,60,0.30)]"
-                      style={{ borderColor: `${tile.tint}55` }}
-                    >
-                      <div className="aspect-[4/3] overflow-hidden bg-stone-50 dark:bg-stone-900">
-                        <img
-                          src={tile.src}
-                          alt={tile.label}
-                          loading="lazy"
-                          decoding="async"
-                          className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
-                        />
-                      </div>
-                      <div className="px-2 py-1.5 text-center bg-white dark:bg-stone-900 border-t" style={{ borderColor: `${tile.tint}33` }}>
-                        <p className="text-[10px] sm:text-[10.5px] font-extrabold text-stone-700 dark:text-stone-200 leading-tight">
-                          {tile.label}
-                        </p>
-                      </div>
-                    </div>
+                    <CheckoutPreviewTile key={tile.label} tile={tile} />
                   ))}
                 </div>
 
@@ -2252,7 +1918,10 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
                     today" and the sub-line spells out the post-trial
                     price ladder. */}
                 <div className="space-y-2.5" role="radiogroup" aria-label="Subscription plan">
-                  {(['pro', 'premium'] as const).map((planId) => {
+                  {/* Pro is shown by default; Premium only after the user
+                      taps "Compare Premium" so the trial-start decision
+                      stays a single, low-friction choice. */}
+                  {(showPremium ? (['pro', 'premium'] as const) : (['pro'] as const)).map((planId) => {
                     const plan = PLANS[planId];
                     const cycleData = plan[billingCycle];
                     const isSelected = selectedPlanId === planId;
@@ -2317,18 +1986,20 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
                             the regular renewal price. */}
                         <p className="mt-1 text-[11.5px] font-bold text-stone-500 dark:text-stone-400 leading-snug">
                           {TRIAL_DAYS} days free, then{' '}
+                          <span className="line-through decoration-2 decoration-[#FF4B4B]/70 text-stone-400 dark:text-stone-500">
+                            {cycleData.rolloverPrice}
+                          </span>{' '}
                           <span className="font-extrabold text-[#46A302]">
                             {cycleData.firstCyclePrice}
                           </span>{' '}
-                          {cycleData.firstCycleLabel}{' '}
-                          <span className="text-stone-400 dark:text-stone-500">
-                            ({cycleData.rolloverPrice}{cycleData.rolloverSuffix})
+                          <span className="inline-flex items-center rounded-md bg-[#46A302]/12 px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-[#46A302]">
+                            50% off {cycleData.firstCycleLabel}
                           </span>
                         </p>
 
-                        {/* Top 2 features — compact */}
+                        {/* Full feature list — compact */}
                         <ul className="mt-2.5 space-y-1">
-                          {plan.features.slice(0, 2).map((f) => (
+                          {plan.features.map((f) => (
                             <li key={f} className="flex items-start gap-1.5 text-[12px] font-bold text-stone-600 dark:text-stone-300">
                               <svg className="w-3.5 h-3.5 mt-0.5 shrink-0 text-[#58CC02]" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
@@ -2340,6 +2011,17 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
                       </button>
                     );
                   })}
+                  {/* Premium disclosure — keeps the default decision to a
+                      single plan, but lets power users compare on demand. */}
+                  {!showPremium && (
+                    <button
+                      type="button"
+                      onClick={() => setShowPremium(true)}
+                      className="w-full text-center py-2 text-[12px] font-extrabold text-[#A560E8] hover:text-[#8A48C7] underline underline-offset-4 decoration-[#A560E8]/40 hover:decoration-[#A560E8] transition-colors"
+                    >
+                      Compare Premium (5× usage)
+                    </button>
+                  )}
                 </div>
 
                 {/* Error from create-checkout-session call */}
@@ -2348,6 +2030,19 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
                     {trialError}
                   </div>
                 )}
+
+                {/* Trust row — reassurance lives next to the commitment,
+                    not two screens back. Stars + student count + a one-line
+                    proof quote to lower card anxiety right before the CTA. */}
+                <div className="rounded-2xl border-2 border-[#FFC800]/45 bg-[#FFFBEB] dark:bg-[#FFC800]/10 px-3.5 py-2.5">
+                  <div className="flex items-center justify-center gap-2">
+                    <span aria-hidden className="text-[#FF9600] text-sm leading-none tracking-tight">★★★★★</span>
+                    <span className="text-[12px] font-extrabold text-[#3C3C3C] dark:text-stone-100">Loved by 50,000+ students</span>
+                  </div>
+                  <p className="mt-1 text-center text-[11.5px] font-bold text-stone-600 dark:text-stone-300 leading-snug">
+                    &ldquo;Went from a B to an A on two back-to-back essays.&rdquo; — Maya K.
+                  </p>
+                </div>
 
                 {/* Subscribe CTA — opens Stripe's hosted Checkout page
                     with the 7-day trial and 50% off auto-applied. */}
@@ -2376,97 +2071,29 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
                 </button>
 
                 <p className="text-center text-[10.5px] font-bold text-stone-400 dark:text-stone-500">
-                  🔒 $0 today · We&apos;ll email you 24h before any charge · Secure checkout by Stripe
+                  🔒 $0 today · We&apos;ll email you 24h before any charge · Renews at{' '}
+                  {PLANS[selectedPlanId][billingCycle].rolloverPrice}{PLANS[selectedPlanId][billingCycle].rolloverSuffix} · Cancel anytime
                 </p>
 
-                {/* Maybe later — opens the NEWCUSTOMER 50% off reconsider modal */}
-                <div className="text-center">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      trackEvent('onboarding_paywall_decline_intent');
-                      setShowCheckoutDeclineConfirm(true);
-                    }}
-                    className="px-4 py-2 text-sm font-extrabold text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 underline underline-offset-4 decoration-stone-300 dark:decoration-stone-600 hover:decoration-[#A560E8] transition-colors"
-                  >
-                    Maybe later
-                  </button>
-                </div>
               </div>
 
             </div>
           </div>
         </div>
 
-        {/* ─── "Are you sure?" reconsider modal ───
-            Light recovery prompt after "Maybe later". The 50% off is
-            already auto-applied to everyone's checkout, so this is
-            just a soft "you'll lose the trial" reminder, not a
-            discount-bait offer. Green CTA = start the trial; red
-            secondary CTA = skip checkout and finish onboarding. */}
-        {showCheckoutDeclineConfirm && (
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="checkout-decline-title"
-            className="fixed inset-0 z-50 flex items-center justify-center px-4 sm:px-6 py-6 bg-black/55 backdrop-blur-sm animate-[fadeIn_0.18s_ease-out]"
-            onClick={(e) => { if (e.target === e.currentTarget) setShowCheckoutDeclineConfirm(false); }}
+        {/* Mobile-only sticky CTA — keeps "Start free trial" reachable
+            without scrolling past the pitch column on phones. */}
+        <div className="lg:hidden border-t-2 border-[#E5E5E5] dark:border-stone-800 bg-white/95 dark:bg-stone-900/95 backdrop-blur px-4 py-3">
+          <button
+            type="button"
+            onClick={() => handleSubscribeChoice()}
+            disabled={startingTrial}
+            className="w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-[#58CC02] hover:bg-[#46A302] disabled:opacity-60 disabled:cursor-not-allowed text-white text-base font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_14px_30px_-14px_rgba(70,163,2,0.6)]"
           >
-            <div className="relative w-full max-w-md rounded-3xl border-2 border-b-4 border-[#A560E8]/45 bg-white dark:bg-stone-900 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.4)] overflow-hidden">
-              {/* Soft brand glows */}
-              <div className="pointer-events-none absolute -top-16 -right-16 h-40 w-40 rounded-full bg-[#A560E8]/18 blur-3xl" aria-hidden />
-              <div className="pointer-events-none absolute -bottom-16 -left-16 h-40 w-40 rounded-full bg-[#FFC800]/18 blur-3xl" aria-hidden />
-
-              <div className="relative px-6 sm:px-7 pt-7 pb-6 text-center">
-                {/* Sad mascot — softens the "are you sure" moment */}
-                <div className="flex justify-center mb-4">
-                  <MascotGif src="/mascot-sad.webp" alt="" size={92} bordered borderColor="#A560E8" bgColor="#F3EAFF" />
-                </div>
-
-                <h2
-                  id="checkout-decline-title"
-                  className="text-[1.55rem] sm:text-[1.7rem] font-extrabold leading-tight tracking-tight text-[#3C3C3C] dark:text-stone-50"
-                  style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                >
-                  Are you sure?
-                </h2>
-                <p className="mt-2.5 text-[13.5px] sm:text-sm font-bold text-stone-600 dark:text-stone-300 leading-relaxed">
-                  You&apos;ll miss the <span className="text-[#A560E8]">{TRIAL_DAYS}-day free trial</span> and the half-price first cycle. $0 due today and you can cancel anytime in one click.
-                </p>
-
-                {/* CTAs */}
-                <div className="mt-6 space-y-2.5">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      trackEvent('onboarding_paywall_decline_reconsider', { source: 'checkout_confirm_modal' });
-                      setShowCheckoutDeclineConfirm(false);
-                      handleSubscribeChoice();
-                    }}
-                    disabled={startingTrial}
-                    className="w-full py-3 px-4 rounded-2xl bg-[#58CC02] hover:bg-[#46A302] disabled:opacity-60 disabled:cursor-not-allowed text-white text-[13px] sm:text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all"
-                  >
-                    You&apos;re right, start my free trial
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      trackEvent('onboarding_paywall_decline_soft', { source: 'checkout_confirm_modal' });
-                      setShowCheckoutDeclineConfirm(false);
-                      // Skip checkout entirely — drop straight to the
-                      // dashboard via the transition screen.
-                      handleContinueFree();
-                    }}
-                    className="w-full py-3 px-4 rounded-2xl bg-white dark:bg-stone-900 hover:bg-[#FFE8E8] dark:hover:bg-[#FF4B4B]/10 text-[#FF4B4B] text-[12px] sm:text-[12.5px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#FF4B4B]/50 hover:border-[#FF4B4B] active:border-b-2 active:translate-y-0.5 transition-all"
-                  >
-                    No thanks, take me to the dashboard
-                  </button>
-                </div>
-              </div>
-            </div>
-            <style>{`@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }`}</style>
-          </div>
-        )}
+            {startingTrial ? 'Opening secure checkout…' : `Start my ${TRIAL_DAYS}-day free trial`}
+          </button>
+          <p className="mt-1.5 text-center text-[10px] font-bold text-stone-400 dark:text-stone-500">$0 today · Cancel anytime</p>
+        </div>
       </div>
     );
   }
@@ -2474,9 +2101,10 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
   /* ─── INTRO — first screen the user sees, Duolingo-style "Hi! I'm Scholar!" ─── */
   if (phase === 'intro') {
     return (
-      <div className="h-screen bg-[#FFFCF7] dark:bg-stone-950 flex flex-col overflow-hidden">
-        {/* Top thin progress line — empty, intro is "step 0" */}
-        <div className="h-1.5 bg-[#E5E5E5] dark:bg-stone-800" aria-hidden />
+      <div className="relative h-screen bg-gradient-to-br from-[#FAF7FF] via-[#FBF7FF] to-[#F3EAFF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 flex flex-col overflow-hidden">
+        <OnboardingAura />
+        {/* Top accent line — brand gradient, matches dashboard's header rule */}
+        <div className="relative z-10 h-1.5 bg-gradient-to-r from-[#A560E8] via-[#1CB0F6] to-[#58CC02]" aria-hidden />
 
         <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
           <div className={`flex flex-col items-center transition-all duration-500 ${phaseVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
@@ -2545,8 +2173,9 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
   /* ─── CELEBRATE — second welcome screen, "Yay! Let me show you around!" ─── */
   if (phase === 'celebrate') {
     return (
-      <div className="h-screen bg-[#FFFCF7] dark:bg-stone-950 flex flex-col relative overflow-hidden">
-        <div className="h-1.5 bg-[#E5E5E5] dark:bg-stone-800" aria-hidden />
+      <div className="h-screen bg-gradient-to-br from-[#FAF7FF] via-[#FBF7FF] to-[#F3EAFF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 flex flex-col relative overflow-hidden">
+        <OnboardingAura />
+        <div className="relative z-10 h-1.5 bg-gradient-to-r from-[#A560E8] via-[#1CB0F6] to-[#58CC02]" aria-hidden />
 
         {/* Mini confetti — light celebration, not full burst */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
@@ -2679,7 +2308,8 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
     ];
 
     return (
-      <div className="h-screen bg-[#F7F7F7] dark:bg-stone-950 flex flex-col overflow-hidden">
+      <div className="relative h-screen bg-gradient-to-br from-[#FAF7FF] via-[#FBF7FF] to-[#F3EAFF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 flex flex-col overflow-hidden">
+        <OnboardingAura />
         {/* Header — matches paywall page so the transition feels seamless */}
         <div className="bg-white dark:bg-stone-900 border-b-2 border-[#E5E5E5] dark:border-stone-800 px-5 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -2688,9 +2318,6 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
             </div>
             <span className="text-lg font-extrabold tracking-tight text-[#3C3C3C] dark:text-stone-100" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>WriteScholar</span>
           </div>
-          <button type="button" onClick={handleSoftPaywallDecline} className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 font-bold underline underline-offset-4">
-            Skip
-          </button>
         </div>
         <div className="h-3 bg-[#E5E5E5] dark:bg-stone-800">
           <div className="h-full bg-[#58CC02] rounded-r-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
@@ -2849,163 +2476,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
     );
   }
 
-  /* ─── PAYWALL — full 8-tool showcase, Duolingo-styled ─── */
-  /* Hidden when HIDE_END_PAYWALLS is on. The render block below is
-     intentionally preserved so flipping the flag to `false` brings
-     this entire screen back without re-typing it. The defensive short-
-     circuit handles the edge case where some other code path sets
-     phase = 'paywall' while the flag is on — we just send the user
-     straight to the dashboard transition. */
-  if (phase === 'paywall' && HIDE_END_PAYWALLS) {
-    queueMicrotask(() => goToPhase('transition'));
-    return null;
-  }
-  if (phase === 'paywall') {
-    return (
-      <div className="h-screen bg-[#F7F7F7] dark:bg-stone-950 flex flex-col overflow-hidden">
-        <div className="bg-white dark:bg-stone-900 border-b-2 border-[#E5E5E5] dark:border-stone-800 px-5 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-800">
-              <img src="/main-logo.png" alt="WriteScholar" className="w-full h-full object-contain" loading="eager" width="120" height="120" />
-            </div>
-            <span className="text-lg font-extrabold tracking-tight text-[#3C3C3C] dark:text-stone-100" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>WriteScholar</span>
-          </div>
-          <button type="button" onClick={handleSoftPaywallDecline} className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 font-bold underline underline-offset-4">
-            Skip
-          </button>
-        </div>
-        <div className="h-3 bg-[#E5E5E5] dark:bg-stone-800">
-          <div className="h-full bg-[#58CC02] rounded-r-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
-        </div>
-
-        <div className="flex-1 overflow-y-auto">
-          <div className="px-4 sm:px-6 py-6 sm:py-8 max-w-5xl mx-auto w-full ob-fade-in">
-          {/* Hero header */}
-          <div className="text-center mb-6 sm:mb-8">
-            <div className="mb-4">
-              <MascotGif src="/mascot-dance.webp" alt="" size={130} bordered borderColor="#58CC02" bgColor="#E5F8D0" />
-            </div>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border-2 border-[#FF9600]/40 bg-[#FFF4E0] text-[#FF9600] text-[10px] font-extrabold uppercase tracking-wider mb-3">
-              <span aria-hidden>⚡</span>
-              Last step, {firstName}!
-            </span>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#3C3C3C] dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-              You're now ready to <span className="text-[#58CC02]">ace school</span>.
-            </h1>
-            <p className="mt-3 text-stone-600 dark:text-stone-300 font-bold text-sm sm:text-base max-w-xl mx-auto">
-              You showed up, you set your goal, you sat through the tour. You've showed you take school seriously. Now it's time to make those grades improve.
-            </p>
-          </div>
-
-          {/* Primary CTA — above the fold */}
-          <div className="max-w-md mx-auto mb-8">
-            <div className="rounded-2xl border-2 border-b-4 border-[#46A302] bg-[#E5F8D0] dark:bg-[#58CC02]/10 p-5 sm:p-6 text-center relative overflow-hidden">
-              <div className="pointer-events-none absolute -top-12 -right-12 w-32 h-32 rounded-full bg-[#58CC02]/20 blur-2xl" aria-hidden />
-              <p className="relative text-lg font-extrabold text-[#3C3C3C] dark:text-stone-100" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                Upgrade to Pro
-              </p>
-              <button
-                type="button"
-                onClick={SKIP_ONBOARDING_STRIPE ? handleContinueFree : handleStartTrial}
-                disabled={startingTrial}
-                className="relative mt-4 w-full py-4 rounded-2xl bg-[#58CC02] text-white font-extrabold text-base uppercase tracking-wide border-2 border-b-4 border-[#46A302] hover:bg-[#46A302] active:border-b-2 active:translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-lg"
-              >
-                {startingTrial ? (
-                  <>
-                    <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden>
-                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-25" />
-                      <path fill="currentColor" className="opacity-90" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                    Redirecting…
-                  </>
-                ) : (
-                  <>
-                    Start for free
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                  </>
-                )}
-              </button>
-              {trialError && <p className="relative mt-3 text-sm text-[#FF4B4B] font-bold">{trialError}</p>}
-              <div className="relative mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[10px] font-extrabold text-stone-500 dark:text-stone-400">
-                <span className="inline-flex items-center gap-1"><span className="text-[#58CC02]">✓</span> No charge today</span>
-                <span aria-hidden>·</span>
-                <span className="inline-flex items-center gap-1"><span className="text-[#58CC02]">✓</span> Cancel anytime</span>
-                <span aria-hidden>·</span>
-                <span className="inline-flex items-center gap-1"><span className="text-[#58CC02]">✓</span> Loved by 50k+ students</span>
-              </div>
-              <p className="relative mt-2 text-[10px] font-bold text-stone-500 dark:text-stone-400">
-                Then $19.99/mo. Cancel anytime.
-              </p>
-            </div>
-          </div>
-
-          {/* 8-tool feature grid */}
-          <div className="mb-8">
-            <div className="text-center mb-5">
-              <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#A560E8] mb-2">EVERYTHING YOU GET</p>
-              <h2 className="text-xl sm:text-2xl font-extrabold text-[#3C3C3C] dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                Eight tools. Designed for success.
-              </h2>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-              {PAYWALL_TOOLS.map((tool, i) => (
-                <ToolCard key={tool.title} tool={tool} delayMs={i * 60} />
-              ))}
-            </div>
-          </div>
-
-          <p className="text-center text-[11px] text-stone-400 dark:text-stone-500 font-bold pb-2">
-            Secured by Stripe · Free plan available
-          </p>
-          </div>
-        </div>
-
-        {/* Sticky footer — "Maybe later" always visible exit ramp */}
-        <div className="border-t-2 border-[#E5E5E5] dark:border-stone-800 bg-white dark:bg-stone-900 px-5 sm:px-8 py-4 sm:py-5">
-          <div className="max-w-2xl mx-auto flex justify-end">
-            <button
-              type="button"
-              onClick={handleSoftPaywallDecline}
-              className="w-full sm:w-auto sm:min-w-[200px] py-3.5 px-8 rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-600 bg-white dark:bg-stone-900 text-[#3C3C3C] dark:text-stone-100 font-extrabold text-base hover:bg-stone-50 dark:hover:bg-stone-800 active:border-b-2 active:translate-y-0.5 transition-all"
-            >
-              Maybe later
-            </button>
-          </div>
-        </div>
-
-        <style>{`
-          @keyframes obFadeIn {
-            from { opacity: 0; transform: translateY(16px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-          .ob-fade-in { animation: obFadeIn 0.4s ease-out; }
-          @keyframes obToolPop {
-            0% { transform: translateY(12px); opacity: 0; }
-            100% { transform: translateY(0); opacity: 1; }
-          }
-          .ob-tool-pop { animation: obToolPop 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
-        `}</style>
-      </div>
-    );
-  }
-
-  /* ─── HARD PAYWALL — last-chance interception ────────────────────
-     Fires when the user declines the soft paywall. NEW PRODUCT RULE
-     (per user brief): no one reaches the dashboard without starting a
-     trial. So this screen has only ONE forward button (start trial) and
-     ONE way out (sign out). Visually it's a more emotional, "Wait —
-     don't go!" beat with the begging mascot, big loss-aversion copy,
-     and the same Duolingo Pro green CTA as the soft paywall.
-
-     Conversion mechanics:
-       1. Single decisive CTA — no choice paradox
-       2. Loss-framing list — what they LOSE without the trial
-       3. Risk reversal — "no payment today · cancel anytime"
-       4. Social proof reminder — "50,000+ students already on Pro"
-       5. The escape is a small low-contrast "Sign out instead" link
-          so it's findable but not the obvious path. */
+  /* ─── HARD PAYWALL — final upsell (no skip / no "maybe later") ─── */
   /* Hidden when HIDE_END_PAYWALLS is on. Same pattern as the soft-
      paywall short-circuit above — render block stays intact for easy
      re-enable. */
@@ -3015,7 +2486,8 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
   }
   if (phase === 'paywall-hard') {
     return (
-      <div className="h-screen bg-[#F7F7F7] dark:bg-stone-950 flex flex-col overflow-hidden">
+      <div className="relative h-screen bg-gradient-to-br from-[#FAF7FF] via-[#FBF7FF] to-[#F3EAFF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 flex flex-col overflow-hidden">
+        <OnboardingAura />
         {/* Top bar — NO skip button, NO escape from the header */}
         <div className="bg-white dark:bg-stone-900 border-b-2 border-[#E5E5E5] dark:border-stone-800 px-5 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -3220,20 +2692,6 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
               </div>
             </div>
 
-            {/* Subtle, low-contrast escape hatch — routes the user
-                into the dashboard (via the 'transition' phase). The
-                hard paywall is no longer a wall; weekly-cooldown soft
-                paywalls + free-tier API limits take over from here. */}
-            <div className="text-center pb-4">
-              <button
-                type="button"
-                onClick={handleHardPaywallDecline}
-                className="text-xs text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 font-bold underline underline-offset-4"
-              >
-                No thanks, maybe later
-              </button>
-            </div>
-
             <p className="text-center text-[11px] text-stone-400 dark:text-stone-500 font-bold pb-2">
               Secured by Stripe · Never lose progress
             </p>
@@ -3254,7 +2712,8 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
   /* ─── DAILY REVIEW RESULTS ─── */
   if (phase === 'daily-review-results') {
     return (
-      <div className="h-screen bg-[#F7F7F7] dark:bg-stone-950 flex flex-col overflow-hidden">
+      <div className="relative h-screen bg-gradient-to-br from-[#FAF7FF] via-[#FBF7FF] to-[#F3EAFF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 flex flex-col overflow-hidden">
+        <OnboardingAura />
         <TopBar />
 
         {/* Confetti — fixed-position so it covers the whole viewport */}
@@ -3375,7 +2834,8 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
   /* ─── DAILY REVIEW INTRO — eases the user into the demo ─── */
   if (phase === 'daily-review-intro') {
     return (
-      <div className="h-screen bg-[#F7F7F7] dark:bg-stone-950 flex flex-col overflow-hidden">
+      <div className="relative h-screen bg-gradient-to-br from-[#FAF7FF] via-[#FBF7FF] to-[#F3EAFF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 flex flex-col overflow-hidden">
+        <OnboardingAura />
         <TopBar showBack onBack={() => goToPhase('tour-motivation')} />
 
         <div className={`flex-1 overflow-y-auto transition-opacity duration-200 ${phaseVisible ? 'opacity-100' : 'opacity-0'}`}>
@@ -3466,7 +2926,8 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
     const isWrong = answerChecked && selectedAnswer !== q.correctIndex;
 
     return (
-      <div className="h-screen bg-[#F7F7F7] dark:bg-stone-950 flex flex-col overflow-hidden">
+      <div className="relative h-screen bg-gradient-to-br from-[#FAF7FF] via-[#FBF7FF] to-[#F3EAFF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 flex flex-col overflow-hidden">
+        <OnboardingAura />
         <div className="bg-white dark:bg-stone-900 border-b-2 border-[#E5E5E5] dark:border-stone-800 px-5 py-3 flex items-center gap-4">
           <button type="button" onClick={() => goToPhase('daily-review-intro')} className="text-stone-400 dark:text-stone-500 hover:text-stone-700 dark:hover:text-stone-300" aria-label="Back">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
@@ -3617,7 +3078,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
   }
 
   /* ─── TOUR SLIDES ─── */
-  if (phase === 'tour-essays' || phase === 'tour-essays-2' || phase === 'tour-study' || phase === 'tour-citations' || phase === 'tour-games' || phase === 'tour-motivation') {
+  if (phase === 'tour-essays' || phase === 'tour-study' || phase === 'tour-citations' || phase === 'tour-games' || phase === 'tour-motivation') {
     // Dynamic eyebrow: "TOOL X OF Y" — X is position in the user's
     // personalised tour, Y is total slides they'll see.
     const tourIdx = tourSequence.indexOf(phase as TourPhase);
@@ -3626,7 +3087,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
       const i = tourSequence.indexOf(slot);
       return i === -1 ? `TOOL ? OF ${totalTools}` : `TOOL ${i + 1} OF ${totalTools}`;
     };
-    const slideData: Record<string, { mascot: string; color: string; borderColor: string; bgColor: string; eyebrow: string; title: string; speech: string; visual: 'essay' | 'essay-deep-dive' | 'screenshot' | 'tools' | 'motivation' | 'citations' | 'games' }> = {
+    const slideData: Record<string, { mascot: string; color: string; borderColor: string; bgColor: string; eyebrow: string; title: string; speech: string; visual: 'essay' | 'screenshot' | 'tools' | 'motivation' | 'citations' | 'games' }> = {
       'tour-essays': {
         mascot: '/mascot-paper.webp',
         color: '#A560E8',
@@ -3636,16 +3097,6 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
         title: 'Our premium essay analyzer',
         speech: "We're not your average AI grader. Trained on thousands of graded papers. The feedback you get reads like a TA marked up your draft, not a chatbot. Everything you need to get a perfect grade.",
         visual: 'essay',
-      },
-      'tour-essays-2': {
-        mascot: '/mascot-laptop.webp',
-        color: '#A560E8',
-        borderColor: '#8A48C7',
-        bgColor: '#F3EAFF',
-        eyebrow: eyebrowFor('tour-essays-2'),
-        title: 'Comprehensive analysis',
-        speech: "Overall verdict, top suggestions, strengths, areas to improve, and serious concerns. Every angle of your draft covered in plain English so you know exactly what to fix next.",
-        visual: 'essay-deep-dive',
       },
       'tour-study': {
         mascot: '/mascot-juggling.webp',
@@ -3698,7 +3149,8 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
     };
 
     return (
-      <div className="h-screen bg-[#F7F7F7] dark:bg-stone-950 flex flex-col overflow-hidden">
+      <div className="relative h-screen bg-gradient-to-br from-[#FAF7FF] via-[#FBF7FF] to-[#F3EAFF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 flex flex-col overflow-hidden">
+        <OnboardingAura />
         <TopBar showBack onBack={() => goToPhase(prevMap[phase])} />
 
         <div className={`flex-1 overflow-y-auto transition-opacity duration-200 ${phaseVisible ? 'opacity-100' : 'opacity-0'}`}>
@@ -3709,7 +3161,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
               keep their own max-w-2xl wrapper below, so the wider
               outer container only affects the visual area. Other tour
               slides stay narrow. */}
-          <div className={`px-4 sm:px-6 py-5 mx-auto ${(phase === 'tour-essays' || phase === 'tour-essays-2' || phase === 'tour-games') ? 'max-w-2xl lg:max-w-6xl xl:max-w-7xl' : 'max-w-2xl'}`}>
+          <div className={`px-4 sm:px-6 py-5 mx-auto ${(phase === 'tour-essays' || phase === 'tour-games') ? 'max-w-2xl lg:max-w-6xl xl:max-w-7xl' : 'max-w-2xl'}`}>
             {/* Mascot + speech bubble — centered in the original narrow
                 container so the chat header looks the same as on other
                 tour slides, even when the visual below is wider. */}
@@ -3742,19 +3194,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
             {/* Visual preview */}
             <div>
               {slide.visual === 'essay' && (
-                /* PAGE 1 — pitch. Why our Essay Analyzer is the best
-                   in the world: stat badges + 4 interactive pillar
-                   cards + social proof. Heavy on outcome language,
-                   light on screenshots (those live on page 2). */
                 <EssayPitchVisual color={slide.color} borderColor={slide.borderColor} />
-              )}
-
-              {slide.visual === 'essay-deep-dive' && (
-                /* PAGE 2 — comprehensive analysis walkthrough.
-                   Annotated /full-report.png with 4 arrow callouts
-                   on desktop (stacked on mobile), capped off with a
-                   colour key + B → A revision outcome card. */
-                <EssayDeepDiveVisual color={slide.color} borderColor={slide.borderColor} />
               )}
 
               {slide.visual === 'screenshot' && (
@@ -4035,7 +3475,8 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
     const sourceSpeech = selectedSource ? selectedSource.mascotReply : "How did you hear about us? Pick the closest match!";
 
     return (
-      <div className="h-screen bg-[#F7F7F7] dark:bg-stone-950 flex flex-col overflow-hidden">
+      <div className="relative h-screen bg-gradient-to-br from-[#FAF7FF] via-[#FBF7FF] to-[#F3EAFF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 flex flex-col overflow-hidden">
+        <OnboardingAura />
         <TopBar showBack onBack={() => goToPhase('profile')} />
 
         <div className={`flex-1 overflow-y-auto transition-opacity duration-200 ${phaseVisible ? 'opacity-100' : 'opacity-0'}`}>
@@ -4119,7 +3560,8 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
       : "Why are you here today? I'll tailor your tour based on your goal!";
 
     return (
-      <div className="h-screen bg-[#F7F7F7] dark:bg-stone-950 flex flex-col overflow-hidden">
+      <div className="relative h-screen bg-gradient-to-br from-[#FAF7FF] via-[#FBF7FF] to-[#F3EAFF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 flex flex-col overflow-hidden">
+        <OnboardingAura />
         <TopBar showBack onBack={() => goToPhase('survey-source')} />
 
         <div className={`flex-1 overflow-y-auto transition-opacity duration-200 ${phaseVisible ? 'opacity-100' : 'opacity-0'}`}>
@@ -4146,7 +3588,8 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
             <div className="mb-5">
               <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#58CC02] mb-2">YOUR GOAL</p>
               <h1 className="text-xl sm:text-2xl font-extrabold text-[#3C3C3C] dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                What brings you to WriteScholar?
+                What brings you to{' '}
+                <span className="text-[#A560E8]">WriteScholar</span>?
               </h1>
             </div>
 
@@ -4222,7 +3665,8 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
         : `${featureCount} picked — looking great! Add more or tap continue.`;
 
     return (
-      <div className="h-screen bg-[#F7F7F7] dark:bg-stone-950 flex flex-col overflow-hidden">
+      <div className="relative h-screen bg-gradient-to-br from-[#FAF7FF] via-[#FBF7FF] to-[#F3EAFF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 flex flex-col overflow-hidden">
+        <OnboardingAura />
         <TopBar showBack onBack={() => goToPhase('survey-goal')} />
 
         <div className={`flex-1 overflow-y-auto transition-opacity duration-200 ${phaseVisible ? 'opacity-100' : 'opacity-0'}`}>
@@ -4334,7 +3778,8 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, testMode =
     /* h-screen + overflow-hidden — guarantees the sticky footer stays in view
        no matter how tall the content gets. Content scrolls inside its own
        container, footer never moves. */
-    <div className="h-screen bg-gradient-to-b from-[#F7F7F7] to-white dark:from-stone-950 dark:to-stone-900 flex flex-col overflow-hidden">
+    <div className="relative h-screen bg-gradient-to-br from-[#FAF7FF] via-[#FBF7FF] to-[#F3EAFF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 flex flex-col overflow-hidden">
+      <OnboardingAura />
       <TopBar />
 
       <div className="flex-1 overflow-y-auto">

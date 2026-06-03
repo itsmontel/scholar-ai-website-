@@ -342,24 +342,6 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
             </div>
           </div>
 
-          {/* Limited-time discount — urgency banner above the cards. */}
-          <div className="max-w-xl mx-auto mb-8 sm:mb-10">
-            <div className="flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1.5 rounded-2xl border-2 border-b-4 border-[#D97F00] bg-[#FFF4E0] dark:bg-[#FF9600]/15 px-4 sm:px-5 py-3 text-center">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FF9600] px-2.5 py-0.5 text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-white">
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-                </svg>
-                Limited time
-              </span>
-              <p className="text-[13px] sm:text-sm font-bold text-[#9A5500] dark:text-[#FFCF70]">
-                <span className="font-extrabold">50% off your first month</span> — use code{' '}
-                <span className="inline-flex items-center rounded-md border border-[#D97F00]/50 bg-white dark:bg-stone-900 px-1.5 py-0.5 font-mono font-extrabold text-[#9A5500] dark:text-[#FFCF70] text-[12px] tracking-wide">
-                  MAY2026
-                </span>
-              </p>
-            </div>
-          </div>
-
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto">
           {plans.map((plan) => (
             <div
