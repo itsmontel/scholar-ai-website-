@@ -2,24 +2,49 @@ const OpenAI = require('openai');
 const subscriptionService = require('./subscriptionService');
 
 /**
- * Build chat.completions params for either a reasoning model (GPT-5 /
- * o-series) or a classic model.
- *  - Reasoning models reject a custom `temperature`, bill "thinking"
- *    tokens against `max_completion_tokens`, and accept a
- *    `reasoning_effort` knob (minimal | low | medium | high | xhigh).
- *  - Classic models (gpt-4o-mini, gpt-4.1-*) use `temperature` +
- *    `max_tokens` and have no reasoning effort.
- * Sending the wrong shape 400s the request (which then silently falls
- * back to gpt-4o-mini), so we branch on the model id here.
+ * Build chat.completions params for a reasoning model (GPT-5 / o-series)
+ * or a classic model.
+ *  - Reasoning models reject a custom `temperature`, bill their "thinking"
+ *    tokens against `max_completion_tokens`, and take a `reasoning_effort`
+ *    knob. They need a GENEROUS token budget so the reasoning AND the JSON
+ *    answer both fit — otherwise the answer truncates mid-JSON (which is
+ *    what dropped the rubric + annotations before).
+ *  - Both analysis prompts demand strict JSON, so we force
+ *    `response_format: json_object` for clean, fence-free, parseable output.
  */
 function buildChatParams(model, messages, maxTokens, reasoningEffort = null, temperature = 0.3) {
   const isReasoning = /^(gpt-5|o[0-9])/i.test(model);
   if (isReasoning) {
-    const params = { model, messages, max_completion_tokens: maxTokens };
+    const params = {
+      model,
+      messages,
+      max_completion_tokens: maxTokens,
+      response_format: { type: 'json_object' },
+    };
     if (reasoningEffort) params.reasoning_effort = reasoningEffort;
     return params;
   }
-  return { model, messages, max_tokens: maxTokens, temperature };
+  // Classic path: leave exactly as it worked before (no response_format —
+  // the parser already strips any markdown fences from the {...} block).
+  return {
+    model,
+    messages,
+    max_tokens: maxTokens,
+    temperature,
+  };
+}
+
+/**
+ * Pull the first {...} block out of a model response and JSON.parse it.
+ * Returns the parsed object, or null when it is absent / truncated /
+ * invalid — that null is the signal we use to fall back to a reliable
+ * model so the user never sees an empty analysis.
+ */
+function extractJsonObject(text) {
+  if (!text || typeof text !== 'string') return null;
+  const m = text.match(/\{[\s\S]*\}/);
+  if (!m) return null;
+  try { return JSON.parse(m[0]); } catch { return null; }
 }
 
 /**
@@ -292,12 +317,19 @@ class AIAnalysisService {
       }
 
       // Model ladder (overridable via env):
-      //   Free          → gpt-4o-mini       (classic, no reasoning effort)
-      //   Pro + Premium → gpt-5.4-mini      at medium reasoning effort
+      //   Free          → gpt-4o-mini   (classic, fast, reliable)
+      //   Pro + Premium → gpt-5.4-mini  at LOW reasoning effort —
+      //                   sharper, better-targeted annotations than 4o-mini
+      //                   at a good cost (~4¢/analysis).
+      // Reasoning tokens share the OUTPUT budget, so paid gets a LARGE
+      // max_completion_tokens (reasoning + the JSON must both fit). If the
+      // model still truncates (finish_reason 'length') or returns unparseable
+      // output, we transparently re-run on gpt-4o-mini below — so the user
+      // can never end up with no rubric / annotations.
       let userPlan = 'free';
-      let selectedModel = process.env.OPENAI_STANDARD_MODEL || 'gpt-4o-mini';
-      let maxTokens = 5000; // Default for free
-      let reasoningEffort = null; // only set for reasoning models (paid)
+      let selectedModel = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+      let maxTokens = 8000;       // free / classic output
+      let reasoningEffort = null; // only set for the paid reasoning model
 
       try {
         const { plan } = await subscriptionService.getUserSubscriptionDetails(userId);
@@ -306,12 +338,12 @@ class AIAnalysisService {
 
         if (subscriptionService.isPaidSubscriptionTier(plan)) {
           selectedModel = process.env.OPENAI_PREMIUM_MODEL || 'gpt-5.4-mini';
-          reasoningEffort = process.env.OPENAI_REASONING_EFFORT || 'medium';
-          maxTokens = 15000; // reasoning tokens share this budget
+          reasoningEffort = process.env.OPENAI_REASONING_EFFORT || 'low';
+          maxTokens = parseInt(process.env.OPENAI_PREMIUM_MAX_TOKENS, 10) || 32000;
         } else {
           selectedModel = process.env.OPENAI_STANDARD_MODEL || 'gpt-4o-mini';
           reasoningEffort = null;
-          maxTokens = 5000;
+          maxTokens = 8000;
         }
       } catch (planErr) {
         // If plan lookup fails, keep free defaults
@@ -325,26 +357,50 @@ class AIAnalysisService {
         { role: 'user', content: analysisPrompt },
       ];
 
+      const FALLBACK_MAX = 15000;
+
       let completion;
+      let usedModel = selectedModel;
       try {
         completion = await this.openai.chat.completions.create(
           buildChatParams(selectedModel, messages, maxTokens, reasoningEffort)
         );
       } catch (modelErr) {
-        // If the premium/reasoning model fails (bad model id, param
-        // mismatch, quota…), retry with the reliable classic default.
+        // Hard error (bad model id, param mismatch, quota…) → classic model.
         if (selectedModel !== 'gpt-4o-mini') {
-          console.log(`Model ${selectedModel} failed, falling back to gpt-4o-mini`);
+          console.log(`Model ${selectedModel} errored (${modelErr.message}); falling back to gpt-4o-mini`);
+          usedModel = 'gpt-4o-mini';
           selectedModel = 'gpt-4o-mini';
           completion = await this.openai.chat.completions.create(
-            buildChatParams('gpt-4o-mini', messages, maxTokens, null)
+            buildChatParams('gpt-4o-mini', messages, FALLBACK_MAX, null)
           );
         } else {
           throw modelErr;
         }
       }
 
-      const analysisResult = completion.choices[0].message.content;
+      let analysisResult = completion.choices?.[0]?.message?.content || '';
+      const finishReason = completion.choices?.[0]?.finish_reason;
+
+      // Soft fallback: the call succeeded but the (reasoning) model ran out
+      // of room mid-JSON (finish_reason 'length') or returned something we
+      // can't parse → transparently redo on gpt-4o-mini so the user always
+      // gets a full rubric + annotations.
+      if (usedModel !== 'gpt-4o-mini' && (finishReason === 'length' || !extractJsonObject(analysisResult))) {
+        console.log(`⚠️ ${usedModel} output unusable (finish_reason=${finishReason}); retrying on gpt-4o-mini`);
+        try {
+          const retry = await this.openai.chat.completions.create(
+            buildChatParams('gpt-4o-mini', messages, FALLBACK_MAX, null)
+          );
+          const retryText = retry.choices?.[0]?.message?.content || '';
+          if (extractJsonObject(retryText)) {
+            analysisResult = retryText;
+            selectedModel = 'gpt-4o-mini';
+          }
+        } catch (retryErr) {
+          console.log(`gpt-4o-mini retry also failed: ${retryErr.message}`);
+        }
+      }
       
       // Parse structured analysis and extract annotations
       const structuredAnalysis = this.parseStructuredAnalysis(analysisResult, content, userPlan, gradingStyle, citationStyle);
@@ -391,10 +447,12 @@ class AIAnalysisService {
       try {
         const { plan } = await subscriptionService.getUserSubscriptionDetails(userId);
         if (subscriptionService.isPaidSubscriptionTier(plan)) {
-          // Pro + Premium → gpt-5.4-mini at medium reasoning effort.
+          // Paid → gpt-5.4-mini at LOW reasoning effort, with a large
+          // budget so the reasoning + JSON both fit (falls back to
+          // gpt-4o-mini if it truncates or returns unparseable output).
           selectedModel = process.env.OPENAI_PREMIUM_MODEL || 'gpt-5.4-mini';
-          reasoningEffort = process.env.OPENAI_REASONING_EFFORT || 'medium';
-          maxTokens = 12000; // headroom so reasoning tokens don't truncate the JSON
+          reasoningEffort = process.env.OPENAI_REASONING_EFFORT || 'low';
+          maxTokens = parseInt(process.env.OPENAI_PREMIUM_MAX_TOKENS, 10) || 24000;
         }
       } catch (planErr) {
         console.log('Could not fetch plan for rubric analysis, using defaults');
@@ -439,24 +497,43 @@ IMPORTANT:
         { role: 'user', content: userPrompt },
       ];
 
+      const FALLBACK_MAX = 12000;
+
       let completion;
+      let usedModel = selectedModel;
       try {
         completion = await this.openai.chat.completions.create(
           buildChatParams(selectedModel, messages, maxTokens, reasoningEffort)
         );
       } catch (modelErr) {
         if (selectedModel !== 'gpt-4o-mini') {
-          console.log(`Model ${selectedModel} failed for rubric analysis, falling back to gpt-4o-mini`);
-          selectedModel = 'gpt-4o-mini';
+          console.log(`Model ${selectedModel} errored for rubric analysis (${modelErr.message}); falling back to gpt-4o-mini`);
+          usedModel = 'gpt-4o-mini';
           completion = await this.openai.chat.completions.create(
-            buildChatParams('gpt-4o-mini', messages, maxTokens, null)
+            buildChatParams('gpt-4o-mini', messages, FALLBACK_MAX, null)
           );
         } else {
           throw modelErr;
         }
       }
 
-      const rawResult = completion.choices[0].message.content;
+      let rawResult = completion.choices?.[0]?.message?.content || '';
+      const finishReason = completion.choices?.[0]?.finish_reason;
+
+      // Soft fallback: reasoning model truncated mid-JSON or returned
+      // unparseable output → redo on gpt-4o-mini so the rubric never blanks.
+      if (usedModel !== 'gpt-4o-mini' && (finishReason === 'length' || !extractJsonObject(rawResult))) {
+        console.log(`⚠️ ${usedModel} rubric output unusable (finish_reason=${finishReason}); retrying on gpt-4o-mini`);
+        try {
+          const retry = await this.openai.chat.completions.create(
+            buildChatParams('gpt-4o-mini', messages, FALLBACK_MAX, null)
+          );
+          const retryText = retry.choices?.[0]?.message?.content || '';
+          if (extractJsonObject(retryText)) rawResult = retryText;
+        } catch (retryErr) {
+          console.log(`gpt-4o-mini rubric retry also failed: ${retryErr.message}`);
+        }
+      }
       const parsed = this.parseRubricAnalysis(rawResult);
 
       return {
