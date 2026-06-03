@@ -1120,6 +1120,9 @@ const AcademicAIApp = () => {
         onLogout={handleLogout}
         onUserUpdate={handleOnboardingUserUpdate}
         onComplete={() => handleOnboardingComplete(destination)}
+        // First-run users get the full flow; existing free users who
+        // never trialed are dropped straight on the trial paywall.
+        forceTrialGate={!needsOnboarding && mustStartTrial}
       />
     );
   };
@@ -1148,8 +1151,84 @@ const AcademicAIApp = () => {
   const [showPostCheckoutWelcome, setShowPostCheckoutWelcome] = useState<boolean>(sawStripeSuccessOnLoad);
   const [showDailyReviewPrompt, setShowDailyReviewPrompt] = useState(false);
 
+  // ─── Mandatory 7-day trial gate ───
+  // The product has no permanently-free tier for brand-new accounts: to
+  // use the app you must start the 7-day trial first. Once you've used
+  // the trial (even after it ends / you cancel) you can stay on as a
+  // free user. `trialEligible === true` means this email has NEVER
+  // started a trial (authoritative `trial_usage` check on the backend),
+  // so they still owe us the trial step. `null` = not yet known. Seeded
+  // from a per-user cache so the gate doesn't flash on reload.
+  const [trialEligible, setTrialEligible] = useState<boolean | null>(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const uid = JSON.parse(localStorage.getItem('user') || 'null')?.id;
+      if (!uid) return null;
+      const cached = localStorage.getItem(`ws_trial_eligible_${uid}`);
+      return cached === 'true' ? true : cached === 'false' ? false : null;
+    } catch {
+      return null;
+    }
+  });
+  const trialEligibilityCheckedRef = useRef<string | null>(null);
+  useEffect(() => {
+    const planLower = (user?.plan || user?.subscription_plan || 'free').toLowerCase();
+    const isPaid = planLower === 'pro' || planLower === 'premium';
+    // Paid users (incl. active trials) are never gated. Once someone is
+    // paid they've necessarily started the trial, so persist that — if
+    // they later cancel back to free they won't be wrongly re-gated.
+    if (isPaid) {
+      setTrialEligible(false);
+      if (user?.id) {
+        try {
+          localStorage.setItem(`ws_trial_eligible_${user.id}`, 'false');
+        } catch {
+          /* ignore */
+        }
+      }
+      return;
+    }
+    if (!isLoggedIn || !user?.id) return;
+    if (trialEligibilityCheckedRef.current === user.id) return;
+    trialEligibilityCheckedRef.current = user.id;
+    void (async () => {
+      try {
+        const token = localStorage.getItem('authToken');
+        if (!token) return;
+        const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+        const res = await fetch(`${apiBase}/subscriptions/trial-eligibility`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) return;
+        const data = await res.json().catch(() => null);
+        if (!data) return;
+        const eligible = data.trialEligible === true;
+        setTrialEligible(eligible);
+        try {
+          localStorage.setItem(`ws_trial_eligible_${user.id}`, eligible ? 'true' : 'false');
+        } catch {
+          /* ignore */
+        }
+      } catch {
+        /* network error — leave unknown so we don't wrongly gate */
+      }
+    })();
+  }, [isLoggedIn, user?.id, user?.plan, user?.subscription_plan]);
+
   const needsOnboarding =
     isLoggedIn && user?.id && !user.onboardingCompleted && !sawStripeSuccessOnLoad;
+
+  // Existing free user who finished onboarding but never started the
+  // trial → they must go through the trial paywall before using the app
+  // again. New users (needsOnboarding) get the full first-run flow that
+  // already ends at the same hard paywall.
+  const planLower = (user?.plan || user?.subscription_plan || 'free').toLowerCase();
+  const isPaidPlan = planLower === 'pro' || planLower === 'premium';
+  const mustStartTrial =
+    isLoggedIn && !!user?.id && !isPaidPlan && trialEligible === true && !sawStripeSuccessOnLoad;
+  // Any logged-in user who still owes us the onboarding flow or the
+  // trial step gets routed to OnboardingPage on the protected surfaces.
+  const shouldGateToOnboarding = needsOnboarding || mustStartTrial;
 
   /* ─── Post-Stripe-success recovery ───
      When Stripe-hosted Checkout redirects to /dashboard?payment=success
@@ -1394,25 +1473,25 @@ const AcademicAIApp = () => {
         // lives inside the Documents workspace (Analyze / Daily
         // Review / Study Packs / Citations / Games as in-page
         // panels). Any old /study-tools link lands in the workspace.
-        if (needsOnboarding) return renderOnboarding('dashboard');
+        if (shouldGateToOnboarding) return renderOnboarding('dashboard');
         return renderDocumentsWorkspace();
       case 'analyze':
-        if (needsOnboarding) return renderOnboarding('analyze');
+        if (shouldGateToOnboarding) return renderOnboarding('analyze');
         return <AnalyzeEssayPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'citations':
-        if (needsOnboarding) return renderOnboarding('citations');
+        if (shouldGateToOnboarding) return renderOnboarding('citations');
         return <CitationsPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'study-pack':
-        if (needsOnboarding) return renderOnboarding('dashboard');
+        if (shouldGateToOnboarding) return renderOnboarding('dashboard');
         return <StudyPackPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'study-pack-hub':
-        if (needsOnboarding) return renderOnboarding('dashboard');
+        if (shouldGateToOnboarding) return renderOnboarding('dashboard');
         return <StudyPackHubPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'analyze-hub':
-        if (needsOnboarding) return renderOnboarding('dashboard');
+        if (shouldGateToOnboarding) return renderOnboarding('dashboard');
         return <AnalyzeHubPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'citations-hub':
-        if (needsOnboarding) return renderOnboarding('dashboard');
+        if (shouldGateToOnboarding) return renderOnboarding('dashboard');
         return <CitationsHubPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'analysis':
         return (
@@ -1468,7 +1547,7 @@ const AcademicAIApp = () => {
       }
       case 'friends':
         if (HIDE_FRIENDS) {
-          if (needsOnboarding) return renderOnboarding('dashboard');
+          if (shouldGateToOnboarding) return renderOnboarding('dashboard');
           return renderDocumentsWorkspace();
         }
         return <FriendsPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
@@ -1487,7 +1566,7 @@ const AcademicAIApp = () => {
       case 'upload':
       case 'write':
       case 'documents': {
-        if (needsOnboarding) return renderOnboarding('dashboard');
+        if (shouldGateToOnboarding) return renderOnboarding('dashboard');
         return renderDocumentsWorkspace();
       }
       case 'profile':
@@ -1531,13 +1610,13 @@ const AcademicAIApp = () => {
         return <MoreToolsPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'badges':
         if (HIDE_STREAK_AND_BADGES) {
-          if (needsOnboarding) return renderOnboarding('dashboard');
+          if (shouldGateToOnboarding) return renderOnboarding('dashboard');
           return renderDocumentsWorkspace();
         }
         return <BadgesPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;
       case 'share-friends':
         if (HIDE_FRIENDS) {
-          if (needsOnboarding) return renderOnboarding('dashboard');
+          if (shouldGateToOnboarding) return renderOnboarding('dashboard');
           return renderDocumentsWorkspace();
         }
         return <ShareFriendsPage onNavigate={navigateTo} user={user} onLogout={handleLogout} />;

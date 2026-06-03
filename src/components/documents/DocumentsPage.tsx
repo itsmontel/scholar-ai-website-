@@ -49,6 +49,55 @@ import { consumePendingWorkspaceView, WS_SWITCH_VIEW_EVENT } from '../workspace/
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
+/** Grade format defaults to US; only pre-select UK if the last analysis used it. */
+type GradingStyle = 'us' | 'uk';
+type AnalyzeStyleOptions = { citationStyle: string; gradingStyle: GradingStyle };
+
+const LAST_ANALYSIS_GRADING_KEY = 'writescholar_last_analysis_grading_style';
+const PENDING_GRADING_KEY = 'writescholar_pending_grading_style';
+
+function getDefaultGradingStyle(): GradingStyle {
+  try {
+    return localStorage.getItem(LAST_ANALYSIS_GRADING_KEY) === 'uk' ? 'uk' : 'us';
+  } catch {
+    return 'us';
+  }
+}
+
+function persistLastAnalysisGradingStyle(style: GradingStyle) {
+  try {
+    localStorage.setItem(LAST_ANALYSIS_GRADING_KEY, style);
+  } catch {
+    /* noop */
+  }
+}
+
+/** Hub picker → editor auto-analyze bridge (consumed once on first analyze). */
+function stagePendingGradingStyle(style: GradingStyle) {
+  try {
+    localStorage.setItem(PENDING_GRADING_KEY, style);
+  } catch {
+    /* noop */
+  }
+}
+
+function consumePendingGradingStyle(): GradingStyle | null {
+  try {
+    const v = localStorage.getItem(PENDING_GRADING_KEY);
+    localStorage.removeItem(PENDING_GRADING_KEY);
+    return v === 'uk' || v === 'us' ? v : null;
+  } catch {
+    return null;
+  }
+}
+
+function resolveGradingStyleForAnalyze(opts?: AnalyzeStyleOptions): GradingStyle {
+  if (opts?.gradingStyle) return opts.gradingStyle;
+  const pending = consumePendingGradingStyle();
+  if (pending) return pending;
+  return getDefaultGradingStyle();
+}
+
 type DocSummary = {
   id: string;
   title: string;
@@ -341,20 +390,18 @@ function AnalyzePanel({
   const [citationStyle, setCitationStyleState] = useState<string>(() => {
     try { return localStorage.getItem('writescholar_editor_citation_style') || 'None'; } catch { return 'None'; }
   });
-  const [gradingStyle, setGradingStyleState] = useState<'us' | 'uk'>(() => {
-    try { return (localStorage.getItem('writescholar_editor_grading_style') as 'us' | 'uk') === 'uk' ? 'uk' : 'us'; } catch { return 'us'; }
-  });
+  const [gradingStyle, setGradingStyleState] = useState<GradingStyle>(getDefaultGradingStyle);
   const updateCitationStyle = (v: string) => {
     setCitationStyleState(v);
     try { localStorage.setItem('writescholar_editor_citation_style', v); } catch { /* noop */ }
   };
-  const updateGradingStyle = (v: 'us' | 'uk') => {
+  const updateGradingStyle = (v: GradingStyle) => {
     setGradingStyleState(v);
-    try { localStorage.setItem('writescholar_editor_grading_style', v); } catch { /* noop */ }
   };
   /** Wraps any analyze trigger so the picker shows first. The
    *  `action` is captured in state and invoked on confirm. */
   const askThenRun = (action: () => void) => {
+    setGradingStyleState(getDefaultGradingStyle());
     setPendingAction(() => action);
     setOptionsOpen(true);
   };
@@ -595,7 +642,7 @@ function AnalyzePanel({
                   ))}
                 </div>
               </div>
-              <p className="text-[11px] font-bold text-stone-400 leading-snug">Tailors the rubric &amp; grade to your institution. Saved for next time.</p>
+              <p className="text-[11px] font-bold text-stone-400 leading-snug">Defaults to US; UK is pre-selected only if you used it on your last analysis.</p>
             </div>
 
             <div className="mt-6 flex items-center justify-end gap-2">
@@ -610,6 +657,8 @@ function AnalyzePanel({
                 type="button"
                 onClick={() => {
                   setOptionsOpen(false);
+                  try { localStorage.setItem('writescholar_editor_citation_style', citationStyle); } catch { /* noop */ }
+                  stagePendingGradingStyle(gradingStyle);
                   // Defer to next tick so the modal close animation
                   // doesn't jank the underlying action's transition.
                   const fn = pendingAction;
@@ -1836,7 +1885,7 @@ function DocumentEditorView({
   onTitleSave: (title: string) => Promise<void>;
   onContentSave: (payload: { html: string; text: string; wordCount: number }) => Promise<void>;
   onBack: () => void;
-  onAnalyze: () => void;
+  onAnalyze: (opts: AnalyzeStyleOptions) => void;
   analyzerResult: AnalyzerResult | null;
   analyzerLoading: boolean;
   analyzerError: string | null;
@@ -1877,16 +1926,17 @@ function DocumentEditorView({
   const [citationStyle, setCitationStyle] = useState<string>(() => {
     try { return localStorage.getItem('writescholar_editor_citation_style') || 'None'; } catch { return 'None'; }
   });
-  const [gradingStyle, setGradingStyle] = useState<'us' | 'uk'>(() => {
-    try { return (localStorage.getItem('writescholar_editor_grading_style') as 'us' | 'uk') === 'uk' ? 'uk' : 'us'; } catch { return 'us'; }
-  });
+  const [gradingStyle, setGradingStyle] = useState<GradingStyle>(getDefaultGradingStyle);
   const changeCitationStyle = useCallback((v: string) => {
     setCitationStyle(v);
     try { localStorage.setItem('writescholar_editor_citation_style', v); } catch { /* noop */ }
   }, []);
-  const changeGradingStyle = useCallback((v: 'us' | 'uk') => {
+  const changeGradingStyle = useCallback((v: GradingStyle) => {
     setGradingStyle(v);
-    try { localStorage.setItem('writescholar_editor_grading_style', v); } catch { /* noop */ }
+  }, []);
+  const openAnalyzeConfirm = useCallback(() => {
+    setGradingStyle(getDefaultGradingStyle());
+    setConfirmAnalyze(true);
   }, []);
   const isReanalyze = !!analyzerResult;
   const noAnalysesLeft = typeof analysesLeft === 'number' && analysesLeft === 0;
@@ -1895,8 +1945,8 @@ function DocumentEditorView({
   // analyze-confirm modal — so the citation style + grade picker
   // shows instead of analysis firing straight away.
   useEffect(() => {
-    if (analyzeConfirmSignal > 0) setConfirmAnalyze(true);
-  }, [analyzeConfirmSignal]);
+    if (analyzeConfirmSignal > 0) openAnalyzeConfirm();
+  }, [analyzeConfirmSignal, openAnalyzeConfirm]);
 
   useEffect(() => {
     if (title === initialTitle) return;
@@ -2094,7 +2144,7 @@ function DocumentEditorView({
             )}
             <button
               type="button"
-              onClick={() => setConfirmAnalyze(true)}
+              onClick={openAnalyzeConfirm}
               disabled={analyzerLoading}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] disabled:opacity-60 disabled:cursor-not-allowed text-white text-[11px] sm:text-xs font-extrabold uppercase tracking-wider border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
             >
@@ -2133,7 +2183,7 @@ function DocumentEditorView({
               error={analyzerError}
               selectedAnnotationId={selectedAnnotationId}
               onAnnotationClick={handleSelectAnnotation}
-              onRerun={() => setConfirmAnalyze(true)}
+              onRerun={openAnalyzeConfirm}
               onClose={onAnalyzerClose}
               onOpenFullReport={onOpenFullReport}
               onApplyRevision={onApplyRevision}
@@ -2169,7 +2219,7 @@ function DocumentEditorView({
 
                 <button
                   type="button"
-                  onClick={() => (noAnalysesLeft ? onUpgrade() : setConfirmAnalyze(true))}
+                  onClick={() => (noAnalysesLeft ? onUpgrade() : openAnalyzeConfirm())}
                   className="group mt-7 w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-gradient-to-br from-[#A560E8] to-[#7733B5] text-white text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_12px_26px_-14px_rgba(122,51,181,0.5)]"
                 >
                   <I.Sparkle />
@@ -2254,7 +2304,7 @@ function DocumentEditorView({
               error={analyzerError}
               selectedAnnotationId={selectedAnnotationId}
               onAnnotationClick={handleSelectAnnotation}
-              onRerun={() => setConfirmAnalyze(true)}
+              onRerun={openAnalyzeConfirm}
               onClose={onAnalyzerClose}
               onOpenFullReport={onOpenFullReport}
               onApplyRevision={onApplyRevision}
@@ -2351,7 +2401,7 @@ function DocumentEditorView({
                     ))}
                   </div>
                 </div>
-                <p className="text-[11px] font-bold text-stone-400 leading-snug">Tailors the rubric &amp; grade to your institution. Saved for next time.</p>
+                <p className="text-[11px] font-bold text-stone-400 leading-snug">Defaults to US; UK is pre-selected only if you used it on your last analysis.</p>
               </div>
             )}
 
@@ -2374,7 +2424,11 @@ function DocumentEditorView({
               ) : (
                 <button
                   type="button"
-                  onClick={() => { setConfirmAnalyze(false); onAnalyze(); }}
+                  onClick={() => {
+                    setConfirmAnalyze(false);
+                    try { localStorage.setItem('writescholar_editor_citation_style', citationStyle); } catch { /* noop */ }
+                    onAnalyze({ citationStyle, gradingStyle });
+                  }}
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] text-white text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
                 >
                   <I.Sparkle />
@@ -3009,7 +3063,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
   // so we can map them back to the editor without ambiguity. We
   // open the panel immediately (showing the loading skeleton) so
   // the click feels responsive.
-  const handleAnalyzeInEditor = useCallback(async () => {
+  const handleAnalyzeInEditor = useCallback(async (opts?: AnalyzeStyleOptions) => {
     if (!openDocId || analyzerLoading) return;
     const text = latestTextRef.current || openDoc?.contentText || '';
     if (!text.trim()) {
@@ -3022,22 +3076,34 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
     setAnalyzerError(null);
     // Re-analyze invalidates any "applied" markers from the previous
     // result — every card starts fresh (and the cached revisions are
-    // no longer valid against the new annotations).
+    // no longer valid against the new annotations). Drop the persisted
+    // store too so the now-stale revisions don't resurrect on refresh.
     setAppliedRevisions(new Map());
+    try {
+      if (openDocId) {
+        localStorage.removeItem(`writescholar_applied_revisions_${openDocId}`);
+        void fetch(`${API_URL}/analysis/revision-markers`, {
+          method: 'POST',
+          headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+          body: JSON.stringify({ documentId: openDocId, wsRevisionCache: {} }),
+        }).catch(() => {});
+      }
+    } catch { /* ignore */ }
     revisionCacheRef.current.clear();
     setApplyingAnnotationId(null);
     // Hard timeout so a stalled request can't pin the analyzer
     // panel in its loading state forever.
     const abort = new AbortController();
     const timeoutId = window.setTimeout(() => abort.abort(), 120000);
-    // Personalise the analysis with the citation style + grade scale
-    // the user picked in the confirm modal (persisted per browser).
-    let citationStyle = 'None';
-    let gradingStyle: 'us' | 'uk' = 'us';
-    try {
-      citationStyle = localStorage.getItem('writescholar_editor_citation_style') || 'None';
-      gradingStyle = localStorage.getItem('writescholar_editor_grading_style') === 'uk' ? 'uk' : 'us';
-    } catch { /* defaults */ }
+    // Citation style sticks per browser; grade format defaults to US
+    // unless the user's last completed analysis used UK.
+    let citationStyle = opts?.citationStyle ?? 'None';
+    if (!opts?.citationStyle) {
+      try {
+        citationStyle = localStorage.getItem('writescholar_editor_citation_style') || 'None';
+      } catch { /* default */ }
+    }
+    const gradingStyle = resolveGradingStyleForAnalyze(opts);
     try {
       const res = await fetch(`${API_URL}/analysis/analyze`, {
         method: 'POST',
@@ -3106,6 +3172,8 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
             }))
           : [],
       });
+      persistLastAnalysisGradingStyle(gradingStyle);
+      try { localStorage.setItem('writescholar_editor_citation_style', citationStyle); } catch { /* noop */ }
       // Soft paywall is NOT shown here — it fires once a free user
       // has scrolled ~65% through their paper after an analysis
       // (see the scroll-progress effect below), capped to once a day.
@@ -3133,6 +3201,31 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
   // a focused model call that returns CLEAN replacement prose
   // ready to splice. That endpoint is Pro/Premium-gated, so a 403
   // surfaces an upgrade nudge rather than a silent no-op.
+  // Persist the applied-revision map (annotation id → original +
+  // replacement text) per document so a refresh keeps the "Revert"
+  // state AND the original text needed to undo. Cleared on re-analyze.
+  const persistAppliedRevisions = useCallback((docId: string | null, map: Map<string, { originalText: string; replacementText: string }>) => {
+    if (!docId) return;
+    // 1. Local cache — instant + offline.
+    try {
+      const key = `writescholar_applied_revisions_${docId}`;
+      if (map.size === 0) localStorage.removeItem(key);
+      else localStorage.setItem(key, JSON.stringify([...map.entries()]));
+    } catch { /* localStorage quota/serialisation — non-fatal */ }
+    // 2. Server — cross-device. Persist JUST the markers (no content),
+    //    so the editor's own content autosave is never clobbered.
+    try {
+      const wsRevisionCache = Object.fromEntries(
+        [...map.entries()].map(([id, r]) => [id, { sourceSpan: r.originalText, replacement: r.replacementText }])
+      );
+      void fetch(`${API_URL}/analysis/revision-markers`, {
+        method: 'POST',
+        headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ documentId: docId, wsRevisionCache }),
+      }).catch(() => { /* offline / non-fatal — localStorage still holds it */ });
+    } catch { /* ignore */ }
+  }, []);
+
   const handleApplyRevision = useCallback(async (annotationId: string) => {
     if (!editorRef.current || !analyzerResult || applyingAnnotationId) return;
     // Already applied → nothing to do (the card shows "Revert").
@@ -3162,6 +3255,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
       setAppliedRevisions((prev) => {
         const next = new Map(prev);
         next.set(annotationId, { originalText, replacementText: cached });
+        persistAppliedRevisions(openDocId, next);
         return next;
       });
       return;
@@ -3243,6 +3337,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
       setAppliedRevisions((prev) => {
         const next = new Map(prev);
         next.set(annotationId, { originalText, replacementText: replacement });
+        persistAppliedRevisions(openDocId, next);
         return next;
       });
     } catch (e) {
@@ -3251,7 +3346,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
     } finally {
       setApplyingAnnotationId(null);
     }
-  }, [analyzerResult, applyingAnnotationId, appliedRevisions, openDoc, user]);
+  }, [analyzerResult, applyingAnnotationId, appliedRevisions, openDoc, openDocId, persistAppliedRevisions, user]);
 
   // ─── Revert revision ────────────────────────────────────────
   // Always returns the card to the un-applied state so the user is
@@ -3269,6 +3364,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
     setAppliedRevisions((prev) => {
       const next = new Map(prev);
       next.delete(annotationId);
+      persistAppliedRevisions(openDocId, next);
       return next;
     });
     if (ok) {
@@ -3276,7 +3372,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
     } else {
       setAnalyzerError("Auto-revert couldn't find the revised text (it was edited further). Press ⌘Z to undo, or edit it back — re-applying will reuse the saved revision instantly.");
     }
-  }, [appliedRevisions]);
+  }, [appliedRevisions, openDocId, persistAppliedRevisions]);
 
   // ─── Full report ────────────────────────────────────────────
   // Open the SAVED comprehensive analysis in the legacy /analysis
@@ -3408,6 +3504,35 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
             feedback: typeof r.feedback === 'string' ? r.feedback : undefined,
           })),
         });
+        // Restore which revisions were already applied (+ the original
+        // text needed to revert) so refresh / another device keeps the
+        // "Revert" state. Prefer the server copy (ws_revision_cache,
+        // cross-device); fall back to the local cache.
+        try {
+          const validIds = new Set(annotations.map((a: { id: string }) => a.id));
+          let restored = new Map<string, { originalText: string; replacementText: string }>();
+          const serverCache = (ar as { ws_revision_cache?: Record<string, { sourceSpan?: string; replacement?: string }> }).ws_revision_cache;
+          if (serverCache && typeof serverCache === 'object') {
+            for (const [id, r] of Object.entries(serverCache)) {
+              if (validIds.has(id) && r && typeof r.replacement === 'string') {
+                restored.set(id, { originalText: String(r.sourceSpan ?? ''), replacementText: String(r.replacement) });
+              }
+            }
+          }
+          if (restored.size === 0) {
+            const raw = localStorage.getItem(`writescholar_applied_revisions_${openDocId}`);
+            if (raw) {
+              const entries = JSON.parse(raw) as [string, { originalText: string; replacementText: string }][];
+              restored = new Map(entries.filter(([id]) => validIds.has(id)));
+            }
+          }
+          if (restored.size > 0) {
+            setAppliedRevisions(restored);
+            // Re-seed the in-memory replacement cache so re-applying
+            // after a refresh is instant + free (no extra API call).
+            restored.forEach((rec, id) => revisionCacheRef.current.set(id, rec.replacementText));
+          }
+        } catch { /* ignore corrupt/absent store */ }
         // Open the panel so the user sees the restored feedback.
         setAnalyzerOpen(true);
       } catch (e) {

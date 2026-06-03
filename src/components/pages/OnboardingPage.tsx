@@ -52,6 +52,11 @@ interface OnboardingPageProps {
   /** Preview-only mode (the /onboarding-test route) — skip every API
    *  call, never persist, never load Stripe; just walk the UI. */
   testMode?: boolean;
+  /** Hard trial gate — when an existing free user who never started the
+   *  7-day trial lands here, skip the first-run flow and drop them
+   *  straight on the checkout (trial) screen. There is no escape except
+   *  starting the trial or signing out. */
+  forceTrialGate?: boolean;
 }
 
 type Phase =
@@ -303,16 +308,19 @@ const PLANS: Record<PlanId, Plan> = {
  *  apply on the hosted checkout page. */
 const NEW_CUSTOMER_PROMO_CODE = 'NEWCUSTOMER';
 
-function getInitialPhase(): Phase {
+function getInitialPhase(forceTrialGate = false): Phase {
   if (typeof window === 'undefined') return 'intro';
   const params = new URLSearchParams(window.location.search);
   // ?preview=value-prop is what Stripe's hosted-checkout cancel URL
   // lands on — drops the user back at checkout (plan picker + trial CTA).
   if (params.get('preview') === 'value-prop') return 'value-prop';
-  if (params.get('preview') === 'aha') return 'checkout';
+  if (params.get('preview') === 'checkout' || params.get('preview') === 'aha') return 'checkout';
   if (params.get('preview') === 'profile') return 'profile';
   const sid = params.get('session_id');
-  return sid ? 'verifying' : 'intro';
+  if (sid) return 'verifying';
+  // Existing free user who never trialed → straight to the trial screen.
+  if (forceTrialGate) return 'checkout';
+  return 'intro';
 }
 
 /* ─── Paywall: full 8-tool showcase ─── */
@@ -1002,8 +1010,8 @@ function OnboardingSignOutButton({ onLogout }: { onLogout?: () => void }) {
 /* ═══════════════════════════════════════════════════════════════
    Main component
    ═══════════════════════════════════════════════════════════════ */
-const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, testMode = false }: OnboardingPageProps) => {
-  const [phase, setPhase] = useState<Phase>(getInitialPhase);
+const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, testMode = false, forceTrialGate = false }: OnboardingPageProps) => {
+  const [phase, setPhase] = useState<Phase>(() => getInitialPhase(forceTrialGate));
   const [displayName, setDisplayName] = useState(user?.name || '');
   const [username, setUsername] = useState(user?.username || '');
   const [usernameError, setUsernameError] = useState<string | null>(null);

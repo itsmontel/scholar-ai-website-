@@ -23,6 +23,27 @@ function buildChatParams(model, messages, maxTokens, reasoningEffort = null, tem
 }
 
 /**
+ * Find the character index where a reference list / bibliography section
+ * begins — i.e. a line that is essentially just a heading such as
+ * "References", "Bibliography", "Works Cited", "Reference List". Returns
+ * Infinity when there is no such section. Used as a hard guard to keep
+ * essay annotations / rewrites out of the reference list, even if the
+ * model ignores the prompt rule. Takes the LAST such heading (the real
+ * reference list sits at the end of the document).
+ */
+function findReferencesStartIndex(content) {
+  if (!content || typeof content !== 'string') return Infinity;
+  const re = /(^|\n)[ \t>#*_(\[]*\s*(references?|reference list|bibliography|works[ \t]+cited|work[ \t]+cited)\s*[)\]*_:.\-—]*[ \t]*(?=\n|$)/gi;
+  let last = Infinity;
+  let m;
+  while ((m = re.exec(content)) !== null) {
+    last = m[1] === '\n' ? m.index + 1 : m.index;
+    if (re.lastIndex === m.index) re.lastIndex++; // guard against zero-width loop
+  }
+  return last;
+}
+
+/**
  * Get 30 days from now (used for free user data expiration)
  * Free user data (citations, quizzes, flashcards, crosswords) expires 30 days after creation
  */
@@ -326,7 +347,7 @@ class AIAnalysisService {
       const analysisResult = completion.choices[0].message.content;
       
       // Parse structured analysis and extract annotations
-      const structuredAnalysis = this.parseStructuredAnalysis(analysisResult, content, userPlan, gradingStyle);
+      const structuredAnalysis = this.parseStructuredAnalysis(analysisResult, content, userPlan, gradingStyle, citationStyle);
       
       // Save analysis to database (temporarily disabled for demo)
       // await this.saveAnalysis(documentId, userId, analysisType, analysisResult, content);
@@ -723,7 +744,7 @@ ${citationStyle === 'None'
       CRITICAL — INLINE ANNOTATIONS:
       - Strengths: Say what works in the quoted words (logic, evidence, clarity), not stock praise. Do not repeat the same phrase across items. Avoid filler like "appropriate complexity", "well suited for academic work", "sophisticated academic discourse" as the main point.
       - Improvements/concerns: Tie every suggestion to this document. No [X]/[Y] placeholders. Give a revision, a sentence to add, or before/after using their topic — never generic "add evidence" without naming what claim.
-      - References/bibliography: If a reference list / bibliography / works-cited section is present, do NOT annotate or rewrite its entries as sentences — leave reference entries alone (citation formatting is reviewed separately).`,
+      - References/bibliography: never reword a reference-list entry as if it were a prose sentence (no grammar/style edits on references). Citation-format feedback on the reference list is allowed ONLY when a citation style is in use; if the user chose "no citations", leave the reference list alone entirely.`,
       
       citation: `You are a citation and referencing expert. Analyze the provided document for:
       - Proper citation format and style
@@ -766,7 +787,7 @@ ${citationStyle === 'None'
       CRITICAL — INLINE ANNOTATIONS:
       - Strengths: Each strength must describe what is strong in that exact quote (word choice, structure, evidence). Do not reuse boilerplate across strengths. Ban empty praise: "appropriate complexity", "well suited for academic work", "sophisticated academic discourse" as filler.
       - Improvements/concerns: Every suggestion must reference their draft — revised wording, a clause to insert, or a named element from their essay. Never [X]/[Y] placeholders or template advice without a concrete fix.
-      - References/bibliography: If a reference list / bibliography / works-cited section is present, do NOT annotate or rewrite its entries as sentences — leave reference entries alone (citation formatting is reviewed separately).`,
+      - References/bibliography: never reword a reference-list entry as if it were a prose sentence (no grammar/style edits on references). Citation-format feedback on the reference list is allowed ONLY when a citation style is in use; if the user chose "no citations", leave the reference list alone entirely.`,
       
       citation_review: `You are an expert academic citation and referencing specialist with deep knowledge of all major citation styles (APA, MLA, Chicago, Harvard, etc.).
 
@@ -945,14 +966,26 @@ CRITICAL REQUIREMENTS:
     }
   }`;
     
+    // References handling depends on whether the user wants citations:
+    //  • "None"  → ignore the reference list entirely (no prose edits).
+    //  • a style → DO review references for that style's formatting, but
+    //    as citation feedback, never as prose rewrites.
+    const referencesGuidance = (citationStyle === 'None')
+      ? `REFERENCES / BIBLIOGRAPHY — LEAVE IT ALONE:
+- If the document has a reference list / bibliography / works-cited section (usually at the end, under a heading like "References", "Bibliography", "Works Cited" or "Reference List"), treat those entries as citations, NOT sentences.
+- Do NOT annotate, create a "specific_rewrite", or give any grammar/clarity/style/structure feedback on a reference-list entry, and never quote reference-list text. The user chose "no citations", so ignore the reference list entirely — only annotate the essay's BODY prose.`
+      : `REFERENCES / BIBLIOGRAPHY — REVIEW FOR ${citationStyle} FORMATTING:
+- DO review the reference list / bibliography / works-cited section against ${citationStyle} standards: flag entries with incorrect format, missing elements (author, year, title, publisher/URL, page numbers), wrong ordering, or inconsistent style — and say exactly what to fix.
+- Cross-check in-text citations against the reference list: flag any in-text citation that has NO matching entry in the reference list, and any listed source that is never cited in the text.
+- Treat reference entries as CITATIONS: give citation-format corrections, NOT prose rewrites. Never reword a reference as if it were an essay sentence (no grammar/style/"flow" edits on references).
+- Do NOT judge whether a source is real or its facts are accurate — only its formatting and whether it matches the in-text citations.
+- Keep reference feedback to the ~5 most important issues (don't list every tiny nitpick), then continue annotating the essay's BODY prose as normal.`;
+
     return `Please perform a comprehensive academic analysis of the following document ${citationInstruction}
 
 IMPORTANT: For each feedback point, you must include the EXACT text from the document that you're referring to, enclosed in double quotes. All quoted text must appear verbatim in the document.
 
-REFERENCES / BIBLIOGRAPHY — DO NOT REVISE AS PROSE:
-- If the document contains a reference list, bibliography, or works-cited section (usually at the end — often after a heading like "References", "Bibliography", "Works Cited", or "Reference List", and made up of source entries with authors, years, titles, publishers/URLs), treat those entries as CITATIONS, not sentences.
-- NEVER create an annotation, a "specific_rewrite", or a grammar/clarity/style/structure suggestion for a reference-list entry, and never quote reference-list text in your output. Do not "rewrite" a reference as if it were a sentence.
-- Only annotate and revise the essay's BODY prose. (Citation/reference formatting is checked in a separate pass — ignore it here.)
+${referencesGuidance}
 
 ADAPTIVE ANNOTATION GUIDELINES:
 - Aim for approximately ${targetAnnotations} total annotations spread across the essay
@@ -1214,7 +1247,7 @@ CRITICAL REQUIREMENTS:
   /**
    * Parse structured analysis response and extract annotations
    */
-  parseStructuredAnalysis(analysisResult, content, userPlan = 'free', gradingStyle = 'us') {
+  parseStructuredAnalysis(analysisResult, content, userPlan = 'free', gradingStyle = 'us', citationStyle = 'None') {
     try {
       console.log('=== BACKEND: STARTING BULLETPROOF ANNOTATION GENERATION ===');
       console.log('Content length:', content.length);
@@ -1465,15 +1498,42 @@ CRITICAL REQUIREMENTS:
       console.log(`Final annotations: ${finalAnnotations.length}`);
       console.log(`Final strong points: ${finalAnnotations.filter(a => a.type === 'strong').length}`);
 
+      // ─── References/bibliography hard guard ──────────────────────
+      // Belt-and-braces: even if the model ignores the prompt rule,
+      // drop any annotation or rewrite that lands inside the reference
+      // list so a stray "fix" can never reach the editor.
+      // BUT only when the user chose NO citation style — if a style
+      // (APA/MLA/Harvard…) is selected, the analyzer SHOULD review the
+      // reference list for citation-format help, so let those through.
+      const guardReferences = !citationStyle || citationStyle === 'None';
+      const refStart = guardReferences ? findReferencesStartIndex(content) : Infinity;
+      const guardedAnnotations = finalAnnotations
+        .filter((a) => !(typeof a.startIndex === 'number' && a.startIndex >= refStart))
+        .sort((a, b) => a.startIndex - b.startIndex);
+      const rewritesIn = Array.isArray(structuredData.specific_rewrites) ? structuredData.specific_rewrites : [];
+      const guardedRewrites = rewritesIn.filter((rw) => {
+        const orig = rw && typeof rw.original === 'string' ? rw.original.trim() : '';
+        if (!orig) return true;
+        const pos = content.indexOf(orig);
+        return pos === -1 || pos < refStart;
+      });
+      if (refStart !== Infinity) {
+        const droppedA = finalAnnotations.length - guardedAnnotations.length;
+        const droppedR = rewritesIn.length - guardedRewrites.length;
+        if (droppedA || droppedR) {
+          console.log(`🛡️ References guard: dropped ${droppedA} annotation(s) + ${droppedR} rewrite(s) inside the reference list (start @ ${refStart})`);
+        }
+      }
+
       return {
         formattedResult,
-        annotations: finalAnnotations.sort((a, b) => a.startIndex - b.startIndex),
+        annotations: guardedAnnotations,
         overall_score: displayScore,
         grade_estimate: gradeEstimate,
         clarity_rating: structuredData.clarity_rating ?? null,
         top_suggestions: Array.isArray(structuredData.top_suggestions) ? structuredData.top_suggestions : [],
         grade_rubric: displayRubric ?? null,
-        specific_rewrites: Array.isArray(structuredData.specific_rewrites) ? structuredData.specific_rewrites : []
+        specific_rewrites: guardedRewrites
       };
 
     } catch (error) {
@@ -5506,6 +5566,44 @@ Output JSON only: {"replacement":"..."}`;
       .eq('id', row.id)
       .eq('user_id', userId);
 
+    if (upErr) throw upErr;
+    return { ok: true, analysisUpdated: true };
+  }
+
+  /**
+   * Persist ONLY the WriteScholar revision markers (annotation id →
+   * { sourceSpan, replacement }) onto the latest comprehensive/general
+   * analysis row. Used by the editor's apply/revert so the "Revert"
+   * state + the original text follow the user across devices.
+   * Deliberately does NOT touch content_text or annotations — the
+   * editor autosaves its own content, so we must not clobber it here.
+   */
+  async saveRevisionMarkers(documentId, userId, wsRevisionCache) {
+    const { createClient } = require('@supabase/supabase-js');
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+    );
+    const { data: rows, error: fetchErr } = await supabase
+      .from('document_analyses')
+      .select('id, analysis_results')
+      .eq('document_id', documentId)
+      .eq('user_id', userId)
+      .in('analysis_type', ['comprehensive', 'general'])
+      .order('created_at', { ascending: false })
+      .limit(1);
+    if (fetchErr) throw fetchErr;
+    if (!rows?.length) return { ok: true, analysisUpdated: false };
+    const row = rows[0];
+    const ar = row.analysis_results || {};
+    const cache = wsRevisionCache && typeof wsRevisionCache === 'object' && !Array.isArray(wsRevisionCache)
+      ? wsRevisionCache
+      : {};
+    const { error: upErr } = await supabase
+      .from('document_analyses')
+      .update({ analysis_results: { ...ar, ws_revision_cache: cache } })
+      .eq('id', row.id)
+      .eq('user_id', userId);
     if (upErr) throw upErr;
     return { ok: true, analysisUpdated: true };
   }

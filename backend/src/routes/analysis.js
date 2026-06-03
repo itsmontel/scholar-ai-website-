@@ -1558,6 +1558,39 @@ router.post('/save-revised-draft', authenticateToken, async (req, res) => {
   }
 });
 
+// @route   POST /api/analysis/revision-markers
+// @desc    Persist ONLY the applied-revision markers (ws_revision_cache)
+//          for a document's latest analysis — so the editor's "Revert"
+//          state follows the user across devices. Does not touch content.
+router.post('/revision-markers', authenticateToken, async (req, res) => {
+  try {
+    const { documentId, wsRevisionCache } = req.body;
+    const userId = req.user.id;
+    const { plan: subPlan } = await subscriptionService.getUserSubscriptionDetails(userId);
+    if (!isPaidAnalysisTier(subscriptionService.normalizePlanForLimits(subPlan))) {
+      return res.status(403).json({
+        success: false,
+        message: 'Applying revisions requires a Pro or Premium plan.',
+      });
+    }
+    if (!documentId || typeof documentId !== 'string') {
+      return res.status(400).json({ success: false, message: 'documentId is required' });
+    }
+    const result = await aiAnalysisService.saveRevisionMarkers(
+      documentId,
+      userId,
+      wsRevisionCache && typeof wsRevisionCache === 'object' ? wsRevisionCache : {}
+    );
+    return res.status(200).json({ success: true, data: result });
+  } catch (error) {
+    console.error('revision-markers error:', error);
+    return res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to save revision markers',
+    });
+  }
+});
+
 // Note: Validation schemas are now imported from middleware/validation.js
 
 /**
