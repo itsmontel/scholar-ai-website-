@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, lazy, Suspense, type ReactNode } from 'react';
+import { useState, useEffect, useMemo, lazy, Suspense, type ReactNode, type Dispatch, type SetStateAction } from 'react';
 import Header from '../common/Header';
 import Footer from '../common/Footer';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -289,39 +289,251 @@ function LandingCombinedAnalyzerCallouts() {
   );
 }
 
-/**
- * Hero "Study Games" tile — single autoplaying <video> that cycles
- * through Word Blitz → Word Tower → Crater Blast and loops. We can't
- * use the native `loop` attribute because that prevents `onEnded`
- * from firing, so we drive the cycle manually. `key={src}` re-mounts
- * the element on each swap so Safari starts playback cleanly.
- */
-const HERO_STUDY_GAMES_PLAYLIST = [
-  '/hero-word-blitz.mp4',
-  '/hero-word-tower.mp4',
-  '/writescholar-crater-blast-demo.mp4',
-] as const;
+/* ─── HERO PRODUCT SHOWCASE — right column of the split hero ──────────
+   A single framed "app window" that flickers between the six core
+   products every 5 seconds (editor → essay analyzer → study pack →
+   flashcards → quiz → arcade). All slides are mounted and cross-faded
+   so videos keep playing and there's no reload flash. The labelled
+   chips beneath double as (a) a legend of everything WriteScholar does
+   and (b) clickable controls — tapping one jumps straight to that
+   slide. A celebrating mascot peeks out of the bottom-right corner. */
+type HeroSlideMedia =
+  | { kind: 'image'; src: string; objectPosition?: string }
+  | { kind: 'video'; src: string; objectPosition?: string };
 
-const HeroStudyGamesVideo = () => {
-  const [idx, setIdx] = useState(0);
-  const src = HERO_STUDY_GAMES_PLAYLIST[idx];
+const HERO_SHOWCASE_SLIDES: ReadonlyArray<{
+  id: string;
+  label: string;
+  heading: string;
+  description: string;
+  color: string;
+  media: HeroSlideMedia;
+}> = [
+  {
+    id: 'editor',
+    label: 'AI Editor',
+    heading: 'Write in a distraction-free editor',
+    description: 'Draft, cite and rewrite your essay with AI beside you.',
+    color: '#1CB0F6',
+    media: { kind: 'image', src: '/WriterPic.png', objectPosition: '92% top' },
+  },
+  {
+    id: 'analyzer',
+    label: 'Essay Analyzer',
+    heading: 'Get a /100 grade in seconds',
+    description: 'Rubric scores and line-by-line feedback on every paragraph.',
+    color: '#A560E8',
+    media: { kind: 'image', src: '/rubric-and-notes.png' },
+  },
+  {
+    id: 'studypack',
+    label: 'Study Pack',
+    heading: 'Turn notes into a study pack',
+    description: 'Summaries, flashcards, quizzes and a lesson in a minute.',
+    color: '#FF9600',
+    media: { kind: 'image', src: '/studypack.png' },
+  },
+  {
+    id: 'flashcards',
+    label: 'Flashcards',
+    heading: 'Flashcards that actually stick',
+    description: 'Auto-built cards with flip, spaced repetition and streaks.',
+    color: '#FFC800',
+    media: { kind: 'video', src: '/hero-flashcards-hq.mp4' },
+  },
+  {
+    id: 'quiz',
+    label: 'Quizzes',
+    heading: 'Quiz yourself before the test',
+    description: 'Mixed-format questions with an explanation on every answer.',
+    color: '#FF4B82',
+    media: { kind: 'video', src: '/hero-quiz-hq.mp4' },
+  },
+  {
+    id: 'arcade',
+    label: 'Arcade Games',
+    heading: 'Make revision feel like a game',
+    description: 'Word Tower, Word Blitz and more, built from your notes.',
+    color: '#58CC02',
+    media: { kind: 'video', src: '/hero-word-tower-hq.mp4' },
+  },
+];
+
+const HERO_SHOWCASE_INTERVAL_MS = 5000;
+
+function HeroProductShowcase({ idx, setIdx }: { idx: number; setIdx: Dispatch<SetStateAction<number>> }) {
+  // Re-arm the interval whenever `idx` changes so a manual chip click
+  // gives the visitor a fresh full 5s on the slide they picked rather
+  // than cutting it short.
+  useEffect(() => {
+    const id = window.setInterval(
+      () => setIdx((i) => (i + 1) % HERO_SHOWCASE_SLIDES.length),
+      HERO_SHOWCASE_INTERVAL_MS
+    );
+    return () => window.clearInterval(id);
+  }, [idx]);
+
+  const active = HERO_SHOWCASE_SLIDES[idx];
+
   return (
-    <video
-      key={src}
-      src={src}
-      autoPlay
-      muted
-      playsInline
-      preload="metadata"
-      onEnded={() => setIdx((i) => (i + 1) % HERO_STUDY_GAMES_PLAYLIST.length)}
-      className="absolute inset-0 w-full h-full object-cover"
-    />
+    <div className="relative w-full mx-auto text-center lg:text-left">
+      {/* Ambient glow keyed to the active product colour — gives the whole
+          showcase a soft halo that recolours as the slide changes. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -inset-8 rounded-[3rem] blur-3xl -z-10 transition-colors duration-700"
+        style={{ background: `radial-gradient(ellipse at center, ${active.color}4D, transparent 70%)` }}
+      />
+
+      {/* ── APP WINDOW ─────────────────────────────────────────────────
+          Floats with a gentle bob. The frame keeps a subtle colour-matched
+          ring + drop shadow that recolours with the active product; the
+          mascot peeks out of the top-right corner. */}
+      <div className="relative motion-safe:animate-float">
+        {/* Mascot — peeks over the top-right corner of the window. */}
+        <img
+          src="/mascot-celebrating.webp"
+          alt=""
+          aria-hidden
+          loading="lazy"
+          decoding="async"
+          className="pointer-events-none select-none absolute -top-8 -right-2 sm:-top-10 sm:-right-4 w-[4.5rem] sm:w-20 lg:w-[5.5rem] h-auto z-30 drop-shadow-[0_16px_26px_rgba(0,0,0,0.32)]"
+        />
+
+        <div
+          className="relative rounded-[1.4rem] sm:rounded-[1.75rem] bg-white border-2 overflow-hidden transition-colors duration-700"
+          style={{
+            borderColor: active.color,
+            boxShadow: `0 34px 70px -26px rgba(0,0,0,0.5), 0 14px 34px -16px ${active.color}80`,
+          }}
+        >
+          {/* Browser chrome — traffic-light dots, live address + LIVE badge. */}
+          <div className="flex items-center gap-1.5 px-3.5 py-2.5 border-b border-stone-100 bg-stone-50/80">
+            <span className="h-2.5 w-2.5 rounded-full bg-[#FF5F57]" aria-hidden />
+            <span className="h-2.5 w-2.5 rounded-full bg-[#FEBC2E]" aria-hidden />
+            <span className="h-2.5 w-2.5 rounded-full bg-[#28C840]" aria-hidden />
+            <span
+              className="ml-3 hidden xs:inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[10px] font-bold text-stone-500 bg-white border border-stone-200"
+              aria-hidden
+            >
+              writescholar.com
+            </span>
+            <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-[#58CC02]/15 px-2 py-0.5 text-[10px] font-extrabold text-[#3A8A00]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#58CC02] motion-safe:animate-pulse" aria-hidden />
+              LIVE
+            </span>
+          </div>
+
+          {/* Auto-advance progress bar — fills over the 5s dwell then resets
+              on the next slide (keyed remount restarts the animation). */}
+          <div className="relative h-1 w-full bg-stone-100 overflow-hidden">
+            <div
+              key={idx}
+              aria-hidden
+              className="absolute inset-y-0 left-0 w-full origin-left motion-safe:[animation:hero-progress_5s_linear_forwards]"
+              style={{ backgroundColor: active.color, transform: 'scaleX(0)' }}
+            />
+          </div>
+
+          {/* Media stage — fixed 16:10 rectangle so EVERY slide is the exact
+              same size; media is cover-cropped so switching never resizes
+              the frame. A subtle zoom on entry adds life on each change. */}
+          <div className="relative aspect-[16/10] w-full bg-stone-950 overflow-hidden">
+            {HERO_SHOWCASE_SLIDES.map((slide, i) => (
+              <div
+                key={slide.id}
+                className={`absolute inset-0 transition-all duration-700 ease-out ${
+                  i === idx ? 'opacity-100 scale-100' : 'opacity-0 scale-[1.04]'
+                }`}
+                aria-hidden={i !== idx}
+              >
+                {slide.media.kind === 'image' ? (
+                  <img
+                    src={slide.media.src}
+                    alt={`${slide.label} preview`}
+                    loading={i === 0 ? 'eager' : 'lazy'}
+                    decoding="async"
+                    className="absolute inset-0 w-full h-full object-cover"
+                    style={{ objectPosition: slide.media.objectPosition ?? 'top' }}
+                  />
+                ) : (
+                  <video
+                    src={slide.media.src}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="metadata"
+                    className="absolute inset-0 w-full h-full object-cover"
+                    style={{ objectPosition: slide.media.objectPosition ?? 'center' }}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── CAPTION ────────────────────────────────────────────────────
+          Re-keyed on every slide so the colour tag + heading + blurb fade
+          and slide up together. Fixed min-height keeps the frame steady. */}
+      <div className="mt-5 sm:mt-6 min-h-[5.25rem] sm:min-h-[5rem]">
+        <div key={idx} className="motion-safe:animate-fade-slide-in">
+          <span
+            className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-[11px] font-extrabold uppercase tracking-wide shadow-[0_6px_16px_-6px_rgba(0,0,0,0.35)]"
+            style={{ color: active.color }}
+          >
+            <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: active.color }} aria-hidden />
+            {active.label}
+          </span>
+          <h3
+            className="mt-2.5 text-lg sm:text-xl font-extrabold text-white leading-tight"
+            style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+          >
+            {active.heading}
+          </h3>
+          <p className="mt-1 mx-auto lg:mx-0 max-w-[22rem] sm:max-w-none text-sm sm:text-[15px] text-white/80 leading-snug">
+            {active.description}
+          </p>
+        </div>
+      </div>
+
+      {/* Carousel dots — mobile/tablet jump controls (desktop uses icon row). */}
+      <div className="mt-3 flex items-center justify-center gap-2 lg:hidden">
+        {HERO_SHOWCASE_SLIDES.map((slide, i) => {
+          const isActive = i === idx;
+          return (
+            <button
+              key={slide.id}
+              type="button"
+              onClick={() => setIdx(i)}
+              aria-pressed={isActive}
+              aria-label={`Show ${slide.label}`}
+              className="group/dot p-1.5 focus-visible:outline-none rounded-full"
+            >
+              <span
+                className="block h-2 rounded-full transition-all duration-300 group-hover/dot:opacity-100"
+                style={{
+                  width: isActive ? '1.65rem' : '0.5rem',
+                  backgroundColor: isActive ? slide.color : 'rgba(255,255,255,0.45)',
+                }}
+              />
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
-};
+}
 
 const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { theme: _theme, toggleTheme: _toggleTheme } = useTheme();
+  // Active slide of the hero product showcase — lifted here so the
+  // feature-icons row below the hero can highlight (glow + enlarge) the
+  // icon for whichever product the carousel is currently showing, and so
+  // clicking an icon jumps the carousel straight to that slide.
+  const [heroSlideIdx, setHeroSlideIdx] = useState(0);
   // ─── Floating PiP demo video state ──────────────────────────────────────
   // Mirrors a "video stays with you while you scroll" experience similar to
   // YouTube's Miniplayer or how product demo overlays float on SaaS landings.
@@ -949,11 +1161,31 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             section reverts to cream for downstream content. White
             headline + light atmospheric orbs + starry sparkles. */}
         <div
-          className="absolute top-0 left-0 right-0 h-[940px] md:h-[820px] lg:h-[880px] xl:h-[920px] overflow-hidden pointer-events-none"
+          className="absolute inset-0 overflow-hidden pointer-events-none"
           aria-hidden
         >
           {/* Base — rich purple gradient (top #A560E8 → bottom #6B27A3). */}
           <div className="absolute inset-0 bg-gradient-to-b from-[#A560E8] via-[#8A48C7] to-[#6B27A3] dark:from-[#4A1B70] dark:via-[#3A1457] dark:to-[#2A0E40]" />
+
+          {/* ── Background PATTERNS — give the purple field texture ──
+              1) A fine dotted grid (subtle, masked toward the centre so
+                 it never fights the headline). 2) Faint diagonal grid
+                 lines for depth. 3) A few oversized translucent ring
+                 outlines that read as playful geometric shapes. */}
+          <div
+            className="absolute inset-0 opacity-[0.18] [background-image:radial-gradient(circle,rgba(255,255,255,0.9)_1.4px,transparent_1.6px)] [background-size:26px_26px] [mask-image:radial-gradient(ellipse_80%_75%_at_50%_45%,black,transparent_75%)]"
+          />
+          <div
+            className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(115deg,white_1px,transparent_1px),linear-gradient(205deg,white_1px,transparent_1px)] [background-size:64px_64px]"
+          />
+          {/* Decorative ring outlines — big, soft, off-screen-anchored. */}
+          <div className="absolute -top-24 right-[12%] h-72 w-72 rounded-full border-2 border-white/15" />
+          <div className="absolute -top-10 right-[8%] h-44 w-44 rounded-full border-2 border-white/10" />
+          <div className="absolute bottom-[14%] left-[6%] h-60 w-60 rounded-full border-2 border-white/10" />
+          {/* Floating brand-confetti shapes — squares + circles, tilted. */}
+          <div className="hidden md:block absolute top-[16%] left-[40%] h-5 w-5 rounded-md bg-[#FFC800]/40 rotate-12 motion-safe:animate-[hero-tile-drift_9s_ease-in-out_infinite]" />
+          <div className="hidden md:block absolute top-[26%] right-[34%] h-4 w-4 rounded-full bg-[#58CC02]/45 motion-safe:animate-[hero-tile-drift_8s_ease-in-out_infinite]" style={{ animationDelay: '1.2s' }} />
+          <div className="hidden md:block absolute bottom-[30%] left-[30%] h-4 w-4 rounded-md bg-[#1CB0F6]/40 -rotate-12 motion-safe:animate-[hero-tile-drift_10s_ease-in-out_infinite]" style={{ animationDelay: '0.6s' }} />
 
           {/* Lighter-purple atmospheric orbs — top-left / top-right. */}
           <div className="pointer-events-none absolute -top-40 -left-[10%] h-[min(95vw,40rem)] w-[min(95vw,40rem)] rounded-full bg-[#D4A8F5]/[0.22] blur-[110px] dark:bg-[#C589FF]/[0.14] animate-landing-hero-blob" />
@@ -982,139 +1214,11 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           />
         </div>
 
-        <div className="relative z-10 flex flex-col items-center justify-start px-4 sm:px-6 lg:px-8 pt-10 sm:pt-12 lg:pt-8 pb-8 sm:pb-0 min-w-0">
-          <div className="w-full min-w-0 max-w-[1240px] xl:mx-auto">
-            {/* ─── DARK-PURPLE KNOWUNITY HERO (restored from git ca4bf8d) ──
-                Per user brief ("make it look like previous git"): the
-                hero is the pre-StudyFetch dark-violet layout — six
-                feature tiles (videos + screenshots) floating around a
-                centred H1 + CTA, with the icon+title feature row at the
-                bottom of the purple band. Verbatim restore of the
-                2026-05-13 hero-inner block. */}
-            <div className="relative w-full max-w-6xl xl:max-w-7xl mx-auto px-4 sm:px-6 pt-3 pb-6 sm:pt-4 sm:pb-8 lg:pt-6 lg:pb-10 md:min-h-[640px] lg:min-h-[720px] xl:min-h-[760px]">
-
-              {/* ─── SIX FLOATING FEATURE TILES ──────────────────────
-                  Each tile = rounded card with Duolingo-style brand-colour
-                  border, holding a real feature video or screenshot.
-                  The outer div animates translateY (float keyframe from
-                  tailwind.config.js) with staggered delays so the tiles
-                  bob out of sync. The inner div carries the rotation so
-                  the float transform doesn't conflict with rotate().
-                  Hidden entirely on mobile — phones get a clean centred
-                  hero so the H1 + CTA dominate the viewport. */}
-              <div className="hidden md:block absolute inset-0 pointer-events-none" aria-hidden>
-
-                {/* SIX-TILE KNOWUNITY-STYLE SCATTER — md+ only.
-                    Layout (matching the reference image):
-                      Tile 1 (top-left)    Tile 2 (top-center)   Tile 3 (top-right)
-                      Tile 4 (mid-left)              [H1+CTA]              Tile 5 (mid-right)
-                                          Tile 6 (bottom-center, below CTA)
-                    Tiles are now SMALLER and 16:10 landscape (was 4:3).
-                    Borders use 6 different Duolingo brand colours so each
-                    tile pops against the purple background. White label
-                    strip at the bottom of each tile auto-separates the
-                    rounded card from the purple field. */}
-
-                {/* Tile 1 — Essay Analyzer — top-left — YELLOW border */}
-                <div className="absolute top-[2%] left-[-3%] lg:left-[-2%] motion-safe:animate-[hero-tile-drift_8s_ease-in-out_infinite]">
-                  <div className="w-44 lg:w-52 xl:w-60">
-                    <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_18px_42px_-12px_rgba(255,200,0,0.55)] bg-white">
-                      <div className="relative aspect-[16/10] w-full bg-stone-100">
-                        <img
-                          src="/rubric-and-notes.png"
-                          alt=""
-                          loading="eager"
-                          decoding="async"
-                          className="absolute inset-0 w-full h-full object-cover object-top"
-                        />
-                      </div>
-                      <p className="px-2 py-1 text-center text-[9px] lg:text-[10px] font-extrabold text-stone-800 bg-white border-t-2 border-[#FFC800]/40">Essay Analyzer</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Tile 2 — Notes to Flashcards */}
-                <div className="absolute bottom-[20%] left-[34%] -translate-x-1/2 motion-safe:animate-[hero-tile-drift-centered_9s_ease-in-out_infinite]" style={{ animationDelay: '0.8s' }}>
-                  <div className="w-44 lg:w-52 xl:w-60">
-                    <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_18px_42px_-12px_rgba(255,200,0,0.55)] bg-stone-950">
-                      <div className="relative aspect-[16/10] w-full bg-black">
-                        <video src="/hero-flashcards.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
-                      </div>
-                      <p className="px-2 py-1 text-center text-[9px] lg:text-[10px] font-extrabold text-stone-800 bg-white border-t-2 border-[#FFC800]/40">Notes to Flashcards</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Tile 3 — Quiz — top-right */}
-                <div className="absolute top-[2%] right-[-3%] lg:right-[-2%] motion-safe:animate-[hero-tile-drift_8.4s_ease-in-out_infinite]" style={{ animationDelay: '1.6s' }}>
-                  <div className="w-44 lg:w-52 xl:w-60">
-                    <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_18px_42px_-12px_rgba(255,200,0,0.55)] bg-stone-950">
-                      <div className="relative aspect-[16/10] w-full bg-black">
-                        <video src="/hero-quiz.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
-                      </div>
-                      <p className="px-2 py-1 text-center text-[9px] lg:text-[10px] font-extrabold text-stone-800 bg-white border-t-2 border-[#FFC800]/40">Notes to Quiz</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Tile 4 — Study Games — MID-LEFT */}
-                <div className="absolute top-[42%] left-[-6%] lg:left-[-5%] motion-safe:animate-[hero-tile-drift_8.6s_ease-in-out_infinite]" style={{ animationDelay: '2.4s' }}>
-                  <div className="w-44 lg:w-52 xl:w-60">
-                    <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_22px_50px_-12px_rgba(255,200,0,0.55)] bg-stone-950">
-                      <div className="relative aspect-[16/10] w-full bg-black">
-                        <HeroStudyGamesVideo />
-                      </div>
-                      <p className="px-2 py-1 text-center text-[10px] lg:text-[11px] font-extrabold text-stone-800 bg-white border-t-2 border-[#FFC800]/40">Arcade mode</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Tile 5 — Full writing workspace — MID-RIGHT */}
-                <div className="absolute top-[44%] right-[-6%] lg:right-[-5%] motion-safe:animate-[hero-tile-drift_9.2s_ease-in-out_infinite]" style={{ animationDelay: '3.2s' }}>
-                  <div className="w-44 lg:w-52 xl:w-60">
-                    <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_22px_50px_-12px_rgba(255,200,0,0.55)] bg-white">
-                      <div className="relative aspect-[16/10] w-full bg-stone-100">
-                        <img
-                          src="/WriterPic.png"
-                          alt=""
-                          loading="eager"
-                          decoding="async"
-                          className="absolute inset-0 w-full h-full object-cover object-top"
-                        />
-                      </div>
-                      <p className="px-2 py-1 text-center text-[10px] lg:text-[11px] font-extrabold text-stone-800 bg-white border-t-2 border-[#FFC800]/40">Full writing workspace</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Tile 6 — Daily review */}
-                <div className="absolute bottom-[20%] left-[66%] -translate-x-1/2 motion-safe:animate-[hero-tile-drift-centered_7.8s_ease-in-out_infinite]" style={{ animationDelay: '4s' }}>
-                  <div className="w-44 lg:w-52 xl:w-60">
-                    <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#FFC800] shadow-[0_18px_42px_-12px_rgba(255,200,0,0.55)] bg-white">
-                      <div className="relative aspect-[16/10] w-full bg-stone-100">
-                        <img
-                          src="/daily-review-preview.png"
-                          alt=""
-                          loading="eager"
-                          decoding="async"
-                          className="absolute inset-0 w-full h-full object-cover object-top"
-                        />
-                      </div>
-                      <p className="px-2 py-1 text-center text-[9px] lg:text-[10px] font-extrabold text-stone-800 bg-white border-t-2 border-[#FFC800]/40">Daily review</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* ─── CENTERED H1 + CTA ────────────────────────────────
-                  Everything else previously stacked here — H2 subheadline,
-                  trust pill, login link, mobile video, mascots, risk
-                  reversal — has been intentionally removed per user brief
-                  to match Knowunity's minimal centred-hero pattern. The
-                  six floating tiles around this column do the
-                  "what does the product do?" job those elements used to
-                  share. */}
-              <div className="relative z-10 flex flex-col items-center text-center w-full mx-auto pt-6 pb-8 sm:pt-10 sm:pb-10 md:pt-2 md:pb-20 lg:pt-0 lg:pb-24 opacity-0 animate-hero-card-enter">
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-10 lg:pt-14 xl:pt-16 pb-10 sm:pb-12 lg:pb-20 xl:pb-24 min-w-0 lg:min-h-[calc(90svh-4.75rem)] lg:flex lg:flex-col lg:justify-center">
+            {/* ─── SPLIT HERO — copy left, cycling product showcase right. */}
+            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] gap-10 lg:gap-8 xl:gap-12 items-center">
+              {/* ─── LEFT COLUMN — copy + CTA ───────────────────────── */}
+              <div className="relative z-10 flex flex-col items-center text-center lg:items-start lg:text-left w-full min-w-0 lg:max-w-[34rem] xl:max-w-[36rem] opacity-0 animate-hero-card-enter">
                 {/* ─── TRUST PILL — 50,000+ students worldwide ─────────
                     Sits ABOVE the H1 as a credibility eyebrow on every
                     viewport (desktop + mobile). Restored from commit
@@ -1135,13 +1239,15 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </span>
                 </div>
 
-                {/* ─── HEADLINE — two-line layout, ALL viewports ───────── */}
+                {/* ─── HEADLINE — three lines: "Turn your grades" /
+                    "from B to A" / "with WriteScholar". ───────────────── */}
                 <h1
-                  className="text-[1.5rem] xs:text-[1.85rem] sm:text-[2.2rem] md:text-[2.55rem] lg:text-[2.9rem] xl:text-[3.35rem] font-extrabold tracking-[-0.02em] leading-[1.05] text-white mb-5 sm:mb-6"
+                  className="text-[1.7rem] xs:text-[2rem] sm:text-[2.5rem] md:text-[2.75rem] lg:text-[2.85rem] xl:text-[3.25rem] font-extrabold tracking-[-0.02em] leading-[1.08] text-white mb-4 sm:mb-5"
                   style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                 >
-                  <span className="block whitespace-nowrap">
-                    Turn your grades from B to{' '}
+                  <span className="block">Turn your grades</span>
+                  <span className="block mt-1.5 sm:mt-2.5">
+                    <span className="whitespace-nowrap">from B to{' '}
                     <span
                       className="relative inline-flex items-center justify-center align-baseline rounded-2xl bg-[#58CC02] text-white font-extrabold leading-none w-[0.95em] h-[0.95em] border-2 border-b-[5px] border-[#46A302] rotate-[-4deg] motion-safe:animate-[hero-a-wiggle_4.5s_ease-in-out_infinite] shadow-[0_10px_30px_-4px_rgba(88,204,2,0.75)] ring-4 ring-white/15"
                       style={{ verticalAlign: '-0.06em' }}
@@ -1156,8 +1262,9 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                       </span>
                     </span>
                     <span className="sr-only">A</span>
+                    </span>
                   </span>
-                  <span className="block mt-1.5 sm:mt-2.5 whitespace-nowrap">
+                  <span className="block mt-1.5 sm:mt-2.5">
                     with{' '}
                     <span className="relative inline-block text-[#FFC800]">
                       WriteScholar
@@ -1181,8 +1288,21 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </span>
                 </h1>
 
+                {/* ─── SUBHEADLINE (H2) — the "what + why" beneath the H1.
+                    Copy locked to the reference mock: the all-in-one study
+                    system value-prop, with the three verbs accented white. */}
+                <p
+                  className="max-w-md lg:max-w-none text-base sm:text-lg lg:text-[1.125rem] font-semibold text-white/90 leading-relaxed mb-5 sm:mb-6"
+                  style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+                >
+                  The all-in-one study system to{' '}
+                  <span className="font-extrabold text-white">write better</span>,{' '}
+                  <span className="font-extrabold text-white">study smarter</span>, and{' '}
+                  <span className="font-extrabold text-white">get higher grades</span>.
+                </p>
+
                 {/* ─── CTA ROW ───────────────────────────────────────── */}
-                <div className="mt-3 sm:mt-4 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5">
+                <div className="mt-1 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 sm:gap-5">
                   <button
                     type="button"
                     onClick={() => onNavigate('signup')}
@@ -1223,86 +1343,43 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   About 30 seconds to get started. No payment today.
                 </p>
 
-                {/* ─── MOBILE TILE GRID — 6 tiles, md:hidden ─────────
-                    On phones the desktop scatter would overlap the H1,
-                    so we instead show a compact 3-col grid right under
-                    the CTA button. Mirrors the desktop content exactly:
-                    Essay · Flashcards · Quiz on row 1, then Fun Study
-                    Games (the same cycling Word Blitz → Word Tower →
-                    Crater Blast video used on desktop), Premium essay
-                    analysis, and Daily review on row 2. */}
-                <div className="md:hidden mt-10 grid grid-cols-3 gap-2.5 w-full max-w-[20rem] mx-auto">
-                  {[
-                    { label: 'Essay', src: '/rubric-and-notes.png', isImg: true, color: '#FFC800' },
-                    { label: 'Flashcards', src: '/hero-flashcards.mp4', isImg: false, color: '#FFC800' },
-                    { label: 'Quiz', src: '/hero-quiz.mp4', isImg: false, color: '#FFC800' },
-                    { label: 'Arcade mode', src: '', isImg: false, isCycle: true, color: '#FFC800' },
-                    { label: 'Writing workspace', src: '/WriterPic.png', isImg: true, color: '#FFC800' },
-                    { label: 'Daily review', src: '/daily-review-preview.png', isImg: true, color: '#FFC800' },
-                  ].map((t, i) => (
-                    /* `hero-tile-drift-mobile` is the gentle-drift
-                       keyframe (defined in src/index.css). Per-tile
-                       duration + delay arrays stagger the six tiles
-                       so they float out of sync with one another.
-                       Durations live in the 10-13s range — slow
-                       enough that each tile reads as a smooth glide
-                       rather than scatter. `motion-safe:` keeps
-                       reduced-motion users static. */
-                    <div
-                      key={t.label}
-                      className="rounded-xl overflow-hidden border-2 border-b-[3px] bg-white shadow-[0_10px_22px_-8px_rgba(0,0,0,0.35)] motion-safe:animate-[hero-tile-drift-mobile_11s_ease-in-out_infinite]"
-                      style={{
-                        borderColor: t.color,
-                        animationDuration: ['10s', '11.5s', '12.5s', '10.8s', '11.8s', '13s'][i % 6],
-                        animationDelay: ['0s', '1.2s', '2.4s', '3.6s', '4.8s', '6s'][i % 6],
-                      }}
-                    >
-                      <div className="relative aspect-[16/10] w-full bg-stone-100">
-                        {t.isCycle ? (
-                          <HeroStudyGamesVideo />
-                        ) : t.isImg ? (
-                          <img src={t.src} alt="" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover object-top" />
-                        ) : (
-                          <video src={t.src} autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
-                        )}
-                      </div>
-                      <p
-                        className="px-1 py-0.5 text-center text-[8px] font-extrabold text-stone-800 bg-white border-t"
-                        style={{ borderColor: `${t.color}66` }}
-                      >
-                        {t.label}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-
-                {/* "Plus many more to choose from" — mobile-only teaser
-                    line sitting right below the 3×2 tile grid, signalling
-                    to phone visitors that the six tiles above are just a
-                    sample of the full toolkit. Hidden at md+ where the
-                    desktop scatter already implies abundance. Tapping it
-                    routes to signup so it doubles as a soft secondary
-                    CTA. */}
-                <button
-                  type="button"
-                  onClick={() => onNavigate('signup')}
-                  className="md:hidden mt-4 mx-auto block text-xs sm:text-sm text-white/85 font-semibold tracking-wide hover:text-white transition-colors"
-                >
-                  Plus many more to choose from{' '}
-                  <span aria-hidden className="inline-block ml-0.5">&rarr;</span>
-                </button>
               </div>
 
-              {/* ─── FEATURE ICONS ROW — bottom of hero (Knowunity-style)
-                  Each entry is a custom SVG illustration (NOT a generic
-                  emoji) with the label sitting directly underneath. No
-                  border, no background — pure icon + text floating on
-                  the purple field. Custom-drawn so the hero feels unique
-                  to WriteScholar instead of generic, per user brief. */}
-              <div className="relative z-10 w-full max-w-5xl mx-auto mt-4 sm:mt-12 lg:mt-36 pb-2 px-4">
-                <div className="flex flex-wrap items-start justify-center gap-x-5 gap-y-4 sm:gap-x-8 sm:gap-y-5">
+              {/* ─── RIGHT COLUMN — cycling product showcase ────────── */}
+              <div className="relative z-10 w-full min-w-0 lg:max-w-[36rem] xl:max-w-[38rem] lg:justify-self-end">
+                <HeroProductShowcase idx={heroSlideIdx} setIdx={setHeroSlideIdx} />
+              </div>
+            </div>
+
+            {/* ─── FEATURE ICONS ROW — synced to the showcase carousel ── */}
+            <div className="relative z-10 w-full mt-10 sm:mt-12 lg:mt-10 pt-2 border-t border-white/10">
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-x-2 gap-y-5 sm:gap-x-3 lg:gap-x-2 xl:gap-x-4 max-w-3xl sm:max-w-4xl lg:max-w-5xl mx-auto">
                   {[
                     {
+                      slideId: 'editor',
+                      glow: '#1CB0F6',
+                      label: 'AI Editor',
+                      svg: (
+                        // FLAT-SOLID: blue pencil at a 45° writing angle (tip
+                        // bottom-left, eraser-end top-right) with a darker-blue
+                        // collar, a soft white barrel highlight and a sharpened
+                        // graphite point. A gold sparkle in the open top-left
+                        // corner signals the "AI" assist. Maps to editor slide.
+                        <svg viewBox="0 0 64 64" fill="none" aria-hidden>
+                          <g transform="rotate(45 32 32)">
+                            <rect x="24" y="8" width="16" height="36" rx="5" fill="#1CB0F6" />
+                            <rect x="27.5" y="12" width="3.5" height="27" rx="1.75" fill="white" opacity="0.6" />
+                            <rect x="24" y="39.5" width="16" height="4.5" fill="#1899D6" />
+                            <path d="M24 44 L40 44 L32 59 Z" fill="#F4B860" />
+                            <path d="M29 51.5 L35 51.5 L32 59 Z" fill="#3C3C3C" />
+                          </g>
+                          <path d="M15 8 L16.5 12.5 L21 14 L16.5 15.5 L15 20 L13.5 15.5 L9 14 L13.5 12.5 Z" fill="#FFC800" />
+                        </svg>
+                      ),
+                    },
+                    {
+                      slideId: 'analyzer',
+                      glow: '#FF4B4B',
                       label: 'Essay Analyzer',
                       svg: (
                         // FLAT-SOLID: RED document silhouette with folded
@@ -1319,6 +1396,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                       ),
                     },
                     {
+                      slideId: 'studypack',
+                      glow: '#FF9600',
                       label: 'Study Pack',
                       svg: (
                         // FLAT-SOLID: three orange books stacked, white spine
@@ -1335,30 +1414,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                       ),
                     },
                     {
-                      label: 'Citations',
-                      svg: (
-                        // FLAT-SOLID: two BLUE quotation-mark blobs — the
-                        // universal "this is a cited source" pictogram.
-                        <svg viewBox="0 0 64 64" fill="none" aria-hidden>
-                          <path d="M10 18 Q10 12 16 12 L24 12 Q28 12 28 16 L28 32 Q28 44 16 50 Q12 50 12 46 Q12 44 14 42 Q20 38 20 32 L16 32 Q10 32 10 26 Z" fill="#1CB0F6" />
-                          <path d="M36 18 Q36 12 42 12 L50 12 Q54 12 54 16 L54 32 Q54 44 42 50 Q38 50 38 46 Q38 44 40 42 Q46 38 46 32 L42 32 Q36 32 36 26 Z" fill="#1CB0F6" />
-                        </svg>
-                      ),
-                    },
-                    {
-                      label: 'Quizzes',
-                      svg: (
-                        // FLAT-SOLID: chunky pink question mark — silhouette
-                        // only, no outline, no badge. The single sparkle
-                        // accent stays as a tiny gold flourish.
-                        <svg viewBox="0 0 64 64" fill="none" aria-hidden>
-                          <path d="M20 22 Q20 8 32 8 Q44 8 44 22 Q44 30 32 34 L32 44" stroke="#FF4B82" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                          <circle cx="32" cy="55" r="5.5" fill="#FF4B82" />
-                          <path d="M52 10 L53.5 13 L56.5 14.5 L53.5 16 L52 19 L50.5 16 L47.5 14.5 L50.5 13 Z" fill="#FFC800" />
-                        </svg>
-                      ),
-                    },
-                    {
+                      slideId: 'flashcards',
+                      glow: '#FFC800',
                       label: 'Flashcards',
                       svg: (
                         // FLAT-SOLID: two YELLOW cards (back tilted, front
@@ -1374,6 +1431,23 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                       ),
                     },
                     {
+                      slideId: 'quiz',
+                      glow: '#FF4B82',
+                      label: 'Quizzes',
+                      svg: (
+                        // FLAT-SOLID: chunky pink question mark — silhouette
+                        // only, no outline, no badge. The single sparkle
+                        // accent stays as a tiny gold flourish.
+                        <svg viewBox="0 0 64 64" fill="none" aria-hidden>
+                          <path d="M20 22 Q20 8 32 8 Q44 8 44 22 Q44 30 32 34 L32 44" stroke="#FF4B82" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                          <circle cx="32" cy="55" r="5.5" fill="#FF4B82" />
+                          <path d="M52 10 L53.5 13 L56.5 14.5 L53.5 16 L52 19 L50.5 16 L47.5 14.5 L50.5 13 Z" fill="#FFC800" />
+                        </svg>
+                      ),
+                    },
+                    {
+                      slideId: 'arcade',
+                      glow: '#58CC02',
                       label: 'Arcade mode',
                       svg: (
                         // FLAT-SOLID: green gamepad silhouette. Top now has
@@ -1392,28 +1466,46 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                         </svg>
                       ),
                     },
-                  ].map((f) => (
-                    <button
-                      key={f.label}
-                      type="button"
-                      onClick={() => onNavigate('signup')}
-                      className="group flex flex-col items-center gap-1.5 sm:gap-2 px-1 py-1 hover:-translate-y-1 transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 rounded-md"
-                    >
-                      <span
-                        aria-hidden
-                        className="block w-7 h-7 sm:w-8 sm:h-8 lg:w-10 lg:h-10 [filter:drop-shadow(0_6px_14px_rgba(0,0,0,0.30))] group-hover:[filter:drop-shadow(0_10px_18px_rgba(255,200,0,0.55))] transition-[filter] duration-300"
+                  ].map((f) => {
+                    // Sync to the hero carousel: highlight the icon for the
+                    // slide currently on screen, and jump the carousel when
+                    // an icon is tapped. slideIndex < 0 ⇒ no matching slide.
+                    const slideIndex = HERO_SHOWCASE_SLIDES.findIndex((s) => s.id === f.slideId);
+                    const isActive = slideIndex === heroSlideIdx;
+                    return (
+                      <button
+                        key={f.label}
+                        type="button"
+                        onClick={() => { if (slideIndex >= 0) setHeroSlideIdx(slideIndex); }}
+                        aria-pressed={isActive}
+                        aria-label={`Show ${f.label}`}
+                        className={`group flex flex-col items-center justify-self-center gap-1.5 sm:gap-2 px-1 py-1 transition-transform duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 rounded-md ${
+                          isActive ? '-translate-y-1.5 scale-110' : 'hover:-translate-y-1'
+                        }`}
                       >
-                        {f.svg}
-                      </span>
-                      <span className="text-[11px] sm:text-xs lg:text-sm font-bold text-white/90 group-hover:text-white whitespace-nowrap tracking-wide">
-                        {f.label}
-                      </span>
-                    </button>
-                  ))}
-                </div>
+                        <span
+                          aria-hidden
+                          className="block w-7 h-7 sm:w-8 sm:h-8 lg:w-10 lg:h-10 transition-[filter,transform] duration-300"
+                          style={{
+                            filter: isActive
+                              ? `drop-shadow(0 0 9px ${f.glow}) drop-shadow(0 10px 18px ${f.glow}B3)`
+                              : 'drop-shadow(0 6px 14px rgba(0,0,0,0.30))',
+                          }}
+                        >
+                          {f.svg}
+                        </span>
+                        <span
+                          className={`text-[11px] sm:text-xs lg:text-sm font-bold whitespace-nowrap tracking-wide transition-colors duration-300 ${
+                            isActive ? 'text-white' : 'text-white/80 group-hover:text-white'
+                          }`}
+                        >
+                          {f.label}
+                        </span>
+                      </button>
+                    );
+                  })}
               </div>
             </div>
-          </div>
         </div>
       </section>
 

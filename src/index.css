@@ -1057,6 +1057,14 @@ html.dark .landing-hero-grid-animate {
   70% { transform: rotate(-6deg) scale(1.03); }
 }
 
+/* Hero product-showcase auto-advance bar. Fills left→right over the slide
+   dwell time, then the keyed remount restarts it on the next product.
+   scaleX keeps it off the layout/paint path (transform-only). */
+@keyframes hero-progress {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
 /* Hero floating tiles — smooth horizontal-dominant drift.
    Replaces the previous up/down `float` keyframe (felt too "bouncy").
    The tile traces a soft, rounded path that's mostly left↔right with a

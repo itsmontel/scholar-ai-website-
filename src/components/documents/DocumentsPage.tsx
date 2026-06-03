@@ -208,7 +208,7 @@ function PanelHeader({
   right?: React.ReactNode;
   /** Brand palette — usually one entry from SIDEBAR_TOOLS. When
    *  omitted, falls back to the neutral original layout. */
-  tint?: { tint: string; tintBg: string; border?: string };
+  tint?: { tint: string; tintBg: string; border?: string; icon?: React.ReactNode };
   /** Optional mascot image shown in the banner's right side. */
   mascotSrc?: string;
 }) {
@@ -232,47 +232,51 @@ function PanelHeader({
     );
   }
 
-  // Colourful gradient banner. Reuses the same "border-2 border-b-4"
-  // language as the dashboard tiles so the workspace feels unified.
+  // Clean dashboard-style header — a brand-coloured icon chip beside a
+  // dark Nunito title on the page background (no saturated banner), so
+  // every tool page reads like the redesigned home instead of the old
+  // gradient hero. The tool's own icon + colour anchor each page.
   return (
-    <div
-      className="mb-6 sm:mb-7 relative overflow-hidden rounded-3xl border-2 border-b-4 text-white p-5 sm:p-6 lg:p-7"
-      style={{
-        backgroundImage: `linear-gradient(135deg, ${tint.tint} 0%, ${tint.tint} 50%, ${shadeColor(tint.tint, -22)} 100%)`,
-        borderColor: shadeColor(tint.tint, -28),
-      }}
-    >
-      <div className="pointer-events-none absolute -top-20 -right-20 w-60 h-60 rounded-full bg-white/10 blur-3xl" aria-hidden />
-      <div className="pointer-events-none absolute -bottom-16 -left-16 w-48 h-48 rounded-full bg-white/8 blur-3xl" aria-hidden />
-      <div className="relative flex items-center gap-4 sm:gap-6">
-        <div className="flex-1 min-w-0">
-          <p className="text-[10.5px] sm:text-xs font-extrabold uppercase tracking-[0.22em] text-white/85">
-            {eyebrow}
+    <div className="mb-6 sm:mb-7 flex items-center gap-3.5 sm:gap-4">
+      {/* Tool icon chip — same chunky, brand-coloured chip language as
+          the dashboard "Pick a tool" cards. */}
+      <span
+        className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-2xl border-2 border-b-4 text-white shadow-[0_10px_24px_-12px_rgba(0,0,0,0.4)] [&>svg]:h-6 [&>svg]:w-6 sm:[&>svg]:h-7 sm:[&>svg]:w-7"
+        style={{ backgroundColor: tint.tint, borderColor: shadeColor(tint.tint, -28) }}
+        aria-hidden
+      >
+        {tint.icon ?? null}
+      </span>
+      <div className="flex-1 min-w-0">
+        <p
+          className="text-[10.5px] sm:text-[11px] font-extrabold uppercase tracking-[0.22em] mb-1"
+          style={{ color: tint.tint }}
+        >
+          {eyebrow}
+        </p>
+        <h1
+          className="text-[1.7rem] sm:text-[2rem] lg:text-[2.3rem] font-extrabold leading-[1.04] tracking-tight text-stone-900 dark:text-stone-50"
+          style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+        >
+          {title}
+        </h1>
+        {subtitle && (
+          <p className="mt-1.5 text-[13px] sm:text-[15px] font-bold text-stone-500 dark:text-stone-400 leading-snug max-w-2xl">
+            {subtitle}
           </p>
-          <h1
-            className="mt-1.5 text-[1.65rem] sm:text-[2rem] lg:text-[2.25rem] font-extrabold leading-[1.05] tracking-tight"
-            style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-          >
-            {title}
-          </h1>
-          {subtitle && (
-            <p className="mt-2 text-[13px] sm:text-sm font-bold text-white/90 leading-snug max-w-2xl">
-              {subtitle}
-            </p>
-          )}
-          {right && <div className="mt-4 sm:mt-5">{right}</div>}
-        </div>
-        {mascotSrc && (
-          <img
-            src={mascotSrc}
-            alt=""
-            aria-hidden
-            className="hidden sm:block relative w-16 h-16 lg:w-24 lg:h-24 object-contain shrink-0"
-            loading="eager"
-            decoding="async"
-          />
         )}
+        {right && <div className="mt-4">{right}</div>}
       </div>
+      {mascotSrc && (
+        <img
+          src={mascotSrc}
+          alt=""
+          aria-hidden
+          className="hidden md:block w-16 h-16 lg:w-20 lg:h-20 object-contain shrink-0 self-start drop-shadow-[0_10px_18px_rgba(0,0,0,0.12)]"
+          loading="eager"
+          decoding="async"
+        />
+      )}
     </div>
   );
 }
@@ -405,7 +409,7 @@ function AnalyzePanel({
           const f = e.dataTransfer.files?.[0];
           if (f && !parsing) void handleFile(f);
         }}
-        className={`group relative cursor-pointer rounded-3xl border-2 border-dashed transition-all duration-200 ${
+        className={`group relative cursor-pointer rounded-3xl border-2 border-dashed transition-all duration-200 shadow-[0_16px_40px_-28px_rgba(165,96,232,0.5)] ${
           parsing ? 'opacity-70 cursor-wait pointer-events-none' : ''
         } ${
           dropActive
@@ -625,48 +629,26 @@ function AnalyzePanel({
   );
 }
 
-/* ─── Cycling media helpers for dashboard action tiles ──────────
- * CyclingImages: fades between a list of images on a fixed interval.
- * CyclingVideos: plays each video to completion then advances. */
-
-function CyclingImages({ srcs, intervalMs = 2200 }: { srcs: string[]; intervalMs?: number }) {
+/* ─── CyclingMedia — cycles a mixed list of videos + images for the
+ * dashboard tool cards (e.g. a Study Pack card showing flashcards →
+ * quiz → crossword → lesson). Videos play then advance (capped so the
+ * loop stays snappy); images hold ~5s. Only the current item is
+ * mounted, so we never autoplay several clips at once. */
+function CyclingMedia({ items, imageMs = 5000, maxVideoMs = 6500 }: { items: { kind: 'video' | 'image'; src: string }[]; imageMs?: number; maxVideoMs?: number }) {
   const [idx, setIdx] = useState(0);
+  const list = items.length ? items : [{ kind: 'image' as const, src: '' }];
+  const cur = list[idx % list.length];
+  const advance = () => setIdx((i) => (i + 1) % list.length);
   useEffect(() => {
-    if (srcs.length <= 1) return;
-    const t = setInterval(() => setIdx((i) => (i + 1) % srcs.length), intervalMs);
-    return () => clearInterval(t);
-  }, [srcs.length, intervalMs]);
-  return (
-    <>
-      {srcs.map((src, i) => (
-        <img
-          key={src}
-          src={src}
-          alt=""
-          aria-hidden
-          loading="lazy"
-          draggable={false}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i === idx ? 'opacity-100' : 'opacity-0'}`}
-        />
-      ))}
-    </>
-  );
-}
-
-function CyclingVideos({ srcs }: { srcs: string[] }) {
-  const [idx, setIdx] = useState(0);
-  const next = () => setIdx((i) => (i + 1) % srcs.length);
-  return (
-    <video
-      key={srcs[idx]}
-      src={srcs[idx]}
-      autoPlay
-      muted
-      playsInline
-      onEnded={next}
-      className="absolute inset-0 w-full h-full object-cover"
-      aria-hidden
-    />
+    if (list.length <= 1) return;
+    const t = setTimeout(advance, cur.kind === 'image' ? imageMs : maxVideoMs);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idx, list.length, imageMs, maxVideoMs]);
+  return cur.kind === 'video' ? (
+    <video key={cur.src} src={cur.src} autoPlay muted playsInline preload="metadata" onEnded={advance} className="absolute inset-0 w-full h-full object-cover" aria-hidden />
+  ) : (
+    <img key={cur.src} src={cur.src} alt="" aria-hidden draggable={false} className="absolute inset-0 w-full h-full object-cover object-top" />
   );
 }
 
@@ -687,7 +669,6 @@ function DocumentsHub({
   onNew,
   onOpen,
   onUpload,
-  onAnalyze,
   onDownload,
   onDelete,
   userName,
@@ -702,7 +683,6 @@ function DocumentsHub({
   onNew: () => void;
   onOpen: (id: string) => void;
   onUpload: (file: File) => void;
-  onAnalyze: (id: string) => void;
   onDownload: (id: string) => void;
   onDelete: (id: string) => void;
   userName: string;
@@ -722,12 +702,12 @@ function DocumentsHub({
   // Drag-over highlight for the dashboard upload drop-zone card.
   const [uploadDropActive, setUploadDropActive] = useState(false);
 
-  /* ─── Bento data fetch ────────────────────────────────────────
-   * studyPacks: last few packs the user generated, for the "Your
-   * study packs" tile. Endpoint is the quiz-history one filtered to
-   * study_pack rows. */
-  interface StudyPackPreview { id: string; title: string; createdAt: string; questionCount: number }
-  const [studyPacks, setStudyPacks] = useState<StudyPackPreview[]>([]);
+  /* ─── Recent study materials + expiry data fetch ───────────────
+   * recentMaterials (study packs / quizzes / flashcards from the
+   * quiz-history endpoint) powers the right-rail "Your study packs"
+   * card; the same rows + citations feed the free-user expiry nag. */
+  interface RecentMaterial { id: string; title: string; kind: string; createdAt: string }
+  const [recentMaterials, setRecentMaterials] = useState<RecentMaterial[]>([]);
 
   /** Expiry urgency snapshot for the free-user "your stuff is about
    *  to vanish" banner. We aggregate study materials + citation
@@ -756,27 +736,21 @@ function DocumentsHub({
         if (cancelled) return;
         const objs = rows.filter((r): r is Record<string, unknown> => !!r && typeof r === 'object');
 
-        const packs: StudyPackPreview[] = objs
-          .filter((r) => (r as { quiz_type?: string }).quiz_type === 'study_pack')
-          .slice(0, 4)
+        // Recent study materials (all types) for the activity feed.
+        const materials: RecentMaterial[] = objs
           .map((r) => ({
             id: String((r as { id?: unknown }).id ?? ''),
-            title: String((r as { title?: unknown }).title ?? 'Untitled study pack'),
+            title: String((r as { title?: unknown }).title ?? 'Study material'),
+            kind: String((r as { quiz_type?: unknown }).quiz_type ?? 'material'),
             createdAt: String((r as { created_at?: unknown }).created_at ?? ''),
-            questionCount: Array.isArray((r as { questions?: unknown }).questions)
-              ? ((r as { questions: unknown[] }).questions.length)
-              : 0,
-          }));
-        setStudyPacks(packs);
+          }))
+          .filter((m) => m.createdAt)
+          .slice(0, 12);
+        setRecentMaterials(materials);
 
-        // Stop here for paid users — they don't see the expiry nag.
-        if (isPaidUser) return;
-
-        const materialExpiries = objs
-          .map((r) => (r as { expires_at?: string | null }).expires_at)
-          .filter((d): d is string => typeof d === 'string' && d.length > 0);
-
-        let citationExpiries: string[] = [];
+        // Citation searches — feed BOTH the activity list and (for free
+        // users) the expiry nag, so we always fetch them.
+        let citationObjs: Record<string, unknown>[] = [];
         try {
           const cRes = await fetch(`${API_URL}/analysis/citation-history`, {
             headers: { Authorization: `Bearer ${token}` },
@@ -784,19 +758,24 @@ function DocumentsHub({
           if (cRes.ok) {
             const cData = await cRes.json().catch(() => null);
             const cRows: unknown[] = Array.isArray(cData) ? cData : (cData?.data ?? []);
-            citationExpiries = cRows
-              .filter((r): r is Record<string, unknown> => !!r && typeof r === 'object')
-              .map((r) => (r as { expires_at?: string | null }).expires_at ?? null)
-              .filter((d): d is string => typeof d === 'string' && d.length > 0);
+            citationObjs = cRows.filter((r): r is Record<string, unknown> => !!r && typeof r === 'object');
           }
         } catch { /* ignore citation fetch failures */ }
-
         if (cancelled) return;
+
+        // Stop here for paid users — they don't see the expiry nag.
+        if (isPaidUser) return;
 
         const now = Date.now();
         const toDays = (iso: string) => Math.ceil((new Date(iso).getTime() - now) / 86_400_000);
-        const materialDays = materialExpiries.map(toDays).filter((d) => d >= 0);
-        const citationDays = citationExpiries.map(toDays).filter((d) => d >= 0);
+        const materialDays = objs
+          .map((r) => (r as { expires_at?: string | null }).expires_at)
+          .filter((d): d is string => typeof d === 'string' && d.length > 0)
+          .map(toDays).filter((d) => d >= 0);
+        const citationDays = citationObjs
+          .map((r) => (r.expires_at as string | null | undefined) ?? null)
+          .filter((d): d is string => typeof d === 'string' && d.length > 0)
+          .map(toDays).filter((d) => d >= 0);
         const allDays = [...materialDays, ...citationDays];
         if (allDays.length === 0) {
           setExpiryInfo(null);
@@ -828,6 +807,136 @@ function DocumentsHub({
       });
   }, [docs, search]);
 
+  /* ─── Reference-dashboard data ─────────────────────────────────
+   * Powers the redesigned home: streak (right-rail "on a roll" card),
+   * recent docs ("Continue where you left off"), the sticky-note quick
+   * tasks (+ progress footer), and the "Pick a tool" grid. */
+  const [streak, setStreak] = useState<{ currentStreak: number; longestStreak: number; hasActivityToday: boolean; weekActivities: string[] } | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const token = localStorage.getItem('authToken');
+        if (!token) return;
+        const res = await fetch(`${API_URL}/streaks`, { headers: { Authorization: `Bearer ${token}` } });
+        if (!res.ok || cancelled) return;
+        // The /streaks endpoint wraps everything under `data` — read THAT
+        // (the previous top-level read always fell back to 0, so the card
+        // never matched the real streak shown elsewhere).
+        const json = (await res.json().catch(() => null)) as { data?: Record<string, unknown> } | null;
+        const d = json?.data;
+        if (!d || cancelled) return;
+        setStreak({
+          currentStreak: Number(d.currentStreak ?? 0) || 0,
+          longestStreak: Number(d.longestStreak ?? 0) || 0,
+          hasActivityToday: Boolean(d.hasActivityToday ?? false),
+          weekActivities: Array.isArray(d.weekActivities) ? (d.weekActivities as string[]) : [],
+        });
+      } catch { /* offline — card just shows 0 */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+  // Day-of-week index, Mon=0 … Sun=6 (for the streak week dots).
+  const todayDow = (new Date().getDay() + 6) % 7;
+  // Calendar dates (YYYY-MM-DD) for Mon→Sun of the current week, so the
+  // dots can be matched against the real `weekActivities` from the API.
+  const weekDates = (() => {
+    const monday = new Date();
+    monday.setDate(monday.getDate() - todayDow);
+    return Array.from({ length: 7 }, (_, i) => {
+      const dt = new Date(monday);
+      dt.setDate(monday.getDate() + i);
+      return dt.toISOString().split('T')[0];
+    });
+  })();
+
+  // Recent study materials (study packs / quizzes / flashcards) for the
+  // right-rail "Your study packs" card — newest first, top 3.
+  type PackKind = 'pack' | 'quiz' | 'flashcards' | 'material';
+  const recentStudyPacks = useMemo<{ id: string; title: string; kind: PackKind; when: number }[]>(() => {
+    const mapKind = (k: string): PackKind => {
+      const s = (k || '').toLowerCase();
+      if (s.includes('quiz')) return 'quiz';
+      if (s.includes('flash')) return 'flashcards';
+      if (s.includes('pack')) return 'pack';
+      return 'material';
+    };
+    return [...recentMaterials]
+      .map((m) => ({ id: m.id, title: m.title, kind: mapKind(m.kind), when: new Date(m.createdAt).getTime() }))
+      .filter((m) => Number.isFinite(m.when) && m.when > 0)
+      .sort((a, b) => b.when - a.when)
+      .slice(0, 3);
+  }, [recentMaterials]);
+  const ACTIVITY_META: Record<PackKind, { icon: string; tint: string; label: string }> = {
+    pack:       { icon: '📚', tint: '#FF9600', label: 'Study pack' },
+    quiz:       { icon: '❓', tint: '#FF4B82', label: 'Quiz' },
+    flashcards: { icon: '🗂️', tint: '#1CB0F6', label: 'Flashcards' },
+    material:   { icon: '🧩', tint: '#FF9600', label: 'Study material' },
+  };
+  const relativeTime = (iso: string) => {
+    const diff = Date.now() - new Date(iso).getTime();
+    const h = Math.floor(diff / 3.6e6);
+    if (h < 1) return 'just now';
+    if (h < 24) return `${h}h ago`;
+    const dys = Math.floor(h / 24);
+    return dys === 1 ? '1d ago' : `${dys}d ago`;
+  };
+
+  // "Pick a tool" — three focused entry points: start a draft, make a
+  // study pack, or analyze an essay. Each routes to a real view.
+  const PICK_TOOLS: { key: string; title: string; sub: string; icon: React.ReactNode; media: { kind: 'image' | 'video'; src: string }[]; tint: string; tintDark: string; onClick: () => void }[] = [
+    {
+      key: 'editor', title: 'Start a draft', sub: 'Blank page with live AI feedback', tint: '#A560E8', tintDark: '#7733B5', onClick: onNew,
+      media: [{ kind: 'image', src: '/WriterPic.png' }],
+      icon: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M12 20h9" /><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4 12.5-12.5z" /></svg>),
+    },
+    {
+      // Cycles through everything a Study Pack creates: flashcards →
+      // quiz → crossword (videos) → lesson (image, ~5s).
+      key: 'pack', title: 'Study Pack', sub: 'Lesson · flashcards · quiz · crossword', tint: '#FF9600', tintDark: '#B85F00', onClick: () => onSwitchView('study-packs'),
+      media: [
+        { kind: 'video', src: '/hero-flashcards.mp4' },
+        { kind: 'video', src: '/hero-quiz.mp4' },
+        { kind: 'video', src: '/writescholar-crossword-demo.mp4' },
+        { kind: 'image', src: '/study-pack-previews/lesson-plan.png' },
+      ],
+      icon: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M12 4l8 4-8 4-8-4 8-4z" /><path strokeLinecap="round" strokeLinejoin="round" d="M4 12l8 4 8-4M4 16l8 4 8-4" /></svg>),
+    },
+    {
+      // Cycles through every free arcade game clip.
+      key: 'games', title: 'Arcade', sub: 'Crater Blast · Word Tower · Word Blitz', tint: '#FF4B4B', tintDark: '#C93535', onClick: () => onSwitchView('games'),
+      media: [
+        { kind: 'video', src: '/writescholar-crater-blast-demo.mp4' },
+        { kind: 'video', src: '/hero-word-tower.mp4' },
+        { kind: 'video', src: '/hero-word-blitz.mp4' },
+      ],
+      icon: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M7.5 7.5h9a4.5 4.5 0 014.43 3.72l.74 4.3A3.04 3.04 0 0118.66 19c-.97 0-1.88-.46-2.45-1.25L15 16H9l-1.21 1.75A3.04 3.04 0 015.34 19a3.04 3.04 0 01-3-3.48l.74-4.3A4.5 4.5 0 017.5 7.5z" /><path strokeLinecap="round" strokeLinejoin="round" d="M7 12h3m-1.5-1.5v3M16 11.5h.01M18 13.5h.01" /></svg>),
+    },
+  ];
+
+  // "What's on your mind?" — a personal to-do / reminders list. Users
+  // add THEIR OWN items (an essay to finish, a chapter to revise, a
+  // deadline) and tick them off; persists per user. Actionable + useful,
+  // not a pile of forced tasks.
+  interface Todo { id: string; text: string; done: boolean }
+  const todoKey = `writescholar_todos_${user?.id || 'anon'}`;
+  const [todos, setTodos] = useState<Todo[]>(() => {
+    try { const raw = localStorage.getItem(todoKey); return raw ? (JSON.parse(raw) as Todo[]) : []; } catch { return []; }
+  });
+  const [todoInput, setTodoInput] = useState('');
+  const persistTodos = (next: Todo[]) => {
+    setTodos(next);
+    try { localStorage.setItem(todoKey, JSON.stringify(next)); } catch { /* ignore */ }
+  };
+  const addTodo = () => {
+    const text = todoInput.trim();
+    if (!text) return;
+    persistTodos([{ id: `${Date.now()}`, text, done: false }, ...todos].slice(0, 30));
+    setTodoInput('');
+  };
+  const toggleTodo = (id: string) => persistTodos(todos.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));
+  const removeTodo = (id: string) => persistTodos(todos.filter((t) => t.id !== id));
+
   return (
     <>
       {/* Hidden file input — reused by the Upload tile in the bento. */}
@@ -843,62 +952,44 @@ function DocumentsHub({
         }}
       />
 
-      {/* ─── DASHBOARD STACK ────────────────────────────────────
-          Left column (2/3): greeting on top + a dashed drop-zone
-          Upload card below. Right column (1/3): three tall action
-          cards (Write / Study / Games). Then study packs full
-          width. Matches the approved reference layout. */}
-      {/* ─── GREETING + TOP-BAR — merged into one card. Greeting
-          copy sits on the left, the workspace toolbar (Saved
-          Materials, streak, Pomodoro, avatar) lives on the right of
-          the same card on desktop and stacks above the copy on
-          mobile/tablet. Card itself stays `overflow-visible` so the
-          toolbar popovers (Pomodoro / Avatar menu) can escape it;
-          orbs are clipped inside an absolute inner wrapper. */}
-      <div className="relative rounded-3xl border-2 border-b-4 border-[#A560E8]/55 bg-gradient-to-br from-[#F3EAFF] via-white to-white dark:from-[#A560E8]/15 dark:via-stone-900 dark:to-stone-900 p-5 sm:p-6 mb-4 sm:mb-5">
-        {/* Atmospheric orbs — clipped inside their own wrapper so they
-            don't bleed past the card but the toolbar dropdowns can. */}
-        <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl" aria-hidden>
-          <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-[#A560E8]/15 blur-3xl" />
-          <div className="absolute -bottom-16 -left-16 w-56 h-56 rounded-full bg-[#FFC800]/15 blur-3xl" />
+      {/* ═══════════════════════════════════════════════════════════
+          DASHBOARD HOME — greeting top row, a "What's on your mind?"
+          sticky note beside a "Pick a tool" card row, "Continue where
+          you left off" recents, and a right rail (Daily Review ·
+          streak · Arcade). The full document library is kept below. */}
+
+      {/* ─── TOP ROW — greeting (left) · account controls (right).
+          `relative z-40` lifts this row (and the top-bar's avatar /
+          Pomodoro dropdowns) above the main column + right-rail cards,
+          which otherwise paint over the open menus. ─── */}
+      <div className="relative z-40 flex flex-col lg:flex-row lg:items-center gap-3 sm:gap-4 mb-5 sm:mb-6">
+        <div className="min-w-0 flex-1">
+          <h1
+            className="text-[1.8rem] sm:text-[2.25rem] lg:text-[2.55rem] font-extrabold leading-[1.04] tracking-tight text-stone-900 dark:text-stone-50"
+            style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+          >
+            {greetingFor()}{userName ? <>, <span className="text-[#A560E8]">{userName}!</span></> : '!'}{' '}
+            <span className="inline-block" aria-hidden>✨</span>
+          </h1>
+          <p className="mt-1.5 text-[13.5px] sm:text-[15px] font-bold text-stone-500 dark:text-stone-400">
+            {(() => {
+              const cs = streak?.currentStreak ?? 0;
+              if (cs >= 2) return <><span aria-hidden>🔥</span> You&apos;re on a {cs}-day streak — keep the momentum going!</>;
+              if (docs.length > 0 || recentMaterials.length > 0) return 'Pick up where you left off, or start something new.';
+              return 'Ready to crush your study goals today?';
+            })()}
+          </p>
         </div>
 
-        {/* Toolbar — top of card on mobile, right-aligned inline on desktop */}
-        {topBar && (
-          <div className="relative mb-4 lg:mb-0 lg:absolute lg:top-4 lg:right-4 z-30 flex justify-end">
-            {topBar}
-          </div>
-        )}
-
-        <div className="relative flex items-center gap-4 sm:gap-5 lg:pr-[27rem]">
-          {/* Circular animated logo — plays silently in a round clip */}
-          <div className="shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden border-[3px] border-[#A560E8]/40 shadow-[0_6px_20px_-8px_rgba(165,96,232,0.4)] bg-[#F3EAFF] dark:bg-[#A560E8]/15">
-            <video
-              src="/dashboardlogo.mp4"
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-full object-cover"
-            />
-          </div>
-
-          <div className="flex-1 min-w-0">
-            <p className="text-[10.5px] sm:text-xs font-extrabold uppercase tracking-[0.22em] text-[#A560E8] mb-2">
-              {todayLabel()}
-            </p>
-            <h1
-              className="text-[1.65rem] sm:text-[2rem] lg:text-[2.2rem] font-extrabold leading-[1.05] tracking-tight text-stone-900 dark:text-stone-50"
-              style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-            >
-              {greetingFor()}{userName ? <>, <span className="text-[#A560E8]">{userName}</span></> : null}
-            </h1>
-            <p className="mt-2 text-[13px] sm:text-sm font-bold text-stone-600 dark:text-stone-300 leading-relaxed max-w-md">
-              Let&apos;s turn today into a productive one. Pick where you want to start.
-            </p>
-          </div>
+        <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+          {/* Account controls — avatar menu, Saved Materials, Pomodoro. */}
+          {topBar}
         </div>
       </div>
+
+      {/* ─── MAIN COLUMN + RIGHT RAIL ─── */}
+      <div className="flex flex-col xl:flex-row gap-5">
+        <div className="flex-1 min-w-0 space-y-5">
 
       {!isPaidUser && expiryInfo && (() => {
         const { materialCount, citationCount, soonestDays } = expiryInfo;
@@ -971,15 +1062,100 @@ function DocumentsHub({
         );
       })()}
 
-      <div className="space-y-4 sm:space-y-5 mb-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-5 lg:items-start">
-          {/* ─── LEFT (col-span-2): upload drop-zone ─── */}
-          <div className="lg:col-span-2 flex flex-col gap-4 min-w-0">
+          {/* ── "What's on your mind?" sticky note  +  "Pick a tool" ── */}
+          <div className="grid grid-cols-1 lg:grid-cols-[290px_minmax(0,1fr)] gap-4 lg:gap-5 items-stretch">
 
-            {/* Upload drop-zone card — flagship action. Click or
-                drag-and-drop a file. Premium-feeling glassy panel
-                with animated halos + a floating stack of "files"
-                so the empty state still feels alive. */}
+            {/* "What's on your mind?" — a playful hand-drawn lavender
+                to-do note (matches the sketch look): purple Caveat text,
+                ○ circle checks, a little grad-cap mascot + sparkles +
+                arrow. You still add / tick / remove your own items.
+                On mobile it sits AFTER the flagship CTA (order-2) so the
+                primary action leads; on desktop it's the left column. */}
+            <div className="order-2 lg:order-1 relative overflow-hidden rounded-[26px] bg-gradient-to-br from-[#ECE7FC] to-[#E2DAF8] dark:from-[#574897] dark:to-[#473A80] border-2 border-[#D2C7F2] dark:border-[#7A68C0]/60 px-5 py-5 shadow-[0_14px_32px_-20px_rgba(124,95,225,0.45)] min-h-[236px] flex flex-col">
+              {/* Paperclip */}
+              <svg aria-hidden viewBox="0 0 24 24" className="absolute -top-2.5 right-6 w-7 h-7 text-[#9B82DC]/80 rotate-12" fill="none" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+              </svg>
+
+              {/* Sketch decorations — grad-cap bear, sparkles, arrow. Sit
+                  behind the text (low z, semi-transparent) so they read
+                  as doodles in the bottom-right corner. */}
+              <svg aria-hidden viewBox="0 0 120 120" className="pointer-events-none absolute bottom-1.5 right-1.5 w-[78px] h-[78px] text-[#7C5FE1]/80" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="42" cy="49" r="11" />
+                <circle cx="78" cy="49" r="11" />
+                <path d="M34 67 Q34 47 60 47 Q86 47 86 67 Q86 89 60 89 Q34 89 34 67 Z" />
+                <ellipse cx="60" cy="75" rx="9" ry="6" />
+                <path d="M40 41 L60 33 L80 41 L60 49 Z" />
+                <path d="M80 41 v9 q0 2 -2 2" />
+                <path d="M88 69 q9 -3 8 -12" />
+                <circle cx="51" cy="65" r="1.8" fill="currentColor" stroke="none" />
+                <circle cx="69" cy="65" r="1.8" fill="currentColor" stroke="none" />
+                <circle cx="60" cy="72" r="1.8" fill="currentColor" stroke="none" />
+                <circle cx="78" cy="53" r="1.6" fill="currentColor" stroke="none" />
+              </svg>
+              <span aria-hidden className="pointer-events-none absolute bottom-[5.4rem] right-[1.2rem] text-[#7C5FE1] text-lg motion-safe:animate-pulse">✦</span>
+              <span aria-hidden className="pointer-events-none absolute bottom-[3.9rem] right-[0.7rem] text-[#7C5FE1]/70 text-[11px] motion-safe:animate-pulse" style={{ animationDelay: '0.7s' }}>✦</span>
+              <svg aria-hidden viewBox="0 0 40 40" className="pointer-events-none absolute bottom-[2.4rem] right-[5.6rem] w-9 h-9 text-[#7C5FE1]/75" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M6 9 Q2 30 27 29" />
+                <path d="M20 24 L27 29 L23 21" />
+              </svg>
+
+              <h3 className="relative z-10 text-[1.95rem] leading-none text-[#7C3FD6] dark:text-[#C9A0F0] mb-3" style={{ fontFamily: '"Caveat", cursive' }}>
+                What&apos;s on your mind?
+              </h3>
+
+              {/* Checklist — your own to-dos */}
+              <ul className="relative z-10 flex-1 min-h-0 overflow-y-auto -mr-1 pr-1 space-y-1.5">
+                {todos.length === 0 && (
+                  <li>
+                    <span className="text-[1.25rem] leading-tight text-[#9B82DC]/85 dark:text-white/45" style={{ fontFamily: '"Caveat", cursive' }}>Jot down what you need to do…</span>
+                  </li>
+                )}
+                {todos.map((t) => (
+                  <li key={t.id} className="group flex items-center gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => toggleTodo(t.id)}
+                      aria-label={t.done ? 'Mark not done' : 'Mark done'}
+                      className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border-2 transition-all ${t.done ? 'bg-[#7C5FE1] border-[#7C5FE1] text-white' : 'border-[#9B82DC] text-transparent hover:border-[#7C3FD6]'}`}
+                    >
+                      <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth={4} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    </button>
+                    <span className={`flex-1 min-w-0 text-[1.25rem] leading-tight truncate ${t.done ? 'line-through text-[#7C5FE1]/45 dark:text-white/40' : 'text-[#5B3FA8] dark:text-white/90'}`} style={{ fontFamily: '"Caveat", cursive' }}>{t.text}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeTodo(t.id)}
+                      aria-label="Remove to-do"
+                      className="shrink-0 flex h-6 w-6 items-center justify-center rounded-md text-[#9B82DC]/70 hover:text-[#7C3FD6] hover:bg-white/60 opacity-80 group-hover:opacity-100 focus:opacity-100 transition-all"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+
+              {/* Add a to-do — a clear, legible field + visible button
+                  (typing reads in a normal font; saved items still show
+                  in the handwritten style above). */}
+              <form onSubmit={(e) => { e.preventDefault(); addTodo(); }} className="relative z-10 mt-2 flex items-center gap-2">
+                <input
+                  value={todoInput}
+                  onChange={(e) => setTodoInput(e.target.value)}
+                  placeholder="Add a to-do…"
+                  className="flex-1 min-w-0 rounded-xl border-2 border-[#CFC4F0] dark:border-[#7A68C0]/50 bg-white/85 dark:bg-white/10 px-3 py-2 text-[13px] font-bold text-[#5B3FA8] dark:text-white placeholder:text-[#9B82DC] dark:placeholder:text-white/45 focus:outline-none focus:border-[#7C5FE1] focus:bg-white dark:focus:bg-white/20 transition-colors"
+                  aria-label="Add a to-do"
+                />
+                <button type="submit" aria-label="Add to-do" className="shrink-0 inline-flex items-center gap-1 h-9 px-3 rounded-xl bg-[#7C5FE1] text-white text-[12px] font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#5B3FA8] hover:bg-[#6B4FD6] active:border-b-2 active:translate-y-0.5 transition-all">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14m7-7H5" /></svg>
+                  Add
+                </button>
+              </form>
+            </div>
+
+            {/* ── GET ESSAY FEEDBACK — flagship CTA. Deliberately the
+                boldest tile on the page: vivid purple, glow + yellow
+                accents so essay analysis is unmistakably the headline
+                action. Click / drag-drop a paper to upload + analyze. */}
             <div
               role="button"
               tabIndex={0}
@@ -994,319 +1170,210 @@ function DocumentsHub({
                 const f = e.dataTransfer.files?.[0];
                 if (f) onUpload(f);
               }}
-              className={`group relative cursor-pointer rounded-3xl border-2 border-b-4 border-[#66299E] bg-gradient-to-br from-[#A560E8] via-[#8A48C7] to-[#7733B5] text-white transition-all duration-300 flex items-center justify-center min-h-[260px] sm:min-h-[300px] lg:min-h-[280px] overflow-hidden focus:outline-none focus-visible:ring-4 focus-visible:ring-[#A560E8]/60 shadow-[0_8px_22px_-12px_rgba(119,51,181,0.55)] ${
-                uploadDropActive ? 'scale-[1.008] active:border-b-2' : 'hover:-translate-y-0.5 hover:shadow-[0_12px_28px_-10px_rgba(119,51,181,0.6)]'
+              className={`order-1 lg:order-2 group relative cursor-pointer overflow-hidden rounded-[26px] border-2 border-b-[6px] border-[#5B1F8E] text-white transition-all duration-300 flex items-center min-h-[236px] bg-gradient-to-br from-[#B77CF1] via-[#A560E8] to-[#7733B5] shadow-[0_24px_48px_-16px_rgba(119,51,181,0.75)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#FFC800]/60 ${
+                uploadDropActive ? 'scale-[1.01] active:border-b-2' : 'hover:-translate-y-1 hover:shadow-[0_30px_56px_-16px_rgba(119,51,181,0.85)]'
               }`}
             >
-              {/* Decorative sparkle halo — matches Upgrade to Pro card */}
-              <span
-                className="pointer-events-none absolute -top-12 -right-8 w-40 h-40 sm:w-48 sm:h-48 rounded-full bg-white/15 blur-2xl"
-                aria-hidden
-              />
-              <span
-                className="pointer-events-none absolute -bottom-16 -left-10 w-36 h-36 rounded-full bg-[#7733B5]/25 blur-3xl"
-                aria-hidden
-              />
+              {/* Glow halos, grid texture + sparkles */}
+              <span className="pointer-events-none absolute -top-14 -right-10 w-52 h-52 rounded-full bg-white/20 blur-3xl" aria-hidden />
+              <span className="pointer-events-none absolute -bottom-16 -left-10 w-44 h-44 rounded-full bg-[#FFC800]/20 blur-3xl" aria-hidden />
+              <span className="pointer-events-none absolute inset-0 opacity-[0.07] mix-blend-overlay" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)', backgroundSize: '30px 30px' }} aria-hidden />
+              <span aria-hidden className="absolute top-5 right-6 text-[#FFC800] text-base motion-safe:animate-pulse">✦</span>
+              <span aria-hidden className="absolute bottom-8 right-10 text-white/60 text-xs motion-safe:animate-pulse" style={{ animationDelay: '0.8s' }}>✦</span>
 
-              {/* Faint grid pattern */}
-              <div
-                className="pointer-events-none absolute inset-0 opacity-[0.08] mix-blend-overlay"
-                style={{
-                  backgroundImage:
-                    'linear-gradient(rgba(255,255,255,0.55) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.55) 1px, transparent 1px)',
-                  backgroundSize: '32px 32px',
-                }}
-                aria-hidden
-              />
-
-              {/* Animated dashed border ring */}
-              <div
-                className={`pointer-events-none absolute inset-2.5 lg:inset-3 rounded-2xl border-2 border-dashed transition-all duration-200 ${
-                  uploadDropActive
-                    ? 'border-[#C9A0F0] shadow-[0_0_0_4px_rgba(165,96,232,0.3)_inset]'
-                    : 'border-white/30 group-hover:border-white/55'
-                }`}
-                aria-hidden
-              />
-
-              {/* Drag-active full overlay */}
+              {/* Drag-active overlay */}
               {uploadDropActive && (
-                <div className="absolute inset-0 z-20 flex items-center justify-center bg-gradient-to-br from-[#A560E8]/95 via-[#8A48C7]/92 to-[#7733B5]/95 backdrop-blur-sm rounded-3xl">
+                <div className="absolute inset-0 z-20 flex items-center justify-center bg-gradient-to-br from-[#A560E8]/95 via-[#8A48C7]/92 to-[#7733B5]/95 backdrop-blur-sm rounded-[26px]">
                   <div className="text-center">
                     <div className="mx-auto mb-2 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#FFC800] text-[#7733B5] border-2 border-b-4 border-[#D4A300] shadow-xl">
-                      <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 14v6a2 2 0 01-2 2H7a2 2 0 01-2-2v-6m4-6l4-4m0 0l4 4m-4-4v12" />
-                      </svg>
+                      <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M19 14v6a2 2 0 01-2 2H7a2 2 0 01-2-2v-6m4-6l4-4m0 0l4 4m-4-4v12" /></svg>
                     </div>
-                    <p className="text-lg font-extrabold text-white" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                      Drop to upload
-                    </p>
+                    <p className="text-lg font-extrabold text-white" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Drop to upload</p>
                   </div>
                 </div>
               )}
 
-              <div className="relative z-10 w-full px-6 py-9 sm:px-8 sm:py-10 lg:px-10 lg:py-8 flex flex-col items-center text-center lg:flex-row lg:items-center lg:gap-10 lg:text-left">
-                {/* Stacked "files" illustration */}
-                <div className="relative mx-auto lg:mx-0 mb-6 lg:mb-0 h-24 w-24 shrink-0" aria-hidden>
-                  <span
-                    className="absolute left-1/2 top-3 -translate-x-1/2 rotate-[-10deg] h-[4.5rem] w-[3.25rem] rounded-md bg-white/15 border border-white/25 backdrop-blur-sm"
-                    style={{ boxShadow: '0 6px 16px -8px rgba(0,0,0,0.4)' }}
-                  />
-                  <span
-                    className="absolute left-1/2 top-1 -translate-x-1/2 rotate-[6deg] h-[4.5rem] w-[3.25rem] rounded-md bg-white/25 border border-white/40 backdrop-blur-sm"
-                    style={{ boxShadow: '0 8px 18px -8px rgba(0,0,0,0.45)' }}
-                  >
-                    <span className="absolute left-1.5 right-1.5 top-2 h-[2px] rounded bg-white/60" />
-                    <span className="absolute left-1.5 right-3 top-3.5 h-[2px] rounded bg-white/45" />
-                    <span className="absolute left-1.5 right-2 top-5 h-[2px] rounded bg-white/45" />
-                  </span>
-                  <span className="absolute -bottom-1 -right-1 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#FFC800] text-[#7733B5] border-2 border-b-4 border-[#D4A300] shadow-[0_10px_24px_-8px_rgba(255,200,0,0.55)]">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.75} viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 16V4m0 0L8 8m4-4l4 4" />
-                    </svg>
-                  </span>
-                </div>
+              <div className="relative z-10 w-full px-6 py-7 sm:px-8 flex flex-col items-center text-center sm:flex-row sm:items-center sm:gap-6 sm:text-left">
+                {/* Upload icon chip — yellow so it pops on the purple */}
+                <span className="mb-4 sm:mb-0 shrink-0 flex h-16 w-16 items-center justify-center rounded-3xl bg-[#FFC800] text-[#6B27A3] border-2 border-b-4 border-[#D4A300] shadow-[0_12px_28px_-8px_rgba(255,200,0,0.6)] transition-transform group-hover:scale-105 group-hover:-rotate-6" aria-hidden>
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={2.6} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 16V4m0 0L8 8m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" /></svg>
+                </span>
 
                 <div className="min-w-0 flex-1">
-                  <p
-                    className="text-2xl sm:text-[1.85rem] lg:text-[2rem] font-extrabold tracking-tight text-white leading-tight"
-                    style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                  >
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FFC800] text-[#6B27A3] px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.14em] mb-2 shadow-[0_4px_12px_-4px_rgba(255,200,0,0.6)]">
+                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24" aria-hidden><path d="M13 2L4.5 13H11l-1 9 8.5-11H12l1-9z" /></svg>
+                    Most powerful tool
+                  </span>
+                  <p className="text-2xl sm:text-[2rem] font-extrabold tracking-tight text-white leading-[1.03]" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                     Get essay feedback
                   </p>
-                  <p className="mt-2 text-[13px] sm:text-sm font-bold text-white/80 leading-relaxed max-w-md lg:max-w-none mx-auto lg:mx-0">
-                    PDF, DOCX or TXT — we&apos;ll analyse it <span className="text-[#FFC800]">line by line</span>.
+                  <p className="mt-1.5 text-[13px] sm:text-sm font-bold text-white/85 leading-relaxed">
+                    Upload your essay — we&apos;ll grade it &amp; mark it up <span className="text-[#FFC800]">line by line</span>.
                   </p>
-
-                  <div className="mt-5 flex flex-col sm:flex-row items-center lg:items-center gap-3 sm:gap-4 justify-center lg:justify-start">
-                    <span className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#FFC800] text-[#6B27A3] text-[13px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#D4A300] group-hover:bg-[#FFD52E] group-hover:-translate-y-0.5 group-active:border-b-2 group-active:translate-y-0 transition-all shadow-[0_12px_28px_-10px_rgba(255,200,0,0.5)]">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.75} viewBox="0 0 24 24" aria-hidden>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 16V4m0 0L8 8m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
-                      </svg>
+                  <div className="mt-4 flex flex-col sm:flex-row items-center gap-3 justify-center sm:justify-start">
+                    <span className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#FFC800] text-[#6B27A3] text-[13px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#D4A300] group-hover:bg-[#FFD52E] group-hover:-translate-y-0.5 group-active:border-b-2 group-active:translate-y-0 transition-all shadow-[0_12px_28px_-10px_rgba(255,200,0,0.55)]">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.75} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M12 16V4m0 0L8 8m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" /></svg>
                       Choose file
                     </span>
-                    <span className="text-[12px] font-bold text-white/55">
-                      or drag &amp; drop here
+                    <span className="text-[12px] font-bold text-white/60">or drag &amp; drop</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── PICK A TOOL — big "show it in action" cards: a real
+              preview of each tool up top, a floating brand icon chip
+              overlapping it, then title · description · CTA. */}
+          <div>
+            <h2 className="text-[15px] font-extrabold text-stone-800 dark:text-stone-100 mb-3" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Pick a tool</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {PICK_TOOLS.map((t) => (
+                <button
+                  key={t.key}
+                  type="button"
+                  onClick={t.onClick}
+                  className="group relative overflow-hidden flex flex-col text-left rounded-3xl border-2 border-b-[3px] bg-white dark:bg-stone-900 hover:-translate-y-1 active:translate-y-px transition-all shadow-[0_14px_34px_-22px_rgba(0,0,0,0.4)] hover:shadow-[0_26px_46px_-24px_rgba(120,60,200,0.32)]"
+                  style={{ borderColor: t.tint, borderBottomColor: t.tintDark }}
+                >
+                  {/* Live preview — shorter crop on mobile keeps the
+                      stacked cards compact; full 16:10 once they sit in a row. */}
+                  <div className="relative aspect-[5/2] sm:aspect-[16/10] w-full overflow-hidden" style={{ background: `linear-gradient(160deg, ${t.tint}, ${t.tintDark})` }} aria-hidden>
+                    <CyclingMedia items={t.media} />
+                    <span className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-black/35 to-transparent" />
+                  </div>
+                  {/* Body — floating icon chip overlaps the preview's lower edge */}
+                  <div className="relative px-4 pt-7 pb-4">
+                    <span
+                      className="absolute -top-6 left-4 flex h-12 w-12 items-center justify-center rounded-2xl text-white border-2 border-b-4 [&>svg]:w-6 [&>svg]:h-6 transition-transform group-hover:scale-105 group-hover:-rotate-6"
+                      style={{ backgroundColor: t.tint, borderColor: t.tintDark, boxShadow: `0 12px 24px -10px ${t.tint}` }}
+                      aria-hidden
+                    >
+                      {t.icon}
+                    </span>
+                    <p className="text-[15px] font-extrabold text-stone-900 dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>{t.title}</p>
+                    <p className="mt-0.5 text-[12px] font-bold text-stone-500 dark:text-stone-400 leading-snug">{t.sub}</p>
+                    <span className="mt-3 inline-flex items-center gap-1.5 text-[10.5px] font-extrabold uppercase tracking-wide transition-transform group-hover:translate-x-0.5" style={{ color: t.tintDark }}>
+                      Open
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                     </span>
                   </div>
-                </div>
-              </div>
-            </div>
-
-            {/* ─── YOUR STUDY PACKS — pulled into the left column so it
-                sits right under the Upload card on desktop instead of
-                hanging off the bottom of the dashboard. */}
-            <div className="relative overflow-hidden rounded-3xl border-2 border-b-4 border-[#FF9600]/55 bg-gradient-to-br from-[#FFE8C4] via-[#FFF4E0] to-[#FFFBF5] dark:from-[#FF9600]/18 dark:via-[#FF9600]/10 dark:to-stone-900 p-5 sm:p-6 shadow-[0_10px_28px_-16px_rgba(255,150,0,0.45)]">
-              <div className="pointer-events-none absolute -top-10 -right-10 w-36 h-36 rounded-full bg-[#FF9600]/20 blur-2xl" aria-hidden />
-              <div className="pointer-events-none absolute -bottom-8 -left-8 w-28 h-28 rounded-full bg-[#FFC800]/15 blur-2xl" aria-hidden />
-              <div className="relative flex items-center justify-between mb-3 gap-3">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#FF9600] text-white text-base border-2 border-b-2 border-[#D97F00]" aria-hidden>📚</span>
-                  <div className="min-w-0">
-                    <h3
-                      className="text-base sm:text-lg font-extrabold text-stone-900 dark:text-stone-50 leading-tight truncate"
-                      style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                    >
-                      Your study packs
-                    </h3>
-                    <p className="text-[11.5px] font-bold text-stone-500 dark:text-stone-400 leading-tight truncate">
-                      Flashcards, quizzes &amp; arcade mode from your notes
-                    </p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => onSwitchView('study-packs')}
-                  className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-extrabold uppercase tracking-wider text-[#D97F00] dark:text-[#FF9600] hover:bg-[#FFF4E0] dark:hover:bg-[#FF9600]/10 transition-colors"
-                >
-                  View all <span aria-hidden>→</span>
                 </button>
-              </div>
-              {studyPacks.length === 0 ? (
-                <div className="flex flex-col sm:flex-row items-center gap-4 py-3">
-                  <img src="/mascot-juggling.webp" alt="" aria-hidden className="w-16 h-16 object-contain shrink-0" loading="lazy" decoding="async" />
-                  <div className="flex-1 min-w-0 text-center sm:text-left">
-                    <p className="text-sm font-extrabold text-stone-700 dark:text-stone-200">No study packs yet</p>
-                    <p className="text-[12px] font-bold text-stone-500 dark:text-stone-400 mt-0.5">
-                      Paste any notes and Scholar turns them into a lesson, flashcards, a quiz and arcade mode — in under a minute.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => onSwitchView('study-packs')}
-                      className="mt-3 inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#FF9600] hover:bg-[#D97F00] text-white text-[12.5px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all"
-                    >
-                      Make my first one
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                    </button>
+              ))}
+            </div>
+          </div>
+
+
+        </div>{/* /main column */}
+
+        {/* ─── RIGHT RAIL — Daily Review · streak · Arcade ─── */}
+        <aside className="w-full xl:w-[320px] shrink-0 flex flex-col gap-4">
+
+          {/* Daily Review (green) */}
+          <div className="relative overflow-hidden rounded-3xl border-2 border-b-4 border-[#46A302]/40 bg-gradient-to-br from-[#E6F8D2] via-[#F1FBE4] to-white dark:from-[#58CC02]/15 dark:via-stone-900 dark:to-stone-900 p-5 shadow-[0_14px_32px_-20px_rgba(88,204,2,0.55)]">
+            <span className="pointer-events-none absolute -top-8 -right-8 w-28 h-28 rounded-full bg-[#58CC02]/20 blur-2xl" aria-hidden />
+            <img src="/mascot-study.webp" alt="" aria-hidden loading="lazy" decoding="async" className="pointer-events-none absolute -bottom-1 right-0 w-[88px] h-[88px] object-contain drop-shadow-[0_10px_18px_rgba(70,163,2,0.3)]" />
+            <div className="relative max-w-[62%]">
+              <h3 className="text-lg font-extrabold text-stone-900 dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Daily Review</h3>
+              <p className="mt-1 text-[12.5px] font-bold text-stone-600 dark:text-stone-300 leading-snug">5 quick recall questions</p>
+              <button
+                type="button"
+                onClick={() => onSwitchView('daily-review')}
+                className="mt-3.5 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#58CC02] hover:bg-[#46A302] text-white text-[12px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_8px_18px_-10px_rgba(88,204,2,0.6)]"
+              >
+                Start now
+              </button>
+            </div>
+          </div>
+
+          {/* Streak (cream) */}
+          <div className="relative overflow-hidden rounded-3xl border-2 border-b-4 border-[#F5C518]/45 bg-gradient-to-br from-[#FFF4D6] via-[#FFFBEE] to-white dark:from-[#FFC800]/12 dark:via-stone-900 dark:to-stone-900 p-5 shadow-[0_14px_32px_-20px_rgba(245,158,11,0.5)]">
+            <h3 className="text-lg font-extrabold text-stone-900 dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+              You&apos;re on a roll! <span aria-hidden>🔥</span>
+            </h3>
+            <p className="mt-1.5 flex items-baseline gap-1.5">
+              <span className="text-[2rem] font-extrabold text-[#E8890C] dark:text-[#FFBD5C] tabular-nums leading-none">{streak?.currentStreak ?? 0}</span>
+              <span className="text-[12.5px] font-bold text-stone-500 dark:text-stone-400">{(streak?.currentStreak ?? 0) === 1 ? 'day in a row' : 'days in a row'}</span>
+            </p>
+            <div className="mt-4 grid grid-cols-7 gap-1.5">
+              {(['M','T','W','T','F','S','S'] as const).map((dayLabel, i) => {
+                // Real activity: this day's calendar date appears in the
+                // API's weekActivities (login dates from the last 7 days).
+                const done = !!streak?.weekActivities?.includes(weekDates[i]);
+                const isToday = i === todayDow;
+                return (
+                  <div key={i} className="flex flex-col items-center gap-1.5">
+                    <span className={`text-[9px] font-extrabold uppercase ${isToday ? 'text-[#E8890C] dark:text-[#FFBD5C]' : 'text-stone-400 dark:text-stone-500'}`}>{dayLabel}</span>
+                    <span className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all ${done ? 'bg-[#58CC02] border-[#46A302] text-white' : isToday ? 'border-[#E8890C]/60 text-[#E8890C] dark:text-[#FFBD5C] bg-[#FFC800]/10' : 'border-stone-200 dark:border-stone-700 text-transparent'}`}>
+                      {done
+                        ? <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={3.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                        : <span className="h-1 w-1 rounded-full bg-stone-300 dark:bg-stone-600" aria-hidden />}
+                    </span>
                   </div>
-                </div>
-              ) : (
-                <div className="relative grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {studyPacks.slice(0, 4).map((pack) => (
-                    <button
-                      key={pack.id}
-                      type="button"
-                      onClick={() => onSwitchView('study-packs')}
-                      className="text-left rounded-2xl border-2 border-b-4 border-[#FF9600]/35 dark:border-[#FF9600]/30 bg-gradient-to-br from-[#FFF8EE] to-white dark:from-[#FF9600]/12 dark:to-stone-900 px-3.5 py-3 hover:border-[#FF9600]/60 hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_4px_14px_-10px_rgba(255,150,0,0.35)]"
-                    >
-                      <span className="inline-flex h-6 w-6 items-center justify-center rounded-lg bg-[#FF9600]/15 text-[#D97F00] dark:text-[#FFBD5C] text-xs mb-2" aria-hidden>📚</span>
-                      <p className="text-[13.5px] font-extrabold text-stone-900 dark:text-stone-50 leading-snug line-clamp-2" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                        {pack.title}
-                      </p>
-                      <p className="mt-1 text-[10.5px] font-bold text-[#B85F00]/80 dark:text-[#FFBD5C]/90">
-                        {pack.questionCount > 0 ? `${pack.questionCount} questions` : 'Open pack'}
-                      </p>
-                    </button>
-                  ))}
-                </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Your study packs — your latest study materials (top 3) with
+              a "Show more" link to the full study-materials page, so it
+              stays compact in the rail. */}
+          <div className="rounded-3xl border-2 border-stone-200/80 dark:border-stone-700 bg-gradient-to-b from-white to-stone-50/70 dark:from-stone-900 dark:to-stone-950/40 p-4 shadow-[0_14px_32px_-24px_rgba(0,0,0,0.4)]">
+            <div className="flex items-center justify-between gap-2 mb-3 px-0.5">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#FFF4E0] text-[#B85F00] dark:bg-[#FF9600]/15 dark:text-[#FFBD5C]" aria-hidden>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.4} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4l8 4-8 4-8-4 8-4z" /><path strokeLinecap="round" strokeLinejoin="round" d="M4 12l8 4 8-4M4 16l8 4 8-4" /></svg>
+                </span>
+                <h3 className="text-[13.5px] font-extrabold text-stone-800 dark:text-stone-100 truncate" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Your study packs</h3>
+              </div>
+              {recentStudyPacks.length > 0 && (
+                <button type="button" onClick={() => onSwitchView('study-packs')} className="shrink-0 text-[10.5px] font-extrabold uppercase tracking-wide text-[#B85F00] dark:text-[#FFBD5C] hover:underline">
+                  Show more
+                </button>
               )}
             </div>
-          </div>
-
-          {/* ─── RIGHT (col-span-1): 3 action cards, aligned to top ─── */}
-          <div className="lg:col-span-1 flex flex-col gap-3.5 lg:pt-0">
-            {([
-              {
-                key: 'write',
-                title: 'Start new draft',
-                desc: 'Blank page with live AI feedback.',
-                tag: 'Write',
-                emoji: '✍️',
-                tint: '#1CB0F6',
-                tintLight: '#B8E8FE',
-                tintDark: '#1899D6',
-                bodyGradient: 'linear-gradient(135deg, #DDF4FF 0%, #FFFFFF 48%, #E8F7FF 100%)',
-                shadow: '0 12px 28px -12px rgba(28,176,246,0.50)',
-                onClick: onNew,
-              },
-              {
-                key: 'study',
-                title: 'Make study pack',
-                desc: 'Notes → flashcards, quizzes & crosswords.',
-                tag: 'Study',
-                emoji: '📚',
-                tint: '#FF9600',
-                tintLight: '#FFE0B0',
-                tintDark: '#D97F00',
-                bodyGradient: 'linear-gradient(135deg, #FFF4E0 0%, #FFFFFF 48%, #FFF8EC 100%)',
-                shadow: '0 12px 28px -12px rgba(255,150,0,0.45)',
-                onClick: () => onSwitchView('study-packs'),
-              },
-              {
-                key: 'games',
-                title: 'Arcade mode',
-                desc: 'Word Blitz, Crater Blast & more.',
-                tag: 'Play',
-                emoji: '🎮',
-                tint: '#FF4B82',
-                tintLight: '#FFC8DA',
-                tintDark: '#ED4070',
-                bodyGradient: 'linear-gradient(135deg, #FFE8F0 0%, #FFFFFF 48%, #FFF0F5 100%)',
-                shadow: '0 12px 28px -12px rgba(255,75,130,0.45)',
-                onClick: () => onSwitchView('games'),
-              },
-            ] as const).map((tile) => (
-              <button
-                key={tile.key}
-                type="button"
-                onClick={tile.onClick}
-                className="group relative overflow-hidden rounded-2xl border-2 border-b-[5px] min-h-[104px] sm:min-h-[112px] text-left flex items-stretch lg:flex-1 hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all dark:from-stone-900 dark:via-stone-900 dark:to-stone-900"
-                style={{
-                  background: tile.bodyGradient,
-                  borderColor: tile.tint,
-                  borderBottomColor: tile.tintDark,
-                  boxShadow: tile.shadow,
-                }}
-              >
-                {/* Media block — picture/video preview with vivid colour wash */}
-                <span
-                  className="relative shrink-0 self-stretch overflow-hidden w-[92px] sm:w-[100px] min-h-[104px] sm:min-h-[112px]"
-                  aria-hidden
-                  style={{ background: `linear-gradient(168deg, ${tile.tint} 0%, ${tile.tintDark} 100%)` }}
-                >
-                  {tile.key === 'write' && (
-                    <img
-                      src="/WriterPic.png"
-                      alt=""
-                      aria-hidden
-                      draggable={false}
-                      className="absolute inset-0 w-full h-full object-cover"
-                    />
-                  )}
-                  {tile.key === 'study' && (
-                    <CyclingImages
-                      srcs={['/quiz pic.png', '/flashcard pic.png', '/notes pic.png', '/crosssword pic.png']}
-                    />
-                  )}
-                  {tile.key === 'games' && (
-                    <CyclingVideos
-                      srcs={['/writescholar-crater-blast-demo.mp4', '/hero-word-tower-hq.mp4', '/hero-word-blitz-hq.mp4']}
-                    />
-                  )}
-                  <span className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/60 via-black/25 to-transparent" />
-                  <span
-                    className="absolute bottom-2 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold uppercase tracking-[0.16em] text-white border border-white/30 shadow-[0_2px_8px_rgba(0,0,0,0.25)]"
-                    style={{ background: `linear-gradient(145deg, ${tile.tintLight}, ${tile.tint})` }}
-                  >
-                    {tile.tag}
-                  </span>
-                </span>
-
-                {/* Body */}
-                <span className="relative flex-1 min-w-0 px-4 sm:px-5 py-4 flex items-center gap-3.5">
-                  <span
-                    className="pointer-events-none absolute -top-6 -right-8 w-32 h-32 rounded-full blur-2xl opacity-70"
-                    style={{ backgroundColor: tile.tintLight }}
-                    aria-hidden
-                  />
-
-                  <span className="relative min-w-0 flex-1">
-                    <p
-                      className="flex items-center gap-1.5 text-base sm:text-[17px] font-extrabold leading-tight truncate"
-                      style={{ fontFamily: '"Nunito", system-ui, sans-serif', color: tile.tintDark }}
-                    >
-                      <span className="truncate">{tile.title}</span>
-                      <span className="text-[15px] leading-none shrink-0" aria-hidden>{tile.emoji}</span>
-                    </p>
-                    <p
-                      className="mt-1 text-[12.5px] sm:text-[13px] font-bold leading-snug line-clamp-2"
-                      style={{ color: `${tile.tintDark}CC` }}
-                    >
-                      {tile.desc}
-                    </p>
-                  </span>
-
-                  <span
-                    className="relative shrink-0 flex h-9 w-9 items-center justify-center rounded-xl border-2 text-white transition-all group-hover:translate-x-0.5 group-hover:scale-105"
-                    style={{
-                      borderColor: tile.tintDark,
-                      background: `linear-gradient(145deg, ${tile.tintLight}, ${tile.tint})`,
-                      boxShadow: `0 4px 12px -4px ${tile.tint}88`,
-                    }}
-                    aria-hidden
-                  >
-                    <svg className="relative w-4 h-4" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                    </svg>
-                  </span>
-                </span>
+            {recentStudyPacks.length === 0 ? (
+              <button type="button" onClick={() => onSwitchView('study-packs')} className="w-full rounded-2xl border-2 border-dashed border-[#FF9600]/35 bg-[#FFFBF5] dark:bg-[#FF9600]/5 px-3 py-4 text-center hover:border-[#FF9600]/60 transition-colors">
+                <p className="text-[12.5px] font-extrabold text-stone-700 dark:text-stone-200">No study packs yet</p>
+                <p className="mt-0.5 text-[11px] font-bold text-[#B85F00] dark:text-[#FFBD5C]">Make your first one →</p>
               </button>
-            ))}
-
-            {/* ─── Compact Daily Review CTA — sits below the 3 pills,
-                replacing the larger old DailyReviewStreakHub card. */}
-            <CompactDailyReview user={user} onSwitchView={onSwitchView} />
+            ) : (
+              <ul className="space-y-2">
+                {recentStudyPacks.map((p) => {
+                  const meta = ACTIVITY_META[p.kind];
+                  return (
+                    <li key={p.id}>
+                      <button
+                        type="button"
+                        onClick={() => onSwitchView('study-packs')}
+                        className="group w-full flex items-center gap-3 rounded-2xl border-2 border-b-[3px] bg-white dark:bg-stone-900 p-2.5 text-left hover:-translate-y-0.5 active:translate-y-px active:border-b-2 transition-all shadow-[0_6px_16px_-14px_rgba(0,0,0,0.45)]"
+                        style={{ borderColor: `${meta.tint}30`, borderBottomColor: `${meta.tint}55` }}
+                      >
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-base border-2 transition-transform group-hover:scale-105" style={{ backgroundColor: `${meta.tint}1A`, borderColor: `${meta.tint}3A`, color: meta.tint }} aria-hidden>{meta.icon}</span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-[12.5px] font-extrabold text-stone-800 dark:text-stone-100 leading-tight truncate" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>{p.title}</span>
+                          <span className="mt-1 flex items-center gap-1.5">
+                            <span className="text-[8.5px] font-extrabold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md" style={{ backgroundColor: `${meta.tint}1F`, color: meta.tint }}>{meta.label}</span>
+                            <span className="text-[10px] font-bold text-stone-400 dark:text-stone-500">{relativeTime(new Date(p.when).toISOString())}</span>
+                          </span>
+                        </span>
+                        <svg className="w-4 h-4 shrink-0 transition-transform group-hover:translate-x-0.5" style={{ color: meta.tint }} fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
           </div>
-        </div>
 
-
-      </div>
+        </aside>
+      </div>{/* /main + rail */}
 
       {/* ─── FULL DOCUMENTS LIBRARY ─────────────────────────────
           Polished bento with a gradient hero header strip, prominent
           icon badge, and a slimmer search row that sits inside its
           own glass panel for visual hierarchy. */}
-      <div className="relative overflow-hidden rounded-[28px] border-2 border-b-4 border-[#A560E8]/40 bg-white dark:bg-stone-900 shadow-[0_18px_44px_-22px_rgba(120,60,200,0.35)]">
+      <div className="relative overflow-hidden rounded-[28px] border-2 border-b-4 border-[#A560E8]/40 bg-white dark:bg-stone-900 shadow-[0_18px_44px_-22px_rgba(120,60,200,0.35)] mt-5 sm:mt-6">
         {/* Hero strip header — sets the section apart with a soft
             purple gradient field behind the title row. */}
         <div className="relative px-5 sm:px-7 pt-5 sm:pt-6 pb-4 sm:pb-5 bg-gradient-to-br from-[#F3EAFF] via-[#FAF5FF] to-white dark:from-[#A560E8]/15 dark:via-stone-900 dark:to-stone-900 border-b border-stone-200/70 dark:border-stone-800">
@@ -1437,7 +1504,6 @@ function DocumentsHub({
                     key={d.id}
                     doc={d}
                     onOpen={() => onOpen(d.id)}
-                    onAnalyze={() => onAnalyze(d.id)}
                     onDownload={() => onDownload(d.id)}
                     onDelete={() => onDelete(d.id)}
                   />
@@ -1447,7 +1513,6 @@ function DocumentsHub({
           )}
         </div>
       </div>
-
     </>
   );
 }
@@ -1641,13 +1706,11 @@ function DocsEmptyState({ hasAnyDocs, hasSearch, onNew, onUpload }: { hasAnyDocs
 function DocumentCard({
   doc,
   onOpen,
-  onAnalyze,
   onDownload,
   onDelete,
 }: {
   doc: DocSummary;
   onOpen: () => void;
-  onAnalyze: () => void;
   onDownload: () => void;
   onDelete: () => void;
 }) {
@@ -1700,10 +1763,10 @@ function DocumentCard({
         <div className="mt-3 flex items-center gap-1.5">
           <button
             type="button"
-            onClick={(e) => { e.stopPropagation(); onAnalyze(); }}
+            onClick={(e) => { e.stopPropagation(); onOpen(); }}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#8A48C7] dark:text-[#C9A0F0] text-[12px] font-extrabold border-2 border-[#A560E8]/20 hover:bg-[#A560E8] hover:text-white hover:border-[#7733B5] transition-all"
           >
-            <I.Sparkle /> Analyze
+            <I.Doc /> Open document
           </button>
           <span className="ml-auto flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
             <CardAction title="Download" onClick={onDownload}><I.Download /></CardAction>
@@ -3573,7 +3636,6 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
             onNew={handleNewDoc}
             onOpen={handleOpenDoc}
             onUpload={handleUpload}
-            onAnalyze={handleAnalyzeFromHub}
             onDownload={handleDownload}
             onDelete={(id) => setConfirmDeleteId(id)}
             userName={firstNameOf(user)}
@@ -3771,3 +3833,5 @@ function ConfirmDeleteModal({ docTitle, onCancel, onConfirm }: { docTitle: strin
     </div>
   );
 }
+
+const __unused_probe = 42;

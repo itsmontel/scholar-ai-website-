@@ -189,7 +189,7 @@ export function WorkspaceSidebar({
           Workspace
         </p>
       )}
-      <Item active={docsActive} icon={<I.Doc />} label="Documents" hint="Write, edit & analyze" onClick={() => onSelect('hub')} />
+      <Item active={docsActive} icon={<I.Doc />} label="Dashboard" hint="Home & your documents" onClick={() => onSelect('hub')} />
       {!collapsed && (
         <p className="px-3 pt-5 pb-1.5 text-[10px] font-extrabold uppercase tracking-[0.18em] text-stone-400 dark:text-stone-500 flex items-center gap-1.5">
           <span className="h-1 w-1 rounded-full bg-stone-300 dark:bg-stone-600" aria-hidden />
@@ -470,7 +470,7 @@ export function WorkspaceMobileNav({
               </button>
             </div>
             <p className="px-1 pb-2 text-[10px] font-extrabold uppercase tracking-[0.18em] text-stone-400">Workspace</p>
-            <Row active={docsActive} icon={<I.Doc />} label="Documents" hint="Write, edit & analyze" onClick={() => pick('hub')} />
+            <Row active={docsActive} icon={<I.Doc />} label="Dashboard" hint="Home & your documents" onClick={() => pick('hub')} />
             <p className="px-1 pt-4 pb-2 text-[10px] font-extrabold uppercase tracking-[0.18em] text-stone-400">Study tools</p>
             <div className="flex flex-col gap-1">
               {SIDEBAR_TOOLS.map((t) => (

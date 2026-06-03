@@ -103,8 +103,16 @@ export default function CitationsPanel({ onNavigate }: { onNavigate: (page: stri
   return (
     <div>
       {/* Search card */}
-      <div className="rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-5 sm:p-6">
-        <label className="block text-[13px] font-extrabold text-stone-700 dark:text-stone-200 mb-2">
+      <div className="relative overflow-hidden rounded-3xl border-2 border-stone-200/80 dark:border-stone-700 bg-white dark:bg-stone-900 p-5 sm:p-6 shadow-[0_16px_38px_-26px_rgba(28,176,246,0.55)]">
+        <div className="pointer-events-none absolute -top-16 -right-16 w-44 h-44 rounded-full bg-[#1CB0F6]/12 blur-3xl" aria-hidden />
+        <div className="relative flex items-center gap-3 mb-4">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#DDF4FF] dark:bg-[#1CB0F6]/15 text-[#1CB0F6] border-2 border-[#1CB0F6]/30 text-lg" aria-hidden>🔖</span>
+          <div className="min-w-0">
+            <h2 className="text-[17px] font-extrabold text-stone-900 dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Find citable sources</h2>
+            <p className="text-[12px] font-bold text-stone-500 dark:text-stone-400 leading-snug">Describe your topic — get real references with ready-to-use sentences in your style.</p>
+          </div>
+        </div>
+        <label className="relative block text-[13px] font-extrabold text-stone-700 dark:text-stone-200 mb-2">
           What are you researching?
         </label>
         <textarea

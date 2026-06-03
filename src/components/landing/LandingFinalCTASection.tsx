@@ -7,7 +7,7 @@ interface LandingFinalCTASectionProps {
 
 const STATS = [
   { value: '50K+', desc: 'Students worldwide' },
-  { value: '92%', desc: 'of frequent active users reported better grades' },
+  { value: '91%', desc: 'of frequent active users reported better grades' },
 ] as const;
 
 export default function LandingFinalCTASection({ onNavigate }: LandingFinalCTASectionProps) {

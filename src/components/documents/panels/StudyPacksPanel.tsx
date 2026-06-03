@@ -123,8 +123,16 @@ export default function StudyPacksPanel({ onNavigate }: { onNavigate: (page: str
 
   return (
     <div>
-      <div className="rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-5 sm:p-6">
-        <div className="flex items-center justify-between mb-2">
+      <div className="relative overflow-hidden rounded-3xl border-2 border-stone-200/80 dark:border-stone-700 bg-white dark:bg-stone-900 p-5 sm:p-6 shadow-[0_16px_38px_-26px_rgba(255,150,0,0.55)]">
+        <div className="pointer-events-none absolute -top-16 -right-16 w-44 h-44 rounded-full bg-[#FF9600]/12 blur-3xl" aria-hidden />
+        <div className="relative flex items-center gap-3 mb-4">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#FFF4E0] dark:bg-[#FF9600]/15 text-[#FF9600] border-2 border-[#FF9600]/30 text-lg" aria-hidden>📚</span>
+          <div className="min-w-0">
+            <h2 className="text-[17px] font-extrabold text-stone-900 dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Make a study pack</h2>
+            <p className="text-[12px] font-bold text-stone-500 dark:text-stone-400 leading-snug">Paste notes — get a lesson, flashcards, a quiz, a crossword &amp; arcade games.</p>
+          </div>
+        </div>
+        <div className="relative flex items-center justify-between mb-2">
           <label className="text-[13px] font-extrabold text-stone-700 dark:text-stone-200">Paste your notes or lecture material</label>
           <span className={`text-[11px] font-bold tabular-nums ${wordCount < 50 ? 'text-stone-400' : 'text-[#B85F00]'}`}>{wordCount} words</span>
         </div>
@@ -219,7 +227,8 @@ export default function StudyPacksPanel({ onNavigate }: { onNavigate: (page: str
             {[0, 1].map((i) => <div key={i} className="h-20 rounded-2xl bg-stone-100 dark:bg-stone-800 animate-pulse" />)}
           </div>
         ) : recents.length === 0 ? (
-          <div className="rounded-2xl border-2 border-dashed border-stone-200 dark:border-stone-700 p-8 text-center">
+          <div className="rounded-2xl border-2 border-dashed border-[#FF9600]/30 dark:border-[#FF9600]/25 bg-[#FFFBF5] dark:bg-[#FF9600]/5 p-8 text-center">
+            <img src="/mascot-juggling.webp" alt="" aria-hidden loading="lazy" decoding="async" className="mx-auto w-16 h-16 object-contain mb-2" />
             <p className="text-sm font-extrabold text-stone-700 dark:text-stone-200">No study packs yet</p>
             <p className="mt-1 text-xs text-stone-500 dark:text-stone-400">Generate your first one above. It takes about a minute.</p>
           </div>

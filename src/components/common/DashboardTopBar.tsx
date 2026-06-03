@@ -145,27 +145,8 @@ export default function DashboardTopBar({
     isPaidUsage &&
     typeof usageStats?.combinedActionsRemaining === 'number';
 
-  // ─── Login streak (powers the little 🔥N chip in the bar) ───
-  const [loginStreak, setLoginStreak] = useState<{ currentStreak: number; hasActivityToday: boolean } | null>(null);
-  useEffect(() => {
-    if (!user) return;
-    let cancelled = false;
-    (async () => {
-      try {
-        const token = localStorage.getItem('authToken');
-        if (!token) return;
-        const res = await fetch(`${API_URL}/streaks`, { headers: { Authorization: `Bearer ${token}` } });
-        if (!res.ok) return;
-        const data = await res.json().catch(() => null);
-        if (cancelled || !data?.data) return;
-        setLoginStreak({
-          currentStreak: data.data.currentStreak ?? 0,
-          hasActivityToday: !!data.data.hasActivityToday,
-        });
-      } catch { /* chip stays hidden */ }
-    })();
-    return () => { cancelled = true; };
-  }, [user]);
+  // (Login-streak chip removed from the header — the dashboard right
+  //  rail now carries the streak card, so it's no longer duplicated here.)
 
   // ─── Pomodoro state (persisted) ────────────────────────────────
   const [pomo, setPomo] = useState<PomodoroState>(() => loadPomodoro());
@@ -328,7 +309,7 @@ export default function DashboardTopBar({
   })();
 
   return (
-    <div className="inline-flex items-center gap-2 p-1.5 sm:p-2 rounded-[20px] bg-white/95 dark:bg-stone-900/90 backdrop-blur-md border-2 border-stone-200/90 dark:border-stone-700 shadow-[0_14px_36px_-14px_rgba(40,30,60,0.28)]">
+    <div className="inline-flex flex-wrap items-center justify-end gap-2 p-1.5 sm:p-2 rounded-[20px] bg-white/95 dark:bg-stone-900/90 backdrop-blur-md border-2 border-stone-200/90 dark:border-stone-700 shadow-[0_14px_36px_-14px_rgba(40,30,60,0.28)] max-w-[calc(100vw-2rem)] lg:max-w-none">
       {variant === 'dashboard' && (
         <>
           {/* Saved materials */}
@@ -346,22 +327,6 @@ export default function DashboardTopBar({
             <span className="hidden sm:inline">Saved Materials</span>
           </button>
 
-          {/* Streak chip — mirrors the streak card in the dashboard */}
-          {loginStreak && (
-            <button
-              type="button"
-              onClick={() => onNavigate('account')}
-              title={`${loginStreak.currentStreak}-day login streak`}
-              className={`inline-flex items-center gap-1.5 px-3 h-10 sm:h-11 rounded-2xl text-[13px] sm:text-[14px] font-extrabold border-2 border-b-[3px] transition-all hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 ${
-                loginStreak.hasActivityToday
-                  ? 'bg-gradient-to-b from-[#FFE7B8] to-[#FFD888] text-[#B8530A] border-[#E08600] hover:from-[#FFEFCC] hover:to-[#FFDD99] shadow-[0_6px_16px_-8px_rgba(255,150,0,0.45)]'
-                  : 'bg-white dark:bg-stone-800 text-stone-500 dark:text-stone-400 border-stone-200 dark:border-stone-700 hover:text-stone-700'
-              }`}
-            >
-              <span className="text-[17px] leading-none" aria-hidden>{loginStreak.hasActivityToday ? '🔥' : '🕯️'}</span>
-              <span className="tabular-nums">{loginStreak.currentStreak}</span>
-            </button>
-          )}
         </>
       )}
 
