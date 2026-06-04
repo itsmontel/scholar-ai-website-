@@ -23,12 +23,15 @@ struct QuizView: View {
     @State private var fillBlankAnswer: String = ""
     @State private var didAwardCompletion = false
     @State private var celebrate: Int = 0
+    @State private var startedAt = Date()
 
     private var questions: [QuizQuestion] { quiz.questions }
     private var total: Int { questions.count }
 
     var body: some View {
         ZStack {
+            WSColor.background.ignoresSafeArea()
+
             if questions.isEmpty {
                 EmptyStateView(
                     icon: "checkmark.bubble",
@@ -87,34 +90,19 @@ struct QuizView: View {
     // MARK: - Header with Duolingo green progress bar
 
     private var progressHeader: some View {
-        VStack(spacing: 10) {
+        VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Text(quiz.title ?? "Quiz")
-                    .font(WSFont.sans(15, weight: .bold))
-                    .foregroundStyle(WSColor.duoText)
+                    .wsBody(.large, weight: .bold)
+                    .foregroundStyle(WSColor.foreground)
                     .lineLimit(1)
                 Spacer()
-                HStack(spacing: 6) {
-                    Image(systemName: "checkmark.circle.fill").foregroundStyle(WSColor.duoGreen)
-                    Text("\(correctCount)/\(total)")
-                        .font(WSFont.sans(11, weight: .bold))
-                        .foregroundStyle(WSColor.duoText)
-                }
-                .padding(.horizontal, 10)
-                .padding(.vertical, 4)
-                .background(Capsule().fill(WSColor.duoGreenLight)
-                    .overlay(Capsule().stroke(WSColor.duoGreen.opacity(0.3), lineWidth: 2)))
-
-                Text("\(qIndex + 1)/\(total)")
-                    .font(WSFont.sans(11, weight: .bold))
+                Text("Question \(qIndex + 1) of \(total)")
+                    .wsBody(.small, weight: .bold)
                     .foregroundStyle(WSColor.foregroundMuted)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(Capsule().fill(WSColor.backgroundElevated)
-                        .overlay(Capsule().stroke(WSColor.duoBorder, lineWidth: 2)))
             }
 
-            WSProgressBar(fraction: progressFraction, tint: WSColor.duoGreen, height: 14)
+            WSProgressBar(fraction: progressFraction, tint: WSColor.duoPurple, height: 12)
         }
     }
 
@@ -204,7 +192,7 @@ struct QuizView: View {
 
     private func letterFillColor(for state: WSChunkyOptionState) -> Color {
         switch state {
-        case .selected: return WSColor.duoBlue.opacity(0.18)
+        case .selected: return WSColor.duoPurple.opacity(0.18)
         case .correct:  return Color.white.opacity(0.25)
         case .wrong:    return Color.white.opacity(0.25)
         case .disabled: return WSColor.duoSurface
@@ -214,7 +202,7 @@ struct QuizView: View {
 
     private func letterForeground(for state: WSChunkyOptionState) -> Color {
         switch state {
-        case .selected: return WSColor.duoBlueDark
+        case .selected: return WSColor.duoPurpleDark
         case .correct, .wrong: return Color.white
         default:        return WSColor.duoText.opacity(0.65)
         }
@@ -326,75 +314,41 @@ struct QuizView: View {
 
     private var scoreScreen: some View {
         let percentage = total == 0 ? 0 : Int(round(Double(correctCount) / Double(total) * 100))
-        let palette: (icon: String, color: Color, label: String, blurb: String) = {
-            if percentage == 100 { return ("crown.fill",            WSColor.duoOrange, "Perfect!",   "Every single one — you nailed it.") }
-            if percentage >= 90  { return ("trophy.fill",           WSColor.duoGreen, "Outstanding", "Top-tier work. Treat yourself.") }
-            if percentage >= 70  { return ("hand.thumbsup.fill",    WSColor.duoPurple, "Solid",       "Most of it locked in.") }
-            if percentage >= 50  { return ("flame.fill",            WSColor.duoOrange, "Keep going",  "More than halfway. One more pass.") }
-            return ("arrow.counterclockwise.circle.fill",          WSColor.duoRed, "Try again",   "Re-read the lesson and give it another go.")
+        let incorrect = max(0, total - correctCount)
+        let blurb: String = {
+            if percentage == 100 { return "Perfect run — every single one!" }
+            if percentage >= 90  { return "Outstanding work." }
+            if percentage >= 70  { return "Great job — most of it locked in." }
+            if percentage >= 50  { return "Good effort — one more pass will nail it." }
+            return "Keep going — re-read and give it another go."
         }()
 
         return ScrollView {
             VStack(spacing: 22) {
-                // Big medallion hero — chunky circle
-                ZStack {
-                    Circle()
-                        .fill(palette.color.opacity(0.15))
-                        .frame(width: 200, height: 200)
+                Text("Quiz complete! 🎉")
+                    .wsHeadline(.large, weight: .black)
+                    .foregroundStyle(WSColor.foreground)
+                    .padding(.top, 14)
 
-                    // 3D circle
-                    ZStack(alignment: .top) {
-                        Circle()
-                            .fill(palette.color.opacity(0.4))
-                            .frame(width: 150, height: 150)
-                            .offset(y: 6)
-                        Circle()
-                            .fill(palette.color)
-                            .frame(width: 150, height: 150)
-                            .overlay(Circle().stroke(.white.opacity(0.25), lineWidth: 3))
-                    }
+                WSProgressRing(progress: total == 0 ? 0 : Double(correctCount) / Double(total),
+                               tint: WSColor.duoPurple,
+                               size: 168, lineWidth: 14,
+                               centerText: "\(percentage)%")
+                    .wsBobbing(amount: 4, duration: 2.8)
+                    .padding(.vertical, 4)
 
-                    Image(systemName: palette.icon)
-                        .font(.system(size: 60, weight: .heavy))
-                        .foregroundStyle(.white)
-                }
-                .padding(.top, 8)
-                .wsBobbing(amount: 5, duration: 2.6)
+                Text(blurb)
+                    .wsBody(.medium, weight: .semibold)
+                    .foregroundStyle(WSColor.foregroundMuted)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 24)
 
-                VStack(spacing: 6) {
-                    Text("\(percentage)%")
-                        .font(WSFont.headline(64, weight: .black))
-                        .foregroundStyle(palette.color)
-                        .contentTransition(.numericText())
-
-                    Text(palette.label)
-                        .font(WSFont.headline(22, weight: .black))
-                        .foregroundStyle(WSColor.duoText)
-
-                    Text(palette.blurb)
-                        .font(WSFont.sans(14, weight: .bold))
-                        .foregroundStyle(WSColor.foregroundMuted)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 24)
-                }
-
-                // Stat tiles row — chunky cards
                 HStack(spacing: 10) {
-                    WSChunkyStat(icon: "checkmark.circle.fill",
-                                 value: "\(correctCount)",
-                                 label: "Correct",
-                                 tint: WSColor.duoGreen)
-                    WSChunkyStat(icon: "list.number",
-                                 value: "\(total)",
-                                 label: "Total",
-                                 tint: WSColor.duoBlue)
-                    WSChunkyStat(icon: "bolt.fill",
-                                 value: "+\(percentage == 100 ? 25 : 15)",
-                                 label: "XP earned",
-                                 tint: WSColor.duoOrange)
+                    WSStatChip(icon: "checkmark.circle.fill", value: "\(correctCount)", label: "Correct",   tint: WSColor.duoGreen)
+                    WSStatChip(icon: "xmark.circle.fill",     value: "\(incorrect)",    label: "Incorrect", tint: WSColor.duoRed)
+                    WSStatChip(icon: "clock.fill",            value: elapsedString,     label: "Time",      tint: WSColor.duoBlue)
                 }
 
-                // CTA
                 Button {
                     qIndex = 0
                     correctCount = 0
@@ -402,16 +356,23 @@ struct QuizView: View {
                     revealed = false
                     fillBlankAnswer = ""
                     didAwardCompletion = false
+                    startedAt = Date()
                     Haptics.medium()
                 } label: {
                     Label("Retake quiz", systemImage: "arrow.counterclockwise")
+                        .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(WSDuoPrimaryButtonStyle(fullWidth: false))
+                .buttonStyle(WSDuoPrimaryButtonStyle(fullWidth: true))
                 .padding(.top, 8)
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 24)
         }
+    }
+
+    private var elapsedString: String {
+        let secs = max(0, Int(Date().timeIntervalSince(startedAt)))
+        return String(format: "%dm %02ds", secs / 60, secs % 60)
     }
 }
 

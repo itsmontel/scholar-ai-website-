@@ -51,7 +51,7 @@ struct AchievementsGallerySheet: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                WSColor.duoSurface.ignoresSafeArea()
+                WSColor.background.ignoresSafeArea()
 
                 VStack(spacing: 0) {
                     WSChunkyRibbon(color: WSColor.duoPurple)
@@ -402,7 +402,7 @@ struct AchievementDetailSheet: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                WSColor.duoSurface.ignoresSafeArea()
+                WSColor.background.ignoresSafeArea()
 
                 ScrollView {
                     VStack(spacing: 18) {

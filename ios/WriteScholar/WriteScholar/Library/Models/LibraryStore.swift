@@ -109,16 +109,6 @@ final class LibraryStore: ObservableObject {
             .compactMap { k in buckets[k].map { (k, $0) } }
     }
 
-    var totalCount: Int { items.count }
-    var studyPackCount: Int { items.filter { $0.kind == .studyPack    }.count }
-    var essayCount:     Int { items.filter { $0.kind == .essayAnalysis }.count }
-    var documentCount:  Int { items.filter { $0.kind == .document     }.count }
-
-    /// Most recent item across all kinds. The hero card highlights this.
-    var mostRecent: LibraryItem? {
-        items.sorted { $0.createdAt > $1.createdAt }.first
-    }
-
     // MARK: - Mutating API
 
     func add(_ item: LibraryItem) {
@@ -195,6 +185,9 @@ final class LibraryStore: ObservableObject {
         }
         if let wt = pack.wordTower, !wt.questions.isEmpty {
             chips.append(.init(icon: "building.2.fill", label: "Word Tower"))
+        }
+        if let wb = pack.wordBlitz, !wb.questions.isEmpty {
+            chips.append(.init(icon: "bolt.fill", label: "Word Blitz"))
         }
 
         let snippet = pack.originalNotes

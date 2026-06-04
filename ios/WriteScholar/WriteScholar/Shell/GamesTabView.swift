@@ -17,6 +17,7 @@ struct GamesTabView: View {
     @State private var presented: PresentedGame? = nil
     @State private var craterMode: CraterMode = .playForFun
     @State private var towerMode: TowerMode  = .playForFun
+    @State private var blitzMode: WordBlitzMode = .playForFun
     /// Drives the "My Notes" pack picker sheet. Set to `.craterBlast` or
     /// `.wordTower` to present, set back to nil on dismiss/cancel.
     @State private var pickerForGame: NotesPackPickerSheet.Game? = nil
@@ -53,24 +54,39 @@ struct GamesTabView: View {
         }
     }
 
+    enum WordBlitzMode: String, CaseIterable, Identifiable {
+        case playForFun = "Play for Fun"
+        case myNotes    = "My Notes"
+        case mentalMath = "Mental Math"
+        var id: Self { self }
+        var icon: String {
+            switch self {
+            case .playForFun: return "sparkles"
+            case .myNotes:    return "doc.text.fill"
+            case .mentalMath: return "function"
+            }
+        }
+    }
+
     /// Wraps the chosen game + freshly-built bank so the fullScreenCover
     /// can hand the pre-built questions to the game view.
     enum PresentedGame: Identifiable {
         case craterBlast(CraterBlast)
         case wordTower(WordTower)
+        case wordBlitz(WordBlitz)
 
         var id: String {
             switch self {
             case .craterBlast: return "crater"
             case .wordTower:   return "tower"
+            case .wordBlitz:   return "blitz"
             }
         }
     }
 
     var body: some View {
         ZStack {
-            // Duo-style flat backdrop
-            WSColor.duoSurface.ignoresSafeArea()
+            WSColor.background.ignoresSafeArea()
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
@@ -120,6 +136,28 @@ struct GamesTabView: View {
                         }
                     }
 
+                    // Word Blitz card -- pink accent
+                    gameCard(
+                        title: "Word Blitz",
+                        subtitle: "60-second fill-in-the-blank speedrun. Read the sentence, tap the right word -- how many can you get in a minute?",
+                        icon: "bolt.fill",
+                        accent: WSColor.duoPink,
+                        accentDark: WSColor.duoPinkDark,
+                        accentLight: WSColor.duoPinkLight
+                    ) {
+                        modePicker(modes: WordBlitzMode.allCases, selected: $blitzMode, palette: .pink)
+                        playButton(
+                            label: blitzMode == .myNotes ? "Pick a study pack" : "Play \(blitzMode.rawValue)",
+                            palette: .pink
+                        ) {
+                            if blitzMode == .myNotes {
+                                pickerForGame = .wordBlitz
+                            } else {
+                                launchBlitz(mode: blitzMode)
+                            }
+                        }
+                    }
+
                     libraryHint
                 }
                 .padding(.horizontal, 20)
@@ -131,6 +169,7 @@ struct GamesTabView: View {
                 switch game {
                 case .craterBlast(let pack): CraterBlastView(craterBlast: pack)
                 case .wordTower(let pack):   WordTowerView(wordTower: pack)
+                case .wordBlitz(let pack):   WordBlitzView(wordBlitz: pack)
                 }
 
                 Button {
@@ -173,87 +212,37 @@ struct GamesTabView: View {
                 title: "Word Tower \u{00B7} \(pack.displayTitle)",
                 questions: wt.questions
             ))
+        case .wordBlitz:
+            guard let wb = pack.wordBlitz, !wb.questions.isEmpty else { return }
+            presented = .wordBlitz(WordBlitz(
+                title: "Word Blitz \u{00B7} \(pack.displayTitle)",
+                questions: wb.questions
+            ))
         }
     }
 
     // MARK: - Header (Duolingo-style hero)
 
     private var headerBlock: some View {
-        VStack(spacing: 12) {
-            ZStack {
-                // Pulsing green halo behind the mascot
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [WSColor.duoGreen.opacity(0.40), .clear],
-                            center: .center, startRadius: 8, endRadius: 110
-                        )
-                    )
-                    .frame(width: 220, height: 220)
-                    .blur(radius: 18)
-
-                // Six sparkle satellites in Duo colors
-                ForEach(0..<6, id: \.self) { i in
-                    let angle = Double(i) * (.pi * 2 / 6)
-                    let radius: Double = 110
-                    Image(systemName: i.isMultiple(of: 2) ? "sparkle" : "star.fill")
-                        .font(.system(size: 13, weight: .heavy))
-                        .foregroundStyle(gameSparkleColor(for: i))
-                        .offset(x: CGFloat(cos(angle) * radius),
-                                y: CGFloat(sin(angle) * radius))
-                        .opacity(0.85)
-                }
-
-                WSAnimatedImage(name: "mascot-dance", ext: "webp")
-                    .frame(width: 170, height: 170)
-                    .shadow(color: WSColor.duoGreen.opacity(0.35), radius: 22, y: 12)
-                    .wsBobbing(amount: 7, duration: 2.4)
-            }
-
-            // GAMES eyebrow chip + bold headline
-            VStack(spacing: 8) {
-                HStack(spacing: 6) {
-                    Image(systemName: "gamecontroller.fill")
-                        .font(.system(size: 11, weight: .heavy))
-                    Text("GAMES")
-                        .font(WSFont.sans(11, weight: .black))
-                        .tracking(0.8)
-                }
-                .foregroundStyle(.white)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(
-                    Capsule()
-                        .fill(WSColor.duoGreen)
-                        .shadow(color: WSColor.duoGreenDark.opacity(0.45), radius: 8, y: 3)
-                )
-
-                // Solid-color headline -- NO gradient text
-                Text("Beat the boss")
+        HStack(alignment: .center, spacing: 14) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Arcade Mode")
                     .wsHeadline(.large, weight: .black)
-                    .foregroundStyle(WSColor.duoText)
-
-                Text("Same physics + word banks as desktop. 750+ questions, two games, three lives -- go.")
-                    .wsBody(.small, weight: .bold)
+                    .foregroundStyle(WSColor.foreground)
+                Text("Learn by playing fun games!")
+                    .wsBody(.small)
                     .foregroundStyle(WSColor.foregroundMuted)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 6)
+            }
+            Spacer(minLength: 8)
+            ZStack {
+                Circle().fill(WSColor.duoPink.opacity(0.14)).frame(width: 76, height: 76)
+                Image(systemName: "gamecontroller.fill")
+                    .font(.system(size: 32, weight: .bold))
+                    .foregroundStyle(WSColor.duoPink)
             }
         }
-        .frame(maxWidth: .infinity)
-        .padding(.top, 6)
-    }
-
-    private func gameSparkleColor(for i: Int) -> Color {
-        let palette: [Color] = [
-            WSColor.duoOrange,
-            WSColor.duoRed,
-            WSColor.duoBlue,
-            WSColor.duoGreen,
-            WSColor.duoPurple,
-            WSColor.duoOrange,
-        ]
-        return palette[i % palette.count]
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.top, 2)
     }
 
     // MARK: - Game card (chunky 3D card with icon banner)
@@ -362,6 +351,7 @@ struct GamesTabView: View {
     private func modeIcon<M: Hashable>(_ mode: M) -> String {
         if let m = mode as? CraterMode { return m.icon }
         if let m = mode as? TowerMode  { return m.icon }
+        if let m = mode as? WordBlitzMode { return m.icon }
         return "circle"
     }
 
@@ -435,6 +425,19 @@ struct GamesTabView: View {
         }()
         guard !questions.isEmpty else { return }
         presented = .wordTower(WordTower(title: "Word Tower \u{00B7} \(mode.rawValue)", questions: questions))
+    }
+
+    private func launchBlitz(mode: WordBlitzMode) {
+        let questions: [WordBlitzQuestion] = {
+            switch mode {
+            case .playForFun: return WordBlitzBank.playForFun.shuffled()
+            case .mentalMath: return WordBlitzBank.mentalMath().shuffled()
+            // .myNotes routes through the pack picker → launchFromPack.
+            case .myNotes:    return []
+            }
+        }()
+        guard !questions.isEmpty else { return }
+        presented = .wordBlitz(WordBlitz(title: "Word Blitz \u{00B7} \(mode.rawValue)", questions: questions))
     }
 }
 

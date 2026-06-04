@@ -152,7 +152,7 @@ struct OnboardingFlow: View {
                 }
             }
         }
-        .buttonStyle(WSDuoSuccessButtonStyle())
+        .buttonStyle(WSDuoPrimaryButtonStyle())
         .wsShineSweep()
     }
 

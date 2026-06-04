@@ -5684,6 +5684,35 @@ Output JSON only: {"replacement":"..."}`;
     if (upErr) throw upErr;
     return { ok: true, analysisUpdated: true };
   }
+
+  /**
+   * Smart Editor (mobile) — rewrite a passage for a given action:
+   * improve | grammar | simplify | shorten | expand. Returns ONLY the
+   * rewritten text, or the original on any failure.
+   */
+  async rewriteForEditor(text, mode = 'improve', userPlan = 'free') {
+    if (!this.openai) return text;
+    const instructions = {
+      improve:  "Rewrite the passage to be clearer, more compelling and better-structured while preserving the meaning and the author's voice. Keep it roughly the same length.",
+      grammar:  'Fix all spelling, grammar and punctuation errors. Make only the minimal changes needed for correctness — keep the wording, voice and meaning intact.',
+      simplify: 'Rewrite the passage in plain, simple language that is easy to read. Break up long sentences and replace jargon, while keeping every key point.',
+      shorten:  'Make the passage more concise — cut filler and redundancy while keeping every important point. Aim for noticeably shorter.',
+      expand:   'Expand the passage with more detail, explanation and supporting points, keeping the same tone and staying on topic.',
+    };
+    const instruction = instructions[mode] || instructions.improve;
+    const model = process.env.OPENAI_STANDARD_MODEL || 'gpt-4o-mini';
+    const completion = await this.openai.chat.completions.create({
+      model,
+      messages: [
+        { role: 'system', content: `You are an expert academic writing editor. ${instruction} Return ONLY the rewritten text — no preamble, no quotes, no markdown, no commentary.` },
+        { role: 'user', content: text },
+      ],
+      max_tokens: 4000,
+      temperature: 0.4,
+    });
+    const out = completion.choices?.[0]?.message?.content?.trim();
+    return out && out.length > 0 ? out : text;
+  }
 }
 
 module.exports = new AIAnalysisService();

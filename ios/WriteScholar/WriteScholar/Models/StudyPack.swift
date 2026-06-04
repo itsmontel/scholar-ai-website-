@@ -18,6 +18,9 @@ struct StudyPack: Codable, Equatable {
     let crossword: Crossword?
     let craterBlast: CraterBlast?
     let wordTower: WordTower?
+    /// Defaulted so existing `StudyPack(...)` call sites (previews/mocks) keep
+    /// compiling; Codable still decodes the backend's `wordBlitz` when present.
+    var wordBlitz: WordBlitz? = nil
     let originalNotes: String?
 
     /// Title used to label the pack in the library.
@@ -209,4 +212,39 @@ struct WordTowerItem: Codable, Identifiable, Equatable {
         self.text = text
         self.isCorrect = isCorrect
     }
+}
+
+// MARK: - Word Blitz (60-second fill-in-the-blank speedrun)
+
+struct WordBlitz: Codable {
+    let title: String?
+    let questions: [WordBlitzQuestion]
+}
+
+struct WordBlitzQuestion: Codable, Identifiable {
+    let id: String
+    /// Sentence containing the literal "{{blank}}" token.
+    let sentence: String
+    let correctAnswer: String
+    let distractors: [String]
+
+    enum CodingKeys: String, CodingKey { case id, sentence, correctAnswer, distractors }
+
+    init(id: String = UUID().uuidString, sentence: String, correctAnswer: String, distractors: [String]) {
+        self.id = id
+        self.sentence = sentence
+        self.correctAnswer = correctAnswer
+        self.distractors = distractors
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id            = (try? c.decode(String.self, forKey: .id)) ?? UUID().uuidString
+        sentence      = try c.decode(String.self, forKey: .sentence)
+        correctAnswer = try c.decode(String.self, forKey: .correctAnswer)
+        distractors   = (try? c.decode([String].self, forKey: .distractors)) ?? []
+    }
+
+    /// Correct answer + distractors (shuffle for display in the view).
+    var options: [String] { [correctAnswer] + distractors }
 }

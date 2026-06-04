@@ -38,14 +38,19 @@ struct StudyTabContainer: View {
 
     var body: some View {
         ZStack {
-            WSColor.duoSurface.ignoresSafeArea()
+            WSColor.background.ignoresSafeArea()
 
             switch coordinator.phase {
             case .input:
                 StudyHubView(
                     onPaste:      { pasteSheetOpen = true },
                     onPlayGame:   { game in presentedGame = game },
-                    onOpenFocus:  { onOpenFocus() }
+                    onOpenFocus:  { onOpenFocus() },
+                    onOpenPack:   { pack in
+                        withAnimation(.easeInOut(duration: 0.35)) {
+                            coordinator.phase = .home(pack)
+                        }
+                    }
                 )
                 .transition(.opacity)
 
@@ -97,6 +102,7 @@ struct StudyTabContainer: View {
                 switch game {
                 case .craterBlast(let pack): CraterBlastView(craterBlast: pack)
                 case .wordTower(let pack):   WordTowerView(wordTower: pack)
+                case .wordBlitz(let pack):   WordBlitzView(wordBlitz: pack)
                 }
 
                 Button {

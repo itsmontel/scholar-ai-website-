@@ -58,7 +58,7 @@ struct FocusUnlockChallenge: View {
 
     var body: some View {
         ZStack {
-            WSColor.duoSurface.ignoresSafeArea()
+            WSColor.background.ignoresSafeArea()
 
             switch phase {
             case .running:

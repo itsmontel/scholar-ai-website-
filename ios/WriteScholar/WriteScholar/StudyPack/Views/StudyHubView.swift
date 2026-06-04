@@ -32,10 +32,15 @@ struct StudyHubView: View {
     var onPlayGame: (StudyHubGame) -> Void
     /// User taps the Focus shortcut → bubble up to MainTabView
     var onOpenFocus: () -> Void = {}
+    /// User taps a saved pack → parent reopens it (coordinator → .home).
+    var onOpenPack: (StudyPack) -> Void = { _ in }
+
+    @ObservedObject private var library = LibraryStore.shared
 
     /// In-line mode pickers per game (mirrors GamesTabView UX)
     @State private var craterMode: CraterMode = .playForFun
     @State private var towerMode:  TowerMode  = .playForFun
+    @State private var blitzMode:  TowerMode  = .playForFun
 
     enum CraterMode: String, CaseIterable, Identifiable, Hashable {
         case playForFun = "Play for Fun"
@@ -67,11 +72,12 @@ struct StudyHubView: View {
 
     var body: some View {
         ZStack {
-            WSColor.duoSurface.ignoresSafeArea()
+            WSColor.background.ignoresSafeArea()
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
                     headerBlock
+                    yourPacksSection
                     generateGrid
                     playSection
                     toolsSection
@@ -87,86 +93,52 @@ struct StudyHubView: View {
     // MARK: - Header (Duolingo-energy hero with mascot-study)
 
     private var headerBlock: some View {
-        VStack(spacing: 12) {
-            ZStack {
-                // Green halo
-                Circle()
-                    .fill(WSColor.duoGreenLight)
-                    .frame(width: 220, height: 220)
-                    .blur(radius: 18)
-
-                // Six sparkle satellites in Duolingo colors
-                ForEach(0..<6, id: \.self) { i in
-                    let angle = Double(i) * (.pi * 2 / 6)
-                    let radius: Double = 110
-                    Image(systemName: i.isMultiple(of: 2) ? "sparkle" : "star.fill")
-                        .font(.system(size: 13, weight: .heavy))
-                        .foregroundStyle(studySparkleColor(for: i))
-                        .offset(x: CGFloat(cos(angle) * radius),
-                                y: CGFloat(sin(angle) * radius))
-                        .opacity(0.85)
-                }
-
-                WSAnimatedImage(name: "mascot-study", ext: "webp")
-                    .frame(width: 170, height: 170)
-                    .shadow(color: WSColor.duoGreen.opacity(0.35), radius: 22, y: 12)
-                    .wsBobbing(amount: 6, duration: 2.6)
-            }
-
-            VStack(spacing: 8) {
-                HStack(spacing: 6) {
-                    Image(systemName: "graduationcap.fill")
-                        .font(.system(size: 11, weight: .heavy))
-                    Text("STUDY HUB")
-                        .font(WSFont.sans(11, weight: .black))
-                        .tracking(2.2)
-                        .textCase(.uppercase)
-                }
-                .foregroundStyle(.white)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(
-                    Capsule()
-                        .fill(WSColor.duoGreen)
-                        .shadow(color: WSColor.duoGreen.opacity(0.35), radius: 8, y: 3)
-                )
-
-                (
-                    Text("What shall we ")
-                        .font(WSFont.headline(28, weight: .black))
-                        .foregroundStyle(WSColor.duoText)
-                    +
-                    Text("study")
-                        .font(WSFont.headline(28, weight: .black))
-                        .foregroundStyle(WSColor.duoPurple)
-                    +
-                    Text(" today?")
-                        .font(WSFont.headline(28, weight: .black))
-                        .foregroundStyle(WSColor.duoText)
-                )
-                .multilineTextAlignment(.center)
-
-                Text("Generate a fresh pack from your notes — or jump into a game with desktop word banks loaded.")
-                    .font(WSFont.sans(13, weight: .bold))
+        HStack(alignment: .center, spacing: 14) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Study Packs")
+                    .wsHeadline(.large, weight: .black)
+                    .foregroundStyle(WSColor.foreground)
+                Text("Turn your notes into flashcards, quizzes & lessons.")
+                    .wsBody(.small)
                     .foregroundStyle(WSColor.foregroundMuted)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 6)
             }
+            Spacer(minLength: 8)
+            WSMascotHero(asset: "mascot-study", size: 60, haloTint: WSColor.duoOrange)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.top, 4)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.top, 2)
     }
 
-    private func studySparkleColor(for i: Int) -> Color {
-        let palette: [Color] = [
-            WSColor.duoOrange,
-            WSColor.duoPurple,
-            WSColor.duoBlue,
-            WSColor.duoGreen,
-            WSColor.duoRed,
-            WSColor.duoOrange,
-        ]
-        return palette[i % palette.count]
+    // MARK: - Your saved packs (reopen from on-device store)
+
+    @ViewBuilder
+    private var yourPacksSection: some View {
+        let packs = library.items
+            .filter { $0.kind == .studyPack }
+            .sorted { ($0.lastOpenedAt ?? $0.createdAt) > ($1.lastOpenedAt ?? $1.createdAt) }
+        if !packs.isEmpty {
+            VStack(alignment: .leading, spacing: 10) {
+                sectionHeader(title: "Your packs",
+                              tint: WSColor.duoPurple,
+                              icon: "square.stack.3d.up.fill")
+                ForEach(packs) { item in
+                    Button {
+                        Haptics.medium()
+                        if let pack = StudyPackPersistence.shared.loadPack(for: item.id) {
+                            onOpenPack(pack)
+                        } else {
+                            onPaste()   // pre-store item: can't reopen, start fresh
+                        }
+                    } label: {
+                        WSListRowCard(icon: "square.stack.3d.up.fill",
+                                      iconTint: WSColor.duoPurple,
+                                      title: item.title,
+                                      subtitle: item.subtitle)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
     }
 
     // MARK: - Generate (paste / upload / youtube / photo)
@@ -174,7 +146,7 @@ struct StudyHubView: View {
     private var generateGrid: some View {
         VStack(alignment: .leading, spacing: 10) {
             sectionHeader(title: "Start a new pack",
-                          tint: WSColor.duoPurple,
+                          tint: WSColor.duoOrange,
                           icon: "wand.and.stars")
 
             let cols = [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)]
@@ -300,6 +272,19 @@ struct StudyHubView: View {
                 modePicker(modes: TowerMode.allCases, selected: $towerMode, tint: WSColor.duoPurple)
                 playButton(label: "Play \(towerMode.rawValue)") {
                     onPlayGame(.wordTower(buildWordTower()))
+                }
+            }
+
+            gameCard(
+                title: "Word Blitz",
+                subtitle: "60-second fill-in-the-blank speedrun — read the sentence, tap the right word.",
+                gradient: [WSColor.duoPink, WSColor.duoPinkDark, Color(hex: 0x7A1E50)],
+                icon: "bolt.fill",
+                accent: Color.white
+            ) {
+                modePicker(modes: TowerMode.allCases, selected: $blitzMode, tint: WSColor.duoPink)
+                playButton(label: "Play \(blitzMode.rawValue)") {
+                    onPlayGame(.wordBlitz(buildWordBlitz()))
                 }
             }
         }
@@ -440,6 +425,16 @@ struct StudyHubView: View {
         return WordTower(title: "Word Tower · \(towerMode.rawValue)", questions: questions)
     }
 
+    private func buildWordBlitz() -> WordBlitz {
+        let questions: [WordBlitzQuestion] = {
+            switch blitzMode {
+            case .playForFun: return WordBlitzBank.playForFun.shuffled()
+            case .mentalMath: return WordBlitzBank.mentalMath().shuffled()
+            }
+        }()
+        return WordBlitz(title: "Word Blitz · \(blitzMode.rawValue)", questions: questions)
+    }
+
     // MARK: - Tools (info cards)
 
     private var toolsSection: some View {
@@ -562,11 +557,13 @@ struct StudyHubView: View {
 enum StudyHubGame: Identifiable {
     case craterBlast(CraterBlast)
     case wordTower(WordTower)
+    case wordBlitz(WordBlitz)
 
     var id: String {
         switch self {
         case .craterBlast: return "crater"
         case .wordTower:   return "tower"
+        case .wordBlitz:   return "blitz"
         }
     }
 }

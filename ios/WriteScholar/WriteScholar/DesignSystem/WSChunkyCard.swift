@@ -36,32 +36,20 @@ struct WSChunkyCardModifier: ViewModifier {
     var fillColor: Color = WSColor.backgroundElevated
 
     func body(content: Content) -> some View {
-        let lipColor = (accent ?? WSColor.duoBorder).opacity(accent != nil ? 0.35 : 1.0)
-        let glow     = (accent ?? WSColor.duoPurple).opacity(0.08)
+        // Soft-shadow card (prototype look): flat fill, generous radius, a
+        // diffuse shadow softly tinted by the accent. No 3D "lip".
+        // `lipHeight` is retained in the API but unused now.
+        let shadowTint = (accent ?? WSColor.duoPurple).opacity(0.16)
 
-        return ZStack(alignment: .top) {
-            // Dark bottom lip — fixed in place. Slightly inset so it
-            // hugs the card and doesn't peek out the sides.
-            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                .fill(lipColor)
-                .padding(.top, lipHeight)
-                .padding(.horizontal, 1)
-
-            // Top face — the actual content.
-            content
-                .padding(.horizontal, horizontalPadding)
-                .padding(.vertical, verticalPadding)
-                .background(
-                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                        .fill(fillColor)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                        .stroke(WSColor.hairline, lineWidth: 1)
-                )
-        }
-        .compositingGroup()
-        .shadow(color: glow, radius: 14, y: 6)
+        return content
+            .padding(.horizontal, horizontalPadding)
+            .padding(.vertical, verticalPadding)
+            .background(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .fill(fillColor)
+            )
+            .shadow(color: shadowTint, radius: 16, y: 8)
+            .shadow(color: Color.black.opacity(0.04), radius: 2, y: 1)
     }
 }
 

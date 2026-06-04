@@ -20,6 +20,8 @@ struct AnalyzeResultsView: View {
     @ObservedObject var coordinator: AnalyzeCoordinator
 
     @State private var tab: ResultTab = .highlights
+    @State private var celebrate = 0
+    @State private var didCelebrate = false
 
     enum ResultTab: String, CaseIterable, Identifiable {
         case highlights = "Highlights"
@@ -37,19 +39,30 @@ struct AnalyzeResultsView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            scoreBanner
-                .padding(.horizontal, 16)
-                .padding(.top, 8)
+        ZStack {
+            WSColor.background.ignoresSafeArea()
 
-            tabStrip
-                .padding(.top, 12)
+            VStack(spacing: 0) {
+                scoreBanner
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
 
-            Divider()
+                tabStrip
+                    .padding(.top, 12)
 
-            content(for: tab)
+                Divider()
+
+                content(for: tab)
+            }
+
+            WSConfettiView(trigger: $celebrate)
+                .allowsHitTesting(false)
         }
-        .background(WSColor.duoSurface.ignoresSafeArea())
+        .onAppear {
+            guard !didCelebrate else { return }
+            didCelebrate = true
+            if scoreFraction >= 0.7 { celebrate += 1 }
+        }
     }
 
     // MARK: - Score banner
@@ -73,9 +86,12 @@ struct AnalyzeResultsView: View {
             }
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(result.gradeEstimate ?? "Analysis ready")
+                Text(encouragement)
                     .wsHeadline(.small, weight: .black)
-                    .foregroundStyle(WSColor.duoText)
+                    .foregroundStyle(WSColor.foreground)
+                Text(result.gradeEstimate ?? "Analysis ready")
+                    .wsBody(.small, weight: .bold)
+                    .foregroundStyle(WSColor.foregroundMuted)
                 if let clarity = result.clarityRating, !clarity.isEmpty {
                     HStack(spacing: 6) {
                         Image(systemName: "eye")
@@ -130,6 +146,14 @@ struct AnalyzeResultsView: View {
             return "\(Int(round(s)))"
         }
         return "--"
+    }
+
+    private var encouragement: String {
+        let f = scoreFraction
+        if f >= 0.85 { return "Excellent work! 🎉" }
+        if f >= 0.70 { return "Great work! 👏" }
+        if f >= 0.50 { return "Good effort 💪" }
+        return "Keep going 📈"
     }
 
     // MARK: - Tab strip

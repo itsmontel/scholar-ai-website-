@@ -166,7 +166,7 @@ struct SignUpView: View {
                     Text(isLoading ? "Creating account..." : "Create account")
                 }
             }
-            .buttonStyle(WSDuoSuccessButtonStyle())
+            .buttonStyle(WSDuoPrimaryButtonStyle())
             .disabled(!canSubmit || isLoading)
             .opacity(canSubmit ? 1 : 0.55)
             .padding(.top, 4)

@@ -153,7 +153,7 @@ struct AuthFlowView: View {
                     Text("Continue with email")
                 }
             }
-            .buttonStyle(WSDuoSuccessButtonStyle())
+            .buttonStyle(WSDuoPrimaryButtonStyle())
 
             // Sign up nudge
             Button {

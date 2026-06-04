@@ -2956,4 +2956,35 @@ router.get('/study-pack-usage', authenticateToken, async (req, res) => {
   }
 });
 
+// Smart Editor (mobile) — rewrite a passage for an action:
+// improve | grammar | simplify | shorten | expand. Returns { data: { result } }.
+router.post('/editor', authenticateToken, async (req, res) => {
+  try {
+    const { text, mode } = req.body;
+    const userPlan = getEffectivePlan(req);
+
+    if (!text || text.trim().length === 0) {
+      return res.status(400).json({ success: false, message: 'Text is required' });
+    }
+
+    const wordCount = text.trim().split(/\s+/).length;
+    const maxWords = isPaidAnalysisTier(userPlan) ? 15000 : 5000;
+    if (wordCount > maxWords) {
+      return res.status(400).json({
+        success: false,
+        message: `Text exceeds the ${maxWords.toLocaleString()} word limit for your plan.`
+      });
+    }
+
+    const validModes = ['improve', 'grammar', 'simplify', 'shorten', 'expand'];
+    const safeMode = validModes.includes(mode) ? mode : 'improve';
+
+    const result = await aiAnalysisService.rewriteForEditor(text, safeMode, userPlan);
+    return res.json({ success: true, data: { result } });
+  } catch (error) {
+    console.error('[editor] error:', error.message);
+    return res.status(500).json({ success: false, message: 'Could not process the text. Please try again.' });
+  }
+});
+
 module.exports = router;

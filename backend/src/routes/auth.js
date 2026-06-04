@@ -27,6 +27,47 @@ const generateToken = (userId) => {
   );
 };
 
+// --- Sign in with Apple: verify the identity token against Apple's JWKS ---
+// No extra dependency: Node 18+ has global fetch, and crypto.createPublicKey
+// can build a verify key straight from Apple's JWK.
+const APPLE_ISSUER = 'https://appleid.apple.com';
+const APPLE_KEYS_URL = 'https://appleid.apple.com/auth/keys';
+// Must equal the iOS app's bundle identifier (Apple's `aud` claim). Override
+// via the APPLE_CLIENT_ID env var if the bundle id ever changes.
+const APPLE_CLIENT_ID = process.env.APPLE_CLIENT_ID || 'com.writescholar.app';
+
+let appleKeyCache = { keys: null, fetchedAt: 0 };
+
+const getAppleSigningKey = async (kid) => {
+  const now = Date.now();
+  const stale = !appleKeyCache.keys
+    || (now - appleKeyCache.fetchedAt > 60 * 60 * 1000)
+    || !appleKeyCache.keys.find((k) => k.kid === kid);
+  if (stale) {
+    const resp = await fetch(APPLE_KEYS_URL);
+    if (!resp.ok) throw new Error('Could not fetch Apple public keys');
+    const json = await resp.json();
+    appleKeyCache = { keys: json.keys || [], fetchedAt: now };
+  }
+  const jwk = appleKeyCache.keys.find((k) => k.kid === kid);
+  if (!jwk) throw new Error('No matching Apple public key');
+  return crypto.createPublicKey({ key: jwk, format: 'jwk' });
+};
+
+// Verifies signature + issuer + audience + expiry; returns the token claims.
+const verifyAppleIdentityToken = async (identityToken) => {
+  const decoded = jwt.decode(identityToken, { complete: true });
+  if (!decoded || !decoded.header || !decoded.header.kid) {
+    throw new Error('Malformed Apple identity token');
+  }
+  const publicKey = await getAppleSigningKey(decoded.header.kid);
+  return jwt.verify(identityToken, publicKey, {
+    algorithms: ['RS256'],
+    issuer: APPLE_ISSUER,
+    audience: APPLE_CLIENT_ID,
+  });
+};
+
 // @route   POST /api/auth/register
 // @desc    Register a new user
 // @access  Public
@@ -210,6 +251,93 @@ router.post('/login', validateLogin, async (req, res) => {
       success: false,
       message: 'Login failed'
     });
+  }
+});
+
+// @route   POST /api/auth/apple
+// @desc    Sign in (or sign up) with Apple — verifies the identity token,
+//          then finds-or-creates a user by the token's email claim.
+// @access  Public
+router.post('/apple', async (req, res) => {
+  try {
+    const { identityToken, firstName, lastName, email: bodyEmail } = req.body;
+
+    if (!identityToken) {
+      return res.status(400).json({ success: false, message: 'Missing Apple identity token' });
+    }
+
+    let claims;
+    try {
+      claims = await verifyAppleIdentityToken(identityToken);
+    } catch (verifyError) {
+      console.error('Apple token verification failed:', verifyError.message);
+      return res.status(401).json({
+        success: false,
+        message: 'Apple sign-in could not be verified. Please try again.'
+      });
+    }
+
+    // Apple's identity token always carries the email claim (real or relay),
+    // even when the client-side `email` is only sent on first authorization.
+    const email = (claims.email || bodyEmail || '').toLowerCase().trim();
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Apple did not return an email for this account.'
+      });
+    }
+
+    let user = await userService.findUserByEmail(email);
+
+    if (!user) {
+      const name = [firstName, lastName].filter(Boolean).join(' ').trim() || null;
+      const signupDevice = parseDeviceFromUserAgent(req.headers['user-agent']);
+      user = await userService.createAppleUser({
+        email,
+        name,
+        firstName: firstName || null,
+        lastName: lastName || null,
+        emailVerified: claims.email_verified !== false,
+        signupDevice
+      });
+    } else {
+      if (user.is_active === false) {
+        return res.status(401).json({
+          success: false,
+          message: 'Account is deactivated. Please contact support.'
+        });
+      }
+      // Existing account (email/password or a prior Apple sign-in) — log in.
+      await userService.updateUser(user.id, { last_login: new Date().toISOString() });
+    }
+
+    // Record streak activity (fire and forget)
+    streakService.recordLogin(user.id).catch(() => {});
+
+    const token = generateToken(user.id);
+
+    res.json({
+      success: true,
+      message: 'Apple sign-in successful',
+      data: {
+        user: {
+          id: user.id,
+          email: user.email,
+          username: user.username || null,
+          firstName: user.first_name || firstName || null,
+          lastName: user.last_name || lastName || null,
+          subscriptionPlan: user.subscription_plan,
+          subscriptionStatus: user.subscription_status,
+          emailVerified: user.email_verified,
+          onboardingCompleted: user.onboarding_completed || false,
+          welcomeTutorialCompleted: user.welcome_tutorial_completed || false
+        },
+        token
+      }
+    });
+  } catch (error) {
+    console.error('Apple sign-in error:', error);
+    res.status(500).json({ success: false, message: 'Apple sign-in failed' });
   }
 });
 

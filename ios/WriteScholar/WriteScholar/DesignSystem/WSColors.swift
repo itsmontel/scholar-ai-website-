@@ -36,10 +36,16 @@ enum WSColor {
     static let duoRedDark  = Color(hex: 0xE04343)
     static let duoRedLight = Color(hex: 0xFFE8E8)
 
-    /// Purple — brand primary, achievements, premium
-    static let duoPurple      = Color(hex: 0xA560E8)
-    static let duoPurpleDark  = Color(hex: 0x8A48C7)
-    static let duoPurpleLight = Color(hex: 0xF3EAFF)
+    /// Purple — brand primary, achievements, premium.
+    /// Retuned to the prototype's bluer violet (was #A560E8 orchid).
+    static let duoPurple      = Color(hex: 0x7C5CE6)
+    static let duoPurpleDark  = Color(hex: 0x6246C9)
+    static let duoPurpleLight = Color(hex: 0xEFEAFE)
+
+    /// Pink — arcade / games accent (matches the website's arcade section)
+    static let duoPink      = Color(hex: 0xEC4899)
+    static let duoPinkDark  = Color(hex: 0xDB2777)
+    static let duoPinkLight = Color(hex: 0xFCE7F3)
 
     // MARK: - Neutrals (Duolingo-style)
 
@@ -47,8 +53,8 @@ enum WSColor {
     static let duoText = Color(hex: 0x3C3C3C)
     /// Light border / dividers — matches Duolingo's #E5E5E5
     static let duoBorder = Color(hex: 0xE5E5E5)
-    /// Off-white surface background — matches #F7F7F7
-    static let duoSurface = Color(hex: 0xF7F7F7)
+    /// Lavender page wash — matches the prototype's tinted background (was #F7F7F7)
+    static let duoSurface = Color(hex: 0xF6F4FE)
 
     // MARK: - Semantic aliases (used throughout the app)
 

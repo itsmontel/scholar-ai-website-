@@ -74,6 +74,13 @@ struct WSDuoPalette {
         glow:       WSColor.duoBlue
     )
 
+    static let pink = WSDuoPalette(
+        topColor:   WSColor.duoPink,
+        baseColor:  WSColor.duoPinkDark,
+        foreground: .white,
+        glow:       WSColor.duoPink
+    )
+
     // Keep legacy gradient-based name for backward compat
     var topGradient: [Color] { [topColor] }
 }
@@ -90,40 +97,31 @@ struct WSDuoButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         let pressed = configuration.isPressed
 
-        return ZStack(alignment: .top) {
-            // Base "lip" — fixed in place
-            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                .fill(palette.baseColor)
-                .frame(maxWidth: fullWidth ? .infinity : nil)
-                .padding(.top, lip)
-
-            // Top face — the visible solid button
-            configuration.label
-                .font(WSFont.sans(15, weight: .black))
-                .textCase(.uppercase)
-                .tracking(1.0)
-                .foregroundStyle(palette.foreground)
-                .padding(.vertical, verticalPadding)
-                .padding(.horizontal, fullWidth ? 0 : 22)
-                .frame(maxWidth: fullWidth ? .infinity : nil)
-                .background(
-                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                        .fill(palette.topColor)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                                .stroke(Color.white.opacity(0.12), lineWidth: 1)
-                        )
-                )
-                .offset(y: pressed ? lip : 0)
-        }
-        .compositingGroup()
-        .shadow(color: palette.glow.opacity(pressed ? 0.06 : 0.22),
-                radius: pressed ? 2 : 8,
-                y: pressed ? 1 : 4)
-        .animation(.spring(response: 0.16, dampingFraction: 0.65), value: pressed)
-        .onChange(of: configuration.isPressed) { _, isPressed in
-            if isPressed { Haptics.light() }
-        }
+        // Soft-shadow button (prototype look): flat solid fill, rounded,
+        // title-case label. Press = a small scale-down + softer shadow,
+        // no vertical "lip slide". `lip` retained in the API but unused.
+        return configuration.label
+            .font(WSFont.sans(16, weight: .bold))
+            .foregroundStyle(palette.foreground)
+            .padding(.vertical, verticalPadding)
+            .padding(.horizontal, fullWidth ? 0 : 22)
+            .frame(maxWidth: fullWidth ? .infinity : nil)
+            .background(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .fill(palette.topColor)
+                    .overlay(
+                        // Subtle outline only for light (secondary) buttons
+                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                            .stroke(WSColor.hairline, lineWidth: palette.foreground == .white ? 0 : 1)
+                    )
+            )
+            .shadow(color: palette.glow.opacity(pressed ? 0.10 : 0.26),
+                    radius: pressed ? 4 : 12, y: pressed ? 2 : 6)
+            .scaleEffect(pressed ? 0.97 : 1.0)
+            .animation(.spring(response: 0.16, dampingFraction: 0.65), value: pressed)
+            .onChange(of: configuration.isPressed) { _, isPressed in
+                if isPressed { Haptics.light() }
+            }
     }
 }
 

@@ -126,6 +126,36 @@ class UserService {
     }
   }
 
+  async createAppleUser({ email, name, firstName = null, lastName = null, emailVerified = true, signupDevice = null }) {
+    try {
+      const { data, error } = await this.getSupabaseClient()
+        .from('users')
+        .insert({
+          email: email?.toLowerCase(),
+          name: name,
+          first_name: firstName,
+          last_name: lastName,
+          email_verified: emailVerified,
+          subscription_plan: 'free',
+          subscription_status: 'active',
+          signup_device: signupDevice,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error creating Apple user:', error);
+      throw error;
+    }
+  }
+
   async createUser(userData) {
     try {
       const { data, error } = await this.getSupabaseClient()

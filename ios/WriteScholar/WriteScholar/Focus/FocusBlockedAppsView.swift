@@ -34,7 +34,7 @@ struct FocusBlockedAppsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                WSColor.duoSurface.ignoresSafeArea()
+                WSColor.background.ignoresSafeArea()
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {

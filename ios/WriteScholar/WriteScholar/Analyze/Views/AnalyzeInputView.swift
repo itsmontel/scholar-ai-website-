@@ -26,7 +26,7 @@ struct AnalyzeInputView: View {
 
     var body: some View {
         ZStack {
-            WSColor.duoSurface.ignoresSafeArea()
+            WSColor.background.ignoresSafeArea()
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {

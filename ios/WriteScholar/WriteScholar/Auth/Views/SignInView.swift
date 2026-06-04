@@ -117,7 +117,7 @@ struct SignInView: View {
                     Text(isLoading ? "Signing in..." : "Sign in")
                 }
             }
-            .buttonStyle(WSDuoSuccessButtonStyle())
+            .buttonStyle(WSDuoPrimaryButtonStyle())
             .disabled(!canSubmit || isLoading)
             .opacity(canSubmit ? 1 : 0.55)
             .padding(.top, 4)

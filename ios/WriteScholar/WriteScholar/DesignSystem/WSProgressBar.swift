@@ -38,7 +38,6 @@ struct WSProgressBar: View {
     var body: some View {
         GeometryReader { geo in
             let cornerRadius = height / 2
-            let darkenedTint = tint.mix(with: Color.black, by: 0.20)
 
             ZStack(alignment: .leading) {
                 // Track — darker base so the fill looks like it sits *in* a slot
@@ -52,14 +51,9 @@ struct WSProgressBar: View {
                 // Fill (the actual progress)
                 if clamped > 0.0001 {
                     ZStack(alignment: .leading) {
-                        // Bottom lip — darker tint inset 2pt
-                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                            .fill(darkenedTint)
-
-                        // Top face
+                        // Flat soft fill (no 3D lip)
                         RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                             .fill(tint)
-                            .padding(.bottom, max(2, height * 0.18))
 
                         // Sliding white shimmer
                         if showsShimmer {

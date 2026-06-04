@@ -19,6 +19,7 @@ struct NotesPackPickerSheet: View {
     enum Game: String, Identifiable {
         case craterBlast
         case wordTower
+        case wordBlitz
         var id: String { rawValue }
     }
 
@@ -31,7 +32,7 @@ struct NotesPackPickerSheet: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                WSColor.duoSurface.ignoresSafeArea()
+                WSColor.background.ignoresSafeArea()
 
                 VStack(spacing: 0) {
                     WSChunkyRibbon(color: WSColor.duoBlue)
@@ -211,6 +212,7 @@ struct NotesPackPickerSheet: View {
                     switch game {
                     case .craterBlast: return pack.craterBlast?.questions.count ?? 0
                     case .wordTower:   return pack.wordTower?.questions.count ?? 0
+                    case .wordBlitz:   return pack.wordBlitz?.questions.count ?? 0
                     }
                 }()
                 guard count > 0 else { return nil }
@@ -228,6 +230,7 @@ struct NotesPackPickerSheet: View {
                 switch game {
                 case .craterBlast: return (pack.craterBlast?.questions.count ?? 0) == 0
                 case .wordTower:   return (pack.wordTower?.questions.count ?? 0) == 0
+                case .wordBlitz:   return (pack.wordBlitz?.questions.count ?? 0) == 0
                 }
             }
     }
@@ -236,6 +239,7 @@ struct NotesPackPickerSheet: View {
         switch game {
         case .craterBlast: return "Crater Blast"
         case .wordTower:   return "Word Tower"
+        case .wordBlitz:   return "Word Blitz"
         }
     }
 
@@ -243,6 +247,7 @@ struct NotesPackPickerSheet: View {
         switch game {
         case .craterBlast: return "burst.fill"
         case .wordTower:   return "building.2.fill"
+        case .wordBlitz:   return "bolt.fill"
         }
     }
 
@@ -250,6 +255,7 @@ struct NotesPackPickerSheet: View {
         switch game {
         case .craterBlast: return WSColor.duoRed
         case .wordTower:   return WSColor.duoGreen
+        case .wordBlitz:   return WSColor.duoPink
         }
     }
 
@@ -257,6 +263,7 @@ struct NotesPackPickerSheet: View {
         switch game {
         case .craterBlast: return "Pick a pack — Crater Blast"
         case .wordTower:   return "Pick a pack — Word Tower"
+        case .wordBlitz:   return "Pick a pack — Word Blitz"
         }
     }
 }

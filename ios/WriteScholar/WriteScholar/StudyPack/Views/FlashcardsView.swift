@@ -22,9 +22,9 @@ struct FlashcardsView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            scoreboard
+            header
                 .padding(.horizontal, 20)
-                .padding(.top, 8)
+                .padding(.top, 12)
 
             ZStack {
                 if deck.isEmpty {
@@ -38,9 +38,10 @@ struct FlashcardsView: View {
             if !deck.isEmpty {
                 actionBar
                     .padding(.horizontal, 20)
-                    .padding(.bottom, 12)
+                    .padding(.bottom, 16)
             }
         }
+        .background(WSColor.background.ignoresSafeArea())
         .onAppear {
             if deck.isEmpty { deck = flashcards.cards }
         }
@@ -48,39 +49,23 @@ struct FlashcardsView: View {
 
     // MARK: - Scoreboard
 
-    private var scoreboard: some View {
-        HStack(spacing: 12) {
-            scorePill(label: "Got it",     count: knownCount,  color: WSColor.duoGreen)
-            scorePill(label: "Reviewing",  count: reviewCount, color: WSColor.duoOrange)
-            Spacer()
-            Text("\(deck.count) left")
-                .font(WSFont.sans(11, weight: .bold))
-                .foregroundStyle(WSColor.foregroundMuted)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 5)
-                .background(
-                    Capsule().fill(WSColor.backgroundElevated)
-                        .overlay(Capsule().stroke(WSColor.duoBorder, lineWidth: 2))
-                )
+    private var header: some View {
+        let total = max(flashcards.cards.count, 1)
+        let done  = knownCount + reviewCount
+        return VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text(flashcards.title ?? "Flashcards")
+                    .wsBody(.large, weight: .bold)
+                    .foregroundStyle(WSColor.foreground)
+                    .lineLimit(1)
+                Spacer()
+                Text("\(min(done + 1, total)) / \(total)")
+                    .wsBody(.small, weight: .bold)
+                    .foregroundStyle(WSColor.foregroundMuted)
+            }
+            WSProgressBar(fraction: Double(done) / Double(total),
+                          tint: WSColor.duoPurple, height: 10)
         }
-    }
-
-    private func scorePill(label: String, count: Int, color: Color) -> some View {
-        HStack(spacing: 6) {
-            Circle().fill(color).frame(width: 8, height: 8)
-            Text("\(count)")
-                .font(WSFont.sans(13, weight: .bold))
-                .foregroundStyle(WSColor.duoText)
-            Text(label)
-                .font(WSFont.sans(11, weight: .bold))
-                .foregroundStyle(WSColor.foregroundMuted)
-        }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        .background(
-            Capsule().fill(color.opacity(0.12))
-                .overlay(Capsule().stroke(color.opacity(0.3), lineWidth: 2))
-        )
     }
 
     // MARK: - Card stack
@@ -175,19 +160,9 @@ struct FlashcardsView: View {
         .padding(24)
         .frame(width: 280, height: 360)
         .background(
-            ZStack(alignment: .top) {
-                // 3D lip
-                RoundedRectangle(cornerRadius: 26, style: .continuous)
-                    .fill(accent.opacity(0.35))
-                    .padding(.top, 6)
-                // Top face
-                RoundedRectangle(cornerRadius: 26, style: .continuous)
-                    .fill(WSColor.backgroundElevated)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 26, style: .continuous)
-                            .stroke(WSColor.duoBorder, lineWidth: 2)
-                    )
-            }
+            RoundedRectangle(cornerRadius: 26, style: .continuous)
+                .fill(WSColor.backgroundElevated)
+                .shadow(color: Color.black.opacity(0.08), radius: 18, y: 8)
         )
     }
 
@@ -252,62 +227,30 @@ struct FlashcardsView: View {
     // MARK: - Action bar
 
     private var actionBar: some View {
-        HStack(spacing: 12) {
-            actionButton(
-                title: "Review",
-                icon: "arrow.uturn.backward",
-                color: WSColor.duoOrange
-            ) {
-                advance(known: false)
-            }
-            actionButton(
-                title: "Flip",
-                icon: "arrow.left.arrow.right",
-                color: WSColor.duoBlue
-            ) {
-                withAnimation(.spring(response: 0.45, dampingFraction: 0.75)) {
-                    topFlipped.toggle()
-                }
-                Haptics.light()
-            }
-            actionButton(
-                title: "Got it",
-                icon: "checkmark",
-                color: WSColor.duoGreen
-            ) {
-                advance(known: true)
-            }
+        HStack(spacing: 10) {
+            gradeButton(title: "Again", color: WSColor.duoRed)    { advance(known: false) }
+            gradeButton(title: "Hard",  color: WSColor.duoOrange) { advance(known: false) }
+            gradeButton(title: "Good",  color: WSColor.duoGreen)  { advance(known: true) }
+            gradeButton(title: "Easy",  color: WSColor.duoBlue)   { advance(known: true) }
         }
     }
 
-    private func actionButton(title: String, icon: String, color: Color, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            VStack(spacing: 6) {
-                Image(systemName: icon)
-                    .font(.system(size: 18, weight: .black))
-                    .foregroundStyle(color)
-                Text(title)
-                    .font(WSFont.sans(11, weight: .black))
-                    .tracking(0.4)
-                    .foregroundStyle(WSColor.duoText)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
-            .background(
-                ZStack(alignment: .top) {
+    private func gradeButton(title: String, color: Color, action: @escaping () -> Void) -> some View {
+        Button {
+            Haptics.light()
+            action()
+        } label: {
+            Text(title)
+                .wsBody(.small, weight: .bold)
+                .foregroundStyle(color)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(color.opacity(0.32))
-                        .padding(.top, 4)
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(WSColor.backgroundElevated)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .stroke(color.opacity(0.45), lineWidth: 2)
-                        )
-                }
-            )
+                        .fill(color.opacity(0.14))
+                )
         }
-        .buttonStyle(WSBouncyButtonStyle())
+        .buttonStyle(.plain)
     }
 
     // MARK: - Completed state

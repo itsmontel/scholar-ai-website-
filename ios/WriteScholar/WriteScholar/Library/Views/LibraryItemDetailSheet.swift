@@ -35,7 +35,7 @@ struct LibraryItemDetailSheet: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                WSColor.duoSurface.ignoresSafeArea()
+                WSColor.background.ignoresSafeArea()
 
                 VStack(spacing: 0) {
                     WSChunkyRibbon(color: accentColor)

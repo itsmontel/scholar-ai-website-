@@ -84,7 +84,7 @@ struct SignUpSuccessView: View {
                             UIApplication.shared.open(url)
                         }
                     }
-                    .buttonStyle(WSDuoSuccessButtonStyle())
+                    .buttonStyle(WSDuoPrimaryButtonStyle())
 
                     Button("I've verified \u{2014} sign me in") {
                         // Pop back to sign-in so user can log in.

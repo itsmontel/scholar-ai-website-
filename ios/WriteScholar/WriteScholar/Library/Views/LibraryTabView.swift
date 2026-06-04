@@ -30,26 +30,26 @@ struct LibraryTabView: View {
 
     var body: some View {
         ZStack {
-            WSColor.duoSurface.ignoresSafeArea()
+            WSColor.background.ignoresSafeArea()
 
             ScrollView {
-                LazyVStack(alignment: .leading, spacing: 18, pinnedViews: []) {
-                    mascotHero
-                    topBar
-                    heroCapsule
+                LazyVStack(alignment: .leading, spacing: 16, pinnedViews: []) {
+                    header
                     if showSearch { searchBar }
                     segmentedFilter
                     contentArea
                 }
                 .padding(.horizontal, 18)
-                .padding(.top, 8)
-                .padding(.bottom, 32)
+                .padding(.top, 10)
+                .padding(.bottom, 96)
             }
             .scrollDismissesKeyboard(.interactively)
             .refreshable {
                 store.lastSyncedAt = Date()
                 Haptics.light()
             }
+
+            newButton
         }
         .sheet(item: $presentedItem) { item in
             LibraryItemDetailSheet(
@@ -90,59 +90,15 @@ struct LibraryTabView: View {
         }
     }
 
-    // MARK: - Mascot hero (Duolingo-energy header with mascot-laptop)
+    // MARK: - Header ("My Stuff" + search + sort)
 
-    private var mascotHero: some View {
-        VStack(spacing: 12) {
-            ZStack {
-                Circle()
-                    .fill(WSColor.duoPurpleLight)
-                    .frame(width: 180, height: 180)
-
-                WSAnimatedImage(name: "mascot-laptop", ext: "webp")
-                    .frame(width: 140, height: 140)
-                    .shadow(color: WSColor.duoPurple.opacity(0.30), radius: 16, y: 8)
-                    .wsBobbing(amount: 6, duration: 2.6)
-            }
-
-            VStack(spacing: 6) {
-                HStack(spacing: 6) {
-                    Image(systemName: "books.vertical.fill")
-                        .font(.system(size: 11, weight: .heavy))
-                    Text("LIBRARY")
-                        .font(WSFont.sans(11, weight: .black))
-                        .tracking(0.8)
-                }
-                .foregroundStyle(.white)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(
-                    Capsule()
-                        .fill(WSColor.duoPurple)
-                        .shadow(color: WSColor.duoPurple.opacity(0.35), radius: 6, y: 3)
-                )
-
-                Text("Your ")
-                    .font(WSFont.headline(28))
-                    .foregroundStyle(WSColor.duoText)
-                +
-                Text("shelf")
-                    .font(WSFont.headline(28))
-                    .foregroundStyle(WSColor.duoBlue)
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.top, 4)
-    }
-
-    // MARK: - Top bar (utility row -- search + sort)
-
-    private var topBar: some View {
-        HStack(spacing: 12) {
+    private var header: some View {
+        HStack(alignment: .center, spacing: 10) {
+            Text("My Stuff")
+                .wsHeadline(.large, weight: .black)
+                .foregroundStyle(WSColor.foreground)
             Spacer()
-
-            // Search toggle
-            iconButton(systemImage: showSearch ? "xmark" : "magnifyingglass") {
+            Button {
                 Haptics.selection()
                 withAnimation(.wsBouncePop) {
                     showSearch.toggle()
@@ -151,9 +107,11 @@ struct LibraryTabView: View {
                 if showSearch {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { searchFocused = true }
                 }
+            } label: {
+                circleIcon(showSearch ? "xmark" : "magnifyingglass")
             }
+            .buttonStyle(.plain)
 
-            // Sort menu
             Menu {
                 Picker("Sort", selection: $store.sort) {
                     ForEach(LibrarySort.allCases) { s in
@@ -161,73 +119,54 @@ struct LibraryTabView: View {
                     }
                 }
             } label: {
-                ZStack {
-                    Circle().fill(WSColor.backgroundElevated).frame(width: 40, height: 40)
-                        .overlay(Circle().stroke(WSColor.duoBorder, lineWidth: 2))
-                    Image(systemName: "arrow.up.arrow.down")
-                        .foregroundStyle(WSColor.duoText)
-                        .font(.system(size: 14, weight: .heavy))
-                }
+                circleIcon("arrow.up.arrow.down")
             }
             .accessibilityLabel("Sort library")
         }
+        .padding(.top, 2)
     }
 
-    private func iconButton(systemImage: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            ZStack {
-                Circle().fill(WSColor.backgroundElevated).frame(width: 40, height: 40)
-                    .overlay(Circle().stroke(WSColor.duoBorder, lineWidth: 2))
-                Image(systemName: systemImage)
-                    .foregroundStyle(WSColor.duoText)
-                    .font(.system(size: 14, weight: .heavy))
-            }
-        }
-        .buttonStyle(.plain)
+    private func circleIcon(_ systemImage: String) -> some View {
+        Image(systemName: systemImage)
+            .font(.system(size: 15, weight: .bold))
+            .foregroundStyle(WSColor.duoPurple)
+            .frame(width: 42, height: 42)
+            .background(
+                Circle()
+                    .fill(WSColor.backgroundElevated)
+                    .shadow(color: Color.black.opacity(0.05), radius: 6, y: 2)
+            )
     }
 
-    // MARK: - Hero capsule
+    // MARK: - Floating "New" button
 
-    private var heroCapsule: some View {
-        HStack(spacing: 12) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(WSColor.duoPurple)
-                    .frame(width: 48, height: 48)
-                Image(systemName: "books.vertical.fill")
-                    .foregroundStyle(.white)
-                    .font(.system(size: 20, weight: .heavy))
-            }
-            VStack(alignment: .leading, spacing: 2) {
-                Text("\(store.totalCount) item\(store.totalCount == 1 ? "" : "s")")
-                    .font(WSFont.headline(18))
-                    .foregroundStyle(WSColor.duoText)
-                Text(heroSubtitle)
-                    .wsBody(.caption, weight: .semibold)
-                    .foregroundStyle(WSColor.duoText.opacity(0.55))
-            }
+    private var newButton: some View {
+        VStack {
             Spacer()
-            if let last = store.lastSyncedAt {
-                HStack(spacing: 4) {
-                    Circle().fill(WSColor.duoGreen).frame(width: 6, height: 6)
-                    Text("Synced \(LibraryRelativeFormatter.compact(last))")
-                        .font(WSFont.sans(10, weight: .bold))
-                        .foregroundStyle(WSColor.duoText.opacity(0.55))
+            HStack {
+                Spacer()
+                Button {
+                    Haptics.medium()
+                    onJumpToTab(.study)
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "plus").font(.system(size: 15, weight: .bold))
+                        Text("New").wsBody(.medium, weight: .bold)
+                    }
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 18)
+                    .padding(.vertical, 13)
+                    .background(
+                        Capsule()
+                            .fill(WSColor.duoPurple)
+                            .shadow(color: WSColor.duoPurple.opacity(0.4), radius: 10, y: 5)
+                    )
                 }
+                .buttonStyle(.plain)
+                .padding(.trailing, 18)
+                .padding(.bottom, 18)
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .wsChunkyCard(verticalPadding: 14, accent: WSColor.duoPurple)
-    }
-
-    private var heroSubtitle: String {
-        if store.totalCount == 0 { return "Generate your first study pack to begin." }
-        let p = store.studyPackCount, e = store.essayCount, d = store.documentCount
-        var parts: [String] = []
-        if p > 0 { parts.append("\(p) pack\(p == 1 ? "" : "s")") }
-        if e > 0 { parts.append("\(e) essay\(e == 1 ? "" : "s")") }
-        if d > 0 { parts.append("\(d) doc\(d == 1 ? "" : "s")") }
-        return parts.isEmpty ? "Just getting started." : parts.joined(separator: " · ")
     }
 
     // MARK: - Search bar
@@ -271,55 +210,31 @@ struct LibraryTabView: View {
     // MARK: - Segmented filter
 
     private var segmentedFilter: some View {
-        HStack(spacing: 0) {
-            ForEach(LibraryFilter.allCases) { f in
-                segmentedItem(f)
-            }
-        }
-        .padding(4)
-        .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(WSColor.backgroundElevated)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(WSColor.duoBorder, lineWidth: 2)
-                )
-        )
-    }
-
-    private func segmentedItem(_ f: LibraryFilter) -> some View {
-        let active = store.filter == f
-        let count  = matchCount(for: f)
-        return Button {
-            Haptics.selection()
-            withAnimation(.wsBouncePop) { store.filter = f }
-        } label: {
-            VStack(spacing: 2) {
-                HStack(spacing: 5) {
-                    Image(systemName: f.icon).font(.system(size: 11, weight: .heavy))
-                    Text(filterShortLabel(f))
-                        .font(WSFont.sans(12, weight: .black))
-                }
-                .foregroundStyle(active ? .white : WSColor.duoText)
-
-                Text("\(count)")
-                    .font(WSFont.sans(9, weight: .black))
-                    .foregroundStyle(active ? .white.opacity(0.85) : WSColor.duoText.opacity(0.55))
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
-            .background(
-                Group {
-                    if active {
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(segmentColor(for: f))
-                    } else {
-                        Color.clear
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(LibraryFilter.allCases) { f in
+                    let active = store.filter == f
+                    Button {
+                        Haptics.selection()
+                        withAnimation(.wsBouncePop) { store.filter = f }
+                    } label: {
+                        Text(filterShortLabel(f))
+                            .wsBody(.small, weight: .bold)
+                            .foregroundStyle(active ? .white : WSColor.foregroundMuted)
+                            .padding(.vertical, 9)
+                            .padding(.horizontal, 16)
+                            .background(
+                                Capsule()
+                                    .fill(active ? segmentColor(for: f) : WSColor.backgroundElevated)
+                                    .overlay(Capsule().stroke(WSColor.hairline, lineWidth: active ? 0 : 1))
+                            )
                     }
+                    .buttonStyle(.plain)
                 }
-            )
+            }
+            .padding(.horizontal, 2)
+            .padding(.vertical, 2)
         }
-        .buttonStyle(.plain)
     }
 
     private func segmentColor(for f: LibraryFilter) -> Color {
@@ -338,10 +253,6 @@ struct LibraryTabView: View {
         case .essays:     return "Essays"
         case .documents:  return "Docs"
         }
-    }
-
-    private func matchCount(for f: LibraryFilter) -> Int {
-        store.items.filter { f.matches($0) }.count
     }
 
     // MARK: - Content area
@@ -368,18 +279,6 @@ struct LibraryTabView: View {
             }
             .padding(.top, 6)
         } else {
-            // Featured "Continue" card -- only when no slice is active
-            if let mostRecent = store.mostRecent,
-               store.sort == .recent,
-               store.searchQuery.isEmpty,
-               store.filter == .all {
-                LibraryHeroFeaturedCard(item: mostRecent) {
-                    store.markOpened(mostRecent.id)
-                    presentedItem = mostRecent
-                }
-                .padding(.top, 4)
-            }
-
             // Grouped list
             switch store.sort {
             case .recent:

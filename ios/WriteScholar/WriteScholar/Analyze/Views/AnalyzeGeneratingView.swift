@@ -26,7 +26,7 @@ struct AnalyzeGeneratingView: View {
 
     var body: some View {
         ZStack {
-            WSColor.duoSurface.ignoresSafeArea()
+            WSColor.background.ignoresSafeArea()
 
             VStack(spacing: 28) {
                 Spacer()
