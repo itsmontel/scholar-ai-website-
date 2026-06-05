@@ -776,10 +776,16 @@ router.post('/logout', authenticateToken, (req, res) => {
 // @route   GET /api/auth/google
 // @desc    Initiate Google OAuth
 // @access  Public
-router.get('/google', passport.authenticate('google', {
-  scope: ['profile', 'email'],
-  prompt: 'select_account'
-}));
+router.get('/google', (req, res, next) => {
+  // Carry the platform through OAuth `state` so the callback knows whether to
+  // return to the web app or the iOS app's custom URL scheme.
+  const state = req.query.platform === 'ios' ? 'ios' : 'web';
+  passport.authenticate('google', {
+    scope: ['profile', 'email'],
+    prompt: 'select_account',
+    state
+  })(req, res, next);
+});
 
 // @route   GET /api/auth/google/callback
 // @desc    Google OAuth callback
@@ -794,6 +800,12 @@ router.get('/google/callback',
       // Generate JWT token for the user
       const token = generateToken(req.user.id);
       
+      // iOS app flow: hand the token back via the app's custom URL scheme so
+      // the in-app web auth session (ASWebAuthenticationSession) captures it.
+      if (req.query.state === 'ios') {
+        return res.redirect(`writescholar://auth/google?token=${token}`);
+      }
+
       // Redirect to frontend with token
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
       res.redirect(`${frontendUrl}/auth/callback?token=${token}&user=${encodeURIComponent(JSON.stringify({

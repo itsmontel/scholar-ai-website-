@@ -131,6 +131,24 @@ final class AuthSession: ObservableObject {
         }
     }
 
+    // MARK: Google Sign-In (in-app web auth → backend OAuth)
+
+    func signInWithGoogle() async {
+        lastError = nil
+        do {
+            let token = try await GoogleSignInService.shared.signIn()
+            KeychainStore.shared.authToken = token
+            await bootstrap()   // validates the token via /me + sets state
+            if !state.isAuthenticated {
+                lastError = "Google sign-in failed. Please try again."
+            }
+        } catch GoogleSignInService.GoogleSignInError.cancelled {
+            // User dismissed the sheet — not an error worth showing.
+        } catch {
+            lastError = (error as? APIError)?.errorDescription ?? error.localizedDescription
+        }
+    }
+
     /// Enters the main app tabs without storing credentials — for previews or until auth is wired.
     func continueWithoutSigningIn() {
         lastError = nil

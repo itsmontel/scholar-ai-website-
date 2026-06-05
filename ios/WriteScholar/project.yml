@@ -53,6 +53,12 @@ targets:
           UIApplicationSupportsMultipleScenes: false
           UISceneConfigurations: {}
         ITSAppUsesNonExemptEncryption: false
+        # Custom URL scheme for the Google OAuth callback (captured by
+        # ASWebAuthenticationSession during in-app Google sign-in).
+        CFBundleURLTypes:
+          - CFBundleURLName: com.writescholar.app
+            CFBundleURLSchemes:
+              - writescholar
         # Allow plain HTTP to localhost (and 127.0.0.1) so Debug builds can
         # reach the dev backend on the host Mac. Production talks to
         # https://writescholar.com and is not affected.

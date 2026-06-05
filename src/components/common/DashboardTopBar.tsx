@@ -509,8 +509,11 @@ export default function DashboardTopBar({
         </>
       )}
 
-      {/* Avatar menu */}
-      <div className="relative" ref={menuRef}>
+      {/* Avatar menu — data-trial-exempt so the post-onboarding "locked
+          dashboard" gate lets these clicks through (avatar → Account /
+          Billing / Sign out) while any other dashboard click opens the
+          paywall. This is the user's escape hatch out of the locked state. */}
+      <div data-trial-exempt className="relative" ref={menuRef}>
         <button
           type="button"
           onClick={() => setMenuOpen((o) => !o)}

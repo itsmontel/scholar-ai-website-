@@ -782,15 +782,28 @@ router.get('/trial-eligibility', authenticateToken, async (req, res) => {
 
     const trialEligibility = await subscriptionService.checkTrialEligibility(user.email);
 
+    // Backstop for legacy accounts: anyone who has EVER had a subscription
+    // (trial or paid) — even one created before trial_usage tracking existed,
+    // and even if they've since churned back to a free plan — is NOT eligible
+    // for a new trial and must NOT see the trial paywall again. trial_usage
+    // covers every post-migration subscriber; this covers the pre-migration
+    // tail so previously-paying-now-free users stay free without re-gating.
+    let trialEligible = trialEligibility.eligible;
+    let trialReason = trialEligibility.reason || null;
+    if (trialEligible && (await subscriptionService.hasEverSubscribed(user.id))) {
+      trialEligible = false;
+      trialReason = 'Has prior subscription history';
+    }
+
     res.json({
       success: true,
-      trialEligible: trialEligibility.eligible,
+      trialEligible,
       off10Eligible: false,
       /** @deprecated retained for older clients; always false */
       eligible: false,
-      trialReason: trialEligibility.reason || null,
+      trialReason,
       off10Reason: null,
-      reason: trialEligibility.reason || null,
+      reason: trialReason,
       previousTrialDate: trialEligibility.previousTrialDate || null
     });
 

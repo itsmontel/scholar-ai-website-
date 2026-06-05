@@ -313,6 +313,7 @@ struct HomeTabView: View {
         await withTaskGroup(of: Void.self) { group in
             group.addTask { await refreshStreak() }
             group.addTask { await session.refreshAchievements() }
+            group.addTask { await LibraryStore.shared.syncFromBackend() }
         }
     }
 

@@ -19,7 +19,7 @@ struct EssayAnalyzerHero: View {
     var body: some View {
         ZStack {
             // Real product screenshot inside a chunky purple card
-            Image("screenshot-analyse")
+            Image.bundleResource("screenshot-analyse")
                 .resizable()
                 .scaledToFit()
                 .frame(maxWidth: 300)

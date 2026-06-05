@@ -289,7 +289,10 @@ struct CraterBlastView: View {
         let areaHeight = geo.size.height - 220
         let areaWidth = geo.size.width
 
-        return ZStack {
+        // TimelineView(.animation) syncs the loop to the display refresh
+        // (incl. 120Hz ProMotion) for smooth, judder-free motion.
+        return TimelineView(.animation) { timeline in
+            ZStack {
             Color.clear
 
             // Danger zone at bottom
@@ -335,9 +338,10 @@ struct CraterBlastView: View {
                     fireCannon(at: value.location, areaWidth: areaWidth, areaHeight: areaHeight)
                 }
         )
-        .onReceive(Timer.publish(every: 0.016, on: .main, in: .common).autoconnect()) { _ in
+        .onChange(of: timeline.date) { _, _ in
             updateProjectile(areaWidth: areaWidth, areaHeight: areaHeight)
             checkMissedCraters(areaHeight: areaHeight)
+        }
         }
     }
 

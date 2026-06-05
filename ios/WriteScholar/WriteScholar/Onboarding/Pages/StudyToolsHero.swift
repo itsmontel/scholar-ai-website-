@@ -33,7 +33,7 @@ struct StudyToolsHero: View {
     var body: some View {
         ZStack {
             // Real lesson screenshot in a chunky blue card
-            Image("screenshot-lesson")
+            Image.bundleResource("screenshot-lesson")
                 .resizable()
                 .scaledToFit()
                 .frame(maxWidth: 280)

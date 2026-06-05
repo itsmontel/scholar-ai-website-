@@ -15,6 +15,13 @@ struct DailyReviewView: View {
 
     @State private var streak: StreakAPI.StreakInfo?
     @State private var showHistory = false
+    @State private var reviewDeck: ReviewDeck?
+
+    /// Identifiable wrapper so the aggregated deck can drive `.sheet(item:)`.
+    private struct ReviewDeck: Identifiable {
+        let id = UUID()
+        let flashcards: Flashcards
+    }
 
     private var current: Int  { streak?.currentStreak ?? 0 }
     private var longest: Int  { streak?.longestStreak ?? 0 }
@@ -53,6 +60,19 @@ struct DailyReviewView: View {
         .sheet(isPresented: $showHistory) {
             HistorySheet().presentationDetents([.large, .medium])
         }
+        .sheet(item: $reviewDeck) { deck in
+            NavigationStack {
+                FlashcardsView(flashcards: deck.flashcards)
+                    .navigationTitle("Daily Review")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button("Done") { reviewDeck = nil }
+                                .foregroundStyle(WSColor.duoPurple)
+                        }
+                    }
+            }
+        }
     }
 
     private var banner: some View {
@@ -85,13 +105,17 @@ struct DailyReviewView: View {
                 .wsHeadline(.medium, weight: .black)
                 .foregroundStyle(WSColor.foreground)
                 .multilineTextAlignment(.center)
-            Text("Run through your packs' flashcards and quizzes to lock it in.")
+            Text("Run through your saved packs' flashcards to lock it in.")
                 .wsBody(.medium)
                 .foregroundStyle(WSColor.foregroundMuted)
                 .multilineTextAlignment(.center)
             Button {
                 Haptics.medium()
-                onStartReview()
+                if let deck = buildReviewDeck() {
+                    reviewDeck = ReviewDeck(flashcards: deck)
+                } else {
+                    onStartReview()   // no packs yet → go create one
+                }
             } label: {
                 Text("Start review").frame(maxWidth: .infinity)
             }
@@ -136,6 +160,19 @@ struct DailyReviewView: View {
 
     private func loadStreak() async {
         do { streak = try await StreakAPI.fetch() } catch { /* keep nil → zeros */ }
+    }
+
+    /// Aggregates flashcards from every saved study pack into one shuffled
+    /// review deck (capped at 20). Returns nil if the user has no packs yet.
+    @MainActor
+    private func buildReviewDeck() -> Flashcards? {
+        let cards = LibraryStore.shared.items
+            .filter { $0.kind == .studyPack }
+            .compactMap { StudyPackPersistence.shared.loadPack(for: $0.id) }
+            .compactMap { $0.flashcards?.cards }
+            .flatMap { $0 }
+        guard !cards.isEmpty else { return nil }
+        return Flashcards(title: "Daily Review", cards: Array(cards.shuffled().prefix(20)))
     }
 }
 

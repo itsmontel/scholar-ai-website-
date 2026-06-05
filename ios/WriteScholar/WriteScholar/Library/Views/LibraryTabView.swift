@@ -45,9 +45,10 @@ struct LibraryTabView: View {
             }
             .scrollDismissesKeyboard(.interactively)
             .refreshable {
-                store.lastSyncedAt = Date()
+                await store.syncFromBackend()
                 Haptics.light()
             }
+            .task { await store.syncFromBackend() }
 
             newButton
         }

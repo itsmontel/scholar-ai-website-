@@ -34,7 +34,7 @@ struct FlashcardsHero: View {
                 .wsStaggerEntry(1)
 
             // Top -- real flashcard screenshot in a chunky card
-            Image("screenshot-flashcards")
+            Image.bundleResource("screenshot-flashcards")
                 .resizable()
                 .scaledToFit()
                 .frame(width: 250)

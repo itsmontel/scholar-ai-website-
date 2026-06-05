@@ -90,7 +90,7 @@ struct LibraryHero: View {
     private func libraryTile(_ item: Item) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             // Real screenshot thumbnail at the top
-            Image(item.imageName)
+            Image.bundleResource(item.imageName)
                 .resizable()
                 .scaledToFill()
                 .frame(height: 56)

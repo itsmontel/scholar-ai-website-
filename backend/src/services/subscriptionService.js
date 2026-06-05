@@ -495,6 +495,26 @@ const checkTrialEligibility = async (email) => {
   }
 };
 
+// True if the user has EVER had a subscription row (trial OR paid, any status).
+// Backstop for trial eligibility: legacy accounts that subscribed BEFORE the
+// trial_usage table existed (migration 011) and have since churned back to
+// free have a `subscriptions` row but no `trial_usage` row — they must NOT be
+// offered a new trial / shown the trial paywall again. The `subscriptions` row
+// is only written on the `customer.subscription.created` webhook (a real
+// trial/paid subscription), so abandoned checkouts never count here.
+const hasEverSubscribed = async (userId) => {
+  if (!userId) return false;
+  try {
+    const result = await query('SELECT 1 FROM subscriptions WHERE user_id = $1 LIMIT 1', [userId]);
+    return result.rows.length > 0;
+  } catch (err) {
+    console.error('Error in hasEverSubscribed:', err);
+    // Fall back to the trial_usage signal (don't suppress the paywall on a
+    // transient DB error — that would let it leak away for everyone).
+    return false;
+  }
+};
+
 // Record that an email has used the first-time offer (prevents OFF10 reuse)
 const recordTrialUsage = async (email, stripeCustomerId, planType) => {
   try {
@@ -1421,6 +1441,7 @@ module.exports = {
   getPlanDetails,
   getPlanLimits,
   checkTrialEligibility,
+  hasEverSubscribed,
   checkOff10Eligibility,
   recordTrialUsage,
   recordTrialDecline,

@@ -116,9 +116,8 @@ struct AuthFlowView: View {
 
             // Google — chunky card style button
             Button {
-                // TODO Chapter 2.5: integrate GoogleSignIn iOS SDK
                 Haptics.light()
-                session.lastError = "Google Sign-In ships in the next chapter."
+                Task { await session.signInWithGoogle() }
             } label: {
                 HStack(spacing: 10) {
                     Image(systemName: "g.circle.fill")

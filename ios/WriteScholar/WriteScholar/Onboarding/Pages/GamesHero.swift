@@ -19,7 +19,7 @@ struct GamesHero: View {
     var body: some View {
         ZStack {
             // Word Tower hero card (real screenshot) in a chunky orange card
-            Image("screenshot-wordtower")
+            Image.bundleResource("screenshot-wordtower")
                 .resizable()
                 .scaledToFit()
                 .frame(maxWidth: 300)

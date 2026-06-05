@@ -97,6 +97,7 @@ struct GamesTabView: View {
                         title: "Crater Blast",
                         subtitle: "Boss-battle reflex quiz. Hit the falling answers before they land -- 3 lives, react fast.",
                         icon: "burst.fill",
+                        videoName: "game-crater-blast",
                         accent: WSColor.duoOrange,
                         accentDark: WSColor.duoOrangeDark,
                         accentLight: WSColor.duoOrangeLight
@@ -119,6 +120,7 @@ struct GamesTabView: View {
                         title: "Word Tower",
                         subtitle: "Catch the correct answers, dodge the wrong ones -- build your tower across 7 lives.",
                         icon: "building.2.fill",
+                        videoName: "game-word-tower",
                         accent: WSColor.duoBlue,
                         accentDark: WSColor.duoBlueDark,
                         accentLight: WSColor.duoBlueLight
@@ -141,6 +143,7 @@ struct GamesTabView: View {
                         title: "Word Blitz",
                         subtitle: "60-second fill-in-the-blank speedrun. Read the sentence, tap the right word -- how many can you get in a minute?",
                         icon: "bolt.fill",
+                        videoName: "game-word-blitz",
                         accent: WSColor.duoPink,
                         accentDark: WSColor.duoPinkDark,
                         accentLight: WSColor.duoPinkLight
@@ -251,28 +254,35 @@ struct GamesTabView: View {
         title: String,
         subtitle: String,
         icon: String,
+        videoName: String,
         accent: Color,
         accentDark: Color,
         accentLight: Color,
         @ViewBuilder body: () -> Content
     ) -> some View {
         VStack(spacing: 0) {
-            // Icon banner top
-            HStack(spacing: 14) {
+            // Looping video preview banner
+            LoopingVideoView(resourceName: videoName)
+                .frame(height: 150)
+                .frame(maxWidth: .infinity)
+                .background(accentLight)
+                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .stroke(WSColor.duoBorder, lineWidth: 1)
+                )
+                .padding(.bottom, 12)
+
+            // Title row with a small accent icon badge
+            HStack(spacing: 12) {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(accent)
-                        .frame(width: 56, height: 56)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                .stroke(accentDark, lineWidth: 2)
-                        )
+                    Circle().fill(accent).frame(width: 40, height: 40)
                     Image(systemName: icon)
-                        .font(.system(size: 26, weight: .bold))
+                        .font(.system(size: 18, weight: .bold))
                         .foregroundStyle(.white)
                 }
 
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 3) {
                     Text(title)
                         .wsHeadline(.medium, weight: .black)
                         .foregroundStyle(WSColor.duoText)

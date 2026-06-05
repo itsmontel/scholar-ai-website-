@@ -290,6 +290,14 @@ const AcademicAIApp = () => {
   const [studyPackInitialData, setStudyPackInitialData] = useState<{ data: any; title?: string } | null>(null);
   /** Opened when API returns upgrade/limit (403/429) so user can subscribe after canceling Stripe */
   const [apiLimitPaywallOpen, setApiLimitPaywallOpen] = useState(() => readInitialSoftPaywallOpen(initialAuth.user));
+  /** Post-onboarding trial gate. Free, never-trialed users can browse the
+   *  real dashboard; any create / upload / tool action opens the full-page
+   *  hard-paywall overlay. `trialGateOpen` controls that overlay. */
+  const [trialGateOpen, setTrialGateOpen] = useState(false);
+  /** Mirror of `mustStartTrial` (computed later in the render). Held in a ref
+   *  so `navigateTo` and the paywall-event listener can read the live gate
+   *  state without stale closures. */
+  const trialGateActiveRef = useRef(false);
   /** After Stripe cancel from post-tutorial checkout: choice to retry trial or forfeit (restored after refresh until resolved) */
   const [stripeCancelTrialModalOpen, setStripeCancelTrialModalOpen] = useState(() => {
     if (typeof window === 'undefined') return false;
@@ -653,6 +661,13 @@ const AcademicAIApp = () => {
 
   useEffect(() => {
     const onOpenPaywall = () => {
+      // Trial-gated (free, never-trialed) users get the full-page hard
+      // paywall instead of the soft modal — any gated action that hits a
+      // 403/upgrade response routes here.
+      if (trialGateActiveRef.current) {
+        setTrialGateOpen(true);
+        return;
+      }
       // [soft-paywall-debug] Temporary trace — see comment at
       // handleOnboardingComplete dispatch site.
       console.log('[soft-paywall] listener invoked');
@@ -951,6 +966,15 @@ const AcademicAIApp = () => {
   };
 
   const navigateTo = (page: string, slug?: string, options?: { quizHistoryFilter?: 'all' | 'quiz' | 'flashcards' | 'crossword' | 'crater_blast'; studyPack?: { data: any; title?: string }; unlockQuizQuery?: string }) => {
+    // Trial gate: a free, never-trialed user can browse the dashboard, but
+    // navigating to any paid tool opens the full-page hard-paywall overlay
+    // instead (the X returns them to the dashboard). The upgrade path
+    // ('pricing') and ordinary content pages stay reachable.
+    const TRIAL_GATED_PAGES = ['analyze', 'analyze-hub', 'citations', 'citations-hub', 'study-pack', 'study-pack-hub', 'analysis'];
+    if (trialGateActiveRef.current && TRIAL_GATED_PAGES.includes(page)) {
+      setTrialGateOpen(true);
+      return;
+    }
     // Programmatic SEO routes — caller passes a URL path like "/study/biology"
     // instead of a page name. Map it to the 'programmatic' page; the
     // ProgrammaticLandingPage component looks up the config by URL pathname.
@@ -1076,6 +1100,9 @@ const AcademicAIApp = () => {
       /* ignore */
     }
 
+    // Drop the user straight onto the real dashboard. Free, never-trialed
+    // users can browse it freely; the hard-paywall overlay only opens when
+    // they try a gated action (see navigateTo + the DocumentsPage trial gate).
     navigateTo(destination);
   };
 
@@ -1226,9 +1253,27 @@ const AcademicAIApp = () => {
   const isPaidPlan = planLower === 'pro' || planLower === 'premium';
   const mustStartTrial =
     isLoggedIn && !!user?.id && !isPaidPlan && trialEligible === true && !sawStripeSuccessOnLoad;
-  // Any logged-in user who still owes us the onboarding flow or the
-  // trial step gets routed to OnboardingPage on the protected surfaces.
-  const shouldGateToOnboarding = needsOnboarding || mustStartTrial;
+  // Only brand-new users get the full onboarding takeover. Free, never-
+  // trialed users who already finished onboarding now land on the REAL
+  // dashboard — the hard-paywall overlay opens only when they try a gated
+  // action (see navigateTo, the paywall-event listener, and DocumentsPage).
+  const shouldGateToOnboarding = needsOnboarding;
+
+  // Keep navigateTo / the paywall-event listener in sync with the gate.
+  useEffect(() => {
+    trialGateActiveRef.current = mustStartTrial;
+  }, [mustStartTrial]);
+
+  // Deep-link safety: if a trial-gated user lands directly on a gated tool
+  // route (e.g. /analyze), bounce them to the dashboard with the overlay open.
+  useEffect(() => {
+    if (!mustStartTrial) return;
+    const gatedTools = ['analyze', 'analyze-hub', 'citations', 'citations-hub', 'study-pack', 'study-pack-hub', 'analysis'];
+    if (gatedTools.includes(currentPage)) {
+      setTrialGateOpen(true);
+      setCurrentPage('dashboard');
+    }
+  }, [mustStartTrial, currentPage]);
 
   /* ─── Post-Stripe-success recovery ───
      When Stripe-hosted Checkout redirects to /dashboard?payment=success
@@ -1368,7 +1413,26 @@ const AcademicAIApp = () => {
       const m = typeof window !== 'undefined' ? window.location.pathname.match(/^\/documents\/([\w-]+)/) : null;
       const initialDocumentId = m ? m[1] : undefined;
       return (
-        <div className="min-h-screen bg-[#FAF7FF] dark:bg-stone-950">
+        <div
+          className="min-h-screen bg-[#FAF7FF] dark:bg-stone-950"
+          // Locked preview for never-trialed free users: the real dashboard
+          // is fully visible, but ANY click opens the hard-paywall overlay —
+          // EXCEPT clicks inside the top-bar menu (marked data-trial-exempt),
+          // so the user can always reach the avatar menu and sign out. The
+          // capture phase swallows the click before the underlying control
+          // can act on it.
+          onClickCapture={
+            mustStartTrial
+              ? (e) => {
+                  const el = e.target as HTMLElement;
+                  if (el.closest?.('[data-trial-exempt]')) return;
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setTrialGateOpen(true);
+                }
+              : undefined
+          }
+        >
           {/* The global site Header is intentionally NOT rendered for
               the Documents workspace. Logged-in users live in this
               page all day — the left workspace sidebar already covers
@@ -1382,6 +1446,8 @@ const AcademicAIApp = () => {
             onLogout={handleLogout}
             user={user}
             onEditorActiveChange={setDocumentsEditorActive}
+            trialGated={mustStartTrial}
+            onTrialGate={() => setTrialGateOpen(true)}
           />
         </div>
       );
@@ -1771,6 +1837,23 @@ const AcademicAIApp = () => {
             markSoftPaywallDismissedNow();
           }}
           onNavigate={navigateTo}
+        />
+      )}
+      {/* Post-onboarding trial gate — free, never-trialed users browse the
+          real (locked) dashboard; any non-menu click opens this paywall.
+          In `paywallOverlay` mode OnboardingPage renders the same checkout
+          design as a centered popup/modal over a dimmed backdrop (it owns
+          its own fixed backdrop). The X or a backdrop click returns to the
+          dashboard. */}
+      {trialGateOpen && isLoggedIn && user && !isPaidPlan && (
+        <OnboardingPage
+          paywallOverlay
+          onClose={() => setTrialGateOpen(false)}
+          user={user}
+          onLogout={handleLogout}
+          onUserUpdate={handleOnboardingUserUpdate}
+          onNavigate={navigateTo}
+          onComplete={() => setTrialGateOpen(false)}
         />
       )}
       {stripeCancelTrialModalOpen && user && (

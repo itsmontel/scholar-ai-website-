@@ -287,45 +287,51 @@ struct WordTowerView: View {
         let areaHeight = geo.size.height - 200
         let areaWidth = geo.size.width
 
-        return ZStack {
-            Color.clear
+        // TimelineView(.animation) drives the loop in sync with the display
+        // refresh — including 120Hz ProMotion — so motion is smooth and
+        // judder-free, unlike a fixed 60fps Timer. Physics runs once per frame.
+        return TimelineView(.animation) { timeline in
+            ZStack {
+                Color.clear
 
-            ForEach(fallingBlocks) { block in
-                fallingBlockView(block: block, areaWidth: areaWidth, areaHeight: areaHeight)
-            }
-
-            if gameState != .collapsing {
-                towerView(areaWidth: areaWidth, areaHeight: areaHeight)
-            } else {
-                collapsingTowerView(areaWidth: areaWidth, areaHeight: areaHeight)
-            }
-
-            ForEach(scorePopups) { popup in
-                Text("+\(popup.points)")
-                    .font(WSFont.headline(18, weight: .black))
-                    .foregroundStyle(WSColor.duoGreen)
-                    .shadow(color: .black.opacity(0.6), radius: 4)
-                    .position(x: popup.x, y: popup.y)
-                    .transition(.opacity)
-            }
-
-            paddleView(areaWidth: areaWidth, areaHeight: areaHeight)
-        }
-        .frame(height: areaHeight)
-        .contentShape(Rectangle())
-        .gesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged { value in
-                    let xRatio = value.location.x / areaWidth
-                    let halfPaddle = paddleWidthRatio / 2
-                    paddleXRatio = min(max(xRatio, halfPaddle), 1 - halfPaddle)
-                    checkCollisions(areaWidth: areaWidth, areaHeight: areaHeight)
+                ForEach(fallingBlocks) { block in
+                    fallingBlockView(block: block, areaWidth: areaWidth, areaHeight: areaHeight)
                 }
-        )
-        .onReceive(Timer.publish(every: 0.016, on: .main, in: .common).autoconnect()) { _ in
-            updateWobble()
-            checkCollisions(areaWidth: areaWidth, areaHeight: areaHeight)
-            checkMissedBlocks(areaHeight: areaHeight)
+
+                if gameState != .collapsing {
+                    towerView(areaWidth: areaWidth, areaHeight: areaHeight)
+                } else {
+                    collapsingTowerView(areaWidth: areaWidth, areaHeight: areaHeight)
+                }
+
+                ForEach(scorePopups) { popup in
+                    Text("+\(popup.points)")
+                        .font(WSFont.headline(18, weight: .black))
+                        .foregroundStyle(WSColor.duoGreen)
+                        .shadow(color: .black.opacity(0.6), radius: 4)
+                        .position(x: popup.x, y: popup.y)
+                        .transition(.opacity)
+                }
+
+                paddleView(areaWidth: areaWidth, areaHeight: areaHeight)
+            }
+            .frame(height: areaHeight)
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { value in
+                        let xRatio = value.location.x / areaWidth
+                        let halfPaddle = paddleWidthRatio / 2
+                        paddleXRatio = min(max(xRatio, halfPaddle), 1 - halfPaddle)
+                        checkCollisions(areaWidth: areaWidth, areaHeight: areaHeight)
+                    }
+            )
+            .onChange(of: timeline.date) { _, _ in
+                guard gameState == .playing else { return }
+                updateWobble()
+                checkCollisions(areaWidth: areaWidth, areaHeight: areaHeight)
+                checkMissedBlocks(areaHeight: areaHeight)
+            }
         }
     }
 

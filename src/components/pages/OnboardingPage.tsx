@@ -12,10 +12,11 @@ const TRIAL_DAYS = 7;
 
 /**
  * When true, `paywall-hard` and `checkout` short-circuit to the dashboard
- * transition (dev / A-B bypass). Default `false` — tour ends at value-prop
- * → checkout (hard paywall, no "maybe later").
+ * transition. Onboarding ends at value-prop → congrats animation → dashboard,
+ * and the paywall is instead shown on the dashboard a couple of seconds later
+ * (higher-converting "see the product first" flow).
  */
-const HIDE_END_PAYWALLS = false;
+const HIDE_END_PAYWALLS = true;
 /* Promo code silently pre-applied to checkout when the user clicks the
    trial CTA from the hard paywall.  Surfaces a 50% lifetime discount
    ($19.99/mo → $9.99/mo) so the on-page copy and the Stripe session
@@ -57,6 +58,11 @@ interface OnboardingPageProps {
    *  straight on the checkout (trial) screen. There is no escape except
    *  starting the trial or signing out. */
   forceTrialGate?: boolean;
+  /** Render the trial paywall as a dismissable overlay (used on the dashboard):
+   *  starts directly on the checkout step and shows an X (→ onClose) in place
+   *  of the Sign-out button. */
+  paywallOverlay?: boolean;
+  onClose?: () => void;
 }
 
 type Phase =
@@ -308,7 +314,8 @@ const PLANS: Record<PlanId, Plan> = {
  *  apply on the hosted checkout page. */
 const NEW_CUSTOMER_PROMO_CODE = 'NEWCUSTOMER';
 
-function getInitialPhase(forceTrialGate = false): Phase {
+function getInitialPhase(forceTrialGate = false, paywallOverlay = false): Phase {
+  if (paywallOverlay) return 'checkout';
   if (typeof window === 'undefined') return 'intro';
   const params = new URLSearchParams(window.location.search);
   // ?preview=value-prop is what Stripe's hosted-checkout cancel URL
@@ -318,8 +325,10 @@ function getInitialPhase(forceTrialGate = false): Phase {
   if (params.get('preview') === 'profile') return 'profile';
   const sid = params.get('session_id');
   if (sid) return 'verifying';
-  // Existing free user who never trialed → straight to the trial screen.
-  if (forceTrialGate) return 'checkout';
+  // Existing free user who never trialed → straight to the trial screen,
+  // UNLESS we're hiding end paywalls: then let them onto the dashboard, where
+  // the paywall pops up a couple of seconds later.
+  if (forceTrialGate) return HIDE_END_PAYWALLS ? 'transition' : 'checkout';
   return 'intro';
 }
 
@@ -332,7 +341,7 @@ const PAYWALL_TOOLS: { title: string; desc: string; video?: string; image?: stri
   { title: 'Citations',      desc: 'APA, MLA, Chicago — real sources',       video: '/writescholar-citation-finder-demo.mp4', badge: 'Pro',  color: '#1CB0F6', borderColor: '#1899D6' },
   { title: 'Crater Blast',   desc: 'Boss-battle quiz arcade',                video: '/writescholar-crater-blast-demo.mp4',    badge: 'Game', color: '#FF9600', borderColor: '#D97F00' },
   { title: 'Word Blitz',     desc: '60-second fill-the-blank speedrun',      video: '/hero-word-blitz.mp4',                   badge: 'Game', color: '#FF4B82', borderColor: '#D63672' },
-  { title: 'Summarizer',     desc: 'Compress chapters into key points',      video: '/writescholar-summarizer-demo.mp4',      badge: 'Pro',  color: '#A560E8', borderColor: '#8A48C7' },
+  { title: 'Smart Editor',   desc: 'AI rewrites, grammar & clarity inline',  image: '/WriterPic.png',                         badge: 'Pro',  color: '#A560E8', borderColor: '#8A48C7' },
   { title: 'Word Tower',     desc: 'Stack words, beat your streak',          video: '/hero-word-tower.mp4',                   badge: 'Game', color: '#FF9600', borderColor: '#D97F00' },
 ];
 
@@ -471,7 +480,10 @@ function ToolCard({ tool, delayMs = 0 }: { tool: typeof PAYWALL_TOOLS[number]; d
             loading="lazy"
             decoding="async"
             onLoad={() => setLoaded(true)}
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+            // object-right: the Smart Editor screenshot is very wide (≈2:1). Pin
+            // it right to drop the unimportant left workspace rail and frame the
+            // two things that matter — the document/editor + the feedback panel.
+            className={`absolute inset-0 w-full h-full object-cover object-right transition-opacity duration-500 ${loaded ? 'opacity-100' : 'opacity-0'}`}
           />
         ) : null}
         {/* Badge pills (Free/Pro/Game) removed per user brief — the
@@ -1010,8 +1022,8 @@ function OnboardingSignOutButton({ onLogout }: { onLogout?: () => void }) {
 /* ═══════════════════════════════════════════════════════════════
    Main component
    ═══════════════════════════════════════════════════════════════ */
-const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, testMode = false, forceTrialGate = false }: OnboardingPageProps) => {
-  const [phase, setPhase] = useState<Phase>(() => getInitialPhase(forceTrialGate));
+const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, testMode = false, forceTrialGate = false, paywallOverlay = false, onClose }: OnboardingPageProps) => {
+  const [phase, setPhase] = useState<Phase>(() => getInitialPhase(forceTrialGate, paywallOverlay));
   const [displayName, setDisplayName] = useState(user?.name || '');
   const [username, setUsername] = useState(user?.username || '');
   const [usernameError, setUsernameError] = useState<string | null>(null);
@@ -1570,7 +1582,18 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
             <span className="text-lg font-extrabold tracking-tight text-[#3C3C3C] dark:text-stone-100" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>WriteScholar</span>
           </div>
         </div>
-        <OnboardingSignOutButton onLogout={onLogout} />
+        {onClose ? (
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="w-9 h-9 flex items-center justify-center rounded-xl bg-[#F7F7F7] dark:bg-stone-800 text-stone-500 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-200 dark:hover:bg-stone-700 transition-all border-2 border-b-[3px] border-[#E5E5E5] dark:border-stone-700 active:border-b-2 active:translate-y-0.5"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        ) : (
+          <OnboardingSignOutButton onLogout={onLogout} />
+        )}
       </div>
       {showProgress && (
         <div className="h-3 bg-[#E5E5E5] dark:bg-stone-800 overflow-hidden">
@@ -1815,9 +1838,18 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
   }
 
   /* ─── EMBEDDED CHECKOUT ─── */
+  /* Hidden when HIDE_END_PAYWALLS is on — same short-circuit as paywall-hard,
+     so the trial offer moves to the dashboard instead of the onboarding. */
+  if (phase === 'checkout' && HIDE_END_PAYWALLS && !paywallOverlay) {
+    queueMicrotask(() => goToPhase('transition'));
+    return null;
+  }
   if (phase === 'checkout') {
-    return (
-      <div className="min-h-screen h-screen bg-gradient-to-br from-[#FAF7FF] via-[#F7F0FF] to-[#F0E8FF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-950 flex flex-col overflow-hidden">
+    // Shared body — the same pitch + plan-picker UI is presented either as a
+    // full-screen page (onboarding) or, when used as the dashboard paywall
+    // overlay, as a centered popup/modal (see the conditional return below).
+    const checkoutBody = (
+      <>
         {/* Ambient brand glows */}
         <div className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 h-72 w-[44rem] max-w-full rounded-full bg-[#A560E8]/14 dark:bg-[#A560E8]/15 blur-3xl" aria-hidden />
         <div className="pointer-events-none absolute -bottom-40 -right-24 h-80 w-80 rounded-full bg-[#FFC800]/18 blur-3xl" aria-hidden />
@@ -2119,6 +2151,32 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
           </button>
           <p className="mt-1.5 text-center text-[10px] font-bold text-stone-400 dark:text-stone-500">$0 today · Cancel anytime</p>
         </div>
+      </>
+    );
+
+    // POPUP — dashboard paywall overlay. Same design, contained in a centered
+    // modal card over a dimmed backdrop. Clicking the backdrop (or the TopBar
+    // X) closes it; clicks on the card itself are swallowed so it stays open.
+    if (paywallOverlay) {
+      return (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/55 backdrop-blur-sm"
+          onClick={() => onClose?.()}
+        >
+          <div
+            className="relative w-full max-w-5xl max-h-[94dvh] flex flex-col overflow-hidden rounded-[28px] bg-gradient-to-br from-[#FAF7FF] via-[#F7F0FF] to-[#F0E8FF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-950 shadow-[0_40px_120px_-30px_rgba(60,40,90,0.6)] border-2 border-white/70 dark:border-stone-800"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {checkoutBody}
+          </div>
+        </div>
+      );
+    }
+
+    // FULL PAGE — onboarding flow.
+    return (
+      <div className="min-h-screen h-screen bg-gradient-to-br from-[#FAF7FF] via-[#F7F0FF] to-[#F0E8FF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-950 flex flex-col overflow-hidden">
+        {checkoutBody}
       </div>
     );
   }

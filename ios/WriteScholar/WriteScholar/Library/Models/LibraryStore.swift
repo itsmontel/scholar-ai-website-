@@ -64,9 +64,9 @@ final class LibraryStore: ObservableObject {
     private init() {
         loadFromDisk()
         loadSort()
-        if items.isEmpty {
-            seedDemoIfFirstRun()
-        }
+        // No demo seed — the library shows only the user's real generated
+        // packs/analyses. Purge any #sample data left over from older builds.
+        purgeSampleItems()
     }
 
     // MARK: - Computed slices
@@ -150,6 +150,29 @@ final class LibraryStore: ObservableObject {
         guard let i = items.firstIndex(where: { $0.id == id }) else { return }
         items[i].lastOpenedAt = Date()
         persist()
+    }
+
+    // MARK: - Backend sync
+
+    /// Pulls the user's saved content from the backend and merges it with the
+    /// device-generated packs so the Library mirrors their web/desktop account.
+    /// Device packs (which carry local playable data) are preserved; previously
+    /// synced web items are replaced with the fresh fetch. No-op for guests.
+    func syncFromBackend() async {
+        guard KeychainStore.shared.authToken != nil else { return }
+        isSyncing = true
+        defer { isSyncing = false }
+        do {
+            let remote = try await LibraryAPI.fetchDocuments()
+            let device = items.filter { $0.source == .device }
+            var merged = device + remote
+            merged.sort { ($0.lastOpenedAt ?? $0.createdAt) > ($1.lastOpenedAt ?? $1.createdAt) }
+            items = merged
+            lastSyncedAt = Date()
+            persist()
+        } catch {
+            // Offline or not signed in — keep whatever we already have.
+        }
     }
 
     // MARK: - Convenience recorders (called by coordinators on completion)
@@ -292,7 +315,17 @@ final class LibraryStore: ObservableObject {
         }
     }
 
-    // MARK: - Demo seed
+    /// Removes leftover demo items (tagged "#sample") seeded by older builds,
+    /// so the library only ever shows the user's real content.
+    private func purgeSampleItems() {
+        let cleaned = items.filter { !$0.tags.contains("#sample") }
+        if cleaned.count != items.count {
+            items = cleaned
+            persist()
+        }
+    }
+
+    // MARK: - Demo seed (unused — retained for reference only)
 
     /// Seed with a few realistic-looking entries so the very first launch
     /// of the new Library tab feels lived-in. Tagged with `#sample` so we

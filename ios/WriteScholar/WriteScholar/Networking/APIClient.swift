@@ -82,6 +82,22 @@ final class APIClient: @unchecked Sendable {
         return try await perform(request)
     }
 
+    /// GET with query items — builds the URL via URLComponents so `?key=val`
+    /// is preserved (appendingPathComponent would percent-encode the `?`).
+    func get<T: Decodable>(path: String, query: [URLQueryItem], requiresAuth: Bool = false) async throws -> T {
+        var comps = URLComponents(url: APIConfig.baseURL.appendingPathComponent(path), resolvingAgainstBaseURL: false)
+        comps?.queryItems = query
+        guard let url = comps?.url else { throw APIError.noData }
+        var req = URLRequest(url: url)
+        req.httpMethod = "GET"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue("application/json", forHTTPHeaderField: "Accept")
+        if requiresAuth, let token = authTokenProvider() {
+            req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        return try await perform(req)
+    }
+
     /// GET an endpoint that returns its payload at the **top level** of the
     /// JSON object rather than nested under `data` (e.g. /subscriptions/usage).
     /// The response must still include `success: true` for non-2xx error

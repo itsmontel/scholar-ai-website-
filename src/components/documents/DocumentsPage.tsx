@@ -146,6 +146,12 @@ interface DocumentsPageProps {
       The shell uses this to hide the global site header (and free up
       vertical space) while a document is open. */
   onEditorActiveChange?: (active: boolean) => void;
+  /** Free, never-trialed user in the post-onboarding trial gate. They can
+      browse the dashboard, but any create / upload / tool-switch action
+      calls `onTrialGate` (which opens the app-level hard-paywall overlay)
+      instead of running. */
+  trialGated?: boolean;
+  onTrialGate?: () => void;
 }
 
 function authHeaders(): HeadersInit {
@@ -2522,7 +2528,7 @@ function DocumentEditorView({
 }
 
 /* ─── Page shell — owns the hub ⇄ editor view state ──────── */
-export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout, user, onEditorActiveChange }: DocumentsPageProps) {
+export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout, user, onEditorActiveChange, trialGated, onTrialGate }: DocumentsPageProps) {
   const [view, setView] = useState<WorkspaceView>(initialDocumentId ? 'editor' : 'hub');
   const [openDocId, setOpenDocId] = useState<string | null>(initialDocumentId ?? null);
 
@@ -3628,6 +3634,12 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
 
   // ─── Render ───────────────────────────────────────────────────
   const handleRailSelect = (v: WorkspaceView) => {
+    // Trial gate: never-trialed free users can stay on the hub, but switching
+    // into any tool view opens the app-level hard-paywall overlay instead.
+    if (trialGated && v !== 'hub') {
+      onTrialGate?.();
+      return;
+    }
     setView(v);
     if (v === 'hub') {
       try { window.history.pushState({}, '', '/documents'); } catch { /* ignore */ }
@@ -3758,9 +3770,9 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
           <DocumentsHub
             docs={docList}
             loading={listLoading}
-            onNew={handleNewDoc}
+            onNew={() => { if (trialGated) { onTrialGate?.(); return; } handleNewDoc(); }}
             onOpen={handleOpenDoc}
-            onUpload={handleUpload}
+            onUpload={(f: File) => { if (trialGated) { onTrialGate?.(); return; } handleUpload(f); }}
             onDownload={handleDownload}
             onDelete={(id) => setConfirmDeleteId(id)}
             userName={firstNameOf(user)}
