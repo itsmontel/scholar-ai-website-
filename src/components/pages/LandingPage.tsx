@@ -1214,11 +1214,11 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           />
         </div>
 
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-10 lg:pt-14 xl:pt-16 pb-10 sm:pb-12 lg:pb-20 xl:pb-24 min-w-0 lg:min-h-[calc(90svh-4.75rem)] lg:flex lg:flex-col lg:justify-center">
+        <div className="relative z-10 w-full max-w-7xl xl:max-w-[84rem] mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-10 lg:pt-14 xl:pt-16 pb-10 sm:pb-12 lg:pb-20 xl:pb-24 min-w-0 lg:min-h-[calc(90svh-4.75rem)] lg:flex lg:flex-col lg:justify-center">
             {/* ─── SPLIT HERO — copy left, cycling product showcase right. */}
-            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] gap-10 lg:gap-8 xl:gap-12 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] gap-10 lg:gap-8 xl:gap-12 items-center">
               {/* ─── LEFT COLUMN — copy + CTA ───────────────────────── */}
-              <div className="relative z-10 flex flex-col items-center text-center lg:items-start lg:text-left w-full min-w-0 lg:max-w-[34rem] xl:max-w-[36rem] opacity-0 animate-hero-card-enter">
+              <div className="relative z-10 flex flex-col items-center text-center lg:items-start lg:text-left w-full min-w-0 lg:max-w-[38rem] xl:max-w-[40rem] 2xl:max-w-[42rem] opacity-0 animate-hero-card-enter">
                 {/* ─── TRUST PILL — 50,000+ students worldwide ─────────
                     Sits ABOVE the H1 as a credibility eyebrow on every
                     viewport (desktop + mobile). Restored from commit
@@ -1292,13 +1292,13 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     Copy locked to the reference mock: the all-in-one study
                     system value-prop, with the three verbs accented white. */}
                 <p
-                  className="max-w-md lg:max-w-none text-base sm:text-lg lg:text-[1.125rem] font-semibold text-white/90 leading-relaxed mb-5 sm:mb-6"
+                  className="max-w-lg sm:max-w-xl lg:max-w-none text-base sm:text-lg lg:text-[1.125rem] font-semibold text-white/90 leading-relaxed mb-5 sm:mb-6"
                   style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                 >
                   The all-in-one study system to{' '}
                   <span className="font-extrabold text-white">write better</span>,{' '}
                   <span className="font-extrabold text-white">study smarter</span>, and{' '}
-                  <span className="font-extrabold text-white">get higher grades</span>.
+                  <span className="font-extrabold text-[#FFC800]">get higher grades.</span>
                 </p>
 
                 {/* ─── CTA ROW ───────────────────────────────────────── */}
@@ -1306,12 +1306,12 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   <button
                     type="button"
                     onClick={() => onNavigate('signup')}
-                    aria-label="Start free, get the A"
-                    className="group/btn inline-flex items-center justify-center px-7 py-3.5 sm:px-9 sm:py-[18px] lg:px-11 lg:py-[22px] rounded-2xl bg-[#58CC02] hover:bg-[#61E002] text-white font-extrabold text-base sm:text-[18px] lg:text-xl border-2 border-b-4 border-[#46A302] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 whitespace-nowrap shadow-[0_8px_28px_-6px_rgba(88,204,2,0.55)] hover:shadow-[0_12px_36px_-6px_rgba(88,204,2,0.75)]"
+                    aria-label="Start my free trial"
+                    className="group/btn w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 sm:px-10 sm:py-5 lg:px-12 lg:py-6 rounded-2xl bg-[#58CC02] hover:bg-[#61E002] text-white font-extrabold text-lg sm:text-xl lg:text-2xl border-2 border-b-[5px] border-[#46A302] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 whitespace-nowrap shadow-[0_10px_32px_-6px_rgba(88,204,2,0.6)] hover:shadow-[0_14px_40px_-6px_rgba(88,204,2,0.8)]"
                     style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                   >
-                    Get started today
-                    <svg className="ml-2 w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 group-hover/btn:translate-x-1" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
+                    Start my free trial
+                    <svg className="ml-2.5 w-5 h-5 sm:w-6 sm:h-6 transition-transform duration-200 group-hover/btn:translate-x-1" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                   </button>
@@ -1346,7 +1346,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               </div>
 
               {/* ─── RIGHT COLUMN — cycling product showcase ────────── */}
-              <div className="relative z-10 w-full min-w-0 lg:max-w-[36rem] xl:max-w-[38rem] lg:justify-self-end">
+              <div className="relative z-10 w-full min-w-0 lg:max-w-[34rem] xl:max-w-[36rem] lg:justify-self-end">
                 <HeroProductShowcase idx={heroSlideIdx} setIdx={setHeroSlideIdx} />
               </div>
             </div>
@@ -2866,7 +2866,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               onClick={() => onNavigate('signup')}
               className="group/pipcta relative w-full flex items-center justify-center gap-1.5 px-3 py-2.5 bg-gradient-to-r from-[#FFF4E0] via-white to-[#DDF4FF] dark:from-stone-800 dark:via-stone-900 dark:to-stone-800 text-[#3C3C3C] dark:text-stone-100 text-[12px] sm:text-[13px] font-extrabold border-t-2 border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800 active:translate-y-[1px] transition-all"
             >
-              <span>Get started today</span>
+              <span>Start my free trial</span>
               <svg className="w-4 h-4 text-[#A560E8] group-hover/pipcta:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>

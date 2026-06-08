@@ -1211,6 +1211,7 @@ function DocumentsHub({
                 boldest tile on the page: vivid purple, glow + yellow
                 accents so essay analysis is unmistakably the headline
                 action. Click / drag-drop a paper to upload + analyze. */}
+            <div className="order-1 lg:order-2 relative">
             <div
               role="button"
               tabIndex={0}
@@ -1225,15 +1226,37 @@ function DocumentsHub({
                 const f = e.dataTransfer.files?.[0];
                 if (f) onUpload(f);
               }}
-              className={`order-1 lg:order-2 group relative cursor-pointer overflow-hidden rounded-[26px] border-2 border-b-[6px] border-[#5B1F8E] text-white transition-all duration-300 flex items-center min-h-[236px] bg-gradient-to-br from-[#B77CF1] via-[#A560E8] to-[#7733B5] shadow-[0_24px_48px_-16px_rgba(119,51,181,0.75)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#FFC800]/60 ${
+              className={`group relative cursor-pointer overflow-hidden rounded-[26px] border-2 border-b-[6px] border-[#5B1F8E] text-white transition-all duration-300 flex items-center min-h-[236px] bg-gradient-to-br from-[#B77CF1] via-[#A560E8] to-[#7733B5] shadow-[0_24px_48px_-16px_rgba(119,51,181,0.75)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#FFC800]/60 ${
                 uploadDropActive ? 'scale-[1.01] active:border-b-2' : 'hover:-translate-y-1 hover:shadow-[0_30px_56px_-16px_rgba(119,51,181,0.85)]'
               }`}
             >
+              {/* Golden "Start here!" — lives inside the card (never bleeds
+                  into the greeting row above). Points down-right at the
+                  headline + CTA. */}
+              <style>{`
+                @keyframes wsStartNudge{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+                @keyframes wsGoldFlash{
+                  0%,100%{color:#FFC800;filter:drop-shadow(0 0 6px rgba(255,200,0,0.9)) drop-shadow(0 0 12px rgba(255,150,0,0.5));opacity:1}
+                  50%{color:#FFE566;filter:drop-shadow(0 0 14px rgba(255,220,0,1)) drop-shadow(0 0 24px rgba(255,200,0,0.95));opacity:1}
+                }
+                .ws-start-nudge{animation:wsStartNudge 2.2s ease-in-out infinite}
+                .ws-gold-flash{animation:wsGoldFlash 1.1s ease-in-out infinite}
+                @media (prefers-reduced-motion:reduce){.ws-start-nudge,.ws-gold-flash{animation:none}}
+              `}</style>
+              <div className="pointer-events-none absolute z-30 top-3 right-4 sm:top-4 sm:right-6 flex flex-col items-end" aria-hidden>
+                <div className="ws-start-nudge flex flex-col items-end">
+                  <span className="ws-gold-flash text-[1.5rem] sm:text-[1.75rem] leading-none rotate-3 font-extrabold" style={{ fontFamily: '"Caveat", cursive' }}>Start here!</span>
+                  <svg className="ws-gold-flash w-8 h-8 sm:w-9 sm:h-9 -mt-0.5 mr-2" viewBox="0 0 44 44" fill="none" stroke="currentColor" strokeWidth={2.75} strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M28 6 C18 14, 14 26, 8 38" />
+                    <path d="M4 32 L8 38 L14 34" />
+                  </svg>
+                </div>
+              </div>
+
               {/* Glow halos, grid texture + sparkles */}
               <span className="pointer-events-none absolute -top-14 -right-10 w-52 h-52 rounded-full bg-white/20 blur-3xl" aria-hidden />
               <span className="pointer-events-none absolute -bottom-16 -left-10 w-44 h-44 rounded-full bg-[#FFC800]/20 blur-3xl" aria-hidden />
               <span className="pointer-events-none absolute inset-0 opacity-[0.07] mix-blend-overlay" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)', backgroundSize: '30px 30px' }} aria-hidden />
-              <span aria-hidden className="absolute top-5 right-6 text-[#FFC800] text-base motion-safe:animate-pulse">✦</span>
               <span aria-hidden className="absolute bottom-8 right-10 text-white/60 text-xs motion-safe:animate-pulse" style={{ animationDelay: '0.8s' }}>✦</span>
 
               {/* Drag-active overlay */}
@@ -1274,6 +1297,7 @@ function DocumentsHub({
                   </div>
                 </div>
               </div>
+            </div>
             </div>
           </div>
 

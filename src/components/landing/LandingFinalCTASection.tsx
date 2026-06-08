@@ -68,7 +68,7 @@ export default function LandingFinalCTASection({ onNavigate }: LandingFinalCTASe
             <button
               type="button"
               onClick={() => onNavigate('signup')}
-              className="inline-flex items-center justify-center rounded-full bg-[#A560E8] px-10 py-4 text-base font-bold text-white shadow-[0_12px_32px_-8px_rgba(165,96,232,0.5)] transition-all hover:bg-[#9450D8] hover:-translate-y-0.5 sm:text-lg"
+              className="w-full sm:w-auto inline-flex items-center justify-center rounded-full bg-[#A560E8] px-12 py-5 sm:px-14 sm:py-6 text-lg sm:text-xl lg:text-2xl font-extrabold text-white shadow-[0_14px_36px_-8px_rgba(165,96,232,0.55)] transition-all hover:bg-[#9450D8] hover:-translate-y-0.5"
               style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
             >
               Start for free

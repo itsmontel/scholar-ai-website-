@@ -38,6 +38,18 @@ interface StudyPackPageProps {
 const getWordCount = (text: string) =>
   text.trim().split(/\s+/).filter((word) => word.length > 0).length;
 
+// Quick-fill suggestions for the "from a topic" mode so users can see the
+// kind of thing they can type (and start a pack in one tap).
+const TOPIC_EXAMPLES = [
+  "Plato's philosophy",
+  'Psych 101',
+  'The French Revolution',
+  'Photosynthesis',
+  'Supply and demand',
+];
+
+const TOPIC_DRAFT_KEY = 'writescholar_dashboard_topic_draft';
+
 // Study-pack preview slots have moved to ../common/PreviewSections so the
 // same row can also render on the dashboard's study-pack hub view (between
 // the FeatureHub recents and Quick Access).
@@ -46,6 +58,16 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
   const [inputText, setInputText] = useState(() => {
     try {
       return sessionStorage.getItem('writescholar_dashboard_draft') || '';
+    } catch {
+      return '';
+    }
+  });
+  // 'notes' = paste/upload notes (default). 'topic' = type a subject and let
+  // us write the notes + build the whole pack from it.
+  const [mode, setMode] = useState<'notes' | 'topic'>('notes');
+  const [topicText, setTopicText] = useState(() => {
+    try {
+      return sessionStorage.getItem(TOPIC_DRAFT_KEY) || '';
     } catch {
       return '';
     }
@@ -220,6 +242,15 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
     }
   };
 
+  const updateTopic = (v: string) => {
+    setTopicText(v);
+    try {
+      sessionStorage.setItem(TOPIC_DRAFT_KEY, v);
+    } catch {
+      /* ignore */
+    }
+  };
+
   const handleGenerateStudyPack = async () => {
     if (!user) {
       onNavigate('signup');
@@ -234,11 +265,21 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
       setStudyPackError("You've used all study pack generations this period. Upgrade for more.");
       return;
     }
+
+    const isTopic = mode === 'topic';
+    const trimmedTopic = topicText.trim();
     const wordCount = getWordCount(inputText);
-    if (wordCount < 50) {
+
+    if (isTopic) {
+      if (trimmedTopic.length < 2) {
+        setStudyPackError('Please enter a topic to generate a study pack.');
+        return;
+      }
+    } else if (wordCount < 50) {
       setStudyPackError('Please enter at least 50 words to generate a study pack.');
       return;
     }
+
     setIsGeneratingStudyPack(true);
     setStudyPackError('');
     try {
@@ -251,7 +292,7 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
       const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/analysis/generate-study-pack`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ text: inputText }),
+        body: JSON.stringify(isTopic ? { inputType: 'topic', topic: trimmedTopic } : { text: inputText }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'Study pack generation failed');
@@ -259,7 +300,11 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
       const wasFirst = (getStats().study_packs_count || 0) === 0;
       if (wasFirst) trackEvent('first_study_pack');
       const packTitle =
-        data.data?.quiz?.title || data.data?.flashcards?.title || data.data?.lesson?.title || 'Study Pack';
+        data.data?.quiz?.title ||
+        data.data?.flashcards?.title ||
+        data.data?.lesson?.title ||
+        (isTopic ? trimmedTopic : '') ||
+        'Study Pack';
       try {
         sessionStorage.setItem('writescholar_study_pack_viewer', JSON.stringify({ data: data.data, title: packTitle }));
       } catch {
@@ -271,7 +316,7 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
         /* ignore */
       }
       onNavigate('study-pack-viewer', undefined, { studyPack: { data: data.data, title: packTitle } });
-      trackStudyPackGenerated(wordCount);
+      trackStudyPackGenerated(isTopic ? getWordCount(data.data?.originalNotes || '') || 100 : wordCount);
     } catch (error: unknown) {
       setStudyPackError(error instanceof Error ? error.message : 'Study pack generation failed. Please try again.');
       try {
@@ -525,6 +570,35 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                 </div>
 
                 <div className={`relative mb-2 max-w-5xl mx-auto ${embedded ? 'mt-0' : 'mt-1'}`}>
+                  {/* Choose how to build the pack: paste your own notes, or
+                      just type a topic and we write the notes for you. */}
+                  <div className="flex gap-1.5 p-1 mb-3 sm:mb-4 rounded-2xl bg-stone-100 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-700 max-w-md mx-auto">
+                    <button
+                      type="button"
+                      onClick={() => { setMode('notes'); setStudyPackError(''); }}
+                      aria-pressed={mode === 'notes'}
+                      className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-extrabold text-sm transition-all ${
+                        mode === 'notes'
+                          ? 'bg-white dark:bg-stone-900 text-[#FF9600] border-2 border-[#FF9600] shadow-sm'
+                          : 'text-stone-500 dark:text-stone-400 border-2 border-transparent'
+                      }`}
+                    >
+                      <span className="text-base">📝</span> Paste notes
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setMode('topic'); setStudyPackError(''); }}
+                      aria-pressed={mode === 'topic'}
+                      className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-extrabold text-sm transition-all ${
+                        mode === 'topic'
+                          ? 'bg-white dark:bg-stone-900 text-[#FF9600] border-2 border-[#FF9600] shadow-sm'
+                          : 'text-stone-500 dark:text-stone-400 border-2 border-transparent'
+                      }`}
+                    >
+                      <span className="text-base">✨</span> From a topic
+                    </button>
+                  </div>
+                  {mode === 'notes' ? (
                   <div
                     className="relative rounded-xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 transition-all duration-300 focus-within:border-[#FF9600]"
                   >
@@ -552,27 +626,73 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                       </div>
                     </div>
                   </div>
+                  ) : (
+                  <div className="relative rounded-xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 transition-all duration-300 focus-within:border-[#FF9600] p-5 sm:p-6">
+                    <label htmlFor="study-pack-topic" className="block text-sm sm:text-base font-extrabold text-stone-700 dark:text-stone-200 mb-2">
+                      What do you want to study?
+                    </label>
+                    <input
+                      id="study-pack-topic"
+                      type="text"
+                      value={topicText}
+                      onChange={(e) => updateTopic(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          if (!isGeneratingStudyPack && !quizExhausted && topicText.trim().length >= 2) handleGenerateStudyPack();
+                        }
+                      }}
+                      placeholder="e.g. Plato's philosophy, Psych 101, the French Revolution"
+                      maxLength={200}
+                      disabled={isGeneratingStudyPack}
+                      className="w-full bg-transparent border-none outline-none text-stone-800 dark:text-stone-100 text-[15px] sm:text-lg placeholder-stone-400 dark:placeholder-stone-500"
+                    />
+                    <p className="mt-3 text-xs sm:text-sm text-stone-400 dark:text-stone-500 font-medium leading-relaxed">
+                      Type any subject, topic or course. We&apos;ll write the notes, then build your lesson, flashcards, quiz, crossword &amp; games from them.
+                    </p>
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      <span className="text-xs font-bold text-stone-400 dark:text-stone-500">Try:</span>
+                      {TOPIC_EXAMPLES.map((ex) => (
+                        <button
+                          key={ex}
+                          type="button"
+                          onClick={() => updateTopic(ex)}
+                          disabled={isGeneratingStudyPack}
+                          className="px-3 py-1.5 rounded-xl bg-[#FFF4E0] dark:bg-[#FF9600]/10 border-2 border-[#FF9600]/30 text-[#B85F00] dark:text-[#FF9600] text-xs font-extrabold transition-all hover:border-[#FF9600] active:translate-y-0.5 disabled:opacity-50"
+                        >
+                          {ex}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  )}
                   <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 mt-4">
                     <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => studyToolsFileInputRef.current?.click()}
-                        disabled={isParsingStudyDoc || isGeneratingStudyPack}
-                        className="flex items-center gap-2.5 px-5 py-3 rounded-xl font-extrabold text-sm transition-all disabled:opacity-50 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-200 border-2 border-b-4 border-stone-200 dark:border-stone-700 active:border-b-2 active:translate-y-0.5"
-                      >
-                        {isParsingStudyDoc ? (
-                          <span className="w-5 h-5 border-2 border-orange-600 border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                          </svg>
-                        )}
-                        {isParsingStudyDoc ? 'Uploading...' : 'Upload file'}
-                      </button>
-                      {inputText.trim() && (
+                      {mode === 'notes' && (
+                        <button
+                          type="button"
+                          onClick={() => studyToolsFileInputRef.current?.click()}
+                          disabled={isParsingStudyDoc || isGeneratingStudyPack}
+                          className="flex items-center gap-2.5 px-5 py-3 rounded-xl font-extrabold text-sm transition-all disabled:opacity-50 bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-200 border-2 border-b-4 border-stone-200 dark:border-stone-700 active:border-b-2 active:translate-y-0.5"
+                        >
+                          {isParsingStudyDoc ? (
+                            <span className="w-5 h-5 border-2 border-orange-600 border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                          )}
+                          {isParsingStudyDoc ? 'Uploading...' : 'Upload file'}
+                        </button>
+                      )}
+                      {((mode === 'notes' && inputText.trim()) || (mode === 'topic' && topicText.trim())) && (
                         <button
                           type="button"
                           onClick={() => {
+                            if (mode === 'topic') {
+                              updateTopic('');
+                              return;
+                            }
                             setInputText('');
                             try {
                               sessionStorage.removeItem('writescholar_dashboard_draft');
@@ -589,7 +709,7 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                     <button
                       type="button"
                       onClick={handleGenerateStudyPack}
-                      disabled={isGeneratingStudyPack || quizExhausted || getWordCount(inputText) < 50}
+                      disabled={isGeneratingStudyPack || quizExhausted || (mode === 'notes' ? getWordCount(inputText) < 50 : topicText.trim().length < 2)}
                       className="px-8 sm:px-10 py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 font-extrabold uppercase tracking-wide text-base bg-[#58CC02] text-white border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 disabled:bg-stone-200 dark:disabled:bg-stone-700 disabled:border-2 disabled:border-b-4 disabled:border-stone-300 dark:disabled:border-stone-600 disabled:cursor-not-allowed"
                     >
                       {isGeneratingStudyPack ? (

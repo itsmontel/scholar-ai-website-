@@ -2757,14 +2757,29 @@ router.delete('/study-events/:id', authenticateToken, async (req, res) => {
 // @access  Private
 router.post('/generate-study-pack', authenticateToken, async (req, res) => {
   try {
-    const { text } = req.body;
-    if (!text || typeof text !== 'string' || text.trim().length === 0) {
-      return res.status(400).json({ success: false, message: 'Text content is required' });
-    }
+    const { text, topic } = req.body;
+    // Two ways to build a pack: paste/upload notes ('notes', the default) or
+    // type a topic to learn ('topic'). Topic mode synthesizes the source
+    // notes server-side, so it skips the notes word-count validation.
+    const inputType = req.body.inputType === 'topic' ? 'topic' : 'notes';
 
-    const wordCount = text.trim().split(/\s+/).length;
-    if (wordCount < 50) {
-      return res.status(400).json({ success: false, message: 'Please provide at least 50 words for a study pack.' });
+    let notesText = '';
+    let topicText = '';
+
+    if (inputType === 'topic') {
+      // Accept the topic from `topic` (preferred) or `text` for flexibility.
+      topicText = (typeof topic === 'string' ? topic : (typeof text === 'string' ? text : '')).trim();
+      if (!topicText) {
+        return res.status(400).json({ success: false, message: 'Please enter a topic to generate a study pack.' });
+      }
+      if (topicText.length > 200) {
+        return res.status(400).json({ success: false, message: 'Please keep your topic under 200 characters.' });
+      }
+    } else {
+      if (!text || typeof text !== 'string' || text.trim().length === 0) {
+        return res.status(400).json({ success: false, message: 'Text content is required' });
+      }
+      notesText = text.trim();
     }
 
     const userId = req.user.id;
@@ -2772,12 +2787,19 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
     const normalizedBilling = subscriptionService.normalizePlanForLimits(dbPlan);
     const planLimits = subscriptionService.PLAN_LIMITS[normalizedBilling] || subscriptionService.PLAN_LIMITS.free;
 
-    const maxWords = planLimits.studyPackMaxWordsPerGeneration || planLimits.quizMaxWordsPerGeneration || 5000;
-    if (wordCount > maxWords) {
-      return res.status(400).json({
-        success: false,
-        message: `Text exceeds the ${maxWords.toLocaleString()} word limit for your plan. Please shorten your text.`
-      });
+    if (inputType === 'notes') {
+      const wordCount = notesText.split(/\s+/).length;
+      if (wordCount < 50) {
+        return res.status(400).json({ success: false, message: 'Please provide at least 50 words for a study pack.' });
+      }
+
+      const maxWords = planLimits.studyPackMaxWordsPerGeneration || planLimits.quizMaxWordsPerGeneration || 5000;
+      if (wordCount > maxWords) {
+        return res.status(400).json({
+          success: false,
+          message: `Text exceeds the ${maxWords.toLocaleString()} word limit for your plan. Please shorten your text.`
+        });
+      }
     }
 
     const { createClient } = require('@supabase/supabase-js');
@@ -2829,14 +2851,19 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
     }
 
     const pack = await aiAnalysisService.generateStudyPack(
-      text,
-      subscriptionService.isPaidSubscriptionTier(dbPlan) ? 'pro' : 'free'
+      inputType === 'topic' ? topicText : notesText,
+      subscriptionService.isPaidSubscriptionTier(dbPlan) ? 'pro' : 'free',
+      { inputType }
     );
-    pack.originalNotes = text.trim();
+    // generateStudyPack sets pack.originalNotes (the resolved notes — for
+    // topic mode, the AI-written notes), pack.inputType and pack.sourceTopic.
+    // Meter and store against the resolved notes so topic packs record a
+    // realistic word count.
+    const resolvedWordCount = (pack.originalNotes || '').trim().split(/\s+/).filter(Boolean).length;
 
     supabase.from('quiz_usage').insert({
       user_id: userId,
-      words_count: wordCount,
+      words_count: resolvedWordCount,
       quiz_type: 'study_pack',
       difficulty: 'mixed'
     }).then(() => {}).catch(err => console.error('Failed to record study pack usage:', err));
@@ -2844,7 +2871,7 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
     const isPaidUser = subscriptionService.isPaidSubscriptionTier(dbPlan);
     const expiresAt = isPaidUser ? null : (() => { const d = new Date(); d.setDate(d.getDate() + 30); return d.toISOString(); })();
 
-    const packTitle = pack.quiz?.title || pack.flashcards?.title || pack.lesson?.title || 'Study Pack';
+    const packTitle = pack.quiz?.title || pack.flashcards?.title || pack.lesson?.title || pack.sourceTopic || 'Study Pack';
 
     supabase.from('quizzes').insert([{
       user_id: userId,
@@ -2866,8 +2893,13 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
         // saved notes.
         wordBlitz: pack.wordBlitz,
         originalNotes: pack.originalNotes,
+        // How the pack was created: 'notes' (pasted/uploaded) or 'topic'
+        // (typed a topic). sourceTopic is the original topic string for
+        // topic-built packs, null otherwise.
+        inputType: pack.inputType || inputType,
+        sourceTopic: pack.sourceTopic || null,
       },
-      source_word_count: wordCount,
+      source_word_count: resolvedWordCount,
       created_at: new Date().toISOString(),
       expires_at: expiresAt
     }]).select().then(({ data }) => {

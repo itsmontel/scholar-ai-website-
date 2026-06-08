@@ -5419,7 +5419,93 @@ Rules:
     throw lastErr;
   }
 
-  async generateStudyPack(text, userPlan = 'free') {
+  /**
+   * Expand a short topic into a rich, factual body of study notes.
+   *
+   * This powers topic-based study packs: instead of pasting their own
+   * notes, the user types what they want to learn (e.g. "Plato's
+   * philosophy", "Psych 101", "the French Revolution") and we synthesize
+   * the source material the rest of the pipeline (lesson, quiz, flashcards,
+   * crossword, arcade games) builds on. Returns clean plain-text notes.
+   */
+  async generateStudyNotesFromTopic(topic, userPlan = 'free') {
+    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
+      throw new Error('OpenAI API key not configured');
+    }
+
+    const cleanTopic = String(topic || '').trim();
+    if (!cleanTopic) throw new Error('A topic is required to generate study notes');
+
+    const selectedModel = 'gpt-4.1-nano';
+
+    const systemPrompt = `You are an expert tutor and study-notes writer. Given a topic a student wants to learn, write clear, comprehensive, and factually accurate study notes that fully cover the topic at an introductory-to-intermediate level.
+
+Your notes MUST:
+- Be well organised: short section headings, each on its own line, followed by explanatory prose
+- Define key terms, concepts, people, dates, and vocabulary precisely
+- Include concrete facts, examples, and the relationships between ideas (these become quiz questions, flashcards, and crossword answers)
+- Stay strictly on topic and only include information you are confident is accurate
+- Be roughly 700 to 1100 words
+- Be written in plain text. Do NOT use markdown symbols like # or *, tables, or code blocks
+- Never use em dashes. Use commas, periods, or colons instead
+
+If the topic looks like a course code or level (e.g. "Psych 101", "AP Biology"), cover the foundational concepts a student would meet early in that course.
+
+Write ONLY the study notes themselves. Do not add a preamble, a title line like "Study Notes:", or any closing commentary.`;
+
+    const userMessage = `Write detailed study notes a student can revise from for this topic:\n\n${cleanTopic}`;
+
+    try {
+      const completion = await this.openai.chat.completions.create({
+        model: selectedModel,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userMessage },
+        ],
+        max_tokens: 2500,
+        temperature: 0.5,
+      });
+
+      const raw = completion.choices?.[0]?.message?.content?.trim();
+      if (!raw) throw new Error('No response from AI');
+
+      // Strip stray markdown markers and em dashes so the downstream
+      // generators (and the viewer's "Original Notes" tab) get clean prose.
+      const notes = raw
+        .replace(/^#{1,6}\s*/gm, '')
+        .replace(/\*\*([^*]+)\*\*/g, '$1')
+        .replace(/\*([^*]+)\*/g, '$1')
+        .replace(/—/g, ', ')
+        .trim();
+
+      if (notes.split(/\s+/).filter(Boolean).length < 50) {
+        throw new Error('Generated notes were too short');
+      }
+
+      return notes;
+    } catch (error) {
+      console.error('OpenAI topic-notes generation error:', error);
+      throw new Error('Failed to generate study notes for that topic: ' + error.message);
+    }
+  }
+
+  async generateStudyPack(input, userPlan = 'free', options = {}) {
+    const inputType = options.inputType === 'topic' ? 'topic' : 'notes';
+
+    // Topic mode: the user typed what they want to study (e.g. "Plato's
+    // philosophy", "Psych 101") instead of pasting notes. Expand that short
+    // topic into one rich, factual notes document first, then run the exact
+    // same 7-tool pipeline on it. Generating shared notes up front (rather
+    // than letting each tool interpret the topic on its own) keeps the
+    // lesson, quiz, flashcards, crossword and games all about the same
+    // coherent material.
+    let sourceTopic = null;
+    let text = input;
+    if (inputType === 'topic') {
+      sourceTopic = String(input || '').trim();
+      text = await this.withRetries('topic-notes', () => this.generateStudyNotesFromTopic(sourceTopic, userPlan));
+    }
+
     const words = text.trim().split(/\s+/);
     const wordCount = words.length;
     const quizCount = Math.min(25, Math.max(10, Math.ceil(wordCount / 200)));
@@ -5458,7 +5544,7 @@ Rules:
       throw new Error('Study pack generation failed: core components could not be generated');
     }
 
-    return {
+    const pack = {
       quiz: quizR.status === 'fulfilled' ? quizR.value : null,
       flashcards: flashR.status === 'fulfilled' ? flashR.value : null,
       crossword: crossR.status === 'fulfilled' ? crossR.value : null,
@@ -5467,6 +5553,17 @@ Rules:
       wordTower: towerR.status === 'fulfilled' ? towerR.value : null,
       wordBlitz: blitzR.status === 'fulfilled' ? blitzR.value : null,
     };
+
+    // The resolved notes become the pack's "Original Notes". In topic mode
+    // these are the AI-written notes, which double as a written summary of
+    // the topic the student can revise from. inputType/sourceTopic are
+    // carried through so the route, viewer and history know how the pack
+    // was created.
+    pack.originalNotes = text.trim();
+    pack.inputType = inputType;
+    pack.sourceTopic = sourceTopic;
+
+    return pack;
   }
 
   /**

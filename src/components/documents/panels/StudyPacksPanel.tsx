@@ -10,7 +10,11 @@ import PreviewStrip from './PreviewStrip';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 const DRAFT_KEY = 'writescholar_dashboard_draft';
+const TOPIC_DRAFT_KEY = 'writescholar_dashboard_topic_draft';
 const VIEWER_KEY = 'writescholar_study_pack_viewer';
+
+// Quick-fill suggestions for "from a topic" mode.
+const TOPIC_EXAMPLES = ["Plato's philosophy", 'Psych 101', 'The French Revolution', 'Photosynthesis', 'Supply and demand'];
 
 function authHeaders(json = true): HeadersInit {
   const token = localStorage.getItem('authToken');
@@ -34,6 +38,12 @@ function timeAgo(iso: string): string {
 export default function StudyPacksPanel({ onNavigate }: { onNavigate: (page: string, slug?: string, options?: unknown) => void }) {
   const [notes, setNotes] = useState(() => {
     try { return sessionStorage.getItem(DRAFT_KEY) || ''; } catch { return ''; }
+  });
+  // 'notes' = paste/upload notes (default). 'topic' = type a subject and we
+  // write the notes + build the whole pack from it.
+  const [mode, setMode] = useState<'notes' | 'topic'>('notes');
+  const [topic, setTopic] = useState(() => {
+    try { return sessionStorage.getItem(TOPIC_DRAFT_KEY) || ''; } catch { return ''; }
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -71,8 +81,11 @@ export default function StudyPacksPanel({ onNavigate }: { onNavigate: (page: str
   };
 
   const generate = async () => {
+    if (loading) return;
+    const isTopic = mode === 'topic';
     const text = notes.trim();
-    if (wordCount < 50 || loading) return;
+    const trimmedTopic = topic.trim();
+    if (isTopic ? trimmedTopic.length < 2 : wordCount < 50) return;
     setLoading(true);
     setError(null);
     setUpgrade(false);
@@ -80,7 +93,7 @@ export default function StudyPacksPanel({ onNavigate }: { onNavigate: (page: str
       const res = await fetch(`${API_URL}/analysis/generate-study-pack`, {
         method: 'POST',
         headers: authHeaders(),
-        body: JSON.stringify({ text }),
+        body: JSON.stringify(isTopic ? { inputType: 'topic', topic: trimmedTopic } : { text }),
       });
       const json = await res.json();
       if (res.status === 429) {
@@ -92,7 +105,8 @@ export default function StudyPacksPanel({ onNavigate }: { onNavigate: (page: str
         throw new Error(json?.message || `Generation failed (${res.status})`);
       }
       try { localStorage.setItem('writescholar_has_study_pack', 'true'); } catch { /* noop */ }
-      const title = text.split(/\s+/).slice(0, 6).join(' ') + (wordCount > 6 ? '…' : '');
+      const notesTitle = text.split(/\s+/).slice(0, 6).join(' ') + (wordCount > 6 ? '…' : '');
+      const title = (json?.data?.quiz?.title as string) || (isTopic ? trimmedTopic : notesTitle);
       openViewer(json?.data, title || 'Study pack');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not build that study pack.');
@@ -129,23 +143,89 @@ export default function StudyPacksPanel({ onNavigate }: { onNavigate: (page: str
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#FFF4E0] dark:bg-[#FF9600]/15 text-[#FF9600] border-2 border-[#FF9600]/30 text-lg" aria-hidden>📚</span>
           <div className="min-w-0">
             <h2 className="text-[17px] font-extrabold text-stone-900 dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Make a study pack</h2>
-            <p className="text-[12px] font-bold text-stone-500 dark:text-stone-400 leading-snug">Paste notes — get a lesson, flashcards, a quiz, a crossword &amp; arcade games.</p>
+            <p className="text-[12px] font-bold text-stone-500 dark:text-stone-400 leading-snug">Paste notes or pick a topic — get a lesson, flashcards, a quiz, a crossword &amp; arcade games.</p>
           </div>
         </div>
-        <div className="relative flex items-center justify-between mb-2">
-          <label className="text-[13px] font-extrabold text-stone-700 dark:text-stone-200">Paste your notes or lecture material</label>
-          <span className={`text-[11px] font-bold tabular-nums ${wordCount < 50 ? 'text-stone-400' : 'text-[#B85F00]'}`}>{wordCount} words</span>
+        {/* Choose how to build the pack: paste your own notes, or type a
+            topic and we write the notes for you. */}
+        <div className="relative flex gap-1.5 p-1 mb-3 rounded-2xl bg-stone-100 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-700">
+          <button
+            type="button"
+            onClick={() => { setMode('notes'); setError(null); }}
+            aria-pressed={mode === 'notes'}
+            className={`flex-1 inline-flex items-center justify-center gap-1.5 py-2 rounded-xl text-[13px] font-extrabold transition-all ${
+              mode === 'notes'
+                ? 'bg-white dark:bg-stone-900 text-[#FF9600] border-2 border-[#FF9600]'
+                : 'text-stone-500 dark:text-stone-400 border-2 border-transparent'
+            }`}
+          >
+            <span>📝</span> Paste notes
+          </button>
+          <button
+            type="button"
+            onClick={() => { setMode('topic'); setError(null); }}
+            aria-pressed={mode === 'topic'}
+            className={`flex-1 inline-flex items-center justify-center gap-1.5 py-2 rounded-xl text-[13px] font-extrabold transition-all ${
+              mode === 'topic'
+                ? 'bg-white dark:bg-stone-900 text-[#FF9600] border-2 border-[#FF9600]'
+                : 'text-stone-500 dark:text-stone-400 border-2 border-transparent'
+            }`}
+          >
+            <span>✨</span> From a topic
+          </button>
         </div>
-        <textarea
-          value={notes}
-          onChange={(e) => {
-            setNotes(e.target.value);
-            try { sessionStorage.setItem(DRAFT_KEY, e.target.value); } catch { /* noop */ }
-          }}
-          rows={8}
-          placeholder="Drop in a chapter, your class notes, an article… at least 50 words. We'll turn it into a lesson, flashcards, a quiz, a crossword and arcade mode."
-          className="w-full px-4 py-3 rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-sm text-stone-800 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#FF9600]/40 focus:border-[#FF9600]/40 resize-y"
-        />
+        {mode === 'notes' ? (
+          <>
+            <div className="relative flex items-center justify-between mb-2">
+              <label className="text-[13px] font-extrabold text-stone-700 dark:text-stone-200">Paste your notes or lecture material</label>
+              <span className={`text-[11px] font-bold tabular-nums ${wordCount < 50 ? 'text-stone-400' : 'text-[#B85F00]'}`}>{wordCount} words</span>
+            </div>
+            <textarea
+              value={notes}
+              onChange={(e) => {
+                setNotes(e.target.value);
+                try { sessionStorage.setItem(DRAFT_KEY, e.target.value); } catch { /* noop */ }
+              }}
+              rows={8}
+              placeholder="Drop in a chapter, your class notes, an article… at least 50 words. We'll turn it into a lesson, flashcards, a quiz, a crossword and arcade mode."
+              className="w-full px-4 py-3 rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-sm text-stone-800 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#FF9600]/40 focus:border-[#FF9600]/40 resize-y"
+            />
+          </>
+        ) : (
+          <>
+            <label htmlFor="study-pack-topic-input" className="block text-[13px] font-extrabold text-stone-700 dark:text-stone-200 mb-2">What do you want to study?</label>
+            <input
+              id="study-pack-topic-input"
+              type="text"
+              value={topic}
+              onChange={(e) => {
+                setTopic(e.target.value);
+                try { sessionStorage.setItem(TOPIC_DRAFT_KEY, e.target.value); } catch { /* noop */ }
+              }}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); if (!loading && topic.trim().length >= 2) void generate(); } }}
+              maxLength={200}
+              placeholder="e.g. Plato's philosophy, Psych 101, the French Revolution"
+              className="w-full px-4 py-3 rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-sm text-stone-800 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#FF9600]/40 focus:border-[#FF9600]/40"
+            />
+            <p className="mt-2 text-[11px] font-bold text-stone-400 dark:text-stone-500 leading-snug">Type any subject, topic or course. We&apos;ll write the notes, then build the whole pack from them.</p>
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              <span className="text-[11px] font-bold text-stone-400">Try:</span>
+              {TOPIC_EXAMPLES.map((ex) => (
+                <button
+                  key={ex}
+                  type="button"
+                  onClick={() => {
+                    setTopic(ex);
+                    try { sessionStorage.setItem(TOPIC_DRAFT_KEY, ex); } catch { /* noop */ }
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-[#FFF4E0] dark:bg-[#FF9600]/10 border-2 border-[#FF9600]/30 text-[#B85F00] dark:text-[#FF9600] text-[11px] font-extrabold transition-all hover:border-[#FF9600] active:translate-y-0.5"
+                >
+                  {ex}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
         <input
           ref={fileRef}
           type="file"
@@ -154,17 +234,19 @@ export default function StudyPacksPanel({ onNavigate }: { onNavigate: (page: str
           onChange={(e) => { const f = e.target.files?.[0]; if (f) void onFile(f); e.target.value = ''; }}
         />
         <div className="mt-3 flex flex-col sm:flex-row sm:items-center gap-2">
-          <button
-            type="button"
-            onClick={() => fileRef.current?.click()}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-b-[3px] border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-sm font-extrabold text-stone-700 dark:text-stone-200 hover:border-[#FF9600]/40 active:border-b-2 active:translate-y-0.5 transition-all"
-          >
-            Upload a file
-          </button>
+          {mode === 'notes' && (
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-b-[3px] border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-sm font-extrabold text-stone-700 dark:text-stone-200 hover:border-[#FF9600]/40 active:border-b-2 active:translate-y-0.5 transition-all"
+            >
+              Upload a file
+            </button>
+          )}
           <button
             type="button"
             onClick={generate}
-            disabled={loading || wordCount < 50}
+            disabled={loading || (mode === 'notes' ? wordCount < 50 : topic.trim().length < 2)}
             className="sm:ml-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#FF9600] hover:bg-[#B85F00] disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#B85F00] active:border-b-2 active:translate-y-0.5 transition-all"
           >
             {loading ? (
@@ -178,7 +260,7 @@ export default function StudyPacksPanel({ onNavigate }: { onNavigate: (page: str
             ) : 'Generate study pack'}
           </button>
         </div>
-        {wordCount > 0 && wordCount < 50 && (
+        {mode === 'notes' && wordCount > 0 && wordCount < 50 && (
           <p className="mt-2 text-[11px] font-bold text-stone-400">Add {50 - wordCount} more words to generate.</p>
         )}
       </div>

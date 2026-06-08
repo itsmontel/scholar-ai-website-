@@ -266,10 +266,10 @@ const Header: React.FC<HeaderProps> = ({
             {/* Right side */}
             <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 shrink-0">
               <button
-                onClick={() => onNavigate?.('login')}
+                onClick={() => onNavigate?.('signup')}
                 className={`hidden sm:inline-flex px-4 py-2 text-sm font-bold uppercase tracking-wide rounded-xl border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all shrink-0 ${isLandingPurple ? 'text-[#6B27A3] bg-white border-white/70 hover:bg-stone-50' : 'text-stone-700 dark:text-stone-300 border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800'}`}
               >
-                Log in
+                Start for free
               </button>
               <button
                 onClick={() => onNavigate?.('signup')}
@@ -321,10 +321,10 @@ const Header: React.FC<HeaderProps> = ({
               ))}
               <div className="pt-2 pb-1 flex flex-col gap-2">
                 <button
-                  onClick={() => { onNavigate?.('login'); setIsMobileMenuOpen(false); }}
+                  onClick={() => { onNavigate?.('signup'); setIsMobileMenuOpen(false); }}
                   className={`block text-center px-4 py-2.5 text-sm font-bold uppercase tracking-wide rounded-xl border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all ${isLandingPurple ? 'text-[#6B27A3] bg-white border-white/70 hover:bg-stone-50' : 'text-stone-700 dark:text-stone-300 border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800'}`}
                 >
-                  Log in
+                  Start for free
                 </button>
                 <button
                   onClick={() => { onNavigate?.('signup'); setIsMobileMenuOpen(false); }}
