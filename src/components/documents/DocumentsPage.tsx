@@ -447,87 +447,126 @@ function AnalyzePanel({
 
   return (
     <div>
-      {/* 1. Drop a file (the most common way to bring a paper in) */}
-      <div
-        role="button"
-        tabIndex={0}
-        onClick={() => !parsing && fileRef.current?.click()}
-        onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && !parsing) { e.preventDefault(); fileRef.current?.click(); } }}
-        onDragEnter={(e) => { e.preventDefault(); setDropActive(true); }}
-        onDragOver={(e) => { e.preventDefault(); setDropActive(true); }}
-        onDragLeave={(e) => { e.preventDefault(); setDropActive(false); }}
-        onDrop={(e) => {
-          e.preventDefault();
-          setDropActive(false);
-          const f = e.dataTransfer.files?.[0];
-          if (f && !parsing) void handleFile(f);
-        }}
-        className={`group relative cursor-pointer rounded-3xl border-2 border-dashed transition-all duration-200 shadow-[0_16px_40px_-28px_rgba(165,96,232,0.5)] ${
-          parsing ? 'opacity-70 cursor-wait pointer-events-none' : ''
-        } ${
-          dropActive
-            ? 'scale-[1.005] border-[#A560E8] bg-[#F3EAFF] dark:bg-[#A560E8]/10'
-            : 'border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-900 hover:border-[#A560E8]/60 hover:bg-[#F3EAFF]/40'
-        }`}
-      >
-        <input
-          ref={fileRef}
-          type="file"
-          accept=".pdf,.doc,.docx,.txt"
-          className="hidden"
-          onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleFile(f); e.target.value = ''; }}
-        />
-        <div className="px-6 py-10 sm:py-12 text-center">
-          <span className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#A560E8] border-2 border-[#A560E8]/25">
-            {parsing ? (
-              <svg className="w-6 h-6 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden>
-                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity={0.3} strokeWidth={3} />
-                <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth={3} strokeLinecap="round" />
-              </svg>
-            ) : (
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M12 16V4m0 0L8 8m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" /></svg>
-            )}
-          </span>
-          <p className="text-base sm:text-lg font-extrabold text-stone-900 dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-            {parsing ? 'Reading your paper' : 'Drop your essay here'}
-          </p>
-          <p className="mt-1 text-[13px] font-bold text-stone-500 dark:text-stone-400">
-            {parsing ? 'One moment' : 'or click to browse. Opens in the editor, ready when you are.'}
-          </p>
-          {!parsing && (
-            <div className="mt-3 flex items-center justify-center gap-1.5">
-              {['PDF', 'Word', 'TXT'].map((t) => (
-                <span key={t} className="px-2.5 py-1 rounded-full bg-stone-100 dark:bg-stone-800 text-[10px] font-extrabold uppercase tracking-wide text-stone-500">{t}</span>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-      {fileError && <p className="mt-2 text-[12px] font-bold text-[#D63A3A]">{fileError}</p>}
+      {/* ── ANALYZE CARD — premium gradient frame ─────────────────── */}
+      <div className="relative rounded-[28px] p-[2px] bg-gradient-to-br from-[#C79BF2] via-[#A560E8] to-[#7733B5] shadow-[0_28px_60px_-30px_rgba(165,96,232,0.7)]">
+        <div className="relative overflow-hidden rounded-[26px] bg-white dark:bg-stone-900 p-5 sm:p-7">
+          {/* Ambient glow + faint grid texture */}
+          <div className="pointer-events-none absolute -top-24 -right-20 w-64 h-64 rounded-full bg-[#A560E8]/15 blur-3xl" aria-hidden />
+          <div className="pointer-events-none absolute -bottom-24 -left-16 w-56 h-56 rounded-full bg-[#C79BF2]/15 blur-3xl" aria-hidden />
+          <div className="pointer-events-none absolute inset-0 opacity-[0.035] dark:opacity-[0.06]" style={{ backgroundImage: 'linear-gradient(rgba(120,113,108,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(120,113,108,0.8) 1px, transparent 1px)', backgroundSize: '26px 26px' }} aria-hidden />
 
-      {/* 2. Paste an essay (always visible) */}
-      <div className="mt-4 rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-5 sm:p-6">
-        <div className="flex items-center justify-between mb-2">
-          <label className="text-[13px] font-extrabold text-stone-700 dark:text-stone-200">Or paste your essay</label>
-          <span className={`text-[11px] font-bold tabular-nums ${words < 50 ? 'text-stone-400' : 'text-[#8A48C7]'}`}>{words} words</span>
-        </div>
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          rows={7}
-          placeholder="Paste your draft here. It saves as a document and opens in the editor, where you can run the analysis when you're ready."
-          className="w-full px-4 py-3 rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-sm text-stone-800 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#A560E8]/40 focus:border-[#A560E8]/40 resize-y"
-        />
-        <div className="mt-3 flex items-center gap-2">
-          {words > 0 && words < 50 && <p className="text-[11px] font-bold text-stone-400">Add {50 - words} more words.</p>}
-          <button
-            type="button"
-            onClick={() => askThenRun(() => onPasteAnalyze(text))}
-            disabled={words < 50}
-            className="ml-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
+          {/* Header */}
+          <div className="relative flex items-center gap-3.5 mb-5">
+            <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#BD8BF0] to-[#A560E8] text-white text-xl border-2 border-b-[3px] border-[#7733B5] shadow-[0_10px_24px_-10px_rgba(165,96,232,0.9)]" aria-hidden>
+              ✦
+            </span>
+            <div className="min-w-0">
+              <h2 className="text-[19px] font-extrabold text-stone-900 dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Get essay feedback</h2>
+              <p className="text-[12.5px] font-semibold text-stone-500 dark:text-stone-400 leading-snug">Upload or paste your essay — we&apos;ll mark it up with professor-style notes and a grade.</p>
+            </div>
+          </div>
+
+          {/* Drop zone */}
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => !parsing && fileRef.current?.click()}
+            onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && !parsing) { e.preventDefault(); fileRef.current?.click(); } }}
+            onDragEnter={(e) => { e.preventDefault(); setDropActive(true); }}
+            onDragOver={(e) => { e.preventDefault(); setDropActive(true); }}
+            onDragLeave={(e) => { e.preventDefault(); setDropActive(false); }}
+            onDrop={(e) => {
+              e.preventDefault();
+              setDropActive(false);
+              const f = e.dataTransfer.files?.[0];
+              if (f && !parsing) void handleFile(f);
+            }}
+            className={`group relative cursor-pointer rounded-2xl border-2 border-dashed transition-all duration-200 ${
+              parsing ? 'opacity-70 cursor-wait pointer-events-none' : ''
+            } ${
+              dropActive
+                ? 'scale-[1.005] border-[#A560E8] bg-[#F3EAFF] dark:bg-[#A560E8]/10'
+                : 'border-[#A560E8]/30 dark:border-stone-600 bg-[#FBF8FF] dark:bg-stone-800/60 hover:border-[#A560E8]/70 hover:bg-[#F3EAFF]/60'
+            }`}
           >
-            Open in editor
-          </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept=".pdf,.doc,.docx,.txt"
+              className="hidden"
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleFile(f); e.target.value = ''; }}
+            />
+            <div className="px-6 py-8 text-center">
+              <span className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#F3EAFF] to-[#E9DBFF] dark:bg-[#A560E8]/15 text-[#A560E8] border-2 border-[#A560E8]/25 transition-transform group-hover:-translate-y-0.5">
+                {parsing ? (
+                  <svg className="w-6 h-6 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden>
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity={0.3} strokeWidth={3} />
+                    <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth={3} strokeLinecap="round" />
+                  </svg>
+                ) : (
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M12 16V4m0 0L8 8m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" /></svg>
+                )}
+              </span>
+              <p className="text-base sm:text-lg font-extrabold text-stone-900 dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+                {parsing ? 'Reading your paper' : 'Drop your essay here'}
+              </p>
+              <p className="mt-1 text-[13px] font-bold text-stone-500 dark:text-stone-400">
+                {parsing ? 'One moment' : 'or click to browse. Opens in the editor, ready when you are.'}
+              </p>
+              {!parsing && (
+                <div className="mt-3 flex items-center justify-center gap-1.5">
+                  {['PDF', 'Word', 'TXT'].map((t) => (
+                    <span key={t} className="px-2.5 py-1 rounded-full bg-white dark:bg-stone-800 border border-[#A560E8]/20 text-[10px] font-extrabold uppercase tracking-wide text-[#8A48C7] dark:text-stone-400">{t}</span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+          {fileError && <p className="mt-2 text-[12px] font-bold text-[#D63A3A]">{fileError}</p>}
+
+          {/* OR divider */}
+          <div className="relative my-4 flex items-center gap-3">
+            <span className="h-px flex-1 bg-stone-200 dark:bg-stone-700" />
+            <span className="text-[11px] font-extrabold uppercase tracking-wide text-stone-400">or paste it</span>
+            <span className="h-px flex-1 bg-stone-200 dark:bg-stone-700" />
+          </div>
+
+          {/* Paste */}
+          <div className="flex items-center justify-between mb-2">
+            <label htmlFor="analyze-paste-input" className="text-[13px] font-extrabold text-stone-700 dark:text-stone-200">Paste your essay</label>
+            <span className={`inline-flex items-center gap-1 text-[11px] font-extrabold tabular-nums px-2 py-0.5 rounded-full transition-colors ${words >= 50 ? 'text-[#8A48C7] bg-[#F3EAFF] dark:bg-[#A560E8]/15' : 'text-stone-400 bg-stone-100 dark:bg-stone-800'}`}>
+              {words >= 50 && (<svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3.5} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>)}
+              {words} words
+            </span>
+          </div>
+          <textarea
+            id="analyze-paste-input"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            rows={6}
+            placeholder="Paste your draft here. It saves as a document and opens in the editor, where you can run the analysis when you're ready."
+            className="w-full px-4 py-3.5 rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-stone-50/80 dark:bg-stone-800/80 text-sm text-stone-800 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-4 focus:ring-[#A560E8]/20 focus:border-[#A560E8] resize-y transition-all"
+          />
+          <div className="mt-4 flex items-center gap-2">
+            {words > 0 && words < 50 && <p className="text-[11px] font-bold text-stone-400">Add {50 - words} more words.</p>}
+            <button
+              type="button"
+              onClick={() => askThenRun(() => onPasteAnalyze(text))}
+              disabled={words < 50}
+              className="group ml-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#A560E8] to-[#8A48C7] hover:from-[#8A48C7] hover:to-[#7733B5] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 text-white text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] enabled:hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_12px_28px_-12px_rgba(165,96,232,0.9)]"
+            >
+              Open in editor
+              <svg className="w-4 h-4 transition-transform group-enabled:group-hover:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+            </button>
+          </div>
+
+          {/* What you'll get — value reinforcement chips */}
+          <div className="mt-5 pt-4 border-t border-stone-100 dark:border-stone-800 flex flex-wrap items-center gap-1.5">
+            <span className="text-[10.5px] font-extrabold uppercase tracking-wide text-stone-400 mr-0.5">You&apos;ll get</span>
+            {['📝 Margin notes', '📊 Rubric breakdown', '🎯 Grade estimate'].map((c) => (
+              <span key={c} className="px-2.5 py-1 rounded-full bg-[#FBF8FF] dark:bg-[#A560E8]/10 border border-[#A560E8]/25 text-[11px] font-extrabold text-[#8A48C7] dark:text-[#C79BF2]">{c}</span>
+            ))}
+          </div>
         </div>
       </div>
 

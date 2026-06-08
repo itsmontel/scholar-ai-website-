@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import PreviewStrip from './PreviewStrip';
+import GenerationOverlay from '../../common/GenerationOverlay';
 
 /* ═══════════════════════════════════════════════════════════════
    CitationsPanel — in-page source finder.
@@ -102,66 +103,93 @@ export default function CitationsPanel({ onNavigate }: { onNavigate: (page: stri
 
   return (
     <div>
-      {/* Search card */}
-      <div className="relative overflow-hidden rounded-3xl border-2 border-stone-200/80 dark:border-stone-700 bg-white dark:bg-stone-900 p-5 sm:p-6 shadow-[0_16px_38px_-26px_rgba(28,176,246,0.55)]">
-        <div className="pointer-events-none absolute -top-16 -right-16 w-44 h-44 rounded-full bg-[#1CB0F6]/12 blur-3xl" aria-hidden />
-        <div className="relative flex items-center gap-3 mb-4">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#DDF4FF] dark:bg-[#1CB0F6]/15 text-[#1CB0F6] border-2 border-[#1CB0F6]/30 text-lg" aria-hidden>🔖</span>
-          <div className="min-w-0">
-            <h2 className="text-[17px] font-extrabold text-stone-900 dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Find citable sources</h2>
-            <p className="text-[12px] font-bold text-stone-500 dark:text-stone-400 leading-snug">Describe your topic — get real references with ready-to-use sentences in your style.</p>
+      <GenerationOverlay open={loading} variant="citations" />
+
+      {/* ── SEARCH CARD — premium gradient frame ──────────────────── */}
+      <div className="relative rounded-[28px] p-[2px] bg-gradient-to-br from-[#7FD4FF] via-[#1CB0F6] to-[#1486B5] shadow-[0_28px_60px_-30px_rgba(28,176,246,0.7)]">
+        <div className="relative overflow-hidden rounded-[26px] bg-white dark:bg-stone-900 p-5 sm:p-7">
+          {/* Ambient glow + faint grid texture */}
+          <div className="pointer-events-none absolute -top-24 -right-20 w-64 h-64 rounded-full bg-[#1CB0F6]/15 blur-3xl" aria-hidden />
+          <div className="pointer-events-none absolute -bottom-24 -left-16 w-56 h-56 rounded-full bg-[#7FD4FF]/15 blur-3xl" aria-hidden />
+          <div className="pointer-events-none absolute inset-0 opacity-[0.035] dark:opacity-[0.06]" style={{ backgroundImage: 'linear-gradient(rgba(120,113,108,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(120,113,108,0.8) 1px, transparent 1px)', backgroundSize: '26px 26px' }} aria-hidden />
+
+          {/* Header */}
+          <div className="relative flex items-center gap-3.5 mb-5">
+            <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#5BC5FF] to-[#1CB0F6] text-white text-xl border-2 border-b-[3px] border-[#1486B5] shadow-[0_10px_24px_-10px_rgba(28,176,246,0.9)]" aria-hidden>
+              🔖
+              <span className="absolute -top-1.5 -right-1.5 text-[#FFC800] text-sm motion-safe:animate-pulse">✦</span>
+            </span>
+            <div className="min-w-0">
+              <h2 className="text-[19px] font-extrabold text-stone-900 dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Find citable sources</h2>
+              <p className="text-[12.5px] font-semibold text-stone-500 dark:text-stone-400 leading-snug">Describe your topic — get real references with ready-to-use sentences in your style.</p>
+            </div>
           </div>
-        </div>
-        <label className="relative block text-[13px] font-extrabold text-stone-700 dark:text-stone-200 mb-2">
-          What are you researching?
-        </label>
-        <textarea
-          value={topic}
-          onChange={(e) => {
-            setTopic(e.target.value);
-            try { sessionStorage.setItem(DRAFT_KEY, e.target.value); } catch { /* noop */ }
-          }}
-          rows={3}
-          placeholder="e.g. the effect of social media on adolescent sleep quality"
-          className="w-full px-4 py-3 rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-sm text-stone-800 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#1CB0F6]/40 focus:border-[#1CB0F6]/40 resize-none"
-        />
-        <div className="mt-3 flex flex-col sm:flex-row sm:items-center gap-3">
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-extrabold uppercase tracking-wide text-stone-400">Style</span>
-            <select
-              value={style}
-              onChange={(e) => setStyle(e.target.value)}
-              className="px-3 py-2 rounded-xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-[13px] font-bold text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-2 focus:ring-[#1CB0F6]/40"
+
+          <label htmlFor="citations-topic-input" className="relative block text-[13px] font-extrabold text-stone-700 dark:text-stone-200 mb-2">
+            What are you researching?
+          </label>
+          <textarea
+            id="citations-topic-input"
+            value={topic}
+            onChange={(e) => {
+              setTopic(e.target.value);
+              try { sessionStorage.setItem(DRAFT_KEY, e.target.value); } catch { /* noop */ }
+            }}
+            rows={3}
+            placeholder="e.g. the effect of social media on adolescent sleep quality"
+            className="relative w-full px-4 py-3.5 rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-stone-50/80 dark:bg-stone-800/80 text-sm text-stone-800 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-4 focus:ring-[#1CB0F6]/20 focus:border-[#1CB0F6] resize-none transition-all"
+          />
+          <div className="relative mt-4 flex flex-col sm:flex-row sm:items-center gap-3">
+            <label className="flex items-center gap-2">
+              <span className="text-[10.5px] font-extrabold uppercase tracking-wide text-stone-400">Style</span>
+              <select
+                value={style}
+                onChange={(e) => setStyle(e.target.value)}
+                className="px-3 py-2.5 rounded-xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-[13px] font-bold text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-4 focus:ring-[#1CB0F6]/20 focus:border-[#1CB0F6] transition-all"
+              >
+                {STYLES.map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </label>
+            <label className="flex items-center gap-2">
+              <span className="text-[10.5px] font-extrabold uppercase tracking-wide text-stone-400">Recency</span>
+              <select
+                value={yearRange}
+                onChange={(e) => setYearRange(e.target.value)}
+                className="px-3 py-2.5 rounded-xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-[13px] font-bold text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-4 focus:ring-[#1CB0F6]/20 focus:border-[#1CB0F6] transition-all"
+              >
+                {YEARS.map((y) => <option key={y.v} value={y.v}>{y.label}</option>)}
+              </select>
+            </label>
+            <button
+              type="button"
+              onClick={search}
+              disabled={loading || !topic.trim()}
+              className="group sm:ml-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#1CB0F6] to-[#0E9BE0] hover:from-[#0E9BE0] hover:to-[#1486B5] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 text-white text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#1486B5] enabled:hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_12px_28px_-12px_rgba(28,176,246,0.9)]"
             >
-              {STYLES.map((s) => <option key={s} value={s}>{s}</option>)}
-            </select>
+              {loading ? (
+                <>
+                  <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden>
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity={0.3} strokeWidth={3} />
+                    <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth={3} strokeLinecap="round" />
+                  </svg>
+                  Searching…
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.6} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M11 19a8 8 0 110-16 8 8 0 010 16z" /></svg>
+                  Find sources
+                </>
+              )}
+            </button>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-extrabold uppercase tracking-wide text-stone-400">Recency</span>
-            <select
-              value={yearRange}
-              onChange={(e) => setYearRange(e.target.value)}
-              className="px-3 py-2 rounded-xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-[13px] font-bold text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-2 focus:ring-[#1CB0F6]/40"
-            >
-              {YEARS.map((y) => <option key={y.v} value={y.v}>{y.label}</option>)}
-            </select>
+
+          {/* What you'll get — value reinforcement chips */}
+          <div className="relative mt-5 pt-4 border-t border-stone-100 dark:border-stone-800 flex flex-wrap items-center gap-1.5">
+            <span className="text-[10.5px] font-extrabold uppercase tracking-wide text-stone-400 mr-0.5">You'll get</span>
+            {['📄 Real sources', '✍️ Ready-to-use sentences', '🏷️ In-text citations'].map((c) => (
+              <span key={c} className="px-2.5 py-1 rounded-full bg-[#F5FBFF] dark:bg-[#1CB0F6]/10 border border-[#1CB0F6]/25 text-[11px] font-extrabold text-[#1486B5] dark:text-[#1CB0F6]">{c}</span>
+            ))}
           </div>
-          <button
-            type="button"
-            onClick={search}
-            disabled={loading || !topic.trim()}
-            className="sm:ml-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#1CB0F6] hover:bg-[#1486B5] disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#1486B5] active:border-b-2 active:translate-y-0.5 transition-all"
-          >
-            {loading ? (
-              <>
-                <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden>
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity={0.3} strokeWidth={3} />
-                  <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth={3} strokeLinecap="round" />
-                </svg>
-                Searching…
-              </>
-            ) : 'Find sources'}
-          </button>
         </div>
       </div>
 

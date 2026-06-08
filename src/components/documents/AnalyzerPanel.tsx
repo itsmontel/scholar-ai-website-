@@ -407,51 +407,10 @@ export default function AnalyzerPanel({
         {/* Loading state — the full animated treatment, shown for
             EVERY analysis (first run and re-analyze alike). */}
         {loading && (
-          <div className="ws-analyzing-pop flex flex-col items-center text-center px-2 pt-6 pb-1">
-            <div className="relative h-20 w-20">
-              <span className="absolute inset-0 rounded-full border-2 border-[#A560E8]/40 ws-radar" />
-              <span className="absolute inset-0 rounded-full border-2 border-[#A560E8]/30 ws-radar ws-radar-2" />
-              <svg className="ws-spin absolute inset-0 h-20 w-20" viewBox="0 0 80 80" fill="none" aria-hidden>
-                <defs>
-                  <linearGradient id="wsAnalyzeRing" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="#A560E8" />
-                    <stop offset="100%" stopColor="#7733B5" />
-                  </linearGradient>
-                </defs>
-                <circle cx="40" cy="40" r="34" className="text-stone-200 dark:text-stone-700" stroke="currentColor" strokeWidth={5} />
-                <circle cx="40" cy="40" r="34" stroke="url(#wsAnalyzeRing)" strokeWidth={5} strokeLinecap="round" strokeDasharray="62 200" />
-              </svg>
-              <span className="absolute inset-[18px] flex items-center justify-center rounded-2xl bg-gradient-to-br from-[#A560E8] to-[#7733B5] text-white shadow-[0_8px_22px_-6px_rgba(165,96,232,0.7)] ws-badge-pulse">
-                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
-                  <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8l-6.2 4.5 2.4-7.4L2 9.4h7.6z" />
-                </svg>
-              </span>
-            </div>
-
-            <p className="mt-5 text-[15px] font-extrabold text-stone-900 dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-              Analyzing your essay
-            </p>
-            <div className="mt-1 h-5 overflow-hidden text-[12px] font-bold text-[#8A48C7] dark:text-[#C9A0F0]">
-              <div className="ws-phrase-ticker">
-                <div className="h-5 leading-5">Reading your draft…</div>
-                <div className="h-5 leading-5">Weighing the thesis &amp; argument…</div>
-                <div className="h-5 leading-5">Checking structure &amp; evidence…</div>
-                <div className="h-5 leading-5">Scoring the rubric…</div>
-                <div className="h-5 leading-5">Writing line-by-line fixes…</div>
-                <div className="h-5 leading-5">Reading your draft…</div>
-              </div>
-            </div>
-
-            <div className="mt-4 h-1.5 w-44 overflow-hidden rounded-full bg-stone-100 dark:bg-stone-800">
-              <div className="h-full w-1/3 rounded-full bg-gradient-to-r from-[#A560E8] to-[#7733B5] ws-scan-bar" />
-            </div>
-
-            <div className="mt-7 w-full space-y-3">
-              <div className="h-28 rounded-2xl ws-shimmer" />
-              {[0, 1, 2].map((i) => (
-                <div key={i} className="h-16 rounded-xl ws-shimmer" />
-              ))}
-            </div>
+          <div className="flex flex-col items-center justify-center py-14 px-4 text-center">
+            <div className="h-24 w-full max-w-[200px] rounded-2xl bg-stone-100 dark:bg-stone-800 animate-pulse" />
+            <div className="mt-3 h-3 w-32 rounded-full bg-stone-100 dark:bg-stone-800 animate-pulse" />
+            <p className="mt-4 text-[12px] font-bold text-stone-400">Feedback loading…</p>
           </div>
         )}
 
@@ -586,63 +545,6 @@ export default function AnalyzerPanel({
         )}
       </div>
 
-      {/* Locally-scoped animations — keeps the polish self-contained
-          rather than polluting the global stylesheet. */}
-      <style>{`
-        @keyframes wsAnalyzingPop {
-          0%   { opacity: 0; transform: scale(0.92) translateY(8px); }
-          60%  { opacity: 1; transform: scale(1.02) translateY(0); }
-          100% { opacity: 1; transform: scale(1)    translateY(0); }
-        }
-        .ws-analyzing-pop { animation: wsAnalyzingPop 420ms cubic-bezier(0.34, 1.56, 0.64, 1); }
-
-        @keyframes wsAnalyzeSpin { to { transform: rotate(360deg); } }
-        .ws-spin { transform-origin: 50% 50%; animation: wsAnalyzeSpin 1.8s linear infinite; }
-
-        @keyframes wsRadar {
-          0%   { transform: scale(0.55); opacity: 0.7; }
-          100% { transform: scale(1.6);  opacity: 0; }
-        }
-        .ws-radar { animation: wsRadar 1.9s ease-out infinite; }
-        .ws-radar-2 { animation-delay: 0.95s; }
-
-        @keyframes wsBadgePulse {
-          0%, 100% { transform: scale(1); }
-          50%      { transform: scale(1.08); }
-        }
-        .ws-badge-pulse { animation: wsBadgePulse 1.5s ease-in-out infinite; }
-
-        @keyframes wsPhraseTicker {
-          0%,  15% { transform: translateY(0); }
-          20%, 35% { transform: translateY(-1.25rem); }
-          40%, 55% { transform: translateY(-2.5rem); }
-          60%, 75% { transform: translateY(-3.75rem); }
-          80%, 95% { transform: translateY(-5rem); }
-          100%     { transform: translateY(-6.25rem); }
-        }
-        .ws-phrase-ticker { animation: wsPhraseTicker 11s cubic-bezier(0.7, 0, 0.3, 1) infinite; }
-
-        @keyframes wsScanBar {
-          0%   { transform: translateX(-120%); }
-          100% { transform: translateX(420%); }
-        }
-        .ws-scan-bar { animation: wsScanBar 1.15s ease-in-out infinite; }
-
-        @keyframes wsShimmer {
-          0%   { background-position: -200% 0; }
-          100% { background-position: 200% 0; }
-        }
-        .ws-shimmer {
-          background: linear-gradient(90deg, rgba(165,96,232,0.07) 25%, rgba(165,96,232,0.18) 37%, rgba(165,96,232,0.07) 63%);
-          background-size: 200% 100%;
-          animation: wsShimmer 1.6s linear infinite;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .ws-analyzing-pop, .ws-spin, .ws-radar, .ws-badge-pulse,
-          .ws-phrase-ticker, .ws-scan-bar, .ws-shimmer { animation: none; }
-        }
-      `}</style>
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { diffWordsWithSpace } from 'diff';
 import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
 import LoadingSpinner from '../common/LoadingSpinner';
-import AnalysisAnimation from '../common/AnalysisAnimation';
+import GenerationOverlay from '../common/GenerationOverlay';
 import { ExportService, AnalysisData } from '../../services/exportService';
 import { trackAction, getStats } from '../../data/achievements';
 import { trackEvent } from '../../utils/analytics';
@@ -593,7 +593,6 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
   const [essayCopyFeedback, setEssayCopyFeedback] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showAnalysisPopup, setShowAnalysisPopup] = useState(false);
-  const [analysisComplete, setAnalysisComplete] = useState(false);
   const [currentPlan, setCurrentPlan] = useState<string>('free');
   const [isExporting, setIsExporting] = useState(false);
   const [applyingRevisionId, setApplyingRevisionId] = useState<string | null>(null);
@@ -2001,12 +2000,10 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
       setActivationCoachStep('loading');
       setIsAnalyzing(true);
       setShowAnalysisPopup(true);
-      setAnalysisComplete(false);
       window.setTimeout(() => {
         applyActivationMock(pasted);
         setIsAnalyzing(false);
         setShowAnalysisPopup(false);
-        setAnalysisComplete(true);
         setActivationCoachStep('rubric');
       }, 3000);
       return;
@@ -2047,7 +2044,6 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
 
     setIsAnalyzing(true);
     setShowAnalysisPopup(true);
-    setAnalysisComplete(false);
     setError('');
     setLimitExceededError(null);
     setSuccessMessage('');
@@ -2120,7 +2116,6 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
           setShowAnalysisPopup(false);
           analyzingRef.current = false;
           setIsAnalyzing(false);
-          setAnalysisComplete(true);
           fetchDocuments();
           return;
         }
@@ -2251,8 +2246,6 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
     } finally {
       analyzingRef.current = false;
       setIsAnalyzing(false);
-      // Mark analysis as complete and let the popup handle the transition
-      setAnalysisComplete(true);
       // Refresh documents to update analysis status
       fetchDocuments();
       // Dispatch custom event to notify other components
@@ -5192,17 +5185,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
       )}
 
       {/* Analysis Popup Animation */}
-      {showAnalysisPopup && (
-        <AnalysisAnimation
-          isPopup={true}
-          variant="analyze"
-          isComplete={analysisComplete}
-          onComplete={() => {
-            setShowAnalysisPopup(false);
-            setAnalysisComplete(false);
-          }}
-        />
-      )}
+      <GenerationOverlay open={showAnalysisPopup} variant="analyze" />
     </LoggedInPageShell>
   );
 };

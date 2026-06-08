@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import GenerationOverlay from '../common/GenerationOverlay';
 
 /* ═══════════════════════════════════════════════════════════════
    Daily Review Tab — Duolingo-style daily practice
@@ -231,6 +232,9 @@ const DailyReviewTab = ({ user, onNavigate, onSwitchTool }: DailyReviewTabProps)
 
       if (selected.length === 0) { setNoContent(true); setPhase('home'); return; }
 
+      // Let the build animation breathe so it doesn't flash for a frame.
+      await new Promise((r) => setTimeout(r, 1100));
+
       setReviewItems(selected);
       setPhase('playing');
     } catch {
@@ -353,12 +357,14 @@ const DailyReviewTab = ({ user, onNavigate, onSwitchTool }: DailyReviewTabProps)
 
     return (
       <section className="space-y-5">
-        {/* Hero card */}
-        <div className="relative rounded-2xl bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 overflow-hidden">
-          {/* Top accent */}
-          <div className="h-2 bg-[#58CC02]" />
+        {/* Hero card — premium gradient frame */}
+        <div className="relative rounded-[28px] p-[2px] bg-gradient-to-br from-[#86E04A] via-[#58CC02] to-[#46A302] shadow-[0_28px_60px_-30px_rgba(88,204,2,0.7)]">
+          <div className="relative overflow-hidden rounded-[26px] bg-white dark:bg-stone-900 p-6 sm:p-8 lg:p-10">
+            {/* Ambient glow + faint grid texture */}
+            <div className="pointer-events-none absolute -top-24 -right-16 w-64 h-64 rounded-full bg-[#58CC02]/15 blur-3xl" aria-hidden />
+            <div className="pointer-events-none absolute -bottom-24 -left-16 w-56 h-56 rounded-full bg-[#FFC800]/10 blur-3xl" aria-hidden />
+            <div className="pointer-events-none absolute inset-0 opacity-[0.035] dark:opacity-[0.06]" style={{ backgroundImage: 'linear-gradient(rgba(120,113,108,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(120,113,108,0.8) 1px, transparent 1px)', backgroundSize: '26px 26px' }} aria-hidden />
 
-          <div className="relative p-6 sm:p-8 lg:p-10">
             {/* Mascot */}
             <img
               src="/mascot-study.webp"
@@ -366,12 +372,12 @@ const DailyReviewTab = ({ user, onNavigate, onSwitchTool }: DailyReviewTabProps)
               aria-hidden
               loading="lazy"
               decoding="async"
-              className="hidden lg:block pointer-events-none absolute top-4 right-6 w-20 h-auto z-10 opacity-90"
+              className="hidden lg:block pointer-events-none absolute top-5 right-7 w-24 h-auto z-10 drop-shadow-[0_14px_28px_rgba(88,204,2,0.35)]"
             />
 
-            <div className="text-center max-w-lg mx-auto">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#E5F8D0] dark:bg-[#58CC02]/10 text-[#58CC02] border-2 border-[#58CC02]/30 text-xs font-extrabold mb-4">
-                <span aria-hidden>🎯</span>
+            <div className="relative text-center max-w-lg mx-auto">
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-[#E5F8D0] to-[#D6F4B8] dark:from-[#58CC02]/15 dark:to-[#58CC02]/5 text-[#46A302] border-2 border-[#58CC02]/30 text-[11px] font-extrabold uppercase tracking-[0.12em] mb-4 shadow-[0_6px_16px_-10px_rgba(88,204,2,0.9)]">
+                <span aria-hidden className="motion-safe:animate-pulse">🎯</span>
                 Daily Review
               </span>
 
@@ -460,10 +466,11 @@ const DailyReviewTab = ({ user, onNavigate, onSwitchTool }: DailyReviewTabProps)
                   <button
                     type="button"
                     onClick={startReview}
-                    className="px-10 py-4 bg-[#58CC02] text-white font-extrabold rounded-2xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all text-lg tracking-tight hover:bg-[#9B53E0]"
+                    className="group inline-flex items-center justify-center gap-2 px-10 py-4 bg-gradient-to-r from-[#58CC02] to-[#46A302] hover:from-[#61E002] hover:to-[#58CC02] text-white font-extrabold rounded-2xl border-2 border-b-4 border-[#46A302] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all text-lg tracking-tight shadow-[0_14px_30px_-12px_rgba(88,204,2,0.9)]"
                     style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                   >
                     {completedToday ? 'Practice again' : 'Start review'}
+                    <svg className="w-5 h-5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                   </button>
                 )}
               </div>
@@ -539,14 +546,18 @@ const DailyReviewTab = ({ user, onNavigate, onSwitchTool }: DailyReviewTabProps)
      ═══════════════════════════════════════════════════════════ */
   if (phase === 'loading') {
     return (
-      <section className="rounded-2xl bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 p-10 sm:p-16">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-14 h-14 border-4 border-[#58CC02]/30 border-t-[#58CC02] rounded-full animate-spin" />
-          <p className="text-stone-600 dark:text-stone-400 font-extrabold" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-            Preparing your review...
-          </p>
-        </div>
-      </section>
+      <>
+        <GenerationOverlay open variant="dailyReview" />
+        {/* Soft placeholder behind the overlay */}
+        <section className="rounded-2xl bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 p-10 sm:p-16">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-14 h-14 border-4 border-[#58CC02]/30 border-t-[#58CC02] rounded-full animate-spin" />
+            <p className="text-stone-600 dark:text-stone-400 font-extrabold" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+              Preparing your review...
+            </p>
+          </div>
+        </section>
+      </>
     );
   }
 

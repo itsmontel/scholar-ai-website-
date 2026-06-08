@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
-import AnalysisAnimation from '../common/AnalysisAnimation';
+import GenerationOverlay from '../common/GenerationOverlay';
 import { trackAction } from '../../data/achievements';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../utils/seo';
 
@@ -29,7 +29,6 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout, embedded = false }: Anal
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const [showWordWarning, setShowWordWarning] = useState(false);
   const [showAnalysisPopup, setShowAnalysisPopup] = useState(false);
-  const [analysisComplete, setAnalysisComplete] = useState(false);
   const [showSignupPrompt, setShowSignupPrompt] = useState(false);
   const [showRevealAnimation, setShowRevealAnimation] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
@@ -147,25 +146,19 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout, embedded = false }: Anal
         return;
       }
       setShowAnalysisPopup(true);
-      setAnalysisComplete(false);
       localStorage.setItem('textAnalysisContent', inputText);
       trackAction('analyses_count');
-      setTimeout(() => setAnalysisComplete(true), 2000);
       setTimeout(() => {
         setShowAnalysisPopup(false);
-        setAnalysisComplete(false);
         onNavigate('analysis');
       }, 4000);
       return;
     }
 
     setShowAnalysisPopup(true);
-    setAnalysisComplete(false);
     setShowRevealAnimation(false);
-    setTimeout(() => setAnalysisComplete(true), 4500);
     setTimeout(() => {
       setShowAnalysisPopup(false);
-      setAnalysisComplete(false);
       setShowRevealAnimation(true);
     }, 6000);
     setTimeout(() => {
@@ -543,17 +536,7 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout, embedded = false }: Anal
         </div>
       </main>
 
-      {showAnalysisPopup && (
-        <AnalysisAnimation
-          isPopup={true}
-          text="Analyzing your writing"
-          isComplete={analysisComplete}
-          onComplete={() => {
-            setShowAnalysisPopup(false);
-            setAnalysisComplete(false);
-          }}
-        />
-      )}
+      <GenerationOverlay open={showAnalysisPopup} variant="analyze" />
 
       {showRevealAnimation && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">

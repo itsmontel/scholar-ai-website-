@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import PreviewStrip from './PreviewStrip';
+import GenerationOverlay from '../../common/GenerationOverlay';
 
 /* ═══════════════════════════════════════════════════════════════
    StudyPacksPanel — notes → a full study pack (lesson, flashcards,
@@ -135,134 +136,173 @@ export default function StudyPacksPanel({ onNavigate }: { onNavigate: (page: str
     }
   };
 
+  const notesReady = wordCount >= 50;
+  const topicReady = topic.trim().length >= 2;
+  const canGenerate = mode === 'notes' ? notesReady : topicReady;
+
   return (
     <div>
-      <div className="relative overflow-hidden rounded-3xl border-2 border-stone-200/80 dark:border-stone-700 bg-white dark:bg-stone-900 p-5 sm:p-6 shadow-[0_16px_38px_-26px_rgba(255,150,0,0.55)]">
-        <div className="pointer-events-none absolute -top-16 -right-16 w-44 h-44 rounded-full bg-[#FF9600]/12 blur-3xl" aria-hidden />
-        <div className="relative flex items-center gap-3 mb-4">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#FFF4E0] dark:bg-[#FF9600]/15 text-[#FF9600] border-2 border-[#FF9600]/30 text-lg" aria-hidden>📚</span>
-          <div className="min-w-0">
-            <h2 className="text-[17px] font-extrabold text-stone-900 dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Make a study pack</h2>
-            <p className="text-[12px] font-bold text-stone-500 dark:text-stone-400 leading-snug">Paste notes or pick a topic — get a lesson, flashcards, a quiz, a crossword &amp; arcade games.</p>
+      <GenerationOverlay open={loading} variant="studyPack" />
+
+      {/* ── CREATOR CARD — premium gradient frame ─────────────────── */}
+      <div className="relative rounded-[28px] p-[2px] bg-gradient-to-br from-[#FFC36B] via-[#FF9600] to-[#B85F00] shadow-[0_28px_60px_-30px_rgba(255,150,0,0.7)]">
+        <div className="relative overflow-hidden rounded-[26px] bg-white dark:bg-stone-900 p-5 sm:p-7">
+          {/* Ambient glow + faint grid texture */}
+          <div className="pointer-events-none absolute -top-24 -right-20 w-64 h-64 rounded-full bg-[#FF9600]/15 blur-3xl" aria-hidden />
+          <div className="pointer-events-none absolute -bottom-24 -left-16 w-56 h-56 rounded-full bg-[#FFC800]/10 blur-3xl" aria-hidden />
+          <div className="pointer-events-none absolute inset-0 opacity-[0.035] dark:opacity-[0.06]" style={{ backgroundImage: 'linear-gradient(rgba(120,113,108,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(120,113,108,0.8) 1px, transparent 1px)', backgroundSize: '26px 26px' }} aria-hidden />
+
+          {/* Header */}
+          <div className="relative flex items-center gap-3.5 mb-5">
+            <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#FFB347] to-[#FF9600] text-white text-xl border-2 border-b-[3px] border-[#B85F00] shadow-[0_10px_24px_-10px_rgba(255,150,0,0.9)]" aria-hidden>
+              📚
+              <span className="absolute -top-1.5 -right-1.5 text-[#FFC800] text-sm motion-safe:animate-pulse">✦</span>
+            </span>
+            <div className="min-w-0">
+              <h2 className="text-[19px] font-extrabold text-stone-900 dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Make a study pack</h2>
+              <p className="text-[12.5px] font-semibold text-stone-500 dark:text-stone-400 leading-snug">Paste notes or pick a topic — get a lesson, flashcards, a quiz, a crossword &amp; arcade games.</p>
+            </div>
           </div>
-        </div>
-        {/* Choose how to build the pack: paste your own notes, or type a
-            topic and we write the notes for you. */}
-        <div className="relative flex gap-1.5 p-1 mb-3 rounded-2xl bg-stone-100 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-700">
-          <button
-            type="button"
-            onClick={() => { setMode('notes'); setError(null); }}
-            aria-pressed={mode === 'notes'}
-            className={`flex-1 inline-flex items-center justify-center gap-1.5 py-2 rounded-xl text-[13px] font-extrabold transition-all ${
-              mode === 'notes'
-                ? 'bg-white dark:bg-stone-900 text-[#FF9600] border-2 border-[#FF9600]'
-                : 'text-stone-500 dark:text-stone-400 border-2 border-transparent'
-            }`}
-          >
-            <span>📝</span> Paste notes
-          </button>
-          <button
-            type="button"
-            onClick={() => { setMode('topic'); setError(null); }}
-            aria-pressed={mode === 'topic'}
-            className={`flex-1 inline-flex items-center justify-center gap-1.5 py-2 rounded-xl text-[13px] font-extrabold transition-all ${
-              mode === 'topic'
-                ? 'bg-white dark:bg-stone-900 text-[#FF9600] border-2 border-[#FF9600]'
-                : 'text-stone-500 dark:text-stone-400 border-2 border-transparent'
-            }`}
-          >
-            <span>✨</span> From a topic
-          </button>
-        </div>
-        {mode === 'notes' ? (
-          <>
-            <div className="relative flex items-center justify-between mb-2">
-              <label className="text-[13px] font-extrabold text-stone-700 dark:text-stone-200">Paste your notes or lecture material</label>
-              <span className={`text-[11px] font-bold tabular-nums ${wordCount < 50 ? 'text-stone-400' : 'text-[#B85F00]'}`}>{wordCount} words</span>
-            </div>
-            <textarea
-              value={notes}
-              onChange={(e) => {
-                setNotes(e.target.value);
-                try { sessionStorage.setItem(DRAFT_KEY, e.target.value); } catch { /* noop */ }
-              }}
-              rows={8}
-              placeholder="Drop in a chapter, your class notes, an article… at least 50 words. We'll turn it into a lesson, flashcards, a quiz, a crossword and arcade mode."
-              className="w-full px-4 py-3 rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-sm text-stone-800 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#FF9600]/40 focus:border-[#FF9600]/40 resize-y"
+
+          {/* Mode segmented control — sliding pill */}
+          <div className="relative flex p-1.5 mb-4 rounded-2xl bg-stone-100 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-700">
+            <span
+              aria-hidden
+              className="absolute top-1.5 bottom-1.5 left-1.5 w-[calc(50%-0.375rem)] rounded-xl bg-white dark:bg-stone-900 border-2 border-[#FF9600] shadow-[0_6px_16px_-8px_rgba(255,150,0,0.8)] transition-transform duration-300 ease-out"
+              style={{ transform: mode === 'topic' ? 'translateX(calc(100% + 0.25rem))' : 'translateX(0)' }}
             />
-          </>
-        ) : (
-          <>
-            <label htmlFor="study-pack-topic-input" className="block text-[13px] font-extrabold text-stone-700 dark:text-stone-200 mb-2">What do you want to study?</label>
-            <input
-              id="study-pack-topic-input"
-              type="text"
-              value={topic}
-              onChange={(e) => {
-                setTopic(e.target.value);
-                try { sessionStorage.setItem(TOPIC_DRAFT_KEY, e.target.value); } catch { /* noop */ }
-              }}
-              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); if (!loading && topic.trim().length >= 2) void generate(); } }}
-              maxLength={200}
-              placeholder="e.g. Plato's philosophy, Psych 101, the French Revolution"
-              className="w-full px-4 py-3 rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-sm text-stone-800 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#FF9600]/40 focus:border-[#FF9600]/40"
-            />
-            <p className="mt-2 text-[11px] font-bold text-stone-400 dark:text-stone-500 leading-snug">Type any subject, topic or course. We&apos;ll write the notes, then build the whole pack from them.</p>
-            <div className="mt-2 flex flex-wrap items-center gap-1.5">
-              <span className="text-[11px] font-bold text-stone-400">Try:</span>
-              {TOPIC_EXAMPLES.map((ex) => (
-                <button
-                  key={ex}
-                  type="button"
-                  onClick={() => {
-                    setTopic(ex);
-                    try { sessionStorage.setItem(TOPIC_DRAFT_KEY, ex); } catch { /* noop */ }
-                  }}
-                  className="px-2.5 py-1 rounded-lg bg-[#FFF4E0] dark:bg-[#FF9600]/10 border-2 border-[#FF9600]/30 text-[#B85F00] dark:text-[#FF9600] text-[11px] font-extrabold transition-all hover:border-[#FF9600] active:translate-y-0.5"
-                >
-                  {ex}
-                </button>
-              ))}
-            </div>
-          </>
-        )}
-        <input
-          ref={fileRef}
-          type="file"
-          accept=".pdf,.doc,.docx,.txt"
-          className="hidden"
-          onChange={(e) => { const f = e.target.files?.[0]; if (f) void onFile(f); e.target.value = ''; }}
-        />
-        <div className="mt-3 flex flex-col sm:flex-row sm:items-center gap-2">
-          {mode === 'notes' && (
             <button
               type="button"
-              onClick={() => fileRef.current?.click()}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-b-[3px] border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-sm font-extrabold text-stone-700 dark:text-stone-200 hover:border-[#FF9600]/40 active:border-b-2 active:translate-y-0.5 transition-all"
+              onClick={() => { setMode('notes'); setError(null); }}
+              aria-pressed={mode === 'notes'}
+              className={`relative z-10 flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-[13px] font-extrabold transition-colors ${mode === 'notes' ? 'text-[#FF9600]' : 'text-stone-500 dark:text-stone-400'}`}
             >
-              Upload a file
+              <span>📝</span> Paste notes
             </button>
+            <button
+              type="button"
+              onClick={() => { setMode('topic'); setError(null); }}
+              aria-pressed={mode === 'topic'}
+              className={`relative z-10 flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-[13px] font-extrabold transition-colors ${mode === 'topic' ? 'text-[#FF9600]' : 'text-stone-500 dark:text-stone-400'}`}
+            >
+              <span>✨</span> From a topic
+            </button>
+          </div>
+
+          {mode === 'notes' ? (
+            <>
+              <div className="relative flex items-center justify-between mb-2">
+                <label className="text-[13px] font-extrabold text-stone-700 dark:text-stone-200">Paste your notes or lecture material</label>
+                <span className={`inline-flex items-center gap-1 text-[11px] font-extrabold tabular-nums px-2 py-0.5 rounded-full transition-colors ${notesReady ? 'text-[#B85F00] bg-[#FFF4E0] dark:bg-[#FF9600]/15' : 'text-stone-400 bg-stone-100 dark:bg-stone-800'}`}>
+                  {notesReady && (
+                    <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3.5} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                  )}
+                  {wordCount} words
+                </span>
+              </div>
+              <textarea
+                value={notes}
+                onChange={(e) => {
+                  setNotes(e.target.value);
+                  try { sessionStorage.setItem(DRAFT_KEY, e.target.value); } catch { /* noop */ }
+                }}
+                rows={8}
+                placeholder="Drop in a chapter, your class notes, an article… at least 50 words. We'll turn it into a lesson, flashcards, a quiz, a crossword and arcade mode."
+                className="w-full px-4 py-3.5 rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-stone-50/80 dark:bg-stone-800/80 text-sm text-stone-800 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-4 focus:ring-[#FF9600]/20 focus:border-[#FF9600] resize-y transition-all"
+              />
+            </>
+          ) : (
+            <>
+              <label htmlFor="study-pack-topic-input" className="block text-[13px] font-extrabold text-stone-700 dark:text-stone-200 mb-2">What do you want to study?</label>
+              <div className="relative">
+                <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-stone-300 dark:text-stone-500" aria-hidden>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M11 19a8 8 0 110-16 8 8 0 010 16z" /></svg>
+                </span>
+                <input
+                  id="study-pack-topic-input"
+                  type="text"
+                  value={topic}
+                  onChange={(e) => {
+                    setTopic(e.target.value);
+                    try { sessionStorage.setItem(TOPIC_DRAFT_KEY, e.target.value); } catch { /* noop */ }
+                  }}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); if (!loading && topic.trim().length >= 2) void generate(); } }}
+                  maxLength={200}
+                  placeholder="e.g. Plato's philosophy, Psych 101, the French Revolution"
+                  className="w-full pl-11 pr-4 py-3.5 rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-stone-50/80 dark:bg-stone-800/80 text-sm text-stone-800 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-4 focus:ring-[#FF9600]/20 focus:border-[#FF9600] transition-all"
+                />
+              </div>
+              <p className="mt-2 text-[11px] font-bold text-stone-400 dark:text-stone-500 leading-snug">Type any subject, topic or course. We&apos;ll write the notes, then build the whole pack from them.</p>
+              <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                <span className="text-[11px] font-bold text-stone-400">Try:</span>
+                {TOPIC_EXAMPLES.map((ex) => (
+                  <button
+                    key={ex}
+                    type="button"
+                    onClick={() => {
+                      setTopic(ex);
+                      try { sessionStorage.setItem(TOPIC_DRAFT_KEY, ex); } catch { /* noop */ }
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-[#FFF4E0] dark:bg-[#FF9600]/10 border-2 border-[#FF9600]/30 text-[#B85F00] dark:text-[#FF9600] text-[11px] font-extrabold transition-all hover:border-[#FF9600] hover:-translate-y-0.5 active:translate-y-0"
+                  >
+                    {ex}
+                  </button>
+                ))}
+              </div>
+            </>
           )}
-          <button
-            type="button"
-            onClick={generate}
-            disabled={loading || (mode === 'notes' ? wordCount < 50 : topic.trim().length < 2)}
-            className="sm:ml-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#FF9600] hover:bg-[#B85F00] disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#B85F00] active:border-b-2 active:translate-y-0.5 transition-all"
-          >
-            {loading ? (
-              <>
-                <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden>
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity={0.3} strokeWidth={3} />
-                  <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth={3} strokeLinecap="round" />
-                </svg>
-                Building your pack…
-              </>
-            ) : 'Generate study pack'}
-          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".pdf,.doc,.docx,.txt"
+            className="hidden"
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) void onFile(f); e.target.value = ''; }}
+          />
+          <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-2.5">
+            {mode === 'notes' && (
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-b-[3px] border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-sm font-extrabold text-stone-700 dark:text-stone-200 hover:border-[#FF9600]/50 hover:text-[#B85F00] active:border-b-2 active:translate-y-0.5 transition-all"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M12 16V4m0 0L8 8m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" /></svg>
+                Upload a file
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={generate}
+              disabled={loading || !canGenerate}
+              className="group sm:ml-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#FF9600] to-[#FF7A00] hover:from-[#FF7A00] hover:to-[#B85F00] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:-translate-y-0 text-white text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#B85F00] enabled:hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_12px_28px_-12px_rgba(255,150,0,0.9)]"
+            >
+              {loading ? (
+                <>
+                  <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden>
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity={0.3} strokeWidth={3} />
+                    <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth={3} strokeLinecap="round" />
+                  </svg>
+                  Building your pack…
+                </>
+              ) : (
+                <>
+                  <span>✨</span> Generate study pack
+                  <svg className="w-4 h-4 transition-transform group-enabled:group-hover:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                </>
+              )}
+            </button>
+          </div>
+          {mode === 'notes' && wordCount > 0 && !notesReady && (
+            <p className="mt-2.5 text-[11px] font-bold text-stone-400">Add {50 - wordCount} more words to generate.</p>
+          )}
+
+          {/* What you'll get — value reinforcement chips */}
+          <div className="mt-5 pt-4 border-t border-stone-100 dark:border-stone-800 flex flex-wrap items-center gap-1.5">
+            <span className="text-[10.5px] font-extrabold uppercase tracking-wide text-stone-400 mr-0.5">You'll get</span>
+            {['🎓 Lesson', '🃏 Flashcards', '📝 Quiz', '🧩 Crossword', '🎮 Games'].map((c) => (
+              <span key={c} className="px-2.5 py-1 rounded-full bg-[#FFFBF5] dark:bg-[#FF9600]/10 border border-[#FF9600]/25 text-[11px] font-extrabold text-[#B85F00] dark:text-[#FF9600]">{c}</span>
+            ))}
+          </div>
         </div>
-        {mode === 'notes' && wordCount > 0 && wordCount < 50 && (
-          <p className="mt-2 text-[11px] font-bold text-stone-400">Add {50 - wordCount} more words to generate.</p>
-        )}
       </div>
 
       {error && (
