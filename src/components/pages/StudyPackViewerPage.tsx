@@ -8,6 +8,8 @@ import ScholarMascot from '../common/ScholarMascot';
 import ExportFormatModal, { type ExportFormat } from '../common/ExportFormatModal';
 import RandomMascotLoader from '../common/RandomMascotLoader';
 import { exportStudyPackSegment } from '../../utils/studyPackExport';
+import { trackEvent } from '../../utils/analytics';
+import { openUpgradePaywall } from '../../utils/paywall';
 
 // Game pages, lazy-loaded so they only ship when the user actually
 // taps "Start Game" inside the viewer. Both pages already support a
@@ -21,7 +23,7 @@ const TABS = [
   { key: 'notes', label: 'Original Notes', icon: '📄', proOnly: false },
   { key: 'lesson', label: 'Lesson', icon: '📖', proOnly: false },
   { key: 'flashcards', label: 'Flashcards', icon: '🃏', proOnly: false },
-  { key: 'quiz', label: 'Quiz', icon: '📝', proOnly: false },
+  { key: 'quiz', label: 'Quiz', icon: '📝', proOnly: true },
   { key: 'crossword', label: 'Crossword', icon: '🧩', proOnly: true },
   { key: 'craterBlast', label: 'Crater Blast', icon: '💥', proOnly: true },
   { key: 'wordTower', label: 'Word Tower', icon: '🗼', proOnly: true },
@@ -33,6 +35,10 @@ type TabKey = typeof TABS[number]['key'];
 const STORAGE_KEY = 'writescholar_study_pack_viewer';
 const RETURN_TAB_KEY = 'writescholar_study_pack_return_tab';
 const RETURN_STATE_KEY = 'writescholar_study_pack_return_state';
+
+/** Free users flip through this many flashcards as a preview; the full deck
+ *  (and the full-screen study mode) unlocks with Pro. */
+const FREE_FLASHCARD_PREVIEW = 4;
 
 interface StudyPackViewerPageProps {
   onNavigate: (page: string) => void;
@@ -103,7 +109,19 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
 
   const plan = (user?.plan || 'free').toLowerCase();
   const isPaidUser = plan === 'pro' || plan === 'premium';
-  const isLocked = (key: TabKey) => !isPaidUser && ['crossword', 'craterBlast', 'wordTower', 'wordBlitz'].includes(key);
+  // Free users get a real preview (original notes, lesson, a few flashcards)
+  // but the active-study payoff — quiz + all the games — is Pro. Driven off
+  // each tab's `proOnly` flag so the lock set stays in one place (TABS).
+  const isLocked = (key: TabKey) => !isPaidUser && (TABS.find((t) => t.key === key)?.proOnly ?? false);
+
+  // Funnel: free user opened a Pro-locked tab (quiz / games) — the moment
+  // they see the lock screen instead of content.
+  useEffect(() => {
+    if (isLocked(activeTab)) {
+      trackEvent('lock_viewed', { feature: 'study_pack', tab: activeTab });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, isPaidUser]);
 
   const handleOpenFull = (tab: TabKey, state?: { questionIndex?: number; slideIndex?: number }) => {
     const d = pack?.data?.[tab];
@@ -371,15 +389,36 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
           onTryQuiz={() => setActiveTab('quiz')}
         />
       )}
-      {activeTab === 'flashcards' && hasData('flashcards') && !isLocked('flashcards') && (
+      {activeTab === 'flashcards' && hasData('flashcards') && !isLocked('flashcards') && (() => {
+        const lockedCount = isPaidUser ? 0 : Math.max(0, flashcardCards.length - FREE_FLASHCARD_PREVIEW);
+        const visibleCards = isPaidUser ? flashcardCards : flashcardCards.slice(0, FREE_FLASHCARD_PREVIEW);
+        return (
         <div className="p-4">
           <FlashcardViewer
-            initialCards={flashcardCards}
+            initialCards={visibleCards}
             title={packTitle}
-            onEnlarge={() => handleOpenFull('flashcards')}
+            onEnlarge={isPaidUser ? () => handleOpenFull('flashcards') : () => onNavigate('pricing')}
           />
+          {lockedCount > 0 && (
+            <div className="mt-4 max-w-xl mx-auto rounded-2xl border-2 border-[#FF9600]/40 bg-gradient-to-br from-[#FFF4E0] to-white dark:from-[#FF9600]/12 dark:to-stone-900 p-4 sm:p-5 text-center">
+              <p className="text-[14px] font-extrabold text-[#D97F00] dark:text-[#FFB84D]">
+                +{lockedCount} more flashcard{lockedCount === 1 ? '' : 's'} in this deck
+              </p>
+              <p className="mt-1 text-[12px] font-bold text-stone-600 dark:text-stone-300 leading-snug">
+                Free previews the first {FREE_FLASHCARD_PREVIEW}. Unlock the full deck, the quiz, and study games with Pro.
+              </p>
+                  <button
+                    type="button"
+                    onClick={() => { trackEvent('upgrade_clicked', { source: 'study_pack_flashcard_banner' }); openUpgradePaywall('study_pack_flashcard_banner'); }}
+                    className="mt-3 inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#FF9600] hover:bg-[#D97F00] text-white text-[12px] font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all"
+                  >
+                    Unlock all {flashcardCards.length} cards
+                  </button>
+            </div>
+          )}
         </div>
-      )}
+        );
+      })()}
       {activeTab === 'quiz' && hasData('quiz') && !isLocked('quiz') && (
         <QuizViewer
           questions={pack.data.quiz?.questions ?? []}
@@ -480,9 +519,13 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
                 {TABS.find(t => t.key === activeTab)?.icon}
               </div>
               <h3 className="text-lg font-extrabold text-stone-800 dark:text-stone-100 mb-2">{TABS.find(t => t.key === activeTab)?.label} is a Pro feature</h3>
-              <p className="text-stone-500 dark:text-stone-400 text-sm mb-6 font-medium">Upgrade to unlock Crossword, Crater Blast, Word Tower, and Word Blitz.</p>
+              <p className="text-stone-500 dark:text-stone-400 text-sm mb-6 font-medium">
+                {activeTab === 'quiz'
+                  ? `Test yourself with all ${pack.data.quiz?.questions?.length || ''} quiz questions — plus Crossword, Crater Blast, Word Tower, and Word Blitz — with Pro.`
+                  : 'Upgrade to unlock the Quiz, Crossword, Crater Blast, Word Tower, and Word Blitz.'}
+              </p>
               <button
-                onClick={() => onNavigate('pricing')}
+                onClick={() => { trackEvent('upgrade_clicked', { source: 'study_pack_locked_tab', tab: activeTab }); openUpgradePaywall('study_pack_locked_tab'); }}
                 className="px-8 py-3 bg-[#FF9600] text-white font-bold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all"
               >
                 Upgrade to Pro

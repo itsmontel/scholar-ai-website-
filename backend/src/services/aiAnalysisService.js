@@ -5810,6 +5810,164 @@ Output JSON only: {"replacement":"..."}`;
     const out = completion.choices?.[0]?.message?.content?.trim();
     return out && out.length > 0 ? out : text;
   }
+
+  /**
+   * OCR / transcribe a photo of notes (handwritten or printed) into clean
+   * study text using a vision model. Powers the iOS "Photo" study-pack
+   * input. Returns plain text suitable for generateStudyPack().
+   *
+   * @param {string} base64Image - raw base64 (no data: prefix)
+   * @param {string} mimeType - e.g. "image/jpeg" / "image/png"
+   */
+  async extractTextFromImage(base64Image, mimeType = 'image/jpeg') {
+    if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
+      throw new Error('OpenAI API key not configured');
+    }
+    if (!base64Image) throw new Error('No image provided');
+
+    const model = process.env.OPENAI_VISION_MODEL || 'gpt-4o';
+    const systemPrompt = `You transcribe photos of study material into clean, accurate plain text.
+Rules:
+- Transcribe ALL readable text: headings, body, bullet points, labelled diagrams, equations.
+- Preserve the original structure: keep headings on their own line, keep lists as lines.
+- Fix obvious OCR artefacts but never invent content that is not in the image.
+- For diagrams, briefly describe the labels and relationships in words.
+- Output ONLY the transcribed study text. No preamble, no markdown symbols like # or *.
+- Never use em dashes; use commas or periods.`;
+
+    try {
+      const completion = await this.openai.chat.completions.create({
+        model,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: 'Transcribe the study material in this photo into clean plain text.' },
+              { type: 'image_url', image_url: { url: `data:${mimeType};base64,${base64Image}`, detail: 'high' } },
+            ],
+          },
+        ],
+        max_tokens: 2500,
+        temperature: 0.2,
+      });
+      const raw = completion.choices?.[0]?.message?.content?.trim();
+      if (!raw) throw new Error('No text found in that image');
+      const cleaned = raw.replace(/^#{1,6}\s*/gm, '').replace(/\*\*([^*]+)\*\*/g, '$1').replace(/—/g, ', ').trim();
+      return cleaned;
+    } catch (error) {
+      console.error('Image text extraction error:', error);
+      throw new Error('Could not read text from that image. Try a clearer, well-lit photo.');
+    }
+  }
+
+  /**
+   * Fetch the transcript/captions for a YouTube video and return it as
+   * plain text. No API key required — reads the public player response and
+   * the timedtext caption track. Best-effort: throws a friendly error when
+   * the video has no captions or YouTube blocks the request.
+   *
+   * @param {string} url - a YouTube URL or bare 11-char video id
+   */
+  async fetchYouTubeTranscript(url) {
+    const videoId = this.parseYouTubeId(url);
+    if (!videoId) throw new Error('That does not look like a valid YouTube link.');
+
+    const watchUrl = `https://www.youtube.com/watch?v=${videoId}&hl=en`;
+    const headers = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36',
+      'Accept-Language': 'en-US,en;q=0.9',
+    };
+
+    let html;
+    try {
+      const resp = await fetch(watchUrl, { headers });
+      html = await resp.text();
+    } catch (e) {
+      throw new Error('Could not reach YouTube. Check the link and try again.');
+    }
+
+    // Pull the captionTracks array out of the embedded player response.
+    const match = html.match(/"captionTracks":(\[.*?\])/);
+    if (!match) {
+      throw new Error('This video has no captions to build a study pack from. Try one with subtitles, or paste the notes instead.');
+    }
+
+    // The watch HTML embeds the player response as a JS object literal, so the
+    // captured array is usually already valid JSON. Some responses are encoded
+    // as a JSON string (double-escaped) — fall back to unescaping in that case.
+    let tracks;
+    try {
+      tracks = JSON.parse(match[1]);
+    } catch {
+      try {
+        tracks = JSON.parse(match[1].replace(/\\u0026/g, '&').replace(/\\"/g, '"').replace(/\\\//g, '/'));
+      } catch {
+        throw new Error('Could not read this video\'s captions. Try another video.');
+      }
+    }
+    if (!Array.isArray(tracks) || tracks.length === 0) {
+      throw new Error('This video has no captions to build a study pack from.');
+    }
+
+    // Prefer an English track, else the first available.
+    const track = tracks.find(t => (t.languageCode || '').startsWith('en')) || tracks[0];
+    const baseUrl = (track.baseUrl || '').replace(/\\u0026/g, '&');
+    if (!baseUrl) throw new Error('Could not load this video\'s captions.');
+
+    let xml;
+    try {
+      const capResp = await fetch(baseUrl, { headers });
+      xml = await capResp.text();
+    } catch {
+      throw new Error('Could not download this video\'s captions.');
+    }
+
+    // timedtext XML → plain text. Decode entities and strip tags.
+    const segments = [...xml.matchAll(/<text[^>]*>([\s\S]*?)<\/text>/g)].map(m =>
+      m[1]
+        .replace(/&amp;#39;/g, "'")
+        .replace(/&#39;/g, "'")
+        .replace(/&amp;quot;/g, '"')
+        .replace(/&quot;/g, '"')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/<[^>]+>/g, '')
+        .trim()
+    ).filter(Boolean);
+
+    const transcript = segments.join(' ').replace(/\s+/g, ' ').trim();
+    if (transcript.split(/\s+/).filter(Boolean).length < 50) {
+      throw new Error('This video\'s captions were too short to build a study pack.');
+    }
+
+    // Try to grab the title for a nicer pack name.
+    let title = null;
+    const titleMatch = html.match(/<meta name="title" content="([^"]+)"/) || html.match(/<title>([^<]+)<\/title>/);
+    if (titleMatch) title = titleMatch[1].replace(/ - YouTube$/, '').trim();
+
+    return { transcript, title };
+  }
+
+  /** Extract the 11-char video id from common YouTube URL shapes. */
+  parseYouTubeId(input) {
+    if (!input) return null;
+    const s = String(input).trim();
+    if (/^[a-zA-Z0-9_-]{11}$/.test(s)) return s;
+    const patterns = [
+      /[?&]v=([a-zA-Z0-9_-]{11})/,
+      /youtu\.be\/([a-zA-Z0-9_-]{11})/,
+      /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+      /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
+      /youtube\.com\/live\/([a-zA-Z0-9_-]{11})/,
+    ];
+    for (const p of patterns) {
+      const m = s.match(p);
+      if (m) return m[1];
+    }
+    return null;
+  }
 }
 
 module.exports = new AIAnalysisService();

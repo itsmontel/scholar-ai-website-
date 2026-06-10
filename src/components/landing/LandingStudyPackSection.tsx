@@ -1,3 +1,4 @@
+import { FREE_PLAN_STUDY_PACK_LINE } from '../../constants/freePlanCopy';
 import LandingSectionLayers from '../common/LandingSectionLayers';
 import LandingScrollReveal from './LandingScrollReveal';
 import InteractiveStudyPackDemo from './InteractiveStudyPackDemo';
@@ -58,7 +59,7 @@ export default function LandingStudyPackSection({ onNavigate }: LandingStudyPack
                 ))}
               </ul>
               <p className="text-sm text-stone-500 dark:text-stone-400 leading-relaxed">
-                Free includes lesson and flashcards. Quiz, crossword, Crater Blast & Word Tower unlock on Pro, same flow as your dashboard.
+                {FREE_PLAN_STUDY_PACK_LINE} Same flow as your dashboard — try it free, unlock the full deck and quiz with Pro.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 pt-1">
                 <button

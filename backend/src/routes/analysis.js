@@ -134,6 +134,56 @@ router.post('/parse-document', authenticateToken, parseUpload.single('file'), ha
   }
 });
 
+// Image upload (photo of notes) — accepts common image types up to 25MB.
+const imageUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 25 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (/^image\/(jpe?g|png|heic|heif|webp|gif)$/i.test(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Unsupported image type. Use JPEG, PNG, HEIC or WebP.'), false);
+    }
+  },
+});
+
+// @route   POST /api/analysis/extract-image-text
+// @desc    OCR a photo of notes into plain text (for photo study packs)
+// @access  Private
+router.post('/extract-image-text', authenticateToken, imageUpload.single('image'), handleMulterError, async (req, res) => {
+  try {
+    const file = req.file;
+    if (!file) {
+      return res.status(400).json({ success: false, message: 'No image uploaded' });
+    }
+    const base64 = file.buffer.toString('base64');
+    const content = await aiAnalysisService.extractTextFromImage(base64, file.mimetype);
+    const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
+    res.json({ success: true, data: { content, wordCount } });
+  } catch (error) {
+    console.error('[extract-image-text] Error:', error);
+    res.status(400).json({ success: false, message: error.message || 'Failed to read image' });
+  }
+});
+
+// @route   POST /api/analysis/extract-youtube
+// @desc    Fetch a YouTube video's transcript as plain text (for YT study packs)
+// @access  Private
+router.post('/extract-youtube', authenticateToken, async (req, res) => {
+  try {
+    const { url } = req.body;
+    if (!url || typeof url !== 'string' || !url.trim()) {
+      return res.status(400).json({ success: false, message: 'A YouTube link is required' });
+    }
+    const { transcript, title } = await aiAnalysisService.fetchYouTubeTranscript(url.trim());
+    const wordCount = transcript.trim().split(/\s+/).filter(Boolean).length;
+    res.json({ success: true, data: { content: transcript, wordCount, title } });
+  } catch (error) {
+    console.error('[extract-youtube] Error:', error);
+    res.status(400).json({ success: false, message: error.message || 'Failed to read that video' });
+  }
+});
+
 // @route   POST /api/analysis/humanize
 // @desc    Humanize AI-generated text using OpenAI
 // @access  Private (all users, word-limited)
@@ -1201,7 +1251,7 @@ router.post('/citation-search', authenticateToken, async (req, res) => {
         success: false,
         message: isPaidAnalysisTier(userPlan)
           ? `You've used all ${limitCheck.limit} combined actions (analyses, study packs & citations) this period. Limit resets when your billing renews.`
-          : `Citation search limit reached. You have used ${limitCheck.usage} of ${limitCheck.limit} searches this period. Upgrade to get more.`,
+          : `You've used your ${limitCheck.limit} free citation search previews. Upgrade to Pro for full source lists every month.`,
         limit: limitCheck.limit,
         usage: limitCheck.usage,
         remaining: limitCheck.remaining,
@@ -1700,7 +1750,7 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
             success: false,
             message: useCombined
               ? `Combined action limit exceeded for this period. You have used ${analysisCheck.usage}/${analysisCheck.limit} (analyses, study packs & citations). Limit resets when your billing renews.`
-              : `You've exceeded your monthly analysis limit. You have used ${analysisCheck.usage} of ${analysisCheck.limit} analyses this period. Upgrade for more.`,
+              : `You've used your ${analysisCheck.limit} free analysis previews. Upgrade to Pro for full analyses every month.`,
             upgrade: true,
             usage: {
               limit: analysisCheck.limit,
@@ -2828,12 +2878,17 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
         });
       }
     } else {
+      // Free preview: study packs are one-time tastes — counted over the
+      // account lifetime (no monthly reset). See FREE_PREVIEW_LIFETIME.
+      const freePackPeriodStart = subscriptionService.FREE_PREVIEW_LIFETIME
+        ? subscriptionService.FREE_LIFETIME_EPOCH
+        : periodStart;
       const { data: usageData, error: usageError } = await supabase
         .from('quiz_usage')
         .select('id')
         .eq('user_id', userId)
         .eq('quiz_type', 'study_pack')
-        .gte('created_at', periodStart);
+        .gte('created_at', freePackPeriodStart);
 
       generationsUsed = usageError ? 0 : (usageData || []).length;
       generationLimit = planLimits.studyPackGenerationsPerMonth || planLimits.quizGenerationsPerMonth;
@@ -2841,7 +2896,7 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
       if (generationLimit !== -1 && generationsUsed >= generationLimit) {
         return res.status(429).json({
           success: false,
-          message: `You've used all ${generationLimit} study pack generation${generationLimit === 1 ? '' : 's'} this period. Upgrade for Pro — 99 combined analyses, study packs & citations per month.`,
+          message: `You've used your ${generationLimit} free study pack preview${generationLimit === 1 ? '' : 's'}. Upgrade to Pro for 99 combined analyses, study packs & citations every month.`,
           generationsUsed,
           generationLimit,
           generationsRemaining: 0,

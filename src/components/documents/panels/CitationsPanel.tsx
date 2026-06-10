@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import PreviewStrip from './PreviewStrip';
 import GenerationOverlay from '../../common/GenerationOverlay';
+import { trackEvent } from '../../../utils/analytics';
+import { openUpgradePaywall } from '../../../utils/paywall';
 
 /* ═══════════════════════════════════════════════════════════════
    CitationsPanel — in-page source finder.
@@ -40,7 +42,12 @@ const YEARS: { v: string; label: string }[] = [
 
 const DRAFT_KEY = 'writescholar_citations_draft';
 
-export default function CitationsPanel({ onNavigate }: { onNavigate: (page: string, slug?: string, options?: unknown) => void }) {
+/** Free users see this many full citations; the rest are locked behind Pro
+ *  (blurred + count badge) so they feel the quality on their own topic without
+ *  walking away with a finished bibliography. */
+const FREE_CITATION_PREVIEW = 3;
+
+export default function CitationsPanel({ onNavigate, isPaid = false }: { onNavigate: (page: string, slug?: string, options?: unknown) => void; isPaid?: boolean }) {
   const [topic, setTopic] = useState(() => {
     try { return sessionStorage.getItem(DRAFT_KEY) || ''; } catch { return ''; }
   });
@@ -76,15 +83,20 @@ export default function CitationsPanel({ onNavigate }: { onNavigate: (page: stri
       const json = await res.json();
       if (res.status === 429) {
         setUpgrade(true);
-        setError(json?.message || "You've hit this month's citation searches. Upgrade for more.");
+        setError(json?.message || "You've hit your citation search limit. Upgrade for more.");
         return;
       }
       if (!res.ok || json?.success === false) {
         throw new Error(json?.message || `Search failed (${res.status})`);
       }
       const data = json?.data ?? json;
-      setResults(Array.isArray(data?.citations) ? data.citations : []);
+      const citations = Array.isArray(data?.citations) ? data.citations : [];
+      setResults(citations);
       setKeywords(Array.isArray(data?.keywords) ? data.keywords : []);
+      trackEvent('preview_ran', { feature: 'citations', results: citations.length });
+      if (!isPaid && citations.length > FREE_CITATION_PREVIEW) {
+        trackEvent('lock_viewed', { feature: 'citations', locked: citations.length - FREE_CITATION_PREVIEW });
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not run that search.');
     } finally {
@@ -248,9 +260,11 @@ export default function CitationsPanel({ onNavigate }: { onNavigate: (page: stri
             </div>
           ) : (
             <div className="space-y-3">
-              {results.map((c, i) => (
-                <div key={i} className="rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-4 sm:p-5">
-                  <div className="flex items-start gap-3">
+              {results.map((c, i) => {
+                const locked = !isPaid && i >= FREE_CITATION_PREVIEW;
+                return (
+                <div key={i} className="relative rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-4 sm:p-5 overflow-hidden">
+                  <div className={`flex items-start gap-3 ${locked ? 'blur-[5px] select-none pointer-events-none' : ''}`} aria-hidden={locked || undefined}>
                     <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#DDF4FF] dark:bg-[#1CB0F6]/15 text-[#1CB0F6] text-[11px] font-extrabold">{i + 1}</span>
                     <div className="min-w-0 flex-1">
                       <p
@@ -297,8 +311,42 @@ export default function CitationsPanel({ onNavigate }: { onNavigate: (page: stri
                       </div>
                     </div>
                   </div>
+                  {locked && (
+                    <button
+                      type="button"
+                      onClick={() => { trackEvent('upgrade_clicked', { source: 'citations_locked_card' }); openUpgradePaywall('citations_locked_card'); }}
+                      className="absolute inset-0 flex items-center justify-center bg-white/40 dark:bg-stone-900/40"
+                      aria-label="Unlock this source with Pro"
+                    >
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#1CB0F6] text-white text-[11px] font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#1486B5] shadow-lg">
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+                          <rect x="5" y="11" width="14" height="9" rx="2" />
+                          <path strokeLinecap="round" d="M8 11V8a4 4 0 0 1 8 0v3" />
+                        </svg>
+                        Unlock with Pro
+                      </span>
+                    </button>
+                  )}
                 </div>
-              ))}
+                );
+              })}
+            </div>
+          )}
+          {!isPaid && results.length > FREE_CITATION_PREVIEW && (
+            <div className="mt-4 rounded-2xl border-2 border-[#1CB0F6]/40 bg-gradient-to-br from-[#DDF4FF] to-white dark:from-[#1CB0F6]/12 dark:to-stone-900 p-4 sm:p-5 text-center">
+              <p className="text-[14px] font-extrabold text-[#1486B5] dark:text-[#7FD4FF]">
+                {results.length - FREE_CITATION_PREVIEW} more sources ready for your topic
+              </p>
+              <p className="mt-1 text-[12px] font-bold text-stone-600 dark:text-stone-300 leading-snug">
+                Free shows the first {FREE_CITATION_PREVIEW}. Unlock every source — plus the full bibliography — with Pro.
+              </p>
+              <button
+                type="button"
+                onClick={() => { trackEvent('upgrade_clicked', { source: 'citations_unlock_banner' }); openUpgradePaywall('citations_unlock_banner'); }}
+                className="mt-3 inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#1CB0F6] hover:bg-[#1486B5] text-white text-[12px] font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#1486B5] active:border-b-2 active:translate-y-0.5 transition-all"
+              >
+                Unlock all {results.length} sources
+              </button>
             </div>
           )}
         </div>

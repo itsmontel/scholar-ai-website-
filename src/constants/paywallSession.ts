@@ -89,12 +89,12 @@ export const LAST_CHANCE_PAYWALL_SHOWN_KEY = 'writescholar_last_chance_paywall_s
 /**
  * localStorage: set once the user has been shown — and either
  * dismissed or proceeded to checkout from — the first post-onboarding
- * soft paywall with the MAY2026 welcome discount on it. Subsequent
- * soft paywalls (e.g. the one that fires again after the 7-day
- * cooldown expires) read this flag and render plain pricing only:
- * Pro $19.99/mo, Premium $39.99/mo, no strike-through, no "Save $X
- * today only" urgency badge, no MAY2026 coupon auto-applied at
- * checkout. The discount is a one-shot welcome offer.
+ * soft paywall with the NEWCUSTOMER welcome discount on it. Subsequent
+ * soft paywalls read this flag and skip the one-shot extras ("Save $X
+ * today only" urgency badge + Last-chance pop-up). The NEWCUSTOMER
+ * first-month price itself remains visible for as long as the user is
+ * still eligible (never trialed or subscribed) so the paywall matches
+ * the pricing / billing pages.
  */
 export const FIRST_PAYWALL_DISCOUNT_SHOWN_KEY = 'writescholar_first_paywall_discount_shown';
 
@@ -119,3 +119,19 @@ export const FIRST_SOFT_PAYWALL_FIRED_KEY = 'writescholar_first_soft_paywall_fir
 /** 7 days in ms — fallback window for the post-onboarding paywall
  *  trigger when the user hasn't actually used the product yet. */
 export const POST_ONBOARDING_PAYWALL_FALLBACK_MS = 7 * 24 * 60 * 60 * 1000;
+
+/**
+ * localStorage: one-shot flag — the dashboard's first-run fast path
+ * (auto-open the analyze tab + focus the essay box right after
+ * onboarding) has already fired. Prevents yanking returning users
+ * into the essay box on every visit.
+ */
+export const FIRST_RUN_FAST_PATH_DONE_KEY = 'writescholar_first_run_fast_path_done';
+
+/**
+ * sessionStorage: set when the user lands via /dashboard?upgrade=1
+ * (preview follow-up email CTA). Survives the login redirect so the
+ * soft paywall can open once they're authenticated. Cleared after
+ * the paywall fires or if they're already on a paid plan.
+ */
+export const EMAIL_UPGRADE_PENDING_KEY = 'writescholar_email_upgrade_pending';

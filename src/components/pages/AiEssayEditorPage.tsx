@@ -92,7 +92,7 @@ const FAQS = [
   },
   {
     q: 'Is it free?',
-    a: 'Yes, you can write an essay and get a grade and rubric on the free plan with no credit card. Pro unlocks higher limits and the full workspace.',
+    a: 'Yes — run a real analysis on your essay with no credit card. Free shows your estimated grade, what\'s wrong, and top suggestions; Pro unlocks every fix, one-click apply, and unlimited analyses.',
   },
   {
     q: 'Does it work for university and college essays?',

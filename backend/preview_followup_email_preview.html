@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Preview follow-up email — WriteScholar (design preview)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; background: #e7e5e4; font-family: 'Nunito', system-ui, sans-serif; }
+    .preview-bar {
+      position: sticky; top: 0; z-index: 10;
+      background: #1c1917; color: #fafaf9;
+      padding: 12px 20px; font-size: 13px; font-weight: 700;
+      display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+    }
+    .preview-bar select {
+      font: inherit; padding: 6px 10px; border-radius: 8px; border: none;
+    }
+    .inbox-meta {
+      max-width: 520px; margin: 20px auto 0; padding: 0 16px;
+      font-size: 13px; color: #57534e;
+    }
+    .inbox-meta strong { color: #1c1917; }
+  </style>
+</head>
+<body>
+  <div class="preview-bar">
+    <span>Preview follow-up email (static mockup)</span>
+    <label>
+      Variant:
+      <select id="variant" onchange="switchVariant()">
+        <option value="analysis">Analysis — essay fixes</option>
+        <option value="citations">Citations — sources</option>
+        <option value="study pack">Study pack — deck & quiz</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="inbox-meta" id="inbox-meta"></div>
+
+  <div id="email-root"></div>
+
+  <script>
+    const COLORS = {
+      bg: '#F7F7F7', white: '#FFFFFF', green: '#58CC02', greenDark: '#46A302', greenSoft: '#E5F8D0',
+      purple: '#A560E8', purpleDark: '#8A48C7', purpleSoft: '#F3EAFF',
+      blue: '#1CB0F6', blueDark: '#1899D6', blueSoft: '#DDF4FF',
+      orange: '#FF9600', orangeDark: '#D97F00', orangeSoft: '#FFF4E0',
+      text: '#3C3C3C', textMuted: '#78716c',
+      border: '#E5E5E5',
+    };
+    const NUNITO = "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+    const mascotUrl = 'https://writescholar.com/main-logo.png';
+    const firstName = 'Alex';
+
+    const hooks = {
+      analysis: {
+        subject: `${firstName}, your essay fixes are still waiting`,
+        headline: `Your fixes are ready, ${firstName} 📝`,
+        body: "Yesterday WriteScholar graded your essay and found fixes that would raise it — they're still sitting in your draft, locked. One upgrade and you can apply every one before you submit.",
+        preheader: "WriteScholar found fixes for your essay — they're still waiting in your draft.",
+      },
+      citations: {
+        subject: `${firstName}, your sources are still waiting`,
+        headline: `Your sources are ready, ${firstName} 📚`,
+        body: 'Yesterday WriteScholar found real, citable sources for your topic — most are still locked. Unlock the full list and your bibliography writes itself.',
+        preheader: 'WriteScholar found sources for your topic — the full list is still waiting.',
+      },
+      'study pack': {
+        subject: `${firstName}, your study pack is still waiting`,
+        headline: `Your pack is ready, ${firstName} 🃏`,
+        body: 'Yesterday WriteScholar turned your notes into a lesson and flashcards — the quiz, games, and the rest of your deck are still locked. Unlock them and actually test yourself before the exam.',
+        preheader: 'Your study pack is built — the quiz and full deck are still waiting.',
+      },
+    };
+
+    const valueRows = [
+      { emoji: '📝', title: 'Every fix, applied', desc: 'Full line-by-line annotations + one-click apply into your draft.', color: COLORS.purple, soft: COLORS.purpleSoft, dark: COLORS.purpleDark },
+      { emoji: '🃏', title: 'Full study packs', desc: 'Quiz, arcade games, and the whole flashcard deck — unlocked.', color: COLORS.orange, soft: COLORS.orangeSoft, dark: COLORS.orangeDark },
+      { emoji: '📚', title: 'Complete source lists', desc: 'Every citation for your topic, plus PDF & Word export.', color: COLORS.blue, soft: COLORS.blueSoft, dark: COLORS.blueDark },
+    ];
+
+    function valueRowsHtml() {
+      return valueRows.map(f => `
+        <tr><td style="padding: 5px 0;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: ${COLORS.white}; border-radius: 14px; border: 2px solid ${COLORS.border}; border-bottom: 4px solid ${COLORS.border};">
+            <tr>
+              <td width="48" style="padding: 10px 12px;">
+                <div style="background-color: ${f.soft}; border: 2px solid ${f.color}; border-bottom: 3px solid ${f.dark}; border-radius: 12px; width: 44px; height: 44px; text-align: center; font-size: 22px; line-height: 44px;">${f.emoji}</div>
+              </td>
+              <td style="padding: 10px 14px 10px 4px;">
+                <p style="margin: 0 0 2px 0; font-family: ${NUNITO}; font-size: 14px; font-weight: 800; color: ${COLORS.text};">${f.title}</p>
+                <p style="margin: 0; font-size: 12px; font-weight: 600; color: ${COLORS.textMuted}; line-height: 1.45;">${f.desc}</p>
+              </td>
+            </tr>
+          </table>
+        </td></tr>`).join('');
+    }
+
+    function render(feature) {
+      const hook = hooks[feature];
+      document.getElementById('inbox-meta').innerHTML = `
+        <p><strong>From:</strong> WriteScholar &lt;noreply@writescholar.com&gt;</p>
+        <p><strong>Subject:</strong> ${hook.subject}</p>
+        <p><strong>Preheader</strong> (inbox snippet): ${hook.preheader}</p>
+      `;
+      document.getElementById('email-root').innerHTML = `
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: ${COLORS.bg}; font-family: ${NUNITO};">
+          <tr><td align="center" style="padding: 36px 16px;">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 520px; background-color: ${COLORS.white}; border-radius: 18px; overflow: hidden; border: 2px solid ${COLORS.border}; border-bottom: 4px solid ${COLORS.border};">
+              <tr><td style="height: 8px; background-color: ${COLORS.green};"></td></tr>
+              <tr><td align="center" style="padding: 32px 32px 22px;">
+                <div style="display: inline-block; background: ${COLORS.greenSoft}; border: 4px solid ${COLORS.green}; border-radius: 64px; padding: 8px; margin-bottom: 14px;">
+                  <img src="${mascotUrl}" alt="WriteScholar mascot" width="80" height="80" style="display: block; border-radius: 50%; background: white;" onerror="this.style.display='none'" />
+                </div>
+                <p style="margin: 0; font-size: 11px; font-weight: 800; color: ${COLORS.green}; letter-spacing: 0.2em; text-transform: uppercase;">Picking up where you left off</p>
+              </td></tr>
+              <tr><td style="padding: 8px 32px 26px;">
+                <h1 style="margin: 0 0 10px 0; font-size: 28px; font-weight: 900; color: ${COLORS.text}; text-align: center; line-height: 1.2;">${hook.headline}</h1>
+                <p style="margin: 0 0 22px 0; font-size: 15px; font-weight: 600; color: ${COLORS.textMuted}; text-align: center; line-height: 1.55;">${hook.body}</p>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-bottom: 22px;">${valueRowsHtml()}</table>
+                <p style="text-align: center; margin: 0 0 14px 0;">
+                  <a href="/dashboard?upgrade=1" style="display: inline-block; background: ${COLORS.green}; color: white; font-size: 15px; font-weight: 800; text-decoration: none; padding: 14px 36px; border-radius: 14px; border: 2px solid ${COLORS.greenDark}; border-bottom: 4px solid ${COLORS.greenDark}; text-transform: uppercase; letter-spacing: 0.04em;">Unlock my results</a>
+                </p>
+                <p style="margin: 0; font-size: 12.5px; font-weight: 600; color: ${COLORS.textMuted}; text-align: center; line-height: 1.55;">
+                  Pro starts at <strong style="color: ${COLORS.text};">$9.99 for your first month</strong> with the NEWCUSTOMER discount — cancel anytime.
+                </p>
+                <p style="margin: 16px 0 0 0; font-size: 12px; font-weight: 600; color: ${COLORS.textMuted}; text-align: center;">
+                  Got a question? Just hit reply — a real person will get back to you.
+                </p>
+              </td></tr>
+            </table>
+            <p style="margin: 16px 0 0 0; font-size: 11px; font-weight: 600; color: ${COLORS.textMuted}; text-align: center;">
+              WriteScholar · You received this because you tried WriteScholar on your own work.
+            </p>
+          </td></tr>
+        </table>`;
+    }
+
+    function switchVariant() {
+      render(document.getElementById('variant').value);
+    }
+    render('analysis');
+  </script>
+</body>
+</html>

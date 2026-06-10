@@ -432,9 +432,10 @@ const CitationHistoryPage = ({ onNavigate, user, onLogout }: CitationHistoryProp
                 </svg>
               </div>
               <div className="ml-4">
-                <h3 className="font-extrabold text-[#A560E8] mb-1">Free Plan Storage</h3>
+                <h3 className="font-extrabold text-[#A560E8] mb-1">Free Plan</h3>
                 <p className="text-sm text-stone-600 dark:text-stone-300 font-bold">
-                  Citation searches expire 30 days after creation. <button onClick={() => onNavigate('pricing')} className="text-[#A560E8] font-extrabold hover:underline">Upgrade</button> to keep your citations forever!
+                  Each search shows 3 full sources as a preview — unlock the full list with Pro. Saved searches expire after 30 days.{' '}
+                  <button onClick={() => onNavigate('pricing')} className="text-[#A560E8] font-extrabold hover:underline">Upgrade</button> to keep every citation forever.
                 </p>
               </div>
             </div>

@@ -156,40 +156,77 @@ final class LibraryStore: ObservableObject {
 
     /// Pulls the user's saved content from the backend and merges it with the
     /// device-generated packs so the Library mirrors their web/desktop account.
-    /// Device packs (which carry local playable data) are preserved; previously
-    /// synced web items are replaced with the fresh fetch. No-op for guests.
+    ///
+    /// Two sources are fetched: documents/essays (GET /documents) and study
+    /// packs (GET /analysis/quiz-history). Each is replaced independently so a
+    /// partial failure (e.g. one endpoint offline) doesn't wipe the other.
+    /// Synced study packs are persisted in full so their games/quiz/flashcards
+    /// are immediately playable. Device study packs that now exist on the
+    /// server (matched by title) are dropped to avoid post-round-trip dupes.
+    /// No-op for guests.
     func syncFromBackend() async {
         guard KeychainStore.shared.authToken != nil else { return }
         isSyncing = true
         defer { isSyncing = false }
-        do {
-            let remote = try await LibraryAPI.fetchDocuments()
-            let device = items.filter { $0.source == .device }
-            var merged = device + remote
-            merged.sort { ($0.lastOpenedAt ?? $0.createdAt) > ($1.lastOpenedAt ?? $1.createdAt) }
-            items = merged
-            lastSyncedAt = Date()
-            persist()
-        } catch {
-            // Offline or not signed in — keep whatever we already have.
+
+        let fetchedDocs: [LibraryItem]? = try? await LibraryAPI.fetchDocuments()
+        let fetchedPacks: [SyncedStudyPack]? = try? await LibraryAPI.fetchStudyPacks()
+
+        // Both endpoints failed — likely offline. Keep whatever we have.
+        if fetchedDocs == nil && fetchedPacks == nil { return }
+
+        let existingWebDocs  = items.filter { $0.source == .web && $0.kind != .studyPack }
+        let existingWebPacks = items.filter { $0.source == .web && $0.kind == .studyPack }
+
+        let webDocs = fetchedDocs ?? existingWebDocs
+
+        var webPackItems: [LibraryItem] = []
+        var remotePackTitles = Set<String>()
+        if let fetchedPacks {
+            for sp in fetchedPacks {
+                let itemID = "web-pack-\(sp.serverID)"
+                StudyPackPersistence.shared.save(sp.pack, for: itemID)
+                remotePackTitles.insert(sp.title.lowercased())
+                let snippet = sp.pack.originalNotes.map {
+                    String($0.prefix(160)).trimmingCharacters(in: .whitespacesAndNewlines)
+                }
+                webPackItems.append(
+                    LibraryItem(
+                        id: itemID,
+                        kind: .studyPack,
+                        title: sp.title,
+                        subtitle: "Study pack",
+                        snippet: snippet,
+                        chips: Self.chips(for: sp.pack),
+                        source: .web,
+                        serverID: sp.serverID,
+                        createdAt: sp.createdAt
+                    )
+                )
+            }
+        } else {
+            webPackItems = existingWebPacks
+            for p in existingWebPacks { remotePackTitles.insert(p.title.lowercased()) }
         }
+
+        let device = items.filter { item in
+            guard item.source == .device else { return false }
+            if item.kind == .studyPack && remotePackTitles.contains(item.title.lowercased()) {
+                return false
+            }
+            return true
+        }
+
+        var merged = device + webDocs + webPackItems
+        merged.sort { ($0.lastOpenedAt ?? $0.createdAt) > ($1.lastOpenedAt ?? $1.createdAt) }
+        items = merged
+        lastSyncedAt = Date()
+        persist()
     }
 
-    // MARK: - Convenience recorders (called by coordinators on completion)
-
-    /// Record a freshly-generated study pack into the library, and
-    /// log it to the daily-goal activity feed (no XP — generation
-    /// itself is now 0 XP; the user earns XP by *using* the pack).
-    func recordStudyPack(_ pack: StudyPack) {
-        DailyGoalStore.shared.record(
-            .studyPackGenerated,
-            title: pack.quiz?.title ?? pack.flashcards?.title ?? pack.lesson?.title ?? "Study pack",
-            subtitle: pack.originalNotes.map { String($0.prefix(80)) }
-        )
-        recordStudyPackInternal(pack)
-    }
-
-    private func recordStudyPackInternal(_ pack: StudyPack) {
+    /// Builds the metadata chips shown on a study-pack card from its contents.
+    /// Shared by device recordings and web-synced packs so they look identical.
+    static func chips(for pack: StudyPack) -> [LibraryMetaChip] {
         var chips: [LibraryMetaChip] = []
         if let q = pack.quiz {
             chips.append(.init(icon: "checkmark.bubble.fill", label: "Quiz · \(q.questions.count) qs"))
@@ -212,6 +249,25 @@ final class LibraryStore: ObservableObject {
         if let wb = pack.wordBlitz, !wb.questions.isEmpty {
             chips.append(.init(icon: "bolt.fill", label: "Word Blitz"))
         }
+        return chips
+    }
+
+    // MARK: - Convenience recorders (called by coordinators on completion)
+
+    /// Record a freshly-generated study pack into the library, and
+    /// log it to the daily-goal activity feed (no XP — generation
+    /// itself is now 0 XP; the user earns XP by *using* the pack).
+    func recordStudyPack(_ pack: StudyPack) {
+        DailyGoalStore.shared.record(
+            .studyPackGenerated,
+            title: pack.quiz?.title ?? pack.flashcards?.title ?? pack.lesson?.title ?? "Study pack",
+            subtitle: pack.originalNotes.map { String($0.prefix(80)) }
+        )
+        recordStudyPackInternal(pack)
+    }
+
+    private func recordStudyPackInternal(_ pack: StudyPack) {
+        let chips = Self.chips(for: pack)
 
         let snippet = pack.originalNotes
             .map { String($0.prefix(160)).trimmingCharacters(in: .whitespacesAndNewlines) }

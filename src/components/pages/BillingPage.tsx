@@ -1,4 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import {
+  FREE_PLAN_DESCRIPTION,
+  FREE_PLAN_FEATURE_BULLETS_COMPACT,
+} from '../../constants/freePlanCopy';
 import Footer from '../common/Footer';
 import CancelRetentionModal from '../common/CancelRetentionModal';
 
@@ -36,6 +40,12 @@ interface UsageStats {
   plan?: string;
 }
 
+/** Auto-applied welcome discount for first-time customers: 50% off the
+ *  first monthly invoice (Pro $19.99 → $9.99, Premium $39.99 → $19.99).
+ *  Backend strips the code for anyone with prior subscription history. */
+const WELCOME_PROMO_CODE = 'NEWCUSTOMER';
+const FIRST_MONTH_PRICE: Record<string, number> = { pro: 9.99, premium: 19.99 };
+
 const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout }) => {
   const [currentPlan, setCurrentPlan] = useState<string>('free');
   // Stripe subscription status (trialing / active / past_due / …) —
@@ -45,7 +55,10 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
   // Cancellation retention modal visibility.
   const [cancelOpen, setCancelOpen] = useState(false);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
-  // (Trial eligibility check removed — free trial offering retired.)
+  // New-customer check (never trialed/subscribed) → show + auto-apply
+  // the NEWCUSTOMER first-month discount. Backend re-verifies at
+  // checkout, so an optimistic default is safe.
+  const [newCustomer, setNewCustomer] = useState<boolean>(false);
   const [usageStats, setUsageStats] = useState<UsageStats>({
     documentsUploaded: 0,
     documentsAnalyzed: 0,
@@ -64,14 +77,9 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       name: 'Free',
       price: 0,
       interval: 'month',
-      description: 'Perfect for getting started',
+      description: FREE_PLAN_DESCRIPTION,
       icon: '🆓',
-      features: [
-        '3 documents, 2 analyses, 2 study packs/mo',
-        '5k words Paper Summarizer',
-        '2 citation searches/mo',
-        'Basic grammar check'
-      ],
+      features: [...FREE_PLAN_FEATURE_BULLETS_COMPACT],
       stripePriceId: ''
     },
     {
@@ -130,9 +138,10 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
         'Content-Type': 'application/json',
       } as const;
 
-      const [subscriptionResponse, usageResponse] = await Promise.all([
+      const [subscriptionResponse, usageResponse, eligibilityResponse] = await Promise.all([
         fetch(`${base}/subscriptions/current`, { headers }),
         fetch(`${base}/subscriptions/usage`, { headers }),
+        fetch(`${base}/subscriptions/trial-eligibility`, { headers }),
       ]);
 
       if (subscriptionResponse.ok) {
@@ -147,6 +156,11 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       if (usageResponse.ok) {
         const usageData = await usageResponse.json();
         setUsageStats(usageData);
+      }
+
+      if (eligibilityResponse.ok) {
+        const elig = await eligibilityResponse.json();
+        setNewCustomer(elig.trialEligible === true);
       }
     } catch (error) {
       console.error('Error fetching subscription data:', error);
@@ -199,6 +213,11 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
             billingCycle: billingCycle,
             successUrl: `${window.location.origin}/billing?success=true`,
             cancelUrl: `${window.location.origin}/dashboard?payment=cancelled`,
+            // Auto-apply the new-customer first-month discount on monthly
+            // plans only (the coupon discounts the first invoice; on
+            // yearly it would halve the whole year). Backend strips it
+            // for returning subscribers.
+            ...(newCustomer && billingCycle === 'monthly' ? { promoCode: WELCOME_PROMO_CODE } : {}),
           })
         });
 
@@ -415,25 +434,25 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
               
               {/* Price */}
               <div className="text-center mb-6">
-                {plan.id !== 'free' && billingCycle === 'monthly' && currentPlan === 'free' ? (
-                  /* Monthly price display:
-                     • Struck-through "was" price = plan.price + $20
-                       (Pro: $39.99 → $19.99 ; Premium: $59.99 → $39.99).
-                     • Active price = the real plan.price from the
-                       plans data ($19.99 Pro / $39.99 Premium).
-                     Matches the pricing-page treatment. The previous
-                     markup showed plan.price as struck-through and
-                     `plan.price - 10` as the active price, which
-                     displayed $9.99 / $29.99 as the headline. */
+                {plan.id !== 'free' && billingCycle === 'monthly' && currentPlan === 'free' && newCustomer ? (
+                  /* New-customer monthly display — leads with the
+                     NEWCUSTOMER first-month price (Pro $9.99, Premium
+                     $19.99) anchored against the standard monthly
+                     price, with the renewal price spelled out. The
+                     coupon is auto-applied at checkout so this matches
+                     what Stripe charges. Mirrors the pricing page. */
                   <div className="flex flex-col items-center gap-1">
                     <span className="text-2xl font-extrabold text-red-600 line-through decoration-2 decoration-red-500">
-                      ${(plan.price + 20).toFixed(2)}
-                    </span>
-                    <span className="text-4xl font-extrabold text-stone-800">
                       ${plan.price.toFixed(2)}
                     </span>
+                    <span className="text-4xl font-extrabold text-stone-800">
+                      ${(FIRST_MONTH_PRICE[plan.id] ?? plan.price).toFixed(2)}
+                    </span>
                     <span className="text-stone-500 text-sm">
-                      /month
+                      first month, then ${plan.price.toFixed(2)}/mo
+                    </span>
+                    <span className="text-[#46A302] text-xs font-extrabold">
+                      NEWCUSTOMER discount applied at checkout
                     </span>
                   </div>
                 ) : plan.id !== 'free' && billingCycle === 'yearly' ? (
@@ -567,7 +586,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
             <div className="bg-[#F3EAFF] dark:bg-[#A560E8]/10 border-2 border-[#A560E8]/30 rounded-2xl p-5">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-extrabold text-stone-800 dark:text-stone-200 text-sm">
-                  {currentPlan === 'pro' || currentPlan === 'premium' ? 'Combined actions' : 'Analyses'}
+                  {currentPlan === 'pro' || currentPlan === 'premium' ? 'Combined actions' : 'Analysis previews'}
                 </h3>
                 <div className="w-8 h-8 bg-[#A560E8] rounded-xl border-b-2 border-[#8A48C7] flex items-center justify-center">
                   <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -581,7 +600,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
                   : (usageStats.analysesRemaining === -1 ? '∞' : usageStats.analysesRemaining)}
               </div>
               <div className="text-xs text-stone-500">
-                {currentPlan === 'free' ? 'analyses remaining' : (currentPlan === 'pro' || currentPlan === 'premium') ? `${currentPlan === 'premium' ? 499 : 99} combined/month` : 'combined/month'}
+                {currentPlan === 'free' ? 'free previews remaining (one-time)' : (currentPlan === 'pro' || currentPlan === 'premium') ? `${currentPlan === 'premium' ? 499 : 99} combined/month` : 'combined/month'}
               </div>
             </div>
 

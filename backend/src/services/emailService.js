@@ -742,6 +742,169 @@ class EmailService {
       return { success: false, error: error.message };
     }
   }
+
+  /* ─── Preview follow-up (freemium recovery) ───
+   *  Fired by the hourly `notifyPreviewFollowups` cron in
+   *  subscriptionService ~24h after a free user ran a preview
+   *  (analysis / citation search / study pack) but didn't upgrade.
+   *  Their locked results are still sitting in the app — this email
+   *  brings them back at the moment the assignment is still live.
+   *  One per user, ever (users.preview_followup_email_sent_at).
+   *
+   *  @param {string} email   recipient
+   *  @param {Object} opts    { firstName, feature } — feature is
+   *                          'analysis' | 'citations' | 'study pack'
+   */
+  async sendPreviewFollowupEmail(email, opts = {}) {
+    if (!this.transporter) {
+      console.log('📧 Preview follow-up email would be sent to:', email, opts);
+      return { success: true, message: 'Email service not configured - preview follow-up logged to console' };
+    }
+
+    try {
+      const fromAddress = process.env.EMAIL_FROM || process.env.EMAIL_USER;
+      const replyToAddress = process.env.EMAIL_REPLY_TO || 'support@writescholar.com';
+      const { frontendUrl, mascotUrl } = getEmailAssets();
+      // ?upgrade=1 opens the soft paywall on arrival (EMAIL_UPGRADE_PENDING_KEY
+      // in CompleteAcademicAIApp) so the CTA matches "unlock my results".
+      const dashboardUrl = `${frontendUrl}/dashboard?upgrade=1`;
+
+      const firstName = (opts.firstName || '').trim();
+      const greetingName = firstName ? `, ${firstName}` : '';
+      const feature = opts.feature || 'analysis';
+
+      // Feature-aware hook: lead with the exact thing they left locked.
+      const hooks = {
+        analysis: {
+          subject: firstName
+            ? `${firstName}, your essay fixes are still waiting`
+            : 'Your essay fixes are still waiting',
+          headline: `Your fixes are ready${greetingName} 📝`,
+          body: 'Yesterday WriteScholar graded your essay and found fixes that would raise it — they\'re still sitting in your draft, locked. One upgrade and you can apply every one before you submit.',
+          preheader: 'WriteScholar found fixes for your essay — they\'re still waiting in your draft.',
+        },
+        citations: {
+          subject: firstName
+            ? `${firstName}, your sources are still waiting`
+            : 'Your sources are still waiting',
+          headline: `Your sources are ready${greetingName} 📚`,
+          body: 'Yesterday WriteScholar found real, citable sources for your topic — most are still locked. Unlock the full list and your bibliography writes itself.',
+          preheader: 'WriteScholar found sources for your topic — the full list is still waiting.',
+        },
+        'study pack': {
+          subject: firstName
+            ? `${firstName}, your study pack is still waiting`
+            : 'Your study pack is still waiting',
+          headline: `Your pack is ready${greetingName} 🃏`,
+          body: 'Yesterday WriteScholar turned your notes into a lesson and flashcards — the quiz, games, and the rest of your deck are still locked. Unlock them and actually test yourself before the exam.',
+          preheader: 'Your study pack is built — the quiz and full deck are still waiting.',
+        },
+      };
+      const hook = hooks[feature] || hooks.analysis;
+
+      const valueRows = [
+        { emoji: '📝', title: 'Every fix, applied',     desc: 'Full line-by-line annotations + one-click apply into your draft.', color: EMAIL_COLORS.purple, soft: EMAIL_COLORS.purpleSoft, dark: EMAIL_COLORS.purpleDark },
+        { emoji: '🃏', title: 'Full study packs',        desc: 'Quiz, arcade games, and the whole flashcard deck — unlocked.',     color: EMAIL_COLORS.orange, soft: EMAIL_COLORS.orangeSoft, dark: EMAIL_COLORS.orangeDark },
+        { emoji: '📚', title: 'Complete source lists',   desc: 'Every citation for your topic, plus PDF & Word export.',           color: EMAIL_COLORS.blue,   soft: EMAIL_COLORS.blueSoft,   dark: EMAIL_COLORS.blueDark },
+      ];
+      const valueRowsHtml = valueRows.map((f) => `
+                          <tr>
+                            <td style="padding: 5px 0;">
+                              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: ${EMAIL_COLORS.white}; border-radius: 14px; border: 2px solid ${EMAIL_COLORS.border}; border-bottom: 4px solid ${EMAIL_COLORS.border};">
+                                <tr>
+                                  <td width="48" style="padding: 10px 12px;">
+                                    <table role="presentation" cellspacing="0" cellpadding="0">
+                                      <tr>
+                                        <td style="background-color: ${f.soft}; border: 2px solid ${f.color}; border-bottom: 3px solid ${f.dark}; border-radius: 12px; width: 44px; height: 44px; text-align: center; font-size: 22px; line-height: 44px; vertical-align: middle;">
+                                          ${f.emoji}
+                                        </td>
+                                      </tr>
+                                    </table>
+                                  </td>
+                                  <td style="padding: 10px 14px 10px 4px;">
+                                    <p style="margin: 0 0 2px 0; font-family: ${NUNITO_STACK}; font-size: 14px; font-weight: 800; color: ${EMAIL_COLORS.text};">${f.title}</p>
+                                    <p style="margin: 0; font-size: 12px; font-weight: 600; color: ${EMAIL_COLORS.textMuted}; line-height: 1.45;">${f.desc}</p>
+                                  </td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>`).join('');
+
+      const mailOptions = {
+        from: `"WriteScholar" <${fromAddress}>`,
+        to: email,
+        replyTo: replyToAddress,
+        subject: hook.subject,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <meta name="color-scheme" content="light">
+            <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+          </head>
+          <body style="margin: 0; padding: 0; background-color: ${EMAIL_COLORS.bg}; font-family: ${NUNITO_STACK};">
+            <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
+              ${hook.preheader}
+            </div>
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: ${EMAIL_COLORS.bg};">
+              <tr>
+                <td align="center" style="padding: 36px 16px;">
+                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 520px; background-color: ${EMAIL_COLORS.white}; border-radius: 18px; overflow: hidden; border: 2px solid ${EMAIL_COLORS.border}; border-bottom: 4px solid ${EMAIL_COLORS.border};">
+                    ${emailHeaderBlock('Picking up where you left off', { mascotUrl, accentColor: EMAIL_COLORS.green, accentSoft: EMAIL_COLORS.greenSoft })}
+
+                    <tr>
+                      <td style="padding: 8px 32px 26px;">
+                        <h1 style="margin: 0 0 10px 0; font-family: ${NUNITO_STACK}; font-size: 28px; font-weight: 900; color: ${EMAIL_COLORS.text}; text-align: center; letter-spacing: -0.02em; line-height: 1.2;">
+                          ${hook.headline}
+                        </h1>
+                        <p style="margin: 0 0 22px 0; font-size: 15px; font-weight: 600; color: ${EMAIL_COLORS.textMuted}; text-align: center; line-height: 1.55;">
+                          ${hook.body}
+                        </p>
+
+                        <!-- What unlocks with Pro -->
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-bottom: 22px;">
+                          ${valueRowsHtml}
+                        </table>
+
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                          <tr>
+                            <td align="center" style="padding: 0 0 14px 0;">
+                              ${ctaButton(dashboardUrl, 'Unlock my results')}
+                            </td>
+                          </tr>
+                        </table>
+
+                        <p style="margin: 0; font-size: 12.5px; font-weight: 600; color: ${EMAIL_COLORS.textMuted}; text-align: center; line-height: 1.55;">
+                          Pro starts at <strong style="color: ${EMAIL_COLORS.text};">$9.99 for your first month</strong> with the NEWCUSTOMER discount — cancel anytime.
+                        </p>
+
+                        <p style="margin: 16px 0 0 0; font-size: 12px; font-weight: 600; color: ${EMAIL_COLORS.textMuted}; text-align: center; line-height: 1.5;">
+                          Got a question? Just hit reply — a real person will get back to you.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                  <p style="margin: 16px 0 0 0; font-size: 11px; font-weight: 600; color: ${EMAIL_COLORS.textMuted}; text-align: center;">
+                    WriteScholar · You received this because you tried WriteScholar on your own work.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </body>
+          </html>
+        `,
+      };
+
+      const result = await this.transporter.sendMail(mailOptions);
+      console.log('✅ Preview follow-up email sent to:', email);
+      return { success: true, messageId: result.messageId };
+    } catch (error) {
+      console.error('❌ Failed to send preview follow-up email:', error);
+      return { success: false, error: error.message };
+    }
+  }
 }
 
 module.exports = new EmailService();

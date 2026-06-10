@@ -32,7 +32,14 @@ export type AnalyticsEvent =
   | 'onboarding_aha_generate'
   | 'onboarding_aha_complete'
   | 'onboarding_choose_trial'
-  | 'onboarding_choose_free';
+  | 'onboarding_choose_free'
+  // — Freemium preview funnel: signup → preview_ran → lock_viewed →
+  //   upgrade_clicked → checkout_started → (Stripe webhook = paid).
+  //   Read these five in order to find where users drop. —
+  | 'preview_ran'
+  | 'lock_viewed'
+  | 'upgrade_clicked'
+  | 'checkout_started';
 
 let initialized = false;
 

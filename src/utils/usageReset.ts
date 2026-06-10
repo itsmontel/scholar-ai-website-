@@ -1,7 +1,30 @@
 /**
- * Usage limits reset: paid = billing period, free = rolling 30 days from signup.
- * When daysUntilReset is provided from API, use it. Otherwise fallback to calendar month.
+ * Usage limits reset: paid = billing period; free documents/summarizer =
+ * rolling 30-day periods from signup. Free preview features (analyses,
+ * study packs, citations) are one-time lifetime limits and never reset.
+ * When daysUntilReset is provided from API, use it. Otherwise fallback
+ * to calendar month.
  */
+
+/** Shown under free preview counters — analyses, packs, citations. */
+export const FREE_PREVIEW_LIFETIME_NOTE = 'One-time previews — they don\u2019t reset';
+
+/**
+ * Footer under usage widgets. For free users with lifetime previews,
+ * only document uploads still reset on the rolling period.
+ */
+export function getUsagePeriodFooterText(
+  previewsAreLifetime: boolean,
+  daysUntilReset?: number | null
+): string | null {
+  if (previewsAreLifetime) {
+    if (daysUntilReset == null) return FREE_PREVIEW_LIFETIME_NOTE;
+    const reset = getResetsInText(daysUntilReset).toLowerCase();
+    return `${FREE_PREVIEW_LIFETIME_NOTE} · Uploads ${reset}`;
+  }
+  if (daysUntilReset == null) return null;
+  return getResetsInText(daysUntilReset);
+}
 export function getDaysUntilReset(daysFromApi?: number | null): number {
   if (typeof daysFromApi === 'number' && daysFromApi >= 0) return daysFromApi;
   const now = new Date();

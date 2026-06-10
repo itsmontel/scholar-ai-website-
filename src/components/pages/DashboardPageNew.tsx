@@ -928,7 +928,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
               <p className="text-sm sm:text-base font-bold text-stone-800 dark:text-stone-100">
                 <span className="text-[#FF4B4B]">50% off</span> your first month on monthly plans · use code{' '}
                 <span className="inline-flex items-center rounded-lg border-2 border-b-4 border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 px-2 py-0.5 font-mono font-extrabold text-[#A560E8] tracking-wide">
-                  MAY2026
+                  NEWCUSTOMER
                 </span>
               </p>
             </div>
@@ -1806,7 +1806,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                         {[
                           {
                             key: 'analyses',
-                            label: 'Essay analyses',
+                            label: 'Analysis previews',
                             emoji: '📝',
                             remaining: usageStats.analysesRemaining,
                             total: freeMonthlyCaps.analyses,
@@ -1815,7 +1815,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                           },
                           {
                             key: 'study',
-                            label: 'Study packs',
+                            label: 'Pack previews',
                             emoji: '📦',
                             remaining: usageStats.studyPacksRemaining,
                             total: freeMonthlyCaps.studyPacks,
@@ -1824,7 +1824,7 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
                           },
                           {
                             key: 'citations',
-                            label: 'Citations',
+                            label: 'Citation previews',
                             emoji: '📚',
                             remaining: usageStats.citationsRemaining,
                             total: freeMonthlyCaps.citations,

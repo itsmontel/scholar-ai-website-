@@ -1,4 +1,10 @@
 import { useState, useEffect } from 'react';
+import {
+  FREE_PLAN_DESCRIPTION,
+  FREE_PLAN_FEATURE_BULLETS,
+  FREE_PLAN_LIMITATIONS,
+  FREE_PLAN_FAQ_ANSWER,
+} from '../../constants/freePlanCopy';
 import Header from '../common/Header';
 import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
@@ -9,10 +15,20 @@ interface PricingPageProps {
   onLogout: () => void;
 }
 
+/** Auto-applied welcome discount for first-time customers: 50% off the
+ *  first monthly invoice (Pro $19.99 → $9.99, Premium $39.99 → $19.99).
+ *  The backend strips the code for anyone with prior subscription
+ *  history, so showing it optimistically here is safe. */
+const WELCOME_PROMO_CODE = 'NEWCUSTOMER';
+const FIRST_MONTH_PRICE: Record<string, number> = { pro: 9.99, premium: 19.99 };
+
 const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
   const [billingCycle, setBillingCycle] = useState('monthly');
   const [currentPlan, setCurrentPlan] = useState<string>('free');
   const [processingPlan, setProcessingPlan] = useState<string | null>(null);
+  // Logged-out visitors are treated as new customers (the discount is
+  // the acquisition pitch); logged-in users get a real eligibility check.
+  const [newCustomer, setNewCustomer] = useState<boolean>(true);
 
   useEffect(() => {
     if (!user) return;
@@ -23,11 +39,18 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
 
     (async () => {
       try {
-        const planRes = await fetch(`${base}/subscriptions/current`, { headers });
+        const [planRes, eligRes] = await Promise.all([
+          fetch(`${base}/subscriptions/current`, { headers }),
+          fetch(`${base}/subscriptions/trial-eligibility`, { headers }),
+        ]);
         if (cancelled) return;
         if (planRes.ok) {
           const data = await planRes.json();
           setCurrentPlan(data.plan || 'free');
+        }
+        if (eligRes.ok) {
+          const elig = await eligRes.json();
+          setNewCustomer(elig.trialEligible === true);
         }
       } catch (error) {
         console.error('Error loading pricing subscription data:', error);
@@ -93,6 +116,11 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
             billingCycle: billingCycle as 'monthly' | 'yearly',
             successUrl: `${window.location.origin}/dashboard?payment=success`,
             cancelUrl: `${window.location.origin}/dashboard?payment=cancelled`,
+            // Auto-apply the new-customer first-month discount on monthly
+            // plans (coupon is 50% off the first invoice — applying it to
+            // yearly would halve the whole year). Backend re-verifies
+            // eligibility and strips it for returning subscribers.
+            ...(newCustomer && billingCycle === 'monthly' ? { promoCode: WELCOME_PROMO_CODE } : {}),
           })
         });
 
@@ -152,21 +180,11 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
     {
       id: 'free',
       name: 'Free',
-      description: 'Perfect for getting started',
+      description: FREE_PLAN_DESCRIPTION,
       monthlyPrice: 0,
       yearlyPrice: 0,
-      features: [
-        '3 documents, 2 analyses, 2 study packs/mo',
-        '5,000 words Paper Summarizer',
-        '2 citation searches',
-        '2MB document library storage',
-        'Basic grammar & citation styles'
-      ],
-      limitations: [
-        'Quiz & crossword locked (Pro)',
-        '3 documents max',
-        'Basic AI model'
-      ],
+      features: [...FREE_PLAN_FEATURE_BULLETS],
+      limitations: [...FREE_PLAN_LIMITATIONS],
       popular: false,
       buttonText: getFreePlanButtonText(),
       buttonAction: handleFreePlanAction
@@ -220,7 +238,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
   const faqs = [
     {
       question: "What's included in the free plan?",
-        answer: "The free plan includes 3 documents per month, 2 AI essay analyses, 2 study pack generations (lesson, flashcards & quiz included — crossword & Crater Blast unlock with Pro), 5,000 words for the Paper Summarizer, 2 citation searches, and 2MB document library storage. It's perfect for students just getting started."
+        answer: FREE_PLAN_FAQ_ANSWER
     },
     {
       question: "What does Pro include?",
@@ -378,20 +396,30 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                 
                 <div className="mb-4">
                   {plan.id !== 'free' && billingCycle === 'monthly' ? (
-                    <>
-                      {/* Monthly price display:
-                          • Struck-through "was" price = monthlyPrice + $20
-                            (Pro: $39.99 → $19.99 ; Premium: $59.99 → $39.99).
-                          • Active price = the real plan.monthlyPrice from
-                            the plans data ($19.99 Pro / $39.99 Premium).
-                          The previous markup showed `monthlyPrice` as the
-                          struck-through value and `monthlyPrice - 10` as
-                          the active price, which incorrectly displayed
-                          $9.99 / $29.99 as the headline price. */}
+                    newCustomer ? (
+                      /* New-customer monthly display — leads with the
+                         NEWCUSTOMER first-month price (Pro $9.99,
+                         Premium $19.99), anchored against the standard
+                         monthly price, with the renewal price spelled
+                         out underneath. The coupon is auto-applied at
+                         checkout so this is exactly what Stripe charges. */
                       <div className="flex flex-col items-center gap-1">
                         <span className="text-2xl font-semibold text-stone-400 dark:text-stone-500 line-through decoration-2">
-                          ${(plan.monthlyPrice + 20).toFixed(2)}
+                          ${plan.monthlyPrice.toFixed(2)}
                         </span>
+                        <span className="text-4xl font-bold text-stone-800 dark:text-stone-100">
+                          ${(FIRST_MONTH_PRICE[plan.id] ?? plan.monthlyPrice).toFixed(2)}
+                        </span>
+                        <span className="text-stone-500 dark:text-stone-400 text-sm">
+                          first month, then ${plan.monthlyPrice.toFixed(2)}/mo
+                        </span>
+                        <span className="text-[#46A302] text-xs font-extrabold">
+                          NEWCUSTOMER discount applied at checkout
+                        </span>
+                      </div>
+                    ) : (
+                      /* Returning customers see the plain standard price. */
+                      <div className="flex flex-col items-center gap-1">
                         <span className="text-4xl font-bold text-stone-800 dark:text-stone-100">
                           ${plan.monthlyPrice.toFixed(2)}
                         </span>
@@ -399,7 +427,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                           /month
                         </span>
                       </div>
-                    </>
+                    )
                   ) : plan.id !== 'free' && billingCycle === 'yearly' ? (
                     /* Yearly price display:
                        • Struck-through "was" price = yearlyPrice + $100

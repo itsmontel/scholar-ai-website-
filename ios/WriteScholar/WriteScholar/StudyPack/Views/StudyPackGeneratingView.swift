@@ -2,138 +2,171 @@
 //  StudyPackGeneratingView.swift
 //  WriteScholar
 //
-//  Loading state shown while the backend builds the study pack. Mirrors
-//  the web's progress modal: animated study mascot, progress bar, and a
-//  ticker of step messages so the wait feels active.
+//  Compact mascot-led loading card shown while the backend builds a study
+//  pack. Mirrors the desktop GenerationOverlay — less vertical, one live
+//  status line, slim progress bar with step dots.
 //
 
 import SwiftUI
 
 struct StudyPackGeneratingView: View {
-    private static let steps: [(icon: String, text: String)] = [
-        ("doc.text",          "Reading your notes..."),
-        ("brain.head.profile", "Pulling out the key ideas..."),
-        ("book.pages",        "Writing your lesson..."),
-        ("square.stack.3d.up", "Building flashcards..."),
-        ("checkmark.bubble",  "Crafting quiz questions..."),
-        ("grid",              "Drawing the crossword..."),
-        ("burst",             "Loading the boss battle..."),
-        ("sparkles",          "Adding the finishing touches...")
+    private static let steps: [(icon: String, label: String)] = [
+        ("doc.text",           "Reading your material"),
+        ("brain.head.profile", "Pulling out key ideas"),
+        ("book.pages",         "Writing your lesson"),
+        ("rectangle.on.rectangle.angled", "Building flashcards"),
+        ("checkmark.bubble",   "Crafting quiz questions"),
+        ("gamecontroller.fill", "Loading arcade games"),
+        ("sparkles",           "Finishing touches"),
     ]
 
+    var statusText: String? = nil
+
     @State private var stepIndex = 0
-    @State private var progress: Double = 0.05
+    @State private var progress: Double = 0.06
+    @State private var mascotBob = false
+
+    private let accent = WSColor.duoOrange
+    private let accentDark = Color(hex: 0xB85F00)
 
     var body: some View {
         ZStack {
-            WSColor.background.ignoresSafeArea()
+            Color.black.opacity(0.22).ignoresSafeArea()
 
-            VStack(spacing: 28) {
+            VStack(spacing: 0) {
                 Spacer()
 
-                // Mascot with green glow
-                ZStack {
-                    Circle()
-                        .fill(WSColor.duoGreenLight)
-                        .frame(width: 240, height: 240)
-                        .blur(radius: 30)
+                // Floating card
+                VStack(spacing: 20) {
+                    mascotEmblem
 
-                    WSAnimatedImage(name: "mascot-study", ext: "webp")
-                        .frame(width: 200, height: 200)
-                        .shadow(color: WSColor.duoGreen.opacity(0.35), radius: 28, y: 12)
-                        .wsBobbing(amount: 8, duration: 2.6)
-                }
+                    VStack(spacing: 6) {
+                        Text("Building your study pack")
+                            .font(WSFont.headline(20, weight: .black))
+                            .foregroundStyle(WSColor.duoText)
+                        Text(statusText ?? "Usually 30–60 seconds")
+                            .font(WSFont.sans(13, weight: .semibold))
+                            .foregroundStyle(WSColor.foregroundMuted)
+                            .multilineTextAlignment(.center)
+                            .id(statusText ?? "default")
+                            .transition(.opacity)
+                    }
 
-                // Title
-                VStack(spacing: 6) {
-                    Text("Building your study pack")
-                        .font(WSFont.headline(22, weight: .black))
-                        .foregroundStyle(WSColor.duoText)
-                    Text("Usually 30-60 seconds.")
-                        .font(WSFont.sans(13))
-                        .foregroundStyle(WSColor.foregroundMuted)
-                }
+                    // Live status line
+                    HStack(spacing: 8) {
+                        Image(systemName: Self.steps[stepIndex].icon)
+                            .font(.system(size: 14, weight: .heavy))
+                            .foregroundStyle(accent)
+                        Text(Self.steps[stepIndex].label + "…")
+                            .font(WSFont.sans(14, weight: .bold))
+                            .foregroundStyle(WSColor.duoText)
+                            .id(stepIndex)
+                            .transition(.opacity.combined(with: .move(edge: .bottom)))
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(
+                        Capsule()
+                            .fill(WSColor.duoOrangeLight.opacity(0.6))
+                            .overlay(Capsule().stroke(accent.opacity(0.25), lineWidth: 1.5))
+                    )
 
-                // Step ticker — chunky pill
-                HStack(spacing: 8) {
-                    Image(systemName: Self.steps[stepIndex].icon)
-                        .foregroundStyle(WSColor.duoGreen)
-                        .font(.system(size: 16, weight: .heavy))
-                    Text(Self.steps[stepIndex].text)
-                        .font(WSFont.sans(15, weight: .bold))
-                        .foregroundStyle(WSColor.duoText)
-                        .id(stepIndex)
-                        .transition(.asymmetric(
-                            insertion: .opacity.combined(with: .move(edge: .bottom)),
-                            removal: .opacity.combined(with: .move(edge: .top))
-                        ))
+                    // Progress bar + step dots
+                    VStack(spacing: 10) {
+                        GeometryReader { geo in
+                            ZStack(alignment: .leading) {
+                                Capsule().fill(WSColor.duoBorder)
+                                Capsule()
+                                    .fill(
+                                        LinearGradient(
+                                            colors: [accent, Color(hex: 0xFFC800)],
+                                            startPoint: .leading,
+                                            endPoint: .trailing
+                                        )
+                                    )
+                                    .frame(width: max(12, geo.size.width * progress))
+                            }
+                        }
+                        .frame(height: 10)
+
+                        HStack(spacing: 6) {
+                            ForEach(0..<Self.steps.count, id: \.self) { i in
+                                Circle()
+                                    .fill(i <= stepIndex ? accent : WSColor.duoBorder)
+                                    .frame(width: i == stepIndex ? 8 : 6, height: i == stepIndex ? 8 : 6)
+                                    .animation(.spring(response: 0.35), value: stepIndex)
+                            }
+                        }
+                    }
                 }
-                .padding(.horizontal, 18)
-                .padding(.vertical, 12)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 28)
                 .background(
-                    Capsule().fill(WSColor.backgroundElevated)
-                        .overlay(Capsule().stroke(WSColor.duoBorder, lineWidth: 2))
-                        .shadow(color: WSColor.duoGreen.opacity(0.12), radius: 8, y: 3)
+                    RoundedRectangle(cornerRadius: 26, style: .continuous)
+                        .fill(WSColor.backgroundElevated)
+                        .shadow(color: accent.opacity(0.20), radius: 32, y: 16)
                 )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 26, style: .continuous)
+                        .stroke(
+                            LinearGradient(
+                                colors: [Color(hex: 0xFFC36B), accent, accentDark],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 2
+                        )
+                )
+                .padding(.horizontal, 28)
 
-                // Green Duolingo-style progress bar
-                progressBar
-                    .frame(height: 16)
-                    .padding(.horizontal, 32)
-
+                Spacer()
                 Spacer()
             }
-            .padding(.horizontal, 24)
         }
         .onAppear {
+            withAnimation(.easeInOut(duration: 2.4).repeatForever(autoreverses: true)) {
+                mascotBob = true
+            }
             startStepTicker()
             startProgressEasing()
         }
     }
 
-    private var progressBar: some View {
-        GeometryReader { geo in
-            ZStack(alignment: .leading) {
-                Capsule()
-                    .fill(WSColor.duoBorder)
-                Capsule()
-                    .fill(WSColor.duoGreen)
-                    .frame(width: max(16, geo.size.width * progress))
-                    .overlay(
-                        // Shine stripe inside the bar
-                        Capsule()
-                            .fill(
-                                LinearGradient(
-                                    colors: [.white.opacity(0.0), .white.opacity(0.25), .white.opacity(0.0)],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                    )
-                    .shadow(color: WSColor.duoGreen.opacity(0.4), radius: 4, y: 1)
-            }
+    // MARK: - Mascot emblem
+
+    private var mascotEmblem: some View {
+        ZStack {
+            Circle()
+                .fill(accent.opacity(0.12))
+                .frame(width: 130, height: 130)
+                .scaleEffect(mascotBob ? 1.06 : 0.94)
+
+            Circle()
+                .stroke(accent.opacity(0.18), lineWidth: 2)
+                .frame(width: 108, height: 108)
+
+            WSAnimatedImage(name: "mascot-study", ext: "webp")
+                .frame(width: 88, height: 88)
+                .offset(y: mascotBob ? -4 : 4)
+                .shadow(color: accent.opacity(0.30), radius: 12, y: 6)
         }
     }
 
     private func startStepTicker() {
-        Timer.scheduledTimer(withTimeInterval: 2.4, repeats: true) { timer in
+        Timer.scheduledTimer(withTimeInterval: 2.2, repeats: true) { _ in
             DispatchQueue.main.async {
-                withAnimation(.easeInOut(duration: 0.45)) {
+                withAnimation(.easeInOut(duration: 0.4)) {
                     stepIndex = (stepIndex + 1) % Self.steps.count
                 }
             }
         }
     }
 
-    /// Asymptotically eases progress toward 0.95 so the bar always feels
-    /// like it's making forward motion. The actual completion handler in
-    /// the coordinator swaps the view away when the response lands.
     private func startProgressEasing() {
-        Timer.scheduledTimer(withTimeInterval: 0.18, repeats: true) { timer in
+        Timer.scheduledTimer(withTimeInterval: 0.16, repeats: true) { _ in
             DispatchQueue.main.async {
-                withAnimation(.easeOut(duration: 0.3)) {
-                    let remaining = 0.95 - progress
-                    progress += remaining * 0.04
+                withAnimation(.easeOut(duration: 0.28)) {
+                    progress += (0.94 - progress) * 0.035
                 }
             }
         }
@@ -141,5 +174,5 @@ struct StudyPackGeneratingView: View {
 }
 
 #Preview {
-    StudyPackGeneratingView()
+    StudyPackGeneratingView(statusText: "Reading your PDF...")
 }

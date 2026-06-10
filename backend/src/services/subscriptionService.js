@@ -89,6 +89,22 @@ const PLAN_LIMITS = {
   },
 };
 
+/**
+ * Freemium preview model: the three AI preview features (analyses, citation
+ * searches, study packs) are ONE-TIME tastes for free users — counted over
+ * the account's lifetime, never resetting. Monthly resets train free users
+ * to ration instead of upgrading. Documents / summarizer word pools keep
+ * their rolling 30-day periods (writing is the funnel into paid analysis).
+ * Set to false to restore rolling 30-day resets for everything.
+ */
+const FREE_PREVIEW_LIFETIME = true;
+const FREE_LIFETIME_EPOCH = '1970-01-01T00:00:00.000Z';
+const LIFETIME_PREVIEW_LIMIT_TYPES = new Set([
+  'analysesPerMonth',
+  'citationSearchesPerMonth',
+  'studyPackGenerationsPerMonth',
+]);
+
 /** Map legacy / alternate SKU names to canonical limit keys: free | pro | premium */
 function normalizePlanForLimits(plan) {
   const p = (plan || 'free').toLowerCase();
@@ -283,7 +299,15 @@ const checkLimit = async (userId, limitType) => {
       return { allowed: true, limit: -1, usage: 0, remaining: -1 };
     }
 
-    const { periodStart, periodEnd, daysUntilReset } = await getUsagePeriod(userId);
+    // Free preview features never reset — count lifetime usage.
+    const lifetimePreview =
+      FREE_PREVIEW_LIFETIME &&
+      effPlan === 'free' &&
+      LIFETIME_PREVIEW_LIMIT_TYPES.has(limitType);
+
+    const { periodStart, periodEnd, daysUntilReset } = lifetimePreview
+      ? { periodStart: FREE_LIFETIME_EPOCH, periodEnd: null, daysUntilReset: null }
+      : await getUsagePeriod(userId);
     
     // Use service role key to bypass RLS for limit checking
     // This is safe because we've already authenticated the user
@@ -1218,6 +1242,104 @@ const notifyTrialsEndingSoon = async () => {
 };
 
 /**
+ * Hourly: find free users who ran a preview (analysis / citation search /
+ * study pack) 24–48 hours ago and never upgraded, then send the one-shot
+ * "your results are still waiting" recovery email.
+ *
+ * Window is 24–48h (not open-ended) so a fresh deploy doesn't blast every
+ * historical free user; idempotency via users.preview_followup_email_sent_at
+ * guarantees at most one email per user, ever, no matter how many previews
+ * they run or how many cron ticks land inside the window.
+ *
+ * Returns { sent, errors, candidates }.
+ */
+const notifyPreviewFollowups = async () => {
+  const emailService = require('./emailService');
+  let sent = 0;
+  let errors = 0;
+  try {
+    const nowMs = Date.now();
+    const windowStartIso = new Date(nowMs - 48 * 60 * 60 * 1000).toISOString();
+    const windowEndIso = new Date(nowMs - 24 * 60 * 60 * 1000).toISOString();
+
+    const [analyses, citations, packs] = await Promise.all([
+      supabaseServiceRole.from('document_analyses').select('user_id').gte('created_at', windowStartIso).lte('created_at', windowEndIso),
+      supabaseServiceRole.from('citation_searches').select('user_id').gte('created_at', windowStartIso).lte('created_at', windowEndIso),
+      supabaseServiceRole.from('quiz_usage').select('user_id').eq('quiz_type', 'study_pack').gte('created_at', windowStartIso).lte('created_at', windowEndIso),
+    ]);
+
+    // user_id → which feature to lead the email with. Analysis wins ties —
+    // "your fixes are waiting" is the strongest hook.
+    const candidates = new Map();
+    for (const [rows, feature] of [
+      [packs.data, 'study pack'],
+      [citations.data, 'citations'],
+      [analyses.data, 'analysis'],
+    ]) {
+      for (const r of rows || []) {
+        if (r?.user_id) candidates.set(r.user_id, feature);
+      }
+    }
+
+    const candidateCount = candidates.size;
+    if (candidateCount === 0) return { sent: 0, errors: 0, candidates: 0 };
+
+    console.log(`💌 preview-followup: ${candidateCount} user(s) previewed 24–48h ago`);
+
+    for (const [userId, feature] of candidates) {
+      try {
+        const { data: user, error: userErr } = await supabaseServiceRole
+          .from('users')
+          .select('email, first_name, name, subscription_plan, preview_followup_email_sent_at')
+          .eq('id', userId)
+          .single();
+        if (userErr || !user?.email) {
+          console.warn(`💌 preview-followup: skipping ${userId} — user lookup failed`, userErr?.message);
+          continue;
+        }
+        if (user.preview_followup_email_sent_at) continue;
+        if (isPaidSubscriptionTier(user.subscription_plan)) continue;
+
+        const firstName =
+          (user.first_name && String(user.first_name).trim()) ||
+          (user.name && !String(user.name).includes('@')
+            ? String(user.name).trim().split(/\s+/)[0]
+            : '') ||
+          '';
+
+        const emailResult = await emailService.sendPreviewFollowupEmail(user.email, { firstName, feature });
+        if (!emailResult.success) {
+          console.error(`💌 preview-followup: send failed for ${userId}:`, emailResult.error);
+          errors += 1;
+          continue;
+        }
+
+        const { error: stampErr } = await supabaseServiceRole
+          .from('users')
+          .update({ preview_followup_email_sent_at: new Date().toISOString() })
+          .eq('id', userId);
+        if (stampErr) {
+          console.error(`💌 preview-followup: stamp failed for ${userId}:`, stampErr.message);
+          errors += 1;
+          continue;
+        }
+
+        sent += 1;
+      } catch (rowErr) {
+        console.error(`💌 preview-followup: error for ${userId}:`, rowErr.message);
+        errors += 1;
+      }
+    }
+
+    console.log(`💌 preview-followup: complete — sent ${sent}, errors ${errors}, candidates ${candidateCount}`);
+    return { sent, errors, candidates: candidateCount };
+  } catch (error) {
+    console.error('💌 preview-followup: fatal error:', error);
+    return { sent, errors: errors + 1, candidates: 0 };
+  }
+};
+
+/**
  * Daily reconciliation: walk every paid user in our DB, compare against
  * Stripe, and downgrade anyone whose Stripe subscription is no longer in an
  * access state. Safety net for missed/failed webhooks and silent trial expiry.
@@ -1428,6 +1550,8 @@ const syncCheckoutSessionForUser = async (sessionId, appUserId) => {
 module.exports = {
   supabase,
   PLAN_LIMITS,
+  FREE_PREVIEW_LIFETIME,
+  FREE_LIFETIME_EPOCH,
   normalizePlanForLimits,
   isPaidSubscriptionTier,
   getPriceId,
@@ -1461,6 +1585,7 @@ module.exports = {
   cleanupOldCitations,
   reconcileSubscriptions,
   notifyTrialsEndingSoon,
+  notifyPreviewFollowups,
   STRIPE_ACCESS_STATUSES,
   mapPriceIdToPlan,
   resolveEffectivePlan,

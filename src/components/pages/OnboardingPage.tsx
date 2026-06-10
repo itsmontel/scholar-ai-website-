@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { SKIP_ONBOARDING_STRIPE } from '../../config/featureFlags';
 import { trackEvent } from '../../utils/analytics';
+import { saveFeatureInterests } from '../../utils/featureInterests';
 // Static import: see CompleteAcademicAIApp.tsx for why we don't dynamic-
 // import the gtag helper. Short version — ensures gtag.js starts loading
 // on first paint so the conversion event isn't racing the script load.
@@ -18,10 +19,10 @@ const TRIAL_DAYS = 7;
  */
 const HIDE_END_PAYWALLS = true;
 /* Promo code silently pre-applied to checkout when the user clicks the
-   trial CTA from the hard paywall.  Surfaces a 50% lifetime discount
-   ($19.99/mo → $9.99/mo) so the on-page copy and the Stripe session
-   stay in sync. */
-const HARD_PAYWALL_PROMO_CODE = 'MAY2026';
+   trial CTA from the hard paywall. NEWCUSTOMER = 50% off the first
+   invoice only ($19.99 → $9.99 first month). The backend strips it for
+   users with prior subscription history. */
+const HARD_PAYWALL_PROMO_CODE = 'NEWCUSTOMER';
 
 /* ═══════════════════════════════════════════════════════════════
    OnboardingPage — Duolingo-style interactive onboarding
@@ -1374,6 +1375,9 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
     setSurveySaving(true);
     await saveSurvey();
     setSurveySaving(false);
+    // Persist the picks locally so the dashboard's first-run fast path
+    // can route the user straight to the feature they said they wanted.
+    if (!testMode) saveFeatureInterests(featureInterests);
     trackEvent('onboarding_survey_complete', { source: referralSource, features: featureInterests.join(',') });
     // Jump to the FIRST slide in their personalised tour (essays if
     // selected, otherwise the highest-priority feature they picked).
@@ -2730,9 +2734,9 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                   <p className="mt-1 text-[11px] sm:text-xs font-bold text-stone-700 dark:text-stone-300">
                     Code{' '}
                     <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-white dark:bg-stone-900 border-2 border-b-[3px] border-[#D4A300] text-[#7A5C00] font-extrabold tabular-nums tracking-wider">
-                      MAY2026
+                      NEWCUSTOMER
                     </span>{' '}
-                    is already on your order. $19.99/mo becomes $9.99/mo at billing — nothing to type in.
+                    is already on your order. $19.99/mo becomes $9.99 for your first month — nothing to type in.
                   </p>
                 </div>
               </div>

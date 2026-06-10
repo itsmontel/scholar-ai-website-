@@ -40,7 +40,7 @@ import AnalysisAnimation from '../../common/AnalysisAnimation';
 import FlashcardViewer from '../../common/FlashcardViewer';
 import QuizMascotReaction from '../../common/QuizMascotReaction';
 import { trackAction, trackExport } from '../../../data/achievements';
-import { getResetsInText } from '../../../utils/usageReset';
+import { FREE_PREVIEW_LIFETIME_NOTE } from '../../../utils/usageReset';
 import { jsPDF } from 'jspdf';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
 import { saveAs } from 'file-saver';
@@ -349,7 +349,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
     }
 
     if (quizExhausted) {
-      setError('You\'ve used all your quiz generations this period. Upgrade to Pro for more quizzes.');
+      setError('You\'ve used your free quiz generations — they don\'t reset. Upgrade to Pro for more quizzes.');
       return;
     }
 
@@ -406,7 +406,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
   const handleGenerateFlashcards = async () => {
     if (!inputText.trim()) return;
     if (!user) { setShowFakeAnimation(true); setTimeout(() => { setShowFakeAnimation(false); setShowSignupPrompt(true); }, 14000); return; }
-    if (quizExhausted) { setError('You\'ve used all your study pack generations this period. Upgrade to Pro for more access.'); return; }
+    if (quizExhausted) { setError('You\'ve used your free study pack previews — they don\'t reset. Upgrade to Pro for more access.'); return; }
     setIsLoading(true);
     setError(null);
     try {
@@ -430,7 +430,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
   const handleGenerateCrossword = async () => {
     if (!inputText.trim()) return;
     if (!user) { setShowFakeAnimation(true); setTimeout(() => { setShowFakeAnimation(false); setShowSignupPrompt(true); }, 14000); return; }
-    if (quizExhausted) { setError('You\'ve used all your study pack generations this period. Upgrade to Pro for more access.'); return; }
+    if (quizExhausted) { setError('You\'ve used your free study pack previews — they don\'t reset. Upgrade to Pro for more access.'); return; }
     setIsLoading(true);
     setError(null);
     try {
@@ -2389,7 +2389,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                   <p className="text-stone-800 dark:text-stone-200 text-sm font-bold">{error}</p>
                   {(quizExhausted || (error && error.includes('Upgrade'))) && user && (
                     <>
-                      <p className="text-[#FF4B4B] text-xs mt-1 font-bold">{getResetsInText(quizUsage.daysUntilReset)}</p>
+                      <p className="text-[#FF4B4B] text-xs mt-1 font-bold">{FREE_PREVIEW_LIFETIME_NOTE}</p>
                       <button
                         onClick={() => onNavigate('pricing')}
                         className="mt-2 px-4 py-2 bg-[#FF9600] text-white text-sm font-bold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all inline-flex items-center gap-2"
@@ -2407,9 +2407,9 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
               <div className="mt-6 mx-3 sm:mx-0">
                 <div className="bg-[#FF9600] rounded-2xl p-6 text-white text-center border-2 border-b-4 border-[#D97F00]">
                   <span className="text-4xl mb-3 block">🔒</span>
-                  <h3 className="text-xl font-extrabold mb-2">Monthly Limit Reached</h3>
-                  <p className="text-white/90 mb-1 font-bold">You've used all your quiz generations this period. Upgrade to Pro for more!</p>
-                  <p className="text-white/70 text-sm mb-4 font-bold">{getResetsInText(quizUsage.daysUntilReset)}</p>
+                  <h3 className="text-xl font-extrabold mb-2">Free Previews Used</h3>
+                  <p className="text-white/90 mb-1 font-bold">You've used your free quiz generations. Upgrade to Pro to keep making them!</p>
+                  <p className="text-white/70 text-sm mb-4 font-bold">{FREE_PREVIEW_LIFETIME_NOTE}</p>
                   <button
                     onClick={() => onNavigate('pricing')}
                     className="px-6 py-2.5 bg-white text-[#FF9600] font-extrabold rounded-xl border-2 border-b-4 border-stone-200 active:border-b-2 active:translate-y-0.5 transition-all inline-flex items-center gap-2 uppercase tracking-wide"
@@ -2456,7 +2456,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
                         <p className="text-stone-800 dark:text-stone-200 font-bold text-sm">
                           Free plan: {quizUsage.generationsRemaining} of {quizUsage.generationLimit} quizzes remaining • Mixed type • Medium difficulty • 10 questions • Max {(quizUsage.maxWordsPerGeneration || 5000).toLocaleString()} words
                         </p>
-                        <p className="text-[#FF9600] text-xs mt-0.5 font-bold">Upgrade to Pro for all quiz types, difficulties, and up to 15,000 words • {getResetsInText(quizUsage.daysUntilReset)}</p>
+                        <p className="text-[#FF9600] text-xs mt-0.5 font-bold">Upgrade to Pro for all quiz types, difficulties, and up to 15,000 words • {FREE_PREVIEW_LIFETIME_NOTE}</p>
                       </>
                     </div>
                   </div>

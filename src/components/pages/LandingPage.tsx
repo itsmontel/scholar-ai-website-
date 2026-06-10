@@ -4,6 +4,12 @@ import Footer from '../common/Footer';
 import { useTheme } from '../../contexts/ThemeContext';
 import AnalysisAnimation from '../common/AnalysisAnimation';
 import { FOCUS_MODE_CHROME_EXTENSION_URL } from '../../constants/focusMode';
+import {
+  FREE_PLAN_DESCRIPTION,
+  FREE_PLAN_FEATURE_BULLETS,
+  FREE_PLAN_LANDING_CTA,
+  FREE_PLAN_STUDY_PACK_LINE,
+} from '../../constants/freePlanCopy';
 import { HIDE_FRIENDS } from '../../config/featureFlags';
 import ScholarMascot from '../common/ScholarMascot';
 import DualMascot from '../common/DualMascot';
@@ -1142,7 +1148,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             <p className="text-xs sm:text-[13px] font-medium text-stone-800 dark:text-stone-100">
               <span className="font-bold text-[#FF9600] dark:text-[#FF9600]">50% off</span> your first month on monthly plans · use code{' '}
               <span className="inline-flex items-center rounded-md border border-[#FF9600]/40 dark:border-[#D97F00]/50 bg-white dark:bg-stone-900 px-1.5 py-0.5 font-mono font-bold text-[#FF9600] dark:text-[#FF9600] tracking-wide text-[11px]">
-                MAY2026
+                NEWCUSTOMER
               </span>
             </p>
           </div>
@@ -1610,7 +1616,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     </svg>
                   </button>
                   <p className="mt-4 text-sm text-stone-500 dark:text-stone-400">
-                    Free plan includes 2 analyses per month
+                    {FREE_PLAN_LANDING_CTA}
                   </p>
                 </div>
 
@@ -1800,7 +1806,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
                 <LandingScrollReveal className="w-full" delayMs={420}>
                   <p className="mt-6 sm:mt-8 text-center text-xs text-stone-500 dark:text-stone-400 leading-relaxed max-w-2xl mx-auto">
-                    Free plan includes 2 essay analyses per month · Encrypted in transit · Cancel anytime · Quizzes &amp; flashcards live under{' '}
+                    {FREE_PLAN_LANDING_CTA} · Encrypted in transit · Cancel anytime · Study tools live under{' '}
                     <button type="button" onClick={() => onNavigate('more-tools')} className="text-[#1CB0F6] dark:text-[#1CB0F6] font-extrabold hover:underline transition-colors">
                       More tools
                     </button>
@@ -2275,30 +2281,20 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 max-w-6xl mx-auto">
             <div className="rounded-3xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-[0_24px_60px_-32px_rgba(96,48,140,0.30)] p-6 sm:p-8 flex flex-col">
               <h3 className="font-semibold text-xl text-stone-900 dark:text-stone-100 mb-1">Free</h3>
-              <p className="text-sm text-stone-500 dark:text-stone-400 mb-6">Perfect for getting started</p>
+              <p className="text-sm text-stone-500 dark:text-stone-400 mb-6">{FREE_PLAN_DESCRIPTION}</p>
               <div className="mb-6">
                 <span className="text-4xl font-bold text-stone-900 dark:text-stone-50">$0</span>
                 <span className="text-stone-500 dark:text-stone-400 ml-1">/month</span>
               </div>
               <ul className="space-y-2.5 mb-8 flex-1 text-sm sm:text-[0.9375rem] text-stone-600 dark:text-stone-400">
-                <li className="flex gap-2">
-                  <svg className="w-5 h-5 flex-shrink-0 text-[#A560E8] dark:text-[#A560E8] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>3 documents, 2 analyses, 2 study packs per month</span>
-                </li>
-                <li className="flex gap-2">
-                  <svg className="w-5 h-5 flex-shrink-0 text-[#A560E8] dark:text-[#A560E8] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>5,000 words Paper Summarizer, 2 citation searches</span>
-                </li>
-                <li className="flex gap-2">
-                  <svg className="w-5 h-5 flex-shrink-0 text-[#A560E8] dark:text-[#A560E8] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>Basic grammar and citation styles</span>
-                </li>
+                {FREE_PLAN_FEATURE_BULLETS.map((line) => (
+                  <li key={line} className="flex gap-2">
+                    <svg className="w-5 h-5 flex-shrink-0 text-[#A560E8] dark:text-[#A560E8] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>{line}</span>
+                  </li>
+                ))}
               </ul>
               <button
                 type="button"
@@ -2725,8 +2721,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </svg>
                 </span>
                 <div>
-                  <p className="text-amber-800 font-semibold text-sm">2 free study packs per month (lesson and flashcards; quiz, crossword, Crater Blast & Word Tower with Pro)</p>
-                  <p className="text-amber-600 text-xs mt-0.5">Sign up to unlock Study Tools. Upgrade for unlimited</p>
+                  <p className="text-amber-800 font-semibold text-sm">{FREE_PLAN_STUDY_PACK_LINE}</p>
+                  <p className="text-amber-600 text-xs mt-0.5">Sign up free — preview on your notes, upgrade for quiz &amp; games</p>
                 </div>
               </div>
             </div>

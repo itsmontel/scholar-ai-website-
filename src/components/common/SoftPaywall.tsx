@@ -8,6 +8,7 @@ import {
   SOFT_PAYWALL_OPEN_KEY,
   markSoftPaywallDismissedNow,
 } from '../../constants/paywallSession';
+import { trackEvent } from '../../utils/analytics';
 
 /* ═══════════════════════════════════════════════════════════════
    SoftPaywall — Duolingo-style upsell modal.
@@ -83,33 +84,35 @@ const PREMIUM_MONTHLY = '$39.99';
 const PRO_MONTHLY_WAS = '$39.99';
 const PREMIUM_MONTHLY_WAS = '$59.99';
 
-// ─── MAY2026 discount applied to both soft-paywall branches ──────────
-// Pricing is unified across both soft-paywall branches so a single
-// Stripe coupon honours every displayed price:
+// ─── NEWCUSTOMER welcome discount (new-customer first month) ─────────
+// One promo code across every surface (soft paywall, pricing, billing,
+// onboarding) so all of them tell the same story:
 //   Pro     — $9.99 first month  (vs $39.99 anchor → save $30)
 //   Premium — $19.99 first month (vs $59.99 anchor → save $40)
 //
-// CRITICAL: configure MAY2026 in Stripe as a 50% off coupon, duration
-// "once" (first invoice only). The math:
-//   Pro:     $19.99 standard intro × 0.5 = $9.99  ✓
-//   Premium: $39.99 standard intro × 0.5 = $19.99 ✓
+// CRITICAL: configure NEWCUSTOMER in Stripe as a 50% off coupon,
+// duration "once" (first invoice only). The math:
+//   Pro:     $19.99 standard × 0.5 = $9.99  ✓
+//   Premium: $39.99 standard × 0.5 = $19.99 ✓
 // After the first month, billing rolls over to the standard recurring
-// rate (PRO_MONTHLY / PREMIUM_MONTHLY). The "Save $N today only"
-// urgency badge on the first paywall derives N from the difference
-// between PRO_MONTHLY_WAS / PREMIUM_MONTHLY_WAS and the first-month
-// price, so Pro shows "Save $30" and Premium shows "Save $40"
-// automatically.
+// rate (PRO_MONTHLY / PREMIUM_MONTHLY).
+//
+// Eligibility: users who have NEVER trialed or subscribed (checked via
+// GET /subscriptions/trial-eligibility on the frontend; the backend
+// re-verifies on create-checkout-session and silently strips the code
+// for anyone with prior subscription history, so churned users can't
+// re-subscribe at half price).
 const FIRST_PAYWALL_PRO_FIRST_MONTH = '$9.99';
 const FIRST_PAYWALL_PREMIUM_FIRST_MONTH = '$19.99';
 const LAST_CHANCE_PRO_FIRST_MONTH = '$9.99';
 const LAST_CHANCE_PREMIUM_FIRST_MONTH = '$19.99';
 const LAST_CHANCE_PRO_WAS = '$39.99';
 const LAST_CHANCE_PREMIUM_WAS = '$59.99';
-/** Stripe coupon ID applied at checkout from any non-hard soft-paywall
- *  branch (first paywall + last-chance). `null` ⇒ no coupon sent;
- *  checkout falls back to the standard intro price. The matching
- *  coupon must exist in Stripe Dashboard → Products → Coupons. */
-const MAY2026_PROMO_CODE: string | null = 'MAY2026';
+/** Stripe promotion code applied at checkout from any non-hard
+ *  soft-paywall branch. `null` ⇒ no coupon sent; checkout falls back
+ *  to the standard price. The matching promotion code must exist in
+ *  Stripe Dashboard → Products → Coupons. */
+const WELCOME_PROMO_CODE: string | null = 'NEWCUSTOMER';
 
 const SoftPaywall = ({
   userName,
@@ -130,13 +133,12 @@ const SoftPaywall = ({
   const [checkedFeatures, setCheckedFeatures] = useState<number[]>([]);
   const [showLastChance, setShowLastChance] = useState(false);
   /**
-   * Captured at mount: whether the MAY2026 welcome discount has
-   * already been "consumed" (shown + dismissed or converted) on a
-   * previous paywall fire. Lives on `localStorage` via
-   * FIRST_PAYWALL_DISCOUNT_SHOWN_KEY. Reading it once at mount means
-   * the discount UI stays consistent for this paywall instance even
-   * if other code writes to the key mid-render — the user can't lose
-   * the discount mid-flow.
+   * Captured at mount: whether the welcome paywall has already fired
+   * once (shown + dismissed or converted). Lives on `localStorage` via
+   * FIRST_PAYWALL_DISCOUNT_SHOWN_KEY. Only gates the one-shot urgency
+   * badge + Last-chance pop-up — the NEWCUSTOMER first-month price
+   * itself stays available to any still-eligible new customer so this
+   * surface always matches pricing / billing.
    */
   const [discountAlreadyConsumed] = useState(() => {
     try {
@@ -145,9 +147,6 @@ const SoftPaywall = ({
       return false;
     }
   });
-  /** Convenience: true ⇒ render strike-through + urgency badge +
-   *  apply MAY2026 promo at checkout. Hard variant always skips it. */
-  const showDiscount = !discountAlreadyConsumed && !hard;
   const intervalRef = useRef<ReturnType<typeof setInterval>>();
 
   useEffect(() => {
@@ -185,13 +184,18 @@ const SoftPaywall = ({
 
   // Free trial offering disabled site-wide — force the non-trial path so
   // all downstream copy (CTAs, paywall body, last-chance modal) renders
-  // the subscribe-now variant. The fetched/prop eligibility values are
-  // still wired in case the offering is brought back later.
+  // the subscribe-now variant. Eligibility is repurposed below as the
+  // NEWCUSTOMER discount check (never trialed = never subscribed).
   const showTrial = false;
-  // Silence unused-var: `fetchedTrialEligible` and `canStartFreeTrialProp`
-  // remain set by the effect/prop above so re-enabling is a one-line flip.
-  void fetchedTrialEligible;
-  void canStartFreeTrialProp;
+  // New-customer check: trial-eligibility doubles as "has never trialed
+  // OR subscribed" (the endpoint backstops with hasEverSubscribed).
+  // null = still loading → render the discount optimistically; the
+  // backend strips NEWCUSTOMER server-side for ineligible users so an
+  // optimistic UI can never produce a wrongly-discounted charge.
+  const newCustomerEligible = (canStartFreeTrialProp ?? fetchedTrialEligible) !== false;
+  /** True ⇒ render strike-through first-month price + apply NEWCUSTOMER
+   *  at checkout. Hard variant always skips it. */
+  const showDiscount = !hard && newCustomerEligible;
 
   useEffect(() => {
     if (hard) setShowLastChance(false);
@@ -206,7 +210,7 @@ const SoftPaywall = ({
 
   const monthlyPrice = checkoutPlan === 'premium' ? PREMIUM_MONTHLY : PRO_MONTHLY;
   const monthlyWas = checkoutPlan === 'premium' ? PREMIUM_MONTHLY_WAS : PRO_MONTHLY_WAS;
-  // First soft paywall (BRANCH 3) — MAY2026 discount applied. Pro
+  // First soft paywall (BRANCH 3) — NEWCUSTOMER discount applied. Pro
   // $9.99 first month (vs $39.99 anchor), Premium $29.99 first month
   // (vs $59.99 anchor). Both save $30 vs the original "was" price.
   const firstPaywallFirstMonth =
@@ -248,10 +252,10 @@ const SoftPaywall = ({
   const handleDismiss = () => {
     if (hard) return;
     if (!showLastChance) {
-      // Burn the MAY2026 welcome-discount flag on every BRANCH-3
-      // dismissal. After this, future paywalls (after the 7-day
-      // cooldown) render the plain-price variant — no strike-through,
-      // no urgency badge, no coupon at checkout.
+      // Burn the welcome-paywall flag on every BRANCH-3 dismissal.
+      // After this, future paywalls skip the one-shot urgency badge and
+      // Last-chance pop-up. The NEWCUSTOMER first-month price itself
+      // remains as long as the user is still a new customer.
       if (showDiscount) {
         try {
           localStorage.setItem(FIRST_PAYWALL_DISCOUNT_SHOWN_KEY, '1');
@@ -300,6 +304,7 @@ const SoftPaywall = ({
     setCheckoutError(null);
     setIsCheckoutLoading(true);
     onStartTrial();
+    trackEvent('checkout_started', { source: 'soft_paywall', plan: planType, promo: code || null });
 
     try {
       const token = localStorage.getItem('authToken');
@@ -364,22 +369,21 @@ const SoftPaywall = ({
   };
 
   const startPrimaryCheckout = () => {
-    // Auto-apply MAY2026 only when the paywall is currently showing
-    // the discount UI — i.e. the first-ever post-onboarding pitch
-    // (BRANCH 3 with `showDiscount`) or the Last-chance pop-up
-    // (BRANCH 1), both of which display the discounted first-month
-    // price. The plain-pricing variant (BRANCH 3 after the 7-day
-    // cooldown re-fires) intentionally skips the coupon so Stripe
-    // charges the standard intro price ($19.99 Pro / $39.99 Premium)
-    // that the UI is showing. Hard paywall (BRANCH 2) also skips.
+    // Auto-apply NEWCUSTOMER whenever the paywall is showing the
+    // discounted first-month price (eligible new customers on BRANCH 3
+    // or the Last-chance pop-up). The plain-pricing variant (returning
+    // / churned users) skips the coupon so Stripe charges the standard
+    // price the UI is showing. Hard paywall (BRANCH 2) also skips.
+    // The backend re-verifies eligibility and strips the code for
+    // anyone with prior subscription history.
     const discountActive = (showDiscount || showLastChance) && !hard;
-    const promo = discountActive && MAY2026_PROMO_CODE ? MAY2026_PROMO_CODE : undefined;
-    if (discountActive && !MAY2026_PROMO_CODE) {
+    const promo = discountActive && WELCOME_PROMO_CODE ? WELCOME_PROMO_CODE : undefined;
+    if (discountActive && !WELCOME_PROMO_CODE) {
       // eslint-disable-next-line no-console
       console.warn(
-        '[SoftPaywall] Discount paywall shown but MAY2026_PROMO_CODE is unset — ' +
-          'Stripe will charge the regular intro price. Create the coupon in Stripe ' +
-          'Dashboard and set the constant in SoftPaywall.tsx before this ships.'
+        '[SoftPaywall] Discount paywall shown but WELCOME_PROMO_CODE is unset — ' +
+          'Stripe will charge the regular price. Create the NEWCUSTOMER coupon in ' +
+          'Stripe Dashboard and set the constant in SoftPaywall.tsx before this ships.'
       );
     }
     // Burn the welcome-discount flag if we're converting from a
@@ -456,7 +460,9 @@ const SoftPaywall = ({
             ? 'Start for free'
             : showLastChance
               ? `Get ${planName} for a discounted ${lastChanceFirstMonth}`
-              : 'Get better grades'}
+              : showDiscount
+                ? `Start ${planName} for ${firstPaywallFirstMonth}`
+                : 'Get better grades'}
           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
             <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
           </svg>
@@ -775,6 +781,8 @@ const SoftPaywall = ({
                     : <>Upgrade to {planName} for essay analysis, study packs, citations, and arcade mode. Cancel anytime.</>
                 ) : showTrial ? (
                   <>Try {planName} free for <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{TRIAL_DAYS} days</span>. Cancel anytime.</>
+                ) : showDiscount ? (
+                  <>Get {planName} for <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{firstPaywallFirstMonth} your first month</span>, then {monthlyPrice}/mo. Cancel anytime.</>
                 ) : (
                   <>Subscribe to {planName}. Cancel anytime.</>
                 )}
@@ -796,10 +804,10 @@ const SoftPaywall = ({
 
               {/* Urgency badge — "Save $X today only" red pill sitting
                   above the big price. Shown only on the first-ever
-                  post-onboarding paywall (the MAY2026 welcome offer).
-                  Subsequent paywalls (after the 7-day cooldown
-                  re-fires) and the trial branch (disabled) skip it. */}
-              {!showTrial && showDiscount && (
+                  post-onboarding paywall; later paywalls keep the
+                  discounted price (while eligible) but drop the
+                  urgency framing since "today only" would be false. */}
+              {!showTrial && showDiscount && !discountAlreadyConsumed && (
                 <div className="mb-2.5">
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#FF4B4B] text-white text-[10px] font-extrabold uppercase tracking-[0.14em] border-2 border-b-[3px] border-[#D93B3B] shadow-sm">
                     <span aria-hidden>⏰</span>

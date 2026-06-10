@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import PreviewStrip from './PreviewStrip';
 import GenerationOverlay from '../../common/GenerationOverlay';
+import { trackEvent } from '../../../utils/analytics';
+import { openUpgradePaywall } from '../../../utils/paywall';
 
 /* ═══════════════════════════════════════════════════════════════
    StudyPacksPanel — notes → a full study pack (lesson, flashcards,
@@ -99,13 +101,14 @@ export default function StudyPacksPanel({ onNavigate }: { onNavigate: (page: str
       const json = await res.json();
       if (res.status === 429) {
         setUpgrade(true);
-        setError(json?.message || "You've used this month's study packs. Upgrade to make more.");
+        setError(json?.message || "You've hit your study pack limit. Upgrade to make more.");
         return;
       }
       if (!res.ok || json?.success === false) {
         throw new Error(json?.message || `Generation failed (${res.status})`);
       }
       try { localStorage.setItem('writescholar_has_study_pack', 'true'); } catch { /* noop */ }
+      trackEvent('preview_ran', { feature: 'study_pack', input: isTopic ? 'topic' : 'notes' });
       const notesTitle = text.split(/\s+/).slice(0, 6).join(' ') + (wordCount > 6 ? '…' : '');
       const title = (json?.data?.quiz?.title as string) || (isTopic ? trimmedTopic : notesTitle);
       openViewer(json?.data, title || 'Study pack');
@@ -301,6 +304,9 @@ export default function StudyPacksPanel({ onNavigate }: { onNavigate: (page: str
             {['🎓 Lesson', '🃏 Flashcards', '📝 Quiz', '🧩 Crossword', '🎮 Games'].map((c) => (
               <span key={c} className="px-2.5 py-1 rounded-full bg-[#FFFBF5] dark:bg-[#FF9600]/10 border border-[#FF9600]/25 text-[11px] font-extrabold text-[#B85F00] dark:text-[#FF9600]">{c}</span>
             ))}
+            <span className="w-full mt-1 text-[10.5px] font-bold text-stone-400 dark:text-stone-500">
+              Free preview: lesson + 4 flashcards · Quiz &amp; games with Pro
+            </span>
           </div>
         </div>
       </div>
@@ -311,7 +317,7 @@ export default function StudyPacksPanel({ onNavigate }: { onNavigate: (page: str
           {upgrade && (
             <button
               type="button"
-              onClick={() => onNavigate('pricing')}
+              onClick={() => { trackEvent('upgrade_clicked', { source: 'study_pack_limit_error' }); openUpgradePaywall('study_pack_limit_error'); }}
               className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#FF9600] hover:bg-[#B85F00] text-white text-xs font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#B85F00] active:border-b-2 active:translate-y-0.5 transition-all"
             >
               See plans
@@ -323,7 +329,7 @@ export default function StudyPacksPanel({ onNavigate }: { onNavigate: (page: str
       <div className="mt-8">
         <PreviewStrip
           title="Everything a study pack creates"
-          subtitle="One paste of notes becomes a full lesson, flashcards, a quiz, a crossword and arcade mode."
+          subtitle="One paste becomes a full pack — free users preview the lesson and first 4 flashcards; Pro unlocks quiz, games, and the full deck."
           aspect="aspect-[4/5]"
           tint="#FF9600"
           tintShadowRgb="255,150,0"

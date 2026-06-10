@@ -148,7 +148,7 @@ export default function LandingChatGPTComparisonSection({ onNavigate }: LandingC
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
             </button>
-            <p className="text-[12px] sm:text-xs font-bold text-[#AFAFAF] dark:text-stone-500">No credit card · Free plan included</p>
+            <p className="text-[12px] sm:text-xs font-bold text-[#AFAFAF] dark:text-stone-500">No credit card · Free previews on your own work</p>
           </div>
         </LandingScrollReveal>
 

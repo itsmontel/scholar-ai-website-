@@ -208,6 +208,18 @@ const startServer = async () => {
       setInterval(async () => {
         await subscriptionService.notifyTrialsEndingSoon();
       }, 60 * 60 * 1000); // 1 hour in milliseconds
+
+      // Preview follow-up — every hour, find free users who ran a preview
+      // (analysis / citation search / study pack) 24–48h ago and never
+      // upgraded, then send the one-shot "your results are still waiting"
+      // recovery email. Idempotent via users.preview_followup_email_sent_at.
+      subscriptionService.notifyPreviewFollowups()
+        .then((result) => console.log('✅ Initial preview follow-up sweep completed:', result))
+        .catch((error) => console.error('❌ Initial preview follow-up sweep failed:', error));
+
+      setInterval(async () => {
+        await subscriptionService.notifyPreviewFollowups();
+      }, 60 * 60 * 1000); // 1 hour in milliseconds
     });
   } catch (error) {
     console.error('❌ Failed to start server:', error);

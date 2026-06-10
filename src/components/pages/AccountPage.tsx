@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import CancelRetentionModal from '../common/CancelRetentionModal';
 import { FOCUS_MODE_COMING_SOON, FOCUS_MODE_CHROME_EXTENSION_URL } from '../../constants/focusMode';
+import { FREE_PLAN_ACCOUNT_BULLETS } from '../../constants/freePlanCopy';
 
 interface User {
   id: string;
@@ -528,7 +529,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                   <div className="font-extrabold text-stone-800 dark:text-stone-100">Plan Features</div>
                   <div className="text-stone-600 dark:text-stone-400">
                     {userStats.subscriptionPlan === 'free'
-                      ? '3 documents, 2 analyses per month, 2 citation searches'
+                      ? 'Preview analyses, study packs & citations on your own work'
                       : userStats.subscriptionPlan === 'pro'
                       ? '99 combined/mo (analyses, study packs & citations)'
                       : userStats.subscriptionPlan === 'premium'
@@ -545,13 +546,10 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                 <div className="space-y-2 text-sm text-stone-600 dark:text-stone-400">
                   {userStats.subscriptionPlan === 'free' && (
                     <>
-                      <div>• 3 documents per month</div>
-                      <div>• 2 AI essay analyses per month</div>
-                      <div>• 2 citation searches per month</div>
-                      <div>• 5,000 Paper Summarizer words</div>
-                      <div>• 2 study packs (lesson & flashcards — quiz, crossword & Crater Blast with Pro)</div>
-                      <div>• 2MB document library storage</div>
-                      <div className="text-stone-400 text-xs">Crossword & Crater Blast unlock with Pro</div>
+                      {FREE_PLAN_ACCOUNT_BULLETS.map((line) => (
+                        <div key={line}>• {line}</div>
+                      ))}
+                      <div className="text-stone-400 text-xs">Full fixes, quiz, games & export unlock with Pro</div>
                     </>
                   )}
                   {userStats.subscriptionPlan === 'pro' && (

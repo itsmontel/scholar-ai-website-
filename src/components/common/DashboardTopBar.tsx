@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { getResetsInText } from '../../utils/usageReset';
+import { getUsagePeriodFooterText } from '../../utils/usageReset';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -80,6 +80,8 @@ interface TopBarUsageStats {
   studyPacksRemaining: number;
   combinedActionsRemaining?: number;
   daysUntilReset?: number;
+  /** Free preview counters are one-time and never reset. */
+  previewsAreLifetime?: boolean;
 }
 
 function usageLeftColor(n: number): string {
@@ -131,6 +133,7 @@ export default function DashboardTopBar({
           studyPacksRemaining: data.studyPacksRemaining ?? 0,
           combinedActionsRemaining: data.combinedActionsRemaining,
           daysUntilReset: data.daysUntilReset,
+          previewsAreLifetime: data.previewsAreLifetime === true,
         });
       } catch { /* chip stays empty */ } finally {
         if (!cancelled) setLoadingUsage(false);
@@ -583,19 +586,19 @@ export default function DashboardTopBar({
                     ) : (
                       <>
                         <div className="rounded-xl bg-stone-50 dark:bg-stone-800/80 border border-stone-200/80 dark:border-stone-700 px-2.5 py-2">
-                          <p className="text-[9px] font-extrabold uppercase tracking-wider text-stone-400">Analyses</p>
+                          <p className="text-[9px] font-extrabold uppercase tracking-wider text-stone-400">Previews</p>
                           <p className={`text-sm font-extrabold tabular-nums ${usageLeftColor(usageStats.analysesRemaining)}`}>
                             {fmtUsageLeft(usageStats.analysesRemaining)} <span className="text-[10px] font-bold text-stone-400">left</span>
                           </p>
                         </div>
                         <div className="rounded-xl bg-stone-50 dark:bg-stone-800/80 border border-stone-200/80 dark:border-stone-700 px-2.5 py-2">
-                          <p className="text-[9px] font-extrabold uppercase tracking-wider text-stone-400">Citations</p>
+                          <p className="text-[9px] font-extrabold uppercase tracking-wider text-stone-400">Cites</p>
                           <p className={`text-sm font-extrabold tabular-nums ${usageLeftColor(usageStats.citationsRemaining)}`}>
                             {fmtUsageLeft(usageStats.citationsRemaining)} <span className="text-[10px] font-bold text-stone-400">left</span>
                           </p>
                         </div>
                         <div className="rounded-xl bg-stone-50 dark:bg-stone-800/80 border border-stone-200/80 dark:border-stone-700 px-2.5 py-2 col-span-2">
-                          <p className="text-[9px] font-extrabold uppercase tracking-wider text-stone-400">Study packs</p>
+                          <p className="text-[9px] font-extrabold uppercase tracking-wider text-stone-400">Packs</p>
                           <p className={`text-sm font-extrabold tabular-nums ${usageLeftColor(usageStats.studyPacksRemaining)}`}>
                             {fmtUsageLeft(usageStats.studyPacksRemaining)} <span className="text-[10px] font-bold text-stone-400">left</span>
                           </p>
@@ -603,11 +606,17 @@ export default function DashboardTopBar({
                       </>
                     )}
                   </div>
-                  {usageStats.daysUntilReset != null && (
-                    <p className="mt-2 text-center text-[10px] font-bold text-stone-400">
-                      {getResetsInText(usageStats.daysUntilReset)}
-                    </p>
-                  )}
+                  {(() => {
+                    // Free previews never reset — only uploads do. Don't show
+                    // a blanket "Resets in N days" under one-time counters.
+                    const footer = getUsagePeriodFooterText(
+                      usageStats.previewsAreLifetime === true,
+                      usageStats.daysUntilReset
+                    );
+                    return footer ? (
+                      <p className="mt-2 text-center text-[10px] font-bold text-stone-400">{footer}</p>
+                    ) : null;
+                  })()}
                   {!isPaidUsage && (
                     <button
                       type="button"

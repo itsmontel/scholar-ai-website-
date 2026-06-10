@@ -26,8 +26,9 @@
 import SwiftUI
 
 struct StudyHubView: View {
-    /// User taps "Paste your notes" → parent presents the paste sheet
-    var onPaste: () -> Void
+    /// User taps a "Start a new pack" card → parent presents the generator
+    /// sheet pre-selected to the chosen input mode.
+    var onStartGenerate: (StudyPackInputView.InputMode) -> Void
     /// User taps a game card → parent presents the game fullScreenCover
     var onPlayGame: (StudyHubGame) -> Void
     /// User taps the Focus shortcut → bubble up to MainTabView
@@ -72,11 +73,11 @@ struct StudyHubView: View {
 
     var body: some View {
         ZStack {
-            WSColor.background.ignoresSafeArea()
+            WSGradient.heroBackdrop.ignoresSafeArea()
 
             ScrollView {
-                VStack(alignment: .leading, spacing: 22) {
-                    headerBlock
+                VStack(alignment: .leading, spacing: 24) {
+                    heroBanner
                     yourPacksSection
                     generateGrid
                     playSection
@@ -84,29 +85,75 @@ struct StudyHubView: View {
                     focusShortcut
                 }
                 .padding(.horizontal, 18)
-                .padding(.top, 10)
-                .padding(.bottom, 28)
+                .padding(.top, 8)
+                .padding(.bottom, 32)
             }
         }
     }
 
-    // MARK: - Header (Duolingo-energy hero with mascot-study)
+    // MARK: - Hero banner
 
-    private var headerBlock: some View {
-        HStack(alignment: .center, spacing: 14) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Study Packs")
-                    .wsHeadline(.large, weight: .black)
-                    .foregroundStyle(WSColor.foreground)
-                Text("Turn your notes into flashcards, quizzes & lessons.")
-                    .wsBody(.small)
-                    .foregroundStyle(WSColor.foregroundMuted)
+    private var heroBanner: some View {
+        ZStack(alignment: .bottomTrailing) {
+            RoundedRectangle(cornerRadius: 26, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [Color(hex: 0xFFC36B), WSColor.duoOrange, Color(hex: 0xD97F00)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .shadow(color: WSColor.duoOrange.opacity(0.40), radius: 20, y: 10)
+
+            HStack(alignment: .center, spacing: 0) {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("STUDY PACKS")
+                        .font(WSFont.sans(10, weight: .black))
+                        .tracking(2.4)
+                        .foregroundStyle(.white.opacity(0.85))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 4)
+                        .background(Capsule().fill(.white.opacity(0.18)))
+
+                    Text("Turn anything\ninto a pack")
+                        .font(WSFont.headline(26, weight: .black))
+                        .foregroundStyle(.white)
+                        .lineSpacing(2)
+
+                    Text("Topic · notes · PDF · photo · YouTube")
+                        .font(WSFont.sans(12, weight: .bold))
+                        .foregroundStyle(.white.opacity(0.88))
+
+                    Button {
+                        Haptics.medium()
+                        onStartGenerate(.topic)
+                    } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: "sparkles")
+                            Text("Start a pack")
+                        }
+                        .font(WSFont.sans(14, weight: .black))
+                        .foregroundStyle(WSColor.duoOrange)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                        .background(Capsule().fill(.white))
+                        .shadow(color: .black.opacity(0.12), radius: 6, y: 3)
+                    }
+                    .buttonStyle(WSBouncyButtonStyle())
+                    .padding(.top, 4)
+                }
+                .padding(22)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                WSAnimatedImage(name: "mascot-study", ext: "webp")
+                    .frame(width: 110, height: 110)
+                    .shadow(color: .black.opacity(0.15), radius: 12, y: 6)
+                    .offset(x: 8, y: 8)
+                    .wsBobbing(amount: 6, duration: 2.8)
             }
-            Spacer(minLength: 8)
-            WSMascotHero(asset: "mascot-study", size: 60, haloTint: WSColor.duoOrange)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.top, 2)
+        .frame(minHeight: 168)
+        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
     }
 
     // MARK: - Your saved packs (reopen from on-device store)
@@ -117,125 +164,161 @@ struct StudyHubView: View {
             .filter { $0.kind == .studyPack }
             .sorted { ($0.lastOpenedAt ?? $0.createdAt) > ($1.lastOpenedAt ?? $1.createdAt) }
         if !packs.isEmpty {
-            VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: 12) {
                 sectionHeader(title: "Your packs",
                               tint: WSColor.duoPurple,
-                              icon: "square.stack.3d.up.fill")
-                ForEach(packs) { item in
-                    Button {
-                        Haptics.medium()
-                        if let pack = StudyPackPersistence.shared.loadPack(for: item.id) {
-                            onOpenPack(pack)
-                        } else {
-                            onPaste()   // pre-store item: can't reopen, start fresh
+                              icon: "square.stack.3d.up.fill",
+                              rightCaption: "\(packs.count) saved")
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(packs.prefix(8)) { item in
+                            savedPackCard(item)
                         }
-                    } label: {
-                        WSListRowCard(icon: "square.stack.3d.up.fill",
-                                      iconTint: WSColor.duoPurple,
-                                      title: item.title,
-                                      subtitle: item.subtitle)
                     }
-                    .buttonStyle(.plain)
+                    .padding(.horizontal, 2)
                 }
             }
         }
+    }
+
+    private func savedPackCard(_ item: LibraryItem) -> some View {
+        Button {
+            Haptics.medium()
+            if let pack = StudyPackPersistence.shared.loadPack(for: item.id) {
+                onOpenPack(pack)
+            } else {
+                onStartGenerate(.notes)
+            }
+        } label: {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(WSColor.duoPurple.opacity(0.14))
+                            .frame(width: 40, height: 40)
+                        Image(systemName: "graduationcap.fill")
+                            .font(.system(size: 18, weight: .heavy))
+                            .foregroundStyle(WSColor.duoPurple)
+                    }
+                    Spacer()
+                    if item.source == .web {
+                        Image(systemName: "globe")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundStyle(WSColor.duoBlue)
+                    }
+                }
+                Text(item.title)
+                    .font(WSFont.sans(15, weight: .black))
+                    .foregroundStyle(WSColor.duoText)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+                    .frame(width: 168, alignment: .leading)
+
+                if let chip = item.chips.first {
+                    Text(chip.label)
+                        .font(WSFont.sans(10, weight: .bold))
+                        .foregroundStyle(WSColor.duoPurple)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Capsule().fill(WSColor.duoPurpleLight))
+                }
+
+                Text(LibraryRelativeFormatter.compact(item.createdAt))
+                    .font(WSFont.sans(11, weight: .semibold))
+                    .foregroundStyle(WSColor.foregroundMuted)
+            }
+            .padding(14)
+            .frame(width: 196)
+            .background(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .fill(WSColor.backgroundElevated)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .stroke(WSColor.duoBorder, lineWidth: 1.5)
+            )
+            .shadow(color: WSColor.duoPurple.opacity(0.12), radius: 12, y: 6)
+        }
+        .buttonStyle(WSBouncyButtonStyle())
     }
 
     // MARK: - Generate (paste / upload / youtube / photo)
 
     private var generateGrid: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 12) {
             sectionHeader(title: "Start a new pack",
                           tint: WSColor.duoOrange,
                           icon: "wand.and.stars")
 
+            generateCard(title: "Type a topic", subtitle: "Name any subject — we write the notes & build the whole pack",
+                         icon: "sparkles", tint: WSColor.duoPurple, featured: true) { onStartGenerate(.topic) }
+
             let cols = [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)]
             LazyVGrid(columns: cols, spacing: 10) {
-                generateCard(
-                    title: "Paste notes",
-                    subtitle: "Type or paste up to 10k words.",
-                    icon: "doc.on.clipboard.fill",
-                    tint: WSColor.duoPurple,
-                    badge: nil
-                ) { onPaste() }
-
-                generateCard(
-                    title: "Upload PDF",
-                    subtitle: "Lecture slides, textbooks, handouts.",
-                    icon: "doc.fill",
-                    tint: WSColor.duoBlue,
-                    badge: "Soon"
-                ) { Haptics.light() }
-
-                generateCard(
-                    title: "YouTube link",
-                    subtitle: "Turn a video lecture into a pack.",
-                    icon: "play.rectangle.fill",
-                    tint: WSColor.duoRed,
-                    badge: "Soon"
-                ) { Haptics.light() }
-
-                generateCard(
-                    title: "Photo of notes",
-                    subtitle: "Snap a page, we'll OCR it.",
-                    icon: "camera.fill",
-                    tint: WSColor.duoOrange,
-                    badge: "Soon"
-                ) { Haptics.light() }
+                generateCard(title: "Paste notes", subtitle: "Your class notes",
+                             icon: "doc.on.clipboard.fill", tint: WSColor.duoGreen, featured: false) { onStartGenerate(.notes) }
+                generateCard(title: "Upload file", subtitle: "PDF · Word · TXT",
+                             icon: "doc.fill", tint: WSColor.duoBlue, featured: false) { onStartGenerate(.document) }
+                generateCard(title: "YouTube", subtitle: "Video transcript",
+                             icon: "play.rectangle.fill", tint: WSColor.duoRed, featured: false) { onStartGenerate(.youtube) }
+                generateCard(title: "Photo", subtitle: "Snap your notes",
+                             icon: "camera.fill", tint: WSColor.duoOrange, featured: false) { onStartGenerate(.photo) }
             }
         }
     }
 
-    private func generateCard(title: String, subtitle: String, icon: String, tint: Color, badge: String?, action: @escaping () -> Void) -> some View {
+    private func generateCard(title: String, subtitle: String, icon: String, tint: Color, featured: Bool, action: @escaping () -> Void) -> some View {
         Button {
             Haptics.medium()
             action()
         } label: {
-            VStack(alignment: .leading, spacing: 10) {
-                HStack {
-                    // Chunky icon tile
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .fill(tint)
-                            .frame(width: 46, height: 46)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                    .stroke(.white.opacity(0.20), lineWidth: 1)
+            ZStack {
+                if featured {
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .fill(
+                            LinearGradient(
+                                colors: [tint.opacity(0.6), tint],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
                             )
-                            .shadow(color: tint.opacity(0.35), radius: 4, y: 2)
-                        Image(systemName: icon)
-                            .font(.system(size: 18, weight: .heavy))
-                            .foregroundStyle(.white)
-                    }
-                    Spacer()
-                    if let badge {
-                        Text(badge.uppercased())
-                            .font(WSFont.sans(9, weight: .black))
-                            .tracking(1.0)
-                            .foregroundStyle(WSColor.foregroundMuted)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 3)
-                            .background(Capsule().fill(WSColor.duoSurface)
-                                .overlay(Capsule().stroke(WSColor.duoBorder, lineWidth: 1)))
-                    }
+                        )
                 }
-                Text(title)
-                    .font(WSFont.sans(15, weight: .black))
-                    .foregroundStyle(WSColor.duoText)
-                Text(subtitle)
-                    .font(WSFont.sans(11))
-                    .foregroundStyle(WSColor.foregroundMuted)
-                    .lineLimit(2)
-                    .frame(minHeight: 28, alignment: .topLeading)
+
+                VStack(alignment: .leading, spacing: 8) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(featured ? .white.opacity(0.22) : tint.opacity(0.14))
+                            .frame(width: 42, height: 42)
+                        Image(systemName: icon)
+                            .font(.system(size: 17, weight: .heavy))
+                            .foregroundStyle(featured ? .white : tint)
+                    }
+                    Text(title)
+                        .font(WSFont.sans(14, weight: .black))
+                        .foregroundStyle(featured ? .white : WSColor.duoText)
+                    Text(subtitle)
+                        .font(WSFont.sans(11, weight: .semibold))
+                        .foregroundStyle(featured ? .white.opacity(0.85) : WSColor.foregroundMuted)
+                        .lineLimit(1)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(14)
+                .background(
+                    Group {
+                        if !featured {
+                            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                                .fill(WSColor.backgroundElevated)
+                        }
+                    }
+                )
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .wsChunkyCard(
-                cornerRadius: 18,
-                horizontalPadding: 14,
-                verticalPadding: 14,
-                lipHeight: 5,
-                accent: tint
+            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .stroke(featured ? .clear : WSColor.duoBorder, lineWidth: 1.5)
             )
+            .shadow(color: tint.opacity(featured ? 0.35 : 0.12), radius: featured ? 14 : 8, y: featured ? 6 : 4)
         }
         .buttonStyle(WSBouncyButtonStyle())
     }
@@ -456,7 +539,7 @@ struct StudyHubView: View {
     private func toolInfoCard(title: String, icon: String, tint: Color, blurb: String) -> some View {
         Button {
             Haptics.light()
-            onPaste() // funnels users into the generator
+            onStartGenerate(.topic) // funnels users into the generator
         } label: {
             HStack(alignment: .top, spacing: 12) {
                 ZStack {
@@ -570,7 +653,7 @@ enum StudyHubGame: Identifiable {
 
 #Preview {
     StudyHubView(
-        onPaste: {},
+        onStartGenerate: { _ in },
         onPlayGame: { _ in },
         onOpenFocus: {}
     )

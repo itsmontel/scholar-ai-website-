@@ -17,6 +17,7 @@ import { ACTIVATION_MOCK_ESSAY_BODY } from '../../data/activationTutorialMock';
 import { trackAction, syncFromAPIData, trackExport, trackCopy, trackStudyPackGenerated, getStats } from '../../data/achievements';
 import { getResetsInText, getExpiringSoonCount, getExpiringSoonUrgencyText, getDaysUntilExpiration } from '../../utils/usageReset';
 import { trackEvent } from '../../utils/analytics';
+import { ONBOARDING_COMPLETED_AT_KEY, FIRST_RUN_FAST_PATH_DONE_KEY } from '../../constants/paywallSession';
 import FocusModeSettingsSection from '../common/FocusModeSettingsSection';
 import { FOCUS_MODE_COMING_SOON, FOCUS_MODE_CHROME_EXTENSION_URL } from '../../constants/focusMode';
 import { HIDE_FRIENDS, HIDE_STREAK_AND_BADGES } from '../../config/featureFlags';
@@ -431,6 +432,34 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
   useEffect(() => {
     if (showFirstAnalysisOnboarding) trackEvent('first_action_prompt_view');
   }, [showFirstAnalysisOnboarding]);
+
+  // First-run fast path: a user who JUST finished onboarding lands with the
+  // analyze tab open and the essay box focused — "paste your essay, see your
+  // grade" in the first 60 seconds instead of an empty dashboard. One-shot;
+  // only fires within 10 minutes of onboarding so returning users are never
+  // yanked around.
+  useEffect(() => {
+    if (!showFirstAnalysisOnboarding || isActivationDashboardTutorial) return;
+    try {
+      if (localStorage.getItem(FIRST_RUN_FAST_PATH_DONE_KEY) === '1') return;
+      const completedAt = Number(localStorage.getItem(ONBOARDING_COMPLETED_AT_KEY) || 0);
+      if (!completedAt || Date.now() - completedAt > 10 * 60 * 1000) return;
+      localStorage.setItem(FIRST_RUN_FAST_PATH_DONE_KEY, '1');
+    } catch {
+      return;
+    }
+    setMode('analyze');
+    trackEvent('first_action_prompt_cta_click', { cta: 'auto_fast_path' });
+    setTimeout(() => {
+      document
+        .querySelector('[data-tutorial-target="essay-input-wrapper"]')
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      document
+        .querySelector<HTMLTextAreaElement>('textarea[data-tutorial-target="essay-input-wrapper"]')
+        ?.focus({ preventScroll: true });
+    }, 450);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showFirstAnalysisOnboarding, isActivationDashboardTutorial]);
 
   const analyzePlaceholders = [
     "Paste your essay or research paper here...",
@@ -3103,9 +3132,9 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                     {isFreeUser ? (
                       <>
                         <p className="text-amber-800 dark:text-amber-200 font-medium text-xs sm:text-sm">
-                          Free: {quizUsage.generationsRemaining}/{quizUsage.generationLimit} study packs • {(quizUsage.maxWordsPerGeneration || 5000).toLocaleString()} words max • {getResetsInText(usageStats.daysUntilReset ?? quizUsage.daysUntilReset)}
+                          Free: {quizUsage.generationsRemaining}/{quizUsage.generationLimit} pack previews left • {(quizUsage.maxWordsPerGeneration || 5000).toLocaleString()} words max
                         </p>
-                        <p className="text-amber-600 dark:text-amber-400 text-[10px] sm:text-xs mt-0.5 line-clamp-2">Lesson, flashcards & quiz included • Crossword & Crater Blast unlock with Pro</p>
+                        <p className="text-amber-600 dark:text-amber-400 text-[10px] sm:text-xs mt-0.5 line-clamp-2">Preview: lesson + 4 flashcards • Quiz &amp; games unlock with Pro</p>
                       </>
                     ) : (
                       <>
@@ -4347,9 +4376,9 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
           };
 
           const freeBars: Bar[] = [
-            { key: 'analyses', label: 'Essay analyses', emoji: '📝', remaining: usageStats.analysesRemaining, limit: planLimits?.analysesPerMonth ?? 2, tone: 'rose' },
-            { key: 'citations', label: 'Citations', emoji: '📚', remaining: usageStats.citationsRemaining, limit: planLimits?.citationSearchesPerMonth ?? 2, tone: 'violet' },
-            { key: 'studyPacks', label: 'Study packs', emoji: '📦', remaining: usageStats.studyPacksRemaining, limit: planLimits?.studyPackGenerationsPerMonth ?? 2, tone: 'amber' },
+            { key: 'analyses', label: 'Analysis previews', emoji: '📝', remaining: usageStats.analysesRemaining, limit: planLimits?.analysesPerMonth ?? 2, tone: 'rose' },
+            { key: 'citations', label: 'Citation previews', emoji: '📚', remaining: usageStats.citationsRemaining, limit: planLimits?.citationSearchesPerMonth ?? 2, tone: 'violet' },
+            { key: 'studyPacks', label: 'Study pack previews', emoji: '📦', remaining: usageStats.studyPacksRemaining, limit: planLimits?.studyPackGenerationsPerMonth ?? 2, tone: 'amber' },
             { key: 'uploads', label: 'Uploads', emoji: '📄', remaining: usageStats.uploadsRemaining, limit: planLimits?.documentsPerMonth ?? 3, tone: 'emerald' },
           ];
 
@@ -4653,9 +4682,9 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
               </div>
               <div className="space-y-2.5">
                 {[
-                  { label: 'Essays', emoji: '📝', remaining: usageStats.analysesRemaining, limit: (usageStats.planLimits as any)?.analysesPerMonth ?? 2, color: 'rose' },
-                  { label: 'Citations', emoji: '📚', remaining: usageStats.citationsRemaining, limit: (usageStats.planLimits as any)?.citationSearchesPerMonth ?? 2, color: 'blue' },
-                  { label: 'Study packs', emoji: '📦', remaining: usageStats.studyPacksRemaining, limit: (usageStats.planLimits as any)?.studyPackGenerationsPerMonth ?? 2, color: 'amber' },
+                  { label: 'Analysis previews', emoji: '📝', remaining: usageStats.analysesRemaining, limit: (usageStats.planLimits as any)?.analysesPerMonth ?? 2, color: 'rose' },
+                  { label: 'Citation previews', emoji: '📚', remaining: usageStats.citationsRemaining, limit: (usageStats.planLimits as any)?.citationSearchesPerMonth ?? 2, color: 'blue' },
+                  { label: 'Pack previews', emoji: '📦', remaining: usageStats.studyPacksRemaining, limit: (usageStats.planLimits as any)?.studyPackGenerationsPerMonth ?? 2, color: 'amber' },
                 ].map((bar) => {
                   const isUnlimited = bar.remaining === -1;
                   const remaining = isUnlimited ? Infinity : Math.max(0, bar.remaining);

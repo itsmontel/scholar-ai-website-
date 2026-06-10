@@ -91,7 +91,31 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
       }
     }
 
-    const effectivePromoCode = typeof promoCode === 'string' && promoCode.trim() ? promoCode.trim() : null;
+    let effectivePromoCode = typeof promoCode === 'string' && promoCode.trim() ? promoCode.trim() : null;
+
+    // NEWCUSTOMER (legacy alias: MAY2026) is the auto-applied welcome
+    // discount for first-time customers. The frontend decides whether to
+    // show the discounted price optimistically; this is the authoritative
+    // check — anyone who has ever trialed or subscribed (even pre-tracking
+    // legacy accounts) gets the code silently stripped so churned users
+    // can't re-subscribe at the new-customer price.
+    const WELCOME_PROMO_CODES = ['NEWCUSTOMER', 'MAY2026'];
+    if (effectivePromoCode && WELCOME_PROMO_CODES.includes(effectivePromoCode.toUpperCase())) {
+      try {
+        const trialEligibility = await subscriptionService.checkTrialEligibility(user.email);
+        const everSubscribed = await subscriptionService.hasEverSubscribed(userId);
+        if (!trialEligibility.eligible || everSubscribed) {
+          console.log(
+            `create-checkout-session: stripping welcome promo ${effectivePromoCode} for user ${userId} (not a new customer)`
+          );
+          effectivePromoCode = null;
+        }
+      } catch (eligibilityError) {
+        // Fail closed: if we can't verify eligibility, don't apply the discount.
+        console.error('create-checkout-session: welcome promo eligibility check failed:', eligibilityError);
+        effectivePromoCode = null;
+      }
+    }
 
     const trialDays =
       trialPeriodDays != null &&
@@ -828,6 +852,14 @@ router.get('/usage', authenticateToken, async (req, res) => {
 
     const { periodStart, periodEnd, daysUntilReset } = await subscriptionService.getUsagePeriod(userId);
 
+    // Free preview features (analyses, citations, study packs) count over
+    // the account lifetime — they never reset. Documents/storage stay on
+    // the rolling period. Paid plans always use their billing period.
+    const isFreePlan = !subscriptionService.isPaidSubscriptionTier(subscriptionDetails.plan);
+    const previewPeriodStart = (isFreePlan && subscriptionService.FREE_PREVIEW_LIFETIME)
+      ? subscriptionService.FREE_LIFETIME_EPOCH
+      : periodStart;
+
     // Use service role key to bypass RLS for usage statistics
     // This is safe because user is already authenticated via JWT
     const { createClient } = require('@supabase/supabase-js');
@@ -843,19 +875,19 @@ router.get('/usage', authenticateToken, async (req, res) => {
       .eq('user_id', userId)
       .gte('created_at', periodStart);
 
-    // Get analyses performed this period
+    // Get analyses performed this period (lifetime for free previews)
     const { data: analyses, error: analysesError } = await supabaseServiceRole
       .from('document_analyses')
       .select('id')
       .eq('user_id', userId)
-      .gte('created_at', periodStart);
+      .gte('created_at', previewPeriodStart);
 
-    // Get citation searches this period
+    // Get citation searches this period (lifetime for free previews)
     const { data: citationSearches, error: citationsError } = await supabaseServiceRole
       .from('citation_searches')
       .select('id')
       .eq('user_id', userId)
-      .gte('created_at', periodStart);
+      .gte('created_at', previewPeriodStart);
 
     // Get study pack generations this period (recorded in quiz_usage with quiz_type='study_pack')
     const { data: studyPacks, error: studyPacksError } = await supabaseServiceRole
@@ -863,7 +895,7 @@ router.get('/usage', authenticateToken, async (req, res) => {
       .select('id')
       .eq('user_id', userId)
       .eq('quiz_type', 'study_pack')
-      .gte('created_at', periodStart);
+      .gte('created_at', previewPeriodStart);
 
     // Calculate current storage used (only existing documents - decreases when files are deleted)
     const { data: currentDocuments, error: currentDocsError } = await supabaseServiceRole
@@ -925,7 +957,10 @@ router.get('/usage', authenticateToken, async (req, res) => {
       plan: subscriptionDetails.plan,
       planLimits,
       periodEnd,
-      daysUntilReset
+      daysUntilReset,
+      // Free preview counters (analyses / citations / study packs) never
+      // reset — the frontend should show "one-time previews", not a timer.
+      previewsAreLifetime: isFreePlan && subscriptionService.FREE_PREVIEW_LIFETIME
     };
     if (isPaid) {
       payload.combinedActionsUsed = combinedActionsUsed;

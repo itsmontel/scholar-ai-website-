@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HIDE_FRIENDS } from '../../config/featureFlags';
-import { getResetsInText } from '../../utils/usageReset';
+import { getUsagePeriodFooterText } from '../../utils/usageReset';
 import { useWorkspaceChrome, shouldHideLegacyHeader, isSessionAuthenticated } from '../workspace/workspaceChrome';
 
 interface HeaderProps {
@@ -66,6 +66,8 @@ interface UsageStats {
     name: string;
   };
   daysUntilReset?: number;
+  /** Free preview counters are one-time and never reset. */
+  previewsAreLifetime?: boolean;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -634,7 +636,7 @@ const Header: React.FC<HeaderProps> = ({
                           </div>
                           {(usageStats.uploadsRemaining !== -1 || (usageStats.plan === 'pro' || usageStats.plan === 'premium' ? usageStats.combinedActionsRemaining != null && usageStats.combinedActionsRemaining !== -1 : usageStats.analysesRemaining !== -1 || usageStats.citationsRemaining !== -1 || usageStats.studyPacksRemaining !== -1)) && (
                             <p className="text-[10px] text-stone-500 dark:text-stone-400 mt-2 text-center">
-                              {getResetsInText(usageStats.daysUntilReset)}
+                              {getUsagePeriodFooterText(usageStats.previewsAreLifetime === true, usageStats.daysUntilReset)}
                             </p>
                           )}
                         </div>

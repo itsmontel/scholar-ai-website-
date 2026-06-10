@@ -2,38 +2,17 @@
 //  StudyTabContainer.swift
 //  WriteScholar
 //
-//  New top-level container for the Study tab. Replaces the old
-//  StudyPackTabContainer which dropped users straight into the paste
-//  view.
-//
-//  Behaviour:
-//    • Phase .input    → render StudyHubView (the new hub landing).
-//                        The hub presents the existing paste flow as a
-//                        sheet, presents games as fullScreenCover, and
-//                        bubbles a Focus shortcut up to MainTabView.
-//    • Phase .generating → render StudyPackGeneratingView inline.
-//    • Phase .home(pack) → render StudyPackHomeView inline (existing
-//                          quiz/flashcards/lesson UI).
-//
-//  The StudyPackTabContainer file is preserved for #Preview / legacy
-//  but is no longer wired into MainTabView.
+//  Study tab flow: create → generating → pack home.
+//  One screen to create — no hub + sheet double-pick.
 //
 
 import SwiftUI
 
 struct StudyTabContainer: View {
     @StateObject private var coordinator = StudyPackCoordinator()
-
-    @State private var pasteSheetOpen: Bool = false
-    @State private var presentedGame:  StudyHubGame? = nil
-
-    /// Bumped once each time a fresh pack lands on .home — fires the
-    /// confetti overlay so generation feels like a *win*.
+    @State private var presentedGame: StudyHubGame? = nil
     @State private var celebrate: Int = 0
 
-    /// Optional callback so the hub's Focus shortcut can hop to the
-    /// Focus tab. MainTabView doesn't currently pipe one in, so by
-    /// default we just no-op.
     var onOpenFocus: () -> Void = {}
 
     var body: some View {
@@ -42,69 +21,38 @@ struct StudyTabContainer: View {
 
             switch coordinator.phase {
             case .input:
-                StudyHubView(
-                    onPaste:      { pasteSheetOpen = true },
-                    onPlayGame:   { game in presentedGame = game },
-                    onOpenFocus:  { onOpenFocus() },
-                    onOpenPack:   { pack in
-                        withAnimation(.easeInOut(duration: 0.35)) {
-                            coordinator.phase = .home(pack)
-                        }
+                StudyPackInputView(coordinator: coordinator) { pack in
+                    withAnimation(.easeInOut(duration: 0.35)) {
+                        coordinator.phase = .home(pack)
                     }
-                )
+                }
                 .transition(.opacity)
 
             case .generating:
-                StudyPackGeneratingView()
+                StudyPackGeneratingView(statusText: coordinator.statusText)
                     .transition(.opacity)
 
             case .home(let pack):
-                StudyPackHomeView(pack: pack, coordinator: coordinator)
-                    .transition(.opacity.combined(with: .scale(scale: 1.01)))
+                StudyPackHomeView(pack: pack, coordinator: coordinator, onPlayGame: { game in
+                    presentedGame = game
+                })
+                .transition(.opacity.combined(with: .scale(scale: 1.01)))
             }
 
-            // Confetti overlay sits on top of every phase. It only fires
-            // when `celebrate` changes, so it's free until the moment
-            // the pack lands.
             WSConfettiView(trigger: $celebrate)
                 .allowsHitTesting(false)
         }
         .animation(.easeInOut(duration: 0.35), value: coordinator.phase)
-        // Paste flow as a sheet
-        .sheet(isPresented: $pasteSheetOpen) {
-            NavigationStack {
-                StudyPackInputView(coordinator: coordinator)
-                    .toolbar {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button("Close") {
-                                pasteSheetOpen = false
-                            }
-                            .foregroundStyle(WSColor.foregroundMuted)
-                        }
-                    }
-            }
-        }
-        // Auto-dismiss the paste sheet when generation kicks off so the
-        // user sees the loading screen and pack inline instead of behind
-        // a half-mounted sheet. Also fires the confetti the moment a
-        // freshly-generated pack lands on .home.
         .onChange(of: coordinator.phase) { _, newPhase in
-            if case .generating = newPhase {
-                pasteSheetOpen = false
-            }
-            if case .home = newPhase {
-                celebrate += 1
-            }
+            if case .home = newPhase { celebrate += 1 }
         }
-        // Games as fullScreenCover with a top-left close button
         .fullScreenCover(item: $presentedGame) { game in
             ZStack(alignment: .topLeading) {
                 switch game {
-                case .craterBlast(let pack): CraterBlastView(craterBlast: pack)
-                case .wordTower(let pack):   WordTowerView(wordTower: pack)
-                case .wordBlitz(let pack):   WordBlitzView(wordBlitz: pack)
+                case .craterBlast(let p): CraterBlastView(craterBlast: p)
+                case .wordTower(let p):   WordTowerView(wordTower: p)
+                case .wordBlitz(let p):   WordBlitzView(wordBlitz: p)
                 }
-
                 Button {
                     Haptics.light()
                     presentedGame = nil

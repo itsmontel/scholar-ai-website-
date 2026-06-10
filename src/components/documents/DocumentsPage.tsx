@@ -18,6 +18,10 @@ import { SIDEBAR_TOOLS } from '../workspace/sidebarTools';
 import { WorkspaceShell } from '../workspace/WorkspaceShell';
 import DashboardTopBar from '../common/DashboardTopBar';
 import { consumePendingWorkspaceView, WS_SWITCH_VIEW_EVENT } from '../workspace/workspaceNavigate';
+import { trackEvent } from '../../utils/analytics';
+import { openUpgradePaywall } from '../../utils/paywall';
+import { ONBOARDING_COMPLETED_AT_KEY, FIRST_RUN_FAST_PATH_DONE_KEY } from '../../constants/paywallSession';
+import { getPrimaryFeatureInterest, INTEREST_TO_VIEW } from '../../utils/featureInterests';
 
 /* ═══════════════════════════════════════════════════════════════
    DocumentsPage — unified hub for everything in /documents.
@@ -739,10 +743,11 @@ function CyclingMedia({ items, imageMs = 5000, maxVideoMs = 6500 }: { items: { k
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idx, list.length, imageMs, maxVideoMs]);
+  const mediaClass = 'absolute inset-0 h-full w-full object-cover object-center scale-[1.04]';
   return cur.kind === 'video' ? (
-    <video key={cur.src} src={cur.src} autoPlay muted playsInline preload="metadata" onEnded={advance} className="absolute inset-0 w-full h-full object-cover" aria-hidden />
+    <video key={cur.src} src={cur.src} autoPlay muted playsInline preload="metadata" onEnded={advance} className={mediaClass} aria-hidden />
   ) : (
-    <img key={cur.src} src={cur.src} alt="" aria-hidden draggable={false} className="absolute inset-0 w-full h-full object-cover object-top" />
+    <img key={cur.src} src={cur.src} alt="" aria-hidden draggable={false} className={`${mediaClass} object-top`} />
   );
 }
 
@@ -978,16 +983,16 @@ function DocumentsHub({
 
   // "Pick a tool" — three focused entry points: start a draft, make a
   // study pack, or analyze an essay. Each routes to a real view.
-  const PICK_TOOLS: { key: string; title: string; sub: string; icon: React.ReactNode; media: { kind: 'image' | 'video'; src: string }[]; tint: string; tintDark: string; onClick: () => void }[] = [
+  const PICK_TOOLS: { key: string; title: string; sub: string; nudgeLabel: string; icon: React.ReactNode; media: { kind: 'image' | 'video'; src: string }[]; tint: string; tintDark: string; onClick: () => void }[] = [
     {
-      key: 'editor', title: 'Start a draft', sub: 'Blank page with live AI feedback', tint: '#A560E8', tintDark: '#7733B5', onClick: onNew,
+      key: 'editor', title: 'Start a draft', sub: 'Blank page with live AI feedback', nudgeLabel: 'Write here!', tint: '#A560E8', tintDark: '#7733B5', onClick: onNew,
       media: [{ kind: 'image', src: '/WriterPic.png' }],
       icon: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M12 20h9" /><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4 12.5-12.5z" /></svg>),
     },
     {
       // Cycles through everything a Study Pack creates: flashcards →
       // quiz → crossword (videos) → lesson (image, ~5s).
-      key: 'pack', title: 'Study Pack', sub: 'Lesson · flashcards · quiz · crossword', tint: '#FF9600', tintDark: '#B85F00', onClick: () => onSwitchView('study-packs'),
+      key: 'pack', title: 'Study Pack', sub: 'Lesson · flashcards · quiz · crossword', nudgeLabel: 'Learn here!', tint: '#FF9600', tintDark: '#B85F00', onClick: () => onSwitchView('study-packs'),
       media: [
         { kind: 'video', src: '/hero-flashcards.mp4' },
         { kind: 'video', src: '/hero-quiz.mp4' },
@@ -998,7 +1003,7 @@ function DocumentsHub({
     },
     {
       // Cycles through every free arcade game clip.
-      key: 'games', title: 'Arcade', sub: 'Crater Blast · Word Tower · Word Blitz', tint: '#FF4B4B', tintDark: '#C93535', onClick: () => onSwitchView('games'),
+      key: 'games', title: 'Arcade', sub: 'Crater Blast · Word Tower · Word Blitz', nudgeLabel: 'Play here!', tint: '#FF4B4B', tintDark: '#C93535', onClick: () => onSwitchView('games'),
       media: [
         { kind: 'video', src: '/writescholar-crater-blast-demo.mp4' },
         { kind: 'video', src: '/hero-word-tower.mp4' },
@@ -1007,6 +1012,18 @@ function DocumentsHub({
       icon: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M7.5 7.5h9a4.5 4.5 0 014.43 3.72l.74 4.3A3.04 3.04 0 0118.66 19c-.97 0-1.88-.46-2.45-1.25L15 16H9l-1.21 1.75A3.04 3.04 0 015.34 19a3.04 3.04 0 01-3-3.48l.74-4.3A4.5 4.5 0 017.5 7.5z" /><path strokeLinecap="round" strokeLinejoin="round" d="M7 12h3m-1.5-1.5v3M16 11.5h.01M18 13.5h.01" /></svg>),
     },
   ];
+
+  // Personalized ordering: the feature the user said excited them most
+  // during onboarding leads the row on every visit (essays → draft card
+  // stays first; study packs / games move up when picked). Subtle,
+  // permanent counterpart to the one-shot first-run fast path. Not
+  // memoized: PICK_TOOLS closes over per-render handlers, and sorting a
+  // 3-element array is free.
+  const primaryInterest = getPrimaryFeatureInterest();
+  const pickToolsFirstKey = primaryInterest === 'study_packs' ? 'pack' : primaryInterest === 'games' ? 'games' : 'editor';
+  const pickTools = [...PICK_TOOLS].sort(
+    (a, b) => (a.key === pickToolsFirstKey ? -1 : 0) - (b.key === pickToolsFirstKey ? -1 : 0)
+  );
 
   // "What's on your mind?" — a personal to-do / reminders list. Users
   // add THEIR OWN items (an essay to finish, a chapter to revise, a
@@ -1033,6 +1050,18 @@ function DocumentsHub({
 
   return (
     <>
+      {/* Golden nudge arrows — shared by essay feedback + pick-a-tool cards */}
+      <style>{`
+        @keyframes wsStartNudge{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+        @keyframes wsGoldFlash{
+          0%,100%{color:#FFC800;filter:drop-shadow(0 0 6px rgba(255,200,0,0.9)) drop-shadow(0 0 12px rgba(255,150,0,0.5));opacity:1}
+          50%{color:#FFE566;filter:drop-shadow(0 0 14px rgba(255,220,0,1)) drop-shadow(0 0 24px rgba(255,200,0,0.95));opacity:1}
+        }
+        .ws-start-nudge{animation:wsStartNudge 2.2s ease-in-out infinite}
+        .ws-gold-flash{animation:wsGoldFlash 1.1s ease-in-out infinite}
+        @media (prefers-reduced-motion:reduce){.ws-start-nudge,.ws-gold-flash{animation:none}}
+      `}</style>
+
       {/* Hidden file input — reused by the Upload tile in the bento. */}
       <input
         ref={fileInputRef}
@@ -1272,16 +1301,6 @@ function DocumentsHub({
               {/* Golden "Start here!" — lives inside the card (never bleeds
                   into the greeting row above). Points down-right at the
                   headline + CTA. */}
-              <style>{`
-                @keyframes wsStartNudge{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
-                @keyframes wsGoldFlash{
-                  0%,100%{color:#FFC800;filter:drop-shadow(0 0 6px rgba(255,200,0,0.9)) drop-shadow(0 0 12px rgba(255,150,0,0.5));opacity:1}
-                  50%{color:#FFE566;filter:drop-shadow(0 0 14px rgba(255,220,0,1)) drop-shadow(0 0 24px rgba(255,200,0,0.95));opacity:1}
-                }
-                .ws-start-nudge{animation:wsStartNudge 2.2s ease-in-out infinite}
-                .ws-gold-flash{animation:wsGoldFlash 1.1s ease-in-out infinite}
-                @media (prefers-reduced-motion:reduce){.ws-start-nudge,.ws-gold-flash{animation:none}}
-              `}</style>
               <div className="pointer-events-none absolute z-30 top-3 right-4 sm:top-4 sm:right-6 flex flex-col items-end" aria-hidden>
                 <div className="ws-start-nudge flex flex-col items-end">
                   <span className="ws-gold-flash text-[1.5rem] sm:text-[1.75rem] leading-none rotate-3 font-extrabold" style={{ fontFamily: '"Caveat", cursive' }}>Start here!</span>
@@ -1346,7 +1365,7 @@ function DocumentsHub({
           <div>
             <h2 className="text-[15px] font-extrabold text-stone-800 dark:text-stone-100 mb-3" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Pick a tool</h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {PICK_TOOLS.map((t) => (
+              {pickTools.map((t) => (
                 <button
                   key={t.key}
                   type="button"
@@ -1354,11 +1373,31 @@ function DocumentsHub({
                   className="group relative overflow-hidden flex flex-col text-left rounded-3xl border-2 border-b-[3px] bg-white dark:bg-stone-900 hover:-translate-y-1 active:translate-y-px transition-all shadow-[0_14px_34px_-22px_rgba(0,0,0,0.4)] hover:shadow-[0_26px_46px_-24px_rgba(120,60,200,0.32)]"
                   style={{ borderColor: t.tint, borderBottomColor: t.tintDark }}
                 >
-                  {/* Live preview — shorter crop on mobile keeps the
-                      stacked cards compact; full 16:10 once they sit in a row. */}
-                  <div className="relative aspect-[5/2] sm:aspect-[16/10] w-full overflow-hidden" style={{ background: `linear-gradient(160deg, ${t.tint}, ${t.tintDark})` }} aria-hidden>
-                    <CyclingMedia items={t.media} />
-                    <span className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-black/35 to-transparent" />
+                  {/* Golden nudge — same treatment as essay feedback card.
+                      Sits on a dark glass pill so the gold stays legible
+                      over the bright tool previews. */}
+                  <div className="pointer-events-none absolute z-30 top-2.5 right-3 sm:top-3 sm:right-4 flex flex-col items-end" aria-hidden>
+                    <div className="ws-start-nudge flex flex-col items-end rounded-2xl bg-black/45 backdrop-blur-[2px] px-2.5 py-1.5 shadow-[0_4px_14px_-4px_rgba(0,0,0,0.6)]">
+                      <span className="ws-gold-flash text-[1.15rem] sm:text-[1.35rem] leading-none rotate-3 font-extrabold whitespace-nowrap" style={{ fontFamily: '"Caveat", cursive', textShadow: '0 1px 3px rgba(0,0,0,0.7)' }}>{t.nudgeLabel}</span>
+                      <svg className="ws-gold-flash w-6 h-6 sm:w-7 sm:h-7 -mt-0.5 mr-1.5" viewBox="0 0 44 44" fill="none" stroke="currentColor" strokeWidth={2.75} strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.6))' }}>
+                        <path d="M28 6 C18 14, 14 26, 8 38" />
+                        <path d="M4 32 L8 38 L14 34" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Live preview — rounded top matches the card's inner
+                      curve (rounded-3xl minus the 2px border). Videos
+                      scale slightly so no gaps show at the corners. */}
+                  <div
+                    className="relative aspect-[5/2] sm:aspect-[16/10] w-full shrink-0 overflow-hidden rounded-t-[22px]"
+                    style={{ background: `linear-gradient(160deg, ${t.tint}, ${t.tintDark})` }}
+                    aria-hidden
+                  >
+                    <div className="absolute inset-0 overflow-hidden rounded-t-[22px]">
+                      <CyclingMedia items={t.media} />
+                    </div>
+                    <span className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-14 bg-gradient-to-t from-black/35 to-transparent" />
                   </div>
                   {/* Body — floating icon chip overlaps the preview's lower edge */}
                   <div className="relative px-4 pt-7 pb-4">
@@ -1434,7 +1473,7 @@ function DocumentsHub({
           </div>
 
           {/* Your study packs — your latest study materials (top 3) with
-              a "Show more" link to the full study-materials page, so it
+              a "Show more" link to Saved Materials (quiz-history), so it
               stays compact in the rail. */}
           <div className="rounded-3xl border-2 border-stone-200/80 dark:border-stone-700 bg-gradient-to-b from-white to-stone-50/70 dark:from-stone-900 dark:to-stone-950/40 p-4 shadow-[0_14px_32px_-24px_rgba(0,0,0,0.4)]">
             <div className="flex items-center justify-between gap-2 mb-3 px-0.5">
@@ -1445,7 +1484,7 @@ function DocumentsHub({
                 <h3 className="text-[13.5px] font-extrabold text-stone-800 dark:text-stone-100 truncate" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Your study packs</h3>
               </div>
               {recentStudyPacks.length > 0 && (
-                <button type="button" onClick={() => onSwitchView('study-packs')} className="shrink-0 text-[10.5px] font-extrabold uppercase tracking-wide text-[#B85F00] dark:text-[#FFBD5C] hover:underline">
+                <button type="button" onClick={() => onNavigate('quiz-history')} className="shrink-0 text-[10.5px] font-extrabold uppercase tracking-wide text-[#B85F00] dark:text-[#FFBD5C] hover:underline">
                   Show more
                 </button>
               )}
@@ -2182,7 +2221,15 @@ function DocumentEditorView({
                   <button
                     type="button"
                     onClick={analysesLeft === 0 ? onUpgrade : undefined}
-                    title={analysesLeft === 0 ? 'No analyses left this month — upgrade for more' : `${analysesLeft} ${analysesLeft === 1 ? 'analysis' : 'analyses'} left this month`}
+                    title={
+                      analysesLeft === 0
+                        ? revisionsLocked
+                          ? 'You\u2019ve used your free analysis previews — upgrade for more'
+                          : 'No analyses left this month — upgrade for more'
+                        : revisionsLocked
+                          ? `${analysesLeft} free ${analysesLeft === 1 ? 'analysis preview' : 'analysis previews'} left (one-time, no monthly reset)`
+                          : `${analysesLeft} ${analysesLeft === 1 ? 'analysis' : 'analyses'} left this month`
+                    }
                     className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-wider border-2 ${
                       analysesLeft === 0
                         ? 'bg-[#FFE8E8] text-[#FF4B4B] border-[#FF4B4B]/30 cursor-pointer hover:bg-[#FFDADA]'
@@ -2298,7 +2345,7 @@ function DocumentEditorView({
 
                 {revisionsLocked && !noAnalysesLeft && (
                   <p className="mx-auto mt-4 max-w-[16rem] text-[11.5px] font-medium text-stone-400 dark:text-stone-500 leading-relaxed">
-                    Free plan shows your grade and a rubric preview.{' '}
+                    Free preview: grade estimate, issue counts &amp; top fixes.{' '}
                     <button
                       type="button"
                       onClick={onUpgrade}
@@ -2310,7 +2357,7 @@ function DocumentEditorView({
                 )}
                 {typeof analysesLeft === 'number' && !noAnalysesLeft && (
                   <p className="mt-3 text-[11px] font-bold text-stone-400 dark:text-stone-500 tabular-nums">
-                    {analysesLeft} {analysesLeft === 1 ? 'analysis' : 'analyses'} left this month
+                    {analysesLeft} free {analysesLeft === 1 ? 'analysis' : 'analyses'} left
                   </p>
                 )}
               </div>
@@ -2405,13 +2452,19 @@ function DocumentEditorView({
                 <I.Sparkle />
               </span>
               <h3 className="text-lg font-extrabold text-stone-900 dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                {noAnalysesLeft ? 'No analyses left this month' : isReanalyze ? 'Re-analyze this draft?' : 'Analyze this draft?'}
+                {noAnalysesLeft
+                  ? revisionsLocked
+                    ? 'Free previews used up'
+                    : 'No analyses left this month'
+                  : isReanalyze ? 'Re-analyze this draft?' : 'Analyze this draft?'}
               </h3>
             </div>
 
             {noAnalysesLeft ? (
               <p className="text-sm text-stone-600 dark:text-stone-300 font-medium leading-relaxed">
-                You've used all your analyses for this billing period. Upgrade for more, or wait until your allowance resets.
+                {revisionsLocked
+                  ? 'You\u2019ve used your free analysis previews — they\u2019re one-time and don\u2019t reset. Upgrade to keep analyzing your papers.'
+                  : 'You\u2019ve used all your analyses for this billing period. Upgrade for more, or wait until your allowance resets.'}
               </p>
             ) : (
               <>
@@ -2426,7 +2479,11 @@ function DocumentEditorView({
                   )}
                   <li className="flex gap-2"><span className="text-[#A560E8] font-extrabold">•</span><span>
                     Uses <strong>one analysis</strong>
-                    {typeof analysesLeft === 'number' && analysesLeft >= 0 ? ` — you have ${analysesLeft} left this month.` : '.'}
+                    {typeof analysesLeft === 'number' && analysesLeft >= 0
+                      ? revisionsLocked
+                        ? ` — you have ${analysesLeft} free ${analysesLeft === 1 ? 'preview' : 'previews'} left (one-time).`
+                        : ` — you have ${analysesLeft} left this month.`
+                      : '.'}
                   </span></li>
                 </ul>
               </>
@@ -2602,6 +2659,33 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
       setView(pending);
     }
   }, [initialDocumentId]);
+
+  // First-run fast path — a user who JUST finished onboarding lands
+  // directly in the tool they said excited them most in the survey
+  // (essays → analyze, study packs → study-packs, etc.) instead of an
+  // empty hub, with a one-shot mascot line acknowledging their pick.
+  // One-shot; only fires within 10 minutes of onboarding completion so
+  // returning users are never yanked around.
+  const [firstRunNudge, setFirstRunNudge] = useState<WorkspaceView | null>(null);
+  useEffect(() => {
+    if (initialDocumentId || trialGated) return;
+    try {
+      if (localStorage.getItem(FIRST_RUN_FAST_PATH_DONE_KEY) === '1') return;
+      const completedAt = Number(localStorage.getItem(ONBOARDING_COMPLETED_AT_KEY) || 0);
+      if (!completedAt || Date.now() - completedAt > 10 * 60 * 1000) return;
+      localStorage.setItem(FIRST_RUN_FAST_PATH_DONE_KEY, '1');
+    } catch {
+      return;
+    }
+    const interest = getPrimaryFeatureInterest();
+    // Default to analyze — the strongest preview → upgrade loop — when
+    // the user skipped the survey or picked nothing.
+    const target: WorkspaceView = interest ? INTEREST_TO_VIEW[interest] : 'analyze';
+    setView(target);
+    setFirstRunNudge(target);
+    trackEvent('first_action_prompt_cta_click', { cta: 'auto_fast_path', view: target, interest: interest || 'none' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialDocumentId, trialGated]);
 
   // Listen for direct view-switch events fired by navigateWorkspaceView
   // when DocumentsPage is already mounted (e.g. "Start review" popup
@@ -3243,6 +3327,13 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
       });
       persistLastAnalysisGradingStyle(gradingStyle);
       try { localStorage.setItem('writescholar_editor_citation_style', citationStyle); } catch { /* noop */ }
+      trackEvent('preview_ran', { feature: 'analysis', annotations: annotations.length });
+      if (!isPaidPlan(user)) {
+        trackEvent('lock_viewed', {
+          feature: 'analysis',
+          locked: annotations.filter((a) => a.locked).length,
+        });
+      }
       // Soft paywall is NOT shown here — it fires once a free user
       // has scrolled ~65% through their paper after an analysis
       // (see the scroll-progress effect below), capped to once a day.
@@ -3703,6 +3794,9 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
       onTrialGate?.();
       return;
     }
+    // Leaving the fast-path landing view retires the one-shot mascot
+    // acknowledgment — it shouldn't reappear if they come back later.
+    if (firstRunNudge !== null && v !== firstRunNudge) setFirstRunNudge(null);
     setView(v);
     if (v === 'hub') {
       try { window.history.pushState({}, '', '/documents'); } catch { /* ignore */ }
@@ -3745,7 +3839,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
           applyingAnnotationId={applyingAnnotationId}
           onOpenFullReport={handleOpenFullReport}
           wordLimit={isPaidPlan(user) || !FREE_EDITOR_WORD_LIMIT ? null : FREE_EDITOR_WORD_LIMIT}
-          onUpgrade={() => onNavigate('pricing')}
+          onUpgrade={() => { trackEvent('upgrade_clicked', { source: 'analyzer_panel' }); openUpgradePaywall('analyzer_panel'); }}
           analysesLeft={analysesLeft}
           revisionsLocked={!isPaidPlan(user)}
           revisionPaywallAnn={revisionPaywallAnn}
@@ -3829,6 +3923,32 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
         onNavigateBadges={() => onNavigate('badges')} onNavigateHome={goHomeDashboard}
         topBar={view === 'hub' ? undefined : dashboardTopBar}
       >
+        {/* First-run acknowledgment — one-shot mascot line shown only on
+            the fast-path landing right after onboarding. Tells the user
+            we routed them based on their own survey pick, then points
+            them at the input below. Dismissed by the X or by navigating
+            to any other view. */}
+        {firstRunNudge !== null && firstRunNudge === view && view !== 'hub' && (
+          <div className="mx-auto w-full max-w-3xl px-4 pt-4">
+            <div className="relative flex items-center gap-3 rounded-2xl border-2 border-b-4 border-[#46A302] bg-[#E5F8D0] dark:bg-[#58CC02]/15 px-4 py-3">
+              <img src="/mascot-celebrating.webp" alt="" width={48} height={48} className="w-12 h-12 object-contain shrink-0" loading="eager" />
+              <p className="min-w-0 flex-1 text-[13px] sm:text-sm font-extrabold text-[#3C3C3C] dark:text-stone-100 leading-snug" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+                {view === 'analyze' && <>You said you wanted feedback on your essays — paste one in below and I&apos;ll grade it 👇</>}
+                {view === 'study-packs' && <>You said you wanted flashcards &amp; quizzes — drop your notes in and I&apos;ll build your study pack 👇</>}
+                {view === 'daily-review' && <>You said you wanted daily practice — let&apos;s do a quick review session 👇</>}
+                {view === 'games' && <>You picked arcade mode — load your notes into a game and start playing 👇</>}
+              </p>
+              <button
+                type="button"
+                onClick={() => setFirstRunNudge(null)}
+                aria-label="Dismiss"
+                className="shrink-0 inline-flex h-7 w-7 items-center justify-center rounded-lg text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200 hover:bg-white/60 dark:hover:bg-stone-800/60 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+          </div>
+        )}
         {view === 'hub' && (
           <DocumentsHub
             docs={docList}
@@ -3902,7 +4022,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
               tint={SIDEBAR_TOOLS.find((t) => t.view === 'citations')}
               mascotSrc="/mascot-pointing.webp"
             />
-            <CitationsPanel onNavigate={onNavigate} />
+            <CitationsPanel onNavigate={onNavigate} isPaid={isPaidPlan(user)} />
           </>
         )}
         {view === 'games' && (

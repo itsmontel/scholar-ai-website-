@@ -82,6 +82,49 @@ final class APIClient: @unchecked Sendable {
         return try await perform(request)
     }
 
+    /// Upload a single file (plus optional text fields) as multipart/form-data
+    /// and decode the envelope's `data` field as `T`. Used by document parsing
+    /// and photo OCR for study packs.
+    func upload<T: Decodable>(
+        path: String,
+        fileField: String,
+        fileName: String,
+        mimeType: String,
+        fileData: Data,
+        fields: [String: String] = [:],
+        requiresAuth: Bool = true
+    ) async throws -> T {
+        let url = APIConfig.baseURL.appendingPathComponent(path)
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.timeoutInterval = 90
+        let boundary = "WSBoundary-\(UUID().uuidString)"
+        req.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        req.setValue("application/json", forHTTPHeaderField: "Accept")
+        if requiresAuth, let token = authTokenProvider() {
+            req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+
+        var body = Data()
+        let lineBreak = "\r\n"
+        func append(_ s: String) { body.append(s.data(using: .utf8)!) }
+
+        for (key, value) in fields {
+            append("--\(boundary)\(lineBreak)")
+            append("Content-Disposition: form-data; name=\"\(key)\"\(lineBreak)\(lineBreak)")
+            append("\(value)\(lineBreak)")
+        }
+        append("--\(boundary)\(lineBreak)")
+        append("Content-Disposition: form-data; name=\"\(fileField)\"; filename=\"\(fileName)\"\(lineBreak)")
+        append("Content-Type: \(mimeType)\(lineBreak)\(lineBreak)")
+        body.append(fileData)
+        append(lineBreak)
+        append("--\(boundary)--\(lineBreak)")
+        req.httpBody = body
+
+        return try await perform(req)
+    }
+
     /// GET with query items — builds the URL via URLComponents so `?key=val`
     /// is preserved (appendingPathComponent would percent-encode the `?`).
     func get<T: Decodable>(path: String, query: [URLQueryItem], requiresAuth: Bool = false) async throws -> T {

@@ -1,4 +1,5 @@
 import React from 'react';
+import { FREE_PLAN_TERMS_BULLET } from '../../constants/freePlanCopy';
 import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
 
@@ -85,7 +86,7 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
             <div className="space-y-4 text-stone-600 dark:text-stone-400 leading-relaxed">
               <p>WriteScholar offers the following plans:</p>
               <ul className="list-disc list-inside space-y-2 ml-4">
-                <li><strong className="text-stone-700 dark:text-stone-300">Free</strong> — 3 documents per month, 2 AI essay analyses per month, 5,000 words/month for the Paper Summarizer, 2 study pack generations (lesson, flashcards & quiz — crossword, Crater Blast & Word Tower unlock with Pro), 2 citation searches per month, 2MB total document library storage</li>
+                <li><strong className="text-stone-700 dark:text-stone-300">Free</strong> — {FREE_PLAN_TERMS_BULLET}</li>
                 <li><strong className="text-stone-700 dark:text-stone-300">Pro ($19.99/month)</strong> — 99 combined actions per month (analyses, study packs & citations), 999,999 words/month for the Paper Summarizer; quiz, flashcards, crossword, Crater Blast & Word Tower with all types and difficulties; Focus Mode with unlimited blocked sites; document uploads up to 100MB per file; 100MB total library storage; full annotations and feedback; one-click Apply WriteScholar revisions into your draft</li>
                 <li><strong className="text-stone-700 dark:text-stone-300">Premium ($39.99/month)</strong> — everything in Pro with 5× usage (499 combined actions per month, unlimited research-paper summarisation) and 1GB total library storage</li>
               </ul>

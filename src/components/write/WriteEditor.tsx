@@ -789,7 +789,7 @@ function CitationInsertModal({ editor, onClose }: { editor: Editor; onClose: () 
         body: JSON.stringify({ researchTopic: t, citationStyle: style, numberOfCitations: 6 }),
       });
       const json = await res.json();
-      if (res.status === 429) { setErr(json?.message || "You've hit this month's citation searches. Upgrade for more."); return; }
+      if (res.status === 429) { setErr(json?.message || "You've hit your citation search limit. Upgrade for more."); return; }
       if (!res.ok || json?.success === false) throw new Error(json?.message || `Search failed (${res.status})`);
       const data = json?.data ?? json;
       setResults(Array.isArray(data?.citations) ? data.citations : []);

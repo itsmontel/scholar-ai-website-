@@ -176,7 +176,7 @@ export const PaywallDebugPanel: React.FC<PaywallDebugPanelProps> = ({ user, payw
       /* ignore */
     }
     setTick((n) => n + 1);
-    console.log('[paywall-debug] preview: DISCOUNT paywall (MAY2026 + Save badge + strike price)');
+    console.log('[paywall-debug] preview: DISCOUNT paywall (NEWCUSTOMER + Save badge + strike price)');
     window.setTimeout(() => {
       window.dispatchEvent(new CustomEvent('writescholar-open-paywall'));
     }, 50);
@@ -386,7 +386,7 @@ export const PaywallDebugPanel: React.FC<PaywallDebugPanelProps> = ({ user, payw
           valueClass={lastChanceShown ? 'text-[#FF4B4B]' : 'text-[#58CC02]'}
         />
         <Row
-          label="MAY2026 discount"
+          label="NEWCUSTOMER discount"
           value={welcomeDiscountConsumed ? 'consumed' : 'available'}
           valueClass={welcomeDiscountConsumed ? 'text-[#FF4B4B]' : 'text-[#58CC02]'}
         />
@@ -429,7 +429,7 @@ export const PaywallDebugPanel: React.FC<PaywallDebugPanelProps> = ({ user, payw
         <DebugBtn label="Reset cooldown" tone="violet" onClick={resetCooldown} />
         <DebugBtn label="Reset welcome" tone="blue" onClick={resetWelcomeToast} />
         <DebugBtn label="Reset last-chance" tone="orange" onClick={resetLastChance} />
-        <DebugBtn label="Reset MAY2026" tone="green" onClick={resetWelcomeDiscount} />
+        <DebugBtn label="Reset NEWCUSTOMER" tone="green" onClick={resetWelcomeDiscount} />
         <DebugBtn label="Reset first fired" tone="violet" onClick={resetFirstFired} />
         <DebugBtn label="Backdate onboarding -8d" tone="blue" onClick={backdateOnboarding} />
         <DebugBtn

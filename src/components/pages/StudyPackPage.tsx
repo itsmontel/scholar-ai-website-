@@ -5,7 +5,7 @@ import { trackStudyPackGenerated, getStats } from '../../data/achievements';
 import { trackEvent } from '../../utils/analytics';
 import { applyPageSeoTags, absoluteCanonicalUrl, injectJsonLd, removeJsonLd } from '../../utils/seo';
 import { ogImageUrlForPage } from '../../utils/ogImageUrls';
-import { getResetsInText } from '../../utils/usageReset';
+import { FREE_PREVIEW_LIFETIME_NOTE } from '../../utils/usageReset';
 import type { EmbeddedDashboardTool } from './CitationsPage';
 import AnalysisAnimation from '../common/AnalysisAnimation';
 import { StudyPackPreviewSection } from '../common/PreviewSections';
@@ -262,7 +262,7 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
       return;
     }
     if (quizExhausted) {
-      setStudyPackError("You've used all study pack generations this period. Upgrade for more.");
+      setStudyPackError("You've used your free study pack previews — they don't reset. Upgrade for more.");
       return;
     }
 
@@ -367,12 +367,12 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
         {quizExhausted && (
           <div className="mb-4 sm:mb-6 bg-[#FF9600] border-2 border-b-4 border-[#D97F00] rounded-xl p-4 sm:p-6 text-white text-center">
             <span className="text-3xl sm:text-4xl mb-2 sm:mb-3 block">🔒</span>
-            <h3 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2">Monthly Limit Reached</h3>
+            <h3 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2">Free Previews Used</h3>
             <p className="text-amber-100 dark:text-amber-100/90 mb-1 text-sm sm:text-base">
-              You&apos;ve used all {quizUsage.generationLimit} study pack generations this period. Upgrade for more!
+              You&apos;ve used your {quizUsage.generationLimit} free study pack previews. Upgrade to keep making them!
             </p>
             <p className="text-amber-200/90 text-xs sm:text-sm mb-3 sm:mb-4">
-              {getResetsInText(usageStats.daysUntilReset ?? quizUsage.daysUntilReset)}
+              {FREE_PREVIEW_LIFETIME_NOTE}
             </p>
             <button
               type="button"
@@ -392,10 +392,10 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                 <p className="text-[#FF9600] font-extrabold text-xs sm:text-sm">
                   Free: {quizUsage.generationsRemaining}/{quizUsage.generationLimit} study packs •{' '}
                   {(quizUsage.maxWordsPerGeneration || 5000).toLocaleString()} words max •{' '}
-                  {getResetsInText(usageStats.daysUntilReset ?? quizUsage.daysUntilReset)}
+                  {FREE_PREVIEW_LIFETIME_NOTE}
                 </p>
                 <p className="text-amber-600 dark:text-amber-400 text-[10px] sm:text-xs mt-0.5 line-clamp-2">
-                  Lesson, flashcards & quiz included • Crossword, Crater Blast & Word Tower unlock with Pro
+                  Free preview: lesson + 4 flashcards • Quiz, games & full deck unlock with Pro
                 </p>
               </div>
             </div>

@@ -11,6 +11,16 @@
 
 import Foundation
 
+/// A study pack pulled from the website/desktop account, carrying both the
+/// metadata for the Library row and the full playable pack so the games,
+/// quiz, flashcards and lesson all work offline once synced.
+struct SyncedStudyPack: Sendable {
+    let serverID: String
+    let title: String
+    let createdAt: Date
+    let pack: StudyPack
+}
+
 enum LibraryAPI {
 
     /// Fetches the user's documents (essays, uploads, drafts) and maps them to
@@ -26,6 +36,73 @@ enum LibraryAPI {
             requiresAuth: true
         )
         return resp.documents.map { $0.toLibraryItem() }
+    }
+
+    /// Fetches the user's saved study packs (created on web/desktop or any
+    /// device) from the shared quiz-history endpoint and decodes the full
+    /// pack for each so they're immediately playable after a sync.
+    static func fetchStudyPacks(limit: Int = 100) async throws -> [SyncedStudyPack] {
+        let rows: [QuizHistoryItemDTO] = try await APIClient.shared.get(
+            path: "analysis/quiz-history",
+            query: [URLQueryItem(name: "limit", value: "\(limit)")],
+            requiresAuth: true
+        )
+        return rows.compactMap { row in
+            guard row.quizType == "study_pack", let pack = row.pack else { return nil }
+            return SyncedStudyPack(
+                serverID: row.id,
+                title: (row.title?.isEmpty == false ? row.title! : pack.displayTitle),
+                createdAt: parseISODate(row.createdAt) ?? Date(),
+                pack: pack
+            )
+        }
+    }
+
+    // MARK: - Quiz history DTO
+
+    /// One row from GET /api/analysis/quiz-history. Only study-pack rows carry
+    /// a decodable `pack`; other rows (lessons / standalone quizzes) leave it
+    /// nil so the array still decodes cleanly.
+    private struct QuizHistoryItemDTO: Decodable {
+        let id: String
+        let title: String?
+        let quizType: String?
+        let createdAt: String?
+        let pack: StudyPack?
+
+        enum CodingKeys: String, CodingKey {
+            case id, title, questions
+            case quizType = "quiz_type"
+            case createdAt = "created_at"
+        }
+
+        init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            if let s = try? c.decode(String.self, forKey: .id) {
+                id = s
+            } else if let i = try? c.decode(Int.self, forKey: .id) {
+                id = String(i)
+            } else {
+                id = UUID().uuidString
+            }
+            title = try? c.decode(String.self, forKey: .title)
+            quizType = try? c.decode(String.self, forKey: .quizType)
+            createdAt = try? c.decode(String.self, forKey: .createdAt)
+            if quizType == "study_pack" {
+                pack = try? c.decode(StudyPack.self, forKey: .questions)
+            } else {
+                pack = nil
+            }
+        }
+    }
+
+    private static func parseISODate(_ s: String?) -> Date? {
+        guard let s, !s.isEmpty else { return nil }
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let d = f.date(from: s) { return d }
+        f.formatOptions = [.withInternetDateTime]
+        return f.date(from: s)
     }
 
     // MARK: - DTOs

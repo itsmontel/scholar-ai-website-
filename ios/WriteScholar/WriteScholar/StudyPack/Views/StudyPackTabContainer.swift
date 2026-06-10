@@ -21,7 +21,7 @@ struct StudyPackTabContainer: View {
                     .transition(.opacity)
 
             case .generating:
-                StudyPackGeneratingView()
+                StudyPackGeneratingView(statusText: coordinator.statusText)
                     .transition(.opacity)
 
             case .home(let pack):

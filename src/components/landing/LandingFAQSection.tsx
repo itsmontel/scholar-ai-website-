@@ -1,5 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { HIDE_FRIENDS } from '../../config/featureFlags';
+import {
+  FREE_PLAN_FAQ_ANALYSIS_TIMING,
+  FREE_PLAN_FAQ_PLAN_COMPARE,
+  FREE_PLAN_FAQ_STUDY_TOOLS,
+} from '../../constants/freePlanCopy';
 import LandingScrollReveal from './LandingScrollReveal';
 import LandingSectionBackdrop from './LandingSectionBackdrop';
 
@@ -37,12 +42,12 @@ const LANDING_FAQ_ITEMS: { question: string; answer: string }[] = [
   {
     question: 'How long does an analysis take?',
     answer:
-      'Usually under 60 seconds. Write or paste your essay, hit Analyze, and you get the rubric, the estimated grade and a ranked fix list. The free plan includes 2 analyses a month.',
+      FREE_PLAN_FAQ_ANALYSIS_TIMING,
   },
   {
     question: 'Can I also turn my notes into study tools?',
     answer:
-      'Yes. Alongside the writing workspace, Study Pack turns any notes into flashcards, quizzes, crosswords and arcade mode. Free users get lessons and flashcards; the rest unlocks with Pro.',
+      FREE_PLAN_FAQ_STUDY_TOOLS,
   },
   {
     question: 'What citation styles are supported?',
@@ -57,7 +62,7 @@ const LANDING_FAQ_ITEMS: { question: string; answer: string }[] = [
   {
     question: "What's the difference between Free, Pro and Premium?",
     answer:
-      'Free: 3 documents, 2 analyses and 2 study packs a month. Pro: 99 combined analyses, study packs and citations a month, apply WriteScholar revisions into your draft, all citation styles, PDF and Word export, uploads up to 100MB, and the full study tools. Premium: 5x the Pro usage at 499 actions a month, unlimited research-paper summarising, and 1GB of library storage.',
+      FREE_PLAN_FAQ_PLAN_COMPARE,
   },
   {
     question: 'How do I add friends and share my study materials?',

@@ -7,7 +7,7 @@ import { logger } from '../utils/logger';
 // the race condition where a conversion event could be queued in dataLayer
 // but lost if the user navigated away before gtag.js finished loading.
 import { trackSignupConversion, trackPaidConversion } from '../utils/gtag';
-import { HIDE_FRIENDS, HIDE_STREAK_AND_BADGES } from '../config/featureFlags';
+import { HIDE_FRIENDS, HIDE_STREAK_AND_BADGES, FREEMIUM_PREVIEW } from '../config/featureFlags';
 import { persistOnboardingToServer, persistTutorialToServer } from '../utils/onboarding';
 import { trackEvent } from '../utils/analytics';
 import { lazyWithRetry } from '../utils/lazyWithRetry';
@@ -122,6 +122,7 @@ import {
   POST_ACTIVATION_PAYWALL_PENDING_KEY,
   SOFT_PAYWALL_OPEN_KEY,
   SOFT_PAYWALL_DISMISSED_KEY,
+  EMAIL_UPGRADE_PENDING_KEY,
   STRIPE_CANCEL_TRIAL_MODAL_PENDING_KEY,
   TUTORIAL_CHECKOUT_CANCEL_MODAL_RESOLVED_KEY,
   TUTORIAL_CHECKOUT_CANCEL_MODAL_SEEN_KEY,
@@ -660,7 +661,7 @@ const AcademicAIApp = () => {
   }, []);
 
   useEffect(() => {
-    const onOpenPaywall = () => {
+    const onOpenPaywall = (e: Event) => {
       // Trial-gated (free, never-trialed) users get the full-page hard
       // paywall instead of the soft modal — any gated action that hits a
       // 403/upgrade response routes here.
@@ -668,19 +669,26 @@ const AcademicAIApp = () => {
         setTrialGateOpen(true);
         return;
       }
+      // force=true ⇒ user-initiated (limit hit / locked-content click):
+      // always show — the cooldown only protects against unprompted nags.
+      const detail = (e as CustomEvent).detail as { force?: boolean; trigger?: string } | undefined;
+      const force = detail?.force === true;
+      const paywallTrigger = detail?.trigger;
       // [soft-paywall-debug] Temporary trace — see comment at
       // handleOnboardingComplete dispatch site.
-      console.log('[soft-paywall] listener invoked');
+      console.log('[soft-paywall] listener invoked', force ? '(forced — user action)' : '', paywallTrigger || '');
       try {
-        // If user already dismissed the soft paywall this session, don't re-open it
-        if (sessionStorage.getItem(SOFT_PAYWALL_DISMISSED_KEY) === '1') {
-          console.log('[soft-paywall] silent: SOFT_PAYWALL_DISMISSED_KEY=1 (dismissed this session)');
-          return;
-        }
-        // Weekly cooldown — silent if dismissed within the last 7 days.
-        if (isSoftPaywallOnCooldown()) {
-          console.log('[soft-paywall] silent: weekly cooldown active (clear localStorage.writescholar_soft_paywall_dismissed_at to reset)');
-          return;
+        if (!force) {
+          // If user already dismissed the soft paywall this session, don't re-open it
+          if (sessionStorage.getItem(SOFT_PAYWALL_DISMISSED_KEY) === '1') {
+            console.log('[soft-paywall] silent: SOFT_PAYWALL_DISMISSED_KEY=1 (dismissed this session)');
+            return;
+          }
+          // Weekly cooldown — silent if dismissed within the last 7 days.
+          if (isSoftPaywallOnCooldown()) {
+            console.log('[soft-paywall] silent: weekly cooldown active (clear localStorage.writescholar_soft_paywall_dismissed_at to reset)');
+            return;
+          }
         }
         sessionStorage.setItem(SOFT_PAYWALL_OPEN_KEY, '1');
       } catch {
@@ -688,11 +696,62 @@ const AcademicAIApp = () => {
       }
       console.log('[soft-paywall] setApiLimitPaywallOpen(true) — paywall should now render');
       setApiLimitPaywallOpen(true);
-      trackEvent('paywall_view', { trigger: 'api_limit_or_upgrade' });
+      trackEvent('paywall_view', {
+        trigger: paywallTrigger || (force ? 'limit_hit_user_action' : 'api_limit_or_upgrade'),
+      });
     };
     window.addEventListener('writescholar-open-paywall', onOpenPaywall);
     return () => window.removeEventListener('writescholar-open-paywall', onOpenPaywall);
   }, []);
+
+  // Preview follow-up email CTA: /dashboard?upgrade=1 → stash intent, strip
+  // param, open soft paywall once the user is logged in on the dashboard.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('upgrade') !== '1') return;
+    try {
+      sessionStorage.setItem(EMAIL_UPGRADE_PENDING_KEY, '1');
+    } catch {
+      /* ignore */
+    }
+    params.delete('upgrade');
+    const qs = params.toString();
+    const clean = window.location.pathname + (qs ? `?${qs}` : '');
+    window.history.replaceState(null, '', clean);
+  }, []);
+
+  useEffect(() => {
+    if (!isLoggedIn || !user?.id) return;
+    const plan = (user.plan || 'free').toLowerCase();
+    if (plan === 'pro' || plan === 'premium') {
+      try {
+        sessionStorage.removeItem(EMAIL_UPGRADE_PENDING_KEY);
+      } catch {
+        /* ignore */
+      }
+      return;
+    }
+    if (!user.onboardingCompleted) return;
+    try {
+      if (sessionStorage.getItem(EMAIL_UPGRADE_PENDING_KEY) !== '1') return;
+      sessionStorage.removeItem(EMAIL_UPGRADE_PENDING_KEY);
+    } catch {
+      return;
+    }
+
+    setCurrentPage('dashboard');
+    window.history.replaceState(null, '', '/dashboard');
+    trackEvent('upgrade_clicked', { source: 'email_followup' });
+
+    const t = window.setTimeout(() => {
+      window.dispatchEvent(
+        new CustomEvent('writescholar-open-paywall', {
+          detail: { force: true, trigger: 'email_followup' },
+        })
+      );
+    }, 300);
+    return () => window.clearTimeout(t);
+  }, [isLoggedIn, user?.id, user?.plan, user?.onboardingCompleted]);
 
   /** Restore soft paywall after refresh if user is still on Free and did not dismiss */
   useEffect(() => {
@@ -859,7 +918,11 @@ const AcademicAIApp = () => {
               data?.usage &&
               typeof (data.usage as { limit?: unknown }).limit === 'number');
           if (open) {
-            window.dispatchEvent(new CustomEvent('writescholar-open-paywall'));
+            // force: a 403/429 limit response is always the direct result of
+            // a user action (they clicked Analyze / Generate / Search) —
+            // that's peak motivation, so the paywall must show even during
+            // the weekly cooldown or after a same-session dismissal.
+            window.dispatchEvent(new CustomEvent('writescholar-open-paywall', { detail: { force: true } }));
           }
         })
         .catch(() => {
@@ -1064,6 +1127,7 @@ const AcademicAIApp = () => {
       sessionStorage.removeItem(LAST_TUTORIAL_CHECKOUT_PLAN_KEY);
       sessionStorage.removeItem(SOFT_PAYWALL_OPEN_KEY);
       sessionStorage.removeItem(SOFT_PAYWALL_DISMISSED_KEY);
+      sessionStorage.removeItem(EMAIL_UPGRADE_PENDING_KEY);
       sessionStorage.removeItem(POST_ACTIVATION_PAYWALL_PENDING_KEY);
       sessionStorage.removeItem(STRIPE_CANCEL_TRIAL_MODAL_PENDING_KEY);
     } catch {
@@ -1251,7 +1315,12 @@ const AcademicAIApp = () => {
   // already ends at the same hard paywall.
   const planLower = (user?.plan || user?.subscription_plan || 'free').toLowerCase();
   const isPaidPlan = planLower === 'pro' || planLower === 'premium';
+  // In FREEMIUM_PREVIEW mode the hard trial gate is OFF: new free users reach
+  // the real tools and run them on their own input, hitting the soft paywall
+  // only when they want the full payoff (or exceed the free preview quota).
+  // Flip FREEMIUM_PREVIEW to false to restore the old block-everything gate.
   const mustStartTrial =
+    !FREEMIUM_PREVIEW &&
     isLoggedIn && !!user?.id && !isPaidPlan && trialEligible === true && !sawStripeSuccessOnLoad;
   // Only brand-new users get the full onboarding takeover. Free, never-
   // trialed users who already finished onboarding now land on the REAL
