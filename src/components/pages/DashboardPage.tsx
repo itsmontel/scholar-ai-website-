@@ -17,7 +17,11 @@ import { ACTIVATION_MOCK_ESSAY_BODY } from '../../data/activationTutorialMock';
 import { trackAction, syncFromAPIData, trackExport, trackCopy, trackStudyPackGenerated, getStats } from '../../data/achievements';
 import { getResetsInText, getExpiringSoonCount, getExpiringSoonUrgencyText, getDaysUntilExpiration } from '../../utils/usageReset';
 import { trackEvent } from '../../utils/analytics';
-import { ONBOARDING_COMPLETED_AT_KEY, FIRST_RUN_FAST_PATH_DONE_KEY } from '../../constants/paywallSession';
+import {
+  getOnboardingCompletedAt,
+  isFirstRunFastPathDone,
+  markFirstRunFastPathDone,
+} from '../../constants/paywallSession';
 import FocusModeSettingsSection from '../common/FocusModeSettingsSection';
 import { FOCUS_MODE_COMING_SOON, FOCUS_MODE_CHROME_EXTENSION_URL } from '../../constants/focusMode';
 import { HIDE_FRIENDS, HIDE_STREAK_AND_BADGES } from '../../config/featureFlags';
@@ -439,12 +443,13 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
   // only fires within 10 minutes of onboarding so returning users are never
   // yanked around.
   useEffect(() => {
-    if (!showFirstAnalysisOnboarding || isActivationDashboardTutorial) return;
+    const userId = user?.id;
+    if (!userId || !showFirstAnalysisOnboarding || isActivationDashboardTutorial) return;
     try {
-      if (localStorage.getItem(FIRST_RUN_FAST_PATH_DONE_KEY) === '1') return;
-      const completedAt = Number(localStorage.getItem(ONBOARDING_COMPLETED_AT_KEY) || 0);
+      if (isFirstRunFastPathDone(userId)) return;
+      const completedAt = getOnboardingCompletedAt(userId);
       if (!completedAt || Date.now() - completedAt > 10 * 60 * 1000) return;
-      localStorage.setItem(FIRST_RUN_FAST_PATH_DONE_KEY, '1');
+      markFirstRunFastPathDone(userId);
     } catch {
       return;
     }
@@ -458,8 +463,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
         .querySelector<HTMLTextAreaElement>('textarea[data-tutorial-target="essay-input-wrapper"]')
         ?.focus({ preventScroll: true });
     }, 450);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showFirstAnalysisOnboarding, isActivationDashboardTutorial]);
+  }, [user?.id, showFirstAnalysisOnboarding, isActivationDashboardTutorial]);
 
   const analyzePlaceholders = [
     "Paste your essay or research paper here...",

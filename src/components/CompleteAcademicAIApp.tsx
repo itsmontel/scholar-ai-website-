@@ -118,7 +118,8 @@ import {
   CHECKOUT_FROM_TUTORIAL_PAYWALL_KEY,
   LAST_TUTORIAL_CHECKOUT_PLAN_KEY,
   MANDATORY_CHECKOUT_PENDING_KEY,
-  ONBOARDING_COMPLETED_AT_KEY,
+  stampOnboardingCompletedAt,
+  getOnboardingCompletedAt,
   POST_ACTIVATION_PAYWALL_PENDING_KEY,
   SOFT_PAYWALL_OPEN_KEY,
   SOFT_PAYWALL_DISMISSED_KEY,
@@ -1156,12 +1157,8 @@ const AcademicAIApp = () => {
     // decide when to fire the first soft paywall — either when the user
     // creates their first analysis / study pack, or, as a fallback, 7
     // days after this timestamp. No paywall dispatch here.
-    try {
-      if (!localStorage.getItem(ONBOARDING_COMPLETED_AT_KEY)) {
-        localStorage.setItem(ONBOARDING_COMPLETED_AT_KEY, String(Date.now()));
-      }
-    } catch {
-      /* ignore */
+    if (user?.id) {
+      stampOnboardingCompletedAt(user.id);
     }
 
     // Drop the user straight onto the real dashboard. Free, never-trialed
@@ -1385,8 +1382,8 @@ const AcademicAIApp = () => {
         setUser(refreshed);
         try { localStorage.setItem('user', JSON.stringify(refreshed)); } catch { /* ignore */ }
         try {
-          if (!localStorage.getItem(ONBOARDING_COMPLETED_AT_KEY)) {
-            localStorage.setItem(ONBOARDING_COMPLETED_AT_KEY, String(Date.now()));
+          if (refreshed.id && !getOnboardingCompletedAt(refreshed.id)) {
+            stampOnboardingCompletedAt(refreshed.id);
           }
         } catch { /* ignore */ }
       } catch (e) {

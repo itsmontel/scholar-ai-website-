@@ -7,7 +7,9 @@ import {
   LAST_CHANCE_PAYWALL_SHOWN_KEY,
   FIRST_PAYWALL_DISCOUNT_SHOWN_KEY,
   FIRST_SOFT_PAYWALL_FIRED_KEY,
-  ONBOARDING_COMPLETED_AT_KEY,
+  onboardingCompletedAtKey,
+  firstRunFastPathDoneKey,
+  getOnboardingCompletedAt,
   POST_ONBOARDING_PAYWALL_FALLBACK_MS,
   isSoftPaywallOnCooldown,
 } from '../../constants/paywallSession';
@@ -147,9 +149,10 @@ export const PaywallDebugPanel: React.FC<PaywallDebugPanelProps> = ({ user, payw
   };
 
   const backdateOnboarding = () => {
+    if (!user?.id) return;
     try {
       const eightDaysAgo = Date.now() - 8 * 24 * 60 * 60 * 1000;
-      localStorage.setItem(ONBOARDING_COMPLETED_AT_KEY, String(eightDaysAgo));
+      localStorage.setItem(onboardingCompletedAtKey(user.id), String(eightDaysAgo));
       // Also clear the one-shot fired flag so the 7-day fallback can fire.
       localStorage.removeItem(FIRST_SOFT_PAYWALL_FIRED_KEY);
     } catch {
@@ -242,7 +245,10 @@ export const PaywallDebugPanel: React.FC<PaywallDebugPanelProps> = ({ user, payw
         localStorage.removeItem(LAST_CHANCE_PAYWALL_SHOWN_KEY);
         localStorage.removeItem(FIRST_PAYWALL_DISCOUNT_SHOWN_KEY);
         localStorage.removeItem(FIRST_SOFT_PAYWALL_FIRED_KEY);
-        localStorage.removeItem(ONBOARDING_COMPLETED_AT_KEY);
+        if (parsed.id) {
+          localStorage.removeItem(onboardingCompletedAtKey(parsed.id));
+          localStorage.removeItem(firstRunFastPathDoneKey(parsed.id));
+        }
       } catch {
         /* ignore */
       }
@@ -291,8 +297,7 @@ export const PaywallDebugPanel: React.FC<PaywallDebugPanelProps> = ({ user, payw
     lastChanceShown = localStorage.getItem(LAST_CHANCE_PAYWALL_SHOWN_KEY) === '1';
     welcomeDiscountConsumed = localStorage.getItem(FIRST_PAYWALL_DISCOUNT_SHOWN_KEY) === '1';
     firstFired = localStorage.getItem(FIRST_SOFT_PAYWALL_FIRED_KEY) === '1';
-    const rawOnboarded = localStorage.getItem(ONBOARDING_COMPLETED_AT_KEY);
-    if (rawOnboarded) onboardedAt = Number(rawOnboarded) || 0;
+    onboardedAt = user?.id ? getOnboardingCompletedAt(user.id) : 0;
   } catch {
     /* ignore */
   }

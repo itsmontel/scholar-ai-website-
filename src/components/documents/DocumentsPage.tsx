@@ -20,7 +20,11 @@ import DashboardTopBar from '../common/DashboardTopBar';
 import { consumePendingWorkspaceView, WS_SWITCH_VIEW_EVENT } from '../workspace/workspaceNavigate';
 import { trackEvent } from '../../utils/analytics';
 import { openUpgradePaywall } from '../../utils/paywall';
-import { ONBOARDING_COMPLETED_AT_KEY, FIRST_RUN_FAST_PATH_DONE_KEY } from '../../constants/paywallSession';
+import {
+  getOnboardingCompletedAt,
+  isFirstRunFastPathDone,
+  markFirstRunFastPathDone,
+} from '../../constants/paywallSession';
 import { getPrimaryFeatureInterest, INTEREST_TO_VIEW } from '../../utils/featureInterests';
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1019,7 +1023,7 @@ function DocumentsHub({
   // permanent counterpart to the one-shot first-run fast path. Not
   // memoized: PICK_TOOLS closes over per-render handlers, and sorting a
   // 3-element array is free.
-  const primaryInterest = getPrimaryFeatureInterest();
+  const primaryInterest = getPrimaryFeatureInterest(user?.id);
   const pickToolsFirstKey = primaryInterest === 'study_packs' ? 'pack' : primaryInterest === 'games' ? 'games' : 'editor';
   const pickTools = [...PICK_TOOLS].sort(
     (a, b) => (a.key === pickToolsFirstKey ? -1 : 0) - (b.key === pickToolsFirstKey ? -1 : 0)
@@ -2668,24 +2672,24 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
   // returning users are never yanked around.
   const [firstRunNudge, setFirstRunNudge] = useState<WorkspaceView | null>(null);
   useEffect(() => {
-    if (initialDocumentId || trialGated) return;
+    const userId = user?.id;
+    if (!userId || initialDocumentId || trialGated) return;
     try {
-      if (localStorage.getItem(FIRST_RUN_FAST_PATH_DONE_KEY) === '1') return;
-      const completedAt = Number(localStorage.getItem(ONBOARDING_COMPLETED_AT_KEY) || 0);
+      if (isFirstRunFastPathDone(userId)) return;
+      const completedAt = getOnboardingCompletedAt(userId);
       if (!completedAt || Date.now() - completedAt > 10 * 60 * 1000) return;
-      localStorage.setItem(FIRST_RUN_FAST_PATH_DONE_KEY, '1');
+      markFirstRunFastPathDone(userId);
     } catch {
       return;
     }
-    const interest = getPrimaryFeatureInterest();
+    const interest = getPrimaryFeatureInterest(userId);
     // Default to analyze — the strongest preview → upgrade loop — when
     // the user skipped the survey or picked nothing.
     const target: WorkspaceView = interest ? INTEREST_TO_VIEW[interest] : 'analyze';
     setView(target);
     setFirstRunNudge(target);
     trackEvent('first_action_prompt_cta_click', { cta: 'auto_fast_path', view: target, interest: interest || 'none' });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialDocumentId, trialGated]);
+  }, [user?.id, initialDocumentId, trialGated]);
 
   // Listen for direct view-switch events fired by navigateWorkspaceView
   // when DocumentsPage is already mounted (e.g. "Start review" popup

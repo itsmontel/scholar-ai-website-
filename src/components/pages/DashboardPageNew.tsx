@@ -25,7 +25,7 @@ import {
   type Badge,
 } from '../../data/achievements';
 import {
-  ONBOARDING_COMPLETED_AT_KEY,
+  getOnboardingCompletedAt,
   FIRST_SOFT_PAYWALL_FIRED_KEY,
   POST_ONBOARDING_PAYWALL_FALLBACK_MS,
   SOFT_PAYWALL_OPEN_KEY,
@@ -591,9 +591,8 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
 
     let sevenDaysElapsed = false;
     try {
-      const raw = localStorage.getItem(ONBOARDING_COMPLETED_AT_KEY);
-      const ts = raw ? Number(raw) : 0;
-      if (Number.isFinite(ts) && ts > 0) {
+      const ts = user?.id ? getOnboardingCompletedAt(user.id) : 0;
+      if (ts > 0) {
         sevenDaysElapsed = Date.now() - ts >= POST_ONBOARDING_PAYWALL_FALLBACK_MS;
       }
     } catch {

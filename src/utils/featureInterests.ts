@@ -2,9 +2,9 @@ import type { WorkspaceView } from '../components/workspace/types';
 
 /**
  * Onboarding "what excites you most?" survey picks, persisted locally so
- * the dashboard can personalize the first-run experience. The same
- * answers also POST to /users/onboarding-survey for analytics — this
- * copy exists because the dashboard needs them synchronously on mount.
+ * the dashboard can personalize the first-run experience. Scoped per user
+ * so shared browsers don't route account B using account A's picks.
+ * The same answers also POST to /users/onboarding-survey for analytics.
  */
 export const FEATURE_INTERESTS_KEY = 'writescholar_feature_interests';
 
@@ -26,17 +26,23 @@ export const INTEREST_TO_VIEW: Record<FeatureInterest, WorkspaceView> = {
   games: 'games',
 };
 
-export function saveFeatureInterests(ids: string[]) {
+export function featureInterestsKey(userId: string): string {
+  return `${FEATURE_INTERESTS_KEY}_${userId}`;
+}
+
+export function saveFeatureInterests(userId: string, ids: string[]) {
+  if (!userId) return;
   try {
-    localStorage.setItem(FEATURE_INTERESTS_KEY, JSON.stringify(ids));
+    localStorage.setItem(featureInterestsKey(userId), JSON.stringify(ids));
   } catch {
     /* ignore */
   }
 }
 
-export function getFeatureInterests(): string[] {
+export function getFeatureInterests(userId?: string): string[] {
+  if (!userId) return [];
   try {
-    const raw = localStorage.getItem(FEATURE_INTERESTS_KEY);
+    const raw = localStorage.getItem(featureInterestsKey(userId));
     const parsed = raw ? JSON.parse(raw) : null;
     return Array.isArray(parsed) ? parsed.filter((v): v is string => typeof v === 'string') : [];
   } catch {
@@ -45,7 +51,7 @@ export function getFeatureInterests(): string[] {
 }
 
 /** Highest-priority feature the user picked, or null if none stored. */
-export function getPrimaryFeatureInterest(): FeatureInterest | null {
-  const picks = getFeatureInterests();
+export function getPrimaryFeatureInterest(userId?: string): FeatureInterest | null {
+  const picks = getFeatureInterests(userId);
   return INTEREST_PRIORITY.find((id) => picks.includes(id)) ?? null;
 }

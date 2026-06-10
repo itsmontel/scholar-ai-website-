@@ -1377,7 +1377,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
     setSurveySaving(false);
     // Persist the picks locally so the dashboard's first-run fast path
     // can route the user straight to the feature they said they wanted.
-    if (!testMode) saveFeatureInterests(featureInterests);
+    if (!testMode && user?.id) saveFeatureInterests(user.id, featureInterests);
     trackEvent('onboarding_survey_complete', { source: referralSource, features: featureInterests.join(',') });
     // Jump to the FIRST slide in their personalised tour (essays if
     // selected, otherwise the highest-priority feature they picked).

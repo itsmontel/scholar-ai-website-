@@ -128,6 +128,55 @@ export const POST_ONBOARDING_PAYWALL_FALLBACK_MS = 7 * 24 * 60 * 60 * 1000;
  */
 export const FIRST_RUN_FAST_PATH_DONE_KEY = 'writescholar_first_run_fast_path_done';
 
+/** Per-user key — shared browsers must not block a new account's fast path. */
+export function onboardingCompletedAtKey(userId: string): string {
+  return `${ONBOARDING_COMPLETED_AT_KEY}_${userId}`;
+}
+
+export function firstRunFastPathDoneKey(userId: string): string {
+  return `${FIRST_RUN_FAST_PATH_DONE_KEY}_${userId}`;
+}
+
+/** Record (or refresh) when this user finished onboarding. Always overwrites
+ *  so re-onboarding or a second account on the same browser gets a fresh
+ *  10-minute fast-path window. */
+export function stampOnboardingCompletedAt(userId: string): void {
+  if (!userId) return;
+  try {
+    localStorage.setItem(onboardingCompletedAtKey(userId), String(Date.now()));
+  } catch {
+    /* ignore */
+  }
+}
+
+export function getOnboardingCompletedAt(userId: string): number {
+  if (!userId) return 0;
+  try {
+    const ts = Number(localStorage.getItem(onboardingCompletedAtKey(userId)) || 0);
+    return Number.isFinite(ts) && ts > 0 ? ts : 0;
+  } catch {
+    return 0;
+  }
+}
+
+export function isFirstRunFastPathDone(userId: string): boolean {
+  if (!userId) return true;
+  try {
+    return localStorage.getItem(firstRunFastPathDoneKey(userId)) === '1';
+  } catch {
+    return true;
+  }
+}
+
+export function markFirstRunFastPathDone(userId: string): void {
+  if (!userId) return;
+  try {
+    localStorage.setItem(firstRunFastPathDoneKey(userId), '1');
+  } catch {
+    /* ignore */
+  }
+}
+
 /**
  * sessionStorage: set when the user lands via /dashboard?upgrade=1
  * (preview follow-up email CTA). Survives the login redirect so the
