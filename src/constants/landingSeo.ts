@@ -21,4 +21,4 @@ export const LANDING_PAGE_TITLE =
   "AI Essay Grader — Turn B Essays Into A's | WriteScholar";
 
 export const LANDING_META_DESCRIPTION =
-  "Write your essay in a real editor and get a professor-style grade, a full rubric, and line-by-line fixes you apply in one click. Free to try.";
+  "Write your essay in a real editor and get a professor-style grade, a full rubric, and one-click fixes. Preview free — first month of Pro is $9.99.";

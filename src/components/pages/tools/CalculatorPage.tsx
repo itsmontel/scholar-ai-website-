@@ -4,6 +4,7 @@ import Footer from '../../common/Footer';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 import ToolPageSeoContent from '../../common/ToolPageSeoContent';
 import { calcSeo } from '../../../data/toolSeoContent';
+import { TOOL_SEO_META } from '../../../constants/toolSeoMeta';
 
 interface CalculatorPageProps {
   onNavigate: (page: string) => void;
@@ -68,8 +69,7 @@ const CalculatorPage = ({ onNavigate, user, onLogout }: CalculatorPageProps) => 
 
   useEffect(() => {
     applyPageSeoTags({
-      title: 'Free Scientific Calculator – Trig, Log, Powers | WriteScholar',
-      description: 'Free online scientific calculator for students. Trigonometry (sin, cos, tan), logarithms, square root, powers, and more. Works in degrees or radians. No signup required.',
+      ...TOOL_SEO_META.calculator,
     });
     injectToolProductSchema({
       name: 'Scientific Calculator',

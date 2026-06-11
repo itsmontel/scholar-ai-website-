@@ -5,6 +5,7 @@ import ScholarMascot from '../../common/ScholarMascot';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 import ToolPageSeoContent from '../../common/ToolPageSeoContent';
 import { thesisGenSeo } from '../../../data/toolSeoContent';
+import { TOOL_SEO_META } from '../../../constants/toolSeoMeta';
 
 interface ThesisGeneratorPageProps {
   onNavigate: (page: string) => void;
@@ -29,8 +30,7 @@ const ThesisGeneratorPage = ({ onNavigate, user, onLogout }: ThesisGeneratorPage
   // SEO: per-route title, description, canonical, OG, Twitter, plus tool schema.
   useEffect(() => {
     applyPageSeoTags({
-      title: 'Free Thesis Statement Generator - Create Strong Arguments | WriteScholar',
-      description: 'Free thesis statement generator. Create strong thesis statements for argumentative, expository, and analytical essays. Get instant results with no signup required.',
+      ...TOOL_SEO_META['thesis-generator'],
     });
     injectToolProductSchema({
       name: 'Thesis Statement Generator',

@@ -5,6 +5,7 @@ import ScholarMascot from '../../common/ScholarMascot';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 import ToolPageSeoContent from '../../common/ToolPageSeoContent';
 import { essayOutlineSeo } from '../../../data/toolSeoContent';
+import { TOOL_SEO_META } from '../../../constants/toolSeoMeta';
 
 interface EssayOutlineGeneratorPageProps {
   onNavigate: (page: string) => void;
@@ -31,8 +32,7 @@ const EssayOutlineGeneratorPage = ({ onNavigate, user, onLogout }: EssayOutlineG
   // SEO: per-route title, description, canonical, OG, Twitter, plus tool schema.
   useEffect(() => {
     applyPageSeoTags({
-      title: 'Free Essay Outline Generator - Structure Your Essay | WriteScholar',
-      description: 'Free essay outline generator. Create organized outlines for argumentative, expository, narrative, and research essays. Get a structured template instantly. No signup required.',
+      ...TOOL_SEO_META['essay-outline'],
     });
     injectToolProductSchema({
       name: 'Essay Outline Generator',

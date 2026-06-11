@@ -7,6 +7,7 @@ import { CRATER_BLAST_MENTAL_MATH_BANK } from '../../../data/craterBlastMentalMa
 import { buildCapitalQuestions, buildCapitalAnswers } from '../../../data/craterBlastCapitalCitiesBank';
 import { buildFlagQuestions, buildFlagAnswers } from '../../../data/craterBlastFlagsBank';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
+import { TOOL_SEO_META } from '../../../constants/toolSeoMeta';
 import { trackCraterBlastGame } from '../../../data/achievements';
 
 /* ────────────────────── Types ────────────────────── */
@@ -170,8 +171,7 @@ const LightningReflexQuizPage = ({ onNavigate, user, onLogout }: LightningReflex
 
   useEffect(() => {
     applyPageSeoTags({
-      title: 'Crater Blast — AI Quiz Arcade Game | WriteScholar',
-      description: 'Crater Blast — the AI-powered quiz shooter. Blast the correct falling crater before it lands. Build streaks, beat your high score!',
+      ...TOOL_SEO_META['crater-blast'],
     });
     injectToolProductSchema({
       name: 'Crater Blast',

@@ -5,6 +5,7 @@ import ScholarMascot from '../../common/ScholarMascot';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 import ToolPageSeoContent from '../../common/ToolPageSeoContent';
 import { readabilitySeo } from '../../../data/toolSeoContent';
+import { TOOL_SEO_META } from '../../../constants/toolSeoMeta';
 
 interface ReadabilityScorePageProps {
   onNavigate: (page: string) => void;
@@ -40,8 +41,7 @@ const ReadabilityScorePage = ({ onNavigate, user, onLogout }: ReadabilityScorePa
   // SEO: per-route title, description, canonical, OG, Twitter, plus tool schema.
   useEffect(() => {
     applyPageSeoTags({
-      title: 'Free Readability Score Calculator - Flesch-Kincaid & More | WriteScholar',
-      description: 'Free readability score calculator. Get Flesch-Kincaid, Gunning Fog, SMOG Index, and more. Check your text\'s grade level and reading difficulty. No signup required.',
+      ...TOOL_SEO_META['readability-score'],
     });
     injectToolProductSchema({
       name: 'Readability Score Calculator',

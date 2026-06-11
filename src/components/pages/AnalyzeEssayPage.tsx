@@ -4,6 +4,7 @@ import Footer from '../common/Footer';
 import GenerationOverlay from '../common/GenerationOverlay';
 import { trackAction } from '../../data/achievements';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../utils/seo';
+import { TOOL_SEO_META } from '../../constants/toolSeoMeta';
 
 interface AnalyzeEssayPageProps {
   onNavigate: (page: string, slug?: string, options?: { studyPack?: { data: unknown; title?: string } }) => void;
@@ -39,8 +40,7 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout, embedded = false }: Anal
 
   useEffect(() => {
     applyPageSeoTags({
-      title: 'AI Essay Checker — Professor-Level Feedback in Seconds | WriteScholar',
-      description: 'Paste your essay and get professor-style feedback with grade, rubric scores, line-by-line annotations, and a polished revision. Free first analysis, no credit card.',
+      ...TOOL_SEO_META.analyze,
     });
     injectToolProductSchema({
       name: 'AI Essay Checker',

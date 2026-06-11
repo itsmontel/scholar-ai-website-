@@ -5,6 +5,7 @@ import ScholarMascot from '../../common/ScholarMascot';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 import ToolPageSeoContent from '../../common/ToolPageSeoContent';
 import { grammarCheckerSeo } from '../../../data/toolSeoContent';
+import { TOOL_SEO_META } from '../../../constants/toolSeoMeta';
 
 interface GrammarCheckerPageProps {
   onNavigate: (page: string) => void;
@@ -28,8 +29,7 @@ const GrammarCheckerPage = ({ onNavigate, user, onLogout }: GrammarCheckerPagePr
   // SEO: per-route title, description, canonical, OG, Twitter, plus tool schema.
   useEffect(() => {
     applyPageSeoTags({
-      title: 'Free Grammar Checker - Fix Spelling & Punctuation | WriteScholar',
-      description: 'Free online grammar checker. Find and fix spelling, punctuation, and grammar errors instantly. Get suggestions to improve your writing. No signup required.',
+      ...TOOL_SEO_META['grammar-checker'],
     });
     injectToolProductSchema({
       name: 'Grammar Checker',

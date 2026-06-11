@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 import ToolPageSeoContent from '../../common/ToolPageSeoContent';
 import { quizGenSeo } from '../../../data/toolSeoContent';
+import { TOOL_SEO_META } from '../../../constants/toolSeoMeta';
 
 function shuffleAndTake<T>(arr: T[], count: number): T[] {
   const shuffled = [...arr].sort(() => Math.random() - 0.5);
@@ -178,8 +179,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
 
   useEffect(() => {
     applyPageSeoTags({
-      title: 'AI Quiz Generator from Notes — College Exam Prep | WriteScholar',
-      description: 'Free quiz generator from text: paste notes or articles and get multiple-choice, true/false, fill-in-the-blank quizzes in seconds. Best free Quizlet alternative. No signup to start.',
+      ...TOOL_SEO_META['quiz-generator'],
     });
     injectToolProductSchema({
       name: 'AI Quiz Generator',

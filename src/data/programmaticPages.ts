@@ -16,9 +16,24 @@
  * 500 words of unique content + FAQ schema + internal links.
  */
 
-import type { ProgrammaticPageConfig } from '../components/pages/ProgrammaticLandingPage';
+import type { ProgrammaticPageConfig, ProgrammaticSection } from '../components/pages/ProgrammaticLandingPage';
+import { FREE_PLAN_FAQ_ANSWER } from '../constants/freePlanCopy';
 
 /* ─── Helpers ──────────────────────────────────────────────────── */
+
+/** Comparison-table cell — matches PricingPage NEWCUSTOMER offer. */
+const PRO_PRICING_CELL = 'Preview free · $9.99 1st mo Pro';
+
+/** Short free-plan explainer for alternative-page FAQs. */
+const FREE_PLAN_PROG_SHORT =
+  'Free gives you lifetime previews on your own work (2 essay analyses, 2 study packs, 2 citation searches with sample results) — no credit card. Pro unlocks full rubrics, quizzes, games, decks, and exports.';
+
+/** Signup step copy — no "covers your first semester" over-promises. */
+const FREE_SIGNUP_STEP =
+  'Sign up in 30 seconds — no credit card. Run a real preview on your own essay or notes before you pay anything.';
+
+const freeSubjectFaqAnswer = (niceName: string) =>
+  `Yes. ${FREE_PLAN_PROG_SHORT} First month of Pro is $9.99 with code NEWCUSTOMER, then $19.99/mo — built for ${niceName} students who want to see results before subscribing.`;
 
 const TOOL_LINKS_PROG = {
   flashcards: { href: '/tools/create-flashcards', page: 'create-flashcards', label: 'Flashcard Maker' },
@@ -46,6 +61,15 @@ interface SubjectMeta {
   topics: string[];      // 5-6 sub-areas of the subject
   courses: string[];     // 3-4 typical course codes/names
   studyTips: string[];   // 4-5 subject-specific tips
+  /**
+   * Optional hand-written deep-dive sections (real sample flashcards, exam
+   * questions, worked examples) spliced in after the topics list. Engagement
+   * experiment: biology + psychology get real embedded content; if their
+   * dwell time / bounce diverges from the templated subjects, roll out to
+   * all 10. Template-only subject pages risk "thin programmatic content"
+   * classification — these sections are the antidote.
+   */
+  deepDive?: ProgrammaticSection[];
 }
 
 const SUBJECTS: SubjectMeta[] = [
@@ -59,6 +83,42 @@ const SUBJECTS: SubjectMeta[] = [
       'Use mnemonics for ordered processes. "Please Make Cookies" for prophase-metaphase-anaphase-telophase will save you on exam day.',
       'Start the day before lecture, not the day before exam. Bio is too cumulative to cram.',
       'Quiz yourself on terminology daily, biology has more vocabulary per chapter than most subjects.',
+    ],
+    deepDive: [
+      {
+        type: 'examples',
+        heading: 'Weak vs strong biology flashcards',
+        examples: [
+          {
+            label: 'Definition card',
+            before: 'Q: What is cellular respiration?  A: The process cells use to make energy.',
+            after: 'Q: Why does cellular respiration yield ~30-32 ATP while glycolysis alone yields only 2?  A: Glycolysis is anaerobic and stops at pyruvate; the Krebs cycle + electron transport chain (aerobic, in mitochondria) extract the remaining energy via NADH/FADH2 driving oxidative phosphorylation.',
+            explanation: 'The weak card tests recognition of a phrase. The strong card forces you to connect glycolysis, the Krebs cycle, and the ETC — which is exactly how Bio 101 exams ask it.',
+          },
+          {
+            label: 'Process card',
+            before: 'Q: What are the stages of mitosis?  A: Prophase, metaphase, anaphase, telophase.',
+            after: 'Q: A cell\'s chromosomes are aligned at the equatorial plate. What stage is it in, what happens next, and what error at this checkpoint causes aneuploidy?  A: Metaphase. Next, sister chromatids separate (anaphase). Failure of the spindle-assembly checkpoint lets improperly attached chromatids separate unevenly → aneuploidy.',
+            explanation: 'Listing stage names gets you the first mark only. Exams test what happens in each stage and what goes wrong — build cards that ask that.',
+          },
+        ],
+      },
+      {
+        type: 'list',
+        heading: 'Sample deck: cell respiration (what WriteScholar generates from one lecture)',
+        items: [
+          { title: 'Where does glycolysis occur, and does it need oxygen?', body: 'Cytoplasm; anaerobic (no oxygen required). Net yield: 2 ATP + 2 NADH per glucose.' },
+          { title: 'What is the role of NAD+ in respiration?', body: 'Electron carrier — picks up electrons (becoming NADH) during glycolysis and the Krebs cycle, then delivers them to the electron transport chain.' },
+          { title: 'Why is oxygen called the "final electron acceptor"?', body: 'At the end of the ETC, electrons combine with O2 and H+ to form water. Without O2 the chain backs up and ATP production stalls — which is why cells switch to fermentation.' },
+          { title: 'Krebs cycle: inputs and outputs per acetyl-CoA?', body: 'In: 1 acetyl-CoA. Out: 2 CO2, 3 NADH, 1 FADH2, 1 ATP (GTP). The cycle turns twice per glucose.' },
+          { title: 'Lactic acid vs alcoholic fermentation — what do they have in common?', body: 'Both regenerate NAD+ so glycolysis can continue without oxygen. They differ in end product: lactate (muscle cells) vs ethanol + CO2 (yeast).' },
+        ],
+      },
+      {
+        type: 'paragraph',
+        heading: 'How to study genetics problems (not just genetics terms)',
+        body: 'Genetics is where bio students who only memorise fall apart, because exams test Punnett-square reasoning, not vocabulary. Build two decks: one for terms (allele, genotype, heterozygous, codominance) and one for problem patterns. A pattern card looks like "Cross two heterozygous tall plants (Tt x Tt) — what ratio of offspring are short?" with the answer walking through the 3:1 phenotypic ratio, so 1/4 are short. When you generate a quiz from a genetics lecture, set it to mixed format so you get both recall questions (define epistasis) and applied questions (given this dihybrid cross, predict the ratio). That mirrors the real exam split.',
+      },
     ],
   },
   {
@@ -119,6 +179,42 @@ const SUBJECTS: SubjectMeta[] = [
       'Memorise the DSM-5 criteria as flashcards if you\'re in abnormal psych. Vague answers won\'t cut it.',
       'For research methods, drill the difference between correlation and causation until it\'s automatic.',
       'Practice case-study application. "Given this patient profile, what disorder fits?" is a common exam pattern.',
+    ],
+    deepDive: [
+      {
+        type: 'examples',
+        heading: 'Weak vs strong psychology flashcards',
+        examples: [
+          {
+            label: 'Theorist card',
+            before: 'Q: Who is B.F. Skinner?  A: A behaviorist psychologist.',
+            after: 'Q: A child cleans their room to stop their parent\'s nagging. Which of Skinner\'s mechanisms is this, and why is it not punishment?  A: Negative reinforcement — an aversive stimulus (nagging) is removed, which increases the behavior. Punishment would decrease a behavior; here the behavior is strengthened.',
+            explanation: 'Psych exams almost never ask "who is X." They give you a scenario and ask which concept applies. Write cards in scenario format from day one.',
+          },
+          {
+            label: 'Research methods card',
+            before: 'Q: What is a confound?  A: A variable that affects the results.',
+            after: 'Q: A study finds students who drink coffee score higher on exams. Name two plausible confounds and the design fix.  A: Sleep schedule and study hours could drive both coffee intake and scores. Fix: random assignment to coffee/no-coffee conditions, which distributes confounds across groups.',
+            explanation: 'Methods questions are applied. A card that makes you generate confounds and fixes trains the exact skill the exam grades.',
+          },
+        ],
+      },
+      {
+        type: 'list',
+        heading: 'Sample deck: classical vs operant conditioning (from one Psych 101 lecture)',
+        items: [
+          { title: 'Classical vs operant — the one-line distinction?', body: 'Classical: involuntary responses paired with new stimuli (Pavlov\'s dogs). Operant: voluntary behavior shaped by consequences (Skinner\'s boxes).' },
+          { title: 'In Pavlov\'s experiment, what is the conditioned stimulus?', body: 'The bell. It starts neutral and acquires the power to trigger salivation only after repeated pairing with food (the unconditioned stimulus).' },
+          { title: 'Positive punishment vs negative reinforcement?', body: 'Positive punishment ADDS something aversive to decrease behavior (extra chores for missing curfew). Negative reinforcement REMOVES something aversive to increase behavior (seatbelt alarm stops when you buckle).' },
+          { title: 'What is extinction in classical conditioning?', body: 'The conditioned response fades when the conditioned stimulus is repeatedly presented without the unconditioned stimulus — the bell rings, no food arrives, salivation stops.' },
+          { title: 'Bandura\'s Bobo doll study — why does it matter?', body: 'Children imitated aggression they merely observed, without any reinforcement. It established social/observational learning as a third pathway beyond classical and operant conditioning.' },
+        ],
+      },
+      {
+        type: 'paragraph',
+        heading: 'How to prepare for case-study questions',
+        body: 'Upper-level psych exams lean on vignettes: a paragraph describing a patient, then "which disorder best fits, and which DSM-5 criterion is NOT met?" To prepare, turn each disorder\'s criteria into a two-sided card — symptoms on one side, the differential (what rules it out vs its nearest neighbour) on the other. Generalized anxiety vs panic disorder, MDD vs persistent depressive disorder, bipolar I vs II. Then quiz yourself with mixed vignettes rather than chapter-by-chapter, because the exam will not tell you which chapter the patient walked out of.',
+      },
     ],
   },
   {
@@ -212,9 +308,9 @@ function subjectPage(s: SubjectMeta): ProgrammaticPageConfig {
     slug: s.slug,
     type: 'subject',
     metaTitle: `${s.name} Study Tools, Free Flashcards, Quizzes, Notes | WriteScholar`,
-    metaDescription: `Study ${s.niceName} smarter with free AI tools. Turn ${s.niceName} lecture notes into flashcards, quizzes, and summaries in seconds. Trusted by 50,000+ students.`,
+    metaDescription: `Study ${s.niceName} smarter with AI tools. Turn ${s.niceName} lecture notes into flashcards, quizzes, and summaries — preview free on your own work.`,
     h1: `Study ${s.name} smarter, built for ${s.niceName} students`,
-    subtitle: `Free AI tools that turn your ${s.niceName} notes into the flashcards, quizzes, and summaries you actually use to study.`,
+    subtitle: `AI tools that turn your ${s.niceName} notes into flashcards, quizzes, and summaries. Preview on your own work free — no credit card.`,
     eyebrow: `${s.name} study tools`,
     accent: s.accent,
     intro: s.intro,
@@ -227,6 +323,9 @@ function subjectPage(s: SubjectMeta): ProgrammaticPageConfig {
           body: `Paste your ${topic.toLowerCase()} notes into WriteScholar to instantly generate flashcards, quiz questions, and concept summaries. The AI extracts key terms and definitions automatically.`,
         })),
       },
+      // Hand-written deep-dive content (real flashcards, exam questions) for
+      // subjects in the engagement experiment — see SubjectMeta.deepDive.
+      ...(s.deepDive ?? []),
       {
         type: 'paragraph',
         heading: `Course examples, ${s.name} classes WriteScholar handles`,
@@ -249,7 +348,7 @@ function subjectPage(s: SubjectMeta): ProgrammaticPageConfig {
       },
     ],
     faqs: [
-      { question: `Is WriteScholar free for ${s.niceName} students?`, answer: `Yes, the free plan covers your first essay analysis, one quiz generation, one flashcard deck, and a study pack. No credit card. Pro unlocks unlimited generations and saves all your decks across devices.` },
+      { question: `Is WriteScholar free for ${s.niceName} students?`, answer: freeSubjectFaqAnswer(s.niceName) },
       { question: `Will it work with my professor's lecture slides?`, answer: `Yes. Paste the slide content as text or upload the PDF directly. WriteScholar parses the slides and pulls out concepts, terms, and questions automatically.` },
       { question: `Can I use WriteScholar on my phone?`, answer: `Yes. The web app is mobile-responsive, and we have native iOS and Android apps with the same study tools, flashcards work especially well on phones for spaced-repetition during commutes.` },
       { question: `How is this different from Quizlet?`, answer: `Quizlet requires you to manually build flashcard decks. WriteScholar auto-generates them from your notes in seconds. We also include the AI essay checker, summarizer, and quiz generator that Quizlet doesn't have.` },
@@ -267,7 +366,7 @@ function subjectPage(s: SubjectMeta): ProgrammaticPageConfig {
       { label: 'AI Quiz Generator', href: '/tools/quiz-generator', teaser: `Generate ${s.niceName} practice quizzes from notes.` },
       { label: 'AI Summarizer', href: '/tools/summarizer', teaser: `Condense long ${s.niceName} chapters fast.` },
     ],
-    primaryCta: { label: `Start studying ${s.niceName} free`, page: 'signup' },
+    primaryCta: { label: `Preview ${s.niceName} tools free`, page: 'signup' },
     secondaryCta: { label: 'See all tools', page: 'dashboard' },
   };
 }
@@ -277,39 +376,47 @@ function subjectPage(s: SubjectMeta): ProgrammaticPageConfig {
 const quizletAlt: ProgrammaticPageConfig = {
   slug: 'quizlet',
   type: 'alternative',
-  metaTitle: 'Quizlet Alternative, Free AI Flashcards Built From Your Notes | WriteScholar',
-  metaDescription: 'WriteScholar is the best free Quizlet alternative for college students. Auto-generate flashcards from notes, study with spaced repetition, no ads, no paywall on test mode.',
-  h1: 'The free Quizlet alternative students actually keep using',
-  subtitle: 'Auto-generate flashcards from your notes in seconds. Study with shuffle, flip, and spaced repetition, without the ads, paywalls, or shutdown of Test Mode.',
-  eyebrow: 'Quizlet alternative · Free',
+  metaTitle: 'Quizlet Alternative, AI Flashcards Built From Your Notes | WriteScholar',
+  metaDescription: 'WriteScholar is a Quizlet alternative for college students. Auto-generate flashcards from notes, preview study packs free, no ads. Pro unlocks full quizzes and decks from $9.99 first month.',
+  h1: 'The Quizlet alternative students switch to for AI study tools',
+  subtitle: 'Auto-generate flashcards from your notes in seconds. Preview lesson + sample cards free; Pro unlocks full quizzes, games, and decks — without Quizlet\'s ads or paywalled Test Mode.',
+  eyebrow: 'Quizlet alternative · Preview free',
   accent: '#A560E8',
-  intro: 'Quizlet used to be free. Then they paywalled Test Mode, Learn Mode, and most of the actually-useful study features. WriteScholar is the free alternative students switch to when they realise they\'re paying $35.99/year for a flashcard app. We auto-generate decks from your notes (Quizlet can\'t), include unlimited test mode + spaced repetition for free, and ship a full AI essay checker and quiz generator alongside flashcards. Same flashcard mechanic you already know, without the squeeze for premium.',
+  intro: 'Quizlet used to be free. Then they paywalled Test Mode, Learn Mode, and most of the actually-useful study features behind Quizlet+ ($35.99/year). WriteScholar is different: paste your notes and AI builds flashcards, quizzes, and study packs in seconds — preview the results on your own work free (no credit card), then upgrade when you want the full deck, quiz modes, and essay tools. Same study workflow, honest pricing, no ad interruptions.',
   sections: [
+    {
+      type: 'media',
+      kind: 'video',
+      src: '/hero-flashcards.mp4',
+      alt: 'WriteScholar auto-generating a flashcard deck from pasted lecture notes',
+      heading: 'See it: notes → flashcards in seconds',
+      caption: 'Paste your notes, get a deck — no manual card typing like Quizlet.',
+    },
     {
       type: 'comparison',
       heading: 'WriteScholar vs Quizlet',
-      intro: 'A side-by-side of what you get on each free plan.',
-      columns: ['Feature', 'WriteScholar Free', 'Quizlet Free'],
+      intro: 'A side-by-side of what you get before paying.',
+      columns: ['Feature', 'WriteScholar', 'Quizlet Free'],
       rows: [
         { feature: 'Auto-generate flashcards from notes', values: ['Yes', 'No (manual only)'] },
-        { feature: 'Test mode with multiple-choice/written', values: ['Yes', 'Paid (Quizlet+)'] },
-        { feature: 'Learn mode (spaced repetition)', values: ['Yes', 'Paid (Quizlet+)'] },
+        { feature: 'Test / quiz mode', values: ['Preview, full on Pro', 'Paid (Quizlet+)'] },
+        { feature: 'Spaced repetition', values: ['Pro', 'Paid (Quizlet+)'] },
         { feature: 'Ads on study screen', values: ['None', 'Heavy ads'] },
-        { feature: 'Decks per account', values: ['5 free / unlimited Pro', 'Unlimited' ] },
-        { feature: 'AI explanations of wrong answers', values: ['Yes', 'Paid'] },
-        { feature: 'Includes essay checker', values: ['Yes', 'No'] },
-        { feature: 'Includes AI quiz generator', values: ['Yes', 'No'] },
+        { feature: 'Study pack from one paste', values: ['Preview (lesson + 4 cards)', 'No'] },
+        { feature: 'AI explanations of wrong answers', values: ['Pro', 'Paid'] },
+        { feature: 'Includes essay checker', values: ['Yes (preview free)', 'No'] },
+        { feature: 'Includes AI quiz generator', values: ['Yes (preview free)', 'No'] },
         { feature: 'Includes AI summarizer', values: ['Yes', 'No'] },
-        { feature: 'Cost', values: ['Free + Pro $19.99/mo', '$35.99/year for Quizlet+'] },
+        { feature: 'Cost', values: [PRO_PRICING_CELL, '$35.99/year for Quizlet+'] },
       ],
     },
     {
       type: 'list',
       heading: 'Why students switch from Quizlet',
       items: [
-        { title: 'Test mode is paywalled now', body: 'Quizlet locked Test Mode behind their $35.99/year Quizlet+ subscription in 2022. WriteScholar keeps test/quiz mode permanently free.' },
-        { title: 'Auto-generation saves hours', body: 'Building a 50-card Quizlet deck takes 30+ minutes of typing. Pasting your notes into WriteScholar generates the same deck in 10 seconds.' },
-        { title: 'No ads', body: 'Quizlet free is plastered with ads, including in the middle of study sessions. WriteScholar free has no ads, ever.' },
+        { title: 'Test mode is paywalled now', body: 'Quizlet locked Test Mode behind their $35.99/year Quizlet+ subscription in 2022. WriteScholar lets you preview study packs and quizzes on your own notes free; full quiz, game, and deck access unlocks with Pro.' },
+        { title: 'Auto-generation saves hours', body: 'Building a 50-card Quizlet deck takes 30+ minutes of typing. Pasting your notes into WriteScholar generates a lesson plus sample flashcards in under a minute — preview free before upgrading.' },
+        { title: 'No ads', body: 'Quizlet free is plastered with ads, including in the middle of study sessions. WriteScholar has no ads on any plan.' },
         { title: 'Better for essay-heavy classes', body: 'Most college courses need essays AND flashcards. Quizlet only handles flashcards; WriteScholar handles both, plus citations, summarisation, and rubric-based grading.' },
         { title: 'Cleaner mobile experience', body: 'Quizlet\'s mobile app pushes upgrades constantly. WriteScholar\'s mobile flow is built for studying, not selling.' },
       ],
@@ -319,20 +426,20 @@ const quizletAlt: ProgrammaticPageConfig = {
       heading: 'How to migrate from Quizlet to WriteScholar',
       steps: [
         { title: 'Export your Quizlet decks', body: 'In Quizlet, open each deck → ... menu → Export → "Set Term and Definition" → copy the text.' },
-        { title: 'Sign up for WriteScholar', body: '30 seconds, no credit card. Free plan covers most students through their first semester.' },
-        { title: 'Import your decks', body: 'On Pro, paste the exported CSV directly. On free, paste term-definition pairs and WriteScholar parses them.' },
+        { title: 'Sign up for WriteScholar', body: FREE_SIGNUP_STEP },
+        { title: 'Import your decks', body: 'On Pro, paste exported Quizlet CSV directly. On free, paste term-definition pairs and WriteScholar parses them into a deck you can preview.' },
         { title: 'Auto-generate new decks from notes', body: 'For new classes, skip the manual creation entirely, paste your lecture notes and let the AI build the deck.' },
       ],
     },
   ],
   faqs: [
-    { question: 'Is WriteScholar really free?', answer: 'Yes, Free plan: 5 saved decks, unlimited test/learn mode, AI auto-generation. Pro ($19.99/mo) unlocks unlimited decks, cross-device sync, and the rest of the WriteScholar tool suite (essay checker, study packs, etc.).' },
-    { question: 'Can I import my Quizlet decks?', answer: 'Yes, paste your exported flashcards in CSV format (term,definition) or as a list of pairs. Pro plan handles bulk imports.' },
-    { question: 'Does WriteScholar have spaced repetition?', answer: 'Yes, Pro plan includes a spaced repetition scheduler. Free plan has shuffle and self-paced flip.' },
-    { question: 'How does pricing compare?', answer: 'Quizlet+ is $35.99/year ($3/mo) for flashcards only. WriteScholar Pro is $19.99/mo ($240/year if billed monthly, less on annual) for flashcards + essay checker + quiz gen + study packs + summarizer + citations. More expensive on flashcards alone, much cheaper if you also need writing tools.' },
-    { question: 'Can I share decks with friends?', answer: 'On Pro, yes, share via link. Recipient can study; on Pro+ they can clone the deck into their own library.' },
-    { question: 'Does it work for medical school flashcards?', answer: 'Yes. We have med students using it for anatomy, pharm, and pathology decks. Image-card support is on Pro (drag-and-drop images for visual cues like anatomy diagrams).' },
-    { question: 'Is my data private?', answer: 'Yes. Free decks store locally in your browser. Pro decks sync to your account encrypted at rest. We don\'t sell or share user data.' },
+    { question: 'Is WriteScholar really free?', answer: FREE_PLAN_FAQ_ANSWER },
+    { question: 'Can I import my Quizlet decks?', answer: 'Yes, paste your exported flashcards in CSV format (term,definition) or as a list of pairs. Pro plan handles bulk imports and saves decks across devices.' },
+    { question: 'Does WriteScholar have spaced repetition?', answer: 'Yes — on Pro. Free previews include the lesson and first four flashcards from a study pack; spaced repetition and full deck study unlock with Pro.' },
+    { question: 'How does pricing compare?', answer: 'Quizlet+ is $35.99/year ($3/mo) for flashcards only. WriteScholar Pro is $9.99 for your first month (code NEWCUSTOMER), then $19.99/mo for flashcards + essay checker + quiz gen + study packs + summarizer + citations. Better value if you need writing tools, not just cards.' },
+    { question: 'Can I share decks with friends?', answer: 'On Pro, yes — share via link. Recipient can study; on Pro+ they can clone the deck into their own library.' },
+    { question: 'Does it work for medical school flashcards?', answer: 'Yes. Med students use WriteScholar for anatomy, pharm, and pathology study packs. Image-card support is on Pro (drag-and-drop images for visual cues like anatomy diagrams).' },
+    { question: 'Is my data private?', answer: 'Yes. Your content is encrypted, never sold, and you can delete it anytime. Pro saves sync to your account; preview runs process your paste without long-term storage unless you save on Pro.' },
     { question: 'Does it work offline?', answer: 'After loading, the flashcard study screen works offline. Generation requires internet (the AI runs on our servers, not your device).' },
   ],
   related: [
@@ -342,7 +449,7 @@ const quizletAlt: ProgrammaticPageConfig = {
     { label: 'Knowt alternative', href: '/alternatives/knowt', teaser: 'See how WriteScholar compares to Knowt.' },
     { label: 'Course Hero alternative', href: '/alternatives/course-hero', teaser: 'A free alternative to Course Hero\'s study packs.' },
   ],
-  primaryCta: { label: 'Try WriteScholar free', page: 'signup' },
+  primaryCta: { label: 'Preview WriteScholar free', page: 'signup' },
   secondaryCta: { label: 'See pricing', page: 'pricing' },
 };
 
@@ -353,10 +460,18 @@ const knowtAlt: ProgrammaticPageConfig = {
   metaDescription: 'Knowt does flashcards and notes; WriteScholar does both plus AI essay feedback, summarizer, and quiz generation. The all-in-one Knowt alternative.',
   h1: 'WriteScholar, the all-in-one Knowt alternative',
   subtitle: 'Knowt is great for flashcards. WriteScholar handles flashcards, essays, quizzes, summaries, and citations, one app, one subscription.',
-  eyebrow: 'Knowt alternative · Free',
+  eyebrow: 'Knowt alternative · Preview free',
   accent: '#1CB0F6',
   intro: 'Knowt is one of the better Quizlet alternatives, a clean flashcard app with note-taking. But if you\'re writing essays AND making flashcards (which is most college courses), you end up paying for two tools. WriteScholar bundles both: AI flashcards from notes + the essay checker, quiz generator, summarizer, and citation tools that Knowt doesn\'t have. Same single-price model, more output.',
   sections: [
+    {
+      type: 'media',
+      kind: 'video',
+      src: '/hero-quiz.mp4',
+      alt: 'WriteScholar generating a multiple-choice quiz from study notes',
+      heading: 'See it: a real quiz built from your notes',
+      caption: 'Mixed-format quizzes (MCQ, true/false, fill-in) — the part Knowt is light on.',
+    },
     {
       type: 'comparison',
       heading: 'WriteScholar vs Knowt',
@@ -368,7 +483,7 @@ const knowtAlt: ProgrammaticPageConfig = {
         { feature: 'AI summarizer', values: ['Yes', 'No'] },
         { feature: 'Citation generator (APA/MLA/Chicago)', values: ['Yes', 'No'] },
         { feature: 'Notes editor', values: ['Coming', 'Yes'] },
-        { feature: 'Free plan', values: ['Yes', 'Yes'] },
+        { feature: 'Free previews', values: ['Yes (lifetime)', 'Yes'] },
         { feature: 'iOS + Android apps', values: ['Yes', 'Yes'] },
       ],
     },
@@ -391,7 +506,7 @@ const knowtAlt: ProgrammaticPageConfig = {
     },
   ],
   faqs: [
-    { question: 'How does pricing compare?', answer: 'Both have free plans. Knowt Pro and WriteScholar Pro are similar prices (~$5-20/mo range). The decision usually comes down to whether you need essay tools (WriteScholar) or polished notes (Knowt).' },
+    { question: 'How does pricing compare?', answer: 'Both let you try before paying. WriteScholar Pro is $9.99 for your first month (NEWCUSTOMER), then $19.99/mo — Knowt Pro is in a similar range. The decision usually comes down to whether you need essay tools and study packs (WriteScholar) or polished notes (Knowt).' },
     { question: 'Can I import from Knowt?', answer: 'Yes, export your Knowt flashcard decks to CSV and paste into WriteScholar. We also accept term/definition pairs as plain text.' },
     { question: 'Does WriteScholar have a notes editor?', answer: 'A lightweight one is in beta. For heavy note-taking, pair WriteScholar with Notion or Google Docs and paste content into the AI tools when you need to study from it.' },
     { question: 'Are the flashcard study modes the same?', answer: 'Both apps have flip + shuffle + spaced repetition. WriteScholar also has explanation cards (AI-generated explanations of why an answer is wrong) on Pro.' },
@@ -403,29 +518,37 @@ const knowtAlt: ProgrammaticPageConfig = {
     { label: 'AI Flashcard Maker', href: '/tools/create-flashcards', teaser: 'Build flashcards from notes automatically.' },
     { label: 'AI Quiz Generator', href: '/tools/quiz-generator', teaser: 'Mixed-format quizzes from any text.' },
   ],
-  primaryCta: { label: 'Try WriteScholar free', page: 'signup' },
+  primaryCta: { label: 'Preview WriteScholar free', page: 'signup' },
   secondaryCta: { label: 'See pricing', page: 'pricing' },
 };
 
 const courseHeroAlt: ProgrammaticPageConfig = {
   slug: 'course-hero',
   type: 'alternative',
-  metaTitle: 'Course Hero Alternative, Free Study Tools, No Document Paywall | WriteScholar',
-  metaDescription: 'Course Hero charges $40/mo to unlock student-uploaded notes. WriteScholar makes your own study tools from your own notes, free, unlimited, no upload paywall.',
+  metaTitle: 'Course Hero Alternative, Study Tools From Your Notes | WriteScholar',
+  metaDescription: 'Course Hero charges $40/mo to unlock student-uploaded notes. WriteScholar turns your own notes into flashcards, quizzes, and study packs — preview free on your own work.',
   h1: 'WriteScholar, the Course Hero alternative that uses YOUR notes',
-  subtitle: 'Course Hero locks student notes behind a paywall. WriteScholar turns your own notes into flashcards, quizzes, and study packs, free, no upload required.',
-  eyebrow: 'Course Hero alternative · Free',
+  subtitle: 'Course Hero locks other students\' notes behind a paywall. WriteScholar turns your own notes into flashcards, quizzes, and study packs — preview free, no upload of others\' work.',
+  eyebrow: 'Course Hero alternative · Preview free',
   accent: '#FF9600',
-  intro: 'Course Hero\'s model is "pay $40/month to access notes other students uploaded." That model has problems: it\'s expensive, the notes are often poorly transcribed, and many universities flag Course Hero use as academic dishonesty. WriteScholar is a fundamentally different tool, you paste YOUR notes, and AI generates the study tools from them. No upload requirement, no paywall, no integrity risk.',
+  intro: 'Course Hero\'s model is "pay $40/month to access notes other students uploaded." That model has problems: it\'s expensive, the notes are often poorly transcribed, and many universities flag Course Hero use as academic dishonesty. WriteScholar is a fundamentally different tool — you paste YOUR notes, and AI generates study tools from them. Preview the results free on your own work; Pro unlocks full decks, quizzes, and exports. No document paywall, no integrity risk.',
   sections: [
+    {
+      type: 'media',
+      kind: 'image',
+      src: '/daily-review-preview.png',
+      alt: 'WriteScholar daily review screen built from a student\'s own study materials',
+      heading: 'See it: study tools built from YOUR notes',
+      caption: 'Everything is generated from material you already have — no document marketplace.',
+    },
     {
       type: 'comparison',
       heading: 'WriteScholar vs Course Hero',
       columns: ['Feature', 'WriteScholar', 'Course Hero'],
       rows: [
         { feature: 'Source material', values: ['Your own notes', 'Other students\' uploads'] },
-        { feature: 'Cost', values: ['Free + Pro $19.99/mo', '$39.99/mo'] },
-        { feature: 'Document paywall', values: ['None', 'Yes, most docs locked'] },
+        { feature: 'Cost', values: [PRO_PRICING_CELL, '$39.99/mo'] },
+        { feature: 'Document paywall', values: ['Preview free, Pro unlocks full', 'Yes, most docs locked'] },
         { feature: 'Academic integrity risk', values: ['Low (your work)', 'High (using others\' notes)'] },
         { feature: 'Auto-generated flashcards', values: ['Yes', 'No'] },
         { feature: 'AI essay checker', values: ['Yes', 'No (different "essay help" model)'] },
@@ -446,18 +569,18 @@ const courseHeroAlt: ProgrammaticPageConfig = {
   ],
   faqs: [
     { question: 'Can WriteScholar give me access to past exams?', answer: 'No, and that\'s a feature, not a bug. Past exam access from Course Hero often violates academic integrity policies. WriteScholar focuses on legitimate study tools built from your own notes.' },
-    { question: 'How much does WriteScholar cost compared to Course Hero?', answer: 'WriteScholar Pro is $19.99/mo. Course Hero is $39.99/mo (or $9.95/mo annual). Less than half the price for Pro features.' },
+    { question: 'How much does WriteScholar cost compared to Course Hero?', answer: 'WriteScholar Pro is $9.99 for your first month (NEWCUSTOMER), then $19.99/mo. Course Hero is $39.99/mo (or $9.95/mo annual). Less than half the price for Pro, and you study from your own notes.' },
     { question: 'Will my professor consider WriteScholar academic dishonesty?', answer: 'Generating flashcards from your own lecture notes is unambiguously fine, same as making them by hand. AI essay grading is also fine when used as feedback (you don\'t submit AI-generated text). When in doubt, ask your professor what tools are allowed.' },
     { question: 'Can I upload PDFs of textbooks?', answer: 'Yes, paste textbook content (your own copies) and the AI generates study tools. Note: copying entire copyrighted textbooks for distribution is illegal; using them privately for study is generally fine.' },
     { question: 'Does it work for med school study packs?', answer: 'Yes. WriteScholar\'s study pack feature is popular with med students for converting lecture transcripts into flashcards + quizzes + summaries in 60 seconds.' },
-    { question: 'Is my paste content private?', answer: 'Yes. Pasted notes are processed for tool generation but not stored long-term unless you save them on Pro. Free plan content is ephemeral.' },
+    { question: 'Is my paste content private?', answer: 'Yes. Pasted notes are processed for tool generation. Preview content is not stored long-term unless you save on Pro. We never sell or train on your work.' },
   ],
   related: [
     { label: 'Quizlet alternative', href: '/alternatives/quizlet', teaser: 'How WriteScholar compares to Quizlet.' },
     { label: 'Chegg alternative', href: '/alternatives/chegg', teaser: 'A cheaper, integrity-safer alternative to Chegg.' },
     { label: 'Study Pack Generator', href: '/tools/study-pack', teaser: 'Notes → 7 tools in 60 seconds.' },
   ],
-  primaryCta: { label: 'Get free study tools', page: 'signup' },
+  primaryCta: { label: 'Preview study tools free', page: 'signup' },
   secondaryCta: { label: 'See pricing', page: 'pricing' },
 };
 
@@ -468,10 +591,18 @@ const cheggAlt: ProgrammaticPageConfig = {
   metaDescription: 'Chegg charges $19.95/mo for textbook answers + tutoring. WriteScholar charges similar for AI essay feedback, flashcards, quizzes, and citations, and won\'t flag your account.',
   h1: 'A Chegg alternative students aren\'t scared to use',
   subtitle: 'Same price as Chegg Study, completely different value: AI essay feedback, flashcards from your notes, quiz generator, and citations, without the academic-integrity risk.',
-  eyebrow: 'Chegg alternative · Free to start',
+  eyebrow: 'Chegg alternative · Preview free',
   accent: '#58CC02',
   intro: 'Chegg has a brand problem. Universities now actively monitor Chegg accounts for evidence of homework-answer cheating, and many schools have expelled students whose Chegg activity matched test answers. WriteScholar is the opposite tool: it\'s an AI study coach that generates flashcards from your notes, gives essay feedback (without writing essays for you), and helps you understand material, none of which trips academic integrity sensors.',
   sections: [
+    {
+      type: 'media',
+      kind: 'image',
+      src: '/full-report.png',
+      alt: 'WriteScholar essay analysis report with grade estimate and rubric scores',
+      heading: 'See it: feedback, not answer keys',
+      caption: 'A professor-style grade and rubric on your own draft — the legitimate kind of help.',
+    },
     {
       type: 'comparison',
       heading: 'WriteScholar vs Chegg',
@@ -484,7 +615,7 @@ const cheggAlt: ProgrammaticPageConfig = {
         { feature: 'Textbook step-by-step answers', values: ['No (intentionally)', 'Yes, primary feature'] },
         { feature: 'Live tutoring', values: ['No', 'Yes (paid extra)'] },
         { feature: 'Academic integrity flag risk', values: ['Low', 'High'] },
-        { feature: 'Cost', values: ['Free + Pro $19.99/mo', '$19.95/mo'] },
+        { feature: 'Cost', values: [PRO_PRICING_CELL, '$19.95/mo'] },
       ],
     },
     {
@@ -501,7 +632,7 @@ const cheggAlt: ProgrammaticPageConfig = {
   faqs: [
     { question: 'Can WriteScholar solve my homework problems?', answer: 'No, that\'s by design. WriteScholar generates flashcards, quizzes, summaries, and essay feedback FROM your notes. It doesn\'t solve textbook problems, which is exactly the feature that gets students in trouble with academic integrity offices.' },
     { question: 'Will my school flag WriteScholar use?', answer: 'No. Generating flashcards from lecture notes and using AI essay feedback (when you don\'t submit AI-generated text) is consistent with academic integrity policies at virtually every university.' },
-    { question: 'How does pricing compare?', answer: 'WriteScholar Pro is $19.99/mo; Chegg Study is $19.95/mo. Roughly the same price, very different feature sets.' },
+    { question: 'How does pricing compare?', answer: 'WriteScholar Pro is $9.99 for your first month (NEWCUSTOMER), then $19.99/mo; Chegg Study is $19.95/mo. Similar headline price, very different feature sets — WriteScholar focuses on study tools from your notes, not textbook answer keys.' },
     { question: 'Does WriteScholar do tutoring?', answer: 'Not live human tutoring. The AI tools (essay checker with explanations, quiz generator with explanations) function as on-demand learning support, but if you need a real tutor we recommend Wyzant or your school\'s tutoring center.' },
     { question: 'Can I cancel anytime?', answer: 'Yes, cancel via the billing settings page in 30 seconds. No retention scripts, no "are you sure?" loops. We don\'t auto-renew without notice.' },
     { question: 'Does WriteScholar have textbook solutions?', answer: 'No. Use your textbook + WriteScholar to generate practice problems and study tools, but the worked solutions to specific textbook problems aren\'t our feature.' },
@@ -511,7 +642,7 @@ const cheggAlt: ProgrammaticPageConfig = {
     { label: 'AI Essay Checker', href: '/tools/analyze', teaser: 'Get professor-level essay feedback.' },
     { label: 'AI Quiz Generator', href: '/tools/quiz-generator', teaser: 'Generate practice quizzes from notes.' },
   ],
-  primaryCta: { label: 'Try WriteScholar free', page: 'signup' },
+  primaryCta: { label: 'Preview WriteScholar free', page: 'signup' },
   secondaryCta: { label: 'See pricing', page: 'pricing' },
 };
 
@@ -522,10 +653,19 @@ const grammarlyAlt: ProgrammaticPageConfig = {
   metaDescription: 'WriteScholar combines a free grammar checker with full AI essay feedback (grade, rubric, line-by-line revision). The Grammarly alternative built for students.',
   h1: 'WriteScholar, Grammarly for students who actually need essay feedback',
   subtitle: 'A free grammar checker + a full AI essay grader with rubric scores, line-by-line annotations, and a polished revision. One tool, no $30/month subscription.',
-  eyebrow: 'Grammarly alternative · Free',
+  eyebrow: 'Grammarly alternative · Preview free',
   accent: '#58CC02',
-  intro: 'Grammarly is great at one thing: catching grammar and spelling errors as you type. But for college students, "your writing is grammatically correct" doesn\'t earn As, strong arguments, clear theses, and rubric-aligned structure do. WriteScholar combines a free grammar checker with the AI essay feedback Grammarly Premium charges $30/month for, plus the writing-process tools (thesis generator, outline generator, citation tool) Grammarly doesn\'t have.',
+  intro: 'Grammarly is great at one thing: catching grammar and spelling errors as you type. But for college students, "your writing is grammatically correct" doesn\'t earn As — strong arguments, clear theses, and rubric-aligned structure do. WriteScholar combines a free grammar checker with AI essay feedback (grade, rubric, line-by-line notes) you can preview on your own draft free. Pro unlocks full fixes and one-click apply. Plus thesis generator, outline generator, and citation tools Grammarly doesn\'t have.',
   sections: [
+    {
+      type: 'media',
+      kind: 'video',
+      src: '/hero-vid.mp4',
+      poster: '/hero-vid-poster.jpg',
+      alt: 'WriteScholar grading an essay with a rubric and line-by-line fixes in the editor',
+      heading: 'See it: grade + fixes, not just grammar',
+      caption: 'Write in a real editor, get a professor-style grade — then apply fixes in one click.',
+    },
     {
       type: 'comparison',
       heading: 'WriteScholar vs Grammarly',
@@ -539,7 +679,7 @@ const grammarlyAlt: ProgrammaticPageConfig = {
         { feature: 'Essay outline generator', values: ['Yes', 'No', 'No'] },
         { feature: 'Citation generator', values: ['Yes', 'No', 'Yes'] },
         { feature: 'Browser extension', values: ['Coming', 'Yes', 'Yes'] },
-        { feature: 'Cost', values: ['Free + Pro $19.99/mo', 'Free', '$30/mo'] },
+        { feature: 'Cost', values: [PRO_PRICING_CELL, 'Free', '$30/mo'] },
       ],
     },
     {
@@ -549,7 +689,7 @@ const grammarlyAlt: ProgrammaticPageConfig = {
         { title: 'You need essay feedback, not just grammar', body: 'Grammarly tells you "this sentence has a comma splice." WriteScholar tells you "your thesis is too broad, here are 3 ways to narrow it." Different problem solved.' },
         { title: 'You\'re writing for grades, not professional emails', body: 'Grammarly\'s sweet spot is workplace email. WriteScholar is built for academic writing with rubric-based feedback aligned to how professors actually grade.' },
         { title: 'You want all your writing tools in one place', body: 'Grammarly + EasyBib + Outline Builder = three subscriptions. WriteScholar bundles them.' },
-        { title: 'Cost matters', body: 'Grammarly Premium is $30/mo. WriteScholar Pro is $19.99/mo with more academic-specific features.' },
+        { title: 'Cost matters', body: 'Grammarly Premium is $30/mo. WriteScholar Pro is $9.99 for your first month (NEWCUSTOMER), then $19.99/mo — with essay rubrics and study tools Grammarly doesn\'t include.' },
       ],
     },
     {
@@ -566,9 +706,9 @@ const grammarlyAlt: ProgrammaticPageConfig = {
     { question: 'How does the essay grader work?', answer: 'Paste your essay; AI analyzes against a rubric (thesis, structure, evidence, style, mechanics) and returns an overall grade plus per-criterion scores. Includes line-by-line annotations and a polished revision.' },
     { question: 'Is the grammar checker as accurate as Grammarly?', answer: 'For common errors (typos, missing commas, run-ons, agreement), yes. Grammarly\'s premium tier catches more subtle stylistic issues. WriteScholar\'s strength is the essay-level feedback Grammarly doesn\'t do.' },
     { question: 'Can I use both?', answer: 'Sure, many students use Grammarly free for in-line corrections while drafting, then run the finished essay through WriteScholar for grade-level feedback.' },
-    { question: 'Does WriteScholar do plagiarism detection?', answer: 'Not on the free plan. Most universities provide Turnitin access (the gold standard); we don\'t try to compete with it.' },
+    { question: 'Does WriteScholar do plagiarism detection?', answer: 'Not included. Most universities provide Turnitin access (the gold standard); we don\'t try to compete with it. Use WriteScholar for draft feedback before you submit.' },
     { question: 'What about the AI writing detector?', answer: 'WriteScholar doesn\'t flag AI-written text. The strongest signal that something was AI-generated is its style, robotic, evenly-paced, overuse of "moreover" and "furthermore". A grammar checker won\'t catch it; a human reader will.' },
-    { question: 'How does pricing compare?', answer: 'Grammarly Premium: $30/mo (or $144/year). WriteScholar Pro: $19.99/mo. Roughly 33% cheaper on monthly, with academic-specific features Grammarly doesn\'t have.' },
+    { question: 'How does pricing compare?', answer: 'Grammarly Premium: $30/mo (or $144/year). WriteScholar Pro: $9.99 first month (NEWCUSTOMER), then $19.99/mo — roughly 33% cheaper on ongoing monthly, with academic rubrics and study tools Grammarly doesn\'t have.' },
   ],
   related: [
     { label: 'AI Essay Checker', href: '/tools/analyze', teaser: 'Free grade + rubric + revision.' },
@@ -576,7 +716,7 @@ const grammarlyAlt: ProgrammaticPageConfig = {
     { label: 'Thesis Generator', href: '/tools/thesis-generator', teaser: 'Build a strong thesis statement.' },
     { label: 'Quizlet alternative', href: '/alternatives/quizlet', teaser: 'How WriteScholar compares to Quizlet.' },
   ],
-  primaryCta: { label: 'Try the essay checker free', page: 'analyze' },
+  primaryCta: { label: 'Preview the essay checker', page: 'analyze' },
   secondaryCta: { label: 'See pricing', page: 'pricing' },
 };
 
@@ -909,11 +1049,11 @@ function essayGuidePage(g: EssayGuideMeta): ProgrammaticPageConfig {
     metaTitle: isThesisOrCitation
       ? `How to Write a ${g.shortName === 'thesis' ? 'Thesis Statement' : 'APA Citation'}, Complete Guide | WriteScholar`
       : `How to Write a ${g.shortName.charAt(0).toUpperCase() + g.shortName.slice(1)} Essay, Step-by-Step | WriteScholar`,
-    metaDescription: `Learn how to write a ${g.niceName} step-by-step. Structure, examples, common mistakes, and FAQs. Plus free AI tools to help you draft, outline, and grade your essay.`,
+    metaDescription: `Learn how to write a ${g.niceName} step-by-step. Structure, examples, common mistakes, and FAQs. Plus AI tools to draft, outline, and preview-grade your essay.`,
     h1: isThesisOrCitation && g.type === 'apa-citation'
       ? 'How to Cite Sources in APA Format, Complete Guide'
       : `How to Write a ${g.shortName.charAt(0).toUpperCase() + g.shortName.slice(1)} ${g.type === 'apa-citation' ? '' : g.type === 'thesis' ? 'Statement' : g.type === 'research' ? 'Paper' : g.type === 'college' ? 'Essay' : 'Essay'}`,
-    subtitle: `Structure, examples, mistakes to avoid, and free AI tools to help you draft and check your work.`,
+    subtitle: `Structure, examples, mistakes to avoid, and AI tools to draft and preview-check your work.`,
     eyebrow: `${g.niceName} guide`,
     accent: '#A560E8',
     intro: g.intro,
@@ -969,7 +1109,7 @@ const bestPages: ProgrammaticPageConfig[] = [
         intro: 'Tested on the same 1,500-word argumentative essay across all platforms.',
         columns: ['Tool', 'Rubric depth', 'Grade calibration', 'Line annotations', 'Price'],
         rows: [
-          { feature: 'WriteScholar', values: ['5 categories + sub-criteria', 'Calibrated to college rubrics', 'Yes, interactive', 'Free + Pro $19.99/mo'] },
+          { feature: 'WriteScholar', values: ['5 categories + sub-criteria', 'Calibrated to college rubrics', 'Yes, interactive', PRO_PRICING_CELL] },
           { feature: 'Grammarly Premium', values: ['Style/clarity only', 'No essay grade', 'Yes, grammar focus', '$30/mo'] },
           { feature: 'ProWritingAid', values: ['Style/structure', 'No essay grade', 'Yes, comprehensive', '$120/year'] },
           { feature: 'EssayGrader.ai', values: ['Single grade only', 'Inconsistent', 'Limited', '$15/mo'] },
@@ -984,7 +1124,7 @@ const bestPages: ProgrammaticPageConfig[] = [
           { title: 'Calibration', body: 'A grader that gives every essay a B+ is useless. Best graders are calibrated to give roughly the distribution real professors give: 20% A, 40% B, 30% C, 10% below. WriteScholar tested with 200 graded essays from across freshman composition.' },
           { title: 'Line-by-line annotations', body: 'A holistic grade is fine; line annotations are where actual learning happens. "This sentence is unclear" is more useful than "your style is good".' },
           { title: 'Polished revision', body: 'The strongest graders also output a revised version of your essay so you can compare what could be different.' },
-          { title: 'Price', body: 'College students aren\'t paying $50/month for grading. Look for $20/mo or under, with a meaningful free tier for occasional use.' },
+          { title: 'Price', body: 'College students aren\'t paying $50/month for grading. WriteScholar Pro is $9.99 for your first month, then $19.99/mo — with lifetime previews so you can test on your own essay before subscribing.' },
         ],
       },
       {
@@ -1000,17 +1140,17 @@ const bestPages: ProgrammaticPageConfig[] = [
     faqs: [
       { question: 'Are AI essay graders accurate?', answer: 'For surface-level feedback (grammar, structure, basic argument quality), they\'re 80-90% accurate. For nuanced argument quality and originality, less so. Use as a complement to human feedback, not a replacement.' },
       { question: 'Will my professor know I used an AI grader?', answer: 'No, running your own essay through an AI grader for feedback is no different from running it through Grammarly. The output is feedback to YOU, not text you submit.' },
-      { question: 'What\'s the catch with the free tier?', answer: 'Most free tiers cap usage (1-3 essays per month). For occasional use, free is enough. For weekly papers, you\'ll need a paid plan.' },
+      { question: 'What\'s the catch with the free tier?', answer: 'WriteScholar gives 2 lifetime essay analysis previews on your own work (grade estimate, issues, top suggestions — full rubric and one-click fixes unlock with Pro). No monthly reset tricks: when previews are used, you know exactly what Pro adds. First month of Pro is $9.99 with NEWCUSTOMER.' },
       { question: 'Can AI graders grade as well as professors?', answer: 'Not yet. Top AI graders (WriteScholar, top-tier ChatGPT prompts) match professors ~75% of the time on overall grade, less on nuanced feedback. They\'re a useful first pass; not a replacement.' },
       { question: 'Which is best for med school applications?', answer: 'For high-stakes essays, get human feedback (admissions counsellor, mentor, English teacher). AI graders are useful for early drafts and grammar passes.' },
-      { question: 'Is WriteScholar genuinely better, or are you biased?', answer: 'I built it, so yes I\'m biased. The honest pitch: WriteScholar costs $20/mo (cheaper than Grammarly, half of ChatGPT Plus), gives 5-category rubric scoring (most don\'t), and includes line annotations + a revision (some do, some don\'t). For college students specifically, calibrated rubrics, college pricing, it\'s the best fit. For workplace writing, Grammarly is better. For creative work, neither.' },
+      { question: 'Is WriteScholar genuinely better, or are you biased?', answer: 'I built it, so yes I\'m biased. The honest pitch: preview your essay free, then Pro is $9.99 for your first month and $19.99/mo after — cheaper than Grammarly Premium, with 5-category rubric scoring most tools skip. For workplace writing, Grammarly is better. For creative work, neither.' },
     ],
     related: [
       { label: 'AI Essay Checker', href: '/tools/analyze', teaser: 'Try the WriteScholar essay grader free.' },
       { label: 'Best flashcard app for med school', href: '/best/flashcard-app-for-medical-school', teaser: 'Top flashcard tools compared.' },
       { label: 'Grammarly alternative', href: '/alternatives/grammarly', teaser: 'WriteScholar vs Grammarly side by side.' },
     ],
-    primaryCta: { label: 'Try the essay grader free', page: 'analyze' },
+    primaryCta: { label: 'Preview the essay grader', page: 'analyze' },
     secondaryCta: { label: 'See pricing', page: 'pricing' },
   },
   {
@@ -1030,7 +1170,7 @@ const bestPages: ProgrammaticPageConfig[] = [
         columns: ['App', 'SRS algorithm', 'Image cards', 'Premade content', 'Cost (4 years)'],
         rows: [
           { feature: 'Anki', values: ['SM-2 (best)', 'Yes', 'Anking deck (free)', 'Free desktop / $25 iOS' ] },
-          { feature: 'WriteScholar', values: ['SM-2 (Pro)', 'Yes (Pro)', 'AI-generate from notes', '$20/mo Pro'] },
+          { feature: 'WriteScholar', values: ['SM-2 (Pro)', 'Yes (Pro)', 'AI-generate from notes', PRO_PRICING_CELL] },
           { feature: 'RemNote', values: ['SM-2', 'Yes', 'Limited', '$80/year'] },
           { feature: 'Brainscape', values: ['Confidence-based', 'Yes', 'Pro decks', '$120/year'] },
           { feature: 'Quizlet', values: ['Limited', 'Yes', 'User decks', '$36/year'] },
@@ -1044,7 +1184,7 @@ const bestPages: ProgrammaticPageConfig[] = [
           { title: 'Image card support', body: 'Anatomy, histology, pathology, all visual. Text-only cards don\'t cut it. Image-occlusion (hide parts of an image) is a major plus.' },
           { title: 'Premade content', body: 'Anking is the gold standard premade deck for med school (~25,000 cards covering Step 1). For Anki, free. For other apps, you usually have to build your own.' },
           { title: 'Cross-device sync', body: 'Phone for commute reviews, laptop for evening studying. Syncing has to be fast and reliable.' },
-          { title: 'Cost over 4 years', body: 'Anki is free desktop (paid iOS). WriteScholar is $20/mo. Over 4 years: Anki ~$25 total, WriteScholar ~$960.' },
+          { title: 'Cost over 4 years', body: 'Anki is free desktop (paid iOS). WriteScholar Pro is $9.99 first month, then $19.99/mo. Over 4 years: Anki ~$25 total; WriteScholar ~$960 if you stay subscribed — preview study packs free before committing.' },
         ],
       },
       {
@@ -1052,7 +1192,7 @@ const bestPages: ProgrammaticPageConfig[] = [
         heading: 'When to pick each',
         items: [
           { title: 'Pick Anki if', body: 'You want the best SRS algorithm, Anking deck, and lowest cost. Downside: ugly UI, steep learning curve, manual deck setup.' },
-          { title: 'Pick WriteScholar if', body: 'You want AI to generate flashcards from your lecture notes (Anki can\'t do this), and you want essay tools + summarizer alongside. Downside: more expensive than Anki.' },
+          { title: 'Pick WriteScholar if', body: 'You want AI to generate flashcards from your lecture notes (Anki can\'t do this), and you want essay tools + summarizer alongside. Preview the lesson + sample cards free; full deck and SRS unlock on Pro.' },
           { title: 'Pick RemNote if', body: 'You want note-taking integrated with flashcards (write the notes, automatically convert to cards). Smaller community than Anki.' },
           { title: 'Pick Brainscape if', body: 'You like confidence-based ratings (you choose how well you knew the answer on a 1-5 scale). Less flexible than SM-2 but easier to start.' },
         ],
@@ -1071,7 +1211,7 @@ const bestPages: ProgrammaticPageConfig[] = [
       { label: 'Best AI essay grader for college', href: '/best/ai-essay-grader-for-college', teaser: 'Top essay graders compared.' },
       { label: 'Quizlet alternative', href: '/alternatives/quizlet', teaser: 'WriteScholar vs Quizlet.' },
     ],
-    primaryCta: { label: 'Try WriteScholar free', page: 'signup' },
+    primaryCta: { label: 'Preview WriteScholar free', page: 'signup' },
     secondaryCta: { label: 'See flashcard tool', page: 'create-flashcards' },
   },
   {
@@ -1090,7 +1230,7 @@ const bestPages: ProgrammaticPageConfig[] = [
         heading: 'Top study apps for college',
         columns: ['App', 'Notes', 'Flashcards', 'Quizzes', 'Essays', 'Cost'],
         rows: [
-          { feature: 'WriteScholar', values: ['Light', 'AI-generated', 'AI-generated', 'AI grader', '$19.99/mo'] },
+          { feature: 'WriteScholar', values: ['Light', 'AI-generated', 'AI-generated', 'AI grader', PRO_PRICING_CELL] },
           { feature: 'Notion', values: ['Best', 'Manual', 'Manual', 'No', 'Free / $8/mo'] },
           { feature: 'Quizlet', values: ['No', 'Yes', 'Limited', 'No', '$36/year'] },
           { feature: 'Anki', values: ['No', 'Best', 'No', 'No', 'Free / $25 iOS'] },
@@ -1102,9 +1242,9 @@ const bestPages: ProgrammaticPageConfig[] = [
         type: 'list',
         heading: 'How to pick',
         items: [
-          { title: 'For STEM-heavy schedules', body: 'Anki + WriteScholar. Anki for premade content (Anking, etc.); WriteScholar for class-specific notes that need AI generation.' },
+          { title: 'For STEM-heavy schedules', body: 'Anki + WriteScholar. Anki for premade content (Anking, etc.); WriteScholar for class-specific notes — preview the AI-generated pack free, then upgrade for full quizzes and decks.' },
           { title: 'For humanities-heavy schedules', body: 'Notion + WriteScholar. Notion for note-taking and research organisation; WriteScholar for essay tools, citations, and study guides.' },
-          { title: 'For occasional studying', body: 'WriteScholar free covers most casual student needs. Notion free for note-taking. Don\'t pay for what you don\'t use weekly.' },
+          { title: 'For occasional studying', body: 'WriteScholar lets you preview essay feedback and study packs on your own work before paying — no credit card. Notion free for note-taking. Don\'t subscribe until you\'ve seen real results.' },
           { title: 'For visual note-takers', body: 'Notability or Goodnotes for handwritten notes on iPad. Then run scanned notes through WriteScholar to generate flashcards/quizzes.' },
         ],
       },
@@ -1112,7 +1252,7 @@ const bestPages: ProgrammaticPageConfig[] = [
     faqs: [
       { question: 'What\'s the single best study app?', answer: 'There isn\'t one, best app depends on your major and study style. Most students end up using 2-3 apps that complement each other.' },
       { question: 'How much should I spend on study apps?', answer: '$0-30/month is reasonable for college. Anything more, you\'re probably paying for features you don\'t use.' },
-      { question: 'Are paid apps worth it over free?', answer: 'For occasional studying, no. For 4 years of college, yes, paying $20/month for tools that save you hours per week is good ROI.' },
+      { question: 'Are paid apps worth it over free?', answer: 'Preview free first. If a tool saves you hours per week on essays or exam prep, $9.99 for the first month of Pro is easy ROI — but only after you\'ve seen it work on your own material.' },
       { question: 'Can I use multiple apps?', answer: 'Yes, most students do. Notion + Anki + WriteScholar is a common combo. Avoid 5+ apps; switching becomes friction.' },
       { question: 'Are these apps academic-integrity safe?', answer: 'Generating flashcards/quizzes from your own notes is fine. Submitting AI-generated essays is not. Each tool here can be used safely; the user determines whether use is ethical.' },
     ],
@@ -1121,7 +1261,7 @@ const bestPages: ProgrammaticPageConfig[] = [
       { label: 'Quizlet alternative', href: '/alternatives/quizlet', teaser: 'WriteScholar vs Quizlet.' },
       { label: 'AI Quiz Generator', href: '/tools/quiz-generator', teaser: 'Try the WriteScholar quiz tool free.' },
     ],
-    primaryCta: { label: 'Try WriteScholar free', page: 'signup' },
+    primaryCta: { label: 'Preview WriteScholar free', page: 'signup' },
     secondaryCta: { label: 'See pricing', page: 'pricing' },
   },
   {
@@ -1140,7 +1280,7 @@ const bestPages: ProgrammaticPageConfig[] = [
         heading: 'Top quiz makers for teachers',
         columns: ['Tool', 'AI from lesson plans', 'Multiple formats', 'LMS integration', 'Cost'],
         rows: [
-          { feature: 'WriteScholar', values: ['Yes', 'MCQ + T/F + fill-in', 'CSV export', 'Free + $19.99/mo'] },
+          { feature: 'WriteScholar', values: ['Yes', 'MCQ + T/F + fill-in', 'CSV export', PRO_PRICING_CELL] },
           { feature: 'Kahoot', values: ['Limited', 'MCQ only (mostly)', 'Yes, many LMS', '$10-20/mo'] },
           { feature: 'Quizizz', values: ['Yes', 'MCQ + open-ended', 'Yes, Google/Canvas', '$10/mo'] },
           { feature: 'ChatGPT', values: ['With prompting', 'Anything you ask', 'Manual', '$20/mo'] },
@@ -1189,7 +1329,7 @@ const bestPages: ProgrammaticPageConfig[] = [
         heading: 'Top citation generators',
         columns: ['Tool', 'Free unlimited', 'APA/MLA/Chicago', 'IEEE/Vancouver', 'Cost (paid)'],
         rows: [
-          { feature: 'WriteScholar', values: ['Yes', 'Yes', 'Yes', '$19.99/mo for full suite'] },
+          { feature: 'WriteScholar', values: ['Citation tool: unlimited free', 'Yes', 'Yes', PRO_PRICING_CELL] },
           { feature: 'Cite This For Me', values: ['No (5 free)', 'Yes', 'Paid only', '$9.99/mo'] },
           { feature: 'EasyBib', values: ['No (5 free)', 'Yes', 'Paid only', '$9.99/mo'] },
           { feature: 'Zotero', values: ['Yes', 'Yes', 'Yes', 'Free' ] },
@@ -1211,7 +1351,7 @@ const bestPages: ProgrammaticPageConfig[] = [
       { question: 'Are citation generators 100% accurate?', answer: 'For standard sources (books, journal articles, websites), yes. For edge cases (legal documents, archival manuscripts, government reports), often need manual fixes. Cross-check with your style\'s manual.' },
       { question: 'Should I use Zotero?', answer: 'For research-heavy work (theses, dissertations, multi-paper projects), yes. The browser extension + library + auto-citation is unmatched. For occasional one-off citations, lighter tools are faster.' },
       { question: 'Can I import from Zotero into WriteScholar?', answer: 'Yes, export from Zotero in BibTeX or RIS format, then import into WriteScholar Pro.' },
-      { question: 'Is the WriteScholar citation generator free?', answer: 'Yes, unlimited free use of the citation generator. Other features (essay grader, etc.) have free + paid tiers, but citations are unlimited free.' },
+      { question: 'Is the WriteScholar citation generator free?', answer: 'Yes — the standalone citation formatter (APA, MLA, Chicago, Harvard) is unlimited and free, no signup. Citation Finder (search peer-reviewed sources by topic) includes 2 lifetime preview searches on free; full source lists unlock with Pro.' },
       { question: 'Does it support APA 6 or APA 7?', answer: 'APA 7 (the current standard, 2019). Most universities require APA 7; APA 6 is being phased out.' },
     ],
     related: [

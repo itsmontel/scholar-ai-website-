@@ -5,6 +5,7 @@ import FlashcardViewer from '../../common/FlashcardViewer';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 import ToolPageSeoContent from '../../common/ToolPageSeoContent';
 import { flashcardsSeo } from '../../../data/toolSeoContent';
+import { TOOL_SEO_META } from '../../../constants/toolSeoMeta';
 
 interface CreateFlashcardsPageProps {
   onNavigate: (page: string, slug?: string, options?: { quizHistoryFilter?: string }) => void;
@@ -181,10 +182,10 @@ const CreateFlashcardsPage = ({ onNavigate, user, onLogout }: CreateFlashcardsPa
     applyPageSeoTags({
       title: studyMode
         ? 'Study Flashcards | WriteScholar'
-        : 'Create Flashcards – Custom Deck Builder | WriteScholar',
+        : TOOL_SEO_META['create-flashcards'].title,
       description: studyMode
         ? 'Study your flashcard decks with WriteScholar — flip, shuffle, and master your notes.'
-        : 'Build custom flashcard decks for any subject with WriteScholar. Free to start, save up to 5 decks. Auto-generate cards from your notes with the AI option.',
+        : TOOL_SEO_META['create-flashcards'].description,
     });
     if (!studyMode) {
       injectToolProductSchema({

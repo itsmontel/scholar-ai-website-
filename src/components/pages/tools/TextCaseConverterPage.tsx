@@ -4,6 +4,7 @@ import Footer from '../../common/Footer';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 import ToolPageSeoContent from '../../common/ToolPageSeoContent';
 import { textCaseSeo } from '../../../data/toolSeoContent';
+import { TOOL_SEO_META } from '../../../constants/toolSeoMeta';
 
 interface TextCaseConverterPageProps {
   onNavigate: (page: string) => void;
@@ -20,8 +21,7 @@ const TextCaseConverterPage = ({ onNavigate, user, onLogout }: TextCaseConverter
   // SEO: per-route title, description, canonical, OG, Twitter, plus tool schema.
   useEffect(() => {
     applyPageSeoTags({
-      title: 'Free Text Case Converter - Uppercase, Lowercase, Title Case | WriteScholar',
-      description: 'Free text case converter. Convert text to uppercase, lowercase, title case, sentence case, and more. Transform your text instantly. No signup required.',
+      ...TOOL_SEO_META['text-case-converter'],
     });
     injectToolProductSchema({
       name: 'Text Case Converter',

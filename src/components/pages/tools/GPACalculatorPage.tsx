@@ -5,6 +5,7 @@ import ScholarMascot from '../../common/ScholarMascot';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 import ToolPageSeoContent from '../../common/ToolPageSeoContent';
 import { gpaSeo } from '../../../data/toolSeoContent';
+import { TOOL_SEO_META } from '../../../constants/toolSeoMeta';
 import EmbedCodeBlock from '../../common/EmbedCodeBlock';
 
 interface GPACalculatorPageProps {
@@ -42,8 +43,7 @@ const GPACalculatorPage = ({ onNavigate, user, onLogout }: GPACalculatorPageProp
 
   useEffect(() => {
     applyPageSeoTags({
-      title: 'Free GPA Calculator — College & University Grades | WriteScholar',
-      description: 'Free GPA calculator for college and high school students. Calculate your semester or cumulative GPA instantly. Add courses, credits, and grades. No signup required.',
+      ...TOOL_SEO_META['gpa-calculator'],
     });
     injectToolProductSchema({
       name: 'GPA Calculator',
@@ -128,7 +128,7 @@ const GPACalculatorPage = ({ onNavigate, user, onLogout }: GPACalculatorPageProp
               Free Tool
             </span>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-800 dark:text-stone-100 mb-4 leading-tight tracking-tight">
-              GPA Calculator
+              College GPA Calculator
             </h1>
             <p className="text-base text-stone-500 dark:text-stone-400 leading-relaxed max-w-2xl mx-auto font-bold">
               Calculate your semester or cumulative GPA instantly. Add your courses, credit hours, and grades to see where you stand.

@@ -27,6 +27,36 @@ export const BLOG_DEFAULT_AUTHOR_BIO =
 
 export const blogPostList: BlogPostMeta[] = [
   {
+    slug: 'grade-my-essay-before-submitting',
+    title: 'Grade My Essay: How to Check Your Grade Before You Submit (2026)',
+    description:
+      'Want to know your essay grade before your professor does? How AI essay graders estimate your score, what a rubric-based check catches that proofreading misses, and a 15-minute pre-submission routine.',
+    date: '2026-06-11',
+    author: 'WriteScholar Team',
+    readTime: '9 min read',
+    category: 'Guides',
+    keyTakeaways: [
+      'An estimated grade is a diagnostic, not a verdict — its job is to show which rubric categories are costing you points while you can still fix them.',
+      'Rubric-based feedback (thesis, evidence, structure, style, mechanics) catches the issues that actually move grades; grammar-only passes do not.',
+      'A 15-minute routine — grade check, fix the two lowest categories, re-check — beats an hour of unfocused polishing.',
+    ],
+  },
+  {
+    slug: 'turn-lecture-notes-into-study-guide',
+    title: 'How to Turn Lecture Notes Into a Study Guide (in Under 5 Minutes)',
+    description:
+      'Stop rereading messy lecture notes. A step-by-step method for turning raw notes into a structured study guide with flashcards and a practice quiz — manually or with AI in under five minutes.',
+    date: '2026-05-28',
+    author: 'WriteScholar Team',
+    readTime: '10 min read',
+    category: 'Study skills',
+    keyTakeaways: [
+      'Rereading notes feels productive but tests recognition, not recall — restructure notes into questions before the exam does it for you.',
+      'A good study guide has three layers: a condensed summary, term flashcards, and self-test questions that mirror the exam format.',
+      'AI can build all three layers from one paste of your notes; your job shifts from typing to reviewing and drilling.',
+    ],
+  },
+  {
     slug: 'essay-checker-plagiarism-research-paper-help-google-searches',
     title:
       'Essay Checker, Plagiarism & Research Paper Help: What Students Actually Type Into Google',

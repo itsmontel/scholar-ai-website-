@@ -59,7 +59,12 @@ export type ProgrammaticSection =
   | { type: 'list'; heading: string; items: { title: string; body: string }[] }
   | { type: 'comparison'; heading: string; columns: string[]; rows: { feature: string; values: string[] }[]; intro?: string }
   | { type: 'steps'; heading: string; steps: { title: string; body: string }[] }
-  | { type: 'examples'; heading: string; examples: { label: string; before: string; after: string; explanation: string }[] };
+  | { type: 'examples'; heading: string; examples: { label: string; before: string; after: string; explanation: string }[] }
+  /** Product visual — autoplay demo clip or screenshot inside a device-style
+      card. The single highest-leverage engagement block on competitor
+      comparison pages: visitors searching "X alternative" want to SEE the
+      product, not read another table. */
+  | { type: 'media'; kind: 'video' | 'image'; src: string; alt: string; heading?: string; caption?: string; poster?: string };
 
 /* ─── Schema injection helpers ─────────────────────────────────── */
 
@@ -397,6 +402,43 @@ const ExamplesSection = ({ section, accent }: { section: Extract<ProgrammaticSec
   </div>
 );
 
+/**
+ * Product visual — demo video (autoplay, muted, looped) or screenshot in a
+ * browser-chrome card. Lazy-loaded so it never hurts LCP on these pages.
+ */
+const MediaSection = ({ section, accent }: { section: Extract<ProgrammaticSection, { type: 'media' }>; accent: string }) => (
+  <div className="mb-14">
+    {section.heading && <SectionHeading accent={accent}>{section.heading}</SectionHeading>}
+    <div className="rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 overflow-hidden shadow-sm">
+      {/* Faux browser chrome so the asset reads as "the actual product" */}
+      <div className="flex items-center gap-1.5 px-4 py-2.5 border-b-2 border-stone-100 dark:border-stone-800 bg-stone-50 dark:bg-stone-900/60">
+        <span className="w-2.5 h-2.5 rounded-full bg-[#FF5F57]" aria-hidden />
+        <span className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]" aria-hidden />
+        <span className="w-2.5 h-2.5 rounded-full bg-[#28C840]" aria-hidden />
+        <span className="ml-3 text-[11px] font-bold text-stone-400 dark:text-stone-500 truncate">writescholar.com</span>
+      </div>
+      {section.kind === 'video' ? (
+        <video
+          className="w-full h-auto block"
+          src={section.src}
+          poster={section.poster}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          aria-label={section.alt}
+        />
+      ) : (
+        <img src={section.src} alt={section.alt} loading="lazy" className="w-full h-auto block" />
+      )}
+    </div>
+    {section.caption && (
+      <p className="mt-3 text-center text-[13px] font-bold text-stone-500 dark:text-stone-400">{section.caption}</p>
+    )}
+  </div>
+);
+
 /* ─── Page component ───────────────────────────────────────────── */
 
 interface Props {
@@ -641,6 +683,8 @@ const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) 
                 return <StepsSection key={i} section={section} accent={accent} />;
               case 'examples':
                 return <ExamplesSection key={i} section={section} accent={accent} />;
+              case 'media':
+                return <MediaSection key={i} section={section} accent={accent} />;
               default:
                 return null;
             }

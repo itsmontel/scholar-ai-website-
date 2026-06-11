@@ -1301,8 +1301,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   className="max-w-lg sm:max-w-xl lg:max-w-none text-base sm:text-lg lg:text-[1.125rem] font-semibold text-white/90 leading-relaxed mb-5 sm:mb-6"
                   style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                 >
-                  The all-in-one study system to{' '}
-                  <span className="font-extrabold text-white">write better</span>,{' '}
+                  The all-in-one AI study system to{' '}
+                  <span className="font-extrabold text-white">write better essays</span>,{' '}
                   <span className="font-extrabold text-white">study smarter</span>, and{' '}
                   <span className="font-extrabold text-[#FFC800]">get higher grades.</span>
                 </p>

@@ -7,6 +7,7 @@ import { trackCopy } from '../../../data/achievements';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 import ToolPageSeoContent from '../../common/ToolPageSeoContent';
 import { citationGeneratorSeo } from '../../../data/toolSeoContent';
+import { TOOL_SEO_META } from '../../../constants/toolSeoMeta';
 
 interface CitationGeneratorToolPageProps {
   onNavigate: (page: string) => void;
@@ -93,8 +94,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
   // SEO: per-route title, description, canonical, OG, Twitter, plus tool schema.
   useEffect(() => {
     applyPageSeoTags({
-      title: 'Free Citation Generator – APA, MLA, Chicago, Harvard | WriteScholar',
-      description: 'Free online citation generator. Create APA, MLA, Chicago, Harvard citations for books, journals, websites. Generate citations instantly—no signup. Trusted by students.',
+      ...TOOL_SEO_META['citation-generator-tool'],
     });
     injectToolProductSchema({
       name: 'Citation Generator',
@@ -1296,7 +1296,7 @@ const CitationGeneratorToolPage = ({ onNavigate, user, onLogout }: CitationGener
               Free Tool
             </span>
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-stone-900 dark:text-stone-50 mb-3 leading-tight">
-              Citation Generator
+              Citation Generator for APA, MLA &amp; Chicago
             </h1>
             <p className="text-base sm:text-lg text-stone-500 dark:text-stone-400 leading-relaxed max-w-2xl mx-auto">
               APA, MLA, Chicago, Harvard, IEEE & Vancouver for 12 source types.

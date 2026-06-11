@@ -265,19 +265,19 @@ const Header: React.FC<HeaderProps> = ({
               </div>
             </nav>
 
-            {/* Right side */}
+            {/* Right side — Log in (returning) + Start for free (new users) */}
             <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 shrink-0">
               <button
-                onClick={() => onNavigate?.('signup')}
+                onClick={() => onNavigate?.('login')}
                 className={`hidden sm:inline-flex px-4 py-2 text-sm font-bold uppercase tracking-wide rounded-xl border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all shrink-0 ${isLandingPurple ? 'text-[#6B27A3] bg-white border-white/70 hover:bg-stone-50' : 'text-stone-700 dark:text-stone-300 border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800'}`}
               >
-                Start for free
+                Log in
               </button>
               <button
                 onClick={() => onNavigate?.('signup')}
                 className={`inline-flex items-center justify-center px-4 py-2 sm:px-5 text-sm font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all whitespace-nowrap shrink-0 ${isLandingPurple ? 'text-[#6B27A3] bg-[#FFC800] hover:bg-[#FFD52E] border-[#D4A300]' : 'text-white bg-[#A560E8] hover:bg-[#9450D8] border-[#8A48C7]'}`}
               >
-                Sign up
+                Start for free
               </button>
               <button
                 type="button"
@@ -323,16 +323,16 @@ const Header: React.FC<HeaderProps> = ({
               ))}
               <div className="pt-2 pb-1 flex flex-col gap-2">
                 <button
-                  onClick={() => { onNavigate?.('signup'); setIsMobileMenuOpen(false); }}
+                  onClick={() => { onNavigate?.('login'); setIsMobileMenuOpen(false); }}
                   className={`block text-center px-4 py-2.5 text-sm font-bold uppercase tracking-wide rounded-xl border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all ${isLandingPurple ? 'text-[#6B27A3] bg-white border-white/70 hover:bg-stone-50' : 'text-stone-700 dark:text-stone-300 border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800'}`}
                 >
-                  Start for free
+                  Log in
                 </button>
                 <button
                   onClick={() => { onNavigate?.('signup'); setIsMobileMenuOpen(false); }}
                   className={`block text-center px-4 py-2.5 text-sm font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all ${isLandingPurple ? 'text-[#6B27A3] bg-[#FFC800] hover:bg-[#FFD52E] border-[#D4A300]' : 'text-white bg-[#A560E8] hover:bg-[#9450D8] border-[#8A48C7]'}`}
                 >
-                  Sign up
+                  Start for free
                 </button>
               </div>
               </div>

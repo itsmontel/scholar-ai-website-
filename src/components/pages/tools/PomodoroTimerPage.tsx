@@ -4,6 +4,7 @@ import Footer from '../../common/Footer';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 import ToolPageSeoContent from '../../common/ToolPageSeoContent';
 import { pomodoroSeo } from '../../../data/toolSeoContent';
+import { TOOL_SEO_META } from '../../../constants/toolSeoMeta';
 import EmbedCodeBlock from '../../common/EmbedCodeBlock';
 
 interface PomodoroTimerPageProps {
@@ -30,8 +31,7 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
 
   useEffect(() => {
     applyPageSeoTags({
-      title: 'Free Pomodoro Timer - Study Timer & Focus Tool | WriteScholar',
-      description: 'Free Pomodoro timer for focused studying. Boost productivity with timed work sessions and breaks. Customizable focus and break intervals. No signup required.',
+      ...TOOL_SEO_META['pomodoro-timer'],
     });
     injectToolProductSchema({
       name: 'Pomodoro Timer',
@@ -215,7 +215,7 @@ const PomodoroTimerPage = ({ onNavigate, user, onLogout }: PomodoroTimerPageProp
               Free Tool
             </span>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-900 dark:text-stone-50 mb-5 leading-tight">
-              Pomodoro Timer
+              Pomodoro Study Timer
             </h1>
             <p className="text-lg text-stone-500 dark:text-stone-400 leading-relaxed max-w-2xl mx-auto">
               Stay focused and productive with timed study sessions. Work in focused bursts with scheduled breaks to maximize your learning.

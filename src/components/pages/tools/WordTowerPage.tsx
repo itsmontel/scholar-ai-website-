@@ -5,6 +5,7 @@ import { WriteScholarEditorialBackgroundLayers } from '../../common/WriteScholar
 import { WORD_TOWER_WORD_BANK, WordTowerQuestion as BankQuestion } from '../../../data/wordTowerWordBank';
 import { WORD_TOWER_MENTAL_MATH_BANK } from '../../../data/wordTowerMentalMathBank';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
+import { TOOL_SEO_META } from '../../../constants/toolSeoMeta';
 import { trackWordTowerGame } from '../../../data/achievements';
 
 /* ────────────────────── Types ────────────────────── */
@@ -206,8 +207,7 @@ const WordTowerPage = ({ onNavigate, user, onLogout }: WordTowerPageProps) => {
 
   useEffect(() => {
     applyPageSeoTags({
-      title: 'Word Tower — AI Stacking Study Game | WriteScholar',
-      description: 'Word Tower — the AI-powered stacking study game. Build the tallest tower by catching correct answers. Don\'t let the tower fall!',
+      ...TOOL_SEO_META['word-tower'],
     });
     injectToolProductSchema({
       name: 'Word Tower',

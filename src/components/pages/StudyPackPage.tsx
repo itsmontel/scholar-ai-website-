@@ -5,16 +5,13 @@ import { trackStudyPackGenerated, getStats } from '../../data/achievements';
 import { trackEvent } from '../../utils/analytics';
 import { applyPageSeoTags, absoluteCanonicalUrl, injectJsonLd, removeJsonLd } from '../../utils/seo';
 import { ogImageUrlForPage } from '../../utils/ogImageUrls';
+import { TOOL_SEO_META } from '../../constants/toolSeoMeta';
 import { FREE_PREVIEW_LIFETIME_NOTE } from '../../utils/usageReset';
 import type { EmbeddedDashboardTool } from './CitationsPage';
 import AnalysisAnimation from '../common/AnalysisAnimation';
 import { StudyPackPreviewSection } from '../common/PreviewSections';
 
-const STUDY_PACK_PAGE_SEO = {
-  title: 'AI Study Pack — Lesson, Flashcards, Quiz, Crossword & More | WriteScholar',
-  description:
-    'Turn notes into a lesson, flashcards, quiz, crossword, Crater Blast, and Word Tower from one paste. Same study pack flow as the dashboard.',
-};
+const STUDY_PACK_PAGE_SEO = TOOL_SEO_META['study-pack'];
 
 type NavigateFn = (
   page: string,

@@ -431,6 +431,164 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
   };
 
   switch (slug) {
+    case 'grade-my-essay-before-submitting':
+      return (
+        <>
+          <p className={p}>
+            Every student has had the moment: you hit submit, and somewhere between the upload and the grade coming back, you realise you have no idea how it went. Was the thesis sharp enough? Did paragraph three actually support the argument? You will find out in a week — when it is too late to do anything about it.
+          </p>
+          <p className={p}>
+            Searching &quot;grade my essay&quot; is really asking a different question: <em>can I see my grade while I can still change it?</em> The answer in 2026 is yes. AI essay graders read your draft against the same rubric categories professors use and return an estimated grade with category-level scores in under a minute. Here is how to use one properly — and how to avoid treating the number like a promise.
+          </p>
+
+          <EssayAnalysisIllustration />
+
+          <h2 className={h2}>What an estimated grade actually is</h2>
+          <p className={p}>
+            A good AI grader does not pull a number from thin air. It scores your essay across the categories that appear on virtually every college rubric: thesis clarity, evidence and support, structure and organization, academic style, and mechanics. Each category gets a score; the overall grade is the weighted result. That breakdown is the entire value. A &quot;B+&quot; on its own tells you nothing — &quot;B+ because your evidence category scored 6/10&quot; tells you exactly where the next hour of revision should go.
+          </p>
+          <p className={p}>
+            Treat the estimate as a diagnostic, not a verdict. In practice, rubric-calibrated tools land within a few points of real professor scores most of the time — close enough to find weak spots, not close enough to bet your submission on. Your professor weighs things no tool can see: class discussions, the prompt&apos;s hidden emphasis, their personal pet peeves. Use the estimate to fix, not to predict.
+          </p>
+
+          <h2 className={h2}>Why grammar checks alone won&apos;t move your grade</h2>
+          <p className={p}>
+            Most students &quot;check&quot; an essay by running a grammar pass and rereading it twice. Here is the problem: mechanics are usually worth 10–20% of a college rubric. You can have flawless commas and still get a C, because the grade lives in the other categories — argument, evidence, structure. A <a href="/tools/grammar-checker" onClick={handleNavigate('grammar-checker')} className={internalLink}>grammar checker</a> is a fine final pass, but it cannot tell you that your thesis is too broad or that paragraph four never connects back to the argument.
+          </p>
+          <p className={p}>
+            That is the gap rubric-based grading fills. When feedback is mapped to your exact sentences — this claim lacks support, this transition breaks the logic, this conclusion just restates — you revise the things that carry grade weight. If you are still shaping the argument itself, start with a <a href="/tools/thesis-generator" onClick={handleNavigate('thesis-generator')} className={internalLink}>thesis statement generator</a> and an <a href="/tools/essay-outline" onClick={handleNavigate('essay-outline')} className={internalLink}>outline</a> before drafting at all.
+          </p>
+
+          <h2 className={h2}>The 15-minute pre-submission routine</h2>
+          <p className={p}>
+            You do not need an hour. You need a focused loop:
+          </p>
+          <p className={p}>
+            <strong>Minutes 0–2: run the grade check.</strong> Paste your draft (or import the Word doc) into an <a href="/tools/analyze" onClick={handleNavigate('analyze')} className={internalLink}>AI essay checker</a>. You get an estimated grade, category scores, and line-level annotations.
+          </p>
+          <p className={p}>
+            <strong>Minutes 2–12: fix the two lowest categories.</strong> Ignore everything else. If evidence scored lowest, strengthen or replace the weakest two pieces of support — the <a href="/tools/citations" onClick={handleNavigate('citations')} className={internalLink}>citation finder</a> can surface a peer-reviewed source in a minute. If structure scored lowest, fix topic sentences and transitions first; they are the cheapest structural repairs.
+          </p>
+          <p className={p}>
+            <strong>Minutes 12–15: re-check and stop.</strong> Run the analysis again. If the weak categories moved, you are done — diminishing returns set in fast, and sleep is worth more than a fourth pass. Export the Word doc and submit.
+          </p>
+
+          <h2 className={h2}>Is checking your grade with AI cheating?</h2>
+          <p className={p}>
+            No — with one bright line. Getting feedback on writing you produced is what writing centers, peer review sessions, and office hours have always been for. An AI grader is the same loop, faster. The line is submission: the words you hand in must be yours. Feedback on your draft is legitimate; generated paragraphs pasted in as your own voice are not. If you are paraphrasing sources, do it properly — our <a href="/tools/paraphrasing-tips" onClick={handleNavigate('paraphrasing-tips')} className={internalLink}>paraphrasing guide</a> covers staying on the right side of that line too.
+          </p>
+
+          <h2 className={h2}>Check your draft before your professor does</h2>
+          <p className={p}>
+            <a href="/tools/analyze" onClick={handleNavigate('analyze')} className={internalLink}>WriteScholar&apos;s essay checker</a> gives you an estimated grade, full rubric scores, and line-by-line annotations on your own draft. You can preview your first analyses free — see the grade and what is costing you points before paying anything. Pro unlocks every fix with one-click apply, plus Word import and export. See <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for the current first-month offer.
+          </p>
+          <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
+            Grade my essay →
+          </a>
+
+          <BlogFaqAccordion
+            items={[
+              {
+                question: 'How accurate is an AI-estimated essay grade?',
+                answer:
+                  'Rubric-calibrated graders typically land within a few points of real professor scores on standard academic essays. Accuracy is highest on structure, evidence use, and mechanics; lowest on originality and nuanced argument quality. Use the category scores to direct revision rather than treating the overall number as a guarantee.',
+              },
+              {
+                question: 'Can I check my grade more than once?',
+                answer:
+                  'Yes — and you should. The grade-check → revise → re-check loop is the whole point. On WriteScholar, free accounts get preview analyses to see how it works on their own writing; Pro removes the practical limits for weekly papers.',
+              },
+              {
+                question: 'Does it work for research papers and longer essays?',
+                answer:
+                  'Yes. The same rubric analysis runs on short essays, term papers, and thesis chapters. Longer documents take slightly longer to process, and the line-by-line annotations become more valuable as length grows — nobody rereads a 6,000-word draft objectively at 2am.',
+              },
+              {
+                question: 'Will my professor know I used an AI grader?',
+                answer:
+                  'Checking your own draft is feedback, like using a writing center or Grammarly — there is nothing to detect, because you are not submitting generated text. The work stays yours; the tool just tells you where it is weak before someone with a red pen does.',
+              },
+            ]}
+          />
+        </>
+      );
+
+    case 'turn-lecture-notes-into-study-guide':
+      return (
+        <>
+          <p className={p}>
+            It is week 11. The exam covers nine weeks of lectures, and your notes are 40 pages of half-sentences, arrows, and the occasional &quot;IMPORTANT??&quot; in the margin. The default move — rereading them start to finish — feels productive and does almost nothing. Recognition is not recall. The night you reread notes, everything looks familiar; the morning of the exam, familiar is not the same as retrievable.
+          </p>
+          <p className={p}>
+            A study guide fixes this by changing the format of the material from &quot;things to read&quot; into &quot;things to answer.&quot; Here is the three-layer structure that works, how to build it by hand, and how to build it in under five minutes with AI.
+          </p>
+
+          <FlashcardsIllustration />
+
+          <h2 className={h2}>The three layers of a study guide that works</h2>
+          <p className={p}>
+            <strong>Layer 1: the condensed summary.</strong> Each lecture compressed to 5–10 lines: the core concept, why it matters, how it connects to the previous week. This is your map — it tells you what exists, not the details.
+          </p>
+          <p className={p}>
+            <strong>Layer 2: term flashcards.</strong> Every bolded term, named theory, formula, and date becomes a card. Definition on the back, but also the &quot;why it matters&quot; — a card that says &quot;operant conditioning = learning via consequences&quot; is weaker than one that adds &quot;contrast with classical: voluntary vs reflexive behavior.&quot;
+          </p>
+          <p className={p}>
+            <strong>Layer 3: self-test questions in exam format.</strong> If your exam is multiple-choice, drill multiple-choice. If it is short-answer, write &quot;explain X in 3 sentences&quot; prompts. The biggest study-guide mistake is testing yourself in a format the exam will not use. Our guide on <a href="/blog/how-to-study-effectively-complete-guide" onClick={handleNavigate('blog')} className={internalLink}>studying effectively</a> covers the research behind this — retrieval practice in matching format is one of the most reliable effects in learning science.
+          </p>
+
+          <h2 className={h2}>The manual method (about 90 minutes per exam)</h2>
+          <p className={p}>
+            Go lecture by lecture. Write the 5-line summary first — forcing the compression is itself a study event. Then pull terms into a deck (paper or app). Then write 3–5 self-test questions per lecture, answers on a separate page. For a 9-week course this takes most of an evening, which is fine if you have the evening. The compression and question-writing are genuinely valuable; the typing is not.
+          </p>
+
+          <h2 className={h2}>The AI method (under 5 minutes)</h2>
+          <p className={p}>
+            This is where a <a href="/tools/study-pack" onClick={handleNavigate('study-pack')} className={internalLink}>study pack generator</a> earns its place: paste your raw notes — messy formatting and all — and it builds all three layers at once. A structured lesson (your Layer 1), a flashcard deck pulled from the key terms (Layer 2), and a mixed-format quiz with multiple-choice, true/false, and fill-in-the-blank (Layer 3). What took an evening now takes the time it takes to paste.
+          </p>
+          <p className={p}>
+            Your job shifts from typing to quality control: skim the lesson for anything the AI over-compressed, delete flashcards for terms you already know cold, and drill the quiz. If you want more question volume for a heavy exam, the standalone <a href="/tools/quiz-generator" onClick={handleNavigate('quiz-generator')} className={internalLink}>quiz generator</a> can build additional rounds from the same notes. For dense assigned readings, run them through the <a href="/tools/summarizer" onClick={handleNavigate('summarizer')} className={internalLink}>summarizer</a> first and feed the key points in alongside your lecture notes.
+          </p>
+
+          <h2 className={h2}>The schedule that makes the guide work</h2>
+          <p className={p}>
+            A study guide built the night before the exam is a security blanket. Built a week out, it is a system: day 1, generate the guide and read the summaries. Days 2–4, drill flashcards in short sessions — 15 minutes with a <a href="/tools/pomodoro-timer" onClick={handleNavigate('pomodoro-timer')} className={internalLink}>Pomodoro timer</a> beats an hour of fatigue. Days 5–6, take the quizzes and re-drill only what you miss. Day 7, reread summaries once and stop. Spacing the retrieval out is the multiplier; the guide just makes the retrieval possible.
+          </p>
+
+          <h2 className={h2}>Build your first study guide now</h2>
+          <p className={p}>
+            <a href="/tools/study-pack" onClick={handleNavigate('study-pack')} className={internalLink}>WriteScholar&apos;s Study Pack</a> turns one paste of lecture notes into a lesson, flashcards, and a quiz. You can preview it free on your own notes — full lesson plus sample flashcards, no credit card — and unlock the full deck, quiz modes, and study games with Pro. See <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for the current first-month offer.
+          </p>
+          <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
+            Turn my notes into a study guide →
+          </a>
+
+          <BlogFaqAccordion
+            items={[
+              {
+                question: 'How long should a study guide be?',
+                answer:
+                  'Roughly 10% of the source material. Forty pages of lecture notes should compress to about four pages of summary, plus the flashcards and quiz questions. If your guide approaches the length of the notes, you are transcribing, not condensing.',
+              },
+              {
+                question: 'Do AI-generated study guides actually work?',
+                answer:
+                  'The evidence-backed part of studying is the retrieval — answering questions and recalling terms — not the act of typing the guide. AI handles the assembly; the learning happens when you drill the output. Students who manually want the compression benefit can write the summary themselves and let AI build only the flashcards and quiz.',
+              },
+              {
+                question: 'What format should my notes be in?',
+                answer:
+                  'Anything textual works: typed notes, copied slides, PDF or DOCX uploads, even rough bullet points. Messy formatting is fine — the AI extracts concepts and terms, not your formatting. Handwritten notes need to be photographed or typed first.',
+              },
+              {
+                question: 'Is this useful for cumulative finals?',
+                answer:
+                  'Especially so. Generate one pack per major unit, then drill the flashcard decks together in mixed order. Mixed-topic retrieval (interleaving) is harder in the moment and measurably better for exams that span a whole semester.',
+              },
+            ]}
+          />
+        </>
+      );
+
     case 'check-essay-with-ai-professor-style-feedback':
       return (
         <>

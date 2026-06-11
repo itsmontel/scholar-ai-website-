@@ -4,6 +4,7 @@ import Footer from '../../common/Footer';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 import ToolPageSeoContent from '../../common/ToolPageSeoContent';
 import { converterSeo } from '../../../data/toolSeoContent';
+import { TOOL_SEO_META } from '../../../constants/toolSeoMeta';
 
 interface ConverterPageProps {
   onNavigate: (page: string) => void;
@@ -156,8 +157,7 @@ const ConverterPage = ({ onNavigate, user, onLogout }: ConverterPageProps) => {
 
   useEffect(() => {
     applyPageSeoTags({
-      title: 'Free Unit Converter – Length, Weight, Temperature & More | WriteScholar',
-      description: 'Free online unit converter for students. Length, weight, temperature, volume, area, time, speed, energy. Meters to feet, m/s to mph & more. No signup required.',
+      ...TOOL_SEO_META.converter,
     });
     injectToolProductSchema({
       name: 'Unit Converter',

@@ -5,6 +5,7 @@ import ScholarMascot from '../../common/ScholarMascot';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 import ToolPageSeoContent from '../../common/ToolPageSeoContent';
 import { wordCounterSeo } from '../../../data/toolSeoContent';
+import { TOOL_SEO_META } from '../../../constants/toolSeoMeta';
 import EmbedCodeBlock from '../../common/EmbedCodeBlock';
 
 interface WordCounterPageProps {
@@ -28,8 +29,7 @@ const WordCounterPage = ({ onNavigate, user, onLogout }: WordCounterPageProps) =
   // SEO: per-route title, description, canonical, OG, Twitter, plus tool schema.
   useEffect(() => {
     applyPageSeoTags({
-      title: 'Free Word Counter Tool - Count Words & Characters | WriteScholar',
-      description: 'Free online word counter tool. Count words, characters, sentences, and paragraphs instantly. Check reading time and speaking time. No signup required.',
+      ...TOOL_SEO_META['word-counter'],
     });
     injectToolProductSchema({
       name: 'Word Counter',
@@ -80,7 +80,7 @@ const WordCounterPage = ({ onNavigate, user, onLogout }: WordCounterPageProps) =
               Free Tool
             </span>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-900 dark:text-stone-100 mb-5 leading-tight">
-              Word Counter
+              Word Counter for Essays &amp; Papers
             </h1>
             <p className="text-lg text-stone-500 dark:text-stone-400 leading-relaxed max-w-2xl mx-auto font-semibold">
               Count words, characters, sentences, and paragraphs instantly. Perfect for essays, assignments, and academic papers with word limits.

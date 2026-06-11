@@ -6,6 +6,7 @@ import AnalysisAnimation from '../common/AnalysisAnimation';
 import { CitationsPreviewSection } from '../common/PreviewSections';
 import { trackAction } from '../../data/achievements';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../utils/seo';
+import { TOOL_SEO_META } from '../../constants/toolSeoMeta';
 
 export type EmbeddedDashboardTool = 'analyze' | 'citations' | 'study_pack';
 
@@ -57,8 +58,7 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
   useEffect(() => {
     if (embedded) return;
     applyPageSeoTags({
-      title: 'Citation Finder for College Papers — APA, MLA, Chicago | WriteScholar',
-      description: 'Find real, citable sources for any research topic in seconds. WriteScholar surfaces peer-reviewed papers and books with formatted citations in APA, MLA, Chicago, Harvard, and IEEE.',
+      ...TOOL_SEO_META.citations,
     });
     injectToolProductSchema({
       name: 'Citation Finder',

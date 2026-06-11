@@ -5,6 +5,7 @@ import ScholarMascot from '../../common/ScholarMascot';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 import ToolPageSeoContent from '../../common/ToolPageSeoContent';
 import { paraphraseSeo } from '../../../data/toolSeoContent';
+import { TOOL_SEO_META } from '../../../constants/toolSeoMeta';
 
 interface ParaphrasingTipsPageProps {
   onNavigate: (page: string) => void;
@@ -33,8 +34,7 @@ const ParaphrasingTipsPage = ({ onNavigate, user, onLogout }: ParaphrasingTipsPa
   // SEO: per-route title, description, canonical, OG, Twitter, plus tool schema.
   useEffect(() => {
     applyPageSeoTags({
-      title: 'Free Paraphrasing Tips Tool - Improve Your Writing Style | WriteScholar',
-      description: 'Free paraphrasing tips tool. Get synonym suggestions, identify wordy phrases, detect passive voice, and improve your writing style. No signup required.',
+      ...TOOL_SEO_META['paraphrasing-tips'],
     });
     injectToolProductSchema({
       name: 'Paraphrasing Tips Analyzer',

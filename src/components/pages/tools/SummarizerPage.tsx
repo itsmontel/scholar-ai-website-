@@ -8,6 +8,7 @@ import { getResetsInText } from '../../../utils/usageReset';
 import { applyPageSeoTags, injectToolProductSchema, removeJsonLd } from '../../../utils/seo';
 import ToolPageSeoContent from '../../common/ToolPageSeoContent';
 import { summarizerSeo } from '../../../data/toolSeoContent';
+import { TOOL_SEO_META } from '../../../constants/toolSeoMeta';
 
 interface SummarizerPageProps {
   onNavigate: (page: string) => void;
@@ -46,8 +47,7 @@ const SummarizerPage = ({ onNavigate, user, onLogout }: SummarizerPageProps) => 
 
   useEffect(() => {
     applyPageSeoTags({
-      title: 'AI Summarizer – Condense Papers & Articles | WriteScholar',
-      description: 'Transform lengthy papers, articles, and research documents into concise key points. Perfect for literature reviews and quick comprehension. Pro unlocks all styles and limits.',
+      ...TOOL_SEO_META.summarizer,
     });
     injectToolProductSchema({
       name: 'AI Summarizer',
