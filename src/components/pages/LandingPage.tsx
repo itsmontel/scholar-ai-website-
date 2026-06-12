@@ -1312,11 +1312,11 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   <button
                     type="button"
                     onClick={() => onNavigate('signup')}
-                    aria-label="Start my free trial"
+                    aria-label="Get started today"
                     className="group/btn w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 sm:px-10 sm:py-5 lg:px-12 lg:py-6 rounded-2xl bg-[#58CC02] hover:bg-[#61E002] text-white font-extrabold text-lg sm:text-xl lg:text-2xl border-2 border-b-[5px] border-[#46A302] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 whitespace-nowrap shadow-[0_10px_32px_-6px_rgba(88,204,2,0.6)] hover:shadow-[0_14px_40px_-6px_rgba(88,204,2,0.8)]"
                     style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                   >
-                    Start my free trial
+                    Get started today
                     <svg className="ml-2.5 w-5 h-5 sm:w-6 sm:h-6 transition-transform duration-200 group-hover/btn:translate-x-1" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
@@ -2862,7 +2862,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               onClick={() => onNavigate('signup')}
               className="group/pipcta relative w-full flex items-center justify-center gap-1.5 px-3 py-2.5 bg-gradient-to-r from-[#FFF4E0] via-white to-[#DDF4FF] dark:from-stone-800 dark:via-stone-900 dark:to-stone-800 text-[#3C3C3C] dark:text-stone-100 text-[12px] sm:text-[13px] font-extrabold border-t-2 border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-800 active:translate-y-[1px] transition-all"
             >
-              <span>Start my free trial</span>
+              <span>Get started today</span>
               <svg className="w-4 h-4 text-[#A560E8] group-hover/pipcta:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
