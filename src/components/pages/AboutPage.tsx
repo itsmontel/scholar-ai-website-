@@ -11,10 +11,10 @@ interface AboutPageProps {
 
 const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
   const mainFeatures = [
-    { id: 'analyze', title: 'Essay Analyzer', desc: 'Professor-style feedback on structure, clarity, citations. Grade-level rubric.', accent: 'rose', gif: '/mascot-study.webp' },
-    { id: 'citations', title: 'Online Citations', desc: 'Find and format academic sources in APA, MLA, Chicago, Harvard, IEEE, Vancouver.', accent: 'sky', gif: '/mascot-paper.webp' },
-    { id: 'dashboard', title: 'Study Packs', desc: 'Quizzes, flashcards, crosswords & lessons from any notes. One paste, five formats.', accent: 'amber', gif: '/mascot-juggling.webp' },
-    { id: 'focus-mode', title: 'Focus Mode', desc: 'Block YouTube, TikTok until you answer quiz questions from your notes. Earn your screen time.', accent: 'rose', gif: '/mascot-thinking.webp' },
+    { id: 'analyze', title: 'Essay Analyzer', desc: 'Professor-style feedback on structure, clarity, citations. Grade-level rubric.', gif: '/mascot-study.webp' },
+    { id: 'citations', title: 'Online Citations', desc: 'Find and format academic sources in APA, MLA, Chicago, Harvard, IEEE, Vancouver.', gif: '/mascot-paper.webp' },
+    { id: 'dashboard', title: 'Study Packs', desc: 'Quizzes, flashcards, crosswords & lessons from any notes. One paste, five formats.', gif: '/mascot-juggling.webp' },
+    { id: 'focus-mode', title: 'Focus Mode', desc: 'Block YouTube, TikTok until you answer quiz questions from your notes. Earn your screen time.', gif: '/mascot-thinking.webp' },
   ];
 
   return (
@@ -26,10 +26,10 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
         <LandingSectionLayers />
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto">
-            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#58CC02] dark:text-[#58CC02] mb-3">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#A560E8] dark:text-[#A560E8] mb-3">
               About us
             </p>
-            <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-[#58CC02]" aria-hidden />
+            <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-[#A560E8]" aria-hidden />
             <h1
               id="about-page-heading"
               className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-stone-900 dark:text-stone-100 mb-4 tracking-tight leading-tight"
@@ -48,10 +48,10 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
         <LandingSectionLayers />
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
-            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#58CC02] dark:text-[#58CC02] mb-3">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#A560E8] dark:text-[#A560E8] mb-3">
               Mission
             </p>
-            <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-[#58CC02]" aria-hidden />
+            <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-[#A560E8]" aria-hidden />
             <h2
               className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-stone-900 dark:text-stone-100 tracking-tight leading-tight"
               style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
@@ -70,8 +70,8 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
               <div className="space-y-3">
                 {['Essay analysis with professor-style feedback', 'Online citations in 6 styles', 'Study packs: quizzes, flashcards, crosswords'].map((item, i) => (
                   <div key={i} className="flex items-center space-x-3">
-                    <div className="w-6 h-6 bg-[#EAFFD6] dark:bg-[#58CC02]/20 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg className="w-4 h-4 text-[#58CC02]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-6 h-6 bg-[#F3EAFF] dark:bg-[#A560E8]/20 rounded-full flex items-center justify-center flex-shrink-0">
+                      <svg className="w-4 h-4 text-[#A560E8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
@@ -81,7 +81,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
               </div>
             </div>
             
-            <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#58CC02]/30 dark:border-[#58CC02]/30 bg-[#EAFFD6] dark:bg-[#58CC02]/10 p-6 sm:p-8">
+            <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#A560E8]/30 dark:border-[#A560E8]/30 bg-[#F3EAFF] dark:bg-[#A560E8]/10 p-6 sm:p-8">
               <div className="grid grid-cols-2 gap-4 sm:gap-6">
                 {[
                   { value: '50K+', label: 'Students' },
@@ -90,7 +90,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
                   { value: '50+', label: 'Countries' },
                 ].map((stat, i) => (
                   <div key={i} className="text-center p-4 rounded-2xl bg-white/60 dark:bg-stone-800/50">
-                    <div className="text-3xl sm:text-4xl font-bold text-[#58CC02]">{stat.value}</div>
+                    <div className="text-3xl sm:text-4xl font-bold text-[#A560E8]">{stat.value}</div>
                     <div className="text-stone-600 dark:text-stone-400 text-sm font-medium">{stat.label}</div>
                   </div>
                 ))}
@@ -104,10 +104,10 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
         <LandingSectionLayers variant="faq" />
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
-            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#58CC02] dark:text-[#58CC02] mb-3">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#A560E8] dark:text-[#A560E8] mb-3">
               What we offer
             </p>
-            <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-[#58CC02]" aria-hidden />
+            <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-[#A560E8]" aria-hidden />
             <h2
               className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-stone-900 dark:text-stone-100 mb-4 tracking-tight leading-tight"
               style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
@@ -120,23 +120,24 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
           </div>
           
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
-            {mainFeatures.map((f) => {
-              const borderCls = f.accent === 'rose' ? 'border-stone-200 dark:border-stone-700 hover:border-[#1CB0F6] dark:hover:border-[#1CB0F6]' : f.accent === 'sky' ? 'border-stone-200 dark:border-stone-700 hover:border-[#1CB0F6] dark:hover:border-[#1CB0F6]' : f.accent === 'amber' ? 'border-[#FF9600]/30 dark:border-[#FF9600]/30 hover:border-[#FF9600]' : 'border-stone-200 dark:border-stone-700 hover:border-[#1CB0F6] dark:hover:border-[#1CB0F6]';
-              const titleCls = f.accent === 'rose' ? 'text-[#1CB0F6]' : f.accent === 'sky' ? 'text-[#1CB0F6]' : f.accent === 'amber' ? 'text-[#FF9600]' : 'text-[#1CB0F6]';
-              const iconBgCls = f.accent === 'rose' ? 'bg-[#DDF4FF] dark:bg-[#1CB0F6]/20' : f.accent === 'sky' ? 'bg-[#DDF4FF] dark:bg-[#1CB0F6]/20' : f.accent === 'amber' ? 'bg-[#FFF4E0] dark:bg-[#FF9600]/20' : 'bg-[#DDF4FF] dark:bg-[#1CB0F6]/20';
-              return (
-                <button key={f.id} onClick={() => onNavigate(f.id)} className={`group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 ${borderCls} bg-white dark:bg-stone-800 border-b-4 p-6 transition-all duration-300 text-left`}>
-                  <div className="relative flex flex-col items-center text-center mb-4">
-                    <div className={`w-14 h-14 rounded-2xl ${iconBgCls} flex items-center justify-center mb-3`}><img src={f.gif} alt={f.title} className="w-[48px] h-[48px] object-contain" /></div>
-                    <h3 className={`font-bold ${titleCls} text-lg`}>{f.title}</h3>
+            {mainFeatures.map((f) => (
+              <button
+                key={f.id}
+                onClick={() => onNavigate(f.id)}
+                className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-stone-200 dark:border-stone-700 hover:border-[#A560E8] dark:hover:border-[#A560E8] bg-white dark:bg-stone-800 border-b-4 p-6 transition-all duration-300 text-left"
+              >
+                <div className="relative flex flex-col items-center text-center mb-4">
+                  <div className="w-14 h-14 rounded-2xl bg-[#F3EAFF] dark:bg-[#A560E8]/20 flex items-center justify-center mb-3">
+                    <img src={f.gif} alt={f.title} className="w-[48px] h-[48px] object-contain" />
                   </div>
-                  <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed text-center">{f.desc}</p>
-                </button>
-              );
-            })}
+                  <h3 className="font-bold text-[#A560E8] text-lg">{f.title}</h3>
+                </div>
+                <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed text-center">{f.desc}</p>
+              </button>
+            ))}
           </div>
           <div className="text-center mt-8">
-            <button onClick={() => onNavigate('features')} className="text-[#1CB0F6] font-extrabold hover:text-[#1899D6] transition-colors">
+            <button onClick={() => onNavigate('features')} className="text-[#A560E8] font-extrabold hover:text-[#7733B5] transition-colors">
               See all features →
             </button>
           </div>
@@ -147,10 +148,10 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
         <LandingSectionLayers />
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
-            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#58CC02] dark:text-[#58CC02] mb-3">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#A560E8] dark:text-[#A560E8] mb-3">
               Principles
             </p>
-            <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-[#58CC02]" aria-hidden />
+            <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-[#A560E8]" aria-hidden />
             <h2
               className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-stone-900 dark:text-stone-100 mb-4 tracking-tight leading-tight"
               style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
@@ -163,7 +164,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
           </div>
           
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
-            <div className="rounded-2xl sm:rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-6 text-center hover:border-[#58CC02] dark:hover:border-[#58CC02] transition-all">
+            <div className="rounded-2xl sm:rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-6 text-center hover:border-[#A560E8] dark:hover:border-[#A560E8] transition-all">
               <div className="flex justify-center mb-4">
                 <img src="/mascot-study.webp" alt="Quality" className="w-16 h-16 object-contain" />
               </div>
@@ -171,7 +172,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
               <p className="text-stone-600 dark:text-stone-400 text-sm">Highest standards in AI analysis and feedback</p>
             </div>
 
-            <div className="rounded-2xl sm:rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-6 text-center hover:border-[#58CC02] dark:hover:border-[#58CC02] transition-all">
+            <div className="rounded-2xl sm:rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-6 text-center hover:border-[#A560E8] dark:hover:border-[#A560E8] transition-all">
               <div className="flex justify-center mb-4">
                 <img src="/mascot-thinking.webp" alt="Privacy" className="w-16 h-16 object-contain" />
               </div>
@@ -179,7 +180,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
               <p className="text-stone-600 dark:text-stone-400 text-sm">Enterprise-grade security for your documents</p>
             </div>
 
-            <div className="rounded-2xl sm:rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-6 text-center hover:border-[#58CC02] dark:hover:border-[#58CC02] transition-all">
+            <div className="rounded-2xl sm:rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-6 text-center hover:border-[#A560E8] dark:hover:border-[#A560E8] transition-all">
               <div className="flex justify-center mb-4">
                 <img src="/mascot-laptop.webp" alt="Innovation" className="w-16 h-16 object-contain" />
               </div>
@@ -187,7 +188,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
               <p className="text-stone-600 dark:text-stone-400 text-sm">Continuous improvement of our technology</p>
             </div>
 
-            <div className="rounded-2xl sm:rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-6 text-center hover:border-[#58CC02] dark:hover:border-[#58CC02] transition-all">
+            <div className="rounded-2xl sm:rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-6 text-center hover:border-[#A560E8] dark:hover:border-[#A560E8] transition-all">
               <div className="flex justify-center mb-4">
                 <img src="/mascot-dance.webp" alt="Accessibility" className="w-16 h-16 object-contain" />
               </div>
@@ -202,10 +203,10 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
         <LandingSectionLayers variant="faq" />
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
-            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#58CC02] dark:text-[#58CC02] mb-3">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#A560E8] dark:text-[#A560E8] mb-3">
               Story
             </p>
-            <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-[#58CC02]" aria-hidden />
+            <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-[#A560E8]" aria-hidden />
             <h2
               className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-stone-900 dark:text-stone-100 mb-6 tracking-tight leading-tight"
               style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
@@ -236,10 +237,10 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
         <LandingSectionLayers variant="cta" />
         <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 px-6 py-10 sm:px-10 sm:py-12">
-            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#58CC02] dark:text-[#58CC02] mb-3">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#A560E8] dark:text-[#A560E8] mb-3">
               Get started
             </p>
-            <div className="mx-auto mb-5 h-1 w-12 rounded-full bg-[#58CC02]" aria-hidden />
+            <div className="mx-auto mb-5 h-1 w-12 rounded-full bg-[#A560E8]" aria-hidden />
             <h2
               className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-stone-900 dark:text-stone-50 mb-4 tracking-tight leading-[1.15]"
               style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
@@ -257,7 +258,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
                   <button
                     type="button"
                     onClick={() => onNavigate('dashboard')}
-                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#58CC02] hover:bg-[#4CAF00] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all duration-150 text-base"
+                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#A560E8] hover:bg-[#9450D8] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all duration-150 text-base"
                   >
                     Go to dashboard
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
@@ -277,7 +278,7 @@ const AboutPage = ({ onNavigate, user, onLogout }: AboutPageProps) => {
                   <button
                     type="button"
                     onClick={() => onNavigate('signup')}
-                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#58CC02] hover:bg-[#4CAF00] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all duration-150 text-base"
+                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#A560E8] hover:bg-[#9450D8] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all duration-150 text-base"
                   >
                     Try free
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>

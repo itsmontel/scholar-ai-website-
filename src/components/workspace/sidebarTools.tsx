@@ -2,7 +2,8 @@ import type { ReactNode } from 'react';
 import type { WorkspaceView } from './types';
 
 export const sidebarIcons = {
-  Doc: () => (<svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h4m-7 4h12a2 2 0 002-2V8.83a2 2 0 00-.59-1.42l-3.83-3.83A2 2 0 0014.17 3H6a2 2 0 00-2 2v15a2 2 0 002 2z" /></svg>),
+  Home: () => (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.9} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3.6 10.4L12 3.8l8.4 6.6V19a1.6 1.6 0 01-1.6 1.6h-3.6v-5.2h-6.4v5.2H5.2A1.6 1.6 0 013.6 19v-8.6z" /></svg>),
+  Doc: () => (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.9} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h4m-7 4h12a2 2 0 002-2V8.83a2 2 0 00-.59-1.42l-3.83-3.83A2 2 0 0014.17 3H6a2 2 0 00-2 2v15a2 2 0 002 2z" /></svg>),
   Plus: () => (<svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m-8-8h16" /></svg>),
   Upload: () => (<svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16" /></svg>),
   Search: () => (<svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path strokeLinecap="round" d="M21 21l-4.5-4.5" /></svg>),
@@ -11,20 +12,24 @@ export const sidebarIcons = {
   Trash: () => (<svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z" /></svg>),
   ArrowR: () => (<svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>),
   ArrowL: () => (<svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>),
-  Review: () => (<svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>),
-  Pack: () => (<svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth={2.1} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 3l9 4.5-9 4.5-9-4.5L12 3zM3 12l9 4.5L21 12M3 16.5L12 21l9-4.5" /></svg>),
-  Cite: () => (<svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth={2.1} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 006.5 22H20V2H6.5A2.5 2.5 0 004 4.5v15z" /></svg>),
-  Game: () => (<svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth={2.1} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 11h4m-2-2v4m6-3h.01M17 13h.01M7.5 6h9a4.5 4.5 0 014.47 5l-.9 6.3A2.5 2.5 0 0117.6 19.5c-1 0-1.9-.6-2.3-1.5l-.5-1a2 2 0 00-1.8-1.1h-1.9a2 2 0 00-1.8 1.1l-.5 1c-.4.9-1.3 1.5-2.3 1.5a2.5 2.5 0 01-2.47-2.2l-.9-6.3A4.5 4.5 0 017.5 6z" /></svg>),
+  /* ─── Tool glyphs — thin-line set that matches the dashboard rail.
+     Drawn at 24px on a 1.9 stroke so they read as calm outlines
+     rather than the heavier chunky icons used inside the tools. */
+  Wand: () => (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.9} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M14.5 5.5l4 4L9 19H5v-4l9.5-9.5z" /><path strokeLinecap="round" strokeLinejoin="round" d="M17.5 2.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7.7-1.8zM5.5 3l.5 1.3L7.3 5l-1.3.5L5.5 7 5 5.5 3.7 5 5 4.3 5.5 3z" /></svg>),
+  Review: () => (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.9} viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3" /><path strokeLinecap="round" d="M8 3v4M16 3v4M3.5 10h17" /><path strokeLinecap="round" strokeLinejoin="round" d="M9.2 14.8l2 2 3.6-3.8" /></svg>),
+  Pack: () => (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.9} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 3.2l8.5 4.3-8.5 4.3-8.5-4.3L12 3.2z" /><path strokeLinecap="round" strokeLinejoin="round" d="M3.5 12l8.5 4.3 8.5-4.3M3.5 16.4l8.5 4.4 8.5-4.4" /></svg>),
+  Cite: () => (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.9} viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="4" /><path strokeLinecap="round" strokeLinejoin="round" d="M9.6 15.2c-1.5 0-2.4-1-2.4-2.4 0-1.9 1.3-3.4 3.1-4.1M16 15.2c-1.5 0-2.4-1-2.4-2.4 0-1.9 1.3-3.4 3.1-4.1" /></svg>),
+  Game: () => (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.9} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M7.6 7.5h8.8a4.5 4.5 0 014.44 5.26l-.62 3.62A2.9 2.9 0 0117.36 18c-.9 0-1.74-.42-2.28-1.14L14 15.5h-4l-1.08 1.36A2.86 2.86 0 016.64 18a2.9 2.9 0 01-2.86-3.62l.62-3.62A4.5 4.5 0 017.6 7.5z" /><path strokeLinecap="round" strokeLinejoin="round" d="M7.7 11.6h2.4m-1.2-1.2v2.4M15.4 11h.01M17.4 12.6h.01" /></svg>),
 };
 
 /* ─── Workspace sidebar ──────────────────────────────────────
    The single navigation surface for the whole product. Clicking an
    item swaps the in-page view — it never leaves the page, so the
-   workspace always feels like one app. Documents is the home base;
+   workspace always feels like one app. Dashboard is the home base;
    every study tool lives one click away in the same shell. */
-/* Each tool gets its own brand colour for the workspace rail.
- * `tint` is the base colour, `tintBg` is the active background,
- * `tintFg` is the text + icon tone on the active row. */
+/* Each tool shares the WriteScholar purple palette so the workspace
+ * feels like one product. Panel headers and mobile drawer read from
+ * these tint fields. */
 export const SIDEBAR_TOOLS: {
   view: WorkspaceView;
   label: string;
@@ -36,9 +41,9 @@ export const SIDEBAR_TOOLS: {
   tintFg: string;
   tintFgDark: string;
 }[] = [
-  { view: 'analyze',      label: 'Analyze',      icon: <sidebarIcons.Sparkle />, hint: 'Professor-style feedback', tint: '#A560E8', tintBg: '#F3EAFF', tintBgDark: 'rgba(165,96,232,0.15)', tintFg: '#8A48C7', tintFgDark: '#C9A0F0' },
-  { view: 'daily-review', label: 'Daily review', icon: <sidebarIcons.Review />,  hint: 'Quick recall session',     tint: '#58CC02', tintBg: '#E5F8D0', tintBgDark: 'rgba(88,204,2,0.15)',  tintFg: '#46A302', tintFgDark: '#A6E66E' },
-  { view: 'study-packs',  label: 'Study packs',  icon: <sidebarIcons.Pack />,    hint: 'Notes → lessons & quizzes', tint: '#FF9600', tintBg: '#FFF4E0', tintBgDark: 'rgba(255,150,0,0.15)', tintFg: '#B85F00', tintFgDark: '#FFBD5C' },
-  { view: 'citations',    label: 'Citations',    icon: <sidebarIcons.Cite />,    hint: 'Find & format sources',     tint: '#1CB0F6', tintBg: '#DDF4FF', tintBgDark: 'rgba(28,176,246,0.15)', tintFg: '#1486B5', tintFgDark: '#7DD3FC' },
-  { view: 'games',        label: 'Arcade mode',  icon: <sidebarIcons.Game />,    hint: 'Learn by playing',          tint: '#FF4B82', tintBg: '#FFE8EE', tintBgDark: 'rgba(255,75,130,0.15)', tintFg: '#A82754', tintFgDark: '#FFA0BC' },
+  { view: 'analyze',      label: 'Analyze',      icon: <sidebarIcons.Wand />,   hint: 'Professor-style feedback',  tint: '#A560E8', tintBg: '#F3EAFF', tintBgDark: 'rgba(165,96,232,0.15)', tintFg: '#8A48C7', tintFgDark: '#C9A0F0' },
+  { view: 'study-packs',  label: 'Study Packs',  icon: <sidebarIcons.Pack />,   hint: 'Notes → lessons & quizzes', tint: '#A560E8', tintBg: '#F3EAFF', tintBgDark: 'rgba(165,96,232,0.15)', tintFg: '#8A48C7', tintFgDark: '#C9A0F0' },
+  { view: 'citations',    label: 'Citations',    icon: <sidebarIcons.Cite />,   hint: 'Find & format sources',     tint: '#A560E8', tintBg: '#F3EAFF', tintBgDark: 'rgba(165,96,232,0.15)', tintFg: '#8A48C7', tintFgDark: '#C9A0F0' },
+  { view: 'daily-review', label: 'Daily Review', icon: <sidebarIcons.Review />, hint: 'Quick recall session',      tint: '#A560E8', tintBg: '#F3EAFF', tintBgDark: 'rgba(165,96,232,0.15)', tintFg: '#8A48C7', tintFgDark: '#C9A0F0' },
+  { view: 'games',        label: 'Arcade Mode',  icon: <sidebarIcons.Game />,   hint: 'Learn by playing',          tint: '#A560E8', tintBg: '#F3EAFF', tintBgDark: 'rgba(165,96,232,0.15)', tintFg: '#8A48C7', tintFgDark: '#C9A0F0' },
 ];

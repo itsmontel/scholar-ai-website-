@@ -44,28 +44,28 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
 
   const getIllustration = (post: BlogPostMeta, index: number) => {
     const colors = [
-      { bg: '#F3E8FF', accent: '#8B5CF6', secondary: '#C4B5FD' },
-      { bg: '#DBEAFE', accent: '#3B82F6', secondary: '#93C5FD' },
-      { bg: '#D1FAE5', accent: '#10B981', secondary: '#6EE7B7' },
-      { bg: '#FEE2E2', accent: '#EF4444', secondary: '#FCA5A5' },
-      { bg: '#FEF3C7', accent: '#F59E0B', secondary: '#FCD34D' },
-      { bg: '#E0E7FF', accent: '#6366F1', secondary: '#A5B4FC' }
+      { bg: '#F3EAFF', accent: '#A560E8', secondary: '#C9A0F0' },
+      { bg: '#FBF8FF', accent: '#8A48C7', secondary: '#E9DBFF' },
+      { bg: '#F3EAFF', accent: '#7733B5', secondary: '#C9A0F0' },
+      { bg: '#FBF8FF', accent: '#A560E8', secondary: '#BD8BF0' },
+      { bg: '#F3EAFF', accent: '#8A48C7', secondary: '#E9DBFF' },
+      { bg: '#FBF8FF', accent: '#7733B5', secondary: '#C9A0F0' },
     ];
     const color = colors[index % colors.length];
 
     if (post.slug.includes('check-essay') || post.slug.includes('professor-style')) {
       return (
         <svg viewBox="0 0 200 140" fill="none" className="w-full h-full">
-          <rect width="200" height="140" fill="#F3E8FF" />
-          <rect x="50" y="30" width="55" height="75" rx="4" fill="white" stroke="#8B5CF6" strokeWidth="2" />
-          <line x1="58" y1="45" x2="95" y2="45" stroke="#C4B5FD" strokeWidth="2" />
-          <line x1="58" y1="58" x2="100" y2="58" stroke="#10B981" strokeWidth="2" />
-          <line x1="58" y1="71" x2="92" y2="71" stroke="#C4B5FD" strokeWidth="2" />
-          <line x1="58" y1="84" x2="85" y2="84" stroke="#F59E0B" strokeWidth="2" />
-          <circle cx="135" cy="60" r="18" fill="#8B5CF6" />
+          <rect width="200" height="140" fill="#F3EAFF" />
+          <rect x="50" y="30" width="55" height="75" rx="4" fill="white" stroke="#A560E8" strokeWidth="2" />
+          <line x1="58" y1="45" x2="95" y2="45" stroke="#C9A0F0" strokeWidth="2" />
+          <line x1="58" y1="58" x2="100" y2="58" stroke="#8A48C7" strokeWidth="2" />
+          <line x1="58" y1="71" x2="92" y2="71" stroke="#C9A0F0" strokeWidth="2" />
+          <line x1="58" y1="84" x2="85" y2="84" stroke="#C9A0F0" strokeWidth="2" />
+          <circle cx="135" cy="60" r="18" fill="#A560E8" />
           <path d="M128 60 L132 64 L144 52" stroke="white" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-          <rect x="120" y="95" width="55" height="28" rx="4" fill="white" stroke="#7C3AED" strokeWidth="2" />
-          <text x="147" y="112" textAnchor="middle" fontSize="10" fill="#6D28D9" fontWeight="bold">Rubric</text>
+          <rect x="120" y="95" width="55" height="28" rx="4" fill="white" stroke="#7733B5" strokeWidth="2" />
+          <text x="147" y="112" textAnchor="middle" fontSize="10" fill="#7733B5" fontWeight="bold">Rubric</text>
         </svg>
       );
     }
@@ -73,18 +73,18 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
     if (post.slug.includes('thesis') || post.slug.includes('structure')) {
       return (
         <svg viewBox="0 0 200 140" fill="none" className="w-full h-full">
-          <rect width="200" height="140" fill="#FEE2E2" />
-          <rect x="60" y="30" width="50" height="65" rx="4" fill="white" stroke="#EF4444" strokeWidth="2" />
-          <line x1="70" y1="45" x2="100" y2="45" stroke="#FCA5A5" strokeWidth="2" />
-          <line x1="70" y1="55" x2="95" y2="55" stroke="#FCA5A5" strokeWidth="2" />
-          <line x1="70" y1="65" x2="100" y2="65" stroke="#FCA5A5" strokeWidth="2" />
-          <line x1="70" y1="75" x2="90" y2="75" stroke="#FCA5A5" strokeWidth="2" />
-          <circle cx="130" cy="50" r="20" fill="#EF4444" opacity="0.2" />
-          <path d="M130 35 L130 30 M145 50 L150 50 M115 50 L110 50 M142 38 L146 34 M118 38 L114 34" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" />
-          <path d="M123 55 Q130 40 137 55 L135 65 Q130 68 125 65 Z" fill="#EF4444" />
-          <rect x="125" y="65" width="10" height="5" rx="1" fill="#FCA5A5" />
-          <rect x="145" y="75" width="35" height="8" rx="2" fill="#EF4444" transform="rotate(-45 145 75)" />
-          <polygon points="170,100 165,105 162,95" fill="#FCA5A5" />
+          <rect width="200" height="140" fill="#F3EAFF" />
+          <rect x="60" y="30" width="50" height="65" rx="4" fill="white" stroke="#A560E8" strokeWidth="2" />
+          <line x1="70" y1="45" x2="100" y2="45" stroke="#C9A0F0" strokeWidth="2" />
+          <line x1="70" y1="55" x2="95" y2="55" stroke="#C9A0F0" strokeWidth="2" />
+          <line x1="70" y1="65" x2="100" y2="65" stroke="#C9A0F0" strokeWidth="2" />
+          <line x1="70" y1="75" x2="90" y2="75" stroke="#C9A0F0" strokeWidth="2" />
+          <circle cx="130" cy="50" r="20" fill="#A560E8" opacity="0.2" />
+          <path d="M130 35 L130 30 M145 50 L150 50 M115 50 L110 50 M142 38 L146 34 M118 38 L114 34" stroke="#A560E8" strokeWidth="2" strokeLinecap="round" />
+          <path d="M123 55 Q130 40 137 55 L135 65 Q130 68 125 65 Z" fill="#A560E8" />
+          <rect x="125" y="65" width="10" height="5" rx="1" fill="#C9A0F0" />
+          <rect x="145" y="75" width="35" height="8" rx="2" fill="#A560E8" transform="rotate(-45 145 75)" />
+          <polygon points="170,100 165,105 162,95" fill="#C9A0F0" />
         </svg>
       );
     }
@@ -92,18 +92,18 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
     if (post.slug === 'students-who-get-as-dont-work-harder') {
       return (
         <svg viewBox="0 0 200 140" fill="none" className="w-full h-full">
-          <rect width="200" height="140" fill="#FEF3C7" />
-          <rect x="55" y="40" width="55" height="70" rx="3" fill="white" stroke="#F59E0B" strokeWidth="2" transform="rotate(-5 55 40)" />
-          <rect x="60" y="35" width="55" height="70" rx="3" fill="white" stroke="#F59E0B" strokeWidth="2" />
-          <line x1="68" y1="50" x2="107" y2="50" stroke="#FCD34D" strokeWidth="2" />
-          <line x1="68" y1="60" x2="100" y2="60" stroke="#FCD34D" strokeWidth="2" />
-          <line x1="68" y1="70" x2="107" y2="70" stroke="#FCD34D" strokeWidth="2" />
-          <line x1="68" y1="80" x2="95" y2="80" stroke="#FCD34D" strokeWidth="2" />
-          <line x1="68" y1="90" x2="107" y2="90" stroke="#FCD34D" strokeWidth="2" />
-          <rect x="130" y="45" width="40" height="10" rx="2" fill="#F59E0B" transform="rotate(30 130 45)" />
-          <polygon points="125,72 120,80 132,77" fill="#FCD34D" />
-          <rect x="155" y="35" width="10" height="10" rx="1" fill="#FCD34D" transform="rotate(30 155 35)" />
-          <path d="M155 100 L158 108 L167 108 L160 113 L163 121 L155 116 L147 121 L150 113 L143 108 L152 108 Z" fill="#F59E0B" />
+          <rect width="200" height="140" fill="#F3EAFF" />
+          <rect x="55" y="40" width="55" height="70" rx="3" fill="white" stroke="#C9A0F0" strokeWidth="2" transform="rotate(-5 55 40)" />
+          <rect x="60" y="35" width="55" height="70" rx="3" fill="white" stroke="#C9A0F0" strokeWidth="2" />
+          <line x1="68" y1="50" x2="107" y2="50" stroke="#E9DBFF" strokeWidth="2" />
+          <line x1="68" y1="60" x2="100" y2="60" stroke="#E9DBFF" strokeWidth="2" />
+          <line x1="68" y1="70" x2="107" y2="70" stroke="#E9DBFF" strokeWidth="2" />
+          <line x1="68" y1="80" x2="95" y2="80" stroke="#E9DBFF" strokeWidth="2" />
+          <line x1="68" y1="90" x2="107" y2="90" stroke="#E9DBFF" strokeWidth="2" />
+          <rect x="130" y="45" width="40" height="10" rx="2" fill="#C9A0F0" transform="rotate(30 130 45)" />
+          <polygon points="125,72 120,80 132,77" fill="#E9DBFF" />
+          <rect x="155" y="35" width="10" height="10" rx="1" fill="#E9DBFF" transform="rotate(30 155 35)" />
+          <path d="M155 100 L158 108 L167 108 L160 113 L163 121 L155 116 L147 121 L150 113 L143 108 L152 108 Z" fill="#C9A0F0" />
         </svg>
       );
     }
@@ -112,14 +112,14 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
       return (
         <svg viewBox="0 0 200 140" fill="none" className="w-full h-full">
           <rect width="200" height="140" fill="#ECFDF5" />
-          <rect x="55" y="35" width="55" height="75" rx="4" fill="white" stroke="#10B981" strokeWidth="2" />
-          <line x1="65" y1="50" x2="100" y2="50" stroke="#D1FAE5" strokeWidth="2" />
-          <line x1="65" y1="62" x2="95" y2="62" stroke="#D1FAE5" strokeWidth="2" />
-          <line x1="65" y1="74" x2="102" y2="74" stroke="#D1FAE5" strokeWidth="2" />
-          <circle cx="135" cy="75" r="22" fill="#10B981" />
+          <rect x="55" y="35" width="55" height="75" rx="4" fill="white" stroke="#8A48C7" strokeWidth="2" />
+          <line x1="65" y1="50" x2="100" y2="50" stroke="#F3EAFF" strokeWidth="2" />
+          <line x1="65" y1="62" x2="95" y2="62" stroke="#F3EAFF" strokeWidth="2" />
+          <line x1="65" y1="74" x2="102" y2="74" stroke="#F3EAFF" strokeWidth="2" />
+          <circle cx="135" cy="75" r="22" fill="#8A48C7" />
           <path d="M125 75 L131 81 L146 64" stroke="white" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M155 45 L175 60 L175 95 Q165 110 155 120 Q145 110 135 95 L135 60 Z" fill="#D1FAE5" stroke="#10B981" strokeWidth="2" />
-          <path d="M150 78 L157 85 L172 68" stroke="#10B981" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M155 45 L175 60 L175 95 Q165 110 155 120 Q145 110 135 95 L135 60 Z" fill="#F3EAFF" stroke="#8A48C7" strokeWidth="2" />
+          <path d="M150 78 L157 85 L172 68" stroke="#8A48C7" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       );
     }
@@ -164,23 +164,23 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
     if (post.slug.includes('free-writing-tools')) {
       return (
         <svg viewBox="0 0 200 140" fill="none" className="w-full h-full">
-          <rect width="200" height="140" fill="#D1FAE5" />
+          <rect width="200" height="140" fill="#F3EAFF" />
           {/* Toolbox */}
-          <rect x="60" y="60" width="80" height="50" rx="4" fill="#A7F3D0" stroke="#10B981" strokeWidth="2" />
-          <rect x="60" y="52" width="80" height="12" rx="2" fill="#6EE7B7" stroke="#10B981" strokeWidth="2" />
-          <rect x="90" y="48" width="20" height="8" rx="2" fill="#10B981" />
+          <rect x="60" y="60" width="80" height="50" rx="4" fill="#E9DBFF" stroke="#8A48C7" strokeWidth="2" />
+          <rect x="60" y="52" width="80" height="12" rx="2" fill="#C9A0F0" stroke="#8A48C7" strokeWidth="2" />
+          <rect x="90" y="48" width="20" height="8" rx="2" fill="#8A48C7" />
           {/* Tools popping out */}
-          <rect x="70" y="25" width="6" height="30" rx="1" fill="#FCD34D" />
-          <rect x="70" y="20" width="6" height="8" rx="1" fill="#F59E0B" />
+          <rect x="70" y="25" width="6" height="30" rx="1" fill="#E9DBFF" />
+          <rect x="70" y="20" width="6" height="8" rx="1" fill="#C9A0F0" />
           <rect x="90" y="18" width="8" height="38" rx="1" fill="#34D399" />
-          <circle cx="94" cy="14" r="6" fill="#10B981" />
-          <rect x="115" y="28" width="6" height="27" rx="1" fill="#F472B6" />
-          <polygon points="118,28 115,20 121,20" fill="#EC4899" />
+          <circle cx="94" cy="14" r="6" fill="#8A48C7" />
+          <rect x="115" y="28" width="6" height="27" rx="1" fill="#C9A0F0" />
+          <polygon points="118,28 115,20 121,20" fill="#A560E8" />
           {/* Stars/sparkles */}
           <path d="M40 35 L42 40 L47 40 L43 44 L45 49 L40 46 L35 49 L37 44 L33 40 L38 40 Z" fill="#FBBF24" />
           <path d="M160 25 L161 28 L164 28 L162 30 L163 33 L160 31 L157 33 L158 30 L156 28 L159 28 Z" fill="#FBBF24" />
-          <circle cx="155" cy="95" r="10" fill="white" stroke="#10B981" strokeWidth="2" />
-          <text x="152" y="99" fontSize="10" fontWeight="bold" fill="#10B981">8</text>
+          <circle cx="155" cy="95" r="10" fill="white" stroke="#8A48C7" strokeWidth="2" />
+          <text x="152" y="99" fontSize="10" fontWeight="bold" fill="#8A48C7">8</text>
         </svg>
       );
     }
@@ -188,20 +188,20 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
     if (post.slug === 'how-to-study-effectively-complete-guide') {
       return (
         <svg viewBox="0 0 200 140" fill="none" className="w-full h-full">
-          <rect width="200" height="140" fill="#DBEAFE" />
-          <circle cx="100" cy="55" r="22" fill="white" stroke="#3B82F6" strokeWidth="2" />
-          <path d="M92 55 L97 60 L108 49" stroke="#3B82F6" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-          <rect x="55" y="88" width="90" height="35" rx="4" fill="white" stroke="#2563EB" strokeWidth="2" />
-          <line x1="65" y1="98" x2="135" y2="98" stroke="#93C5FD" strokeWidth="2" />
-          <line x1="65" y1="108" x2="120" y2="108" stroke="#93C5FD" strokeWidth="2" />
-          <line x1="65" y1="118" x2="130" y2="118" stroke="#93C5FD" strokeWidth="2" />
-          <circle cx="165" cy="50" r="18" fill="white" stroke="#F59E0B" strokeWidth="2" />
-          <path d="M165 38 L165 50 L172 56" stroke="#F59E0B" strokeWidth="2" fill="none" strokeLinecap="round" />
-          <rect x="35" y="45" width="25" height="32" rx="2" fill="white" stroke="#3B82F6" strokeWidth="2" transform="rotate(-15 35 45)" />
-          <line x1="40" y1="55" x2="55" y2="55" stroke="#93C5FD" strokeWidth="1" transform="rotate(-15 40 55)" />
-          <line x1="40" y1="62" x2="52" y2="62" stroke="#93C5FD" strokeWidth="1" transform="rotate(-15 40 62)" />
-          <circle cx="50" cy="95" r="6" fill="#3B82F6" opacity="0.3" />
-          <circle cx="155" cy="95" r="5" fill="#F59E0B" opacity="0.3" />
+          <rect width="200" height="140" fill="#F3EAFF" />
+          <circle cx="100" cy="55" r="22" fill="white" stroke="#A560E8" strokeWidth="2" />
+          <path d="M92 55 L97 60 L108 49" stroke="#A560E8" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <rect x="55" y="88" width="90" height="35" rx="4" fill="white" stroke="#7733B5" strokeWidth="2" />
+          <line x1="65" y1="98" x2="135" y2="98" stroke="#C9A0F0" strokeWidth="2" />
+          <line x1="65" y1="108" x2="120" y2="108" stroke="#C9A0F0" strokeWidth="2" />
+          <line x1="65" y1="118" x2="130" y2="118" stroke="#C9A0F0" strokeWidth="2" />
+          <circle cx="165" cy="50" r="18" fill="white" stroke="#C9A0F0" strokeWidth="2" />
+          <path d="M165 38 L165 50 L172 56" stroke="#C9A0F0" strokeWidth="2" fill="none" strokeLinecap="round" />
+          <rect x="35" y="45" width="25" height="32" rx="2" fill="white" stroke="#A560E8" strokeWidth="2" transform="rotate(-15 35 45)" />
+          <line x1="40" y1="55" x2="55" y2="55" stroke="#C9A0F0" strokeWidth="1" transform="rotate(-15 40 55)" />
+          <line x1="40" y1="62" x2="52" y2="62" stroke="#C9A0F0" strokeWidth="1" transform="rotate(-15 40 62)" />
+          <circle cx="50" cy="95" r="6" fill="#A560E8" opacity="0.3" />
+          <circle cx="155" cy="95" r="5" fill="#C9A0F0" opacity="0.3" />
         </svg>
       );
     }
@@ -209,24 +209,24 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
     if (post.slug.includes('study-tools')) {
       return (
         <svg viewBox="0 0 200 140" fill="none" className="w-full h-full">
-          <rect width="200" height="140" fill="#F3E8FF" />
-          <circle cx="100" cy="70" r="28" fill="white" stroke="#8B5CF6" strokeWidth="2" />
-          <path d="M88 70 Q92 58 100 62 Q108 58 112 70 Q115 82 100 86 Q85 82 88 70" fill="#8B5CF6" />
+          <rect width="200" height="140" fill="#F3EAFF" />
+          <circle cx="100" cy="70" r="28" fill="white" stroke="#A560E8" strokeWidth="2" />
+          <path d="M88 70 Q92 58 100 62 Q108 58 112 70 Q115 82 100 86 Q85 82 88 70" fill="#A560E8" />
           <circle cx="95" cy="68" r="2" fill="white" />
           <circle cx="105" cy="68" r="2" fill="white" />
-          <rect x="45" y="45" width="35" height="25" rx="3" fill="white" stroke="#7C3AED" strokeWidth="2" />
-          <text x="62" y="62" textAnchor="middle" fontSize="12" fill="#7C3AED" fontWeight="bold">?</text>
-          <rect x="120" y="42" width="35" height="28" rx="3" fill="white" stroke="#6D28D9" strokeWidth="2" />
-          <circle cx="132" cy="52" r="4" fill="#C4B5FD" />
+          <rect x="45" y="45" width="35" height="25" rx="3" fill="white" stroke="#7733B5" strokeWidth="2" />
+          <text x="62" y="62" textAnchor="middle" fontSize="12" fill="#7733B5" fontWeight="bold">?</text>
+          <rect x="120" y="42" width="35" height="28" rx="3" fill="white" stroke="#7733B5" strokeWidth="2" />
+          <circle cx="132" cy="52" r="4" fill="#C9A0F0" />
           <line x1="140" y1="52" x2="148" y2="52" stroke="#E5E7EB" strokeWidth="2" />
-          <circle cx="132" cy="64" r="4" fill="#C4B5FD" />
+          <circle cx="132" cy="64" r="4" fill="#C9A0F0" />
           <line x1="140" y1="64" x2="148" y2="64" stroke="#E5E7EB" strokeWidth="2" />
-          <rect x="82" y="105" width="36" height="22" rx="2" fill="white" stroke="#7C3AED" strokeWidth="2" />
-          <line x1="92" y1="105" x2="92" y2="127" stroke="#C4B5FD" strokeWidth="1" />
-          <line x1="108" y1="105" x2="108" y2="127" stroke="#C4B5FD" strokeWidth="1" />
-          <line x1="82" y1="116" x2="118" y2="116" stroke="#C4B5FD" strokeWidth="1" />
-          <circle cx="165" cy="45" r="5" fill="#C4B5FD" />
-          <circle cx="50" cy="100" r="4" fill="#10B981" />
+          <rect x="82" y="105" width="36" height="22" rx="2" fill="white" stroke="#7733B5" strokeWidth="2" />
+          <line x1="92" y1="105" x2="92" y2="127" stroke="#C9A0F0" strokeWidth="1" />
+          <line x1="108" y1="105" x2="108" y2="127" stroke="#C9A0F0" strokeWidth="1" />
+          <line x1="82" y1="116" x2="118" y2="116" stroke="#C9A0F0" strokeWidth="1" />
+          <circle cx="165" cy="45" r="5" fill="#C9A0F0" />
+          <circle cx="50" cy="100" r="4" fill="#8A48C7" />
         </svg>
       );
     }
@@ -314,7 +314,7 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
               onClick={() => handlePageChange(page as number)}
               className={`w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${
                 currentPage === page
-                  ? 'bg-[#1CB0F6] text-white border-2 border-b-4 border-[#1899D6] font-extrabold'
+                  ? 'bg-[#A560E8] text-white border-2 border-b-4 border-[#7733B5] font-extrabold'
                   : 'text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800'
               }`}
             >
@@ -364,10 +364,10 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
             </nav>
 
             <header className="text-center max-w-2xl mx-auto">
-              <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#58CC02] dark:text-[#58CC02] mb-3">
+              <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#A560E8] dark:text-[#A560E8] mb-3">
                 Tips &amp; guides
               </p>
-              <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-[#58CC02]" aria-hidden />
+              <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-[#A560E8]" aria-hidden />
               <h1
                 id="blog-page-heading"
                 className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-stone-900 dark:text-stone-100 mb-4 tracking-tight leading-tight"
@@ -389,7 +389,7 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
           {currentPosts.map((post, idx) => (
             <article
               key={post.slug}
-              className="group cursor-pointer rounded-2xl overflow-hidden border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 hover:border-[#1CB0F6] dark:hover:border-[#1CB0F6] transition-all duration-300"
+              className="group cursor-pointer rounded-2xl overflow-hidden border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 hover:border-[#A560E8] dark:hover:border-[#A560E8] transition-all duration-300"
               onClick={() => handlePostClick(post.slug)}
             >
               {/* Image Container */}
@@ -402,7 +402,7 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
               {/* Content */}
               <div className="p-5 sm:p-6">
                 <h2
-                  className="text-lg sm:text-xl font-extrabold text-stone-900 dark:text-stone-100 mb-3 group-hover:text-[#1CB0F6] transition-colors leading-snug line-clamp-2"
+                  className="text-lg sm:text-xl font-extrabold text-stone-900 dark:text-stone-100 mb-3 group-hover:text-[#A560E8] transition-colors leading-snug line-clamp-2"
                   style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                 >
                   {post.title}
@@ -412,7 +412,7 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
                 </p>
                 
                 {/* Read time badge */}
-                <span className="inline-block px-3 py-1.5 bg-[#DDF4FF] dark:bg-[#1CB0F6]/20 text-[#1899D6] dark:text-[#1CB0F6] text-sm font-extrabold border border-[#1CB0F6]/30 rounded-xl">
+                <span className="inline-block px-3 py-1.5 bg-[#F3EAFF] dark:bg-[#A560E8]/20 text-[#7733B5] dark:text-[#A560E8] text-sm font-extrabold border border-[#A560E8]/30 rounded-xl">
                   {getReadTimeMinutes(post.readTime)} min read
                 </span>
               </div>
@@ -435,10 +435,10 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
           <LandingSectionLayers variant="cta" />
           <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 px-6 py-10 sm:px-10 sm:py-12">
-              <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#58CC02] dark:text-[#58CC02] mb-3">
+              <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#A560E8] dark:text-[#A560E8] mb-3">
                 Get started
               </p>
-              <div className="mx-auto mb-5 h-1 w-12 rounded-full bg-[#58CC02]" aria-hidden />
+              <div className="mx-auto mb-5 h-1 w-12 rounded-full bg-[#A560E8]" aria-hidden />
               <h2
                 className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-stone-900 dark:text-stone-50 mb-4 tracking-tight leading-[1.15]"
                 style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
@@ -456,7 +456,7 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
                     <button
                       type="button"
                       onClick={() => onNavigate('dashboard')}
-                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#58CC02] hover:bg-[#4CAF00] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all duration-150"
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#A560E8] hover:bg-[#9450D8] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all duration-150"
                     >
                       Go to dashboard
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
@@ -478,7 +478,7 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
                     <button
                       type="button"
                       onClick={() => onNavigate('signup')}
-                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#58CC02] hover:bg-[#4CAF00] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all duration-150"
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#A560E8] hover:bg-[#9450D8] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all duration-150"
                     >
                       Try free
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>

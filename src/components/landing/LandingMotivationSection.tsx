@@ -27,31 +27,31 @@ export default function LandingMotivationSection({ onNavigate }: LandingMotivati
     >
       {/* Decorative mascot — floats near the section heading on lg+. */}
       <div aria-hidden className="pointer-events-none select-none hidden lg:block absolute top-10 right-[3%] xl:right-[7%] z-20 w-32 xl:w-40 rotate-[6deg]">
-        <div className="absolute -inset-6 rounded-full bg-[#FF9600]/30 blur-2xl" />
+        <div className="absolute -inset-6 rounded-full bg-[#A560E8]/30 blur-2xl" />
         <img
           src="/mascot-jumping-joy.webp"
           alt=""
           loading="lazy"
           decoding="async"
-          className="relative w-full h-auto motion-safe:animate-float drop-shadow-[0_22px_36px_rgba(255,150,0,0.42)]"
+          className="relative w-full h-auto motion-safe:animate-float drop-shadow-[0_22px_36px_rgba(165,96,232,0.42)]"
         />
       </div>
       <LandingSectionBackdrop
-        base="bg-[#FFF4E0] dark:bg-[#2A1800]"
+        base="bg-[#F3EAFF] dark:bg-[#1A0B2E]"
         topFrom="from-[#FCFBF7]/80 dark:from-stone-950/80"
         bottomTo="from-[#FCFBF7]/80 dark:from-stone-950/80"
-        radial="bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(255,150,0,0.10),transparent_60%)]"
+        radial="bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(165,96,232,0.14),transparent_60%)]"
       />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <LandingScrollReveal>
           <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
-            <div className="inline-flex items-center gap-2 mb-5 rounded-full border-2 border-[#FF9600]/45 bg-[#FFF4E0] dark:bg-[#FF9600]/15 px-3.5 py-1.5 shadow-[0_0_12px_rgba(255,150,0,0.25)]">
+            <div className="inline-flex items-center gap-2 mb-5 rounded-full border-2 border-[#A560E8]/45 bg-[#F3EAFF] dark:bg-[#A560E8]/15 px-3.5 py-1.5 shadow-[0_0_12px_rgba(165,96,232,0.25)]">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF9600] opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FF9600]" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#A560E8] opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#A560E8]" />
               </span>
-              <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.18em] text-[#9A5500] dark:text-[#FFCF70]">
+              <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.18em] text-[#7733B5] dark:text-[#C9A0F0]">
                 The habit loop that keeps grades up
               </span>
             </div>
@@ -60,10 +60,10 @@ export default function LandingMotivationSection({ onNavigate }: LandingMotivati
               style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
             >
               Studying that{' '}
-              <span className="relative inline-block text-[#FF9600]">
+              <span className="relative inline-block text-[#A560E8]">
                 actually sticks.
                 <svg
-                  className="absolute -bottom-1.5 left-0 w-full h-2 text-[#FF9600]"
+                  className="absolute -bottom-1.5 left-0 w-full h-2 text-[#A560E8]"
                   viewBox="0 0 200 8"
                   preserveAspectRatio="none"
                   aria-hidden
@@ -77,17 +77,17 @@ export default function LandingMotivationSection({ onNavigate }: LandingMotivati
             </p>
           </div>
 
-          <div className="relative rounded-3xl border-2 border-[#FFCF70]/70 bg-white/70 dark:bg-[#2A0E40]/40 shadow-[0_0_60px_-20px_rgba(255,150,0,0.30)] p-4 sm:p-5 lg:p-6 backdrop-blur-sm">
-            <div className="pointer-events-none absolute -top-10 -left-10 w-48 h-48 rounded-full bg-[#FF9600]/15 blur-3xl" aria-hidden />
-            <div className="pointer-events-none absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-[#58CC02]/12 blur-3xl" aria-hidden />
+          <div className="relative rounded-3xl border-2 border-[#D8B4FE]/70 bg-white/70 dark:bg-[#2A0E40]/40 shadow-[0_0_60px_-20px_rgba(165,96,232,0.30)] p-4 sm:p-5 lg:p-6 backdrop-blur-sm">
+            <div className="pointer-events-none absolute -top-10 -left-10 w-48 h-48 rounded-full bg-[#A560E8]/15 blur-3xl" aria-hidden />
+            <div className="pointer-events-none absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-[#8A48C7]/12 blur-3xl" aria-hidden />
 
             <div className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
               {/* Daily Review */}
-              <div className="relative rounded-2xl border-2 border-b-4 border-[#46A302] bg-white dark:bg-stone-900 p-5 sm:p-6 hover:-translate-y-1 transition-all overflow-hidden shadow-[0_8px_28px_-10px_rgba(88,204,2,0.35)]">
-                <span className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-[#58CC02] to-[#46A302]" aria-hidden />
-                <div className="pointer-events-none absolute -top-12 -right-12 w-36 h-36 rounded-full bg-[#58CC02]/15 blur-3xl" aria-hidden />
+              <div className="relative rounded-2xl border-2 border-b-4 border-[#A560E8] bg-white dark:bg-stone-900 p-5 sm:p-6 hover:-translate-y-1 transition-all overflow-hidden shadow-[0_8px_28px_-10px_rgba(165,96,232,0.35)]">
+                <span className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-[#A560E8] to-[#8A48C7]" aria-hidden />
+                <div className="pointer-events-none absolute -top-12 -right-12 w-36 h-36 rounded-full bg-[#A560E8]/15 blur-3xl" aria-hidden />
                 <div className="relative">
-                  <div className="w-12 h-12 rounded-2xl bg-[#58CC02] flex items-center justify-center mb-4 border-2 border-b-4 border-[#46A302]">
+                  <div className="w-12 h-12 rounded-2xl bg-[#A560E8] flex items-center justify-center mb-4 border-2 border-b-4 border-[#8A48C7]">
                     <span className="text-xl" aria-hidden>📚</span>
                   </div>
                   <h3 className="text-lg font-extrabold text-[#3C3C3C] dark:text-stone-50 mb-2" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
@@ -96,15 +96,15 @@ export default function LandingMotivationSection({ onNavigate }: LandingMotivati
                   <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed mb-4">
                     10 minutes a day beats 4 hours of cramming. Your personalised drill from saved notes, built around what you keep getting wrong.
                   </p>
-                  <div className="hidden sm:block rounded-xl bg-[#E5F8D0]/60 dark:bg-[#58CC02]/10 border-2 border-[#58CC02]/30 p-3">
+                  <div className="hidden sm:block rounded-xl bg-[#F3EAFF]/60 dark:bg-[#A560E8]/10 border-2 border-[#A560E8]/30 p-3">
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="w-6 h-6 rounded-lg bg-[#58CC02] flex items-center justify-center">
+                      <div className="w-6 h-6 rounded-lg bg-[#A560E8] flex items-center justify-center">
                         <span className="text-white text-[10px] font-extrabold">1</span>
                       </div>
                       <span className="text-xs font-bold text-[#3C3C3C] dark:text-stone-200">Today&apos;s Session</span>
                     </div>
-                    <div className="h-1.5 rounded-full bg-[#58CC02]/20 overflow-hidden">
-                      <div className="h-full w-[65%] rounded-full bg-[#58CC02]" />
+                    <div className="h-1.5 rounded-full bg-[#A560E8]/20 overflow-hidden">
+                      <div className="h-full w-[65%] rounded-full bg-[#A560E8]" />
                     </div>
                     <p className="text-[10px] text-stone-500 dark:text-stone-400 mt-1.5 font-medium">3 of 5 questions done</p>
                   </div>
@@ -112,11 +112,11 @@ export default function LandingMotivationSection({ onNavigate }: LandingMotivati
               </div>
 
               {/* XP & Levels */}
-              <div className="relative rounded-2xl border-2 border-b-4 border-[#1899D6] bg-white dark:bg-stone-900 p-5 sm:p-6 hover:-translate-y-1 transition-all overflow-hidden shadow-[0_8px_28px_-10px_rgba(28,176,246,0.35)]">
-                <span className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-[#1CB0F6] to-[#1899D6]" aria-hidden />
-                <div className="pointer-events-none absolute -top-12 -right-12 w-36 h-36 rounded-full bg-[#1CB0F6]/15 blur-3xl" aria-hidden />
+              <div className="relative rounded-2xl border-2 border-b-4 border-[#8A48C7] bg-white dark:bg-stone-900 p-5 sm:p-6 hover:-translate-y-1 transition-all overflow-hidden shadow-[0_8px_28px_-10px_rgba(138,72,199,0.35)]">
+                <span className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-[#8A48C7] to-[#6B27A3]" aria-hidden />
+                <div className="pointer-events-none absolute -top-12 -right-12 w-36 h-36 rounded-full bg-[#8A48C7]/15 blur-3xl" aria-hidden />
                 <div className="relative">
-                  <div className="w-12 h-12 rounded-2xl bg-[#1CB0F6] flex items-center justify-center mb-4 border-2 border-b-4 border-[#1899D6]">
+                  <div className="w-12 h-12 rounded-2xl bg-[#8A48C7] flex items-center justify-center mb-4 border-2 border-b-4 border-[#6B27A3]">
                     <span className="text-xl" aria-hidden>⭐</span>
                   </div>
                   <h3 className="text-lg font-extrabold text-[#3C3C3C] dark:text-stone-50 mb-2" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
@@ -125,18 +125,18 @@ export default function LandingMotivationSection({ onNavigate }: LandingMotivati
                   <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed mb-4">
                     Every essay reviewed, every quiz aced, every streak day. They all stack into XP and levels you actually want to chase.
                   </p>
-                  <div className="hidden sm:block rounded-xl bg-[#DDF4FF]/60 dark:bg-[#1CB0F6]/10 border-2 border-[#1CB0F6]/30 p-3">
+                  <div className="hidden sm:block rounded-xl bg-[#F3EAFF]/60 dark:bg-[#8A48C7]/10 border-2 border-[#8A48C7]/30 p-3">
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="w-7 h-7 rounded-lg bg-[#1CB0F6] flex items-center justify-center border-b-2 border-[#1899D6]">
+                      <div className="w-7 h-7 rounded-lg bg-[#8A48C7] flex items-center justify-center border-b-2 border-[#6B27A3]">
                         <span className="text-white text-[11px] font-extrabold">12</span>
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-[10px] font-extrabold text-[#3C3C3C] dark:text-stone-200 truncate">Knowledge Keeper III</p>
                         <div className="flex items-center gap-1">
-                          <div className="flex-1 h-1.5 rounded-full bg-[#1CB0F6]/20 overflow-hidden">
-                            <div className="h-full w-[42%] rounded-full bg-[#1CB0F6]" />
+                          <div className="flex-1 h-1.5 rounded-full bg-[#8A48C7]/20 overflow-hidden">
+                            <div className="h-full w-[42%] rounded-full bg-[#8A48C7]" />
                           </div>
-                          <span className="text-[8px] text-[#1CB0F6] font-bold tabular-nums">1,340 XP</span>
+                          <span className="text-[8px] text-[#8A48C7] font-bold tabular-nums">1,340 XP</span>
                         </div>
                       </div>
                     </div>
@@ -145,11 +145,11 @@ export default function LandingMotivationSection({ onNavigate }: LandingMotivati
               </div>
 
               {/* Streaks */}
-              <div className="relative rounded-2xl border-2 border-b-4 border-[#D97F00] bg-white dark:bg-stone-900 p-5 sm:p-6 hover:-translate-y-1 transition-all overflow-hidden shadow-[0_8px_28px_-10px_rgba(255,150,0,0.35)]">
-                <span className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-[#FF9600] to-[#D97F00]" aria-hidden />
-                <div className="pointer-events-none absolute -top-12 -right-12 w-36 h-36 rounded-full bg-[#FF9600]/15 blur-3xl" aria-hidden />
+              <div className="relative rounded-2xl border-2 border-b-4 border-[#7733B5] bg-white dark:bg-stone-900 p-5 sm:p-6 hover:-translate-y-1 transition-all overflow-hidden shadow-[0_8px_28px_-10px_rgba(119,51,181,0.35)]">
+                <span className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-[#7733B5] to-[#5A1B8E]" aria-hidden />
+                <div className="pointer-events-none absolute -top-12 -right-12 w-36 h-36 rounded-full bg-[#7733B5]/15 blur-3xl" aria-hidden />
                 <div className="relative">
-                  <div className="w-12 h-12 rounded-2xl bg-[#FF9600] flex items-center justify-center mb-4 border-2 border-b-4 border-[#D97F00]">
+                  <div className="w-12 h-12 rounded-2xl bg-[#7733B5] flex items-center justify-center mb-4 border-2 border-b-4 border-[#5A1B8E]">
                     <span className="text-xl" aria-hidden>🔥</span>
                   </div>
                   <h3 className="text-lg font-extrabold text-[#3C3C3C] dark:text-stone-50 mb-2" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
@@ -158,12 +158,12 @@ export default function LandingMotivationSection({ onNavigate }: LandingMotivati
                   <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed mb-4">
                     Your streak is your accountability. Miss a day and you&apos;ll feel it. That&apos;s how casual users become 4.0 students.
                   </p>
-                  <div className="hidden sm:block rounded-xl bg-[#FFF4E0]/60 dark:bg-[#FF9600]/10 border-2 border-[#FF9600]/30 p-3">
+                  <div className="hidden sm:block rounded-xl bg-[#F3EAFF]/60 dark:bg-[#7733B5]/10 border-2 border-[#7733B5]/30 p-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="text-2xl" aria-hidden>🔥</span>
                         <div>
-                          <p className="text-lg font-extrabold text-[#FF9600]">14</p>
+                          <p className="text-lg font-extrabold text-[#7733B5]">14</p>
                           <p className="text-[10px] font-bold text-stone-500 dark:text-stone-400 -mt-0.5">day streak</p>
                         </div>
                       </div>
@@ -172,7 +172,7 @@ export default function LandingMotivationSection({ onNavigate }: LandingMotivati
                           <div
                             key={`${d}-${i}`}
                             className={`w-4 h-4 rounded-full flex items-center justify-center text-[7px] font-bold ${
-                              i < 6 ? 'bg-[#FF9600] text-white' : 'bg-stone-200 dark:bg-stone-700 text-stone-400 dark:text-stone-500'
+                              i < 6 ? 'bg-[#7733B5] text-white' : 'bg-stone-200 dark:bg-stone-700 text-stone-400 dark:text-stone-500'
                             }`}
                           >
                             {d}
@@ -185,8 +185,8 @@ export default function LandingMotivationSection({ onNavigate }: LandingMotivati
               </div>
 
               {/* Badges */}
-              <div className="relative rounded-2xl border-2 border-b-4 border-[#8A48C7] bg-white dark:bg-stone-900 p-5 sm:p-6 hover:-translate-y-1 transition-all overflow-hidden shadow-[0_8px_28px_-10px_rgba(165,96,232,0.35)]">
-                <span className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-[#A560E8] to-[#8A48C7]" aria-hidden />
+              <div className="relative rounded-2xl border-2 border-b-4 border-[#C9A0F0] bg-white dark:bg-stone-900 p-5 sm:p-6 hover:-translate-y-1 transition-all overflow-hidden shadow-[0_8px_28px_-10px_rgba(165,96,232,0.35)]">
+                <span className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-[#C9A0F0] to-[#A560E8]" aria-hidden />
                 <div className="pointer-events-none absolute -top-12 -right-12 w-36 h-36 rounded-full bg-[#A560E8]/15 blur-3xl" aria-hidden />
                 <div className="relative">
                   <div className="w-12 h-12 rounded-2xl bg-[#A560E8] flex items-center justify-center mb-4 border-2 border-b-4 border-[#8A48C7]">
@@ -222,14 +222,14 @@ export default function LandingMotivationSection({ onNavigate }: LandingMotivati
             {/* Daily Review screenshot */}
             <div className="relative mt-10 sm:mt-12 max-w-4xl mx-auto">
               <div className="text-center mb-5 sm:mb-6">
-                <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border-2 border-[#58CC02]/40 bg-[#E5F8D0] dark:bg-[#58CC02]/15 text-[#46A302] dark:text-[#58CC02] text-[10px] sm:text-xs font-extrabold uppercase tracking-wider">
+                <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border-2 border-[#A560E8]/40 bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#7733B5] dark:text-[#C9A0F0] text-[10px] sm:text-xs font-extrabold uppercase tracking-wider">
                   <span aria-hidden>📚</span>
                   Daily Review in action
                 </span>
               </div>
               <div className="relative">
-                <div className="pointer-events-none absolute -inset-4 rounded-[2.5rem] bg-gradient-to-br from-[#58CC02]/20 to-[#46A302]/10 blur-3xl -z-10" aria-hidden />
-                <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-b-4 border-[#46A302] shadow-[0_24px_50px_-18px_rgba(88,204,2,0.35)]">
+                <div className="pointer-events-none absolute -inset-4 rounded-[2.5rem] bg-gradient-to-br from-[#A560E8]/20 to-[#8A48C7]/10 blur-3xl -z-10" aria-hidden />
+                <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-b-4 border-[#A560E8] shadow-[0_24px_50px_-18px_rgba(165,96,232,0.35)]">
                   <img
                     src="/daily-review-preview.png"
                     alt="WriteScholar Daily Review: personalised daily practice with multiple choice questions, progress tracking, and instant feedback"
@@ -245,14 +245,14 @@ export default function LandingMotivationSection({ onNavigate }: LandingMotivati
             </div>
 
             {/* Level-up preview */}
-            <div className="mt-10 sm:mt-12 rounded-2xl border-2 border-b-4 border-[#1899D6] bg-white dark:bg-stone-900 p-5 sm:p-6 max-w-4xl mx-auto shadow-[0_8px_28px_-10px_rgba(28,176,246,0.30)]">
+            <div className="mt-10 sm:mt-12 rounded-2xl border-2 border-b-4 border-[#8A48C7] bg-white dark:bg-stone-900 p-5 sm:p-6 max-w-4xl mx-auto shadow-[0_8px_28px_-10px_rgba(138,72,199,0.30)]">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#1CB0F6] flex items-center justify-center border-4 border-[#DDF4FF] dark:border-[#1CB0F6]/30 shadow-[0_0_20px_rgba(28,176,246,0.35)]">
+                  <div className="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#A560E8] flex items-center justify-center border-4 border-[#F3EAFF] dark:border-[#A560E8]/30 shadow-[0_0_20px_rgba(165,96,232,0.35)]">
                     <span className="text-2xl sm:text-3xl font-extrabold text-white">7</span>
                   </div>
                   <div>
-                    <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#1CB0F6] mb-0.5">Level up!</p>
+                    <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#A560E8] mb-0.5">Level up!</p>
                     <p className="text-lg sm:text-xl font-extrabold text-[#3C3C3C] dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                       Curious Cat II
                     </p>
@@ -264,7 +264,7 @@ export default function LandingMotivationSection({ onNavigate }: LandingMotivati
                 <button
                   type="button"
                   onClick={() => onNavigate('signup')}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#1CB0F6] text-white font-extrabold text-sm border-2 border-b-4 border-[#1899D6] hover:bg-[#1899D6] active:border-b-2 active:translate-y-0.5 transition-all whitespace-nowrap"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#A560E8] text-white font-extrabold text-sm border-2 border-b-4 border-[#7733B5] hover:bg-[#8A48C7] active:border-b-2 active:translate-y-0.5 transition-all whitespace-nowrap"
                 >
                   Start earning XP
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>

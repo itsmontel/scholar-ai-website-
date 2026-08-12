@@ -20,6 +20,8 @@ struct LibraryTabView: View {
     /// MainTabView passes this in so the empty-state CTAs can switch tab.
     /// Default no-op for previews.
     var onJumpToTab: (LibraryJumpDestination) -> Void = { _ in }
+    /// Opens the ⊕ tool picker (the floating "+ New" affordance).
+    var onOpenToolPicker: () -> Void = {}
 
     @StateObject private var store = LibraryStore.shared
 
@@ -72,6 +74,21 @@ struct LibraryTabView: View {
         } message: {
             Text("This won't delete the original — just removes it from your library shelf.")
         }
+        // Home's "Continue studying" rows land here with a pending item —
+        // open its detail sheet so the tap truly resumes that item.
+        .onAppear { consumePendingOpen() }
+        .onChange(of: store.pendingOpenItemID) { _, _ in consumePendingOpen() }
+    }
+
+    private func consumePendingOpen() {
+        guard let id = store.pendingOpenItemID else { return }
+        store.pendingOpenItemID = nil
+        if let item = store.items.first(where: { $0.id == id }) {
+            // Small delay lets the tab switch settle before the sheet slides up.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                presentedItem = item
+            }
+        }
     }
 
     // MARK: - Helpers
@@ -86,8 +103,8 @@ struct LibraryTabView: View {
     private func handleOpenSource(_ item: LibraryItem) {
         switch item.kind {
         case .studyPack:     onJumpToTab(.study)
-        case .essayAnalysis: onJumpToTab(.study)
-        case .document:      onJumpToTab(.study)
+        case .essayAnalysis: onJumpToTab(.analyzer)
+        case .document:      onJumpToTab(.editor)
         }
     }
 
@@ -99,6 +116,30 @@ struct LibraryTabView: View {
                 .wsHeadline(.large, weight: .black)
                 .foregroundStyle(WSColor.foreground)
             Spacer()
+
+            // Refresh / sync (spins while a backend sync is in flight)
+            Button {
+                Haptics.light()
+                Task { await store.syncFromBackend() }
+            } label: {
+                if store.isSyncing {
+                    ProgressView()
+                        .controlSize(.small)
+                        .tint(WSColor.duoPurple)
+                        .frame(width: 42, height: 42)
+                        .background(
+                            Circle()
+                                .fill(WSColor.backgroundElevated)
+                                .shadow(color: Color.black.opacity(0.05), radius: 6, y: 2)
+                        )
+                } else {
+                    circleIcon("arrow.clockwise")
+                }
+            }
+            .buttonStyle(WSBouncyButtonStyle())
+            .disabled(store.isSyncing)
+            .accessibilityLabel("Sync library")
+
             Button {
                 Haptics.selection()
                 withAnimation(.wsBouncePop) {
@@ -111,7 +152,7 @@ struct LibraryTabView: View {
             } label: {
                 circleIcon(showSearch ? "xmark" : "magnifyingglass")
             }
-            .buttonStyle(.plain)
+            .buttonStyle(WSBouncyButtonStyle())
 
             Menu {
                 Picker("Sort", selection: $store.sort) {
@@ -148,7 +189,7 @@ struct LibraryTabView: View {
                 Spacer()
                 Button {
                     Haptics.medium()
-                    onJumpToTab(.study)
+                    onOpenToolPicker()
                 } label: {
                     HStack(spacing: 6) {
                         Image(systemName: "plus").font(.system(size: 15, weight: .bold))
@@ -163,7 +204,7 @@ struct LibraryTabView: View {
                             .shadow(color: WSColor.duoPurple.opacity(0.4), radius: 10, y: 5)
                     )
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(WSBouncyButtonStyle())
                 .padding(.trailing, 18)
                 .padding(.bottom, 18)
             }
@@ -238,13 +279,10 @@ struct LibraryTabView: View {
         }
     }
 
+    /// Active pill is always brand purple (mockup) — category color only
+    /// lives on the row tiles.
     private func segmentColor(for f: LibraryFilter) -> Color {
-        switch f {
-        case .all:        return WSColor.duoPurple
-        case .studyPacks: return WSColor.duoBlue
-        case .essays:     return WSColor.duoOrange
-        case .documents:  return WSColor.duoGreen
-        }
+        WSColor.duoPurple
     }
 
     private func filterShortLabel(_ f: LibraryFilter) -> String {
@@ -260,7 +298,26 @@ struct LibraryTabView: View {
 
     @ViewBuilder
     private var contentArea: some View {
-        if store.items.isEmpty {
+        if store.items.isEmpty && store.isSyncing {
+            // First sync in flight — skeleton rows instead of a blank page.
+            VStack(spacing: 12) {
+                ForEach(0..<3, id: \.self) { _ in
+                    HStack(spacing: 14) {
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .fill(WSColor.surface)
+                            .frame(width: 48, height: 48)
+                        VStack(alignment: .leading, spacing: 6) {
+                            RoundedRectangle(cornerRadius: 4).fill(WSColor.surface).frame(width: 170, height: 13)
+                            RoundedRectangle(cornerRadius: 4).fill(WSColor.surface).frame(width: 110, height: 10)
+                        }
+                        Spacer()
+                    }
+                    .wsChunkyCard(cornerRadius: 18, horizontalPadding: 14, verticalPadding: 14)
+                }
+            }
+            .redacted(reason: .placeholder)
+            .padding(.top, 6)
+        } else if store.items.isEmpty {
             LibraryEmptyState(
                 onCreateStudyPack: { onJumpToTab(.study) },
                 onAnalyzeEssay:    { onJumpToTab(.study) },
@@ -311,19 +368,19 @@ struct LibraryTabView: View {
             Text(label.uppercased())
                 .font(WSFont.sans(10, weight: .black))
                 .tracking(0.8)
-                .foregroundStyle(tint == WSColor.duoText ? WSColor.duoText.opacity(0.55) : tint)
+                .foregroundStyle(tint == WSColor.duoText ? WSColor.foregroundMuted : tint)
             Rectangle()
-                .fill(WSColor.duoBorder)
-                .frame(height: 2)
+                .fill(WSColor.hairline)
+                .frame(height: 1)
             Text("\(count)")
                 .font(WSFont.sans(10, weight: .black))
-                .foregroundStyle(WSColor.duoText.opacity(0.55))
+                .foregroundStyle(WSColor.foregroundMuted)
                 .padding(.horizontal, 7)
                 .padding(.vertical, 2)
                 .background(
                     Capsule()
                         .fill(WSColor.backgroundElevated)
-                        .overlay(Capsule().stroke(WSColor.duoBorder, lineWidth: 2))
+                        .overlay(Capsule().stroke(WSColor.hairline, lineWidth: 1))
                 )
         }
         .padding(.top, 8)
@@ -354,6 +411,8 @@ enum LibraryJumpDestination {
     case study
     case games
     case focus
+    case analyzer
+    case editor
 }
 
 // MARK: - Preview

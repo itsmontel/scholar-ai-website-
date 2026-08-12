@@ -101,6 +101,7 @@ export default function DashboardTopBar({
   onNavigate,
   onLogout,
   variant = 'dashboard',
+  chromeless = false,
 }: {
   user?: Record<string, unknown> | null;
   plan: string;
@@ -108,6 +109,10 @@ export default function DashboardTopBar({
   onLogout?: () => void;
   /** Full bar on the documents dashboard; slim bar elsewhere. */
   variant?: 'dashboard' | 'compact';
+  /** Drop the floating white container — used when the bar sits
+      inline in the dashboard greeting row and needs no surface of
+      its own (the pills already carry their own borders). */
+  chromeless?: boolean;
 }) {
   const isPaid = plan === 'pro' || plan === 'premium' || plan === 'focus';
   const isCompact = variant === 'compact';
@@ -312,17 +317,26 @@ export default function DashboardTopBar({
   })();
 
   return (
-    <div className="inline-flex flex-wrap items-center justify-end gap-2 p-1.5 sm:p-2 rounded-[20px] bg-white/95 dark:bg-stone-900/90 backdrop-blur-md border-2 border-stone-200/90 dark:border-stone-700 shadow-[0_14px_36px_-14px_rgba(40,30,60,0.28)] max-w-[calc(100vw-2rem)] lg:max-w-none">
+    <div
+      className={
+        chromeless
+          ? 'inline-flex flex-wrap items-center justify-end gap-2 max-w-full'
+          : 'inline-flex flex-wrap items-center justify-end gap-1.5 sm:gap-2 p-1.5 sm:p-2 rounded-[22px] bg-gradient-to-br from-white/95 to-[#FBF8FF]/95 dark:from-stone-900/90 dark:to-stone-900/90 backdrop-blur-md border border-[#E4D4F8] dark:border-[#A560E8]/25 shadow-[0_12px_30px_-22px_rgba(90,45,140,0.4)] max-w-[calc(100vw-2rem)] lg:max-w-none'
+      }
+    >
       {variant === 'dashboard' && (
         <>
           {/* Saved materials */}
           <button
             type="button"
             onClick={() => onNavigate('quiz-history')}
-            className="group inline-flex items-center gap-2 pl-2.5 pr-3.5 sm:pl-3 sm:pr-4 h-10 sm:h-11 rounded-2xl bg-gradient-to-b from-[#FFD42E] to-[#FFC800] hover:from-[#FFDD55] hover:to-[#FFD52E] text-[#6B27A3] text-[12px] sm:text-[13px] font-extrabold uppercase tracking-wide border-2 border-b-[4px] border-[#C99800] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_6px_18px_-8px_rgba(255,200,0,0.6)]"
+            className="group inline-flex items-center gap-2 pl-1.5 pr-4 h-10 sm:h-11 rounded-full bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-200 text-[13px] sm:text-[14px] font-extrabold border border-[#E4D4F8] dark:border-stone-700 shadow-[0_1px_2px_rgba(60,40,90,0.05)] hover:border-[#C9A0F0] hover:text-[#7733B5] dark:hover:text-[#C9A0F0] hover:shadow-[0_10px_22px_-14px_rgba(122,52,182,0.65)] transition-all duration-200"
           >
-            <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#6B27A3]/15">
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+            <span
+              className="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#B57AF0] to-[#7733B5] text-white shadow-[0_4px_10px_-5px_rgba(122,52,182,0.8)] transition-transform duration-200 group-hover:scale-105"
+              aria-hidden
+            >
+              <svg className="w-[15px] h-[15px]" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
               </svg>
             </span>
@@ -338,7 +352,7 @@ export default function DashboardTopBar({
         <button
           type="button"
           onClick={() => onNavigate('pricing')}
-          className="inline-flex items-center gap-1.5 px-3.5 h-10 sm:h-11 rounded-2xl bg-gradient-to-b from-[#65DC0F] to-[#58CC02] hover:from-[#6FEA15] hover:to-[#52BD02] text-white text-[12.5px] sm:text-[13px] font-extrabold uppercase tracking-wide border-2 border-b-[4px] border-[#3D8B00] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_6px_18px_-8px_rgba(88,204,2,0.55)]"
+          className="inline-flex items-center gap-1.5 px-4 h-10 sm:h-11 rounded-full bg-gradient-to-br from-[#B57AF0] to-[#8A48C7] text-white text-[13px] sm:text-[14px] font-extrabold hover:scale-[1.03] transition-transform duration-200 shadow-[0_10px_22px_-10px_rgba(122,52,182,0.8)]"
         >
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.75} viewBox="0 0 24 24" aria-hidden>
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
@@ -356,21 +370,18 @@ export default function DashboardTopBar({
 
       {variant === 'dashboard' && (
         <>
-          {/* Subtle divider before utility pills */}
-          <span aria-hidden className="hidden sm:block w-px h-6 bg-stone-200 dark:bg-stone-700 mx-0.5" />
-
           {/* Pomodoro pill */}
           <div className="relative" ref={pomoMenuRef}>
         <button
           type="button"
           onClick={() => setPomoOpen((o) => !o)}
           title={`Pomodoro · ${pomo.mode === 'work' ? 'Focus' : 'Break'} · ${isRunning ? 'Running' : 'Paused'}`}
-          className="inline-flex items-center gap-1.5 px-3 h-10 sm:h-11 rounded-2xl bg-white dark:bg-stone-800 text-[13px] sm:text-[14px] font-extrabold tabular-nums border-2 border-b-[3px] border-stone-200 dark:border-stone-700 hover:border-stone-300 dark:hover:border-stone-600 hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all"
+          className="inline-flex items-center gap-2 pl-3 pr-4 h-10 sm:h-11 rounded-full bg-white dark:bg-stone-900 text-[13px] sm:text-[14px] font-extrabold tabular-nums border border-[#E4D4F8] dark:border-stone-700 shadow-[0_1px_2px_rgba(60,40,90,0.05)] hover:border-[#C9A0F0] hover:shadow-[0_10px_22px_-14px_rgba(122,52,182,0.65)] transition-all duration-200"
           style={{ color: pillColor }}
         >
           {/* Progress ring + center dot indicating running state */}
           <span className="relative inline-flex items-center justify-center">
-            <svg className="w-5 h-5" viewBox="0 0 36 36" aria-hidden>
+            <svg className="w-[22px] h-[22px]" viewBox="0 0 36 36" aria-hidden>
               <circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" strokeOpacity="0.16" strokeWidth="6" />
               <circle
                 cx="18" cy="18" r="15" fill="none"
@@ -525,7 +536,7 @@ export default function DashboardTopBar({
           className={
             isCompact
               ? 'inline-flex items-center gap-2 pl-2 pr-2.5 sm:pl-2.5 sm:pr-3 h-10 sm:h-11 max-w-[min(52vw,220px)] rounded-2xl bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-100 text-[12.5px] sm:text-[13px] font-extrabold border-2 border-b-[3px] border-stone-200 dark:border-stone-700 hover:border-stone-300 dark:hover:border-stone-600 hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all'
-              : 'inline-flex items-center justify-center h-10 w-10 sm:h-11 sm:w-11 rounded-2xl bg-gradient-to-br from-[#B978F0] via-[#A560E8] to-[#7733B5] text-white text-[13px] sm:text-[14px] font-extrabold border-2 border-b-[4px] border-[#6B27A3] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_8px_22px_-10px_rgba(165,96,232,0.7)]'
+              : 'inline-flex items-center justify-center h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-gradient-to-br from-[#B57AF0] to-[#7733B5] text-white text-[14px] sm:text-[15px] font-extrabold ring-2 ring-white dark:ring-stone-900 shadow-[0_8px_18px_-8px_rgba(122,52,182,0.85)] hover:scale-105 transition-transform duration-200'
           }
         >
           <span
@@ -547,18 +558,32 @@ export default function DashboardTopBar({
           )}
         </button>
         {menuOpen && (
-          <div className="absolute top-full right-0 mt-2 w-[min(92vw,320px)] rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 shadow-2xl overflow-hidden z-50">
-            {/* Profile header */}
-            <div className="px-4 py-3 border-b border-stone-100 dark:border-stone-800 bg-gradient-to-br from-[#F3EAFF]/80 via-white to-white dark:from-[#A560E8]/10 dark:via-stone-900 dark:to-stone-900">
-              {fullName && <p className="text-sm font-extrabold text-stone-900 dark:text-stone-50 truncate">{fullName}</p>}
-              {displayEmail && <p className="text-[11.5px] font-bold text-stone-500 dark:text-stone-400 truncate">{displayEmail}</p>}
-              <span className="mt-1.5 inline-flex items-center rounded-full bg-[#F3EAFF] dark:bg-[#A560E8]/20 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-[#8A48C7] dark:text-[#C9A0F0] capitalize">
-                {usagePlan} plan
-              </span>
+          <div className="absolute top-full right-0 mt-2.5 w-[min(92vw,320px)] rounded-[1.25rem] border border-[#E4D4F8] dark:border-[#A560E8]/25 bg-white dark:bg-stone-900 shadow-[0_28px_60px_-24px_rgba(60,30,110,0.42)] overflow-hidden z-50">
+            {/* Profile header — avatar, identity, plan */}
+            <div className="relative px-4 py-3.5 border-b border-[#EFE4FB] dark:border-stone-800 bg-gradient-to-br from-[#F3EAFF] via-[#FBF8FF] to-white dark:from-[#A560E8]/15 dark:via-stone-900 dark:to-stone-900 overflow-hidden">
+              <span className="pointer-events-none absolute -top-10 -right-6 h-24 w-24 rounded-full bg-[#C9A0F0]/25 blur-2xl dark:bg-[#A560E8]/15" aria-hidden />
+              <div className="relative flex items-center gap-3">
+                <span
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#B57AF0] to-[#7733B5] text-white text-[15px] font-extrabold ring-2 ring-white dark:ring-stone-900 shadow-[0_8px_18px_-8px_rgba(122,52,182,0.85)]"
+                  aria-hidden
+                >
+                  {initials}
+                </span>
+                <div className="min-w-0 flex-1">
+                  {fullName && <p className="text-sm font-extrabold text-stone-900 dark:text-stone-50 truncate">{fullName}</p>}
+                  {displayEmail && <p className="text-[11.5px] font-bold text-stone-500 dark:text-stone-400 truncate">{displayEmail}</p>}
+                  <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-white/90 dark:bg-[#A560E8]/20 ring-1 ring-[#C9A0F0]/50 dark:ring-[#A560E8]/30 px-2 py-0.5 text-[9.5px] font-extrabold uppercase tracking-wider text-[#7733B5] dark:text-[#C9A0F0] capitalize">
+                    <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
+                      <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7-6.3-4.6L5.7 21 8 14 2 9.4h7.6z" />
+                    </svg>
+                    {usagePlan} plan
+                  </span>
+                </div>
+              </div>
             </div>
 
             {/* Monthly usage */}
-            <div className="px-4 py-3 border-b border-stone-100 dark:border-stone-800">
+            <div className="px-4 py-3.5 border-b border-[#EFE4FB] dark:border-stone-800">
               <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-stone-400 mb-2">This month</p>
               {loadingUsage ? (
                 <div className="grid grid-cols-2 gap-2">
@@ -621,8 +646,11 @@ export default function DashboardTopBar({
                     <button
                       type="button"
                       onClick={() => { setMenuOpen(false); onNavigate('pricing'); }}
-                      className="mt-2.5 w-full py-2 rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] text-white text-[11px] font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
+                      className="mt-2.5 w-full inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-gradient-to-br from-[#B57AF0] to-[#8A48C7] text-white text-[11.5px] font-extrabold uppercase tracking-wide shadow-[0_10px_22px_-12px_rgba(122,52,182,0.85)] hover:scale-[1.02] active:scale-100 transition-transform duration-200"
                     >
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                      </svg>
                       Get more usage
                     </button>
                   )}
@@ -632,8 +660,8 @@ export default function DashboardTopBar({
               )}
             </div>
 
-            {/* Account links */}
-            <div className="py-1">
+            {/* Account links — icon tiles + arrow that slides in on hover */}
+            <div className="p-1.5">
               {([
                 { label: 'Account', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z', page: 'account' },
                 { label: 'Billing', icon: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z', page: 'billing' },
@@ -644,29 +672,45 @@ export default function DashboardTopBar({
                   key={item.page}
                   type="button"
                   onClick={() => { setMenuOpen(false); onNavigate(item.page); }}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
+                  className="group/item w-full flex items-center gap-3 px-2.5 py-2 rounded-xl text-[13.5px] font-bold text-stone-700 dark:text-stone-200 hover:bg-[#F7F1FF] dark:hover:bg-[#A560E8]/12 hover:text-[#7733B5] dark:hover:text-[#C9A0F0] transition-colors"
                 >
-                  <svg className="w-4 h-4 text-stone-400" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden>
-                    <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
+                  <span
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#8A48C7] dark:text-[#C9A0F0] transition-colors group-hover/item:bg-[#A560E8] group-hover/item:text-white"
+                    aria-hidden
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
+                    </svg>
+                  </span>
+                  <span className="flex-1 text-left">{item.label}</span>
+                  <svg
+                    className="w-3.5 h-3.5 shrink-0 text-[#A560E8] opacity-0 -translate-x-1 group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all duration-200"
+                    fill="none" stroke="currentColor" strokeWidth={2.75} viewBox="0 0 24 24" aria-hidden
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
-                  {item.label}
                 </button>
               ))}
             </div>
             {onLogout && (
-              <>
-                <div className="border-t border-stone-100 dark:border-stone-800" />
+              <div className="p-1.5 pt-0">
+                <div className="mb-1.5 border-t border-[#EFE4FB] dark:border-stone-800" />
                 <button
                   type="button"
                   onClick={() => { setMenuOpen(false); onLogout(); }}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                  className="group/out w-full flex items-center gap-3 px-2.5 py-2 rounded-xl text-[13.5px] font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" aria-hidden>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
+                  <span
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-50 dark:bg-red-900/25 text-red-500 dark:text-red-400 transition-colors group-hover/out:bg-red-500 group-hover/out:text-white"
+                    aria-hidden
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                  </span>
                   Sign out
                 </button>
-              </>
+              </div>
             )}
           </div>
         )}

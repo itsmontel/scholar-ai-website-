@@ -114,7 +114,8 @@ struct StudyPackInputView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     titleRow
-                    recentPacksRow
+                    // (The saved-packs rail moved to StudyPacksListView — the
+                    // dedicated list screen users land on when packs exist.)
                     primarySegment
                     inputArea
                     moreSourcesSection
@@ -163,48 +164,6 @@ struct StudyPackInputView: View {
     }
 
     // MARK: - Recent packs
-
-    @ViewBuilder
-    private var recentPacksRow: some View {
-        let packs = library.items
-            .filter { $0.kind == .studyPack }
-            .sorted { ($0.lastOpenedAt ?? $0.createdAt) > ($1.lastOpenedAt ?? $1.createdAt) }
-            .prefix(6)
-
-        if !packs.isEmpty {
-            VStack(alignment: .leading, spacing: 10) {
-                Text("Continue")
-                    .font(WSFont.sans(13, weight: .black))
-                    .foregroundStyle(WSColor.foregroundMuted)
-
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 10) {
-                        ForEach(Array(packs)) { item in
-                            Button {
-                                Haptics.medium()
-                                if let pack = StudyPackPersistence.shared.loadPack(for: item.id) {
-                                    onOpenPack(pack)
-                                }
-                            } label: {
-                                Text(item.title)
-                                    .font(WSFont.sans(13, weight: .bold))
-                                    .foregroundStyle(WSColor.duoPurple)
-                                    .lineLimit(1)
-                                    .padding(.horizontal, 14)
-                                    .padding(.vertical, 10)
-                                    .background(
-                                        Capsule()
-                                            .fill(WSColor.duoPurpleLight)
-                                            .overlay(Capsule().stroke(WSColor.duoPurple.opacity(0.2), lineWidth: 1.5))
-                                    )
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                }
-            }
-        }
-    }
 
     // MARK: - Primary segment (Topic | Notes)
 

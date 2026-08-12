@@ -437,11 +437,9 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
     if (showFirstAnalysisOnboarding) trackEvent('first_action_prompt_view');
   }, [showFirstAnalysisOnboarding]);
 
-  // First-run fast path: a user who JUST finished onboarding lands with the
-  // analyze tab open and the essay box focused — "paste your essay, see your
-  // grade" in the first 60 seconds instead of an empty dashboard. One-shot;
-  // only fires within 10 minutes of onboarding so returning users are never
-  // yanked around.
+  // First-run after onboarding / trial: stay on the main dashboard overview.
+  // We used to auto-open Analyze; that skipped the hub right when orientation
+  // matters most (incl. Stripe → /dashboard?payment=success).
   useEffect(() => {
     const userId = user?.id;
     if (!userId || !showFirstAnalysisOnboarding || isActivationDashboardTutorial) return;
@@ -453,16 +451,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
     } catch {
       return;
     }
-    setMode('analyze');
-    trackEvent('first_action_prompt_cta_click', { cta: 'auto_fast_path' });
-    setTimeout(() => {
-      document
-        .querySelector('[data-tutorial-target="essay-input-wrapper"]')
-        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      document
-        .querySelector<HTMLTextAreaElement>('textarea[data-tutorial-target="essay-input-wrapper"]')
-        ?.focus({ preventScroll: true });
-    }, 450);
+    trackEvent('first_action_prompt_cta_click', { cta: 'auto_fast_path', view: 'hub' });
   }, [user?.id, showFirstAnalysisOnboarding, isActivationDashboardTutorial]);
 
   const analyzePlaceholders = [
@@ -4380,9 +4369,9 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
           };
 
           const freeBars: Bar[] = [
-            { key: 'analyses', label: 'Analysis previews', emoji: '📝', remaining: usageStats.analysesRemaining, limit: planLimits?.analysesPerMonth ?? 2, tone: 'rose' },
-            { key: 'citations', label: 'Citation previews', emoji: '📚', remaining: usageStats.citationsRemaining, limit: planLimits?.citationSearchesPerMonth ?? 2, tone: 'violet' },
-            { key: 'studyPacks', label: 'Study pack previews', emoji: '📦', remaining: usageStats.studyPacksRemaining, limit: planLimits?.studyPackGenerationsPerMonth ?? 2, tone: 'amber' },
+            { key: 'analyses', label: 'Analysis previews', emoji: '📝', remaining: usageStats.analysesRemaining, limit: planLimits?.analysesPerMonth ?? 1, tone: 'rose' },
+            { key: 'citations', label: 'Citation previews', emoji: '📚', remaining: usageStats.citationsRemaining, limit: planLimits?.citationSearchesPerMonth ?? 1, tone: 'violet' },
+            { key: 'studyPacks', label: 'Study pack previews', emoji: '📦', remaining: usageStats.studyPacksRemaining, limit: planLimits?.studyPackGenerationsPerMonth ?? 1, tone: 'amber' },
             { key: 'uploads', label: 'Uploads', emoji: '📄', remaining: usageStats.uploadsRemaining, limit: planLimits?.documentsPerMonth ?? 3, tone: 'emerald' },
           ];
 
@@ -4686,9 +4675,9 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
               </div>
               <div className="space-y-2.5">
                 {[
-                  { label: 'Analysis previews', emoji: '📝', remaining: usageStats.analysesRemaining, limit: (usageStats.planLimits as any)?.analysesPerMonth ?? 2, color: 'rose' },
-                  { label: 'Citation previews', emoji: '📚', remaining: usageStats.citationsRemaining, limit: (usageStats.planLimits as any)?.citationSearchesPerMonth ?? 2, color: 'blue' },
-                  { label: 'Pack previews', emoji: '📦', remaining: usageStats.studyPacksRemaining, limit: (usageStats.planLimits as any)?.studyPackGenerationsPerMonth ?? 2, color: 'amber' },
+                  { label: 'Analysis previews', emoji: '📝', remaining: usageStats.analysesRemaining, limit: (usageStats.planLimits as any)?.analysesPerMonth ?? 1, color: 'rose' },
+                  { label: 'Citation previews', emoji: '📚', remaining: usageStats.citationsRemaining, limit: (usageStats.planLimits as any)?.citationSearchesPerMonth ?? 1, color: 'blue' },
+                  { label: 'Pack previews', emoji: '📦', remaining: usageStats.studyPacksRemaining, limit: (usageStats.planLimits as any)?.studyPackGenerationsPerMonth ?? 1, color: 'amber' },
                 ].map((bar) => {
                   const isUnlimited = bar.remaining === -1;
                   const remaining = isUnlimited ? Infinity : Math.max(0, bar.remaining);

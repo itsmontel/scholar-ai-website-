@@ -46,6 +46,11 @@ final class LibraryStore: ObservableObject {
     /// Set true while a sync is in flight (future use).
     @Published var isSyncing: Bool = false
 
+    /// Set by Home's "Continue studying" rows before routing to the
+    /// My Stuff tab — LibraryTabView consumes it once to open that
+    /// item's detail sheet ("resume where I left off").
+    @Published var pendingOpenItemID: String? = nil
+
     /// Last completed sync timestamp (future use).
     @Published var lastSyncedAt: Date?
 
@@ -152,6 +157,17 @@ final class LibraryStore: ObservableObject {
         persist()
     }
 
+    /// Update an item's study progress (0…1). Only ever ratchets upward so
+    /// re-doing one quiz can't shrink an otherwise-further-along pack.
+    func setProgress(_ id: String, progress: Double) {
+        guard let i = items.firstIndex(where: { $0.id == id }) else { return }
+        let clamped = min(1.0, max(0.0, progress))
+        if clamped > (items[i].progress ?? 0) {
+            items[i].progress = clamped
+            persist()
+        }
+    }
+
     // MARK: - Backend sync
 
     /// Pulls the user's saved content from the backend and merges it with the
@@ -217,10 +233,21 @@ final class LibraryStore: ObservableObject {
             return true
         }
 
-        var merged = device + webDocs + webPackItems
+        // Carry device-side state (progress, pin, last-opened) onto the
+        // freshly-built web rows — the fetch replaces the structs wholesale.
+        let byID = Dictionary(uniqueKeysWithValues: items.map { ($0.id, $0) })
+        var merged = device + (webDocs + webPackItems).map { fresh -> LibraryItem in
+            guard let old = byID[fresh.id] else { return fresh }
+            var carried = fresh
+            carried.progress = old.progress
+            carried.isPinned = old.isPinned
+            carried.lastOpenedAt = old.lastOpenedAt ?? fresh.lastOpenedAt
+            return carried
+        }
         merged.sort { ($0.lastOpenedAt ?? $0.createdAt) > ($1.lastOpenedAt ?? $1.createdAt) }
         items = merged
         lastSyncedAt = Date()
+        defaults.set(Date(), forKey: Keys.lastSync)   // read back as Date in loadSort()
         persist()
     }
 

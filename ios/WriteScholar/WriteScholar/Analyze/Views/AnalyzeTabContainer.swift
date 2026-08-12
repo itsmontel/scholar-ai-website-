@@ -32,6 +32,7 @@ struct AnalyzeTabContainer: View {
                 .transition(.opacity.combined(with: .scale(scale: 1.01)))
             }
         }
+        .interactiveDismissDisabled(phaseTag == "generating")
         .animation(.easeInOut(duration: 0.35), value: phaseTag)
     }
 

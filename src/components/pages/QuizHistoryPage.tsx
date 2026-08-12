@@ -496,8 +496,8 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'easy': return 'bg-[#FFF4E0] text-[#B85F00] font-extrabold border-2 border-[#FF9600]/30';
-      case 'medium': return 'bg-[#FFF4E0] text-[#B85F00] font-extrabold border-2 border-[#FF9600]/30';
+      case 'easy': return 'bg-[#F3EAFF] text-[#7733B5] font-extrabold border-2 border-[#A560E8]/30';
+      case 'medium': return 'bg-[#F3EAFF] text-[#7733B5] font-extrabold border-2 border-[#A560E8]/30';
       case 'hard': return 'bg-[#FFE8E8] text-[#E04343] font-extrabold border-2 border-[#FF4B4B]/30';
       default: return 'bg-stone-50 text-stone-700 font-extrabold';
     }
@@ -523,13 +523,13 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
     switch (type) {
       case 'study_pack':
         return {
-          tint: '#FF9600',
+          tint: '#A560E8',
           tintDark: '#E88800',
-          cardBg: 'bg-gradient-to-br from-[#FFF4E0]/90 via-white to-[#FFFBF5] dark:from-[#FF9600]/15 dark:via-stone-900 dark:to-stone-900',
-          borderAccent: 'border-[#FF9600]/50',
-          badge: 'bg-[#FFF4E0] text-[#B85F00] font-extrabold border-2 border-[#FF9600]/40',
-          buttonBorder: '#D97F00',
-          hoverShadow: 'hover:shadow-[0_22px_44px_-24px_rgba(255,150,0,0.4)]',
+          cardBg: 'bg-gradient-to-br from-[#F3EAFF]/90 via-white to-[#FBF8FF] dark:from-[#A560E8]/15 dark:via-stone-900 dark:to-stone-900',
+          borderAccent: 'border-[#A560E8]/50',
+          badge: 'bg-[#F3EAFF] text-[#7733B5] font-extrabold border-2 border-[#A560E8]/40',
+          buttonBorder: '#7733B5',
+          hoverShadow: 'hover:shadow-[0_22px_44px_-24px_rgba(165,96,232,0.4)]',
         };
       case 'flashcards':
         return {
@@ -543,43 +543,43 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
         };
       case 'crossword':
         return {
-          tint: '#1CB0F6',
-          tintDark: '#1486B5',
-          cardBg: 'bg-gradient-to-br from-[#DDF4FF]/90 via-white to-[#F0FAFF] dark:from-[#1CB0F6]/12 dark:via-stone-900 dark:to-stone-900',
-          borderAccent: 'border-[#1CB0F6]/45',
-          badge: 'bg-[#DDF4FF] text-[#1486B5] font-extrabold border-2 border-[#1CB0F6]/35',
+          tint: '#A560E8',
+          tintDark: '#7733B5',
+          cardBg: 'bg-gradient-to-br from-[#F3EAFF]/90 via-white to-[#F0FAFF] dark:from-[#A560E8]/12 dark:via-stone-900 dark:to-stone-900',
+          borderAccent: 'border-[#A560E8]/45',
+          badge: 'bg-[#F3EAFF] text-[#7733B5] font-extrabold border-2 border-[#A560E8]/35',
           buttonBorder: '#0F6F99',
-          hoverShadow: 'hover:shadow-[0_22px_44px_-24px_rgba(28,176,246,0.38)]',
+          hoverShadow: 'hover:shadow-[0_22px_44px_-24px_rgba(165,96,232,0.38)]',
         };
       case 'crater_blast':
         return {
-          tint: '#FF4B82',
+          tint: '#A560E8',
           tintDark: '#ED4070',
-          cardBg: 'bg-gradient-to-br from-[#FFE8EE]/90 via-white to-[#FFF5F8] dark:from-[#FF4B82]/12 dark:via-stone-900 dark:to-stone-900',
-          borderAccent: 'border-[#FF4B82]/45',
-          badge: 'bg-[#FFE8EE] text-[#A82754] font-extrabold border-2 border-[#FF4B82]/35',
+          cardBg: 'bg-gradient-to-br from-[#F3EAFF]/90 via-white to-[#FFF5F8] dark:from-[#A560E8]/12 dark:via-stone-900 dark:to-stone-900',
+          borderAccent: 'border-[#A560E8]/45',
+          badge: 'bg-[#F3EAFF] text-[#7733B5] font-extrabold border-2 border-[#A560E8]/35',
           buttonBorder: '#C93562',
-          hoverShadow: 'hover:shadow-[0_22px_44px_-24px_rgba(255,75,130,0.38)]',
+          hoverShadow: 'hover:shadow-[0_22px_44px_-24px_rgba(165,96,232,0.38)]',
         };
       case 'lesson':
         return {
-          tint: '#58CC02',
-          tintDark: '#46A302',
-          cardBg: 'bg-gradient-to-br from-[#E5F8D0]/90 via-white to-[#F6FFF0] dark:from-[#58CC02]/12 dark:via-stone-900 dark:to-stone-900',
-          borderAccent: 'border-[#58CC02]/45',
-          badge: 'bg-[#E5F8D0] text-[#46A302] font-extrabold border-2 border-[#58CC02]/35',
+          tint: '#A560E8',
+          tintDark: '#7733B5',
+          cardBg: 'bg-gradient-to-br from-[#F3EAFF]/90 via-white to-[#F6FFF0] dark:from-[#A560E8]/12 dark:via-stone-900 dark:to-stone-900',
+          borderAccent: 'border-[#A560E8]/45',
+          badge: 'bg-[#F3EAFF] text-[#7733B5] font-extrabold border-2 border-[#A560E8]/35',
           buttonBorder: '#3D8B00',
-          hoverShadow: 'hover:shadow-[0_22px_44px_-24px_rgba(88,204,2,0.38)]',
+          hoverShadow: 'hover:shadow-[0_22px_44px_-24px_rgba(165,96,232,0.38)]',
         };
       default:
         return {
-          tint: '#FF9600',
+          tint: '#A560E8',
           tintDark: '#E88800',
-          cardBg: 'bg-gradient-to-br from-[#FFF4E0]/90 via-white to-[#FFFBF5] dark:from-[#FF9600]/15 dark:via-stone-900 dark:to-stone-900',
-          borderAccent: 'border-[#FF9600]/50',
-          badge: 'bg-[#FFF4E0] text-[#B85F00] font-extrabold border-2 border-[#FF9600]/40',
-          buttonBorder: '#D97F00',
-          hoverShadow: 'hover:shadow-[0_22px_44px_-24px_rgba(255,150,0,0.4)]',
+          cardBg: 'bg-gradient-to-br from-[#F3EAFF]/90 via-white to-[#FBF8FF] dark:from-[#A560E8]/15 dark:via-stone-900 dark:to-stone-900',
+          borderAccent: 'border-[#A560E8]/50',
+          badge: 'bg-[#F3EAFF] text-[#7733B5] font-extrabold border-2 border-[#A560E8]/40',
+          buttonBorder: '#7733B5',
+          hoverShadow: 'hover:shadow-[0_22px_44px_-24px_rgba(165,96,232,0.4)]',
         };
     }
   };
@@ -1252,7 +1252,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
         <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
           <div className="flex items-center justify-center min-h-64">
             <div className="text-center">
-              <div className="animate-spin w-10 h-10 border-2 border-stone-300 border-t-[#FF9600] rounded-full mx-auto mb-4"></div>
+              <div className="animate-spin w-10 h-10 border-2 border-stone-300 border-t-[#A560E8] rounded-full mx-auto mb-4"></div>
               <p className="text-sm text-stone-500">Loading study tools...</p>
             </div>
           </div>
@@ -1275,7 +1275,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
             <p className="text-sm text-stone-500 font-bold mb-6">{error}</p>
             <button
               onClick={fetchStudyToolHistory}
-              className="px-5 py-2.5 rounded-xl font-extrabold text-white bg-[#FF9600] border-2 border-b-4 border-[#B85F00] active:border-b-2 active:translate-y-0.5 text-sm transition-all uppercase tracking-wide"
+              className="px-5 py-2.5 rounded-xl font-extrabold text-white bg-[#A560E8] border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 text-sm transition-all uppercase tracking-wide"
             >
               Try Again
             </button>
@@ -1325,7 +1325,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 mb-10">
           <div className="flex items-start gap-4 sm:gap-5 min-w-0">
             {/* Circular animated logo — same as dashboard welcome */}
-            <div className="shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-[3px] border-[#FF9600]/40 shadow-[0_6px_20px_-8px_rgba(165,96,232,0.4)] bg-[#FFF4E0] dark:bg-[#FF9600]/15">
+            <div className="shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-[3px] border-[#A560E8]/40 shadow-[0_6px_20px_-8px_rgba(165,96,232,0.4)] bg-[#F3EAFF] dark:bg-[#A560E8]/15">
               <video
                 src="/dashboardlogo.mp4"
                 autoPlay
@@ -1338,8 +1338,8 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2.5">
-                <span className="h-px w-7 bg-[#FF9600]/50" aria-hidden />
-                <p className="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.22em] text-[#FF9600]">Your history</p>
+                <span className="h-px w-7 bg-[#A560E8]/50" aria-hidden />
+                <p className="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.22em] text-[#A560E8]">Your history</p>
               </div>
               <h1 className="dash-serif mt-3 text-[2rem] sm:text-[2.6rem] lg:text-[3rem] font-extrabold leading-[1.03] tracking-tight text-stone-900 dark:text-stone-50">
                 Saved materials
@@ -1365,7 +1365,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                   </div>
                   <button
                     onClick={() => onNavigate('pricing')}
-                    className={`flex-shrink-0 px-4 py-1.5 text-xs font-extrabold rounded-xl border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all ${expiringSoonCount <= 2 ? 'bg-[#FF4B4B] border-[#E04343] text-white' : 'bg-[#FF9600] border-[#B85F00] text-white'}`}
+                    className={`flex-shrink-0 px-4 py-1.5 text-xs font-extrabold rounded-xl border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all ${expiringSoonCount <= 2 ? 'bg-[#FF4B4B] border-[#E04343] text-white' : 'bg-[#A560E8] border-[#7733B5] text-white'}`}
                   >
                     Upgrade Now
                   </button>
@@ -1376,7 +1376,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
           <button
             type="button"
             onClick={() => onNavigate('study-pack')}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#FF9600] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#B85F00] active:border-b-2 active:translate-y-0.5 transition-all shrink-0"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#A560E8] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all shrink-0"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -1453,7 +1453,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                 }}
                 className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all ${
                   timePeriod === option.key
-                    ? 'bg-[#FF9600] text-white border-2 border-b-4 border-[#B85F00]'
+                    ? 'bg-[#A560E8] text-white border-2 border-b-4 border-[#7733B5]'
                     : 'bg-white text-stone-500 border-2 border-b-4 border-stone-200 active:border-b-2 active:translate-y-0.5'
                 }`}
               >
@@ -1487,11 +1487,11 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
         )}
 
         {/* Storage notice - compact inline */}
-        <div className={`mb-8 px-3 sm:px-4 py-2.5 sm:py-3 rounded-2xl flex items-center gap-3 sm:gap-4 min-w-0 border-2 border-b-4 ${isPaidUser ? 'bg-[#FFF4E0] border-[#B85F00]/30 dark:bg-[#FFF4E0]/10 dark:border-[#B85F00]/40' : 'bg-[#FFF4E0] border-[#B85F00]/30'}`}>
+        <div className={`mb-8 px-3 sm:px-4 py-2.5 sm:py-3 rounded-2xl flex items-center gap-3 sm:gap-4 min-w-0 border-2 border-b-4 ${isPaidUser ? 'bg-[#F3EAFF] border-[#7733B5]/30 dark:bg-[#F3EAFF]/10 dark:border-[#7733B5]/40' : 'bg-[#F3EAFF] border-[#7733B5]/30'}`}>
           {isPaidUser ? (
             <>
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-[#FF9600]/20 flex items-center justify-center shrink-0">
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-[#FF9600]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-[#A560E8]/20 flex items-center justify-center shrink-0">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-[#A560E8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
@@ -1501,14 +1501,14 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
             </>
           ) : (
             <>
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-[#FF9600]/20 flex items-center justify-center shrink-0">
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-[#FF9600]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-[#A560E8]/20 flex items-center justify-center shrink-0">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-[#A560E8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <p className="text-xs sm:text-sm text-stone-800 font-bold flex-1 min-w-0">
                 Free plan: tools expire in 30 days.{' '}
-                <button onClick={() => onNavigate('pricing')} className="font-extrabold underline underline-offset-2 hover:text-[#B85F00]">
+                <button onClick={() => onNavigate('pricing')} className="font-extrabold underline underline-offset-2 hover:text-[#7733B5]">
                   Upgrade
                 </button>{' '}
                 <span className="hidden sm:inline">for permanent storage & export.</span>
@@ -1520,7 +1520,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
         {/* Study Tool Grid */}
         {filteredTools.length === 0 ? (
           <div className="bg-white dark:bg-stone-900 rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 p-12 sm:p-16 text-center shadow-[0_12px_34px_-22px_rgba(0,0,0,0.18)]">
-            <div className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-4xl bg-[#FFF4E0]">
+            <div className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-4xl bg-[#F3EAFF]">
               🧠
             </div>
             <h2 className="text-xl font-extrabold text-stone-900 mb-2">
@@ -1532,7 +1532,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
             <button
               type="button"
               onClick={() => onNavigate('study-pack')}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[#FF9600] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#B85F00] active:border-b-2 active:translate-y-0.5 transition-all"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[#A560E8] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -1581,13 +1581,13 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                                     if (e.key === 'Enter') saveRename(tool.id);
                                     if (e.key === 'Escape') cancelRename();
                                   }}
-                                  className="flex-1 min-w-0 px-3 py-1.5 rounded-lg border-2 border-[#FF9600] bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 text-sm font-extrabold focus:outline-none focus:ring-2 focus:ring-[#FF9600]/40 focus:border-[#FF9600]"
+                                  className="flex-1 min-w-0 px-3 py-1.5 rounded-lg border-2 border-[#A560E8] bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 text-sm font-extrabold focus:outline-none focus:ring-2 focus:ring-[#A560E8]/40 focus:border-[#A560E8]"
                                   maxLength={200}
                                 />
                                 <button
                                   onClick={() => saveRename(tool.id)}
                                   disabled={isRenaming || !renameValue.trim()}
-                                  className="p-1.5 rounded-lg bg-[#FF9600] text-white border-2 border-b-4 border-[#B85F00] active:border-b-2 active:translate-y-0.5 disabled:opacity-50 transition-all"
+                                  className="p-1.5 rounded-lg bg-[#A560E8] text-white border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 disabled:opacity-50 transition-all"
                                   title="Save"
                                 >
                                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
@@ -1607,7 +1607,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                                 </h3>
                                 <button
                                   onClick={() => startRename(tool)}
-                                  className="opacity-0 group-hover/title:opacity-100 p-1 rounded-lg text-stone-400 hover:text-[#FF9600] hover:bg-[#FFF4E0] dark:hover:bg-[#FF9600]/10 transition-all shrink-0"
+                                  className="opacity-0 group-hover/title:opacity-100 p-1 rounded-lg text-stone-400 hover:text-[#A560E8] hover:bg-[#F3EAFF] dark:hover:bg-[#A560E8]/10 transition-all shrink-0"
                                   title="Rename"
                                 >
                                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
@@ -1633,7 +1633,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                                 {tool.quiz_type === 'study_pack' ? '7 formats' : `${tool.question_count} ${tool.quiz_type === 'flashcards' ? 'cards' : tool.quiz_type === 'crossword' ? 'words' : tool.quiz_type === 'crater_blast' || tool.quiz_type === 'word_tower' || tool.quiz_type === 'word_blitz' ? 'questions' : tool.quiz_type === 'lesson' ? 'slides' : 'questions'}`}
                               </span>
                               {tool.quiz_type === 'lesson' && tool.quiz_bank && tool.quiz_bank.length > 0 && (
-                                <span className="px-1.5 py-0.5 rounded-lg text-[10px] font-extrabold bg-[#FFF4E0] text-[#B85F00] border-2 border-[#FF9600]/30">
+                                <span className="px-1.5 py-0.5 rounded-lg text-[10px] font-extrabold bg-[#F3EAFF] text-[#7733B5] border-2 border-[#A560E8]/30">
                                   🎯 Quiz
                                 </span>
                               )}
@@ -1642,7 +1642,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                                   Permanent
                                 </span>
                               ) : (
-                                <span className={`px-1.5 py-0.5 rounded-lg text-[10px] font-extrabold ${daysRemaining <= 2 ? 'bg-[#FFE8E8] text-[#E04343] border-2 border-[#FF4B4B]/30' : 'bg-[#FFF4E0] text-[#B85F00] border-2 border-[#FF9600]/30'}`}>
+                                <span className={`px-1.5 py-0.5 rounded-lg text-[10px] font-extrabold ${daysRemaining <= 2 ? 'bg-[#FFE8E8] text-[#E04343] border-2 border-[#FF4B4B]/30' : 'bg-[#F3EAFF] text-[#7733B5] border-2 border-[#A560E8]/30'}`}>
                                   {daysRemaining <= 0 ? 'Expires today' : `${daysRemaining}d left`}
                                 </span>
                               )}
@@ -1718,7 +1718,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                                       }}
                                       className={`w-full px-4 py-2.5 text-left text-sm text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700 flex items-center gap-2 ${(tool.quiz_type === 'flashcards' || tool.quiz_type === 'study_pack') ? '' : 'rounded-b-xl'}`}
                                     >
-                                      <svg className="w-4 h-4 text-[#B85F00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                      <svg className="w-4 h-4 text-[#7733B5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                                       Word
                                     </button>
                                   </>
@@ -1737,7 +1737,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                                     }}
                                     className={`w-full px-4 py-2.5 text-left text-sm text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700 flex items-center gap-2 ${!isPaidUser ? 'rounded-t-xl rounded-b-xl' : 'rounded-b-xl'}`}
                                   >
-                                    <svg className="w-4 h-4 text-[#B85F00]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+                                    <svg className="w-4 h-4 text-[#7733B5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
                                     JSON
                                   </button>
                                 )}
@@ -1810,7 +1810,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                     onClick={() => setCurrentPage(page)}
                     className={`w-10 h-10 rounded-lg font-extrabold transition-all ${
                       currentPage === page
-                        ? 'bg-[#FF9600] text-white border-2 border-b-4 border-[#B85F00]'
+                        ? 'bg-[#A560E8] text-white border-2 border-b-4 border-[#7733B5]'
                         : 'bg-white text-stone-600 border-2 border-b-4 border-stone-200 active:border-b-2 active:translate-y-0.5'
                     }`}
                   >
@@ -1890,8 +1890,8 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
         <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm flex items-center justify-center z-50 px-4">
           <div className="bg-white dark:bg-stone-900 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 max-w-md w-full p-6">
             <div className="text-center mb-6">
-              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-[#FFF4E0]">
-                <svg className="w-7 h-7 text-[#FF9600]" fill="currentColor" viewBox="0 0 20 20">
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-[#F3EAFF]">
+                <svg className="w-7 h-7 text-[#A560E8]" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                 </svg>
               </div>
@@ -1903,7 +1903,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
             <ul className="space-y-3 mb-6">
               {['Export to PDF & Word', 'Permanent storage', 'Unlimited generations', 'All question types'].map((item, i) => (
                 <li key={i} className="flex items-center gap-3 text-sm text-stone-700">
-                  <svg className="w-4 h-4 text-[#FF9600] shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-4 h-4 text-[#A560E8] shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                   {item}
@@ -1919,7 +1919,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
               </button>
               <button
                 onClick={() => { setShowUpgradeModal(false); onNavigate('pricing'); }}
-                className="flex-1 px-4 py-2.5 text-white bg-[#FF9600] font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#B85F00] active:border-b-2 active:translate-y-0.5 text-sm transition-all"
+                className="flex-1 px-4 py-2.5 text-white bg-[#A560E8] font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 text-sm transition-all"
               >
                 View Plans
               </button>
@@ -1934,8 +1934,8 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
           <div className="bg-white dark:bg-stone-900 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 max-w-md w-full p-6">
             <div className="flex items-start justify-between mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 bg-[#FFF4E0] rounded-xl flex items-center justify-center">
-                  <svg className="w-5 h-5 text-[#FF9600]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-11 h-11 bg-[#F3EAFF] rounded-xl flex items-center justify-center">
+                  <svg className="w-5 h-5 text-[#A560E8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
                   </svg>
                 </div>
@@ -1956,8 +1956,8 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
 
             {shareSuccess ? (
               <div className="text-center py-8">
-                <div className="w-16 h-16 bg-[#FFF4E0] rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-[#FF9600]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-16 h-16 bg-[#F3EAFF] rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-[#A560E8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
@@ -1973,7 +1973,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
 
                 {loadingFriends ? (
                   <div className="flex items-center justify-center py-8">
-                    <div className="animate-spin w-8 h-8 border-2 border-stone-300 border-t-[#FF9600] rounded-full"></div>
+                    <div className="animate-spin w-8 h-8 border-2 border-stone-300 border-t-[#A560E8] rounded-full"></div>
                   </div>
                 ) : friends.length === 0 ? (
                   <div className="text-center py-8">
@@ -1986,7 +1986,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                     <p className="text-sm text-stone-500 mb-4">Add friends to share study tools with them</p>
                     <button
                       onClick={() => { closeShareModal(); onNavigate('friends'); }}
-                      className="px-4 py-2 bg-[#FF9600] text-white text-sm font-extrabold rounded-xl border-2 border-b-4 border-[#B85F00] active:border-b-2 active:translate-y-0.5 transition-all uppercase tracking-wide"
+                      className="px-4 py-2 bg-[#A560E8] text-white text-sm font-extrabold rounded-xl border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all uppercase tracking-wide"
                     >
                       Add Friends
                     </button>
@@ -2002,15 +2002,15 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                             onClick={() => setSelectedFriendId(friend.id)}
                             className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${
                               selectedFriendId === friend.id
-                                ? 'border-[#FF9600] bg-[#FFF4E0]'
+                                ? 'border-[#A560E8] bg-[#F3EAFF]'
                                 : 'border-stone-200 hover:border-stone-300 hover:bg-stone-50'
                             }`}
                           >
                             <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                              selectedFriendId === friend.id ? 'bg-[#FF9600]/20' : 'bg-stone-200'
+                              selectedFriendId === friend.id ? 'bg-[#A560E8]/20' : 'bg-stone-200'
                             }`}>
                               <span className={`font-extrabold ${
-                                selectedFriendId === friend.id ? 'text-[#B85F00]' : 'text-stone-600'
+                                selectedFriendId === friend.id ? 'text-[#7733B5]' : 'text-stone-600'
                               }`}>
                                 {(friend.username?.[0] || friend.first_name?.[0] || friend.email?.[0] || '?').toUpperCase()}
                               </span>
@@ -2020,7 +2020,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                               <p className="text-xs text-stone-500">{friend.friend_code}</p>
                             </div>
                             {selectedFriendId === friend.id && (
-                              <svg className="w-5 h-5 text-[#FF9600]" fill="currentColor" viewBox="0 0 20 20">
+                              <svg className="w-5 h-5 text-[#A560E8]" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                               </svg>
                             )}
@@ -2036,7 +2036,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                         value={shareMessage}
                         onChange={(e) => setShareMessage(e.target.value)}
                         placeholder="e.g. Check out these flashcards!"
-                        className="w-full px-4 py-3 border-2 border-stone-200 rounded-xl focus:ring-2 focus:ring-[#FF9600]/40 focus:border-[#FF9600] focus:outline-none text-sm font-bold"
+                        className="w-full px-4 py-3 border-2 border-stone-200 rounded-xl focus:ring-2 focus:ring-[#A560E8]/40 focus:border-[#A560E8] focus:outline-none text-sm font-bold"
                         maxLength={200}
                       />
                     </div>
@@ -2051,7 +2051,7 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
                       <button
                         onClick={handleShare}
                         disabled={!selectedFriendId || isSharing}
-                        className="flex-1 px-4 py-2.5 text-white bg-[#FF9600] font-extrabold rounded-xl border-2 border-b-4 border-[#B85F00] active:border-b-2 active:translate-y-0.5 disabled:bg-stone-300 disabled:border-stone-400 text-sm transition-all flex items-center justify-center gap-2"
+                        className="flex-1 px-4 py-2.5 text-white bg-[#A560E8] font-extrabold rounded-xl border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 disabled:bg-stone-300 disabled:border-stone-400 text-sm transition-all flex items-center justify-center gap-2"
                       >
                         {isSharing ? (
                           <>

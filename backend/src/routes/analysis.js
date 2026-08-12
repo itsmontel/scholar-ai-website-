@@ -1650,7 +1650,7 @@ router.post('/revision-markers', authenticateToken, async (req, res) => {
  */
 router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, res) => {
   try {
-    const { documentId, content, analysisType, citationStyle, gradingStyle = 'us', rubricContent } = req.body;
+    const { documentId, content, analysisType, citationStyle, gradingStyle = 'us', rubricContent, title: requestedTitle } = req.body;
     const userId = req.user.id;
 
     if (rubricContent) {
@@ -1677,11 +1677,16 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
     let analysisDocumentId = documentId;
 
     if (content && !documentId) {
-      // Text analysis from dashboard (pasted content) - create document so it saves to library
+      // Text analysis (dashboard paste or onboarding aha) — create a
+      // library document so the marked essay shows up in My Documents
+      // after they start the trial.
       analysisContent = content;
       try {
-        const title = content.trim().slice(0, 80) + (content.trim().length > 80 ? '...' : '');
-        const newDoc = await documentService.createDocumentFromText(userId, content, title || 'Pasted Essay');
+        const cleanedTitle = typeof requestedTitle === 'string' ? requestedTitle.trim().slice(0, 120) : '';
+        const title = cleanedTitle
+          || (content.trim().slice(0, 80) + (content.trim().length > 80 ? '...' : ''))
+          || 'Pasted Essay';
+        const newDoc = await documentService.createDocumentFromText(userId, content, title);
         analysisDocumentId = newDoc.id;
         console.log('Created document from pasted text for library - documentId:', analysisDocumentId);
       } catch (createErr) {

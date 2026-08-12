@@ -1,23 +1,77 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { SKIP_ONBOARDING_STRIPE } from '../../config/featureFlags';
-import { trackEvent } from '../../utils/analytics';
+import { trackEvent, trackFunnelStep } from '../../utils/analytics';
 import { saveFeatureInterests } from '../../utils/featureInterests';
 // Static import: see CompleteAcademicAIApp.tsx for why we don't dynamic-
 // import the gtag helper. Short version — ensures gtag.js starts loading
 // on first paint so the conversion event isn't racing the script load.
 import { trackTrialConversion } from '../../utils/gtag';
 import BadgeCreature from '../common/BadgeCreature';
+import { signupPromoCode, showSignupDiscount, STANDARD_MONTHLY_PRICE } from '../../config/pricing';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 const TRIAL_DAYS = 7;
+
+/** Minimum words before we'll run the onboarding analysis. Below this
+ *  the analyzer has nothing useful to say, and a weak first result is
+ *  worse than asking the user to paste more. */
+const MIN_ESSAY_WORDS = 50;
+
+/** Narration for the analysing screen. Named after what the analyzer
+ *  genuinely does, so the wait feels like work rather than a hang. */
+const ANALYSIS_STEPS = [
+  { icon: '📖', label: 'Reading your draft' },
+  { icon: '🧩', label: 'Checking structure & argument' },
+  { icon: '📊', label: 'Grading against the rubric' },
+  { icon: '✍️', label: 'Writing your feedback' },
+] as const;
+
+/** How long each stage is shown for. Tuned so the full stepper lasts
+ *  ~22s — long enough that a short draft finishing early still feels
+ *  like real work was done, short enough that a genuine OpenAI run
+ *  (often 25–60s) isn't padded awkwardly after the API returns. */
+const ANALYSIS_STEP_MS = 5500;
+
+/** Floor on the analysing screen, derived so every stage actually gets
+ *  its turn. A full-paper analysis usually takes longer than this, but
+ *  on a short draft it can come back in a few seconds — and a result
+ *  that appears that fast reads as "it didn't really read my essay",
+ *  which undermines the one screen the whole trial ask rests on. */
+const MIN_ANALYSIS_MS = ANALYSIS_STEPS.length * ANALYSIS_STEP_MS;
+
+/** Shape we keep from POST /analysis/analyze for the result screen.
+ *  Deliberately narrow — the onboarding screen shows the headline
+ *  numbers and keeps the report body locked, so it has no use for the
+ *  full annotation payload beyond counting it. */
+interface OnboardingAnalysis {
+  /** Predicted grade, e.g. "B+". Null when the model didn't return one. */
+  gradeEstimate: string | null;
+  /** Score out of 100. */
+  overallScore: number | null;
+  /** How many issues the analyzer found in their draft. */
+  issueCount: number;
+  /** Top suggestions — we show the first one and lock the rest. */
+  topSuggestions: string[];
+  /** Word count of the analysed draft, for the result header. */
+  wordCount: number;
+  /** Library document id — the backend creates this so the marked
+   *  essay appears in My Documents after they start the trial. */
+  documentId: string | null;
+}
 
 /**
  * When true, `paywall-hard` and `checkout` short-circuit to the dashboard
  * transition. Onboarding ends at value-prop → congrats animation → dashboard,
  * and the paywall is instead shown on the dashboard a couple of seconds later
- * (higher-converting "see the product first" flow).
+ * ("see the product first" flow).
+ *
+ * Set to false (current) to make onboarding END on the no-skip 7-day trial
+ * checkout: after the tour, value-prop → "I'm ready" → the card-required
+ * trial screen, whose only forward action is "Start my 7-day free trial"
+ * (or sign out). Pairs with FREEMIUM_PREVIEW=false so existing never-trialed
+ * users are gated too. Flip back to true to restore the see-first flow.
  */
-const HIDE_END_PAYWALLS = true;
+const HIDE_END_PAYWALLS = false;
 /* Promo code silently pre-applied to checkout when the user clicks the
    trial CTA from the hard paywall. NEWCUSTOMER = 50% off the first
    invoice only ($19.99 → $9.99 first month). The backend strips it for
@@ -81,6 +135,9 @@ type Phase =
   | 'daily-review-intro'
   | 'daily-review-demo'
   | 'daily-review-results'
+  // Real analysis on the user's own essay, run before the card ask.
+  | 'analyze-input'
+  | 'analyze-result'
   | 'value-prop'
   | 'paywall-hard'
   | 'checkout'
@@ -108,9 +165,13 @@ const PHASE_STEP: Record<string, number> = {
   'daily-review-intro': 9,
   'daily-review-demo': 10,
   'daily-review-results': 11,
-  // Value-prop page sits between the tour and the paywall.  It builds
-  // up the "everything you get" pitch + social proof so the paywall
-  // doesn't land cold.
+  // The user's own essay, analysed for real. This is the aha moment
+  // and it sits immediately before the card ask on purpose.
+  'analyze-input': 8,
+  'analyze-result': 9,
+  // Value-prop is the fallback pitch for users who skipped the analysis
+  // (no essay to hand). It builds the "everything you get" case with
+  // social proof so the paywall doesn't land cold.
   'value-prop': 9,
   checkout: 10,
   'paywall-hard': 10,
@@ -120,11 +181,11 @@ const TOTAL_STEPS = 10;
 /* ─── Survey: What are you using WriteScholar for? (single-select goal) ─── */
 const GOAL_OPTIONS = [
   { id: 'essays',  emoji: '📝', label: 'Improve my essays',     color: '#A560E8', borderColor: '#8A48C7', bgColor: '#F3EAFF', mascotResponse: "Great choice! Our essay analyzer gives you professor-level feedback on every paragraph — students raise their grades by a full letter on average." },
-  { id: 'exams',   emoji: '📚', label: 'Study for my exams',    color: '#58CC02', borderColor: '#46A302', bgColor: '#E5F8D0', mascotResponse: "Perfect! Daily Review turns your notes into 5-minute quizzes — proven to triple how much you remember on exam day." },
-  { id: 'grades',  emoji: '🎯', label: 'Get better grades',     color: '#1CB0F6', borderColor: '#1899D6', bgColor: '#DDF4FF', mascotResponse: "Love it! Combine essay feedback, daily practice, and study packs and you'll see your grades climb week by week." },
-  { id: 'learn',   emoji: '🧠', label: 'Learn more efficiently', color: '#FF9600', borderColor: '#D97F00', bgColor: '#FFF4E0', mascotResponse: "Smart move! Flashcards, summaries, and quizzes from your own notes — the science-backed way to learn 4x faster." },
-  { id: 'curious', emoji: '🌱', label: 'Just exploring',         color: '#58CC02', borderColor: '#46A302', bgColor: '#E5F8D0', mascotResponse: "Welcome! Take a look around — every tool is built to feel like a game, not a chore." },
-  { id: 'other',   emoji: '✨', label: 'Other',                  color: '#FF4B4B', borderColor: '#E04343', bgColor: '#FFE8E8', mascotResponse: "Got it! WriteScholar adapts to whatever you're working on — let's find the tools that fit you best." },
+  { id: 'exams',   emoji: '📚', label: 'Study for my exams',    color: '#A560E8', borderColor: '#7733B5', bgColor: '#F3EAFF', mascotResponse: "Perfect! Daily Review turns your notes into 5-minute quizzes — proven to triple how much you remember on exam day." },
+  { id: 'grades',  emoji: '🎯', label: 'Get better grades',     color: '#8A48C7', borderColor: '#7733B5', bgColor: '#F3EAFF', mascotResponse: "Love it! Combine essay feedback, daily practice, and study packs and you'll see your grades climb week by week." },
+  { id: 'learn',   emoji: '🧠', label: 'Learn more efficiently', color: '#B57AF0', borderColor: '#8A48C7', bgColor: '#F3EAFF', mascotResponse: "Smart move! Flashcards, summaries, and quizzes from your own notes — the science-backed way to learn 4x faster." },
+  { id: 'curious', emoji: '🌱', label: 'Just exploring',         color: '#A560E8', borderColor: '#7733B5', bgColor: '#F3EAFF', mascotResponse: "Welcome! Take a look around — every tool is built to feel like a game, not a chore." },
+  { id: 'other',   emoji: '✨', label: 'Other',                  color: '#A560E8', borderColor: '#7733B5', bgColor: '#F3EAFF', mascotResponse: "Got it! WriteScholar adapts to whatever you're working on — let's find the tools that fit you best." },
 ];
 
 /* ─── Brand logos for the "how did you hear" cards. Inlined as SVG so
@@ -176,13 +237,13 @@ const BRAND_LOGOS: Record<string, JSX.Element> = {
 
 /* ─── Survey 1: How did you hear about us? ─── */
 const REFERRAL_SOURCES = [
-  { id: 'tiktok',    label: 'TikTok',      emoji: '🎵', color: '#FF4B4B', borderColor: '#E04343', bgColor: '#FFE8E8', mascotReply: "TikTok, nice! Glad our videos found you 🎵" },
+  { id: 'tiktok',    label: 'TikTok',      emoji: '🎵', color: '#A560E8', borderColor: '#7733B5', bgColor: '#F3EAFF', mascotReply: "TikTok, nice! Glad our videos found you 🎵" },
   { id: 'instagram', label: 'Instagram',   emoji: '📸', color: '#A560E8', borderColor: '#8A48C7', bgColor: '#F3EAFF', mascotReply: "Insta! Glad our reels caught your eye 📸" },
-  { id: 'youtube',   label: 'YouTube',     emoji: '▶️', color: '#FF4B4B', borderColor: '#E04343', bgColor: '#FFE8E8', mascotReply: "YouTube — love it! Hope our videos hooked you ▶️" },
-  { id: 'google',    label: 'Google',      emoji: '🔍', color: '#1CB0F6', borderColor: '#1899D6', bgColor: '#DDF4FF', mascotReply: "You searched and found us — smart move! 🔍" },
-  { id: 'friend',    label: 'A friend',    emoji: '👥', color: '#58CC02', borderColor: '#46A302', bgColor: '#E5F8D0', mascotReply: "Best kind of intro — thank your friend for me! 👥" },
-  { id: 'reddit',    label: 'Reddit',      emoji: '🔥', color: '#FF9600', borderColor: '#D97F00', bgColor: '#FFF4E0', mascotReply: "Reddit fam, welcome! 🔥" },
-  { id: 'twitter',   label: 'X / Twitter', emoji: '🐦', color: '#1CB0F6', borderColor: '#1899D6', bgColor: '#DDF4FF', mascotReply: "From the timeline — let's go! 🐦" },
+  { id: 'youtube',   label: 'YouTube',     emoji: '▶️', color: '#A560E8', borderColor: '#7733B5', bgColor: '#F3EAFF', mascotReply: "YouTube — love it! Hope our videos hooked you ▶️" },
+  { id: 'google',    label: 'Google',      emoji: '🔍', color: '#8A48C7', borderColor: '#7733B5', bgColor: '#F3EAFF', mascotReply: "You searched and found us — smart move! 🔍" },
+  { id: 'friend',    label: 'A friend',    emoji: '👥', color: '#A560E8', borderColor: '#7733B5', bgColor: '#F3EAFF', mascotReply: "Best kind of intro — thank your friend for me! 👥" },
+  { id: 'reddit',    label: 'Reddit',      emoji: '🔥', color: '#B57AF0', borderColor: '#8A48C7', bgColor: '#F3EAFF', mascotReply: "Reddit fam, welcome! 🔥" },
+  { id: 'twitter',   label: 'X / Twitter', emoji: '🐦', color: '#8A48C7', borderColor: '#7733B5', bgColor: '#F3EAFF', mascotReply: "From the timeline — let's go! 🐦" },
   { id: 'other',     label: 'Other',       emoji: '✨', color: '#A560E8', borderColor: '#8A48C7', bgColor: '#F3EAFF', mascotReply: "Cool — glad you found us, however you did! ✨" },
 ];
 
@@ -204,9 +265,9 @@ const FEATURE_TOUR_ORDER: { id: string; phase: TourPhase }[] = [
 /* ─── Survey 2: What features excite you most? (multi-select) ─── */
 const FEATURE_INTERESTS = [
   { id: 'essays',       emoji: '📝', label: 'Essay analysis',       desc: 'Get instant feedback & rubric scores', color: '#A560E8', borderColor: '#8A48C7', bgColor: '#F3EAFF' },
-  { id: 'daily_review', emoji: '📚', label: 'Daily Review',         desc: 'Practice every day, like Duolingo',    color: '#58CC02', borderColor: '#46A302', bgColor: '#E5F8D0' },
-  { id: 'study_packs',  emoji: '🃏', label: 'Flashcards & quizzes', desc: 'Turn your notes into study tools',     color: '#1CB0F6', borderColor: '#1899D6', bgColor: '#DDF4FF' },
-  { id: 'games',        emoji: '🎮', label: 'Arcade mode',          desc: 'Crater Blast, Word Tower & more',      color: '#FF4B4B', borderColor: '#E04343', bgColor: '#FFE8E8' },
+  { id: 'daily_review', emoji: '📚', label: 'Daily Review',         desc: 'Practice every day, like Duolingo',    color: '#A560E8', borderColor: '#7733B5', bgColor: '#F3EAFF' },
+  { id: 'study_packs',  emoji: '🃏', label: 'Flashcards & quizzes', desc: 'Turn your notes into study tools',     color: '#8A48C7', borderColor: '#7733B5', bgColor: '#F3EAFF' },
+  { id: 'games',        emoji: '🎮', label: 'Arcade mode',          desc: 'Crater Blast, Word Tower & more',      color: '#A560E8', borderColor: '#7733B5', bgColor: '#F3EAFF' },
 ];
 
 /* ─── Demo quiz questions — easy and universal ─── */
@@ -230,7 +291,7 @@ const DEMO_QUESTIONS = [
 
 const XP_PER_QUESTION = 10;
 
-const CONFETTI_COLORS = ['#58CC02', '#1CB0F6', '#FF9600', '#FF4B4B', '#A560E8', '#FFD700'];
+const CONFETTI_COLORS = ['#A560E8', '#8A48C7', '#B57AF0', '#A560E8', '#A560E8', '#C9A0F0'];
 
 /* ─── Subscription plans shown on the onboarding checkout step ───
    Backend's getPriceId() maps these IDs to env-var-configured Stripe
@@ -240,8 +301,9 @@ const CONFETTI_COLORS = ['#58CC02', '#1CB0F6', '#FF9600', '#FF4B4B', '#A560E8', 
 type PlanId = 'pro' | 'premium';
 type BillingCycle = 'monthly' | 'yearly';
 interface PlanCycle {
-  /** Discounted price for the first billing cycle after the 7-day
-   *  trial (NEWCUSTOMER 50% off is auto-applied at checkout). */
+  /** Discounted price for the first billing cycle after the trial.
+   *  Only rendered when the welcome discount is active at signup — see
+   *  WELCOME_DISCOUNT_AT_SIGNUP in src/config/pricing.ts. */
   firstCyclePrice: string;
   /** Full price after the first cycle renews. */
   rolloverPrice: string;
@@ -310,19 +372,17 @@ const PLANS: Record<PlanId, Plan> = {
   },
 };
 
-/** Stripe promo code surfaced by the "Maybe later" reconsider modal —
- *  must exist in the Stripe Dashboard for the discount to actually
- *  apply on the hosted checkout page. */
-const NEW_CUSTOMER_PROMO_CODE = 'NEWCUSTOMER';
-
 function getInitialPhase(forceTrialGate = false, paywallOverlay = false): Phase {
   if (paywallOverlay) return 'checkout';
   if (typeof window === 'undefined') return 'intro';
   const params = new URLSearchParams(window.location.search);
-  // ?preview=value-prop is what Stripe's hosted-checkout cancel URL
-  // lands on — drops the user back at checkout (plan picker + trial CTA).
-  if (params.get('preview') === 'value-prop') return 'value-prop';
-  if (params.get('preview') === 'checkout' || params.get('preview') === 'aha') return 'checkout';
+  // ?preview=value-prop is a legacy cancel URL; treat it like checkout
+  // so backing out of Stripe never re-opens the pitch hop.
+  if (params.get('preview') === 'value-prop') return 'checkout';
+  if (params.get('preview') === 'checkout') return 'checkout';
+  // ?preview=aha jumps to the real-analysis step for QA without walking
+  // the whole survey + tour.
+  if (params.get('preview') === 'aha') return 'analyze-input';
   if (params.get('preview') === 'profile') return 'profile';
   const sid = params.get('session_id');
   if (sid) return 'verifying';
@@ -337,19 +397,19 @@ function getInitialPhase(forceTrialGate = false, paywallOverlay = false): Phase 
 type ToolBadge = 'Free' | 'Pro' | 'Game';
 const PAYWALL_TOOLS: { title: string; desc: string; video?: string; image?: string; badge: ToolBadge; color: string; borderColor: string }[] = [
   { title: 'Essay Analyzer', desc: 'Line-by-line feedback & rubric scores',  video: '/writescholar-essay-checker-demo.mp4',   badge: 'Pro',  color: '#A560E8', borderColor: '#8A48C7' },
-  { title: 'Flashcards',     desc: 'AI-built decks from your notes',         video: '/hero-flashcards.mp4',                   badge: 'Free', color: '#58CC02', borderColor: '#46A302' },
-  { title: 'Quizzes',        desc: 'MCQ, true/false & fill-in-the-blank',    video: '/hero-quiz.mp4',                         badge: 'Free', color: '#1CB0F6', borderColor: '#1899D6' },
-  { title: 'Citations',      desc: 'APA, MLA, Chicago — real sources',       video: '/writescholar-citation-finder-demo.mp4', badge: 'Pro',  color: '#1CB0F6', borderColor: '#1899D6' },
-  { title: 'Crater Blast',   desc: 'Boss-battle quiz arcade',                video: '/writescholar-crater-blast-demo.mp4',    badge: 'Game', color: '#FF9600', borderColor: '#D97F00' },
-  { title: 'Word Blitz',     desc: '60-second fill-the-blank speedrun',      video: '/hero-word-blitz.mp4',                   badge: 'Game', color: '#FF4B82', borderColor: '#D63672' },
+  { title: 'Flashcards',     desc: 'AI-built decks from your notes',         video: '/hero-flashcards.mp4',                   badge: 'Free', color: '#A560E8', borderColor: '#7733B5' },
+  { title: 'Quizzes',        desc: 'MCQ, true/false & fill-in-the-blank',    video: '/hero-quiz.mp4',                         badge: 'Free', color: '#8A48C7', borderColor: '#7733B5' },
+  { title: 'Citations',      desc: 'APA, MLA, Chicago — real sources',       video: '/writescholar-citation-finder-demo.mp4', badge: 'Pro',  color: '#8A48C7', borderColor: '#7733B5' },
+  { title: 'Crater Blast',   desc: 'Boss-battle quiz arcade',                video: '/writescholar-crater-blast-demo.mp4',    badge: 'Game', color: '#B57AF0', borderColor: '#8A48C7' },
+  { title: 'Word Blitz',     desc: '60-second fill-the-blank speedrun',      video: '/hero-word-blitz.mp4',                   badge: 'Game', color: '#A560E8', borderColor: '#7733B5' },
   { title: 'Smart Editor',   desc: 'AI rewrites, grammar & clarity inline',  image: '/WriterPic.png',                         badge: 'Pro',  color: '#A560E8', borderColor: '#8A48C7' },
-  { title: 'Word Tower',     desc: 'Stack words, beat your streak',          video: '/hero-word-tower.mp4',                   badge: 'Game', color: '#FF9600', borderColor: '#D97F00' },
+  { title: 'Word Tower',     desc: 'Stack words, beat your streak',          video: '/hero-word-tower.mp4',                   badge: 'Game', color: '#B57AF0', borderColor: '#8A48C7' },
 ];
 
 const TOOL_BADGE_STYLE: Record<ToolBadge, { bg: string; border: string }> = {
-  Free: { bg: '#58CC02', border: '#46A302' },
+  Free: { bg: '#A560E8', border: '#7733B5' },
   Pro:  { bg: '#A560E8', border: '#8A48C7' },
-  Game: { bg: '#FF9600', border: '#D97F00' },
+  Game: { bg: '#B57AF0', border: '#8A48C7' },
 };
 
 /* Tool mini demo for tour-study — autoplay-on-visible video tile */
@@ -582,8 +642,8 @@ function OnboardingAura() {
   return (
     <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden>
       <div className="absolute -top-32 left-1/2 -translate-x-1/2 h-72 w-[44rem] max-w-full rounded-full bg-[#A560E8]/14 dark:bg-[#A560E8]/15 blur-3xl" />
-      <div className="absolute -bottom-40 -right-24 h-80 w-80 rounded-full bg-[#FFC800]/18 dark:bg-[#FFC800]/12 blur-3xl" />
-      <div className="absolute top-1/3 -left-24 h-72 w-72 rounded-full bg-[#58CC02]/10 dark:bg-[#58CC02]/10 blur-3xl" />
+      <div className="absolute -bottom-40 -right-24 h-80 w-80 rounded-full bg-[#C9A0F0]/18 dark:bg-[#C9A0F0]/12 blur-3xl" />
+      <div className="absolute top-1/3 -left-24 h-72 w-72 rounded-full bg-[#A560E8]/10 dark:bg-[#A560E8]/10 blur-3xl" />
     </div>
   );
 }
@@ -594,8 +654,8 @@ function MascotGif({
   alt = '',
   size = 140,
   bordered = false,
-  borderColor = '#58CC02',
-  bgColor = '#E5F8D0',
+  borderColor = '#A560E8',
+  bgColor = '#F3EAFF',
   className = '',
 }: {
   src: string;
@@ -1089,6 +1149,42 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
   const [trialEligible, setTrialEligible] = useState<boolean | null>(null);
   const [startingTrial, setStartingTrial] = useState(false);
   const [trialError, setTrialError] = useState<string | null>(null);
+
+  /* ─── Real essay analysis (analyze-input / analyze-result) ───
+     The user's own essay, run through the production analyzer before
+     we ask for a card. Everything here is real: the grade estimate,
+     the issue count, and the annotations behind the lock all come from
+     POST /analysis/analyze. Nothing is mocked — a fabricated preview
+     that doesn't match what Pro delivers would be worse than no
+     preview, because the trial would immediately disprove it. */
+  const [essayInput, setEssayInput] = useState('');
+  const [essayFileName, setEssayFileName] = useState<string | null>(null);
+  const [essayParsing, setEssayParsing] = useState(false);
+  const [essayDropActive, setEssayDropActive] = useState(false);
+  const [analysisRunning, setAnalysisRunning] = useState(false);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [analysisResult, setAnalysisResult] = useState<OnboardingAnalysis | null>(null);
+  // Which named stage the progress screen is showing. A real analysis
+  // takes 30–60s, and a bare spinner that long reads as "broken" — so we
+  // narrate the actual pipeline instead. Cosmetic: the request is a
+  // single call, so these are timed, not reported by the server.
+  const [analysisStep, setAnalysisStep] = useState(0);
+  const essayFileInputRef = useRef<HTMLInputElement>(null);
+  const essayWordCount = useMemo(
+    () => essayInput.trim().split(/\s+/).filter(Boolean).length,
+    [essayInput],
+  );
+
+  useEffect(() => {
+    if (!analysisRunning) return;
+    setAnalysisStep(0);
+    const id = window.setInterval(() => {
+      // Hold on the last stage rather than looping — pretending to
+      // restart would undercut the sense of progress.
+      setAnalysisStep((s) => Math.min(s + 1, ANALYSIS_STEPS.length - 1));
+    }, ANALYSIS_STEP_MS);
+    return () => window.clearInterval(id);
+  }, [analysisRunning]);
   // Onboarding plan picker — monthly is the default so the free trial
   // checkout shows the lower-commitment option first. Users can still
   // switch to yearly for the per-month savings.
@@ -1101,7 +1197,10 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
   const [phaseVisible, setPhaseVisible] = useState(true);
 
   const TRANSITION_MS = 2400;
-  const firstName = displayName.trim().split(/\s+/)[0] || 'there';
+  // Empty fallback (not "there") — every use site appends firstName after a
+  // comma ("…, Maya"), so a placeholder would render "…, there". Each site
+  // conditionally drops the comma when the name is unknown.
+  const firstName = displayName.trim().split(/\s+/)[0] || '';
 
   /* ─── Smooth phase transition ─── */
   const goToPhase = (next: Phase) => {
@@ -1169,6 +1268,13 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
           // recovering cross-device / cookie-cleared attribution.
           const planPrice = data.data.plan === 'premium' ? 39.99 : data.data.plan === 'pro' ? 19.99 : 0;
           void trackTrialConversion(planPrice, sessionId, user?.email);
+          // Funnel step 3 of 4. Fired on the confirmed subscription rather
+          // than the checkout click, so it counts cards actually captured.
+          trackFunnelStep('trial_started', {
+            plan: data.data.plan,
+            status: data.data.subscriptionStatus,
+            planPrice,
+          });
           window.history.replaceState({}, '', '/onboarding');
           setPhase('transition');
         } else if (SKIP_ONBOARDING_STRIPE) {
@@ -1381,20 +1487,202 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
     trackEvent('onboarding_survey_complete', { source: referralSource, features: featureInterests.join(',') });
     // Jump to the FIRST slide in their personalised tour (essays if
     // selected, otherwise the highest-priority feature they picked).
-    goToPhase(tourSequence[0] ?? 'value-prop');
+    goToPhase(tourSequence[0] ?? 'analyze-input');
   };
 
   const handleTourContinue = () => {
     // Find current position in the personalised sequence and advance.
-    // When we run off the end of the sequence, we route to the
-    // "value-prop" page (everything-you-get + testimonials) which then
-    // hands the user off to the paywall.
+    // Running off the end hands the user to the real analysis step —
+    // we ask for their own essay before we ask for their card, so the
+    // paywall lands on a result they've seen rather than a promise.
+    // (analyze-input offers a skip to value-prop for anyone without an
+    // essay to hand.)
     const idx = tourSequence.indexOf(phase as TourPhase);
     if (idx === -1 || idx >= tourSequence.length - 1) {
-      goToPhase('value-prop');
+      trackEvent('onboarding_aha_view');
+      goToPhase('analyze-input');
     } else {
       goToPhase(tourSequence[idx + 1]);
     }
+  };
+
+  /* ─── Real essay analysis handlers ─────────────────────────────── */
+
+  /** Pull text out of an uploaded file so the user doesn't have to
+   *  copy-paste. .txt is read locally; PDF/Word go through the same
+   *  parse endpoint the dashboard uploader uses. */
+  const handleEssayFile = async (file: File) => {
+    setAnalysisError(null);
+    setEssayParsing(true);
+    setEssayFileName(file.name);
+    try {
+      const isPlainText = /\.txt$/i.test(file.name) || file.type === 'text/plain';
+      if (isPlainText) {
+        setEssayInput(await file.text());
+        return;
+      }
+      const token = localStorage.getItem('authToken');
+      const form = new FormData();
+      form.append('file', file);
+      const res = await fetch(`${API_URL}/analysis/parse-document`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: form,
+      });
+      const data = await res.json().catch(() => null);
+      const text = data?.data?.content;
+      if (!res.ok || !text) {
+        throw new Error((data && typeof data.message === 'string' && data.message) || 'We could not read that file.');
+      }
+      setEssayInput(text);
+    } catch (e) {
+      setEssayFileName(null);
+      setAnalysisError(
+        e instanceof Error ? e.message : 'We could not read that file. Try pasting the text instead.',
+      );
+    } finally {
+      setEssayParsing(false);
+    }
+  };
+
+  /**
+   * Run the production analyzer on the user's own essay.
+   *
+   * This is the aha moment the trial ask is built on, so it uses the
+   * real endpoint and the real result. It spends the account's single
+   * free lifetime analysis (see PLAN_LIMITS.free), which is the whole
+   * point: the free tier IS this one run.
+   */
+  const handleRunOnboardingAnalysis = async () => {
+    if (analysisRunning) return;
+    const content = essayInput.trim();
+    if (essayWordCount < MIN_ESSAY_WORDS) {
+      setAnalysisError(`Add at least ${MIN_ESSAY_WORDS} words so the analysis has something to work with.`);
+      return;
+    }
+    setAnalysisError(null);
+    setAnalysisRunning(true);
+    trackEvent('onboarding_aha_generate', { words: essayWordCount, source: essayFileName ? 'upload' : 'paste' });
+
+    // Hold the progress screen for at least as long as the stepper needs.
+    // Only applied on success — an error should surface immediately
+    // rather than making the user wait to be told it failed.
+    const startedAt = Date.now();
+    const holdForFloor = async () => {
+      const remaining = MIN_ANALYSIS_MS - (Date.now() - startedAt);
+      if (remaining > 0) await new Promise((r) => setTimeout(r, remaining));
+    };
+
+    if (testMode) {
+      // Preview route — no API call, no quota spent.
+      await holdForFloor();
+      setAnalysisResult({
+        gradeEstimate: 'B',
+        overallScore: 78,
+        issueCount: 12,
+        topSuggestions: ['Sharpen the thesis so it states a position, not a topic.'],
+        wordCount: essayWordCount,
+        documentId: null,
+      });
+      setAnalysisRunning(false);
+      goToPhase('analyze-result');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) { onNavigate('login'); return; }
+      // Prefer the uploaded filename as the library title so the essay
+      // is recognisable in My Documents after they start the trial.
+      // Fall back to the first line of the draft (same as the dashboard
+      // paste flow) when they typed/pasted instead of uploading.
+      const titleFromFile = essayFileName
+        ? essayFileName.replace(/\.(pdf|docx?|txt)$/i, '').trim()
+        : null;
+      const titleFromText = content.split(/\n/).map((l) => l.trim()).find(Boolean)?.slice(0, 80) || null;
+      const res = await fetch(`${API_URL}/analysis/analyze`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          content,
+          analysisType: 'comprehensive',
+          citationStyle: 'None',
+          gradingStyle: 'us',
+          ...(titleFromFile || titleFromText ? { title: titleFromFile || titleFromText } : {}),
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        throw new Error(
+          (data && typeof data.message === 'string' && data.message) ||
+            'We could not analyse that right now.',
+        );
+      }
+      // Same payload shape the dashboard uses — real OpenAI result,
+      // already persisted to documents + analyses by the backend.
+      const d = data?.data || {};
+      const annotations = Array.isArray(d.annotations) ? d.annotations : [];
+      const suggestions = Array.isArray(d.top_suggestions)
+        ? d.top_suggestions.filter((s: unknown): s is string => typeof s === 'string' && s.trim().length > 0)
+        : [];
+      const scoreRaw = d.overall_score;
+      const overallScore =
+        typeof scoreRaw === 'number' && Number.isFinite(scoreRaw)
+          ? Math.round(scoreRaw)
+          : typeof scoreRaw === 'string' && scoreRaw.trim() !== '' && Number.isFinite(Number(scoreRaw))
+            ? Math.round(Number(scoreRaw))
+            : null;
+      const gradeEstimate =
+        typeof d.grade_estimate === 'string' && d.grade_estimate.trim()
+          ? d.grade_estimate.trim()
+          : null;
+      const documentId =
+        typeof d.documentId === 'string' && d.documentId
+          ? d.documentId
+          : typeof d.document_id === 'string' && d.document_id
+            ? d.document_id
+            : null;
+
+      // Refuse to show a fabricated preview. If the model returned
+      // nothing usable, surface the error so we don't sell a trial on
+      // a fake grade that the dashboard would immediately contradict.
+      if (overallScore === null && !gradeEstimate && annotations.length === 0) {
+        throw new Error('Analysis came back empty. Please try again with a longer draft.');
+      }
+
+      await holdForFloor();
+      setAnalysisResult({
+        gradeEstimate,
+        overallScore,
+        issueCount: annotations.length,
+        topSuggestions: suggestions,
+        wordCount: essayWordCount,
+        documentId,
+      });
+      trackEvent('onboarding_aha_complete', {
+        issues: annotations.length,
+        grade: gradeEstimate,
+        score: overallScore,
+        documentId,
+      });
+      trackFunnelStep('analysis_completed', {
+        source: 'onboarding',
+        annotations: annotations.length,
+        documentId,
+      });
+      goToPhase('analyze-result');
+    } catch (e) {
+      setAnalysisError(e instanceof Error ? e.message : 'We could not analyse that right now.');
+    } finally {
+      setAnalysisRunning(false);
+    }
+  };
+
+  /** No essay to hand — fall back to the generic pitch rather than
+   *  dead-ending someone who signed up on their phone. */
+  const handleSkipAnalysis = () => {
+    trackEvent('onboarding_aha_skip', { hadText: essayWordCount > 0 });
+    goToPhase('value-prop');
   };
 
   /* ─── Interactive tour handlers ─── */
@@ -1511,20 +1799,28 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
   };
 
   /* ─── Start trial → Stripe-hosted Checkout ───
-     Called by the Subscribe CTA. Always opens checkout with:
-       • 7-day free trial (trialPeriodDays = TRIAL_DAYS)
-       • NEWCUSTOMER promo code auto-applied so the first cycle after
-         the trial is 50% off (then the plan rolls over to full price)
-     Cancel from Stripe lands the user back on the 8-tools page (the
-     same place they came from), NOT the hidden end-paywall. */
+     Called by the Subscribe CTA (and by the analyze-result CTA, so we
+     don't force a second click through the Try Pro page). Opens checkout
+     with the 7-day free trial at standard price.
+
+     Cancel URL lands on the Try Pro / checkout screen — so backing out
+     of Stripe still gives them a recovery path, without making every
+     converted user click twice to get there.
+
+     No promo code: the trial IS the front-door offer. Stacking a free
+     week and 50% off spends two acquisition levers on one user, and the
+     50% is worth far more as a save offer in the cancel flow. See
+     src/config/pricing.ts. */
   const handleSubscribeChoice = async () => {
     if (startingTrial) return;
     setTrialError(null);
+    const signupPromo = signupPromoCode(true, billingCycle);
     trackEvent('onboarding_choose_subscription', {
       plan: selectedPlanId,
       cycle: billingCycle,
       trialDays: TRIAL_DAYS,
-      promo: NEW_CUSTOMER_PROMO_CODE,
+      promo: signupPromo?.promoCode ?? null,
+      source: phase,
     });
     if (testMode) {
       onComplete?.();
@@ -1535,7 +1831,9 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
       const token = localStorage.getItem('authToken');
       if (!token) { onNavigate('login'); return; }
       const successUrl = `${window.location.origin}/dashboard?payment=success`;
-      const cancelUrl = `${window.location.origin}/onboarding?preview=value-prop`;
+      // Back-out of Stripe → Try Pro page (plan picker + trial CTA),
+      // never back to value-prop which would force another hop.
+      const cancelUrl = `${window.location.origin}/onboarding?preview=checkout`;
       const res = await fetch(`${API_URL}/subscriptions/create-checkout-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -1545,7 +1843,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
           successUrl,
           cancelUrl,
           trialPeriodDays: TRIAL_DAYS,
-          promoCode: NEW_CUSTOMER_PROMO_CODE,
+          ...(signupPromo ?? {}),
         }),
       });
       const data = await res.json().catch(() => null);
@@ -1601,7 +1899,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
       </div>
       {showProgress && (
         <div className="h-3 bg-[#E5E5E5] dark:bg-stone-800 overflow-hidden">
-          <div className="h-full bg-[#58CC02] rounded-r-full transition-all duration-500 ease-out" style={{ width: `${progressPercent}%` }} />
+          <div className="h-full bg-[#A560E8] rounded-r-full transition-all duration-500 ease-out" style={{ width: `${progressPercent}%` }} />
         </div>
       )}
     </>
@@ -1613,7 +1911,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
       <div className="min-h-screen bg-[#F7F7F7] dark:bg-stone-950 flex items-center justify-center px-6">
         <div className="text-center">
           <div className="mx-auto mb-4">
-            <MascotGif src="/mascot-thinking.webp" alt="" size={120} bordered borderColor="#1CB0F6" bgColor="#DDF4FF" />
+            <MascotGif src="/mascot-thinking.webp" alt="" size={120} bordered borderColor="#8A48C7" bgColor="#F3EAFF" />
           </div>
           <p className="text-xl font-extrabold text-[#3C3C3C] dark:text-stone-100" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
             Confirming your membership…
@@ -1622,7 +1920,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
             One moment while we finish setting up.
           </p>
           <div className="mt-5 mx-auto w-32 h-1.5 rounded-full bg-stone-200 dark:bg-stone-700 overflow-hidden">
-            <div className="h-full bg-[#1CB0F6] ob-progress-fill rounded-full" />
+            <div className="h-full bg-[#8A48C7] ob-progress-fill rounded-full" />
           </div>
         </div>
         <style>{`
@@ -1636,11 +1934,10 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
   /* ─── TRANSITION ───────────────────────────────────────────────
      "Welcome to WriteScholar!" celebration screen — gamified
      achievement-unlock moment:
-       • Animated radial gradient background that hue-cycles between
-         the 5 brand colours (purple / green / orange / blue / red)
-         — kept subtle (low opacity) so it doesn't feel rainbow-y.
+       • Animated radial gradient background that hue-cycles through
+         purple brand shades — kept subtle (low opacity).
        • Two concentric pulsing rings around the mascot (Duolingo
-         "achievement earned" treatment) + soft green glow.
+         "achievement earned" treatment) + soft purple glow.
        • Mascot bounces gently while the rings animate.
        • H1 cascades in word by word — "WriteScholar" in brand purple.
        • Confetti uses 4 shape variants (square, circle, sparkle
@@ -1714,7 +2011,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
               className="absolute inset-0 flex items-center justify-center pointer-events-none"
               aria-hidden
             >
-              <div className="w-56 h-56 rounded-full border-4 border-[#58CC02]/50 ob-ring-pulse" />
+              <div className="w-56 h-56 rounded-full border-4 border-[#A560E8]/50 ob-ring-pulse" />
             </div>
             {/* Inner pulsing ring (offset delay) */}
             <div
@@ -1725,11 +2022,11 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
             </div>
             {/* Soft glow behind mascot */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden>
-              <div className="w-40 h-40 rounded-full bg-[#58CC02]/30 blur-2xl ob-glow-pulse" />
+              <div className="w-40 h-40 rounded-full bg-[#A560E8]/30 blur-2xl ob-glow-pulse" />
             </div>
             {/* The mascot — bounces */}
             <div className="relative ob-mascot-bounce flex justify-center">
-              <MascotGif src="/mascot-celebrating.webp" alt="Mascot celebrating" size={160} bordered borderColor="#58CC02" bgColor="#E5F8D0" />
+              <MascotGif src="/mascot-celebrating.webp" alt="Mascot celebrating" size={160} bordered borderColor="#A560E8" bgColor="#F3EAFF" />
             </div>
           </div>
 
@@ -1743,13 +2040,13 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
             <span className="inline-block ob-word" style={{ animationDelay: '0.60s' }}>!</span>
           </h1>
           <p className="mt-3 text-stone-500 dark:text-stone-400 font-bold text-base ob-subtitle">
-            Your journey starts now, {firstName} 🎉
+            Your journey starts now{firstName ? `, ${firstName}` : ''} 🎉
           </p>
 
           {/* Progress bar with shimmer pass */}
           <div className="mt-8 w-60 mx-auto relative">
             <div className="h-3 bg-stone-200 dark:bg-stone-700 rounded-full overflow-hidden border-2 border-stone-300 dark:border-stone-600">
-              <div className="h-full bg-gradient-to-r from-[#58CC02] via-[#46A302] to-[#58CC02] rounded-full ob-progress-fill relative overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-[#A560E8] via-[#7733B5] to-[#A560E8] rounded-full ob-progress-fill relative overflow-hidden">
                 <div className="absolute inset-0 ob-shimmer" aria-hidden />
               </div>
             </div>
@@ -1762,9 +2059,9 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
         <style>{`
           /* Animated brand-colour radial gradient background */
           @keyframes obBgCycle {
-            0%, 100% { background: radial-gradient(ellipse at 30% 30%, rgba(165,96,232,0.18), transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(88,204,2,0.18), transparent 60%); }
-            33%      { background: radial-gradient(ellipse at 70% 30%, rgba(255,150,0,0.18), transparent 60%), radial-gradient(ellipse at 30% 70%, rgba(28,176,246,0.18), transparent 60%); }
-            66%      { background: radial-gradient(ellipse at 50% 80%, rgba(255,75,75,0.16), transparent 60%), radial-gradient(ellipse at 50% 20%, rgba(255,215,0,0.18), transparent 60%); }
+            0%, 100% { background: radial-gradient(ellipse at 30% 30%, rgba(165,96,232,0.22), transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(138,72,199,0.16), transparent 60%); }
+            33%      { background: radial-gradient(ellipse at 70% 30%, rgba(181,122,240,0.20), transparent 60%), radial-gradient(ellipse at 30% 70%, rgba(119,51,181,0.16), transparent 60%); }
+            66%      { background: radial-gradient(ellipse at 50% 80%, rgba(201,160,240,0.18), transparent 60%), radial-gradient(ellipse at 50% 20%, rgba(165,96,232,0.18), transparent 60%); }
           }
           .ob-bg-cycle { animation: obBgCycle 6s ease-in-out infinite; }
 
@@ -1856,8 +2153,8 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
       <>
         {/* Ambient brand glows */}
         <div className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 h-72 w-[44rem] max-w-full rounded-full bg-[#A560E8]/14 dark:bg-[#A560E8]/15 blur-3xl" aria-hidden />
-        <div className="pointer-events-none absolute -bottom-40 -right-24 h-80 w-80 rounded-full bg-[#FFC800]/18 blur-3xl" aria-hidden />
-        <div className="pointer-events-none absolute top-1/3 -left-24 h-72 w-72 rounded-full bg-[#58CC02]/10 blur-3xl" aria-hidden />
+        <div className="pointer-events-none absolute -bottom-40 -right-24 h-80 w-80 rounded-full bg-[#C9A0F0]/18 blur-3xl" aria-hidden />
+        <div className="pointer-events-none absolute top-1/3 -left-24 h-72 w-72 rounded-full bg-[#A560E8]/10 blur-3xl" aria-hidden />
         <TopBar showProgress={false} />
         <div className="relative flex-1 overflow-y-auto">
           <div className="px-4 sm:px-6 lg:px-8 py-5 lg:py-6 max-w-6xl mx-auto w-full">
@@ -1876,7 +2173,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                     <MascotGif src="/mascot-laptop.webp" alt="" size={84} bordered borderColor="#A560E8" bgColor="#F3EAFF" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFC800]/15 border-2 border-[#FFC800]/45 text-[#7A5C00] text-[10px] font-extrabold uppercase tracking-[0.18em] mb-2 shadow-[0_4px_14px_-4px_rgba(255,200,0,0.5)]">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#C9A0F0]/15 border-2 border-[#C9A0F0]/45 text-[#7733B5] text-[10px] font-extrabold uppercase tracking-[0.18em] mb-2 shadow-[0_4px_14px_-4px_rgba(122,52,182,0.45)]">
                       <span aria-hidden>✨</span> {TRIAL_DAYS}-day free trial
                     </span>
                     <h1 className="text-[1.6rem] sm:text-[1.85rem] lg:text-[2rem] xl:text-[2.2rem] font-extrabold leading-[1.05] tracking-tight text-[#3C3C3C] dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
@@ -1895,15 +2192,15 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                 <div className="grid grid-cols-3 gap-2 sm:gap-3">
                   {[
                     { src: '/WriterPic.png',            label: 'Smart editor',         tint: '#A560E8' },
-                    { src: '/rubric-and-notes.png',     label: 'Live grade + rubric',  tint: '#58CC02' },
-                    { src: '/full-report.png',          label: 'Full report + fixes',  tint: '#FF9600' },
+                    { src: '/rubric-and-notes.png',     label: 'Live grade + rubric',  tint: '#A560E8' },
+                    { src: '/full-report.png',          label: 'Full report + fixes',  tint: '#B57AF0' },
                     // Live product footage instead of flat screenshots — the
                     // flashcards/quizzes tile cycles the two study demos, and
                     // Arcade mode plays the actual games (Crater Blast → Word
                     // Blitz → Word Tower) rather than the old crossword still.
-                    { videos: ['/hero-flashcards.mp4', '/hero-quiz.mp4'], label: 'Flashcards + quizzes', tint: '#1CB0F6' },
-                    { videos: ['/writescholar-crater-blast-demo.mp4', '/hero-word-blitz.mp4', '/hero-word-tower.mp4'], label: 'Arcade mode', tint: '#FF4B4B' },
-                    { src: '/daily-review-preview.png', label: 'Daily review',         tint: '#FFC800' },
+                    { videos: ['/hero-flashcards.mp4', '/hero-quiz.mp4'], label: 'Flashcards + quizzes', tint: '#8A48C7' },
+                    { videos: ['/writescholar-crater-blast-demo.mp4', '/hero-word-blitz.mp4', '/hero-word-tower.mp4'], label: 'Arcade mode', tint: '#A560E8' },
+                    { src: '/daily-review-preview.png', label: 'Daily review',         tint: '#C9A0F0' },
                   ].map((tile) => (
                     <CheckoutPreviewTile key={tile.label} tile={tile} />
                   ))}
@@ -1914,7 +2211,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                 <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-2 pt-1">
                   {['Full annotations on every paper', 'One-click apply revisions', 'Estimated grade + full rubric', '99 analyses · 100MB uploads'].map((b) => (
                     <li key={b} className="flex items-start gap-1.5 text-[12.5px] font-bold text-stone-700 dark:text-stone-300">
-                      <svg className="w-4 h-4 mt-0.5 shrink-0 text-[#58CC02]" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                      <svg className="w-4 h-4 mt-0.5 shrink-0 text-[#A560E8]" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                       <span>{b}</span>
                     </li>
                   ))}
@@ -1951,7 +2248,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                       className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-extrabold uppercase tracking-wider ${
                         billingCycle === 'yearly'
                           ? 'bg-white/25 text-white'
-                          : 'bg-[#FFC800]/20 text-[#7A5C00]'
+                          : 'bg-[#C9A0F0]/20 text-[#7733B5]'
                       }`}
                     >
                       Save 17%
@@ -1973,11 +2270,9 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                 </div>
 
                 {/* Plan cards — radio-style, click to select.
-                    Every plan starts with a 7-day free trial and a
-                    50%-off first cycle (NEWCUSTOMER auto-applied by
-                    handleSubscribeChoice), so the headline is "$0
-                    today" and the sub-line spells out the post-trial
-                    price ladder. */}
+                    Every plan starts with a 7-day free trial, so the
+                    headline is "$0 today" and the sub-line spells out
+                    the post-trial price. */}
                 <div className="space-y-2.5" role="radiogroup" aria-label="Subscription plan">
                   {/* Pro is shown by default; Premium only after the user
                       taps "Compare Premium" so the trial-start decision
@@ -2023,7 +2318,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                             {plan.name}
                           </span>
                           {plan.popular && (
-                            <span className="px-1.5 py-0.5 rounded-md bg-[#FFC800]/25 text-[#7A5C00] text-[9px] font-extrabold uppercase tracking-wide">
+                            <span className="px-1.5 py-0.5 rounded-md bg-[#C9A0F0]/25 text-[#7733B5] text-[9px] font-extrabold uppercase tracking-wide">
                               Most popular
                             </span>
                           )}
@@ -2033,7 +2328,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                             price ladder is in the sub-line below. */}
                         <div className="mt-1.5 flex items-baseline gap-1">
                           <span
-                            className="text-[1.85rem] sm:text-[2rem] font-extrabold leading-none text-[#58CC02]"
+                            className="text-[1.85rem] sm:text-[2rem] font-extrabold leading-none text-[#A560E8]"
                             style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                           >
                             $0
@@ -2041,28 +2336,39 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                           <span className="text-xs font-bold text-stone-500 dark:text-stone-400">today</span>
                         </div>
 
-                        {/* Trial + post-trial pricing ladder. The
-                            green "first cycle" price is the
-                            NEWCUSTOMER-discounted rate; rollover is
-                            the regular renewal price. */}
+                        {/* Post-trial pricing. Must match exactly what
+                            Stripe charges — a discounted figure here
+                            with no coupon on the session reads as a
+                            bait-and-switch on the first invoice. */}
                         <p className="mt-1 text-[11.5px] font-bold text-stone-500 dark:text-stone-400 leading-snug">
                           {TRIAL_DAYS} days free, then{' '}
-                          <span className="line-through decoration-2 decoration-[#FF4B4B]/70 text-stone-400 dark:text-stone-500">
-                            {cycleData.rolloverPrice}
-                          </span>{' '}
-                          <span className="font-extrabold text-[#46A302]">
-                            {cycleData.firstCyclePrice}
-                          </span>{' '}
-                          <span className="inline-flex items-center rounded-md bg-[#46A302]/12 px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-[#46A302]">
-                            50% off {cycleData.firstCycleLabel}
-                          </span>
+                          {showSignupDiscount(true, billingCycle) ? (
+                            <>
+                              <span className="line-through decoration-2 decoration-[#A560E8]/70 text-stone-400 dark:text-stone-500">
+                                {cycleData.rolloverPrice}
+                              </span>{' '}
+                              <span className="font-extrabold text-[#7733B5]">
+                                {cycleData.firstCyclePrice}
+                              </span>{' '}
+                              <span className="inline-flex items-center rounded-md bg-[#7733B5]/12 px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-[#7733B5]">
+                                50% off {cycleData.firstCycleLabel}
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <span className="font-extrabold text-[#7733B5]">
+                                {cycleData.rolloverPrice}
+                              </span>
+                              {cycleData.rolloverSuffix.replace(' after', '')}. Cancel anytime.
+                            </>
+                          )}
                         </p>
 
                         {/* Full feature list — compact */}
                         <ul className="mt-2.5 space-y-1">
                           {plan.features.map((f) => (
                             <li key={f} className="flex items-start gap-1.5 text-[12px] font-bold text-stone-600 dark:text-stone-300">
-                              <svg className="w-3.5 h-3.5 mt-0.5 shrink-0 text-[#58CC02]" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
+                              <svg className="w-3.5 h-3.5 mt-0.5 shrink-0 text-[#A560E8]" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                               </svg>
                               <span>{f}</span>
@@ -2087,7 +2393,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
 
                 {/* Error from create-checkout-session call */}
                 {trialError && (
-                  <div className="rounded-xl bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-2 border-[#FF4B4B]/30 px-3 py-2.5 text-[12.5px] text-[#FF4B4B] font-bold">
+                  <div className="rounded-xl bg-[#F3EAFF] dark:bg-[#A560E8]/10 border-2 border-[#A560E8]/30 px-3 py-2.5 text-[12.5px] text-[#A560E8] font-bold">
                     {trialError}
                   </div>
                 )}
@@ -2095,9 +2401,9 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                 {/* Trust row — reassurance lives next to the commitment,
                     not two screens back. Stars + student count + a one-line
                     proof quote to lower card anxiety right before the CTA. */}
-                <div className="rounded-2xl border-2 border-[#FFC800]/45 bg-[#FFFBEB] dark:bg-[#FFC800]/10 px-3.5 py-2.5">
+                <div className="rounded-2xl border-2 border-[#C9A0F0]/45 bg-[#FBF8FF] dark:bg-[#C9A0F0]/10 px-3.5 py-2.5">
                   <div className="flex items-center justify-center gap-2">
-                    <span aria-hidden className="text-[#FF9600] text-sm leading-none tracking-tight">★★★★★</span>
+                    <span aria-hidden className="text-[#B57AF0] text-sm leading-none tracking-tight">★★★★★</span>
                     <span className="text-[12px] font-extrabold text-[#3C3C3C] dark:text-stone-100">Loved by 50,000+ students</span>
                   </div>
                   <p className="mt-1 text-center text-[11.5px] font-bold text-stone-600 dark:text-stone-300 leading-snug">
@@ -2106,12 +2412,12 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                 </div>
 
                 {/* Subscribe CTA — opens Stripe's hosted Checkout page
-                    with the 7-day trial and 50% off auto-applied. */}
+                    with the 7-day trial at standard price. */}
                 <button
                   type="button"
                   onClick={() => handleSubscribeChoice()}
                   disabled={startingTrial}
-                  className="w-full inline-flex items-center justify-center gap-2 py-4 rounded-2xl bg-[#58CC02] hover:bg-[#46A302] disabled:opacity-60 disabled:cursor-not-allowed text-white text-base sm:text-[17px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_14px_30px_-14px_rgba(70,163,2,0.6)]"
+                  className="w-full inline-flex items-center justify-center gap-2 py-4 rounded-2xl bg-[#A560E8] hover:bg-[#7733B5] disabled:opacity-60 disabled:cursor-not-allowed text-white text-base sm:text-[17px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_14px_30px_-14px_rgba(70,163,2,0.6)]"
                 >
                   {startingTrial ? (
                     <>
@@ -2149,7 +2455,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
             type="button"
             onClick={() => handleSubscribeChoice()}
             disabled={startingTrial}
-            className="w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-[#58CC02] hover:bg-[#46A302] disabled:opacity-60 disabled:cursor-not-allowed text-white text-base font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_14px_30px_-14px_rgba(70,163,2,0.6)]"
+            className="w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-[#A560E8] hover:bg-[#7733B5] disabled:opacity-60 disabled:cursor-not-allowed text-white text-base font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_14px_30px_-14px_rgba(70,163,2,0.6)]"
           >
             {startingTrial ? 'Opening secure checkout…' : `Start my ${TRIAL_DAYS}-day free trial`}
           </button>
@@ -2191,7 +2497,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
       <div className="relative h-screen bg-gradient-to-br from-[#FAF7FF] via-[#FBF7FF] to-[#F3EAFF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 flex flex-col overflow-hidden">
         <OnboardingAura />
         {/* Top accent line — brand gradient, matches dashboard's header rule */}
-        <div className="relative z-10 h-1.5 bg-gradient-to-r from-[#A560E8] via-[#1CB0F6] to-[#58CC02]" aria-hidden />
+        <div className="relative z-10 h-1.5 bg-gradient-to-r from-[#A560E8] via-[#8A48C7] to-[#A560E8]" aria-hidden />
         <div className="relative z-10 flex justify-end px-5 pt-3">
           <OnboardingSignOutButton onLogout={onLogout} />
         </div>
@@ -2233,7 +2539,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
             <button
               type="button"
               onClick={handleIntroContinue}
-              className="w-full sm:w-auto sm:min-w-[200px] py-3.5 px-8 rounded-2xl bg-[#58CC02] text-white font-extrabold text-base uppercase tracking-wide border-2 border-b-4 border-[#46A302] hover:bg-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all"
+              className="w-full sm:w-auto sm:min-w-[200px] py-3.5 px-8 rounded-2xl bg-[#A560E8] text-white font-extrabold text-base uppercase tracking-wide border-2 border-b-4 border-[#7733B5] hover:bg-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
             >
               Continue
             </button>
@@ -2265,7 +2571,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
     return (
       <div className="h-screen bg-gradient-to-br from-[#FAF7FF] via-[#FBF7FF] to-[#F3EAFF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 flex flex-col relative overflow-hidden">
         <OnboardingAura />
-        <div className="relative z-10 h-1.5 bg-gradient-to-r from-[#A560E8] via-[#1CB0F6] to-[#58CC02]" aria-hidden />
+        <div className="relative z-10 h-1.5 bg-gradient-to-r from-[#A560E8] via-[#8A48C7] to-[#A560E8]" aria-hidden />
         <div className="relative z-10 flex justify-end px-5 pt-3">
           <OnboardingSignOutButton onLogout={onLogout} />
         </div>
@@ -2302,7 +2608,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
             <div className="relative ob-bubble-pop max-w-[85vw] sm:max-w-md">
               <div className="relative rounded-3xl bg-white dark:bg-stone-900 border-2 border-[#E5E5E5] dark:border-stone-700 px-5 py-3.5 shadow-md">
                 <p className="text-base sm:text-lg font-extrabold text-[#3C3C3C] dark:text-stone-100 leading-tight text-center" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                  Let me show you how to get the <span className="text-[#58CC02]">best</span> out of WriteScholar
+                  Let me show you how to get the <span className="text-[#A560E8]">best</span> out of WriteScholar
                 </p>
                 <div
                   aria-hidden
@@ -2332,7 +2638,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
             <button
               type="button"
               onClick={handleCelebrateContinue}
-              className="w-full sm:w-auto sm:min-w-[200px] py-3.5 px-8 rounded-2xl bg-[#58CC02] text-white font-extrabold text-base uppercase tracking-wide border-2 border-b-4 border-[#46A302] hover:bg-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all"
+              className="w-full sm:w-auto sm:min-w-[200px] py-3.5 px-8 rounded-2xl bg-[#A560E8] text-white font-extrabold text-base uppercase tracking-wide border-2 border-b-4 border-[#7733B5] hover:bg-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
             >
               Continue
             </button>
@@ -2365,8 +2671,460 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
     );
   }
 
-  /* ─── VALUE-PROP — pre-paywall page that builds value: the full
-     8-tool grid, social proof, and student testimonials. Routes
+  /* ─── ANALYZE-INPUT — the user's own essay, before the card ask ───
+     Everything up to here has been us talking. This is the first screen
+     where the product does something for them, and it's deliberately
+     the last screen before checkout: the trial ask lands much better
+     against a grade they just watched appear on their own work than
+     against a feature list. Skippable, because plenty of people sign up
+     on a phone with no essay to hand and dead-ending them is worse than
+     falling back to the generic pitch. ─── */
+  if (phase === 'analyze-input') {
+    const notEnoughWords = essayWordCount < MIN_ESSAY_WORDS;
+    const progressPct = Math.min(100, (essayWordCount / MIN_ESSAY_WORDS) * 100);
+
+    /* Analysing takes real time, so it gets the whole screen and a
+       narrated stepper. Sharing the screen with an editable textarea
+       would invite edits that the in-flight request can't reflect. */
+    if (analysisRunning) {
+      return (
+        <div className="relative h-screen bg-gradient-to-br from-[#FAF7FF] via-[#FBF7FF] to-[#F3EAFF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 flex flex-col overflow-hidden">
+          <OnboardingAura />
+          <TopBar />
+
+          <div className="flex-1 flex flex-col items-center justify-center px-5 py-8">
+            <div className="w-full max-w-md">
+              <div className="flex justify-center mb-6">
+                <MascotGif src="/mascot-thinking.webp" alt="" size={130} bordered borderColor="#A560E8" bgColor="#F3EAFF" />
+              </div>
+
+              <h1
+                className="text-center text-2xl sm:text-[1.9rem] font-extrabold text-[#3C3C3C] dark:text-stone-50 leading-tight"
+                style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+              >
+                Marking your essay…
+              </h1>
+              <p className="mt-2 text-center text-sm font-bold text-stone-500 dark:text-stone-400">
+                {essayWordCount.toLocaleString()} words · usually under a minute
+              </p>
+
+              <div className="mt-6 rounded-3xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900 p-3 space-y-1.5">
+                {ANALYSIS_STEPS.map((s, i) => {
+                  const done = i < analysisStep;
+                  const active = i === analysisStep;
+                  return (
+                    <div
+                      key={s.label}
+                      className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-all duration-300 ${
+                        active
+                          ? 'bg-[#F3EAFF] dark:bg-[#A560E8]/15 border-2 border-[#A560E8]/40'
+                          : 'border-2 border-transparent'
+                      }`}
+                    >
+                      <span
+                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-[15px] transition-all ${
+                          done || active
+                            ? 'bg-[#A560E8] text-white'
+                            : 'bg-[#F5F5F5] dark:bg-stone-800 text-stone-400'
+                        }`}
+                        aria-hidden
+                      >
+                        {done ? '✓' : s.icon}
+                      </span>
+                      <span
+                        className={`flex-1 text-[13.5px] font-extrabold ${
+                          done
+                            ? 'text-stone-400 dark:text-stone-500'
+                            : active
+                              ? 'text-[#3C3C3C] dark:text-stone-100'
+                              : 'text-stone-400 dark:text-stone-600'
+                        }`}
+                      >
+                        {s.label}
+                      </span>
+                      {active && (
+                        <span className="h-4 w-4 shrink-0 rounded-full border-2 border-[#A560E8]/30 border-t-[#A560E8] animate-spin" aria-hidden />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              <p className="mt-5 text-center text-[12px] font-bold text-stone-400 dark:text-stone-500">
+                Hang tight — don&apos;t close this page.
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div
+        className="relative h-screen bg-gradient-to-br from-[#FAF7FF] via-[#FBF7FF] to-[#F3EAFF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 flex flex-col overflow-hidden"
+        onDragOver={(e) => { e.preventDefault(); setEssayDropActive(true); }}
+        onDragLeave={(e) => {
+          // Only clear when the pointer actually leaves the page, not on
+          // every child boundary crossing.
+          if (e.currentTarget === e.target) setEssayDropActive(false);
+        }}
+        onDrop={(e) => {
+          e.preventDefault();
+          setEssayDropActive(false);
+          const f = e.dataTransfer.files?.[0];
+          if (f) void handleEssayFile(f);
+        }}
+      >
+        <OnboardingAura />
+        <TopBar />
+
+        <div className="flex-1 overflow-y-auto">
+          <div className="px-4 sm:px-6 pt-5 pb-6 max-w-xl mx-auto w-full ob-fade-in">
+            {/* Header — deliberately compact so the input is above the
+                fold on a laptop. */}
+            <div className="text-center mb-5">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border-2 border-[#A560E8]/40 bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#A560E8] text-[10px] font-extrabold uppercase tracking-wider mb-2.5">
+                <span aria-hidden>✨</span>
+                Your free analysis
+              </span>
+              <h1
+                className="text-2xl sm:text-[1.9rem] font-extrabold text-[#3C3C3C] dark:text-stone-50 leading-tight"
+                style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+              >
+                Let&apos;s grade <span className="text-[#A560E8]">your essay</span>
+              </h1>
+              <p className="mt-1.5 text-stone-500 dark:text-stone-400 font-bold text-[13.5px] sm:text-sm max-w-md mx-auto">
+                Any draft, however rough. Takes about a minute — no card needed.
+              </p>
+            </div>
+
+            {/* What comes back. Sets the payoff before we ask for effort. */}
+            <div className="mb-4 flex flex-wrap items-center justify-center gap-1.5">
+              {['Predicted grade', 'What to fix', 'Rubric breakdown'].map((f) => (
+                <span
+                  key={f}
+                  className="inline-flex items-center gap-1.5 rounded-full border-2 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900 px-2.5 py-1 text-[11.5px] font-extrabold text-stone-600 dark:text-stone-300"
+                >
+                  <svg className="w-3 h-3 text-[#A560E8]" fill="none" stroke="currentColor" strokeWidth={3.5} viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  {f}
+                </span>
+              ))}
+            </div>
+
+            <div
+              className={`relative rounded-3xl border-2 border-b-4 bg-white dark:bg-stone-900 p-3 sm:p-3.5 transition-colors ${
+                essayDropActive
+                  ? 'border-[#A560E8] bg-[#FBF7FF] dark:bg-[#A560E8]/10'
+                  : 'border-[#E5E5E5] dark:border-stone-700'
+              }`}
+            >
+              <textarea
+                value={essayInput}
+                onChange={(e) => { setEssayInput(e.target.value); setAnalysisError(null); }}
+                disabled={essayParsing}
+                rows={9}
+                placeholder={'Paste your essay here…\n\nOr drag a PDF or Word file anywhere on this page.'}
+                className="w-full resize-none rounded-2xl bg-[#FAFAFA] dark:bg-stone-950 px-4 py-3.5 text-[14px] font-semibold leading-relaxed text-[#3C3C3C] dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-600 border-2 border-transparent focus:border-[#A560E8]/50 focus:outline-none transition-colors disabled:opacity-60"
+              />
+
+              {/* Progress toward the minimum — a bar reads as "keep
+                  going", where a bare "50 minimum" reads as a rejection. */}
+              <div className="mt-2.5 px-1">
+                <div className="flex items-baseline justify-between gap-2 mb-1.5">
+                  <span className="min-w-0 flex items-center gap-1.5 text-[12px] font-extrabold text-stone-500 dark:text-stone-400">
+                    {essayFileName && (
+                      <>
+                        <span aria-hidden>📄</span>
+                        <span className="truncate max-w-[150px] text-[#A560E8]">{essayFileName}</span>
+                        <span className="text-stone-300 dark:text-stone-600" aria-hidden>·</span>
+                      </>
+                    )}
+                    <span className="shrink-0">
+                      {essayWordCount.toLocaleString()} {essayWordCount === 1 ? 'word' : 'words'}
+                    </span>
+                  </span>
+                  <span className={`text-[11.5px] font-extrabold ${notEnoughWords ? 'text-stone-400 dark:text-stone-500' : 'text-[#A560E8]'}`}>
+                    {notEnoughWords ? `${MIN_ESSAY_WORDS - essayWordCount} more to go` : 'Ready to analyse'}
+                  </span>
+                </div>
+                <div className="h-2 rounded-full bg-[#F0F0F0] dark:bg-stone-800 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-[#A560E8] transition-all duration-300"
+                    style={{ width: `${progressPct}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Upload as a real target, not a buried text link. */}
+              <button
+                type="button"
+                onClick={() => essayFileInputRef.current?.click()}
+                disabled={essayParsing}
+                className="mt-3 w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900 hover:border-[#A560E8]/50 hover:bg-[#FBF7FF] dark:hover:bg-[#A560E8]/10 text-[12.5px] font-extrabold text-stone-600 dark:text-stone-300 active:border-b-2 active:translate-y-0.5 disabled:opacity-60 transition-all"
+              >
+                {essayParsing ? (
+                  <>
+                    <span className="h-3.5 w-3.5 rounded-full border-2 border-[#A560E8]/30 border-t-[#A560E8] animate-spin" aria-hidden />
+                    Reading your file…
+                  </>
+                ) : (
+                  <>
+                    <span aria-hidden>📎</span>
+                    {essayFileName ? 'Choose a different file' : 'Upload PDF, Word or TXT'}
+                  </>
+                )}
+              </button>
+              <input
+                ref={essayFileInputRef}
+                type="file"
+                accept=".pdf,.doc,.docx,.txt"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) void handleEssayFile(f);
+                  e.target.value = '';
+                }}
+              />
+
+              {analysisError && (
+                <div className="mt-3 rounded-2xl bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-2 border-[#FF4B4B]/30 px-3 py-2.5 text-[12.5px] text-[#FF4B4B] font-bold">
+                  {analysisError}
+                </div>
+              )}
+
+              {/* Full-card drop affordance */}
+              {essayDropActive && (
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-3xl bg-[#F3EAFF]/95 dark:bg-[#A560E8]/25 border-2 border-dashed border-[#A560E8] pointer-events-none">
+                  <span className="text-3xl mb-1.5" aria-hidden>📄</span>
+                  <p className="text-[14px] font-extrabold text-[#7733B5] dark:text-[#E9DBFF]">Drop your essay to upload</p>
+                </div>
+              )}
+            </div>
+
+            <p className="mt-3 text-center text-[11.5px] font-bold text-stone-400 dark:text-stone-500">
+              🔒 Private to your account · never used to train models
+            </p>
+          </div>
+        </div>
+
+        {/* Sticky action bar — matches the intro/celebrate pattern so the
+            primary action is always reachable without scrolling. */}
+        <div className="relative z-10 border-t-2 border-[#E5E5E5] dark:border-stone-800 bg-white dark:bg-stone-900 px-5 sm:px-8 py-3.5 sm:py-4">
+          <div className="max-w-xl mx-auto">
+            <button
+              type="button"
+              onClick={handleRunOnboardingAnalysis}
+              disabled={essayParsing || notEnoughWords}
+              className="w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-[#A560E8] hover:bg-[#7733B5] disabled:opacity-40 disabled:cursor-not-allowed text-white text-[15px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
+            >
+              Analyse my essay
+            </button>
+            {/* Escape hatch, deliberately quiet: this run is the aha
+                moment the trial ask depends on, so it shouldn't compete
+                with the primary action — but dead-ending someone who
+                signed up on a phone with no draft is worse. */}
+            <button
+              type="button"
+              onClick={handleSkipAnalysis}
+              className="mt-1 w-full py-1.5 text-[11.5px] font-bold text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
+            >
+              I don&apos;t have an essay right now
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ─── ANALYZE-RESULT — teaser grade, locked score ───
+     Letter grade is the hero. Annotation count proves we read the
+     paper. Exact /100 stays locked so curiosity drives the trial. ─── */
+  if (phase === 'analyze-result' && analysisResult) {
+    const { gradeEstimate, overallScore, issueCount, topSuggestions, wordCount, documentId } = analysisResult;
+    const topFix = topSuggestions[0] ?? null;
+    const hasScore = overallScore !== null;
+    // API often returns "B (80-89%)" — only the letter fits the seal;
+    // keep any range as a quiet subtitle underneath.
+    const gradeRaw = (gradeEstimate || '').trim();
+    const gradeLetterMatch = gradeRaw.match(/^([A-F][+-]?|Pass|Fail|First|2:1|2:2|3rd)/i);
+    const gradeLetter = gradeLetterMatch?.[1] || (gradeRaw ? gradeRaw.split(/\s|\(/)[0] : '—');
+
+    return (
+      <div className="relative h-screen bg-gradient-to-br from-[#FAF7FF] via-[#FBF7FF] to-[#F3EAFF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 flex flex-col overflow-hidden">
+        <OnboardingAura />
+        <TopBar />
+
+        <div className="flex-1 overflow-y-auto">
+          <div className="px-4 sm:px-6 py-4 max-w-[34rem] mx-auto w-full ob-fade-in">
+            {/* Celebration and outcome read as one composed header. */}
+            <div className="mb-3.5 flex items-center justify-center gap-[1.125rem]">
+              <div className="ob-result-mascot relative flex h-[106px] w-[106px] shrink-0 items-center justify-center rounded-full bg-white dark:bg-stone-900 shadow-[0_16px_34px_-18px_rgba(119,51,181,0.7)]">
+                <span className="absolute inset-0 rounded-full border-[5px] border-[#DAB8FA]" aria-hidden />
+                <span className="absolute inset-[9px] rounded-full border border-[#EAD8FB]" aria-hidden />
+                <span className="ob-result-orbit absolute left-1/2 top-1/2 h-3.5 w-3.5 rounded-full bg-[#A560E8] ring-[3px] ring-white dark:ring-stone-900" aria-hidden />
+                <img
+                  src="/mascot-jumping-joy.webp"
+                  alt=""
+                  width={86}
+                  height={86}
+                  className="relative h-[86px] w-[86px] object-contain"
+                  loading="eager"
+                  decoding="async"
+                />
+              </div>
+              <div className="min-w-0">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#EADCF8] dark:bg-[#A560E8]/15 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.17em] text-[#7733B5] dark:text-[#C9A0F0]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#A560E8]" aria-hidden />
+                  Analysis complete
+                </span>
+                <h1
+                  className="mt-1.5 text-[1.8rem] sm:text-[1.95rem] font-extrabold leading-[1.05] text-[#2F2538] dark:text-stone-50"
+                  style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+                >
+                  Your paper is<br /><span className="text-[#A560E8]">ready to improve.</span>
+                </h1>
+                <p className="mt-1.5 text-[12.5px] font-bold text-stone-500 dark:text-stone-400">
+                  {wordCount.toLocaleString()} words reviewed{documentId ? ' · saved' : ''}
+                </p>
+              </div>
+            </div>
+
+            {/* Professor-style report preview. */}
+            <section className="relative overflow-hidden rounded-[26px] border-2 border-b-[5px] border-[#D8BDF2] dark:border-[#A560E8]/35 bg-white dark:bg-stone-900 shadow-[0_24px_55px_-32px_rgba(84,35,133,0.7)]">
+              <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-[#C9A0F0] via-[#A560E8] to-[#7733B5]" aria-hidden />
+
+              <div className="flex items-center justify-between border-b border-[#EEE4F7] dark:border-stone-700 px-4 pb-3 pt-[1.125rem]">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex h-[2.375rem] w-[2.375rem] items-center justify-center rounded-xl bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[15px]" aria-hidden>✎</span>
+                  <div>
+                    <p className="text-[13px] font-extrabold text-[#3C3C3C] dark:text-stone-100">Essay feedback report</p>
+                    <p className="text-[11px] font-bold text-stone-400 dark:text-stone-500">Professor-style analysis</p>
+                  </div>
+                </div>
+                <span className="rounded-full bg-[#F3EAFF] dark:bg-[#A560E8]/15 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide text-[#7733B5] dark:text-[#C9A0F0]">
+                  Preview
+                </span>
+              </div>
+
+              <div className="grid grid-cols-[122px_1fr] sm:grid-cols-[138px_1fr]">
+                {/* Grade seal — letter only */}
+                <div className="flex flex-col items-center justify-center border-r border-[#EEE4F7] dark:border-stone-700 bg-gradient-to-b from-[#FBF7FF] to-white dark:from-[#A560E8]/10 dark:to-stone-900 px-2.5 py-4">
+                  <div className="relative flex h-[86px] w-[86px] shrink-0 items-center justify-center overflow-hidden rounded-full border-[5px] border-[#A560E8] bg-white dark:bg-stone-900 shadow-[inset_0_0_0_4px_#F3EAFF,0_10px_24px_-15px_rgba(119,51,181,0.8)]">
+                    <span
+                      className={`font-black leading-none text-[#7733B5] dark:text-[#C9A0F0] ${
+                        gradeLetter.length > 2 ? 'text-[1.5rem]' : gradeLetter.length > 1 ? 'text-[2.35rem]' : 'text-[2.95rem]'
+                      }`}
+                      style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+                    >
+                      {gradeLetter}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-center text-[10px] font-extrabold uppercase tracking-[0.12em] text-stone-500 dark:text-stone-400">
+                    Predicted grade
+                  </p>
+                </div>
+
+                <div className="divide-y divide-[#EEE4F7] dark:divide-stone-700">
+                  <div className="flex items-center gap-3 px-4 py-4">
+                    <span className="flex h-[2.625rem] w-[2.625rem] shrink-0 items-center justify-center rounded-xl bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[15px] font-black text-[#7733B5] dark:text-[#C9A0F0]">
+                      {issueCount}
+                    </span>
+                    <div>
+                      <p className="text-[13.5px] font-extrabold text-[#3C3C3C] dark:text-stone-100">{issueCount === 1 ? 'Annotation found' : 'Annotations found'}</p>
+                      <p className="mt-0.5 text-[11px] font-bold text-stone-400 dark:text-stone-500">Marked throughout your draft</p>
+                    </div>
+                  </div>
+                  {hasScore && (
+                    <div className="flex items-center gap-3 bg-[#FCF9FF] dark:bg-[#A560E8]/5 px-4 py-4">
+                      <span className="flex h-[2.625rem] w-[2.625rem] shrink-0 items-center justify-center rounded-xl bg-[#EADCF8] dark:bg-[#A560E8]/20 text-base" aria-hidden>🔒</span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[13.5px] font-extrabold text-[#3C3C3C] dark:text-stone-100">Exact score / 100</p>
+                        <p className="mt-0.5 text-[11px] font-bold text-[#A560E8]">Unlock with free trial</p>
+                      </div>
+                      <span className="text-lg font-black tracking-widest text-[#D2B3EE] blur-[2px] select-none" aria-hidden>??</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {topFix && (
+                <div className="border-t border-[#EEE4F7] dark:border-stone-700 px-4 py-3.5">
+                  <div className="flex items-start gap-2.5">
+                    <span className="mt-0.5 text-[#A560E8]" aria-hidden>◆</span>
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#A560E8]">First improvement</p>
+                      <p className="mt-1 text-[13.5px] font-bold leading-relaxed text-[#3C3C3C] dark:text-stone-100 line-clamp-3">{topFix}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-center justify-center gap-2 border-t border-[#E6D4F5] dark:border-[#A560E8]/25 bg-[#F7EEFF] dark:bg-[#A560E8]/10 px-4 py-3">
+                <span className="text-sm" aria-hidden>🔒</span>
+                <p className="text-[12px] font-extrabold text-[#7733B5] dark:text-[#C9A0F0]">
+                  Full rubric · every note · one-click fixes
+                </p>
+              </div>
+            </section>
+          </div>
+          <style>{`
+            @keyframes obResultOrbit {
+              from { transform: translate(-50%, -50%) rotate(0deg) translateX(54px) rotate(0deg); }
+              to { transform: translate(-50%, -50%) rotate(360deg) translateX(54px) rotate(-360deg); }
+            }
+            @keyframes obResultMascotPulse {
+              0%, 100% { box-shadow: 0 0 0 0 rgba(165,96,232,.12), 0 16px 34px -18px rgba(119,51,181,.7); }
+              50% { box-shadow: 0 0 0 8px rgba(165,96,232,.07), 0 18px 38px -16px rgba(119,51,181,.75); }
+            }
+            .ob-result-orbit { animation: obResultOrbit 5s linear infinite; }
+            .ob-result-mascot { animation: obResultMascotPulse 2.4s ease-in-out infinite; }
+            @media (prefers-reduced-motion: reduce) {
+              .ob-result-orbit, .ob-result-mascot { animation: none; }
+            }
+          `}</style>
+        </div>
+
+        {/* Sticky CTA */}
+        <div className="relative z-10 border-t-2 border-[#E5E5E5] dark:border-stone-800 bg-white dark:bg-stone-900 px-4 sm:px-6 py-3 sm:py-3.5">
+          <div className="max-w-[34rem] mx-auto">
+            {trialError && (
+              <div className="mb-2.5 rounded-xl bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-2 border-[#FF4B4B]/30 px-3 py-2 text-[12px] text-[#FF4B4B] font-bold">
+                {trialError}
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={() => void handleSubscribeChoice()}
+              disabled={startingTrial}
+              className="w-full inline-flex items-center justify-center gap-2 py-[0.9375rem] rounded-2xl bg-[#A560E8] hover:bg-[#7733B5] disabled:opacity-60 disabled:cursor-not-allowed text-white text-[15px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
+            >
+              {startingTrial ? (
+                <>
+                  <span className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white animate-spin" aria-hidden />
+                  Opening secure checkout…
+                </>
+              ) : (
+                <>
+                  Unlock score &amp; full markup
+                  <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </>
+              )}
+            </button>
+            <p className="mt-1.5 text-center text-[11px] font-bold text-stone-400 dark:text-stone-500">
+              {`${TRIAL_DAYS}-day free trial · $0 today · Then $${STANDARD_MONTHLY_PRICE.pro}/mo`}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ─── VALUE-PROP — fallback pitch for users who skipped the analysis:
+     the full 8-tool grid, social proof, and student testimonials. Routes
      to the paywall on Continue. ─── */
   if (phase === 'value-prop') {
     const testimonials: { quote: string; name: string; meta: string; emoji: string; accent: string; border: string; bg: string }[] = [
@@ -2382,21 +3140,21 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
         name: 'Daniel R.',
         meta: 'High school junior · AP Bio',
         emoji: '🎴',
-        accent: '#58CC02', border: '#46A302', bg: '#E5F8D0',
+        accent: '#A560E8', border: '#7733B5', bg: '#F3EAFF',
       },
       {
         quote: "Crater Blast made me look forward to reviewing for finals. My friends thought I was joking when I said studying was fun.",
         name: 'Olivia M.',
         meta: 'College freshman · Pre-med',
         emoji: '🎮',
-        accent: '#FF9600', border: '#D97F00', bg: '#FFF4E0',
+        accent: '#B57AF0', border: '#8A48C7', bg: '#F3EAFF',
       },
       {
         quote: "The citation finder saved me three all-nighters this semester. Real sources, formatted correctly, in seconds.",
         name: 'Aiden T.',
         meta: 'College senior · English',
         emoji: '📚',
-        accent: '#1CB0F6', border: '#1899D6', bg: '#DDF4FF',
+        accent: '#8A48C7', border: '#7733B5', bg: '#F3EAFF',
       },
     ];
 
@@ -2414,7 +3172,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
           <OnboardingSignOutButton onLogout={onLogout} />
         </div>
         <div className="h-3 bg-[#E5E5E5] dark:bg-stone-800">
-          <div className="h-full bg-[#58CC02] rounded-r-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
+          <div className="h-full bg-[#A560E8] rounded-r-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
         </div>
 
         <div className="flex-1 overflow-y-auto">
@@ -2448,7 +3206,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
               {false && (
                 <>
                   <span className="inline-flex items-center gap-1.5">
-                    <span className="text-[#FF9600] text-base leading-none">★</span>
+                    <span className="text-[#B57AF0] text-base leading-none">★</span>
                     <span className="text-[#3C3C3C] dark:text-stone-100">4.9</span>
                     <span>from 12k+ reviews</span>
                   </span>
@@ -2464,11 +3222,11 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                 <div className="flex flex-col items-center leading-[1.15]">
                   <span aria-hidden className="flex items-center gap-0.5">
                     {[0, 1, 2, 3, 4].map((i) => (
-                      <span key={i} className="text-[#FF9600] text-xs">★</span>
+                      <span key={i} className="text-[#B57AF0] text-xs">★</span>
                     ))}
                   </span>
                   <span className="text-[12px] sm:text-[13px] font-extrabold text-[#3C3C3C] dark:text-stone-100 tracking-tight">
-                    Loved by <span className="text-[#58CC02] tabular-nums">50,000+</span> students
+                    Loved by <span className="text-[#A560E8] tabular-nums">50,000+</span> students
                   </span>
                 </div>
               </div>
@@ -2493,7 +3251,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
             {/* Testimonials — real students, specific outcomes */}
             <div className="mb-6">
               <div className="text-center mb-5">
-                <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#58CC02] mb-2">Real students, real results</p>
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#A560E8] mb-2">Real students, real results</p>
                 <h2 className="text-xl sm:text-2xl font-extrabold text-[#3C3C3C] dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                   Students are getting their grades back.
                 </h2>
@@ -2507,7 +3265,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                   >
                     <div className="flex items-center gap-1 mb-2">
                       {[0,1,2,3,4].map((s) => (
-                        <span key={s} className="text-[#FF9600] text-sm" aria-hidden>★</span>
+                        <span key={s} className="text-[#B57AF0] text-sm" aria-hidden>★</span>
                       ))}
                     </div>
                     <p className="text-[13px] sm:text-sm text-[#3C3C3C] dark:text-stone-200 font-semibold leading-snug mb-3">
@@ -2532,7 +3290,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
             </div>
 
             {/* Closing reassurance — frames the next step without pressuring */}
-            <div className="rounded-2xl border-2 border-b-4 border-[#46A302] bg-[#E5F8D0] dark:bg-[#58CC02]/10 px-4 sm:px-5 py-4 sm:py-5 text-center mb-2">
+            <div className="rounded-2xl border-2 border-b-4 border-[#7733B5] bg-[#F3EAFF] dark:bg-[#A560E8]/10 px-4 sm:px-5 py-4 sm:py-5 text-center mb-2">
               <p className="text-sm sm:text-base font-extrabold text-[#3C3C3C] dark:text-stone-100" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                 Ready to unlock all 8 tools?
               </p>
@@ -2549,7 +3307,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
             <button
               type="button"
               onClick={() => goToPhase('checkout')}
-              className="w-full sm:w-auto sm:min-w-[220px] py-3.5 px-8 rounded-2xl bg-[#58CC02] text-white font-extrabold text-base uppercase tracking-wide border-2 border-b-4 border-[#46A302] hover:bg-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all flex items-center justify-center gap-2"
+              className="w-full sm:w-auto sm:min-w-[220px] py-3.5 px-8 rounded-2xl bg-[#A560E8] text-white font-extrabold text-base uppercase tracking-wide border-2 border-b-4 border-[#7733B5] hover:bg-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all flex items-center justify-center gap-2"
             >
               I&apos;m ready
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
@@ -2593,7 +3351,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
           <OnboardingSignOutButton onLogout={onLogout} />
         </div>
         <div className="h-3 bg-[#E5E5E5] dark:bg-stone-800">
-          <div className="h-full bg-[#58CC02] rounded-r-full transition-all duration-500" style={{ width: `100%` }} />
+          <div className="h-full bg-[#A560E8] rounded-r-full transition-all duration-500" style={{ width: `100%` }} />
         </div>
 
         <div className="flex-1 overflow-y-auto">
@@ -2613,13 +3371,13 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                 <span aria-hidden className="absolute -top-1 -right-2 text-2xl ob-sparkle-spin">✨</span>
                 <span aria-hidden className="absolute bottom-2 -left-3 text-xl ob-sparkle-spin" style={{ animationDelay: '0.7s' }}>⭐</span>
               </div>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border-2 border-[#FF4B4B]/40 bg-[#FFE8E8] text-[#FF4B4B] text-[10px] font-extrabold uppercase tracking-wider mb-3">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border-2 border-[#A560E8]/40 bg-[#F3EAFF] text-[#A560E8] text-[10px] font-extrabold uppercase tracking-wider mb-3">
                 <span aria-hidden>⏰</span>
-                Last chance, {firstName}!
+                Last chance{firstName ? `, ${firstName}` : ''}!
               </span>
               <h1 className="text-2xl sm:text-3xl lg:text-[2.25rem] font-extrabold text-[#3C3C3C] dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                 Don&apos;t miss out on{' '}
-                <span className="text-[#58CC02]">50% off Pro</span>
+                <span className="text-[#A560E8]">50% off Pro</span>
               </h1>
               <p className="mt-3 text-base sm:text-lg text-stone-600 dark:text-stone-400 font-bold leading-snug max-w-md">
                 An exclusive <em className="not-italic text-[#A560E8]">50% off</em> — only on this screen.
@@ -2634,7 +3392,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                 Citations) — not generic emoji — so the visual identity
                 stays consistent end-to-end. */}
             <div className="rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900 p-5 sm:p-6 mb-6">
-              <p className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#FF4B4B] mb-3 text-center">
+              <p className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#A560E8] mb-3 text-center">
                 Walk away and you&apos;ll miss:
               </p>
               <ul className="space-y-3">
@@ -2643,13 +3401,13 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                     // Study Pack icon (orange stacked books + gold star)
                     icon: (
                       <svg viewBox="0 0 64 64" fill="none" aria-hidden>
-                        <rect x="6" y="44" width="52" height="14" rx="3" fill="#FF9600" />
+                        <rect x="6" y="44" width="52" height="14" rx="3" fill="#B57AF0" />
                         <rect x="14" y="44" width="3" height="14" fill="white" opacity="0.65" />
-                        <rect x="10" y="28" width="44" height="14" rx="3" fill="#FF9600" />
+                        <rect x="10" y="28" width="44" height="14" rx="3" fill="#B57AF0" />
                         <rect x="18" y="28" width="3" height="14" fill="white" opacity="0.65" />
-                        <rect x="14" y="12" width="36" height="14" rx="3" fill="#FF9600" />
+                        <rect x="14" y="12" width="36" height="14" rx="3" fill="#B57AF0" />
                         <rect x="22" y="12" width="3" height="14" fill="white" opacity="0.65" />
-                        <path d="M44 8 L45 11 L48 12 L45 13 L44 16 L43 13 L40 12 L43 11 Z" fill="#FFC800" />
+                        <path d="M44 8 L45 11 L48 12 L45 13 L44 16 L43 13 L40 12 L43 11 Z" fill="#C9A0F0" />
                       </svg>
                     ),
                     title: 'Better grades, guaranteed',
@@ -2659,8 +3417,8 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                     // Essay Analyzer icon (red document + folded corner + white check)
                     icon: (
                       <svg viewBox="0 0 64 64" fill="none" aria-hidden>
-                        <path d="M14 6 Q12 6 12 8 L12 56 Q12 58 14 58 L50 58 Q52 58 52 56 L52 22 L36 6 Z" fill="#FF4B4B" />
-                        <path d="M36 6 L52 22 L38 22 Q36 22 36 20 Z" fill="#C13030" />
+                        <path d="M14 6 Q12 6 12 8 L12 56 Q12 58 14 58 L50 58 Q52 58 52 56 L52 22 L36 6 Z" fill="#A560E8" />
+                        <path d="M36 6 L52 22 L38 22 Q36 22 36 20 Z" fill="#7733B5" />
                         <rect x="20" y="30" width="22" height="3" rx="1.5" fill="white" />
                         <rect x="20" y="37" width="18" height="3" rx="1.5" fill="white" opacity="0.7" />
                         <path d="M22 48 L28 54 L40 41" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
@@ -2673,7 +3431,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                     // Games icon (green controller silhouette + white D-pad and buttons)
                     icon: (
                       <svg viewBox="0 0 64 64" fill="none" aria-hidden>
-                        <path d="M14 22 Q6 22 6 30 L6 44 Q6 56 18 56 Q23 56 26 50 L28 46 L36 46 L38 50 Q41 56 46 56 Q58 56 58 44 L58 30 Q58 22 50 22 Q46 17 40 21 Q36 24 32 24 Q28 24 24 21 Q18 17 14 22 Z" fill="#58CC02" />
+                        <path d="M14 22 Q6 22 6 30 L6 44 Q6 56 18 56 Q23 56 26 50 L28 46 L36 46 L38 50 Q41 56 46 56 Q58 56 58 44 L58 30 Q58 22 50 22 Q46 17 40 21 Q36 24 32 24 Q28 24 24 21 Q18 17 14 22 Z" fill="#A560E8" />
                         <rect x="14" y="32" width="12" height="3.5" rx="1.5" fill="white" />
                         <rect x="18.25" y="27.75" width="3.5" height="12" rx="1.5" fill="white" />
                         <circle cx="46" cy="30" r="3.2" fill="white" />
@@ -2689,8 +3447,8 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                     // Citations icon (two blue quote-mark blobs)
                     icon: (
                       <svg viewBox="0 0 64 64" fill="none" aria-hidden>
-                        <path d="M10 18 Q10 12 16 12 L24 12 Q28 12 28 16 L28 32 Q28 44 16 50 Q12 50 12 46 Q12 44 14 42 Q20 38 20 32 L16 32 Q10 32 10 26 Z" fill="#1CB0F6" />
-                        <path d="M36 18 Q36 12 42 12 L50 12 Q54 12 54 16 L54 32 Q54 44 42 50 Q38 50 38 46 Q38 44 40 42 Q46 38 46 32 L42 32 Q36 32 36 26 Z" fill="#1CB0F6" />
+                        <path d="M10 18 Q10 12 16 12 L24 12 Q28 12 28 16 L28 32 Q28 44 16 50 Q12 50 12 46 Q12 44 14 42 Q20 38 20 32 L16 32 Q10 32 10 26 Z" fill="#8A48C7" />
+                        <path d="M36 18 Q36 12 42 12 L50 12 Q54 12 54 16 L54 32 Q54 44 42 50 Q38 50 38 46 Q38 44 40 42 Q46 38 46 32 L42 32 Q36 32 36 26 Z" fill="#8A48C7" />
                       </svg>
                     ),
                     title: 'No more 2 AM citation panic',
@@ -2718,22 +3476,22 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                 the checkout session via HARD_PAYWALL_PROMO_CODE. The
                 copy below tells the user the code is already on their
                 order so they don't have to type anything at Stripe. */}
-            <div className="relative rounded-2xl border-2 border-b-4 border-[#D4A300] bg-[#FFF4C2] dark:bg-[#FFC800]/10 p-4 sm:p-5 mb-4 overflow-hidden">
-              <div className="pointer-events-none absolute -top-10 -right-10 w-28 h-28 rounded-full bg-[#FFC800]/30 blur-2xl" aria-hidden />
+            <div className="relative rounded-2xl border-2 border-b-4 border-[#8A48C7] bg-[#F3EAFF] dark:bg-[#C9A0F0]/10 p-4 sm:p-5 mb-4 overflow-hidden">
+              <div className="pointer-events-none absolute -top-10 -right-10 w-28 h-28 rounded-full bg-[#C9A0F0]/30 blur-2xl" aria-hidden />
               <div className="relative flex items-center gap-3 sm:gap-4">
                 <span aria-hidden className="text-2xl sm:text-3xl shrink-0">🎟️</span>
                 <div className="flex-1 min-w-0 text-left">
-                  <p className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#7A5C00]">
+                  <p className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#7733B5]">
                     <span className="inline-flex items-center gap-1">
                       <span aria-hidden>✓</span> Code applied to your checkout
                     </span>
                   </p>
                   <p className="mt-0.5 text-sm sm:text-base font-extrabold text-[#3C3C3C] dark:text-stone-100 leading-snug" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                    Save <span className="text-[#46A302]">50%</span> on your first monthly plan after the trial
+                    Save <span className="text-[#7733B5]">50%</span> on your first monthly plan after the trial
                   </p>
                   <p className="mt-1 text-[11px] sm:text-xs font-bold text-stone-700 dark:text-stone-300">
                     Code{' '}
-                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-white dark:bg-stone-900 border-2 border-b-[3px] border-[#D4A300] text-[#7A5C00] font-extrabold tabular-nums tracking-wider">
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-white dark:bg-stone-900 border-2 border-b-[3px] border-[#8A48C7] text-[#7733B5] font-extrabold tabular-nums tracking-wider">
                       NEWCUSTOMER
                     </span>{' '}
                     is already on your order. $19.99/mo becomes $9.99 for your first month — nothing to type in.
@@ -2743,22 +3501,22 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
             </div>
 
             {/* Big green CTA — the only forward door */}
-            <div className="rounded-2xl border-2 border-b-4 border-[#46A302] bg-[#E5F8D0] dark:bg-[#58CC02]/10 p-5 sm:p-6 text-center relative overflow-hidden mb-4">
-              <div className="pointer-events-none absolute -top-12 -right-12 w-32 h-32 rounded-full bg-[#58CC02]/20 blur-2xl" aria-hidden />
-              <div className="pointer-events-none absolute -bottom-12 -left-12 w-32 h-32 rounded-full bg-[#58CC02]/15 blur-2xl" aria-hidden />
+            <div className="rounded-2xl border-2 border-b-4 border-[#7733B5] bg-[#F3EAFF] dark:bg-[#A560E8]/10 p-5 sm:p-6 text-center relative overflow-hidden mb-4">
+              <div className="pointer-events-none absolute -top-12 -right-12 w-32 h-32 rounded-full bg-[#A560E8]/20 blur-2xl" aria-hidden />
+              <div className="pointer-events-none absolute -bottom-12 -left-12 w-32 h-32 rounded-full bg-[#A560E8]/15 blur-2xl" aria-hidden />
               <p className="relative text-lg sm:text-xl font-extrabold text-[#3C3C3C] dark:text-stone-100" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                 Upgrade to Pro
               </p>
               <p className="relative mt-1 text-sm font-bold text-stone-600 dark:text-stone-400">
-                <span className="line-through decoration-2 decoration-[#FF4B4B] text-stone-400">$19.99/mo</span>{' '}
-                <span className="text-[#46A302] font-extrabold">$9.99/mo</span>{' '}
-                <span className="text-[#7A5C00] font-extrabold">(50% off applied)</span>
+                <span className="line-through decoration-2 decoration-[#A560E8] text-stone-400">$19.99/mo</span>{' '}
+                <span className="text-[#7733B5] font-extrabold">$9.99/mo</span>{' '}
+                <span className="text-[#7733B5] font-extrabold">(50% off applied)</span>
               </p>
               <button
                 type="button"
                 onClick={SKIP_ONBOARDING_STRIPE ? handleContinueFree : handleStartTrial}
                 disabled={startingTrial}
-                className="relative mt-4 w-full py-4 rounded-2xl bg-[#58CC02] text-white font-extrabold text-base sm:text-lg uppercase tracking-wide border-2 border-b-4 border-[#46A302] hover:bg-[#46A302] active:border-b-2 active:translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-[0_8px_24px_-6px_rgba(88,204,2,0.55)] hover:shadow-[0_12px_32px_-6px_rgba(88,204,2,0.75)]"
+                className="relative mt-4 w-full py-4 rounded-2xl bg-[#A560E8] text-white font-extrabold text-base sm:text-lg uppercase tracking-wide border-2 border-b-4 border-[#7733B5] hover:bg-[#7733B5] active:border-b-2 active:translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-[0_8px_24px_-6px_rgba(122,52,182,0.55)] hover:shadow-[0_12px_32px_-6px_rgba(122,52,182,0.75)]"
               >
                 {startingTrial ? (
                   <>
@@ -2777,13 +3535,13 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                   </>
                 )}
               </button>
-              {trialError && <p className="relative mt-3 text-sm text-[#FF4B4B] font-bold">{trialError}</p>}
+              {trialError && <p className="relative mt-3 text-sm text-[#A560E8] font-bold">{trialError}</p>}
               <div className="relative mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[10px] font-extrabold text-stone-600 dark:text-stone-400">
-                <span className="inline-flex items-center gap-1"><span className="text-[#58CC02]">✓</span> No charge today</span>
+                <span className="inline-flex items-center gap-1"><span className="text-[#A560E8]">✓</span> No charge today</span>
                 <span aria-hidden>·</span>
-                <span className="inline-flex items-center gap-1"><span className="text-[#58CC02]">✓</span> Cancel anytime</span>
+                <span className="inline-flex items-center gap-1"><span className="text-[#A560E8]">✓</span> Cancel anytime</span>
                 <span aria-hidden>·</span>
-                <span className="inline-flex items-center gap-1"><span className="text-[#58CC02]">✓</span> 50k+ students</span>
+                <span className="inline-flex items-center gap-1"><span className="text-[#A560E8]">✓</span> 50k+ students</span>
               </div>
             </div>
 
@@ -2834,14 +3592,14 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
           <div className="w-full max-w-sm mx-auto text-center px-4 py-6 ob-scale-in">
             {/* Big celebrating mascot in halo */}
             <div className="mb-4 relative inline-block">
-              <div className="absolute inset-0 rounded-full bg-[#58CC02]/30 blur-2xl ob-halo-pulse" aria-hidden />
-              <MascotGif src="/mascot-celebrating.webp" alt="" size={130} bordered borderColor="#58CC02" bgColor="#E5F8D0" />
+              <div className="absolute inset-0 rounded-full bg-[#A560E8]/30 blur-2xl ob-halo-pulse" aria-hidden />
+              <MascotGif src="/mascot-celebrating.webp" alt="" size={130} bordered borderColor="#A560E8" bgColor="#F3EAFF" />
             </div>
 
             {/* Achievement banner */}
-            <div className="mb-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFF4E0] border-2 border-[#FF9600]/40 ob-banner-pop">
+            <div className="mb-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F3EAFF] border-2 border-[#B57AF0]/40 ob-banner-pop">
               <span className="text-base" aria-hidden>🏆</span>
-              <span className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#FF9600]">FIRST LESSON UNLOCKED</span>
+              <span className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#B57AF0]">FIRST LESSON UNLOCKED</span>
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-extrabold text-[#3C3C3C] dark:text-stone-50 ob-title-pop" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
@@ -2852,21 +3610,21 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
             </p>
 
             {/* Streak badge — the celebratory +1 day moment */}
-            <div className="mt-4 mx-auto inline-flex items-center gap-3 px-5 py-3 rounded-2xl border-2 border-b-4 border-[#D97F00] bg-gradient-to-br from-[#FFF4E0] to-white dark:from-[#FF9600]/15 dark:to-stone-900 ob-streak-banner">
+            <div className="mt-4 mx-auto inline-flex items-center gap-3 px-5 py-3 rounded-2xl border-2 border-b-4 border-[#8A48C7] bg-gradient-to-br from-[#F3EAFF] to-white dark:from-[#B57AF0]/15 dark:to-stone-900 ob-streak-banner">
               <span className="text-3xl ob-fire-pulse inline-block" aria-hidden>🔥</span>
               <div className="text-left">
-                <p className="text-[9px] font-extrabold uppercase tracking-[0.2em] text-[#FF9600]">DAY STREAK</p>
-                <p className="text-2xl font-extrabold text-[#FF9600] leading-none mt-0.5">+1 day!</p>
+                <p className="text-[9px] font-extrabold uppercase tracking-[0.2em] text-[#B57AF0]">DAY STREAK</p>
+                <p className="text-2xl font-extrabold text-[#B57AF0] leading-none mt-0.5">+1 day!</p>
               </div>
             </div>
 
             <div className="mt-4 grid grid-cols-3 gap-2.5">
               <div className="rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900 p-3 ob-stat-pop" style={{ animationDelay: '300ms' }}>
-                <p className="text-xl font-extrabold text-[#58CC02]">{correctCount}/{DEMO_QUESTIONS.length}</p>
+                <p className="text-xl font-extrabold text-[#A560E8]">{correctCount}/{DEMO_QUESTIONS.length}</p>
                 <p className="text-[10px] font-extrabold text-stone-400 dark:text-stone-500 uppercase tracking-wider">Correct</p>
               </div>
               <div className="rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900 p-3 ob-stat-pop" style={{ animationDelay: '420ms' }}>
-                <p className="text-xl font-extrabold text-[#1CB0F6]">+{xpEarned}</p>
+                <p className="text-xl font-extrabold text-[#8A48C7]">+{xpEarned}</p>
                 <p className="text-[10px] font-extrabold text-stone-400 dark:text-stone-500 uppercase tracking-wider">XP</p>
               </div>
               <div className="rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900 p-3 ob-stat-pop" style={{ animationDelay: '540ms' }}>
@@ -2875,9 +3633,9 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
               </div>
             </div>
 
-            <div className="mt-4 rounded-2xl border-2 border-b-4 border-[#46A302] bg-[#E5F8D0] dark:bg-[#58CC02]/10 px-4 py-3">
+            <div className="mt-4 rounded-2xl border-2 border-b-4 border-[#7733B5] bg-[#F3EAFF] dark:bg-[#A560E8]/10 px-4 py-3">
               <p className="text-sm font-bold text-[#3C3C3C] dark:text-stone-200">
-                In the real app, questions come from <span className="text-[#58CC02]">your own study materials</span> — so every session helps you remember what matters.
+                In the real app, questions come from <span className="text-[#A560E8]">your own study materials</span> — so every session helps you remember what matters.
               </p>
             </div>
           </div>
@@ -2889,7 +3647,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
             <button
               type="button"
               onClick={() => goToPhase('value-prop')}
-              className="w-full sm:w-auto sm:min-w-[200px] py-3.5 px-8 rounded-2xl bg-[#58CC02] text-white font-extrabold text-base uppercase tracking-wide border-2 border-b-4 border-[#46A302] hover:bg-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all"
+              className="w-full sm:w-auto sm:min-w-[200px] py-3.5 px-8 rounded-2xl bg-[#A560E8] text-white font-extrabold text-base uppercase tracking-wide border-2 border-b-4 border-[#7733B5] hover:bg-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
             >
               Continue
             </button>
@@ -2938,12 +3696,12 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
             {/* Mascot + speech bubble — top-left layout */}
             <div className="flex items-start gap-3 mb-5">
               <img src="/mascot-study.webp" alt="" width={88} height={88} className="object-contain w-20 h-20 sm:w-24 sm:h-24 shrink-0" loading="eager" />
-              <div className="relative flex-1 ob-bubble-fade rounded-2xl bg-white dark:bg-stone-900 border-2 border-b-4 border-[#46A302] px-4 py-3 mt-3">
-                <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#58CC02] mb-1">YOUR DAILY HABIT</p>
+              <div className="relative flex-1 ob-bubble-fade rounded-2xl bg-white dark:bg-stone-900 border-2 border-b-4 border-[#7733B5] px-4 py-3 mt-3">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#A560E8] mb-1">YOUR DAILY HABIT</p>
                 <p className="text-[15px] sm:text-base font-extrabold text-[#3C3C3C] dark:text-stone-100 leading-snug" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                  Studying for exams can feel tedious — so we built WriteScholar to be <span className="text-[#58CC02]">fun and addictive</span>, while still raising your grades.
+                  Studying for exams can feel tedious — so we built WriteScholar to be <span className="text-[#A560E8]">fun and addictive</span>, while still raising your grades.
                 </p>
-                <div aria-hidden className="absolute -left-1.5 top-4 w-3 h-3 bg-white dark:bg-stone-900 border-l-2 border-b-2 border-[#46A302] rotate-45" />
+                <div aria-hidden className="absolute -left-1.5 top-4 w-3 h-3 bg-white dark:bg-stone-900 border-l-2 border-b-2 border-[#7733B5] rotate-45" />
               </div>
             </div>
 
@@ -2952,32 +3710,32 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
               Daily Review is our most loved feature
             </h1>
             <p className="text-stone-500 dark:text-stone-400 font-bold text-sm leading-relaxed mb-5">
-              Students who use it stick around <span className="text-[#58CC02] font-extrabold">3x longer</span> and remember <span className="text-[#58CC02] font-extrabold">2x more</span> on exam day. Let me show you why.
+              Students who use it stick around <span className="text-[#A560E8] font-extrabold">3x longer</span> and remember <span className="text-[#A560E8] font-extrabold">2x more</span> on exam day. Let me show you why.
             </p>
 
             {/* Animated 3-step flow diagram — Notes → AI → Quiz */}
             <div className="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-center gap-1.5 sm:gap-2 mb-5">
-              <div className="ob-flow-step rounded-2xl border-2 border-b-4 border-[#1899D6] bg-white dark:bg-stone-900 p-3 sm:p-4 text-center" style={{ animationDelay: '0ms' }}>
+              <div className="ob-flow-step rounded-2xl border-2 border-b-4 border-[#7733B5] bg-white dark:bg-stone-900 p-3 sm:p-4 text-center" style={{ animationDelay: '0ms' }}>
                 <span className="text-2xl sm:text-3xl block" aria-hidden>📝</span>
-                <p className="text-[9px] sm:text-[10px] font-extrabold text-[#1CB0F6] uppercase tracking-wider mt-1.5 leading-tight">Your<br />notes</p>
+                <p className="text-[9px] sm:text-[10px] font-extrabold text-[#8A48C7] uppercase tracking-wider mt-1.5 leading-tight">Your<br />notes</p>
               </div>
-              <span className="ob-flow-arrow text-[#FF9600] font-extrabold text-xl sm:text-2xl" style={{ animationDelay: '300ms' }}>→</span>
+              <span className="ob-flow-arrow text-[#B57AF0] font-extrabold text-xl sm:text-2xl" style={{ animationDelay: '300ms' }}>→</span>
               <div className="ob-flow-step rounded-2xl border-2 border-b-4 border-[#8A48C7] bg-white dark:bg-stone-900 p-3 sm:p-4 text-center" style={{ animationDelay: '500ms' }}>
                 <span className="text-2xl sm:text-3xl block" aria-hidden>✨</span>
                 <p className="text-[9px] sm:text-[10px] font-extrabold text-[#A560E8] uppercase tracking-wider mt-1.5 leading-tight">AI builds<br />a quiz</p>
               </div>
-              <span className="ob-flow-arrow text-[#FF9600] font-extrabold text-xl sm:text-2xl" style={{ animationDelay: '800ms' }}>→</span>
-              <div className="ob-flow-step rounded-2xl border-2 border-b-4 border-[#46A302] bg-white dark:bg-stone-900 p-3 sm:p-4 text-center" style={{ animationDelay: '1000ms' }}>
+              <span className="ob-flow-arrow text-[#B57AF0] font-extrabold text-xl sm:text-2xl" style={{ animationDelay: '800ms' }}>→</span>
+              <div className="ob-flow-step rounded-2xl border-2 border-b-4 border-[#7733B5] bg-white dark:bg-stone-900 p-3 sm:p-4 text-center" style={{ animationDelay: '1000ms' }}>
                 <span className="text-2xl sm:text-3xl block" aria-hidden>📚</span>
-                <p className="text-[9px] sm:text-[10px] font-extrabold text-[#58CC02] uppercase tracking-wider mt-1.5 leading-tight">Daily<br />review</p>
+                <p className="text-[9px] sm:text-[10px] font-extrabold text-[#A560E8] uppercase tracking-wider mt-1.5 leading-tight">Daily<br />review</p>
               </div>
             </div>
 
             {/* Demo expectation note */}
-            <div className="rounded-2xl border-2 border-b-4 border-[#FF9600]/30 bg-[#FFF4E0] dark:bg-[#FF9600]/10 px-4 py-3 flex items-start gap-3 ob-flow-step" style={{ animationDelay: '1300ms' }}>
+            <div className="rounded-2xl border-2 border-b-4 border-[#B57AF0]/30 bg-[#F3EAFF] dark:bg-[#B57AF0]/10 px-4 py-3 flex items-start gap-3 ob-flow-step" style={{ animationDelay: '1300ms' }}>
               <span className="text-2xl shrink-0" aria-hidden>💡</span>
               <p className="text-sm font-bold text-[#3C3C3C] dark:text-stone-200 leading-snug text-left">
-                Let&apos;s show you how it works with <span className="font-extrabold text-[#FF9600]">3 super-easy general-knowledge questions</span> right now.
+                Let&apos;s show you how it works with <span className="font-extrabold text-[#B57AF0]">3 super-easy general-knowledge questions</span> right now.
               </p>
             </div>
           </div>
@@ -2992,7 +3750,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                 trackEvent('onboarding_daily_review_intro_continue');
                 goToPhase('daily-review-demo');
               }}
-              className="w-full sm:w-auto sm:min-w-[200px] py-3.5 px-8 rounded-2xl bg-[#58CC02] text-white font-extrabold text-base uppercase tracking-wide border-2 border-b-4 border-[#46A302] hover:bg-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all flex items-center justify-center gap-2"
+              className="w-full sm:w-auto sm:min-w-[200px] py-3.5 px-8 rounded-2xl bg-[#A560E8] text-white font-extrabold text-base uppercase tracking-wide border-2 border-b-4 border-[#7733B5] hover:bg-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all flex items-center justify-center gap-2"
             >
               Try the demo
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
@@ -3029,15 +3787,15 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
           </button>
           <div className="flex-1 h-3 bg-[#E5E5E5] dark:bg-stone-700 rounded-full overflow-hidden">
             <div
-              className="h-full bg-[#58CC02] rounded-full transition-all duration-500"
+              className="h-full bg-[#A560E8] rounded-full transition-all duration-500"
               style={{ width: `${((quizIndex + (answerChecked ? 1 : 0)) / DEMO_QUESTIONS.length) * 100}%` }}
             />
           </div>
-          <div className="relative flex items-center gap-1 text-sm font-extrabold text-[#FF9600] shrink-0">
+          <div className="relative flex items-center gap-1 text-sm font-extrabold text-[#B57AF0] shrink-0">
             <span aria-hidden>⭐</span>
             <span>{xpEarned}</span>
             {showXpFloat && (
-              <span className="absolute -top-6 right-0 text-[#58CC02] font-extrabold text-sm ob-xp-float" aria-hidden>
+              <span className="absolute -top-6 right-0 text-[#A560E8] font-extrabold text-sm ob-xp-float" aria-hidden>
                 +{XP_PER_QUESTION}
               </span>
             )}
@@ -3047,7 +3805,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
 
         <div className="flex-1 flex flex-col px-4 sm:px-6 pt-6 sm:pt-8 pb-4 max-w-lg mx-auto w-full">
           <div className="mb-3">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border-2 border-[#58CC02]/30 bg-[#E5F8D0] dark:bg-[#58CC02]/10 text-[10px] font-extrabold uppercase tracking-wider text-[#58CC02]">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border-2 border-[#A560E8]/30 bg-[#F3EAFF] dark:bg-[#A560E8]/10 text-[10px] font-extrabold uppercase tracking-wider text-[#A560E8]">
               <span aria-hidden>📚</span>
               Daily Review · Question {quizIndex + 1} of {DEMO_QUESTIONS.length}
             </span>
@@ -3071,23 +3829,23 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
 
               if (answerChecked) {
                 if (idx === q.correctIndex) {
-                  borderColor = '#58CC02';
-                  bgColor = '#E5F8D0';
+                  borderColor = '#A560E8';
+                  bgColor = '#F3EAFF';
                 } else if (idx === selectedAnswer && idx !== q.correctIndex) {
                   borderColor = '#FF4B4B';
                   bgColor = '#FFE8E8';
                 }
               } else if (idx === selectedAnswer) {
-                borderColor = '#1CB0F6';
-                bgColor = '#DDF4FF';
+                borderColor = '#8A48C7';
+                bgColor = '#F3EAFF';
               }
 
               const badgeBg = answerChecked
-                ? idx === q.correctIndex ? '#58CC02' : idx === selectedAnswer ? '#FF4B4B' : 'transparent'
-                : idx === selectedAnswer ? '#1CB0F6' : 'transparent';
+                ? idx === q.correctIndex ? '#A560E8' : idx === selectedAnswer ? '#FF4B4B' : 'transparent'
+                : idx === selectedAnswer ? '#8A48C7' : 'transparent';
               const badgeBorder = answerChecked
-                ? idx === q.correctIndex ? '#46A302' : idx === selectedAnswer ? '#E04343' : '#E5E5E5'
-                : idx === selectedAnswer ? '#1899D6' : '#E5E5E5';
+                ? idx === q.correctIndex ? '#7733B5' : idx === selectedAnswer ? '#E04343' : '#E5E5E5'
+                : idx === selectedAnswer ? '#7733B5' : '#E5E5E5';
               const badgeText = (answerChecked && (idx === q.correctIndex || idx === selectedAnswer)) || (!answerChecked && idx === selectedAnswer) ? 'white' : '#AFAFAF';
               const badgeChar = answerChecked && idx === q.correctIndex ? '✓' : answerChecked && idx === selectedAnswer && idx !== q.correctIndex ? '✗' : String.fromCharCode(65 + idx);
 
@@ -3119,18 +3877,18 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
         </div>
 
         {answerChecked ? (
-          <div className="border-t-2 px-5 py-4 sm:py-5 ob-feedback-in" style={{ borderColor: isCorrect ? '#46A302' : '#E04343', backgroundColor: isCorrect ? '#D7FFB8' : '#FFE0E0' }}>
+          <div className="border-t-2 px-5 py-4 sm:py-5 ob-feedback-in" style={{ borderColor: isCorrect ? '#7733B5' : '#E04343', backgroundColor: isCorrect ? '#F3EAFF' : '#FFE0E0' }}>
             <div className="max-w-lg mx-auto flex items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-lg font-extrabold" style={{ backgroundColor: isCorrect ? '#58CC02' : '#FF4B4B' }}>
+                <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-lg font-extrabold" style={{ backgroundColor: isCorrect ? '#A560E8' : '#A560E8' }}>
                   {isCorrect ? '✓' : '✗'}
                 </div>
                 <div>
-                  <p className="font-extrabold text-base" style={{ color: isCorrect ? '#46A302' : '#E04343' }}>
+                  <p className="font-extrabold text-base" style={{ color: isCorrect ? '#7733B5' : '#7733B5' }}>
                     {isCorrect ? 'Nicely done!' : 'Not quite!'}
                   </p>
                   {isWrong && (
-                    <p className="text-sm font-bold" style={{ color: '#E04343' }}>
+                    <p className="text-sm font-bold" style={{ color: '#7733B5' }}>
                       Correct answer: {q.options[q.correctIndex]}
                     </p>
                   )}
@@ -3140,7 +3898,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                 type="button"
                 onClick={handleQuizContinue}
                 className="px-6 py-3 rounded-2xl text-white font-extrabold text-sm uppercase tracking-wide border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all"
-                style={{ backgroundColor: isCorrect ? '#58CC02' : '#FF4B4B', borderColor: isCorrect ? '#46A302' : '#E04343' }}
+                style={{ backgroundColor: isCorrect ? '#A560E8' : '#FF4B4B', borderColor: isCorrect ? '#7733B5' : '#E04343' }}
               >
                 Continue
               </button>
@@ -3153,7 +3911,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                 type="button"
                 onClick={handleCheckAnswer}
                 disabled={selectedAnswer === null}
-                className="w-full py-3.5 rounded-2xl bg-[#58CC02] text-white font-extrabold text-base uppercase tracking-wide border-2 border-b-4 border-[#46A302] hover:bg-[#46A302] active:border-b-2 active:translate-y-0.5 disabled:bg-[#E5E5E5] disabled:border-[#CECECE] disabled:text-stone-400 disabled:active:border-b-4 disabled:active:translate-y-0 transition-all"
+                className="w-full py-3.5 rounded-2xl bg-[#A560E8] text-white font-extrabold text-base uppercase tracking-wide border-2 border-b-4 border-[#7733B5] hover:bg-[#7733B5] active:border-b-2 active:translate-y-0.5 disabled:bg-[#E5E5E5] disabled:border-[#CECECE] disabled:text-stone-400 disabled:active:border-b-4 disabled:active:translate-y-0 transition-all"
               >
                 Check
               </button>
@@ -3196,9 +3954,9 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
       },
       'tour-study': {
         mascot: '/mascot-juggling.webp',
-        color: '#1CB0F6',
-        borderColor: '#1899D6',
-        bgColor: '#DDF4FF',
+        color: '#8A48C7',
+        borderColor: '#7733B5',
+        bgColor: '#F3EAFF',
         eyebrow: eyebrowFor('tour-study'),
         title: 'Turn notes into study tools',
         speech: "One paste of your notes turns into flashcards, quizzes, lessons, and summaries. Watch them in action below!",
@@ -3206,9 +3964,9 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
       },
       'tour-citations': {
         mascot: '/mascot-laptop.webp',
-        color: '#FF9600',
-        borderColor: '#D97F00',
-        bgColor: '#FFF4E0',
+        color: '#B57AF0',
+        borderColor: '#8A48C7',
+        bgColor: '#F3EAFF',
         eyebrow: eyebrowFor('tour-citations'),
         title: 'Find real citations in seconds',
         speech: "Paste your topic and I'll pull real, formatted sources in APA, MLA, or Chicago — no more hunting through Google Scholar.",
@@ -3216,9 +3974,9 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
       },
       'tour-games': {
         mascot: '/mascot-celebrating.webp',
-        color: '#FF4B4B',
-        borderColor: '#E04343',
-        bgColor: '#FFE8E8',
+        color: '#A560E8',
+        borderColor: '#7733B5',
+        bgColor: '#F3EAFF',
         eyebrow: eyebrowFor('tour-games'),
         title: 'Study with arcade mode',
         speech: "Crater Blast, Word Blitz, and Word Tower turn your notes into quick boss-battles — learning that actually feels like play.",
@@ -3226,9 +3984,9 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
       },
       'tour-motivation': {
         mascot: '/mascot-jumping-joy.webp',
-        color: '#FF9600',
-        borderColor: '#D97F00',
-        bgColor: '#FFF4E0',
+        color: '#B57AF0',
+        borderColor: '#8A48C7',
+        bgColor: '#F3EAFF',
         eyebrow: eyebrowFor('tour-motivation'),
         title: 'Stay motivated with XP & levels',
         speech: "Earn XP for everything you do. Climb 100 levels, keep your streak alive, and collect 80+ badges along the way!",
@@ -3309,15 +4067,15 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                     // hero videos so the onboarding deck visually matches
                     // what the visitor saw on the landing page.
                     { name: 'Flashcards', video: '/hero-flashcards.mp4', color: '#A560E8', borderColor: '#8A48C7' },
-                    { name: 'Quizzes', video: '/hero-quiz.mp4', color: '#58CC02', borderColor: '#46A302' },
+                    { name: 'Quizzes', video: '/hero-quiz.mp4', color: '#A560E8', borderColor: '#7733B5' },
                     // Crosswords replaced by Lessons. Uses the existing
                     // study-pack lesson PNG since we don't have a Lessons
                     // video; ToolMiniDemo renders it as a still image.
-                    { name: 'Lessons', image: '/study-pack-previews/lesson-plan.png', color: '#FF9600', borderColor: '#D97F00' },
+                    { name: 'Lessons', image: '/study-pack-previews/lesson-plan.png', color: '#B57AF0', borderColor: '#8A48C7' },
                     // Games — cycles through the three arcade games
                     // (Crater Blast → Word Blitz → Word Tower) by switching
                     // src on each video's `ended` event.
-                    { name: 'Arcade mode', videos: ['/writescholar-crater-blast-demo.mp4', '/hero-word-blitz.mp4', '/hero-word-tower.mp4'], color: '#FF4B4B', borderColor: '#E04343' },
+                    { name: 'Arcade mode', videos: ['/writescholar-crater-blast-demo.mp4', '/hero-word-blitz.mp4', '/hero-word-tower.mp4'], color: '#A560E8', borderColor: '#7733B5' },
                   ].map((tool, i) => (
                     <ToolMiniDemo
                       key={tool.name}
@@ -3353,8 +4111,8 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                     <ToolMiniDemo
                       name="Crater Blast · Word Blitz · Word Tower"
                       videos={['/writescholar-crater-blast-demo.mp4', '/hero-word-blitz.mp4', '/hero-word-tower.mp4']}
-                      color="#FF4B4B"
-                      borderColor="#E04343"
+                      color="#A560E8"
+                      borderColor="#7733B5"
                     />
                   </div>
 
@@ -3370,22 +4128,22 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                     <ToolMiniDemo
                       name="Crater Blast"
                       video="/writescholar-crater-blast-demo.mp4"
-                      color="#FF4B4B"
-                      borderColor="#E04343"
+                      color="#A560E8"
+                      borderColor="#7733B5"
                       delayMs={0}
                     />
                     <ToolMiniDemo
                       name="Word Blitz"
                       video="/hero-word-blitz.mp4"
-                      color="#FF4B82"
-                      borderColor="#D63672"
+                      color="#A560E8"
+                      borderColor="#7733B5"
                       delayMs={80}
                     />
                     <ToolMiniDemo
                       name="Word Tower"
                       video="/hero-word-tower.mp4"
-                      color="#FF9600"
-                      borderColor="#D97F00"
+                      color="#B57AF0"
+                      borderColor="#8A48C7"
                       delayMs={160}
                     />
                   </div>
@@ -3395,12 +4153,12 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
               {slide.visual === 'motivation' && (
                 <div className="space-y-3">
                   {/* Animated XP / level card — continuously alive */}
-                  <div className="ob-card-pop relative rounded-2xl border-2 border-b-4 border-[#1899D6] bg-white dark:bg-stone-900 p-4 overflow-hidden" style={{ animationDelay: '0ms' }}>
+                  <div className="ob-card-pop relative rounded-2xl border-2 border-b-4 border-[#7733B5] bg-white dark:bg-stone-900 p-4 overflow-hidden" style={{ animationDelay: '0ms' }}>
                     {/* Background gradient pulse */}
-                    <div aria-hidden className="absolute -inset-1 bg-gradient-to-br from-[#1CB0F6]/10 via-transparent to-[#1CB0F6]/10 ob-bg-shimmer pointer-events-none" />
+                    <div aria-hidden className="absolute -inset-1 bg-gradient-to-br from-[#8A48C7]/10 via-transparent to-[#8A48C7]/10 ob-bg-shimmer pointer-events-none" />
 
                     <div className="relative flex items-center gap-3 mb-3">
-                      <div className="relative w-14 h-14 rounded-full bg-[#1CB0F6] flex items-center justify-center border-2 border-[#1899D6] text-white font-extrabold text-xl ob-level-pulse">
+                      <div className="relative w-14 h-14 rounded-full bg-[#8A48C7] flex items-center justify-center border-2 border-[#7733B5] text-white font-extrabold text-xl ob-level-pulse">
                         12
                         <span aria-hidden className="absolute -top-1.5 -right-1.5 text-base ob-sparkle-spin">✨</span>
                         <span aria-hidden className="absolute -bottom-1 -left-1 text-xs ob-sparkle-spin" style={{ animationDelay: '0.6s' }}>⭐</span>
@@ -3408,10 +4166,10 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                       <div className="flex-1 min-w-0 text-left">
                         <p className="text-sm font-extrabold text-[#3C3C3C] dark:text-stone-100">Knowledge Keeper III</p>
                         <div className="flex items-center gap-2 mt-1">
-                          <div className="flex-1 h-2.5 rounded-full bg-[#1CB0F6]/20 overflow-hidden">
-                            <div className="h-full rounded-full bg-gradient-to-r from-[#1CB0F6] to-[#58CC02] ob-xp-bar-loop" />
+                          <div className="flex-1 h-2.5 rounded-full bg-[#8A48C7]/20 overflow-hidden">
+                            <div className="h-full rounded-full bg-gradient-to-r from-[#8A48C7] to-[#A560E8] ob-xp-bar-loop" />
                           </div>
-                          <span className="text-[11px] font-extrabold text-[#1CB0F6] tabular-nums">
+                          <span className="text-[11px] font-extrabold text-[#8A48C7] tabular-nums">
                             {xpDisplay.toLocaleString()} XP
                           </span>
                         </div>
@@ -3423,23 +4181,23 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                       {[0, 1, 2].map((i) => (
                         <span
                           key={i}
-                          className="absolute left-2 text-[11px] font-extrabold text-[#58CC02] ob-xp-particle"
+                          className="absolute left-2 text-[11px] font-extrabold text-[#A560E8] ob-xp-particle"
                           style={{ animationDelay: `${i * 1.4}s` }}
                         >
                           +10 XP
                         </span>
                       ))}
-                      <p className="text-[11px] font-extrabold text-[#58CC02] opacity-70">Daily review · keep going!</p>
+                      <p className="text-[11px] font-extrabold text-[#A560E8] opacity-70">Daily review · keep going!</p>
                     </div>
                   </div>
 
                   {/* Streak + badges row */}
                   <div className="grid grid-cols-2 gap-3">
                     {/* Streak — counter continuously climbs 1→14 in a loop */}
-                    <div className="ob-card-pop relative rounded-2xl border-2 border-b-4 border-[#D97F00] bg-white dark:bg-stone-900 p-3 text-center overflow-hidden" style={{ animationDelay: '120ms' }}>
-                      <div aria-hidden className="absolute -top-2 -right-2 w-16 h-16 rounded-full bg-[#FF9600]/20 blur-2xl ob-fire-glow" />
+                    <div className="ob-card-pop relative rounded-2xl border-2 border-b-4 border-[#8A48C7] bg-white dark:bg-stone-900 p-3 text-center overflow-hidden" style={{ animationDelay: '120ms' }}>
+                      <div aria-hidden className="absolute -top-2 -right-2 w-16 h-16 rounded-full bg-[#B57AF0]/20 blur-2xl ob-fire-glow" />
                       <span className="relative text-4xl ob-fire-pulse inline-block" aria-hidden>🔥</span>
-                      <p key={streakDisplay} className="relative text-3xl font-extrabold text-[#FF9600] mt-1 ob-streak-bounce tabular-nums leading-none">
+                      <p key={streakDisplay} className="relative text-3xl font-extrabold text-[#B57AF0] mt-1 ob-streak-bounce tabular-nums leading-none">
                         {streakDisplay}
                       </p>
                       <p className="relative text-[10px] font-extrabold text-stone-400 uppercase tracking-wider mt-1">Day Streak</p>
@@ -3448,7 +4206,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                         {[0, 1, 2, 3, 4, 5, 6].map((i) => (
                           <span
                             key={i}
-                            className={`block w-1.5 h-1.5 rounded-full ${i < (streakDisplay % 7 || 7) ? 'bg-[#FF9600]' : 'bg-stone-200 dark:bg-stone-700'}`}
+                            className={`block w-1.5 h-1.5 rounded-full ${i < (streakDisplay % 7 || 7) ? 'bg-[#B57AF0]' : 'bg-stone-200 dark:bg-stone-700'}`}
                           />
                         ))}
                       </div>
@@ -3484,7 +4242,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                       '⭐ +10 XP — perfect quiz score',
                     ];
                     return (
-                      <div className="ob-card-pop rounded-2xl border-2 border-b-4 border-[#46A302] bg-[#E5F8D0]/60 dark:bg-[#58CC02]/10 px-3.5 py-2.5 overflow-hidden h-11 relative" style={{ animationDelay: '280ms' }}>
+                      <div className="ob-card-pop rounded-2xl border-2 border-b-4 border-[#7733B5] bg-[#F3EAFF]/60 dark:bg-[#A560E8]/10 px-3.5 py-2.5 overflow-hidden h-11 relative" style={{ animationDelay: '280ms' }}>
                         <p
                           key={feedIndex}
                           className="ob-feed-msg absolute inset-x-3.5 inset-y-0 text-xs font-extrabold text-[#3C3C3C] dark:text-stone-200 flex items-center truncate"
@@ -3506,7 +4264,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
             <button
               type="button"
               onClick={handleTourContinue}
-              className="w-full sm:w-auto sm:min-w-[200px] py-3.5 px-8 rounded-2xl bg-[#58CC02] text-white font-extrabold text-base uppercase tracking-wide border-2 border-b-4 border-[#46A302] hover:bg-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all"
+              className="w-full sm:w-auto sm:min-w-[200px] py-3.5 px-8 rounded-2xl bg-[#A560E8] text-white font-extrabold text-base uppercase tracking-wide border-2 border-b-4 border-[#7733B5] hover:bg-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
             >
               {phase === 'tour-motivation' ? 'Try it yourself!' : 'Continue'}
             </button>
@@ -3526,7 +4284,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
           .ob-results-pop { animation: obResultsPop 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
 
           /* Motivation animations — alive, looped, dramatic */
-          @keyframes obLevelPulse { 0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(28,176,246,0.6); } 50% { transform: scale(1.08); box-shadow: 0 0 0 10px rgba(28,176,246,0); } }
+          @keyframes obLevelPulse { 0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(165,96,232,0.6); } 50% { transform: scale(1.08); box-shadow: 0 0 0 10px rgba(165,96,232,0); } }
           .ob-level-pulse { animation: obLevelPulse 1.8s ease-in-out infinite; }
           @keyframes obSparkleSpin { 0%, 100% { transform: rotate(0deg) scale(1); opacity: 0.9; } 50% { transform: rotate(180deg) scale(1.4); opacity: 1; } }
           .ob-sparkle-spin { animation: obSparkleSpin 2.2s ease-in-out infinite; display: inline-block; }
@@ -3542,7 +4300,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
           .ob-xp-bar-loop { animation: obXpBarLoop 4.5s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
           @keyframes obXpParticle { 0% { opacity: 0; transform: translateY(8px) scale(0.7); } 25% { opacity: 1; transform: translateY(-2px) scale(1.05); } 75% { opacity: 1; transform: translateY(-14px) scale(1); } 100% { opacity: 0; transform: translateY(-22px) scale(0.85); } }
           .ob-xp-particle { animation: obXpParticle 4.2s ease-out infinite; }
-          @keyframes obFirePulse { 0%, 100% { transform: scale(1) rotate(-4deg); filter: drop-shadow(0 0 0 rgba(255,150,0,0)); } 50% { transform: scale(1.22) rotate(5deg); filter: drop-shadow(0 0 12px rgba(255,150,0,0.7)); } }
+          @keyframes obFirePulse { 0%, 100% { transform: scale(1) rotate(-4deg); filter: drop-shadow(0 0 0 rgba(165,96,232,0)); } 50% { transform: scale(1.22) rotate(5deg); filter: drop-shadow(0 0 12px rgba(165,96,232,0.7)); } }
           .ob-fire-pulse { animation: obFirePulse 1.2s ease-in-out infinite; transform-origin: center bottom; }
           @keyframes obFireGlow { 0%, 100% { transform: scale(1); opacity: 0.4; } 50% { transform: scale(1.4); opacity: 0.7; } }
           .ob-fire-glow { animation: obFireGlow 1.6s ease-in-out infinite; }
@@ -3631,7 +4389,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
               type="button"
               onClick={handleSourceContinue}
               disabled={!referralSource}
-              className="w-full sm:w-auto sm:min-w-[200px] py-3.5 px-8 rounded-2xl bg-[#58CC02] text-white font-extrabold text-base uppercase tracking-wide border-2 border-b-4 border-[#46A302] hover:bg-[#46A302] active:border-b-2 active:translate-y-0.5 disabled:bg-[#E5E5E5] disabled:border-[#CECECE] disabled:text-stone-400 disabled:active:border-b-4 disabled:active:translate-y-0 transition-all"
+              className="w-full sm:w-auto sm:min-w-[200px] py-3.5 px-8 rounded-2xl bg-[#A560E8] text-white font-extrabold text-base uppercase tracking-wide border-2 border-b-4 border-[#7733B5] hover:bg-[#7733B5] active:border-b-2 active:translate-y-0.5 disabled:bg-[#E5E5E5] disabled:border-[#CECECE] disabled:text-stone-400 disabled:active:border-b-4 disabled:active:translate-y-0 transition-all"
             >
               Continue
             </button>
@@ -3682,7 +4440,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
 
             {/* Eyebrow + title — left-aligned, higher up */}
             <div className="mb-5">
-              <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#58CC02] mb-2">YOUR GOAL</p>
+              <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#A560E8] mb-2">YOUR GOAL</p>
               <h1 className="text-xl sm:text-2xl font-extrabold text-[#3C3C3C] dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                 What brings you to{' '}
                 <span className="text-[#A560E8]">WriteScholar</span>?
@@ -3734,7 +4492,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
               type="button"
               onClick={handleGoalContinue}
               disabled={!useGoal}
-              className="w-full sm:w-auto sm:min-w-[200px] py-3.5 px-8 rounded-2xl bg-[#58CC02] text-white font-extrabold text-base uppercase tracking-wide border-2 border-b-4 border-[#46A302] hover:bg-[#46A302] active:border-b-2 active:translate-y-0.5 disabled:bg-[#E5E5E5] disabled:border-[#CECECE] disabled:text-stone-400 disabled:active:border-b-4 disabled:active:translate-y-0 transition-all"
+              className="w-full sm:w-auto sm:min-w-[200px] py-3.5 px-8 rounded-2xl bg-[#A560E8] text-white font-extrabold text-base uppercase tracking-wide border-2 border-b-4 border-[#7733B5] hover:bg-[#7733B5] active:border-b-2 active:translate-y-0.5 disabled:bg-[#E5E5E5] disabled:border-[#CECECE] disabled:text-stone-400 disabled:active:border-b-4 disabled:active:translate-y-0 transition-all"
             >
               Continue
             </button>
@@ -3770,12 +4528,12 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
             {/* Mascot + speech bubble — top-left layout */}
             <div className="flex items-start gap-3 mb-5">
               <img src="/mascot-juggling.webp" alt="" width={88} height={88} className="object-contain w-20 h-20 sm:w-24 sm:h-24 shrink-0" loading="eager" />
-              <div key={featureCount} className="relative flex-1 ob-bubble-fade rounded-2xl bg-white dark:bg-stone-900 border-2 border-b-4 border-[#1CB0F6] px-4 py-3 mt-3">
-                <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#1CB0F6] mb-1">PICK ANY YOU LIKE</p>
+              <div key={featureCount} className="relative flex-1 ob-bubble-fade rounded-2xl bg-white dark:bg-stone-900 border-2 border-b-4 border-[#8A48C7] px-4 py-3 mt-3">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#8A48C7] mb-1">PICK ANY YOU LIKE</p>
                 <p className="text-[15px] sm:text-base font-extrabold text-[#3C3C3C] dark:text-stone-100 leading-snug" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                   {featureSpeech}
                 </p>
-                <div aria-hidden className="absolute -left-1.5 top-4 w-3 h-3 bg-white dark:bg-stone-900 border-l-2 border-b-2 border-[#1CB0F6] rotate-45" />
+                <div aria-hidden className="absolute -left-1.5 top-4 w-3 h-3 bg-white dark:bg-stone-900 border-l-2 border-b-2 border-[#8A48C7] rotate-45" />
               </div>
             </div>
 
@@ -3830,7 +4588,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
               type="button"
               onClick={handleSurveyContinue}
               disabled={featureCount === 0 || surveySaving}
-              className="w-full sm:w-auto sm:min-w-[200px] py-3.5 px-8 rounded-2xl bg-[#58CC02] text-white font-extrabold text-base uppercase tracking-wide border-2 border-b-4 border-[#46A302] hover:bg-[#46A302] active:border-b-2 active:translate-y-0.5 disabled:bg-[#E5E5E5] disabled:border-[#CECECE] disabled:text-stone-400 disabled:active:border-b-4 disabled:active:translate-y-0 transition-all flex items-center justify-center gap-2"
+              className="w-full sm:w-auto sm:min-w-[200px] py-3.5 px-8 rounded-2xl bg-[#A560E8] text-white font-extrabold text-base uppercase tracking-wide border-2 border-b-4 border-[#7733B5] hover:bg-[#7733B5] active:border-b-2 active:translate-y-0.5 disabled:bg-[#E5E5E5] disabled:border-[#CECECE] disabled:text-stone-400 disabled:active:border-b-4 disabled:active:translate-y-0 transition-all flex items-center justify-center gap-2"
             >
               {surveySaving ? (
                 <>
@@ -3907,7 +4665,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
           </div>
 
           {profileNotice && (
-            <div className="mb-4 rounded-2xl bg-[#FFF4E0] border-2 border-b-4 border-[#FF9600]/40 px-4 py-3 text-sm text-[#D97F00] font-bold" role="status">
+            <div className="mb-4 rounded-2xl bg-[#F3EAFF] border-2 border-b-4 border-[#B57AF0]/40 px-4 py-3 text-sm text-[#8A48C7] font-bold" role="status">
               {profileNotice}
             </div>
           )}
@@ -3925,14 +4683,14 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                   placeholder="e.g. Alex or Jordan"
                   className={`w-full px-4 pr-12 py-3.5 rounded-xl border-2 border-b-4 bg-[#F7F7F7] dark:bg-stone-800 focus:ring-0 focus:outline-none transition-all text-base font-extrabold text-[#3C3C3C] dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 ${
                     profileNameValid
-                      ? 'border-[#58CC02] bg-[#E5F8D0]/40 focus:border-[#58CC02]'
+                      ? 'border-[#A560E8] bg-[#F3EAFF]/40 focus:border-[#A560E8]'
                       : 'border-[#E5E5E5] dark:border-stone-600 focus:border-[#A560E8] dark:focus:border-[#A560E8]'
                   }`}
                   autoFocus
                   maxLength={40}
                 />
                 {profileNameValid && (
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#58CC02] border-2 border-[#46A302] flex items-center justify-center text-white text-sm font-extrabold ob-check-pop">
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#A560E8] border-2 border-[#7733B5] flex items-center justify-center text-white text-sm font-extrabold ob-check-pop">
                     ✓
                   </div>
                 )}
@@ -3951,9 +4709,9 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                   disabled={!profileNameValid}
                   className={`w-full pl-4 pr-12 py-3.5 rounded-xl border-2 border-b-4 bg-[#F7F7F7] dark:bg-stone-800 focus:ring-0 focus:outline-none transition-all text-base font-extrabold text-[#3C3C3C] dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 ${
                     usernameError
-                      ? 'border-[#FF4B4B] focus:border-[#FF4B4B]'
+                      ? 'border-[#A560E8] focus:border-[#A560E8]'
                       : profileUsernameValid
-                        ? 'border-[#58CC02] bg-[#E5F8D0]/40 focus:border-[#58CC02]'
+                        ? 'border-[#A560E8] bg-[#F3EAFF]/40 focus:border-[#A560E8]'
                         : 'border-[#E5E5E5] dark:border-stone-600 focus:border-[#A560E8] dark:focus:border-[#A560E8]'
                   }`}
                   onKeyDown={(e) => {
@@ -3962,12 +4720,12 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                   maxLength={30}
                 />
                 {profileUsernameValid && (
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#58CC02] border-2 border-[#46A302] flex items-center justify-center text-white text-sm font-extrabold ob-check-pop">
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#A560E8] border-2 border-[#7733B5] flex items-center justify-center text-white text-sm font-extrabold ob-check-pop">
                     ✓
                   </div>
                 )}
               </div>
-              {usernameError && <p className="mt-1.5 text-sm text-[#FF4B4B] font-bold">{usernameError}</p>}
+              {usernameError && <p className="mt-1.5 text-sm text-[#A560E8] font-bold">{usernameError}</p>}
               {!usernameError && username.trim().length > 0 && !profileUsernameValid && (
                 <p className="mt-1.5 text-xs text-stone-500 dark:text-stone-400 font-bold">3+ characters · letters, numbers, underscores</p>
               )}
@@ -3977,17 +4735,17 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
           {/* Live profile preview — appears when both valid */}
           {profileBothValid && (
             <div className="mt-4 ob-preview-pop">
-              <div className="rounded-2xl border-2 border-b-4 border-[#46A302] bg-gradient-to-br from-[#E5F8D0] to-white dark:from-[#58CC02]/10 dark:to-stone-900 p-4">
-                <p className="text-[10px] font-extrabold text-[#58CC02] uppercase tracking-[0.18em] mb-2">PROFILE PREVIEW</p>
+              <div className="rounded-2xl border-2 border-b-4 border-[#7733B5] bg-gradient-to-br from-[#F3EAFF] to-white dark:from-[#A560E8]/10 dark:to-stone-900 p-4">
+                <p className="text-[10px] font-extrabold text-[#A560E8] uppercase tracking-[0.18em] mb-2">PROFILE PREVIEW</p>
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-[#58CC02] border-2 border-b-2 border-[#46A302] flex items-center justify-center text-white text-xl font-extrabold shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-[#A560E8] border-2 border-b-2 border-[#7733B5] flex items-center justify-center text-white text-xl font-extrabold shrink-0">
                     {profileFirstName.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-base font-extrabold text-[#3C3C3C] dark:text-stone-100 truncate" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                       {displayName.trim()}
                     </p>
-                    <p className="text-sm font-bold text-[#58CC02] truncate">@{normalizedUsername}</p>
+                    <p className="text-sm font-bold text-[#A560E8] truncate">@{normalizedUsername}</p>
                   </div>
                   <span className="text-2xl ob-sparkle" aria-hidden>✨</span>
                 </div>
@@ -4010,7 +4768,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
             type="button"
             onClick={() => void handleContinueFromProfile()}
             disabled={!profileBothValid || isSaving}
-            className="w-full sm:w-auto sm:min-w-[200px] py-3.5 px-8 rounded-2xl bg-[#58CC02] text-white font-extrabold text-base uppercase tracking-wide border-2 border-b-4 border-[#46A302] hover:bg-[#46A302] active:border-b-2 active:translate-y-0.5 disabled:bg-[#E5E5E5] disabled:border-[#CECECE] disabled:text-stone-400 disabled:active:border-b-4 disabled:active:translate-y-0 transition-all flex items-center justify-center gap-2"
+            className="w-full sm:w-auto sm:min-w-[200px] py-3.5 px-8 rounded-2xl bg-[#A560E8] text-white font-extrabold text-base uppercase tracking-wide border-2 border-b-4 border-[#7733B5] hover:bg-[#7733B5] active:border-b-2 active:translate-y-0.5 disabled:bg-[#E5E5E5] disabled:border-[#CECECE] disabled:text-stone-400 disabled:active:border-b-4 disabled:active:translate-y-0 transition-all flex items-center justify-center gap-2"
           >
             {isSaving ? (
               <>

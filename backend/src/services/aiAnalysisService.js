@@ -326,9 +326,23 @@ class AIAnalysisService {
       // model still truncates (finish_reason 'length') or returns unparseable
       // output, we transparently re-run on gpt-4o-mini below — so the user
       // can never end up with no rubric / annotations.
+      // The free budget has to scale with the document. The prompt asks
+      // for up to 45 annotations (text + comment + suggestion each), a
+      // 6-part rubric and the rewrites — on a long paper that does not
+      // fit in a flat 8k, and a truncated response means annotations
+      // simply stop partway through the essay. That reads to the user as
+      // "it only analysed half my paper", which is exactly what it did.
+      const classicBudgetFor = (text) => {
+        const words = String(text || '').split(/\s+/).length;
+        if (words > 5000) return 16000;
+        if (words > 3000) return 14000;
+        if (words > 1500) return 12000;
+        return 10000;
+      };
+
       let userPlan = 'free';
       let selectedModel = process.env.OPENAI_MODEL || 'gpt-4o-mini';
-      let maxTokens = 8000;       // free / classic output
+      let maxTokens = classicBudgetFor(content);
       let reasoningEffort = null; // only set for the paid reasoning model
 
       try {
@@ -343,7 +357,7 @@ class AIAnalysisService {
         } else {
           selectedModel = process.env.OPENAI_STANDARD_MODEL || 'gpt-4o-mini';
           reasoningEffort = null;
-          maxTokens = 8000;
+          maxTokens = classicBudgetFor(content);
         }
       } catch (planErr) {
         // If plan lookup fails, keep free defaults
@@ -358,6 +372,9 @@ class AIAnalysisService {
       ];
 
       const FALLBACK_MAX = 15000;
+      // Ceiling for a widened classic retry — gpt-4o-mini caps output at
+      // 16k, so this is the most room we can give it.
+      const CLASSIC_MAX = 16000;
 
       let completion;
       let usedModel = selectedModel;
@@ -380,13 +397,15 @@ class AIAnalysisService {
       }
 
       let analysisResult = completion.choices?.[0]?.message?.content || '';
-      const finishReason = completion.choices?.[0]?.finish_reason;
+      let finishReason = completion.choices?.[0]?.finish_reason;
+
+      const unusable = () => finishReason === 'length' || !extractJsonObject(analysisResult);
 
       // Soft fallback: the call succeeded but the (reasoning) model ran out
       // of room mid-JSON (finish_reason 'length') or returned something we
       // can't parse → transparently redo on gpt-4o-mini so the user always
       // gets a full rubric + annotations.
-      if (usedModel !== 'gpt-4o-mini' && (finishReason === 'length' || !extractJsonObject(analysisResult))) {
+      if (usedModel !== 'gpt-4o-mini' && unusable()) {
         console.log(`⚠️ ${usedModel} output unusable (finish_reason=${finishReason}); retrying on gpt-4o-mini`);
         try {
           const retry = await this.openai.chat.completions.create(
@@ -395,10 +414,33 @@ class AIAnalysisService {
           const retryText = retry.choices?.[0]?.message?.content || '';
           if (extractJsonObject(retryText)) {
             analysisResult = retryText;
+            finishReason = retry.choices?.[0]?.finish_reason;
             selectedModel = 'gpt-4o-mini';
           }
         } catch (retryErr) {
           console.log(`gpt-4o-mini retry also failed: ${retryErr.message}`);
+        }
+      }
+
+      // Same safety net for the classic model, which previously had none:
+      // it is already gpt-4o-mini, so the switch above could not help it.
+      // Without this a truncated free analysis fell through to the
+      // heuristic annotations, which are generic by construction — the
+      // "this doesn't feel like a real analysis" case.
+      if (unusable() && maxTokens < CLASSIC_MAX) {
+        console.log(`⚠️ classic output unusable (finish_reason=${finishReason}); retrying with ${CLASSIC_MAX} tokens`);
+        try {
+          const retry = await this.openai.chat.completions.create(
+            buildChatParams('gpt-4o-mini', messages, CLASSIC_MAX, null)
+          );
+          const retryText = retry.choices?.[0]?.message?.content || '';
+          if (extractJsonObject(retryText)) {
+            analysisResult = retryText;
+            finishReason = retry.choices?.[0]?.finish_reason;
+            selectedModel = 'gpt-4o-mini';
+          }
+        } catch (retryErr) {
+          console.log(`classic wide retry also failed: ${retryErr.message}`);
         }
       }
       

@@ -908,6 +908,7 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
         apiUrl={API_URL}
         onMutate={fetchUserData}
         subscriptionStatus={userStats.subscriptionStatus}
+        plan={userStats.subscriptionPlan}
       />
     </>
   );

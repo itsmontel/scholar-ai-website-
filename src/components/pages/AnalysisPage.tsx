@@ -7,7 +7,7 @@ import LoadingSpinner from '../common/LoadingSpinner';
 import GenerationOverlay from '../common/GenerationOverlay';
 import { ExportService, AnalysisData } from '../../services/exportService';
 import { trackAction, getStats } from '../../data/achievements';
-import { trackEvent } from '../../utils/analytics';
+import { trackEvent, trackFunnelStep } from '../../utils/analytics';
 import ActivationAnalysisCoach from '../common/ActivationAnalysisCoach';
 import SoftPaywall from '../common/SoftPaywall';
 import {
@@ -2190,6 +2190,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
       const wasFirst = (getStats().analyses_count || 0) === 0;
       trackAction('analyses_count');
       if (wasFirst) trackEvent('first_analysis');
+      // Funnel step 2 of 4 — legacy standalone analyzer path.
+      trackFunnelStep('analysis_completed', { source: 'analysis_page' });
 
       // Backend already saves analysis (including pasted text → creates document for library)
       // Only call /save if backend didn't save (e.g. legacy path)

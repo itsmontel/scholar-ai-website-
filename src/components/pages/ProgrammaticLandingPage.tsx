@@ -1,7 +1,10 @@
-import { useEffect } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
+import { lazyWithRetry } from '../../utils/lazyWithRetry';
 import { applyPageSeoTags, injectJsonLd, removeJsonLd, absoluteCanonicalUrl } from '../../utils/seo';
+
+const InteractiveDocumentAnalysis = lazyWithRetry(() => import('../landing/InteractiveDocumentAnalysis'));
 
 /**
  * Single component that powers every programmatic SEO landing page:
@@ -52,6 +55,24 @@ export interface ProgrammaticPageConfig {
   accent?: string;
   /** Optional ISO date for guide-type pages (used in Article schema) */
   datePublished?: string;
+  /** Extra editorial framing for /best/* round-ups: review metadata plus the
+      up-front verdict. Round-up searchers want the answer before the table,
+      so this renders above the fold instead of being buried in prose. */
+  bestMeta?: {
+    /** Human-readable freshness stamp — e.g. "August 2026" */
+    updated: string;
+    /** e.g. "5 tools tested" */
+    tested: string;
+    /** e.g. "6 min read" */
+    readTime?: string;
+    /** How the round-up was run, one line */
+    method?: string;
+    verdict: {
+      pick: { name: string; why: string; badge?: string };
+      runnerUp?: { name: string; why: string };
+      budget?: { name: string; why: string };
+    };
+  };
 }
 
 export type ProgrammaticSection =
@@ -64,7 +85,10 @@ export type ProgrammaticSection =
       card. The single highest-leverage engagement block on competitor
       comparison pages: visitors searching "X alternative" want to SEE the
       product, not read another table. */
-  | { type: 'media'; kind: 'video' | 'image'; src: string; alt: string; heading?: string; caption?: string; poster?: string };
+  | { type: 'media'; kind: 'video' | 'image'; src: string; alt: string; heading?: string; caption?: string; poster?: string }
+  /** The same live essay-analysis demo the homepage runs. Beats a screenshot on
+      pages where the whole question is "does this grader actually work". */
+  | { type: 'demo'; heading?: string; caption?: string };
 
 /* ─── Schema injection helpers ─────────────────────────────────── */
 
@@ -252,14 +276,30 @@ const ListSection = ({ section, accent }: { section: Extract<ProgrammaticSection
 );
 
 /**
- * Comparison table. The first product column (assumed to be us, "WriteScholar")
- * gets highlighted with the accent color so the visual scan immediately tells
- * the reader who comes out ahead. Yes/No values render as check/X icons.
+ * Comparison table.
+ *
+ * The products sit on different axes depending on the page: /alternatives/*
+ * tables list each product as a column, while /best/* round-ups list one
+ * product per row. `productAxis` decides which cells get the accent highlight
+ * so the "we win" emphasis lands on an actual product, never on a feature
+ * label. Yes/No values render as check/X icons.
  */
-const ComparisonSection = ({ section, accent }: { section: Extract<ProgrammaticSection, { type: 'comparison' }>; accent: string }) => {
-  // Column 1 is "Feature" (the row label). Column 2 is the first product column,
-  // which is almost always WriteScholar in our data — highlight it.
+const ComparisonSection = ({
+  section,
+  accent,
+  productAxis = 'columns',
+}: {
+  section: Extract<ProgrammaticSection, { type: 'comparison' }>;
+  accent: string;
+  productAxis?: 'rows' | 'columns';
+}) => {
+  const rowsAreProducts = productAxis === 'rows';
+  // Column 1 is "Feature" (the row label). Column 2 is the first product column.
   const winnerColIndex = 1;
+  const winnerRowIndex = rowsAreProducts
+    ? section.rows.findIndex((r) => r.feature.toLowerCase().includes('writescholar'))
+    : -1;
+
   return (
     <div className="mb-14">
       <SectionHeading accent={accent}>{section.heading}</SectionHeading>
@@ -271,12 +311,12 @@ const ComparisonSection = ({ section, accent }: { section: Extract<ProgrammaticS
           <thead>
             <tr>
               {section.columns.map((c, i) => {
-                const isWinner = i === winnerColIndex;
+                const isWinner = !rowsAreProducts && i === winnerColIndex;
                 return (
                   <th
                     key={i}
-                    className="p-3 sm:p-4 text-[13px] sm:text-sm font-extrabold text-stone-900 dark:text-stone-50 whitespace-nowrap border-b-2 border-stone-200 dark:border-stone-800"
-                    style={isWinner ? { backgroundColor: `${accent}18`, color: accent } : { backgroundColor: '#fafaf9' }}
+                    className="p-3 sm:p-4 text-[13px] sm:text-sm font-extrabold text-stone-900 dark:text-stone-50 whitespace-nowrap border-b-2 border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900/70"
+                    style={isWinner ? { backgroundColor: `${accent}18`, color: accent } : undefined}
                   >
                     {isWinner && (
                       <span
@@ -293,26 +333,42 @@ const ComparisonSection = ({ section, accent }: { section: Extract<ProgrammaticS
             </tr>
           </thead>
           <tbody>
-            {section.rows.map((r, i) => (
-              <tr
-                key={i}
-                className={`border-b border-stone-100 dark:border-stone-800/60 last:border-0 ${i % 2 === 1 ? 'bg-stone-50/50 dark:bg-stone-900/40' : ''}`}
-              >
-                <td className="p-3 sm:p-4 text-[13px] sm:text-sm font-bold text-stone-800 dark:text-stone-200">{r.feature}</td>
-                {r.values.map((v, j) => {
-                  const isWinnerCol = j === 0; // values array starts after the feature column
-                  return (
-                    <td
-                      key={j}
-                      className="p-3 sm:p-4 text-[13px] sm:text-sm"
-                      style={isWinnerCol ? { backgroundColor: `${accent}08` } : undefined}
-                    >
-                      <ComparisonCell value={v} isHighlighted={isWinnerCol} accent={accent} />
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
+            {section.rows.map((r, i) => {
+              const isWinnerRow = i === winnerRowIndex;
+              return (
+                <tr
+                  key={i}
+                  className={`border-b border-stone-100 dark:border-stone-800/60 last:border-0 ${
+                    isWinnerRow ? '' : i % 2 === 1 ? 'bg-stone-50/50 dark:bg-stone-900/40' : ''
+                  }`}
+                  style={isWinnerRow ? { backgroundColor: `${accent}12` } : undefined}
+                >
+                  <td className="p-3 sm:p-4 text-[13px] sm:text-sm font-bold text-stone-800 dark:text-stone-200 whitespace-nowrap">
+                    {isWinnerRow && (
+                      <span
+                        className="inline-block px-2 py-0.5 rounded-full text-white text-[10px] mr-2 align-middle"
+                        style={{ backgroundColor: accent }}
+                      >
+                        ★ Our pick
+                      </span>
+                    )}
+                    <span style={isWinnerRow ? { color: accent } : undefined}>{r.feature}</span>
+                  </td>
+                  {r.values.map((v, j) => {
+                    const isWinnerCell = rowsAreProducts ? isWinnerRow : j === 0;
+                    return (
+                      <td
+                        key={j}
+                        className="p-3 sm:p-4 text-[13px] sm:text-sm"
+                        style={!rowsAreProducts && j === 0 ? { backgroundColor: `${accent}08` } : undefined}
+                      >
+                        <ComparisonCell value={v} isHighlighted={isWinnerCell} accent={accent} />
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -439,6 +495,354 @@ const MediaSection = ({ section, accent }: { section: Extract<ProgrammaticSectio
   </div>
 );
 
+/**
+ * Live essay-analysis demo, same component and framing the homepage uses.
+ * The floating grade pill tracks whichever sample the visitor selects.
+ */
+const DemoSection = ({
+  section,
+  accent,
+  onNavigate,
+}: {
+  section: Extract<ProgrammaticSection, { type: 'demo' }>;
+  accent: string;
+  onNavigate: (page: string) => void;
+}) => {
+  const [activeGradeLetter, setActiveGradeLetter] = useState('B');
+  return (
+    // Break out of the article's max-w-4xl so the live grader matches the
+    // homepage demo width (max-w-6xl) on desktop.
+    <div className="mb-14 relative left-1/2 w-screen max-w-[100vw] -translate-x-1/2 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-5xl">
+        {section.heading && <SectionHeading accent={accent}>{section.heading}</SectionHeading>}
+        <div className="relative">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -inset-4 sm:-inset-6 rounded-[2.5rem] blur-3xl -z-10"
+            style={{ background: `linear-gradient(135deg, ${accent}33, ${accent}14 60%, #58CC0214)` }}
+          />
+          <div
+            aria-hidden
+            className="hidden sm:flex absolute -top-4 -right-4 lg:-top-5 lg:-right-5 z-20 items-center justify-center w-16 h-16 lg:w-20 lg:h-20 rounded-2xl bg-[#58CC02] text-white text-3xl lg:text-4xl font-extrabold rotate-[6deg] border-2 border-b-4 border-[#46A302] shadow-[0_18px_32px_-8px_rgba(88,204,2,0.5)]"
+          >
+            {activeGradeLetter}
+          </div>
+          <div
+            className="relative rounded-2xl sm:rounded-3xl border-2 border-b-4 bg-white dark:bg-stone-900 overflow-hidden shadow-lg"
+            style={{ borderColor: accent }}
+          >
+            {/* Browser-chrome strip so the demo reads as the real product */}
+            <div
+              className="flex h-7 shrink-0 items-center gap-1 px-2.5 border-b-2"
+              style={{ borderColor: `${accent}55`, backgroundColor: `${accent}14` }}
+            >
+              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: accent }} aria-hidden />
+              <span className="h-2 w-2 rounded-full opacity-60" style={{ backgroundColor: accent }} aria-hidden />
+              <span className="h-2 w-2 rounded-full opacity-30" style={{ backgroundColor: accent }} aria-hidden />
+              <span className="ml-2 text-[10px] font-bold truncate" style={{ color: accent }}>
+                writescholar.com · essay analyzer
+              </span>
+              <span
+                className="ml-auto inline-flex items-center gap-1 rounded-full bg-white dark:bg-stone-900 px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider"
+                style={{ color: accent }}
+              >
+                <span className="h-1.5 w-1.5 rounded-full motion-safe:animate-pulse" style={{ backgroundColor: accent }} aria-hidden />
+                Live
+              </span>
+            </div>
+            <Suspense fallback={<div className="min-h-[480px] w-full bg-white dark:bg-stone-900" aria-hidden />}>
+              <InteractiveDocumentAnalysis
+                onNavigate={onNavigate}
+                landingHeroEmbed
+                onSampleChange={setActiveGradeLetter}
+              />
+            </Suspense>
+          </div>
+        </div>
+        {section.caption && (
+          <p className="mt-3 text-center text-[13px] font-bold text-stone-500 dark:text-stone-400">{section.caption}</p>
+        )}
+      </div>
+    </div>
+  );
+};
+
+/* ─── /best/* round-up chrome ──────────────────────────────────── */
+
+function slugify(text: string): string {
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+/** Small label/value chip used for the review metadata row in the best hero. */
+const MetaChip = ({ icon, children }: { icon: string; children: React.ReactNode }) => (
+  <span className="inline-flex items-center gap-1.5 rounded-full bg-white/12 border border-white/20 px-3 py-1 text-[11px] sm:text-xs font-bold text-white/90 backdrop-blur-sm">
+    <span aria-hidden>{icon}</span>
+    {children}
+  </span>
+);
+
+/**
+ * Editorial hero for /best/* round-ups. Round-up traffic arrives wanting a
+ * ranked answer, so this leads with review metadata and an "our pick" card
+ * rather than the mascot-and-centered-headline layout the other page types
+ * share.
+ */
+const BestHero = ({
+  config,
+  accent,
+  onNavigate,
+}: {
+  config: ProgrammaticPageConfig;
+  accent: string;
+  onNavigate: (page: string) => void;
+}) => {
+  const meta = config.bestMeta;
+  const pick = meta?.verdict.pick;
+  return (
+    <section className="relative overflow-hidden">
+      {/* Seamless header-purple to muted plum. The readable content area
+          remains dark; the page transition is handled separately below. */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: `linear-gradient(180deg,
+            ${accent} 0%,
+            #9254CF 24%,
+            #7546A2 50%,
+            #603A7E 76%,
+            #4C2D66 100%
+          )`,
+        }}
+        aria-hidden
+      />
+      {/* Restrained lighting keeps the text area calm and readable. */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: `
+            radial-gradient(ellipse 62% 56% at 12% 16%, rgba(255,255,255,0.16), transparent 68%),
+            radial-gradient(ellipse 48% 52% at 92% 24%, rgba(54,25,82,0.22), transparent 72%)
+          `,
+        }}
+        aria-hidden
+      />
+      {/* One diffused highlight, rather than competing colored orbs. */}
+      <div
+        className="absolute -top-24 -left-16 w-96 h-96 rounded-full opacity-[0.16] blur-3xl pointer-events-none bg-white"
+        aria-hidden
+      />
+      {/* Fine dot texture, faded out before the light zone */}
+      <div
+        className="absolute inset-0 opacity-[0.09] pointer-events-none"
+        style={{
+          backgroundImage: `radial-gradient(circle, rgba(255,255,255,0.6) 0.7px, transparent 0.8px)`,
+          backgroundSize: '24px 24px',
+          maskImage: 'linear-gradient(180deg, #000 0%, #000 38%, transparent 70%)',
+          WebkitMaskImage: 'linear-gradient(180deg, #000 0%, #000 38%, transparent 70%)',
+        }}
+        aria-hidden
+      />
+      {/* Soft top rim highlight */}
+      <div
+        className="absolute inset-x-0 top-0 h-px opacity-30 pointer-events-none"
+        style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }}
+        aria-hidden
+      />
+      {/* A short transition below the content avoids washing out the trust
+          line while still blending the hero into the light page body. */}
+      <div
+        className="absolute inset-x-0 bottom-0 h-14 pointer-events-none bg-gradient-to-b from-transparent to-stone-50 dark:to-stone-950"
+        aria-hidden
+      />
+
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-16 pb-20 sm:pb-24">
+        <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] gap-10 lg:gap-12 items-start">
+          {/* Left: editorial headline block */}
+          <div>
+            <span
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[10px] sm:text-[11px] font-extrabold uppercase tracking-[0.14em] border text-white"
+              style={{ backgroundColor: `${accent}33`, borderColor: `${accent}80` }}
+            >
+              <span className="block w-1.5 h-1.5 rounded-full" style={{ backgroundColor: accent }} aria-hidden />
+              {config.eyebrow}
+            </span>
+
+            <h1 className="mt-5 text-3xl sm:text-5xl lg:text-[3.4rem] font-extrabold tracking-tight text-white leading-[1.05] text-balance">
+              {config.h1}
+            </h1>
+
+            <p className="mt-4 text-base sm:text-lg text-white/75 leading-relaxed max-w-xl">
+              {config.subtitle}
+            </p>
+
+            {meta && (
+              <div className="mt-6 flex flex-wrap gap-2">
+                <MetaChip icon="↻">Updated {meta.updated}</MetaChip>
+                <MetaChip icon="⚖">{meta.tested}</MetaChip>
+                {meta.readTime && <MetaChip icon="◷">{meta.readTime}</MetaChip>}
+              </div>
+            )}
+
+            <div className="mt-7 flex flex-col sm:flex-row gap-3 sm:items-center">
+              <button
+                type="button"
+                onClick={() => onNavigate(config.primaryCta.page)}
+                className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl font-extrabold text-white border-2 border-b-4 transition-all duration-150 hover:-translate-y-0.5 active:translate-y-0 active:border-b-2 text-[15px]"
+                style={{ backgroundColor: accent, borderColor: '#00000040' }}
+              >
+                {config.primaryCta.label}
+                <span aria-hidden>→</span>
+              </button>
+              {config.secondaryCta && (
+                <button
+                  type="button"
+                  onClick={() => onNavigate(config.secondaryCta!.page)}
+                  className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl font-extrabold text-white border-2 border-b-4 border-white/25 bg-white/10 hover:bg-white/15 transition-all duration-150 hover:-translate-y-0.5 active:translate-y-0 active:border-b-2 text-[15px]"
+                >
+                  {config.secondaryCta.label}
+                </button>
+              )}
+            </div>
+
+            <div className="mt-5 text-[12px] sm:text-[13px] font-bold text-white/85">
+              Trusted by <span className="text-white tabular-nums">50,000+</span> students
+            </div>
+          </div>
+
+          {/* Right: product preview card — sits high so the feedback panel is
+              the first visual answer above the fold */}
+          {pick && (
+            <div className="relative lg:-mt-2">
+              <div
+                className="absolute -inset-4 rounded-[2rem] opacity-35 blur-3xl"
+                style={{ backgroundColor: accent }}
+                aria-hidden
+              />
+              <div className="relative rounded-3xl border-2 border-b-[6px] border-white/20 bg-white dark:bg-stone-900 overflow-hidden shadow-[0_28px_60px_-20px_rgba(0,0,0,0.55)]">
+                {/* Compact pick bar */}
+                <div
+                  className="flex items-center justify-between gap-3 px-4 sm:px-5 py-2.5"
+                  style={{ backgroundColor: accent }}
+                >
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-[0.14em] text-white">
+                    <span className="inline-flex w-4 h-4 rounded-full bg-white/20 items-center justify-center text-[10px]" aria-hidden>★</span>
+                    {pick.badge || 'Our pick'}
+                  </span>
+                  <span className="text-[11px] font-extrabold text-white/85 tabular-nums">#1 of {meta?.tested}</span>
+                </div>
+
+                {/* Product identity row */}
+                <div className="flex items-center gap-3 px-4 sm:px-5 py-3 bg-white dark:bg-stone-900">
+                  <img
+                    src="/main-logo.png"
+                    alt=""
+                    aria-hidden
+                    className="w-10 h-10 rounded-xl object-contain bg-white border-2 border-stone-200 dark:border-stone-700 p-1 shadow-sm"
+                    loading="eager"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="font-extrabold text-[16px] text-stone-900 dark:text-stone-50 leading-tight truncate">{pick.name}</div>
+                    <div className="text-[11px] font-bold text-stone-500 dark:text-stone-400">Best overall · essay grader</div>
+                  </div>
+                  <span
+                    className="hidden sm:inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider"
+                    style={{ backgroundColor: `${accent}18`, color: accent }}
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full motion-safe:animate-pulse" style={{ backgroundColor: accent }} aria-hidden />
+                    Live
+                  </span>
+                </div>
+
+                {/* Editor preview — crop biased to the feedback panel, higher in-frame */}
+                <div className="relative border-t-2 border-stone-100 dark:border-stone-800">
+                  <div
+                    className="flex h-6 items-center gap-1 px-3 border-b border-stone-100 dark:border-stone-800 bg-stone-50 dark:bg-stone-900/80"
+                    aria-hidden
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#FF5F57]" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#FFBD2E]" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#28C840]" />
+                    <span className="ml-2 text-[9px] font-bold text-stone-400 truncate">writescholar.com · essay analyzer</span>
+                  </div>
+                  <img
+                    src="/WriterPic.png"
+                    alt="WriteScholar editor showing an essay with AI feedback"
+                    className="block w-full aspect-[16/10] object-cover object-[88%_8%] bg-white"
+                    loading="eager"
+                  />
+                  {/* Soft edge vignette so the crop feels intentional */}
+                  <div
+                    className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-black/10 to-transparent"
+                    aria-hidden
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+/**
+ * Sticky in-page nav for round-ups. Long comparison pages lose readers to the
+ * scroll; anchor chips let them jump straight to the table or the FAQ.
+ */
+const BestJumpNav = ({ items, accent }: { items: { id: string; label: string }[]; accent: string }) => (
+  <nav
+    className="sticky top-0 z-30 border-b border-stone-200 dark:border-stone-800 bg-white/85 dark:bg-stone-950/85 backdrop-blur-md"
+    aria-label="On this page"
+  >
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="flex items-center gap-2 overflow-x-auto py-2.5 scrollbar-hide">
+        <span className="flex-shrink-0 text-[11px] font-extrabold uppercase tracking-wider text-stone-400 dark:text-stone-500 pr-1">
+          On this page
+        </span>
+        {items.map((it) => (
+          <a
+            key={it.id}
+            href={`#${it.id}`}
+            className="flex-shrink-0 rounded-full border-2 border-stone-200 dark:border-stone-800 px-3 py-1 text-[12px] font-bold text-stone-700 dark:text-stone-300 hover:text-white transition-colors whitespace-nowrap"
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = accent;
+              e.currentTarget.style.borderColor = accent;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '';
+              e.currentTarget.style.borderColor = '';
+            }}
+          >
+            {it.label}
+          </a>
+        ))}
+      </div>
+    </div>
+  </nav>
+);
+
+/** How-we-tested strip: the credibility signal generic round-ups skip. */
+const MethodologyNote = ({ method, accent }: { method: string; accent: string }) => (
+  <div
+    className="mb-12 rounded-2xl border-2 border-dashed p-5 flex gap-4 items-start"
+    style={{ borderColor: `${accent}45`, backgroundColor: `${accent}0A` }}
+  >
+    <span
+      className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center text-white font-extrabold"
+      style={{ backgroundColor: accent }}
+      aria-hidden
+    >
+      ⚗
+    </span>
+    <div>
+      <div className="text-[11px] font-extrabold uppercase tracking-wider mb-1" style={{ color: accent }}>
+        How we tested
+      </div>
+      <p className="text-[14px] leading-relaxed text-stone-700 dark:text-stone-300">{method}</p>
+    </div>
+  </div>
+);
+
 /* ─── Page component ───────────────────────────────────────────── */
 
 interface Props {
@@ -478,6 +882,18 @@ const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) 
   const accent = config.accent || '#A560E8';
   const heroMascot = pickHeroMascot(config.type);
   const ctaMascot = pickCtaMascot();
+  const isBest = config.type === 'best';
+  const sectionIds = config.sections.map((s, i) =>
+    'heading' in s && s.heading ? slugify(s.heading) : `section-${i}`,
+  );
+  const jumpItems = isBest
+    ? [
+        ...config.sections
+          .map((s, i) => ('heading' in s && s.heading ? { id: sectionIds[i], label: s.heading } : null))
+          .filter((x): x is { id: string; label: string } => x !== null),
+        { id: 'faq', label: 'FAQ' },
+      ]
+    : [];
 
   useEffect(() => {
     applyPageSeoTags({
@@ -497,10 +913,14 @@ const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) 
   return (
     <LoggedInPageShell className="min-h-screen flex flex-col bg-stone-50 dark:bg-stone-950" user={user} onNavigate={onNavigate} onLogout={onLogout}>
 
+      {isBest && <BestHero config={config} accent={accent} onNavigate={onNavigate} />}
+      {isBest && jumpItems.length > 1 && <BestJumpNav items={jumpItems} accent={accent} />}
+
       {/* Hero, with mascot GIF in a coloured ring above the H1 so the page
           feels like part of the WriteScholar product. Decorative dot pattern
           and floating accent shapes give visual depth so the hero doesn't
           feel like a plain blog header. */}
+      {!isBest && (
       <section className="relative pt-14 sm:pt-20 pb-14 sm:pb-20 border-b border-stone-200 dark:border-stone-800 overflow-hidden bg-gradient-to-b from-white to-stone-50/40 dark:from-stone-950 dark:to-stone-900/40">
         {/* Soft radial glow behind the H1 */}
         <div
@@ -612,6 +1032,7 @@ const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) 
           </div>
         </div>
       </section>
+      )}
 
       {/* Body */}
       <main className="flex-1 py-12 sm:py-16">
@@ -621,10 +1042,15 @@ const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) 
             {config.intro}
           </p>
 
+          {isBest && config.bestMeta?.method && (
+            <MethodologyNote method={config.bestMeta.method} accent={accent} />
+          )}
+
           {/* Mascot break card. Sits between the intro and the first content
               section so it interrupts the wall-of-text rhythm without feeling
               like an ad. Uses the accent colour as a top-bar so it reads as a
               colour-coded highlight rather than a plain banner. */}
+          {!isBest && (
           <div className="relative mb-14 rounded-3xl border-2 border-b-4 overflow-hidden bg-white dark:bg-stone-900"
             style={{ borderColor: `${accent}40` }}
           >
@@ -669,31 +1095,41 @@ const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) 
               </button>
             </div>
           </div>
+          )}
 
           {/* Custom sections */}
           {config.sections.map((section, i) => {
-            switch (section.type) {
-              case 'paragraph':
-                return <ParagraphSection key={i} section={section} accent={accent} />;
-              case 'list':
-                return <ListSection key={i} section={section} accent={accent} />;
-              case 'comparison':
-                return <ComparisonSection key={i} section={section} accent={accent} />;
-              case 'steps':
-                return <StepsSection key={i} section={section} accent={accent} />;
-              case 'examples':
-                return <ExamplesSection key={i} section={section} accent={accent} />;
-              case 'media':
-                return <MediaSection key={i} section={section} accent={accent} />;
-              default:
-                return null;
-            }
+            const body = (() => {
+              switch (section.type) {
+                case 'paragraph':
+                  return <ParagraphSection section={section} accent={accent} />;
+                case 'list':
+                  return <ListSection section={section} accent={accent} />;
+                case 'comparison':
+                  return <ComparisonSection section={section} accent={accent} productAxis={isBest ? 'rows' : 'columns'} />;
+                case 'steps':
+                  return <StepsSection section={section} accent={accent} />;
+                case 'examples':
+                  return <ExamplesSection section={section} accent={accent} />;
+                case 'media':
+                  return <MediaSection section={section} accent={accent} />;
+                case 'demo':
+                  return <DemoSection section={section} accent={accent} onNavigate={onNavigate} />;
+                default:
+                  return null;
+              }
+            })();
+            return (
+              <div key={i} id={sectionIds[i]} className="scroll-mt-20">
+                {body}
+              </div>
+            );
           })}
 
           {/* FAQ section. Header bar with a small peeking mascot to break the
               wall-of-questions feel. Each accordion uses chunkier hover/open
               transitions so the interaction feels rewarding. */}
-          <div className="mb-14">
+          <div className="mb-14 scroll-mt-20" id="faq">
             <div className="flex items-center gap-4 mb-6">
               <SectionHeading accent={accent}>Frequently asked questions</SectionHeading>
               <img

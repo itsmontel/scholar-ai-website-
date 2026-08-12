@@ -47,12 +47,18 @@ enum WSColor {
     static let duoPinkDark  = Color(hex: 0xDB2777)
     static let duoPinkLight = Color(hex: 0xFCE7F3)
 
+    /// Yellow — XP, stars, streak milestones, Quiz Run accent
+    static let duoYellow      = Color(hex: 0xFFC800)
+    static let duoYellowDark  = Color(hex: 0xE6B400)
+    static let duoYellowLight = Color(hex: 0xFFF6D6)
+
     // MARK: - Neutrals (Duolingo-style)
 
-    /// Dark text — matches Duolingo's #3C3C3C
-    static let duoText = Color(hex: 0x3C3C3C)
-    /// Light border / dividers — matches Duolingo's #E5E5E5
-    static let duoBorder = Color(hex: 0xE5E5E5)
+    /// Dark text — #3C3C3C in light mode, warm near-white in dark mode.
+    /// Adaptive so headings on card surfaces stay readable in dark mode.
+    static let duoText = Color(lightHex: 0x3C3C3C, darkHex: 0xF5F5F4)
+    /// Light border / dividers — #E5E5E5 light, stone-700 dark.
+    static let duoBorder = Color(lightHex: 0xE5E5E5, darkHex: 0x44403C)
     /// Lavender page wash — matches the prototype's tinted background (was #F7F7F7)
     static let duoSurface = Color(hex: 0xF6F4FE)
 
@@ -98,6 +104,13 @@ enum WSColor {
         Color("Hairline", bundle: nil)
     }
 
+    // MARK: - Tinted surfaces (adapt to dark mode)
+
+    /// Soft cream banner tint — the Daily Review "on a roll" card.
+    static let bannerCream = Color(lightHex: 0xFFF8E7, darkHex: 0x2E2A1E)
+    /// Pale lavender card face — big flashcard, arcade hero.
+    static let surfacePurple = Color(lightHex: 0xEFEAFE, darkHex: 0x2A2440)
+
     // MARK: - Essay annotation tones
 
     /// Strong / positive (emerald)
@@ -116,5 +129,19 @@ extension Color {
         let g = Double((hex >>  8) & 0xff) / 255
         let b = Double( hex        & 0xff) / 255
         self.init(.sRGB, red: r, green: g, blue: b, opacity: opacity)
+    }
+
+    /// Trait-adaptive color from a light/dark hex pair — for tokens that
+    /// need dark-mode variants without an asset-catalog entry.
+    init(lightHex: UInt32, darkHex: UInt32) {
+        self.init(UIColor { trait in
+            let hex = trait.userInterfaceStyle == .dark ? darkHex : lightHex
+            return UIColor(
+                red:   CGFloat((hex >> 16) & 0xff) / 255,
+                green: CGFloat((hex >>  8) & 0xff) / 255,
+                blue:  CGFloat( hex        & 0xff) / 255,
+                alpha: 1
+            )
+        })
     }
 }

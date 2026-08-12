@@ -36,46 +36,75 @@ struct WSListRowCard<Trailing: View>: View {
     var iconTint: Color = WSColor.duoPurple
     let title: String
     var subtitle: String? = nil
+    /// When set (0…1), a thin progress bar + right-aligned percent renders
+    /// along the bottom of the row — the Study Packs pack-row pattern.
+    var progress: Double? = nil
+    var progressTint: Color = WSColor.duoPurple
     @ViewBuilder var trailing: () -> Trailing
 
     init(icon: String,
          iconTint: Color = WSColor.duoPurple,
          title: String,
          subtitle: String? = nil,
+         progress: Double? = nil,
+         progressTint: Color = WSColor.duoPurple,
          @ViewBuilder trailing: @escaping () -> Trailing) {
         self.icon = icon
         self.iconTint = iconTint
         self.title = title
         self.subtitle = subtitle
+        self.progress = progress
+        self.progressTint = progressTint
         self.trailing = trailing
     }
 
     var body: some View {
-        HStack(spacing: 14) {
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(iconTint.opacity(0.14))
-                .frame(width: 48, height: 48)
-                .overlay(
-                    Image(systemName: icon)
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundStyle(iconTint)
-                )
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 14) {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(iconTint.opacity(0.14))
+                    .frame(width: 48, height: 48)
+                    .overlay(
+                        Image(systemName: icon)
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundStyle(iconTint)
+                    )
 
-            VStack(alignment: .leading, spacing: 3) {
-                Text(title)
-                    .wsBody(.large, weight: .bold)
-                    .foregroundStyle(WSColor.foreground)
-                    .lineLimit(1)
-                if let subtitle {
-                    Text(subtitle)
-                        .wsBody(.small)
-                        .foregroundStyle(WSColor.foregroundMuted)
-                        .lineLimit(2)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(title)
+                        .wsBody(.large, weight: .bold)
+                        .foregroundStyle(WSColor.foreground)
+                        .lineLimit(1)
+                    if let subtitle {
+                        Text(subtitle)
+                            .wsBody(.small)
+                            .foregroundStyle(WSColor.foregroundMuted)
+                            .lineLimit(2)
+                    }
                 }
+
+                Spacer(minLength: 8)
+                trailing()
             }
 
-            Spacer(minLength: 8)
-            trailing()
+            if let progress {
+                let clamped = min(1, max(0, progress))
+                HStack(spacing: 10) {
+                    GeometryReader { geo in
+                        ZStack(alignment: .leading) {
+                            Capsule().fill(progressTint.opacity(0.15))
+                            Capsule()
+                                .fill(progressTint)
+                                .frame(width: max(6, geo.size.width * clamped))
+                        }
+                    }
+                    .frame(height: 6)
+                    Text("\(Int(clamped * 100))%")
+                        .wsBody(.caption, weight: .bold)
+                        .foregroundStyle(WSColor.foregroundMuted)
+                        .monospacedDigit()
+                }
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .wsChunkyCard(cornerRadius: 20)
@@ -87,10 +116,60 @@ extension WSListRowCard where Trailing == WSChevron {
     init(icon: String,
          iconTint: Color = WSColor.duoPurple,
          title: String,
-         subtitle: String? = nil) {
-        self.init(icon: icon, iconTint: iconTint, title: title, subtitle: subtitle) {
+         subtitle: String? = nil,
+         progress: Double? = nil,
+         progressTint: Color = WSColor.duoPurple) {
+        self.init(icon: icon, iconTint: iconTint, title: title, subtitle: subtitle,
+                  progress: progress, progressTint: progressTint) {
             WSChevron()
         }
+    }
+}
+
+// MARK: - Search field
+
+/// The mockup's rounded white search bar ("Search packs…"). Magnifier
+/// prefix, soft card fill, hairline stroke, clear button while editing.
+struct WSSearchField: View {
+    let placeholder: String
+    @Binding var text: String
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 15, weight: .bold))
+                .foregroundStyle(WSColor.foregroundMuted.opacity(0.7))
+            TextField(placeholder, text: $text)
+                .wsBody(.medium, weight: .semibold)
+                .foregroundStyle(WSColor.foreground)
+                .focused($focused)
+                .submitLabel(.search)
+                .autocorrectionDisabled()
+            if !text.isEmpty {
+                Button {
+                    text = ""
+                    Haptics.light()
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 16))
+                        .foregroundStyle(WSColor.foregroundMuted.opacity(0.5))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(WSColor.backgroundElevated)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .stroke(focused ? WSColor.duoPurple.opacity(0.5) : WSColor.hairline, lineWidth: focused ? 1.5 : 1)
+                )
+                .shadow(color: Color.black.opacity(0.04), radius: 8, y: 3)
+        )
+        .animation(.easeInOut(duration: 0.15), value: focused)
     }
 }
 
@@ -171,6 +250,9 @@ struct WSSectionHeader: View {
     let title: String
     var actionTitle: String? = nil
     var action: (() -> Void)? = nil
+    /// Non-interactive trailing text ("Keep it up!") — used when the
+    /// header carries a note instead of a navigation action.
+    var note: String? = nil
 
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
@@ -187,6 +269,10 @@ struct WSSectionHeader: View {
                     .foregroundStyle(WSColor.duoPurple)
                 }
                 .buttonStyle(.plain)
+            } else if let note {
+                Text(note)
+                    .wsBody(.small, weight: .bold)
+                    .foregroundStyle(WSColor.foregroundMuted)
             }
         }
     }
@@ -203,6 +289,10 @@ struct WSProgressRing: View {
     var lineWidth: CGFloat = 6
     var showsPercent: Bool = true
     var centerText: String? = nil   // overrides the percentage when set
+    /// Two-line center (big value + small sublabel) — the quiz-complete
+    /// "8 / 10" over "80%" treatment. Overrides centerText/percent.
+    var centerTitle: String? = nil
+    var centerSubtitle: String? = nil
 
     private var clamped: Double { min(1, max(0, progress)) }
 
@@ -215,7 +305,20 @@ struct WSProgressRing: View {
                 .stroke(tint, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                 .rotationEffect(.degrees(-90))
                 .animation(.spring(response: 0.5, dampingFraction: 0.8), value: clamped)
-            if let centerText {
+            if let centerTitle {
+                VStack(spacing: 2) {
+                    Text(centerTitle)
+                        .font(WSFont.sans(size * 0.2, weight: .black))
+                        .foregroundStyle(WSColor.foreground)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+                    if let centerSubtitle {
+                        Text(centerSubtitle)
+                            .font(WSFont.sans(size * 0.12, weight: .bold))
+                            .foregroundStyle(WSColor.foregroundMuted)
+                    }
+                }
+            } else if let centerText {
                 Text(centerText)
                     .font(WSFont.sans(size * 0.24, weight: .bold))
                     .foregroundStyle(WSColor.foreground)

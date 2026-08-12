@@ -166,6 +166,11 @@ struct LibraryItem: Codable, Equatable, Identifiable, Hashable {
     /// Free-form tags. Reserved for the upcoming "Folders" feature.
     var tags: [String]
 
+    /// Study progress 0…1 (fraction of the pack's components attempted).
+    /// Optional so rows persisted before this field existed decode fine;
+    /// nil = no progress tracking for this kind (documents, essays).
+    var progress: Double? = nil
+
     let createdAt: Date
     var lastOpenedAt: Date?
 
@@ -184,6 +189,7 @@ struct LibraryItem: Codable, Equatable, Identifiable, Hashable {
             && lhs.lastOpenedAt == rhs.lastOpenedAt
             && lhs.isPinned == rhs.isPinned
             && lhs.chips == rhs.chips
+            && lhs.progress == rhs.progress
     }
 
     // MARK: - Designated init

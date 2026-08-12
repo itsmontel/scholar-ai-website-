@@ -209,6 +209,29 @@ const startServer = async () => {
         await subscriptionService.notifyTrialsEndingSoon();
       }, 60 * 60 * 1000); // 1 hour in milliseconds
 
+      // Trial value recap — every hour, find trialing users ~48h from
+      // expiry (day 5 of 7) and send the usage recap + charge notice.
+      // Runs ahead of the 24h reminder so there's still time to act.
+      // Idempotent via subscriptions.trial_recap_email_sent_at.
+      subscriptionService.notifyTrialValueRecap()
+        .then((result) => console.log('✅ Initial trial value-recap sweep completed:', result))
+        .catch((error) => console.error('❌ Initial trial value-recap sweep failed:', error));
+
+      setInterval(async () => {
+        await subscriptionService.notifyTrialValueRecap();
+      }, 60 * 60 * 1000); // 1 hour in milliseconds
+
+      // Winback — daily, find users whose subscription lapsed ~14 days
+      // ago and send the one-shot half-price return offer. Idempotent
+      // via users.winback_email_sent_at.
+      subscriptionService.notifyWinbacks()
+        .then((result) => console.log('✅ Initial winback sweep completed:', result))
+        .catch((error) => console.error('❌ Initial winback sweep failed:', error));
+
+      setInterval(async () => {
+        await subscriptionService.notifyWinbacks();
+      }, 24 * 60 * 60 * 1000); // 24 hours in milliseconds
+
       // Preview follow-up — every hour, find free users who ran a preview
       // (analysis / citation search / study pack) 24–48h ago and never
       // upgraded, then send the one-shot "your results are still waiting"

@@ -29,6 +29,9 @@ struct MainTabView: View {
     @State private var selectedTab: Tab = .home
     @State private var showToolPicker = false
     @State private var route: AppRoute?
+    /// Route chosen from the tool picker, presented after the picker
+    /// finishes dismissing (avoids the double-sheet race).
+    @State private var pendingRoute: AppRoute?
 
     enum Tab: Hashable { case home, myStuff, review, profile }
 
@@ -39,16 +42,23 @@ struct MainTabView: View {
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 WSTabBar(selected: $selectedTab, onPlus: { showToolPicker = true })
             }
-            .sheet(isPresented: $showToolPicker) {
+            // Keep the bar anchored below the keyboard instead of riding it up.
+            .ignoresSafeArea(.keyboard, edges: .bottom)
+            .sheet(isPresented: $showToolPicker, onDismiss: {
+                // Present the destination only after UIKit finished tearing
+                // down the picker — a timed delay used to silently no-op.
+                if let p = pendingRoute { pendingRoute = nil; go(p) }
+            }) {
                 ToolPickerSheet(onSelect: { picked in
+                    pendingRoute = picked
                     showToolPicker = false
-                    // Let the picker dismiss before presenting the destination.
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.18) { go(picked) }
                 })
                 .presentationDragIndicator(.visible)
             }
             .sheet(item: $route) { r in
-                routeDestination(r).environmentObject(session)
+                routeDestination(r)
+                    .environmentObject(session)
+                    .presentationDragIndicator(.visible)
             }
     }
 
@@ -59,13 +69,17 @@ struct MainTabView: View {
                         onRoute: { go($0) },
                         onOpenToolPicker: { showToolPicker = true })
         case .myStuff:
-            LibraryTabView(onJumpToTab: { dest in
-                switch dest {
-                case .study: go(.studyPacks)
-                case .games: go(.arcade)
-                case .focus: go(.focus)
-                }
-            })
+            LibraryTabView(
+                onJumpToTab: { dest in
+                    switch dest {
+                    case .study:    go(.studyPacks)
+                    case .games:    go(.arcade)
+                    case .focus:    go(.focus)
+                    case .analyzer: go(.essayAnalyzer)
+                    case .editor:   go(.smartEditor)
+                    }
+                },
+                onOpenToolPicker: { showToolPicker = true })
         case .review:
             DailyReviewView(onStartReview: { go(.studyPacks) })
         case .profile:
@@ -130,6 +144,9 @@ private struct WSTabBar: View {
             VStack(spacing: 4) {
                 Image(systemName: icon)
                     .font(.system(size: 21, weight: .semibold))
+                    .symbolEffect(.bounce, value: active)
+                    .scaleEffect(active ? 1.1 : 1.0)
+                    .animation(.wsBounceTight, value: active)
                 Text(label)
                     .font(WSFont.sans(10, weight: .bold))
             }
@@ -139,6 +156,8 @@ private struct WSTabBar: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(label)
+        .accessibilityAddTraits(active ? [.isSelected] : [])
     }
 
     private var plusButton: some View {
@@ -156,9 +175,10 @@ private struct WSTabBar: View {
                     .foregroundStyle(.white)
             }
         }
-        .buttonStyle(.plain)
+        .buttonStyle(WSBouncyButtonStyle())
         .frame(maxWidth: .infinity)
         .offset(y: -16)
+        .accessibilityLabel("Create — choose a tool")
     }
 }
 

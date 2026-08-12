@@ -6,7 +6,23 @@
 
 import posthog from 'posthog-js';
 
+/* ─── CORE FUNNEL ────────────────────────────────────────────────
+ * These four are the conversion funnel. Read them in order to find
+ * where users drop; everything else below is supporting detail.
+ *
+ *   signed_up → analysis_completed → trial_started → subscription_converted
+ *
+ * Each fires exactly once per user per step (see FUNNEL_ONCE_KEYS),
+ * so the PostHog counts are directly comparable as a funnel.
+ */
+export type FunnelEvent =
+  | 'signed_up'
+  | 'analysis_completed'
+  | 'trial_started'
+  | 'subscription_converted';
+
 export type AnalyticsEvent =
+  | FunnelEvent
   | 'tutorial_start'
   | 'tutorial_complete'
   | 'tutorial_skip'
@@ -31,8 +47,38 @@ export type AnalyticsEvent =
   | 'onboarding_aha_view'
   | 'onboarding_aha_generate'
   | 'onboarding_aha_complete'
+  | 'onboarding_aha_skip'
   | 'onboarding_choose_trial'
   | 'onboarding_choose_free'
+  // — Onboarding step events —
+  | 'onboarding_intro_continue'
+  | 'onboarding_celebrate_continue'
+  | 'onboarding_survey_source_select'
+  | 'onboarding_survey_goal_select'
+  | 'onboarding_survey_complete'
+  | 'onboarding_tour_essay_analyze'
+  | 'onboarding_tour_flashcard_flip'
+  | 'onboarding_tour_badge_unlock'
+  | 'onboarding_choose_subscription'
+  | 'onboarding_daily_review_intro_continue'
+  // — Cancel / retention —
+  | 'cancel_flow_view'
+  | 'cancel_save_offer_view'
+  | 'cancel_save_offer_accept'
+  | 'cancel_confirmed'
+  // — Dashboard —
+  | 'dashboard_file_upload_start'
+  | 'dashboard_file_upload_success'
+  | 'dashboard_file_upload_error'
+  | 'dashboard_file_parsed'
+  | 'dashboard_analyze_text_start'
+  | 'dashboard_citations_success'
+  | 'dashboard_citations_error'
+  | 'dashboard_study_pack_success'
+  | 'dashboard_study_pack_error'
+  | 'dashboard_tool_tab'
+  | 'dashboard_game_launch'
+  | 'dashboard_workspace_shortcut'
   // — Freemium preview funnel: signup → preview_ran → lock_viewed →
   //   upgrade_clicked → checkout_started → (Stripe webhook = paid).
   //   Read these five in order to find where users drop. —
@@ -120,4 +166,42 @@ export function trackEvent(event: AnalyticsEvent, properties?: Record<string, un
       posthog.capture(event, payload);
     }
   } catch (_) {}
+}
+
+/* ─── Funnel step de-duplication ─────────────────────────────────
+   A funnel is only readable if each step counts distinct users, so
+   these fire once per user and then latch. The marker is keyed by
+   user id, so signing in as someone else on the same browser still
+   records their steps. Falls back to an anonymous key when logged
+   out (only `signed_up` can reach that path). */
+const FUNNEL_STORAGE_PREFIX = 'ws_funnel_';
+
+function funnelKey(event: FunnelEvent, userId: string | null): string {
+  return `${FUNNEL_STORAGE_PREFIX}${event}_${userId ?? 'anon'}`;
+}
+
+/**
+ * Track a core funnel step exactly once per user.
+ *
+ * Use this for the four conversion milestones rather than `trackEvent`,
+ * so PostHog counts stay comparable between steps. Repeat calls are
+ * cheap no-ops, so it's safe to call from anywhere the step completes
+ * (e.g. every analysis run, not just the first).
+ *
+ * Returns true when the event was actually sent.
+ */
+export function trackFunnelStep(event: FunnelEvent, properties?: Record<string, unknown>): boolean {
+  try {
+    const userId = getUserId();
+    const key = funnelKey(event, userId);
+    if (localStorage.getItem(key)) return false;
+    localStorage.setItem(key, new Date().toISOString());
+    trackEvent(event, properties);
+    return true;
+  } catch (_) {
+    // Storage unavailable (private mode / quota) — still send the event
+    // rather than losing the step entirely; dedupe in PostHog instead.
+    trackEvent(event, properties);
+    return true;
+  }
 }

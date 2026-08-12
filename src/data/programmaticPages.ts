@@ -21,19 +21,20 @@ import { FREE_PLAN_FAQ_ANSWER } from '../constants/freePlanCopy';
 
 /* ─── Helpers ──────────────────────────────────────────────────── */
 
-/** Comparison-table cell — matches PricingPage NEWCUSTOMER offer. */
-const PRO_PRICING_CELL = 'Preview free · $9.99 1st mo Pro';
+/** Comparison-table cell — matches the PricingPage offer: free preview
+ *  on your own work, then a 7-day trial into $19.99/mo Pro. */
+const PRO_PRICING_CELL = 'Preview free · $19.99/mo Pro';
 
 /** Short free-plan explainer for alternative-page FAQs. */
 const FREE_PLAN_PROG_SHORT =
-  'Free gives you lifetime previews on your own work (2 essay analyses, 2 study packs, 2 citation searches with sample results) — no credit card. Pro unlocks full rubrics, quizzes, games, decks, and exports.';
+  'Free gives you a lifetime preview of each tool on your own work (an essay analysis, a study pack, a citation search with sample results) — no credit card. Pro unlocks full rubrics, quizzes, games, decks, and exports.';
 
 /** Signup step copy — no "covers your first semester" over-promises. */
 const FREE_SIGNUP_STEP =
   'Sign up in 30 seconds — no credit card. Run a real preview on your own essay or notes before you pay anything.';
 
 const freeSubjectFaqAnswer = (niceName: string) =>
-  `Yes. ${FREE_PLAN_PROG_SHORT} First month of Pro is $9.99 with code NEWCUSTOMER, then $19.99/mo — built for ${niceName} students who want to see results before subscribing.`;
+  `Yes. ${FREE_PLAN_PROG_SHORT} Pro is $19.99/mo and starts with a 7-day free trial — built for ${niceName} students who want to see results before subscribing.`;
 
 const TOOL_LINKS_PROG = {
   flashcards: { href: '/tools/create-flashcards', page: 'create-flashcards', label: 'Flashcard Maker' },
@@ -435,8 +436,8 @@ const quizletAlt: ProgrammaticPageConfig = {
   faqs: [
     { question: 'Is WriteScholar really free?', answer: FREE_PLAN_FAQ_ANSWER },
     { question: 'Can I import my Quizlet decks?', answer: 'Yes, paste your exported flashcards in CSV format (term,definition) or as a list of pairs. Pro plan handles bulk imports and saves decks across devices.' },
-    { question: 'Does WriteScholar have spaced repetition?', answer: 'Yes — on Pro. Free previews include the lesson and first four flashcards from a study pack; spaced repetition and full deck study unlock with Pro.' },
-    { question: 'How does pricing compare?', answer: 'Quizlet+ is $35.99/year ($3/mo) for flashcards only. WriteScholar Pro is $9.99 for your first month (code NEWCUSTOMER), then $19.99/mo for flashcards + essay checker + quiz gen + study packs + summarizer + citations. Better value if you need writing tools, not just cards.' },
+    { question: 'Does WriteScholar have spaced repetition?', answer: 'Yes — on Pro. The free preview includes the lesson and first four flashcards from a study pack; spaced repetition and full deck study unlock with Pro.' },
+    { question: 'How does pricing compare?', answer: 'Quizlet+ is $35.99/year ($3/mo) for flashcards only. WriteScholar Pro is $19.99/mo after a 7-day free trial, for flashcards + essay checker + quiz gen + study packs + summarizer + citations. Better value if you need writing tools, not just cards.' },
     { question: 'Can I share decks with friends?', answer: 'On Pro, yes — share via link. Recipient can study; on Pro+ they can clone the deck into their own library.' },
     { question: 'Does it work for medical school flashcards?', answer: 'Yes. Med students use WriteScholar for anatomy, pharm, and pathology study packs. Image-card support is on Pro (drag-and-drop images for visual cues like anatomy diagrams).' },
     { question: 'Is my data private?', answer: 'Yes. Your content is encrypted, never sold, and you can delete it anytime. Pro saves sync to your account; preview runs process your paste without long-term storage unless you save on Pro.' },
@@ -506,7 +507,7 @@ const knowtAlt: ProgrammaticPageConfig = {
     },
   ],
   faqs: [
-    { question: 'How does pricing compare?', answer: 'Both let you try before paying. WriteScholar Pro is $9.99 for your first month (NEWCUSTOMER), then $19.99/mo — Knowt Pro is in a similar range. The decision usually comes down to whether you need essay tools and study packs (WriteScholar) or polished notes (Knowt).' },
+    { question: 'How does pricing compare?', answer: 'Both let you try before paying. WriteScholar Pro is $19.99/mo after a 7-day free trial — Knowt Pro is in a similar range. The decision usually comes down to whether you need essay tools and study packs (WriteScholar) or polished notes (Knowt).' },
     { question: 'Can I import from Knowt?', answer: 'Yes, export your Knowt flashcard decks to CSV and paste into WriteScholar. We also accept term/definition pairs as plain text.' },
     { question: 'Does WriteScholar have a notes editor?', answer: 'A lightweight one is in beta. For heavy note-taking, pair WriteScholar with Notion or Google Docs and paste content into the AI tools when you need to study from it.' },
     { question: 'Are the flashcard study modes the same?', answer: 'Both apps have flip + shuffle + spaced repetition. WriteScholar also has explanation cards (AI-generated explanations of why an answer is wrong) on Pro.' },
@@ -569,7 +570,7 @@ const courseHeroAlt: ProgrammaticPageConfig = {
   ],
   faqs: [
     { question: 'Can WriteScholar give me access to past exams?', answer: 'No, and that\'s a feature, not a bug. Past exam access from Course Hero often violates academic integrity policies. WriteScholar focuses on legitimate study tools built from your own notes.' },
-    { question: 'How much does WriteScholar cost compared to Course Hero?', answer: 'WriteScholar Pro is $9.99 for your first month (NEWCUSTOMER), then $19.99/mo. Course Hero is $39.99/mo (or $9.95/mo annual). Less than half the price for Pro, and you study from your own notes.' },
+    { question: 'How much does WriteScholar cost compared to Course Hero?', answer: 'WriteScholar Pro is $19.99/mo after a 7-day free trial. Course Hero is $39.99/mo (or $9.95/mo annual). Half the monthly price, and you study from your own notes.' },
     { question: 'Will my professor consider WriteScholar academic dishonesty?', answer: 'Generating flashcards from your own lecture notes is unambiguously fine, same as making them by hand. AI essay grading is also fine when used as feedback (you don\'t submit AI-generated text). When in doubt, ask your professor what tools are allowed.' },
     { question: 'Can I upload PDFs of textbooks?', answer: 'Yes, paste textbook content (your own copies) and the AI generates study tools. Note: copying entire copyrighted textbooks for distribution is illegal; using them privately for study is generally fine.' },
     { question: 'Does it work for med school study packs?', answer: 'Yes. WriteScholar\'s study pack feature is popular with med students for converting lecture transcripts into flashcards + quizzes + summaries in 60 seconds.' },
@@ -632,7 +633,7 @@ const cheggAlt: ProgrammaticPageConfig = {
   faqs: [
     { question: 'Can WriteScholar solve my homework problems?', answer: 'No, that\'s by design. WriteScholar generates flashcards, quizzes, summaries, and essay feedback FROM your notes. It doesn\'t solve textbook problems, which is exactly the feature that gets students in trouble with academic integrity offices.' },
     { question: 'Will my school flag WriteScholar use?', answer: 'No. Generating flashcards from lecture notes and using AI essay feedback (when you don\'t submit AI-generated text) is consistent with academic integrity policies at virtually every university.' },
-    { question: 'How does pricing compare?', answer: 'WriteScholar Pro is $9.99 for your first month (NEWCUSTOMER), then $19.99/mo; Chegg Study is $19.95/mo. Similar headline price, very different feature sets — WriteScholar focuses on study tools from your notes, not textbook answer keys.' },
+    { question: 'How does pricing compare?', answer: 'WriteScholar Pro is $19.99/mo after a 7-day free trial; Chegg Study is $19.95/mo. Similar headline price, very different feature sets — WriteScholar focuses on study tools from your notes, not textbook answer keys.' },
     { question: 'Does WriteScholar do tutoring?', answer: 'Not live human tutoring. The AI tools (essay checker with explanations, quiz generator with explanations) function as on-demand learning support, but if you need a real tutor we recommend Wyzant or your school\'s tutoring center.' },
     { question: 'Can I cancel anytime?', answer: 'Yes, cancel via the billing settings page in 30 seconds. No retention scripts, no "are you sure?" loops. We don\'t auto-renew without notice.' },
     { question: 'Does WriteScholar have textbook solutions?', answer: 'No. Use your textbook + WriteScholar to generate practice problems and study tools, but the worked solutions to specific textbook problems aren\'t our feature.' },
@@ -689,7 +690,7 @@ const grammarlyAlt: ProgrammaticPageConfig = {
         { title: 'You need essay feedback, not just grammar', body: 'Grammarly tells you "this sentence has a comma splice." WriteScholar tells you "your thesis is too broad, here are 3 ways to narrow it." Different problem solved.' },
         { title: 'You\'re writing for grades, not professional emails', body: 'Grammarly\'s sweet spot is workplace email. WriteScholar is built for academic writing with rubric-based feedback aligned to how professors actually grade.' },
         { title: 'You want all your writing tools in one place', body: 'Grammarly + EasyBib + Outline Builder = three subscriptions. WriteScholar bundles them.' },
-        { title: 'Cost matters', body: 'Grammarly Premium is $30/mo. WriteScholar Pro is $9.99 for your first month (NEWCUSTOMER), then $19.99/mo — with essay rubrics and study tools Grammarly doesn\'t include.' },
+        { title: 'Cost matters', body: 'Grammarly Premium is $30/mo. WriteScholar Pro is $19.99/mo after a 7-day free trial — with essay rubrics and study tools Grammarly doesn\'t include.' },
       ],
     },
     {
@@ -708,7 +709,7 @@ const grammarlyAlt: ProgrammaticPageConfig = {
     { question: 'Can I use both?', answer: 'Sure, many students use Grammarly free for in-line corrections while drafting, then run the finished essay through WriteScholar for grade-level feedback.' },
     { question: 'Does WriteScholar do plagiarism detection?', answer: 'Not included. Most universities provide Turnitin access (the gold standard); we don\'t try to compete with it. Use WriteScholar for draft feedback before you submit.' },
     { question: 'What about the AI writing detector?', answer: 'WriteScholar doesn\'t flag AI-written text. The strongest signal that something was AI-generated is its style, robotic, evenly-paced, overuse of "moreover" and "furthermore". A grammar checker won\'t catch it; a human reader will.' },
-    { question: 'How does pricing compare?', answer: 'Grammarly Premium: $30/mo (or $144/year). WriteScholar Pro: $9.99 first month (NEWCUSTOMER), then $19.99/mo — roughly 33% cheaper on ongoing monthly, with academic rubrics and study tools Grammarly doesn\'t have.' },
+    { question: 'How does pricing compare?', answer: 'Grammarly Premium: $30/mo (or $144/year). WriteScholar Pro: $19.99/mo after a 7-day free trial — roughly 33% cheaper on ongoing monthly, with academic rubrics and study tools Grammarly doesn\'t have.' },
   ],
   related: [
     { label: 'AI Essay Checker', href: '/tools/analyze', teaser: 'Free grade + rubric + revision.' },
@@ -1102,6 +1103,21 @@ const bestPages: ProgrammaticPageConfig[] = [
     eyebrow: 'Best AI essay grader · 2026',
     accent: '#A560E8',
     intro: 'AI essay graders have multiplied since 2022, at least 20 are now competing for college students\' attention. Most are mediocre. The problem isn\'t the AI; it\'s how grades are calibrated. An A on one platform is a B+ on another. This guide compares the five tools college students actually use, scored on what matters: rubric depth, grade calibration, line-by-line feedback, and price.',
+    bestMeta: {
+      updated: 'August 2026',
+      tested: '5 tools tested',
+      readTime: '6 min read',
+      method: 'Every tool graded the same 1,500-word argumentative essay, already marked by a freshman composition instructor. We scored each on rubric depth, how close its grade landed to the instructor\'s, whether it annotated specific lines, and what a college student actually pays per month.',
+      verdict: {
+        pick: {
+          name: 'WriteScholar',
+          badge: 'Best overall',
+          why: 'The only grader in the test that scores five rubric categories with sub-criteria, calibrates against real college grade distributions, and marks up specific lines you can fix in one click. Preview it on your own essay before paying anything.',
+        },
+        runnerUp: { name: 'ProWritingAid', why: 'deepest style and structure reports, but it never gives you a grade.' },
+        budget: { name: 'ChatGPT', why: '$20/mo and endlessly flexible, though grades run inflated and vary run to run.' },
+      },
+    },
     sections: [
       {
         type: 'comparison',
@@ -1115,6 +1131,11 @@ const bestPages: ProgrammaticPageConfig[] = [
           { feature: 'EssayGrader.ai', values: ['Single grade only', 'Inconsistent', 'Limited', '$15/mo'] },
           { feature: 'ChatGPT (GPT-4)', values: ['Variable', 'Generous (inflated)', 'On request', '$20/mo'] },
         ],
+      },
+      {
+        type: 'demo',
+        heading: 'What the top pick actually looks like',
+        caption: 'Switch samples, hover the highlights, and check the rubric. Same view you get in the app.',
       },
       {
         type: 'list',
@@ -1140,7 +1161,7 @@ const bestPages: ProgrammaticPageConfig[] = [
     faqs: [
       { question: 'Are AI essay graders accurate?', answer: 'For surface-level feedback (grammar, structure, basic argument quality), they\'re 80-90% accurate. For nuanced argument quality and originality, less so. Use as a complement to human feedback, not a replacement.' },
       { question: 'Will my professor know I used an AI grader?', answer: 'No, running your own essay through an AI grader for feedback is no different from running it through Grammarly. The output is feedback to YOU, not text you submit.' },
-      { question: 'What\'s the catch with the free tier?', answer: 'WriteScholar gives 2 lifetime essay analysis previews on your own work (grade estimate, issues, top suggestions — full rubric and one-click fixes unlock with Pro). No monthly reset tricks: when previews are used, you know exactly what Pro adds. First month of Pro is $9.99 with NEWCUSTOMER.' },
+      { question: 'What\'s the catch with the free tier?', answer: 'WriteScholar gives you a lifetime essay analysis preview on your own work (grade estimate, issues, top suggestions — full rubric and one-click fixes unlock with Pro). No monthly reset tricks: once the preview is used, you know exactly what Pro adds. Pro is $19.99/mo and starts with a 7-day free trial.' },
       { question: 'Can AI graders grade as well as professors?', answer: 'Not yet. Top AI graders (WriteScholar, top-tier ChatGPT prompts) match professors ~75% of the time on overall grade, less on nuanced feedback. They\'re a useful first pass; not a replacement.' },
       { question: 'Which is best for med school applications?', answer: 'For high-stakes essays, get human feedback (admissions counsellor, mentor, English teacher). AI graders are useful for early drafts and grammar passes.' },
       { question: 'Is WriteScholar genuinely better, or are you biased?', answer: 'I built it, so yes I\'m biased. The honest pitch: preview your essay free, then Pro is $9.99 for your first month and $19.99/mo after — cheaper than Grammarly Premium, with 5-category rubric scoring most tools skip. For workplace writing, Grammarly is better. For creative work, neither.' },

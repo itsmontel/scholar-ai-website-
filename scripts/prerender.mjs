@@ -167,6 +167,27 @@ async function prerender() {
     } catch (e) {
       console.warn(`  ⚠️ Content wait for ${route}: ${e.message}`);
     }
+
+    // Auto-scroll to the bottom and back so every scroll-reveal block fires
+    // and lazy media loads BEFORE we capture the DOM — otherwise the saved
+    // HTML ships with below-fold sections stuck at opacity-0.
+    await page.evaluate(async () => {
+      await new Promise((resolve) => {
+        let y = 0;
+        const step = () => {
+          y += 600;
+          window.scrollTo(0, y);
+          if (y < document.documentElement.scrollHeight) {
+            setTimeout(step, 40);
+          } else {
+            window.scrollTo(0, 0);
+            resolve(undefined);
+          }
+        };
+        step();
+      });
+    });
+
     await new Promise((r) => setTimeout(r, 800));
 
     let html = await page.content();

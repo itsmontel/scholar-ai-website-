@@ -5,6 +5,7 @@ import {
 } from '../../constants/freePlanCopy';
 import Footer from '../common/Footer';
 import CancelRetentionModal from '../common/CancelRetentionModal';
+import { FIRST_MONTH_PRICE, signupPromoCode, showSignupDiscount } from '../../config/pricing';
 
 interface BillingPageProps {
   onNavigate?: (page: string) => void;
@@ -40,17 +41,16 @@ interface UsageStats {
   plan?: string;
 }
 
-/** Auto-applied welcome discount for first-time customers: 50% off the
- *  first monthly invoice (Pro $19.99 → $9.99, Premium $39.99 → $19.99).
- *  Backend strips the code for anyone with prior subscription history. */
-const WELCOME_PROMO_CODE = 'NEWCUSTOMER';
-const FIRST_MONTH_PRICE: Record<string, number> = { pro: 9.99, premium: 19.99 };
+/* Welcome-discount policy lives in src/config/pricing.ts. Upgrading from
+   Billing is an acquisition surface, so the discount only appears when
+   that policy allows it. The cancel flow (below) is the exception — the
+   retention coupon there is a separate, deliberate save offer. */
 
 const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout }) => {
   const [currentPlan, setCurrentPlan] = useState<string>('free');
   // Stripe subscription status (trialing / active / past_due / …) —
-  // CancelRetentionModal uses 'trialing' to skip the pause + discount
-  // steps and jump straight to the confirm-cancel screen.
+  // CancelRetentionModal uses 'trialing' to skip the pause step and
+  // open directly on the 50%-off save offer.
   const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
   // Cancellation retention modal visibility.
   const [cancelOpen, setCancelOpen] = useState(false);
@@ -213,11 +213,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
             billingCycle: billingCycle,
             successUrl: `${window.location.origin}/billing?success=true`,
             cancelUrl: `${window.location.origin}/dashboard?payment=cancelled`,
-            // Auto-apply the new-customer first-month discount on monthly
-            // plans only (the coupon discounts the first invoice; on
-            // yearly it would halve the whole year). Backend strips it
-            // for returning subscribers.
-            ...(newCustomer && billingCycle === 'monthly' ? { promoCode: WELCOME_PROMO_CODE } : {}),
+            ...(signupPromoCode(newCustomer, billingCycle) ?? {}),
           })
         });
 
@@ -434,7 +430,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
               
               {/* Price */}
               <div className="text-center mb-6">
-                {plan.id !== 'free' && billingCycle === 'monthly' && currentPlan === 'free' && newCustomer ? (
+                {plan.id !== 'free' && billingCycle === 'monthly' && currentPlan === 'free' && showSignupDiscount(newCustomer, 'monthly') ? (
                   /* New-customer monthly display — leads with the
                      NEWCUSTOMER first-month price (Pro $9.99, Premium
                      $19.99) anchored against the standard monthly
@@ -677,6 +673,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
         // wiping the success-step state the modal just set.
         onMutate={() => fetchSubscriptionData(true)}
         subscriptionStatus={subscriptionStatus}
+        plan={currentPlan}
       />
     </>
   );

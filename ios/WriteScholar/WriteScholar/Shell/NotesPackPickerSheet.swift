@@ -20,6 +20,8 @@ struct NotesPackPickerSheet: View {
         case craterBlast
         case wordTower
         case wordBlitz
+        case memoryMatchNotes
+        case quizRunNotes
         var id: String { rawValue }
     }
 
@@ -210,9 +212,11 @@ struct NotesPackPickerSheet: View {
                 guard let pack = StudyPackPersistence.shared.loadPack(for: item.id) else { return nil }
                 let count: Int = {
                     switch game {
-                    case .craterBlast: return pack.craterBlast?.questions.count ?? 0
-                    case .wordTower:   return pack.wordTower?.questions.count ?? 0
-                    case .wordBlitz:   return pack.wordBlitz?.questions.count ?? 0
+                    case .craterBlast:      return pack.craterBlast?.questions.count ?? 0
+                    case .wordTower:        return pack.wordTower?.questions.count ?? 0
+                    case .wordBlitz:        return pack.wordBlitz?.questions.count ?? 0
+                    case .memoryMatchNotes: return pack.flashcards?.cards.count ?? 0
+                    case .quizRunNotes:     return pack.quiz?.questions.count ?? 0
                     }
                 }()
                 guard count > 0 else { return nil }
@@ -228,42 +232,52 @@ struct NotesPackPickerSheet: View {
             .filter { item in
                 guard let pack = StudyPackPersistence.shared.loadPack(for: item.id) else { return true }
                 switch game {
-                case .craterBlast: return (pack.craterBlast?.questions.count ?? 0) == 0
-                case .wordTower:   return (pack.wordTower?.questions.count ?? 0) == 0
-                case .wordBlitz:   return (pack.wordBlitz?.questions.count ?? 0) == 0
+                case .craterBlast:      return (pack.craterBlast?.questions.count ?? 0) == 0
+                case .wordTower:        return (pack.wordTower?.questions.count ?? 0) == 0
+                case .wordBlitz:        return (pack.wordBlitz?.questions.count ?? 0) == 0
+                case .memoryMatchNotes: return (pack.flashcards?.cards.count ?? 0) == 0
+                case .quizRunNotes:     return (pack.quiz?.questions.count ?? 0) == 0
                 }
             }
     }
 
     private var gameLabel: String {
         switch game {
-        case .craterBlast: return "Crater Blast"
-        case .wordTower:   return "Word Tower"
-        case .wordBlitz:   return "Word Blitz"
+        case .craterBlast:      return "Crater Blast"
+        case .wordTower:        return "Word Tower"
+        case .wordBlitz:        return "Word Blitz"
+        case .memoryMatchNotes: return "Memory Match"
+        case .quizRunNotes:     return "Quiz Run"
         }
     }
 
     private var gameIcon: String {
         switch game {
-        case .craterBlast: return "burst.fill"
-        case .wordTower:   return "building.2.fill"
-        case .wordBlitz:   return "bolt.fill"
+        case .craterBlast:      return "burst.fill"
+        case .wordTower:        return "building.2.fill"
+        case .wordBlitz:        return "bolt.fill"
+        case .memoryMatchNotes: return "square.grid.2x2.fill"
+        case .quizRunNotes:     return "hare.fill"
         }
     }
 
     private var accent: Color {
         switch game {
-        case .craterBlast: return WSColor.duoRed
-        case .wordTower:   return WSColor.duoGreen
-        case .wordBlitz:   return WSColor.duoPink
+        case .craterBlast:      return WSColor.duoRed
+        case .wordTower:        return WSColor.duoGreen
+        case .wordBlitz:        return WSColor.duoPink
+        case .memoryMatchNotes: return WSColor.duoPurple
+        case .quizRunNotes:     return WSColor.duoYellowDark
         }
     }
 
     private var navTitle: String {
         switch game {
-        case .craterBlast: return "Pick a pack — Crater Blast"
-        case .wordTower:   return "Pick a pack — Word Tower"
-        case .wordBlitz:   return "Pick a pack — Word Blitz"
+        case .craterBlast:      return "Pick a pack — Crater Blast"
+        case .wordTower:        return "Pick a pack — Word Tower"
+        case .wordBlitz:        return "Pick a pack — Word Blitz"
+        case .memoryMatchNotes: return "Pick a pack — Memory Match"
+        case .quizRunNotes:     return "Pick a pack — Quiz Run"
         }
     }
 }

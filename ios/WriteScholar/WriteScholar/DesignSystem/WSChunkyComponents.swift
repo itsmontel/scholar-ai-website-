@@ -52,30 +52,36 @@ private struct WSChunkyOptionPalette {
     let badgeIcon: String?
     let badgeFill: Color
     let badgeStroke: Color
+    let badgeForeground: Color
 }
 
 private extension WSChunkyOptionState {
-    var palette: WSChunkyOptionPalette {
+    /// `selectedTint` colors the `.selected` state — brand purple by
+    /// default (the mockup's picked-answer treatment: solid fill, white
+    /// text, trailing check).
+    func palette(selectedTint: Color, selectedTintDark: Color) -> WSChunkyOptionPalette {
         switch self {
         case .idle:
             return WSChunkyOptionPalette(
-                topColor:    Color.white,
+                topColor:    WSColor.backgroundElevated,
                 baseColor:   WSColor.duoBorder,
                 foreground:  WSColor.duoText,
                 strokeColor: WSColor.duoBorder,
                 badgeIcon:   nil,
                 badgeFill:   .clear,
-                badgeStroke: WSColor.duoBorder
+                badgeStroke: WSColor.duoBorder,
+                badgeForeground: WSColor.duoText
             )
         case .selected:
             return WSChunkyOptionPalette(
-                topColor:    WSColor.duoBlueLight,
-                baseColor:   WSColor.duoBlueDark,
-                foreground:  WSColor.duoBlueDark,
-                strokeColor: WSColor.duoBlue,
-                badgeIcon:   nil,
-                badgeFill:   WSColor.duoBlue,
-                badgeStroke: WSColor.duoBlueDark
+                topColor:    selectedTint,
+                baseColor:   selectedTintDark,
+                foreground:  Color.white,
+                strokeColor: selectedTintDark,
+                badgeIcon:   "checkmark",
+                badgeFill:   Color.white,
+                badgeStroke: selectedTintDark,
+                badgeForeground: selectedTint
             )
         case .correct:
             return WSChunkyOptionPalette(
@@ -85,7 +91,8 @@ private extension WSChunkyOptionState {
                 strokeColor: WSColor.duoGreenDark,
                 badgeIcon:   "checkmark",
                 badgeFill:   Color.white,
-                badgeStroke: WSColor.duoGreenDark
+                badgeStroke: WSColor.duoGreenDark,
+                badgeForeground: WSColor.duoGreen
             )
         case .wrong:
             return WSChunkyOptionPalette(
@@ -95,26 +102,20 @@ private extension WSChunkyOptionState {
                 strokeColor: WSColor.duoRedDark,
                 badgeIcon:   "xmark",
                 badgeFill:   Color.white,
-                badgeStroke: WSColor.duoRedDark
+                badgeStroke: WSColor.duoRedDark,
+                badgeForeground: WSColor.duoRed
             )
         case .disabled:
             return WSChunkyOptionPalette(
-                topColor:    WSColor.duoSurface,
+                topColor:    WSColor.surface,
                 baseColor:   WSColor.duoBorder,
                 foreground:  WSColor.duoText.opacity(0.45),
                 strokeColor: WSColor.duoBorder,
                 badgeIcon:   nil,
                 badgeFill:   .clear,
-                badgeStroke: WSColor.duoBorder
+                badgeStroke: WSColor.duoBorder,
+                badgeForeground: WSColor.duoText
             )
-        }
-    }
-
-    var badgeForeground: Color {
-        switch self {
-        case .correct: return WSColor.duoGreen
-        case .wrong:   return WSColor.duoRed
-        default:       return WSColor.duoText
         }
     }
 }
@@ -129,68 +130,67 @@ private extension WSChunkyOptionState {
 struct WSChunkyOption<Accessory: View>: View {
     var label: String
     var state: WSChunkyOptionState
+    /// Retained for API compatibility — the soft restyle no longer draws a
+    /// 3D lip; press feedback is a gentle scale + shadow soften instead.
     var lip: CGFloat = 5
     var cornerRadius: CGFloat = 18
     var verticalPadding: CGFloat = 16
     var horizontalPadding: CGFloat = 18
+    /// Tint for the `.selected` state — brand purple per the mockup.
+    var selectedTint: Color = WSColor.duoPurple
+    var selectedTintDark: Color = WSColor.duoPurpleDark
     var action: () -> Void
     @ViewBuilder var accessory: () -> Accessory
 
     @State private var pressed: Bool = false
 
     var body: some View {
-        let palette = state.palette
+        let palette = state.palette(selectedTint: selectedTint, selectedTintDark: selectedTintDark)
         let isLocked = state == .disabled || state == .correct || state == .wrong
+        let isFilled = state == .selected || state == .correct || state == .wrong
 
         Button {
             guard !isLocked else { return }
             Haptics.light()
             action()
         } label: {
-            ZStack(alignment: .top) {
-                // Base "lip"
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .fill(palette.baseColor)
-                    .padding(.top, lip)
+            HStack(spacing: 14) {
+                accessory()
+                Text(label)
+                    .font(WSFont.sans(15, weight: .heavy))
+                    .foregroundStyle(palette.foreground)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
 
-                // Top face
-                HStack(spacing: 14) {
-                    accessory()
-                    Text(label)
-                        .font(WSFont.sans(15, weight: .heavy))
-                        .foregroundStyle(palette.foreground)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .multilineTextAlignment(.leading)
-                        .fixedSize(horizontal: false, vertical: true)
-
-                    if let icon = palette.badgeIcon {
-                        ZStack {
-                            Circle()
-                                .fill(palette.badgeFill)
-                                .frame(width: 28, height: 28)
-                                .overlay(Circle().stroke(palette.badgeStroke, lineWidth: 2))
-                            Image(systemName: icon)
-                                .font(.system(size: 12, weight: .black))
-                                .foregroundStyle(state.badgeForeground)
-                        }
+                if let icon = palette.badgeIcon {
+                    ZStack {
+                        Circle()
+                            .fill(palette.badgeFill)
+                            .frame(width: 28, height: 28)
+                            .overlay(Circle().stroke(palette.badgeStroke.opacity(0.35), lineWidth: 1.5))
+                        Image(systemName: icon)
+                            .font(.system(size: 12, weight: .black))
+                            .foregroundStyle(palette.badgeForeground)
                     }
+                    .transition(.scale.combined(with: .opacity))
                 }
-                .padding(.vertical, verticalPadding)
-                .padding(.horizontal, horizontalPadding)
-                .frame(maxWidth: .infinity)
-                .background(
-                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                        .fill(palette.topColor)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                                .stroke(palette.strokeColor, lineWidth: 2)
-                        )
-                )
-                .offset(y: pressed && !isLocked ? lip : 0)
             }
+            .padding(.vertical, verticalPadding)
+            .padding(.horizontal, horizontalPadding)
+            .frame(maxWidth: .infinity)
+            .background(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .fill(palette.topColor)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                            .stroke(isFilled ? Color.white.opacity(0.15) : palette.strokeColor, lineWidth: 1.5)
+                    )
+            )
             .compositingGroup()
-            .shadow(color: palette.baseColor.opacity(pressed ? 0.04 : 0.18),
-                    radius: pressed ? 1 : 4, y: pressed ? 0 : 2)
+            .shadow(color: isFilled ? palette.baseColor.opacity(pressed ? 0.15 : 0.35) : Color.black.opacity(pressed ? 0.02 : 0.06),
+                    radius: pressed ? 4 : 12, y: pressed ? 2 : 6)
+            .scaleEffect(pressed && !isLocked ? 0.98 : 1)
             .animation(.spring(response: 0.18, dampingFraction: 0.62), value: pressed)
             .animation(.spring(response: 0.30, dampingFraction: 0.70), value: state)
         }
@@ -206,6 +206,8 @@ extension WSChunkyOption where Accessory == EmptyView {
          cornerRadius: CGFloat = 18,
          verticalPadding: CGFloat = 16,
          horizontalPadding: CGFloat = 18,
+         selectedTint: Color = WSColor.duoPurple,
+         selectedTintDark: Color = WSColor.duoPurpleDark,
          action: @escaping () -> Void) {
         self.label = label
         self.state = state
@@ -213,16 +215,21 @@ extension WSChunkyOption where Accessory == EmptyView {
         self.cornerRadius = cornerRadius
         self.verticalPadding = verticalPadding
         self.horizontalPadding = horizontalPadding
+        self.selectedTint = selectedTint
+        self.selectedTintDark = selectedTintDark
         self.action = action
         self.accessory = { EmptyView() }
     }
 }
 
 /// Letter prefix accessory ("A.", "B.", etc.) — pass to `accessory:` slot.
+/// Defaults adapt to dark mode; pass explicit colors on filled rows
+/// (e.g. white-on-translucent when the option is selected).
 struct WSChunkyOptionLetter: View {
     let letter: String
-    var fillColor: Color = WSColor.duoSurface
+    var fillColor: Color = WSColor.surface
     var foreground: Color = WSColor.duoText
+    var strokeColor: Color = WSColor.duoBorder
 
     var body: some View {
         ZStack {
@@ -230,7 +237,7 @@ struct WSChunkyOptionLetter: View {
                 .fill(fillColor)
                 .overlay(
                     RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .stroke(WSColor.duoBorder, lineWidth: 1)
+                        .stroke(strokeColor, lineWidth: 1)
                 )
                 .frame(width: 26, height: 26)
             Text(letter.uppercased())
@@ -263,6 +270,7 @@ struct WSChunkyPill: View {
     var icon: String? = nil
     var isSelected: Bool
     var tint: Color = WSColor.brandPrimary
+    /// Retained for API compatibility — the soft restyle draws no 3D lip.
     var lip: CGFloat = 4
     var verticalPadding: CGFloat = 9
     var horizontalPadding: CGFloat = 16
@@ -275,37 +283,31 @@ struct WSChunkyPill: View {
             Haptics.light()
             action()
         } label: {
-            ZStack(alignment: .top) {
-                Capsule()
-                    .fill(isSelected ? tint.opacity(0.85) : WSColor.duoBorder.opacity(0.7))
-                    .padding(.top, lip)
-
-                HStack(spacing: 6) {
-                    if let icon = icon {
-                        Image(systemName: icon)
-                            .font(.system(size: 11, weight: .black))
-                    }
-                    Text(label)
-                        .font(WSFont.sans(13, weight: .black))
-                        .tracking(0.3)
-                        .lineLimit(1)
+            HStack(spacing: 6) {
+                if let icon = icon {
+                    Image(systemName: icon)
+                        .font(.system(size: 11, weight: .black))
                 }
-                .foregroundStyle(isSelected ? Color.white : WSColor.duoText)
-                .padding(.vertical, verticalPadding)
-                .padding(.horizontal, horizontalPadding)
-                .background(
-                    Capsule()
-                        .fill(isSelected ? tint : Color.white)
-                        .overlay(
-                            Capsule()
-                                .stroke(isSelected ? tint : WSColor.duoBorder, lineWidth: 2)
-                        )
-                )
-                .offset(y: pressed ? lip : 0)
+                Text(label)
+                    .font(WSFont.sans(13, weight: .black))
+                    .tracking(0.3)
+                    .lineLimit(1)
             }
+            .foregroundStyle(isSelected ? Color.white : WSColor.foregroundMuted)
+            .padding(.vertical, verticalPadding)
+            .padding(.horizontal, horizontalPadding)
+            .background(
+                Capsule()
+                    .fill(isSelected ? tint : WSColor.backgroundElevated)
+                    .overlay(
+                        Capsule()
+                            .stroke(isSelected ? Color.clear : WSColor.hairline, lineWidth: 1)
+                    )
+            )
             .compositingGroup()
-            .shadow(color: (isSelected ? tint : WSColor.duoBorder).opacity(pressed ? 0.05 : 0.20),
-                    radius: pressed ? 1 : 4, y: pressed ? 0 : 2)
+            .shadow(color: isSelected ? tint.opacity(pressed ? 0.15 : 0.35) : Color.black.opacity(pressed ? 0.02 : 0.05),
+                    radius: pressed ? 3 : 8, y: pressed ? 1 : 4)
+            .scaleEffect(pressed ? 0.96 : 1)
             .animation(.spring(response: 0.18, dampingFraction: 0.62), value: pressed)
             .animation(.spring(response: 0.26, dampingFraction: 0.72), value: isSelected)
         }

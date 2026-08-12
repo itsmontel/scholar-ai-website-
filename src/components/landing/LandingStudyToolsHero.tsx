@@ -24,9 +24,9 @@ const FEATURE_TABS: FeatureTab[] = [
     id: 'editor',
     label: 'Smart Editor',
     eyebrow: 'Editor',
-    title: <>Write, revise and <span className="text-[#1CB0F6]">fix your draft in one workspace</span>.</>,
+    title: <>Write, revise and <span className="text-[#A560E8]">fix your draft in one workspace</span>.</>,
     body: 'Distraction-free editor with the rubric, citations and one-click fixes right next to your draft.',
-    accent: '#1CB0F6',
+    accent: '#A560E8',
     primaryCta: { label: 'Open the editor', target: 'ai-essay-editor' },
     preview: <img src="/WriterPic.png" alt="WriteScholar editor workspace" loading="lazy" decoding="async" className="w-full h-auto block" />,
   },
@@ -34,9 +34,9 @@ const FEATURE_TABS: FeatureTab[] = [
     id: 'analyzer',
     label: 'Essay Analyzer',
     eyebrow: 'Analyzer',
-    title: <>Get a /100 grade and <span className="text-[#A560E8]">line-by-line feedback</span> in seconds.</>,
+    title: <>Get a /100 grade and <span className="text-[#8A48C7]">line-by-line feedback</span> in seconds.</>,
     body: 'Drop in your essay for rubric scores, colour-coded annotations, and a five-section professor-style report.',
-    accent: '#A560E8',
+    accent: '#8A48C7',
     primaryCta: { label: 'Try the analyzer', target: 'analyze-essay' },
     preview: <img src="/rubric-and-notes.png" alt="Essay analyzer rubric view" loading="lazy" decoding="async" className="w-full h-auto block" />,
   },
@@ -44,9 +44,9 @@ const FEATURE_TABS: FeatureTab[] = [
     id: 'study-pack',
     label: 'Study Pack',
     eyebrow: 'Study Pack',
-    title: <>Turn any notes into a <span className="text-[#FF9600]">complete study pack</span>.</>,
+    title: <>Turn any notes into a <span className="text-[#7733B5]">complete study pack</span>.</>,
     body: 'Upload PDFs, slides or notes once. Get summarised notes, flashcards, a quiz, crossword and lesson plan in 60 seconds.',
-    accent: '#FF9600',
+    accent: '#7733B5',
     primaryCta: { label: 'Build a study pack', target: 'study-pack-hub' },
     preview: <img src="/studypack.png" alt="Study pack preview" loading="lazy" decoding="async" className="w-full h-auto block" />,
   },
@@ -54,9 +54,9 @@ const FEATURE_TABS: FeatureTab[] = [
     id: 'flashcards',
     label: 'Flashcards',
     eyebrow: 'Flashcards',
-    title: <>Make <span className="text-[#FFC800]">flashcards that actually stick</span>.</>,
+    title: <>Make <span className="text-[#A560E8]">flashcards that actually stick</span>.</>,
     body: 'Auto-generated cards with spaced repetition, daily review streaks, and share-with-friends built in.',
-    accent: '#FFC800',
+    accent: '#A560E8',
     primaryCta: { label: 'Try flashcards', target: 'study-pack-hub' },
     preview: (
       <div className="relative aspect-[16/10] w-full bg-black">
@@ -68,9 +68,9 @@ const FEATURE_TABS: FeatureTab[] = [
     id: 'quiz',
     label: 'Quiz',
     eyebrow: 'Quiz',
-    title: <>Quiz yourself before the test <span className="text-[#FF4B82]">with questions from your notes</span>.</>,
+    title: <>Quiz yourself before the test <span className="text-[#8A48C7]">with questions from your notes</span>.</>,
     body: 'Multiple choice, true/false and fill-in-the-blank with explanations on every answer.',
-    accent: '#FF4B82',
+    accent: '#8A48C7',
     primaryCta: { label: 'Generate a quiz', target: 'study-pack-hub' },
     preview: (
       <div className="relative aspect-[16/10] w-full bg-black">
@@ -82,9 +82,9 @@ const FEATURE_TABS: FeatureTab[] = [
     id: 'arcade',
     label: 'Arcade',
     eyebrow: 'Arcade mode',
-    title: <>Study habits, gamified — <span className="text-[#58CC02]">Word Tower, Word Blitz, Crater Blast</span>.</>,
+    title: <>Study habits, gamified — <span className="text-[#6B27A3]">Word Tower, Word Blitz, Crater Blast</span>.</>,
     body: 'Three arcade games seeded with your subject content. Earn XP and keep showing up the day before the test.',
-    accent: '#58CC02',
+    accent: '#6B27A3',
     primaryCta: { label: 'Play arcade', target: 'more-tools' },
     preview: (
       <div className="relative aspect-[16/10] w-full bg-black">
@@ -178,21 +178,21 @@ const ANALYZER_NOTES = [
   },
   {
     n: 2,
-    color: '#FF9600',
+    color: '#8A48C7',
     hotspot: 'top-[13%] left-[3%]',
     title: 'Rubric breakdown',
     desc: 'Thesis, evidence, structure and style — each criterion scored on its own.',
   },
   {
     n: 3,
-    color: '#1CB0F6',
+    color: '#7733B5',
     hotspot: 'top-[54%] left-[24%]',
     title: 'Line-by-line feedback',
     desc: 'Colour-coded highlights mapped to the exact sentences that cost you marks.',
   },
   {
     n: 4,
-    color: '#58CC02',
+    color: '#6B27A3',
     hotspot: 'top-[58%] right-[6%]',
     title: 'One-click revisions',
     desc: 'An "Areas to improve" list with fixes you can apply straight into your draft.',
@@ -450,7 +450,7 @@ type ToneStyle = {
 };
 
 const TONE_STYLES: Record<Tone, ToneStyle> = {
-  // Flashcards — purple
+  // Flashcards — brand purple
   blue: {
     border:      'border-[#A560E8]',
     borderInner: 'border-[#D8B4FE]',
@@ -462,43 +462,42 @@ const TONE_STYLES: Record<Tone, ToneStyle> = {
     chromeDot:   'bg-[#A560E8]',
     livePill:    'bg-[#F3EAFF] text-[#A560E8]',
   },
-  // Quizzes — green
+  // Quizzes — deeper purple
   green: {
-    border:      'border-[#46A302]',
-    borderInner: 'border-[#A8E06B]',
-    accent:      'bg-gradient-to-r from-[#58CC02] to-[#46A302]',
-    badge:       'bg-[#E5F8D0] text-[#2E7200]',
-    numBg:       'bg-[#58CC02]',
+    border:      'border-[#8A48C7]',
+    borderInner: 'border-[#C9A0F0]',
+    accent:      'bg-gradient-to-r from-[#8A48C7] to-[#6B27A3]',
+    badge:       'bg-[#F3EAFF] text-[#7733B5]',
+    numBg:       'bg-[#8A48C7]',
     cardBg:      'bg-white',
-    shadow:      'shadow-[0_8px_28px_-10px_rgba(88,204,2,0.40)] hover:shadow-[0_16px_40px_-12px_rgba(88,204,2,0.55)]',
-    chromeDot:   'bg-[#58CC02]',
-    livePill:    'bg-[#E5F8D0] text-[#46A302]',
+    shadow:      'shadow-[0_8px_28px_-10px_rgba(138,72,199,0.45)] hover:shadow-[0_16px_40px_-12px_rgba(138,72,199,0.60)]',
+    chromeDot:   'bg-[#8A48C7]',
+    livePill:    'bg-[#F3EAFF] text-[#8A48C7]',
   },
-  // Crosswords — orange/amber
+  // Crosswords — rich violet
   orange: {
-    border:      'border-[#D97F00]',
-    borderInner: 'border-[#FFCF70]',
-    accent:      'bg-gradient-to-r from-[#FF9600] to-[#D97F00]',
-    badge:       'bg-[#FFF4E0] text-[#9A5500]',
-    numBg:       'bg-[#FF9600]',
+    border:      'border-[#7733B5]',
+    borderInner: 'border-[#D8B4FE]',
+    accent:      'bg-gradient-to-r from-[#7733B5] to-[#5A1B8E]',
+    badge:       'bg-[#F3EAFF] text-[#5A1B8E]',
+    numBg:       'bg-[#7733B5]',
     cardBg:      'bg-white',
-    shadow:      'shadow-[0_8px_28px_-10px_rgba(255,150,0,0.40)] hover:shadow-[0_16px_40px_-12px_rgba(255,150,0,0.55)]',
-    chromeDot:   'bg-[#FF9600]',
-    livePill:    'bg-[#FFF4E0] text-[#D97F00]',
+    shadow:      'shadow-[0_8px_28px_-10px_rgba(119,51,181,0.45)] hover:shadow-[0_16px_40px_-12px_rgba(119,51,181,0.60)]',
+    chromeDot:   'bg-[#7733B5]',
+    livePill:    'bg-[#F3EAFF] text-[#7733B5]',
   },
-  // Lessons — teal/cyan
+  // Lessons — soft lilac accent
   red: {
-    border:      'border-[#0891B2]',
-    borderInner: 'border-[#67E8F9]',
-    accent:      'bg-gradient-to-r from-[#06B6D4] to-[#0891B2]',
-    badge:       'bg-[#CFFAFE] text-[#0E7490]',
-    numBg:       'bg-[#06B6D4]',
+    border:      'border-[#C9A0F0]',
+    borderInner: 'border-[#E9D5FF]',
+    accent:      'bg-gradient-to-r from-[#C9A0F0] to-[#A560E8]',
+    badge:       'bg-[#F3EAFF] text-[#7733B5]',
+    numBg:       'bg-[#A560E8]',
     cardBg:      'bg-white',
-    shadow:      'shadow-[0_8px_28px_-10px_rgba(6,182,212,0.40)] hover:shadow-[0_16px_40px_-12px_rgba(6,182,212,0.55)]',
-    chromeDot:   'bg-[#06B6D4]',
-    livePill:    'bg-[#CFFAFE] text-[#0891B2]',
+    shadow:      'shadow-[0_8px_28px_-10px_rgba(165,96,232,0.40)] hover:shadow-[0_16px_40px_-12px_rgba(165,96,232,0.55)]',
+    chromeDot:   'bg-[#A560E8]',
+    livePill:    'bg-[#F3EAFF] text-[#A560E8]',
   },
-  // (unused — kept for type safety)
   purple: {
     border:      'border-[#A560E8]',
     borderInner: 'border-[#D8B4FE]',
@@ -510,17 +509,17 @@ const TONE_STYLES: Record<Tone, ToneStyle> = {
     chromeDot:   'bg-[#A560E8]',
     livePill:    'bg-[#F3EAFF] text-[#A560E8]',
   },
-  // Arcade / game cards — hot pink
+  // Arcade / game cards — deep brand purple
   duoBlue: {
-    border:      'border-[#FF4B82]',
-    borderInner: 'border-[#FFB3CB]',
-    accent:      'bg-gradient-to-r from-[#FF4B82] to-[#C73968]',
-    badge:       'bg-[#FFE8EE] text-[#A82754]',
-    numBg:       'bg-[#FF4B82]',
+    border:      'border-[#6B27A3]',
+    borderInner: 'border-[#D8B4FE]',
+    accent:      'bg-gradient-to-r from-[#6B27A3] to-[#4A1B70]',
+    badge:       'bg-[#F3EAFF] text-[#5A1B8E]',
+    numBg:       'bg-[#6B27A3]',
     cardBg:      'bg-white',
-    shadow:      'shadow-[0_8px_28px_-10px_rgba(255,75,130,0.50)] hover:shadow-[0_16px_40px_-12px_rgba(255,75,130,0.70)]',
-    chromeDot:   'bg-[#FF4B82]',
-    livePill:    'bg-[#FFE8EE] text-[#A82754]',
+    shadow:      'shadow-[0_8px_28px_-10px_rgba(107,39,163,0.50)] hover:shadow-[0_16px_40px_-12px_rgba(107,39,163,0.70)]',
+    chromeDot:   'bg-[#6B27A3]',
+    livePill:    'bg-[#F3EAFF] text-[#6B27A3]',
   },
 };
 
@@ -548,8 +547,8 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
       <LandingSectionBackdrop
         base="bg-[#FCFBF7] dark:bg-stone-950"
         topFrom="from-[#FCFBF7]/90 dark:from-stone-950/90"
-        bottomTo="from-[#FFF4E0]/80 dark:from-[#2A1800]/80"
-        radial="bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(165,96,232,0.08),transparent_60%)]"
+        bottomTo="from-[#F3EAFF]/80 dark:from-[#1A0B2E]/80"
+        radial="bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(165,96,232,0.14),transparent_60%)]"
       />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -620,18 +619,18 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
 
         <LandingScrollReveal delayMs={180}>
           <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
-            <p className="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.18em] text-[#FF9600] mb-2">Every tool, in detail</p>
+            <p className="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.18em] text-[#A560E8] mb-2">Every tool, in detail</p>
             <h3 className="text-2xl sm:text-3xl font-extrabold text-stone-900 dark:text-white tracking-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
               Transform your notes into powerful study tools
             </h3>
           </div>
         </LandingScrollReveal>
 
-        {/* ─── Study tools bento (top half) — orange ambient panel ─── */}
-        <div className="relative rounded-3xl border-2 border-[#FFCF70]/70 bg-white/70 dark:bg-[#2A1800]/40 shadow-[0_0_60px_-20px_rgba(255,150,0,0.35)] p-4 sm:p-5 lg:p-6 backdrop-blur-sm">
+        {/* ─── Study tools bento (top half) — purple ambient panel ─── */}
+        <div className="relative rounded-3xl border-2 border-[#D8B4FE]/70 bg-white/70 dark:bg-[#2A0E40]/40 shadow-[0_0_60px_-20px_rgba(165,96,232,0.35)] p-4 sm:p-5 lg:p-6 backdrop-blur-sm">
           {/* Subtle corner glow */}
-          <div className="pointer-events-none absolute -top-10 -left-10 w-48 h-48 rounded-full bg-[#FF9600]/15 blur-3xl" aria-hidden />
-          <div className="pointer-events-none absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-[#D97F00]/12 blur-3xl" aria-hidden />
+          <div className="pointer-events-none absolute -top-10 -left-10 w-48 h-48 rounded-full bg-[#A560E8]/15 blur-3xl" aria-hidden />
+          <div className="pointer-events-none absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-[#8A48C7]/12 blur-3xl" aria-hidden />
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 auto-rows-min">
             {STUDY_TOOLS.map((tool, i) => (
               <LandingScrollReveal key={tool.title} className={tool.span} delayMs={i * 90}>
@@ -642,16 +641,15 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
         </div>
 
         {/* ─── Bridge band — visually carries the eye from study tools
-                 into the arcade games sub-section. Pink gradient ribbon
-                 echoes the in-app GamesPanel banner. ─── */}
+                 into the arcade games sub-section. Purple brand ribbon. ─── */}
         <LandingScrollReveal delayMs={120}>
           <div className="relative mt-14 sm:mt-20 mb-8 sm:mb-10" id="landing-arcade">
             <div
               className="relative overflow-hidden rounded-3xl border-2 border-b-4 text-white p-6 sm:p-8 lg:p-9"
               style={{
                 backgroundImage:
-                  'linear-gradient(135deg, #FF4B82 0%, #FF4B82 50%, #C73968 100%)',
-                borderColor: '#A82754',
+                  'linear-gradient(135deg, #A560E8 0%, #8A48C7 50%, #6B27A3 100%)',
+                borderColor: '#5A1B8E',
               }}
             >
               <div
@@ -688,18 +686,18 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
               </div>
             </div>
             {/* Down chevron — visually leads the eye to the games grid */}
-            <div className="pointer-events-none absolute -bottom-4 left-1/2 -translate-x-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white border-2 border-[#A82754] shadow-[0_6px_14px_-4px_rgba(168,39,84,0.45)]">
-              <svg className="w-4 h-4 text-[#A82754]" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
+            <div className="pointer-events-none absolute -bottom-4 left-1/2 -translate-x-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white border-2 border-[#5A1B8E] shadow-[0_6px_14px_-4px_rgba(90,27,142,0.45)]">
+              <svg className="w-4 h-4 text-[#5A1B8E]" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
               </svg>
             </div>
           </div>
         </LandingScrollReveal>
 
-        {/* ─── Arcade games bento (bottom half) — pink ambient panel ─── */}
-        <div className="relative rounded-3xl border-2 border-[#FF4B82]/50 bg-[#FFE8EE]/80 dark:bg-[#FF4B82]/10 shadow-[0_0_60px_-20px_rgba(255,75,130,0.40)] p-4 sm:p-5 lg:p-6 backdrop-blur-sm">
-          <div className="pointer-events-none absolute -top-10 -left-10 w-48 h-48 rounded-full bg-[#FF4B82]/15 blur-3xl" aria-hidden />
-          <div className="pointer-events-none absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-[#A82754]/20 blur-3xl" aria-hidden />
+        {/* ─── Arcade games bento (bottom half) — purple ambient panel ─── */}
+        <div className="relative rounded-3xl border-2 border-[#A560E8]/40 bg-[#F3EAFF]/80 dark:bg-[#A560E8]/10 shadow-[0_0_60px_-20px_rgba(165,96,232,0.40)] p-4 sm:p-5 lg:p-6 backdrop-blur-sm">
+          <div className="pointer-events-none absolute -top-10 -left-10 w-48 h-48 rounded-full bg-[#A560E8]/15 blur-3xl" aria-hidden />
+          <div className="pointer-events-none absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-[#6B27A3]/20 blur-3xl" aria-hidden />
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 auto-rows-min">
             {ARCADE_GAMES.map((tool, i) => (
               <LandingScrollReveal key={tool.title} className={tool.span} delayMs={i * 90}>
@@ -716,7 +714,7 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
               <button
                 type="button"
                 onClick={() => onNavigate('study-pack')}
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-[#FF9600] hover:bg-[#E88700] text-white font-extrabold text-base border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_8px_24px_-8px_rgba(255,150,0,0.50)]"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] text-white font-extrabold text-base border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_8px_24px_-8px_rgba(165,96,232,0.50)]"
                 style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
               >
                 Try Study Pack free
@@ -736,7 +734,7 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
             </div>
             <p className="text-xs sm:text-sm text-[#777] dark:text-stone-400 font-bold flex flex-wrap items-center justify-center gap-x-2 gap-y-1" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
               <span className="inline-flex items-center gap-1">
-                <svg className="w-3.5 h-3.5 text-[#FF9600]" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
+                <svg className="w-3.5 h-3.5 text-[#A560E8]" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
                 Free previews included · No credit card

@@ -93,6 +93,9 @@ final class DailyGoalStore: ObservableObject {
         case lessonRead
         case craterBlastPlayed
         case wordTowerPlayed
+        case wordBlitzPlayed
+        case memoryMatchPlayed
+        case quizRunPlayed
         case focusUnlock
         case dailyOpen      // First app open of the day
 
@@ -109,6 +112,9 @@ final class DailyGoalStore: ObservableObject {
             case .lessonRead:         return 8
             case .craterBlastPlayed:  return 12
             case .wordTowerPlayed:    return 12
+            case .wordBlitzPlayed:    return 12
+            case .memoryMatchPlayed:  return 12
+            case .quizRunPlayed:      return 12
             case .focusUnlock:        return 10
             case .dailyOpen:          return 5
             }
@@ -127,6 +133,9 @@ final class DailyGoalStore: ObservableObject {
             case .lessonRead:         return 24      // 3 lessons/day
             case .craterBlastPlayed:  return 48      // 4 games/day
             case .wordTowerPlayed:    return 48      // 4 games/day
+            case .wordBlitzPlayed:    return 48      // 4 games/day
+            case .memoryMatchPlayed:  return 48      // 4 games/day
+            case .quizRunPlayed:      return 48      // 4 games/day
             case .focusUnlock:        return 30      // 3 unlocks/day
             case .dailyOpen:          return .max    // fires once per day
             }
@@ -141,6 +150,9 @@ final class DailyGoalStore: ObservableObject {
             case .lessonRead:         return "Lesson read"
             case .craterBlastPlayed:  return "Crater Blast played"
             case .wordTowerPlayed:    return "Word Tower played"
+            case .wordBlitzPlayed:    return "Word Blitz played"
+            case .memoryMatchPlayed:  return "Memory Match played"
+            case .quizRunPlayed:      return "Quiz Run played"
             case .focusUnlock:        return "Focus unlock passed"
             case .dailyOpen:          return "Daily check-in"
             }
@@ -155,6 +167,9 @@ final class DailyGoalStore: ObservableObject {
             case .lessonRead:         return "book.pages.fill"
             case .craterBlastPlayed:  return "burst.fill"
             case .wordTowerPlayed:    return "building.2.fill"
+            case .wordBlitzPlayed:    return "bolt.fill"
+            case .memoryMatchPlayed:  return "square.grid.2x2.fill"
+            case .quizRunPlayed:      return "hare.fill"
             case .focusUnlock:        return "lock.open.fill"
             case .dailyOpen:          return "sparkles"
             }
@@ -169,6 +184,9 @@ final class DailyGoalStore: ObservableObject {
         var target: Int
         var xp: Int
         var entries: [Entry]
+        /// Accumulated foreground study seconds for the day. Optional so
+        /// history persisted before this field existed decodes fine.
+        var seconds: Int? = nil
 
         struct Entry: Codable, Equatable, Identifiable {
             let id: UUID
@@ -346,6 +364,34 @@ final class DailyGoalStore: ObservableObject {
         return award
     }
 
+    /// Accumulate foreground study time into today's bucket. Called by
+    /// the app shell on scene-phase transitions (foreground → background),
+    /// so writes are rare and the count survives relaunches.
+    func addStudyTime(seconds: Int) {
+        guard seconds > 0 else { return }
+        let key = Self.dayKey(for: Date())
+        if let idx = history.firstIndex(where: { $0.id == key }) {
+            history[idx].seconds = (history[idx].seconds ?? 0) + seconds
+        } else {
+            var log = DayLog(id: key,
+                             date: Calendar.current.startOfDay(for: Date()),
+                             target: target.xp,
+                             xp: 0,
+                             entries: [])
+            log.seconds = seconds
+            history.append(log)
+        }
+        persistHistory()
+    }
+
+    /// Today's accumulated study time in seconds.
+    var todayStudySeconds: Int { todayLog.seconds ?? 0 }
+
+    /// Study seconds summed over the last 7 days (including today).
+    var weekStudySeconds: Int {
+        lastDays(7).reduce(0) { $0 + ($1.seconds ?? 0) }
+    }
+
     /// Reset everything (debug + settings sheet "Clear history" action).
     func clearHistory() {
         history.removeAll()
@@ -365,14 +411,20 @@ final class DailyGoalStore: ObservableObject {
     // MARK: - Persistence
 
     private func loadFromDisk() {
+        // ORDER MATTERS: decode `history` BEFORE setting `target`.
+        // Setting `target` from this method (called out of init) fires its
+        // didSet → applyTargetToToday() → persistHistory(). If history were
+        // still empty at that point, the persisted history would be
+        // overwritten with a single blank today-row on every cold launch —
+        // wiping all past days and today's XP.
+        if let data = defaults.data(forKey: Keys.history),
+           let decoded = try? JSONDecoder().decode([DayLog].self, from: data) {
+            history = decoded
+        }
         if let raw = defaults.string(forKey: Keys.target),
            let parsed = Int(raw),
            let t = Target(rawValue: parsed) {
             target = t
-        }
-        if let data = defaults.data(forKey: Keys.history),
-           let decoded = try? JSONDecoder().decode([DayLog].self, from: data) {
-            history = decoded
         }
     }
 

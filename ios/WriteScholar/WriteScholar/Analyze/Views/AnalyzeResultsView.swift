@@ -19,9 +19,16 @@ struct AnalyzeResultsView: View {
     let result: AnalysisResult
     @ObservedObject var coordinator: AnalyzeCoordinator
 
+    @Environment(\.dismiss) private var dismiss
+
     @State private var tab: ResultTab = .highlights
     @State private var celebrate = 0
     @State private var didCelebrate = false
+    /// false = mockup summary (grade badge · score card · criteria rows);
+    /// true = the deep three-tab feedback layer.
+    @State private var showFullFeedback = false
+    /// Count-up value for the big score numeral.
+    @State private var displayedScore = 0
 
     enum ResultTab: String, CaseIterable, Identifiable {
         case highlights = "Highlights"
@@ -43,16 +50,17 @@ struct AnalyzeResultsView: View {
             WSColor.background.ignoresSafeArea()
 
             VStack(spacing: 0) {
-                scoreBanner
+                screenHeader
                     .padding(.horizontal, 16)
                     .padding(.top, 8)
 
-                tabStrip
-                    .padding(.top, 12)
-
-                Divider()
-
-                content(for: tab)
+                if showFullFeedback {
+                    tabStrip
+                        .padding(.top, 12)
+                    content(for: tab)
+                } else {
+                    summaryLayer
+                }
             }
 
             WSConfettiView(trigger: $celebrate)
@@ -61,79 +69,313 @@ struct AnalyzeResultsView: View {
         .onAppear {
             guard !didCelebrate else { return }
             didCelebrate = true
-            if scoreFraction >= 0.7 { celebrate += 1 }
+            if scoreFraction >= 0.7 {
+                celebrate += 1
+                Haptics.success()
+            }
+            countUpScore()
         }
     }
 
-    // MARK: - Score banner
+    // MARK: - Header  (‹ · Essay Analyzer · ↻)
 
-    private var scoreBanner: some View {
-        HStack(spacing: 14) {
-            ZStack {
-                Circle()
-                    .stroke(WSColor.duoSurface, lineWidth: 6)
-                    .frame(width: 70, height: 70)
-                Circle()
-                    .trim(from: 0, to: scoreFraction)
-                    .stroke(scoreFraction >= 0.7 ? WSColor.duoGreen : (scoreFraction >= 0.45 ? WSColor.duoOrange : WSColor.duoRed),
-                            style: StrokeStyle(lineWidth: 6, lineCap: .round))
-                    .rotationEffect(.degrees(-90))
-                    .frame(width: 70, height: 70)
-                    .shadow(color: (scoreFraction >= 0.7 ? WSColor.duoGreen : WSColor.duoOrange).opacity(0.4), radius: 6, y: 1)
-                Text(scoreLabel)
-                    .wsHeadline(.small, weight: .black)
-                    .foregroundStyle(WSColor.duoText)
-            }
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(encouragement)
-                    .wsHeadline(.small, weight: .black)
+    private var screenHeader: some View {
+        HStack {
+            Button {
+                Haptics.light()
+                if showFullFeedback {
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+                        showFullFeedback = false
+                    }
+                } else {
+                    dismiss()
+                }
+            } label: {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 16, weight: .black))
                     .foregroundStyle(WSColor.foreground)
-                Text(result.gradeEstimate ?? "Analysis ready")
-                    .wsBody(.small, weight: .bold)
-                    .foregroundStyle(WSColor.foregroundMuted)
-                if let clarity = result.clarityRating, !clarity.isEmpty {
-                    HStack(spacing: 6) {
-                        Image(systemName: "eye")
-                            .foregroundStyle(WSColor.foregroundMuted)
-                        Text("Clarity: \(clarity)")
-                            .wsBody(.caption, weight: .semibold)
-                            .foregroundStyle(WSColor.foregroundMuted)
-                    }
-                }
-                if let lockedFeatures = result.lockedFeatures, !lockedFeatures.isEmpty {
-                    HStack(spacing: 5) {
-                        Image(systemName: "lock.fill")
-                            .foregroundStyle(WSColor.duoOrange)
-                            .font(.system(size: 10, weight: .bold))
-                        Text("\(lockedFeatures.count) Pro features locked")
-                            .wsBody(.caption, weight: .bold)
-                            .foregroundStyle(WSColor.duoOrange)
-                    }
-                }
+                    .frame(width: 38, height: 38)
+                    .background(
+                        Circle()
+                            .fill(WSColor.backgroundElevated)
+                            .shadow(color: Color.black.opacity(0.05), radius: 5, y: 2)
+                    )
             }
+            .buttonStyle(WSBouncyButtonStyle())
+            .accessibilityLabel(showFullFeedback ? "Back to summary" : "Close")
 
+            Spacer()
+            Text("Essay Analyzer")
+                .wsHeadline(.small, weight: .black)
+                .foregroundStyle(WSColor.foreground)
             Spacer()
 
             Button {
-                coordinator.reset()
+                Haptics.light()
+                Task { await coordinator.analyze(text: content) }
             } label: {
-                Label("New", systemImage: "plus")
-                    .wsBody(.small, weight: .bold)
+                Image(systemName: "arrow.clockwise")
+                    .font(.system(size: 15, weight: .bold))
                     .foregroundStyle(WSColor.duoPurple)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(Capsule().fill(WSColor.duoPurpleLight))
+                    .frame(width: 38, height: 38)
+                    .background(
+                        Circle()
+                            .fill(WSColor.backgroundElevated)
+                            .shadow(color: Color.black.opacity(0.05), radius: 5, y: 2)
+                    )
             }
-            .buttonStyle(.plain)
+            .buttonStyle(WSBouncyButtonStyle())
+            .accessibilityLabel("Re-analyze")
         }
-        .padding(14)
-        .wsChunkyCard(
-            cornerRadius: 22,
-            horizontalPadding: 0,
-            verticalPadding: 0,
-            accent: scoreFraction >= 0.7 ? WSColor.duoGreen : (scoreFraction >= 0.45 ? WSColor.duoOrange : WSColor.duoRed)
+    }
+
+    // MARK: - Summary layer (the mockup screen)
+
+    private var summaryLayer: some View {
+        ScrollView {
+            VStack(spacing: 16) {
+                celebrationHeader.wsStaggerEntry(0)
+                overallScoreCard.wsStaggerEntry(1)
+                criteriaRows.wsStaggerEntry(2)
+                Spacer(minLength: 8)
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 18)
+            .padding(.bottom, 16)
+        }
+        .safeAreaInset(edge: .bottom) { bottomCTA }
+    }
+
+    /// "Great work!" + the circular letter-grade badge.
+    private var celebrationHeader: some View {
+        HStack(spacing: 16) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text(encouragement)
+                    .wsHeadline(.large, weight: .black)
+                    .foregroundStyle(WSColor.foreground)
+                if let clarity = result.clarityRating, !clarity.isEmpty {
+                    Text("Clarity: \(clarity)")
+                        .wsBody(.small, weight: .bold)
+                        .foregroundStyle(WSColor.foregroundMuted)
+                }
+            }
+            Spacer()
+            ZStack {
+                Circle()
+                    .fill(tierColor)
+                    .frame(width: 76, height: 76)
+                    .shadow(color: tierColor.opacity(0.4), radius: 12, y: 5)
+                let gradeText = result.gradeEstimate ?? scoreLabel
+                Text(gradeText)
+                    .font(WSFont.headline(gradeText.count > 2 ? 22 : 30, weight: .black))
+                    .foregroundStyle(.white)
+                    .minimumScaleFactor(0.6)
+                    .lineLimit(1)
+                    .padding(.horizontal, 6)
+            }
+        }
+        .padding(.top, 4)
+    }
+
+    /// Big "82 / 100" + red→yellow→green gradient bar with a marker.
+    private var overallScoreCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("OVERALL SCORE")
+                .font(WSFont.sans(10, weight: .black))
+                .tracking(1.2)
+                .foregroundStyle(WSColor.foregroundMuted)
+
+            HStack(alignment: .firstTextBaseline, spacing: 5) {
+                Text("\(displayedScore)")
+                    .font(WSFont.headline(44, weight: .black))
+                    .foregroundStyle(WSColor.foreground)
+                    .monospacedDigit()
+                Text("/ 100")
+                    .wsBody(.large, weight: .bold)
+                    .foregroundStyle(WSColor.foregroundMuted)
+            }
+
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(
+                            LinearGradient(
+                                colors: [WSColor.duoRed, WSColor.duoOrange, WSColor.duoYellow, WSColor.duoGreen],
+                                startPoint: .leading, endPoint: .trailing
+                            )
+                        )
+                        .frame(height: 12)
+                    Circle()
+                        .fill(.white)
+                        .frame(width: 20, height: 20)
+                        .overlay(Circle().stroke(tierColor, lineWidth: 3))
+                        .shadow(color: Color.black.opacity(0.18), radius: 3, y: 1)
+                        .offset(x: (geo.size.width - 20) * scoreFraction)
+                        .animation(.spring(response: 0.8, dampingFraction: 0.75), value: displayedScore)
+                }
+                .frame(maxHeight: .infinity, alignment: .center)
+            }
+            .frame(height: 22)
+
+            if let lockedFeatures = result.lockedFeatures, !lockedFeatures.isEmpty {
+                HStack(spacing: 5) {
+                    Image(systemName: "lock.fill")
+                        .foregroundStyle(WSColor.duoOrange)
+                        .font(.system(size: 10, weight: .bold))
+                    Text("\(lockedFeatures.count) Pro features locked")
+                        .wsBody(.caption, weight: .bold)
+                        .foregroundStyle(WSColor.duoOrange)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .wsChunkyCard(cornerRadius: 22)
+    }
+
+    /// The mockup's criteria rows — real scores when the rubric exists,
+    /// locked rows for free users.
+    @ViewBuilder
+    private var criteriaRows: some View {
+        VStack(spacing: 10) {
+            if let rubric = result.gradeRubric, !rubric.isEmpty {
+                ForEach(Self.orderedRubricKeys(rubric), id: \.self) { key in
+                    if let criterion = rubric[key] {
+                        criteriaRow(key: key, criterion: criterion)
+                    }
+                }
+            } else if result.lockedFeatures?.contains("grade_rubric") == true {
+                ForEach(Self.expectedCriteria, id: \.self) { key in
+                    lockedCriteriaRow(key: key)
+                }
+            }
+        }
+    }
+
+    private func criteriaRow(key: String, criterion: RubricCriterion) -> some View {
+        let meta = Self.criteriaMeta(for: key)
+        let frac = criterion.fraction
+        let scoreColor: Color = frac >= 0.85 ? WSColor.duoGreen : (frac >= 0.65 ? WSColor.duoBlue : (frac >= 0.45 ? WSColor.duoOrange : WSColor.duoRed))
+        return HStack(spacing: 12) {
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(meta.tint.opacity(0.14))
+                .frame(width: 44, height: 44)
+                .overlay(
+                    Image(systemName: meta.icon)
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundStyle(meta.tint)
+                )
+            Text(Self.prettyCriteriaKey(key))
+                .wsBody(.medium, weight: .black)
+                .foregroundStyle(WSColor.foreground)
+                .lineLimit(1)
+            Spacer(minLength: 8)
+            if let s = criterion.score, let m = criterion.maxScore {
+                Text("\(Int(s))/\(Int(m))")
+                    .wsBody(.large, weight: .black)
+                    .foregroundStyle(scoreColor)
+                    .monospacedDigit()
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .wsChunkyCard(cornerRadius: 16, horizontalPadding: 14, verticalPadding: 12)
+    }
+
+    private func lockedCriteriaRow(key: String) -> some View {
+        let meta = Self.criteriaMeta(for: key)
+        return HStack(spacing: 12) {
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(meta.tint.opacity(0.10))
+                .frame(width: 44, height: 44)
+                .overlay(
+                    Image(systemName: meta.icon)
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundStyle(meta.tint.opacity(0.55))
+                )
+            Text(Self.prettyCriteriaKey(key))
+                .wsBody(.medium, weight: .black)
+                .foregroundStyle(WSColor.foregroundMuted)
+                .lineLimit(1)
+            Spacer(minLength: 8)
+            Image(systemName: "lock.fill")
+                .font(.system(size: 13, weight: .bold))
+                .foregroundStyle(WSColor.duoOrange)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .wsChunkyCard(cornerRadius: 16, horizontalPadding: 14, verticalPadding: 12)
+    }
+
+    /// Mascot + wide "View full feedback" purple button.
+    private var bottomCTA: some View {
+        HStack(spacing: 12) {
+            WSAnimatedImage(name: "mascot-paper", ext: "webp")
+                .frame(width: 66, height: 66)
+                .wsBobbing()
+            Button {
+                Haptics.medium()
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+                    showFullFeedback = true
+                }
+            } label: {
+                Text("View full feedback").frame(maxWidth: .infinity)
+            }
+            .buttonStyle(WSDuoPrimaryButtonStyle(fullWidth: true))
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(
+            WSColor.backgroundElevated
+                .shadow(color: Color.black.opacity(0.06), radius: 10, y: -3)
+                .ignoresSafeArea(edges: .bottom)
         )
+    }
+
+    // MARK: - Criteria metadata
+
+    static let expectedCriteria = ["thesis_argument", "organization", "writing_quality", "grammar_mechanics"]
+
+    static func criteriaMeta(for key: String) -> (icon: String, tint: Color) {
+        switch key {
+        case "thesis_argument", "argument", "thesis": return ("lightbulb.fill", WSColor.duoBlue)
+        case "organization", "structure":             return ("square.stack.3d.up.fill", WSColor.duoOrange)
+        case "writing_quality", "style", "clarity":   return ("pencil.and.outline", WSColor.duoPurple)
+        case "grammar_mechanics", "grammar":          return ("checkmark.seal.fill", WSColor.duoGreen)
+        case "evidence", "citations":                 return ("text.quote", WSColor.duoPink)
+        default:                                      return ("doc.text.fill", WSColor.duoPurple)
+        }
+    }
+
+    static func prettyCriteriaKey(_ key: String) -> String {
+        switch key {
+        case "thesis_argument":   return "Thesis & Argument"
+        case "grammar_mechanics": return "Grammar & Mechanics"
+        default:
+            return key.replacingOccurrences(of: "_", with: " ").capitalized
+        }
+    }
+
+    /// Mockup ordering first, then legacy keys, then anything else.
+    static func orderedRubricKeys(_ dict: [String: RubricCriterion]) -> [String] {
+        let preferred = ["thesis_argument", "organization", "writing_quality", "grammar_mechanics",
+                         "structure", "argument", "evidence", "clarity", "citations", "style", "tone", "grammar"]
+        let knownInOrder = preferred.filter { dict.keys.contains($0) }
+        let extras = dict.keys.filter { !preferred.contains($0) }.sorted()
+        return knownInOrder + extras
+    }
+
+    private var tierColor: Color {
+        scoreFraction >= 0.7 ? WSColor.duoGreen : (scoreFraction >= 0.45 ? WSColor.duoOrange : WSColor.duoRed)
+    }
+
+    /// Animates the big numeral 0 → score over ~0.8s.
+    private func countUpScore() {
+        guard let target = result.overallScore.map({ Int(round($0)) }), target > 0 else { return }
+        displayedScore = 0
+        let steps = 24
+        for step in 1...steps {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8 * Double(step) / Double(steps)) {
+                displayedScore = Int(Double(target) * Double(step) / Double(steps))
+            }
+        }
     }
 
     private var scoreFraction: CGFloat {
@@ -457,8 +699,10 @@ private struct RubricTab: View {
     }
 
     private func orderedKeys(_ dict: [String: RubricCriterion]) -> [String] {
-        // Common ordering -- fall back to alpha for unknown keys
-        let preferred = ["structure", "argument", "evidence", "clarity", "citations", "style", "tone", "grammar"]
+        // Comprehensive-analysis keys first (mockup order), then legacy keys,
+        // then anything else alphabetically.
+        let preferred = ["thesis_argument", "organization", "writing_quality", "grammar_mechanics",
+                         "structure", "argument", "evidence", "clarity", "citations", "style", "tone", "grammar"]
         let knownInOrder = preferred.filter { dict.keys.contains($0) }
         let extras = dict.keys.filter { !preferred.contains($0) }.sorted()
         return knownInOrder + extras
@@ -703,13 +947,13 @@ struct ProLockPane: View {
             annotations: [
                 Annotation(
                     id: "1", type: .strong, text: "clear thesis",
-                    startIndex: 32, endIndex: 44,
+                    startIndex: 26, endIndex: 38,
                     comment: "Strong, focused thesis sets up the rest of the essay.",
                     suggestion: nil, isCoverageOnly: nil
                 ),
                 Annotation(
                     id: "2", type: .improve, text: "transitions between paragraphs are abrupt",
-                    startIndex: 56, endIndex: 96,
+                    startIndex: 49, endIndex: 90,
                     comment: "Add transitional phrases to guide the reader.",
                     suggestion: "Try a connector like 'Building on this...' to link the next paragraph.",
                     isCoverageOnly: nil

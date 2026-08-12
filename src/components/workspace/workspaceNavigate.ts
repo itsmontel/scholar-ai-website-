@@ -22,7 +22,7 @@ export function consumePendingWorkspaceView(): WorkspaceView | null {
     const raw = sessionStorage.getItem(PENDING_VIEW_KEY);
     sessionStorage.removeItem(PENDING_VIEW_KEY);
     if (!raw) return null;
-    const allowed: WorkspaceView[] = ['hub', 'editor', 'analyze', 'daily-review', 'study-packs', 'citations', 'games'];
+    const allowed: WorkspaceView[] = ['hub', 'docs', 'editor', 'analyze', 'daily-review', 'study-packs', 'citations', 'games'];
     return allowed.includes(raw as WorkspaceView) ? (raw as WorkspaceView) : null;
   } catch {
     return null;

@@ -1,5 +1,6 @@
 export type WorkspaceView =
   | 'hub'
+  | 'docs'
   | 'editor'
   | 'analyze'
   | 'daily-review'

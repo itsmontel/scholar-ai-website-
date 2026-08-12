@@ -48,6 +48,11 @@ struct LessonView: View {
         .padding(.vertical, 12)
         .onChange(of: slideIndex) { _, _ in
             Haptics.selection()
+            // Durable pack progress (drives the list rows' % + Home rings).
+            StudyPackProgressStore.shared.recordSlidesSeen(slideIndex + 1)
+        }
+        .onAppear {
+            StudyPackProgressStore.shared.recordSlidesSeen(1)
         }
     }
 

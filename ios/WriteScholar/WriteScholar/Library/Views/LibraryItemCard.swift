@@ -23,12 +23,36 @@ struct LibraryItemCard: View {
     var onPinToggle: () -> Void
     var onDelete: () -> Void
 
+    /// Tile tint — documents vary by file type (mockup: blue W for Word,
+    /// red for PDF, yellow for a generic doc).
     private var accentColor: Color {
         switch item.kind {
         case .studyPack:     return WSColor.duoPurple
         case .essayAnalysis: return WSColor.duoBlue
-        case .document:      return WSColor.duoOrange
+        case .document:
+            switch docExtension {
+            case "pdf":          return WSColor.duoRed
+            case "doc", "docx":  return WSColor.duoBlue
+            default:             return WSColor.duoYellowDark
+            }
         }
+    }
+
+    private var tileIcon: String {
+        switch item.kind {
+        case .studyPack:     return "graduationcap.fill"
+        case .essayAnalysis: return "doc.text.magnifyingglass"
+        case .document:
+            switch docExtension {
+            case "pdf":          return "doc.richtext.fill"
+            case "doc", "docx":  return "doc.fill"
+            default:             return "doc.plaintext.fill"
+            }
+        }
+    }
+
+    private var docExtension: String {
+        (item.title as NSString).pathExtension.lowercased()
     }
 
     var body: some View {
@@ -60,134 +84,83 @@ struct LibraryItemCard: View {
         }
     }
 
-    // MARK: - Body
+    // MARK: - Body (mockup row: pastel tile · title · one meta line · chevron)
 
     private var cardBody: some View {
-        HStack(alignment: .top, spacing: 14) {
+        HStack(alignment: .center, spacing: 14) {
             iconBlock
             contentBlock
-            Spacer(minLength: 0)
+            Spacer(minLength: 8)
             trailingBlock
         }
         .wsChunkyCard(
             cornerRadius: 18,
             horizontalPadding: 14,
-            verticalPadding: 14,
-            lipHeight: item.isPinned ? 6 : 5,
-            accent: accentColor
+            verticalPadding: 14
         )
     }
 
-    // MARK: - Icon block
+    // MARK: - Icon block (pastel tile + saturated glyph)
 
     private var iconBlock: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(accentColor)
-                .frame(width: 52, height: 52)
+                .fill(accentColor.opacity(0.14))
+                .frame(width: 48, height: 48)
 
-            Image(systemName: item.kind.icon)
-                .font(.system(size: 22, weight: .heavy))
-                .foregroundStyle(.white)
+            Image(systemName: tileIcon)
+                .font(.system(size: 20, weight: .bold))
+                .foregroundStyle(accentColor)
+        }
+        .overlay(alignment: .topTrailing) {
+            if item.isPinned {
+                Image(systemName: "pin.fill")
+                    .font(.system(size: 8, weight: .black))
+                    .foregroundStyle(.white)
+                    .padding(4)
+                    .background(Circle().fill(WSColor.duoOrange))
+                    .offset(x: 5, y: -5)
+            }
         }
     }
 
-    // MARK: - Center content
+    // MARK: - Center content (title + single meta line)
 
     private var contentBlock: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            // Top row: kind label + pin badge + source dot
-            HStack(spacing: 6) {
-                Text(item.kind.label.uppercased())
-                    .font(WSFont.sans(9, weight: .black))
-                    .foregroundStyle(accentColor)
-                    .tracking(0.6)
-                    .padding(.horizontal, 7)
-                    .padding(.vertical, 3)
-                    .background(Capsule().fill(accentColor.opacity(0.12)))
-
-                if item.isPinned {
-                    Label("PINNED", systemImage: "pin.fill")
-                        .labelStyle(.titleAndIcon)
-                        .font(WSFont.sans(8, weight: .black))
-                        .foregroundStyle(WSColor.duoOrange)
-                        .padding(.horizontal, 7)
-                        .padding(.vertical, 3)
-                        .background(Capsule().fill(WSColor.duoOrangeLight))
-                }
-
-                if item.source == .web {
-                    HStack(spacing: 3) {
-                        Image(systemName: "globe").font(.system(size: 8, weight: .bold))
-                        Text("WEB")
-                            .font(WSFont.sans(8, weight: .black))
-                    }
-                    .foregroundStyle(WSColor.duoGreen)
-                    .padding(.horizontal, 7)
-                    .padding(.vertical, 3)
-                    .background(Capsule().fill(WSColor.duoGreenLight))
-                }
-
-                if Date().timeIntervalSince(item.createdAt) < 30 * 60 {
-                    HStack(spacing: 3) {
-                        Image(systemName: "sparkles").font(.system(size: 8, weight: .bold))
-                        Text("NEW")
-                            .font(WSFont.sans(8, weight: .black))
-                    }
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 7)
-                    .padding(.vertical, 3)
-                    .background(
-                        Capsule().fill(WSColor.duoOrange)
-                    )
-                }
-            }
-
+        VStack(alignment: .leading, spacing: 3) {
             Text(item.title)
-                .wsBody(.medium, weight: .bold)
-                .foregroundStyle(WSColor.duoText)
-                .lineLimit(2)
+                .wsBody(.large, weight: .bold)
+                .foregroundStyle(WSColor.foreground)
+                .lineLimit(1)
                 .multilineTextAlignment(.leading)
 
-            if let subtitle = item.subtitle, !subtitle.isEmpty {
-                Text(subtitle)
-                    .wsBody(.caption, weight: .semibold)
-                    .foregroundStyle(WSColor.duoText.opacity(0.55))
-            }
-
-            if let snippet = item.snippet, !snippet.isEmpty {
-                Text(snippet)
-                    .wsBody(.caption)
-                    .foregroundStyle(WSColor.duoText.opacity(0.45))
-                    .lineLimit(2)
-                    .multilineTextAlignment(.leading)
-                    .padding(.top, 1)
-            }
-
-            if !item.chips.isEmpty {
-                LibraryChipRow(chips: item.chips, tint: accentColor)
-                    .padding(.top, 6)
-            }
+            Text(metaLine)
+                .wsBody(.small)
+                .foregroundStyle(WSColor.foregroundMuted)
+                .lineLimit(1)
         }
+    }
+
+    /// "Study Pack · 18 cards · Edited 2h ago" — the mockup's single
+    /// muted meta line (kind + first chip + recency, web dot when synced).
+    private var metaLine: String {
+        var parts = [item.kind.label]
+        if let chip = item.chips.first { parts.append(chip.label) }
+        parts.append("Edited \(LibraryRelativeFormatter.compact(item.lastOpenedAt ?? item.createdAt))")
+        if item.source == .web { parts.append("Web") }
+        return parts.joined(separator: " · ")
     }
 
     // MARK: - Trailing block
 
+    @ViewBuilder
     private var trailingBlock: some View {
-        VStack(alignment: .trailing, spacing: 8) {
-            Text(LibraryRelativeFormatter.compact(item.createdAt))
-                .font(WSFont.sans(11, weight: .semibold))
-                .foregroundStyle(WSColor.duoText.opacity(0.55))
-
+        if let progress = item.progress {
+            WSProgressRing(progress: progress, tint: accentColor, size: 42, lineWidth: 4.5)
+        } else {
             Image(systemName: "chevron.right")
-                .font(.system(size: 12, weight: .bold))
-                .foregroundStyle(WSColor.duoText.opacity(0.4))
-                .padding(6)
-                .background(
-                    Circle()
-                        .fill(WSColor.backgroundElevated)
-                        .overlay(Circle().stroke(WSColor.duoBorder, lineWidth: 2))
-                )
+                .font(.system(size: 14, weight: .bold))
+                .foregroundStyle(WSColor.foregroundMuted.opacity(0.6))
         }
     }
 }

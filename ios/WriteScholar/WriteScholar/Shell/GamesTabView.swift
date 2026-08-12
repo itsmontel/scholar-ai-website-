@@ -2,193 +2,64 @@
 //  GamesTabView.swift
 //  WriteScholar
 //
-//  Games hub with a per-game mode picker that mirrors desktop:
-//    Crater Blast   -> Play / Mental Math / Capitals / Flags
-//    Word Tower     -> Play / Mental Math
-//
-//  Each launch builds a fresh question pool from the ported desktop
-//  word banks (CraterBlastBank, CraterBlastMentalMathBank,
-//  CraterBlastCapitalsBank, CraterBlastFlagsBank, WordTowerBank).
+//  Arcade Mode (prototype screen #11): a lavender hero + compact game
+//  rows (tile · name · desc · high score · Play pill). Tapping Play opens
+//  a mode sheet; picking a mode builds the pool and launches the game.
+//  High scores persist in GameScoreStore.
 //
 
 import SwiftUI
 
 struct GamesTabView: View {
+    @StateObject private var scores = GameScoreStore.shared
+
+    @State private var launchTarget: ArcadeGame? = nil
     @State private var presented: PresentedGame? = nil
-    @State private var craterMode: CraterMode = .playForFun
-    @State private var towerMode: TowerMode  = .playForFun
-    @State private var blitzMode: WordBlitzMode = .playForFun
-    /// Drives the "My Notes" pack picker sheet. Set to `.craterBlast` or
-    /// `.wordTower` to present, set back to nil on dismiss/cancel.
     @State private var pickerForGame: NotesPackPickerSheet.Game? = nil
 
-    enum CraterMode: String, CaseIterable, Identifiable {
-        case playForFun  = "Play for Fun"
-        case myNotes     = "My Notes"
-        case mentalMath  = "Mental Math"
-        case capitals    = "Capitals"
-        case flags       = "Flags"
-        var id: Self { self }
-        var icon: String {
-            switch self {
-            case .playForFun: return "sparkles"
-            case .myNotes:    return "doc.text.fill"
-            case .mentalMath: return "function"
-            case .capitals:   return "building.columns.fill"
-            case .flags:      return "flag.fill"
-            }
-        }
-    }
-
-    enum TowerMode: String, CaseIterable, Identifiable {
-        case playForFun  = "Play for Fun"
-        case myNotes     = "My Notes"
-        case mentalMath  = "Mental Math"
-        var id: Self { self }
-        var icon: String {
-            switch self {
-            case .playForFun: return "sparkles"
-            case .myNotes:    return "doc.text.fill"
-            case .mentalMath: return "function"
-            }
-        }
-    }
-
-    enum WordBlitzMode: String, CaseIterable, Identifiable {
-        case playForFun = "Play for Fun"
-        case myNotes    = "My Notes"
-        case mentalMath = "Mental Math"
-        var id: Self { self }
-        var icon: String {
-            switch self {
-            case .playForFun: return "sparkles"
-            case .myNotes:    return "doc.text.fill"
-            case .mentalMath: return "function"
-            }
-        }
-    }
-
-    /// Wraps the chosen game + freshly-built bank so the fullScreenCover
-    /// can hand the pre-built questions to the game view.
+    /// Wraps a game + its freshly-built pool for the fullScreenCover.
     enum PresentedGame: Identifiable {
         case craterBlast(CraterBlast)
         case wordTower(WordTower)
         case wordBlitz(WordBlitz)
+        case memoryMatch(title: String, pairs: [MemoryPair])
+        case quizRun(title: String, questions: [QuizQuestion])
 
         var id: String {
             switch self {
             case .craterBlast: return "crater"
             case .wordTower:   return "tower"
             case .wordBlitz:   return "blitz"
+            case .memoryMatch: return "memory"
+            case .quizRun:     return "quizrun"
             }
         }
     }
+
+    /// Mockup row order.
+    private let rows: [ArcadeGame] = [.wordBlitz, .craterBlast, .memoryMatch, .quizRun, .wordTower]
 
     var body: some View {
         ZStack {
             WSColor.background.ignoresSafeArea()
 
             ScrollView {
-                VStack(alignment: .leading, spacing: 22) {
-                    headerBlock
+                VStack(alignment: .leading, spacing: 18) {
+                    heroCard.wsStaggerEntry(0)
 
-                    // Crater Blast card -- orange accent
-                    gameCard(
-                        title: "Crater Blast",
-                        subtitle: "Boss-battle reflex quiz. Hit the falling answers before they land -- 3 lives, react fast.",
-                        icon: "burst.fill",
-                        videoName: "game-crater-blast",
-                        accent: WSColor.duoOrange,
-                        accentDark: WSColor.duoOrangeDark,
-                        accentLight: WSColor.duoOrangeLight
-                    ) {
-                        modePicker(modes: CraterMode.allCases, selected: $craterMode, palette: .warn)
-                        playButton(
-                            label: craterMode == .myNotes ? "Pick a study pack" : "Play \(craterMode.rawValue)",
-                            palette: .warn
-                        ) {
-                            if craterMode == .myNotes {
-                                pickerForGame = .craterBlast
-                            } else {
-                                launchCrater(mode: craterMode)
-                            }
+                    VStack(spacing: 12) {
+                        ForEach(Array(rows.enumerated()), id: \.element.id) { (i, game) in
+                            gameRow(game).wsStaggerEntry(i + 1)
                         }
                     }
-
-                    // Word Tower card -- blue accent
-                    gameCard(
-                        title: "Word Tower",
-                        subtitle: "Catch the correct answers, dodge the wrong ones -- build your tower across 7 lives.",
-                        icon: "building.2.fill",
-                        videoName: "game-word-tower",
-                        accent: WSColor.duoBlue,
-                        accentDark: WSColor.duoBlueDark,
-                        accentLight: WSColor.duoBlueLight
-                    ) {
-                        modePicker(modes: TowerMode.allCases, selected: $towerMode, palette: .info)
-                        playButton(
-                            label: towerMode == .myNotes ? "Pick a study pack" : "Play \(towerMode.rawValue)",
-                            palette: .info
-                        ) {
-                            if towerMode == .myNotes {
-                                pickerForGame = .wordTower
-                            } else {
-                                launchTower(mode: towerMode)
-                            }
-                        }
-                    }
-
-                    // Word Blitz card -- pink accent
-                    gameCard(
-                        title: "Word Blitz",
-                        subtitle: "60-second fill-in-the-blank speedrun. Read the sentence, tap the right word -- how many can you get in a minute?",
-                        icon: "bolt.fill",
-                        videoName: "game-word-blitz",
-                        accent: WSColor.duoPink,
-                        accentDark: WSColor.duoPinkDark,
-                        accentLight: WSColor.duoPinkLight
-                    ) {
-                        modePicker(modes: WordBlitzMode.allCases, selected: $blitzMode, palette: .pink)
-                        playButton(
-                            label: blitzMode == .myNotes ? "Pick a study pack" : "Play \(blitzMode.rawValue)",
-                            palette: .pink
-                        ) {
-                            if blitzMode == .myNotes {
-                                pickerForGame = .wordBlitz
-                            } else {
-                                launchBlitz(mode: blitzMode)
-                            }
-                        }
-                    }
-
-                    libraryHint
                 }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 18)
+                .padding(.horizontal, 18)
+                .padding(.vertical, 16)
             }
         }
-        .fullScreenCover(item: $presented) { game in
-            ZStack(alignment: .topLeading) {
-                switch game {
-                case .craterBlast(let pack): CraterBlastView(craterBlast: pack)
-                case .wordTower(let pack):   WordTowerView(wordTower: pack)
-                case .wordBlitz(let pack):   WordBlitzView(wordBlitz: pack)
-                }
-
-                Button {
-                    Haptics.light()
-                    presented = nil
-                } label: {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundStyle(WSColor.duoText)
-                        .padding(10)
-                        .background(Circle().fill(Color.white.opacity(0.9)))
-                        .overlay(Circle().stroke(WSColor.duoBorder, lineWidth: 1))
-                }
-                .buttonStyle(.plain)
-                .padding(.top, 14)
-                .padding(.leading, 14)
+        .sheet(item: $launchTarget) { game in
+            GameLaunchSheet(game: game, modes: modes(for: game)) { mode in
+                pick(mode, for: game)
             }
         }
         .sheet(item: $pickerForGame) { game in
@@ -197,257 +68,260 @@ struct GamesTabView: View {
             }
             .presentationDetents([.large, .medium])
         }
+        .fullScreenCover(item: $presented) { game in
+            ZStack(alignment: .topLeading) {
+                switch game {
+                case .craterBlast(let p): CraterBlastView(craterBlast: p)
+                case .wordTower(let p):   WordTowerView(wordTower: p)
+                case .wordBlitz(let p):   WordBlitzView(wordBlitz: p)
+                case .memoryMatch(let t, let pairs): MemoryMatchView(title: t, pairs: pairs)
+                case .quizRun(let t, let qs):        QuizRunView(title: t, questions: qs)
+                }
+                closeButton
+            }
+        }
     }
 
-    /// Launches the chosen game with question banks pulled from the
-    /// user's saved study pack instead of the desktop-ported word banks.
+    private var closeButton: some View {
+        Button {
+            Haptics.light()
+            presented = nil
+        } label: {
+            Image(systemName: "xmark")
+                .font(.system(size: 14, weight: .bold))
+                .foregroundStyle(WSColor.foreground)
+                .padding(10)
+                .background(Circle().fill(WSColor.backgroundElevated))
+                .overlay(Circle().stroke(WSColor.hairline, lineWidth: 1))
+                .shadow(color: Color.black.opacity(0.1), radius: 6, y: 2)
+        }
+        .buttonStyle(.plain)
+        .padding(.top, 14)
+        .padding(.leading, 14)
+    }
+
+    // MARK: - Hero
+
+    private var heroCard: some View {
+        VStack(spacing: 14) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Arcade Mode")
+                        .wsHeadline(.large, weight: .black)
+                        .foregroundStyle(WSColor.foreground)
+                    Text("Learn by playing fun games!")
+                        .wsBody(.small, weight: .bold)
+                        .foregroundStyle(WSColor.foregroundMuted)
+                }
+                Spacer()
+            }
+            controllerIllustration
+                .frame(height: 120)
+                .frame(maxWidth: .infinity)
+        }
+        .padding(20)
+        .background(
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .fill(WSColor.surfacePurple)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .stroke(WSColor.duoPurple.opacity(0.15), lineWidth: 1.5)
+                )
+        )
+    }
+
+    /// A layered controller illustration with floating doodles — stands in
+    /// for the mockup's game-controller art without a bespoke asset.
+    private var controllerIllustration: some View {
+        ZStack {
+            Circle().fill(WSColor.duoPurple.opacity(0.14)).frame(width: 108, height: 108)
+            Image(systemName: "gamecontroller.fill")
+                .font(.system(size: 52, weight: .bold))
+                .foregroundStyle(WSColor.duoPurple)
+                .rotationEffect(.degrees(-8))
+                .shadow(color: WSColor.duoPurple.opacity(0.3), radius: 10, y: 6)
+
+            doodle("plus", tint: WSColor.duoGreen, size: 16, x: -74, y: -36, delay: 0)
+            doodle("puzzlepiece.fill", tint: WSColor.duoOrange, size: 18, x: 78, y: -28, delay: 0.5)
+            doodle("star.fill", tint: WSColor.duoYellowDark, size: 14, x: 66, y: 40, delay: 1.0)
+            doodle("bolt.fill", tint: WSColor.duoPink, size: 15, x: -70, y: 34, delay: 0.3)
+        }
+    }
+
+    private func doodle(_ symbol: String, tint: Color, size: CGFloat, x: CGFloat, y: CGFloat, delay: Double) -> some View {
+        Image(systemName: symbol)
+            .font(.system(size: size, weight: .bold))
+            .foregroundStyle(tint.opacity(0.8))
+            .offset(x: x, y: y)
+            .wsBobbing(amount: 5, duration: 2.6 + delay)
+    }
+
+    // MARK: - Game row
+
+    private func gameRow(_ game: ArcadeGame) -> some View {
+        let high = scores.highScore(for: game)
+        return HStack(spacing: 14) {
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(game.tint.opacity(0.14))
+                .frame(width: 48, height: 48)
+                .overlay(
+                    Image(systemName: game.icon)
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundStyle(game.tint)
+                )
+            VStack(alignment: .leading, spacing: 3) {
+                Text(game.title)
+                    .wsBody(.large, weight: .bold)
+                    .foregroundStyle(WSColor.foreground)
+                    .lineLimit(1)
+                Text(game.blurb)
+                    .wsBody(.small)
+                    .foregroundStyle(WSColor.foregroundMuted)
+                    .lineLimit(1)
+                Text(high > 0 ? "High score: \(formatted(high))" : "Not played yet")
+                    .wsBody(.caption, weight: .bold)
+                    .foregroundStyle(high > 0 ? game.tint : WSColor.foregroundMuted.opacity(0.7))
+            }
+            Spacer(minLength: 8)
+            Button {
+                Haptics.medium()
+                launchTarget = game
+            } label: {
+                HStack(spacing: 5) {
+                    Image(systemName: "play.fill").font(.system(size: 11, weight: .black))
+                    Text("Play").font(WSFont.sans(14, weight: .black))
+                }
+                .foregroundStyle(.white)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 9)
+                .background(Capsule().fill(WSColor.duoPurple).shadow(color: WSColor.duoPurple.opacity(0.35), radius: 6, y: 3))
+            }
+            .buttonStyle(WSBouncyButtonStyle())
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .wsChunkyCard(cornerRadius: 20)
+    }
+
+    private func formatted(_ n: Int) -> String {
+        let f = NumberFormatter(); f.numberStyle = .decimal
+        return f.string(from: NSNumber(value: n)) ?? "\(n)"
+    }
+
+    // MARK: - Modes per game
+
+    private func modes(for game: ArcadeGame) -> [GameMode] {
+        switch game {
+        case .wordBlitz:
+            return [.init(label: "Play for Fun", icon: "sparkles", source: .builtIn("playForFun")),
+                    .init(label: "My Notes", icon: "doc.text.fill", source: .myNotes),
+                    .init(label: "Mental Math", icon: "function", source: .builtIn("mentalMath"))]
+        case .craterBlast:
+            return [.init(label: "Play for Fun", icon: "sparkles", source: .builtIn("playForFun")),
+                    .init(label: "My Notes", icon: "doc.text.fill", source: .myNotes),
+                    .init(label: "Mental Math", icon: "function", source: .builtIn("mentalMath")),
+                    .init(label: "Capitals", icon: "building.columns.fill", source: .builtIn("capitals")),
+                    .init(label: "Flags", icon: "flag.fill", source: .builtIn("flags"))]
+        case .wordTower:
+            return [.init(label: "Play for Fun", icon: "sparkles", source: .builtIn("playForFun")),
+                    .init(label: "My Notes", icon: "doc.text.fill", source: .myNotes),
+                    .init(label: "Mental Math", icon: "function", source: .builtIn("mentalMath"))]
+        case .memoryMatch:
+            return [.init(label: "Play for Fun", icon: "sparkles", source: .builtIn("playForFun")),
+                    .init(label: "My Notes", icon: "doc.text.fill", source: .myNotes)]
+        case .quizRun:
+            return [.init(label: "Play for Fun", icon: "sparkles", source: .builtIn("playForFun")),
+                    .init(label: "My Notes", icon: "doc.text.fill", source: .myNotes),
+                    .init(label: "Science", icon: "atom", source: .builtIn("science")),
+                    .init(label: "History", icon: "clock.arrow.circlepath", source: .builtIn("history")),
+                    .init(label: "Geography", icon: "globe.americas.fill", source: .builtIn("geography")),
+                    .init(label: "Vocabulary", icon: "textformat.abc", source: .builtIn("vocabulary"))]
+        }
+    }
+
+    // MARK: - Launch
+
+    private func pick(_ mode: GameMode, for game: ArcadeGame) {
+        if case .myNotes = mode.source {
+            switch game {
+            case .craterBlast: pickerForGame = .craterBlast
+            case .wordTower:   pickerForGame = .wordTower
+            case .wordBlitz:   pickerForGame = .wordBlitz
+            case .memoryMatch: pickerForGame = .memoryMatchNotes
+            case .quizRun:     pickerForGame = .quizRunNotes
+            }
+            return
+        }
+        guard case let .builtIn(key) = mode.source else { return }
+        launchBuiltIn(game, key: key)
+    }
+
+    private func launchBuiltIn(_ game: ArcadeGame, key: String) {
+        switch game {
+        case .wordBlitz:
+            let qs = key == "mentalMath" ? WordBlitzBank.mentalMath().shuffled() : WordBlitzBank.playForFun.shuffled()
+            guard !qs.isEmpty else { return }
+            presented = .wordBlitz(WordBlitz(title: "Word Blitz", questions: qs))
+        case .craterBlast:
+            let qs: [CraterBlastQuestion] = {
+                switch key {
+                case "mentalMath": return CraterBlastMentalMathBank.shuffledPool()
+                case "capitals":   return CraterBlastCapitalsBank.allQuestions()
+                case "flags":      return CraterBlastFlagsBank.allQuestions()
+                default:           return CraterBlastBank.shuffledPool()
+                }
+            }()
+            guard !qs.isEmpty else { return }
+            presented = .craterBlast(CraterBlast(title: "Crater Blast", questions: qs))
+        case .wordTower:
+            let qs = key == "mentalMath" ? WordTowerBank.mentalMath().shuffled() : WordTowerBank.playForFun.shuffled()
+            guard !qs.isEmpty else { return }
+            presented = .wordTower(WordTower(title: "Word Tower", questions: qs))
+        case .memoryMatch:
+            presented = .memoryMatch(title: "Memory Match", pairs: MemoryMatchBank.general)
+        case .quizRun:
+            let qs = quizRunPool(for: key)
+            guard !qs.isEmpty else { return }
+            presented = .quizRun(title: "Quiz Run", questions: qs)
+        }
+    }
+
+    private func quizRunPool(for key: String) -> [QuizQuestion] {
+        let topic: FocusTopic?
+        switch key {
+        case "science":    topic = .science
+        case "history":    topic = .history
+        case "geography":  topic = .geography
+        case "vocabulary": topic = .vocabulary
+        default:           topic = nil
+        }
+        if let topic {
+            return FocusQuestionRegistry.questions(for: topic).shuffled()
+        }
+        // Play for Fun — a mixed pool across every topic.
+        return FocusTopic.allCases
+            .flatMap { FocusQuestionRegistry.questions(for: $0) }
+            .shuffled()
+    }
+
     private func launchFromPack(_ pack: StudyPack, game: NotesPackPickerSheet.Game) {
         switch game {
         case .craterBlast:
             guard let cb = pack.craterBlast, !cb.questions.isEmpty else { return }
-            presented = .craterBlast(CraterBlast(
-                title: "Crater Blast \u{00B7} \(pack.displayTitle)",
-                questions: cb.questions
-            ))
+            presented = .craterBlast(CraterBlast(title: "Crater Blast · \(pack.displayTitle)", questions: cb.questions))
         case .wordTower:
             guard let wt = pack.wordTower, !wt.questions.isEmpty else { return }
-            presented = .wordTower(WordTower(
-                title: "Word Tower \u{00B7} \(pack.displayTitle)",
-                questions: wt.questions
-            ))
+            presented = .wordTower(WordTower(title: "Word Tower · \(pack.displayTitle)", questions: wt.questions))
         case .wordBlitz:
             guard let wb = pack.wordBlitz, !wb.questions.isEmpty else { return }
-            presented = .wordBlitz(WordBlitz(
-                title: "Word Blitz \u{00B7} \(pack.displayTitle)",
-                questions: wb.questions
-            ))
+            presented = .wordBlitz(WordBlitz(title: "Word Blitz · \(pack.displayTitle)", questions: wb.questions))
+        case .memoryMatchNotes:
+            guard let f = pack.flashcards, !f.cards.isEmpty else { return }
+            let pairs = f.cards.map { MemoryPair(term: $0.front, definition: $0.back) }
+            presented = .memoryMatch(title: "Memory Match · \(pack.displayTitle)", pairs: pairs)
+        case .quizRunNotes:
+            guard let q = pack.quiz, !q.questions.isEmpty else { return }
+            presented = .quizRun(title: "Quiz Run · \(pack.displayTitle)", questions: q.questions)
         }
-    }
-
-    // MARK: - Header (Duolingo-style hero)
-
-    private var headerBlock: some View {
-        HStack(alignment: .center, spacing: 14) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Arcade Mode")
-                    .wsHeadline(.large, weight: .black)
-                    .foregroundStyle(WSColor.foreground)
-                Text("Learn by playing fun games!")
-                    .wsBody(.small)
-                    .foregroundStyle(WSColor.foregroundMuted)
-            }
-            Spacer(minLength: 8)
-            ZStack {
-                Circle().fill(WSColor.duoPink.opacity(0.14)).frame(width: 76, height: 76)
-                Image(systemName: "gamecontroller.fill")
-                    .font(.system(size: 32, weight: .bold))
-                    .foregroundStyle(WSColor.duoPink)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.top, 2)
-    }
-
-    // MARK: - Game card (chunky 3D card with icon banner)
-
-    private func gameCard<Content: View>(
-        title: String,
-        subtitle: String,
-        icon: String,
-        videoName: String,
-        accent: Color,
-        accentDark: Color,
-        accentLight: Color,
-        @ViewBuilder body: () -> Content
-    ) -> some View {
-        VStack(spacing: 0) {
-            // Looping video preview banner
-            LoopingVideoView(resourceName: videoName)
-                .frame(height: 150)
-                .frame(maxWidth: .infinity)
-                .background(accentLight)
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(WSColor.duoBorder, lineWidth: 1)
-                )
-                .padding(.bottom, 12)
-
-            // Title row with a small accent icon badge
-            HStack(spacing: 12) {
-                ZStack {
-                    Circle().fill(accent).frame(width: 40, height: 40)
-                    Image(systemName: icon)
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundStyle(.white)
-                }
-
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(title)
-                        .wsHeadline(.medium, weight: .black)
-                        .foregroundStyle(WSColor.duoText)
-                    Text(subtitle)
-                        .wsBody(.small)
-                        .foregroundStyle(WSColor.foregroundMuted)
-                        .lineLimit(2)
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.bottom, 14)
-
-            // Body (mode picker + play button)
-            VStack(spacing: 12) {
-                body()
-            }
-            .frame(maxWidth: .infinity)
-        }
-        .wsChunkyCard(accent: accent)
-    }
-
-    // MARK: - Mode picker (Duo pill buttons)
-
-    private func modePicker<M: Identifiable & CaseIterable & Hashable>(
-        modes: M.AllCases,
-        selected: Binding<M>,
-        palette: WSDuoPalette
-    ) -> some View where M: RawRepresentable, M.RawValue == String, M.AllCases: RandomAccessCollection {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                ForEach(Array(modes), id: \.self) { mode in
-                    let active = (selected.wrappedValue == mode)
-                    Button {
-                        Haptics.selection()
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                            selected.wrappedValue = mode
-                        }
-                    } label: {
-                        HStack(spacing: 6) {
-                            Image(systemName: modeIcon(mode))
-                                .font(.system(size: 12, weight: .bold))
-                            Text(mode.rawValue)
-                                .font(WSFont.sans(13, weight: .bold))
-                        }
-                        .foregroundStyle(active ? .white : WSColor.duoText)
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 8)
-                        .background(
-                            ZStack(alignment: .top) {
-                                if active {
-                                    // 3D pressed pill
-                                    RoundedRectangle(cornerRadius: 999, style: .continuous)
-                                        .fill(palette.baseColor)
-                                        .padding(.top, 3)
-                                    RoundedRectangle(cornerRadius: 999, style: .continuous)
-                                        .fill(palette.topColor)
-                                } else {
-                                    // Flat outline pill
-                                    RoundedRectangle(cornerRadius: 999, style: .continuous)
-                                        .fill(WSColor.backgroundElevated)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 999, style: .continuous)
-                                                .stroke(WSColor.duoBorder, lineWidth: 2)
-                                        )
-                                }
-                            }
-                        )
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-        }
-    }
-
-    /// SF Symbol per mode using each enum's own icon helper.
-    private func modeIcon<M: Hashable>(_ mode: M) -> String {
-        if let m = mode as? CraterMode { return m.icon }
-        if let m = mode as? TowerMode  { return m.icon }
-        if let m = mode as? WordBlitzMode { return m.icon }
-        return "circle"
-    }
-
-    // MARK: - Play button (Duo 3D button)
-
-    private func playButton(label: String, palette: WSDuoPalette = .success, action: @escaping () -> Void) -> some View {
-        Button {
-            Haptics.medium()
-            action()
-        } label: {
-            HStack(spacing: 8) {
-                Image(systemName: "play.fill")
-                Text(label)
-            }
-        }
-        .buttonStyle(WSDuoButtonStyle(palette: palette))
-    }
-
-    // MARK: - Library hint (chunky card with purple accent)
-
-    private var libraryHint: some View {
-        HStack(spacing: 12) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(WSColor.duoPurple)
-                    .frame(width: 44, height: 44)
-                Image(systemName: "books.vertical.fill")
-                    .font(.system(size: 20, weight: .bold))
-                    .foregroundStyle(.white)
-            }
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Play with your own subjects")
-                    .font(WSFont.sans(14, weight: .bold))
-                    .foregroundStyle(WSColor.duoText)
-                Text("Pick \"My Notes\" mode above to launch either game with questions from a study pack you've saved to your Library.")
-                    .wsBody(.caption)
-                    .foregroundStyle(WSColor.foregroundMuted)
-            }
-            Spacer()
-        }
-        .wsChunkyCard(accent: WSColor.duoPurple)
-    }
-
-    // MARK: - Launchers
-
-    private func launchCrater(mode: CraterMode) {
-        let questions: [CraterBlastQuestion] = {
-            switch mode {
-            case .playForFun: return CraterBlastBank.shuffledPool()
-            case .mentalMath: return CraterBlastMentalMathBank.shuffledPool()
-            case .capitals:   return CraterBlastCapitalsBank.allQuestions()
-            case .flags:      return CraterBlastFlagsBank.allQuestions()
-            // .myNotes is routed to the pack picker by the play button --
-            // it should never reach here. Return an empty pool defensively
-            // so a future caller never crashes the game.
-            case .myNotes:    return []
-            }
-        }()
-        guard !questions.isEmpty else { return }
-        presented = .craterBlast(CraterBlast(title: "Crater Blast \u{00B7} \(mode.rawValue)", questions: questions))
-    }
-
-    private func launchTower(mode: TowerMode) {
-        let questions: [WordTowerQuestion] = {
-            switch mode {
-            case .playForFun: return WordTowerBank.playForFun.shuffled()
-            case .mentalMath: return WordTowerBank.mentalMath().shuffled()
-            // Same as above -- .myNotes goes through launchFromPack instead.
-            case .myNotes:    return []
-            }
-        }()
-        guard !questions.isEmpty else { return }
-        presented = .wordTower(WordTower(title: "Word Tower \u{00B7} \(mode.rawValue)", questions: questions))
-    }
-
-    private func launchBlitz(mode: WordBlitzMode) {
-        let questions: [WordBlitzQuestion] = {
-            switch mode {
-            case .playForFun: return WordBlitzBank.playForFun.shuffled()
-            case .mentalMath: return WordBlitzBank.mentalMath().shuffled()
-            // .myNotes routes through the pack picker → launchFromPack.
-            case .myNotes:    return []
-            }
-        }()
-        guard !questions.isEmpty else { return }
-        presented = .wordBlitz(WordBlitz(title: "Word Blitz \u{00B7} \(mode.rawValue)", questions: questions))
     }
 }
 

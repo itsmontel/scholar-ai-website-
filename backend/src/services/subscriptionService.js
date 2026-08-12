@@ -20,14 +20,19 @@ const PLAN_LIMITS = {
   free: {
     documentsPerMonth: 3,
     maxDocuments: 3, // hard cap on TOTAL documents owned (not monthly)
-    analysesPerMonth: 2,
-    citationSearchesPerMonth: 2,
+    // ONE lifetime analysis — spent during onboarding, where the user
+    // analyses a real essay of their own before being asked for a card.
+    // That single run IS the free tier; there is no standalone free
+    // plan to sit on afterwards. Was 2 when free users could keep
+    // sampling the product without ever reaching the trial ask.
+    analysesPerMonth: 1,
+    citationSearchesPerMonth: 1,
     humanizeWordsPerMonth: 5000,
     summarizeWordsPerMonth: 5000,
-    studyPackGenerationsPerMonth: 2,
+    studyPackGenerationsPerMonth: 1,
     studyPackMaxWordsPerGeneration: 5000,
     quizWordsPerMonth: 15000,
-    quizGenerationsPerMonth: 2,
+    quizGenerationsPerMonth: 1,
     quizMaxWordsPerGeneration: 5000,
     craterBlastMaxWordsPerGeneration: 5000,
     lessonWordsPerMonth: 5000,
@@ -1340,6 +1345,244 @@ const notifyPreviewFollowups = async () => {
 };
 
 /**
+ * Hourly: find trialing subscriptions ~48h from expiry (day 5 of a
+ * 7-day trial) and send the value-recap email.
+ *
+ * Deliberately separate from the 24h reminder above, and deliberately
+ * earlier. The 24h email is a last call; this one arrives while there's
+ * still time to act, reflects the user's own usage back at them, and
+ * carries the plain-language charge notice. Users who were going to
+ * churn cancel here — which routes them through the save offer instead
+ * of into a chargeback after a surprise charge.
+ *
+ * Window is 46–49h (wider than 48h±0.5h) so a dropped tick still catches
+ * the trial on the next run; `trial_recap_email_sent_at` guarantees one
+ * email per subscription regardless of how many ticks land in the window.
+ *
+ * Returns { sent, errors, candidates }.
+ */
+const notifyTrialValueRecap = async () => {
+  const emailService = require('./emailService');
+  let sent = 0;
+  let errors = 0;
+  try {
+    const supabaseAdmin = supabaseServiceRole;
+    const nowMs = Date.now();
+    const windowStartIso = new Date(nowMs + 46 * 60 * 60 * 1000).toISOString();
+    const windowEndIso = new Date(nowMs + 49 * 60 * 60 * 1000).toISOString();
+
+    const { data: candidates, error: queryError } = await supabaseAdmin
+      .from('subscriptions')
+      .select('id, user_id, plan, status, current_period_end, trial_recap_email_sent_at')
+      .eq('status', 'trialing')
+      .is('trial_recap_email_sent_at', null)
+      .gte('current_period_end', windowStartIso)
+      .lte('current_period_end', windowEndIso);
+
+    if (queryError) {
+      console.error('📈 trial-recap: failed to query candidates:', queryError);
+      return { sent: 0, errors: 1, candidates: 0 };
+    }
+
+    const candidateCount = candidates?.length || 0;
+    if (candidateCount === 0) return { sent: 0, errors: 0, candidates: 0 };
+
+    console.log(`📈 trial-recap: ${candidateCount} subscription(s) entering the 48h window`);
+
+    for (const row of candidates) {
+      try {
+        const { data: user, error: userErr } = await supabaseAdmin
+          .from('users')
+          .select('email, first_name, name')
+          .eq('id', row.user_id)
+          .single();
+        if (userErr || !user?.email) {
+          console.warn(`📈 trial-recap: skipping sub ${row.id} — user lookup failed`, userErr?.message);
+          continue;
+        }
+
+        const firstName =
+          (user.first_name && String(user.first_name).trim()) ||
+          (user.name && !String(user.name).includes('@')
+            ? String(user.name).trim().split(/\s+/)[0]
+            : '') ||
+          '';
+
+        // Usage during the trial. Counts are best-effort: a failed
+        // count renders as 0, which downgrades the email to the
+        // "haven't tried it yet" variant rather than blocking the send
+        // — the compliance notice matters more than the stats.
+        const [analysesRes, packsRes, citationsRes] = await Promise.all([
+          supabaseAdmin.from('document_analyses').select('id', { count: 'exact', head: true }).eq('user_id', row.user_id),
+          supabaseAdmin.from('quiz_usage').select('id', { count: 'exact', head: true }).eq('user_id', row.user_id).eq('quiz_type', 'study_pack'),
+          supabaseAdmin.from('citation_searches').select('id', { count: 'exact', head: true }).eq('user_id', row.user_id),
+        ]);
+
+        const planLabel = row.plan === 'premium' ? 'Premium' : 'Pro';
+        const chargeAmount = row.plan === 'premium' ? '$39.99' : '$19.99';
+
+        const emailResult = await emailService.sendTrialValueRecapEmail(user.email, {
+          firstName,
+          planName: planLabel,
+          firstChargeAmount: chargeAmount,
+          firstChargeAt: row.current_period_end,
+          stats: {
+            analyses: analysesRes?.count || 0,
+            studyPacks: packsRes?.count || 0,
+            citations: citationsRes?.count || 0,
+          },
+        });
+
+        if (!emailResult.success) {
+          console.error(`📈 trial-recap: send failed for sub ${row.id}:`, emailResult.error);
+          errors += 1;
+          continue;
+        }
+
+        const { error: stampErr } = await supabaseAdmin
+          .from('subscriptions')
+          .update({ trial_recap_email_sent_at: new Date().toISOString() })
+          .eq('id', row.id);
+        if (stampErr) {
+          console.error(`📈 trial-recap: stamp failed for sub ${row.id}:`, stampErr.message);
+          errors += 1;
+          continue;
+        }
+
+        sent += 1;
+      } catch (rowErr) {
+        console.error(`📈 trial-recap: error for sub ${row.id}:`, rowErr.message);
+        errors += 1;
+      }
+    }
+
+    console.log(`📈 trial-recap: complete — sent ${sent}, errors ${errors}, candidates ${candidateCount}`);
+    return { sent, errors, candidates: candidateCount };
+  } catch (error) {
+    console.error('📈 trial-recap: fatal error:', error);
+    return { sent, errors: errors + 1, candidates: 0 };
+  }
+};
+
+/** Stripe promotion code offered in the winback email. Separate from the
+ *  welcome code because the backend deliberately strips welcome codes for
+ *  anyone with prior subscription history — which is exactly who this
+ *  email targets. Must exist in Stripe Dashboard → Coupons as 50% off,
+ *  duration "once". */
+const WINBACK_PROMO_CODE = process.env.STRIPE_WINBACK_PROMO_CODE || 'COMEBACK50';
+/** Days after a subscription actually lapses before the winback goes out. */
+const WINBACK_DELAY_DAYS = Number(process.env.WINBACK_DELAY_DAYS || 14);
+
+/**
+ * Daily: find users whose subscription lapsed ~WINBACK_DELAY_DAYS ago and
+ * never came back, then send the one-shot half-price winback.
+ *
+ * This is where the 50% discount earns its keep. At signup it mostly
+ * discounted users who would have paid full price; here every conversion
+ * is revenue that was already written off.
+ *
+ * Timed off `canceled_at` (the actual lapse) rather than when the user
+ * clicked cancel — they keep access until period end, so emailing "come
+ * back" while they still have Pro reads as broken.
+ *
+ * Window is a 24h slice so a daily tick catches each user exactly once;
+ * users.winback_email_sent_at guarantees one email per user, ever.
+ *
+ * Returns { sent, errors, candidates }.
+ */
+const notifyWinbacks = async () => {
+  const emailService = require('./emailService');
+  let sent = 0;
+  let errors = 0;
+  try {
+    const supabaseAdmin = supabaseServiceRole;
+    const nowMs = Date.now();
+    const dayMs = 24 * 60 * 60 * 1000;
+    const windowStartIso = new Date(nowMs - (WINBACK_DELAY_DAYS + 1) * dayMs).toISOString();
+    const windowEndIso = new Date(nowMs - WINBACK_DELAY_DAYS * dayMs).toISOString();
+
+    const { data: candidates, error: queryError } = await supabaseAdmin
+      .from('subscriptions')
+      .select('id, user_id, plan, status, canceled_at')
+      .eq('status', 'canceled')
+      .gte('canceled_at', windowStartIso)
+      .lte('canceled_at', windowEndIso);
+
+    if (queryError) {
+      console.error('🔙 winback: failed to query candidates:', queryError);
+      return { sent: 0, errors: 1, candidates: 0 };
+    }
+
+    const candidateCount = candidates?.length || 0;
+    if (candidateCount === 0) return { sent: 0, errors: 0, candidates: 0 };
+
+    console.log(`🔙 winback: ${candidateCount} subscription(s) lapsed ~${WINBACK_DELAY_DAYS}d ago`);
+
+    for (const row of candidates) {
+      try {
+        const { data: user, error: userErr } = await supabaseAdmin
+          .from('users')
+          .select('email, first_name, name, subscription_plan, winback_email_sent_at')
+          .eq('id', row.user_id)
+          .single();
+        if (userErr || !user?.email) {
+          console.warn(`🔙 winback: skipping sub ${row.id} — user lookup failed`, userErr?.message);
+          continue;
+        }
+        if (user.winback_email_sent_at) continue;
+        // Already resubscribed since lapsing — don't offer a discount to
+        // someone currently paying full price.
+        if (isPaidSubscriptionTier(user.subscription_plan)) continue;
+
+        const firstName =
+          (user.first_name && String(user.first_name).trim()) ||
+          (user.name && !String(user.name).includes('@')
+            ? String(user.name).trim().split(/\s+/)[0]
+            : '') ||
+          '';
+
+        const planLabel = row.plan === 'premium' ? 'Premium' : 'Pro';
+        const priceLabel = row.plan === 'premium' ? '$19.99' : '$9.99';
+
+        const emailResult = await emailService.sendWinbackEmail(user.email, {
+          firstName,
+          planName: planLabel,
+          promoCode: WINBACK_PROMO_CODE,
+          priceLabel,
+        });
+
+        if (!emailResult.success) {
+          console.error(`🔙 winback: send failed for ${row.user_id}:`, emailResult.error);
+          errors += 1;
+          continue;
+        }
+
+        const { error: stampErr } = await supabaseAdmin
+          .from('users')
+          .update({ winback_email_sent_at: new Date().toISOString() })
+          .eq('id', row.user_id);
+        if (stampErr) {
+          console.error(`🔙 winback: stamp failed for ${row.user_id}:`, stampErr.message);
+          errors += 1;
+          continue;
+        }
+
+        sent += 1;
+      } catch (rowErr) {
+        console.error(`🔙 winback: error for sub ${row.id}:`, rowErr.message);
+        errors += 1;
+      }
+    }
+
+    console.log(`🔙 winback: complete — sent ${sent}, errors ${errors}, candidates ${candidateCount}`);
+    return { sent, errors, candidates: candidateCount };
+  } catch (error) {
+    console.error('🔙 winback: fatal error:', error);
+    return { sent, errors: errors + 1, candidates: 0 };
+  }
+};
+
+/**
  * Daily reconciliation: walk every paid user in our DB, compare against
  * Stripe, and downgrade anyone whose Stripe subscription is no longer in an
  * access state. Safety net for missed/failed webhooks and silent trial expiry.
@@ -1585,7 +1828,10 @@ module.exports = {
   cleanupOldCitations,
   reconcileSubscriptions,
   notifyTrialsEndingSoon,
+  notifyTrialValueRecap,
+  notifyWinbacks,
   notifyPreviewFollowups,
+  WINBACK_PROMO_CODE,
   STRIPE_ACCESS_STATUSES,
   mapPriceIdToPlan,
   resolveEffectivePlan,

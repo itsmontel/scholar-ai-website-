@@ -111,6 +111,8 @@ export default function LoggedInWorkspaceLayout({
           onUpgrade={() => onNavigate('pricing')}
           onNavigateBadges={() => onNavigate('badges')}
           onNavigateHome={() => onNavigate('dashboard')}
+          user={effectiveUser}
+          onNavigateAccount={() => onNavigate('account')}
           topBar={topBar}
         >
           <div className={contentClassName ?? 'relative z-10'}>{children}</div>

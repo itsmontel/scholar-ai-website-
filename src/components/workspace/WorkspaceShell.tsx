@@ -14,6 +14,8 @@ export function WorkspaceShell({
   onUpgrade,
   onNavigateBadges,
   onNavigateHome,
+  user,
+  onNavigateAccount,
   topBar,
 }: {
   activeView: WorkspaceView;
@@ -29,22 +31,45 @@ export function WorkspaceShell({
   collapsed?: boolean;
   /** Toggle the rail collapsed ⇄ expanded. */
   onToggle?: () => void;
-  /** Plan/usage for the sidebar footer CTA. */
+  /** Plan/usage for the sidebar footer (plan line + upgrade CTA). */
   usage?: { used: number; limit: number | null; plan: string } | null;
   onUpgrade?: () => void;
-  /** Navigate to the /badges page from the sidebar XP card. */
+  /** Achievements page — opened from the rail's XP card. */
   onNavigateBadges?: () => void;
   /** Logo / wordmark — return to the main dashboard. */
   onNavigateHome?: () => void;
-  /** Optional slim top-right toolbar (Upgrade / Feedback /
-      Pomodoro / Avatar). Floats over the content area; replaces
-      the global site Header when present. */
+  /** Logged-in user for the rail's account card. */
+  user?: Record<string, unknown> | null;
+  /** Account card click — opens the account page. */
+  onNavigateAccount?: () => void;
+  /** Optional slim top-right toolbar (Saved Materials / Pomodoro /
+      Avatar). Floats over the content area; replaces the global
+      site Header when present. */
   topBar?: ReactNode;
 }) {
   return (
     <div className="flex w-full min-h-screen items-stretch">
-      <WorkspaceSidebar activeView={activeView} onSelect={onSelect} headerless={headerless} collapsed={collapsed} onToggle={onToggle} usage={usage} onUpgrade={onUpgrade} onNavigateBadges={onNavigateBadges} onNavigateHome={onNavigateHome} />
-      <WorkspaceMobileNav activeView={activeView} onSelect={onSelect} onNavigateHome={onNavigateHome} />
+      <WorkspaceSidebar
+        activeView={activeView}
+        onSelect={onSelect}
+        headerless={headerless}
+        collapsed={collapsed}
+        onToggle={onToggle}
+        usage={usage}
+        onUpgrade={onUpgrade}
+        onNavigateBadges={onNavigateBadges}
+        onNavigateHome={onNavigateHome}
+        user={user}
+        onNavigateAccount={onNavigateAccount}
+      />
+      <WorkspaceMobileNav
+        activeView={activeView}
+        onSelect={onSelect}
+        onNavigateHome={onNavigateHome}
+        user={user}
+        usage={usage}
+        onNavigateAccount={onNavigateAccount}
+      />
       <div className="relative flex-1 min-w-0">
         {topBar && (
           <div className="pointer-events-none absolute top-3 right-3 sm:top-4 sm:right-4 lg:top-5 lg:right-5 z-50">

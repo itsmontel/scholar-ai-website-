@@ -17,15 +17,16 @@ import type { WorkspaceView } from '../workspace/types';
 import { SIDEBAR_TOOLS } from '../workspace/sidebarTools';
 import { WorkspaceShell } from '../workspace/WorkspaceShell';
 import DashboardTopBar from '../common/DashboardTopBar';
+import ViewportAutoplayVideo from '../common/ViewportAutoplayVideo';
 import { consumePendingWorkspaceView, WS_SWITCH_VIEW_EVENT } from '../workspace/workspaceNavigate';
-import { trackEvent } from '../../utils/analytics';
+import { trackEvent, trackFunnelStep } from '../../utils/analytics';
 import { openUpgradePaywall } from '../../utils/paywall';
 import {
   getOnboardingCompletedAt,
   isFirstRunFastPathDone,
   markFirstRunFastPathDone,
 } from '../../constants/paywallSession';
-import { getPrimaryFeatureInterest, INTEREST_TO_VIEW } from '../../utils/featureInterests';
+import { getPrimaryFeatureInterest } from '../../utils/featureInterests';
 
 /* ═══════════════════════════════════════════════════════════════
    DocumentsPage — unified hub for everything in /documents.
@@ -232,6 +233,7 @@ const I = {
   Trash: () => (<svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z" /></svg>),
   ArrowR: () => (<svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>),
   ArrowL: () => (<svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>),
+  Wand: () => (<svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth={2.1} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M14.5 5.5l4 4L9 19H5v-4l9.5-9.5z" /><path strokeLinecap="round" strokeLinejoin="round" d="M17.5 2.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7.7-1.8z" /></svg>),
   Review: () => (<svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>),
   Pack: () => (<svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth={2.1} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 3l9 4.5-9 4.5-9-4.5L12 3zM3 12l9 4.5L21 12M3 16.5L12 21l9-4.5" /></svg>),
   Cite: () => (<svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth={2.1} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 006.5 22H20V2H6.5A2.5 2.5 0 004 4.5v15z" /></svg>),
@@ -731,40 +733,192 @@ function AnalyzePanel({
   );
 }
 
-/* ─── CyclingMedia — cycles a mixed list of videos + images for the
- * dashboard tool cards (e.g. a Study Pack card showing flashcards →
- * quiz → crossword → lesson). Videos play then advance (capped so the
- * loop stays snappy); images hold ~5s. Only the current item is
- * mounted, so we never autoplay several clips at once. */
-function CyclingMedia({ items, imageMs = 5000, maxVideoMs = 6500 }: { items: { kind: 'video' | 'image'; src: string }[]; imageMs?: number; maxVideoMs?: number }) {
-  const [idx, setIdx] = useState(0);
-  const list = items.length ? items : [{ kind: 'image' as const, src: '' }];
-  const cur = list[idx % list.length];
-  const advance = () => setIdx((i) => (i + 1) % list.length);
+/** "Edited 2 days ago" style stamp for the document rows. */
+function editedAgo(iso: string | null | undefined): string {
+  if (!iso) return 'just now';
+  const ms = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(ms / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return mins === 1 ? '1 min ago' : `${mins} mins ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs === 1 ? '1 hour ago' : `${hrs} hours ago`;
+  const days = Math.floor(hrs / 24);
+  if (days === 1) return 'yesterday';
+  if (days < 7) return `${days} days ago`;
+  const weeks = Math.floor(days / 7);
+  if (weeks < 5) return weeks === 1 ? '1 week ago' : `${weeks} weeks ago`;
+  const months = Math.max(1, Math.floor(days / 30));
+  return months === 1 ? '1 month ago' : `${months} months ago`;
+}
+
+/* ─── DocumentRow — one document in the dashboard's recents list and
+ * in the full My Documents library. The whole row opens the doc; the
+ * ⋮ menu holds download + delete. */
+function DocumentRow({
+  doc,
+  onOpen,
+  onDownload,
+  onDelete,
+  elevated = false,
+}: {
+  doc: DocSummary;
+  onOpen: () => void;
+  onDownload: () => void;
+  onDelete: () => void;
+  /** Hub-style spaced card; library keeps the compact list row. */
+  elevated?: boolean;
+}) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    if (list.length <= 1) return;
-    const t = setTimeout(advance, cur.kind === 'image' ? imageMs : maxVideoMs);
-    return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [idx, list.length, imageMs, maxVideoMs]);
-  const mediaClass = 'absolute inset-0 h-full w-full object-cover object-center scale-[1.04]';
-  return cur.kind === 'video' ? (
-    <video key={cur.src} src={cur.src} autoPlay muted playsInline preload="metadata" onEnded={advance} className={mediaClass} aria-hidden />
-  ) : (
-    <img key={cur.src} src={cur.src} alt="" aria-hidden draggable={false} className={`${mediaClass} object-top`} />
+    if (!menuOpen) return;
+    const onDocClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMenuOpen(false); };
+    document.addEventListener('mousedown', onDocClick);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDocClick);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [menuOpen]);
+
+  const words = doc.wordCount ? `${doc.wordCount.toLocaleString()} words` : 'Empty';
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onOpen}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpen(); } }}
+      aria-label={`Open ${doc.title || 'Untitled'}`}
+      className={
+        elevated
+          ? 'group relative flex items-center gap-3.5 sm:gap-4 px-4 sm:px-5 py-4 cursor-pointer rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-[0_1px_2px_rgba(60,40,90,0.04)] hover:border-[#C9A0F0] dark:hover:border-[#A560E8]/40 hover:shadow-[0_14px_28px_-20px_rgba(90,45,140,0.45)] hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A560E8]/40'
+          : 'group relative flex items-center gap-3.5 px-4 sm:px-5 py-3.5 cursor-pointer transition-colors hover:bg-[#FBF8FF] dark:hover:bg-stone-800/60 focus:outline-none focus-visible:bg-[#F5EEFE] dark:focus-visible:bg-stone-800 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#A560E8]/40'
+      }
+    >
+      {!elevated && (
+        <span
+          className="pointer-events-none absolute inset-y-1.5 left-0 w-[3px] rounded-r-full bg-[#A560E8] origin-top scale-y-0 opacity-0 transition-all duration-200 group-hover:scale-y-100 group-hover:opacity-100"
+          aria-hidden
+        />
+      )}
+
+      <span
+        className={
+          elevated
+            ? 'shrink-0 flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[#F3EAFF] to-[#E9DBFF] text-[#8A48C7] dark:from-[#A560E8]/25 dark:to-[#A560E8]/10 dark:text-[#C9A0F0] ring-1 ring-[#C9A0F0]/35 dark:ring-[#A560E8]/25 transition-transform duration-200 group-hover:scale-105'
+            : 'shrink-0 flex h-10 w-10 items-center justify-center rounded-xl bg-[#F3EAFF] text-[#A560E8] dark:bg-[#A560E8]/15 dark:text-[#C9A0F0] transition-colors group-hover:bg-[#EADCFB] dark:group-hover:bg-[#A560E8]/25'
+        }
+        aria-hidden
+      >
+        <svg className={elevated ? 'w-[22px] h-[22px]' : 'w-5 h-5'} fill="none" stroke="currentColor" strokeWidth={1.9} viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h4m-7 4h12a2 2 0 002-2V8.83a2 2 0 00-.59-1.42l-3.83-3.83A2 2 0 0014.17 3H6a2 2 0 00-2 2v15a2 2 0 002 2z" />
+        </svg>
+      </span>
+
+      <div className="min-w-0 flex-1">
+        <p className="text-[14.5px] font-extrabold text-stone-800 dark:text-stone-100 leading-tight truncate transition-colors group-hover:text-[#7733B5] dark:group-hover:text-[#C9A0F0]">
+          {doc.title || 'Untitled'}
+        </p>
+        <div className="mt-1.5 flex flex-wrap items-center gap-1.5 sm:gap-2">
+          <span className="inline-flex items-center gap-1 text-[12px] font-bold text-stone-400 dark:text-stone-500">
+            <svg className="w-3 h-3 opacity-70" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24" aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l2.5 1.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {editedAgo(doc.lastEditedAt || doc.updatedAt)}
+          </span>
+          <span
+            className="inline-flex items-center h-[18px] px-1.5 rounded-md bg-stone-100 dark:bg-stone-800 text-[11px] font-extrabold tabular-nums text-stone-500 dark:text-stone-400"
+          >
+            {words}
+          </span>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); onOpen(); }}
+        className="shrink-0 hidden sm:inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#8A48C7] dark:text-[#C9A0F0] text-[13px] font-extrabold hover:bg-[#A560E8] hover:text-white dark:hover:bg-[#A560E8] dark:hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A560E8]/45"
+      >
+        Open
+        <svg className="w-3.5 h-3.5 opacity-80" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+      </button>
+
+      <div className="relative shrink-0" ref={menuRef}>
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); setMenuOpen((o) => !o); }}
+          aria-label={`More actions for ${doc.title || 'Untitled'}`}
+          aria-expanded={menuOpen}
+          className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 dark:hover:text-stone-200 dark:hover:bg-stone-800 transition-colors"
+        >
+          <svg className="w-4.5 h-4.5" width="18" height="18" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
+            <circle cx="12" cy="5" r="1.8" /><circle cx="12" cy="12" r="1.8" /><circle cx="12" cy="19" r="1.8" />
+          </svg>
+        </button>
+        {menuOpen && (
+          <div
+            className="absolute top-full right-0 mt-1 w-44 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 shadow-[0_18px_38px_-18px_rgba(40,30,60,0.35)] overflow-hidden z-30"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => { setMenuOpen(false); onOpen(); }}
+              className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-[13px] font-bold text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
+            >
+              <I.Doc /> Open
+            </button>
+            <button
+              type="button"
+              onClick={() => { setMenuOpen(false); onDownload(); }}
+              className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-[13px] font-bold text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
+            >
+              <I.Download /> Download
+            </button>
+            <button
+              type="button"
+              onClick={() => { setMenuOpen(false); onDelete(); }}
+              className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-[13px] font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+            >
+              <I.Trash /> Delete
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
-/* ─── HUB view (list + filters + actions) ───────────────────── */
-/* ─── DocumentsHub — bento-grid "home" view ──────────────────────
+/** Loading placeholder rows for the document lists. */
+function DocumentRowSkeleton({ elevated = false }: { elevated?: boolean }) {
+  return (
+    <div
+      className={
+        elevated
+          ? 'flex items-center gap-3.5 sm:gap-4 px-4 sm:px-5 py-4 animate-pulse rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900'
+          : 'flex items-center gap-3.5 px-4 sm:px-5 py-3.5 animate-pulse'
+      }
+    >
+      <div className={`${elevated ? 'h-11 w-11 rounded-2xl' : 'h-10 w-10 rounded-xl'} bg-stone-100 dark:bg-stone-800 shrink-0`} />
+      <div className="flex-1 min-w-0 space-y-2">
+        <div className="h-3 w-1/3 rounded-full bg-stone-100 dark:bg-stone-800" />
+        <div className="h-2.5 w-1/4 rounded-full bg-stone-100 dark:bg-stone-800" />
+      </div>
+      <div className="h-9 w-16 rounded-xl bg-stone-100 dark:bg-stone-800 shrink-0" />
+    </div>
+  );
+}
+
+/* ─── HUB view — the dashboard home ──────────────────────────────
  *
- * The landing surface for /dashboard. Designed to feel like the
- * welcoming Duolingo / Quizlet home: greeting + mascot, a streak
- * chip, a "today's daily review" prompt, four colourful quick-action
- * tiles, a recent-study-packs section, and a mascot tip — all in a
- * responsive bento grid up top. The full document library (with
- * search + filter + grid) lives below so users who came to manage
- * docs can still scroll right to it.
+ * /dashboard landing: greeting, flagship essay-upload surface with a
+ * real product preview, a quiet four-tool launch row, and recent docs.
+ * Full library lives in the `docs` view ("My Documents" in the rail).
  */
 function DocumentsHub({
   docs,
@@ -789,42 +943,34 @@ function DocumentsHub({
   onDownload: (id: string) => void;
   onDelete: (id: string) => void;
   userName: string;
+  /** Logged-in user — only used to personalise the tool order. */
   user: { id?: string } | null | undefined;
   usage: { used: number; limit: number | null; plan: string } | null;
   onSwitchView: (v: WorkspaceView) => void;
-  /** Top-level navigation (e.g. to /pricing) — only used by the
-      expiry urgency banner so it can route free users to upgrade. */
+  /** Top-level navigation (e.g. to /pricing) — used by the expiry
+      urgency banner so it can route free users to upgrade. */
   onNavigate: (page: string) => void;
-  /** Top-bar toolbar (Saved Materials / streak / Pomodoro / avatar).
-      Embedded inside the greeting card on the dashboard so they
-      share a row instead of floating separately. */
+  /** Account controls (Saved Materials / Pomodoro / avatar). Sits in
+      the greeting row so the header reads as one band. */
   topBar?: React.ReactNode;
 }) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [search, setSearch] = useState('');
-  // Drag-over highlight for the dashboard upload drop-zone card.
   const [uploadDropActive, setUploadDropActive] = useState(false);
 
-  /* ─── Recent study materials + expiry data fetch ───────────────
-   * recentMaterials (study packs / quizzes / flashcards from the
-   * quiz-history endpoint) powers the right-rail "Your study packs"
-   * card; the same rows + citations feed the free-user expiry nag. */
-  interface RecentMaterial { id: string; title: string; kind: string; createdAt: string }
-  const [recentMaterials, setRecentMaterials] = useState<RecentMaterial[]>([]);
+  const planLower = String((usage?.plan ?? 'free')).toLowerCase();
+  const isPaidUser = planLower === 'pro' || planLower === 'premium';
 
-  /** Expiry urgency snapshot for the free-user "your stuff is about
-   *  to vanish" banner. We aggregate study materials + citation
-   *  searches and find the soonest-expiring item to anchor the
-   *  countdown. Paid users skip this whole flow. */
+  /* ─── Expiry snapshot for the free-user "your stuff is about to
+   * vanish" banner. We aggregate study materials + citation searches
+   * and anchor the countdown on the soonest-expiring item. Paid users
+   * skip the whole flow. */
   const [expiryInfo, setExpiryInfo] = useState<
     | { materialCount: number; citationCount: number; soonestDays: number }
     | null
   >(null);
 
-  const planLower = String((usage?.plan ?? 'free')).toLowerCase();
-  const isPaidUser = planLower === 'pro' || planLower === 'premium';
-
   useEffect(() => {
+    if (isPaidUser) return;
     let cancelled = false;
     (async () => {
       try {
@@ -839,20 +985,6 @@ function DocumentsHub({
         if (cancelled) return;
         const objs = rows.filter((r): r is Record<string, unknown> => !!r && typeof r === 'object');
 
-        // Recent study materials (all types) for the activity feed.
-        const materials: RecentMaterial[] = objs
-          .map((r) => ({
-            id: String((r as { id?: unknown }).id ?? ''),
-            title: String((r as { title?: unknown }).title ?? 'Study material'),
-            kind: String((r as { quiz_type?: unknown }).quiz_type ?? 'material'),
-            createdAt: String((r as { created_at?: unknown }).created_at ?? ''),
-          }))
-          .filter((m) => m.createdAt)
-          .slice(0, 12);
-        setRecentMaterials(materials);
-
-        // Citation searches — feed BOTH the activity list and (for free
-        // users) the expiry nag, so we always fetch them.
         let citationObjs: Record<string, unknown>[] = [];
         try {
           const cRes = await fetch(`${API_URL}/analysis/citation-history`, {
@@ -865,9 +997,6 @@ function DocumentsHub({
           }
         } catch { /* ignore citation fetch failures */ }
         if (cancelled) return;
-
-        // Stop here for paid users — they don't see the expiry nag.
-        if (isPaidUser) return;
 
         const now = Date.now();
         const toDays = (iso: string) => Math.ceil((new Date(iso).getTime() - now) / 86_400_000);
@@ -889,10 +1018,515 @@ function DocumentsHub({
           citationCount: citationDays.length,
           soonestDays: Math.min(...allDays),
         });
-      } catch { /* network blip — empty state handles it */ }
+      } catch { /* network blip — the banner just stays hidden */ }
     })();
     return () => { cancelled = true; };
   }, [isPaidUser]);
+
+  const recentDocs = useMemo(
+    () =>
+      [...docs]
+        .sort((a, b) => {
+          const ta = a.lastEditedAt || a.updatedAt;
+          const tb = b.lastEditedAt || b.updatedAt;
+          return new Date(tb).getTime() - new Date(ta).getTime();
+        })
+        .slice(0, 5),
+    [docs],
+  );
+
+  /* Quiet launch tiles — icon + copy only. Colour lives in the tools
+   * themselves; the hub stays monochrome so nothing competes with the
+   * essay-upload hero. */
+  /* Each tool shows a looping demo clip, or a still when there's a
+     better-fitting screenshot for that surface. */
+  const PICK_TOOLS: { key: string; title: string; sub: string; icon: React.ReactNode; video?: string; image?: string; onClick: () => void }[] = [
+    {
+      key: 'editor',
+      title: 'Start a draft',
+      sub: 'Blank page with live feedback',
+      onClick: onNew,
+      icon: <I.Wand />,
+      image: '/startdraft.png',
+    },
+    {
+      key: 'pack',
+      title: 'Study Pack',
+      sub: 'Lesson, flashcards, quiz',
+      onClick: () => onSwitchView('study-packs'),
+      icon: <I.Pack />,
+      video: '/hero-flashcards-hq.mp4',
+    },
+    {
+      key: 'citations',
+      title: 'Citations',
+      sub: 'Find and format sources',
+      onClick: () => onSwitchView('citations'),
+      icon: <I.Cite />,
+      video: '/writescholar-citation-finder-demo.mp4',
+    },
+    {
+      key: 'games',
+      title: 'Arcade',
+      sub: 'Learn with study games',
+      onClick: () => onSwitchView('games'),
+      icon: <I.Game />,
+      video: '/hero-word-blitz-hq.mp4',
+    },
+  ];
+
+  const primaryInterest = getPrimaryFeatureInterest(user?.id);
+  const pickToolsFirstKey = primaryInterest === 'study_packs' ? 'pack' : primaryInterest === 'games' ? 'games' : 'editor';
+  const pickTools = [...PICK_TOOLS].sort(
+    (a, b) => (a.key === pickToolsFirstKey ? -1 : 0) - (b.key === pickToolsFirstKey ? -1 : 0),
+  );
+
+  const dateLine = todayLabel();
+
+  return (
+    <>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".pdf,.doc,.docx,.txt"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) onUpload(f);
+          e.target.value = '';
+        }}
+      />
+
+      {/* ─── Header — mascot + greeting left, account chrome right ─ */}
+      <div className="relative z-40 flex flex-col-reverse sm:flex-row sm:items-center gap-4 sm:gap-6 mb-7 sm:mb-8">
+        <div className="min-w-0 flex-1 flex items-center gap-3.5 sm:gap-5">
+          {/* Celebrating Scholar mascot — brand welcome beside the greeting.
+              Animated webp in a purple ring, echoing the product identity. */}
+          <div
+            className="relative shrink-0 w-[4.75rem] h-[4.75rem] sm:w-[5.75rem] sm:h-[5.75rem] lg:w-[6.5rem] lg:h-[6.5rem] motion-safe:animate-float"
+            aria-hidden
+          >
+            <span className="absolute inset-0 rounded-full bg-[#E9DBFF]/70 dark:bg-[#A560E8]/20 ring-[3px] sm:ring-4 ring-[#C9A0F0]/55 dark:ring-[#A560E8]/40" />
+            <span className="absolute -top-0.5 -right-0.5 sm:top-0 sm:right-0 h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-[#A560E8] ring-2 ring-white dark:ring-stone-900" />
+            <span className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-white dark:bg-stone-900 p-1.5 sm:p-2">
+              <img
+                src="/mascot-celebrating.webp"
+                alt=""
+                width={104}
+                height={104}
+                loading="eager"
+                decoding="async"
+                draggable={false}
+                className="h-full w-full object-contain drop-shadow-[0_6px_12px_rgba(122,52,182,0.22)]"
+              />
+            </span>
+          </div>
+          <div className="min-w-0 flex-1">
+            {dateLine && (
+              <p className="text-[11.5px] font-extrabold uppercase tracking-[0.16em] text-stone-400 dark:text-stone-500 mb-2">
+                {dateLine}
+              </p>
+            )}
+            <h1
+              className="text-[1.75rem] sm:text-[2.05rem] lg:text-[2.25rem] font-extrabold leading-[1.08] tracking-tight text-stone-900 dark:text-stone-50"
+              style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+            >
+              {greetingFor()}
+              {userName ? (
+                <>
+                  , <span className="text-[#8A48C7] dark:text-[#C9A0F0]">{userName}</span>
+                </>
+              ) : null}
+            </h1>
+            <p className="mt-1.5 text-[14px] sm:text-[15px] font-semibold text-stone-500 dark:text-stone-400">
+              Upload an essay, open a tool, or continue a draft.
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center justify-end gap-2 shrink-0">
+          {topBar}
+        </div>
+      </div>
+
+      {/* ─── Free-plan expiry nudge ─────────────────────────────── */}
+      {!isPaidUser && expiryInfo && (() => {
+        const { materialCount, citationCount, soonestDays } = expiryInfo;
+        const totalCount = materialCount + citationCount;
+        if (totalCount === 0) return null;
+        const urgent = soonestDays <= 7;
+        const daysText =
+          soonestDays <= 0 ? 'today' :
+          soonestDays === 1 ? 'tomorrow' :
+          `in ${soonestDays} days`;
+        const parts: string[] = [];
+        if (materialCount > 0) parts.push(`${materialCount} study material${materialCount === 1 ? '' : 's'}`);
+        if (citationCount > 0) parts.push(`${citationCount} citation${citationCount === 1 ? '' : 's'}`);
+        const itemsText = parts.join(' & ');
+        return (
+          <div
+            className={`flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 rounded-2xl border px-4 sm:px-5 py-3.5 mb-5 ${
+              urgent
+                ? 'border-red-200/90 bg-red-50/80 dark:border-red-500/30 dark:bg-red-950/30'
+                : 'border-amber-200/90 bg-amber-50/70 dark:border-amber-500/30 dark:bg-amber-950/25'
+            }`}
+          >
+            <div className="min-w-0 flex-1">
+              <h3
+                className="text-[14.5px] font-extrabold text-stone-900 dark:text-stone-50 leading-tight"
+                style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+              >
+                Your {itemsText} disappear {daysText}
+              </h3>
+              <p className="mt-0.5 text-[12.5px] font-semibold text-stone-500 dark:text-stone-400 leading-snug">
+                Free items expire 30 days after creation. Upgrade to keep them.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => onNavigate('pricing')}
+              className="shrink-0 inline-flex items-center justify-center gap-1.5 px-4 h-10 rounded-xl bg-[#A560E8] hover:bg-[#9450D8] text-white text-[13px] font-extrabold transition-colors"
+            >
+              Upgrade
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </button>
+          </div>
+        );
+      })()}
+
+      {/* ─── Flagship: essay feedback upload ──────────────────────
+          Product-led split — copy + CTA left, real editor preview
+          right (same crop bias as the college grader page). */}
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={() => fileInputRef.current?.click()}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInputRef.current?.click(); } }}
+        onDragEnter={(e) => { e.preventDefault(); setUploadDropActive(true); }}
+        onDragOver={(e) => { e.preventDefault(); setUploadDropActive(true); }}
+        onDragLeave={(e) => { e.preventDefault(); setUploadDropActive(false); }}
+        onDrop={(e) => {
+          e.preventDefault();
+          setUploadDropActive(false);
+          const f = e.dataTransfer.files?.[0];
+          if (f) onUpload(f);
+        }}
+        className={`group relative overflow-hidden rounded-[1.75rem] border cursor-pointer transition-all duration-200 focus:outline-none focus-visible:ring-4 focus-visible:ring-[#A560E8]/25 ${
+          uploadDropActive
+            ? 'border-[#A560E8] bg-[#F3EAFF] dark:bg-[#A560E8]/20 shadow-[0_20px_44px_-28px_rgba(90,45,140,0.55)]'
+            : 'border-[#E4D4F8] dark:border-[#A560E8]/25 bg-white dark:bg-stone-900 hover:border-[#C9A0F0] dark:hover:border-[#A560E8]/45 shadow-[0_2px_4px_rgba(60,40,90,0.04),0_22px_50px_-34px_rgba(90,45,140,0.5)] hover:shadow-[0_2px_4px_rgba(60,40,90,0.04),0_30px_60px_-34px_rgba(90,45,140,0.62)]'
+        }`}
+      >
+        {/* Brand wash + ambient orbs behind the copy column */}
+        <span className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#FBF8FF] via-white to-transparent dark:from-[#A560E8]/10 dark:via-stone-900 dark:to-transparent" aria-hidden />
+        <span className="pointer-events-none absolute -top-16 -left-10 h-48 w-48 rounded-full bg-[#C9A0F0]/22 blur-3xl dark:bg-[#A560E8]/12" aria-hidden />
+
+        <div className="relative grid lg:grid-cols-[minmax(0,1fr)_minmax(340px,50%)] items-stretch">
+          <div className="min-w-0 px-5 py-5 sm:px-8 sm:py-6 lg:pr-6">
+            <span className="inline-flex items-center gap-2 h-7 pl-1.5 pr-3 rounded-full bg-[#F3EAFF] dark:bg-[#A560E8]/15 ring-1 ring-[#C9A0F0]/45 dark:ring-[#A560E8]/30">
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-gradient-to-br from-[#B57AF0] to-[#7733B5] text-white" aria-hidden>
+                <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </span>
+              <span className="text-[10.5px] font-extrabold uppercase tracking-[0.14em] text-[#7733B5] dark:text-[#C9A0F0]">
+                Essay Analyzer
+              </span>
+            </span>
+
+            <h2
+              className="mt-2.5 text-[1.5rem] sm:text-[1.8rem] lg:text-[1.95rem] font-extrabold tracking-tight text-stone-900 dark:text-stone-50 leading-[1.08]"
+              style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+            >
+              Get{' '}
+              <span className="relative inline-block">
+                <span className="relative z-10">professor-style</span>
+                <span
+                  className="absolute inset-x-0 bottom-[0.1em] z-0 h-[0.34em] rounded-full bg-gradient-to-r from-[#E9DBFF] to-[#C9A0F0]/70 dark:from-[#A560E8]/35 dark:to-[#A560E8]/20"
+                  aria-hidden
+                />
+              </span>{' '}
+              feedback
+            </h2>
+            <p className="mt-1.5 max-w-md text-[13.5px] sm:text-[14px] font-semibold text-stone-500 dark:text-stone-400 leading-snug">
+              Drop in a draft for a grade, rubric scores, and line-by-line notes — usually in under a minute.
+            </p>
+
+            {/* What you get back — three quick proof points */}
+            <ul className="mt-3.5 flex flex-wrap items-center gap-1.5 sm:gap-2">
+              {['Predicted grade', 'Rubric scores', 'Inline notes'].map((f) => (
+                <li
+                  key={f}
+                  className="inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full bg-white/90 dark:bg-stone-800/70 ring-1 ring-[#E4D4F8] dark:ring-stone-700 text-[11.5px] font-extrabold text-stone-600 dark:text-stone-300"
+                >
+                  <svg className="w-3.5 h-3.5 text-[#A560E8] dark:text-[#C9A0F0]" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  {f}
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-4 flex flex-wrap items-center gap-x-3.5 gap-y-2">
+              <span className="relative inline-flex items-center gap-2 px-5 h-11 rounded-xl bg-gradient-to-br from-[#B57AF0] to-[#8A48C7] text-white text-[14px] font-extrabold overflow-hidden transition-transform duration-200 group-hover:scale-[1.02] shadow-[0_14px_30px_-14px_rgba(122,52,182,0.8)]">
+                <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-transparent to-white/20" aria-hidden />
+                <svg className="relative w-[17px] h-[17px]" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24" aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 16V4m0 0L8 8m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
+                </svg>
+                <span className="relative">Upload document</span>
+              </span>
+              <span className="text-[13px] font-semibold text-stone-400 dark:text-stone-500">
+                or drag &amp; drop · PDF, Word, TXT
+              </span>
+            </div>
+          </div>
+
+          <div className="relative hidden lg:block min-h-[210px] p-3 pl-0" aria-hidden>
+            <div className="relative h-full w-full overflow-hidden rounded-[1.25rem] ring-1 ring-[#E4D4F8] dark:ring-stone-700 bg-stone-50 dark:bg-stone-950/50">
+              <img
+                src="/WriterPic.png"
+                alt=""
+                draggable={false}
+                className="absolute inset-0 h-full w-full object-cover object-[88%_8%] transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+              />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-[#7733B5]/18 via-transparent to-transparent" />
+
+              {/* Result chip — bottom-right, speed claim only */}
+              <div className="absolute bottom-3 right-3 flex items-center gap-2 rounded-xl bg-white/95 dark:bg-stone-900/95 backdrop-blur px-2.5 py-2 shadow-[0_10px_24px_-14px_rgba(40,20,70,0.5)] max-w-[min(100%,13.5rem)]">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#B57AF0] to-[#7733B5] text-white" aria-hidden>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l3.5 2M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </span>
+                <div className="min-w-0 pr-0.5">
+                  <p className="text-[12px] font-extrabold text-stone-800 dark:text-stone-100 leading-tight">
+                    Graded in under 60 seconds
+                  </p>
+                  <p className="text-[11px] font-bold text-stone-400 dark:text-stone-500 leading-tight">
+                    Inline notes · 6 rubric scores
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {uploadDropActive && (
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#A560E8]/96 rounded-[1.65rem]">
+            <div className="text-center px-4">
+              <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-[#7733B5]">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24" aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 14v6a2 2 0 01-2 2H7a2 2 0 01-2-2v-6m4-6l4-4m0 0l4 4m-4-4v12" />
+                </svg>
+              </div>
+              <p className="text-lg font-extrabold text-white" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+                Drop to upload
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ─── Quick start — soft purple tray of launch cards ─────── */}
+      <div className="mt-8 sm:mt-10">
+        <div className="mb-4 flex items-center gap-3">
+          <h2
+            className="text-[1.15rem] sm:text-[1.25rem] font-extrabold text-stone-900 dark:text-stone-50 tracking-tight"
+            style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+          >
+            Quick start
+          </h2>
+          <span className="h-px flex-1 bg-gradient-to-r from-stone-200 to-transparent dark:from-stone-800" aria-hidden />
+        </div>
+
+        <div className="relative overflow-hidden rounded-[1.35rem] border border-[#E4D4F8]/90 dark:border-[#A560E8]/20 bg-gradient-to-br from-[#FBF8FF] via-[#F7F1FF] to-[#F3EAFF]/80 dark:from-stone-900 dark:via-stone-900 dark:to-[#A560E8]/10 p-3 sm:p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
+          {/* Soft ambient orbs — atmosphere without clutter */}
+          <span className="pointer-events-none absolute -top-10 -right-8 h-36 w-36 rounded-full bg-[#C9A0F0]/25 blur-3xl dark:bg-[#A560E8]/15" aria-hidden />
+          <span className="pointer-events-none absolute -bottom-12 -left-10 h-32 w-32 rounded-full bg-[#A560E8]/12 blur-3xl dark:bg-[#A560E8]/10" aria-hidden />
+
+          <div className="relative grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+            {pickTools.map((t, i) => (
+              <button
+                key={t.key}
+                type="button"
+                onClick={t.onClick}
+                className="group relative flex flex-col items-stretch text-left overflow-hidden rounded-2xl border border-white/80 dark:border-stone-700/80 bg-white/90 dark:bg-stone-900/90 backdrop-blur-sm p-2 pb-3.5 sm:p-2.5 sm:pb-4 shadow-[0_2px_8px_-4px_rgba(90,45,140,0.18)] hover:border-[#C9A0F0] dark:hover:border-[#A560E8]/50 hover:shadow-[0_16px_32px_-18px_rgba(90,45,140,0.55)] hover:-translate-y-1 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A560E8]/40"
+              >
+                {/* Preview of what the tool does. Clips play only while
+                    the card is on screen. */}
+                <span className="relative block aspect-[16/10] w-full overflow-hidden rounded-xl bg-stone-900 ring-1 ring-[#E4D4F8] dark:ring-stone-700">
+                  {t.image ? (
+                    <img
+                      src={t.image}
+                      alt=""
+                      draggable={false}
+                      loading="lazy"
+                      decoding="async"
+                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+                    />
+                  ) : t.video ? (
+                    <ViewportAutoplayVideo
+                      src={t.video}
+                      aria-hidden
+                      tabIndex={-1}
+                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+                    />
+                  ) : null}
+                  <span className="pointer-events-none absolute inset-0 bg-gradient-to-t from-stone-950/45 via-transparent to-transparent" aria-hidden />
+                  <span className="absolute top-1.5 right-2 text-[10px] font-extrabold tabular-nums tracking-wider text-white/70" aria-hidden>
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                </span>
+
+                <span className="mt-3 flex items-center gap-2.5 px-1.5">
+                  <span
+                    className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#B57AF0] to-[#7733B5] text-white shadow-[0_8px_16px_-8px_rgba(122,52,182,0.85)] transition-transform duration-200 group-hover:scale-110 group-hover:-rotate-6 [&>svg]:w-[17px] [&>svg]:h-[17px]"
+                    aria-hidden
+                  >
+                    <span className="pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-t from-transparent to-white/25" />
+                    {t.icon}
+                  </span>
+                  <span
+                    className="min-w-0 block text-[14px] sm:text-[14.5px] font-extrabold text-stone-900 dark:text-stone-50 leading-tight"
+                    style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+                  >
+                    {t.title}
+                  </span>
+                </span>
+
+                <span className="mt-1.5 block px-1.5 text-[12.5px] font-semibold text-stone-400 dark:text-stone-500 leading-snug">
+                  {t.sub}
+                </span>
+
+                <span className="mt-2.5 inline-flex items-center gap-1 px-1.5 text-[12px] font-extrabold text-[#8A48C7] dark:text-[#C9A0F0]">
+                  Launch
+                  <svg className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth={2.75} viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ─── Recent documents — title outside, spaced cards inside ─ */}
+      <div className="mt-8 sm:mt-10">
+        <div className="mb-4 flex items-end justify-between gap-3">
+          <div className="min-w-0 flex items-center gap-3 flex-1">
+            <div className="min-w-0 flex items-center gap-2.5">
+              <h2
+                className="text-[1.15rem] sm:text-[1.25rem] font-extrabold text-stone-900 dark:text-stone-50 tracking-tight"
+                style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+              >
+                Recent
+              </h2>
+              {docs.length > 0 && (
+                <span className="inline-flex items-center justify-center min-w-[22px] h-[18px] px-1.5 rounded-full bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#8A48C7] dark:text-[#C9A0F0] text-[10.5px] font-extrabold tabular-nums">
+                  {docs.length}
+                </span>
+              )}
+            </div>
+            <span className="h-px flex-1 bg-gradient-to-r from-stone-200 to-transparent dark:from-stone-800" aria-hidden />
+          </div>
+          <button
+            type="button"
+            onClick={() => onSwitchView('docs')}
+            className="group/all shrink-0 inline-flex items-center gap-1.5 h-9 px-3 rounded-xl text-[12.5px] font-extrabold text-[#8A48C7] dark:text-[#C9A0F0] hover:bg-[#F3EAFF] dark:hover:bg-[#A560E8]/15 transition-colors"
+          >
+            View all
+            <svg className="w-3.5 h-3.5 transition-transform group-hover/all:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </button>
+        </div>
+
+        <div className="relative overflow-hidden rounded-[1.35rem] border border-[#E4D4F8]/90 dark:border-[#A560E8]/20 bg-gradient-to-br from-[#FBF8FF] via-[#F7F1FF] to-[#F3EAFF]/70 dark:from-stone-900 dark:via-stone-900 dark:to-[#A560E8]/10 p-3 sm:p-3.5">
+          <span className="pointer-events-none absolute -bottom-10 right-0 h-28 w-28 rounded-full bg-[#C9A0F0]/20 blur-3xl dark:bg-[#A560E8]/12" aria-hidden />
+
+          <div className="relative flex flex-col gap-2 sm:gap-2.5">
+            {loading ? (
+              <>
+                <DocumentRowSkeleton elevated />
+                <DocumentRowSkeleton elevated />
+                <DocumentRowSkeleton elevated />
+              </>
+            ) : recentDocs.length === 0 ? (
+              <div className="px-5 py-12 text-center rounded-2xl border border-dashed border-[#C9A0F0]/55 dark:border-[#A560E8]/30 bg-white/70 dark:bg-stone-900/70">
+                <div
+                  className="mx-auto mb-3.5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#F3EAFF] to-[#E9DBFF] text-[#8A48C7] dark:from-[#A560E8]/20 dark:to-[#A560E8]/10 dark:text-[#C9A0F0] [&>svg]:w-6 [&>svg]:h-6"
+                  aria-hidden
+                >
+                  <I.Doc />
+                </div>
+                <p className="text-[15px] font-extrabold text-stone-800 dark:text-stone-100">No documents yet</p>
+                <p className="mt-1 text-[13px] font-semibold text-stone-400 dark:text-stone-500">
+                  Upload an essay for feedback, or start a fresh draft.
+                </p>
+                <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="inline-flex items-center gap-2 h-10 px-4 rounded-xl bg-[#A560E8] hover:bg-[#9450D8] text-white text-[13px] font-extrabold transition-colors"
+                  >
+                    <I.Upload /> Upload paper
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onNew}
+                    className="inline-flex items-center gap-2 h-10 px-4 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-600 dark:text-stone-300 text-[13px] font-extrabold hover:border-[#A560E8]/45 transition-colors"
+                  >
+                    <I.Plus /> New document
+                  </button>
+                </div>
+              </div>
+            ) : (
+              recentDocs.map((d) => (
+                <DocumentRow
+                  key={d.id}
+                  doc={d}
+                  elevated
+                  onOpen={() => onOpen(d.id)}
+                  onDownload={() => onDownload(d.id)}
+                  onDelete={() => onDelete(d.id)}
+                />
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+/* ─── DOCS view — the full document library ("My Documents") ─────
+   Same rows as the dashboard recents, plus search, the plan's
+   document allowance, and the create / upload actions. */
+function DocumentsLibrary({
+  docs,
+  loading,
+  onNew,
+  onOpen,
+  onUpload,
+  onDownload,
+  onDelete,
+  usage,
+  topBar,
+}: {
+  docs: DocSummary[];
+  loading: boolean;
+  onNew: () => void;
+  onOpen: (id: string) => void;
+  onUpload: (file: File) => void;
+  onDownload: (id: string) => void;
+  onDelete: (id: string) => void;
+  usage: { used: number; limit: number | null; plan: string } | null;
+  /** Account controls — shares the heading row, same as the hub. */
+  topBar?: React.ReactNode;
+}) {
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [search, setSearch] = useState('');
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -910,163 +1544,8 @@ function DocumentsHub({
       });
   }, [docs, search]);
 
-  /* ─── Reference-dashboard data ─────────────────────────────────
-   * Powers the redesigned home: streak (right-rail "on a roll" card),
-   * recent docs ("Continue where you left off"), the sticky-note quick
-   * tasks (+ progress footer), and the "Pick a tool" grid. */
-  const [streak, setStreak] = useState<{ currentStreak: number; longestStreak: number; hasActivityToday: boolean; weekActivities: string[] } | null>(null);
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const token = localStorage.getItem('authToken');
-        if (!token) return;
-        const res = await fetch(`${API_URL}/streaks`, { headers: { Authorization: `Bearer ${token}` } });
-        if (!res.ok || cancelled) return;
-        // The /streaks endpoint wraps everything under `data` — read THAT
-        // (the previous top-level read always fell back to 0, so the card
-        // never matched the real streak shown elsewhere).
-        const json = (await res.json().catch(() => null)) as { data?: Record<string, unknown> } | null;
-        const d = json?.data;
-        if (!d || cancelled) return;
-        setStreak({
-          currentStreak: Number(d.currentStreak ?? 0) || 0,
-          longestStreak: Number(d.longestStreak ?? 0) || 0,
-          hasActivityToday: Boolean(d.hasActivityToday ?? false),
-          weekActivities: Array.isArray(d.weekActivities) ? (d.weekActivities as string[]) : [],
-        });
-      } catch { /* offline — card just shows 0 */ }
-    })();
-    return () => { cancelled = true; };
-  }, []);
-  // Day-of-week index, Mon=0 … Sun=6 (for the streak week dots).
-  const todayDow = (new Date().getDay() + 6) % 7;
-  // Calendar dates (YYYY-MM-DD) for Mon→Sun of the current week, so the
-  // dots can be matched against the real `weekActivities` from the API.
-  const weekDates = (() => {
-    const monday = new Date();
-    monday.setDate(monday.getDate() - todayDow);
-    return Array.from({ length: 7 }, (_, i) => {
-      const dt = new Date(monday);
-      dt.setDate(monday.getDate() + i);
-      return dt.toISOString().split('T')[0];
-    });
-  })();
-
-  // Recent study materials (study packs / quizzes / flashcards) for the
-  // right-rail "Your study packs" card — newest first, top 3.
-  type PackKind = 'pack' | 'quiz' | 'flashcards' | 'material';
-  const recentStudyPacks = useMemo<{ id: string; title: string; kind: PackKind; when: number }[]>(() => {
-    const mapKind = (k: string): PackKind => {
-      const s = (k || '').toLowerCase();
-      if (s.includes('quiz')) return 'quiz';
-      if (s.includes('flash')) return 'flashcards';
-      if (s.includes('pack')) return 'pack';
-      return 'material';
-    };
-    return [...recentMaterials]
-      .map((m) => ({ id: m.id, title: m.title, kind: mapKind(m.kind), when: new Date(m.createdAt).getTime() }))
-      .filter((m) => Number.isFinite(m.when) && m.when > 0)
-      .sort((a, b) => b.when - a.when)
-      .slice(0, 3);
-  }, [recentMaterials]);
-  const ACTIVITY_META: Record<PackKind, { icon: string; tint: string; label: string }> = {
-    pack:       { icon: '📚', tint: '#FF9600', label: 'Study pack' },
-    quiz:       { icon: '❓', tint: '#FF4B82', label: 'Quiz' },
-    flashcards: { icon: '🗂️', tint: '#1CB0F6', label: 'Flashcards' },
-    material:   { icon: '🧩', tint: '#FF9600', label: 'Study material' },
-  };
-  const relativeTime = (iso: string) => {
-    const diff = Date.now() - new Date(iso).getTime();
-    const h = Math.floor(diff / 3.6e6);
-    if (h < 1) return 'just now';
-    if (h < 24) return `${h}h ago`;
-    const dys = Math.floor(h / 24);
-    return dys === 1 ? '1d ago' : `${dys}d ago`;
-  };
-
-  // "Pick a tool" — three focused entry points: start a draft, make a
-  // study pack, or analyze an essay. Each routes to a real view.
-  const PICK_TOOLS: { key: string; title: string; sub: string; nudgeLabel: string; icon: React.ReactNode; media: { kind: 'image' | 'video'; src: string }[]; tint: string; tintDark: string; onClick: () => void }[] = [
-    {
-      key: 'editor', title: 'Start a draft', sub: 'Blank page with live AI feedback', nudgeLabel: 'Write here!', tint: '#A560E8', tintDark: '#7733B5', onClick: onNew,
-      media: [{ kind: 'image', src: '/WriterPic.png' }],
-      icon: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M12 20h9" /><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4 12.5-12.5z" /></svg>),
-    },
-    {
-      // Cycles through everything a Study Pack creates: flashcards →
-      // quiz → crossword (videos) → lesson (image, ~5s).
-      key: 'pack', title: 'Study Pack', sub: 'Lesson · flashcards · quiz · crossword', nudgeLabel: 'Learn here!', tint: '#FF9600', tintDark: '#B85F00', onClick: () => onSwitchView('study-packs'),
-      media: [
-        { kind: 'video', src: '/hero-flashcards.mp4' },
-        { kind: 'video', src: '/hero-quiz.mp4' },
-        { kind: 'video', src: '/writescholar-crossword-demo.mp4' },
-        { kind: 'image', src: '/study-pack-previews/lesson-plan.png' },
-      ],
-      icon: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M12 4l8 4-8 4-8-4 8-4z" /><path strokeLinecap="round" strokeLinejoin="round" d="M4 12l8 4 8-4M4 16l8 4 8-4" /></svg>),
-    },
-    {
-      // Cycles through every free arcade game clip.
-      key: 'games', title: 'Arcade', sub: 'Crater Blast · Word Tower · Word Blitz', nudgeLabel: 'Play here!', tint: '#FF4B4B', tintDark: '#C93535', onClick: () => onSwitchView('games'),
-      media: [
-        { kind: 'video', src: '/writescholar-crater-blast-demo.mp4' },
-        { kind: 'video', src: '/hero-word-tower.mp4' },
-        { kind: 'video', src: '/hero-word-blitz.mp4' },
-      ],
-      icon: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M7.5 7.5h9a4.5 4.5 0 014.43 3.72l.74 4.3A3.04 3.04 0 0118.66 19c-.97 0-1.88-.46-2.45-1.25L15 16H9l-1.21 1.75A3.04 3.04 0 015.34 19a3.04 3.04 0 01-3-3.48l.74-4.3A4.5 4.5 0 017.5 7.5z" /><path strokeLinecap="round" strokeLinejoin="round" d="M7 12h3m-1.5-1.5v3M16 11.5h.01M18 13.5h.01" /></svg>),
-    },
-  ];
-
-  // Personalized ordering: the feature the user said excited them most
-  // during onboarding leads the row on every visit (essays → draft card
-  // stays first; study packs / games move up when picked). Subtle,
-  // permanent counterpart to the one-shot first-run fast path. Not
-  // memoized: PICK_TOOLS closes over per-render handlers, and sorting a
-  // 3-element array is free.
-  const primaryInterest = getPrimaryFeatureInterest(user?.id);
-  const pickToolsFirstKey = primaryInterest === 'study_packs' ? 'pack' : primaryInterest === 'games' ? 'games' : 'editor';
-  const pickTools = [...PICK_TOOLS].sort(
-    (a, b) => (a.key === pickToolsFirstKey ? -1 : 0) - (b.key === pickToolsFirstKey ? -1 : 0)
-  );
-
-  // "What's on your mind?" — a personal to-do / reminders list. Users
-  // add THEIR OWN items (an essay to finish, a chapter to revise, a
-  // deadline) and tick them off; persists per user. Actionable + useful,
-  // not a pile of forced tasks.
-  interface Todo { id: string; text: string; done: boolean }
-  const todoKey = `writescholar_todos_${user?.id || 'anon'}`;
-  const [todos, setTodos] = useState<Todo[]>(() => {
-    try { const raw = localStorage.getItem(todoKey); return raw ? (JSON.parse(raw) as Todo[]) : []; } catch { return []; }
-  });
-  const [todoInput, setTodoInput] = useState('');
-  const persistTodos = (next: Todo[]) => {
-    setTodos(next);
-    try { localStorage.setItem(todoKey, JSON.stringify(next)); } catch { /* ignore */ }
-  };
-  const addTodo = () => {
-    const text = todoInput.trim();
-    if (!text) return;
-    persistTodos([{ id: `${Date.now()}`, text, done: false }, ...todos].slice(0, 30));
-    setTodoInput('');
-  };
-  const toggleTodo = (id: string) => persistTodos(todos.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));
-  const removeTodo = (id: string) => persistTodos(todos.filter((t) => t.id !== id));
-
   return (
     <>
-      {/* Golden nudge arrows — shared by essay feedback + pick-a-tool cards */}
-      <style>{`
-        @keyframes wsStartNudge{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
-        @keyframes wsGoldFlash{
-          0%,100%{color:#FFC800;filter:drop-shadow(0 0 6px rgba(255,200,0,0.9)) drop-shadow(0 0 12px rgba(255,150,0,0.5));opacity:1}
-          50%{color:#FFE566;filter:drop-shadow(0 0 14px rgba(255,220,0,1)) drop-shadow(0 0 24px rgba(255,200,0,0.95));opacity:1}
-        }
-        .ws-start-nudge{animation:wsStartNudge 2.2s ease-in-out infinite}
-        .ws-gold-flash{animation:wsGoldFlash 1.1s ease-in-out infinite}
-        @media (prefers-reduced-motion:reduce){.ws-start-nudge,.ws-gold-flash{animation:none}}
-      `}</style>
-
-      {/* Hidden file input — reused by the Upload tile in the bento. */}
       <input
         ref={fileInputRef}
         type="file"
@@ -1079,600 +1558,100 @@ function DocumentsHub({
         }}
       />
 
-      {/* ═══════════════════════════════════════════════════════════
-          DASHBOARD HOME — greeting top row, a "What's on your mind?"
-          sticky note beside a "Pick a tool" card row, "Continue where
-          you left off" recents, and a right rail (Daily Review ·
-          streak · Arcade). The full document library is kept below. */}
-
-      {/* ─── TOP ROW — greeting (left) · account controls (right).
-          `relative z-40` lifts this row (and the top-bar's avatar /
-          Pomodoro dropdowns) above the main column + right-rail cards,
-          which otherwise paint over the open menus. ─── */}
-      <div className="relative z-40 flex flex-col lg:flex-row lg:items-center gap-3 sm:gap-4 mb-5 sm:mb-6">
-        <div className="min-w-0 flex-1">
+      {/* Heading row — title (left) · account controls (right), so the
+          top bar shares the band instead of floating over the page. */}
+      <div className="relative z-40 flex flex-col-reverse sm:flex-row sm:items-start justify-between gap-3 sm:gap-5 mb-6">
+        <div className="min-w-0">
           <h1
-            className="text-[1.8rem] sm:text-[2.25rem] lg:text-[2.55rem] font-extrabold leading-[1.04] tracking-tight text-stone-900 dark:text-stone-50"
+            className="text-[1.85rem] sm:text-[2.1rem] font-extrabold leading-tight tracking-tight text-stone-900 dark:text-stone-50"
             style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
           >
-            {greetingFor()}{userName ? <>, <span className="text-[#A560E8]">{userName}!</span></> : '!'}{' '}
-            <span className="inline-block" aria-hidden>✨</span>
+            My Documents
           </h1>
-          <p className="mt-1.5 text-[13.5px] sm:text-[15px] font-bold text-stone-500 dark:text-stone-400">
-            {(() => {
-              const cs = streak?.currentStreak ?? 0;
-              if (cs >= 2) return <><span aria-hidden>🔥</span> You&apos;re on a {cs}-day streak — keep the momentum going!</>;
-              if (docs.length > 0 || recentMaterials.length > 0) return 'Pick up where you left off, or start something new.';
-              return 'Ready to crush your study goals today?';
-            })()}
+          <p className="mt-1.5 text-[14px] font-bold text-stone-500 dark:text-stone-400">
+            {docs.length} {docs.length === 1 ? 'document' : 'documents'}
+            {usage && usage.limit != null && <> · {usage.used}/{usage.limit} on the {usage.plan} plan</>}
           </p>
         </div>
+        <div className="flex items-center justify-end gap-2 shrink-0 sm:pt-1">{topBar}</div>
+      </div>
 
-        <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
-          {/* Account controls — avatar menu, Saved Materials, Pomodoro. */}
-          {topBar}
+      {/* Search (left) · create actions (right) */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
+        <div className="relative w-full sm:max-w-md">
+          <span aria-hidden className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400">
+            <I.Search />
+          </span>
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search documents…"
+            className="w-full pl-10 pr-10 h-11 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-[14px] font-medium text-stone-800 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:border-[#A560E8] transition-colors"
+          />
+          {search && (
+            <button
+              type="button"
+              onClick={() => setSearch('')}
+              aria-label="Clear search"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
+        <div className="flex items-center gap-2 sm:ml-auto shrink-0">
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="inline-flex items-center gap-2 h-11 px-4 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-600 dark:text-stone-300 text-[13.5px] font-extrabold hover:border-[#A560E8]/45 hover:text-[#7733B5] dark:hover:text-[#C9A0F0] transition-colors"
+          >
+            <I.Upload /> Upload
+          </button>
+          <button
+            type="button"
+            onClick={onNew}
+            className="inline-flex items-center gap-2 h-11 px-4 rounded-xl bg-[#A560E8] hover:bg-[#9450D8] text-white text-[13.5px] font-extrabold transition-colors"
+          >
+            <I.Plus /> New document
+          </button>
         </div>
       </div>
 
-      {/* ─── MAIN COLUMN + RIGHT RAIL ─── */}
-      <div className="flex flex-col xl:flex-row gap-5">
-        <div className="flex-1 min-w-0 space-y-5">
+      {search.trim() && !loading && (
+        <p className="mb-3 text-[12.5px] font-bold text-stone-500 dark:text-stone-400">
+          {filtered.length} of {docs.length} {docs.length === 1 ? 'document' : 'documents'} match &ldquo;<span className="text-[#7733B5] dark:text-[#C9A0F0]">{search.trim()}</span>&rdquo;
+        </p>
+      )}
 
-      {!isPaidUser && expiryInfo && (() => {
-        const { materialCount, citationCount, soonestDays } = expiryInfo;
-        const totalCount = materialCount + citationCount;
-        if (totalCount === 0) return null;
-        const urgent = soonestDays <= 7;
-        const daysText =
-          soonestDays <= 0 ? 'today' :
-          soonestDays === 1 ? 'tomorrow' :
-          `in ${soonestDays} days`;
-        const parts: string[] = [];
-        if (materialCount > 0) parts.push(`${materialCount} study material${materialCount === 1 ? '' : 's'}`);
-        if (citationCount > 0) parts.push(`${citationCount} citation${citationCount === 1 ? '' : 's'}`);
-        const itemsText = parts.join(' & ');
-        return (
-          <div
-            className={`relative overflow-hidden rounded-3xl border-2 border-b-4 mb-4 sm:mb-5 p-4 sm:p-5 ${
-              urgent
-                ? 'border-[#FF4B4B]/55 bg-gradient-to-br from-[#FFE8E8] via-white to-[#FFF5F5] dark:from-[#FF4B4B]/18 dark:via-stone-900 dark:to-stone-900 shadow-[0_10px_28px_-16px_rgba(255,75,75,0.45)]'
-                : 'border-[#FF9600]/55 bg-gradient-to-br from-[#FFE8C4] via-[#FFF4E0] to-[#FFFBF5] dark:from-[#FF9600]/18 dark:via-[#FF9600]/10 dark:to-stone-900 shadow-[0_10px_28px_-16px_rgba(255,150,0,0.45)]'
-            }`}
-          >
-            <div
-              className={`pointer-events-none absolute -top-10 -right-10 w-36 h-36 rounded-full blur-2xl ${urgent ? 'bg-[#FF4B4B]/25' : 'bg-[#FF9600]/25'}`}
-              aria-hidden
+      <div className="rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900 overflow-hidden divide-y divide-stone-100 dark:divide-stone-800 shadow-[0_2px_8px_-5px_rgba(60,40,90,0.16)]">
+        {loading ? (
+          <>
+            <DocumentRowSkeleton />
+            <DocumentRowSkeleton />
+            <DocumentRowSkeleton />
+            <DocumentRowSkeleton />
+          </>
+        ) : filtered.length === 0 ? (
+          <DocsEmptyState
+            hasAnyDocs={docs.length > 0}
+            hasSearch={search.trim().length > 0}
+            onNew={onNew}
+            onUpload={() => fileInputRef.current?.click()}
+          />
+        ) : (
+          filtered.map((d) => (
+            <DocumentRow
+              key={d.id}
+              doc={d}
+              onOpen={() => onOpen(d.id)}
+              onDownload={() => onDownload(d.id)}
+              onDelete={() => onDelete(d.id)}
             />
-            <div className="relative flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
-              <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
-                <span
-                  className={`flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl text-white text-xl border-2 border-b-4 ${
-                    urgent ? 'bg-[#FF4B4B] border-[#C93535]' : 'bg-[#FF9600] border-[#B85F00]'
-                  }`}
-                  aria-hidden
-                >
-                  {urgent ? '⚠️' : '⏰'}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p
-                    className={`text-[10.5px] sm:text-[11px] font-extrabold uppercase tracking-[0.2em] mb-1 ${urgent ? 'text-[#C93535]' : 'text-[#B85F00]'}`}
-                  >
-                    {urgent ? 'Expires soon' : 'Heads up'}
-                  </p>
-                  <h3
-                    className="text-base sm:text-[17px] font-extrabold text-stone-900 dark:text-stone-50 leading-tight"
-                    style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                  >
-                    Your {itemsText} disappear {daysText}
-                  </h3>
-                  <p className="mt-1 text-[12.5px] sm:text-[13px] font-bold text-stone-600 dark:text-stone-300 leading-snug">
-                    Free plan items vanish 30 days after creation. Upgrade to keep them forever.
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => onNavigate('pricing')}
-                className={`shrink-0 inline-flex items-center justify-center gap-1.5 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl text-white text-[12.5px] sm:text-[13px] font-extrabold uppercase tracking-wide border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all ${
-                  urgent
-                    ? 'bg-[#FF4B4B] border-[#C93535] hover:bg-[#FF6464] shadow-[0_8px_22px_-10px_rgba(255,75,75,0.55)]'
-                    : 'bg-[#FF9600] border-[#B85F00] hover:bg-[#FFA826] shadow-[0_8px_22px_-10px_rgba(255,150,0,0.55)]'
-                }`}
-              >
-                Upgrade now
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.75} viewBox="0 0 24 24" aria-hidden>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        );
-      })()}
-
-          {/* ── "What's on your mind?" sticky note  +  "Pick a tool" ── */}
-          <div className="grid grid-cols-1 lg:grid-cols-[290px_minmax(0,1fr)] gap-4 lg:gap-5 items-stretch">
-
-            {/* "What's on your mind?" — a playful hand-drawn lavender
-                to-do note (matches the sketch look): purple Caveat text,
-                ○ circle checks, a little grad-cap mascot + sparkles +
-                arrow. You still add / tick / remove your own items.
-                On mobile it sits AFTER the flagship CTA (order-2) so the
-                primary action leads; on desktop it's the left column. */}
-            <div className="order-2 lg:order-1 relative overflow-hidden rounded-[26px] bg-gradient-to-br from-[#ECE7FC] to-[#E2DAF8] dark:from-[#574897] dark:to-[#473A80] border-2 border-[#D2C7F2] dark:border-[#7A68C0]/60 px-5 py-5 shadow-[0_14px_32px_-20px_rgba(124,95,225,0.45)] min-h-[236px] flex flex-col">
-              {/* Paperclip */}
-              <svg aria-hidden viewBox="0 0 24 24" className="absolute -top-2.5 right-6 w-7 h-7 text-[#9B82DC]/80 rotate-12" fill="none" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
-              </svg>
-
-              {/* Sketch decorations — grad-cap bear, sparkles, arrow. Sit
-                  behind the text (low z, semi-transparent) so they read
-                  as doodles in the bottom-right corner. */}
-              <svg aria-hidden viewBox="0 0 120 120" className="pointer-events-none absolute bottom-1.5 right-1.5 w-[78px] h-[78px] text-[#7C5FE1]/80" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="42" cy="49" r="11" />
-                <circle cx="78" cy="49" r="11" />
-                <path d="M34 67 Q34 47 60 47 Q86 47 86 67 Q86 89 60 89 Q34 89 34 67 Z" />
-                <ellipse cx="60" cy="75" rx="9" ry="6" />
-                <path d="M40 41 L60 33 L80 41 L60 49 Z" />
-                <path d="M80 41 v9 q0 2 -2 2" />
-                <path d="M88 69 q9 -3 8 -12" />
-                <circle cx="51" cy="65" r="1.8" fill="currentColor" stroke="none" />
-                <circle cx="69" cy="65" r="1.8" fill="currentColor" stroke="none" />
-                <circle cx="60" cy="72" r="1.8" fill="currentColor" stroke="none" />
-                <circle cx="78" cy="53" r="1.6" fill="currentColor" stroke="none" />
-              </svg>
-              <span aria-hidden className="pointer-events-none absolute bottom-[5.4rem] right-[1.2rem] text-[#7C5FE1] text-lg motion-safe:animate-pulse">✦</span>
-              <span aria-hidden className="pointer-events-none absolute bottom-[3.9rem] right-[0.7rem] text-[#7C5FE1]/70 text-[11px] motion-safe:animate-pulse" style={{ animationDelay: '0.7s' }}>✦</span>
-              <svg aria-hidden viewBox="0 0 40 40" className="pointer-events-none absolute bottom-[2.4rem] right-[5.6rem] w-9 h-9 text-[#7C5FE1]/75" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-                <path d="M6 9 Q2 30 27 29" />
-                <path d="M20 24 L27 29 L23 21" />
-              </svg>
-
-              <h3 className="relative z-10 text-[1.95rem] leading-none text-[#7C3FD6] dark:text-[#C9A0F0] mb-3" style={{ fontFamily: '"Caveat", cursive' }}>
-                What&apos;s on your mind?
-              </h3>
-
-              {/* Checklist — your own to-dos */}
-              <ul className="relative z-10 flex-1 min-h-0 overflow-y-auto -mr-1 pr-1 space-y-1.5">
-                {todos.length === 0 && (
-                  <li>
-                    <span className="text-[1.25rem] leading-tight text-[#9B82DC]/85 dark:text-white/45" style={{ fontFamily: '"Caveat", cursive' }}>Jot down what you need to do…</span>
-                  </li>
-                )}
-                {todos.map((t) => (
-                  <li key={t.id} className="group flex items-center gap-2.5">
-                    <button
-                      type="button"
-                      onClick={() => toggleTodo(t.id)}
-                      aria-label={t.done ? 'Mark not done' : 'Mark done'}
-                      className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border-2 transition-all ${t.done ? 'bg-[#7C5FE1] border-[#7C5FE1] text-white' : 'border-[#9B82DC] text-transparent hover:border-[#7C3FD6]'}`}
-                    >
-                      <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth={4} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                    </button>
-                    <span className={`flex-1 min-w-0 text-[1.25rem] leading-tight truncate ${t.done ? 'line-through text-[#7C5FE1]/45 dark:text-white/40' : 'text-[#5B3FA8] dark:text-white/90'}`} style={{ fontFamily: '"Caveat", cursive' }}>{t.text}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeTodo(t.id)}
-                      aria-label="Remove to-do"
-                      className="shrink-0 flex h-6 w-6 items-center justify-center rounded-md text-[#9B82DC]/70 hover:text-[#7C3FD6] hover:bg-white/60 opacity-80 group-hover:opacity-100 focus:opacity-100 transition-all"
-                    >
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-
-              {/* Add a to-do — a clear, legible field + visible button
-                  (typing reads in a normal font; saved items still show
-                  in the handwritten style above). */}
-              <form onSubmit={(e) => { e.preventDefault(); addTodo(); }} className="relative z-10 mt-2 flex items-center gap-2">
-                <input
-                  value={todoInput}
-                  onChange={(e) => setTodoInput(e.target.value)}
-                  placeholder="Add a to-do…"
-                  className="flex-1 min-w-0 rounded-xl border-2 border-[#CFC4F0] dark:border-[#7A68C0]/50 bg-white/85 dark:bg-white/10 px-3 py-2 text-[13px] font-bold text-[#5B3FA8] dark:text-white placeholder:text-[#9B82DC] dark:placeholder:text-white/45 focus:outline-none focus:border-[#7C5FE1] focus:bg-white dark:focus:bg-white/20 transition-colors"
-                  aria-label="Add a to-do"
-                />
-                <button type="submit" aria-label="Add to-do" className="shrink-0 inline-flex items-center gap-1 h-9 px-3 rounded-xl bg-[#7C5FE1] text-white text-[12px] font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#5B3FA8] hover:bg-[#6B4FD6] active:border-b-2 active:translate-y-0.5 transition-all">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14m7-7H5" /></svg>
-                  Add
-                </button>
-              </form>
-            </div>
-
-            {/* ── GET ESSAY FEEDBACK — flagship CTA. Deliberately the
-                boldest tile on the page: vivid purple, glow + yellow
-                accents so essay analysis is unmistakably the headline
-                action. Click / drag-drop a paper to upload + analyze. */}
-            <div className="order-1 lg:order-2 relative">
-            <div
-              role="button"
-              tabIndex={0}
-              onClick={() => fileInputRef.current?.click()}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInputRef.current?.click(); } }}
-              onDragEnter={(e) => { e.preventDefault(); setUploadDropActive(true); }}
-              onDragOver={(e) => { e.preventDefault(); setUploadDropActive(true); }}
-              onDragLeave={(e) => { e.preventDefault(); setUploadDropActive(false); }}
-              onDrop={(e) => {
-                e.preventDefault();
-                setUploadDropActive(false);
-                const f = e.dataTransfer.files?.[0];
-                if (f) onUpload(f);
-              }}
-              className={`group relative cursor-pointer overflow-hidden rounded-[26px] border-2 border-b-[6px] border-[#5B1F8E] text-white transition-all duration-300 flex items-center min-h-[236px] bg-gradient-to-br from-[#B77CF1] via-[#A560E8] to-[#7733B5] shadow-[0_24px_48px_-16px_rgba(119,51,181,0.75)] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#FFC800]/60 ${
-                uploadDropActive ? 'scale-[1.01] active:border-b-2' : 'hover:-translate-y-1 hover:shadow-[0_30px_56px_-16px_rgba(119,51,181,0.85)]'
-              }`}
-            >
-              {/* Golden "Start here!" — lives inside the card (never bleeds
-                  into the greeting row above). Points down-right at the
-                  headline + CTA. */}
-              <div className="pointer-events-none absolute z-30 top-3 right-4 sm:top-4 sm:right-6 flex flex-col items-end" aria-hidden>
-                <div className="ws-start-nudge flex flex-col items-end">
-                  <span className="ws-gold-flash text-[1.5rem] sm:text-[1.75rem] leading-none rotate-3 font-extrabold" style={{ fontFamily: '"Caveat", cursive' }}>Start here!</span>
-                  <svg className="ws-gold-flash w-8 h-8 sm:w-9 sm:h-9 -mt-0.5 mr-2" viewBox="0 0 44 44" fill="none" stroke="currentColor" strokeWidth={2.75} strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M28 6 C18 14, 14 26, 8 38" />
-                    <path d="M4 32 L8 38 L14 34" />
-                  </svg>
-                </div>
-              </div>
-
-              {/* Glow halos, grid texture + sparkles */}
-              <span className="pointer-events-none absolute -top-14 -right-10 w-52 h-52 rounded-full bg-white/20 blur-3xl" aria-hidden />
-              <span className="pointer-events-none absolute -bottom-16 -left-10 w-44 h-44 rounded-full bg-[#FFC800]/20 blur-3xl" aria-hidden />
-              <span className="pointer-events-none absolute inset-0 opacity-[0.07] mix-blend-overlay" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)', backgroundSize: '30px 30px' }} aria-hidden />
-              <span aria-hidden className="absolute bottom-8 right-10 text-white/60 text-xs motion-safe:animate-pulse" style={{ animationDelay: '0.8s' }}>✦</span>
-
-              {/* Drag-active overlay */}
-              {uploadDropActive && (
-                <div className="absolute inset-0 z-20 flex items-center justify-center bg-gradient-to-br from-[#A560E8]/95 via-[#8A48C7]/92 to-[#7733B5]/95 backdrop-blur-sm rounded-[26px]">
-                  <div className="text-center">
-                    <div className="mx-auto mb-2 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#FFC800] text-[#7733B5] border-2 border-b-4 border-[#D4A300] shadow-xl">
-                      <svg className="w-7 h-7" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M19 14v6a2 2 0 01-2 2H7a2 2 0 01-2-2v-6m4-6l4-4m0 0l4 4m-4-4v12" /></svg>
-                    </div>
-                    <p className="text-lg font-extrabold text-white" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Drop to upload</p>
-                  </div>
-                </div>
-              )}
-
-              <div className="relative z-10 w-full px-6 py-7 sm:px-8 flex flex-col items-center text-center sm:flex-row sm:items-center sm:gap-6 sm:text-left">
-                {/* Upload icon chip — yellow so it pops on the purple */}
-                <span className="mb-4 sm:mb-0 shrink-0 flex h-16 w-16 items-center justify-center rounded-3xl bg-[#FFC800] text-[#6B27A3] border-2 border-b-4 border-[#D4A300] shadow-[0_12px_28px_-8px_rgba(255,200,0,0.6)] transition-transform group-hover:scale-105 group-hover:-rotate-6" aria-hidden>
-                  <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={2.6} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 16V4m0 0L8 8m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" /></svg>
-                </span>
-
-                <div className="min-w-0 flex-1">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FFC800] text-[#6B27A3] px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.14em] mb-2 shadow-[0_4px_12px_-4px_rgba(255,200,0,0.6)]">
-                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24" aria-hidden><path d="M13 2L4.5 13H11l-1 9 8.5-11H12l1-9z" /></svg>
-                    Most powerful tool
-                  </span>
-                  <p className="text-2xl sm:text-[2rem] font-extrabold tracking-tight text-white leading-[1.03]" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                    Get essay feedback
-                  </p>
-                  <p className="mt-1.5 text-[13px] sm:text-sm font-bold text-white/85 leading-relaxed">
-                    Upload your essay — we&apos;ll grade it &amp; mark it up <span className="text-[#FFC800]">line by line</span>.
-                  </p>
-                  <div className="mt-4 flex flex-col sm:flex-row items-center gap-3 justify-center sm:justify-start">
-                    <span className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#FFC800] text-[#6B27A3] text-[13px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#D4A300] group-hover:bg-[#FFD52E] group-hover:-translate-y-0.5 group-active:border-b-2 group-active:translate-y-0 transition-all shadow-[0_12px_28px_-10px_rgba(255,200,0,0.55)]">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.75} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M12 16V4m0 0L8 8m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" /></svg>
-                      Choose file
-                    </span>
-                    <span className="text-[12px] font-bold text-white/60">or drag &amp; drop</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            </div>
-          </div>
-
-          {/* ── PICK A TOOL — big "show it in action" cards: a real
-              preview of each tool up top, a floating brand icon chip
-              overlapping it, then title · description · CTA. */}
-          <div>
-            <h2 className="text-[15px] font-extrabold text-stone-800 dark:text-stone-100 mb-3" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Pick a tool</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {pickTools.map((t) => (
-                <button
-                  key={t.key}
-                  type="button"
-                  onClick={t.onClick}
-                  className="group relative overflow-hidden flex flex-col text-left rounded-3xl border-2 border-b-[3px] bg-white dark:bg-stone-900 hover:-translate-y-1 active:translate-y-px transition-all shadow-[0_14px_34px_-22px_rgba(0,0,0,0.4)] hover:shadow-[0_26px_46px_-24px_rgba(120,60,200,0.32)]"
-                  style={{ borderColor: t.tint, borderBottomColor: t.tintDark }}
-                >
-                  {/* Golden nudge — same treatment as essay feedback card.
-                      Sits on a dark glass pill so the gold stays legible
-                      over the bright tool previews. */}
-                  <div className="pointer-events-none absolute z-30 top-2.5 right-3 sm:top-3 sm:right-4 flex flex-col items-end" aria-hidden>
-                    <div className="ws-start-nudge flex flex-col items-end rounded-2xl bg-black/45 backdrop-blur-[2px] px-2.5 py-1.5 shadow-[0_4px_14px_-4px_rgba(0,0,0,0.6)]">
-                      <span className="ws-gold-flash text-[1.15rem] sm:text-[1.35rem] leading-none rotate-3 font-extrabold whitespace-nowrap" style={{ fontFamily: '"Caveat", cursive', textShadow: '0 1px 3px rgba(0,0,0,0.7)' }}>{t.nudgeLabel}</span>
-                      <svg className="ws-gold-flash w-6 h-6 sm:w-7 sm:h-7 -mt-0.5 mr-1.5" viewBox="0 0 44 44" fill="none" stroke="currentColor" strokeWidth={2.75} strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.6))' }}>
-                        <path d="M28 6 C18 14, 14 26, 8 38" />
-                        <path d="M4 32 L8 38 L14 34" />
-                      </svg>
-                    </div>
-                  </div>
-
-                  {/* Live preview — rounded top matches the card's inner
-                      curve (rounded-3xl minus the 2px border). Videos
-                      scale slightly so no gaps show at the corners. */}
-                  <div
-                    className="relative aspect-[5/2] sm:aspect-[16/10] w-full shrink-0 overflow-hidden rounded-t-[22px]"
-                    style={{ background: `linear-gradient(160deg, ${t.tint}, ${t.tintDark})` }}
-                    aria-hidden
-                  >
-                    <div className="absolute inset-0 overflow-hidden rounded-t-[22px]">
-                      <CyclingMedia items={t.media} />
-                    </div>
-                    <span className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-14 bg-gradient-to-t from-black/35 to-transparent" />
-                  </div>
-                  {/* Body — floating icon chip overlaps the preview's lower edge */}
-                  <div className="relative px-4 pt-7 pb-4">
-                    <span
-                      className="absolute -top-6 left-4 flex h-12 w-12 items-center justify-center rounded-2xl text-white border-2 border-b-4 [&>svg]:w-6 [&>svg]:h-6 transition-transform group-hover:scale-105 group-hover:-rotate-6"
-                      style={{ backgroundColor: t.tint, borderColor: t.tintDark, boxShadow: `0 12px 24px -10px ${t.tint}` }}
-                      aria-hidden
-                    >
-                      {t.icon}
-                    </span>
-                    <p className="text-[15px] font-extrabold text-stone-900 dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>{t.title}</p>
-                    <p className="mt-0.5 text-[12px] font-bold text-stone-500 dark:text-stone-400 leading-snug">{t.sub}</p>
-                    <span className="mt-3 inline-flex items-center gap-1.5 text-[10.5px] font-extrabold uppercase tracking-wide transition-transform group-hover:translate-x-0.5" style={{ color: t.tintDark }}>
-                      Open
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
-                    </span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-
-        </div>{/* /main column */}
-
-        {/* ─── RIGHT RAIL — Daily Review · streak · Arcade ─── */}
-        <aside className="w-full xl:w-[320px] shrink-0 flex flex-col gap-4">
-
-          {/* Daily Review (green) */}
-          <div className="relative overflow-hidden rounded-3xl border-2 border-b-4 border-[#46A302]/40 bg-gradient-to-br from-[#E6F8D2] via-[#F1FBE4] to-white dark:from-[#58CC02]/15 dark:via-stone-900 dark:to-stone-900 p-5 shadow-[0_14px_32px_-20px_rgba(88,204,2,0.55)]">
-            <span className="pointer-events-none absolute -top-8 -right-8 w-28 h-28 rounded-full bg-[#58CC02]/20 blur-2xl" aria-hidden />
-            <img src="/mascot-study.webp" alt="" aria-hidden loading="lazy" decoding="async" className="pointer-events-none absolute -bottom-1 right-0 w-[88px] h-[88px] object-contain drop-shadow-[0_10px_18px_rgba(70,163,2,0.3)]" />
-            <div className="relative max-w-[62%]">
-              <h3 className="text-lg font-extrabold text-stone-900 dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Daily Review</h3>
-              <p className="mt-1 text-[12.5px] font-bold text-stone-600 dark:text-stone-300 leading-snug">5 quick recall questions</p>
-              <button
-                type="button"
-                onClick={() => onSwitchView('daily-review')}
-                className="mt-3.5 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#58CC02] hover:bg-[#46A302] text-white text-[12px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_8px_18px_-10px_rgba(88,204,2,0.6)]"
-              >
-                Start now
-              </button>
-            </div>
-          </div>
-
-          {/* Streak (cream) */}
-          <div className="relative overflow-hidden rounded-3xl border-2 border-b-4 border-[#F5C518]/45 bg-gradient-to-br from-[#FFF4D6] via-[#FFFBEE] to-white dark:from-[#FFC800]/12 dark:via-stone-900 dark:to-stone-900 p-5 shadow-[0_14px_32px_-20px_rgba(245,158,11,0.5)]">
-            <h3 className="text-lg font-extrabold text-stone-900 dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-              You&apos;re on a roll! <span aria-hidden>🔥</span>
-            </h3>
-            <p className="mt-1.5 flex items-baseline gap-1.5">
-              <span className="text-[2rem] font-extrabold text-[#E8890C] dark:text-[#FFBD5C] tabular-nums leading-none">{streak?.currentStreak ?? 0}</span>
-              <span className="text-[12.5px] font-bold text-stone-500 dark:text-stone-400">{(streak?.currentStreak ?? 0) === 1 ? 'day in a row' : 'days in a row'}</span>
-            </p>
-            <div className="mt-4 grid grid-cols-7 gap-1.5">
-              {(['M','T','W','T','F','S','S'] as const).map((dayLabel, i) => {
-                // Real activity: this day's calendar date appears in the
-                // API's weekActivities (login dates from the last 7 days).
-                const done = !!streak?.weekActivities?.includes(weekDates[i]);
-                const isToday = i === todayDow;
-                return (
-                  <div key={i} className="flex flex-col items-center gap-1.5">
-                    <span className={`text-[9px] font-extrabold uppercase ${isToday ? 'text-[#E8890C] dark:text-[#FFBD5C]' : 'text-stone-400 dark:text-stone-500'}`}>{dayLabel}</span>
-                    <span className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-all ${done ? 'bg-[#58CC02] border-[#46A302] text-white' : isToday ? 'border-[#E8890C]/60 text-[#E8890C] dark:text-[#FFBD5C] bg-[#FFC800]/10' : 'border-stone-200 dark:border-stone-700 text-transparent'}`}>
-                      {done
-                        ? <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={3.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                        : <span className="h-1 w-1 rounded-full bg-stone-300 dark:bg-stone-600" aria-hidden />}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Your study packs — your latest study materials (top 3) with
-              a "Show more" link to Saved Materials (quiz-history), so it
-              stays compact in the rail. */}
-          <div className="rounded-3xl border-2 border-stone-200/80 dark:border-stone-700 bg-gradient-to-b from-white to-stone-50/70 dark:from-stone-900 dark:to-stone-950/40 p-4 shadow-[0_14px_32px_-24px_rgba(0,0,0,0.4)]">
-            <div className="flex items-center justify-between gap-2 mb-3 px-0.5">
-              <div className="flex items-center gap-2 min-w-0">
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#FFF4E0] text-[#B85F00] dark:bg-[#FF9600]/15 dark:text-[#FFBD5C]" aria-hidden>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.4} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4l8 4-8 4-8-4 8-4z" /><path strokeLinecap="round" strokeLinejoin="round" d="M4 12l8 4 8-4M4 16l8 4 8-4" /></svg>
-                </span>
-                <h3 className="text-[13.5px] font-extrabold text-stone-800 dark:text-stone-100 truncate" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>Your study packs</h3>
-              </div>
-              {recentStudyPacks.length > 0 && (
-                <button type="button" onClick={() => onNavigate('quiz-history')} className="shrink-0 text-[10.5px] font-extrabold uppercase tracking-wide text-[#B85F00] dark:text-[#FFBD5C] hover:underline">
-                  Show more
-                </button>
-              )}
-            </div>
-            {recentStudyPacks.length === 0 ? (
-              <button type="button" onClick={() => onSwitchView('study-packs')} className="w-full rounded-2xl border-2 border-dashed border-[#FF9600]/35 bg-[#FFFBF5] dark:bg-[#FF9600]/5 px-3 py-4 text-center hover:border-[#FF9600]/60 transition-colors">
-                <p className="text-[12.5px] font-extrabold text-stone-700 dark:text-stone-200">No study packs yet</p>
-                <p className="mt-0.5 text-[11px] font-bold text-[#B85F00] dark:text-[#FFBD5C]">Make your first one →</p>
-              </button>
-            ) : (
-              <ul className="space-y-2">
-                {recentStudyPacks.map((p) => {
-                  const meta = ACTIVITY_META[p.kind];
-                  return (
-                    <li key={p.id}>
-                      <button
-                        type="button"
-                        onClick={() => onSwitchView('study-packs')}
-                        className="group w-full flex items-center gap-3 rounded-2xl border-2 border-b-[3px] bg-white dark:bg-stone-900 p-2.5 text-left hover:-translate-y-0.5 active:translate-y-px active:border-b-2 transition-all shadow-[0_6px_16px_-14px_rgba(0,0,0,0.45)]"
-                        style={{ borderColor: `${meta.tint}30`, borderBottomColor: `${meta.tint}55` }}
-                      >
-                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-base border-2 transition-transform group-hover:scale-105" style={{ backgroundColor: `${meta.tint}1A`, borderColor: `${meta.tint}3A`, color: meta.tint }} aria-hidden>{meta.icon}</span>
-                        <span className="min-w-0 flex-1">
-                          <span className="block text-[12.5px] font-extrabold text-stone-800 dark:text-stone-100 leading-tight truncate" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>{p.title}</span>
-                          <span className="mt-1 flex items-center gap-1.5">
-                            <span className="text-[8.5px] font-extrabold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded-md" style={{ backgroundColor: `${meta.tint}1F`, color: meta.tint }}>{meta.label}</span>
-                            <span className="text-[10px] font-bold text-stone-400 dark:text-stone-500">{relativeTime(new Date(p.when).toISOString())}</span>
-                          </span>
-                        </span>
-                        <svg className="w-4 h-4 shrink-0 transition-transform group-hover:translate-x-0.5" style={{ color: meta.tint }} fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </div>
-
-        </aside>
-      </div>{/* /main + rail */}
-
-      {/* ─── FULL DOCUMENTS LIBRARY ─────────────────────────────
-          Polished bento with a gradient hero header strip, prominent
-          icon badge, and a slimmer search row that sits inside its
-          own glass panel for visual hierarchy. */}
-      <div className="relative overflow-hidden rounded-[28px] border-2 border-b-4 border-[#A560E8]/40 bg-white dark:bg-stone-900 shadow-[0_18px_44px_-22px_rgba(120,60,200,0.35)] mt-5 sm:mt-6">
-        {/* Hero strip header — sets the section apart with a soft
-            purple gradient field behind the title row. */}
-        <div className="relative px-5 sm:px-7 pt-5 sm:pt-6 pb-4 sm:pb-5 bg-gradient-to-br from-[#F3EAFF] via-[#FAF5FF] to-white dark:from-[#A560E8]/15 dark:via-stone-900 dark:to-stone-900 border-b border-stone-200/70 dark:border-stone-800">
-          <div className="pointer-events-none absolute -top-20 -right-20 w-56 h-56 rounded-full bg-[#A560E8]/20 blur-3xl" aria-hidden />
-          <div className="pointer-events-none absolute -bottom-16 -left-16 w-44 h-44 rounded-full bg-[#FFC800]/12 blur-3xl" aria-hidden />
-
-          <div className="relative flex items-start sm:items-center justify-between gap-3 flex-wrap">
-            <div className="flex items-center gap-3.5 min-w-0">
-              <span className="inline-flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#B978F0] via-[#A560E8] to-[#7733B5] text-white border-2 border-b-[4px] border-[#6B27A3] shadow-[0_10px_24px_-10px_rgba(165,96,232,0.75)]" aria-hidden>
-                <svg className="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h4m-7 4h12a2 2 0 002-2V8.83a2 2 0 00-.59-1.42l-3.83-3.83A2 2 0 0014.17 3H6a2 2 0 00-2 2v15a2 2 0 002 2z" />
-                </svg>
-              </span>
-              <div className="min-w-0">
-                <p className="text-[10.5px] sm:text-[11px] font-extrabold uppercase tracking-[0.22em] text-[#A560E8] mb-1">Library</p>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="text-xl sm:text-[1.65rem] font-extrabold text-stone-900 dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                    Your documents
-                  </h2>
-                  <span className="inline-flex items-center justify-center min-w-[28px] h-[24px] px-2 rounded-full bg-white dark:bg-stone-800 border-2 border-[#A560E8]/30 text-[#7733B5] dark:text-[#C9A0F0] text-[11px] font-extrabold tabular-nums shadow-sm">
-                    {docs.length}
-                  </span>
-                </div>
-                <p className="mt-0.5 text-[12.5px] sm:text-[13px] font-bold text-stone-500 dark:text-stone-400 truncate">
-                  Pick up where you left off — or open one to analyze.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 shrink-0">
-              {usage && usage.limit != null && (() => {
-                const atCap = usage.used >= usage.limit;
-                const near = !atCap && usage.used >= usage.limit - 1;
-                const pct = Math.min(100, Math.max(0, (usage.used / Math.max(1, usage.limit)) * 100));
-                const ringColor = atCap ? '#E04343' : near ? '#D97706' : '#A560E8';
-                return (
-                  <span
-                    title={`${usage.used} of ${usage.limit} documents used on the ${usage.plan} plan`}
-                    className={`inline-flex items-center gap-2 rounded-2xl border-2 border-b-[3px] px-3 h-10 sm:h-11 text-[12px] sm:text-[13px] font-extrabold tabular-nums ${
-                      atCap
-                        ? 'border-[#FF4B4B]/40 bg-[#FFE8E8] text-[#E04343] dark:bg-[#FF4B4B]/15 dark:text-[#FF8A8A]'
-                        : near
-                          ? 'border-amber-400/50 bg-amber-50 text-amber-700 dark:bg-amber-400/15 dark:text-amber-300'
-                          : 'border-[#A560E8]/30 bg-white dark:bg-stone-800 text-[#7733B5] dark:text-[#C9A0F0]'
-                    }`}
-                  >
-                    {/* Mini progress ring */}
-                    <svg className="w-4 h-4" viewBox="0 0 36 36" aria-hidden>
-                      <circle cx="18" cy="18" r="15" fill="none" stroke={ringColor} strokeOpacity="0.18" strokeWidth="6" />
-                      <circle cx="18" cy="18" r="15" fill="none" stroke={ringColor} strokeWidth="6" strokeLinecap="round" transform="rotate(-90 18 18)" strokeDasharray={`${(pct / 100) * 94.247} 94.247`} />
-                    </svg>
-                    <span>{usage.used}/{usage.limit}</span>
-                  </span>
-                );
-              })()}
-              <button
-                type="button"
-                onClick={onNew}
-                className="inline-flex items-center gap-1.5 px-3.5 h-10 sm:h-11 rounded-2xl bg-gradient-to-b from-[#B978F0] to-[#A560E8] hover:from-[#C28BF3] hover:to-[#9550DC] text-white text-[12.5px] sm:text-[13px] font-extrabold uppercase tracking-wide border-2 border-b-[4px] border-[#6B27A3] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_8px_20px_-10px_rgba(165,96,232,0.6)]"
-              >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.75} viewBox="0 0 24 24" aria-hidden>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                </svg>
-                <span className="hidden xs:inline sm:hidden">New</span>
-                <span className="hidden sm:inline">New doc</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Body — search row + grid */}
-        <div className="relative p-5 sm:p-6">
-          {/* Search — slightly bolder so it doesn't feel afterthought-y */}
-          <div className="relative w-full sm:max-w-md mb-5">
-            <span aria-hidden className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#A560E8]/70">
-              <I.Search />
-            </span>
-            <input
-              type="search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search documents…"
-              className="w-full pl-10 pr-10 py-3 rounded-2xl border-2 border-b-[3px] border-[#A560E8]/25 dark:border-[#A560E8]/30 bg-white dark:bg-stone-900 text-[14px] font-medium text-stone-800 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#A560E8]/40 focus:border-[#A560E8] transition-colors"
-            />
-            {search && (
-              <button
-                type="button"
-                onClick={() => setSearch('')}
-                aria-label="Clear search"
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            )}
-          </div>
-
-          {/* Document grid — sits inside the section container */}
-          {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
-              {[0, 1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="rounded-[1.5rem] border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 overflow-hidden animate-pulse">
-                  <div className="h-44 bg-stone-100 dark:bg-stone-800 px-5 pt-7">
-                    <div className="h-full rounded-t-2xl bg-white/70 dark:bg-stone-900/60" />
-                  </div>
-                  <div className="px-5 py-4 space-y-2.5">
-                    <div className="h-2.5 w-2/3 rounded-full bg-stone-100 dark:bg-stone-800" />
-                    <div className="h-7 w-24 rounded-xl bg-stone-100 dark:bg-stone-800" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="rounded-3xl border-2 border-b-4 border-[#A560E8]/25 bg-white dark:bg-stone-900 overflow-hidden">
-              <DocsEmptyState hasAnyDocs={docs.length > 0} hasSearch={search.trim().length > 0} onNew={onNew} onUpload={() => fileInputRef.current?.click()} />
-            </div>
-          ) : (
-            <>
-              {search.trim() && (
-                <p className="mb-3 text-[11.5px] font-bold text-stone-500 dark:text-stone-400">
-                  {filtered.length} of {docs.length} {docs.length === 1 ? 'document' : 'documents'} match &ldquo;<span className="text-[#7733B5] dark:text-[#C9A0F0]">{search.trim()}</span>&rdquo;
-                </p>
-              )}
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
-                {filtered.map((d) => (
-                  <DocumentCard
-                    key={d.id}
-                    doc={d}
-                    onOpen={() => onOpen(d.id)}
-                    onDownload={() => onDownload(d.id)}
-                    onDelete={() => onDelete(d.id)}
-                  />
-                ))}
-              </div>
-            </>
-          )}
-        </div>
+          ))
+        )}
       </div>
     </>
   );
@@ -1704,10 +1683,10 @@ function CompactDailyReview({
     } catch { /* ignore */ }
   }, [user?.id]);
 
-  const tint = '#58CC02';
-  const tintLight = '#CAF08A';
-  const tintDark = '#46A302';
-  const bodyGradient = 'linear-gradient(135deg, #E5F8D0 0%, #FFFFFF 48%, #F0FFE8 100%)';
+  const tint = '#A560E8';
+  const tintLight = '#E9DBFF';
+  const tintDark = '#7733B5';
+  const bodyGradient = 'linear-gradient(135deg, #F3EAFF 0%, #FFFFFF 48%, #FBF8FF 100%)';
 
   return (
     <button
@@ -1718,7 +1697,7 @@ function CompactDailyReview({
         background: bodyGradient,
         borderColor: tint,
         borderBottomColor: tintDark,
-        boxShadow: '0 12px 28px -12px rgba(88,204,2,0.45)',
+        boxShadow: '0 12px 28px -12px rgba(165,96,232,0.45)',
       }}
     >
       {/* Video preview left block */}
@@ -1745,7 +1724,7 @@ function CompactDailyReview({
         </span>
         {reviewCompletedToday && (
           <span
-            className="absolute top-1.5 right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-white text-[#46A302] text-[11px] font-extrabold leading-none border border-white/70 shadow-sm"
+            className="absolute top-1.5 right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-white text-[#7733B5] text-[11px] font-extrabold leading-none border border-white/70 shadow-sm"
             aria-hidden
           >
             ✓
@@ -1864,98 +1843,6 @@ function DocsEmptyState({ hasAnyDocs, hasSearch, onNew, onUpload }: { hasAnyDocs
   );
 }
 
-function DocumentCard({
-  doc,
-  onOpen,
-  onDownload,
-  onDelete,
-}: {
-  doc: DocSummary;
-  onOpen: () => void;
-  onDownload: () => void;
-  onDelete: () => void;
-}) {
-  const wordsText = doc.wordCount ? `${doc.wordCount.toLocaleString()} words` : 'Empty';
-  const editedText = timeAgo(doc.lastEditedAt || doc.updatedAt);
-
-  return (
-    <div
-      role="button"
-      tabIndex={0}
-      onClick={onOpen}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpen(); }
-      }}
-      aria-label={`Open ${doc.title || 'Untitled'}`}
-      className="group relative flex flex-col text-left rounded-[1.5rem] border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 overflow-hidden cursor-pointer hover:-translate-y-1 hover:border-[#A560E8]/50 active:translate-y-0 transition-all duration-200 shadow-[0_10px_28px_-20px_rgba(0,0,0,0.22)] hover:shadow-[0_26px_48px_-22px_rgba(165,96,232,0.5)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A560E8]/55"
-    >
-      {/* Cover — a floating "page" thumbnail that shows the real
-          title, like a mini manuscript, on a brand-tinted desk. */}
-      <div className="relative h-44 px-5 pt-5 bg-gradient-to-br from-[#F3EAFF] to-[#E4D3F7] dark:from-stone-800 dark:to-stone-800/60">
-        <div className="pointer-events-none absolute -top-10 -right-10 w-32 h-32 rounded-full bg-white/15 blur-2xl" aria-hidden />
-        {/* the sheet */}
-        <div className="absolute inset-x-5 top-7 bottom-0 rounded-t-2xl bg-white dark:bg-stone-950 shadow-[0_18px_36px_-16px_rgba(0,0,0,0.45)] px-5 pt-5 overflow-hidden ring-1 ring-black/5 dark:ring-white/5 transition-transform duration-200 group-hover:-translate-y-1">
-          <p className="dash-serif text-[15px] font-extrabold leading-snug text-stone-900 dark:text-stone-50 line-clamp-2">
-            {doc.title || 'Untitled'}
-          </p>
-          <div className="mt-2.5 h-[2px] w-8 rounded-full bg-[#A560E8]/45" />
-          {/* Real document preview text (first ~180 chars) so users
-              can recognise a doc without opening it. Falls back to a
-              muted "Empty document" hint when there's no body yet. */}
-          {doc.contentPreview ? (
-            <p className="mt-2.5 text-[11.5px] leading-snug text-stone-600 dark:text-stone-300 line-clamp-4">
-              {doc.contentPreview}
-            </p>
-          ) : (
-            <p className="mt-2.5 text-[11.5px] italic text-stone-400 dark:text-stone-500">
-              Empty document
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Body */}
-      <div className="flex-1 flex flex-col px-5 pt-3.5 pb-4">
-        <p className="text-[11px] font-bold text-stone-500 dark:text-stone-400 tabular-nums">
-          {wordsText} <span className="text-stone-300 dark:text-stone-600">·</span> edited {editedText}
-        </p>
-
-        {/* Action row */}
-        <div className="mt-3 flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); onOpen(); }}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#8A48C7] dark:text-[#C9A0F0] text-[12px] font-extrabold border-2 border-[#A560E8]/20 hover:bg-[#A560E8] hover:text-white hover:border-[#7733B5] transition-all"
-          >
-            <I.Doc /> Open document
-          </button>
-          <span className="ml-auto flex items-center gap-1 sm:opacity-0 sm:group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
-            <CardAction title="Download" onClick={onDownload}><I.Download /></CardAction>
-            <CardAction title="Delete" onClick={onDelete} accent="red"><I.Trash /></CardAction>
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function CardAction({ title, onClick, children, accent }: { title: string; onClick: () => void; children: React.ReactNode; accent?: 'red' }) {
-  const tone =
-    accent === 'red'
-      ? 'text-stone-400 hover:text-[#FF4B4B] hover:bg-[#FFE8E8] dark:hover:bg-[#FF4B4B]/10'
-      : 'text-stone-400 hover:text-stone-700 hover:bg-stone-100 dark:hover:text-stone-200 dark:hover:bg-stone-800';
-  return (
-    <button
-      type="button"
-      onClick={(e) => { e.stopPropagation(); onClick(); }}
-      title={title}
-      aria-label={title}
-      className={`inline-flex h-8 w-8 items-center justify-center rounded-lg transition-all ${tone}`}
-    >
-      {children}
-    </button>
-  );
-}
 
 /* ─── EDITOR view ───────────────────────────────────────────── */
 function DocumentEditorView({
@@ -2659,17 +2546,33 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
   useEffect(() => {
     if (initialDocumentId) return;
     const pending = consumePendingWorkspaceView();
-    if (pending && pending !== 'hub' && pending !== 'editor') {
-      setView(pending);
-    }
-  }, [initialDocumentId]);
+    if (!pending || pending === 'hub' || pending === 'editor') return;
 
-  // First-run fast path — a user who JUST finished onboarding lands
-  // directly in the tool they said excited them most in the survey
-  // (essays → analyze, study packs → study-packs, etc.) instead of an
-  // empty hub, with a one-shot mascot line acknowledging their pick.
-  // One-shot; only fires within 10 minutes of onboarding completion so
-  // returning users are never yanked around.
+    // Right after onboarding / trial checkout, always land on the hub —
+    // ignore a stashed tool view (e.g. Analyze) so Stripe →
+    // /dashboard?payment=success doesn't open a deep-linked panel.
+    const userId = user?.id;
+    if (userId) {
+      try {
+        if (!isFirstRunFastPathDone(userId)) {
+          const completedAt = getOnboardingCompletedAt(userId);
+          if (completedAt && Date.now() - completedAt <= 10 * 60 * 1000) {
+            return;
+          }
+        }
+      } catch {
+        /* fall through and apply pending */
+      }
+    }
+    setView(pending);
+  }, [initialDocumentId, user?.id]);
+
+  // First-run after onboarding / trial start: stay on the main hub.
+  // We used to deep-link into Analyze (or whichever tool they picked in
+  // the survey), but that skips the dashboard overview right when
+  // orientation matters most — especially after Stripe drops them on
+  // /dashboard?payment=success. Mark the fast-path done so we never
+  // yank them later either.
   const [firstRunNudge, setFirstRunNudge] = useState<WorkspaceView | null>(null);
   useEffect(() => {
     const userId = user?.id;
@@ -2682,13 +2585,9 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
     } catch {
       return;
     }
-    const interest = getPrimaryFeatureInterest(userId);
-    // Default to analyze — the strongest preview → upgrade loop — when
-    // the user skipped the survey or picked nothing.
-    const target: WorkspaceView = interest ? INTEREST_TO_VIEW[interest] : 'analyze';
-    setView(target);
-    setFirstRunNudge(target);
-    trackEvent('first_action_prompt_cta_click', { cta: 'auto_fast_path', view: target, interest: interest || 'none' });
+    setView('hub');
+    setFirstRunNudge(null);
+    trackEvent('first_action_prompt_cta_click', { cta: 'auto_fast_path', view: 'hub' });
   }, [user?.id, initialDocumentId, trialGated]);
 
   // Listen for direct view-switch events fired by navigateWorkspaceView
@@ -2697,7 +2596,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
   useEffect(() => {
     const handler = (e: Event) => {
       const view = (e as CustomEvent<string>).detail;
-      const allowed: WorkspaceView[] = ['hub', 'editor', 'analyze', 'daily-review', 'study-packs', 'citations', 'games'];
+      const allowed: WorkspaceView[] = ['hub', 'docs', 'editor', 'analyze', 'daily-review', 'study-packs', 'citations', 'games'];
       if (allowed.includes(view as WorkspaceView)) {
         setView(view as WorkspaceView);
       }
@@ -2705,10 +2604,14 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
     window.addEventListener(WS_SWITCH_VIEW_EVENT, handler);
     return () => window.removeEventListener(WS_SWITCH_VIEW_EVENT, handler);
   }, []);
-  // Editor opens with the rail expanded; the « / » button on the rail
-  // collapses it to a slim icon-only strip when the paper needs the
-  // full width.
-  const [railCollapsed, setRailCollapsed] = useState(false);
+  // Editor opens with the rail collapsed so the paper gets full width;
+  // the › button expands it to the labelled rail when needed.
+  const [railCollapsed, setRailCollapsed] = useState(true);
+  // Re-collapse whenever a document is opened (including switching docs)
+  // so the writing surface always starts with maximum width.
+  useEffect(() => {
+    if (view === 'editor' && openDocId) setRailCollapsed(true);
+  }, [view, openDocId]);
   const [openDoc, setOpenDoc] = useState<DocFull | null>(null);
   const [docList, setDocList] = useState<DocSummary[]>([]);
   const [listLoading, setListLoading] = useState(false);
@@ -2863,7 +2766,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
     }
   }, []);
 
-  useEffect(() => { if (view === 'hub') void refreshList(); }, [view, refreshList]);
+  useEffect(() => { if (view === 'hub' || view === 'docs') void refreshList(); }, [view, refreshList]);
 
   // ─── Single-doc load when entering editor view ────────────────
   useEffect(() => {
@@ -3332,6 +3235,13 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
       persistLastAnalysisGradingStyle(gradingStyle);
       try { localStorage.setItem('writescholar_editor_citation_style', citationStyle); } catch { /* noop */ }
       trackEvent('preview_ran', { feature: 'analysis', annotations: annotations.length });
+      // Funnel step 2 of 4 — activation. This is the primary analyze path
+      // (the workspace editor), so it's the one the funnel has to measure.
+      trackFunnelStep('analysis_completed', {
+        source: 'editor',
+        annotations: annotations.length,
+        paid: isPaidPlan(user),
+      });
       if (!isPaidPlan(user)) {
         trackEvent('lock_viewed', {
           feature: 'analysis',
@@ -3810,13 +3720,13 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
   if (view === 'editor' && openDocId) {
     if (!openDoc) {
       return (
-        <WorkspaceShell activeView={view} onSelect={handleRailSelect} bare headerless collapsed={railCollapsed} onToggle={() => setRailCollapsed((v) => !v)} usage={docUsage} onUpgrade={() => onNavigate('pricing')} onNavigateBadges={() => onNavigate('badges')} onNavigateHome={goHomeDashboard}>
+        <WorkspaceShell activeView={view} onSelect={handleRailSelect} bare headerless collapsed={railCollapsed} onToggle={() => setRailCollapsed((v) => !v)} usage={docUsage} onUpgrade={() => onNavigate('pricing')} onNavigateBadges={() => onNavigate('badges')} onNavigateHome={goHomeDashboard} user={user} onNavigateAccount={() => onNavigate('account')}>
           <div className="px-4 py-16 text-center text-sm font-bold text-stone-500">Loading document…</div>
         </WorkspaceShell>
       );
     }
     return (
-      <WorkspaceShell activeView={view} onSelect={handleRailSelect} bare headerless collapsed={railCollapsed} onToggle={() => setRailCollapsed((v) => !v)} usage={docUsage} onUpgrade={() => onNavigate('pricing')} onNavigateBadges={() => onNavigate('badges')} onNavigateHome={goHomeDashboard}>
+      <WorkspaceShell activeView={view} onSelect={handleRailSelect} bare headerless collapsed={railCollapsed} onToggle={() => setRailCollapsed((v) => !v)} usage={docUsage} onUpgrade={() => onNavigate('pricing')} onNavigateBadges={() => onNavigate('badges')} onNavigateHome={goHomeDashboard} user={user} onNavigateAccount={() => onNavigate('account')}>
         <DocumentEditorView
           docId={openDoc.id}
           initialTitle={openDoc.title}
@@ -3913,6 +3823,9 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
       onNavigate={onNavigate}
       onLogout={onLogout}
       variant="dashboard"
+      // On the hub the bar sits inline in the greeting row, so it
+      // needs no floating white surface of its own.
+      chromeless={view === 'hub' || view === 'docs'}
     />
   );
 
@@ -3924,8 +3837,11 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
         headerless
         usage={docUsage}
         onUpgrade={() => onNavigate('pricing')}
-        onNavigateBadges={() => onNavigate('badges')} onNavigateHome={goHomeDashboard}
-        topBar={view === 'hub' ? undefined : dashboardTopBar}
+        onNavigateBadges={() => onNavigate('badges')}
+        onNavigateHome={goHomeDashboard}
+        user={user}
+        onNavigateAccount={() => onNavigate('account')}
+        topBar={view === 'hub' || view === 'docs' ? undefined : dashboardTopBar}
       >
         {/* First-run acknowledgment — one-shot mascot line shown only on
             the fast-path landing right after onboarding. Tells the user
@@ -3934,7 +3850,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
             to any other view. */}
         {firstRunNudge !== null && firstRunNudge === view && view !== 'hub' && (
           <div className="mx-auto w-full max-w-3xl px-4 pt-4">
-            <div className="relative flex items-center gap-3 rounded-2xl border-2 border-b-4 border-[#46A302] bg-[#E5F8D0] dark:bg-[#58CC02]/15 px-4 py-3">
+            <div className="relative flex items-center gap-3 rounded-2xl border-2 border-b-4 border-[#7733B5] bg-[#F3EAFF] dark:bg-[#A560E8]/15 px-4 py-3">
               <img src="/mascot-celebrating.webp" alt="" width={48} height={48} className="w-12 h-12 object-contain shrink-0" loading="eager" />
               <p className="min-w-0 flex-1 text-[13px] sm:text-sm font-extrabold text-[#3C3C3C] dark:text-stone-100 leading-snug" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                 {view === 'analyze' && <>You said you wanted feedback on your essays — paste one in below and I&apos;ll grade it 👇</>}
@@ -3967,6 +3883,19 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
             usage={docUsage}
             onSwitchView={handleRailSelect}
             onNavigate={onNavigate}
+            topBar={dashboardTopBar}
+          />
+        )}
+        {view === 'docs' && (
+          <DocumentsLibrary
+            docs={docList}
+            loading={listLoading}
+            onNew={() => { if (trialGated) { onTrialGate?.(); return; } handleNewDoc(); }}
+            onOpen={handleOpenDoc}
+            onUpload={(f: File) => { if (trialGated) { onTrialGate?.(); return; } handleUpload(f); }}
+            onDownload={handleDownload}
+            onDelete={(id) => setConfirmDeleteId(id)}
+            usage={docUsage}
             topBar={dashboardTopBar}
           />
         )}

@@ -180,6 +180,9 @@ const validationSchemas = {
     citationStyle: commonSchemas.citationStyle,
     gradingStyle: Joi.string().valid('us', 'uk').optional().default('us'),
     content: commonSchemas.content,
+    // Optional library title (onboarding / paste flow). Used when the
+    // backend creates a documents row from pasted text.
+    title: Joi.string().max(120).optional().allow(''),
     rubricContent: Joi.string().max(100000).optional().allow('').messages({
       'string.max': 'Rubric content is too long (max 100,000 characters)'
     })

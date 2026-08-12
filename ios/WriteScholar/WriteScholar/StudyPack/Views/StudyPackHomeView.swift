@@ -57,6 +57,16 @@ struct StudyPackHomeView: View {
         }
         .background(WSColor.background.ignoresSafeArea())
         .onAppear {
+            // Tool-picker intent: "Flashcards" / "Quiz" jump straight to
+            // that surface once a pack is open (one-shot hand-off).
+            if let intent = StudyLaunchIntent.pending {
+                StudyLaunchIntent.pending = nil
+                switch intent {
+                case .flashcards: tab = .flashcards
+                case .quiz:       tab = .quiz
+                case .create:     break
+                }
+            }
             // Never strand the user on a locked/empty tab — open the first one with content.
             if !isAvailable(tab) {
                 tab = PackTab.allCases.first(where: isAvailable) ?? .lesson

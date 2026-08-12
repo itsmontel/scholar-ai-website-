@@ -51,11 +51,11 @@ struct ContentView: View {
 private struct LoadingShell: View {
     var body: some View {
         ZStack {
-            Color.white.ignoresSafeArea()
-            // Subtle green tint wash at the bottom
+            WSColor.background.ignoresSafeArea()
+            // Subtle brand wash at the bottom
             VStack {
                 Spacer()
-                WSColor.duoGreenLight.opacity(0.4)
+                WSColor.duoPurpleLight.opacity(0.5)
                     .frame(height: 220)
                     .blur(radius: 60)
             }
@@ -65,7 +65,7 @@ private struct LoadingShell: View {
                 WSAnimatedImage(name: "mascot-dance", ext: "webp")
                     .frame(width: 120, height: 120)
                 ProgressView()
-                    .tint(WSColor.duoGreen)
+                    .tint(WSColor.duoPurple)
             }
         }
     }

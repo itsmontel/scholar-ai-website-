@@ -103,10 +103,14 @@ struct SettingsSheet: View {
 
     private var settingsList: some View {
         VStack(spacing: 10) {
-            settingsRow(icon: "crown.fill",          tint: WSColor.duoOrange,   label: "Upgrade to Pro")
-            settingsRow(icon: "trophy.fill",         tint: WSColor.duoPurple,   label: "All achievements")
-            settingsRow(icon: "questionmark.circle", tint: WSColor.duoBlue,     label: "Help center")
-            settingsRow(icon: "lock.shield",         tint: WSColor.duoText.opacity(0.5), label: "Privacy & terms")
+            linkRow(icon: "crown.fill",          tint: WSColor.duoOrange, label: "Upgrade to Pro",
+                    url: "https://writescholar.com/pricing")
+            linkRow(icon: "trophy.fill",         tint: WSColor.duoPurple, label: "All achievements",
+                    url: "https://writescholar.com/dashboard")
+            linkRow(icon: "questionmark.circle", tint: WSColor.duoBlue,   label: "Help center",
+                    url: "https://writescholar.com/help")
+            linkRow(icon: "lock.shield",         tint: WSColor.duoText.opacity(0.5), label: "Privacy & terms",
+                    url: "https://writescholar.com/privacy")
             Button {
                 Haptics.light()
                 onboardingComplete = false
@@ -116,6 +120,16 @@ struct SettingsSheet: View {
             }
             .buttonStyle(.plain)
         }
+    }
+
+    private func linkRow(icon: String, tint: Color, label: String, url: String) -> some View {
+        Button {
+            Haptics.light()
+            if let u = URL(string: url) { UIApplication.shared.open(u) }
+        } label: {
+            settingsRow(icon: icon, tint: tint, label: label)
+        }
+        .buttonStyle(.plain)
     }
 
     private func settingsRow(icon: String, tint: Color, label: String) -> some View {

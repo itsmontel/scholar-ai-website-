@@ -9,6 +9,10 @@ import {
   markSoftPaywallDismissedNow,
 } from '../../constants/paywallSession';
 import { trackEvent } from '../../utils/analytics';
+import {
+  WELCOME_PROMO_CODE as CONFIG_WELCOME_PROMO_CODE,
+  showSignupDiscount,
+} from '../../config/pricing';
 
 /* ═══════════════════════════════════════════════════════════════
    SoftPaywall — Duolingo-style upsell modal.
@@ -109,10 +113,10 @@ const LAST_CHANCE_PREMIUM_FIRST_MONTH = '$19.99';
 const LAST_CHANCE_PRO_WAS = '$39.99';
 const LAST_CHANCE_PREMIUM_WAS = '$59.99';
 /** Stripe promotion code applied at checkout from any non-hard
- *  soft-paywall branch. `null` ⇒ no coupon sent; checkout falls back
- *  to the standard price. The matching promotion code must exist in
- *  Stripe Dashboard → Products → Coupons. */
-const WELCOME_PROMO_CODE: string | null = 'NEWCUSTOMER';
+ *  soft-paywall branch, IF the central policy still allows a discount at
+ *  acquisition (see src/config/pricing.ts — it currently doesn't, so
+ *  `showDiscount` below is false and this goes unused). */
+const WELCOME_PROMO_CODE: string | null = CONFIG_WELCOME_PROMO_CODE;
 
 const SoftPaywall = ({
   userName,
@@ -193,9 +197,11 @@ const SoftPaywall = ({
   // backend strips NEWCUSTOMER server-side for ineligible users so an
   // optimistic UI can never produce a wrongly-discounted charge.
   const newCustomerEligible = (canStartFreeTrialProp ?? fetchedTrialEligible) !== false;
-  /** True ⇒ render strike-through first-month price + apply NEWCUSTOMER
-   *  at checkout. Hard variant always skips it. */
-  const showDiscount = !hard && newCustomerEligible;
+  /** True ⇒ render strike-through first-month price + apply the welcome
+   *  code at checkout. Hard variant always skips it, and the central
+   *  policy in src/config/pricing.ts currently reserves the discount for
+   *  the cancel-flow save offer, so this is normally false. */
+  const showDiscount = !hard && newCustomerEligible && showSignupDiscount(true, 'monthly');
 
   useEffect(() => {
     if (hard) setShowLastChance(false);

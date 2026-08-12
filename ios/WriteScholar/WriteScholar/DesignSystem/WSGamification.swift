@@ -272,6 +272,140 @@ struct WSStreakWeekStrip: View {
     }
 }
 
+// MARK: - Week calendar strip (Daily Review header)
+
+/// The mockup's week header: M T W T F S S letters with day-of-month
+/// numbers beneath; today is a filled brand-purple circle with white text.
+struct WSWeekCalendarStrip: View {
+    /// 7 dates, Monday → Sunday of the current week.
+    let dates: [Date]
+    /// Which of `dates` carry activity (flame-worthy days).
+    var activeDays: [Bool] = Array(repeating: false, count: 7)
+
+    private let labels = ["M", "T", "W", "T", "F", "S", "S"]
+    private var cal: Calendar { Calendar.current }
+
+    var body: some View {
+        HStack(spacing: 6) {
+            ForEach(Array(dates.enumerated()), id: \.offset) { (i, date) in
+                let isToday = cal.isDateInToday(date)
+                let dayNum = cal.component(.day, from: date)
+                let active = i < activeDays.count && activeDays[i]
+
+                VStack(spacing: 6) {
+                    Text(labels[i % 7])
+                        .font(.system(size: 10, weight: .black, design: .rounded))
+                        .tracking(0.6)
+                        .foregroundStyle(isToday ? WSColor.duoPurple : WSColor.foregroundMuted)
+
+                    ZStack {
+                        Circle()
+                            .fill(isToday ? WSColor.duoPurple : (active ? WSColor.duoPurpleLight : Color.clear))
+                            .frame(width: 34, height: 34)
+                        if isToday {
+                            Circle()
+                                .fill(WSColor.duoPurple.opacity(0.25))
+                                .frame(width: 42, height: 42)
+                                .blur(radius: 4)
+                            Circle()
+                                .fill(WSColor.duoPurple)
+                                .frame(width: 34, height: 34)
+                        }
+                        Text("\(dayNum)")
+                            .font(.system(size: 13, weight: .heavy, design: .rounded))
+                            .foregroundStyle(isToday ? .white : (active ? WSColor.duoPurpleDark : WSColor.foreground))
+                    }
+                }
+                .frame(maxWidth: .infinity)
+            }
+        }
+    }
+
+    /// Convenience: the current Monday-first week + per-day activity flags
+    /// from a set of active `yyyy-MM-dd`-style start-of-day dates.
+    static func currentWeek(activeDates: Set<String> = []) -> WSWeekCalendarStrip {
+        var cal = Calendar.current
+        cal.firstWeekday = 2 // Monday
+        let today = cal.startOfDay(for: Date())
+        let weekday = cal.component(.weekday, from: today)
+        // Distance back to Monday (weekday: 1=Sun … 7=Sat)
+        let back = (weekday + 5) % 7
+        let monday = cal.date(byAdding: .day, value: -back, to: today) ?? today
+        let dates = (0..<7).compactMap { cal.date(byAdding: .day, value: $0, to: monday) }
+        let fmt = DateFormatter()
+        fmt.dateFormat = "yyyy-MM-dd"
+        fmt.locale = Locale(identifier: "en_US_POSIX")
+        let flags = dates.map { activeDates.contains(fmt.string(from: $0)) }
+        return WSWeekCalendarStrip(dates: dates, activeDays: flags)
+    }
+}
+
+// MARK: - Hexagon achievement badge
+
+/// Rounded pointy-top hexagon badge — the mockup's Profile achievements.
+/// Earned: tinted fill + white icon + soft tinted shadow. Locked: muted
+/// surface + gray icon.
+struct WSHexBadge: View {
+    var icon: String
+    var tint: Color
+    var earned: Bool = true
+    var size: CGFloat = 62
+
+    var body: some View {
+        ZStack {
+            WSHexagonShape()
+                .fill(earned ? AnyShapeStyle(tint.gradient) : AnyShapeStyle(WSColor.surface))
+                .overlay(
+                    WSHexagonShape()
+                        .stroke(earned ? Color.white.opacity(0.25) : WSColor.duoBorder, lineWidth: 1.5)
+                )
+                .frame(width: size, height: size * 1.1)
+                .shadow(color: earned ? tint.opacity(0.35) : .clear, radius: 8, y: 4)
+
+            Image(systemName: earned ? icon : "lock.fill")
+                .font(.system(size: size * 0.34, weight: .black))
+                .foregroundStyle(earned ? .white : WSColor.foregroundMuted.opacity(0.6))
+        }
+    }
+}
+
+/// Pointy-top hexagon with gently rounded corners.
+struct WSHexagonShape: Shape {
+    var cornerRadius: CGFloat = 6
+
+    func path(in rect: CGRect) -> Path {
+        let w = rect.width, h = rect.height
+        let cx = rect.midX
+        // Pointy-top hexagon vertices (clockwise from top point).
+        let pts: [CGPoint] = [
+            CGPoint(x: cx,          y: rect.minY),
+            CGPoint(x: rect.maxX,   y: rect.minY + h * 0.25),
+            CGPoint(x: rect.maxX,   y: rect.minY + h * 0.75),
+            CGPoint(x: cx,          y: rect.maxY),
+            CGPoint(x: rect.minX,   y: rect.minY + h * 0.75),
+            CGPoint(x: rect.minX,   y: rect.minY + h * 0.25),
+        ]
+        var path = Path()
+        for i in 0..<pts.count {
+            let prev = pts[(i + pts.count - 1) % pts.count]
+            let curr = pts[i]
+            let next = pts[(i + 1) % pts.count]
+            // Inset the corner along both edges, then arc through the vertex.
+            let d1 = hypot(curr.x - prev.x, curr.y - prev.y)
+            let d2 = hypot(next.x - curr.x, next.y - curr.y)
+            let r = min(cornerRadius, d1 / 2, d2 / 2)
+            let p1 = CGPoint(x: curr.x + (prev.x - curr.x) / d1 * r,
+                             y: curr.y + (prev.y - curr.y) / d1 * r)
+            let p2 = CGPoint(x: curr.x + (next.x - curr.x) / d2 * r,
+                             y: curr.y + (next.y - curr.y) / d2 * r)
+            if i == 0 { path.move(to: p1) } else { path.addLine(to: p1) }
+            path.addQuadCurve(to: p2, control: curr)
+        }
+        path.closeSubpath()
+        return path
+    }
+}
+
 // MARK: - Gem chip
 
 struct WSGemChip: View {

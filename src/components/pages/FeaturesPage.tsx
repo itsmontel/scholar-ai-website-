@@ -41,10 +41,10 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
         <LandingSectionLayers />
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto">
-            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#58CC02] dark:text-[#58CC02] mb-3">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#A560E8] dark:text-[#A560E8] mb-3">
               Features
             </p>
-            <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-[#58CC02]" aria-hidden />
+            <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-[#A560E8]" aria-hidden />
             <h1
               id="features-page-heading"
               className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-stone-900 dark:text-stone-100 mb-4 tracking-tight leading-tight"
@@ -63,10 +63,10 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
         <LandingSectionLayers />
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
-            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#58CC02] dark:text-[#58CC02] mb-3">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#A560E8] dark:text-[#A560E8] mb-3">
               Flagship
             </p>
-            <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-[#58CC02]" aria-hidden />
+            <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-[#A560E8]" aria-hidden />
             <h2
               className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-stone-900 dark:text-stone-100 tracking-tight leading-tight"
               style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
@@ -76,41 +76,41 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 mb-16">
             {/* Essay Analyzer - Flagship */}
-            <button onClick={() => onNavigate('analyze')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-6 hover:border-[#1CB0F6] dark:hover:border-[#1CB0F6] active:border-b-2 active:translate-y-0.5 transition-all duration-300 text-left">
+            <button onClick={() => onNavigate('analyze')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-6 hover:border-[#A560E8] dark:hover:border-[#A560E8] active:border-b-2 active:translate-y-0.5 transition-all duration-300 text-left">
               <div className="relative flex flex-col items-center text-center mb-4">
-                <div className="w-14 h-14 rounded-2xl bg-[#DDF4FF] dark:bg-[#1CB0F6]/20 flex items-center justify-center mb-3">
+                <div className="w-14 h-14 rounded-2xl bg-[#F3EAFF] dark:bg-[#A560E8]/20 flex items-center justify-center mb-3">
                   <img src="/mascot-study.webp" alt="WriteScholar mascot" className="w-[48px] h-[48px] object-contain" />
                 </div>
-                <h3 className="font-bold text-[#1CB0F6] text-lg">Essay Analyzer</h3>
+                <h3 className="font-bold text-[#A560E8] text-lg">Essay Analyzer</h3>
               </div>
               <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed text-center">Professor-style feedback on structure, clarity, citations. Grade-level rubric.</p>
             </button>
 
             {/* Citations - Flagship */}
-            <button onClick={() => onNavigate('citations')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-6 hover:border-[#1CB0F6] dark:hover:border-[#1CB0F6] active:border-b-2 active:translate-y-0.5 transition-all duration-300 text-left">
+            <button onClick={() => onNavigate('citations')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-6 hover:border-[#A560E8] dark:hover:border-[#A560E8] active:border-b-2 active:translate-y-0.5 transition-all duration-300 text-left">
               <div className="relative flex flex-col items-center text-center mb-4">
-                <div className="w-14 h-14 rounded-2xl bg-[#DDF4FF] dark:bg-[#1CB0F6]/20 flex items-center justify-center mb-3">
+                <div className="w-14 h-14 rounded-2xl bg-[#F3EAFF] dark:bg-[#A560E8]/20 flex items-center justify-center mb-3">
                   <img src="/mascot-paper.webp" alt="WriteScholar mascot" className="w-[48px] h-[48px] object-contain" />
                 </div>
-                <h3 className="font-bold text-[#1CB0F6] text-lg">Online Citations</h3>
+                <h3 className="font-bold text-[#A560E8] text-lg">Online Citations</h3>
               </div>
               <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed text-center">Find and format academic citations in APA, MLA, Chicago, Harvard, IEEE, Vancouver.</p>
             </button>
 
             {/* Study Packs - Flagship */}
-            <button onClick={() => onNavigate('dashboard')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-b-4 border-[#FF9600]/30 dark:border-[#FF9600]/30 bg-white dark:bg-stone-800 p-6 hover:border-[#FF9600] dark:hover:border-[#FF9600] active:border-b-2 active:translate-y-0.5 transition-all duration-300 text-left">
+            <button onClick={() => onNavigate('dashboard')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-b-4 border-[#A560E8]/30 dark:border-[#A560E8]/30 bg-white dark:bg-stone-800 p-6 hover:border-[#A560E8] dark:hover:border-[#A560E8] active:border-b-2 active:translate-y-0.5 transition-all duration-300 text-left">
               <div className="relative flex flex-col items-center text-center mb-4">
-                <div className="w-14 h-14 rounded-2xl bg-[#FFF4E0] dark:bg-[#FF9600]/20 flex items-center justify-center mb-3"><img src="/mascot-juggling.webp" alt="Study Packs" className="w-[48px] h-[48px] object-contain" /></div>
-                <h3 className="font-bold text-[#FF9600] text-lg">Study Packs</h3>
+                <div className="w-14 h-14 rounded-2xl bg-[#F3EAFF] dark:bg-[#A560E8]/20 flex items-center justify-center mb-3"><img src="/mascot-juggling.webp" alt="Study Packs" className="w-[48px] h-[48px] object-contain" /></div>
+                <h3 className="font-bold text-[#A560E8] text-lg">Study Packs</h3>
               </div>
               <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed text-center">Create quizzes, flashcards, crosswords & lessons from any notes. One paste, five formats.</p>
             </button>
 
             {/* Focus Mode - Flagship */}
-            <button onClick={() => onNavigate('focus-mode')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-6 hover:border-[#1CB0F6] dark:hover:border-[#1CB0F6] active:border-b-2 active:translate-y-0.5 transition-all duration-300 text-left">
+            <button onClick={() => onNavigate('focus-mode')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-6 hover:border-[#A560E8] dark:hover:border-[#A560E8] active:border-b-2 active:translate-y-0.5 transition-all duration-300 text-left">
               <div className="relative flex flex-col items-center text-center mb-4">
-                <div className="w-14 h-14 rounded-2xl bg-[#DDF4FF] dark:bg-[#1CB0F6]/20 flex items-center justify-center mb-3"><img src="/mascot-thinking.webp" alt="Focus Mode" className="w-[48px] h-[48px] object-contain" /></div>
-                <h3 className="font-bold text-[#1CB0F6] text-lg">Focus Mode</h3>
+                <div className="w-14 h-14 rounded-2xl bg-[#F3EAFF] dark:bg-[#A560E8]/20 flex items-center justify-center mb-3"><img src="/mascot-thinking.webp" alt="Focus Mode" className="w-[48px] h-[48px] object-contain" /></div>
+                <h3 className="font-bold text-[#A560E8] text-lg">Focus Mode</h3>
               </div>
               <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed text-center">Block YouTube, TikTok until you answer quiz questions from your notes. Earn your screen time.</p>
             </button>
@@ -121,7 +121,7 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
             <h3 className="text-lg font-bold text-stone-700 dark:text-stone-300 mb-6">More tools</h3>
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 min-w-0">
             {/* Document Library */}
-            <div className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-4 sm:p-6 hover:border-[#1CB0F6] dark:hover:border-[#1CB0F6] transition-all duration-300 min-w-0">
+            <div className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-4 sm:p-6 hover:border-[#A560E8] dark:hover:border-[#A560E8] transition-all duration-300 min-w-0">
               <div className="relative flex items-center gap-2 sm:gap-4 mb-2 sm:mb-4 min-w-0">
                 <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-stone-100 dark:bg-stone-700/80 flex items-center justify-center flex-shrink-0 overflow-hidden">
                   <img src="/mascot-laptop.webp" alt="WriteScholar mascot" className="w-[36px] h-[36px] object-contain" />
@@ -132,28 +132,28 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
             </div>
 
             {/* Text Summarizer */}
-            <button onClick={() => onNavigate('summarizer')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-4 sm:p-6 hover:border-[#58CC02] dark:hover:border-[#58CC02] transition-all duration-300 text-left min-w-0">
+            <button onClick={() => onNavigate('summarizer')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-4 sm:p-6 hover:border-[#A560E8] dark:hover:border-[#A560E8] transition-all duration-300 text-left min-w-0">
               <div className="relative flex items-center gap-2 sm:gap-4 mb-2 sm:mb-4 min-w-0">
-                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-[#EAFFD6] dark:bg-[#58CC02]/20 flex items-center justify-center flex-shrink-0"><img src="/mascot-paper.webp" alt="Paper Summarizer" className="w-[36px] h-[36px] object-contain" /></div>
-                <h3 className="font-bold text-[#58CC02] text-sm sm:text-lg truncate min-w-0">Paper Summarizer</h3>
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-[#F3EAFF] dark:bg-[#A560E8]/20 flex items-center justify-center flex-shrink-0"><img src="/mascot-paper.webp" alt="Paper Summarizer" className="w-[36px] h-[36px] object-contain" /></div>
+                <h3 className="font-bold text-[#A560E8] text-sm sm:text-lg truncate min-w-0">Paper Summarizer</h3>
               </div>
               <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 leading-relaxed line-clamp-3 sm:line-clamp-none">Condense research papers, articles, and textbooks into key points. Bullet points or paragraphs. 5,000 free words/month.</p>
             </button>
 
             {/* Citation Generator */}
-            <button onClick={() => onNavigate('citation-generator-tool')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-4 sm:p-6 hover:border-[#1CB0F6] dark:hover:border-[#1CB0F6] transition-all duration-300 text-left min-w-0">
+            <button onClick={() => onNavigate('citation-generator-tool')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-4 sm:p-6 hover:border-[#A560E8] dark:hover:border-[#A560E8] transition-all duration-300 text-left min-w-0">
               <div className="relative flex items-center gap-2 sm:gap-4 mb-2 sm:mb-4 min-w-0">
-                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-[#DDF4FF] dark:bg-[#1CB0F6]/20 flex items-center justify-center flex-shrink-0"><img src="/mascot-laptop.webp" alt="Citation Generator" className="w-[36px] h-[36px] object-contain" /></div>
-                <h3 className="font-bold text-[#1CB0F6] text-sm sm:text-lg truncate min-w-0">Citation Generator</h3>
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-[#F3EAFF] dark:bg-[#A560E8]/20 flex items-center justify-center flex-shrink-0"><img src="/mascot-laptop.webp" alt="Citation Generator" className="w-[36px] h-[36px] object-contain" /></div>
+                <h3 className="font-bold text-[#A560E8] text-sm sm:text-lg truncate min-w-0">Citation Generator</h3>
               </div>
               <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 leading-relaxed line-clamp-3 sm:line-clamp-none">Generate perfectly formatted citations from a URL, book, or journal. APA, MLA, Chicago, Harvard, and more.</p>
             </button>
 
             {/* Pomodoro Timer */}
-            <button onClick={() => onNavigate('pomodoro-timer')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-4 sm:p-6 hover:border-[#58CC02] dark:hover:border-[#58CC02] transition-all duration-300 text-left min-w-0">
+            <button onClick={() => onNavigate('pomodoro-timer')} className="group relative rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-4 sm:p-6 hover:border-[#A560E8] dark:hover:border-[#A560E8] transition-all duration-300 text-left min-w-0">
               <div className="relative flex items-center gap-2 sm:gap-4 mb-2 sm:mb-4 min-w-0">
-                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-[#EAFFD6] dark:bg-[#58CC02]/20 flex items-center justify-center flex-shrink-0"><img src="/mascot-jumping-joy.webp" alt="Pomodoro Timer" className="w-[36px] h-[36px] object-contain" /></div>
-                <h3 className="font-bold text-[#58CC02] text-sm sm:text-lg truncate min-w-0">Pomodoro Timer</h3>
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-[#F3EAFF] dark:bg-[#A560E8]/20 flex items-center justify-center flex-shrink-0"><img src="/mascot-jumping-joy.webp" alt="Pomodoro Timer" className="w-[36px] h-[36px] object-contain" /></div>
+                <h3 className="font-bold text-[#A560E8] text-sm sm:text-lg truncate min-w-0">Pomodoro Timer</h3>
               </div>
               <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 leading-relaxed line-clamp-3 sm:line-clamp-none">Stay focused with timed study sessions. Work in 25-minute sprints with built-in breaks for better productivity.</p>
             </button>
@@ -166,10 +166,10 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
         <LandingSectionLayers variant="faq" />
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-12">
-            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#58CC02] dark:text-[#58CC02] mb-3">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#A560E8] dark:text-[#A560E8] mb-3">
               Simple
             </p>
-            <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-[#58CC02]" aria-hidden />
+            <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-[#A560E8]" aria-hidden />
             <h2
               className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-stone-900 dark:text-stone-100 mb-4 tracking-tight leading-tight"
               style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
@@ -188,8 +188,8 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
               { num: 3, title: 'Get results', desc: 'Instant results you can copy, study from, or submit with confidence' },
             ].map((step) => (
               <div key={step.num} className="relative group">
-                <div className="flex flex-col items-center text-center p-6 sm:p-8 rounded-2xl sm:rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 hover:border-[#58CC02] dark:hover:border-[#58CC02] transition-all duration-300">
-                  <span className="w-14 h-14 sm:w-16 sm:h-16 bg-[#58CC02] rounded-2xl flex items-center justify-center mx-auto mb-4 text-white font-bold text-xl border-2 border-b-4 border-[#46A302]">
+                <div className="flex flex-col items-center text-center p-6 sm:p-8 rounded-2xl sm:rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 hover:border-[#A560E8] dark:hover:border-[#A560E8] transition-all duration-300">
+                  <span className="w-14 h-14 sm:w-16 sm:h-16 bg-[#A560E8] rounded-2xl flex items-center justify-center mx-auto mb-4 text-white font-bold text-xl border-2 border-b-4 border-[#7733B5]">
                     {step.num}
                   </span>
                   <h3 className="text-lg font-bold text-stone-800 dark:text-stone-100 mb-2">{step.title}</h3>
@@ -205,10 +205,10 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
         <LandingSectionLayers />
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
-            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#58CC02] dark:text-[#58CC02] mb-3">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#A560E8] dark:text-[#A560E8] mb-3">
               Why WriteScholar
             </p>
-            <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-[#58CC02]" aria-hidden />
+            <div className="mx-auto mb-4 h-1 w-12 rounded-full bg-[#A560E8]" aria-hidden />
             <h2
               className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-stone-900 dark:text-stone-100 tracking-tight leading-tight"
               style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
@@ -221,8 +221,8 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
               <div className="space-y-4">
                 {benefits.map((benefit, index) => (
                   <div key={index} className="flex items-start space-x-3">
-                    <div className="w-6 h-6 bg-[#EAFFD6] dark:bg-[#58CC02]/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <svg className="w-4 h-4 text-[#58CC02]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-6 h-6 bg-[#F3EAFF] dark:bg-[#A560E8]/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-4 h-4 text-[#A560E8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
@@ -235,7 +235,7 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
               </div>
             </div>
             
-            <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#58CC02]/30 dark:border-[#58CC02]/30 bg-[#EAFFD6] dark:bg-[#58CC02]/10 p-6 sm:p-8">
+            <div className="rounded-2xl overflow-hidden border-2 border-b-4 border-[#A560E8]/30 dark:border-[#A560E8]/30 bg-[#F3EAFF] dark:bg-[#A560E8]/10 p-6 sm:p-8">
               <div className="grid grid-cols-2 gap-4 sm:gap-6">
                 {[
                   { value: '5+', label: 'AI Tools' },
@@ -244,7 +244,7 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
                   { value: 'Free', label: 'to Start' },
                 ].map((stat, i) => (
                   <div key={i} className="text-center p-4 rounded-2xl bg-white/60 dark:bg-stone-800/50">
-                    <div className="text-3xl sm:text-4xl font-bold text-[#58CC02]">{stat.value}</div>
+                    <div className="text-3xl sm:text-4xl font-bold text-[#A560E8]">{stat.value}</div>
                     <div className="text-stone-600 dark:text-stone-400 text-sm font-medium">{stat.label}</div>
                   </div>
                 ))}
@@ -258,10 +258,10 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
         <LandingSectionLayers variant="cta" />
         <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 px-6 py-10 sm:px-10 sm:py-12">
-            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#58CC02] dark:text-[#58CC02] mb-3">
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#A560E8] dark:text-[#A560E8] mb-3">
               Get started
             </p>
-            <div className="mx-auto mb-5 h-1 w-12 rounded-full bg-[#58CC02]" aria-hidden />
+            <div className="mx-auto mb-5 h-1 w-12 rounded-full bg-[#A560E8]" aria-hidden />
             <h2
               className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-stone-900 dark:text-stone-50 mb-4 tracking-tight leading-[1.15]"
               style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
@@ -279,7 +279,7 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
                   <button
                     type="button"
                     onClick={() => onNavigate('dashboard')}
-                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#58CC02] hover:bg-[#4CAF00] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all duration-150 text-base"
+                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#A560E8] hover:bg-[#9450D8] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all duration-150 text-base"
                   >
                     Go to dashboard
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
@@ -301,7 +301,7 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
                   <button
                     type="button"
                     onClick={() => onNavigate('signup')}
-                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#58CC02] hover:bg-[#4CAF00] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all duration-150 text-base"
+                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[#A560E8] hover:bg-[#9450D8] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all duration-150 text-base"
                   >
                     Try free
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>

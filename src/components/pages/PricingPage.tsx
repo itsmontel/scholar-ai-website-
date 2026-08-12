@@ -8,6 +8,7 @@ import {
 import Header from '../common/Header';
 import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
+import { FIRST_MONTH_PRICE, signupPromoCode, showSignupDiscount } from '../../config/pricing';
 
 interface PricingPageProps {
   onNavigate: (page: string) => void;
@@ -15,12 +16,13 @@ interface PricingPageProps {
   onLogout: () => void;
 }
 
-/** Auto-applied welcome discount for first-time customers: 50% off the
- *  first monthly invoice (Pro $19.99 → $9.99, Premium $39.99 → $19.99).
- *  The backend strips the code for anyone with prior subscription
- *  history, so showing it optimistically here is safe. */
-const WELCOME_PROMO_CODE = 'NEWCUSTOMER';
-const FIRST_MONTH_PRICE: Record<string, number> = { pro: 9.99, premium: 19.99 };
+/* Welcome-discount policy lives in src/config/pricing.ts — this is an
+   acquisition surface, so it only shows a discounted first month when
+   that policy allows it (currently it doesn't: the trial is the offer). */
+
+/** Holds a campaign promo code (e.g. from the winback email) across the
+ *  login redirect, since lapsed users arrive signed out. */
+const CAMPAIGN_PROMO_KEY = 'ws_campaign_promo';
 
 const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
   const [billingCycle, setBillingCycle] = useState('monthly');
@@ -29,6 +31,27 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
   // Logged-out visitors are treated as new customers (the discount is
   // the acquisition pitch); logged-in users get a real eligibility check.
   const [newCustomer, setNewCustomer] = useState<boolean>(true);
+  /**
+   * Promo code carried in from a campaign link, e.g. the winback email's
+   * /pricing?promo=COMEBACK50. Applied on top of the normal signup
+   * policy: these users are by definition NOT new customers, so
+   * signupPromoCode() returns nothing for them and this is the only way
+   * their offer survives to checkout. The backend still validates the
+   * code, so a guessed or expired one just falls back to full price.
+   */
+  const [campaignPromo] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    const raw = new URLSearchParams(window.location.search).get('promo');
+    const cleaned = (raw || '').trim().toUpperCase();
+    if (cleaned && /^[A-Z0-9_-]{3,32}$/.test(cleaned)) {
+      // Survive the login round-trip: a lapsed user clicking the winback
+      // link is signed out, and losing their code on the way back would
+      // silently charge them full price after we promised otherwise.
+      try { sessionStorage.setItem(CAMPAIGN_PROMO_KEY, cleaned); } catch { /* ignore */ }
+      return cleaned;
+    }
+    try { return sessionStorage.getItem(CAMPAIGN_PROMO_KEY); } catch { return null; }
+  });
 
   useEffect(() => {
     if (!user) return;
@@ -116,11 +139,9 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
             billingCycle: billingCycle as 'monthly' | 'yearly',
             successUrl: `${window.location.origin}/dashboard?payment=success`,
             cancelUrl: `${window.location.origin}/dashboard?payment=cancelled`,
-            // Auto-apply the new-customer first-month discount on monthly
-            // plans (coupon is 50% off the first invoice — applying it to
-            // yearly would halve the whole year). Backend re-verifies
-            // eligibility and strips it for returning subscribers.
-            ...(newCustomer && billingCycle === 'monthly' ? { promoCode: WELCOME_PROMO_CODE } : {}),
+            ...(campaignPromo
+              ? { promoCode: campaignPromo }
+              : signupPromoCode(newCustomer, billingCycle === 'yearly' ? 'yearly' : 'monthly') ?? {}),
           })
         });
 
@@ -324,6 +345,24 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
             </p>
           </div>
 
+          {/* Campaign offer confirmation — the winback email promised a
+              specific price, so say plainly that the code is applied
+              rather than leaving them to spot it at Stripe. */}
+          {campaignPromo && (
+            <div className="mx-auto mb-8 max-w-xl rounded-2xl border-2 border-[#A560E8] bg-[#F3EAFF] dark:bg-[#A560E8]/10 px-5 py-4 text-center">
+              <p className="text-sm font-extrabold text-[#7733B5] dark:text-[#C9A0F0]">
+                Your offer is applied
+              </p>
+              <p className="mt-1 text-[13px] font-semibold text-stone-600 dark:text-stone-300">
+                Code{' '}
+                <span className="font-extrabold tracking-wider text-[#7733B5] dark:text-[#C9A0F0]">
+                  {campaignPromo}
+                </span>{' '}
+                is on your order — you&apos;ll see the discount at checkout, nothing to type in.
+              </p>
+            </div>
+          )}
+
           <div className="flex flex-col items-center mb-10 sm:mb-12">
             <div className="inline-flex rounded-xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 p-1">
               <button
@@ -396,7 +435,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                 
                 <div className="mb-4">
                   {plan.id !== 'free' && billingCycle === 'monthly' ? (
-                    newCustomer ? (
+                    showSignupDiscount(newCustomer, 'monthly') ? (
                       /* New-customer monthly display — leads with the
                          NEWCUSTOMER first-month price (Pro $9.99,
                          Premium $19.99), anchored against the standard

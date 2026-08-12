@@ -30,19 +30,18 @@ export default function LandingFinalCTASection({ onNavigate }: LandingFinalCTASe
             className="max-w-2xl text-3xl sm:text-4xl lg:text-[2.75rem] font-extrabold leading-tight tracking-tight text-stone-900 dark:text-stone-50"
             style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
           >
-            The trusted{' '}
-            <span className="relative inline-block text-[#A560E8]">
-              AI learning platform
+            Your next essay could be{' '}
+            <span className="relative inline-block text-[#58CC02]">
+              an A
               <svg
-                className="absolute -bottom-1.5 left-0 w-full h-2 text-[#A560E8]"
+                className="absolute -bottom-1.5 left-0 w-full h-2 text-[#58CC02]"
                 viewBox="0 0 200 8"
                 preserveAspectRatio="none"
                 aria-hidden
               >
                 <path d="M2 6 Q50 1 100 5 T198 4" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
               </svg>
-            </span>{' '}
-            for students.
+            </span>{'.'}
           </h2>
 
           <div className="mt-10 sm:mt-14 flex flex-col sm:flex-row items-start sm:items-stretch gap-8 sm:gap-16 lg:gap-24">

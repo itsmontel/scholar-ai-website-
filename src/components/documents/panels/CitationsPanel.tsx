@@ -118,16 +118,16 @@ export default function CitationsPanel({ onNavigate, isPaid = false }: { onNavig
       <GenerationOverlay open={loading} variant="citations" />
 
       {/* ── SEARCH CARD — premium gradient frame ──────────────────── */}
-      <div className="relative rounded-[28px] p-[2px] bg-gradient-to-br from-[#7FD4FF] via-[#1CB0F6] to-[#1486B5] shadow-[0_28px_60px_-30px_rgba(28,176,246,0.7)]">
+      <div className="relative rounded-[28px] p-[2px] bg-gradient-to-br from-[#C79BF2] via-[#A560E8] to-[#7733B5] shadow-[0_28px_60px_-30px_rgba(165,96,232,0.7)]">
         <div className="relative overflow-hidden rounded-[26px] bg-white dark:bg-stone-900 p-5 sm:p-7">
           {/* Ambient glow + faint grid texture */}
-          <div className="pointer-events-none absolute -top-24 -right-20 w-64 h-64 rounded-full bg-[#1CB0F6]/15 blur-3xl" aria-hidden />
-          <div className="pointer-events-none absolute -bottom-24 -left-16 w-56 h-56 rounded-full bg-[#7FD4FF]/15 blur-3xl" aria-hidden />
+          <div className="pointer-events-none absolute -top-24 -right-20 w-64 h-64 rounded-full bg-[#A560E8]/15 blur-3xl" aria-hidden />
+          <div className="pointer-events-none absolute -bottom-24 -left-16 w-56 h-56 rounded-full bg-[#C79BF2]/15 blur-3xl" aria-hidden />
           <div className="pointer-events-none absolute inset-0 opacity-[0.035] dark:opacity-[0.06]" style={{ backgroundImage: 'linear-gradient(rgba(120,113,108,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(120,113,108,0.8) 1px, transparent 1px)', backgroundSize: '26px 26px' }} aria-hidden />
 
           {/* Header */}
           <div className="relative flex items-center gap-3.5 mb-5">
-            <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#5BC5FF] to-[#1CB0F6] text-white text-xl border-2 border-b-[3px] border-[#1486B5] shadow-[0_10px_24px_-10px_rgba(28,176,246,0.9)]" aria-hidden>
+            <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#BD8BF0] to-[#A560E8] text-white text-xl border-2 border-b-[3px] border-[#7733B5] shadow-[0_10px_24px_-10px_rgba(165,96,232,0.9)]" aria-hidden>
               🔖
               <span className="absolute -top-1.5 -right-1.5 text-[#FFC800] text-sm motion-safe:animate-pulse">✦</span>
             </span>
@@ -149,7 +149,7 @@ export default function CitationsPanel({ onNavigate, isPaid = false }: { onNavig
             }}
             rows={3}
             placeholder="e.g. the effect of social media on adolescent sleep quality"
-            className="relative w-full px-4 py-3.5 rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-stone-50/80 dark:bg-stone-800/80 text-sm text-stone-800 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-4 focus:ring-[#1CB0F6]/20 focus:border-[#1CB0F6] resize-none transition-all"
+            className="relative w-full px-4 py-3.5 rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-stone-50/80 dark:bg-stone-800/80 text-sm text-stone-800 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-4 focus:ring-[#A560E8]/20 focus:border-[#A560E8] resize-none transition-all"
           />
           <div className="relative mt-4 flex flex-col sm:flex-row sm:items-center gap-3">
             <label className="flex items-center gap-2">
@@ -157,7 +157,7 @@ export default function CitationsPanel({ onNavigate, isPaid = false }: { onNavig
               <select
                 value={style}
                 onChange={(e) => setStyle(e.target.value)}
-                className="px-3 py-2.5 rounded-xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-[13px] font-bold text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-4 focus:ring-[#1CB0F6]/20 focus:border-[#1CB0F6] transition-all"
+                className="px-3 py-2.5 rounded-xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-[13px] font-bold text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-4 focus:ring-[#A560E8]/20 focus:border-[#A560E8] transition-all"
               >
                 {STYLES.map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
@@ -167,7 +167,7 @@ export default function CitationsPanel({ onNavigate, isPaid = false }: { onNavig
               <select
                 value={yearRange}
                 onChange={(e) => setYearRange(e.target.value)}
-                className="px-3 py-2.5 rounded-xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-[13px] font-bold text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-4 focus:ring-[#1CB0F6]/20 focus:border-[#1CB0F6] transition-all"
+                className="px-3 py-2.5 rounded-xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-[13px] font-bold text-stone-700 dark:text-stone-200 focus:outline-none focus:ring-4 focus:ring-[#A560E8]/20 focus:border-[#A560E8] transition-all"
               >
                 {YEARS.map((y) => <option key={y.v} value={y.v}>{y.label}</option>)}
               </select>
@@ -176,7 +176,7 @@ export default function CitationsPanel({ onNavigate, isPaid = false }: { onNavig
               type="button"
               onClick={search}
               disabled={loading || !topic.trim()}
-              className="group sm:ml-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#1CB0F6] to-[#0E9BE0] hover:from-[#0E9BE0] hover:to-[#1486B5] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 text-white text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#1486B5] enabled:hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_12px_28px_-12px_rgba(28,176,246,0.9)]"
+              className="group sm:ml-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#A560E8] to-[#9450D8] hover:from-[#9450D8] hover:to-[#7733B5] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 text-white text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] enabled:hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_12px_28px_-12px_rgba(165,96,232,0.9)]"
             >
               {loading ? (
                 <>
@@ -199,7 +199,7 @@ export default function CitationsPanel({ onNavigate, isPaid = false }: { onNavig
           <div className="relative mt-5 pt-4 border-t border-stone-100 dark:border-stone-800 flex flex-wrap items-center gap-1.5">
             <span className="text-[10.5px] font-extrabold uppercase tracking-wide text-stone-400 mr-0.5">You'll get</span>
             {['📄 Real sources', '✍️ Ready-to-use sentences', '🏷️ In-text citations'].map((c) => (
-              <span key={c} className="px-2.5 py-1 rounded-full bg-[#F5FBFF] dark:bg-[#1CB0F6]/10 border border-[#1CB0F6]/25 text-[11px] font-extrabold text-[#1486B5] dark:text-[#1CB0F6]">{c}</span>
+              <span key={c} className="px-2.5 py-1 rounded-full bg-[#FBF8FF] dark:bg-[#A560E8]/10 border border-[#A560E8]/25 text-[11px] font-extrabold text-[#7733B5] dark:text-[#A560E8]">{c}</span>
             ))}
           </div>
         </div>
@@ -209,8 +209,8 @@ export default function CitationsPanel({ onNavigate, isPaid = false }: { onNavig
         <PreviewStrip
           title="What your sources look like"
           subtitle="Real, citable references with ready-to-use sentences and in-text citations in your style."
-          tint="#1CB0F6"
-          tintShadowRgb="28,176,246"
+          tint="#A560E8"
+          tintShadowRgb="165,96,232"
           items={[
             { kind: 'video', src: '/writescholar-citation-finder-demo.mp4', label: 'Finding sources' },
             { kind: 'image', src: '/citations-preview.png', label: 'Formatted citations' },
@@ -219,13 +219,13 @@ export default function CitationsPanel({ onNavigate, isPaid = false }: { onNavig
       </div>
 
       {error && (
-        <div className={`mt-4 rounded-2xl border-2 p-4 ${upgrade ? 'border-[#1CB0F6]/40 bg-[#DDF4FF] dark:bg-[#1CB0F6]/10' : 'border-[#FF4B4B]/40 bg-[#FFF0F0] dark:bg-[#FF4B4B]/10'}`}>
-          <p className={`text-sm font-extrabold ${upgrade ? 'text-[#1486B5]' : 'text-[#D63A3A]'}`}>{error}</p>
+        <div className={`mt-4 rounded-2xl border-2 p-4 ${upgrade ? 'border-[#A560E8]/40 bg-[#F3EAFF] dark:bg-[#A560E8]/10' : 'border-[#FF4B4B]/40 bg-[#FFF0F0] dark:bg-[#FF4B4B]/10'}`}>
+          <p className={`text-sm font-extrabold ${upgrade ? 'text-[#7733B5]' : 'text-[#D63A3A]'}`}>{error}</p>
           {upgrade && (
             <button
               type="button"
               onClick={() => onNavigate('pricing')}
-              className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1CB0F6] hover:bg-[#1486B5] text-white text-xs font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#1486B5] active:border-b-2 active:translate-y-0.5 transition-all"
+              className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#A560E8] hover:bg-[#7733B5] text-white text-xs font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
             >
               See plans
             </button>
@@ -265,7 +265,7 @@ export default function CitationsPanel({ onNavigate, isPaid = false }: { onNavig
                 return (
                 <div key={i} className="relative rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-4 sm:p-5 overflow-hidden">
                   <div className={`flex items-start gap-3 ${locked ? 'blur-[5px] select-none pointer-events-none' : ''}`} aria-hidden={locked || undefined}>
-                    <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#DDF4FF] dark:bg-[#1CB0F6]/15 text-[#1CB0F6] text-[11px] font-extrabold">{i + 1}</span>
+                    <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#A560E8] text-[11px] font-extrabold">{i + 1}</span>
                     <div className="min-w-0 flex-1">
                       <p
                         className="text-[13.5px] leading-relaxed text-stone-800 dark:text-stone-100 [&_i]:italic"
@@ -274,10 +274,10 @@ export default function CitationsPanel({ onNavigate, isPaid = false }: { onNavig
                       <div className="mt-2 flex flex-wrap items-center gap-1.5">
                         {c.type && <span className="px-2 py-0.5 rounded-full bg-stone-100 dark:bg-stone-800 text-[10px] font-extrabold uppercase tracking-wide text-stone-500">{c.type}</span>}
                         {c.year && <span className="px-2 py-0.5 rounded-full bg-stone-100 dark:bg-stone-800 text-[10px] font-bold text-stone-500">{c.year}</span>}
-                        {c.accessibility && <span className="px-2 py-0.5 rounded-full bg-[#E5F8D0] text-[10px] font-extrabold text-[#46A302]">{c.accessibility}</span>}
+                        {c.accessibility && <span className="px-2 py-0.5 rounded-full bg-[#F3EAFF] text-[10px] font-extrabold text-[#7733B5]">{c.accessibility}</span>}
                       </div>
                       {c.ready_to_use_sentence && (
-                        <p className="mt-2.5 text-[12.5px] italic text-stone-600 dark:text-stone-300 border-l-2 border-[#1CB0F6]/30 pl-3">
+                        <p className="mt-2.5 text-[12.5px] italic text-stone-600 dark:text-stone-300 border-l-2 border-[#A560E8]/30 pl-3">
                           {c.ready_to_use_sentence}
                         </p>
                       )}
@@ -285,7 +285,7 @@ export default function CitationsPanel({ onNavigate, isPaid = false }: { onNavig
                         <ul className="mt-2.5 space-y-1">
                           {c.key_points.slice(0, 3).map((p, k) => (
                             <li key={k} className="flex gap-2 text-[12px] text-stone-600 dark:text-stone-300">
-                              <span className="text-[#1CB0F6] font-extrabold">•</span>
+                              <span className="text-[#A560E8] font-extrabold">•</span>
                               <span>{p}</span>
                             </li>
                           ))}
@@ -295,7 +295,7 @@ export default function CitationsPanel({ onNavigate, isPaid = false }: { onNavig
                         <button
                           type="button"
                           onClick={() => copy(strip(c.citation), i)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 border-stone-200 dark:border-stone-700 text-[11px] font-extrabold text-stone-600 dark:text-stone-300 hover:border-[#1CB0F6]/40 hover:text-[#1486B5] transition-colors"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 border-stone-200 dark:border-stone-700 text-[11px] font-extrabold text-stone-600 dark:text-stone-300 hover:border-[#A560E8]/40 hover:text-[#7733B5] transition-colors"
                         >
                           {copiedIdx === i ? 'Copied ✓' : 'Copy citation'}
                         </button>
@@ -303,7 +303,7 @@ export default function CitationsPanel({ onNavigate, isPaid = false }: { onNavig
                           <button
                             type="button"
                             onClick={() => copy(c.in_text_citation as string, 1000 + i)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 border-stone-200 dark:border-stone-700 text-[11px] font-extrabold text-stone-600 dark:text-stone-300 hover:border-[#1CB0F6]/40 hover:text-[#1486B5] transition-colors"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 border-stone-200 dark:border-stone-700 text-[11px] font-extrabold text-stone-600 dark:text-stone-300 hover:border-[#A560E8]/40 hover:text-[#7733B5] transition-colors"
                           >
                             {copiedIdx === 1000 + i ? 'Copied ✓' : `In-text: ${c.in_text_citation}`}
                           </button>
@@ -318,7 +318,7 @@ export default function CitationsPanel({ onNavigate, isPaid = false }: { onNavig
                       className="absolute inset-0 flex items-center justify-center bg-white/40 dark:bg-stone-900/40"
                       aria-label="Unlock this source with Pro"
                     >
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#1CB0F6] text-white text-[11px] font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#1486B5] shadow-lg">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#A560E8] text-white text-[11px] font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#7733B5] shadow-lg">
                         <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
                           <rect x="5" y="11" width="14" height="9" rx="2" />
                           <path strokeLinecap="round" d="M8 11V8a4 4 0 0 1 8 0v3" />
@@ -333,8 +333,8 @@ export default function CitationsPanel({ onNavigate, isPaid = false }: { onNavig
             </div>
           )}
           {!isPaid && results.length > FREE_CITATION_PREVIEW && (
-            <div className="mt-4 rounded-2xl border-2 border-[#1CB0F6]/40 bg-gradient-to-br from-[#DDF4FF] to-white dark:from-[#1CB0F6]/12 dark:to-stone-900 p-4 sm:p-5 text-center">
-              <p className="text-[14px] font-extrabold text-[#1486B5] dark:text-[#7FD4FF]">
+            <div className="mt-4 rounded-2xl border-2 border-[#A560E8]/40 bg-gradient-to-br from-[#F3EAFF] to-white dark:from-[#A560E8]/12 dark:to-stone-900 p-4 sm:p-5 text-center">
+              <p className="text-[14px] font-extrabold text-[#7733B5] dark:text-[#C79BF2]">
                 {results.length - FREE_CITATION_PREVIEW} more sources ready for your topic
               </p>
               <p className="mt-1 text-[12px] font-bold text-stone-600 dark:text-stone-300 leading-snug">
@@ -343,7 +343,7 @@ export default function CitationsPanel({ onNavigate, isPaid = false }: { onNavig
               <button
                 type="button"
                 onClick={() => { trackEvent('upgrade_clicked', { source: 'citations_unlock_banner' }); openUpgradePaywall('citations_unlock_banner'); }}
-                className="mt-3 inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#1CB0F6] hover:bg-[#1486B5] text-white text-[12px] font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#1486B5] active:border-b-2 active:translate-y-0.5 transition-all"
+                className="mt-3 inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#A560E8] hover:bg-[#7733B5] text-white text-[12px] font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
               >
                 Unlock all {results.length} sources
               </button>

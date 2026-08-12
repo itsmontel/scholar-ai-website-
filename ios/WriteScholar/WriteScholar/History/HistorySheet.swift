@@ -214,6 +214,9 @@ struct HistorySheet: View {
         case .flashcardsReviewed:               return WSColor.duoPurple
         case .craterBlastPlayed:                return WSColor.duoRed
         case .wordTowerPlayed:                  return WSColor.duoGreen
+        case .wordBlitzPlayed:                  return WSColor.duoBlue
+        case .memoryMatchPlayed:                return WSColor.duoPurple
+        case .quizRunPlayed:                    return WSColor.duoYellowDark
         case .focusUnlock:                      return WSColor.duoOrange
         case .dailyOpen:                        return WSColor.foregroundMuted
         }

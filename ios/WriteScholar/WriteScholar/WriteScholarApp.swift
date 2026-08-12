@@ -17,6 +17,12 @@ struct WriteScholarApp: App {
     /// Light/dark mode preference. `nil` = follow system, otherwise force.
     @AppStorage("ws_color_scheme_override") private var colorSchemeOverride: String = ""
 
+    /// Study-time accumulator: stamps when the app comes to the
+    /// foreground; the elapsed span is banked into DailyGoalStore when
+    /// it leaves. Drives the "study time" stat chip on Home.
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var foregroundedAt: Date? = nil
+
     var body: some Scene {
         WindowGroup {
             ContentView(onboardingComplete: $onboardingComplete)
@@ -33,6 +39,22 @@ struct WriteScholarApp: App {
                     // small XP nudge so the goal ring isn't blank.
                     if DailyGoalStore.shared.todayXP == 0 {
                         DailyGoalStore.shared.record(.dailyOpen)
+                    }
+                }
+                .onChange(of: scenePhase) { _, phase in
+                    switch phase {
+                    case .active:
+                        if foregroundedAt == nil { foregroundedAt = Date() }
+                    case .inactive, .background:
+                        if let start = foregroundedAt {
+                            // Cap a single span at 4h so a device left open
+                            // overnight doesn't record absurd study time.
+                            let span = min(Int(Date().timeIntervalSince(start)), 4 * 3600)
+                            DailyGoalStore.shared.addStudyTime(seconds: span)
+                            foregroundedAt = nil
+                        }
+                    @unknown default:
+                        break
                     }
                 }
         }

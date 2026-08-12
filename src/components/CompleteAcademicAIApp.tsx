@@ -389,6 +389,15 @@ const AcademicAIApp = () => {
               // sometimes happens a full week after the original ad
               // click, so cross-device is common here).
               void trackPaidConversion(planPrice, `${u.id}-paid`, u.email);
+              // Funnel step 4 of 4. Backend-derived (paid plan + active +
+              // never fired), so this is the trial→paid moment rather than
+              // the checkout click.
+              void import('../utils/analytics').then((m) =>
+                m.trackFunnelStep('subscription_converted', {
+                  plan: u.subscriptionPlan,
+                  planPrice,
+                })
+              );
               void BulletproofAPI.post('/users/mark-paid-conversion-fired', token, {}).catch(() => {
                 // Non-fatal — if the mark fails, paidConversionPending stays
                 // true and we'll fire again on the next session, which is
@@ -1097,9 +1106,11 @@ const AcademicAIApp = () => {
   const handleSignUp = (userData: User) => {
     setIsLoggedIn(true);
     setUser(userData);
-    void import('../utils/analytics').then((m) =>
-      m.identifyUser(userData.id, { email: userData.email, signup: true })
-    );
+    void import('../utils/analytics').then((m) => {
+      m.identifyUser(userData.id, { email: userData.email, signup: true });
+      // Funnel step 1 of 4 — the denominator for everything downstream.
+      m.trackFunnelStep('signed_up', { method: 'app' });
+    });
     // Google Ads signup conversion + Enhanced Conversions. Email is
     // SHA-256 hashed inside the helper before leaving the browser, so
     // Google can match this signup back to an ad click on a different
@@ -1382,6 +1393,19 @@ const AcademicAIApp = () => {
         };
         setUser(refreshed);
         try { localStorage.setItem('user', JSON.stringify(refreshed)); } catch { /* ignore */ }
+        // Funnel step 3 of 4. The live checkout returns here rather than to
+        // /onboarding?session_id=, so this is where most trials are counted.
+        // trackFunnelStep de-dupes, so the onboarding sync path firing too
+        // is harmless.
+        if (refreshed.subscription_status === 'trialing' || refreshed.plan !== 'free') {
+          void import('../utils/analytics').then((m) =>
+            m.trackFunnelStep('trial_started', {
+              plan: refreshed.plan,
+              status: refreshed.subscription_status,
+              source: 'stripe_redirect',
+            })
+          );
+        }
         try {
           if (refreshed.id && !getOnboardingCompletedAt(refreshed.id)) {
             stampOnboardingCompletedAt(refreshed.id);

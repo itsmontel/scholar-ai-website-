@@ -2,23 +2,33 @@
 //  FlashcardsView.swift
 //  WriteScholar
 //
-//  Native iOS swipe-deck. Flagship interaction — has to feel better than
-//  Quizlet's iOS app. Tap to flip; drag right = "Got it", drag left = "Try again".
-//  Cards behind the top one are visible with a slight scale/offset stack.
+//  Native iOS swipe-deck (prototype screen #8). Tap to flip (a real 90°
+//  flip, no ghosting); grade with Again / Hard / Good / Easy. Again & Hard
+//  re-queue the card so it comes back this session (lightweight spaced
+//  repetition); Good & Easy master it and remove it. The session finishes
+//  when every unique card has been mastered.
 //
 
 import SwiftUI
 
 struct FlashcardsView: View {
     let flashcards: Flashcards
+    /// Optional back affordance (mockup's ‹ chevron). Embedded pack tabs
+    /// leave this nil and rely on the surrounding tab bar.
+    var onBack: (() -> Void)? = nil
+
+    private enum Grade { case again, hard, good, easy }
 
     @State private var deck: [Flashcard] = []
-    @State private var knownCount = 0
-    @State private var reviewCount = 0
+    @State private var masteredIDs: Set<String> = []
     @State private var dragOffset: CGSize = .zero
     @State private var topFlipped = false
+    @State private var showingBack = false
+    @State private var isAdvancing = false
+    @State private var didAward = false
 
     private let swipeThreshold: CGFloat = 90
+    private var totalCards: Int { max(flashcards.cards.count, 1) }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -27,7 +37,9 @@ struct FlashcardsView: View {
                 .padding(.top, 12)
 
             ZStack {
-                if deck.isEmpty {
+                if flashcards.cards.isEmpty {
+                    emptyDeckState
+                } else if deck.isEmpty {
                     completedState
                 } else {
                     cardStack
@@ -35,7 +47,7 @@ struct FlashcardsView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            if !deck.isEmpty {
+            if !deck.isEmpty && !flashcards.cards.isEmpty {
                 actionBar
                     .padding(.horizontal, 20)
                     .padding(.bottom, 16)
@@ -43,28 +55,40 @@ struct FlashcardsView: View {
         }
         .background(WSColor.background.ignoresSafeArea())
         .onAppear {
-            if deck.isEmpty { deck = flashcards.cards }
+            if deck.isEmpty && masteredIDs.isEmpty { deck = flashcards.cards }
         }
     }
 
-    // MARK: - Scoreboard
+    // MARK: - Header (‹ · title · counter · thin bar)
 
     private var header: some View {
-        let total = max(flashcards.cards.count, 1)
-        let done  = knownCount + reviewCount
-        return VStack(alignment: .leading, spacing: 8) {
-            HStack {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 10) {
+                if let onBack {
+                    Button {
+                        Haptics.light()
+                        onBack()
+                    } label: {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 15, weight: .black))
+                            .foregroundStyle(WSColor.foreground)
+                            .frame(width: 34, height: 34)
+                            .background(Circle().fill(WSColor.backgroundElevated).shadow(color: .black.opacity(0.05), radius: 4, y: 2))
+                    }
+                    .buttonStyle(WSBouncyButtonStyle())
+                }
                 Text(flashcards.title ?? "Flashcards")
                     .wsBody(.large, weight: .bold)
                     .foregroundStyle(WSColor.foreground)
                     .lineLimit(1)
                 Spacer()
-                Text("\(min(done + 1, total)) / \(total)")
+                Text("\(masteredIDs.count) / \(totalCards)")
                     .wsBody(.small, weight: .bold)
                     .foregroundStyle(WSColor.foregroundMuted)
+                    .monospacedDigit()
             }
-            WSProgressBar(fraction: Double(done) / Double(total),
-                          tint: WSColor.duoPurple, height: 10)
+            WSProgressBar(fraction: Double(masteredIDs.count) / Double(totalCards),
+                          tint: WSColor.duoPurple, height: 8)
         }
     }
 
@@ -72,62 +96,51 @@ struct FlashcardsView: View {
 
     private var cardStack: some View {
         ZStack {
-            // Up to 3 cards visible behind the top
             ForEach(stackIndices, id: \.self) { idx in
-                cardView(for: deck[idx])
+                cardView(for: deck[idx], isTop: idx == 0)
                     .scaleEffect(scale(for: idx))
-                    .offset(y: yOffset(for: idx))
-                    .zIndex(zIndex(for: idx))
-                    .gesture(idx == 0 ? topDragGesture : nil)
-                    .onTapGesture(count: 1) {
-                        if idx == 0 {
-                            withAnimation(.spring(response: 0.45, dampingFraction: 0.75)) {
-                                topFlipped.toggle()
-                            }
-                            Haptics.light()
-                        }
-                    }
                     .rotationEffect(idx == 0 ? .degrees(Double(dragOffset.width / 22)) : .zero)
                     .offset(x: idx == 0 ? dragOffset.width : 0,
-                            y: idx == 0 ? dragOffset.height + yOffset(for: idx) : yOffset(for: idx))
-                    .opacity(idx == 0 ? 1.0 : 0.85 - Double(idx) * 0.15)
+                            y: (idx == 0 ? dragOffset.height : 0) + yOffset(for: idx))
+                    .zIndex(zIndex(for: idx))
+                    .opacity(idx == 0 ? 1.0 : max(0, 0.9 - Double(idx) * 0.2))
+                    .gesture(idx == 0 ? topDragGesture : nil)
+                    .onTapGesture {
+                        if idx == 0 { flip() }
+                    }
             }
 
-            // Action hint chips that fade in based on drag direction
             if dragOffset.width >= 30 {
-                tagHint(label: "Got it", icon: "checkmark.circle.fill", color: WSColor.duoGreen)
-                    .offset(x: -100, y: -150)
+                tagHint(label: "Good", icon: "checkmark.circle.fill", color: WSColor.duoGreen)
+                    .offset(x: -110, y: -170)
                     .opacity(min(1, Double(dragOffset.width) / 100))
             } else if dragOffset.width <= -30 {
-                tagHint(label: "Review", icon: "arrow.uturn.backward.circle.fill", color: WSColor.duoOrange)
-                    .offset(x: 100, y: -150)
+                tagHint(label: "Again", icon: "arrow.counterclockwise.circle.fill", color: WSColor.duoPurple)
+                    .offset(x: 110, y: -170)
                     .opacity(min(1, Double(-dragOffset.width) / 100))
             }
         }
-        .padding(.horizontal, 28)
+        .padding(.horizontal, 24)
     }
 
-    /// Indices into deck for the visible stack (top + up to 2 behind).
     private var stackIndices: [Int] {
         let n = min(3, deck.count)
-        return Array(0..<n).reversed()  // render back-to-front
+        return Array(0..<n).reversed()  // back-to-front
     }
 
-    private func cardView(for card: Flashcard) -> some View {
-        let isTop = (deck.first?.id == card.id)
-        return ZStack {
-            // Front face
-            cardFace(text: card.front, eyebrow: "QUESTION", accent: WSColor.duoBlue)
-                .opacity(isTop && topFlipped ? 0 : 1)
-            // Back face
-            cardFace(text: card.back, eyebrow: "ANSWER", accent: WSColor.duoGreen)
-                .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
-                .opacity(isTop && topFlipped ? 1 : 0)
+    private func cardView(for card: Flashcard, isTop: Bool) -> some View {
+        // Only the top card flips. During its flip we swap faces at the 90°
+        // midpoint (showingBack) so no ghost text shows through.
+        let showBack = isTop && showingBack
+        return Group {
+            if showBack {
+                cardFace(text: card.back, eyebrow: "ANSWER", accent: WSColor.duoGreen)
+                    .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
+            } else {
+                cardFace(text: card.front, eyebrow: "QUESTION", accent: WSColor.duoPurple)
+            }
         }
-        .rotation3DEffect(
-            .degrees(isTop && topFlipped ? 180 : 0),
-            axis: (x: 0, y: 1, z: 0)
-        )
+        .rotation3DEffect(.degrees(isTop && topFlipped ? 180 : 0), axis: (x: 0, y: 1, z: 0))
     }
 
     private func cardFace(text: String, eyebrow: String, accent: Color) -> some View {
@@ -136,33 +149,37 @@ struct FlashcardsView: View {
                 Text(eyebrow)
                     .font(WSFont.sans(10, weight: .black))
                     .tracking(2.2)
-                    .textCase(.uppercase)
                     .foregroundStyle(accent)
                 Spacer()
                 Image(systemName: "square.stack.3d.up.fill")
-                    .foregroundStyle(accent.opacity(0.7))
+                    .foregroundStyle(accent.opacity(0.6))
                     .font(.system(size: 14, weight: .bold))
             }
             Spacer()
             Text(text)
-                .font(WSFont.headline(17, weight: .black))
-                .foregroundStyle(WSColor.duoText)
+                .font(WSFont.headline(22, weight: .black))
+                .foregroundStyle(WSColor.foreground)
                 .multilineTextAlignment(.center)
-                .minimumScaleFactor(0.6)
+                .minimumScaleFactor(0.55)
             Spacer()
             HStack(spacing: 6) {
-                Image(systemName: "hand.point.up.left.fill")
+                Image(systemName: "hand.tap.fill")
                 Text("Tap to flip")
             }
             .font(WSFont.sans(11, weight: .bold))
             .foregroundStyle(WSColor.foregroundMuted)
         }
-        .padding(24)
-        .frame(width: 280, height: 360)
+        .padding(28)
+        .frame(maxWidth: .infinity)
+        .frame(height: 400)
         .background(
-            RoundedRectangle(cornerRadius: 26, style: .continuous)
-                .fill(WSColor.backgroundElevated)
-                .shadow(color: Color.black.opacity(0.08), radius: 18, y: 8)
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .fill(WSColor.surfacePurple)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 28, style: .continuous)
+                        .stroke(WSColor.duoPurple.opacity(0.15), lineWidth: 1.5)
+                )
+                .shadow(color: WSColor.duoPurple.opacity(0.15), radius: 18, y: 8)
         )
     }
 
@@ -173,7 +190,7 @@ struct FlashcardsView: View {
                 .font(.system(size: 14, weight: .bold))
             Text(label)
                 .font(WSFont.sans(13, weight: .bold))
-                .foregroundStyle(WSColor.duoText)
+                .foregroundStyle(WSColor.foreground)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 8)
@@ -190,16 +207,28 @@ struct FlashcardsView: View {
     private func yOffset(for idx: Int) -> CGFloat { CGFloat(idx) * 14 }
     private func zIndex(for idx: Int) -> Double { Double(stackIndices.count - idx) }
 
-    // MARK: - Drag
+    // MARK: - Flip
+
+    private func flip() {
+        Haptics.light()
+        let willFlip = !topFlipped
+        withAnimation(.easeInOut(duration: 0.4)) { topFlipped = willFlip }
+        // Swap the visible face exactly at the 90° midpoint.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            showingBack = willFlip
+        }
+    }
+
+    // MARK: - Drag → grade
 
     private var topDragGesture: some Gesture {
         DragGesture()
             .onChanged { value in dragOffset = value.translation }
             .onEnded { value in
                 if value.translation.width >= swipeThreshold {
-                    advance(known: true)
+                    grade(.good)
                 } else if value.translation.width <= -swipeThreshold {
-                    advance(known: false)
+                    grade(.again)
                 } else {
                     withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
                         dragOffset = .zero
@@ -208,52 +237,96 @@ struct FlashcardsView: View {
             }
     }
 
-    private func advance(known: Bool) {
+    /// Apply a grade to the top card. `isAdvancing` guards against a
+    /// rapid double-tap / swipe+tap removing two cards in one animation.
+    private func grade(_ g: Grade) {
+        guard !isAdvancing, let top = deck.first else { return }
+        isAdvancing = true
         Haptics.success()
-        let direction: CGFloat = known ? 1 : -1
-        withAnimation(.easeOut(duration: 0.3)) {
-            dragOffset = CGSize(width: direction * 600, height: 60)
+
+        let mastered = (g == .good || g == .easy)
+        let direction: CGFloat = mastered ? 1 : -1
+        withAnimation(.easeOut(duration: 0.28)) {
+            dragOffset = CGSize(width: direction * 620, height: 40)
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.28) {
-            if !deck.isEmpty {
-                if known { knownCount += 1 } else { reviewCount += 1 }
-                deck.removeFirst()
-                topFlipped = false
-                dragOffset = .zero
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.26) {
+            deck.removeFirst()
+            if mastered {
+                masteredIDs.insert(top.id)
+            } else {
+                // Re-queue: Again comes back soon, Hard a bit later.
+                let insertAt = min(g == .again ? 2 : 5, deck.count)
+                deck.insert(top, at: insertAt)
             }
+            topFlipped = false
+            showingBack = false
+            dragOffset = .zero
+            isAdvancing = false
         }
     }
 
-    // MARK: - Action bar
+    // MARK: - Action bar (Again · Hard · Good  +  wide Easy)
 
     private var actionBar: some View {
-        HStack(spacing: 10) {
-            gradeButton(title: "Again", color: WSColor.duoRed)    { advance(known: false) }
-            gradeButton(title: "Hard",  color: WSColor.duoOrange) { advance(known: false) }
-            gradeButton(title: "Good",  color: WSColor.duoGreen)  { advance(known: true) }
-            gradeButton(title: "Easy",  color: WSColor.duoBlue)   { advance(known: true) }
-        }
-    }
-
-    private func gradeButton(title: String, color: Color, action: @escaping () -> Void) -> some View {
-        Button {
-            Haptics.light()
-            action()
-        } label: {
-            Text(title)
-                .wsBody(.small, weight: .bold)
-                .foregroundStyle(color)
+        VStack(spacing: 10) {
+            HStack(spacing: 10) {
+                gradeButton(title: "Again", icon: "arrow.counterclockwise",
+                            fg: WSColor.duoPurple, bg: WSColor.duoPurpleLight) { grade(.again) }
+                gradeButton(title: "Hard", icon: "star.fill",
+                            fg: WSColor.duoYellowDark, bg: WSColor.duoYellowLight) { grade(.hard) }
+                gradeButton(title: "Good", icon: "checkmark",
+                            fg: .white, bg: WSColor.duoGreen) { grade(.good) }
+            }
+            Button {
+                grade(.easy)
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "hand.thumbsup.fill").font(.system(size: 14, weight: .bold))
+                    Text("Easy").font(WSFont.sans(15, weight: .black))
+                }
+                .foregroundStyle(WSColor.duoGreenDark)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
+                .padding(.vertical, 13)
                 .background(
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(color.opacity(0.14))
+                        .fill(WSColor.duoGreenLight)
                 )
+            }
+            .buttonStyle(WSBouncyButtonStyle())
         }
-        .buttonStyle(.plain)
     }
 
-    // MARK: - Completed state
+    private func gradeButton(title: String, icon: String, fg: Color, bg: Color, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(spacing: 4) {
+                Image(systemName: icon).font(.system(size: 15, weight: .bold))
+                Text(title).font(WSFont.sans(13, weight: .black))
+            }
+            .foregroundStyle(fg)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous).fill(bg)
+            )
+        }
+        .buttonStyle(WSBouncyButtonStyle())
+    }
+
+    // MARK: - Empty / completed states
+
+    private var emptyDeckState: some View {
+        VStack(spacing: 14) {
+            WSAnimatedImage(name: "mascot-study", ext: "webp")
+                .frame(width: 130, height: 130)
+            Text("No cards in this deck")
+                .font(WSFont.headline(20, weight: .black))
+                .foregroundStyle(WSColor.foreground)
+            Text("This pack didn't include flashcards.")
+                .wsBody(.medium)
+                .foregroundStyle(WSColor.foregroundMuted)
+        }
+        .padding(.horizontal, 32)
+    }
 
     private var completedState: some View {
         VStack(spacing: 18) {
@@ -261,48 +334,42 @@ struct FlashcardsView: View {
                 .frame(width: 160, height: 160)
                 .shadow(color: WSColor.duoGreen.opacity(0.3), radius: 20, y: 8)
 
-            Text("Deck cleared!")
-                .font(WSFont.headline(22, weight: .black))
-                .foregroundStyle(WSColor.duoText)
+            Text("Deck mastered! 🎉")
+                .font(WSFont.headline(24, weight: .black))
+                .foregroundStyle(WSColor.foreground)
 
-            HStack(spacing: 16) {
-                WSChunkyStat(icon: "checkmark.circle.fill",
-                             value: "\(knownCount)",
-                             label: "Known",
-                             tint: WSColor.duoGreen)
-                WSChunkyStat(icon: "arrow.uturn.backward.circle.fill",
-                             value: "\(reviewCount)",
-                             label: "Review",
-                             tint: WSColor.duoOrange)
-            }
-            .padding(.horizontal, 32)
+            Text("You worked through all \(totalCards) card\(totalCards == 1 ? "" : "s").")
+                .wsBody(.medium, weight: .semibold)
+                .foregroundStyle(WSColor.foregroundMuted)
+                .multilineTextAlignment(.center)
 
             Button {
                 deck = flashcards.cards
-                knownCount = 0
-                reviewCount = 0
+                masteredIDs = []
                 topFlipped = false
+                showingBack = false
+                didAward = false
                 Haptics.medium()
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "arrow.counterclockwise")
-                    Text("Restart deck")
+                    Text("Study again")
                 }
             }
             .buttonStyle(WSDuoSuccessButtonStyle(fullWidth: false))
-            .padding(.top, 10)
+            .padding(.top, 8)
         }
+        .padding(.horizontal, 32)
         .onAppear {
             // Award XP + log to History exactly once per cleared deck.
-            // Use a static guard so re-rendering the completed state
-            // doesn't re-award when SwiftUI rebuilds the view.
-            let total = knownCount + reviewCount
-            guard total > 0 else { return }
+            guard !didAward, masteredIDs.count > 0 else { return }
+            didAward = true
             DailyGoalStore.shared.record(
                 .flashcardsReviewed,
                 title: flashcards.title ?? "Flashcards",
-                subtitle: "\(total) cards · \(knownCount) known"
+                subtitle: "\(masteredIDs.count) cards mastered"
             )
+            StudyPackProgressStore.shared.recordCardsReviewed(masteredIDs.count)
         }
     }
 }

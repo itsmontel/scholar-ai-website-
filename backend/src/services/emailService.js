@@ -1,38 +1,37 @@
 const nodemailer = require('nodemailer');
 
 /* ═══════════════════════════════════════════════════════════════
-   Email service — Duolingo-style transactional templates.
+   Email service — WriteScholar purple brand templates.
 
-   Design tokens align with the WriteScholar web app:
-   - Solid Duolingo hex colors (#58CC02 green, #A560E8 purple,
-     #1CB0F6 blue, #FF9600 orange, #FF4B4B red)
+   Design tokens match the web app:
+   - Dominant purple (#A560E8 / #7733B5 / #8A48C7 / #B57AF0)
+   - Soft lavender page wash (#FAF7FF) + white cards
    - Nunito heading font (with web-safe fallbacks)
    - Chunky border-bottom 4px borders for buttons + cards
-   - White cards on cream background with thick coloured top accent
+   - Feature-row "green/blue/orange" keys are purple shade aliases
+     so older call sites stay purple-only without rainbow accents
    ═══════════════════════════════════════════════════════════════ */
 
 const EMAIL_COLORS = {
-  /* Page + cards */
-  bg: '#F7F7F7',
+  /* Page + cards — soft lavender wash, matches onboarding/dashboard */
+  bg: '#FAF7FF',
   white: '#FFFFFF',
-  surfaceSoft: '#FAFAFA',
-  /* Primary brand — green */
-  green: '#58CC02',
-  greenDark: '#46A302',
-  greenSoft: '#E5F8D0',
-  /* Purple */
+  surfaceSoft: '#FBF8FF',
+  /* Primary brand purple */
   purple: '#A560E8',
-  purpleDark: '#8A48C7',
+  purpleDark: '#7733B5',
   purpleSoft: '#F3EAFF',
-  /* Blue (info / security) */
-  blue: '#1CB0F6',
-  blueDark: '#1899D6',
-  blueSoft: '#DDF4FF',
-  /* Orange (warmth / streak) */
-  orange: '#FF9600',
-  orangeDark: '#D97F00',
-  orangeSoft: '#FFF4E0',
-  /* Red (errors / urgent) */
+  /* Mid / light purple shades (legacy keys → purple-only palette) */
+  green: '#8A48C7',
+  greenDark: '#7733B5',
+  greenSoft: '#E9DBFF',
+  blue: '#B57AF0',
+  blueDark: '#8A48C7',
+  blueSoft: '#F7F0FF',
+  orange: '#A560E8',
+  orangeDark: '#7733B5',
+  orangeSoft: '#F3EAFF',
+  /* Red reserved for genuine error states only */
   red: '#FF4B4B',
   redDark: '#E04343',
   redSoft: '#FFE8E8',
@@ -40,8 +39,8 @@ const EMAIL_COLORS = {
   text: '#3C3C3C',
   textMuted: '#78716c',
   textFaint: '#a8a29e',
-  border: '#E5E5E5',
-  borderDark: '#CECECE',
+  border: '#E5D4F5',
+  borderDark: '#D4B8ED',
 };
 
 /* Web-safe Nunito stack (Gmail / Outlook ignore @import; we still
@@ -84,8 +83,8 @@ function getEmailAssets() {
  * the mascot in a coloured ring frame, then the eyebrow tagline.
  */
 function emailHeaderBlock(titleTagline, { mascotUrl, accentColor, accentSoft }) {
-  const color = accentColor || EMAIL_COLORS.green;
-  const soft = accentSoft || EMAIL_COLORS.greenSoft;
+  const color = accentColor || EMAIL_COLORS.purple;
+  const soft = accentSoft || EMAIL_COLORS.purpleSoft;
   return `
                     <tr>
                       <td style="padding: 0; height: 8px; line-height: 8px; font-size: 0; background-color: ${color};">&nbsp;</td>
@@ -105,11 +104,11 @@ function emailHeaderBlock(titleTagline, { mascotUrl, accentColor, accentSoft }) 
 }
 
 /**
- * Reusable Duolingo-style CTA button. `accent` defaults to green.
+ * Reusable chunky CTA button. Accent defaults to brand purple.
  */
 function ctaButton(href, label, accentColor, accentDark) {
-  const bg = accentColor || EMAIL_COLORS.green;
-  const border = accentDark || EMAIL_COLORS.greenDark;
+  const bg = accentColor || EMAIL_COLORS.purple;
+  const border = accentDark || EMAIL_COLORS.purpleDark;
   return `
                             <a href="${href}"
                                style="display: inline-block;
@@ -226,7 +225,7 @@ class EmailService {
               <tr>
                 <td align="center" style="padding: 36px 16px;">
                   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 480px; background-color: ${EMAIL_COLORS.white}; border-radius: 18px; overflow: hidden; border: 2px solid ${EMAIL_COLORS.border}; border-bottom: 4px solid ${EMAIL_COLORS.border};">
-                    ${emailHeaderBlock('Verify your email', { mascotUrl, accentColor: EMAIL_COLORS.green, accentSoft: EMAIL_COLORS.greenSoft })}
+                    ${emailHeaderBlock('Verify your email', { mascotUrl, accentColor: EMAIL_COLORS.purple, accentSoft: EMAIL_COLORS.purpleSoft })}
 
                     <!-- Main content -->
                     <tr>
@@ -348,7 +347,7 @@ class EmailService {
               <tr>
                 <td align="center" style="padding: 36px 16px;">
                   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 480px; background-color: ${EMAIL_COLORS.white}; border-radius: 18px; overflow: hidden; border: 2px solid ${EMAIL_COLORS.border}; border-bottom: 4px solid ${EMAIL_COLORS.border};">
-                    ${emailHeaderBlock('Password reset', { mascotUrl, accentColor: EMAIL_COLORS.blue, accentSoft: EMAIL_COLORS.blueSoft })}
+                    ${emailHeaderBlock('Password reset', { mascotUrl, accentColor: EMAIL_COLORS.purple, accentSoft: EMAIL_COLORS.purpleSoft })}
 
                     <!-- Main content -->
                     <tr>
@@ -359,8 +358,8 @@ class EmailService {
                             <td align="center">
                               <table role="presentation" cellspacing="0" cellpadding="0">
                                 <tr>
-                                  <td style="background-color: ${EMAIL_COLORS.blueSoft}; border: 2px solid ${EMAIL_COLORS.blue}; border-radius: 999px; padding: 6px 14px;">
-                                    <span style="font-family: ${NUNITO_STACK}; font-size: 11px; font-weight: 800; color: ${EMAIL_COLORS.blueDark}; letter-spacing: 0.14em; text-transform: uppercase;">🔒 Secure link</span>
+                                  <td style="background-color: ${EMAIL_COLORS.purpleSoft}; border: 2px solid ${EMAIL_COLORS.purple}; border-radius: 999px; padding: 6px 14px;">
+                                    <span style="font-family: ${NUNITO_STACK}; font-size: 11px; font-weight: 800; color: ${EMAIL_COLORS.purpleDark}; letter-spacing: 0.14em; text-transform: uppercase;">🔒 Secure link</span>
                                   </td>
                                 </tr>
                               </table>
@@ -377,7 +376,7 @@ class EmailService {
                         <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                           <tr>
                             <td align="center" style="padding: 4px 0 26px 0;">
-                              ${ctaButton(resetUrl, 'Reset password', EMAIL_COLORS.blue, EMAIL_COLORS.blueDark)}
+                              ${ctaButton(resetUrl, 'Reset password', EMAIL_COLORS.purple, EMAIL_COLORS.purpleDark)}
                             </td>
                           </tr>
                         </table>
@@ -498,13 +497,13 @@ class EmailService {
               <tr>
                 <td align="center" style="padding: 36px 16px;">
                   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 520px; background-color: ${EMAIL_COLORS.white}; border-radius: 18px; overflow: hidden; border: 2px solid ${EMAIL_COLORS.border}; border-bottom: 4px solid ${EMAIL_COLORS.border};">
-                    ${emailHeaderBlock('Account ready', { mascotUrl, accentColor: EMAIL_COLORS.green, accentSoft: EMAIL_COLORS.greenSoft })}
+                    ${emailHeaderBlock('Account ready', { mascotUrl, accentColor: EMAIL_COLORS.purple, accentSoft: EMAIL_COLORS.purpleSoft })}
 
                     <!-- Main content -->
                     <tr>
                       <td style="padding: 8px 32px 26px;">
                         <h1 style="margin: 0 0 8px 0; font-family: ${NUNITO_STACK}; font-size: 30px; font-weight: 900; color: ${EMAIL_COLORS.text}; text-align: center; letter-spacing: -0.02em; line-height: 1.15;">
-                          Welcome to <span style="color: ${EMAIL_COLORS.green};">WriteScholar!</span>
+                          Welcome to <span style="color: ${EMAIL_COLORS.purple};">WriteScholar!</span>
                         </h1>
                         <p style="margin: 0 0 24px 0; font-size: 15px; font-weight: 600; color: ${EMAIL_COLORS.textMuted}; text-align: center; line-height: 1.55;">
                           Your AI study toolkit is ready — let's level up your grades. 🎉
@@ -553,7 +552,7 @@ class EmailService {
                       <td style="background-color: ${EMAIL_COLORS.surfaceSoft}; padding: 20px 32px; border-top: 2px solid ${EMAIL_COLORS.border};">
                         <p style="margin: 0; font-size: 13px; font-weight: 600; color: ${EMAIL_COLORS.textMuted}; text-align: center; line-height: 1.55;">
                           Questions? Reply to this email or contact<br>
-                          <a href="mailto:support@writescholar.com" style="color: ${EMAIL_COLORS.green}; font-weight: 800; text-decoration: none;">support@writescholar.com</a>
+                          <a href="mailto:support@writescholar.com" style="color: ${EMAIL_COLORS.purple}; font-weight: 800; text-decoration: none;">support@writescholar.com</a>
                         </p>
                       </td>
                     </tr>
@@ -743,6 +742,325 @@ class EmailService {
     }
   }
 
+  /* ─── Day-5 trial value recap ───
+   *  Fired by the hourly `notifyTrialValueRecap` cron ~48h before the
+   *  trial ends (day 5 of 7). Sits ahead of the 24h reminder and does a
+   *  different job: it reflects the user's OWN usage back at them
+   *  ("3 essays analysed, 42 flashcards") so the upcoming charge lands
+   *  against visible value rather than arriving cold.
+   *
+   *  It also doubles as the compliance notice — an unmissable, plainly
+   *  worded heads-up that a card will be charged, with a one-click way
+   *  out. That combination is the point: users who were going to churn
+   *  cancel here instead of disputing the charge later, and cancelling
+   *  routes them through the save offer in CancelRetentionModal, which
+   *  is where the 50% discount now lives.
+   *
+   *  One per subscription (subscriptions.trial_recap_email_sent_at).
+   *
+   *  @param {string} email  recipient
+   *  @param {Object} opts   { firstName, planName, firstChargeAmount,
+   *                           firstChargeAt, stats } where stats is
+   *                           { analyses, studyPacks, citations }
+   */
+  async sendTrialValueRecapEmail(email, opts = {}) {
+    if (!this.transporter) {
+      console.log('📧 Trial value-recap email would be sent to:', email, opts);
+      return { success: true, message: 'Email service not configured - trial value-recap logged to console' };
+    }
+
+    try {
+      const fromAddress = process.env.EMAIL_FROM || process.env.EMAIL_USER;
+      const replyToAddress = process.env.EMAIL_REPLY_TO || 'support@writescholar.com';
+      const { frontendUrl, mascotUrl } = getEmailAssets();
+      const accountUrl = `${frontendUrl}/account`;
+      const dashboardUrl = `${frontendUrl}/dashboard`;
+
+      const firstName = (opts.firstName || '').trim();
+      const greetingName = firstName ? `, ${firstName}` : '';
+      const planName = opts.planName || 'Pro';
+      const firstChargeAmount = opts.firstChargeAmount || '';
+      const firstChargeAt = opts.firstChargeAt
+        ? new Date(opts.firstChargeAt).toLocaleDateString('en-US', {
+            weekday: 'long',
+            month: 'short',
+            day: 'numeric',
+          })
+        : null;
+
+      const stats = opts.stats || {};
+      const analyses = Number(stats.analyses) || 0;
+      const studyPacks = Number(stats.studyPacks) || 0;
+      const citations = Number(stats.citations) || 0;
+      const usedAnything = analyses + studyPacks + citations > 0;
+
+      // Only show counters the user actually put a number on — a row of
+      // zeroes is an argument for cancelling.
+      const statCards = [
+        { n: analyses, label: analyses === 1 ? 'essay analysed' : 'essays analysed', color: EMAIL_COLORS.purple, soft: EMAIL_COLORS.purpleSoft, dark: EMAIL_COLORS.purpleDark },
+        { n: studyPacks, label: studyPacks === 1 ? 'study pack built' : 'study packs built', color: EMAIL_COLORS.orange, soft: EMAIL_COLORS.orangeSoft, dark: EMAIL_COLORS.orangeDark },
+        { n: citations, label: citations === 1 ? 'citation search' : 'citation searches', color: EMAIL_COLORS.blue, soft: EMAIL_COLORS.blueSoft, dark: EMAIL_COLORS.blueDark },
+      ].filter((s) => s.n > 0);
+
+      const statCardsHtml = statCards.length
+        ? `
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-bottom: 22px;">
+                          <tr>
+                            ${statCards.map((s) => `
+                            <td width="${Math.floor(100 / statCards.length)}%" style="padding: 0 4px;">
+                              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: ${s.soft}; border: 2px solid ${s.color}; border-bottom: 4px solid ${s.dark}; border-radius: 14px;">
+                                <tr>
+                                  <td align="center" style="padding: 14px 6px;">
+                                    <p style="margin: 0; font-family: ${NUNITO_STACK}; font-size: 26px; font-weight: 900; color: ${s.dark}; line-height: 1;">${s.n}</p>
+                                    <p style="margin: 4px 0 0 0; font-size: 11.5px; font-weight: 700; color: ${EMAIL_COLORS.text}; line-height: 1.35;">${s.label}</p>
+                                  </td>
+                                </tr>
+                              </table>
+                            </td>`).join('')}
+                          </tr>
+                        </table>`
+        : '';
+
+      // Two openings: one celebrates what they did, one nudges the
+      // never-activated user to try the single highest-value action
+      // while the trial still covers it.
+      const bodyCopy = usedAnything
+        ? `Here&apos;s what you got done on ${planName} this week. Your ${planName} plan starts after the trial, so all of this keeps working.`
+        : `Your trial has a couple of days left and you haven&apos;t run an essay through yet. It takes about a minute and it&apos;s the fastest way to tell whether ${planName} is worth keeping.`;
+
+      const subjectLine = usedAnything
+        ? (firstName ? `${firstName}, here's your week on WriteScholar` : 'Here\'s your week on WriteScholar')
+        : (firstName ? `${firstName}, 2 days left — try one essay?` : '2 days left — try one essay?');
+
+      const mailOptions = {
+        from: `"WriteScholar" <${fromAddress}>`,
+        to: email,
+        replyTo: replyToAddress,
+        subject: subjectLine,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <meta name="color-scheme" content="light">
+            <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+          </head>
+          <body style="margin: 0; padding: 0; background-color: ${EMAIL_COLORS.bg}; font-family: ${NUNITO_STACK};">
+            <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
+              Two days left on your WriteScholar trial — here's what you've done so far, and what happens next.
+            </div>
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: ${EMAIL_COLORS.bg};">
+              <tr>
+                <td align="center" style="padding: 36px 16px;">
+                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 520px; background-color: ${EMAIL_COLORS.white}; border-radius: 18px; overflow: hidden; border: 2px solid ${EMAIL_COLORS.border}; border-bottom: 4px solid ${EMAIL_COLORS.border};">
+                    ${emailHeaderBlock('Your trial so far', { mascotUrl, accentColor: EMAIL_COLORS.purple, accentSoft: EMAIL_COLORS.purpleSoft })}
+
+                    <tr>
+                      <td style="padding: 8px 32px 26px;">
+                        <h1 style="margin: 0 0 10px 0; font-family: ${NUNITO_STACK}; font-size: 28px; font-weight: 900; color: ${EMAIL_COLORS.text}; text-align: center; letter-spacing: -0.02em; line-height: 1.2;">
+                          ${usedAnything ? `Nice work${greetingName} 📈` : `Two days left${greetingName} ⏳`}
+                        </h1>
+                        <p style="margin: 0 0 22px 0; font-size: 15px; font-weight: 600; color: ${EMAIL_COLORS.textMuted}; text-align: center; line-height: 1.55;">
+                          ${bodyCopy}
+                        </p>
+
+                        ${statCardsHtml}
+
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                          <tr>
+                            <td align="center" style="padding: 0 0 18px 0;">
+                              ${ctaButton(dashboardUrl, usedAnything ? 'Open WriteScholar' : 'Analyse an essay', EMAIL_COLORS.purple, EMAIL_COLORS.purpleDark)}
+                            </td>
+                          </tr>
+                        </table>
+
+                        <!-- Compliance notice. Deliberately plain: the charge
+                             date, the amount, and a one-click way out. -->
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                          <tr>
+                            <td style="background-color: ${EMAIL_COLORS.bg}; border: 2px solid ${EMAIL_COLORS.border}; border-radius: 14px; padding: 14px 16px;">
+                              <p style="margin: 0; font-size: 12.5px; font-weight: 600; color: ${EMAIL_COLORS.textMuted}; line-height: 1.55; text-align: center;">
+                                Heads up: your free trial ends in 2 days${firstChargeAt ? ` on <strong style="color: ${EMAIL_COLORS.text};">${firstChargeAt}</strong>` : ''}${firstChargeAmount ? `, when your card is charged <strong style="color: ${EMAIL_COLORS.text};">${firstChargeAmount}</strong>` : ''}. Not for you? <a href="${accountUrl}" style="color: ${EMAIL_COLORS.purple}; font-weight: 800; text-decoration: underline;">Cancel in one click</a> — you won&apos;t be charged a penny.
+                              </p>
+                            </td>
+                          </tr>
+                        </table>
+
+                        <p style="margin: 16px 0 0 0; font-size: 12px; font-weight: 600; color: ${EMAIL_COLORS.textMuted}; text-align: center; line-height: 1.5;">
+                          Got a question? Just hit reply — a real person will get back to you.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                  <p style="margin: 16px 0 0 0; font-size: 11px; font-weight: 600; color: ${EMAIL_COLORS.textMuted}; text-align: center;">
+                    WriteScholar · You received this because you started a free trial.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </body>
+          </html>
+        `,
+      };
+
+      const result = await this.transporter.sendMail(mailOptions);
+      console.log('✅ Trial value-recap email sent to:', email);
+      return { success: true, messageId: result.messageId };
+    } catch (error) {
+      console.error('❌ Failed to send trial value-recap email:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /* ─── Post-lapse winback ───
+   *  Fired by the daily `notifyWinbacks` cron ~14 days after a
+   *  subscription actually lapsed (not when cancellation was requested
+   *  — the user still had paid access until period end).
+   *
+   *  This is the second half of the discount move: the 50% code no
+   *  longer greets new signups, it chases people who already left. A
+   *  churned user who returns at half price is revenue we had written
+   *  off, whereas the same discount at signup mostly reduces what
+   *  already-converting users pay.
+   *
+   *  One per user, ever (users.winback_email_sent_at).
+   *
+   *  @param {string} email  recipient
+   *  @param {Object} opts   { firstName, planName, promoCode, priceLabel }
+   */
+  async sendWinbackEmail(email, opts = {}) {
+    if (!this.transporter) {
+      console.log('📧 Winback email would be sent to:', email, opts);
+      return { success: true, message: 'Email service not configured - winback logged to console' };
+    }
+
+    try {
+      const fromAddress = process.env.EMAIL_FROM || process.env.EMAIL_USER;
+      const replyToAddress = process.env.EMAIL_REPLY_TO || 'support@writescholar.com';
+      const { frontendUrl, mascotUrl } = getEmailAssets();
+
+      const firstName = (opts.firstName || '').trim();
+      const greetingName = firstName ? `, ${firstName}` : '';
+      const planName = opts.planName || 'Pro';
+      const promoCode = opts.promoCode || 'COMEBACK50';
+      const priceLabel = opts.priceLabel || '$9.99';
+      // Pre-applies the code on the pricing page so the user never has
+      // to type it — the offer is only credible if the number they were
+      // promised is the number Stripe shows.
+      const returnUrl = `${frontendUrl}/pricing?promo=${encodeURIComponent(promoCode)}`;
+
+      const valueRows = [
+        { emoji: '📝', title: 'Your drafts are still here', desc: 'Nothing was deleted — pick up exactly where you stopped.', color: EMAIL_COLORS.purple, soft: EMAIL_COLORS.purpleSoft, dark: EMAIL_COLORS.purpleDark },
+        { emoji: '🔁', title: 'One-click revisions', desc: 'Accept a suggested rewrite and it lands in your draft.', color: EMAIL_COLORS.green, soft: EMAIL_COLORS.greenSoft, dark: EMAIL_COLORS.greenDark },
+        { emoji: '📚', title: 'Unlimited study packs', desc: 'Notes → flashcards, quizzes and games on tap.', color: EMAIL_COLORS.blue, soft: EMAIL_COLORS.blueSoft, dark: EMAIL_COLORS.blueDark },
+      ];
+      const valueRowsHtml = valueRows.map((f) => `
+                          <tr>
+                            <td style="padding: 5px 0;">
+                              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: ${EMAIL_COLORS.white}; border-radius: 14px; border: 2px solid ${EMAIL_COLORS.border}; border-bottom: 4px solid ${EMAIL_COLORS.border};">
+                                <tr>
+                                  <td width="48" style="padding: 10px 12px;">
+                                    <table role="presentation" cellspacing="0" cellpadding="0">
+                                      <tr>
+                                        <td style="background-color: ${f.soft}; border: 2px solid ${f.color}; border-bottom: 3px solid ${f.dark}; border-radius: 12px; width: 44px; height: 44px; text-align: center; font-size: 22px; line-height: 44px; vertical-align: middle;">
+                                          ${f.emoji}
+                                        </td>
+                                      </tr>
+                                    </table>
+                                  </td>
+                                  <td style="padding: 10px 14px 10px 4px;">
+                                    <p style="margin: 0 0 2px 0; font-family: ${NUNITO_STACK}; font-size: 14px; font-weight: 800; color: ${EMAIL_COLORS.text};">${f.title}</p>
+                                    <p style="margin: 0; font-size: 12px; font-weight: 600; color: ${EMAIL_COLORS.textMuted}; line-height: 1.45;">${f.desc}</p>
+                                  </td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>`).join('');
+
+      const mailOptions = {
+        from: `"WriteScholar" <${fromAddress}>`,
+        to: email,
+        replyTo: replyToAddress,
+        subject: firstName
+          ? `${firstName}, come back to ${planName} for ${priceLabel}`
+          : `Come back to ${planName} for ${priceLabel}`,
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <meta name="color-scheme" content="light">
+            <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+          </head>
+          <body style="margin: 0; padding: 0; background-color: ${EMAIL_COLORS.bg}; font-family: ${NUNITO_STACK};">
+            <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
+              Your WriteScholar work is still saved — come back to ${planName} for ${priceLabel} your first month.
+            </div>
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: ${EMAIL_COLORS.bg};">
+              <tr>
+                <td align="center" style="padding: 36px 16px;">
+                  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 520px; background-color: ${EMAIL_COLORS.white}; border-radius: 18px; overflow: hidden; border: 2px solid ${EMAIL_COLORS.border}; border-bottom: 4px solid ${EMAIL_COLORS.border};">
+                    ${emailHeaderBlock('We saved your seat', { mascotUrl, accentColor: EMAIL_COLORS.purple, accentSoft: EMAIL_COLORS.purpleSoft })}
+
+                    <tr>
+                      <td style="padding: 8px 32px 26px;">
+                        <h1 style="margin: 0 0 10px 0; font-family: ${NUNITO_STACK}; font-size: 28px; font-weight: 900; color: ${EMAIL_COLORS.text}; text-align: center; letter-spacing: -0.02em; line-height: 1.2;">
+                          Come back for ${priceLabel}${greetingName}
+                        </h1>
+                        <p style="margin: 0 0 22px 0; font-size: 15px; font-weight: 600; color: ${EMAIL_COLORS.textMuted}; text-align: center; line-height: 1.55;">
+                          Essay season doesn&apos;t stop. Restart ${planName} at half price for your first month — everything you wrote is exactly where you left it.
+                        </p>
+
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-bottom: 22px;">
+                          ${valueRowsHtml}
+                        </table>
+
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                          <tr>
+                            <td align="center" style="padding: 0 0 18px 0;">
+                              ${ctaButton(returnUrl, `Restart for ${priceLabel}`, EMAIL_COLORS.purple, EMAIL_COLORS.purpleDark)}
+                            </td>
+                          </tr>
+                        </table>
+
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                          <tr>
+                            <td style="background-color: ${EMAIL_COLORS.purpleSoft}; border: 2px solid ${EMAIL_COLORS.purple}; border-radius: 14px; padding: 14px 16px;">
+                              <p style="margin: 0; font-size: 12.5px; font-weight: 700; color: ${EMAIL_COLORS.text}; line-height: 1.55; text-align: center;">
+                                Code <strong style="letter-spacing: 0.08em;">${promoCode}</strong> is already on the link above — 50% off your first month, then the standard rate. Cancel anytime.
+                              </p>
+                            </td>
+                          </tr>
+                        </table>
+
+                        <p style="margin: 16px 0 0 0; font-size: 12px; font-weight: 600; color: ${EMAIL_COLORS.textMuted}; text-align: center; line-height: 1.5;">
+                          Not coming back? No hard feelings — just hit reply and tell us what was missing.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                  <p style="margin: 16px 0 0 0; font-size: 11px; font-weight: 600; color: ${EMAIL_COLORS.textMuted}; text-align: center;">
+                    WriteScholar · You received this because you previously subscribed.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </body>
+          </html>
+        `,
+      };
+
+      const result = await this.transporter.sendMail(mailOptions);
+      console.log('✅ Winback email sent to:', email);
+      return { success: true, messageId: result.messageId };
+    } catch (error) {
+      console.error('❌ Failed to send winback email:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
   /* ─── Preview follow-up (freemium recovery) ───
    *  Fired by the hourly `notifyPreviewFollowups` cron in
    *  subscriptionService ~24h after a free user ran a preview
@@ -852,7 +1170,7 @@ class EmailService {
               <tr>
                 <td align="center" style="padding: 36px 16px;">
                   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width: 520px; background-color: ${EMAIL_COLORS.white}; border-radius: 18px; overflow: hidden; border: 2px solid ${EMAIL_COLORS.border}; border-bottom: 4px solid ${EMAIL_COLORS.border};">
-                    ${emailHeaderBlock('Picking up where you left off', { mascotUrl, accentColor: EMAIL_COLORS.green, accentSoft: EMAIL_COLORS.greenSoft })}
+                    ${emailHeaderBlock('Picking up where you left off', { mascotUrl, accentColor: EMAIL_COLORS.purple, accentSoft: EMAIL_COLORS.purpleSoft })}
 
                     <tr>
                       <td style="padding: 8px 32px 26px;">

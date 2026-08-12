@@ -28,12 +28,12 @@ const FEATURES = [
     n: 2,
     title: 'One-click apply',
     desc: 'Accept a suggested rewrite and it drops straight into your draft, exactly where it belongs.',
-    border: 'border-[#46A302]',
-    borderInner: 'border-[#A8E06B]',
-    accent: 'bg-gradient-to-r from-[#58CC02] to-[#46A302]',
-    numBg: 'bg-[#58CC02]',
-    badge: 'bg-[#E5F8D0] text-[#2E7200]',
-    shadow: 'shadow-[0_8px_28px_-10px_rgba(88,204,2,0.40)] hover:shadow-[0_16px_40px_-12px_rgba(88,204,2,0.55)]',
+    border: 'border-[#8A48C7]',
+    borderInner: 'border-[#C9A0F0]',
+    accent: 'bg-gradient-to-r from-[#8A48C7] to-[#6B27A3]',
+    numBg: 'bg-[#8A48C7]',
+    badge: 'bg-[#F3EAFF] text-[#7733B5]',
+    shadow: 'shadow-[0_8px_28px_-10px_rgba(138,72,199,0.45)] hover:shadow-[0_16px_40px_-12px_rgba(138,72,199,0.60)]',
     dotX: 84,
     dotY: 82,
     icon: (
@@ -46,12 +46,12 @@ const FEATURES = [
     n: 3,
     title: 'Built for real essays',
     desc: 'Write the actual paper here. Tables, images, citations and footnotes are built in, not bolted on.',
-    border: 'border-[#D97F00]',
-    borderInner: 'border-[#FFCF70]',
-    accent: 'bg-gradient-to-r from-[#FF9600] to-[#D97F00]',
-    numBg: 'bg-[#FF9600]',
-    badge: 'bg-[#FFF4E0] text-[#9A5500]',
-    shadow: 'shadow-[0_8px_28px_-10px_rgba(255,150,0,0.40)] hover:shadow-[0_16px_40px_-12px_rgba(255,150,0,0.55)]',
+    border: 'border-[#7733B5]',
+    borderInner: 'border-[#D8B4FE]',
+    accent: 'bg-gradient-to-r from-[#7733B5] to-[#5A1B8E]',
+    numBg: 'bg-[#7733B5]',
+    badge: 'bg-[#F3EAFF] text-[#5A1B8E]',
+    shadow: 'shadow-[0_8px_28px_-10px_rgba(119,51,181,0.45)] hover:shadow-[0_16px_40px_-12px_rgba(119,51,181,0.60)]',
     dotX: 42,
     dotY: 55,
     icon: (
@@ -64,12 +64,12 @@ const FEATURES = [
     n: 4,
     title: 'Word in, Word out',
     desc: 'Import a .docx and your bold, italics and headings carry over. Export and it comes back perfectly formatted.',
-    border: 'border-[#0891B2]',
-    borderInner: 'border-[#67E8F9]',
-    accent: 'bg-gradient-to-r from-[#06B6D4] to-[#0891B2]',
-    numBg: 'bg-[#06B6D4]',
-    badge: 'bg-[#CFFAFE] text-[#0E7490]',
-    shadow: 'shadow-[0_8px_28px_-10px_rgba(6,182,212,0.40)] hover:shadow-[0_16px_40px_-12px_rgba(6,182,212,0.55)]',
+    border: 'border-[#C9A0F0]',
+    borderInner: 'border-[#E9D5FF]',
+    accent: 'bg-gradient-to-r from-[#C9A0F0] to-[#A560E8]',
+    numBg: 'bg-[#A560E8]',
+    badge: 'bg-[#F3EAFF] text-[#7733B5]',
+    shadow: 'shadow-[0_8px_28px_-10px_rgba(165,96,232,0.40)] hover:shadow-[0_16px_40px_-12px_rgba(165,96,232,0.55)]',
     dotX: 34,
     dotY: 3,
     icon: (
@@ -165,7 +165,7 @@ export default function LandingWritingWorkspaceSection({ onNavigate }: LandingWr
     n: f.n,
     x: f.dotX,
     y: f.dotY,
-    color: f.n === 1 ? '#A560E8' : f.n === 2 ? '#58CC02' : f.n === 3 ? '#FF9600' : '#06B6D4',
+    color: f.n === 1 ? '#A560E8' : f.n === 2 ? '#8A48C7' : f.n === 3 ? '#7733B5' : '#C9A0F0',
   }));
 
   return (
@@ -176,8 +176,8 @@ export default function LandingWritingWorkspaceSection({ onNavigate }: LandingWr
     >
       <LandingSectionBackdrop
         base="bg-[#F3EAFF] dark:bg-[#1A0B2E]"
-        bottomTo="from-[#FFF4E0]/70 dark:from-[#2A1800]/70"
-        radial="bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(165,96,232,0.12),transparent_60%)]"
+        bottomTo="from-[#E9D5FF]/70 dark:from-[#2A0E40]/70"
+        radial="bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(165,96,232,0.18),transparent_60%)]"
       />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

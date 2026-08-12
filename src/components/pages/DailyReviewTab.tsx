@@ -358,10 +358,10 @@ const DailyReviewTab = ({ user, onNavigate, onSwitchTool }: DailyReviewTabProps)
     return (
       <section className="space-y-5">
         {/* Hero card — premium gradient frame */}
-        <div className="relative rounded-[28px] p-[2px] bg-gradient-to-br from-[#86E04A] via-[#58CC02] to-[#46A302] shadow-[0_28px_60px_-30px_rgba(88,204,2,0.7)]">
+        <div className="relative rounded-[28px] p-[2px] bg-gradient-to-br from-[#C79BF2] via-[#A560E8] to-[#7733B5] shadow-[0_28px_60px_-30px_rgba(165,96,232,0.7)]">
           <div className="relative overflow-hidden rounded-[26px] bg-white dark:bg-stone-900 p-6 sm:p-8 lg:p-10">
             {/* Ambient glow + faint grid texture */}
-            <div className="pointer-events-none absolute -top-24 -right-16 w-64 h-64 rounded-full bg-[#58CC02]/15 blur-3xl" aria-hidden />
+            <div className="pointer-events-none absolute -top-24 -right-16 w-64 h-64 rounded-full bg-[#A560E8]/15 blur-3xl" aria-hidden />
             <div className="pointer-events-none absolute -bottom-24 -left-16 w-56 h-56 rounded-full bg-[#FFC800]/10 blur-3xl" aria-hidden />
             <div className="pointer-events-none absolute inset-0 opacity-[0.035] dark:opacity-[0.06]" style={{ backgroundImage: 'linear-gradient(rgba(120,113,108,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(120,113,108,0.8) 1px, transparent 1px)', backgroundSize: '26px 26px' }} aria-hidden />
 
@@ -372,11 +372,11 @@ const DailyReviewTab = ({ user, onNavigate, onSwitchTool }: DailyReviewTabProps)
               aria-hidden
               loading="lazy"
               decoding="async"
-              className="hidden lg:block pointer-events-none absolute top-5 right-7 w-24 h-auto z-10 drop-shadow-[0_14px_28px_rgba(88,204,2,0.35)]"
+              className="hidden lg:block pointer-events-none absolute top-5 right-7 w-24 h-auto z-10 drop-shadow-[0_14px_28px_rgba(165,96,232,0.35)]"
             />
 
             <div className="relative text-center max-w-lg mx-auto">
-              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-[#E5F8D0] to-[#D6F4B8] dark:from-[#58CC02]/15 dark:to-[#58CC02]/5 text-[#46A302] border-2 border-[#58CC02]/30 text-[11px] font-extrabold uppercase tracking-[0.12em] mb-4 shadow-[0_6px_16px_-10px_rgba(88,204,2,0.9)]">
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-[#F3EAFF] to-[#E9DBFF] dark:from-[#A560E8]/15 dark:to-[#A560E8]/5 text-[#7733B5] border-2 border-[#A560E8]/30 text-[11px] font-extrabold uppercase tracking-[0.12em] mb-4 shadow-[0_6px_16px_-10px_rgba(165,96,232,0.9)]">
                 <span aria-hidden className="motion-safe:animate-pulse">🎯</span>
                 Daily Review
               </span>
@@ -386,11 +386,11 @@ const DailyReviewTab = ({ user, onNavigate, onSwitchTool }: DailyReviewTabProps)
                 style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
               >
                 {completedToday ? (
-                  <>You&apos;re done for today! <span className="text-[#58CC02]">🎉</span></>
+                  <>You&apos;re done for today! <span className="text-[#A560E8]">🎉</span></>
                 ) : firstName ? (
-                  <>Ready to review, <span className="text-[#58CC02]">{firstName}</span>?</>
+                  <>Ready to review, <span className="text-[#A560E8]">{firstName}</span>?</>
                 ) : (
-                  <>Ready for your <span className="text-[#58CC02]">daily review</span>?</>
+                  <>Ready for your <span className="text-[#A560E8]">daily review</span>?</>
                 )}
               </h2>
               <p className="mt-2 text-sm sm:text-base text-stone-500 dark:text-stone-400 font-bold">
@@ -404,12 +404,12 @@ const DailyReviewTab = ({ user, onNavigate, onSwitchTool }: DailyReviewTabProps)
                 {/* Streak badge */}
                 <div className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-b-4 ${
                   displayStreak > 0
-                    ? 'bg-[#E5F8D0] border-[#58CC02]/40 dark:bg-[#58CC02]/10'
+                    ? 'bg-[#F3EAFF] border-[#A560E8]/40 dark:bg-[#A560E8]/10'
                     : 'bg-stone-50 border-stone-200 dark:bg-stone-800 dark:border-stone-700'
                 }`}>
                   <span className="text-2xl" aria-hidden>{displayStreak > 0 ? '🔥' : '❄️'}</span>
                   <div className="text-left">
-                    <p className={`text-lg font-extrabold leading-none ${displayStreak > 0 ? 'text-[#58CC02]' : 'text-stone-400'}`}>
+                    <p className={`text-lg font-extrabold leading-none ${displayStreak > 0 ? 'text-[#A560E8]' : 'text-stone-400'}`}>
                       {displayStreak}
                     </p>
                     <p className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">
@@ -419,10 +419,10 @@ const DailyReviewTab = ({ user, onNavigate, onSwitchTool }: DailyReviewTabProps)
                 </div>
 
                 {/* Total reviews */}
-                <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-b-4 bg-[#E5F8D0] border-[#58CC02]/30 dark:bg-[#58CC02]/10">
+                <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-b-4 bg-[#F3EAFF] border-[#A560E8]/30 dark:bg-[#A560E8]/10">
                   <span className="text-2xl" aria-hidden>📊</span>
                   <div className="text-left">
-                    <p className="text-lg font-extrabold leading-none text-[#58CC02]">
+                    <p className="text-lg font-extrabold leading-none text-[#A560E8]">
                       {streak.totalReviews}
                     </p>
                     <p className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">
@@ -432,10 +432,10 @@ const DailyReviewTab = ({ user, onNavigate, onSwitchTool }: DailyReviewTabProps)
                 </div>
 
                 {/* Longest streak */}
-                <div className="hidden sm:flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-b-4 bg-[#E5F8D0] border-[#58CC02]/30 dark:bg-[#58CC02]/10">
+                <div className="hidden sm:flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-b-4 bg-[#F3EAFF] border-[#A560E8]/30 dark:bg-[#A560E8]/10">
                   <span className="text-2xl" aria-hidden>🏆</span>
                   <div className="text-left">
-                    <p className="text-lg font-extrabold leading-none text-[#58CC02]">
+                    <p className="text-lg font-extrabold leading-none text-[#A560E8]">
                       {streak.longestStreak}
                     </p>
                     <p className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">
@@ -457,7 +457,7 @@ const DailyReviewTab = ({ user, onNavigate, onSwitchTool }: DailyReviewTabProps)
                     <button
                       type="button"
                       onClick={() => onSwitchTool ? onSwitchTool('study_pack') : onNavigate('dashboard')}
-                      className="px-6 py-2.5 bg-[#58CC02] text-white font-extrabold rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all text-sm"
+                      className="px-6 py-2.5 bg-[#A560E8] text-white font-extrabold rounded-xl border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all text-sm"
                     >
                       Create a study pack →
                     </button>
@@ -466,7 +466,7 @@ const DailyReviewTab = ({ user, onNavigate, onSwitchTool }: DailyReviewTabProps)
                   <button
                     type="button"
                     onClick={startReview}
-                    className="group inline-flex items-center justify-center gap-2 px-10 py-4 bg-gradient-to-r from-[#58CC02] to-[#46A302] hover:from-[#61E002] hover:to-[#58CC02] text-white font-extrabold rounded-2xl border-2 border-b-4 border-[#46A302] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all text-lg tracking-tight shadow-[0_14px_30px_-12px_rgba(88,204,2,0.9)]"
+                    className="group inline-flex items-center justify-center gap-2 px-10 py-4 bg-gradient-to-r from-[#A560E8] to-[#7733B5] hover:from-[#9450D8] hover:to-[#A560E8] text-white font-extrabold rounded-2xl border-2 border-b-4 border-[#7733B5] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all text-lg tracking-tight shadow-[0_14px_30px_-12px_rgba(165,96,232,0.9)]"
                     style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                   >
                     {completedToday ? 'Practice again' : 'Start review'}
@@ -507,11 +507,11 @@ const DailyReviewTab = ({ user, onNavigate, onSwitchTool }: DailyReviewTabProps)
                     <span className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase">{label}</span>
                     <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-sm font-extrabold border-2 transition-all ${
                       isDone
-                        ? 'bg-[#58CC02] border-[#46A302] text-white border-b-4'
+                        ? 'bg-[#A560E8] border-[#7733B5] text-white border-b-4'
                         : isToday
                           ? completedToday
-                            ? 'bg-[#58CC02] border-[#46A302] text-white border-b-4'
-                            : 'bg-[#E5F8D0] border-[#58CC02] text-[#58CC02] border-b-4'
+                            ? 'bg-[#A560E8] border-[#7733B5] text-white border-b-4'
+                            : 'bg-[#F3EAFF] border-[#A560E8] text-[#A560E8] border-b-4'
                           : isPast
                             ? 'bg-stone-100 border-stone-200 text-stone-300 dark:bg-stone-800 dark:border-stone-700 dark:text-stone-600'
                             : 'bg-stone-50 border-stone-200 text-stone-400 dark:bg-stone-800 dark:border-stone-700 dark:text-stone-500'
@@ -526,11 +526,11 @@ const DailyReviewTab = ({ user, onNavigate, onSwitchTool }: DailyReviewTabProps)
         </div>
 
         {/* Tip card */}
-        <div className="rounded-2xl bg-[#E5F8D0] dark:bg-[#58CC02]/10 border-2 border-b-4 border-[#58CC02]/30 p-4 sm:p-5">
+        <div className="rounded-2xl bg-[#F3EAFF] dark:bg-[#A560E8]/10 border-2 border-b-4 border-[#A560E8]/30 p-4 sm:p-5">
           <div className="flex items-start gap-3">
             <span className="text-2xl flex-shrink-0" aria-hidden>💡</span>
             <div>
-              <p className="text-sm font-extrabold text-[#58CC02] mb-0.5">Pro tip</p>
+              <p className="text-sm font-extrabold text-[#A560E8] mb-0.5">Pro tip</p>
               <p className="text-xs text-stone-600 dark:text-stone-300 font-bold leading-relaxed">
                 The more study packs you create, the better your daily reviews get. Each review pulls from all your materials using spaced repetition to focus on what you need to practice most.
               </p>
@@ -551,7 +551,7 @@ const DailyReviewTab = ({ user, onNavigate, onSwitchTool }: DailyReviewTabProps)
         {/* Soft placeholder behind the overlay */}
         <section className="rounded-2xl bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 p-10 sm:p-16">
           <div className="flex flex-col items-center gap-4">
-            <div className="w-14 h-14 border-4 border-[#58CC02]/30 border-t-[#58CC02] rounded-full animate-spin" />
+            <div className="w-14 h-14 border-4 border-[#A560E8]/30 border-t-[#A560E8] rounded-full animate-spin" />
             <p className="text-stone-600 dark:text-stone-400 font-extrabold" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
               Preparing your review...
             </p>
@@ -575,7 +575,7 @@ const DailyReviewTab = ({ user, onNavigate, onSwitchTool }: DailyReviewTabProps)
           {showConfetti && (
             <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden" aria-hidden>
               {Array.from({ length: 40 }).map((_, i) => {
-                const colors = ['#58CC02', '#58CC02', '#58CC02', '#FF4B4B', '#58CC02', '#FFD700'];
+                const colors = ['#A560E8', '#A560E8', '#A560E8', '#FF4B4B', '#A560E8', '#FFD700'];
                 const color = colors[i % colors.length];
                 const left = Math.random() * 100;
                 const delay = Math.random() * 0.5;
@@ -626,14 +626,14 @@ const DailyReviewTab = ({ user, onNavigate, onSwitchTool }: DailyReviewTabProps)
             {/* Score + XP + Streak row */}
             <div className="flex items-center justify-center gap-3 sm:gap-4 mb-8 flex-wrap">
               {/* Score */}
-              <div className="flex flex-col items-center px-5 py-3 rounded-2xl bg-[#E5F8D0] border-2 border-b-4 border-[#58CC02]/40">
-                <p className="text-3xl font-extrabold text-[#58CC02]">{score}/{reviewItems.length}</p>
+              <div className="flex flex-col items-center px-5 py-3 rounded-2xl bg-[#F3EAFF] border-2 border-b-4 border-[#A560E8]/40">
+                <p className="text-3xl font-extrabold text-[#A560E8]">{score}/{reviewItems.length}</p>
                 <p className="text-[10px] font-bold text-stone-500 uppercase tracking-wider mt-0.5">correct</p>
               </div>
 
               {/* XP earned */}
-              <div className="flex flex-col items-center px-5 py-3 rounded-2xl bg-[#E5F8D0] border-2 border-b-4 border-[#58CC02]/40">
-                <p className="text-3xl font-extrabold text-[#58CC02]">+{xp}</p>
+              <div className="flex flex-col items-center px-5 py-3 rounded-2xl bg-[#F3EAFF] border-2 border-b-4 border-[#A560E8]/40">
+                <p className="text-3xl font-extrabold text-[#A560E8]">+{xp}</p>
                 <p className="text-[10px] font-bold text-stone-500 uppercase tracking-wider mt-0.5">XP earned</p>
               </div>
 
@@ -649,7 +649,7 @@ const DailyReviewTab = ({ user, onNavigate, onSwitchTool }: DailyReviewTabProps)
               <button
                 type="button"
                 onClick={() => setPhase('home')}
-                className="px-8 py-3.5 bg-[#58CC02] text-white font-extrabold rounded-2xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all text-base"
+                className="px-8 py-3.5 bg-[#A560E8] text-white font-extrabold rounded-2xl border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all text-base"
                 style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
               >
                 Done
@@ -675,12 +675,12 @@ const DailyReviewTab = ({ user, onNavigate, onSwitchTool }: DailyReviewTabProps)
                   key={i}
                   className={`flex items-start gap-3 p-3 rounded-xl border-2 ${
                     r.isCorrect
-                      ? 'bg-[#E5F8D0]/50 border-[#58CC02]/30'
+                      ? 'bg-[#F3EAFF]/50 border-[#A560E8]/30'
                       : 'bg-[#FFE8E8]/50 border-[#FF4B4B]/30'
                   }`}
                 >
                   <span className={`flex-shrink-0 w-6 h-6 rounded-lg flex items-center justify-center text-white text-xs font-extrabold ${
-                    r.isCorrect ? 'bg-[#58CC02]' : 'bg-[#FF4B4B]'
+                    r.isCorrect ? 'bg-[#A560E8]' : 'bg-[#FF4B4B]'
                   }`}>
                     {r.isCorrect ? '✓' : '✗'}
                   </span>
@@ -689,7 +689,7 @@ const DailyReviewTab = ({ user, onNavigate, onSwitchTool }: DailyReviewTabProps)
                       {r.item.type === 'quiz' ? r.item.data.question : r.item.data.front}
                     </p>
                     {!r.isCorrect && r.item.type === 'quiz' && (
-                      <p className="text-xs text-[#58CC02] font-bold mt-0.5">
+                      <p className="text-xs text-[#A560E8] font-bold mt-0.5">
                         Correct: {getCorrectText(r.item)}
                       </p>
                     )}
@@ -716,14 +716,14 @@ const DailyReviewTab = ({ user, onNavigate, onSwitchTool }: DailyReviewTabProps)
           </span>
           <div className="flex items-center gap-3">
             {inSessionStreak >= 2 && (
-              <span className="text-xs font-extrabold text-[#58CC02]">🔥 {inSessionStreak} in a row!</span>
+              <span className="text-xs font-extrabold text-[#A560E8]">🔥 {inSessionStreak} in a row!</span>
             )}
-            <span className="text-xs font-extrabold text-[#58CC02]">{score} correct</span>
+            <span className="text-xs font-extrabold text-[#A560E8]">{score} correct</span>
           </div>
         </div>
         <div className="h-3 rounded-full bg-stone-100 dark:bg-stone-800 overflow-hidden border border-stone-200 dark:border-stone-700">
           <div
-            className="h-full rounded-full bg-[#58CC02] transition-all duration-500 ease-out"
+            className="h-full rounded-full bg-[#A560E8] transition-all duration-500 ease-out"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -734,10 +734,10 @@ const DailyReviewTab = ({ user, onNavigate, onSwitchTool }: DailyReviewTabProps)
         <div className="rounded-2xl bg-white dark:bg-stone-900 border-2 border-b-4 border-stone-200 dark:border-stone-700 overflow-hidden">
           {/* Type badge */}
           <div className={`px-4 py-2 flex items-center justify-between ${
-            currentItem.type === 'quiz' ? 'bg-[#E5F8D0]' : 'bg-[#E5F8D0]'
+            currentItem.type === 'quiz' ? 'bg-[#F3EAFF]' : 'bg-[#F3EAFF]'
           }`}>
             <span className={`text-[10px] font-extrabold uppercase tracking-wider ${
-              currentItem.type === 'quiz' ? 'text-[#58CC02]' : 'text-[#58CC02]'
+              currentItem.type === 'quiz' ? 'text-[#A560E8]' : 'text-[#A560E8]'
             }`}>
               {currentItem.type === 'quiz'
                 ? (currentItem.data.type === 'true_false' ? '🔵 True or False' : '🔵 Multiple Choice')
@@ -776,10 +776,10 @@ const DailyReviewTab = ({ user, onNavigate, onSwitchTool }: DailyReviewTabProps)
                         const correctText = getCorrectText(currentItem);
                         const isCorrectOpt = opt === correctText || opt.toLowerCase() === correctText.toLowerCase();
 
-                        let btnClass = 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 hover:border-[#58CC02] hover:bg-[#E5F8D0]/30';
+                        let btnClass = 'bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 hover:border-[#A560E8] hover:bg-[#F3EAFF]/30';
                         if (answered) {
                           if (isCorrectOpt) {
-                            btnClass = 'bg-[#E5F8D0] border-[#58CC02] dark:bg-[#58CC02]/10';
+                            btnClass = 'bg-[#F3EAFF] border-[#A560E8] dark:bg-[#A560E8]/10';
                           } else if (isSelected && !isCorrectOpt) {
                             btnClass = 'bg-[#FFE8E8] border-[#FF4B4B] dark:bg-[#FF4B4B]/10';
                           } else {
@@ -797,7 +797,7 @@ const DailyReviewTab = ({ user, onNavigate, onSwitchTool }: DailyReviewTabProps)
                           >
                             <span className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-sm font-extrabold border-2 ${
                               answered && isCorrectOpt
-                                ? 'bg-[#58CC02] border-[#46A302] text-white'
+                                ? 'bg-[#A560E8] border-[#7733B5] text-white'
                                 : answered && isSelected && !isCorrectOpt
                                   ? 'bg-[#FF4B4B] border-[#E04343] text-white'
                                   : 'bg-stone-100 border-stone-200 text-stone-500 dark:bg-stone-700 dark:border-stone-600 dark:text-stone-300'
@@ -820,20 +820,20 @@ const DailyReviewTab = ({ user, onNavigate, onSwitchTool }: DailyReviewTabProps)
                   return (
                     <div className={`mt-5 -mx-5 sm:-mx-7 -mb-5 sm:-mb-7 p-5 sm:p-7 ${
                       wasCorrect
-                        ? 'bg-[#E5F8D0] border-t-2 border-[#58CC02]/30'
+                        ? 'bg-[#F3EAFF] border-t-2 border-[#A560E8]/30'
                         : 'bg-[#FFE8E8] border-t-2 border-[#FF4B4B]/30'
                     }`}>
                       <div className="flex items-start gap-3 mb-4">
                         {/* Big icon */}
                         <div className={`flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center text-white text-xl font-extrabold border-2 border-b-4 ${
                           wasCorrect
-                            ? 'bg-[#58CC02] border-[#46A302]'
+                            ? 'bg-[#A560E8] border-[#7733B5]'
                             : 'bg-[#FF4B4B] border-[#E04343]'
                         }`}>
                           {wasCorrect ? '✓' : '✗'}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className={`text-lg font-extrabold ${wasCorrect ? 'text-[#58CC02]' : 'text-[#FF4B4B]'}`}
+                          <p className={`text-lg font-extrabold ${wasCorrect ? 'text-[#A560E8]' : 'text-[#FF4B4B]'}`}
                             style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                           >
                             {feedbackMsg}
@@ -855,7 +855,7 @@ const DailyReviewTab = ({ user, onNavigate, onSwitchTool }: DailyReviewTabProps)
                         onClick={goToNext}
                         className={`w-full py-3.5 font-extrabold rounded-xl border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all text-base ${
                           wasCorrect
-                            ? 'bg-[#58CC02] border-[#46A302] text-white'
+                            ? 'bg-[#A560E8] border-[#7733B5] text-white'
                             : 'bg-[#FF4B4B] border-[#E04343] text-white'
                         }`}
                         style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
@@ -875,8 +875,8 @@ const DailyReviewTab = ({ user, onNavigate, onSwitchTool }: DailyReviewTabProps)
                   onClick={() => setIsFlipped(!isFlipped)}
                   className={`min-h-[180px] sm:min-h-[220px] rounded-2xl border-2 border-b-4 p-6 flex items-center justify-center cursor-pointer transition-all ${
                     isFlipped
-                      ? 'bg-[#E5F8D0] border-[#58CC02]/40'
-                      : 'bg-[#E5F8D0] border-[#58CC02]/40'
+                      ? 'bg-[#F3EAFF] border-[#A560E8]/40'
+                      : 'bg-[#F3EAFF] border-[#A560E8]/40'
                   }`}
                 >
                   <div className="text-center">
@@ -904,7 +904,7 @@ const DailyReviewTab = ({ user, onNavigate, onSwitchTool }: DailyReviewTabProps)
                     <button
                       type="button"
                       onClick={() => handleFlashcardKnew(true)}
-                      className="flex-1 max-w-[180px] py-3 bg-[#E5F8D0] text-[#58CC02] font-extrabold rounded-xl border-2 border-b-4 border-[#58CC02]/40 active:border-b-2 active:translate-y-0.5 transition-all text-sm"
+                      className="flex-1 max-w-[180px] py-3 bg-[#F3EAFF] text-[#A560E8] font-extrabold rounded-xl border-2 border-b-4 border-[#A560E8]/40 active:border-b-2 active:translate-y-0.5 transition-all text-sm"
                     >
                       Got it! ✓
                     </button>

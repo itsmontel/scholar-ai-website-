@@ -26,6 +26,9 @@ struct WordBlitzView: View {
     @State private var questionShownAt = Date()
     @State private var locked: String? = nil
     @State private var revealCorrect = false
+    @State private var recorded = false
+    @State private var isNewHigh = false
+    @State private var celebrate = 0
 
     enum Phase { case playing, over }
 
@@ -40,9 +43,23 @@ struct WordBlitzView: View {
         ZStack {
             WSColor.background.ignoresSafeArea()
             if phase == .over { gameOver } else { playing }
+            WSConfettiView(trigger: $celebrate).allowsHitTesting(false)
         }
         .onAppear(perform: start)
         .onReceive(ticker) { _ in tick() }
+        .onChange(of: phase) { _, p in
+            if p == .over { recordResult() }
+        }
+    }
+
+    /// Award XP + persist the high score exactly once per finished run.
+    private func recordResult() {
+        guard !recorded else { return }
+        recorded = true
+        isNewHigh = GameScoreStore.shared.submit(score, for: .wordBlitz)
+        DailyGoalStore.shared.record(.wordBlitzPlayed, title: "Word Blitz",
+                                     subtitle: "\(score) pts · \(correct) correct")
+        if isNewHigh { celebrate += 1 }
     }
 
     // MARK: - Playing
@@ -149,10 +166,11 @@ struct WordBlitzView: View {
             Text("Time's up! ⏱️")
                 .wsHeadline(.large, weight: .black)
                 .foregroundStyle(WSColor.foreground)
-            WSProgressRing(progress: 1, tint: accent, size: 150, lineWidth: 12, centerText: "\(score)")
-            Text("\(score) point\(score == 1 ? "" : "s")")
+            WSProgressRing(progress: 1, tint: accent, size: 150, lineWidth: 12,
+                           centerTitle: "\(score)", centerSubtitle: "points")
+            Text(isNewHigh ? "New high score! 🏆" : "\(score) point\(score == 1 ? "" : "s")")
                 .wsBody(.medium, weight: .bold)
-                .foregroundStyle(WSColor.foregroundMuted)
+                .foregroundStyle(isNewHigh ? WSColor.duoYellowDark : WSColor.foregroundMuted)
             HStack(spacing: 10) {
                 WSStatChip(icon: "checkmark.circle.fill", value: "\(correct)", label: "Correct",     tint: WSColor.duoGreen)
                 WSStatChip(icon: "xmark.circle.fill",     value: "\(wrong)",   label: "Wrong",       tint: WSColor.duoRed)
@@ -172,6 +190,7 @@ struct WordBlitzView: View {
         queue = wordBlitz.questions.shuffled()
         idx = 0; score = 0; correct = 0; wrong = 0; streak = 0; longestStreak = 0
         timeRemaining = 60; phase = .playing; locked = nil; revealCorrect = false
+        recorded = false; isNewHigh = false
         loadOptions()
         questionShownAt = Date()
         Haptics.medium()

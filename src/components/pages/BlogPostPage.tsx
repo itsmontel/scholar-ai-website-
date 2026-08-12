@@ -141,7 +141,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
               e.preventDefault();
               onNavigate('blog');
             }}
-            className="text-[#1CB0F6] hover:text-[#1899D6] font-extrabold"
+            className="text-[#A560E8] hover:text-[#7733B5] font-extrabold"
           >
             ← Back to blog
           </a>
@@ -174,7 +174,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
                     e.preventDefault();
                     onNavigate('landing');
                   }}
-                  className="hover:text-[#1CB0F6] transition-colors"
+                  className="hover:text-[#A560E8] transition-colors"
                 >
                   Home
                 </a>
@@ -189,7 +189,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
                     e.preventDefault();
                     onNavigate('blog');
                   }}
-                  className="hover:text-[#1CB0F6] transition-colors"
+                  className="hover:text-[#A560E8] transition-colors"
                 >
                   Blog
                 </a>
@@ -197,7 +197,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
             </ol>
           </nav>
 
-          <p className="inline-flex items-center rounded-full bg-[#DDF4FF] dark:bg-[#1CB0F6]/20 text-[#1899D6] dark:text-[#1CB0F6] border border-[#1CB0F6]/30 font-extrabold text-[11px] uppercase tracking-wider px-3 py-1 mb-4">
+          <p className="inline-flex items-center rounded-full bg-[#F3EAFF] dark:bg-[#A560E8]/20 text-[#7733B5] dark:text-[#A560E8] border border-[#A560E8]/30 font-extrabold text-[11px] uppercase tracking-wider px-3 py-1 mb-4">
             {category}
           </p>
 
@@ -240,14 +240,14 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
                 <p className="text-lg font-bold text-stone-900 dark:text-stone-100" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                   {post.author}
                 </p>
-                <p className="text-sm font-medium text-[#58CC02] mt-1">{authorRole}</p>
+                <p className="text-sm font-medium text-[#A560E8] mt-1">{authorRole}</p>
                 <p className="text-sm text-stone-600 dark:text-stone-400 mt-2 leading-relaxed">{authorBio}</p>
               </div>
 
               <div
                 ref={articleBodyRef}
                 id="blog-article-body"
-                className="prose prose-stone dark:prose-invert prose-lg max-w-none prose-headings:font-sans prose-a:text-[#1CB0F6] prose-a:no-underline hover:prose-a:underline prose-p:text-stone-600 dark:prose-p:text-stone-400"
+                className="prose prose-stone dark:prose-invert prose-lg max-w-none prose-headings:font-sans prose-a:text-[#A560E8] prose-a:no-underline hover:prose-a:underline prose-p:text-stone-600 dark:prose-p:text-stone-400"
               >
                 <BlogPostContent slug={post.slug} onNavigate={onNavigate} />
                 <BlogKeyTakeaways bullets={post.keyTakeaways} />
@@ -272,7 +272,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
                 <button
                   type="button"
                   onClick={() => handleNavigateToPost(prevPost.slug)}
-                  className="text-[#1CB0F6] hover:text-[#1899D6] font-extrabold text-left transition-colors"
+                  className="text-[#A560E8] hover:text-[#7733B5] font-extrabold text-left transition-colors"
                 >
                   ← {prevPost.title}
                 </button>
@@ -283,7 +283,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
                 <button
                   type="button"
                   onClick={() => handleNavigateToPost(nextPost.slug)}
-                  className="text-[#1CB0F6] hover:text-[#1899D6] font-extrabold sm:text-right transition-colors"
+                  className="text-[#A560E8] hover:text-[#7733B5] font-extrabold sm:text-right transition-colors"
                 >
                   {nextPost.title} →
                 </button>
@@ -297,7 +297,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
                   e.preventDefault();
                   onNavigate('blog');
                 }}
-                className="inline-flex items-center px-6 py-3 bg-[#58CC02] hover:bg-[#4CAF00] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all duration-150"
+                className="inline-flex items-center px-6 py-3 bg-[#A560E8] hover:bg-[#9450D8] text-white font-extrabold uppercase tracking-wide rounded-xl border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all duration-150"
               >
                 All posts
               </a>
