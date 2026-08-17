@@ -69,7 +69,7 @@ const TOOL_LINKS = {
 export const wordCounterSeo: ToolSeoConfig = {
   heading: 'Free Word Counter, Count Words, Characters, and Reading Time',
   intro:
-    'Pasting your essay below will instantly show you the word count, character count (with and without spaces), sentence count, paragraph count, and an estimated reading and speaking time. No sign-up. No limits. Most professors care about word count to the unit, get it right before you submit.',
+    'Pasting your essay below will instantly show you the word count, character count (with and without spaces), sentence count, paragraph count, page count (double- and single-spaced), and an estimated reading and speaking time. No sign-up. No limits. Most professors care about word count to the unit, get it right before you submit.',
   steps: [
     { title: 'Paste your text', body: 'Copy your essay, blog post, social caption, or document and paste it into the box. The counter updates as you type, there is no "count" button to press.' },
     { title: 'Read the live stats', body: 'Words, characters, sentences, paragraphs, reading time, and speaking time all appear on the right. Reading time uses 200 words per minute (typical adult reading speed); speaking time uses 130 wpm (typical speech).' },
@@ -85,6 +85,10 @@ export const wordCounterSeo: ToolSeoConfig = {
     { title: 'SEO content optimization', body: 'Google rewards in-depth content. Shooting for 1,500–2,500 words on tutorial pages and 800–1,200 on listicles is a common rule of thumb. The counter keeps you on target.' },
   ],
   faqs: [
+    { question: 'How many pages is a 500-word essay?', answer: 'About 2 pages double-spaced, or 1 page single-spaced, in 12pt Times New Roman with 1-inch margins. That is the format nearly every assignment brief assumes, so it is the safest estimate unless your brief says otherwise.' },
+    { question: 'How many pages is 1,000 words?', answer: 'Roughly 4 pages double-spaced or 2 pages single-spaced at 12pt with 1-inch margins. 1,500 words is about 6 double-spaced pages, and 2,000 words is about 8.' },
+    { question: 'How many words is a 5-page paper?', answer: 'About 1,250 words if it is double-spaced, or about 2,500 words single-spaced. Multiply the page count by 250 for a double-spaced target — that is the standard 12pt Times New Roman page.' },
+    { question: 'Does the word count include the title page, references, and footnotes?', answer: 'Usually not. Most academic word limits cover the body of the essay only and exclude the title page, abstract, reference list, footnotes, tables, and appendices. Paste in just the body text to get the number your marker cares about.' },
     { question: 'Is this word counter free to use?', answer: 'Yes, completely free, no sign-up, no usage limits. The whole tool runs in your browser, so you can count as much text as you want without hitting any quota.' },
     { question: 'How accurate is the word count?', answer: 'The counter uses the same definition Microsoft Word and Google Docs use: any sequence of non-whitespace characters separated by spaces is one word. Hyphenated words count as one. Numbers count as words. URLs count as one.' },
     { question: 'Does it count characters with or without spaces?', answer: 'Both. The "Characters" stat includes spaces (used by Twitter, SMS, and most word limits), and "Characters (no spaces)" excludes them (used by some academic word limits).' },

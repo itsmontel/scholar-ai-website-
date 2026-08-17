@@ -92,7 +92,7 @@ const FAQS = [
   },
   {
     q: 'Is it free?',
-    a: 'Yes — run a real analysis on your essay with no credit card. Free shows your estimated grade, what\'s wrong, and top suggestions; Pro unlocks every fix, one-click apply, and unlimited analyses.',
+    a: 'You can try it on a real essay of your own during the 7-day free trial. Starting the trial asks for a card so it can roll into Pro if you keep it, but nothing is charged up front and you can cancel any time inside the 7 days. Pro then covers every fix, one-click apply, and 99 analyses a month.',
   },
   {
     q: 'Does it work for university and college essays?',
@@ -139,7 +139,7 @@ const AiEssayEditorPage = ({ onNavigate, user, onLogout }: AiEssayEditorPageProp
       className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-[#A560E8] hover:bg-[#8A48C7] text-white text-base sm:text-lg font-extrabold px-8 sm:px-10 py-4 border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_18px_34px_-14px_rgba(165,96,232,0.6)]"
     >
       Grade my essay
-      <span className="font-semibold text-white/75">— it&apos;s free</span>
+      <span className="font-semibold text-white/75">free for 7 days</span>
       <svg className="w-5 h-5 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
         <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
       </svg>
@@ -170,7 +170,7 @@ const AiEssayEditorPage = ({ onNavigate, user, onLogout }: AiEssayEditorPageProp
             <div className="mt-8 flex flex-col items-center gap-3">
               {cta}
               <p className="text-[12px] sm:text-sm font-bold text-stone-500 dark:text-stone-400">
-                Free to try, no credit card. The grade is an estimate to sharpen your draft, not a guarantee.
+                7-day free trial · $0 today · Cancel anytime. The grade is an estimate to sharpen your draft, not a guarantee.
               </p>
             </div>
           </div>
@@ -340,6 +340,58 @@ const AiEssayEditorPage = ({ onNavigate, user, onLogout }: AiEssayEditorPageProp
                   {f.a}
                 </p>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── WRITING GUIDES ───────────────────────────────────────
+          Reverse half of the topic cluster. The 10 /guides/* pages and the
+          essay-grading blog posts all link up to this page; these links point
+          back down, which is what tells Google this page is the hub of an
+          essay-writing cluster rather than an isolated product page. Real
+          anchors (not buttons) so they are crawlable, with onNavigate kept
+          for SPA navigation. */}
+      <section className="relative py-16 sm:py-20 border-b border-stone-200/90 dark:border-stone-800" aria-labelledby="guides-h2">
+        <LandingSectionLayers />
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2
+            id="guides-h2"
+            className="text-2xl sm:text-3xl lg:text-[2.2rem] font-extrabold text-stone-900 dark:text-stone-50 tracking-tight text-center mb-3"
+            style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+          >
+            Learn the essay first, then grade it
+          </h2>
+          <p className="text-center text-sm sm:text-base text-stone-600 dark:text-stone-400 mb-10 max-w-2xl mx-auto">
+            Step-by-step guides for every essay type, with structure, worked examples, and the mistakes that cost the most marks.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            {[
+              { href: '/guides/how-to-write-argumentative-essay', label: 'Argumentative essay', teaser: 'Claim, evidence, rebuttal.' },
+              { href: '/guides/how-to-write-analytical-essay', label: 'Analytical essay', teaser: 'Break a text down properly.' },
+              { href: '/guides/how-to-write-persuasive-essay', label: 'Persuasive essay', teaser: 'Build a case that lands.' },
+              { href: '/guides/how-to-write-expository-essay', label: 'Expository essay', teaser: 'Explain without arguing.' },
+              { href: '/guides/how-to-write-narrative-essay', label: 'Narrative essay', teaser: 'Structure a story with a point.' },
+              { href: '/guides/how-to-write-compare-contrast-essay', label: 'Compare and contrast', teaser: 'Two subjects, one argument.' },
+              { href: '/guides/how-to-write-research-paper', label: 'Research paper', teaser: 'From question to conclusion.' },
+              { href: '/guides/how-to-write-college-essay', label: 'College essay', teaser: 'Admissions-ready personal writing.' },
+              { href: '/guides/how-to-write-thesis-statement', label: 'Thesis statement', teaser: 'One sentence that carries the essay.' },
+              { href: '/guides/how-to-cite-sources-apa', label: 'APA citations', teaser: 'In-text and reference list rules.' },
+              { href: '/blog/grade-my-essay-before-submitting', label: 'Grade my essay', teaser: 'Check your grade before you submit.' },
+              { href: '/best/ai-essay-grader-for-college', label: 'Best AI essay graders', teaser: 'Five tools compared honestly.' },
+            ].map((g) => (
+              <a
+                key={g.href}
+                href={g.href}
+                onClick={(e) => { e.preventDefault(); onNavigate(g.href); }}
+                className="group block rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 p-4 sm:p-5 transition-all duration-150 hover:-translate-y-0.5 hover:border-[#A560E8] dark:hover:border-[#A560E8]"
+              >
+                <div className="flex items-center gap-2 font-extrabold text-[15px] text-stone-900 dark:text-stone-50 mb-1" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+                  {g.label}
+                  <span aria-hidden className="text-[#A560E8] transition-transform duration-150 group-hover:translate-x-0.5">→</span>
+                </div>
+                <p className="text-[13px] text-stone-600 dark:text-stone-400 leading-snug">{g.teaser}</p>
+              </a>
             ))}
           </div>
         </div>

@@ -89,84 +89,95 @@ export default function DailyReviewReadyModal({
   const greeting = userName ? `${userName}, your` : 'Your';
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-stone-900/55 backdrop-blur-sm animate-[fadeIn_0.35s_ease-out]">
+    <div
+      className="fixed bottom-4 right-4 sm:bottom-5 sm:right-5 z-[120] w-[min(100vw-2rem,20.5rem)] animate-[dailyReviewIn_0.4s_cubic-bezier(0.16,1,0.3,1)]"
+      style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+    >
       <div
         role="dialog"
-        aria-modal="true"
+        aria-modal="false"
         aria-labelledby="daily-review-ready-title"
-        className="relative w-full max-w-md overflow-hidden rounded-3xl border-2 border-b-[5px] border-[#58CC02]/45 bg-white dark:bg-stone-900 shadow-[0_28px_60px_-24px_rgba(88,204,2,0.45)] animate-[slideUp_0.45s_cubic-bezier(0.16,1,0.3,1)]"
+        className="relative overflow-hidden rounded-2xl border-2 border-b-[4px] border-[#58CC02]/45 bg-white dark:bg-stone-900 shadow-[0_18px_40px_-18px_rgba(88,204,2,0.5),0_12px_28px_-16px_rgba(0,0,0,0.35)]"
       >
-        <div className="h-2 bg-gradient-to-r from-[#58CC02] via-[#7AE018] to-[#46A302]" aria-hidden />
+        <div className="h-1.5 bg-gradient-to-r from-[#58CC02] via-[#7AE018] to-[#46A302]" aria-hidden />
 
-        <div className="pointer-events-none absolute -top-12 -right-10 w-36 h-36 rounded-full bg-[#58CC02]/15 blur-3xl" aria-hidden />
-        <div className="pointer-events-none absolute -bottom-10 -left-8 w-28 h-28 rounded-full bg-[#FFC800]/12 blur-2xl" aria-hidden />
+        <div className="pointer-events-none absolute -top-10 -right-8 w-24 h-24 rounded-full bg-[#58CC02]/15 blur-2xl" aria-hidden />
 
-        <div className="relative p-6 sm:p-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full overflow-hidden border-[3px] border-[#58CC02]/40 bg-[#E5F8D0] shadow-[0_8px_22px_-10px_rgba(88,204,2,0.45)]">
-            <video
-              src="/dashboardlogo.mp4"
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="h-full w-full object-cover"
-              aria-hidden
-            />
+        <div className="relative px-4 pt-3.5 pb-3.5">
+          <div className="flex items-start gap-3">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full overflow-hidden border-2 border-[#58CC02]/40 bg-[#E5F8D0] shadow-[0_6px_14px_-8px_rgba(88,204,2,0.5)]">
+              <video
+                src="/dashboardlogo.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="h-full w-full object-cover"
+                aria-hidden
+              />
+            </div>
+
+            <div className="min-w-0 flex-1 pt-0.5">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[#E5F8D0] dark:bg-[#58CC02]/10 text-[#46A302] border border-[#58CC02]/30 text-[10px] font-extrabold uppercase tracking-[0.14em]">
+                <span aria-hidden>🎯</span>
+                Daily review
+              </span>
+
+              <h2
+                id="daily-review-ready-title"
+                className="mt-1.5 text-[15px] font-extrabold leading-snug tracking-tight text-stone-900 dark:text-stone-50"
+              >
+                {greeting} review is ready!
+              </h2>
+
+              <p className="mt-1 text-[12px] font-bold text-stone-500 dark:text-stone-400 leading-snug">
+                10 quick questions · ~3 min
+                {streak > 0 ? (
+                  <>
+                    {' · '}
+                    <span className="text-[#46A302]">🔥 {streak}-day streak</span>
+                  </>
+                ) : null}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={onDismiss}
+              aria-label="Dismiss"
+              className="shrink-0 -mt-0.5 -mr-1 flex h-7 w-7 items-center justify-center rounded-lg text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
 
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#E5F8D0] dark:bg-[#58CC02]/10 text-[#46A302] border-2 border-[#58CC02]/30 text-[11px] font-extrabold uppercase tracking-[0.16em] mb-3">
-            <span aria-hidden>🎯</span>
-            Daily review ready
-          </span>
-
-          <h2
-            id="daily-review-ready-title"
-            className="text-2xl sm:text-[1.75rem] font-extrabold leading-tight tracking-tight text-stone-900 dark:text-stone-50"
-            style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-          >
-            {greeting} daily review is ready!
-          </h2>
-
-          <p className="mt-2.5 text-sm sm:text-[15px] font-bold text-stone-500 dark:text-stone-400 leading-relaxed max-w-sm mx-auto">
-            10 quick questions from your study materials. Takes about 3 minutes and keeps your streak alive.
-          </p>
-
-          {streak > 0 && (
-            <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#E5F8D0] border-2 border-[#58CC02]/35">
-              <span className="text-xl leading-none" aria-hidden>🔥</span>
-              <span className="text-sm font-extrabold text-[#46A302]">{streak}-day streak — don&apos;t break it!</span>
-            </div>
-          )}
-
-          <div className="mt-7 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2.5">
+          <div className="mt-3 flex items-center gap-2">
             <button
               type="button"
               onClick={onStart}
-              className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl bg-[#58CC02] hover:bg-[#52BD02] text-white text-sm sm:text-base font-extrabold uppercase tracking-wide border-2 border-b-[4px] border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_10px_24px_-12px_rgba(88,204,2,0.65)]"
+              className="inline-flex flex-1 items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[#58CC02] hover:bg-[#52BD02] text-white text-[12px] font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all"
             >
               Start review
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
             </button>
             <button
               type="button"
               onClick={onDismiss}
-              className="px-5 py-3 rounded-2xl text-sm font-bold text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+              className="px-2.5 py-2 rounded-xl text-[12px] font-bold text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
             >
-              Maybe later
+              Later
             </button>
           </div>
         </div>
       </div>
 
       <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(18px) scale(0.98); }
+        @keyframes dailyReviewIn {
+          from { opacity: 0; transform: translateY(14px) scale(0.96); }
           to { opacity: 1; transform: translateY(0) scale(1); }
         }
       `}</style>

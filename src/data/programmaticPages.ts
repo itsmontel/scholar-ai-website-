@@ -21,17 +21,17 @@ import { FREE_PLAN_FAQ_ANSWER } from '../constants/freePlanCopy';
 
 /* ─── Helpers ──────────────────────────────────────────────────── */
 
-/** Comparison-table cell — matches the PricingPage offer: free preview
- *  on your own work, then a 7-day trial into $19.99/mo Pro. */
-const PRO_PRICING_CELL = 'Preview free · $19.99/mo Pro';
+/** Comparison-table cell — matches the PricingPage offer: a 7-day free trial
+ *  (card required, $0 charged up front) into $19.99/mo Pro. */
+const PRO_PRICING_CELL = '7-day free trial · $19.99/mo Pro';
 
 /** Short free-plan explainer for alternative-page FAQs. */
 const FREE_PLAN_PROG_SHORT =
-  'Free gives you a lifetime preview of each tool on your own work (an essay analysis, a study pack, a citation search with sample results) — no credit card. Pro unlocks full rubrics, quizzes, games, decks, and exports.';
+  'A free account gets you the standalone utilities (word counter, citation generator, thesis helper, outline, grammar check, GPA calculator) with no card. The AI features (essay analysis, study packs, citation finder) run on a 7-day free trial: $0 today, cancel anytime, then $19.99/mo.';
 
-/** Signup step copy — no "covers your first semester" over-promises. */
+/** Signup step copy — accurate about the card, since the trial gate is live. */
 const FREE_SIGNUP_STEP =
-  'Sign up in 30 seconds — no credit card. Run a real preview on your own essay or notes before you pay anything.';
+  'Sign up in 30 seconds, then start your 7-day free trial. Nothing is charged today and you can cancel inside the trial.';
 
 const freeSubjectFaqAnswer = (niceName: string) =>
   `Yes. ${FREE_PLAN_PROG_SHORT} Pro is $19.99/mo and starts with a 7-day free trial — built for ${niceName} students who want to see results before subscribing.`;
@@ -309,9 +309,9 @@ function subjectPage(s: SubjectMeta): ProgrammaticPageConfig {
     slug: s.slug,
     type: 'subject',
     metaTitle: `${s.name} Study Tools, Free Flashcards, Quizzes, Notes | WriteScholar`,
-    metaDescription: `Study ${s.niceName} smarter with AI tools. Turn ${s.niceName} lecture notes into flashcards, quizzes, and summaries — preview free on your own work.`,
+    metaDescription: `Study ${s.niceName} smarter with AI tools. Turn ${s.niceName} lecture notes into flashcards, quizzes, and summaries. Starts with a 7-day free trial.`,
     h1: `Study ${s.name} smarter, built for ${s.niceName} students`,
-    subtitle: `AI tools that turn your ${s.niceName} notes into flashcards, quizzes, and summaries. Preview on your own work free — no credit card.`,
+    subtitle: `AI tools that turn your ${s.niceName} notes into flashcards, quizzes, and summaries. Starts with a 7-day free trial, $0 today.`,
     eyebrow: `${s.name} study tools`,
     accent: s.accent,
     intro: s.intro,
@@ -368,7 +368,7 @@ function subjectPage(s: SubjectMeta): ProgrammaticPageConfig {
       { label: 'AI Summarizer', href: '/tools/summarizer', teaser: `Condense long ${s.niceName} chapters fast.` },
     ],
     primaryCta: { label: `Preview ${s.niceName} tools free`, page: 'signup' },
-    secondaryCta: { label: 'See all tools', page: 'dashboard' },
+    secondaryCta: { label: 'See all tools', page: 'more-tools' },
   };
 }
 
@@ -381,9 +381,9 @@ const quizletAlt: ProgrammaticPageConfig = {
   metaDescription: 'WriteScholar is a Quizlet alternative for college students. Auto-generate flashcards from notes, preview study packs free, no ads. Pro unlocks full quizzes and decks from $9.99 first month.',
   h1: 'The Quizlet alternative students switch to for AI study tools',
   subtitle: 'Auto-generate flashcards from your notes in seconds. Preview lesson + sample cards free; Pro unlocks full quizzes, games, and decks — without Quizlet\'s ads or paywalled Test Mode.',
-  eyebrow: 'Quizlet alternative · Preview free',
+  eyebrow: 'Quizlet alternative · 7-day free trial',
   accent: '#A560E8',
-  intro: 'Quizlet used to be free. Then they paywalled Test Mode, Learn Mode, and most of the actually-useful study features behind Quizlet+ ($35.99/year). WriteScholar is different: paste your notes and AI builds flashcards, quizzes, and study packs in seconds — preview the results on your own work free (no credit card), then upgrade when you want the full deck, quiz modes, and essay tools. Same study workflow, honest pricing, no ad interruptions.',
+  intro: 'Quizlet used to be free. Then they paywalled Test Mode, Learn Mode, and most of the actually-useful study features behind Quizlet+ ($35.99/year). WriteScholar takes a different shape: paste your notes and AI builds flashcards, quizzes, and study packs in seconds. The AI features run on a 7-day free trial rather than a permanent free tier, so you see the real thing on your own notes for nothing, then decide. No ad interruptions either way.',
   sections: [
     {
       type: 'media',
@@ -405,8 +405,8 @@ const quizletAlt: ProgrammaticPageConfig = {
         { feature: 'Ads on study screen', values: ['None', 'Heavy ads'] },
         { feature: 'Study pack from one paste', values: ['Preview (lesson + 4 cards)', 'No'] },
         { feature: 'AI explanations of wrong answers', values: ['Pro', 'Paid'] },
-        { feature: 'Includes essay checker', values: ['Yes (preview free)', 'No'] },
-        { feature: 'Includes AI quiz generator', values: ['Yes (preview free)', 'No'] },
+        { feature: 'Includes essay checker', values: ['Yes (on trial)', 'No'] },
+        { feature: 'Includes AI quiz generator', values: ['Yes (on trial)', 'No'] },
         { feature: 'Includes AI summarizer', values: ['Yes', 'No'] },
         { feature: 'Cost', values: [PRO_PRICING_CELL, '$35.99/year for Quizlet+'] },
       ],
@@ -416,7 +416,7 @@ const quizletAlt: ProgrammaticPageConfig = {
       heading: 'Why students switch from Quizlet',
       items: [
         { title: 'Test mode is paywalled now', body: 'Quizlet locked Test Mode behind their $35.99/year Quizlet+ subscription in 2022. WriteScholar lets you preview study packs and quizzes on your own notes free; full quiz, game, and deck access unlocks with Pro.' },
-        { title: 'Auto-generation saves hours', body: 'Building a 50-card Quizlet deck takes 30+ minutes of typing. Pasting your notes into WriteScholar generates a lesson plus sample flashcards in under a minute — preview free before upgrading.' },
+        { title: 'Auto-generation saves hours', body: 'Building a 50-card Quizlet deck takes 30+ minutes of typing. Pasting your notes into WriteScholar generates a full lesson plus a flashcard deck in under a minute, and the 7-day trial lets you build one before you pay anything.' },
         { title: 'No ads', body: 'Quizlet free is plastered with ads, including in the middle of study sessions. WriteScholar has no ads on any plan.' },
         { title: 'Better for essay-heavy classes', body: 'Most college courses need essays AND flashcards. Quizlet only handles flashcards; WriteScholar handles both, plus citations, summarisation, and rubric-based grading.' },
         { title: 'Cleaner mobile experience', body: 'Quizlet\'s mobile app pushes upgrades constantly. WriteScholar\'s mobile flow is built for studying, not selling.' },
@@ -461,7 +461,7 @@ const knowtAlt: ProgrammaticPageConfig = {
   metaDescription: 'Knowt does flashcards and notes; WriteScholar does both plus AI essay feedback, summarizer, and quiz generation. The all-in-one Knowt alternative.',
   h1: 'WriteScholar, the all-in-one Knowt alternative',
   subtitle: 'Knowt is great for flashcards. WriteScholar handles flashcards, essays, quizzes, summaries, and citations, one app, one subscription.',
-  eyebrow: 'Knowt alternative · Preview free',
+  eyebrow: 'Knowt alternative · 7-day free trial',
   accent: '#1CB0F6',
   intro: 'Knowt is one of the better Quizlet alternatives, a clean flashcard app with note-taking. But if you\'re writing essays AND making flashcards (which is most college courses), you end up paying for two tools. WriteScholar bundles both: AI flashcards from notes + the essay checker, quiz generator, summarizer, and citation tools that Knowt doesn\'t have. Same single-price model, more output.',
   sections: [
@@ -527,10 +527,10 @@ const courseHeroAlt: ProgrammaticPageConfig = {
   slug: 'course-hero',
   type: 'alternative',
   metaTitle: 'Course Hero Alternative, Study Tools From Your Notes | WriteScholar',
-  metaDescription: 'Course Hero charges $40/mo to unlock student-uploaded notes. WriteScholar turns your own notes into flashcards, quizzes, and study packs — preview free on your own work.',
+  metaDescription: 'Course Hero charges $40/mo to unlock student-uploaded notes. WriteScholar turns your own notes into flashcards, quizzes, and study packs, starting with a 7-day free trial.',
   h1: 'WriteScholar, the Course Hero alternative that uses YOUR notes',
-  subtitle: 'Course Hero locks other students\' notes behind a paywall. WriteScholar turns your own notes into flashcards, quizzes, and study packs — preview free, no upload of others\' work.',
-  eyebrow: 'Course Hero alternative · Preview free',
+  subtitle: 'Course Hero locks other students\' notes behind a paywall. WriteScholar turns your own notes into flashcards, quizzes, and study packs, with no upload of others\' work.',
+  eyebrow: 'Course Hero alternative · 7-day free trial',
   accent: '#FF9600',
   intro: 'Course Hero\'s model is "pay $40/month to access notes other students uploaded." That model has problems: it\'s expensive, the notes are often poorly transcribed, and many universities flag Course Hero use as academic dishonesty. WriteScholar is a fundamentally different tool — you paste YOUR notes, and AI generates study tools from them. Preview the results free on your own work; Pro unlocks full decks, quizzes, and exports. No document paywall, no integrity risk.',
   sections: [
@@ -549,7 +549,7 @@ const courseHeroAlt: ProgrammaticPageConfig = {
       rows: [
         { feature: 'Source material', values: ['Your own notes', 'Other students\' uploads'] },
         { feature: 'Cost', values: [PRO_PRICING_CELL, '$39.99/mo'] },
-        { feature: 'Document paywall', values: ['Preview free, Pro unlocks full', 'Yes, most docs locked'] },
+        { feature: 'Document paywall', values: ['No, your own notes stay yours', 'Yes, most docs locked'] },
         { feature: 'Academic integrity risk', values: ['Low (your work)', 'High (using others\' notes)'] },
         { feature: 'Auto-generated flashcards', values: ['Yes', 'No'] },
         { feature: 'AI essay checker', values: ['Yes', 'No (different "essay help" model)'] },
@@ -592,7 +592,7 @@ const cheggAlt: ProgrammaticPageConfig = {
   metaDescription: 'Chegg charges $19.95/mo for textbook answers + tutoring. WriteScholar charges similar for AI essay feedback, flashcards, quizzes, and citations, and won\'t flag your account.',
   h1: 'A Chegg alternative students aren\'t scared to use',
   subtitle: 'Same price as Chegg Study, completely different value: AI essay feedback, flashcards from your notes, quiz generator, and citations, without the academic-integrity risk.',
-  eyebrow: 'Chegg alternative · Preview free',
+  eyebrow: 'Chegg alternative · 7-day free trial',
   accent: '#58CC02',
   intro: 'Chegg has a brand problem. Universities now actively monitor Chegg accounts for evidence of homework-answer cheating, and many schools have expelled students whose Chegg activity matched test answers. WriteScholar is the opposite tool: it\'s an AI study coach that generates flashcards from your notes, gives essay feedback (without writing essays for you), and helps you understand material, none of which trips academic integrity sensors.',
   sections: [
@@ -654,7 +654,7 @@ const grammarlyAlt: ProgrammaticPageConfig = {
   metaDescription: 'WriteScholar combines a free grammar checker with full AI essay feedback (grade, rubric, line-by-line revision). The Grammarly alternative built for students.',
   h1: 'WriteScholar, Grammarly for students who actually need essay feedback',
   subtitle: 'A free grammar checker + a full AI essay grader with rubric scores, line-by-line annotations, and a polished revision. One tool, no $30/month subscription.',
-  eyebrow: 'Grammarly alternative · Preview free',
+  eyebrow: 'Grammarly alternative · 7-day free trial',
   accent: '#58CC02',
   intro: 'Grammarly is great at one thing: catching grammar and spelling errors as you type. But for college students, "your writing is grammatically correct" doesn\'t earn As — strong arguments, clear theses, and rubric-aligned structure do. WriteScholar combines a free grammar checker with AI essay feedback (grade, rubric, line-by-line notes) you can preview on your own draft free. Pro unlocks full fixes and one-click apply. Plus thesis generator, outline generator, and citation tools Grammarly doesn\'t have.',
   sections: [
@@ -1042,18 +1042,24 @@ const ESSAY_GUIDES_META: EssayGuideMeta[] = [
   },
 ];
 
+/** "a" vs "an" so H1s and title tags read correctly: "an Argumentative Essay",
+ *  not "a Argumentative Essay". Fixes the argumentative, analytical and
+ *  expository guides, whose titles are exactly what searchers see in Google. */
+const articleFor = (word: string): string => (/^[aeiou]/i.test(word) ? 'an' : 'a');
+
 function essayGuidePage(g: EssayGuideMeta): ProgrammaticPageConfig {
   const isThesisOrCitation = g.type === 'thesis' || g.type === 'apa-citation';
+  const shortNameCased = g.shortName.charAt(0).toUpperCase() + g.shortName.slice(1);
   return {
     slug: g.slug,
     type: 'guide',
     metaTitle: isThesisOrCitation
       ? `How to Write a ${g.shortName === 'thesis' ? 'Thesis Statement' : 'APA Citation'}, Complete Guide | WriteScholar`
-      : `How to Write a ${g.shortName.charAt(0).toUpperCase() + g.shortName.slice(1)} Essay, Step-by-Step | WriteScholar`,
-    metaDescription: `Learn how to write a ${g.niceName} step-by-step. Structure, examples, common mistakes, and FAQs. Plus AI tools to draft, outline, and preview-grade your essay.`,
+      : `How to Write ${articleFor(g.shortName)} ${shortNameCased} Essay, Step-by-Step | WriteScholar`,
+    metaDescription: `Learn how to write ${articleFor(g.niceName)} ${g.niceName} step-by-step. Structure, examples, common mistakes, and FAQs. Plus AI tools to draft, outline, and preview-grade your essay.`,
     h1: isThesisOrCitation && g.type === 'apa-citation'
       ? 'How to Cite Sources in APA Format, Complete Guide'
-      : `How to Write a ${g.shortName.charAt(0).toUpperCase() + g.shortName.slice(1)} ${g.type === 'apa-citation' ? '' : g.type === 'thesis' ? 'Statement' : g.type === 'research' ? 'Paper' : g.type === 'college' ? 'Essay' : 'Essay'}`,
+      : `How to Write ${articleFor(g.shortName)} ${shortNameCased} ${g.type === 'apa-citation' ? '' : g.type === 'thesis' ? 'Statement' : g.type === 'research' ? 'Paper' : g.type === 'college' ? 'Essay' : 'Essay'}`,
     subtitle: `Structure, examples, mistakes to avoid, and AI tools to draft and preview-check your work.`,
     eyebrow: `${g.niceName} guide`,
     accent: '#A560E8',
@@ -1076,7 +1082,12 @@ function essayGuidePage(g: EssayGuideMeta): ProgrammaticPageConfig {
       },
     ],
     faqs: g.faqs,
+    // /ai-essay-editor leads deliberately: it is the canonical money page for
+    // "essay grader" intent (see PATH_ALIASES in src/utils/seo.ts, which points
+    // /essay-grader, /ai-essay-grader and /grade-my-essay here), and these 10
+    // guide pages are the largest block of essay-intent internal links we own.
     related: [
+      { label: 'AI College Essay Grader', href: '/ai-essay-editor', teaser: 'Write your essay and see the grade update as you revise.' },
       { label: 'AI Essay Checker', href: '/tools/analyze', teaser: 'Get rubric-based feedback and a polished revision.' },
       { label: 'Thesis Generator', href: '/tools/thesis-generator', teaser: 'Build a strong thesis statement.' },
       { label: 'Essay Outline Generator', href: '/tools/essay-outline', teaser: 'Get a structured outline in 30 seconds.' },
@@ -1084,7 +1095,7 @@ function essayGuidePage(g: EssayGuideMeta): ProgrammaticPageConfig {
       { label: 'Grammar Checker', href: '/tools/grammar-checker', teaser: 'Free spelling and grammar pass.' },
       { label: 'Paraphrasing Tips', href: '/tools/paraphrasing-tips', teaser: 'Spot weak verbs and wordy phrases.' },
     ],
-    primaryCta: { label: 'Try the AI essay checker', page: 'analyze' },
+    primaryCta: { label: 'Grade my essay', page: 'ai-essay-editor' },
     secondaryCta: { label: 'Generate an outline', page: 'essay-outline' },
     datePublished: '2026-04-15',
   };
@@ -1167,11 +1178,12 @@ const bestPages: ProgrammaticPageConfig[] = [
       { question: 'Is WriteScholar genuinely better, or are you biased?', answer: 'I built it, so yes I\'m biased. The honest pitch: preview your essay free, then Pro is $9.99 for your first month and $19.99/mo after — cheaper than Grammarly Premium, with 5-category rubric scoring most tools skip. For workplace writing, Grammarly is better. For creative work, neither.' },
     ],
     related: [
-      { label: 'AI Essay Checker', href: '/tools/analyze', teaser: 'Try the WriteScholar essay grader free.' },
+      { label: 'AI College Essay Grader', href: '/ai-essay-editor', teaser: 'Write, grade and fix your essay in one place.' },
+      { label: 'AI Essay Checker', href: '/tools/analyze', teaser: 'Paste a finished draft for a one-off check.' },
       { label: 'Best flashcard app for med school', href: '/best/flashcard-app-for-medical-school', teaser: 'Top flashcard tools compared.' },
       { label: 'Grammarly alternative', href: '/alternatives/grammarly', teaser: 'WriteScholar vs Grammarly side by side.' },
     ],
-    primaryCta: { label: 'Preview the essay grader', page: 'analyze' },
+    primaryCta: { label: 'Grade my essay', page: 'ai-essay-editor' },
     secondaryCta: { label: 'See pricing', page: 'pricing' },
   },
   {
@@ -1265,7 +1277,7 @@ const bestPages: ProgrammaticPageConfig[] = [
         items: [
           { title: 'For STEM-heavy schedules', body: 'Anki + WriteScholar. Anki for premade content (Anking, etc.); WriteScholar for class-specific notes — preview the AI-generated pack free, then upgrade for full quizzes and decks.' },
           { title: 'For humanities-heavy schedules', body: 'Notion + WriteScholar. Notion for note-taking and research organisation; WriteScholar for essay tools, citations, and study guides.' },
-          { title: 'For occasional studying', body: 'WriteScholar lets you preview essay feedback and study packs on your own work before paying — no credit card. Notion free for note-taking. Don\'t subscribe until you\'ve seen real results.' },
+          { title: 'For occasional studying', body: 'WriteScholar\'s 7-day trial lets you see essay feedback and study packs on your own work before you pay anything, and you can cancel inside it. Notion free for note-taking. Don\'t keep a subscription you are not using.' },
           { title: 'For visual note-takers', body: 'Notability or Goodnotes for handwritten notes on iPad. Then run scanned notes through WriteScholar to generate flashcards/quizzes.' },
         ],
       },
@@ -1273,7 +1285,7 @@ const bestPages: ProgrammaticPageConfig[] = [
     faqs: [
       { question: 'What\'s the single best study app?', answer: 'There isn\'t one, best app depends on your major and study style. Most students end up using 2-3 apps that complement each other.' },
       { question: 'How much should I spend on study apps?', answer: '$0-30/month is reasonable for college. Anything more, you\'re probably paying for features you don\'t use.' },
-      { question: 'Are paid apps worth it over free?', answer: 'Preview free first. If a tool saves you hours per week on essays or exam prep, $9.99 for the first month of Pro is easy ROI — but only after you\'ve seen it work on your own material.' },
+      { question: 'Are paid apps worth it over free?', answer: 'Use the free trial first. If a tool saves you hours per week on essays or exam prep, $9.99 for the first month of Pro is easy ROI, but only after you have seen it work on your own material. Cancel inside the trial if it does not.' },
       { question: 'Can I use multiple apps?', answer: 'Yes, most students do. Notion + Anki + WriteScholar is a common combo. Avoid 5+ apps; switching becomes friction.' },
       { question: 'Are these apps academic-integrity safe?', answer: 'Generating flashcards/quizzes from your own notes is fine. Submitting AI-generated essays is not. Each tool here can be used safely; the user determines whether use is ethical.' },
     ],
@@ -1381,9 +1393,353 @@ const bestPages: ProgrammaticPageConfig[] = [
       { label: 'Best AI essay grader', href: '/best/ai-essay-grader-for-college', teaser: 'Top essay graders compared.' },
     ],
     primaryCta: { label: 'Try citation generator free', page: 'citation-generator-tool' },
-    secondaryCta: { label: 'Read the APA guide', page: 'how-to-cite-sources-apa' },
+    // Guide pages are reached by full path, not a page key: 'how-to-cite-sources-apa'
+    // was not in the router's page map, so this CTA dropped the user on the landing page.
+    secondaryCta: { label: 'Read the APA guide', page: '/guides/how-to-cite-sources-apa' },
   },
 ];
+
+/* ─── WORD-COUNT GUIDES, /guides/how-long-is-a-[n]-word-essay ──
+ *
+ * Targets the "how long is a 500 word essay" / "how many pages is
+ * 1000 words" cluster — the highest-volume follow-up to a word count,
+ * and the intent behind the `word essay counter` queries the site
+ * already gets impressions for.
+ *
+ * Every page is built from real per-length guidance (what the length
+ * is actually assigned for, how to budget it section by section, how
+ * long it takes to write) — the page-count arithmetic is the hook,
+ * not the substance. The counter itself lives at /tools/word-counter
+ * and every page links back to it.
+ *
+ * Conversion basis, stated on each page: 12pt Times New Roman, 1-inch
+ * margins → 250 words per double-spaced page, 500 single-spaced.
+ */
+
+interface WordCountGuideMeta {
+  words: number;
+  /** What this length actually gets assigned for. */
+  context: string;
+  /** Opening paragraph — hand-written per length. */
+  intro: string;
+  /** Section-by-section word budget. */
+  budget: { section: string; words: string; paragraphs: string }[];
+  /** Realistic time to research, draft, and edit. */
+  writingTime: string;
+  /** Total paragraph range for the whole piece. */
+  paragraphs: string;
+  /** Guidance specific to writing at this length. */
+  advice: { title: string; body: string }[];
+  /** Extra length-specific FAQs on top of the computed page-count ones. */
+  faqs: { question: string; answer: string }[];
+}
+
+/** Page count at the two standard spacings. */
+const pagesAt = (words: number, perPage: number): string => {
+  const p = words / perPage;
+  const rounded = p < 10 ? Number(p.toFixed(1)) : Math.round(p);
+  return `${rounded} ${rounded === 1 ? 'page' : 'pages'}`;
+};
+
+const WORD_COUNT_GUIDES_META: WordCountGuideMeta[] = [
+  {
+    words: 250,
+    context: 'discussion board posts, short-answer questions, abstracts, and scholarship blurbs',
+    paragraphs: '2–4 paragraphs',
+    intro:
+      'A 250-word piece is one page double-spaced, and it is the shortest length that still has to behave like an essay: a claim, support for it, and a close. Most 250-word assignments are discussion board posts, exam short answers, or the abstract at the front of a longer paper. The constraint is real — at this length you get roughly two supporting points, not four, and there is no room for a warm-up sentence. Writers who struggle with 250 words are almost always trying to fit a 500-word argument into half the space. The fix is to narrow the claim, not to compress the prose.',
+    budget: [
+      { section: 'Opening claim', words: '30–40', paragraphs: '1 short paragraph' },
+      { section: 'Support', words: '170–190', paragraphs: '2 paragraphs' },
+      { section: 'Close', words: '30–40', paragraphs: '1–2 sentences' },
+    ],
+    writingTime: '30–60 minutes including a read-through, assuming you already have the source material to hand.',
+    advice: [
+      { title: 'Cut the throat-clearing', body: 'At 250 words, "In today\'s society, many people believe that…" costs you 4% of the entire piece before you have said anything. Open on the claim itself.' },
+      { title: 'Two points, not four', body: 'Two well-evidenced points beat four asserted ones. If your brief asks you to cover more ground than that, you are being asked to summarise, not argue — adjust the register accordingly.' },
+      { title: 'Quote sparingly', body: 'A 30-word block quote is 12% of your word count. Paraphrase and cite instead unless the exact wording is the point.' },
+    ],
+    faqs: [
+      { question: 'How many paragraphs is 250 words?', answer: 'Two to four. Academic paragraphs run 100–200 words, so 250 words is typically one short opening, one or two body paragraphs, and a one-sentence close.' },
+      { question: 'Is 250 words enough for a discussion post?', answer: 'For most courses, yes — 250–300 words is the standard discussion board expectation. Check whether your instructor counts the prompt restatement and citations toward the total; most do not.' },
+    ],
+  },
+  {
+    words: 500,
+    context: 'reflection papers, short response essays, scholarship applications, and blog posts',
+    paragraphs: '4–5 paragraphs',
+    intro:
+      'A 500-word essay is two pages double-spaced or one page single-spaced, and it is the most commonly assigned short essay length in secondary and first-year college courses. It is long enough for a proper five-part structure — introduction, three supporting points, conclusion — but short enough that every paragraph has to earn its place. Scholarship committees favour it because it reveals whether you can make a point without padding. The most common failure at this length is spending 150 words on background before reaching the argument, which leaves under 300 for the argument itself.',
+    budget: [
+      { section: 'Introduction + thesis', words: '50–75', paragraphs: '1 paragraph' },
+      { section: 'Body', words: '350–400', paragraphs: '3 paragraphs (~125 each)' },
+      { section: 'Conclusion', words: '50–75', paragraphs: '1 paragraph' },
+    ],
+    writingTime: '1.5–3 hours end to end: 30–45 minutes of planning and research, an hour drafting, and 30 minutes editing.',
+    advice: [
+      { title: 'Three body paragraphs is the natural fit', body: 'At roughly 125 words each, three body paragraphs give you a point, evidence, and analysis apiece. Four paragraphs at 95 words each usually means the analysis gets cut.' },
+      { title: 'Put the thesis in the first 75 words', body: 'A 500-word essay has no room for a slow build. Markers reading a stack of them decide early whether you have a position; make it findable in the opening paragraph.' },
+      { title: 'Write long, then cut 15%', body: 'Drafting to 600 words and cutting back to 500 produces a tighter essay than trying to land on 500 exactly. The cut forces you to drop your weakest supporting point.' },
+    ],
+    faqs: [
+      { question: 'How many paragraphs is a 500-word essay?', answer: 'Five is the standard shape: one introduction, three body paragraphs of roughly 125 words each, and one conclusion. Four paragraphs also works if one body point needs more development.' },
+      { question: 'How long does it take to write a 500-word essay?', answer: 'Around 1.5 to 3 hours in total for most students — roughly 45 minutes planning and researching, an hour drafting, and half an hour editing. The drafting itself is rarely the slow part.' },
+    ],
+  },
+  {
+    words: 750,
+    context: 'standard high-school essays, college application supplements, and opinion pieces',
+    paragraphs: '5–6 paragraphs',
+    intro:
+      'A 750-word essay runs three pages double-spaced and sits in an awkward middle: too long for the tidy five-paragraph shape, too short to develop a counter-argument properly. That extra 250 words over a standard short essay is usually best spent on one of two things — a fourth body paragraph, or deeper analysis in the three you already have. Application supplements often land at this length precisely because it forces a choice about what matters. Depth is almost always the better use of the space than breadth.',
+    budget: [
+      { section: 'Introduction + thesis', words: '80–100', paragraphs: '1 paragraph' },
+      { section: 'Body', words: '550–600', paragraphs: '3–4 paragraphs (~150–190 each)' },
+      { section: 'Conclusion', words: '80–100', paragraphs: '1 paragraph' },
+    ],
+    writingTime: '2.5–4 hours including research, drafting, and a proper editing pass.',
+    advice: [
+      { title: 'Spend the extra words on analysis, not another point', body: 'Going from three points to four at this length gives each one less room. Keeping three and adding 50 words of analysis to each usually reads as more sophisticated work.' },
+      { title: 'This is where counter-arguments start to fit', body: '750 words leaves room for one brief acknowledgement of the opposing view — around 75 words. Any less and it reads as a token gesture.' },
+      { title: 'Watch the introduction creeping', body: 'Introductions tend to grow with the assignment. At 750 words, anything over 100 words of introduction is eating your body paragraphs.' },
+    ],
+    faqs: [
+      { question: 'How many paragraphs is 750 words?', answer: 'Usually five to six: an introduction, three or four body paragraphs of 150–190 words, and a conclusion.' },
+      { question: 'Is 750 words too long for a college application supplement?', answer: 'It depends on the prompt — many supplements cap at 250 or 650 words, and going over is usually a hard cut rather than a deduction. Check the stated limit before writing to 750.' },
+    ],
+  },
+  {
+    words: 1000,
+    context: 'first-year college essays, longer scholarship applications, and take-home assignments',
+    paragraphs: '6–7 paragraphs',
+    intro:
+      'A 1,000-word essay is four pages double-spaced or two single-spaced, and it is the first length where structure has to be planned rather than felt. Four body paragraphs at around 190 words each give you room for a claim, evidence, analysis, and a link back to the thesis in every one — the full shape of an academic paragraph. It is also the length where a weak thesis becomes obvious: an argument that can be exhausted in 500 words gets visibly padded when stretched to 1,000. If you find yourself repeating a point in different words, the problem is upstream in the thesis.',
+    budget: [
+      { section: 'Introduction + thesis', words: '100–130', paragraphs: '1 paragraph' },
+      { section: 'Body', words: '740–800', paragraphs: '4 paragraphs (~190 each)' },
+      { section: 'Conclusion', words: '100–130', paragraphs: '1 paragraph' },
+    ],
+    writingTime: '4–6 hours across two sittings for most students: an hour or two of research, two to three hours drafting, and an hour editing.',
+    advice: [
+      { title: 'Outline before drafting at this length', body: 'Under 750 words you can hold the structure in your head. At 1,000 you cannot — a five-line outline with a word budget per section saves an hour of restructuring later.' },
+      { title: 'Every body paragraph needs evidence', body: 'At roughly 190 words a paragraph, a point without a citation is conspicuous. Four paragraphs means at least four sources for most assignment briefs.' },
+      { title: 'Split the drafting across two sessions', body: 'Drafting 1,000 words in one sitting tends to produce a strong first half and a rushed second. Two sessions with a break between them evens out the quality.' },
+    ],
+    faqs: [
+      { question: 'How many paragraphs is 1,000 words?', answer: 'Six to seven: an introduction, four body paragraphs of roughly 190 words, and a conclusion. Some essays run five longer body paragraphs instead.' },
+      { question: 'How long does it take to write a 1,000-word essay?', answer: 'Four to six hours in total for most students, including research and editing. Pure drafting time is usually two to three hours; the research is what varies.' },
+    ],
+  },
+  {
+    words: 1500,
+    context: 'standard undergraduate essays, mid-term assignments, and seminar responses',
+    paragraphs: '8–10 paragraphs',
+    intro:
+      'A 1,500-word essay is six pages double-spaced and is the workhorse length of undergraduate study. It is long enough to require a genuine argument with development — five or six body paragraphs, a counter-argument, and a conclusion that does more than restate — and it is the length at which markers start expecting engagement with the wider literature rather than a single source per point. Most 1,500-word essays that lose marks do so for structure rather than content: the writer had enough material but no plan for sequencing it, so the argument wanders.',
+    budget: [
+      { section: 'Introduction + thesis', words: '150–190', paragraphs: '1–2 paragraphs' },
+      { section: 'Body', words: '1,100–1,200', paragraphs: '5–6 paragraphs (~200 each)' },
+      { section: 'Counter-argument', words: '150–200', paragraphs: '1 paragraph' },
+      { section: 'Conclusion', words: '150–190', paragraphs: '1 paragraph' },
+    ],
+    writingTime: '8–12 hours spread over several days, including reading. Drafting alone is typically three to four hours.',
+    advice: [
+      { title: 'Sequence your points deliberately', body: 'Strongest point first or last, never buried in the middle. At six body paragraphs the reader forms a judgement well before the end, so lead with something that earns their attention.' },
+      { title: 'Budget the counter-argument in advance', body: 'A counter-argument tacked on at 1,450 words reads as an afterthought. Plan it as its own 150–200 word section from the outline stage.' },
+      { title: 'Check paragraph length variance', body: 'If one paragraph is 350 words and another is 90, the long one is probably two points fused together and the short one is underdeveloped. Even paragraphs signal even thinking.' },
+    ],
+    faqs: [
+      { question: 'How many paragraphs is 1,500 words?', answer: 'Eight to ten: an introduction, five or six body paragraphs of around 200 words, usually a counter-argument paragraph, and a conclusion.' },
+      { question: 'How many sources does a 1,500-word essay need?', answer: 'Most undergraduate briefs expect six to ten sources at this length — roughly one to two per body paragraph. Check your rubric, since some modules set an explicit minimum.' },
+    ],
+  },
+  {
+    words: 2000,
+    context: 'upper-level undergraduate essays, seminar papers, and coursework assignments',
+    paragraphs: '10–13 paragraphs',
+    intro:
+      'A 2,000-word essay is eight pages double-spaced and is where sub-headings start to become acceptable in many disciplines. The additional 500 words over a standard 1,500-word essay is not simply another two paragraphs — it changes what markers expect. At this length an essay should show that you have read around the question, can hold two or three strands of argument at once, and can synthesise sources rather than list them. Padding is very visible here: a 2,000-word essay built from a 1,200-word argument reads as repetitive by the third body section.',
+    budget: [
+      { section: 'Introduction + thesis', words: '200–250', paragraphs: '1–2 paragraphs' },
+      { section: 'Background / context', words: '250–300', paragraphs: '1–2 paragraphs' },
+      { section: 'Body', words: '1,100–1,250', paragraphs: '6–7 paragraphs (~180 each)' },
+      { section: 'Counter-argument', words: '200–250', paragraphs: '1 paragraph' },
+      { section: 'Conclusion', words: '200–250', paragraphs: '1 paragraph' },
+    ],
+    writingTime: '12–16 hours across a week, most of it reading. Drafting is typically four to five hours.',
+    advice: [
+      { title: 'Group body paragraphs into themes', body: 'Seven consecutive paragraphs of equal weight is hard to follow. Grouping them into two or three themed clusters — with or without sub-headings — gives the reader a map.' },
+      { title: 'Synthesise, do not survey', body: 'At 2,000 words, listing what each scholar said in turn is the most common structural weakness. Organise by idea and bring multiple sources to bear on each one.' },
+      { title: 'Leave a day between drafting and editing', body: 'Structural problems in a 2,000-word essay are invisible immediately after writing it. A day\'s gap is worth more than an extra hour of proofreading.' },
+    ],
+    faqs: [
+      { question: 'How many paragraphs is 2,000 words?', answer: 'Ten to thirteen, depending on paragraph length. A typical shape is an introduction, a context section, six or seven body paragraphs, a counter-argument, and a conclusion.' },
+      { question: 'Can I use sub-headings in a 2,000-word essay?', answer: 'In the sciences and social sciences, usually yes. In literature, history, and philosophy, many markers still expect continuous prose — check the brief or ask, because it is a discipline convention rather than a rule.' },
+    ],
+  },
+  {
+    words: 2500,
+    context: 'term papers, extended coursework, and second- and third-year assignments',
+    paragraphs: '13–16 paragraphs',
+    intro:
+      'A 2,500-word essay is ten pages double-spaced and is best planned as sections rather than paragraphs. Two and a half thousand words is enough for a full argument with a literature context, three or four developed strands, a treatment of the opposing view, and a conclusion that draws implications rather than summarising. It is also the length at which unplanned essays reliably fail: without a section-level outline and a word budget, most writers over-invest in the first third and compress the last. Markers see this constantly — a rich opening followed by a thin, rushed final section.',
+    budget: [
+      { section: 'Introduction + thesis', words: '250–300', paragraphs: '2 paragraphs' },
+      { section: 'Literature / context', words: '400–500', paragraphs: '2–3 paragraphs' },
+      { section: 'Body', words: '1,300–1,500', paragraphs: '7–8 paragraphs' },
+      { section: 'Counter-argument', words: '250–300', paragraphs: '1–2 paragraphs' },
+      { section: 'Conclusion', words: '250–300', paragraphs: '1–2 paragraphs' },
+    ],
+    writingTime: '16–22 hours over one to two weeks. Reading and note-taking is usually more than half of it.',
+    advice: [
+      { title: 'Budget by section before you write a word', body: 'Write the five section headings with a word allocation next to each. Then draft to those numbers. This single habit prevents the compressed-ending problem almost entirely.' },
+      { title: 'Track your sources as you draft', body: 'At 2,500 words you will be citing ten to fifteen sources. Building the reference list at the end from memory is where citation errors come from — add each entry as you use it.' },
+      { title: 'Write the conclusion before the final edit', body: 'Draft a rough conclusion at the two-thirds mark. It exposes whether the argument actually arrives anywhere while there is still time to fix it.' },
+    ],
+    faqs: [
+      { question: 'How many paragraphs is 2,500 words?', answer: 'Thirteen to sixteen paragraphs of 150–200 words, usually organised into four or five named sections rather than a flat sequence.' },
+      { question: 'How many references for a 2,500-word essay?', answer: 'Typically ten to fifteen for undergraduate work — roughly one source per 150–250 words. Your rubric or module handbook usually states a minimum.' },
+    ],
+  },
+  {
+    words: 3000,
+    context: 'major term papers, extended projects, and undergraduate dissertation chapters',
+    paragraphs: '16–20 paragraphs',
+    intro:
+      'A 3,000-word essay is twelve pages double-spaced and is a project rather than a sitting. At this length the essay behaves like a small piece of research: it needs a defined question, a stated approach to answering it, sectioned development, and a conclusion that acknowledges limits. Almost every 3,000-word assignment that goes wrong does so at the planning stage — the question was too broad, so the writer covers ground instead of making an argument. Narrowing the question is what makes 3,000 words feel like enough space rather than too much to fill.',
+    budget: [
+      { section: 'Introduction + research question', words: '300–350', paragraphs: '2 paragraphs' },
+      { section: 'Literature / background', words: '500–650', paragraphs: '3–4 paragraphs' },
+      { section: 'Main argument', words: '1,500–1,700', paragraphs: '8–10 paragraphs, 2–3 sections' },
+      { section: 'Counter-argument / limitations', words: '300–400', paragraphs: '2 paragraphs' },
+      { section: 'Conclusion', words: '300–400', paragraphs: '2 paragraphs' },
+    ],
+    writingTime: '25–35 hours over two to three weeks, with reading and note-taking taking the larger share.',
+    advice: [
+      { title: 'Narrow the question until it fits', body: '"The effects of social media on teenagers" needs a book. "How Instagram use relates to sleep quality in 16–18 year olds" fits 3,000 words. The narrower question is the one that produces a real argument.' },
+      { title: 'Use sub-headings unless told otherwise', body: 'Twelve pages of unbroken prose is hard to mark. In most disciplines, three or four sub-headings improve both readability and your structure marks.' },
+      { title: 'Draft sections out of order', body: 'The literature section is usually easiest to write first and the introduction easiest last, once you know what you actually argued. Nothing requires you to write front to back.' },
+    ],
+    faqs: [
+      { question: 'How many paragraphs is 3,000 words?', answer: 'Around sixteen to twenty paragraphs, organised into four or five sections with sub-headings in most disciplines.' },
+      { question: 'How long does a 3,000-word essay take to write?', answer: 'Realistically 25–35 hours spread over two to three weeks, including reading. Attempting it in one or two sittings is where the quality drop-off happens.' },
+    ],
+  },
+  {
+    words: 5000,
+    context: 'capstone projects, dissertation chapters, honours theses, and master\'s essays',
+    paragraphs: '26–34 paragraphs',
+    intro:
+      'A 5,000-word piece is twenty pages double-spaced and is written in sections over weeks, not drafted in sittings. At this length the work is judged as much on architecture as on argument: whether the question is answerable, whether the method suits it, whether the evidence supports the claims, and whether the conclusion earns its confidence. Word count stops being the constraint — most writers find 5,000 words fills faster than expected once the reading is done. The real discipline is deciding what to leave out so the argument stays legible.',
+    budget: [
+      { section: 'Introduction + question', words: '500–600', paragraphs: '3–4 paragraphs' },
+      { section: 'Literature review', words: '1,000–1,200', paragraphs: '6–8 paragraphs' },
+      { section: 'Method / approach', words: '400–600', paragraphs: '2–3 paragraphs' },
+      { section: 'Analysis / argument', words: '2,000–2,400', paragraphs: '12–15 paragraphs, 3–4 sections' },
+      { section: 'Conclusion + limitations', words: '500–700', paragraphs: '3–4 paragraphs' },
+    ],
+    writingTime: '50–80 hours over four to eight weeks, the majority of it reading, note-taking, and revision rather than first-draft writing.',
+    advice: [
+      { title: 'Set a weekly word target, not a deadline sprint', body: '1,200 words a week for four weeks is comfortable. 5,000 words in a weekend produces work that reads exactly like it was written in a weekend.' },
+      { title: 'Keep a running reference file from day one', body: 'At 5,000 words you will cite 25–40 sources. Reconstructing a bibliography at the end costs a full day and is where most referencing penalties originate.' },
+      { title: 'Revise structurally before you revise sentences', body: 'Fixing prose in a section you later cut is wasted work. Get the section order and argument shape settled, then edit the writing.' },
+    ],
+    faqs: [
+      { question: 'How many pages is 5,000 words?', answer: 'Twenty pages double-spaced or ten single-spaced at 12pt with 1-inch margins. Tables, figures, and a reference list add to that and are usually excluded from the word count.' },
+      { question: 'How many sources does a 5,000-word dissertation chapter need?', answer: 'Commonly 25–40 for undergraduate and taught master\'s work. Supervisors care far more about how well you engage each source than about the raw number.' },
+    ],
+  },
+];
+
+function wordCountGuidePage(g: WordCountGuideMeta): ProgrammaticPageConfig {
+  const n = g.words.toLocaleString();
+  const double = pagesAt(g.words, 250);
+  const single = pagesAt(g.words, 500);
+  const readingMin = Math.max(1, Math.ceil(g.words / 200));
+  const speakingMin = Math.max(1, Math.ceil(g.words / 130));
+
+  return {
+    slug: `how-long-is-a-${g.words}-word-essay`,
+    type: 'guide',
+    metaTitle: `How Long Is a ${n}-Word Essay? Pages & Structure | WriteScholar`,
+    metaDescription: `A ${n}-word essay is ${double} double-spaced (${single} single-spaced). Section-by-section word budget, paragraph count, writing time, and a free word counter.`,
+    h1: `How long is a ${n}-word essay?`,
+    subtitle: `${double} double-spaced, ${single} single-spaced — plus how to structure ${n} words section by section.`,
+    eyebrow: `${n}-word essay guide`,
+    accent: '#1CB0F6',
+    intro: g.intro,
+    sections: [
+      {
+        type: 'comparison',
+        heading: `${n} words at a glance`,
+        plain: true,
+        intro: 'Based on 12pt Times New Roman with 1-inch margins — the format nearly every assignment brief assumes.',
+        columns: ['Measure', `${n} words`],
+        rows: [
+          { feature: 'Pages, double-spaced', values: [double] },
+          { feature: 'Pages, single-spaced', values: [single] },
+          { feature: 'Reading time', values: [`${readingMin} min at 200 words per minute`] },
+          { feature: 'Speaking time', values: [`${speakingMin} min at 130 words per minute`] },
+          { feature: 'Typical paragraphs', values: [g.paragraphs] },
+          { feature: 'Usually assigned for', values: [g.context.charAt(0).toUpperCase() + g.context.slice(1)] },
+        ],
+      },
+      {
+        type: 'comparison',
+        heading: `How to budget ${n} words`,
+        plain: true,
+        intro: `Decide the word allocation before drafting. Writers who skip this step reliably over-invest in the opening and compress the ending.`,
+        columns: ['Section', 'Words', 'Paragraphs'],
+        rows: g.budget.map((b) => ({ feature: b.section, values: [b.words, b.paragraphs] })),
+      },
+      {
+        type: 'paragraph',
+        heading: `How long does a ${n}-word essay take to write?`,
+        body: `${g.writingTime} That figure covers the whole job — reading, planning, drafting, and editing — not just time at the keyboard. Students consistently underestimate the reading and overestimate the drafting, which is why ${n}-word assignments started the night before come in thin on evidence rather than short on words.`,
+      },
+      {
+        type: 'list',
+        heading: `Writing well at ${n} words`,
+        items: g.advice,
+      },
+      {
+        type: 'paragraph',
+        heading: 'What the word count usually excludes',
+        body: `Most briefs count the body of the essay only. The title page, abstract, reference list, footnotes, tables, figures, and appendices are normally excluded, and many departments allow a 10% margin either side of the stated limit. Both conventions vary by institution, so check your module handbook before trimming — going under a minimum is treated as an incomplete submission, while going over a hard cap is often cut off mid-sentence by the submission system. Paste just the body text into the word counter to get the number your marker will actually see.`,
+      },
+    ],
+    faqs: [
+      {
+        question: `How many pages is ${n} words?`,
+        answer: `${n} words is ${double} double-spaced or ${single} single-spaced in 12pt Times New Roman with 1-inch margins. Switching to 11pt fits roughly 10% more words per page, 1.5 line spacing lands between the two figures, and handwritten work averages about 125 words per page.`,
+      },
+      ...g.faqs,
+      {
+        question: `How long does it take to read ${n} words out loud?`,
+        answer: `About ${speakingMin} minutes at a normal presentation pace of 130 words per minute, or roughly ${readingMin} minutes to read silently at 200 words per minute. If you are writing to a time slot rather than a word count, budget by speaking time.`,
+      },
+      {
+        question: 'Does the word count include citations and the reference list?',
+        answer: 'In-text citations usually count toward the total; the reference list at the end usually does not. Footnotes vary by discipline — history and law often count them, the sciences typically do not. Check your handbook, because the difference at longer lengths can be several hundred words.',
+      },
+      {
+        question: 'What happens if I go over the word limit?',
+        answer: 'Many institutions allow a 10% margin, some apply a mark deduction beyond it, and some submission systems simply truncate. Treat the stated limit as a maximum rather than a target and aim for 90–95% of it — work submitted at exactly the cap tends to read as padded.',
+      },
+    ],
+    related: [
+      { label: 'Essay Word Counter', href: '/tools/word-counter', teaser: 'Live word, character and page count with a word-limit tracker.' },
+      { label: 'Essay Outline Generator', href: '/tools/essay-outline', teaser: 'Turn your word budget into a section-by-section outline.' },
+      { label: 'Thesis Generator', href: '/tools/thesis-generator', teaser: 'Build the claim the whole essay hangs on.' },
+      { label: 'AI Essay Checker', href: '/tools/analyze', teaser: 'Rubric-based feedback on structure, evidence and style.' },
+      { label: 'Citation Generator', href: '/tools/citation-generator', teaser: 'APA, MLA, Chicago, Harvard and IEEE references.' },
+      { label: 'Readability Score', href: '/tools/readability-score', teaser: 'Check sentence length and reading level before submitting.' },
+    ],
+    primaryCta: { label: 'Count your words', page: 'word-counter' },
+    secondaryCta: { label: 'Generate an outline', page: 'essay-outline' },
+    datePublished: '2026-08-12',
+  };
+}
 
 /* ─── Build the master list ────────────────────────────────────── */
 
@@ -1395,6 +1751,7 @@ export const PROGRAMMATIC_PAGES: ProgrammaticPageConfig[] = [
   cheggAlt,
   grammarlyAlt,
   ...ESSAY_GUIDES_META.map(essayGuidePage),
+  ...WORD_COUNT_GUIDES_META.map(wordCountGuidePage),
   ...bestPages,
 ];
 

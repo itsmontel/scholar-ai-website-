@@ -27,6 +27,36 @@ export const BLOG_DEFAULT_AUTHOR_BIO =
 
 export const blogPostList: BlogPostMeta[] = [
   {
+    slug: 'college-admission-essay-grader',
+    title: 'College Admission Essay Grader: Check Your Personal Statement First',
+    description:
+      'Admissions essays are graded on voice and specificity, not the rubric your coursework uses. What an AI grader can and cannot judge about a personal statement, plus a four-pass revision routine before you submit.',
+    date: '2026-08-17',
+    author: 'WriteScholar Team',
+    readTime: '11 min read',
+    category: 'Guides',
+    keyTakeaways: [
+      'Admissions readers score voice, specificity and reflection. A coursework rubric measures almost none of that, so a generic grader will tell you the wrong thing.',
+      'AI is reliable on the mechanical layer (structure, clarity, word count discipline, cliche detection) and unreliable on whether your story sounds like you.',
+      'Run four separate passes instead of one: story, specificity, sentences, then a human read. Fixing everything at once is how personal statements get flattened.',
+    ],
+  },
+  {
+    slug: 'how-accurate-are-ai-essay-graders',
+    title: 'How Accurate Are AI Essay Graders? A Straight Answer (2026)',
+    description:
+      'What AI essay graders get right, where they measurably fail, and how close estimated grades land next to real professor scores. Includes the bias research and how to read a score without being misled.',
+    date: '2026-08-17',
+    author: 'WriteScholar Team',
+    readTime: '11 min read',
+    category: 'Guides',
+    keyTakeaways: [
+      'Rubric-based scoring is far more reliable than holistic scoring. Asking for one overall number produces the widest error and the most bias.',
+      'Accuracy is highest on structure, citations and mechanics. It is weakest on originality, argument quality and whether you understood the source material.',
+      'Research has found systematic scoring bias against non-native English writers, which is a reason to read category feedback rather than trust a single grade.',
+    ],
+  },
+  {
     slug: 'grade-my-essay-before-submitting',
     title: 'Grade My Essay: How to Check Your Grade Before You Submit (2026)',
     description:

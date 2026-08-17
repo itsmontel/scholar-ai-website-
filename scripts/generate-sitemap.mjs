@@ -109,6 +109,14 @@ function readProgrammaticPages() {
     slugs.forEach((slug) => pages.push({ path: `/guides/${slug}` }));
   }
 
+  // Word-count guides — slugs are built from the `words` field in
+  // WORD_COUNT_GUIDES_META, so derive them the same way the page factory does.
+  const wordCountMatch = src.match(/const WORD_COUNT_GUIDES_META:[\s\S]*?(?=\nfunction wordCountGuidePage)/);
+  if (wordCountMatch) {
+    const counts = [...wordCountMatch[0].matchAll(/^\s*words:\s*(\d+),/gm)].map((m) => m[1]);
+    counts.forEach((n) => pages.push({ path: `/guides/how-long-is-a-${n}-word-essay` }));
+  }
+
   // Best pages — find configs with type: 'best'
   const bestMatches = [...src.matchAll(/slug:\s*'([^']+)'[\s\S]{0,200}?type:\s*'best'/g)];
   bestMatches.forEach((m) => pages.push({ path: `/best/${m[1]}` }));

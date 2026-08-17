@@ -2794,7 +2794,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                 Let&apos;s grade <span className="text-[#A560E8]">your essay</span>
               </h1>
               <p className="mt-1.5 text-stone-500 dark:text-stone-400 font-bold text-[13.5px] sm:text-sm max-w-md mx-auto">
-                Any draft, however rough. Takes about a minute — no card needed.
+                Any draft, however rough. Takes about a minute.
               </p>
             </div>
 

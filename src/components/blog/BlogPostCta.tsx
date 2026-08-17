@@ -26,6 +26,7 @@ const PAGE_HREF: Record<string, string> = {
   badges: '/badges',
   'why-students-choose': '/why-students-choose',
   'study-tools-comparison': '/vs-quizlet-knowt',
+  'ai-essay-editor': '/ai-essay-editor',
 };
 
 function hrefForPage(page: string): string {
@@ -48,8 +49,11 @@ const BlogPostCta: React.FC<BlogPostCtaProps> = ({
   onNavigate,
   primaryPage,
   primaryLabel,
-  secondaryPage = 'analysis',
-  secondaryLabel = 'Open essay analyzer',
+  // Default to the public /ai-essay-editor money page, never the private
+  // /analysis route: that one is noindex + robots-disallowed, so linking to
+  // it from indexable blog posts leaked link equity into a dead end.
+  secondaryPage = 'ai-essay-editor',
+  secondaryLabel = 'Open the AI essay editor',
   footnote = '',
 }) => {
   const go =

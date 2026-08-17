@@ -25,12 +25,12 @@ export const TOOL_SEO_META = {
   analyze: {
     title: 'AI Essay Checker — Feedback in Seconds | WriteScholar',
     description:
-      'Paste your essay and get professor-style feedback with a grade, rubric scores, and line-by-line fixes. See your first preview free, then $9.99 for your first month of Pro.',
+      'Paste your essay and get professor-style feedback with a grade, rubric scores, and line-by-line fixes. 7-day free trial, $0 today, then $9.99 for your first month.',
   },
   'ai-essay-editor': {
     title: 'AI Essay Editor — Write, Grade & Fix Essays | WriteScholar',
     description:
-      'Write your essay in a real editor and get a professor-style grade, a full rubric, and one-click line-by-line fixes. Word in, Word out. Preview free, first month $9.99.',
+      'Write your essay in a real editor and get a professor-style grade, a full rubric, and one-click line-by-line fixes. Word in, Word out. 7-day free trial, $0 today.',
   },
   citations: {
     title: 'Citation Finder — APA, MLA, Chicago | WriteScholar',
@@ -40,7 +40,7 @@ export const TOOL_SEO_META = {
   'study-pack': {
     title: 'AI Study Pack — Flashcards, Quiz & Lesson | WriteScholar',
     description:
-      'Paste your notes once and get a lesson, flashcards, a quiz, and study games. Preview your first study pack free.',
+      'Paste your notes once and get a lesson, flashcards, a quiz, and study games. Build your first study pack on a 7-day free trial, $0 today.',
   },
   summarizer: {
     title: 'AI Summarizer for Papers & Readings | WriteScholar',
@@ -58,9 +58,9 @@ export const TOOL_SEO_META = {
       'Create decks by hand or auto-generate flashcards from your notes in seconds. Fast exam prep without 30 minutes of typing.',
   },
   'word-counter': {
-    title: 'Free Word Counter for Essays & Papers | WriteScholar',
+    title: 'Essay Word Counter — Words, Characters & Pages | WriteScholar',
     description:
-      'Count words, characters, sentences, and paragraphs instantly — built for essays with page or word limits. Free, no signup.',
+      'Free essay word counter with live character, sentence and page counts. See how many pages 500, 1,000 or 2,000 words is, and track your word limit. No signup.',
   },
   'citation-generator-tool': {
     title: 'Free Citation Generator — APA, MLA, Chicago | WriteScholar',

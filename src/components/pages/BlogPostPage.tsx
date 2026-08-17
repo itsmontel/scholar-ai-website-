@@ -6,6 +6,7 @@ import { BLOG_DEFAULT_AUTHOR_BIO, BLOG_DEFAULT_AUTHOR_ROLE, getPostBySlug, getBl
 import BlogPostContent from './BlogPostContent';
 import BlogTocSidebar from '../blog/BlogTocSidebar';
 import BlogShareRail from '../blog/BlogShareRail';
+import BlogMascot from '../blog/BlogMascot';
 import BlogKeyTakeaways from '../blog/BlogKeyTakeaways';
 import BlogPostCta from '../blog/BlogPostCta';
 import { useBlogArticleToc } from '../../hooks/useBlogArticleToc';
@@ -163,8 +164,12 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
   return (
     <LoggedInPageShell user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="blog">
       <main className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-14">
-        {/* Hero */}
-        <header className="max-w-3xl mb-10 md:mb-12">
+        {/* Hero. Flex row so the decorative mascot sits top-right in the
+            space left over by the max-w-3xl text column, without affecting
+            the text measure. `items-start` keeps it level with the
+            breadcrumb rather than vertically centred against a tall H1. */}
+        <div className="flex items-start justify-between gap-8 mb-10 md:mb-12">
+        <header className="max-w-3xl">
           <nav aria-label="Breadcrumb" className="mb-4">
             <ol className="flex flex-wrap items-center gap-1.5 text-sm text-stone-500 dark:text-stone-400">
               <li>
@@ -214,6 +219,9 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
             {post.readTime}
           </p>
         </header>
+
+          <BlogMascot slug={post.slug} />
+        </div>
 
         {/* Three-column layout (desktop) */}
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,200px)_minmax(0,1fr)_minmax(0,56px)] xl:grid-cols-[minmax(0,220px)_minmax(0,680px)_minmax(0,64px)] gap-8 lg:gap-10 xl:gap-12 items-start">

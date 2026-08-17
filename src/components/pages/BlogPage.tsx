@@ -3,6 +3,7 @@ import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
 import LandingSectionLayers from '../common/LandingSectionLayers';
 import NewsletterSubscription from '../common/NewsletterSubscription';
+import BlogMascot from '../blog/BlogMascot';
 import { getBlogPostsSortedDesc, BlogPostMeta } from '../../data/blogPosts';
 import { SITE_ORIGIN, injectJsonLd, removeJsonLd } from '../../utils/seo';
 
@@ -345,6 +346,11 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
           aria-labelledby="blog-page-heading"
         >
           <LandingSectionLayers />
+          {/* Decorative mascot, top right of the hero. Absolute because this
+              page's header is centred, so it cannot ride in a flex row the
+              way the individual post headers do. The section already has
+              overflow-hidden, so it clips cleanly on narrow desktops. */}
+          <BlogMascot className="absolute top-4 right-4 xl:top-6 xl:right-8 z-20" size={120} />
           <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
             <nav className="flex items-center text-sm text-stone-500 dark:text-stone-400 mb-8" aria-label="Breadcrumb">
               <a

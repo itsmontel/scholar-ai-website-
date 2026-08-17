@@ -431,6 +431,342 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
   };
 
   switch (slug) {
+    case 'how-accurate-are-ai-essay-graders':
+      return (
+        <>
+          <p className={p}>
+            Every AI essay grader claims accuracy. Almost none of them define it. The honest answer is that accuracy depends entirely on what you ask the tool to do, and the difference between the best case and the worst case is large enough to change how you should use one.
+          </p>
+          <p className={p}>
+            This is a straight look at where AI grading is reliable, where it measurably fails, and how to read a score without being misled by it. Written by people who build one of these tools, which is a bias worth stating up front.
+          </p>
+
+          <EssayAnalysisIllustration />
+
+          <h2 className={h2}>Two kinds of scoring, two very different accuracies</h2>
+          <p className={p}>
+            The single biggest factor is not which model a tool uses. It is whether it scores holistically or against explicit criteria.
+          </p>
+          <p className={p}>
+            <strong>Holistic scoring</strong> is asking &quot;rate this essay out of 10&quot;. The model produces one number from an overall impression. This is where accuracy is worst: the same essay submitted twice can come back a full grade apart, and the score drifts toward surface fluency, so polished prose making a weak argument tends to score too high.
+          </p>
+          <p className={p}>
+            <strong>Criterion-referenced scoring</strong> asks something narrower: does this essay state a position in the opening paragraph, is each claim supported by cited evidence, do paragraphs open with topic sentences. Each judgement is small, concrete and checkable. Accuracy on those individual questions is much higher, and the results are far more stable between runs.
+          </p>
+          <p className={p}>
+            The practical consequence: a tool that gives you five category scores with reasons is doing something more defensible than one that gives you a single grade, even if the second one feels more satisfying. This is why our <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>AI essay grader</a> reports a category breakdown alongside the estimate rather than the number alone.
+          </p>
+
+          <h2 className={h2}>Why two tools give the same essay different grades</h2>
+          <p className={p}>
+            Run one essay through four graders and you will often get four grades spread across a full letter. That is not four different levels of intelligence. It is four different opinions about what a B means.
+          </p>
+          <p className={p}>
+            Every grader has to decide what population it is comparing you against. Against all writing on the internet, a competent undergraduate essay looks excellent. Against published academic work it looks weak. Against actual first-year submissions at a mid-sized university it looks about average, which is the only comparison a student cares about. Tools that have not been calibrated against real graded coursework tend to drift generous, because their reference point is the general internet rather than a marking pile.
+          </p>
+          <p className={p}>
+            This is why a grader that feels flattering is usually the least useful one. An inflated grade produces no revision, which means the tool has cost you the hour you spent on it. When you are comparing tools, the useful test is not which score you like. It is which tool tells you something specific enough to act on, and whether the same essay scores roughly the same twice in a row.
+          </p>
+          <p className={p}>
+            Run that consistency test yourself before trusting anything: submit the same unchanged draft twice, an hour apart. A tool whose grade moves more than a few points between identical submissions is not measuring your essay.
+          </p>
+
+          <h2 className={h2}>The three kinds of tool, and what each is for</h2>
+          <p className={p}>
+            &quot;AI essay grader&quot; covers three genuinely different products, and most disappointment comes from using one for another&apos;s job.
+          </p>
+          <p className={p}>
+            <strong>General chatbots.</strong> Ask ChatGPT or Claude to grade an essay and it will. The strength is flexibility: you can paste your actual rubric, argue with the feedback, and ask follow-up questions, which is something no purpose-built tool does as well. The weakness is consistency. Scores drift between sessions, and the model tends to agree with you if you push back, which makes it a poor judge but an excellent discussion partner.
+          </p>
+          <p className={p}>
+            <strong>Purpose-built graders.</strong> These fix the scoring criteria in advance and report the same categories every time, which is what makes the run-to-run comparison meaningful. The trade is rigidity: if your assignment is unusual, a fixed rubric measures the wrong things unless you can supply your own.
+          </p>
+          <p className={p}>
+            <strong>AI detectors.</strong> Worth separating out because students conflate them with graders. A detector estimates whether text was machine-generated. It says nothing about quality, and false positives on the writing of non-native English speakers are well documented. If you wrote your essay yourself, a detector has nothing useful to tell you, and a <a href="/tools/grammar-checker" onClick={handleNavigate('grammar-checker')} className={internalLink}>grammar checker</a> is the tool you actually wanted.
+          </p>
+
+          <h2 className={h2}>Where AI grading is genuinely reliable</h2>
+          <p className={p}>
+            <strong>Structure.</strong> Whether an essay has a stated thesis, whether paragraphs have topic sentences, whether the conclusion introduces new claims instead of resolving old ones. These are close to mechanically verifiable, and agreement with human markers is high.
+          </p>
+          <p className={p}>
+            <strong>Citation formatting.</strong> Checking a reference against APA or MLA rules is a rule-following task, which is what these systems are best at. A <a href="/tools/citation-generator" onClick={handleNavigate('citation-generator-tool')} className={internalLink}>citation generator</a> paired with a format check is more reliable than most students are by hand at 1am.
+          </p>
+          <p className={p}>
+            <strong>Mechanics and clarity.</strong> Grammar, sentence length, passive voice, wordiness. Long solved, and the <a href="/tools/readability-score" onClick={handleNavigate('readability-score')} className={internalLink}>readability score</a> quantifies it.
+          </p>
+          <p className={p}>
+            <strong>Coverage against a prompt.</strong> If the prompt asks for three things and you addressed two, a grader will catch it. This is one of the most common real causes of lost marks and one of the easiest wins.
+          </p>
+
+          <h2 className={h2}>Where it fails</h2>
+          <p className={p}>
+            <strong>Originality of argument.</strong> A model cannot tell whether your reading of a text is insightful or merely unusual. It pattern-matches against conventional arguments, which means a genuinely original thesis can be scored down for departing from the expected shape. If you are doing interesting work, expect the tool to under-rate it.
+          </p>
+          <p className={p}>
+            <strong>Whether you understood the material.</strong> An essay can be structurally immaculate and factually confused. Graders are weak at catching a confident misreading of a source, because the writing signals competence even when the content does not.
+          </p>
+          <p className={p}>
+            <strong>Discipline-specific convention.</strong> What earns marks in a philosophy paper differs from a lab report or a history essay. General-purpose graders average across all of it. If your field has a house style, the tool does not know it unless you supply the rubric.
+          </p>
+          <p className={p}>
+            <strong>Your specific marker.</strong> No tool has read the seminar discussion, the assignment sheet&apos;s hidden emphasis, or your professor&apos;s standing objection to first-person writing. This is the irreducible gap, and it is why an estimate should never be treated as a prediction.
+          </p>
+
+          <h2 className={h2}>Accuracy varies by assignment type</h2>
+          <p className={p}>
+            One number for &quot;how accurate&quot; hides a wide spread, because some assignments are far more legible to a model than others.
+          </p>
+          <p className={p}>
+            <strong>Most reliable:</strong> standard argumentative and expository essays, literature reviews, and anything with an explicit structural convention. These have well-defined shapes, so deviation is easy to detect. If you are writing a five-paragraph argument or a research paper with a standard introduction and methods section, expect useful feedback.
+          </p>
+          <p className={p}>
+            <strong>Middling:</strong> close readings and analytical essays on specific texts. Structure still reads fine, but the tool cannot verify whether your interpretation is supported by the passage, so it may approve a confident misreading or flag an unconventional but valid one.
+          </p>
+          <p className={p}>
+            <strong>Least reliable:</strong> reflective writing, creative pieces, personal statements, and discipline-specific formats like legal memos or lab reports. All of these are scored against conventions the general model does not hold. Reflective assignments in particular get penalised for being personal, which is the actual instruction. Supply the rubric or ignore the grade entirely.
+          </p>
+
+          <h2 className={h2}>The bias problem, stated plainly</h2>
+          <p className={p}>
+            Published research has documented systematic scoring bias in language-model grading against non-native English writers, and against writers using non-standard English varieties. Studies from the Center for Democracy and Technology and several university groups have found measurable score gaps affecting exactly the students who most need accurate feedback.
+          </p>
+          <p className={p}>
+            Two things follow from that. First, the bias is strongest in holistic scoring and weakest in explicit criterion scoring, which is another reason to prefer tools that show you categories. Second, if English is your second language, treat a low overall grade with real suspicion and read the specific comments instead. A note saying &quot;paragraph four never connects back to your thesis&quot; is actionable and probably correct. A B-minus with no explanation may be measuring your syntax rather than your thinking.
+          </p>
+
+          <h2 className={h2}>How to read a score properly</h2>
+          <p className={p}>
+            <strong>Read categories, not the total.</strong> The total is a summary of judgements you can inspect. Inspect them. If evidence scored lowest, that is the sentence-level work for tonight.
+          </p>
+          <p className={p}>
+            <strong>Treat it as a floor, not a ceiling.</strong> A grader catching problems means those problems exist. A grader finding nothing does not mean nothing is wrong; it means nothing mechanical is wrong.
+          </p>
+          <p className={p}>
+            <strong>Supply the rubric if you have one.</strong> Accuracy improves substantially when the tool scores against your actual assignment criteria instead of a general academic average. This is the single highest-leverage thing most students never do.
+          </p>
+          <p className={p}>
+            <strong>Re-run after revising.</strong> The direction of movement is more informative than any single score. If your structure category climbed after you fixed transitions, the fix worked, whatever the headline grade says.
+          </p>
+
+          <h2 className={h2}>What to do when the grade looks wrong</h2>
+          <p className={p}>
+            Sometimes the score is simply incorrect, and knowing how to tell is part of using these tools well. Work through it in order.
+          </p>
+          <p className={p}>
+            <strong>Read the reasons, not the number.</strong> If a grader says your evidence is weak, check whether your claims actually carry citations. If the criticism describes something that is genuinely in your essay, the grade is probably fair even if it stings. If the reasons describe an essay you did not write, the tool has misread you and the score is noise.
+          </p>
+          <p className={p}>
+            <strong>Check whether it understood the assignment.</strong> A tool with no rubric assumes a general academic essay. If you were asked for a reflective piece, a lab report, or a close reading, expect the default criteria to punish you for following your actual instructions. Supply the rubric and re-run before concluding anything.
+          </p>
+          <p className={p}>
+            <strong>Look for the fluency trap in reverse.</strong> If English is not your first language, or you write in a plainer register than academic convention expects, a low grade may be measuring surface style rather than substance. Weight the structural feedback, discount the stylistic scoring, and get a human read if the stakes are high.
+          </p>
+          <p className={p}>
+            <strong>Test one specific criticism.</strong> Take the single strongest complaint, fix only that, and re-run. If the relevant category moves and nothing else does, the tool is tracking something real. If the whole grade swings wildly on a small change, it was never measuring carefully in the first place.
+          </p>
+          <p className={p}>
+            The meta-point: a grader is a second opinion, not an authority. Treat a surprising score as a prompt to look at your essay again, which is worth something even when the tool turns out to be wrong.
+          </p>
+
+          <h2 className={h2}>So how accurate is it, in one sentence</h2>
+          <p className={p}>
+            Reliable enough to find most of what is wrong with a draft, and not reliable enough to predict your grade. Used as a diagnostic it is one of the highest-value tools a student has. Used as an oracle it will occasionally be confidently wrong about the most important essay you write that term. The same guidance we give in <a href="/blog/grade-my-essay-before-submitting" className={internalLink}>grade my essay</a> applies: revise from the categories, ignore the prophecy.
+          </p>
+
+          <h2 className={h2}>See the categories, not just a grade</h2>
+          <p className={p}>
+            <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>WriteScholar</a> scores five rubric categories with reasons attached, marks the specific lines behind each judgement, and lets you paste your professor&apos;s own rubric so the analysis matches what you are actually being marked on. See <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for the current first-month offer.
+          </p>
+          <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
+            Grade my essay →
+          </a>
+
+          <BlogFaqAccordion
+            items={[
+              {
+                question: 'How close do AI grades land to real professor scores?',
+                answer:
+                  'On standard academic essays scored against explicit rubric categories, well-calibrated tools usually land within a few points of a human marker. Holistic single-number scoring is considerably less consistent, and can vary by a full grade between runs on the same essay. The category breakdown is the part worth trusting.',
+              },
+              {
+                question: 'Can an AI grader tell if my argument is actually good?',
+                answer:
+                  'Not reliably. It can tell whether your argument is clearly stated, internally consistent and supported by cited evidence, which correlates with quality but is not the same thing. Genuinely original arguments sometimes score lower because they depart from conventional patterns. Judgement of insight still needs a human reader.',
+              },
+              {
+                question: 'Does supplying my assignment rubric improve accuracy?',
+                answer:
+                  "Substantially, and it is the most underused feature in this category. Scoring against your professor's actual criteria replaces a general academic average with the thing you are really being marked on, and it also fixes most discipline-convention mismatches.",
+              },
+              {
+                question: 'Is AI grading biased against non-native English speakers?',
+                answer:
+                  'Research has found measurable bias, concentrated in holistic scoring rather than criterion-based scoring. If English is not your first language, read the specific category comments rather than the overall grade, and give more weight to structural feedback than to stylistic suggestions.',
+              },
+            ]}
+          />
+        </>
+      );
+
+    case 'college-admission-essay-grader':
+      return (
+        <>
+          <p className={p}>
+            A coursework essay and an admissions essay are graded by different species of reader. Your professor has a rubric with categories and point weights. An admissions officer has 40 seconds, 800 other applications that week, and one question: does this sound like a real person I want on campus?
+          </p>
+          <p className={p}>
+            That gap is why students who run a personal statement through a general essay grader often get advice that makes it worse. The tool rewards what rubrics reward: formal structure, hedged claims, topic sentences. Admissions writing rewards nearly the opposite. Here is what an AI grader can genuinely tell you about a personal statement, what it cannot, and the revision order that keeps your voice intact.
+          </p>
+
+          <EssayAnalysisIllustration />
+
+          <h2 className={h2}>What admissions readers actually score</h2>
+          <p className={p}>
+            Most selective schools evaluate a personal statement on four things, none of which appear on a standard coursework rubric. <strong>Specificity:</strong> details only you could have written. <strong>Reflection:</strong> not what happened, but what you now understand because of it. <strong>Voice:</strong> whether it reads like a seventeen-year-old thinking honestly or a committee drafting a mission statement. <strong>Fit:</strong> whether the person on the page belongs at that particular school.
+          </p>
+          <p className={p}>
+            Notice what is missing. Nobody is scoring your thesis statement. Nobody counts topic sentences. A five-paragraph structure, the thing that earns marks in coursework, is a liability here because it signals a template. If you are writing coursework instead, our guide on <a href="/blog/grade-my-essay-before-submitting" className={internalLink}>grading your essay before submitting</a> covers the rubric-based approach that does apply.
+          </p>
+
+          <h2 className={h2}>The two structures that actually work</h2>
+          <p className={p}>
+            Almost every strong personal statement uses one of two shapes, and knowing which one you are attempting makes the revision far easier.
+          </p>
+          <p className={p}>
+            <strong>The narrative.</strong> One moment, told in scene, then unpacked. You are in a specific place at a specific time, something happens or fails to happen, and the second half of the essay works out what it meant. This shape suits people who have one genuinely formative experience and can resist the urge to explain it too early. The failure mode is spending 500 words on plot and 100 on meaning.
+          </p>
+          <p className={p}>
+            <strong>The montage.</strong> Several short vignettes connected by a through-line: a recurring object, a habit, a question you keep returning to. Three or four small scenes, each revealing a different facet, with the connective tissue doing the argumentative work. This suits people whose interesting quality shows up repeatedly in small ways rather than in one dramatic event. The failure mode is a list that never earns its connections, where the reader finishes wondering what held it together.
+          </p>
+          <p className={p}>
+            Pick deliberately. Most weak drafts are a narrative that wanted to be a montage or the reverse, and no amount of sentence-level editing fixes a structural mismatch. An <a href="/tools/essay-outline" onClick={handleNavigate('essay-outline')} className={internalLink}>essay outline</a> is genuinely useful here, not to generate the structure but to see the one you have already written and judge whether it holds.
+          </p>
+
+          <h2 className={h2}>What an AI grader gets right on a personal statement</h2>
+          <p className={p}>
+            The mechanical layer, and it is more useful than it sounds. AI is genuinely reliable at catching the things that quietly sink an application essay: paragraphs that summarise instead of reflecting, an opening that takes 90 words to arrive, word count discipline when you are 140 over the limit and cannot see what to cut, and cliche detection. If your essay contains the phrase &quot;ever since I was young&quot; or &quot;taught me the value of hard work&quot;, a grader will flag it and it is right to.
+          </p>
+          <p className={p}>
+            It is also good at the ratio problem, which is the most common structural failure in personal statements. Strong essays spend roughly a third of their words on the event and two thirds on the meaning. Weak ones invert that: a long story, then two rushed sentences of reflection at the end. That imbalance is measurable, and a structural analysis will show it to you.
+          </p>
+
+          <h2 className={h2}>What it gets wrong, and why</h2>
+          <p className={p}>
+            An AI grader cannot tell you whether your essay sounds like you, because it has no idea what you sound like. It has a model of what admissions essays sound like in aggregate, which is exactly the average you are trying to avoid. Take its stylistic suggestions selectively. If a tool smooths a slightly odd sentence that happens to be the most characteristic line in your essay, keep your version.
+          </p>
+          <p className={p}>
+            It also cannot judge risk. Personal statements that work often do something slightly uncomfortable: admitting a real failure, sitting with an unresolved question, ending without a tidy lesson. Models trained on conventional writing tend to flag those as weaknesses and push you toward resolution. That instinct is wrong for this genre. An unresolved ending written honestly beats a tidy one written to satisfy a scoring function.
+          </p>
+          <p className={p}>
+            And no tool knows the school. Fit is researched, not generated. That part stays your job.
+          </p>
+
+          <h2 className={h2}>A weak paragraph and a strong one</h2>
+          <p className={p}>
+            The difference is easier to see than to describe. Here is a paragraph of the kind that appears in thousands of applications:
+          </p>
+          <p className={p}>
+            <em>&quot;Volunteering at the animal shelter taught me the value of compassion and hard work. Every weekend I would show up and do whatever was needed. It was not always easy, but I learned that helping others is its own reward, and this experience shaped who I am today.&quot;</em>
+          </p>
+          <p className={p}>
+            Nothing in that is false and nothing in it is usable. Every sentence could belong to any applicant at any shelter. There are no proper nouns, no numbers, no specific difficulty, and the reflection is a phrase you could print on a mug. Now the same experience written by someone paying attention:
+          </p>
+          <p className={p}>
+            <em>&quot;The shelter had a dog named Waffle who had been returned three times. My job was to sit in his kennel and read aloud so he would associate people with something other than being left. I read him most of a biology textbook over four months. He was adopted in March by a man who did not ask why the dog flinched. I still do not know if the reading helped, and I have stopped needing it to.&quot;</em>
+          </p>
+          <p className={p}>
+            The second version never says compassion, patience or growth, and it demonstrates all three. It has specifics only this writer could supply, and the last sentence does something rare in application essays: it declines to resolve. That is the level of specificity to aim for, and it is why Pass 2 below matters more than any amount of line editing.
+          </p>
+
+          <h2 className={h2}>The four-pass routine</h2>
+          <p className={p}>
+            The mistake is fixing everything in one read. Personal statements get flattened that way: you accept twenty small suggestions and end up with prose that is cleaner and completely anonymous. Separate the passes.
+          </p>
+          <p className={p}>
+            <strong>Pass 1, story only.</strong> No editing. Ask one question: is the thing I am writing about actually the most interesting thing I could write about? This is the highest-leverage pass and the one everybody skips. A well-edited essay about the wrong subject stays a bad essay.
+          </p>
+          <p className={p}>
+            <strong>Pass 2, specificity.</strong> Go line by line and mark every sentence that could appear in someone else&apos;s essay. &quot;I learned to persevere&quot; goes. &quot;I rewrote the grant application eleven times and my hands shook when I read it aloud&quot; stays. Aim to cut or replace at least a third of the generic sentences. Run the draft through an <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>AI essay editor</a> at this stage: the structural read tells you where the reflection is thin, and you can rewrite in place rather than switching between windows.
+          </p>
+          <p className={p}>
+            <strong>Pass 3, sentences.</strong> Now the mechanical work. Tighten the opening, kill throat-clearing, fix the word count, check the rhythm by reading aloud. A <a href="/tools/grammar-checker" onClick={handleNavigate('grammar-checker')} className={internalLink}>grammar checker</a> handles the last mile, and the <a href="/tools/readability-score" onClick={handleNavigate('readability-score')} className={internalLink}>readability score</a> catches sentences that have grown to 60 words without you noticing.
+          </p>
+          <p className={p}>
+            <strong>Pass 4, a human.</strong> One person who knows you reads it and answers a single question: does this sound like me? No tool can answer that, and no amount of AI feedback substitutes for it. If they hesitate, go back to Pass 2.
+          </p>
+
+          <h2 className={h2}>What to cut when you are over the word limit</h2>
+          <p className={p}>
+            The Common App personal statement caps at 650 words and most students arrive at a first draft somewhere north of 800. Cutting 150 words feels impossible until you know where the fat always is, and it is almost always in the same four places.
+          </p>
+          <p className={p}>
+            <strong>The run-up.</strong> Most drafts take two or three sentences to arrive at the actual opening. Delete everything before the first sentence that would make a stranger curious. This alone usually recovers 40 words.
+          </p>
+          <p className={p}>
+            <strong>Stage directions.</strong> &quot;I walked into the room and sat down and looked at the paper in front of me.&quot; Movement between scenes rarely earns its word count. Cut to the moment that matters.
+          </p>
+          <p className={p}>
+            <strong>Explaining the feeling you just showed.</strong> If you have written a scene where your hands shook, you do not then need to write that you were nervous. Trusting the reader is both better prose and cheaper by the word.
+          </p>
+          <p className={p}>
+            <strong>The summarising final paragraph.</strong> Many drafts end twice: once where the thought genuinely lands, then again with a paragraph restating it in flatter language. Delete the second ending. A <a href="/tools/word-counter" onClick={handleNavigate('word-counter')} className={internalLink}>word counter</a> tells you the number, but the decision about what goes is structural, and cutting in that order preserves voice instead of sanding it off evenly.
+          </p>
+
+          <h2 className={h2}>The supplementals matter more than students think</h2>
+          <p className={p}>
+            The personal statement goes to every school. The supplemental essays go to one, which makes them the only place you can demonstrate fit, and they are where most applications are quietly lost. A &quot;why us&quot; answer that would work for any school with a library and enthusiastic faculty reads as what it is.
+          </p>
+          <p className={p}>
+            Specificity is again the whole game, but the research kind rather than the autobiographical kind. Name the course, the professor whose work connects to something you have actually done, the specific programme structure that changes what you could study. If you cannot name anything that could not be found on ten other schools&apos; sites, you have not finished researching and no editing tool will cover the gap.
+          </p>
+          <p className={p}>
+            A structural read is genuinely useful on supplementals because the failure is usually proportion: 80 percent of the words describing yourself and 20 percent connecting to the school, when a &quot;why us&quot; answer wants close to the reverse. That imbalance is measurable, which means a tool can catch it even though it cannot do the research for you.
+          </p>
+
+          <h2 className={h2}>Is using AI on your admissions essay allowed?</h2>
+          <p className={p}>
+            Feedback is fine. Generation is not, and increasingly it is detectable by a reader rather than a tool. Admissions officers read thousands of essays a season and have developed a reliable instinct for prose with no fingerprints on it. The risk is not that software catches you; it is that a human finds your essay forgettable.
+          </p>
+          <p className={p}>
+            The safe and genuinely useful line: the words are yours, the structure is yours, the story is yours, and AI tells you where a stranger would lose interest. Most schools now state a policy explicitly, so check the ones you are applying to. Our note on <a href="/blog/how-to-avoid-plagiarism" className={internalLink}>avoiding plagiarism</a> covers the same boundary for coursework.
+          </p>
+
+          <h2 className={h2}>Check the draft while you can still change it</h2>
+          <p className={p}>
+            <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>WriteScholar&apos;s essay editor</a> gives you a structural read on your personal statement: where reflection runs thin, which paragraphs summarise instead of thinking, and line-level notes you can apply or ignore one at a time. You write it, it tells you where a tired reader would stop. See <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for the current first-month offer.
+          </p>
+          <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
+            Check my personal statement →
+          </a>
+
+          <BlogFaqAccordion
+            items={[
+              {
+                question: 'Can an AI grader give my admissions essay a score out of 100?',
+                answer:
+                  'It can, but the number means much less here than on coursework. There is no shared rubric across admissions offices, so any score is calibrated against general writing quality rather than what a specific school rewards. Read the category feedback on structure and specificity, and ignore the headline number.',
+              },
+              {
+                question: 'Will admissions officers know I used AI for feedback?',
+                answer:
+                  'There is nothing to detect when the writing is yours. What experienced readers do notice is fully generated prose, which tends to be fluent, tidy and completely anonymous. Using AI to find weak paragraphs leaves no trace because you are the one rewriting them.',
+              },
+              {
+                question: 'How many drafts does a personal statement usually need?',
+                answer:
+                  'Most strong essays go through four to six meaningful drafts over several weeks, plus at least one read from someone who knows the writer. The gap between drafts matters as much as the number: rereading the same paragraph an hour later mostly reproduces your original judgement.',
+              },
+              {
+                question: 'Should I use the same essay for every school?',
+                answer:
+                  'The main personal statement usually stays the same, and supplemental essays should not. Fit is the thing you cannot template, and reused supplements that never name anything specific about the school are the most common avoidable weakness in an application.',
+              },
+            ]}
+          />
+        </>
+      );
+
     case 'grade-my-essay-before-submitting':
       return (
         <>
@@ -464,7 +800,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             You do not need an hour. You need a focused loop:
           </p>
           <p className={p}>
-            <strong>Minutes 0–2: run the grade check.</strong> Paste your draft (or import the Word doc) into an <a href="/tools/analyze" onClick={handleNavigate('analyze')} className={internalLink}>AI essay checker</a>. You get an estimated grade, category scores, and line-level annotations.
+            <strong>Minutes 0–2: run the grade check.</strong> Paste your draft (or import the Word doc) into an <a href="/tools/analyze" onClick={handleNavigate('analyze')} className={internalLink}>AI essay checker</a>. You get an estimated grade, category scores, and line-level annotations. If you would rather keep drafting and revising in one place, the <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>AI college essay grader</a> runs the same check inside a real editor, so the grade updates as you rewrite.
           </p>
           <p className={p}>
             <strong>Minutes 2–12: fix the two lowest categories.</strong> Ignore everything else. If evidence scored lowest, strengthen or replace the weakest two pieces of support — the <a href="/tools/citations" onClick={handleNavigate('citations')} className={internalLink}>citation finder</a> can surface a peer-reviewed source in a minute. If structure scored lowest, fix topic sentences and transitions first; they are the cheapest structural repairs.
@@ -556,7 +892,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <h2 className={h2}>Build your first study guide now</h2>
           <p className={p}>
-            <a href="/tools/study-pack" onClick={handleNavigate('study-pack')} className={internalLink}>WriteScholar&apos;s Study Pack</a> turns one paste of lecture notes into a lesson, flashcards, and a quiz. You can preview it free on your own notes — full lesson plus sample flashcards, no credit card — and unlock the full deck, quiz modes, and study games with Pro. See <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for the current first-month offer.
+            <a href="/tools/study-pack" onClick={handleNavigate('study-pack')} className={internalLink}>WriteScholar&apos;s Study Pack</a> turns one paste of lecture notes into a lesson, flashcards, and a quiz. It runs on a 7-day free trial, so you can build a pack from your own notes and see the full lesson, deck, quiz modes, and study games before paying anything. Nothing is charged today and you can cancel inside the trial. See <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for the current first-month offer.
           </p>
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Turn my notes into a study guide →
@@ -596,7 +932,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             You finish your essay and hit submit. A week later your professor returns it covered in red. The thesis needs work. Your argument drifts in paragraph three. The conclusion does not quite land. You wish someone had caught these issues before you turned it in.
           </p>
           <p className={p}>
-            An AI essay checker does exactly that. Paste your draft, click analyze, and get professor-style feedback in seconds. Not generic corrections. Targeted comments on structure, clarity, argument strength, and academic tone. The kind of feedback that used to require office hours or a writing center appointment. <a href="/dashboard" onClick={handleNavigate('dashboard')} className={internalLink}>WriteScholar&apos;s dashboard</a> gives you one-click access to the analyzer: paste your text and get results in under a minute.
+            An AI essay checker does exactly that. Paste your draft, click analyze, and get professor-style feedback in seconds. Not generic corrections. Targeted comments on structure, clarity, argument strength, and academic tone. The kind of feedback that used to require office hours or a writing center appointment. WriteScholar&apos;s <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>AI essay editor</a> gives you one-click access to the analyzer: paste your text and get results in under a minute.
           </p>
 
           <EssayAnalysisIllustration />
@@ -661,7 +997,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             The biggest mistake students make is turning in first drafts. A single pass with an AI essay checker catches issues you would have missed. Weak thesis. Flabby transitions. Missing evidence. Citation errors. The fixes are usually quick. A stronger draft goes in. Better feedback comes back from your professor. Need to stay focused while you revise? <a href="/focus-mode" onClick={handleNavigate('focus-mode')} className={internalLink}>Focus Mode</a> blocks distracting sites until you study or solve a puzzle. Fewer tabs, fewer rabbit holes.
           </p>
           <p className={p}>
-            <a href="/analysis" onClick={handleNavigate('analysis')} className={internalLink}>WriteScholar&apos;s essay analyzer</a> gives you professor-style feedback in seconds. Inline annotations mark strengths, improvements, and concerns. The grade-level rubric scores your work against academic criteria. Add your assignment rubric and the analysis aligns to your professor&apos;s expectations. Built for college and university students. See our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for details. Free plan includes a one-time analysis preview — see your grade and what to fix before upgrading.
+            <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>WriteScholar&apos;s AI college essay grader</a> gives you professor-style feedback in seconds. Inline annotations mark strengths, improvements, and concerns. The grade-level rubric scores your work against academic criteria. Add your assignment rubric and the analysis aligns to your professor&apos;s expectations. Built for college and university students. See our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for details. Free plan includes a one-time analysis preview — see your grade and what to fix before upgrading.
           </p>
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Check your essay free →
@@ -1157,7 +1493,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <h2 className={h2}>Getting started with WriteScholar study tools</h2>
           <p className={p}>
-            Using WriteScholar&apos;s study tools is straightforward. From your <a href="/dashboard" onClick={handleNavigate('dashboard')} className={internalLink}>dashboard</a>, select the study tool you want to use: flashcards, quiz, or crossword. Paste in your source material: this could be notes from class, a textbook chapter, a Wikipedia article, or any text you need to learn. Customize your settings (number of items, difficulty level, question types), and click generate. Within seconds, you&apos;ll have professional-quality study materials ready to use.
+            Using WriteScholar&apos;s study tools is straightforward. From the <a href="/tools/study-pack" onClick={handleNavigate('study-pack')} className={internalLink}>study pack generator</a>, select the study tool you want to use: flashcards, quiz, or crossword. Paste in your source material: this could be notes from class, a textbook chapter, a Wikipedia article, or any text you need to learn. Customize your settings (number of items, difficulty level, question types), and click generate. Within seconds, you&apos;ll have professional-quality study materials ready to use.
           </p>
           <p className={p}>
             For flashcards, you can study them directly in the browser with a flip-card interface, or export them for offline use. Quizzes give you immediate feedback on each question, with explanations for correct answers. Crosswords can be solved interactively online or printed for pencil-and-paper solving. All your generated materials are saved to your account, so you can return to them anytime.
@@ -2463,7 +2799,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <h2 className={h2}>Find the right tool for your writing</h2>
           <p className={p}>
-            WriteScholar combines grammar and style feedback with citation checking and structure analysis, giving you one place to improve your academic writing from draft to submission. Our tool is built specifically for students and researchers, with support for APA, MLA, Chicago, Harvard, IEEE, and Vancouver citation styles. Check our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing plans</a> to see which option fits your needs, or explore our <a href="/features" onClick={handleNavigate('features')} className={internalLink}>full feature list</a>.
+            WriteScholar combines grammar and style feedback with citation checking and structure analysis, giving you one place to improve your academic writing from draft to submission. The <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>AI essay editor</a> is where those pieces come together: you write the draft, it grades against a rubric, and you apply the fixes without leaving the page. Our tool is built specifically for students and researchers, with support for APA, MLA, Chicago, Harvard, IEEE, and Vancouver citation styles. Check our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing plans</a> to see which option fits your needs, or explore our <a href="/features" onClick={handleNavigate('features')} className={internalLink}>full feature list</a>.
           </p>
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Try WriteScholar Free →
@@ -3115,7 +3451,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             Open a private browser tab and type what you actually need: <em>essay checker</em>, <em>plagiarism checker</em>, <em>grade my essay</em>, <em>APA format</em>, <em>homework help</em>, or <em>research paper help</em>. The autocomplete suggestions are a map of student stress, and every phrase points to a real writing or study problem hiding underneath.
           </p>
           <p className={p}>
-            This guide translates those searches into a practical workflow. You will see which tools match which intent, how to combine a <strong className="text-stone-800 dark:text-stone-200">grammar checker for academic writing</strong> with deeper feedback, and how to stay on the right side of academic integrity while you improve your draft. When you are ready to run analysis on your own text, start from the <a href="/analysis" onClick={handleNavigate('analysis')} className={internalLink}>essay analysis</a> flow or your <a href="/dashboard" onClick={handleNavigate('dashboard')} className={internalLink}>dashboard</a>.
+            This guide translates those searches into a practical workflow. You will see which tools match which intent, how to combine a <strong className="text-stone-800 dark:text-stone-200">grammar checker for academic writing</strong> with deeper feedback, and how to stay on the right side of academic integrity while you improve your draft. When you are ready to run analysis on your own text, start from the <a href="/tools/analyze" onClick={handleNavigate('analyze')} className={internalLink}>essay analysis</a> flow, or draft it inside the <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>AI essay editor</a> so the grade updates as you write.
           </p>
 
           <EssayAnalysisIllustration />
@@ -3170,7 +3506,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <h2 className={h2}>Proofread my paper, spell check, and last-minute uploads</h2>
           <p className={p}>
-            “Proofread my paper” is often the final search before clicking Submit. Slow down: read the prompt one more time, confirm the file name, and skim the first and last paragraphs for alignment. If you use track changes or comments, strip them before export. A last <a href="/analysis" onClick={handleNavigate('analysis')} className={internalLink}>full analysis pass</a> a day before the deadline beats a frantic spell-check five minutes before midnight, especially when you still have room to fix argument gaps.
+            “Proofread my paper” is often the final search before clicking Submit. Slow down: read the prompt one more time, confirm the file name, and skim the first and last paragraphs for alignment. If you use track changes or comments, strip them before export. A last <a href="/tools/analyze" onClick={handleNavigate('analyze')} className={internalLink}>full analysis pass</a> a day before the deadline beats a frantic spell-check five minutes before midnight, especially when you still have room to fix argument gaps.
           </p>
 
           <ExpandedEssayStudentGoogleSearchGuide handleNavigate={handleNavigate} />

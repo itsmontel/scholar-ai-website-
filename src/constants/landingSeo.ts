@@ -15,10 +15,15 @@
  * Description rules:
  *   - 150-160 chars (Google's mobile cutoff)
  *   - Lead with the result ("Paste your essay, ..."), not the feature
- *   - End with a friction-removal phrase ("Free, no credit card") to lift CTR
+ *   - End with a risk-reversal phrase to lift CTR. This used to say
+ *     "Preview free", which stopped being true when the trial gate went
+ *     live (FREEMIUM_PREVIEW = false). Promising a free preview that a
+ *     visitor cannot reach is the most expensive kind of bounce, so the
+ *     phrase is now the trial terms, which are genuinely reassuring:
+ *     nothing is charged up front and it can be cancelled.
  */
 export const LANDING_PAGE_TITLE =
   "AI Essay Grader — Turn B Essays Into A's | WriteScholar";
 
 export const LANDING_META_DESCRIPTION =
-  "Write your essay in a real editor and get a professor-style grade, a full rubric, and one-click fixes. Preview free — first month of Pro is $9.99.";
+  "Write your essay in a real editor and get a professor-style grade, a full rubric, and one-click fixes. 7-day free trial, $0 today, cancel anytime.";

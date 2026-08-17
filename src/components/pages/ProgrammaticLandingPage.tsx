@@ -3,6 +3,7 @@ import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import Footer from '../common/Footer';
 import { lazyWithRetry } from '../../utils/lazyWithRetry';
 import { applyPageSeoTags, injectJsonLd, removeJsonLd, absoluteCanonicalUrl } from '../../utils/seo';
+import { hrefForPage } from '../../utils/pageHref';
 
 const InteractiveDocumentAnalysis = lazyWithRetry(() => import('../landing/InteractiveDocumentAnalysis'));
 
@@ -78,7 +79,9 @@ export interface ProgrammaticPageConfig {
 export type ProgrammaticSection =
   | { type: 'paragraph'; heading?: string; body: string }
   | { type: 'list'; heading: string; items: { title: string; body: string }[] }
-  | { type: 'comparison'; heading: string; columns: string[]; rows: { feature: string; values: string[] }[]; intro?: string }
+  /** `plain` marks a reference table (conversions, budgets) rather than a
+      product round-up — no "★ Pick" winner highlighting. */
+  | { type: 'comparison'; heading: string; columns: string[]; rows: { feature: string; values: string[] }[]; intro?: string; plain?: boolean }
   | { type: 'steps'; heading: string; steps: { title: string; body: string }[] }
   | { type: 'examples'; heading: string; examples: { label: string; before: string; after: string; explanation: string }[] }
   /** Product visual — autoplay demo clip or screenshot inside a device-style
@@ -294,9 +297,12 @@ const ComparisonSection = ({
   productAxis?: 'rows' | 'columns';
 }) => {
   const rowsAreProducts = productAxis === 'rows';
+  // Plain reference tables (word-count conversions, section budgets) have no
+  // product to recommend — skip the winner accent entirely.
+  const isPlain = section.plain === true;
   // Column 1 is "Feature" (the row label). Column 2 is the first product column.
-  const winnerColIndex = 1;
-  const winnerRowIndex = rowsAreProducts
+  const winnerColIndex = isPlain ? -1 : 1;
+  const winnerRowIndex = rowsAreProducts && !isPlain
     ? section.rows.findIndex((r) => r.feature.toLowerCase().includes('writescholar'))
     : -1;
 
@@ -684,23 +690,23 @@ const BestHero = ({
             )}
 
             <div className="mt-7 flex flex-col sm:flex-row gap-3 sm:items-center">
-              <button
-                type="button"
-                onClick={() => onNavigate(config.primaryCta.page)}
+              <a
+                href={hrefForPage(config.primaryCta.page)}
+                onClick={(e) => { e.preventDefault(); onNavigate(config.primaryCta.page); }}
                 className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl font-extrabold text-white border-2 border-b-4 transition-all duration-150 hover:-translate-y-0.5 active:translate-y-0 active:border-b-2 text-[15px]"
                 style={{ backgroundColor: accent, borderColor: '#00000040' }}
               >
                 {config.primaryCta.label}
                 <span aria-hidden>→</span>
-              </button>
+              </a>
               {config.secondaryCta && (
-                <button
-                  type="button"
-                  onClick={() => onNavigate(config.secondaryCta!.page)}
+                <a
+                  href={hrefForPage(config.secondaryCta.page)}
+                  onClick={(e) => { e.preventDefault(); onNavigate(config.secondaryCta!.page); }}
                   className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl font-extrabold text-white border-2 border-b-4 border-white/25 bg-white/10 hover:bg-white/15 transition-all duration-150 hover:-translate-y-0.5 active:translate-y-0 active:border-b-2 text-[15px]"
                 >
                   {config.secondaryCta.label}
-                </button>
+                </a>
               )}
             </div>
 
@@ -997,9 +1003,9 @@ const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) 
           </p>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 max-w-md mx-auto mb-6">
-            <button
-              type="button"
-              onClick={() => onNavigate(config.primaryCta.page)}
+            <a
+              href={hrefForPage(config.primaryCta.page)}
+              onClick={(e) => { e.preventDefault(); onNavigate(config.primaryCta.page); }}
               className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl font-extrabold text-white border-2 border-b-4 transition-all duration-150 hover:-translate-y-0.5 active:translate-y-0 active:border-b-2 text-[15px] shadow-md"
               style={{
                 backgroundColor: accent,
@@ -1009,15 +1015,15 @@ const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) 
             >
               {config.primaryCta.label}
               <span aria-hidden>→</span>
-            </button>
+            </a>
             {config.secondaryCta && (
-              <button
-                type="button"
-                onClick={() => onNavigate(config.secondaryCta!.page)}
+              <a
+                href={hrefForPage(config.secondaryCta.page)}
+                onClick={(e) => { e.preventDefault(); onNavigate(config.secondaryCta!.page); }}
                 className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl font-extrabold text-stone-800 dark:text-stone-100 border-2 border-b-4 border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 hover:border-stone-400 transition-all duration-150 hover:-translate-y-0.5 active:translate-y-0 active:border-b-2 text-[15px]"
               >
                 {config.secondaryCta.label}
-              </button>
+              </a>
             )}
           </div>
 
@@ -1081,18 +1087,18 @@ const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) 
                   Flashcards, quizzes, and AI feedback in one app
                 </h2>
                 <p className="text-stone-700 dark:text-stone-300 text-[14px] leading-relaxed">
-                  Free to start. No credit card. Used by 50,000+ college students.
+                  7-day free trial. $0 today. Used by 50,000+ college students.
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={() => onNavigate(config.primaryCta.page)}
+              <a
+                href={hrefForPage(config.primaryCta.page)}
+                onClick={(e) => { e.preventDefault(); onNavigate(config.primaryCta.page); }}
                 className="hidden sm:inline-flex flex-shrink-0 items-center gap-1.5 px-5 py-2.5 rounded-2xl font-extrabold text-white border-2 border-b-4 text-[14px] transition-transform hover:-translate-y-0.5 active:translate-y-0 active:border-b-2"
                 style={{ backgroundColor: accent, borderColor: accent === '#A560E8' ? '#8A48C7' : accent }}
               >
                 Try free
                 <span aria-hidden>→</span>
-              </button>
+              </a>
             </div>
           </div>
           )}
@@ -1192,16 +1198,16 @@ const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) 
               Ready to try it free?
             </h2>
             <p className="text-stone-700 dark:text-stone-300 max-w-md mx-auto mb-6 leading-relaxed text-[15px]">
-              No credit card. 30 seconds to get started. WriteScholar takes your notes and turns them into the study tools you actually use.
+              Starts with a 7-day free trial, $0 today, cancel anytime. WriteScholar takes your notes and turns them into the study tools you actually use.
             </p>
-            <button
-              type="button"
-              onClick={() => onNavigate(config.primaryCta.page)}
+            <a
+              href={hrefForPage(config.primaryCta.page)}
+              onClick={(e) => { e.preventDefault(); onNavigate(config.primaryCta.page); }}
               className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl font-extrabold text-white border-2 border-b-4 transition-transform hover:-translate-y-0.5 active:translate-y-0 active:border-b-2"
               style={{ backgroundColor: accent, borderColor: accent === '#A560E8' ? '#8A48C7' : accent }}
             >
               {config.primaryCta.label}
-            </button>
+            </a>
           </div>
 
           {/* Related programmatic pages. Cards lift on hover, show a small

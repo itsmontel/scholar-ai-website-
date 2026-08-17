@@ -94,6 +94,14 @@ try {
     slugs.forEach((s) => programmaticPaths.push(`/guides/${s}`));
   }
 
+  // Word-count guides — slug is derived from the `words` field, matching
+  // the wordCountGuidePage factory.
+  const wordCountBlock = content.match(/const WORD_COUNT_GUIDES_META:[\s\S]*?(?=\nfunction wordCountGuidePage)/);
+  if (wordCountBlock) {
+    const counts = [...wordCountBlock[0].matchAll(/^\s*words:\s*(\d+),/gm)].map((m) => m[1]);
+    counts.forEach((n) => programmaticPaths.push(`/guides/how-long-is-a-${n}-word-essay`));
+  }
+
   // Best pages — type: 'best'
   const bestMatches = [...content.matchAll(/slug:\s*'([^']+)'[\s\S]{0,200}?type:\s*'best'/g)];
   bestMatches.forEach((m) => programmaticPaths.push(`/best/${m[1]}`));

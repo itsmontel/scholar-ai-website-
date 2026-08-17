@@ -2772,7 +2772,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               onClick={handleContinueToSignup}
               className="w-full py-3.5 bg-[#58CC02] text-white font-extrabold rounded-2xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all duration-200 flex items-center justify-center"
                 >
-              View full analysis (it&apos;s free)
+              View full analysis (free trial)
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
@@ -2826,7 +2826,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               onClick={handleContinueToSignupFromCitations}
               className="w-full py-3.5 bg-[#58CC02] text-white font-extrabold rounded-2xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all duration-200 flex items-center justify-center"
             >
-              See my citations (it&apos;s free)
+              See my citations (free trial)
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
@@ -2912,7 +2912,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               onClick={handleContinueToSignup}
               className="w-full py-3.5 bg-[#58CC02] text-white font-extrabold rounded-2xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all duration-200 flex items-center justify-center"
             >
-              Get my summary (it&apos;s free)
+              Get my summary (free trial)
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
@@ -2978,7 +2978,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               onClick={handleContinueToSignup}
               className="w-full py-3.5 bg-[#FF9600] text-white font-extrabold rounded-2xl border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all duration-200 flex items-center justify-center"
             >
-              Sign up to unlock Study Tools (it&apos;s free)
+              Sign up to unlock Study Tools (free trial)
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
