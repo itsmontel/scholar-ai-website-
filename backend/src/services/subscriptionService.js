@@ -1345,6 +1345,9 @@ const notifyPreviewFollowups = async () => {
 };
 
 /**
+ * DISABLED in production cron (see server.js) — kept for optional re-enable.
+ * Stacking this with the 24h ending email drove trial cancels.
+ *
  * Hourly: find trialing subscriptions ~48h from expiry (day 5 of a
  * 7-day trial) and send the value-recap email.
  *

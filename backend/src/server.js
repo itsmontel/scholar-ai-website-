@@ -209,17 +209,11 @@ const startServer = async () => {
         await subscriptionService.notifyTrialsEndingSoon();
       }, 60 * 60 * 1000); // 1 hour in milliseconds
 
-      // Trial value recap — every hour, find trialing users ~48h from
-      // expiry (day 5 of 7) and send the usage recap + charge notice.
-      // Runs ahead of the 24h reminder so there's still time to act.
-      // Idempotent via subscriptions.trial_recap_email_sent_at.
-      subscriptionService.notifyTrialValueRecap()
-        .then((result) => console.log('✅ Initial trial value-recap sweep completed:', result))
-        .catch((error) => console.error('❌ Initial trial value-recap sweep failed:', error));
-
-      setInterval(async () => {
-        await subscriptionService.notifyTrialValueRecap();
-      }, 60 * 60 * 1000); // 1 hour in milliseconds
+      // Day-5 trial value-recap is intentionally OFF. Stacking it with
+      // the 24h ending reminder meant two "you're about to be charged /
+      // cancel here" emails in 48 hours, which pushed trial users to
+      // churn. Keep a single charge notice via notifyTrialsEndingSoon.
+      // notifyTrialValueRecap() still exists if we want it back later.
 
       // Winback — daily, find users whose subscription lapsed ~14 days
       // ago and send the one-shot half-price return offer. Idempotent
