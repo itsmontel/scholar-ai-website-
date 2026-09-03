@@ -42,6 +42,7 @@ export function WorkspaceSidebar({
   onNavigateHome,
   user,
   onNavigateAccount,
+  onNavigateBlog,
 }: {
   activeView: WorkspaceView;
   onSelect: (v: WorkspaceView) => void;
@@ -65,6 +66,8 @@ export function WorkspaceSidebar({
   user?: Record<string, unknown> | null;
   /** Account card click — opens the account page. */
   onNavigateAccount?: () => void;
+  /** Guides / blog — signed-in users have no public header. */
+  onNavigateBlog?: () => void;
 }) {
   // The editor is a doc context — keep "My Documents" lit while in it.
   const docsActive = activeView === 'docs' || activeView === 'editor';
@@ -200,6 +203,9 @@ export function WorkspaceSidebar({
       <SectionLabel>Library</SectionLabel>
       <div className="w-full">
         <Item active={docsActive} icon={<I.Doc />} label="My Documents" onClick={() => onSelect('docs')} />
+        {onNavigateBlog && (
+          <Item active={false} icon={<I.Blog />} label="Blog" onClick={onNavigateBlog} />
+        )}
       </div>
 
       {/* ─── Rail footer — XP · upgrade · account. One stack pinned
@@ -338,6 +344,7 @@ export function WorkspaceMobileNav({
   user,
   usage,
   onNavigateAccount,
+  onNavigateBlog,
 }: {
   activeView: WorkspaceView;
   onSelect: (v: WorkspaceView) => void;
@@ -346,6 +353,7 @@ export function WorkspaceMobileNav({
   user?: Record<string, unknown> | null;
   usage?: { used: number; limit: number | null; plan: string } | null;
   onNavigateAccount?: () => void;
+  onNavigateBlog?: () => void;
 }) {
   const [open, setOpen] = useState(false);
   useEffect(() => {
@@ -437,6 +445,9 @@ export function WorkspaceMobileNav({
 
             <p className="px-3 pt-5 pb-2 text-[10.5px] font-extrabold uppercase tracking-[0.16em] text-stone-400">Library</p>
             <Row active={docsActive} icon={<I.Doc />} label="My Documents" onClick={() => pick('docs')} />
+            {onNavigateBlog && (
+              <Row active={false} icon={<I.Blog />} label="Blog" onClick={() => { setOpen(false); onNavigateBlog(); }} />
+            )}
 
             <button
               type="button"

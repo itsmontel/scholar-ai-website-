@@ -27,6 +27,21 @@ export const BLOG_DEFAULT_AUTHOR_BIO =
 
 export const blogPostList: BlogPostMeta[] = [
   {
+    slug: 'first-college-paper-fall-semester',
+    title: 'First College Paper of the Semester: A 3-Week Plan After Classes Start',
+    description:
+      'College just started back across the US. How professors actually grade the first paper, what to do in weeks 1–3, and a routine that keeps you from submitting a summer-brain draft.',
+    date: '2026-09-03',
+    author: 'WriteScholar Team',
+    readTime: '11 min read',
+    category: 'Guides',
+    keyTakeaways: [
+      'The first paper is often a calibration: professors use it to see who read the prompt, who can cite, and who still writes like high school.',
+      'Weeks 1–2 are for the syllabus, notes, and a study pack — not for waiting until the night before the draft is due.',
+      'Grade the draft against the assignment rubric before you submit. The first paper sets the tone for how that professor reads everything else you write.',
+    ],
+  },
+  {
     slug: 'college-admission-essay-grader',
     title: 'College Admission Essay Grader: Check Your Personal Statement First',
     description:

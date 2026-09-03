@@ -20,6 +20,7 @@ export const sidebarIcons = {
   Pack: () => (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.9} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 3.2l8.5 4.3-8.5 4.3-8.5-4.3L12 3.2z" /><path strokeLinecap="round" strokeLinejoin="round" d="M3.5 12l8.5 4.3 8.5-4.3M3.5 16.4l8.5 4.4 8.5-4.4" /></svg>),
   Cite: () => (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.9} viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="4" /><path strokeLinecap="round" strokeLinejoin="round" d="M9.6 15.2c-1.5 0-2.4-1-2.4-2.4 0-1.9 1.3-3.4 3.1-4.1M16 15.2c-1.5 0-2.4-1-2.4-2.4 0-1.9 1.3-3.4 3.1-4.1" /></svg>),
   Game: () => (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.9} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M7.6 7.5h8.8a4.5 4.5 0 014.44 5.26l-.62 3.62A2.9 2.9 0 0117.36 18c-.9 0-1.74-.42-2.28-1.14L14 15.5h-4l-1.08 1.36A2.86 2.86 0 016.64 18a2.9 2.9 0 01-2.86-3.62l.62-3.62A4.5 4.5 0 017.6 7.5z" /><path strokeLinecap="round" strokeLinejoin="round" d="M7.7 11.6h2.4m-1.2-1.2v2.4M15.4 11h.01M17.4 12.6h.01" /></svg>),
+  Blog: () => (<svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.9} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2M7 8h6v4H7V8zM7 16h6" /></svg>),
 };
 
 /* ─── Workspace sidebar ──────────────────────────────────────

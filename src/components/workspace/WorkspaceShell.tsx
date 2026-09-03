@@ -16,8 +16,10 @@ export function WorkspaceShell({
   onNavigateHome,
   user,
   onNavigateAccount,
+  onNavigateBlog,
   topBar,
   banner,
+  footer,
 }: {
   activeView: WorkspaceView;
   onSelect: (v: WorkspaceView) => void;
@@ -43,12 +45,16 @@ export function WorkspaceShell({
   user?: Record<string, unknown> | null;
   /** Account card click — opens the account page. */
   onNavigateAccount?: () => void;
+  /** Blog / guides — signed-in chrome has no public header. */
+  onNavigateBlog?: () => void;
   /** Optional slim top-right toolbar (Saved Materials / Pomodoro /
       Avatar). Floats over the content area; replaces the global
       site Header when present. */
   topBar?: ReactNode;
   /** Full-width strip at the top of the content column (promo, etc.). */
   banner?: ReactNode;
+  /** Optional site footer at the bottom of the content column. */
+  footer?: ReactNode;
 }) {
   return (
     <div className="flex w-full min-h-screen items-stretch">
@@ -64,6 +70,7 @@ export function WorkspaceShell({
         onNavigateHome={onNavigateHome}
         user={user}
         onNavigateAccount={onNavigateAccount}
+        onNavigateBlog={onNavigateBlog}
       />
       <WorkspaceMobileNav
         activeView={activeView}
@@ -72,8 +79,9 @@ export function WorkspaceShell({
         user={user}
         usage={usage}
         onNavigateAccount={onNavigateAccount}
+        onNavigateBlog={onNavigateBlog}
       />
-      <div className="relative flex-1 min-w-0">
+      <div className="relative flex flex-col flex-1 min-w-0">
         {banner}
         {topBar && (
           <div className="pointer-events-none absolute top-3 right-3 sm:top-4 sm:right-4 lg:top-5 lg:right-5 z-50">
@@ -83,10 +91,11 @@ export function WorkspaceShell({
         {bare ? (
           children
         ) : (
-          <div className={`px-4 sm:px-7 lg:px-10 ${topBar ? 'pt-16 sm:pt-20 lg:pt-4 pb-6 sm:pb-9' : 'py-6 sm:py-9'}`}>
+          <div className={`flex-1 px-4 sm:px-7 lg:px-10 ${topBar ? 'pt-16 sm:pt-20 lg:pt-4 pb-6 sm:pb-9' : 'py-6 sm:py-9'}`}>
             <div className="max-w-[1500px]">{children}</div>
           </div>
         )}
+        {footer}
       </div>
     </div>
   );

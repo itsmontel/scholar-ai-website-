@@ -54,6 +54,26 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
     ];
     const color = colors[index % colors.length];
 
+    if (post.slug.includes('first-college') || post.slug.includes('fall-semester')) {
+      return (
+        <svg viewBox="0 0 200 140" fill="none" className="w-full h-full">
+          <rect width="200" height="140" fill="#F3EAFF" />
+          <rect x="28" y="38" width="52" height="68" rx="4" fill="white" stroke="#A560E8" strokeWidth="2" />
+          <line x1="36" y1="52" x2="72" y2="52" stroke="#C9A0F0" strokeWidth="2" />
+          <line x1="36" y1="64" x2="68" y2="64" stroke="#8A48C7" strokeWidth="2" />
+          <line x1="36" y1="76" x2="70" y2="76" stroke="#C9A0F0" strokeWidth="2" />
+          <line x1="36" y1="88" x2="60" y2="88" stroke="#C9A0F0" strokeWidth="2" />
+          <rect x="92" y="32" width="80" height="76" rx="6" fill="white" stroke="#7733B5" strokeWidth="2" />
+          <text x="132" y="52" textAnchor="middle" fontSize="9" fill="#7733B5" fontWeight="bold">WEEK 1–3</text>
+          <rect x="104" y="60" width="56" height="8" rx="2" fill="#E9DBFF" />
+          <rect x="104" y="74" width="48" height="8" rx="2" fill="#C9A0F0" />
+          <rect x="104" y="88" width="56" height="8" rx="2" fill="#A560E8" />
+          <circle cx="168" cy="112" r="14" fill="#A560E8" />
+          <path d="M162 112 L166 116 L176 104" stroke="white" strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      );
+    }
+
     if (post.slug.includes('check-essay') || post.slug.includes('professor-style')) {
       return (
         <svg viewBox="0 0 200 140" fill="none" className="w-full h-full">

@@ -431,6 +431,152 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
   };
 
   switch (slug) {
+    case 'first-college-paper-fall-semester':
+      return (
+        <>
+          <p className={p}>
+            Classes just started back across the US. Dorms smell like disinfectant and instant ramen. You have a syllabus stack, a campus map you will never look at again, and at least one professor who already mentioned a paper due in week three. That first assignment is not a warm-up in the way students hope. It is how the course decides what kind of writer you are.
+          </p>
+          <p className={p}>
+            Summer writing is emails, group chats, and maybe a personal statement you already submitted. College writing is a prompt, a citation style, and a reader who has seen this assignment a hundred times. Here is how to treat the first three weeks so the first paper does not become the grade you spend October recovering from.
+          </p>
+
+          <EssayAnalysisIllustration />
+
+          <h2 className={h2}>What the first paper is actually for</h2>
+          <p className={p}>
+            Professors rarely say this out loud. The first paper is a calibration. They are checking three things: whether you answered the prompt, whether you can support a claim with a source, and whether you still write in the five-paragraph voice that worked in high school. The content of the paper matters. The habits it reveals matter more, because those habits show up on every later assignment.
+          </p>
+          <p className={p}>
+            That is why a B-minus on paper one is not &quot;just the first one.&quot; It is a first impression of your thesis, your evidence, and your citations. Some instructors curve later work. Many do not. Treat paper one like it will sit next to your name for the rest of the term, because in the grader&apos;s head, it will.
+          </p>
+
+          <h2 className={h2}>Read the syllabus like a contract, not a PDF</h2>
+          <p className={p}>
+            Syllabus week feels like filler. It is not. The document tells you the citation style, the late policy, whether drafts are allowed, and what the rubric actually weights. Students lose easy points in September because they write a fine paper in the wrong format: MLA when the course is APA, a reflection when the prompt asked for an argument, three pages when the cap was 1,200 words.
+          </p>
+          <p className={p}>
+            On day one, write down four facts for every writing course: due date, word or page range, citation style, and the two rubric categories worth the most points. If those categories are thesis and evidence, your first draft should spend time there, not on a prettier introduction. If you are unsure which style you have, our comparison of <a href="/blog/mla-vs-apa-vs-chicago-citation-style" className={internalLink}>MLA, APA, and Chicago</a> is a two-minute check before you format a single footnote.
+          </p>
+          <p className={p}>
+            Then find the first paper prompt and put it in a note you will actually open. Prompts hide in LMS modules, email attachments, and slides from lecture two. If you cannot quote the question you are answering, you are not ready to outline.
+          </p>
+
+          <h2 className={h2}>Weeks 1 and 2: build the file, not the all-nighter</h2>
+          <p className={p}>
+            The students who look &quot;naturally&quot; organised in week four did something boring in week one. They kept notes in one place and turned the first two lectures into something they could quiz themselves on. Rereading slides the night before the paper is how you get a draft that summarises the reading and never makes a claim.
+          </p>
+          <p className={p}>
+            After each lecture, spend ten minutes writing three things: the question the class was answering, one claim the professor emphasised, and one example or source they used. That is enough to start an outline later. If the notes are a mess, turn them into a study guide while they are still fresh. Our walkthrough on <a href="/blog/turn-lecture-notes-into-study-guide" className={internalLink}>turning lecture notes into a study guide</a> is built for exactly this window, and a <a href="/study-pack" onClick={handleNavigate('study-pack')} className={internalLink}>study pack</a> from those notes gives you flashcards and a quiz without rebuilding the semester from scratch.
+          </p>
+          <p className={p}>
+            Do not wait for &quot;when things settle.&quot; Things do not settle. Clubs start, shifts get scheduled, and the first Friday of football season arrives. The file you start in week one is the only reason week three is a revision problem instead of a panic problem.
+          </p>
+
+          <h2 className={h2}>A 3-week plan for the first paper</h2>
+          <p className={p}>
+            Assume a typical US fall calendar: classes start in late August, the first short paper lands between week two and week four. Stretch or compress the days, but keep the order. Editing before you have a claim is how first papers stay vague.
+          </p>
+          <p className={p}>
+            <strong>Week 1, claim and sources.</strong> Answer the prompt in one sentence a classmate could disagree with. That is your thesis, not a topic label. List the two or three sources you are allowed to use (the reading, a lecture, a database article). If you cannot name them yet, you are not writing; you are stalling. An <a href="/tools/essay-outline" onClick={handleNavigate('essay-outline')} className={internalLink}>essay outline</a> is useful here only after the claim exists.
+          </p>
+          <p className={p}>
+            <strong>Week 2, ugly draft.</strong> Write the body first. Introductions written too early become throat-clearing. Each paragraph should do one job: a claim, evidence, and a sentence that ties the evidence back to the thesis. Leave the conclusion for last. If you are stuck on wording, keep going; this draft is for structure, not for sounding smart.
+          </p>
+          <p className={p}>
+            <strong>Week 3, grade it before they do.</strong> Read the rubric again, then run the draft through a real check, not just spellcheck. A <a href="/blog/grade-my-essay-before-submitting" className={internalLink}>pre-submission grade check</a> is for the categories that move the mark: thesis, evidence, structure, citations. Fix the two weakest categories, then do a citation pass. Grammar last. Our note on <a href="/blog/how-to-avoid-plagiarism" className={internalLink}>avoiding plagiarism</a> is the right read if you paraphrased from a PDF at 1 a.m. and cannot remember what you invented.
+          </p>
+
+          <h2 className={h2}>What first-years get wrong in September</h2>
+          <p className={p}>
+            <strong>They write the paper they wanted, not the paper that was assigned.</strong> A prompt that says &quot;evaluate&quot; is not asking for a summary of the chapter. A prompt that says &quot;compare&quot; is not asking for two unrelated summaries stapled together. Before you draft, underline the verb in the prompt. That verb is the assignment.
+          </p>
+          <p className={p}>
+            <strong>They pad.</strong> High school rewarded length. College readers reward a claim that arrives on time. If you are 400 words over, you do not have a richness problem; you have a repetition problem. Cut the run-up, the plot summary of the reading, and the paragraph that restates the introduction. A <a href="/tools/word-counter" onClick={handleNavigate('word-counter')} className={internalLink}>word counter</a> tells you the number. The outline tells you what can go.
+          </p>
+          <p className={p}>
+            <strong>They cite like the bibliography is optional.</strong> The first paper is where missing page numbers and mixed styles get noticed, because the rest of the class is making the same mistakes and the professor is still patient enough to mark them. Pick the style on day one and stay in it. A <a href="/citations" onClick={handleNavigate('citations')} className={internalLink}>citation checker</a> is faster than guessing from memory of eleventh-grade MLA.
+          </p>
+          <p className={p}>
+            <strong>They submit the first readable draft.</strong> Readable is not the same as argued. If a roommate can tell you the topic but not the claim, you are not done. That is the whole difference between a high-school report and a college paper, and it is the thing a rubric-based read catches in minutes.
+          </p>
+
+          <h2 className={h2}>If the &quot;first paper&quot; is actually a discussion post</h2>
+          <p className={p}>
+            A lot of fall courses ease in with a 250-word LMS post. Students treat those as throwaways and then wonder why the first real paper feels like a different sport. The post is practice for the same skills: a claim in the first sentence, a reference to the reading, and a close that does not say &quot;I look forward to hearing everyone&apos;s thoughts.&quot;
+          </p>
+          <p className={p}>
+            Write the discussion post as a miniature paper. Quote or paraphrase one specific line from the assigned text. Say what you think it means. Then say what it does not settle. That last move is analysis, and it is the muscle the week-three paper will test at length. If you cannot do it in 250 words, you will not suddenly be able to do it in 1,200.
+          </p>
+          <p className={p}>
+            Same rule for reading responses and &quot;one-pagers.&quot; They are not busywork. They are the professor sampling whether you did the reading and whether you can think on the page. Keep those files. When the longer paper arrives, you already have claims you can expand instead of starting from a blank document on a Sunday night.
+          </p>
+
+          <h2 className={h2}>How to use AI in week three without handing in someone else&apos;s voice</h2>
+          <p className={p}>
+            The temptation in the first month is to paste the prompt into a chatbot and hope the professor is tired. A lot of them are tired. They are also good at spotting fluent, empty prose, especially on a short first paper where they remember the reading better than you do.
+          </p>
+          <p className={p}>
+            The line that stays safe on most syllabi: you write the draft, a tool tells you where a stranger would get lost, you rewrite the weak parts yourself. Feedback on your sentences is different from generated pages. If your course has an AI policy, read it before week three, not after a flag. The same boundary is in our guide to <a href="/blog/ai-writing-assistant-for-students" className={internalLink}>AI writing assistants for students</a>.
+          </p>
+          <p className={p}>
+            Use AI where it is actually good in September: spotting a missing thesis, a paragraph with no evidence, or a citation style that drifted halfway through. Do not use it to invent a personal story or a source you did not read. First papers are short. There is nowhere to hide a fake quotation.
+          </p>
+
+          <h2 className={h2}>A first-paper checklist the night before</h2>
+          <p className={p}>
+            Print this or put it in your notes app. Do it in order.
+          </p>
+          <p className={p}>
+            One: quote the prompt at the top of the file and check that your thesis answers that sentence, not a neighbouring one. Two: every body paragraph has a claim and a source, not just a vibe. Three: in-text citations match the reference list, names, years, and style. Four: the introduction and conclusion use the same key terms. Five: you are inside the word count, not fashionably over it. Six: the file name is not <em>FinalFinal2</em>, and you uploaded the version you just read.
+          </p>
+          <p className={p}>
+            If you still have forty minutes, run one more structural pass in an <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>essay editor</a> and fix only the two lowest rubric categories. Do not rewrite the whole paper at 11 p.m. First impressions are easier to improve with a sharper thesis than with a new introduction you have not proofread.
+          </p>
+
+          <h2 className={h2}>After you get the grade back</h2>
+          <p className={p}>
+            Read the comments the same day, while you still remember what you meant. If the mark is lower than you expected, look at the rubric categories, not the letter. A paper that lost points on evidence needs different work than a paper that lost points on structure. Save the annotated file. Paper two is easier when you can see the exact habit that cost you the first time.
+          </p>
+          <p className={p}>
+            Office hours in week four are underused and unusually high leverage. Bring the prompt, the graded paper, and one question: &quot;If I fix this category, is that the main gap?&quot; That conversation does more for the rest of the semester than rereading the textbook in a panic.
+          </p>
+
+          <h2 className={h2}>Check the draft while the semester is still early</h2>
+          <p className={p}>
+            <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>WriteScholar&apos;s essay editor</a> reads a draft the way a professor would: thesis, evidence, structure, and citations, with notes on the sentences that are costing you the mark. Use it on paper one so paper two starts from a higher baseline. See <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for the current first-month offer.
+          </p>
+          <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
+            Check my first paper →
+          </a>
+
+          <BlogFaqAccordion
+            items={[
+              {
+                question: 'When do most US colleges assign the first paper?',
+                answer:
+                  'It varies by course, but short response papers and source-based essays often land between week two and week four of a fall term that starts in late August. Seminar and writing-intensive courses can assign something in the first ten days. Treat any date on the syllabus as real even if the professor has not mentioned it again.',
+              },
+              {
+                question: 'Should I write the first paper differently from later ones?',
+                answer:
+                  'The standards are the same: answer the prompt, support claims, cite correctly. The difference is that you have less feedback history, so you should be more literal about the rubric and less experimental with structure. Save the ambitious structure for when you know how that professor reads.',
+              },
+              {
+                question: 'Is it okay to use AI on my first college essay?',
+                answer:
+                  'On most campuses, feedback on a draft you wrote is treated differently from generated text. Read your syllabus. If the policy is silent, ask. Never submit prose you could not explain in office hours, and never invent sources.',
+              },
+              {
+                question: 'What if I am a first-year and have never written a college paper?',
+                answer:
+                  'Start with the verb in the prompt, write a one-sentence claim, then draft body paragraphs with evidence. High-school habits (summary, padding, last-minute MLA) are the usual failure modes, not a lack of intelligence. A rubric-based check exists for this exact gap.',
+              },
+            ]}
+          />
+        </>
+      );
+
     case 'how-accurate-are-ai-essay-graders':
       return (
         <>

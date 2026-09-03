@@ -19,6 +19,7 @@ import type { WorkspaceView } from '../workspace/types';
 import { SIDEBAR_TOOLS } from '../workspace/sidebarTools';
 import { WorkspaceShell } from '../workspace/WorkspaceShell';
 import DashboardTopBar from '../common/DashboardTopBar';
+import Footer from '../common/Footer';
 import PromoBanner from '../common/PromoBanner';
 import GenerationOverlay from '../common/GenerationOverlay';
 import ViewportAutoplayVideo from '../common/ViewportAutoplayVideo';
@@ -4267,13 +4268,13 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
   if (view === 'editor' && openDocId) {
     if (!openDoc) {
       return (
-        <WorkspaceShell activeView={view} onSelect={handleRailSelect} bare headerless collapsed={railCollapsed} onToggle={() => setRailCollapsed((v) => !v)} usage={docUsage} onUpgrade={() => onNavigate('pricing')} onNavigateBadges={() => onNavigate('badges')} onNavigateHome={goHomeDashboard} user={user} onNavigateAccount={() => onNavigate('account')} banner={promoBanner}>
+        <WorkspaceShell activeView={view} onSelect={handleRailSelect} bare headerless collapsed={railCollapsed} onToggle={() => setRailCollapsed((v) => !v)} usage={docUsage} onUpgrade={() => onNavigate('pricing')} onNavigateBadges={() => onNavigate('badges')} onNavigateHome={goHomeDashboard} user={user} onNavigateAccount={() => onNavigate('account')} onNavigateBlog={() => onNavigate('blog')} banner={promoBanner}>
           <div className="px-4 py-16 text-center text-sm font-bold text-stone-500">Loading document…</div>
         </WorkspaceShell>
       );
     }
     return (
-      <WorkspaceShell activeView={view} onSelect={handleRailSelect} bare headerless collapsed={railCollapsed} onToggle={() => setRailCollapsed((v) => !v)} usage={docUsage} onUpgrade={() => onNavigate('pricing')} onNavigateBadges={() => onNavigate('badges')} onNavigateHome={goHomeDashboard} user={user} onNavigateAccount={() => onNavigate('account')} banner={promoBanner}>
+      <WorkspaceShell activeView={view} onSelect={handleRailSelect} bare headerless collapsed={railCollapsed} onToggle={() => setRailCollapsed((v) => !v)} usage={docUsage} onUpgrade={() => onNavigate('pricing')} onNavigateBadges={() => onNavigate('badges')} onNavigateHome={goHomeDashboard} user={user} onNavigateAccount={() => onNavigate('account')} onNavigateBlog={() => onNavigate('blog')} banner={promoBanner}>
         <DocumentEditorView
           docId={openDoc.id}
           initialTitle={openDoc.title}
@@ -4391,8 +4392,10 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
         onNavigateHome={goHomeDashboard}
         user={user}
         onNavigateAccount={() => onNavigate('account')}
+        onNavigateBlog={() => onNavigate('blog')}
         topBar={view === 'hub' || view === 'docs' ? undefined : dashboardTopBar}
         banner={promoBanner}
+        footer={<Footer onNavigate={onNavigate} />}
       >
         {/* First-run acknowledgment — one-shot mascot line shown only on
             the fast-path landing right after onboarding. Tells the user
