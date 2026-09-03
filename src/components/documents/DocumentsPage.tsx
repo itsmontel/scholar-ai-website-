@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import WriteEditor, { exportHtmlAsDocx } from '../write/WriteEditor';
 import mammoth from 'mammoth';
 import AnalyzerPanel, { type AnalyzerResult } from './AnalyzerPanel';
+import AnalysisReportView from './AnalysisReportView';
 import type { AnnotatorAnnotation } from './analyzerExtension';
-import { applyAnnotationRevision, revertAnnotationRevision } from './analyzerExtension';
+import { applyAnnotationRevision, revertAnnotationRevision, normalizeAnnotations, normalizeAnnotationType, normalizeTopSuggestions } from './analyzerExtension';
 import type { Editor } from '@tiptap/react';
 import DailyReviewTab from '../pages/DailyReviewTab';
 import CitationsPanel from './panels/CitationsPanel';
@@ -18,6 +20,7 @@ import { SIDEBAR_TOOLS } from '../workspace/sidebarTools';
 import { WorkspaceShell } from '../workspace/WorkspaceShell';
 import DashboardTopBar from '../common/DashboardTopBar';
 import PromoBanner from '../common/PromoBanner';
+import GenerationOverlay from '../common/GenerationOverlay';
 import ViewportAutoplayVideo from '../common/ViewportAutoplayVideo';
 import { consumePendingWorkspaceView, WS_SWITCH_VIEW_EVENT } from '../workspace/workspaceNavigate';
 import { trackEvent, trackFunnelStep } from '../../utils/analytics';
@@ -798,20 +801,39 @@ function DocumentRow({
   kind?: 'document' | 'pack';
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [menuPos, setMenuPos] = useState<{ top: number; right: number } | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const menuPanelRef = useRef<HTMLDivElement | null>(null);
+  const menuBtnRef = useRef<HTMLButtonElement | null>(null);
+
+  const placeMenu = useCallback(() => {
+    const btn = menuBtnRef.current;
+    if (!btn) return;
+    const r = btn.getBoundingClientRect();
+    setMenuPos({ top: r.bottom + 4, right: window.innerWidth - r.right });
+  }, []);
+
   useEffect(() => {
     if (!menuOpen) return;
+    placeMenu();
     const onDocClick = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+      const t = e.target as Node;
+      if (menuRef.current?.contains(t) || menuPanelRef.current?.contains(t)) return;
+      setMenuOpen(false);
     };
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMenuOpen(false); };
+    const onReposition = () => placeMenu();
     document.addEventListener('mousedown', onDocClick);
     document.addEventListener('keydown', onKey);
+    window.addEventListener('resize', onReposition);
+    window.addEventListener('scroll', onReposition, true);
     return () => {
       document.removeEventListener('mousedown', onDocClick);
       document.removeEventListener('keydown', onKey);
+      window.removeEventListener('resize', onReposition);
+      window.removeEventListener('scroll', onReposition, true);
     };
-  }, [menuOpen]);
+  }, [menuOpen, placeMenu]);
 
   const isPack = kind === 'pack';
   const expiryLabel = !isPack ? expiresInLabel(doc.expiresAt) : null;
@@ -911,6 +933,7 @@ function DocumentRow({
       <div className="relative shrink-0" ref={menuRef}>
         <button
           type="button"
+          ref={menuBtnRef}
           onClick={(e) => { e.stopPropagation(); setMenuOpen((o) => !o); }}
           aria-label={`More actions for ${doc.title || 'Untitled'}`}
           aria-expanded={menuOpen}
@@ -920,9 +943,11 @@ function DocumentRow({
             <circle cx="12" cy="5" r="1.8" /><circle cx="12" cy="12" r="1.8" /><circle cx="12" cy="19" r="1.8" />
           </svg>
         </button>
-        {menuOpen && (
+        {menuOpen && menuPos && createPortal(
           <div
-            className="absolute top-full right-0 mt-1 w-44 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 shadow-[0_18px_38px_-18px_rgba(40,30,60,0.35)] overflow-hidden z-30"
+            ref={menuPanelRef}
+            className="fixed z-[240] w-44 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 shadow-[0_18px_38px_-18px_rgba(40,30,60,0.35)] overflow-hidden"
+            style={{ top: menuPos.top, right: menuPos.right }}
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -950,7 +975,8 @@ function DocumentRow({
                 <I.Trash /> Delete
               </button>
             )}
-          </div>
+          </div>,
+          document.body,
         )}
       </div>
       )}
@@ -1185,7 +1211,7 @@ function DocumentsHub({
     {
       key: 'editor',
       title: 'Start a draft',
-      sub: 'Blank page with live feedback',
+      sub: isPaidUser ? 'Blank page with live feedback' : 'Blank page — unlock on Pro',
       onClick: onNew,
       icon: <I.Wand />,
       image: '/startdraft.png',
@@ -1622,6 +1648,11 @@ function DocumentsHub({
                     style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                   >
                     {t.title}
+                    {t.key === 'editor' && !isPaidUser && (
+                      <span className="ml-1.5 inline-flex align-middle rounded-md bg-[#FFC800] px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wide text-[#5A4500] border border-[#D4A300]">
+                        Pro
+                      </span>
+                    )}
                   </span>
                 </span>
 
@@ -1673,7 +1704,7 @@ function DocumentsHub({
           </button>
         </div>
 
-        <div className="relative overflow-hidden rounded-[1.35rem] border border-[#E4D4F8]/90 dark:border-[#A560E8]/20 bg-gradient-to-br from-[#FBF8FF] via-[#F7F1FF] to-[#F3EAFF]/70 dark:from-stone-900 dark:via-stone-900 dark:to-[#A560E8]/10 p-3 sm:p-3.5">
+        <div className="relative overflow-visible rounded-[1.35rem] border border-[#E4D4F8]/90 dark:border-[#A560E8]/20 bg-gradient-to-br from-[#FBF8FF] via-[#F7F1FF] to-[#F3EAFF]/70 dark:from-stone-900 dark:via-stone-900 dark:to-[#A560E8]/10 p-3 sm:p-3.5">
           <span className="pointer-events-none absolute -bottom-10 right-0 h-28 w-28 rounded-full bg-[#C9A0F0]/20 blur-3xl dark:bg-[#A560E8]/12" aria-hidden />
 
           <div className="relative flex flex-col gap-2 sm:gap-2.5">
@@ -2100,6 +2131,50 @@ function DocsEmptyState({ hasAnyDocs, hasSearch, onNew, onUpload }: { hasAnyDocs
 }
 
 
+function extractComprehensiveText(payload: Record<string, unknown> | null | undefined): string {
+  if (!payload) return '';
+  if (typeof payload.result === 'string' && payload.result.trim()) return payload.result;
+  if (typeof payload.analysis_result === 'string' && payload.analysis_result.trim()) return payload.analysis_result;
+  if (typeof payload.formattedResult === 'string' && payload.formattedResult.trim()) return payload.formattedResult;
+  return '';
+}
+
+function parseAnalysisResults(raw: unknown): Record<string, unknown> {
+  if (!raw) return {};
+  if (typeof raw === 'string') {
+    try {
+      const parsed = JSON.parse(raw) as unknown;
+      return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? (parsed as Record<string, unknown>) : {};
+    } catch {
+      return {};
+    }
+  }
+  return typeof raw === 'object' && !Array.isArray(raw) ? (raw as Record<string, unknown>) : {};
+}
+
+function normalizeRubricRows(raw: unknown): NonNullable<AnalyzerResult['rubric']> {
+  const rubricRaw = raw ?? [];
+  const rubricArr = Array.isArray(rubricRaw)
+    ? rubricRaw
+    : typeof rubricRaw === 'object' && rubricRaw !== null
+      ? Object.entries(rubricRaw as Record<string, unknown>).map(([category, val]) => {
+          const v = val as Record<string, unknown>;
+          return {
+            category,
+            score: typeof v?.score === 'number' ? v.score : undefined,
+            maxScore: typeof v?.maxScore === 'number' ? v.maxScore : typeof v?.max_score === 'number' ? v.max_score : undefined,
+            feedback: typeof v?.feedback === 'string' ? v.feedback : undefined,
+          };
+        })
+      : [];
+  return rubricArr.map((r) => ({
+    category: String(r.category ?? 'Criterion'),
+    score: typeof r.score === 'number' ? r.score : undefined,
+    maxScore: typeof r.maxScore === 'number' ? r.maxScore : undefined,
+    feedback: typeof r.feedback === 'string' ? r.feedback : undefined,
+  }));
+}
+
 /* ─── EDITOR view ───────────────────────────────────────────── */
 function DocumentEditorView({
   docId,
@@ -2126,6 +2201,8 @@ function DocumentEditorView({
   appliedAnnotationIds,
   applyingAnnotationId,
   onOpenFullReport,
+  onOpenClassicReport,
+  documentText,
   wordLimit,
   onUpgrade,
   analysesLeft,
@@ -2158,6 +2235,8 @@ function DocumentEditorView({
   appliedAnnotationIds: Set<string>;
   applyingAnnotationId: string | null;
   onOpenFullReport: () => void;
+  onOpenClassicReport?: () => void;
+  documentText: string;
   wordLimit: number | null;
   onUpgrade: () => void;
   analysesLeft: number | null;
@@ -2195,6 +2274,24 @@ function DocumentEditorView({
   }, []);
   const isReanalyze = !!analyzerResult;
   const noAnalysesLeft = typeof analysesLeft === 'number' && analysesLeft === 0;
+  const [editorMode, setEditorMode] = useState<'draft' | 'report'>('draft');
+  const wasAnalyzingRef = useRef(false);
+
+  useEffect(() => {
+    setEditorMode('draft');
+  }, [docId]);
+
+  useEffect(() => {
+    if (wasAnalyzingRef.current && !analyzerLoading && analyzerResult && !analyzerError) {
+      setEditorMode('report');
+    }
+    wasAnalyzingRef.current = analyzerLoading;
+  }, [analyzerLoading, analyzerResult, analyzerError]);
+
+  const openReport = useCallback(() => {
+    if (analyzerResult) setEditorMode('report');
+    else onOpenFullReport();
+  }, [analyzerResult, onOpenFullReport]);
 
   // External request (e.g. the post-upload nudge) to open the
   // analyze-confirm modal — so the citation style + grade picker
@@ -2226,9 +2323,9 @@ function DocumentEditorView({
   // suggestion) so the AnalyzerHighlights extension can power
   // hover tooltips + Apply revisions without a separate lookup.
   const editorAnnotations = useMemo<AnnotatorAnnotation[] | undefined>(
-    () => analyzerResult?.annotations.map((a) => ({
+    () => analyzerResult?.annotations?.map((a) => ({
       id: a.id,
-      type: a.type,
+      type: normalizeAnnotationType(a.type),
       startIndex: a.startIndex,
       endIndex: a.endIndex,
       text: a.text,
@@ -2261,7 +2358,7 @@ function DocumentEditorView({
   // analyzer result (the editor's annotation array only carries
   // positions). Returns null when nothing's hovered.
   const hoveredAnnotation = useMemo(() => {
-    if (!hoverAnnotationId || !analyzerResult) return null;
+    if (!hoverAnnotationId || !analyzerResult?.annotations) return null;
     return analyzerResult.annotations.find((a) => a.id === hoverAnnotationId) ?? null;
   }, [hoverAnnotationId, analyzerResult]);
 
@@ -2281,7 +2378,7 @@ function DocumentEditorView({
 
   return (
     <div className={`mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 transition-[max-width] duration-200 ${splitLayout ? 'max-w-[1600px]' : 'max-w-6xl'}`}>
-      <div className="flex items-center gap-3 mb-3 sm:mb-4">
+      <div className="flex flex-wrap items-center gap-3 mb-3 sm:mb-4">
         <button
           type="button"
           onClick={onBack}
@@ -2290,9 +2387,64 @@ function DocumentEditorView({
           <I.ArrowL />
           All documents
         </button>
+        {analyzerResult && (
+          <div
+            role="tablist"
+            aria-label="Document view"
+            className="inline-flex rounded-xl border-2 border-b-[3px] border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-0.5"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={editorMode === 'draft'}
+              onClick={() => setEditorMode('draft')}
+              className={`px-3.5 py-1.5 rounded-[10px] text-xs font-extrabold transition-colors ${
+                editorMode === 'draft'
+                  ? 'bg-[#F3EAFF] text-[#7733B5] dark:bg-[#A560E8]/20 dark:text-[#C9A0F0]'
+                  : 'text-stone-500 hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-200'
+              }`}
+            >
+              Draft
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={editorMode === 'report'}
+              onClick={() => setEditorMode('report')}
+              className={`px-3.5 py-1.5 rounded-[10px] text-xs font-extrabold transition-colors ${
+                editorMode === 'report'
+                  ? 'bg-[#F3EAFF] text-[#7733B5] dark:bg-[#A560E8]/20 dark:text-[#C9A0F0]'
+                  : 'text-stone-500 hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-200'
+              }`}
+            >
+              Report
+            </button>
+          </div>
+        )}
       </div>
 
-      <div className={`grid gap-4 lg:gap-6 ${splitLayout ? 'lg:grid-cols-[minmax(0,1fr)_min(360px,31%)]' : 'grid-cols-1'}`}>
+      {editorMode === 'report' && analyzerResult && (
+        <AnalysisReportView
+          title={title}
+          documentText={documentText}
+          result={analyzerResult}
+          revisionsLocked={revisionsLocked}
+          selectedAnnotationId={selectedAnnotationId}
+          appliedAnnotationIds={appliedAnnotationIds}
+          applyingAnnotationId={applyingAnnotationId}
+          onSelectAnnotation={handleSelectAnnotation}
+          onApplyRevision={onApplyRevision}
+          onRevertRevision={onRevertRevision}
+          onEditDraft={() => {
+            setEditorMode('draft');
+            onReopenAnalyzer();
+          }}
+          onReanalyze={openAnalyzeConfirm}
+          onUpgrade={onUpgrade}
+          onOpenClassicReport={onOpenClassicReport}
+        />
+      )}
+      <div className={`${editorMode === 'report' && analyzerResult ? 'hidden' : ''} grid gap-4 lg:gap-6 ${splitLayout ? 'lg:grid-cols-[minmax(0,1fr)_min(360px,31%)]' : 'grid-cols-1'}`}>
         {/* overflow-clip (not -hidden): clips the rounded corners the
             same way visually, but unlike -hidden it does NOT create a
             scroll container — so the editor toolbar's `sticky top-0`
@@ -2448,7 +2600,7 @@ function DocumentEditorView({
               onAnnotationClick={handleSelectAnnotation}
               onRerun={openAnalyzeConfirm}
               onClose={onAnalyzerClose}
-              onOpenFullReport={onOpenFullReport}
+              onOpenFullReport={openReport}
               onApplyRevision={onApplyRevision}
               onRevertRevision={onRevertRevision}
               appliedAnnotationIds={appliedAnnotationIds}
@@ -2516,7 +2668,7 @@ function DocumentEditorView({
       {/* Floating hover tooltip — positioned above the underline
           the cursor is over. Pointer-events-none so it never traps
           mouseout events. Hidden on touch devices (no real hover). */}
-      {hoveredAnnotation && hoverRect && (
+      {editorMode === 'draft' && hoveredAnnotation && hoverRect && (
         <div
           aria-hidden
           className="hidden lg:block fixed z-50 max-w-[320px] p-3 rounded-2xl bg-[#3C3C3C] dark:bg-stone-800 text-white border-2 border-b-4 border-[#2a2a2a] shadow-[0_18px_42px_-12px_rgba(0,0,0,0.45)] pointer-events-none ws-tooltip-in"
@@ -2554,7 +2706,7 @@ function DocumentEditorView({
 
       {/* Mobile / tablet drawer — same panel content, takes the
           bottom half of the viewport. Tap-outside dismisses. */}
-      {showSplit && (
+      {editorMode === 'draft' && showSplit && (
         <div className="lg:hidden fixed inset-x-0 bottom-0 z-40 h-[75dvh] rounded-t-3xl border-t-2 border-l-2 border-r-2 border-b-0 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 shadow-[0_-20px_50px_-15px_rgba(0,0,0,0.20)] overflow-hidden flex flex-col">
           {/* Grab handle */}
           <div className="flex justify-center pt-2 pb-1 shrink-0" aria-hidden>
@@ -2569,7 +2721,7 @@ function DocumentEditorView({
               onAnnotationClick={handleSelectAnnotation}
               onRerun={openAnalyzeConfirm}
               onClose={onAnalyzerClose}
-              onOpenFullReport={onOpenFullReport}
+              onOpenFullReport={openReport}
               onApplyRevision={onApplyRevision}
               onRevertRevision={onRevertRevision}
               appliedAnnotationIds={appliedAnnotationIds}
@@ -3168,23 +3320,23 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
         if (!res.ok) throw new Error('Failed to load document');
         const json = await res.json();
         const d = json?.data?.document;
-        if (cancelled) return;
+        if (cancelled || !d) return;
         setOpenDoc({
           id: String(d.id),
           title: String(d.title ?? 'Untitled'),
-          originalFilename: String(d.originalFilename ?? ''),
-          fileType: String(d.fileType ?? ''),
-          fileSize: Number(d.fileSize ?? 0),
-          wordCount: Number(d.wordCount ?? 0),
-          pageCount: Number(d.pageCount ?? 0),
-          uploadStatus: String(d.uploadStatus ?? 'completed'),
-          createdAt: String(d.createdAt ?? new Date().toISOString()),
-          updatedAt: String(d.updatedAt ?? new Date().toISOString()),
-          lastEditedAt: (d.lastEditedAt ?? null) as string | null,
+          originalFilename: String(d.originalFilename ?? d.original_filename ?? ''),
+          fileType: String(d.fileType ?? d.file_type ?? ''),
+          fileSize: Number(d.fileSize ?? d.file_size ?? 0),
+          wordCount: Number(d.wordCount ?? d.word_count ?? 0),
+          pageCount: Number(d.pageCount ?? d.page_count ?? 0),
+          uploadStatus: String(d.uploadStatus ?? d.upload_status ?? 'completed'),
+          createdAt: String(d.createdAt ?? d.created_at ?? new Date().toISOString()),
+          updatedAt: String(d.updatedAt ?? d.updated_at ?? new Date().toISOString()),
+          lastEditedAt: (d.lastEditedAt ?? d.last_edited_at ?? null) as string | null,
           isDraft: false,
           isUpload: false,
-          contentHtml: (d.contentHtml ?? null) as string | null,
-          contentText: (d.content_text ?? null) as string | null,
+          contentHtml: (d.contentHtml ?? d.content_html ?? null) as string | null,
+          contentText: (d.contentText ?? d.content_text ?? null) as string | null,
         });
       } catch (e) {
         console.error('[Documents] doc load error', e);
@@ -3261,6 +3413,20 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
       setView('editor');
     }
   }, [createNewDoc]);
+
+  /** Blank drafts (write from scratch) are Pro-only; uploads and paste stay free. */
+  const requestBlankDraft = useCallback(() => {
+    if (trialGated) {
+      onTrialGate?.();
+      return;
+    }
+    if (!isPaidPlan(user)) {
+      trackEvent('upgrade_clicked', { source: 'blank_draft' });
+      openUpgradePaywall('blank_draft');
+      return;
+    }
+    void handleNewDoc();
+  }, [trialGated, onTrialGate, user, handleNewDoc]);
 
   const runUpload = useCallback(async (file: File) => {
     setShowAnalyzeNudge(false);
@@ -3594,34 +3760,19 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
       const lockFromIndex = isPaidPlan(user)
         ? Number.POSITIVE_INFINITY
         : Math.floor((text?.length || 0) / 2);
-      const annotations = (payload?.annotations ?? []).map((a: Record<string, unknown>) => {
-        const startIndex = Number(a.startIndex ?? a.start_index ?? 0);
-        return {
-          id: String(a.id ?? Math.random()),
-          type: (a.type as 'strong' | 'improve' | 'concern') ?? 'improve',
-          startIndex,
-          endIndex: Number(a.endIndex ?? a.end_index ?? 0),
-          text: String(a.text ?? ''),
-          comment: String(a.comment ?? ''),
-          suggestion: String(a.suggestion ?? ''),
-          locked: startIndex >= lockFromIndex,
-        };
-      });
+      const annotations = normalizeAnnotations(payload?.annotations).map((a) => ({
+        ...a,
+        locked: a.startIndex >= lockFromIndex,
+      }));
       const rubricRaw = payload?.grade_rubric ?? payload?.rubric ?? [];
       setAnalyzerResult({
         annotations,
         overallScore: typeof payload?.overall_score === 'number' ? payload.overall_score : null,
-        gradeEstimate: payload?.grade_estimate ?? null,
+        gradeEstimate: payload?.grade_estimate != null ? String(payload.grade_estimate) : null,
         clarityRating: typeof payload?.clarity_rating === 'number' ? payload.clarity_rating : null,
-        topSuggestions: Array.isArray(payload?.top_suggestions) ? payload.top_suggestions : [],
-        rubric: Array.isArray(rubricRaw)
-          ? rubricRaw.map((r: Record<string, unknown>) => ({
-              category: String(r.category ?? r.criterion ?? 'Criterion'),
-              score: typeof r.score === 'number' ? r.score : undefined,
-              maxScore: typeof r.maxScore === 'number' ? r.maxScore : typeof r.max_score === 'number' ? r.max_score : undefined,
-              feedback: typeof r.feedback === 'string' ? r.feedback : undefined,
-            }))
-          : [],
+        topSuggestions: normalizeTopSuggestions(payload?.top_suggestions),
+        comprehensiveText: extractComprehensiveText(payload as Record<string, unknown>),
+        rubric: normalizeRubricRows(rubricRaw),
       });
       persistLastAnalysisGradingStyle(gradingStyle);
       try { localStorage.setItem('writescholar_editor_citation_style', citationStyle); } catch { /* noop */ }
@@ -3917,8 +4068,15 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
         const json = await res.json();
         const row = json?.data?.comprehensive;
         if (!row || cancelled) return;
-        const ar = row.analysis_results || row.analysisResults;
-        if (!ar) return;
+        const ar = parseAnalysisResults(row.analysis_results ?? row.analysisResults);
+        const hasPayload =
+          ar.annotations != null ||
+          ar.overall_score != null ||
+          ar.grade_estimate != null ||
+          ar.grade_rubric != null ||
+          ar.gradeRubric != null ||
+          typeof ar.result === 'string';
+        if (!hasPayload) return;
         // Recompute the free-tier positional lock on restore too —
         // otherwise closing the full report (which re-hydrates from
         // the saved row) un-gated every annotation for free users.
@@ -3926,48 +4084,19 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
         const restoreLockFromIndex = isPaidPlan(user)
           ? Number.POSITIVE_INFINITY
           : Math.floor((restoreText.length || 0) / 2);
-        const annotations = (ar.annotations ?? []).map((a: Record<string, unknown>) => {
-          const startIndex = Number(a.startIndex ?? a.start_index ?? 0);
-          return {
-            id: String(a.id ?? Math.random()),
-            type: (a.type as 'strong' | 'improve' | 'concern') ?? 'improve',
-            startIndex,
-            endIndex: Number(a.endIndex ?? a.end_index ?? 0),
-            text: String(a.text ?? ''),
-            comment: String(a.comment ?? ''),
-            suggestion: String(a.suggestion ?? ''),
-            locked: startIndex >= restoreLockFromIndex,
-          };
-        });
-        const rubricRaw = ar.grade_rubric ?? ar.gradeRubric ?? [];
-        // grade_rubric stored as either an object keyed by category
-        // or already-flattened array — normalise to array shape.
-        const rubricArr = Array.isArray(rubricRaw)
-          ? rubricRaw
-          : typeof rubricRaw === 'object' && rubricRaw !== null
-            ? Object.entries(rubricRaw).map(([category, val]) => {
-                const v = val as Record<string, unknown>;
-                return {
-                  category,
-                  score: typeof v?.score === 'number' ? v.score : undefined,
-                  maxScore: typeof v?.maxScore === 'number' ? v.maxScore : typeof v?.max_score === 'number' ? v.max_score : undefined,
-                  feedback: typeof v?.feedback === 'string' ? v.feedback : undefined,
-                };
-              })
-            : [];
+        const annotations = normalizeAnnotations(ar.annotations).map((a) => ({
+          ...a,
+          locked: a.startIndex >= restoreLockFromIndex,
+        }));
         if (cancelled) return;
         setAnalyzerResult({
           annotations,
           overallScore: typeof ar.overall_score === 'number' ? ar.overall_score : null,
-          gradeEstimate: ar.grade_estimate ?? null,
+          gradeEstimate: ar.grade_estimate != null ? String(ar.grade_estimate) : null,
           clarityRating: typeof ar.clarity_rating === 'number' ? ar.clarity_rating : null,
-          topSuggestions: Array.isArray(ar.top_suggestions) ? ar.top_suggestions : [],
-          rubric: rubricArr.map((r: Record<string, unknown>) => ({
-            category: String(r.category ?? r.criterion ?? 'Criterion'),
-            score: typeof r.score === 'number' ? r.score : undefined,
-            maxScore: typeof r.maxScore === 'number' ? r.maxScore : typeof r.max_score === 'number' ? r.max_score : undefined,
-            feedback: typeof r.feedback === 'string' ? r.feedback : undefined,
-          })),
+          topSuggestions: normalizeTopSuggestions(ar.top_suggestions),
+          comprehensiveText: extractComprehensiveText(ar),
+          rubric: normalizeRubricRows(ar.grade_rubric ?? ar.gradeRubric),
         });
         // Restore which revisions were already applied (+ the original
         // text needed to revert) so refresh / another device keeps the
@@ -4147,6 +4276,8 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
           appliedAnnotationIds={new Set(appliedRevisions.keys())}
           applyingAnnotationId={applyingAnnotationId}
           onOpenFullReport={handleOpenFullReport}
+          onOpenClassicReport={handleOpenFullReport}
+          documentText={latestTextRef.current || openDoc.contentText || ''}
           wordLimit={isPaidPlan(user) || !FREE_EDITOR_WORD_LIMIT ? null : FREE_EDITOR_WORD_LIMIT}
           onUpgrade={() => { trackEvent('upgrade_clicked', { source: 'analyzer_panel' }); openUpgradePaywall('analyzer_panel'); }}
           analysesLeft={analysesLeft}
@@ -4155,6 +4286,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
           onCloseRevisionPaywall={() => setRevisionPaywallAnn(null)}
           analyzeConfirmSignal={analyzeConfirmSignal}
         />
+        <GenerationOverlay open={analyzerLoading} variant="analyze" />
         {/* Post-upload nudge — pushes a freshly imported paper toward
             an analysis. Auto-hides once they engage the analyzer. */}
         {showAnalyzeNudge && !analyzerResult && !analyzerLoading && !analyzerError && (
@@ -4271,7 +4403,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
             packs={hubPacks}
             packsLoading={packsLoading}
             loading={listLoading}
-            onNew={() => { if (trialGated) { onTrialGate?.(); return; } handleNewDoc(); }}
+            onNew={requestBlankDraft}
             onOpen={handleOpenDoc}
             onOpenPack={openHubStudyPack}
             onUpload={(f: File) => { if (trialGated) { onTrialGate?.(); return; } handleUpload(f); }}
@@ -4295,7 +4427,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
           <DocumentsLibrary
             docs={docList}
             loading={listLoading}
-            onNew={() => { if (trialGated) { onTrialGate?.(); return; } handleNewDoc(); }}
+            onNew={requestBlankDraft}
             onOpen={handleOpenDoc}
             onUpload={(f: File) => { if (trialGated) { onTrialGate?.(); return; } handleUpload(f); }}
             onDownload={handleDownload}
@@ -4319,7 +4451,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
               onPickDoc={handleAnalyzeFromHub}
               onPasteAnalyze={handlePasteAnalyze}
               onUploadFile={handleUploadAndAnalyze}
-              onNew={handleNewDoc}
+              onNew={requestBlankDraft}
             />
           </>
         )}

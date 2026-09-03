@@ -27,6 +27,8 @@ export interface AnalyzerResult {
   clarityRating?: number | null;
   topSuggestions?: string[];
   rubric?: Array<{ category: string; score?: number; maxScore?: number; feedback?: string }>;
+  /** Long-form write-up from the comprehensive analysis (markdown). */
+  comprehensiveText?: string;
 }
 
 interface AnalyzerPanelProps {
@@ -37,7 +39,7 @@ interface AnalyzerPanelProps {
   onAnnotationClick: (id: string) => void;
   onRerun: () => void;
   onClose: () => void;
-  /** Routes to the standalone /analysis report page for the same doc. */
+  /** Opens the in-document Report mode (same analysis, read-only). */
   onOpenFullReport?: () => void;
   /** Fetches clean replacement prose + splices it into the editor. */
   onApplyRevision?: (annotationId: string) => void;
@@ -76,6 +78,33 @@ const TYPE_META: Record<AnnotationType, { label: string; chip: string; bar: stri
     dot: 'bg-[#FF4B4B]',
   },
 };
+
+const FREE_RUBRIC_PREVIEW_KEYS = ['thesis_and_argument', 'analysis_and_critical_thinking'];
+
+const RUBRIC_CATEGORY_STYLES: Record<string, { accent: string }> = {
+  thesis_and_argument: { accent: 'border-l-[#A560E8]' },
+  response_to_question: { accent: 'border-l-[#FFC800]' },
+  use_of_evidence_and_textual_support: { accent: 'border-l-[#58CC02]' },
+  analysis_and_critical_thinking: { accent: 'border-l-[#FF9600]' },
+  organization_and_structure: { accent: 'border-l-[#1CB0F6]' },
+  writing_quality_and_clarity: { accent: 'border-l-[#FF4B4B]' },
+};
+
+function rubricStyleFor(category: string) {
+  return RUBRIC_CATEGORY_STYLES[category.trim().toLowerCase()] ?? RUBRIC_CATEGORY_STYLES.thesis_and_argument;
+}
+
+function splitRubricForFreePreview(rubric: NonNullable<AnalyzerResult['rubric']>) {
+  const unlocked = [...rubric]
+    .sort((a, b) => {
+      const ai = FREE_RUBRIC_PREVIEW_KEYS.indexOf(a.category);
+      const bi = FREE_RUBRIC_PREVIEW_KEYS.indexOf(b.category);
+      return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+    })
+    .slice(0, 2);
+  const locked = rubric.filter((r) => !unlocked.some((u) => u.category === r.category));
+  return { unlocked, locked };
+}
 
 /* Rubric category keys arrive snake_cased from the model
    (thesis_and_argument, response_to_question…). Render them as
@@ -117,6 +146,7 @@ function ScoreCard({
   onRerun,
   loading,
   locked = false,
+  onUpgrade,
 }: {
   overallScore?: number | null;
   gradeEstimate?: string | null;
@@ -128,7 +158,15 @@ function ScoreCard({
       (grade, /100 score, per-category rubric scores, clarity) with
       "?" so free users get a feel for the paid breakdown. */
   locked?: boolean;
+  onUpgrade?: () => void;
 }) {
+  const { unlockedRubric, lockedRubric } = useMemo(() => {
+    if (!rubric?.length) return { unlockedRubric: [] as NonNullable<typeof rubric>, lockedRubric: [] as NonNullable<typeof rubric> };
+    if (!locked) return { unlockedRubric: rubric, lockedRubric: [] as NonNullable<typeof rubric> };
+    const { unlocked, locked: lockedCategories } = splitRubricForFreePreview(rubric);
+    return { unlockedRubric: unlocked, lockedRubric: lockedCategories };
+  }, [rubric, locked]);
+
   return (
     <div className="rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 overflow-hidden">
       <div className="bg-gradient-to-br from-[#A560E8] to-[#7733B5] text-white px-4 py-3.5">
@@ -145,43 +183,58 @@ function ScoreCard({
           </button>
         </div>
         <div className="mt-2 flex items-baseline gap-3">
-          {typeof overallScore === 'number' && (
-            locked ? (
-              <span className="text-[13px] font-extrabold uppercase tracking-wide text-white/90 leading-tight">
-                Upgrade to see your score /100
-              </span>
-            ) : (
-              <span className="text-2xl sm:text-3xl font-extrabold tabular-nums leading-none">
-                {overallScore}
-                <span className="text-xs font-extrabold text-white/75">/100</span>
-              </span>
-            )
-          )}
-          {gradeEstimate && (
-            <span className="ml-auto inline-flex items-center justify-center px-2.5 py-1 rounded-xl bg-[#FFC800] text-[#6B27A3] text-lg font-extrabold leading-none border-2 border-b-[3px] border-[#D4A300]">
-              {gradeEstimate}
-            </span>
+          {locked ? (
+            <button
+              type="button"
+              onClick={onUpgrade}
+              className="rounded-xl bg-[#FFC800] hover:bg-[#F0BC00] border-2 border-b-[3px] border-[#D4A300] active:border-b-2 active:translate-y-px px-3 py-2 text-left transition-all shadow-[0_6px_18px_-6px_rgba(255,200,0,0.5)]"
+            >
+              <span className="block text-[13px] font-extrabold leading-snug text-[#5A4500]">Unlock your estimated grade</span>
+              <span className="block mt-0.5 text-[10px] font-bold text-[#6B5200]/90">Letter grade & /100 score on Pro</span>
+            </button>
+          ) : (
+            <>
+              {typeof overallScore === 'number' && (
+                <span className="text-2xl sm:text-3xl font-extrabold tabular-nums leading-none">
+                  {overallScore}
+                  <span className="text-xs font-extrabold text-white/75">/100</span>
+                </span>
+              )}
+              {gradeEstimate && (
+                <span className="ml-auto inline-flex items-center justify-center px-2.5 py-1 rounded-xl bg-[#FFC800] text-[#6B27A3] text-lg font-extrabold leading-none border-2 border-b-[3px] border-[#D4A300]">
+                  {gradeEstimate}
+                </span>
+              )}
+            </>
           )}
         </div>
-        {(typeof overallScore === 'number' || gradeEstimate) && (
+        {(locked || typeof overallScore === 'number' || gradeEstimate) && (
           <p className="mt-1.5 text-[10px] font-bold text-white/70 leading-snug">
             {locked
-              ? 'Your estimated grade. Upgrade to Pro for the full score and rubric breakdown.'
+              ? 'Your grade and full rubric unlock on Pro — tap above to see them.'
               : 'Estimated grade & score — an AI guide for revision, not your official grade.'}
           </p>
         )}
       </div>
       {rubric && rubric.length > 0 && (
         <div className="px-3 py-3 space-y-2">
-          {rubric.map((r) => {
+          {unlockedRubric.map((r) => {
             const max = r.maxScore || 100;
             const pct = typeof r.score === 'number' ? Math.round((r.score / max) * 100) : 0;
+            const style = rubricStyleFor(r.category);
             return (
-              <div key={r.category}>
+              <div
+                key={r.category}
+                className={
+                  locked
+                    ? `rounded-xl border border-stone-200 dark:border-stone-700 border-l-[3px] ${style.accent} bg-white dark:bg-stone-900/80 px-2.5 py-2`
+                    : undefined
+                }
+              >
                 <div className="flex justify-between text-[11px] font-bold text-stone-700 dark:text-stone-300 mb-1">
                   <span>{humanizeLabel(r.category)}</span>
                   {typeof r.score === 'number' && (
-                    <span className="tabular-nums">{locked ? '?' : r.score}/{max}</span>
+                    <span className="tabular-nums">{r.score}/{max}</span>
                   )}
                 </div>
                 {typeof r.score === 'number' && (
@@ -195,6 +248,40 @@ function ScoreCard({
               </div>
             );
           })}
+          {lockedRubric.map((r) => {
+            const max = r.maxScore || 100;
+            const style = rubricStyleFor(r.category);
+            return (
+              <div
+                key={r.category}
+                className={`rounded-xl border border-stone-200 dark:border-stone-700 border-l-[3px] ${style.accent} bg-white dark:bg-stone-900/80 px-2.5 py-2`}
+              >
+                <div className="flex justify-between text-[11px] font-bold text-stone-700 dark:text-stone-300 mb-1">
+                  <span>{humanizeLabel(r.category)}</span>
+                  <span className="tabular-nums text-stone-400">?/{max}</span>
+                </div>
+                <div className="relative min-h-[2.75rem] overflow-hidden rounded-lg">
+                  <p className="text-[10px] text-stone-500 blur-[5px] select-none leading-snug" aria-hidden>
+                    {r.feedback || 'Personalized feedback for this category unlocks on Pro.'}
+                  </p>
+                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-white/90 via-white/45 to-transparent dark:from-stone-900/90 dark:via-stone-900/45">
+                    <span className="rounded-full border border-[#A560E8] bg-[#F3EAFF] px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-[#A560E8] dark:border-[#8A48C7] dark:bg-[#A560E8]/20 dark:text-[#C9A0F0]">
+                      Pro
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+          {locked && lockedRubric.length > 0 && onUpgrade && (
+            <button
+              type="button"
+              onClick={onUpgrade}
+              className="mt-1 w-full rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] px-3 py-2 text-[11px] font-extrabold text-white border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-px transition-all"
+            >
+              Unlock remaining {lockedRubric.length} categories
+            </button>
+          )}
         </div>
       )}
       {typeof clarityRating === 'number' && (
@@ -231,7 +318,7 @@ function AnnotationCard({
    *  document regardless of position. */
   applyLocked?: boolean;
 }) {
-  const meta = TYPE_META[ann.type];
+  const meta = TYPE_META[ann.type] ?? TYPE_META.improve;
   // Only "improve" / "concern" cards have an Apply button — strong
   // points have no rewrite to apply.
   const canApply = !!onApply && (ann.type === 'improve' || ann.type === 'concern') && !!ann.suggestion?.trim();
@@ -366,8 +453,9 @@ export default function AnalyzerPanel({
   const grouped = useMemo(() => {
     const out: Record<AnnotationType, AnalyzerResult['annotations']> = { strong: [], improve: [], concern: [] };
     if (!result) return out;
-    for (const a of result.annotations) {
-      if (out[a.type]) out[a.type].push(a);
+    for (const a of result.annotations ?? []) {
+      const bucket = out[a.type] ?? out.improve;
+      bucket.push(a);
     }
     return out;
   }, [result]);
@@ -385,11 +473,11 @@ export default function AnalyzerPanel({
             <button
               type="button"
               onClick={onOpenFullReport}
-              title="Open full analysis report"
+              title="Open the full read-only report"
               className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#F3EAFF] hover:bg-[#A560E8]/20 text-[#7733B5] dark:bg-[#A560E8]/15 dark:hover:bg-[#A560E8]/25 dark:text-[#C390F2] text-[10px] font-extrabold uppercase tracking-wider border border-[#A560E8]/30 transition-colors"
             >
               <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M14 3h7m0 0v7m0-7L10 14M5 5h6v2H7v10h10v-4h2v6H5z" /></svg>
-              Full report
+              Report
             </button>
           )}
           <button
@@ -407,10 +495,8 @@ export default function AnalyzerPanel({
         {/* Loading state — the full animated treatment, shown for
             EVERY analysis (first run and re-analyze alike). */}
         {loading && (
-          <div className="flex flex-col items-center justify-center py-14 px-4 text-center">
-            <div className="h-24 w-full max-w-[200px] rounded-2xl bg-stone-100 dark:bg-stone-800 animate-pulse" />
-            <div className="mt-3 h-3 w-32 rounded-full bg-stone-100 dark:bg-stone-800 animate-pulse" />
-            <p className="mt-4 text-[12px] font-bold text-stone-400">Feedback loading…</p>
+          <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+            <p className="text-[12px] font-extrabold text-[#8A48C7] dark:text-[#C9A0F0]">Analyzing your essay…</p>
           </div>
         )}
 
@@ -437,6 +523,7 @@ export default function AnalyzerPanel({
                 onRerun={onRerun}
                 loading={loading}
                 locked={revisionsLocked}
+                onUpgrade={onUpgrade}
               />
             </div>
 
@@ -523,7 +610,7 @@ export default function AnalyzerPanel({
               );
             })}
 
-            {result.annotations.length === 0 && (
+            {(result.annotations ?? []).length === 0 && (
               <div className="text-center py-8 text-[12px] text-stone-500 dark:text-stone-400">
                 No specific annotations on this draft.
               </div>

@@ -28,6 +28,60 @@ import type { Node as PmNode } from '@tiptap/pm/model';
 
 export type AnnotationType = 'strong' | 'improve' | 'concern';
 
+const ANNOTATION_TYPE_ALIASES: Record<string, AnnotationType> = {
+  strong: 'strong',
+  strength: 'strong',
+  strengths: 'strong',
+  positive: 'strong',
+  improve: 'improve',
+  improvement: 'improve',
+  improvements: 'improve',
+  concern: 'concern',
+  concerns: 'concern',
+  serious_concern: 'concern',
+  warning: 'concern',
+};
+
+/** Coerce backend / legacy annotation types into the three UI buckets. */
+export function normalizeAnnotationType(raw: unknown): AnnotationType {
+  const key = String(raw ?? '').trim().toLowerCase();
+  return ANNOTATION_TYPE_ALIASES[key] ?? 'improve';
+}
+
+export function normalizeAnnotations(raw: unknown): AnnotatorAnnotation[] {
+  const list = Array.isArray(raw) ? raw : [];
+  return list.map((item, index) => {
+    const a = item as Record<string, unknown>;
+    const startIndex = Number(a.startIndex ?? a.start_index ?? 0);
+    const endIndex = Number(a.endIndex ?? a.end_index ?? 0);
+    return {
+      id: String(a.id ?? `ann-${index}`),
+      type: normalizeAnnotationType(a.type),
+      startIndex: Number.isFinite(startIndex) ? startIndex : 0,
+      endIndex: Number.isFinite(endIndex) ? endIndex : 0,
+      text: String(a.text ?? ''),
+      comment: String(a.comment ?? a.explanation ?? ''),
+      suggestion: String(a.suggestion ?? ''),
+      locked: Boolean(a.locked),
+    };
+  });
+}
+
+export function normalizeTopSuggestions(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((item) => {
+      if (typeof item === 'string') return item.trim();
+      if (item && typeof item === 'object') {
+        const o = item as Record<string, unknown>;
+        const text = o.text ?? o.suggestion ?? o.message ?? o.title;
+        return typeof text === 'string' ? text.trim() : '';
+      }
+      return String(item ?? '').trim();
+    })
+    .filter(Boolean);
+}
+
 export interface AnnotatorAnnotation {
   id: string;
   type: AnnotationType;
