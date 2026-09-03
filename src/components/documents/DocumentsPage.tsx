@@ -121,6 +121,8 @@ type HubStudyPack = {
   title: string;
   createdAt: string;
   questions: unknown;
+  /** Free packs expire; null means keep forever. */
+  expiresAt?: string | null;
 };
 
 type DocSummary = {
@@ -786,6 +788,7 @@ function DocumentRow({
   onOpen,
   onDownload,
   onDelete,
+  onUpgrade,
   elevated = false,
   highlighted = false,
   kind = 'document',
@@ -794,6 +797,7 @@ function DocumentRow({
   onOpen: () => void;
   onDownload?: () => void;
   onDelete?: () => void;
+  onUpgrade?: () => void;
   /** Hub-style spaced card; library keeps the compact list row. */
   elevated?: boolean;
   /** First-run after onboarding — this is the paper they just analysed. */
@@ -836,7 +840,7 @@ function DocumentRow({
   }, [menuOpen, placeMenu]);
 
   const isPack = kind === 'pack';
-  const expiryLabel = !isPack ? expiresInLabel(doc.expiresAt) : null;
+  const expiryLabel = expiresInLabel(doc.expiresAt);
   const words = isPack
     ? 'Study pack'
     : doc.wordCount
@@ -907,8 +911,20 @@ function DocumentRow({
             {words}
           </span>
           {expiryLabel && (
-            <span className="inline-flex items-center h-[18px] px-1.5 rounded-md bg-red-50 dark:bg-red-950/40 text-[11px] font-extrabold tabular-nums text-red-600 dark:text-red-400">
-              {expiryLabel}
+            <span className="inline-flex items-center gap-1.5">
+              <span className="inline-flex items-center h-[18px] px-1.5 rounded-md bg-red-50 dark:bg-red-950/40 text-[11px] font-extrabold tabular-nums text-red-600 dark:text-red-400">
+                {expiryLabel}
+              </span>
+              {onUpgrade && (
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); onUpgrade(); }}
+                  className="inline-flex items-center h-[18px] px-1.5 rounded-md bg-[#FFC800] text-[11px] font-extrabold text-[#5A4500] hover:bg-[#F0BC00] transition-colors"
+                >
+                  <span className="sm:hidden">Keep forever</span>
+                  <span className="hidden sm:inline">Upgrade to keep forever</span>
+                </button>
+              )}
             </span>
           )}
         </div>
@@ -1410,7 +1426,7 @@ function DocumentsHub({
         const headline =
           totalCount === 1
             ? `This ${itemsText.replace(/^1 /, '')} expires ${daysText}`
-            : `Your ${itemsText} expire ${daysText}`;
+            : `These ${itemsText} expire ${daysText}`;
         return (
           <div
             className={`flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 rounded-2xl border px-4 sm:px-5 py-3.5 mb-5 ${
@@ -1427,7 +1443,7 @@ function DocumentsHub({
                 {headline}
               </h3>
               <p className="mt-0.5 text-[12.5px] font-semibold text-stone-500 dark:text-stone-400 leading-snug">
-                Free items stay until you come back, then last 30 days. Upgrade once and we keep them forever.
+                On the free plan these last 30 days. Upgrade and we keep them forever.
               </p>
             </div>
             <button
@@ -1764,8 +1780,10 @@ function DocumentsHub({
                       wordCount: 0,
                       lastEditedAt: item.pack.createdAt,
                       updatedAt: item.pack.createdAt,
+                      expiresAt: item.pack.expiresAt,
                     }}
                     onOpen={() => onOpenPack(item.pack)}
+                    onUpgrade={() => onNavigate('pricing')}
                   />
                 ) : (
                   <DocumentRow
@@ -1776,6 +1794,7 @@ function DocumentsHub({
                     onOpen={() => onOpen(item.doc.id)}
                     onDownload={() => onDownload(item.doc.id)}
                     onDelete={() => onDelete(item.doc.id)}
+                    onUpgrade={() => onNavigate('pricing')}
                   />
                 ),
               )
@@ -1798,6 +1817,7 @@ function DocumentsLibrary({
   onUpload,
   onDownload,
   onDelete,
+  onUpgrade,
   usage,
   topBar,
 }: {
@@ -1808,6 +1828,7 @@ function DocumentsLibrary({
   onUpload: (file: File) => void;
   onDownload: (id: string) => void;
   onDelete: (id: string) => void;
+  onUpgrade?: () => void;
   usage: { used: number; limit: number | null; plan: string } | null;
   /** Account controls — shares the heading row, same as the hub. */
   topBar?: React.ReactNode;
@@ -1936,6 +1957,7 @@ function DocumentsLibrary({
               onOpen={() => onOpen(d.id)}
               onDownload={() => onDownload(d.id)}
               onDelete={() => onDelete(d.id)}
+              onUpgrade={onUpgrade}
             />
           ))
         )}
@@ -3276,6 +3298,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
             title: String(r.title ?? 'Study pack'),
             createdAt: String(r.created_at ?? r.createdAt ?? new Date().toISOString()),
             questions: r.questions ?? r,
+            expiresAt: (r.expires_at ?? r.expiresAt ?? null) as string | null,
           }))
           .filter((p) => p.id),
       );
@@ -4432,6 +4455,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
             onUpload={(f: File) => { if (trialGated) { onTrialGate?.(); return; } handleUpload(f); }}
             onDownload={handleDownload}
             onDelete={(id) => setConfirmDeleteId(id)}
+            onUpgrade={() => onNavigate('pricing')}
             usage={docUsage}
             topBar={dashboardTopBar}
           />
