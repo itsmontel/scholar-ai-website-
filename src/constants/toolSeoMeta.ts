@@ -25,12 +25,12 @@ export const TOOL_SEO_META = {
   analyze: {
     title: 'AI Essay Checker — Feedback in Seconds | WriteScholar',
     description:
-      'Paste your essay and get professor-style feedback with a grade, rubric scores, and line-by-line fixes. 7-day free trial, $0 today, then $9.99 for your first month.',
+      'Paste your essay and get professor-style feedback with a grade, rubric scores, and line-by-line fixes. Unlock Pro at 50% off your first month ($9.99).',
   },
   'ai-essay-editor': {
     title: 'AI Essay Editor — Write, Grade & Fix Essays | WriteScholar',
     description:
-      'Write your essay in a real editor and get a professor-style grade, a full rubric, and one-click line-by-line fixes. Word in, Word out. 7-day free trial, $0 today.',
+      'Write your essay in a real editor and get a professor-style grade, a full rubric, and one-click line-by-line fixes. Word in, Word out. Pro from $9.99 first month.',
   },
   citations: {
     title: 'Citation Finder — APA, MLA, Chicago | WriteScholar',
@@ -40,7 +40,7 @@ export const TOOL_SEO_META = {
   'study-pack': {
     title: 'AI Study Pack — Flashcards, Quiz & Lesson | WriteScholar',
     description:
-      'Paste your notes once and get a lesson, flashcards, a quiz, and study games. Build your first study pack on a 7-day free trial, $0 today.',
+      'Paste your notes once and get a lesson, flashcards, a quiz, and study games. Unlock the full pack with Pro — 50% off your first month.',
   },
   summarizer: {
     title: 'AI Summarizer for Papers & Readings | WriteScholar',

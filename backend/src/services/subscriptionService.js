@@ -20,16 +20,13 @@ const PLAN_LIMITS = {
   free: {
     documentsPerMonth: 3,
     maxDocuments: 3, // hard cap on TOTAL documents owned (not monthly)
-    // ONE lifetime analysis — spent during onboarding, where the user
-    // analyses a real essay of their own before being asked for a card.
-    // That single run IS the free tier; there is no standalone free
-    // plan to sit on afterwards. Was 2 when free users could keep
-    // sampling the product without ever reaching the trial ask.
-    analysesPerMonth: 1,
+    // TWO lifetime analyses + TWO study packs — enough to feel the
+    // product twice (onboarding + a second real run) before the ask.
+    analysesPerMonth: 2,
     citationSearchesPerMonth: 1,
     humanizeWordsPerMonth: 5000,
     summarizeWordsPerMonth: 5000,
-    studyPackGenerationsPerMonth: 1,
+    studyPackGenerationsPerMonth: 2,
     studyPackMaxWordsPerGeneration: 5000,
     quizWordsPerMonth: 15000,
     quizGenerationsPerMonth: 1,
@@ -531,6 +528,101 @@ const checkTrialEligibility = async (email) => {
 // offered a new trial / shown the trial paywall again. The `subscriptions` row
 // is only written on the `customer.subscription.created` webhook (a real
 // trial/paid subscription), so abandoned checkouts never count here.
+/**
+ * True if this account has ever been on a paid plan. Used so library
+ * items (documents, study packs, citations) stay forever after the
+ * first paid month — even if they later cancel back to Free.
+ */
+const userKeepsLibraryForever = async (userId) => {
+  if (!userId) return false;
+  try {
+    const { plan } = await getUserSubscriptionDetails(userId);
+    if (isPaidSubscriptionTier(plan)) return true;
+  } catch { /* fall through */ }
+  try {
+    const result = await query(
+      `SELECT 1 FROM subscriptions
+       WHERE user_id = $1
+         AND lower(status) IN ('active','trialing','canceled','cancelled','past_due','paused','unpaid')
+       LIMIT 1`,
+      [userId],
+    );
+    if (result.rows.length > 0) return true;
+  } catch (err) {
+    console.error('Error checking subscription history for library retention:', err);
+  }
+  try {
+    const { data } = await supabaseServiceRole
+      .from('users')
+      .select('paid_conversion_fired_at')
+      .eq('id', userId)
+      .maybeSingle();
+    if (data?.paid_conversion_fired_at) return true;
+  } catch { /* ignore */ }
+  return false;
+};
+
+let freeLibraryExpiryColumnMissing = false;
+
+/**
+ * Never-paid Free users: existing library rows stay (expires_at null)
+ * until they next use the app. Then we stamp a 30-day window so items
+ * are not deleted while they are away. Idempotent via
+ * users.free_library_expiry_started_at.
+ */
+const startFreeLibraryExpiryClock = async (userId, userRow = null) => {
+  if (!userId || freeLibraryExpiryColumnMissing) return;
+  if (userRow && userRow.free_library_expiry_started_at) return;
+
+  const columnMissing = (err) => {
+    const msg = `${err?.message || ''}`.toLowerCase();
+    return msg.includes('free_library_expiry_started_at');
+  };
+
+  try {
+    const { data: fresh, error: readErr } = await supabaseServiceRole
+      .from('users')
+      .select('free_library_expiry_started_at')
+      .eq('id', userId)
+      .maybeSingle();
+    if (readErr) {
+      if (columnMissing(readErr)) {
+        freeLibraryExpiryColumnMissing = true;
+        return;
+      }
+      throw readErr;
+    }
+    if (fresh?.free_library_expiry_started_at) return;
+
+    const now = new Date().toISOString();
+    const keepForever = await userKeepsLibraryForever(userId);
+    if (!keepForever) {
+      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+      await Promise.all([
+        supabaseServiceRole.from('documents').update({ expires_at: expiresAt, updated_at: now }).eq('user_id', userId).is('expires_at', null),
+        supabaseServiceRole.from('quizzes').update({ expires_at: expiresAt }).eq('user_id', userId).is('expires_at', null),
+        supabaseServiceRole.from('citation_searches').update({ expires_at: expiresAt }).eq('user_id', userId).is('expires_at', null),
+        supabaseServiceRole.from('lesson_plans').update({ expires_at: expiresAt }).eq('user_id', userId).is('expires_at', null),
+      ]);
+    }
+
+    const { error: flagErr } = await supabaseServiceRole
+      .from('users')
+      .update({ free_library_expiry_started_at: now })
+      .eq('id', userId)
+      .is('free_library_expiry_started_at', null);
+    if (flagErr) {
+      if (columnMissing(flagErr)) {
+        freeLibraryExpiryColumnMissing = true;
+        return;
+      }
+      console.error('Error marking library expiry clock started:', flagErr);
+    }
+  } catch (err) {
+    console.error('Error starting free library expiry clock:', err);
+  }
+};
+
 const hasEverSubscribed = async (userId) => {
   if (!userId) return false;
   try {
@@ -1812,6 +1904,8 @@ module.exports = {
   getPlanLimits,
   checkTrialEligibility,
   hasEverSubscribed,
+  userKeepsLibraryForever,
+  startFreeLibraryExpiryClock,
   checkOff10Eligibility,
   recordTrialUsage,
   recordTrialDecline,

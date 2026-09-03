@@ -5,71 +5,65 @@
  * the actual product gates.
  *
  * ─── IMPORTANT: read before editing ───────────────────────────────────
- * The gate model changed. With FREEMIUM_PREVIEW = false in
- * src/config/featureFlags.ts, a free, never-trialed user is BLOCKED from
- * the essay analyzer, citation finder, study packs and the writing
- * workspace until they start the card-required 7-day trial. The backend
- * `free` entry in PLAN_LIMITS still provisions one preview of each tool,
- * but the UI gate means a free user cannot reach it.
- *
- * So "no credit card" is NOT a true claim for the AI tools any more. It is
- * only true of (a) creating an account and (b) the standalone utilities
- * under /tools/* that need no AI call. Copy here reflects that. If you flip
- * FREEMIUM_PREVIEW back to true, revisit these strings, because they will
- * then be understating what free users get.
+ * With FREEMIUM_PREVIEW = true, free users can run essay analysis and
+ * study packs twice each and see a genuine partial result (~50% of essay
+ * annotations / half the pack unlocked).
+ * Unlocking the rest is a paid Pro checkout — currently 50% off the first
+ * month (NEWCUSTOMER), no free trial (see src/config/pricing.ts).
  */
 
 /** One-line summary for account headers, chips, etc. */
 export const FREE_PLAN_SUMMARY_SHORT =
-  'Free tools plus a 7-day Pro trial when you want the AI features';
+  'Free previews of essay feedback, study packs & citations — unlock Pro at 50% off';
 
 /** Subtitle under pricing / billing Free cards */
-export const FREE_PLAN_DESCRIPTION = 'Free account, free study utilities, upgrade for the AI tools';
+export const FREE_PLAN_DESCRIPTION =
+  'Try essay analysis and study packs twice for free. Unlock the full report with Pro — 50% off your first month.';
 
-/** Reusable trial line. Use this wherever a CTA needs a friction note. */
+/** Reusable upgrade line. Use this wherever a CTA needs a friction note. */
 export const TRIAL_CTA_FOOTNOTE =
-  '7-day free trial · $0 today · Cancel anytime';
+  '50% off first month · then $19.99/mo · Cancel anytime';
 
 /** Slightly longer version where there is room for the honest detail. */
 export const TRIAL_CTA_FOOTNOTE_LONG =
-  'Free to sign up. Starting your 7-day Pro trial takes a card, $0 today, cancel anytime.';
+  'Free to try. Unlock Pro at 50% off your first month ($9.99), then $19.99/mo — cancel anytime.';
 
 /** Bullet list for pricing cards, billing plan picker, landing pricing grid */
 export const FREE_PLAN_FEATURE_BULLETS = [
-  '1 free essay analysis — grade, issues & top fixes (full report with Pro)',
-  '1 free study pack — lesson + 4 flashcards (quiz & games with Pro)',
+  '2 free essay analyses — first half of annotations free (full markup with Pro)',
+  '2 free study packs — lesson + half the flashcards & quiz (games with Pro)',
   '1 free citation search — 3 sources (full list with Pro)',
   '3 documents/mo, 5k-word summarizer, 2MB storage',
 ] as const;
 
 /** Shorter bullets where space is tight (billing sidebar) */
 export const FREE_PLAN_FEATURE_BULLETS_COMPACT = [
-  '1 free analysis (grade + issues; fixes with Pro)',
-  '1 free study pack (lesson + 4 cards; quiz & games with Pro)',
+  '2 free analyses (first half free; full markup with Pro)',
+  '2 free study packs (lesson + half the cards & quiz; games with Pro)',
   '1 free citation search (3 sources; full list with Pro)',
   '3 documents/mo, 5k summarizer, 2MB storage',
 ] as const;
 
 /** “What you don’t get” row on the pricing page Free card */
 export const FREE_PLAN_LIMITATIONS = [
-  'Full fixes & one-click apply revisions (Pro)',
+  'Second half of annotations & one-click apply revisions (Pro)',
   'Quiz, games & full flashcard decks (Pro)',
   'Full citation lists & PDF/Word export (Pro)',
 ] as const;
 
 /** FAQ / long-form answer */
 export const FREE_PLAN_FAQ_ANSWER =
-  'Creating an account is free and takes no card. The study utilities are free to use with no subscription: word counter, citation generator, thesis helper, essay outline, grammar check, readability score, GPA calculator and the Pomodoro timer. The AI features are what Pro covers, so the essay analyzer, citation finder and study pack generator run on a 7-day free trial that asks for a card up front. You pay nothing during the trial, you can cancel any time inside it, and if you keep going your first month is $9.99 instead of $19.99.';
+  'Creating an account is free and takes no card. You get two free essay analyses (first half of line-by-line feedback), two free study packs (lesson plus the first half of the flashcards and quiz), and one citation search that shows three sources. Unlock the rest with Pro — new customers get 50% off the first month ($9.99 instead of $19.99), then the regular rate. Standalone study utilities (word counter, citation generator, GPA calculator, Pomodoro, and more) stay free with no subscription.';
 
 /** Legal / Terms of Service single bullet */
 export const FREE_PLAN_TERMS_BULLET =
-  '3 documents per month; 1 one-time AI essay analysis preview (grade estimate, issue counts, and top suggestions — full annotations, rubric scores, and apply-revisions unlock with Pro); 1 one-time study pack preview (full lesson and first 4 flashcards — quiz, arcade games, full deck, and export unlock with Pro); 1 one-time citation search preview (first 3 sources — full list unlocks with Pro); 5,000 words/month for the Paper Summarizer; 2MB total document library storage';
+  '3 documents per month; 2 one-time AI essay analysis previews (first ~50% of annotations free — full markup, rubric scores, and apply-revisions unlock with Pro); 2 one-time study pack previews (full lesson and first half of flashcards and quiz — arcade games, remaining cards/questions, and export unlock with Pro); 1 one-time citation search preview (first 3 sources — full list unlocks with Pro); 5,000 words/month for the Paper Summarizer; 2MB total document library storage';
 
 /** Account page “What’s included” bullets */
 export const FREE_PLAN_ACCOUNT_BULLETS = [
   '3 documents per month',
-  '1 free essay analysis — grade, issues & top suggestions (full fixes with Pro)',
-  '1 free study pack — lesson + 4 flashcards (quiz & games with Pro)',
+  '2 free essay analyses — first half of annotations (full markup with Pro)',
+  '2 free study packs — lesson + half the flashcards & quiz (games with Pro)',
   '1 free citation search — 3 sources (full list with Pro)',
   '5,000 Paper Summarizer words per month',
   '2MB document library storage',
@@ -77,11 +71,11 @@ export const FREE_PLAN_ACCOUNT_BULLETS = [
 
 /** Study-pack-specific one-liner */
 export const FREE_PLAN_STUDY_PACK_LINE =
-  '1 free pack: full lesson + 4 flashcards — quiz, games & full deck with Pro';
+  '2 free packs: full lesson + half the flashcards & quiz — games & the rest with Pro';
 
 /** Analysis-specific one-liner */
 export const FREE_PLAN_ANALYSIS_LINE =
-  '1 free analysis: grade estimate, issues & top fixes — full report with Pro';
+  '2 free analyses: first half of feedback free — full markup with Pro';
 
 /** Citations-specific one-liner */
 export const FREE_PLAN_CITATIONS_LINE =
@@ -89,16 +83,16 @@ export const FREE_PLAN_CITATIONS_LINE =
 
 /** Landing CTA footnote */
 export const FREE_PLAN_LANDING_CTA =
-  'Start your 7-day free trial · $0 today · Cancel anytime';
+  'Start free — see half your feedback · Pro from $9.99 first month';
 
 /** Landing FAQ: analysis timing */
 export const FREE_PLAN_FAQ_ANALYSIS_TIMING =
-  'Usually under 60 seconds. Write or paste your essay, hit Analyze, and you get your estimated grade, what\'s wrong, and a ranked fix list. The analyzer is a Pro feature, so it runs on your 7-day free trial: $0 today, cancel any time inside the trial.';
+  'Usually under 60 seconds. Write or paste your essay, hit Analyze, and you get your estimated grade plus the first half of line-by-line feedback free. Unlock the rest of the markup with Pro — 50% off your first month for new customers.';
 
 /** Landing FAQ: study tools */
 export const FREE_PLAN_FAQ_STUDY_TOOLS =
-  'Yes. Study Pack turns any notes into a lesson, flashcards, quiz, crossword, and arcade games. It is part of Pro, so it runs on your 7-day free trial. The simpler study utilities, like the Pomodoro timer and GPA calculator, are free to use without a subscription.';
+  'Yes. Study Pack turns any notes into a lesson, flashcards, quiz, crossword, and arcade games. Your free preview includes the lesson plus the first half of the flashcards and quiz; games and the rest of the deck unlock with Pro (50% off first month for new customers). Simpler utilities like the Pomodoro timer and GPA calculator stay free with no subscription.';
 
 /** Landing FAQ: Free vs Pro vs Premium */
 export const FREE_PLAN_FAQ_PLAN_COMPARE =
-  'Free account: the standalone utilities, so word counter, citation generator, thesis helper, essay outline, grammar check, readability score, GPA calculator and Pomodoro timer, with no card and no subscription. Pro: the AI features, so 99 combined analyses, study packs and citations per month, apply WriteScholar revisions into your draft, all citation styles, PDF and Word export, uploads up to 100MB, and every study tool unlocked. Pro starts with a 7-day free trial that asks for a card, charges nothing up front, and can be cancelled inside the trial. Premium: 5x the Pro usage at 499 actions a month, unlimited research-paper summarising, and 1GB of library storage.';
+  'Free: two essay analyses and two study packs (half the essay markup; study-pack lesson + half the cards and quiz), one citation search (3 sources), plus standalone utilities with no card. Pro: full markup and apply-revisions, 99 combined analyses / study packs / citations per month, all citation styles, PDF and Word export, uploads up to 100MB, and every study tool unlocked — new customers get 50% off the first month ($9.99), then $19.99/mo. Premium: 5x the Pro usage at 499 actions a month, unlimited research-paper summarising, and 1GB of library storage.';

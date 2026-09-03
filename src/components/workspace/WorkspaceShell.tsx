@@ -17,6 +17,7 @@ export function WorkspaceShell({
   user,
   onNavigateAccount,
   topBar,
+  banner,
 }: {
   activeView: WorkspaceView;
   onSelect: (v: WorkspaceView) => void;
@@ -46,6 +47,8 @@ export function WorkspaceShell({
       Avatar). Floats over the content area; replaces the global
       site Header when present. */
   topBar?: ReactNode;
+  /** Full-width strip at the top of the content column (promo, etc.). */
+  banner?: ReactNode;
 }) {
   return (
     <div className="flex w-full min-h-screen items-stretch">
@@ -71,6 +74,7 @@ export function WorkspaceShell({
         onNavigateAccount={onNavigateAccount}
       />
       <div className="relative flex-1 min-w-0">
+        {banner}
         {topBar && (
           <div className="pointer-events-none absolute top-3 right-3 sm:top-4 sm:right-4 lg:top-5 lg:right-5 z-50">
             <div className="pointer-events-auto">{topBar}</div>

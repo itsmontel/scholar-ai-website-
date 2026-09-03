@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const userService = require('../services/userService');
+const subscriptionService = require('../services/subscriptionService');
 
 const authenticateToken = async (req, res, next) => {
   try {
@@ -35,6 +36,9 @@ const authenticateToken = async (req, res, next) => {
 
     // Add user to request object
     req.user = user;
+    if (!user.free_library_expiry_started_at) {
+      await subscriptionService.startFreeLibraryExpiryClock(user.id, user);
+    }
     next();
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {

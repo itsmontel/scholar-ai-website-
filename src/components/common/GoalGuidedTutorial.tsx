@@ -40,7 +40,7 @@ const GOAL_CONFIG: Record<OnboardingGoal, { title: string; steps: TutorialStep[]
   study: {
     title: "Let's build your study tools",
     steps: [
-      { instruction: 'Paste your notes', detail: 'Drop your textbook, notes, or article — one click generates a Study Pack preview (full lesson + 4 flashcards free; quiz, games & full deck with Pro)', emoji: '📚', targetSelector: '[data-tutorial-target="study-input"]' },
+      { instruction: 'Paste your notes', detail: 'Drop your textbook, notes, or article — one click generates a Study Pack preview (full lesson + half the flashcards and quiz free; games & the rest with Pro)', emoji: '📚', targetSelector: '[data-tutorial-target="study-input"]' },
       { instruction: 'Generate!', detail: 'Click the Generate button to create your study material', emoji: '🧠', targetSelector: '[data-tutorial-target="study-generate-btn"]', requireAction: true },
     ],
   },

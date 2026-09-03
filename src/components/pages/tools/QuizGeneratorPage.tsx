@@ -2642,7 +2642,7 @@ const QuizGeneratorPage = ({ onNavigate, user, onLogout, initialStudyToolMode = 
               onClick={() => { setShowSignupPrompt(false); onNavigate('signup'); }}
               className="w-full py-3.5 bg-[#58CC02] text-white font-extrabold rounded-xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all flex items-center justify-center uppercase tracking-wide"
             >
-              Sign up to unlock Study Tools (free trial)
+              Sign up to unlock Study Tools
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>

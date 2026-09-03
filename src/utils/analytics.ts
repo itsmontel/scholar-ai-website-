@@ -48,6 +48,7 @@ export type AnalyticsEvent =
   | 'onboarding_aha_generate'
   | 'onboarding_aha_complete'
   | 'onboarding_aha_skip'
+  | 'onboarding_aha_continue_dashboard'
   | 'onboarding_choose_trial'
   | 'onboarding_choose_free'
   // — Onboarding step events —

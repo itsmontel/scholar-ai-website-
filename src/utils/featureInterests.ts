@@ -55,3 +55,32 @@ export function getPrimaryFeatureInterest(userId?: string): FeatureInterest | nu
   const picks = getFeatureInterests(userId);
   return INTEREST_PRIORITY.find((id) => picks.includes(id)) ?? null;
 }
+
+/** Last onboarding step after the tour: real essay, real pack, or hub. */
+export type OnboardingAhaPhase = 'analyze-input' | 'studypack-input' | 'transition';
+
+/**
+ * Essays (alone or with anything else) keep the essay aha — strongest
+ * conversion. Study packs without essays get a notes → pack aha.
+ * Games / Daily Review only skip generation and land on the hub.
+ * Empty picks fall back to the essay path so we never skip the product.
+ */
+export function ahaPhaseForInterests(interests: string[]): OnboardingAhaPhase {
+  if (interests.includes('essays') || interests.length === 0) return 'analyze-input';
+  if (interests.includes('study_packs')) return 'studypack-input';
+  return 'transition';
+}
+
+export type HubNudgeTool = 'daily-review' | 'games';
+
+/** Hub tile / banner to light up when the aha skipped generation. */
+export function hubNudgeForInterests(interests: string[]): HubNudgeTool | null {
+  if (interests.includes('essays') || interests.includes('study_packs')) return null;
+  if (interests.includes('daily_review')) return 'daily-review';
+  if (interests.includes('games')) return 'games';
+  return null;
+}
+
+export const HUB_NUDGE_AFTER_ONBOARDING_KEY = 'writescholar_hub_nudge_after_onboarding';
+export const HIGHLIGHT_PACK_AFTER_ONBOARDING_KEY = 'writescholar_highlight_pack_after_onboarding';
+export const STUDY_PACK_VIEWER_KEY = 'writescholar_study_pack_viewer';

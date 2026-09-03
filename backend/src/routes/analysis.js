@@ -2187,10 +2187,17 @@ router.post('/cleanup-quizzes', async (req, res) => {
     }
 
     const result = await aiAnalysisService.cleanupExpiredQuizzes();
+    let documents = { deleted: 0 };
+    try {
+      const documentService = require('../services/documentService');
+      documents = await documentService.cleanupExpiredDocuments();
+    } catch (docErr) {
+      console.error('Cleanup documents error (non-fatal):', docErr);
+    }
 
     res.json({
       success: true,
-      message: `Cleaned up ${result.deleted} expired quizzes`
+      message: `Cleaned up ${result.deleted} expired quizzes and ${documents.deleted} expired documents`
     });
 
   } catch (error) {

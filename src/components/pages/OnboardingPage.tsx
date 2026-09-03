@@ -1,16 +1,22 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { SKIP_ONBOARDING_STRIPE } from '../../config/featureFlags';
 import { trackEvent, trackFunnelStep } from '../../utils/analytics';
-import { saveFeatureInterests } from '../../utils/featureInterests';
+import {
+  saveFeatureInterests,
+  ahaPhaseForInterests,
+  hubNudgeForInterests,
+  HUB_NUDGE_AFTER_ONBOARDING_KEY,
+  HIGHLIGHT_PACK_AFTER_ONBOARDING_KEY,
+  STUDY_PACK_VIEWER_KEY,
+} from '../../utils/featureInterests';
 // Static import: see CompleteAcademicAIApp.tsx for why we don't dynamic-
 // import the gtag helper. Short version — ensures gtag.js starts loading
 // on first paint so the conversion event isn't racing the script load.
 import { trackTrialConversion } from '../../utils/gtag';
 import BadgeCreature from '../common/BadgeCreature';
-import { signupPromoCode, showSignupDiscount, STANDARD_MONTHLY_PRICE } from '../../config/pricing';
+import { signupPromoCode, showSignupDiscount, STANDARD_MONTHLY_PRICE, FIRST_MONTH_PRICE, TRIAL_DAYS, UPGRADE_CTA_FOOTNOTE } from '../../config/pricing';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-const TRIAL_DAYS = 7;
 
 /** Minimum words before we'll run the onboarding analysis. Below this
  *  the analyzer has nothing useful to say, and a weak first result is
@@ -39,6 +45,47 @@ const ANALYSIS_STEP_MS = 5500;
  *  which undermines the one screen the whole trial ask rests on. */
 const MIN_ANALYSIS_MS = ANALYSIS_STEPS.length * ANALYSIS_STEP_MS;
 
+const MIN_NOTES_WORDS = 50;
+
+const STUDY_PACK_STEPS = [
+  { icon: '📖', label: 'Reading your notes' },
+  { icon: '📘', label: 'Writing the lesson' },
+  { icon: '🃏', label: 'Building flashcards' },
+  { icon: '✅', label: 'Assembling your pack' },
+] as const;
+
+const MIN_STUDY_PACK_MS = STUDY_PACK_STEPS.length * ANALYSIS_STEP_MS;
+
+interface OnboardingStudyPack {
+  title: string;
+  lessonPreview: string;
+  cards: { front: string; back: string }[];
+  cardCount: number;
+  quizCount: number;
+  slideCount: number;
+  wordCount: number;
+}
+
+function lessonPreviewFromPack(data: Record<string, unknown>): string {
+  const lesson = data.lesson;
+  if (!lesson || typeof lesson !== 'object') return '';
+  const slides = (lesson as { slides?: unknown }).slides;
+  if (!Array.isArray(slides) || slides.length === 0) {
+    const title = (lesson as { title?: unknown }).title;
+    return typeof title === 'string' ? title : '';
+  }
+  const first = slides[0];
+  if (typeof first === 'string') return first;
+  if (first && typeof first === 'object') {
+    const s = first as Record<string, unknown>;
+    const body = s.content ?? s.body ?? s.text ?? s.title;
+    if (typeof body === 'string' && body.trim()) return body;
+    const bullets = s.bullets;
+    if (Array.isArray(bullets)) return bullets.filter((b): b is string => typeof b === 'string').slice(0, 3).join(' · ');
+  }
+  return '';
+}
+
 /** Shape we keep from POST /analysis/analyze for the result screen.
  *  Deliberately narrow — the onboarding screen shows the headline
  *  numbers and keeps the report body locked, so it has no use for the
@@ -61,17 +108,14 @@ interface OnboardingAnalysis {
 
 /**
  * When true, `paywall-hard` and `checkout` short-circuit to the dashboard
- * transition. Onboarding ends at value-prop → congrats animation → dashboard,
- * and the paywall is instead shown on the dashboard a couple of seconds later
- * ("see the product first" flow).
+ * transition. Onboarding ends after the essay preview (or value-prop) →
+ * congrats animation → dashboard. The trial ask lives in-product on the
+ * locked half of analysis / study packs / citations (see FREEMIUM_PREVIEW).
  *
- * Set to false (current) to make onboarding END on the no-skip 7-day trial
- * checkout: after the tour, value-prop → "I'm ready" → the card-required
- * trial screen, whose only forward action is "Start my 7-day free trial"
- * (or sign out). Pairs with FREEMIUM_PREVIEW=false so existing never-trialed
- * users are gated too. Flip back to true to restore the see-first flow.
+ * Set to false to make onboarding END on the no-skip 7-day trial checkout.
+ * Pairs with FREEMIUM_PREVIEW=false for the hard gate. Current: true.
  */
-const HIDE_END_PAYWALLS = false;
+const HIDE_END_PAYWALLS = true;
 /* Promo code silently pre-applied to checkout when the user clicks the
    trial CTA from the hard paywall. NEWCUSTOMER = 50% off the first
    invoice only ($19.99 → $9.99 first month). The backend strips it for
@@ -138,6 +182,8 @@ type Phase =
   // Real analysis on the user's own essay, run before the card ask.
   | 'analyze-input'
   | 'analyze-result'
+  | 'studypack-input'
+  | 'studypack-result'
   | 'value-prop'
   | 'paywall-hard'
   | 'checkout'
@@ -169,6 +215,8 @@ const PHASE_STEP: Record<string, number> = {
   // and it sits immediately before the card ask on purpose.
   'analyze-input': 8,
   'analyze-result': 9,
+  'studypack-input': 8,
+  'studypack-result': 9,
   // Value-prop is the fallback pitch for users who skipped the analysis
   // (no essay to hand). It builds the "everything you get" case with
   // social proof so the paywall doesn't land cold.
@@ -383,6 +431,7 @@ function getInitialPhase(forceTrialGate = false, paywallOverlay = false): Phase 
   // ?preview=aha jumps to the real-analysis step for QA without walking
   // the whole survey + tour.
   if (params.get('preview') === 'aha') return 'analyze-input';
+  if (params.get('preview') === 'pack') return 'studypack-input';
   if (params.get('preview') === 'profile') return 'profile';
   const sid = params.get('session_id');
   if (sid) return 'verifying';
@@ -1159,6 +1208,12 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
      preview, because the trial would immediately disprove it. */
   const [essayInput, setEssayInput] = useState('');
   const [essayFileName, setEssayFileName] = useState<string | null>(null);
+  const [essayCitationStyle, setEssayCitationStyle] = useState<string>(() => {
+    try { return localStorage.getItem('writescholar_editor_citation_style') || 'None'; } catch { return 'None'; }
+  });
+  const [essayGradingStyle, setEssayGradingStyle] = useState<'us' | 'uk'>(() => {
+    try { return localStorage.getItem('writescholar_last_analysis_grading_style') === 'uk' ? 'uk' : 'us'; } catch { return 'us'; }
+  });
   const [essayParsing, setEssayParsing] = useState(false);
   const [essayDropActive, setEssayDropActive] = useState(false);
   const [analysisRunning, setAnalysisRunning] = useState(false);
@@ -1175,6 +1230,20 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
     [essayInput],
   );
 
+  const [notesInput, setNotesInput] = useState('');
+  const [notesFileName, setNotesFileName] = useState<string | null>(null);
+  const [notesParsing, setNotesParsing] = useState(false);
+  const [notesDropActive, setNotesDropActive] = useState(false);
+  const [packRunning, setPackRunning] = useState(false);
+  const [packError, setPackError] = useState<string | null>(null);
+  const [packResult, setPackResult] = useState<OnboardingStudyPack | null>(null);
+  const [packStep, setPackStep] = useState(0);
+  const notesFileInputRef = useRef<HTMLInputElement>(null);
+  const notesWordCount = useMemo(
+    () => notesInput.trim().split(/\s+/).filter(Boolean).length,
+    [notesInput],
+  );
+
   useEffect(() => {
     if (!analysisRunning) return;
     setAnalysisStep(0);
@@ -1185,6 +1254,15 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
     }, ANALYSIS_STEP_MS);
     return () => window.clearInterval(id);
   }, [analysisRunning]);
+
+  useEffect(() => {
+    if (!packRunning) return;
+    setPackStep(0);
+    const id = window.setInterval(() => {
+      setPackStep((s) => Math.min(s + 1, STUDY_PACK_STEPS.length - 1));
+    }, ANALYSIS_STEP_MS);
+    return () => window.clearInterval(id);
+  }, [packRunning]);
   // Onboarding plan picker — monthly is the default so the free trial
   // checkout shows the lower-commitment option first. Users can still
   // switch to yearly for the per-month savings.
@@ -1487,20 +1565,30 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
     trackEvent('onboarding_survey_complete', { source: referralSource, features: featureInterests.join(',') });
     // Jump to the FIRST slide in their personalised tour (essays if
     // selected, otherwise the highest-priority feature they picked).
-    goToPhase(tourSequence[0] ?? 'analyze-input');
+    goToPhase(tourSequence[0] ?? ahaPhaseForInterests(featureInterests));
+  };
+
+  const startPostTourAha = () => {
+    const aha = ahaPhaseForInterests(featureInterests);
+    trackEvent('onboarding_aha_view', { kind: aha });
+    if (aha === 'transition') {
+      const nudge = hubNudgeForInterests(featureInterests);
+      try {
+        sessionStorage.setItem('writescholar_ws_pending_view', 'hub');
+        if (nudge) sessionStorage.setItem(HUB_NUDGE_AFTER_ONBOARDING_KEY, nudge);
+      } catch { /* ignore */ }
+    }
+    goToPhase(aha);
   };
 
   const handleTourContinue = () => {
     // Find current position in the personalised sequence and advance.
-    // Running off the end hands the user to the real analysis step —
-    // we ask for their own essay before we ask for their card, so the
-    // paywall lands on a result they've seen rather than a promise.
-    // (analyze-input offers a skip to value-prop for anyone without an
-    // essay to hand.)
+    // After the last slide, the aha matches their survey picks:
+    // essays → grade a draft; study packs → build a pack; otherwise
+    // land on the hub with that tool highlighted.
     const idx = tourSequence.indexOf(phase as TourPhase);
     if (idx === -1 || idx >= tourSequence.length - 1) {
-      trackEvent('onboarding_aha_view');
-      goToPhase('analyze-input');
+      startPostTourAha();
     } else {
       goToPhase(tourSequence[idx + 1]);
     }
@@ -1549,9 +1637,8 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
    * Run the production analyzer on the user's own essay.
    *
    * This is the aha moment the trial ask is built on, so it uses the
-   * real endpoint and the real result. It spends the account's single
-   * free lifetime analysis (see PLAN_LIMITS.free), which is the whole
-   * point: the free tier IS this one run.
+   * real endpoint and the real result. It spends one of the account's
+   * two free lifetime analyses (see PLAN_LIMITS.free).
    */
   const handleRunOnboardingAnalysis = async () => {
     if (analysisRunning) return;
@@ -1606,8 +1693,8 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
         body: JSON.stringify({
           content,
           analysisType: 'comprehensive',
-          citationStyle: 'None',
-          gradingStyle: 'us',
+          citationStyle: essayCitationStyle,
+          gradingStyle: essayGradingStyle,
           ...(titleFromFile || titleFromText ? { title: titleFromFile || titleFromText } : {}),
         }),
       });
@@ -1659,11 +1746,15 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
         wordCount: essayWordCount,
         documentId,
       });
+      try { localStorage.setItem('writescholar_editor_citation_style', essayCitationStyle); } catch { /* noop */ }
+      try { localStorage.setItem('writescholar_last_analysis_grading_style', essayGradingStyle); } catch { /* noop */ }
       trackEvent('onboarding_aha_complete', {
         issues: annotations.length,
         grade: gradeEstimate,
         score: overallScore,
         documentId,
+        citationStyle: essayCitationStyle,
+        gradingStyle: essayGradingStyle,
       });
       trackFunnelStep('analysis_completed', {
         source: 'onboarding',
@@ -1682,6 +1773,167 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
    *  dead-ending someone who signed up on their phone. */
   const handleSkipAnalysis = () => {
     trackEvent('onboarding_aha_skip', { hadText: essayWordCount > 0 });
+    goToPhase('value-prop');
+  };
+
+  const handleNotesFile = async (file: File) => {
+    setPackError(null);
+    setNotesParsing(true);
+    setNotesFileName(file.name);
+    try {
+      const isPlainText = /\.txt$/i.test(file.name) || file.type === 'text/plain';
+      if (isPlainText) {
+        setNotesInput(await file.text());
+        return;
+      }
+      const token = localStorage.getItem('authToken');
+      const form = new FormData();
+      form.append('file', file);
+      const res = await fetch(`${API_URL}/analysis/parse-document`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: form,
+      });
+      const data = await res.json().catch(() => null);
+      const text = data?.data?.content;
+      if (!res.ok || !text) {
+        throw new Error((data && typeof data.message === 'string' && data.message) || 'We could not read that file.');
+      }
+      setNotesInput(text);
+    } catch (e) {
+      setNotesFileName(null);
+      setPackError(
+        e instanceof Error ? e.message : 'We could not read that file. Try pasting the notes instead.',
+      );
+    } finally {
+      setNotesParsing(false);
+    }
+  };
+
+  const stashPackForHub = (payload: { data: unknown; title: string }) => {
+    try {
+      sessionStorage.setItem(STUDY_PACK_VIEWER_KEY, JSON.stringify(payload));
+      sessionStorage.setItem(HIGHLIGHT_PACK_AFTER_ONBOARDING_KEY, '1');
+      sessionStorage.setItem('writescholar_ws_pending_view', 'hub');
+    } catch { /* ignore */ }
+  };
+
+  const handleRunOnboardingStudyPack = async () => {
+    if (packRunning) return;
+    const text = notesInput.trim();
+    if (notesWordCount < MIN_NOTES_WORDS) {
+      setPackError(`Add at least ${MIN_NOTES_WORDS} words so we have enough to build a pack.`);
+      return;
+    }
+    setPackError(null);
+    setPackRunning(true);
+    trackEvent('onboarding_aha_generate', { kind: 'study_pack', words: notesWordCount, source: notesFileName ? 'upload' : 'paste' });
+
+    const startedAt = Date.now();
+    const holdForFloor = async () => {
+      const remaining = MIN_STUDY_PACK_MS - (Date.now() - startedAt);
+      if (remaining > 0) await new Promise((r) => setTimeout(r, remaining));
+    };
+
+    const titleFromFile = notesFileName
+      ? notesFileName.replace(/\.(pdf|docx?|txt)$/i, '').trim()
+      : null;
+    const titleFromText = text.split(/\n/).map((l) => l.trim()).find(Boolean)?.slice(0, 80) || 'Study Pack';
+
+    if (testMode) {
+      await holdForFloor();
+      const demoCards = [
+        { front: 'What is spaced repetition?', back: 'Reviewing material at increasing intervals so it sticks.' },
+        { front: 'Active recall', back: 'Testing yourself instead of re-reading notes.' },
+        { front: 'A study pack includes…', back: 'A lesson, flashcards, and a quiz from your notes.' },
+        { front: 'Why paste your own notes?', back: 'The pack is built from what you actually need to learn.' },
+      ];
+      const demoData = {
+        quiz: { title: titleFromFile || titleFromText, questions: [{}, {}, {}] },
+        flashcards: { title: titleFromFile || titleFromText, cards: demoCards },
+        lesson: { title: titleFromFile || titleFromText, slides: [{ title: 'Key idea', content: 'Your notes become a short lesson, then cards you can actually review.' }] },
+      };
+      const title = titleFromFile || titleFromText;
+      stashPackForHub({ data: demoData, title });
+      setPackResult({
+        title,
+        lessonPreview: 'Your notes become a short lesson, then cards you can actually review.',
+        cards: demoCards,
+        cardCount: demoCards.length,
+        quizCount: 3,
+        slideCount: 1,
+        wordCount: notesWordCount,
+      });
+      setPackRunning(false);
+      goToPhase('studypack-result');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) { onNavigate('login'); return; }
+      const res = await fetch(`${API_URL}/analysis/generate-study-pack`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ text }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || data?.success === false) {
+        throw new Error(
+          (data && typeof data.message === 'string' && data.message) ||
+            'We could not build that study pack right now.',
+        );
+      }
+      const d = (data?.data && typeof data.data === 'object' ? data.data : {}) as Record<string, unknown>;
+      const flashcards = d.flashcards && typeof d.flashcards === 'object' ? d.flashcards as Record<string, unknown> : {};
+      const rawCards = Array.isArray(flashcards.cards) ? flashcards.cards : [];
+      const cards = rawCards
+        .map((c) => {
+          if (!c || typeof c !== 'object') return null;
+          const card = c as Record<string, unknown>;
+          const front = String(card.front ?? card.term ?? '').trim();
+          const back = String(card.back ?? card.definition ?? '').trim();
+          if (!front) return null;
+          return { front, back };
+        })
+        .filter((c): c is { front: string; back: string } => c !== null);
+      const quiz = d.quiz && typeof d.quiz === 'object' ? d.quiz as Record<string, unknown> : {};
+      const questions = Array.isArray(quiz.questions) ? quiz.questions : [];
+      const lesson = d.lesson && typeof d.lesson === 'object' ? d.lesson as Record<string, unknown> : {};
+      const slides = Array.isArray(lesson.slides) ? lesson.slides : [];
+      const title =
+        (typeof quiz.title === 'string' && quiz.title.trim())
+        || (typeof flashcards.title === 'string' && flashcards.title.trim())
+        || (typeof lesson.title === 'string' && lesson.title.trim())
+        || titleFromFile
+        || titleFromText;
+
+      if (cards.length === 0 && slides.length === 0 && questions.length === 0) {
+        throw new Error('Study pack came back empty. Try longer notes, or a clearer topic.');
+      }
+
+      await holdForFloor();
+      stashPackForHub({ data: d, title });
+      setPackResult({
+        title,
+        lessonPreview: lessonPreviewFromPack(d),
+        cards,
+        cardCount: cards.length,
+        quizCount: questions.length,
+        slideCount: slides.length,
+        wordCount: notesWordCount,
+      });
+      trackEvent('onboarding_aha_complete', { kind: 'study_pack', cards: cards.length, quiz: questions.length, title });
+      goToPhase('studypack-result');
+    } catch (e) {
+      setPackError(e instanceof Error ? e.message : 'We could not build that study pack right now.');
+    } finally {
+      setPackRunning(false);
+    }
+  };
+
+  const handleSkipStudyPack = () => {
+    trackEvent('onboarding_aha_skip', { kind: 'study_pack', hadText: notesWordCount > 0 });
     goToPhase('value-prop');
   };
 
@@ -1762,11 +2014,11 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
       } catch { /* assume not eligible */ }
       const successUrl = `${window.location.origin}/dashboard?payment=success`;
       const cancelUrl = `${window.location.origin}/onboarding?preview=checkout`;
-      // Users coming from the hard paywall ("last chance" screen)
-      // get the 50%-off promo silently pre-applied to their checkout
-      // session.  The visible copy on that page implies the code is
-      // already on the order, so the Stripe page must match.
-      const promoCode = phase === 'paywall-hard' ? HARD_PAYWALL_PROMO_CODE : undefined;
+      // Soft paywall / hard paywall: auto-apply NEWCUSTOMER when the
+      // welcome discount is the front-door offer (see pricing.ts).
+      const promoCode =
+        signupPromoCode(true, 'monthly')?.promoCode ??
+        (phase === 'paywall-hard' ? HARD_PAYWALL_PROMO_CODE : undefined);
       const res = await fetch(`${API_URL}/subscriptions/create-checkout-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -1775,7 +2027,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
           billingCycle: 'monthly',
           successUrl,
           cancelUrl,
-          trialPeriodDays: TRIAL_DAYS,
+          ...(TRIAL_DAYS > 0 ? { trialPeriodDays: TRIAL_DAYS } : {}),
           ...(promoCode ? { promoCode } : {}),
         }),
       });
@@ -1798,19 +2050,9 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
     goToPhase('transition');
   };
 
-  /* ─── Start trial → Stripe-hosted Checkout ───
-     Called by the Subscribe CTA (and by the analyze-result CTA, so we
-     don't force a second click through the Try Pro page). Opens checkout
-     with the 7-day free trial at standard price.
-
-     Cancel URL lands on the Try Pro / checkout screen — so backing out
-     of Stripe still gives them a recovery path, without making every
-     converted user click twice to get there.
-
-     No promo code: the trial IS the front-door offer. Stacking a free
-     week and 50% off spends two acquisition levers on one user, and the
-     50% is worth far more as a save offer in the cancel flow. See
-     src/config/pricing.ts. */
+  /* ─── Start checkout → Stripe-hosted Checkout ───
+     Front-door offer is 50% off first month (NEWCUSTOMER) with no free
+     trial when TRIAL_DAYS === 0. See src/config/pricing.ts. */
   const handleSubscribeChoice = async () => {
     if (startingTrial) return;
     setTrialError(null);
@@ -1831,8 +2073,6 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
       const token = localStorage.getItem('authToken');
       if (!token) { onNavigate('login'); return; }
       const successUrl = `${window.location.origin}/dashboard?payment=success`;
-      // Back-out of Stripe → Try Pro page (plan picker + trial CTA),
-      // never back to value-prop which would force another hop.
       const cancelUrl = `${window.location.origin}/onboarding?preview=checkout`;
       const res = await fetch(`${API_URL}/subscriptions/create-checkout-session`, {
         method: 'POST',
@@ -1842,7 +2082,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
           billingCycle,
           successUrl,
           cancelUrl,
-          trialPeriodDays: TRIAL_DAYS,
+          ...(TRIAL_DAYS > 0 ? { trialPeriodDays: TRIAL_DAYS } : {}),
           ...(signupPromo ?? {}),
         }),
       });
@@ -2174,13 +2414,18 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                   </div>
                   <div className="flex-1 min-w-0">
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#C9A0F0]/15 border-2 border-[#C9A0F0]/45 text-[#7733B5] text-[10px] font-extrabold uppercase tracking-[0.18em] mb-2 shadow-[0_4px_14px_-4px_rgba(122,52,182,0.45)]">
-                      <span aria-hidden>✨</span> {TRIAL_DAYS}-day free trial
+                      <span aria-hidden>✨</span>{' '}
+                      {TRIAL_DAYS > 0 ? `${TRIAL_DAYS}-day free trial` : '50% off first month'}
                     </span>
                     <h1 className="text-[1.6rem] sm:text-[1.85rem] lg:text-[2rem] xl:text-[2.2rem] font-extrabold leading-[1.05] tracking-tight text-[#3C3C3C] dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                      Try Pro free for {TRIAL_DAYS} days{firstName ? `, ${firstName}` : ''}
+                      {TRIAL_DAYS > 0
+                        ? `Try Pro free for ${TRIAL_DAYS} days${firstName ? `, ${firstName}` : ''}`
+                        : `Get Pro for $${FIRST_MONTH_PRICE.pro}${firstName ? `, ${firstName}` : ''}`}
                     </h1>
                     <p className="mt-2 text-stone-600 dark:text-stone-400 text-[13px] sm:text-sm font-bold">
-                      $0 today · Cancel anytime · Apple Pay · Google Pay · all major cards
+                      {TRIAL_DAYS > 0
+                        ? '$0 today · Cancel anytime · Apple Pay · Google Pay · all major cards'
+                        : `50% off first month · then $${STANDARD_MONTHLY_PRICE.pro}/mo · Cancel anytime`}
                     </p>
                   </div>
                 </div>
@@ -2270,13 +2515,11 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                 </div>
 
                 {/* Plan cards — radio-style, click to select.
-                    Every plan starts with a 7-day free trial, so the
-                    headline is "$0 today" and the sub-line spells out
-                    the post-trial price. */}
+                    Front-door offer is 50% off first month (no trial). */}
                 <div className="space-y-2.5" role="radiogroup" aria-label="Subscription plan">
                   {/* Pro is shown by default; Premium only after the user
-                      taps "Compare Premium" so the trial-start decision
-                      stays a single, low-friction choice. */}
+                      taps "Compare Premium" so the start decision stays
+                      a single, low-friction choice. */}
                   {(showPremium ? (['pro', 'premium'] as const) : (['pro'] as const)).map((planId) => {
                     const plan = PLANS[planId];
                     const cycleData = plan[billingCycle];
@@ -2324,25 +2567,51 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                           )}
                         </div>
 
-                        {/* $0 today — the headline figure. The actual
-                            price ladder is in the sub-line below. */}
+                        {/* Headline price — $0 today on a trial, or the
+                            discounted first-month price when there's no trial. */}
                         <div className="mt-1.5 flex items-baseline gap-1">
                           <span
                             className="text-[1.85rem] sm:text-[2rem] font-extrabold leading-none text-[#A560E8]"
                             style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                           >
-                            $0
+                            {TRIAL_DAYS > 0
+                              ? '$0'
+                              : showSignupDiscount(true, billingCycle)
+                                ? cycleData.firstCyclePrice
+                                : cycleData.rolloverPrice}
                           </span>
-                          <span className="text-xs font-bold text-stone-500 dark:text-stone-400">today</span>
+                          <span className="text-xs font-bold text-stone-500 dark:text-stone-400">
+                            {TRIAL_DAYS > 0 ? 'today' : cycleData.firstCycleLabel.replace('first ', '/')}
+                          </span>
                         </div>
 
-                        {/* Post-trial pricing. Must match exactly what
-                            Stripe charges — a discounted figure here
-                            with no coupon on the session reads as a
-                            bait-and-switch on the first invoice. */}
+                        {/* Must match exactly what Stripe charges. */}
                         <p className="mt-1 text-[11.5px] font-bold text-stone-500 dark:text-stone-400 leading-snug">
-                          {TRIAL_DAYS} days free, then{' '}
-                          {showSignupDiscount(true, billingCycle) ? (
+                          {TRIAL_DAYS > 0 ? (
+                            <>
+                              {TRIAL_DAYS} days free, then{' '}
+                              {showSignupDiscount(true, billingCycle) ? (
+                                <>
+                                  <span className="line-through decoration-2 decoration-[#A560E8]/70 text-stone-400 dark:text-stone-500">
+                                    {cycleData.rolloverPrice}
+                                  </span>{' '}
+                                  <span className="font-extrabold text-[#7733B5]">
+                                    {cycleData.firstCyclePrice}
+                                  </span>{' '}
+                                  <span className="inline-flex items-center rounded-md bg-[#7733B5]/12 px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-[#7733B5]">
+                                    50% off {cycleData.firstCycleLabel}
+                                  </span>
+                                </>
+                              ) : (
+                                <>
+                                  <span className="font-extrabold text-[#7733B5]">
+                                    {cycleData.rolloverPrice}
+                                  </span>
+                                  {cycleData.rolloverSuffix.replace(' after', '')}. Cancel anytime.
+                                </>
+                              )}
+                            </>
+                          ) : showSignupDiscount(true, billingCycle) ? (
                             <>
                               <span className="line-through decoration-2 decoration-[#A560E8]/70 text-stone-400 dark:text-stone-500">
                                 {cycleData.rolloverPrice}
@@ -2353,13 +2622,16 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                               <span className="inline-flex items-center rounded-md bg-[#7733B5]/12 px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-[#7733B5]">
                                 50% off {cycleData.firstCycleLabel}
                               </span>
+                              {' · then '}
+                              {cycleData.rolloverPrice}
+                              {cycleData.rolloverSuffix}
                             </>
                           ) : (
                             <>
                               <span className="font-extrabold text-[#7733B5]">
                                 {cycleData.rolloverPrice}
                               </span>
-                              {cycleData.rolloverSuffix.replace(' after', '')}. Cancel anytime.
+                              {cycleData.rolloverSuffix}. Cancel anytime.
                             </>
                           )}
                         </p>
@@ -2411,8 +2683,8 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                   </p>
                 </div>
 
-                {/* Subscribe CTA — opens Stripe's hosted Checkout page
-                    with the 7-day trial at standard price. */}
+                {/* Subscribe CTA — opens Stripe Checkout (50% off first
+                    month when WELCOME_DISCOUNT_AT_SIGNUP is on). */}
                 <button
                   type="button"
                   onClick={() => handleSubscribeChoice()}
@@ -2429,7 +2701,9 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                     </>
                   ) : (
                     <>
-                      Start my {TRIAL_DAYS}-day free trial
+                      {TRIAL_DAYS > 0
+                        ? `Start my ${TRIAL_DAYS}-day free trial`
+                        : `Unlock Pro — $${FIRST_MONTH_PRICE.pro} first month`}
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                       </svg>
@@ -2438,8 +2712,10 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                 </button>
 
                 <p className="text-center text-[10.5px] font-bold text-stone-400 dark:text-stone-500">
-                  🔒 $0 today · We&apos;ll email you 24h before any charge · Renews at{' '}
-                  {PLANS[selectedPlanId][billingCycle].rolloverPrice}{PLANS[selectedPlanId][billingCycle].rolloverSuffix} · Cancel anytime
+                  {TRIAL_DAYS > 0
+                    ? <>🔒 $0 today · We&apos;ll email you 24h before any charge · Renews at{' '}
+                      {PLANS[selectedPlanId][billingCycle].rolloverPrice}{PLANS[selectedPlanId][billingCycle].rolloverSuffix} · Cancel anytime</>
+                    : <>🔒 Code NEWCUSTOMER auto-applied · Then {PLANS[selectedPlanId][billingCycle].rolloverPrice}{PLANS[selectedPlanId][billingCycle].rolloverSuffix} · Cancel anytime</>}
                 </p>
 
               </div>
@@ -2457,9 +2733,15 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
             disabled={startingTrial}
             className="w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-[#A560E8] hover:bg-[#7733B5] disabled:opacity-60 disabled:cursor-not-allowed text-white text-base font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_14px_30px_-14px_rgba(70,163,2,0.6)]"
           >
-            {startingTrial ? 'Opening secure checkout…' : `Start my ${TRIAL_DAYS}-day free trial`}
+            {startingTrial
+              ? 'Opening secure checkout…'
+              : TRIAL_DAYS > 0
+                ? `Start my ${TRIAL_DAYS}-day free trial`
+                : `Unlock Pro — $${FIRST_MONTH_PRICE.pro} first month`}
           </button>
-          <p className="mt-1.5 text-center text-[10px] font-bold text-stone-400 dark:text-stone-500">$0 today · Cancel anytime</p>
+          <p className="mt-1.5 text-center text-[10px] font-bold text-stone-400 dark:text-stone-500">
+            {TRIAL_DAYS > 0 ? '$0 today · Cancel anytime' : '50% off first month · Cancel anytime'}
+          </p>
         </div>
       </>
     );
@@ -2857,6 +3139,61 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                 </div>
               </div>
 
+              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div>
+                  <label htmlFor="ob-cite-style" className="block text-[10px] font-extrabold uppercase tracking-[0.16em] text-stone-400 dark:text-stone-500 mb-1.5">
+                    Citation style
+                  </label>
+                  <select
+                    id="ob-cite-style"
+                    value={essayCitationStyle}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setEssayCitationStyle(v);
+                      try { localStorage.setItem('writescholar_editor_citation_style', v); } catch { /* noop */ }
+                    }}
+                    disabled={essayParsing}
+                    className="w-full px-3 py-2 rounded-xl border-2 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-950 text-[13px] font-bold text-[#3C3C3C] dark:text-stone-100 focus:outline-none focus:border-[#A560E8]/50 disabled:opacity-60"
+                  >
+                    <option value="None">None (no citations required)</option>
+                    <option value="APA">APA</option>
+                    <option value="Harvard">Harvard</option>
+                    <option value="Chicago">Chicago</option>
+                    <option value="MLA">MLA</option>
+                    <option value="IEEE">IEEE</option>
+                    <option value="Vancouver">Vancouver</option>
+                  </select>
+                </div>
+                <div>
+                  <span className="block text-[10px] font-extrabold uppercase tracking-[0.16em] text-stone-400 dark:text-stone-500 mb-1.5">
+                    Grade format
+                  </span>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {([
+                      { id: 'us' as const, label: 'US (A–F)' },
+                      { id: 'uk' as const, label: 'UK (class)' },
+                    ]).map((g) => (
+                      <button
+                        key={g.id}
+                        type="button"
+                        disabled={essayParsing}
+                        onClick={() => {
+                          setEssayGradingStyle(g.id);
+                          try { localStorage.setItem('writescholar_last_analysis_grading_style', g.id); } catch { /* noop */ }
+                        }}
+                        className={`px-2 py-2 rounded-xl text-[12.5px] font-extrabold border-2 transition-all disabled:opacity-60 ${
+                          essayGradingStyle === g.id
+                            ? 'bg-[#A560E8] text-white border-[#7733B5]'
+                            : 'bg-white dark:bg-stone-950 text-stone-600 dark:text-stone-300 border-[#E5E5E5] dark:border-stone-700 hover:border-[#A560E8]/40'
+                        }`}
+                      >
+                        {g.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
               {/* Upload as a real target, not a buried text link. */}
               <button
                 type="button"
@@ -3041,7 +3378,9 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                       <span className="flex h-[2.625rem] w-[2.625rem] shrink-0 items-center justify-center rounded-xl bg-[#EADCF8] dark:bg-[#A560E8]/20 text-base" aria-hidden>🔒</span>
                       <div className="min-w-0 flex-1">
                         <p className="text-[13.5px] font-extrabold text-[#3C3C3C] dark:text-stone-100">Exact score / 100</p>
-                        <p className="mt-0.5 text-[11px] font-bold text-[#A560E8]">Unlock with free trial</p>
+                        <p className="mt-0.5 text-[11px] font-bold text-[#A560E8]">
+                          {TRIAL_DAYS > 0 ? 'Unlock with free trial' : 'Unlock with Pro'}
+                        </p>
                       </div>
                       <span className="text-lg font-black tracking-widest text-[#D2B3EE] blur-[2px] select-none" aria-hidden>??</span>
                     </div>
@@ -3089,34 +3428,466 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
         {/* Sticky CTA */}
         <div className="relative z-10 border-t-2 border-[#E5E5E5] dark:border-stone-800 bg-white dark:bg-stone-900 px-4 sm:px-6 py-3 sm:py-3.5">
           <div className="max-w-[34rem] mx-auto">
-            {trialError && (
+            {trialError && !HIDE_END_PAYWALLS && (
               <div className="mb-2.5 rounded-xl bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-2 border-[#FF4B4B]/30 px-3 py-2 text-[12px] text-[#FF4B4B] font-bold">
                 {trialError}
               </div>
             )}
-            <button
-              type="button"
-              onClick={() => void handleSubscribeChoice()}
-              disabled={startingTrial}
-              className="w-full inline-flex items-center justify-center gap-2 py-[0.9375rem] rounded-2xl bg-[#A560E8] hover:bg-[#7733B5] disabled:opacity-60 disabled:cursor-not-allowed text-white text-[15px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
-            >
-              {startingTrial ? (
-                <>
-                  <span className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white animate-spin" aria-hidden />
-                  Opening secure checkout…
-                </>
-              ) : (
-                <>
-                  Unlock score &amp; full markup
+            {HIDE_END_PAYWALLS ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    trackEvent('onboarding_aha_continue_dashboard', {
+                      issueCount,
+                      hasDocument: Boolean(documentId),
+                    });
+                    // Land on the hub with this paper highlighted — they
+                    // choose to open the markup, so the dashboard still
+                    // reads as home.
+                    if (documentId) {
+                      try {
+                        sessionStorage.setItem('writescholar_ws_pending_view', 'hub');
+                        sessionStorage.setItem('writescholar_open_doc_after_onboarding', documentId);
+                      } catch { /* ignore */ }
+                    }
+                    goToPhase('transition');
+                  }}
+                  className="w-full inline-flex items-center justify-center gap-2 py-[0.9375rem] rounded-2xl bg-[#A560E8] hover:bg-[#7733B5] text-white text-[15px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
+                >
+                  See full feedback in your dashboard
                   <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
-                </>
+                </button>
+                <p className="mt-1.5 text-center text-[11px] font-bold text-stone-400 dark:text-stone-500">
+                  First half free · unlock the rest with Pro (50% off first month)
+                </p>
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => void handleSubscribeChoice()}
+                  disabled={startingTrial}
+                  className="w-full inline-flex items-center justify-center gap-2 py-[0.9375rem] rounded-2xl bg-[#A560E8] hover:bg-[#7733B5] disabled:opacity-60 disabled:cursor-not-allowed text-white text-[15px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
+                >
+                  {startingTrial ? (
+                    <>
+                      <span className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white animate-spin" aria-hidden />
+                      Opening secure checkout…
+                    </>
+                  ) : (
+                    <>
+                      Unlock score &amp; full markup
+                      <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </>
+                  )}
+                </button>
+                <p className="mt-1.5 text-center text-[11px] font-bold text-stone-400 dark:text-stone-500">
+                  {UPGRADE_CTA_FOOTNOTE}
+                </p>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ─── STUDYPACK-INPUT — notes → real study pack, same aha slot as essay. ─── */
+  if (phase === 'studypack-input') {
+    const notEnoughWords = notesWordCount < MIN_NOTES_WORDS;
+    const progressPct = Math.min(100, (notesWordCount / MIN_NOTES_WORDS) * 100);
+
+    if (packRunning) {
+      return (
+        <div className="relative h-screen bg-gradient-to-br from-[#FAF7FF] via-[#FBF7FF] to-[#F3EAFF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 flex flex-col overflow-hidden">
+          <OnboardingAura />
+          <TopBar />
+
+          <div className="flex-1 flex flex-col items-center justify-center px-5 py-8">
+            <div className="w-full max-w-md">
+              <div className="flex justify-center mb-6">
+                <MascotGif src="/mascot-thinking.webp" alt="" size={130} bordered borderColor="#A560E8" bgColor="#F3EAFF" />
+              </div>
+
+              <h1
+                className="text-center text-2xl sm:text-[1.9rem] font-extrabold text-[#3C3C3C] dark:text-stone-50 leading-tight"
+                style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+              >
+                Building your study pack…
+              </h1>
+              <p className="mt-2 text-center text-sm font-bold text-stone-500 dark:text-stone-400">
+                {notesWordCount.toLocaleString()} words · usually under a minute
+              </p>
+
+              <div className="mt-6 rounded-3xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900 p-3 space-y-1.5">
+                {STUDY_PACK_STEPS.map((s, i) => {
+                  const done = i < packStep;
+                  const active = i === packStep;
+                  return (
+                    <div
+                      key={s.label}
+                      className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-all duration-300 ${
+                        active
+                          ? 'bg-[#F3EAFF] dark:bg-[#A560E8]/15 border-2 border-[#A560E8]/40'
+                          : 'border-2 border-transparent'
+                      }`}
+                    >
+                      <span className="text-lg" aria-hidden>{s.icon}</span>
+                      <span className={`flex-1 text-[13.5px] font-extrabold ${active ? 'text-[#7733B5] dark:text-[#C9A0F0]' : done ? 'text-stone-500 dark:text-stone-400' : 'text-stone-400 dark:text-stone-500'}`}>
+                        {s.label}
+                      </span>
+                      {done ? (
+                        <span className="text-[#A560E8]" aria-hidden>✓</span>
+                      ) : active ? (
+                        <span className="h-3.5 w-3.5 rounded-full border-2 border-[#A560E8]/30 border-t-[#A560E8] animate-spin" aria-hidden />
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div
+        className="relative h-screen bg-gradient-to-br from-[#FAF7FF] via-[#FBF7FF] to-[#F3EAFF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 flex flex-col overflow-hidden"
+        onDragOver={(e) => { e.preventDefault(); setNotesDropActive(true); }}
+        onDragLeave={(e) => {
+          if (e.currentTarget === e.target) setNotesDropActive(false);
+        }}
+        onDrop={(e) => {
+          e.preventDefault();
+          setNotesDropActive(false);
+          const f = e.dataTransfer.files?.[0];
+          if (f) void handleNotesFile(f);
+        }}
+      >
+        <OnboardingAura />
+        <TopBar />
+
+        <div className="flex-1 overflow-y-auto">
+          <div className="px-4 sm:px-6 pt-5 pb-6 max-w-xl mx-auto w-full ob-fade-in">
+            <div className="text-center mb-5">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border-2 border-[#A560E8]/40 bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#A560E8] text-[10px] font-extrabold uppercase tracking-wider mb-2.5">
+                <span aria-hidden>✨</span>
+                Your free study pack
+              </span>
+              <h1
+                className="text-2xl sm:text-[1.9rem] font-extrabold text-[#3C3C3C] dark:text-stone-50 leading-tight"
+                style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+              >
+                Turn notes into a <span className="text-[#A560E8]">study pack</span>
+              </h1>
+              <p className="mt-1.5 text-stone-500 dark:text-stone-400 font-bold text-[13.5px] sm:text-sm max-w-md mx-auto">
+                Lesson, flashcards, and a quiz — usually under a minute.
+              </p>
+            </div>
+
+            <div className="mb-4 flex flex-wrap items-center justify-center gap-1.5">
+              {['Lesson', 'Flashcards', 'Quiz'].map((f) => (
+                <span
+                  key={f}
+                  className="inline-flex items-center gap-1.5 rounded-full border-2 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900 px-2.5 py-1 text-[11.5px] font-extrabold text-stone-600 dark:text-stone-300"
+                >
+                  <svg className="w-3 h-3 text-[#A560E8]" fill="none" stroke="currentColor" strokeWidth={3.5} viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  {f}
+                </span>
+              ))}
+            </div>
+
+            <div
+              className={`relative rounded-3xl border-2 border-b-4 bg-white dark:bg-stone-900 p-3 sm:p-3.5 transition-colors ${
+                notesDropActive
+                  ? 'border-[#A560E8] bg-[#FBF7FF] dark:bg-[#A560E8]/10'
+                  : 'border-[#E5E5E5] dark:border-stone-700'
+              }`}
+            >
+              <textarea
+                value={notesInput}
+                onChange={(e) => { setNotesInput(e.target.value); setPackError(null); }}
+                disabled={notesParsing}
+                rows={9}
+                placeholder={'Paste your notes here…\n\nOr drag a PDF or Word file anywhere on this page.'}
+                className="w-full resize-none rounded-2xl bg-[#FAFAFA] dark:bg-stone-950 px-4 py-3.5 text-[14px] font-semibold leading-relaxed text-[#3C3C3C] dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-600 border-2 border-transparent focus:border-[#A560E8]/50 focus:outline-none transition-colors disabled:opacity-60"
+              />
+
+              <div className="mt-2.5 px-1">
+                <div className="flex items-baseline justify-between gap-2 mb-1.5">
+                  <span className="min-w-0 flex items-center gap-1.5 text-[12px] font-extrabold text-stone-500 dark:text-stone-400">
+                    {notesFileName && (
+                      <>
+                        <span aria-hidden>📄</span>
+                        <span className="truncate max-w-[150px] text-[#A560E8]">{notesFileName}</span>
+                        <span className="text-stone-300 dark:text-stone-600" aria-hidden>·</span>
+                      </>
+                    )}
+                    <span className="shrink-0">
+                      {notesWordCount.toLocaleString()} {notesWordCount === 1 ? 'word' : 'words'}
+                    </span>
+                  </span>
+                  <span className={`text-[11.5px] font-extrabold ${notEnoughWords ? 'text-stone-400 dark:text-stone-500' : 'text-[#A560E8]'}`}>
+                    {notEnoughWords ? `${MIN_NOTES_WORDS - notesWordCount} more to go` : 'Ready to build'}
+                  </span>
+                </div>
+                <div className="h-2 rounded-full bg-[#F0F0F0] dark:bg-stone-800 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-[#A560E8] transition-all duration-300"
+                    style={{ width: `${progressPct}%` }}
+                  />
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => notesFileInputRef.current?.click()}
+                disabled={notesParsing}
+                className="mt-3 w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900 hover:border-[#A560E8]/50 hover:bg-[#FBF7FF] dark:hover:bg-[#A560E8]/10 text-[12.5px] font-extrabold text-stone-600 dark:text-stone-300 active:border-b-2 active:translate-y-0.5 disabled:opacity-60 transition-all"
+              >
+                {notesParsing ? (
+                  <>
+                    <span className="h-3.5 w-3.5 rounded-full border-2 border-[#A560E8]/30 border-t-[#A560E8] animate-spin" aria-hidden />
+                    Reading your file…
+                  </>
+                ) : (
+                  <>
+                    <span aria-hidden>📎</span>
+                    {notesFileName ? 'Choose a different file' : 'Upload PDF, Word or TXT'}
+                  </>
+                )}
+              </button>
+              <input
+                ref={notesFileInputRef}
+                type="file"
+                accept=".pdf,.doc,.docx,.txt"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) void handleNotesFile(f);
+                  e.target.value = '';
+                }}
+              />
+
+              {packError && (
+                <div className="mt-3 rounded-2xl bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-2 border-[#FF4B4B]/30 px-3 py-2.5 text-[12.5px] text-[#FF4B4B] font-bold">
+                  {packError}
+                </div>
               )}
-            </button>
-            <p className="mt-1.5 text-center text-[11px] font-bold text-stone-400 dark:text-stone-500">
-              {`${TRIAL_DAYS}-day free trial · $0 today · Then $${STANDARD_MONTHLY_PRICE.pro}/mo`}
+
+              {notesDropActive && (
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-3xl bg-[#F3EAFF]/95 dark:bg-[#A560E8]/25 border-2 border-dashed border-[#A560E8] pointer-events-none">
+                  <span className="text-3xl mb-1.5" aria-hidden>📄</span>
+                  <p className="text-[14px] font-extrabold text-[#7733B5] dark:text-[#E9DBFF]">Drop your notes to upload</p>
+                </div>
+              )}
+            </div>
+
+            <p className="mt-3 text-center text-[11.5px] font-bold text-stone-400 dark:text-stone-500">
+              🔒 Private to your account · never used to train models
             </p>
+          </div>
+        </div>
+
+        <div className="relative z-10 border-t-2 border-[#E5E5E5] dark:border-stone-800 bg-white dark:bg-stone-900 px-5 sm:px-8 py-3.5 sm:py-4">
+          <div className="max-w-xl mx-auto">
+            <button
+              type="button"
+              onClick={() => void handleRunOnboardingStudyPack()}
+              disabled={notesParsing || notEnoughWords}
+              className="w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-[#A560E8] hover:bg-[#7733B5] disabled:opacity-40 disabled:cursor-not-allowed text-white text-[15px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
+            >
+              Build my study pack
+            </button>
+            <button
+              type="button"
+              onClick={handleSkipStudyPack}
+              className="mt-1 w-full py-1.5 text-[11.5px] font-bold text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
+            >
+              I don&apos;t have notes right now
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ─── STUDYPACK-RESULT — lesson + first cards, rest locked. ─── */
+  if (phase === 'studypack-result' && packResult) {
+    const previewCount = Math.max(1, Math.ceil((packResult.cards.length || packResult.cardCount) / 2));
+    const previewCards = packResult.cards.slice(0, previewCount);
+    const lockedCards = Math.max(0, packResult.cardCount - previewCards.length);
+
+    return (
+      <div className="relative h-screen bg-gradient-to-br from-[#FAF7FF] via-[#FBF7FF] to-[#F3EAFF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 flex flex-col overflow-hidden">
+        <OnboardingAura />
+        <TopBar />
+
+        <div className="flex-1 overflow-y-auto">
+          <div className="px-4 sm:px-6 py-4 max-w-[34rem] mx-auto w-full ob-fade-in">
+            <div className="mb-3.5 flex items-center justify-center gap-[1.125rem]">
+              <div className="ob-result-mascot relative flex h-[106px] w-[106px] shrink-0 items-center justify-center rounded-full bg-white dark:bg-stone-900 shadow-[0_16px_34px_-18px_rgba(119,51,181,0.7)]">
+                <span className="absolute inset-0 rounded-full border-[5px] border-[#DAB8FA]" aria-hidden />
+                <span className="absolute inset-[9px] rounded-full border border-[#EAD8FB]" aria-hidden />
+                <span className="ob-result-orbit absolute left-1/2 top-1/2 h-3.5 w-3.5 rounded-full bg-[#A560E8] ring-[3px] ring-white dark:ring-stone-900" aria-hidden />
+                <img
+                  src="/mascot-jumping-joy.webp"
+                  alt=""
+                  width={86}
+                  height={86}
+                  className="relative h-[86px] w-[86px] object-contain"
+                  loading="eager"
+                  decoding="async"
+                />
+              </div>
+              <div className="min-w-0">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#EADCF8] dark:bg-[#A560E8]/15 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.17em] text-[#7733B5] dark:text-[#C9A0F0]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#A560E8]" aria-hidden />
+                  Pack ready
+                </span>
+                <h1
+                  className="mt-1.5 text-[1.8rem] sm:text-[1.95rem] font-extrabold leading-[1.05] text-[#2F2538] dark:text-stone-50"
+                  style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+                >
+                  Your study pack is<br /><span className="text-[#A560E8]">ready to open.</span>
+                </h1>
+                <p className="mt-1.5 text-[12.5px] font-bold text-stone-500 dark:text-stone-400">
+                  {packResult.wordCount.toLocaleString()} words · {packResult.cardCount} cards
+                  {packResult.quizCount > 0 ? ` · ${packResult.quizCount} quiz Qs` : ''}
+                </p>
+              </div>
+            </div>
+
+            <section className="relative overflow-hidden rounded-[26px] border-2 border-b-[5px] border-[#D8BDF2] dark:border-[#A560E8]/35 bg-white dark:bg-stone-900 shadow-[0_24px_55px_-32px_rgba(84,35,133,0.7)]">
+              <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-[#C9A0F0] via-[#A560E8] to-[#7733B5]" aria-hidden />
+
+              <div className="flex items-center justify-between border-b border-[#EEE4F7] dark:border-stone-700 px-4 pb-3 pt-[1.125rem]">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex h-[2.375rem] w-[2.375rem] items-center justify-center rounded-xl bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[15px]" aria-hidden>🃏</span>
+                  <div>
+                    <p className="text-[13px] font-extrabold text-[#3C3C3C] dark:text-stone-100 line-clamp-1">{packResult.title}</p>
+                    <p className="text-[11px] font-bold text-stone-400 dark:text-stone-500">Lesson + cards preview</p>
+                  </div>
+                </div>
+                <span className="rounded-full bg-[#F3EAFF] dark:bg-[#A560E8]/15 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide text-[#7733B5] dark:text-[#C9A0F0]">
+                  Preview
+                </span>
+              </div>
+
+              {packResult.lessonPreview && (
+                <div className="border-b border-[#EEE4F7] dark:border-stone-700 px-4 py-3.5">
+                  <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#A560E8]">First lesson beat</p>
+                  <p className="mt-1 text-[13.5px] font-bold leading-relaxed text-[#3C3C3C] dark:text-stone-100 line-clamp-3">{packResult.lessonPreview}</p>
+                </div>
+              )}
+
+              <div className="divide-y divide-[#EEE4F7] dark:divide-stone-700">
+                {previewCards.map((c, i) => (
+                  <div key={`${c.front}-${i}`} className="px-4 py-3">
+                    <p className="text-[12.5px] font-extrabold text-[#3C3C3C] dark:text-stone-100">{c.front}</p>
+                    <p className="mt-0.5 text-[12px] font-bold text-stone-500 dark:text-stone-400 line-clamp-2">{c.back}</p>
+                  </div>
+                ))}
+                {lockedCards > 0 && (
+                  <div className="flex items-center gap-3 bg-[#FCF9FF] dark:bg-[#A560E8]/5 px-4 py-4">
+                    <span className="flex h-[2.625rem] w-[2.625rem] shrink-0 items-center justify-center rounded-xl bg-[#EADCF8] dark:bg-[#A560E8]/20 text-base" aria-hidden>🔒</span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[13.5px] font-extrabold text-[#3C3C3C] dark:text-stone-100">
+                        {lockedCards} more {lockedCards === 1 ? 'card' : 'cards'} + full quiz
+                      </p>
+                      <p className="mt-0.5 text-[11px] font-bold text-[#A560E8]">
+                        {TRIAL_DAYS > 0 ? 'Unlock with free trial' : 'Unlock with Pro'}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center justify-center gap-2 border-t border-[#E6D4F5] dark:border-[#A560E8]/25 bg-[#F7EEFF] dark:bg-[#A560E8]/10 px-4 py-3">
+                <span className="text-sm" aria-hidden>🔒</span>
+                <p className="text-[12px] font-extrabold text-[#7733B5] dark:text-[#C9A0F0]">
+                  Full deck · quiz · games from this pack
+                </p>
+              </div>
+            </section>
+          </div>
+          <style>{`
+            @keyframes obResultOrbit {
+              from { transform: translate(-50%, -50%) rotate(0deg) translateX(54px) rotate(0deg); }
+              to { transform: translate(-50%, -50%) rotate(360deg) translateX(54px) rotate(-360deg); }
+            }
+            @keyframes obResultMascotPulse {
+              0%, 100% { box-shadow: 0 0 0 0 rgba(165,96,232,.12), 0 16px 34px -18px rgba(119,51,181,.7); }
+              50% { box-shadow: 0 0 0 8px rgba(165,96,232,.07), 0 18px 38px -16px rgba(119,51,181,.75); }
+            }
+            .ob-result-orbit { animation: obResultOrbit 5s linear infinite; }
+            .ob-result-mascot { animation: obResultMascotPulse 2.4s ease-in-out infinite; }
+            @media (prefers-reduced-motion: reduce) {
+              .ob-result-orbit, .ob-result-mascot { animation: none; }
+            }
+          `}</style>
+        </div>
+
+        <div className="relative z-10 border-t-2 border-[#E5E5E5] dark:border-stone-800 bg-white dark:bg-stone-900 px-4 sm:px-6 py-3 sm:py-3.5">
+          <div className="max-w-[34rem] mx-auto">
+            {HIDE_END_PAYWALLS ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    trackEvent('onboarding_aha_continue_dashboard', { kind: 'study_pack' });
+                    try {
+                      sessionStorage.setItem('writescholar_ws_pending_view', 'hub');
+                      sessionStorage.setItem(HIGHLIGHT_PACK_AFTER_ONBOARDING_KEY, '1');
+                    } catch { /* ignore */ }
+                    goToPhase('transition');
+                  }}
+                  className="w-full inline-flex items-center justify-center gap-2 py-[0.9375rem] rounded-2xl bg-[#A560E8] hover:bg-[#7733B5] text-white text-[15px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
+                >
+                  See your pack in the dashboard
+                  <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </button>
+                <p className="mt-1.5 text-center text-[11px] font-bold text-stone-400 dark:text-stone-500">
+                  Open it from the hub · unlock the rest with Pro (50% off first month)
+                </p>
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => void handleSubscribeChoice()}
+                  disabled={startingTrial}
+                  className="w-full inline-flex items-center justify-center gap-2 py-[0.9375rem] rounded-2xl bg-[#A560E8] hover:bg-[#7733B5] disabled:opacity-60 disabled:cursor-not-allowed text-white text-[15px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
+                >
+                  {startingTrial ? (
+                    <>
+                      <span className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white animate-spin" aria-hidden />
+                      Opening secure checkout…
+                    </>
+                  ) : (
+                    <>
+                      Unlock full pack
+                      <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </>
+                  )}
+                </button>
+                <p className="mt-1.5 text-center text-[11px] font-bold text-stone-400 dark:text-stone-500">
+                  {UPGRADE_CTA_FOOTNOTE}
+                </p>
+              </>
+            )}
           </div>
         </div>
       </div>

@@ -392,7 +392,7 @@ const StudyPackPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
                   {FREE_PREVIEW_LIFETIME_NOTE}
                 </p>
                 <p className="text-amber-600 dark:text-amber-400 text-[10px] sm:text-xs mt-0.5 line-clamp-2">
-                  Free preview: lesson + 4 flashcards • Quiz, games & full deck unlock with Pro
+                  Free preview: lesson + half the flashcards &amp; quiz • Games &amp; full deck with Pro
                 </p>
               </div>
             </div>

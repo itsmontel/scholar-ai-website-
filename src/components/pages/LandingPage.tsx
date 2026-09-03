@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, lazy, Suspense, type ReactNode, type Dispatch, type SetStateAction } from 'react';
 import Header from '../common/Header';
+import PromoBanner from '../common/PromoBanner';
 import Footer from '../common/Footer';
 import { useTheme } from '../../contexts/ThemeContext';
 import AnalysisAnimation from '../common/AnalysisAnimation';
@@ -606,6 +607,21 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, [pipVisible, pipDismissed]);
+
+  // Gold promo bar: hidden on the purple hero, then pins under the
+  // header. Use scrollY — CSS `zoom` on the landing body makes
+  // getBoundingClientRect unreliable on desktop.
+  const [pastHero, setPastHero] = useState(false);
+  useEffect(() => {
+    const update = () => setPastHero(window.scrollY > 420);
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    document.addEventListener('scroll', update, { passive: true, capture: true });
+    return () => {
+      window.removeEventListener('scroll', update);
+      document.removeEventListener('scroll', update, true);
+    };
+  }, []);
   const handleDismissPip = () => {
     setPipVisible(false);
     setPipDismissed(true);
@@ -1201,36 +1217,26 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
   return (
     <>
       <Header onNavigate={onNavigate} user={user} sticky={true} currentPage="landing" opaqueHeader={false} />
-      <main className="landing-desktop-zoom min-h-screen relative transition-colors font-sans overflow-x-clip xl:overflow-x-visible" role="main">
-      {/* Promo Banner — FULLY HIDDEN per redesign brief. The 50%-off
-          May2026 promo no longer surfaces on landing; the new centred
-          hero with floating feature tiles is the entire above-the-fold
-          story. Markup preserved (just swap `hidden` → `md:block` to
-          re-enable on desktop when a new promo runs). */}
-      <div
-        role="region"
-        aria-label="Limited time promotion"
-        aria-hidden="true"
-        className="hidden relative overflow-hidden border-b-2 border-[#FF9600]/30 dark:border-[#D97F00]/40 bg-[#FFF4E0] dark:bg-stone-950"
-      >
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_120%_at_50%_50%,rgba(255,150,0,0.08),transparent_70%)] dark:bg-[radial-gradient(ellipse_60%_120%_at_50%_50%,rgba(255,150,0,0.12),transparent_70%)]" aria-hidden />
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-1.5 sm:py-2">
-          <div className="flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1 text-center">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FF9600] px-2 py-0.5 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white">
-              <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden>
-                <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.715-5.349L11 6.477V16h2a1 1 0 110 2H7a1 1 0 110-2h2V6.477L6.237 7.582l1.715 5.349a1 1 0 01-.285 1.05A3.989 3.989 0 015 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L9 4.323V3a1 1 0 011-1z" clipRule="evenodd" />
-              </svg>
-              Limited Time
-            </span>
-            <p className="text-xs sm:text-[13px] font-medium text-stone-800 dark:text-stone-100">
-              <span className="font-bold text-[#FF9600] dark:text-[#FF9600]">50% off</span> your first month on monthly plans · use code{' '}
-              <span className="inline-flex items-center rounded-md border border-[#FF9600]/40 dark:border-[#D97F00]/50 bg-white dark:bg-stone-900 px-1.5 py-0.5 font-mono font-bold text-[#FF9600] dark:text-[#FF9600] tracking-wide text-[11px]">
-                NEWCUSTOMER
-              </span>
-            </p>
-          </div>
+      {pastHero && (
+        <div className="fixed inset-x-0 z-[110] top-[3.5rem] sm:top-[4.25rem] landing-promo-slide pointer-events-auto">
+          <PromoBanner
+            variant="gold"
+            onCta={() => onNavigate(user ? 'pricing' : 'signup')}
+            ctaLabel={user ? 'Unlock Pro' : 'Get 50% off'}
+          />
         </div>
-      </div>
+      )}
+      <style>{`
+        @keyframes landingPromoSlide {
+          from { transform: translateY(-100%); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+        .landing-promo-slide { animation: landingPromoSlide 0.32s cubic-bezier(0.22, 1, 0.36, 1); }
+        @media (prefers-reduced-motion: reduce) {
+          .landing-promo-slide { animation: none; }
+        }
+      `}</style>
+      <main className="landing-desktop-zoom min-h-screen relative transition-colors font-sans overflow-x-clip xl:overflow-x-visible" role="main">
       {/* HERO: formal, conversion-focused. Section base is cream so
           everything below the hero (analyzer demo, before/after, etc.)
           sits on the standard light-theme background. The purple hero
@@ -2772,7 +2778,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               onClick={handleContinueToSignup}
               className="w-full py-3.5 bg-[#58CC02] text-white font-extrabold rounded-2xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all duration-200 flex items-center justify-center"
                 >
-              View full analysis (free trial)
+              View full analysis
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
@@ -2826,7 +2832,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               onClick={handleContinueToSignupFromCitations}
               className="w-full py-3.5 bg-[#58CC02] text-white font-extrabold rounded-2xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all duration-200 flex items-center justify-center"
             >
-              See my citations (free trial)
+              See my citations
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
@@ -2912,7 +2918,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               onClick={handleContinueToSignup}
               className="w-full py-3.5 bg-[#58CC02] text-white font-extrabold rounded-2xl border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all duration-200 flex items-center justify-center"
             >
-              Get my summary (free trial)
+              Get my summary
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
@@ -2978,7 +2984,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               onClick={handleContinueToSignup}
               className="w-full py-3.5 bg-[#FF9600] text-white font-extrabold rounded-2xl border-2 border-b-4 border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all duration-200 flex items-center justify-center"
             >
-              Sign up to unlock Study Tools (free trial)
+              Sign up to unlock Study Tools
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>

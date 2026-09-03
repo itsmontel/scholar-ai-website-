@@ -2,23 +2,16 @@
  * Pricing & discount policy — one place that decides WHERE the welcome
  * discount is allowed to appear.
  *
- * The rule we're running: fire ONE acquisition lever at a time.
+ * Current front-door offer: 50% off the first month (NEWCUSTOMER), no
+ * free trial. Soft paywall, pricing, billing, and onboarding checkout
+ * all read this flag so the story stays consistent.
  *
- *   Front door (onboarding, pricing, billing, soft paywall)
- *     → the 7-day free trial is the offer. Full price after: $19.99 Pro,
- *       $39.99 Premium. No coupon, because stacking a free week AND 50%
- *       off spends two levers on the same user and teaches people the
- *       list price isn't real.
+ * Exit (cancel flow / post-lapse winback) can still reuse the same
+ * coupon as a save offer for users who already paid.
  *
- *   Exit (cancel flow, post-lapse winback)
- *     → the same 50% code becomes a SAVE offer, spent only on users who
- *       have explicitly signalled they're leaving.
- *
- * History: the discount used to auto-apply at every checkout surface.
- * It converted poorly at the front door and gave margin away to users
- * who would have paid anyway, so it moved to the exit. Flip
- * WELCOME_DISCOUNT_AT_SIGNUP back to true to restore the old behaviour —
- * every surface reads this flag, so it's a one-line revert.
+ * Flip WELCOME_DISCOUNT_AT_SIGNUP to false to stop auto-applying the
+ * code at acquisition (list price only). Set TRIAL_DAYS > 0 to bring
+ * back a card-required free trial on checkout.
  */
 
 /**
@@ -34,9 +27,9 @@ export const WELCOME_PROMO_CODE = 'NEWCUSTOMER';
 
 /**
  * Whether acquisition surfaces auto-apply WELCOME_PROMO_CODE.
- * false = trial is the front-door offer (current).
+ * true = 50% off first month is the front-door offer (current).
  */
-export const WELCOME_DISCOUNT_AT_SIGNUP = false;
+export const WELCOME_DISCOUNT_AT_SIGNUP = true;
 
 /** First-month price per plan when the discount IS applied. */
 export const FIRST_MONTH_PRICE: Record<string, number> = { pro: 9.99, premium: 19.99 };
@@ -44,8 +37,11 @@ export const FIRST_MONTH_PRICE: Record<string, number> = { pro: 9.99, premium: 1
 /** Standard recurring monthly price per plan. */
 export const STANDARD_MONTHLY_PRICE: Record<string, number> = { pro: 19.99, premium: 39.99 };
 
-/** Length of the card-required free trial, in days. */
-export const TRIAL_DAYS = 7;
+/**
+ * Length of the card-required free trial, in days.
+ * 0 = no trial — charge the (possibly discounted) first invoice immediately.
+ */
+export const TRIAL_DAYS = 0;
 
 /**
  * Promo code to send with a checkout session from an ACQUISITION surface.
@@ -76,3 +72,10 @@ export function showSignupDiscount(
 ): boolean {
   return signupPromoCode(newCustomer, billingCycle) !== undefined;
 }
+
+/** Short CTA footnote for upgrade buttons / locked-content footers. */
+export const UPGRADE_CTA_FOOTNOTE = WELCOME_DISCOUNT_AT_SIGNUP
+  ? `50% off first month · then $${STANDARD_MONTHLY_PRICE.pro}/mo · Cancel anytime`
+  : TRIAL_DAYS > 0
+    ? `${TRIAL_DAYS}-day free trial · $0 today · Cancel anytime`
+    : `From $${STANDARD_MONTHLY_PRICE.pro}/mo · Cancel anytime`;

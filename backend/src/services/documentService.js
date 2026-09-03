@@ -1,5 +1,16 @@
 const { v4: uuidv4 } = require('uuid');
 const { createClient } = require('@supabase/supabase-js');
+const subscriptionService = require('./subscriptionService');
+
+function getExpiresAt30Days() {
+  return new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+}
+
+function isExpired(expiresAt) {
+  if (!expiresAt) return false;
+  const t = new Date(expiresAt).getTime();
+  return Number.isFinite(t) && t <= Date.now();
+}
 
 class DocumentService {
   constructor() {
@@ -24,9 +35,16 @@ class DocumentService {
    */
   async createDocument(documentData) {
     try {
-      const { data, error } = await this.getSupabaseClient()
-        .from('documents')
-        .insert([{
+      let expiresAt = documentData.expiresAt;
+      if (expiresAt === undefined) {
+        try {
+          const keep = await subscriptionService.userKeepsLibraryForever(documentData.userId);
+          expiresAt = keep ? null : getExpiresAt30Days();
+        } catch {
+          expiresAt = getExpiresAt30Days();
+        }
+      }
+      const payload = {
           id: uuidv4(),
           user_id: documentData.userId,
           title: documentData.title,
@@ -40,12 +58,24 @@ class DocumentService {
           page_count: documentData.pageCount,
           upload_status: 'processed',
           created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }])
-        .select()
-        .single();
-
-      if (error) throw error;
+          updated_at: new Date().toISOString(),
+          expires_at: expiresAt,
+      };
+      const insert = async (row) => this.getSupabaseClient().from('documents').insert([row]).select().single();
+      let { data, error } = await insert(payload);
+      if (error) {
+        const msg = `${error.message || ''} ${error.details || ''}`.toLowerCase();
+        const missingExpires =
+          error.code === 'PGRST204' ||
+          (msg.includes('expires_at') && (msg.includes('schema cache') || msg.includes('does not exist') || msg.includes('could not find')));
+        if (missingExpires) {
+          const { expires_at, ...without } = payload;
+          const retry = await insert(without);
+          if (retry.error) throw retry.error;
+          return retry.data;
+        }
+        throw error;
+      }
       return data;
     } catch (error) {
       console.error('Error creating document:', error);
@@ -102,12 +132,26 @@ class DocumentService {
         .from('documents')
         .select('*')
         .eq('user_id', userId)
+        .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
         .order(sortBy, { ascending: sortOrder === 'asc' })
         .range(offset, offset + limit - 1);
 
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        const msg = `${error.message || ''}`.toLowerCase();
+        if (msg.includes('expires_at')) {
+          const fallback = await this.getSupabaseClient()
+            .from('documents')
+            .select('*')
+            .eq('user_id', userId)
+            .order(sortBy, { ascending: sortOrder === 'asc' })
+            .range(offset, offset + limit - 1);
+          if (fallback.error) throw fallback.error;
+          return fallback.data || [];
+        }
+        throw error;
+      }
       return data || [];
     } catch (error) {
       console.error('Error getting user documents:', error);
@@ -126,7 +170,8 @@ class DocumentService {
     const { count, error } = await this.getSupabaseClient()
       .from('documents')
       .select('id', { count: 'exact', head: true })
-      .eq('user_id', userId);
+      .eq('user_id', userId)
+      .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`);
     if (error) throw error;
     return count || 0;
   }
@@ -150,7 +195,9 @@ class DocumentService {
         throw error;
       }
 
-      return data || null;
+      if (!data) return null;
+      if (isExpired(data.expires_at)) return null;
+      return data;
     } catch (error) {
       console.error('Error getting document by ID:', error);
       throw error;
@@ -316,10 +363,56 @@ class DocumentService {
         .limit(20);
 
       if (error) throw error;
-      return data || [];
+      const now = Date.now();
+      return (data || []).filter((d) => !d.expires_at || new Date(d.expires_at).getTime() > now);
     } catch (error) {
       console.error('Error searching documents:', error);
       throw error;
+    }
+  }
+
+  /**
+   * First paid plan: keep every document this user owns. expires_at
+   * null means permanent (same as study packs created while on Pro).
+   */
+  async makeUserDocumentsPermanent(userId) {
+    if (!userId) return { updated: 0 };
+    try {
+      const { data, error } = await this.getSupabaseClient()
+        .from('documents')
+        .update({ expires_at: null, updated_at: new Date().toISOString() })
+        .eq('user_id', userId)
+        .not('expires_at', 'is', null)
+        .select('id');
+      if (error) throw error;
+      return { updated: data?.length || 0 };
+    } catch (error) {
+      const msg = `${error.message || ''}`.toLowerCase();
+      if (msg.includes('expires_at') && msg.includes('does not exist')) return { updated: 0 };
+      console.error('Error making documents permanent:', error);
+      return { updated: 0 };
+    }
+  }
+
+  /**
+   * Delete free-user documents whose 30-day window has passed.
+   * Permanent rows (expires_at null) are never touched.
+   */
+  async cleanupExpiredDocuments() {
+    try {
+      const now = new Date().toISOString();
+      const { data, error } = await this.getSupabaseClient()
+        .from('documents')
+        .delete()
+        .not('expires_at', 'is', null)
+        .lt('expires_at', now)
+        .select('id');
+      if (error) throw error;
+      console.log(`Cleaned up ${data?.length || 0} expired documents`);
+      return { deleted: data?.length || 0 };
+    } catch (error) {
+      console.error('Database error in cleanupExpiredDocuments:', error);
+      return { deleted: 0 };
     }
   }
 }

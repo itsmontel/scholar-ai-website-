@@ -305,7 +305,7 @@ export default function StudyPacksPanel({ onNavigate }: { onNavigate: (page: str
               <span key={c} className="px-2.5 py-1 rounded-full bg-[#FBF8FF] dark:bg-[#A560E8]/10 border border-[#A560E8]/25 text-[11px] font-extrabold text-[#7733B5] dark:text-[#A560E8]">{c}</span>
             ))}
             <span className="w-full mt-1 text-[10.5px] font-bold text-stone-400 dark:text-stone-500">
-              Free preview: lesson + 4 flashcards · Quiz &amp; games with Pro
+              Free preview: lesson + half the flashcards &amp; quiz · Games with Pro
             </span>
           </div>
         </div>
@@ -329,7 +329,7 @@ export default function StudyPacksPanel({ onNavigate }: { onNavigate: (page: str
       <div className="mt-8">
         <PreviewStrip
           title="Everything a study pack creates"
-          subtitle="One paste becomes a full pack — free users preview the lesson and first 4 flashcards; Pro unlocks quiz, games, and the full deck."
+          subtitle="One paste becomes a full pack — free users get the lesson plus half the flashcards and quiz; Pro unlocks games and the rest of the deck."
           aspect="aspect-[4/5]"
           tint="#A560E8"
           tintShadowRgb="165,96,232"

@@ -400,6 +400,7 @@ router.get('/', authenticateToken, validateGetDocuments, async (req, res) => {
           createdAt: doc.created_at,
           updatedAt: doc.updated_at,
           lastEditedAt: doc.last_edited_at,
+          expiresAt: doc.expires_at ?? null,
           contentPreview: buildContentPreview(doc),
           analysisStatus: analysisStatusMap[doc.id] || { hasAnalysis: false, lastAnalyzed: null }
         })),

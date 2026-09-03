@@ -24,13 +24,13 @@ export const SKIP_ONBOARDING_STRIPE = false;
  *           card-required 7-day trial. Standalone free utilities under
  *           /tools/* (word counter, GPA calc, pomodoro, etc.) stay open.
  *
- * History: we ran the hard gate before → almost nobody started the trial, so
- * we switched to freemium preview. Freemium then converted very few users to
- * PAID, so we're re-testing the hard gate: force the 7-day card-on-file trial
- * as the only way to reach the core product. Flip back to true to restore the
- * preview model — all the plumbing stays wired either way.
+ * History: hard gate (card before tools) got signups but near-zero trials.
+ * Freemium preview (run the tool, lock ~half the payoff) is the live model
+ * again: onboarding has no paywall; the trial ask happens on the locked
+ * analysis / study-pack / citations result in-product. Flip to false to
+ * restore the hard gate — plumbing stays wired either way.
  */
-export const FREEMIUM_PREVIEW = false;
+export const FREEMIUM_PREVIEW = true;
 
 /**
  * Free-tier in-app writing editor allowance, in words.

@@ -92,7 +92,7 @@ const FAQS = [
   },
   {
     q: 'Is it free?',
-    a: 'You can try it on a real essay of your own during the 7-day free trial. Starting the trial asks for a card so it can roll into Pro if you keep it, but nothing is charged up front and you can cancel any time inside the 7 days. Pro then covers every fix, one-click apply, and 99 analyses a month.',
+    a: 'You can preview it on a real essay of your own for free — grade estimate, issues, and the first half of the markup. Unlock the full rubric and one-click fixes with Pro at 50% off your first month ($9.99), then $19.99/mo. Cancel anytime.',
   },
   {
     q: 'Does it work for university and college essays?',
@@ -170,7 +170,7 @@ const AiEssayEditorPage = ({ onNavigate, user, onLogout }: AiEssayEditorPageProp
             <div className="mt-8 flex flex-col items-center gap-3">
               {cta}
               <p className="text-[12px] sm:text-sm font-bold text-stone-500 dark:text-stone-400">
-                7-day free trial · $0 today · Cancel anytime. The grade is an estimate to sharpen your draft, not a guarantee.
+                Preview free · 50% off first month · Cancel anytime. The grade is an estimate to sharpen your draft, not a guarantee.
               </p>
             </div>
           </div>

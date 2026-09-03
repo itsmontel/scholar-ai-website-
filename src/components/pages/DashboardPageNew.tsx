@@ -906,14 +906,8 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
       {/* ─── TABLET + DESKTOP DASHBOARD (existing layout) ─── */}
       <div className="hidden md:block">
       <LoggedInPageShell user={user} onNavigate={onNavigate} onLogout={onLogout} currentPage="dashboard">
-      {/* "50% off your first month on monthly plans · use code MAY2026"
-          promo banner — HIDDEN. The render block below is preserved
-          (gated by `false &&`) so this can be re-enabled in one step
-          when the next promo runs: change `false && isFree` to just
-          `isFree` to bring it back. The MAY2026 promo code is still
-          honoured by the onboarding hard-paywall route — only the
-          dashboard banner is suppressed. */}
-      {false && isFree && (
+      {/* 50% off first month (NEWCUSTOMER) — free users only. */}
+      {isFree && (
         <div
           role="region"
           aria-label="Limited time promotion"

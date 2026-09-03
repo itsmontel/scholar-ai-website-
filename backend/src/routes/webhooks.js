@@ -8,6 +8,22 @@ const { query } = require('../database/connection');
 // reconcileSubscriptions, so all paths converge on identical logic.
 const { resolveEffectivePlan } = subscriptionService;
 
+async function persistLibraryForeverIfPaid(userId, plan) {
+  if (!userId || !subscriptionService.isPaidSubscriptionTier(plan)) return;
+  try {
+    const documentService = require('../services/documentService');
+    await documentService.makeUserDocumentsPermanent(userId);
+  } catch (err) {
+    console.error('Error persisting documents after paid conversion:', err);
+  }
+  try {
+    const aiAnalysisService = require('../services/aiAnalysisService');
+    await aiAnalysisService.makeUserMaterialsPermanent(userId);
+  } catch (err) {
+    console.error('Error persisting study materials after paid conversion:', err);
+  }
+}
+
 // @route   GET /api/webhooks/test
 // @desc    Test webhook endpoint
 // @access  Public
@@ -133,6 +149,7 @@ async function handleCheckoutSessionCompleted(session) {
       'UPDATE users SET subscription_plan = $1, subscription_status = $2, onboarding_completed = true WHERE id = $3',
       [plan, subscription.status, user.id]
     );
+    await persistLibraryForeverIfPaid(user.id, plan);
 
     // Record subscription in database using PostgreSQL
     try {
@@ -205,6 +222,7 @@ async function handleSubscriptionCreated(subscription) {
       'UPDATE users SET subscription_plan = $1, subscription_status = $2, onboarding_completed = true WHERE id = $3',
       [plan, subscription.status, user.id]
     );
+    await persistLibraryForeverIfPaid(user.id, plan);
 
   } catch (error) {
     console.error('Error handling subscription created:', error);
@@ -258,6 +276,7 @@ async function handleSubscriptionUpdated(subscription) {
       'UPDATE users SET subscription_plan = $1, subscription_status = $2 WHERE id = $3',
       [plan, subscription.status, user.id]
     );
+    await persistLibraryForeverIfPaid(user.id, plan);
 
     // If user downgraded to free plan, add them to email subscription list (if not unsubscribed)
     if (plan === 'free' && user.email) {

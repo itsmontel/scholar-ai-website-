@@ -78,6 +78,14 @@ function getExpiresAt30Days() {
   return expiresAt.toISOString();
 }
 
+async function libraryExpiresAt(userId, userPlan = 'free') {
+  if (subscriptionService.isPaidSubscriptionTier(userPlan || 'free')) return null;
+  try {
+    if (userId && await subscriptionService.userKeepsLibraryForever(userId)) return null;
+  } catch { /* treat as free */ }
+  return getExpiresAt30Days();
+}
+
 /** Generic / placeholder phrases: never show these to users; prefer comment or quote-anchored fallback. */
 const FORBIDDEN_SUGGESTION_PHRASES = [
   /add a concrete example,?\s*clarify the connection to your argument,?\s*or develop the idea further with specifics/i,
@@ -1941,10 +1949,10 @@ CRITICAL REQUIREMENTS:
       }
     }
     
-    // STEP 2: Free users - ensure at least 1 concern (red) in first ~40% of document (matches free preview cutoff)
+    // STEP 2: Free users - ensure at least 1 concern (red) in first ~50% of document (matches free preview cutoff)
     if (userPlan === 'free') {
       const contentLength = content.length;
-      const freePreviewEnd = Math.floor(contentLength * 0.4);
+      const freePreviewEnd = Math.floor(contentLength * 0.5);
       const concernsInPreview = finalAnnotations.filter(a => a.type === 'concern' && a.startIndex < freePreviewEnd);
 
       if (concernsInPreview.length === 0) {
@@ -1954,7 +1962,7 @@ CRITICAL REQUIREMENTS:
           improveInPreview.type = 'concern';
           improveInPreview.comment = improveInPreview.comment || 'This section needs attention to strengthen your argument.';
           improveInPreview.suggestion = improveInPreview.suggestion || 'Revise with a concrete example: e.g. "As X (Year) notes, …" or "For instance, …" to strengthen your argument.';
-          console.log(`🔄 Free user: Converted 1 improve → concern in first ~40% for conversion`);
+          console.log(`🔄 Free user: Converted 1 improve → concern in first ~50% for conversion`);
         } else {
           // Add a new concern from an unused sentence in the preview region
           const previewContent = content.substring(0, freePreviewEnd);
@@ -1981,7 +1989,7 @@ CRITICAL REQUIREMENTS:
                   suggestion: 'Revise with a concrete transition: e.g. "Therefore, …" or "For instance, …" to clarify and support your point.'
                 });
                 finalAnnotations.sort((a, b) => a.startIndex - b.startIndex);
-                console.log(`🔄 Free user: Added 1 concern in first ~40% for conversion`);
+                console.log(`🔄 Free user: Added 1 concern in first ~50% for conversion`);
                 break;
               }
             }
@@ -3308,8 +3316,7 @@ IMPORTANT REQUIREMENTS:
       );
 
       // Free users: expires 30 days after creation; Paid users (pro/premium): no expiration (null)
-      const isPaidUser = subscriptionService.isPaidSubscriptionTier(userPlan || 'free');
-      const expiresAt = isPaidUser ? null : getExpiresAt30Days();
+      const expiresAt = await libraryExpiresAt(userId, userPlan);
 
       // Note: yearRange is already included in searchResults.yearRange
       // so we don't need a separate column - it's stored in the JSONB field
@@ -3429,8 +3436,7 @@ IMPORTANT REQUIREMENTS:
       );
 
       // Free users: expires 30 days after creation; Paid users (pro/premium): no expiration (null)
-      const isPaidUser = subscriptionService.isPaidSubscriptionTier(userPlan || 'free');
-      const expiresAt = isPaidUser ? null : getExpiresAt30Days();
+      const expiresAt = await libraryExpiresAt(userId, userPlan);
 
       const quizData = {
         user_id: userId,
@@ -3477,8 +3483,7 @@ IMPORTANT REQUIREMENTS:
       );
 
       // Free users: expires 30 days after creation; Paid users (pro/premium): no expiration (null)
-      const isPaidUser = subscriptionService.isPaidSubscriptionTier(userPlan || 'free');
-      const expiresAt = isPaidUser ? null : getExpiresAt30Days();
+      const expiresAt = await libraryExpiresAt(userId, userPlan);
 
       const flashcardData = {
         user_id: userId,
@@ -3525,8 +3530,7 @@ IMPORTANT REQUIREMENTS:
       );
 
       // Free users: expires 30 days after creation; Paid users (pro/premium): no expiration (null)
-      const isPaidUser = subscriptionService.isPaidSubscriptionTier(userPlan || 'free');
-      const expiresAt = isPaidUser ? null : getExpiresAt30Days();
+      const expiresAt = await libraryExpiresAt(userId, userPlan);
 
       // Build clues object from placedWords for display in history
       const cluesFromPlacedWords = {
@@ -3587,8 +3591,7 @@ IMPORTANT REQUIREMENTS:
         process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
       );
 
-      const isPaidUser = subscriptionService.isPaidSubscriptionTier(userPlan || 'free');
-      const expiresAt = isPaidUser ? null : getExpiresAt30Days();
+      const expiresAt = await libraryExpiresAt(userId, userPlan);
 
       const title = (payload.title || payload.sourceText || 'Crater Blast Game').toString().slice(0, 200);
       const wordCount = (payload.sourceText || '').toString().trim().split(/\s+/).length;
@@ -3788,6 +3791,30 @@ IMPORTANT REQUIREMENTS:
     }
   }
 
+  /**
+   * First paid plan: keep this user's study packs, quizzes, citations,
+   * and lessons forever (expires_at null).
+   */
+  async makeUserMaterialsPermanent(userId) {
+    if (!userId) return;
+    try {
+      const { createClient } = require('@supabase/supabase-js');
+      const supabase = createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+      );
+      const now = new Date().toISOString();
+      await Promise.all([
+        supabase.from('quizzes').update({ expires_at: null }).eq('user_id', userId).not('expires_at', 'is', null),
+        supabase.from('citation_searches').update({ expires_at: null }).eq('user_id', userId).not('expires_at', 'is', null),
+        supabase.from('lesson_plans').update({ expires_at: null }).eq('user_id', userId).not('expires_at', 'is', null),
+      ]);
+      console.log('Made study materials permanent for user', userId, 'at', now);
+    } catch (error) {
+      console.error('Error making study materials permanent:', error);
+    }
+  }
+
   // =====================
   // Lesson Plan Methods
   // =====================
@@ -3807,8 +3834,7 @@ IMPORTANT REQUIREMENTS:
       );
 
       // Free users: expires 30 days after creation; Paid users (pro/premium): no expiration (null)
-      const isPaidUser = subscriptionService.isPaidSubscriptionTier(userPlan || 'free');
-      const expiresAt = isPaidUser ? null : getExpiresAt30Days();
+      const expiresAt = await libraryExpiresAt(userId, userPlan);
 
       const lessonData = {
         user_id: userId,
@@ -4863,8 +4889,7 @@ DO NOT include any text outside the JSON object.`;
         process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
       );
 
-      const isPaidUser = subscriptionService.isPaidSubscriptionTier(userPlan || 'free');
-      const expiresAt = isPaidUser ? null : getExpiresAt30Days();
+      const expiresAt = await libraryExpiresAt(userId, userPlan);
 
       const title = (payload.title || payload.sourceText || 'Word Tower Game').toString().slice(0, 200);
       const wordCount = (payload.sourceText || '').toString().trim().split(/\s+/).length;
@@ -5028,8 +5053,7 @@ DO NOT include any text outside the JSON object.`;
         process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
       );
 
-      const isPaidUser = subscriptionService.isPaidSubscriptionTier(userPlan || 'free');
-      const expiresAt = isPaidUser ? null : getExpiresAt30Days();
+      const expiresAt = await libraryExpiresAt(userId, userPlan);
 
       const title = (payload.title || payload.sourceText || 'Word Blitz Game').toString().slice(0, 200);
       const wordCount = (payload.sourceText || '').toString().trim().split(/\s+/).length;

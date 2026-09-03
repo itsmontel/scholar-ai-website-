@@ -4369,9 +4369,9 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
           };
 
           const freeBars: Bar[] = [
-            { key: 'analyses', label: 'Analysis previews', emoji: '📝', remaining: usageStats.analysesRemaining, limit: planLimits?.analysesPerMonth ?? 1, tone: 'rose' },
+            { key: 'analyses', label: 'Analysis previews', emoji: '📝', remaining: usageStats.analysesRemaining, limit: planLimits?.analysesPerMonth ?? 2, tone: 'rose' },
             { key: 'citations', label: 'Citation previews', emoji: '📚', remaining: usageStats.citationsRemaining, limit: planLimits?.citationSearchesPerMonth ?? 1, tone: 'violet' },
-            { key: 'studyPacks', label: 'Study pack previews', emoji: '📦', remaining: usageStats.studyPacksRemaining, limit: planLimits?.studyPackGenerationsPerMonth ?? 1, tone: 'amber' },
+            { key: 'studyPacks', label: 'Study pack previews', emoji: '📦', remaining: usageStats.studyPacksRemaining, limit: planLimits?.studyPackGenerationsPerMonth ?? 2, tone: 'amber' },
             { key: 'uploads', label: 'Uploads', emoji: '📄', remaining: usageStats.uploadsRemaining, limit: planLimits?.documentsPerMonth ?? 3, tone: 'emerald' },
           ];
 
@@ -4675,9 +4675,9 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
               </div>
               <div className="space-y-2.5">
                 {[
-                  { label: 'Analysis previews', emoji: '📝', remaining: usageStats.analysesRemaining, limit: (usageStats.planLimits as any)?.analysesPerMonth ?? 1, color: 'rose' },
+                  { label: 'Analysis previews', emoji: '📝', remaining: usageStats.analysesRemaining, limit: (usageStats.planLimits as any)?.analysesPerMonth ?? 2, color: 'rose' },
                   { label: 'Citation previews', emoji: '📚', remaining: usageStats.citationsRemaining, limit: (usageStats.planLimits as any)?.citationSearchesPerMonth ?? 1, color: 'blue' },
-                  { label: 'Pack previews', emoji: '📦', remaining: usageStats.studyPacksRemaining, limit: (usageStats.planLimits as any)?.studyPackGenerationsPerMonth ?? 1, color: 'amber' },
+                  { label: 'Pack previews', emoji: '📦', remaining: usageStats.studyPacksRemaining, limit: (usageStats.planLimits as any)?.studyPackGenerationsPerMonth ?? 2, color: 'amber' },
                 ].map((bar) => {
                   const isUnlimited = bar.remaining === -1;
                   const remaining = isUnlimited ? Infinity : Math.max(0, bar.remaining);

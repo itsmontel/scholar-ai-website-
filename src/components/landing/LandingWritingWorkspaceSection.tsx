@@ -259,7 +259,7 @@ export default function LandingWritingWorkspaceSection({ onNavigate }: LandingWr
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
             </button>
-            <p className="text-xs sm:text-sm text-[#777] dark:text-stone-400 font-bold">7-day free trial · $0 today · Cancel anytime</p>
+            <p className="text-xs sm:text-sm text-[#777] dark:text-stone-400 font-bold">50% off first month · Cancel anytime</p>
           </div>
         </LandingScrollReveal>
       </div>

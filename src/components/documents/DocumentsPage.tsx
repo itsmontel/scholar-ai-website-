@@ -17,6 +17,7 @@ import type { WorkspaceView } from '../workspace/types';
 import { SIDEBAR_TOOLS } from '../workspace/sidebarTools';
 import { WorkspaceShell } from '../workspace/WorkspaceShell';
 import DashboardTopBar from '../common/DashboardTopBar';
+import PromoBanner from '../common/PromoBanner';
 import ViewportAutoplayVideo from '../common/ViewportAutoplayVideo';
 import { consumePendingWorkspaceView, WS_SWITCH_VIEW_EVENT } from '../workspace/workspaceNavigate';
 import { trackEvent, trackFunnelStep } from '../../utils/analytics';
@@ -26,7 +27,12 @@ import {
   isFirstRunFastPathDone,
   markFirstRunFastPathDone,
 } from '../../constants/paywallSession';
-import { getPrimaryFeatureInterest } from '../../utils/featureInterests';
+import {
+  getPrimaryFeatureInterest,
+  HUB_NUDGE_AFTER_ONBOARDING_KEY,
+  HIGHLIGHT_PACK_AFTER_ONBOARDING_KEY,
+  STUDY_PACK_VIEWER_KEY,
+} from '../../utils/featureInterests';
 
 /* ═══════════════════════════════════════════════════════════════
    DocumentsPage — unified hub for everything in /documents.
@@ -107,6 +113,13 @@ function resolveGradingStyleForAnalyze(opts?: AnalyzeStyleOptions): GradingStyle
   return getDefaultGradingStyle();
 }
 
+type HubStudyPack = {
+  id: string;
+  title: string;
+  createdAt: string;
+  questions: unknown;
+};
+
 type DocSummary = {
   id: string;
   title: string;
@@ -119,6 +132,8 @@ type DocSummary = {
   createdAt: string;
   updatedAt: string;
   lastEditedAt: string | null;
+  /** Free never-paid docs expire; null means keep forever. */
+  expiresAt?: string | null;
   /** Plain-text snippet of the document body (server-trimmed). */
   contentPreview: string;
   /** Derived: did the user open + edit this in the editor? */
@@ -751,6 +766,15 @@ function editedAgo(iso: string | null | undefined): string {
   return months === 1 ? '1 month ago' : `${months} months ago`;
 }
 
+function expiresInLabel(iso: string | null | undefined): string | null {
+  if (!iso) return null;
+  const days = Math.ceil((new Date(iso).getTime() - Date.now()) / 86_400_000);
+  if (!Number.isFinite(days)) return null;
+  if (days <= 0) return 'Expires today';
+  if (days === 1) return '1 day left';
+  return `${days} days left`;
+}
+
 /* ─── DocumentRow — one document in the dashboard's recents list and
  * in the full My Documents library. The whole row opens the doc; the
  * ⋮ menu holds download + delete. */
@@ -760,13 +784,18 @@ function DocumentRow({
   onDownload,
   onDelete,
   elevated = false,
+  highlighted = false,
+  kind = 'document',
 }: {
-  doc: DocSummary;
+  doc: Pick<DocSummary, 'id' | 'title' | 'wordCount' | 'lastEditedAt' | 'updatedAt'> & { expiresAt?: string | null };
   onOpen: () => void;
-  onDownload: () => void;
-  onDelete: () => void;
+  onDownload?: () => void;
+  onDelete?: () => void;
   /** Hub-style spaced card; library keeps the compact list row. */
   elevated?: boolean;
+  /** First-run after onboarding — this is the paper they just analysed. */
+  highlighted?: boolean;
+  kind?: 'document' | 'pack';
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
@@ -784,7 +813,14 @@ function DocumentRow({
     };
   }, [menuOpen]);
 
-  const words = doc.wordCount ? `${doc.wordCount.toLocaleString()} words` : 'Empty';
+  const isPack = kind === 'pack';
+  const expiryLabel = !isPack ? expiresInLabel(doc.expiresAt) : null;
+  const words = isPack
+    ? 'Study pack'
+    : doc.wordCount
+      ? `${doc.wordCount.toLocaleString()} words`
+      : 'Empty';
+  const showMenu = Boolean(onDownload || onDelete);
 
   return (
     <div
@@ -794,7 +830,9 @@ function DocumentRow({
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpen(); } }}
       aria-label={`Open ${doc.title || 'Untitled'}`}
       className={
-        elevated
+        highlighted
+          ? 'group relative flex items-center gap-3.5 sm:gap-4 px-4 sm:px-5 py-4 cursor-pointer rounded-2xl border-2 border-[#A560E8] bg-white dark:bg-stone-900 shadow-[0_16px_36px_-18px_rgba(119,51,181,0.55)] ring-4 ring-[#A560E8]/15 motion-safe:animate-[hubDocPulse_1.8s_ease-in-out_infinite] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A560E8]/40'
+          : elevated
           ? 'group relative flex items-center gap-3.5 sm:gap-4 px-4 sm:px-5 py-4 cursor-pointer rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-[0_1px_2px_rgba(60,40,90,0.04)] hover:border-[#C9A0F0] dark:hover:border-[#A560E8]/40 hover:shadow-[0_14px_28px_-20px_rgba(90,45,140,0.45)] hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A560E8]/40'
           : 'group relative flex items-center gap-3.5 px-4 sm:px-5 py-3.5 cursor-pointer transition-colors hover:bg-[#FBF8FF] dark:hover:bg-stone-800/60 focus:outline-none focus-visible:bg-[#F5EEFE] dark:focus-visible:bg-stone-800 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#A560E8]/40'
       }
@@ -814,15 +852,26 @@ function DocumentRow({
         }
         aria-hidden
       >
-        <svg className={elevated ? 'w-[22px] h-[22px]' : 'w-5 h-5'} fill="none" stroke="currentColor" strokeWidth={1.9} viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h4m-7 4h12a2 2 0 002-2V8.83a2 2 0 00-.59-1.42l-3.83-3.83A2 2 0 0014.17 3H6a2 2 0 00-2 2v15a2 2 0 002 2z" />
-        </svg>
+        {isPack ? (
+          <svg className={elevated ? 'w-[22px] h-[22px]' : 'w-5 h-5'} fill="none" stroke="currentColor" strokeWidth={1.9} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 3l9 4.5-9 4.5-9-4.5L12 3zM3 12l9 4.5L21 12M3 16.5L12 21l9-4.5" />
+          </svg>
+        ) : (
+          <svg className={elevated ? 'w-[22px] h-[22px]' : 'w-5 h-5'} fill="none" stroke="currentColor" strokeWidth={1.9} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h4m-7 4h12a2 2 0 002-2V8.83a2 2 0 00-.59-1.42l-3.83-3.83A2 2 0 0014.17 3H6a2 2 0 00-2 2v15a2 2 0 002 2z" />
+          </svg>
+        )}
       </span>
 
       <div className="min-w-0 flex-1">
         <p className="text-[14.5px] font-extrabold text-stone-800 dark:text-stone-100 leading-tight truncate transition-colors group-hover:text-[#7733B5] dark:group-hover:text-[#C9A0F0]">
           {doc.title || 'Untitled'}
         </p>
+        {highlighted && (
+          <span className="mt-1 inline-flex items-center rounded-full bg-[#F3EAFF] dark:bg-[#A560E8]/20 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#7733B5] dark:text-[#C9A0F0]">
+            Ready to view
+          </span>
+        )}
         <div className="mt-1.5 flex flex-wrap items-center gap-1.5 sm:gap-2">
           <span className="inline-flex items-center gap-1 text-[12px] font-bold text-stone-400 dark:text-stone-500">
             <svg className="w-3 h-3 opacity-70" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24" aria-hidden>
@@ -835,20 +884,30 @@ function DocumentRow({
           >
             {words}
           </span>
+          {expiryLabel && (
+            <span className="inline-flex items-center h-[18px] px-1.5 rounded-md bg-red-50 dark:bg-red-950/40 text-[11px] font-extrabold tabular-nums text-red-600 dark:text-red-400">
+              {expiryLabel}
+            </span>
+          )}
         </div>
       </div>
 
       <button
         type="button"
         onClick={(e) => { e.stopPropagation(); onOpen(); }}
-        className="shrink-0 hidden sm:inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#8A48C7] dark:text-[#C9A0F0] text-[13px] font-extrabold hover:bg-[#A560E8] hover:text-white dark:hover:bg-[#A560E8] dark:hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A560E8]/45"
+        className={
+          highlighted
+            ? 'shrink-0 hidden sm:inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-[#A560E8] text-white text-[13px] font-extrabold hover:bg-[#7733B5] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A560E8]/45'
+            : 'shrink-0 hidden sm:inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#8A48C7] dark:text-[#C9A0F0] text-[13px] font-extrabold hover:bg-[#A560E8] hover:text-white dark:hover:bg-[#A560E8] dark:hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A560E8]/45'
+        }
       >
-        Open
+        {highlighted ? (isPack ? 'Open pack' : 'See notes') : 'Open'}
         <svg className="w-3.5 h-3.5 opacity-80" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
           <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
         </svg>
       </button>
 
+      {showMenu && (
       <div className="relative shrink-0" ref={menuRef}>
         <button
           type="button"
@@ -871,25 +930,30 @@ function DocumentRow({
               onClick={() => { setMenuOpen(false); onOpen(); }}
               className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-[13px] font-bold text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
             >
-              <I.Doc /> Open
+              {isPack ? <I.Pack /> : <I.Doc />} Open
             </button>
-            <button
-              type="button"
-              onClick={() => { setMenuOpen(false); onDownload(); }}
-              className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-[13px] font-bold text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
-            >
-              <I.Download /> Download
-            </button>
-            <button
-              type="button"
-              onClick={() => { setMenuOpen(false); onDelete(); }}
-              className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-[13px] font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-            >
-              <I.Trash /> Delete
-            </button>
+            {onDownload && (
+              <button
+                type="button"
+                onClick={() => { setMenuOpen(false); onDownload(); }}
+                className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-[13px] font-bold text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
+              >
+                <I.Download /> Download
+              </button>
+            )}
+            {onDelete && (
+              <button
+                type="button"
+                onClick={() => { setMenuOpen(false); onDelete(); }}
+                className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-[13px] font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+              >
+                <I.Trash /> Delete
+              </button>
+            )}
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }
@@ -922,9 +986,12 @@ function DocumentRowSkeleton({ elevated = false }: { elevated?: boolean }) {
  */
 function DocumentsHub({
   docs,
+  packs,
+  packsLoading,
   loading,
   onNew,
   onOpen,
+  onOpenPack,
   onUpload,
   onDownload,
   onDelete,
@@ -934,11 +1001,20 @@ function DocumentsHub({
   onSwitchView,
   onNavigate,
   topBar,
+  highlightDocId,
+  highlightPack,
+  highlightTool,
+  onDismissHighlight,
+  onOpenHighlightedPack,
+  onOpenHighlightedTool,
 }: {
   docs: DocSummary[];
+  packs: HubStudyPack[];
+  packsLoading?: boolean;
   loading: boolean;
   onNew: () => void;
   onOpen: (id: string) => void;
+  onOpenPack: (pack: HubStudyPack) => void;
   onUpload: (file: File) => void;
   onDownload: (id: string) => void;
   onDelete: (id: string) => void;
@@ -953,6 +1029,15 @@ function DocumentsHub({
   /** Account controls (Saved Materials / Pomodoro / avatar). Sits in
       the greeting row so the header reads as one band. */
   topBar?: React.ReactNode;
+  /** Paper just analysed in onboarding — highlight it on first landing. */
+  highlightDocId?: string | null;
+  /** Study pack just built in onboarding — highlight the Study Pack tile. */
+  highlightPack?: boolean;
+  /** Games / Daily Review-only onboarding — highlight that tool. */
+  highlightTool?: 'games' | 'daily-review' | null;
+  onDismissHighlight?: () => void;
+  onOpenHighlightedPack?: () => void;
+  onOpenHighlightedTool?: () => void;
 }) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [uploadDropActive, setUploadDropActive] = useState(false);
@@ -965,7 +1050,7 @@ function DocumentsHub({
    * and anchor the countdown on the soonest-expiring item. Paid users
    * skip the whole flow. */
   const [expiryInfo, setExpiryInfo] = useState<
-    | { materialCount: number; citationCount: number; soonestDays: number }
+    | { materialCount: number; citationCount: number; documentCount: number; soonestDays: number }
     | null
   >(null);
 
@@ -1016,6 +1101,7 @@ function DocumentsHub({
         setExpiryInfo({
           materialCount: materialDays.length,
           citationCount: citationDays.length,
+          documentCount: 0,
           soonestDays: Math.min(...allDays),
         });
       } catch { /* network blip — the banner just stays hidden */ }
@@ -1023,17 +1109,72 @@ function DocumentsHub({
     return () => { cancelled = true; };
   }, [isPaidUser]);
 
-  const recentDocs = useMemo(
-    () =>
-      [...docs]
-        .sort((a, b) => {
-          const ta = a.lastEditedAt || a.updatedAt;
-          const tb = b.lastEditedAt || b.updatedAt;
-          return new Date(tb).getTime() - new Date(ta).getTime();
-        })
-        .slice(0, 5),
-    [docs],
-  );
+  const recentItems = useMemo(() => {
+    type Item =
+      | { kind: 'doc'; id: string; at: number; doc: DocSummary; highlighted: boolean }
+      | { kind: 'pack'; id: string; at: number; pack: HubStudyPack; highlighted: boolean };
+
+    const items: Item[] = [
+      ...docs.map((d) => ({
+        kind: 'doc' as const,
+        id: `doc-${d.id}`,
+        at: new Date(d.lastEditedAt || d.updatedAt).getTime(),
+        doc: d,
+        highlighted: Boolean(highlightDocId && d.id === highlightDocId),
+      })),
+      ...packs.map((p) => ({
+        kind: 'pack' as const,
+        id: `pack-${p.id}`,
+        at: new Date(p.createdAt).getTime() || 0,
+        pack: p,
+        highlighted: false,
+      })),
+    ];
+
+    if (highlightPack) {
+      const pending = items.find((i) => i.kind === 'pack' && i.pack.id === '__onboarding_pack__');
+      if (pending) {
+        pending.highlighted = true;
+      } else {
+        const newestPackAt = Math.max(0, ...items.filter((i) => i.kind === 'pack').map((i) => i.at));
+        for (const item of items) {
+          if (item.kind === 'pack' && item.at === newestPackAt) item.highlighted = true;
+        }
+      }
+    }
+
+    items.sort((a, b) => {
+      if (a.highlighted !== b.highlighted) return a.highlighted ? -1 : 1;
+      return b.at - a.at;
+    });
+    return items.slice(0, 5);
+  }, [docs, packs, highlightDocId, highlightPack]);
+
+  const recentsLoading = loading || (Boolean(packsLoading) && docs.length === 0 && packs.length === 0);
+  const recentsCount = docs.length + packs.length;
+
+  const combinedExpiry = useMemo(() => {
+    if (isPaidUser) return null;
+    const now = Date.now();
+    const toDays = (iso: string) => Math.ceil((new Date(iso).getTime() - now) / 86_400_000);
+    const docDays = docs
+      .map((d) => d.expiresAt)
+      .filter((d): d is string => typeof d === 'string' && d.length > 0)
+      .map(toDays)
+      .filter((d) => d >= 0);
+    const materialCount = expiryInfo?.materialCount ?? 0;
+    const citationCount = expiryInfo?.citationCount ?? 0;
+    const documentCount = docDays.length;
+    if (materialCount + citationCount + documentCount === 0) return null;
+    const days: number[] = [...docDays];
+    if (expiryInfo) days.push(expiryInfo.soonestDays);
+    return {
+      materialCount,
+      citationCount,
+      documentCount,
+      soonestDays: Math.min(...days),
+    };
+  }, [docs, expiryInfo, isPaidUser]);
 
   /* Quiet launch tiles — icon + copy only. Colour lives in the tools
    * themselves; the hub stays monochrome so nothing competes with the
@@ -1053,7 +1194,7 @@ function DocumentsHub({
       key: 'pack',
       title: 'Study Pack',
       sub: 'Lesson, flashcards, quiz',
-      onClick: () => onSwitchView('study-packs'),
+      onClick: () => (highlightPack && onOpenHighlightedPack ? onOpenHighlightedPack() : onSwitchView('study-packs')),
       icon: <I.Pack />,
       video: '/hero-flashcards-hq.mp4',
     },
@@ -1069,7 +1210,7 @@ function DocumentsHub({
       key: 'games',
       title: 'Arcade',
       sub: 'Learn with study games',
-      onClick: () => onSwitchView('games'),
+      onClick: () => (highlightTool === 'games' && onOpenHighlightedTool ? onOpenHighlightedTool() : onSwitchView('games')),
       icon: <I.Game />,
       video: '/hero-word-blitz-hq.mp4',
     },
@@ -1085,6 +1226,16 @@ function DocumentsHub({
 
   return (
     <>
+      <style>{`
+        @keyframes hubDocPulse {
+          0%, 100% { box-shadow: 0 16px 36px -18px rgba(119,51,181,0.45); }
+          50% { box-shadow: 0 18px 40px -14px rgba(119,51,181,0.7), 0 0 0 6px rgba(165,96,232,0.12); }
+        }
+        .hub-tile-pulse { animation: hubDocPulse 2.2s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) {
+          .hub-tile-pulse { animation: none; }
+        }
+      `}</style>
       <input
         ref={fileInputRef}
         type="file"
@@ -1139,7 +1290,15 @@ function DocumentsHub({
               ) : null}
             </h1>
             <p className="mt-1.5 text-[14px] sm:text-[15px] font-semibold text-stone-500 dark:text-stone-400">
-              Upload an essay, open a tool, or continue a draft.
+              {highlightDocId
+                ? 'Your essay is ready — open it to see the notes.'
+                : highlightPack
+                  ? 'Your study pack is ready — open it from the tile below.'
+                  : highlightTool === 'daily-review'
+                    ? 'Daily Review is ready — start a short session when you are.'
+                    : highlightTool === 'games'
+                      ? 'Arcade is ready — pick a game and load your notes.'
+                      : 'Upload an essay, open a tool, or continue a draft.'}
             </p>
           </div>
         </div>
@@ -1148,20 +1307,84 @@ function DocumentsHub({
         </div>
       </div>
 
+      {(highlightDocId || highlightPack || highlightTool) && (
+        <div className="relative flex items-center gap-3 rounded-2xl border-2 border-b-4 border-[#7733B5] bg-[#F3EAFF] dark:bg-[#A560E8]/15 px-4 py-3 mb-5">
+          <img src="/mascot-celebrating.webp" alt="" width={48} height={48} className="w-12 h-12 object-contain shrink-0" loading="eager" />
+          <p className="min-w-0 flex-1 text-[13px] sm:text-sm font-extrabold text-[#3C3C3C] dark:text-stone-100 leading-snug" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+            {highlightDocId
+              ? 'Your essay is ready — open it below to see the notes.'
+              : highlightPack
+                ? 'Your study pack is ready — open it to study the lesson and cards.'
+                : highlightTool === 'daily-review'
+                  ? 'You picked Daily Review — start a short practice session.'
+                  : 'You picked Arcade — open it and play a study game.'}
+          </p>
+          {highlightDocId && (
+            <button
+              type="button"
+              onClick={() => onOpen(highlightDocId)}
+              className="shrink-0 inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-[#A560E8] hover:bg-[#7733B5] text-white text-[12.5px] font-extrabold border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-px transition-all"
+            >
+              Open essay
+            </button>
+          )}
+          {highlightPack && onOpenHighlightedPack && (
+            <button
+              type="button"
+              onClick={onOpenHighlightedPack}
+              className="shrink-0 inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-[#A560E8] hover:bg-[#7733B5] text-white text-[12.5px] font-extrabold border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-px transition-all"
+            >
+              Open pack
+            </button>
+          )}
+          {highlightTool && onOpenHighlightedTool && (
+            <button
+              type="button"
+              onClick={onOpenHighlightedTool}
+              className="shrink-0 inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-[#A560E8] hover:bg-[#7733B5] text-white text-[12.5px] font-extrabold border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-px transition-all"
+            >
+              {highlightTool === 'daily-review' ? 'Open Daily Review' : 'Open Arcade'}
+            </button>
+          )}
+          {onDismissHighlight && (
+            <button
+              type="button"
+              onClick={onDismissHighlight}
+              aria-label="Dismiss"
+              className="shrink-0 inline-flex h-7 w-7 items-center justify-center rounded-lg text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200 hover:bg-white/60 dark:hover:bg-stone-800/60 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          )}
+        </div>
+      )}
+
       {/* ─── Free-plan expiry nudge ─────────────────────────────── */}
-      {!isPaidUser && expiryInfo && (() => {
-        const { materialCount, citationCount, soonestDays } = expiryInfo;
-        const totalCount = materialCount + citationCount;
+      {!isPaidUser && combinedExpiry && (() => {
+        const { materialCount, citationCount, documentCount, soonestDays } = combinedExpiry;
+        const totalCount = materialCount + citationCount + documentCount;
         if (totalCount === 0) return null;
         const urgent = soonestDays <= 7;
         const daysText =
           soonestDays <= 0 ? 'today' :
           soonestDays === 1 ? 'tomorrow' :
           `in ${soonestDays} days`;
+        const countLabel = (n: number, one: string, many: string) =>
+          n === 1 ? `1 ${one}` : `${n} ${many}`;
         const parts: string[] = [];
-        if (materialCount > 0) parts.push(`${materialCount} study material${materialCount === 1 ? '' : 's'}`);
-        if (citationCount > 0) parts.push(`${citationCount} citation${citationCount === 1 ? '' : 's'}`);
-        const itemsText = parts.join(' & ');
+        if (documentCount > 0) parts.push(countLabel(documentCount, 'document', 'documents'));
+        if (materialCount > 0) parts.push(countLabel(materialCount, 'study pack', 'study packs'));
+        if (citationCount > 0) parts.push(countLabel(citationCount, 'citation search', 'citation searches'));
+        const itemsText =
+          parts.length <= 1
+            ? parts[0] ?? ''
+            : parts.length === 2
+              ? `${parts[0]} and ${parts[1]}`
+              : `${parts.slice(0, -1).join(', ')}, and ${parts[parts.length - 1]}`;
+        const headline =
+          totalCount === 1
+            ? `This ${itemsText.replace(/^1 /, '')} expires ${daysText}`
+            : `Your ${itemsText} expire ${daysText}`;
         return (
           <div
             className={`flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 rounded-2xl border px-4 sm:px-5 py-3.5 mb-5 ${
@@ -1175,10 +1398,10 @@ function DocumentsHub({
                 className="text-[14.5px] font-extrabold text-stone-900 dark:text-stone-50 leading-tight"
                 style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
               >
-                Your {itemsText} disappear {daysText}
+                {headline}
               </h3>
               <p className="mt-0.5 text-[12.5px] font-semibold text-stone-500 dark:text-stone-400 leading-snug">
-                Free items expire 30 days after creation. Upgrade to keep them.
+                Free items stay until you come back, then last 30 days. Upgrade once and we keep them forever.
               </p>
             </div>
             <button
@@ -1346,12 +1569,19 @@ function DocumentsHub({
           <span className="pointer-events-none absolute -bottom-12 -left-10 h-32 w-32 rounded-full bg-[#A560E8]/12 blur-3xl dark:bg-[#A560E8]/10" aria-hidden />
 
           <div className="relative grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
-            {pickTools.map((t, i) => (
+            {pickTools.map((t, i) => {
+              const tileHighlighted =
+                (t.key === 'pack' && highlightPack) || (t.key === 'games' && highlightTool === 'games');
+              return (
               <button
                 key={t.key}
                 type="button"
                 onClick={t.onClick}
-                className="group relative flex flex-col items-stretch text-left overflow-hidden rounded-2xl border border-white/80 dark:border-stone-700/80 bg-white/90 dark:bg-stone-900/90 backdrop-blur-sm p-2 pb-3.5 sm:p-2.5 sm:pb-4 shadow-[0_2px_8px_-4px_rgba(90,45,140,0.18)] hover:border-[#C9A0F0] dark:hover:border-[#A560E8]/50 hover:shadow-[0_16px_32px_-18px_rgba(90,45,140,0.55)] hover:-translate-y-1 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A560E8]/40"
+                className={`group relative flex flex-col items-stretch text-left overflow-hidden rounded-2xl border bg-white/90 dark:bg-stone-900/90 backdrop-blur-sm p-2 pb-3.5 sm:p-2.5 sm:pb-4 hover:-translate-y-1 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A560E8]/40 ${
+                  tileHighlighted
+                    ? 'hub-tile-pulse border-[#7733B5] dark:border-[#A560E8] shadow-[0_16px_36px_-18px_rgba(119,51,181,0.45)]'
+                    : 'border-white/80 dark:border-stone-700/80 shadow-[0_2px_8px_-4px_rgba(90,45,140,0.18)] hover:border-[#C9A0F0] dark:hover:border-[#A560E8]/50 hover:shadow-[0_16px_32px_-18px_rgba(90,45,140,0.55)]'
+                }`}
               >
                 {/* Preview of what the tool does. Clips play only while
                     the card is on screen. */}
@@ -1406,7 +1636,8 @@ function DocumentsHub({
                   </svg>
                 </span>
               </button>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
@@ -1422,9 +1653,9 @@ function DocumentsHub({
               >
                 Recent
               </h2>
-              {docs.length > 0 && (
+              {recentsCount > 0 && (
                 <span className="inline-flex items-center justify-center min-w-[22px] h-[18px] px-1.5 rounded-full bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#8A48C7] dark:text-[#C9A0F0] text-[10.5px] font-extrabold tabular-nums">
-                  {docs.length}
+                  {recentsCount}
                 </span>
               )}
             </div>
@@ -1446,13 +1677,13 @@ function DocumentsHub({
           <span className="pointer-events-none absolute -bottom-10 right-0 h-28 w-28 rounded-full bg-[#C9A0F0]/20 blur-3xl dark:bg-[#A560E8]/12" aria-hidden />
 
           <div className="relative flex flex-col gap-2 sm:gap-2.5">
-            {loading ? (
+            {recentsLoading ? (
               <>
                 <DocumentRowSkeleton elevated />
                 <DocumentRowSkeleton elevated />
                 <DocumentRowSkeleton elevated />
               </>
-            ) : recentDocs.length === 0 ? (
+            ) : recentItems.length === 0 ? (
               <div className="px-5 py-12 text-center rounded-2xl border border-dashed border-[#C9A0F0]/55 dark:border-[#A560E8]/30 bg-white/70 dark:bg-stone-900/70">
                 <div
                   className="mx-auto mb-3.5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#F3EAFF] to-[#E9DBFF] text-[#8A48C7] dark:from-[#A560E8]/20 dark:to-[#A560E8]/10 dark:text-[#C9A0F0] [&>svg]:w-6 [&>svg]:h-6"
@@ -1460,9 +1691,9 @@ function DocumentsHub({
                 >
                   <I.Doc />
                 </div>
-                <p className="text-[15px] font-extrabold text-stone-800 dark:text-stone-100">No documents yet</p>
+                <p className="text-[15px] font-extrabold text-stone-800 dark:text-stone-100">Nothing here yet</p>
                 <p className="mt-1 text-[13px] font-semibold text-stone-400 dark:text-stone-500">
-                  Upload an essay for feedback, or start a fresh draft.
+                  Upload an essay, start a draft, or build a study pack.
                 </p>
                 <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2">
                   <button
@@ -1479,19 +1710,44 @@ function DocumentsHub({
                   >
                     <I.Plus /> New document
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => onSwitchView('study-packs')}
+                    className="inline-flex items-center gap-2 h-10 px-4 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-600 dark:text-stone-300 text-[13px] font-extrabold hover:border-[#A560E8]/45 transition-colors"
+                  >
+                    <I.Pack /> Study pack
+                  </button>
                 </div>
               </div>
             ) : (
-              recentDocs.map((d) => (
-                <DocumentRow
-                  key={d.id}
-                  doc={d}
-                  elevated
-                  onOpen={() => onOpen(d.id)}
-                  onDownload={() => onDownload(d.id)}
-                  onDelete={() => onDelete(d.id)}
-                />
-              ))
+              recentItems.map((item) =>
+                item.kind === 'pack' ? (
+                  <DocumentRow
+                    key={item.id}
+                    kind="pack"
+                    elevated
+                    highlighted={item.highlighted}
+                    doc={{
+                      id: item.pack.id,
+                      title: item.pack.title,
+                      wordCount: 0,
+                      lastEditedAt: item.pack.createdAt,
+                      updatedAt: item.pack.createdAt,
+                    }}
+                    onOpen={() => onOpenPack(item.pack)}
+                  />
+                ) : (
+                  <DocumentRow
+                    key={item.id}
+                    doc={item.doc}
+                    elevated
+                    highlighted={item.highlighted}
+                    onOpen={() => onOpen(item.doc.id)}
+                    onDownload={() => onDownload(item.doc.id)}
+                    onDelete={() => onDelete(item.doc.id)}
+                  />
+                ),
+              )
             )}
           </div>
         </div>
@@ -2542,9 +2798,90 @@ function DocumentEditorView({
 export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout, user, onEditorActiveChange, trialGated, onTrialGate }: DocumentsPageProps) {
   const [view, setView] = useState<WorkspaceView>(initialDocumentId ? 'editor' : 'hub');
   const [openDocId, setOpenDocId] = useState<string | null>(initialDocumentId ?? null);
+  const [highlightDocId, setHighlightDocId] = useState<string | null>(() => {
+    if (initialDocumentId) return null;
+    try { return sessionStorage.getItem('writescholar_open_doc_after_onboarding'); } catch { return null; }
+  });
+  const [highlightPack, setHighlightPack] = useState(() => {
+    if (initialDocumentId) return false;
+    try { return sessionStorage.getItem(HIGHLIGHT_PACK_AFTER_ONBOARDING_KEY) === '1'; } catch { return false; }
+  });
+  const [highlightTool, setHighlightTool] = useState<'games' | 'daily-review' | null>(() => {
+    if (initialDocumentId) return null;
+    try {
+      const v = sessionStorage.getItem(HUB_NUDGE_AFTER_ONBOARDING_KEY);
+      return v === 'games' || v === 'daily-review' ? v : null;
+    } catch { return null; }
+  });
+
+  const clearOnboardingHighlight = useCallback(() => {
+    setHighlightDocId(null);
+    setHighlightPack(false);
+    setHighlightTool(null);
+    try {
+      sessionStorage.removeItem('writescholar_open_doc_after_onboarding');
+      sessionStorage.removeItem('writescholar_ws_pending_view');
+      sessionStorage.removeItem(HIGHLIGHT_PACK_AFTER_ONBOARDING_KEY);
+      sessionStorage.removeItem(HUB_NUDGE_AFTER_ONBOARDING_KEY);
+    } catch { /* ignore */ }
+  }, []);
+
+  const openHubStudyPack = useCallback((pack: HubStudyPack) => {
+    try {
+      sessionStorage.setItem(STUDY_PACK_VIEWER_KEY, JSON.stringify({ data: pack.questions, title: pack.title }));
+    } catch { /* noop */ }
+    if (highlightPack) clearOnboardingHighlight();
+    onNavigate('study-pack-viewer', undefined, { studyPack: { data: pack.questions, title: pack.title } });
+  }, [onNavigate, highlightPack, clearOnboardingHighlight]);
+
+  const openOnboardingStudyPack = useCallback(() => {
+    try {
+      const raw = sessionStorage.getItem(STUDY_PACK_VIEWER_KEY);
+      const parsed = raw ? JSON.parse(raw) : null;
+      if (parsed && parsed.data) {
+        onNavigate('study-pack-viewer', undefined, { studyPack: parsed });
+        clearOnboardingHighlight();
+        return;
+      }
+    } catch { /* fall through */ }
+    setView('study-packs');
+    clearOnboardingHighlight();
+  }, [onNavigate, clearOnboardingHighlight]);
+
+  const openOnboardingTool = useCallback(() => {
+    const tool = highlightTool;
+    clearOnboardingHighlight();
+    if (tool === 'daily-review') setView('daily-review');
+    else setView('games');
+  }, [highlightTool, clearOnboardingHighlight]);
 
   useEffect(() => {
     if (initialDocumentId) return;
+    // After onboarding essay analysis: stay on the hub and light up
+    // that paper so they know where it lives, then open markup on click.
+    try {
+      const highlight = sessionStorage.getItem('writescholar_open_doc_after_onboarding');
+      if (highlight) {
+        sessionStorage.removeItem('writescholar_ws_pending_view');
+        setHighlightDocId(highlight);
+        setView('hub');
+        return;
+      }
+      if (sessionStorage.getItem(HIGHLIGHT_PACK_AFTER_ONBOARDING_KEY) === '1') {
+        sessionStorage.removeItem('writescholar_ws_pending_view');
+        setHighlightPack(true);
+        setView('hub');
+        return;
+      }
+      const nudge = sessionStorage.getItem(HUB_NUDGE_AFTER_ONBOARDING_KEY);
+      if (nudge === 'games' || nudge === 'daily-review') {
+        sessionStorage.removeItem('writescholar_ws_pending_view');
+        setHighlightTool(nudge);
+        setView('hub');
+        return;
+      }
+    } catch { /* ignore */ }
+
     const pending = consumePendingWorkspaceView();
     if (!pending || pending === 'hub' || pending === 'editor') return;
 
@@ -2614,6 +2951,8 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
   }, [view, openDocId]);
   const [openDoc, setOpenDoc] = useState<DocFull | null>(null);
   const [docList, setDocList] = useState<DocSummary[]>([]);
+  const [packList, setPackList] = useState<HubStudyPack[]>([]);
+  const [packsLoading, setPacksLoading] = useState(false);
   const [listLoading, setListLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
@@ -2749,6 +3088,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
           updatedAt,
           lastEditedAt,
           contentPreview: String(d.contentPreview ?? d.content_preview ?? ''),
+          expiresAt: (d.expiresAt ?? d.expires_at ?? null) as string | null,
           isDraft,
           isUpload,
         };
@@ -2767,6 +3107,56 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
   }, []);
 
   useEffect(() => { if (view === 'hub' || view === 'docs') void refreshList(); }, [view, refreshList]);
+
+  const refreshPacks = useCallback(async () => {
+    setPacksLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/analysis/quiz-history?limit=20`, { headers: authHeaders(), cache: 'no-store' });
+      if (!res.ok) return;
+      const json = await res.json().catch(() => null);
+      const rows: unknown[] = Array.isArray(json) ? json : (json?.data ?? json?.quizzes ?? []);
+      const objs = rows.filter((r): r is Record<string, unknown> => !!r && typeof r === 'object');
+      setPackList(
+        objs
+          .filter((r) => r.quiz_type === 'study_pack')
+          .map((r) => ({
+            id: String(r.id ?? ''),
+            title: String(r.title ?? 'Study pack'),
+            createdAt: String(r.created_at ?? r.createdAt ?? new Date().toISOString()),
+            questions: r.questions ?? r,
+          }))
+          .filter((p) => p.id),
+      );
+    } catch {
+      /* recents stay document-only if this fails */
+    } finally {
+      setPacksLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { if (view === 'hub') void refreshPacks(); }, [view, refreshPacks]);
+
+  const hubPacks = useMemo(() => {
+    if (!highlightPack) return packList;
+    try {
+      const raw = sessionStorage.getItem(STUDY_PACK_VIEWER_KEY);
+      const parsed = raw ? JSON.parse(raw) : null;
+      if (!parsed?.data) return packList;
+      const title = String(parsed.title || 'Study pack');
+      if (packList.some((p) => p.title === title)) return packList;
+      return [
+        {
+          id: '__onboarding_pack__',
+          title,
+          createdAt: new Date().toISOString(),
+          questions: parsed.data,
+        },
+        ...packList,
+      ];
+    } catch {
+      return packList;
+    }
+  }, [packList, highlightPack]);
 
   // ─── Single-doc load when entering editor view ────────────────
   useEffect(() => {
@@ -2976,13 +3366,14 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
     // Explicitly set per open so a stale analyse-intent can't leak
     // onto a plain "open to edit" click.
     analyzeOnOpenRef.current = analyze;
+    if (id === highlightDocId) clearOnboardingHighlight();
     setOpenDocId(id);
     setOpenDoc(null);
     setView('editor');
     // Update URL for deep-linking — uses pushState so the back
     // button returns to the hub instead of the previous tab.
     try { window.history.pushState({}, '', `/documents/${id}`); } catch { /* ignore */ }
-  }, []);
+  }, [highlightDocId, clearOnboardingHighlight]);
 
   const handleBackToHub = useCallback(() => {
     analyzeOnOpenRef.current = false;
@@ -3700,6 +4091,10 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
     if (view === 'editor' && openDocId) void refreshUsage();
   }, [view, openDocId, refreshUsage]);
 
+  const promoBanner = !isPaidPlan(user) ? (
+    <PromoBanner variant="app" onCta={() => onNavigate('pricing')} ctaLabel="Unlock Pro" />
+  ) : undefined;
+
   // ─── Render ───────────────────────────────────────────────────
   const handleRailSelect = (v: WorkspaceView) => {
     // Trial gate: never-trialed free users can stay on the hub, but switching
@@ -3720,13 +4115,13 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
   if (view === 'editor' && openDocId) {
     if (!openDoc) {
       return (
-        <WorkspaceShell activeView={view} onSelect={handleRailSelect} bare headerless collapsed={railCollapsed} onToggle={() => setRailCollapsed((v) => !v)} usage={docUsage} onUpgrade={() => onNavigate('pricing')} onNavigateBadges={() => onNavigate('badges')} onNavigateHome={goHomeDashboard} user={user} onNavigateAccount={() => onNavigate('account')}>
+        <WorkspaceShell activeView={view} onSelect={handleRailSelect} bare headerless collapsed={railCollapsed} onToggle={() => setRailCollapsed((v) => !v)} usage={docUsage} onUpgrade={() => onNavigate('pricing')} onNavigateBadges={() => onNavigate('badges')} onNavigateHome={goHomeDashboard} user={user} onNavigateAccount={() => onNavigate('account')} banner={promoBanner}>
           <div className="px-4 py-16 text-center text-sm font-bold text-stone-500">Loading document…</div>
         </WorkspaceShell>
       );
     }
     return (
-      <WorkspaceShell activeView={view} onSelect={handleRailSelect} bare headerless collapsed={railCollapsed} onToggle={() => setRailCollapsed((v) => !v)} usage={docUsage} onUpgrade={() => onNavigate('pricing')} onNavigateBadges={() => onNavigate('badges')} onNavigateHome={goHomeDashboard} user={user} onNavigateAccount={() => onNavigate('account')}>
+      <WorkspaceShell activeView={view} onSelect={handleRailSelect} bare headerless collapsed={railCollapsed} onToggle={() => setRailCollapsed((v) => !v)} usage={docUsage} onUpgrade={() => onNavigate('pricing')} onNavigateBadges={() => onNavigate('badges')} onNavigateHome={goHomeDashboard} user={user} onNavigateAccount={() => onNavigate('account')} banner={promoBanner}>
         <DocumentEditorView
           docId={openDoc.id}
           initialTitle={openDoc.title}
@@ -3842,6 +4237,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
         user={user}
         onNavigateAccount={() => onNavigate('account')}
         topBar={view === 'hub' || view === 'docs' ? undefined : dashboardTopBar}
+        banner={promoBanner}
       >
         {/* First-run acknowledgment — one-shot mascot line shown only on
             the fast-path landing right after onboarding. Tells the user
@@ -3872,9 +4268,12 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
         {view === 'hub' && (
           <DocumentsHub
             docs={docList}
+            packs={hubPacks}
+            packsLoading={packsLoading}
             loading={listLoading}
             onNew={() => { if (trialGated) { onTrialGate?.(); return; } handleNewDoc(); }}
             onOpen={handleOpenDoc}
+            onOpenPack={openHubStudyPack}
             onUpload={(f: File) => { if (trialGated) { onTrialGate?.(); return; } handleUpload(f); }}
             onDownload={handleDownload}
             onDelete={(id) => setConfirmDeleteId(id)}
@@ -3884,6 +4283,12 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
             onSwitchView={handleRailSelect}
             onNavigate={onNavigate}
             topBar={dashboardTopBar}
+            highlightDocId={highlightDocId}
+            highlightPack={highlightPack}
+            highlightTool={highlightTool}
+            onDismissHighlight={clearOnboardingHighlight}
+            onOpenHighlightedPack={openOnboardingStudyPack}
+            onOpenHighlightedTool={openOnboardingTool}
           />
         )}
         {view === 'docs' && (

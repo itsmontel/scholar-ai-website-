@@ -689,7 +689,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
     return activationConcernDone && activationImproveDone;
   }, [activationConcernDone, activationImproveDone]);
 
-  /** Free plan: show first ~40% of essay + matching annotations; full analysis still runs server-side. */
+  /** Free plan: show first ~50% of essay + matching annotations; full analysis still runs server-side. */
   const isFreePreview = useMemo(
     () => currentPlan === 'free' && !isActivationTutorial,
     [currentPlan, isActivationTutorial]
@@ -699,22 +699,22 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
     if (!isFreePreview) return null;
     const len = (documentContent || '').length;
     if (len < 2) return null;
-    return Math.floor(len * 0.4);
+    return Math.floor(len * 0.5);
   }, [isFreePreview, documentContent]);
 
-  /** Free plan: first ~40% of comprehensive narrative — shown as readable text; remainder is gated (all free sessions). */
+  /** Free plan: first ~50% of comprehensive narrative — shown as readable text; remainder is gated (all free sessions). */
   const freeComprehensiveAnalysisPreviewMd = useMemo(() => {
     if (!analysisResult) return '';
     if (currentPlan !== 'free') return analysisResult;
     const len = analysisResult.length;
     if (len < 2) return analysisResult;
-    return analysisResult.slice(0, Math.floor(len * 0.4));
+    return analysisResult.slice(0, Math.floor(len * 0.5));
   }, [analysisResult, currentPlan]);
 
   const freeComprehensiveAnalysisHasLockedRemainder = useMemo(() => {
     const len = analysisResult.length;
     if (len < 2) return false;
-    return Math.floor(len * 0.4) < len;
+    return Math.floor(len * 0.5) < len;
   }, [analysisResult]);
 
   /** Locked portion of the narrative — shown only inside heavy blur (full analysis already in client state from API). */
@@ -722,7 +722,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
     if (!analysisResult || currentPlan !== 'free') return '';
     const len = analysisResult.length;
     if (len < 2) return '';
-    const cut = Math.floor(len * 0.4);
+    const cut = Math.floor(len * 0.5);
     if (cut >= len) return '';
     return analysisResult.slice(cut);
   }, [analysisResult, currentPlan]);
@@ -747,7 +747,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
       });
   }, [annotations, freePreviewCharCutoff, documentContent]);
 
-  /** Locked annotations for free users — those beyond the 40% cutoff (teaser preview in sidebar) */
+  /** Locked annotations for free users — those beyond the 50% cutoff (teaser preview in sidebar) */
   const lockedAnnotationsForTeaser = useMemo((): Annotation[] => {
     if (!isFreePreview || freePreviewCharCutoff == null) return [];
     return annotations.filter(
@@ -1126,7 +1126,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
           billingCycle: 'monthly',
           successUrl: `${window.location.origin}/library?payment=success`,
           cancelUrl: `${window.location.origin}/library?payment=cancelled`,
-          trialPeriodDays: canStartFreeTrial ? 7 : 0,
+          trialPeriodDays: 0,
         }),
       });
       const data = await res.json();

@@ -1087,7 +1087,7 @@ const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) 
                   Flashcards, quizzes, and AI feedback in one app
                 </h2>
                 <p className="text-stone-700 dark:text-stone-300 text-[14px] leading-relaxed">
-                  7-day free trial. $0 today. Used by 50,000+ college students.
+                  Preview free. 50% off first month. Used by 50,000+ college students.
                 </p>
               </div>
               <a
@@ -1198,7 +1198,7 @@ const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) 
               Ready to try it free?
             </h2>
             <p className="text-stone-700 dark:text-stone-300 max-w-md mx-auto mb-6 leading-relaxed text-[15px]">
-              Starts with a 7-day free trial, $0 today, cancel anytime. WriteScholar takes your notes and turns them into the study tools you actually use.
+              Preview free, then unlock Pro at 50% off your first month. Cancel anytime. WriteScholar takes your notes and turns them into the study tools you actually use.
             </p>
             <a
               href={hrefForPage(config.primaryCta.page)}

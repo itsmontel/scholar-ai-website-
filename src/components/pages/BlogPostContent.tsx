@@ -892,7 +892,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <h2 className={h2}>Build your first study guide now</h2>
           <p className={p}>
-            <a href="/tools/study-pack" onClick={handleNavigate('study-pack')} className={internalLink}>WriteScholar&apos;s Study Pack</a> turns one paste of lecture notes into a lesson, flashcards, and a quiz. It runs on a 7-day free trial, so you can build a pack from your own notes and see the full lesson, deck, quiz modes, and study games before paying anything. Nothing is charged today and you can cancel inside the trial. See <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for the current first-month offer.
+            <a href="/tools/study-pack" onClick={handleNavigate('study-pack')} className={internalLink}>WriteScholar&apos;s Study Pack</a> turns one paste of lecture notes into a lesson, flashcards, and a quiz. The free preview includes the lesson and the first four flashcards; quiz, games, and the full deck unlock with Pro — 50% off your first month. See <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for the current first-month offer.
           </p>
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Turn my notes into a study guide →
@@ -997,7 +997,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             The biggest mistake students make is turning in first drafts. A single pass with an AI essay checker catches issues you would have missed. Weak thesis. Flabby transitions. Missing evidence. Citation errors. The fixes are usually quick. A stronger draft goes in. Better feedback comes back from your professor. Need to stay focused while you revise? <a href="/focus-mode" onClick={handleNavigate('focus-mode')} className={internalLink}>Focus Mode</a> blocks distracting sites until you study or solve a puzzle. Fewer tabs, fewer rabbit holes.
           </p>
           <p className={p}>
-            <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>WriteScholar&apos;s AI college essay grader</a> gives you professor-style feedback in seconds. Inline annotations mark strengths, improvements, and concerns. The grade-level rubric scores your work against academic criteria. Add your assignment rubric and the analysis aligns to your professor&apos;s expectations. Built for college and university students. See our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for details. Free plan includes a one-time analysis preview — see your grade and what to fix before upgrading.
+            <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>WriteScholar&apos;s AI college essay grader</a> gives you professor-style feedback in seconds. Inline annotations mark strengths, improvements, and concerns. The grade-level rubric scores your work against academic criteria. Add your assignment rubric and the analysis aligns to your professor&apos;s expectations. Built for college and university students. See our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for details. Free plan includes two analysis previews — see your grade and what to fix before upgrading.
           </p>
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Check your essay free →
