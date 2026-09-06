@@ -58,6 +58,40 @@ function extractJsonObject(text) {
   try { return JSON.parse(m[0]); } catch { return null; }
 }
 
+function completionMessageText(completion) {
+  const msg = completion?.choices?.[0]?.message;
+  if (!msg) return '';
+  const c = msg.content;
+  if (typeof c === 'string') return c;
+  if (Array.isArray(c)) {
+    return c.map((part) => {
+      if (typeof part === 'string') return part;
+      if (part && typeof part.text === 'string') return part.text;
+      if (part && typeof part.content === 'string') return part.content;
+      return '';
+    }).join('');
+  }
+  if (c && typeof c === 'object' && typeof c.text === 'string') return c.text;
+  return '';
+}
+
+function hasUsableRubric(obj) {
+  const rubric = obj?.grade_rubric || obj?.gradeRubric;
+  if (!rubric || typeof rubric !== 'object' || Array.isArray(rubric)) return false;
+  const scored = Object.values(rubric).filter((entry) => {
+    if (!entry) return false;
+    if (typeof entry.score === 'number') return true;
+    return typeof entry.score === 'string' && entry.score.trim() !== '' && !Number.isNaN(Number(entry.score));
+  });
+  return scored.length >= 4;
+}
+
+function analysisOutputUsable(text, finishReason) {
+  if (finishReason === 'length') return false;
+  const obj = extractJsonObject(text);
+  return Boolean(obj && hasUsableRubric(obj));
+}
+
 /**
  * Find the character index where a reference list / bibliography section
  * begins — i.e. a line that is essentially just a heading such as
@@ -344,9 +378,11 @@ class AIAnalysisService {
       // can never end up with no rubric / annotations.
       const ANALYSIS_MODEL = 'gpt-5.6-luna';
 
+      const ANALYSIS_MAX_TOKENS = parseInt(process.env.OPENAI_ANALYSIS_MAX_TOKENS, 10) || 50000;
+
       let userPlan = 'free';
       let selectedModel = process.env.OPENAI_STANDARD_MODEL || ANALYSIS_MODEL;
-      let maxTokens = parseInt(process.env.OPENAI_STANDARD_MAX_TOKENS, 10) || 28000;
+      let maxTokens = ANALYSIS_MAX_TOKENS;
       let reasoningEffort = process.env.OPENAI_REASONING_EFFORT || 'medium';
 
       try {
@@ -357,11 +393,11 @@ class AIAnalysisService {
         if (subscriptionService.isPaidSubscriptionTier(plan)) {
           selectedModel = process.env.OPENAI_PREMIUM_MODEL || ANALYSIS_MODEL;
           reasoningEffort = process.env.OPENAI_REASONING_EFFORT || 'medium';
-          maxTokens = parseInt(process.env.OPENAI_PREMIUM_MAX_TOKENS, 10) || 36000;
+          maxTokens = ANALYSIS_MAX_TOKENS;
         } else {
           selectedModel = process.env.OPENAI_STANDARD_MODEL || ANALYSIS_MODEL;
           reasoningEffort = process.env.OPENAI_REASONING_EFFORT || 'medium';
-          maxTokens = parseInt(process.env.OPENAI_STANDARD_MAX_TOKENS, 10) || 28000;
+          maxTokens = ANALYSIS_MAX_TOKENS;
         }
       } catch (planErr) {
         // If plan lookup fails, keep luna defaults
@@ -400,23 +436,23 @@ class AIAnalysisService {
         }
       }
 
-      let analysisResult = completion.choices?.[0]?.message?.content || '';
+      let analysisResult = completionMessageText(completion);
       let finishReason = completion.choices?.[0]?.finish_reason;
 
-      const unusable = () => finishReason === 'length' || !extractJsonObject(analysisResult);
+      const unusable = () => !analysisOutputUsable(analysisResult, finishReason);
 
       // Soft fallback: the call succeeded but the (reasoning) model ran out
       // of room mid-JSON (finish_reason 'length') or returned something we
       // can't parse → transparently redo on gpt-4o-mini so the user always
       // gets a full rubric + annotations.
       if (usedModel !== 'gpt-4o-mini' && unusable()) {
-        console.log(`⚠️ ${usedModel} output unusable (finish_reason=${finishReason}); retrying on gpt-4o-mini`);
+        console.log(`⚠️ ${usedModel} output unusable (finish_reason=${finishReason}, hasRubric=${hasUsableRubric(extractJsonObject(analysisResult))}); retrying on gpt-4o-mini`);
         try {
           const retry = await this.openai.chat.completions.create(
             buildChatParams('gpt-4o-mini', messages, FALLBACK_MAX, null)
           );
-          const retryText = retry.choices?.[0]?.message?.content || '';
-          if (extractJsonObject(retryText)) {
+          const retryText = completionMessageText(retry);
+          if (analysisOutputUsable(retryText, retry.choices?.[0]?.finish_reason)) {
             analysisResult = retryText;
             finishReason = retry.choices?.[0]?.finish_reason;
             selectedModel = 'gpt-4o-mini';
@@ -437,8 +473,8 @@ class AIAnalysisService {
           const retry = await this.openai.chat.completions.create(
             buildChatParams('gpt-4o-mini', messages, CLASSIC_MAX, null)
           );
-          const retryText = retry.choices?.[0]?.message?.content || '';
-          if (extractJsonObject(retryText)) {
+          const retryText = completionMessageText(retry);
+          if (analysisOutputUsable(retryText, retry.choices?.[0]?.finish_reason)) {
             analysisResult = retryText;
             finishReason = retry.choices?.[0]?.finish_reason;
             selectedModel = 'gpt-4o-mini';
@@ -487,8 +523,9 @@ class AIAnalysisService {
       }
 
       const ANALYSIS_MODEL = 'gpt-5.6-luna';
+      const ANALYSIS_MAX_TOKENS = parseInt(process.env.OPENAI_ANALYSIS_MAX_TOKENS, 10) || 50000;
       let selectedModel = process.env.OPENAI_STANDARD_MODEL || ANALYSIS_MODEL;
-      let maxTokens = parseInt(process.env.OPENAI_STANDARD_MAX_TOKENS, 10) || 20000;
+      let maxTokens = ANALYSIS_MAX_TOKENS;
       let reasoningEffort = process.env.OPENAI_REASONING_EFFORT || 'medium';
 
       try {
@@ -496,7 +533,7 @@ class AIAnalysisService {
         if (subscriptionService.isPaidSubscriptionTier(plan)) {
           selectedModel = process.env.OPENAI_PREMIUM_MODEL || ANALYSIS_MODEL;
           reasoningEffort = process.env.OPENAI_REASONING_EFFORT || 'medium';
-          maxTokens = parseInt(process.env.OPENAI_PREMIUM_MAX_TOKENS, 10) || 28000;
+          maxTokens = ANALYSIS_MAX_TOKENS;
         }
       } catch (planErr) {
         console.log('Could not fetch plan for rubric analysis, using defaults');
@@ -1160,6 +1197,8 @@ Return ONLY a valid JSON object. No preamble, no markdown, no explanation outsid
     "Third most impactful improvement"
   ],
 
+${gradeRubricSection},
+
   "detailed_analysis": {
     "academic_writing_quality": {
       "assessment": "Analysis of clarity, coherence, and academic tone",
@@ -1211,8 +1250,6 @@ Return ONLY a valid JSON object. No preamble, no markdown, no explanation outsid
     }
   },
 
-${gradeRubricSection},
-
   "specific_rewrites": [
     {
       "original": "exact sentence or phrase from the essay that needs improving",
@@ -1235,7 +1272,8 @@ CRITICAL REQUIREMENTS:
 4. All quoted text must be verbatim from the document — do not paraphrase or invent quotes
 5. For improvements and concerns: every "suggestion" MUST give a concrete example (rewrite, phrase to add, or before/after) — never generic advice without showing the solution
 6. NEVER use placeholder brackets [X] [Y] or the phrases listed in the user prompt as filler. Every suggestion must use the student's topic or quote.
-7. Return ONLY valid JSON — no text before or after the JSON object`;
+7. Return ONLY valid JSON — no text before or after the JSON object
+8. Write grade_rubric BEFORE detailed_analysis. grade_rubric is REQUIRED and must include all 6 category keys with integer scores. Do not omit it.`;
   }
 
   /**
@@ -1381,16 +1419,29 @@ CRITICAL REQUIREMENTS:
       }
 
       const structuredData = JSON.parse(jsonMatch[0]);
+      if (!structuredData.grade_rubric && structuredData.gradeRubric) {
+        structuredData.grade_rubric = structuredData.gradeRubric;
+      }
 
       // College grading adjustment: add +1 to each rubric section score (capped at max_score)
       if (structuredData.grade_rubric && typeof structuredData.grade_rubric === 'object') {
         for (const key of Object.keys(structuredData.grade_rubric)) {
           const entry = structuredData.grade_rubric[key];
-          if (entry && typeof entry.score === 'number' && typeof entry.max_score === 'number') {
+          if (!entry || typeof entry !== 'object') continue;
+          if (typeof entry.score === 'string' && entry.score.trim() !== '' && !Number.isNaN(Number(entry.score))) {
+            entry.score = Number(entry.score);
+          }
+          if (typeof entry.max_score === 'string' && entry.max_score.trim() !== '' && !Number.isNaN(Number(entry.max_score))) {
+            entry.max_score = Number(entry.max_score);
+          }
+          if (typeof entry.score === 'number' && typeof entry.max_score === 'number') {
             entry.score = Math.min(entry.max_score, entry.score + 1);
           }
         }
       }
+      console.log('grade_rubric keys:', structuredData.grade_rubric && typeof structuredData.grade_rubric === 'object'
+        ? Object.keys(structuredData.grade_rubric).join(', ')
+        : 'MISSING');
       const annotations = [];
       let annotationId = 1;
       const usedTexts = new Set();
@@ -1414,7 +1465,7 @@ CRITICAL REQUIREMENTS:
       };
 
       // Extract annotations from each category
-      Object.values(structuredData.detailed_analysis).forEach(category => {
+      Object.values(structuredData.detailed_analysis || {}).forEach(category => {
         // Process strengths (green)
         if (category.strengths) {
           category.strengths.forEach(item => {

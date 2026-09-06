@@ -642,7 +642,7 @@ export default function AnalysisReportView({
             </div>
           </div>
 
-          <div className="flex flex-col md:flex-row md:h-[540px]">
+          <div className="flex flex-col md:flex-row md:h-[800px]">
             <div className="flex-1 p-3.5 md:p-5 overflow-y-auto bg-white dark:bg-stone-950">
               {renderHighlightedText()}
             </div>

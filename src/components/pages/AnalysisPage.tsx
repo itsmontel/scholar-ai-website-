@@ -3881,7 +3881,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
 
 
             {/* Document Analysis — Main Content Area */}
-            <div className="flex flex-col md:flex-row md:h-[600px]">
+            <div className="flex flex-col md:flex-row md:h-[800px]">
               {/* Document Panel */}
               <div className="flex-1 p-4 md:p-6 overflow-y-auto bg-white" ref={documentRef}>
                 <div className="prose max-w-none">

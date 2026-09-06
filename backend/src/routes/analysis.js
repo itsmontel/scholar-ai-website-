@@ -1849,7 +1849,7 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
       data: {
         ...analysisResult,
         documentId: analysisDocumentId,
-        grade_rubric: isPaidUser ? analysisResult.grade_rubric : null,
+        grade_rubric: analysisResult.grade_rubric ?? null,
         specific_rewrites: isPaidUser ? analysisResult.specific_rewrites : null,
         annotations: analysisResult.annotations || [],
         isContentLimited: false,
