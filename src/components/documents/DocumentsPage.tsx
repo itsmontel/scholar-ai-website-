@@ -2301,6 +2301,7 @@ function DocumentEditorView({
   onApplyRevision,
   onRevertRevision,
   appliedAnnotationIds,
+  appliedRevisions,
   applyingAnnotationId,
   onOpenFullReport,
   onOpenClassicReport,
@@ -2335,6 +2336,7 @@ function DocumentEditorView({
   onApplyRevision: (annotationId: string) => void;
   onRevertRevision: (annotationId: string) => void;
   appliedAnnotationIds: Set<string>;
+  appliedRevisions?: Record<string, { originalText: string; replacementText: string }>;
   applyingAnnotationId: string | null;
   onOpenFullReport: () => void;
   onOpenClassicReport?: () => void;
@@ -2533,6 +2535,7 @@ function DocumentEditorView({
           revisionsLocked={revisionsLocked}
           selectedAnnotationId={selectedAnnotationId}
           appliedAnnotationIds={appliedAnnotationIds}
+          appliedRevisions={appliedRevisions}
           applyingAnnotationId={applyingAnnotationId}
           onSelectAnnotation={handleSelectAnnotation}
           onApplyRevision={onApplyRevision}
@@ -3321,6 +3324,15 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
   // reads what the editor most-recently saved (rather than whatever
   // openDoc.contentText was at first load). Updated by handleContentSave.
   const latestTextRef = useRef<string>('');
+  const [liveDraftText, setLiveDraftText] = useState('');
+  const syncLiveDraftFromEditor = useCallback(() => {
+    const ed = editorRef.current as { isDestroyed?: boolean; getText?: () => string } | null;
+    if (!ed || ed.isDestroyed || typeof ed.getText !== 'function') return latestTextRef.current;
+    const text = ed.getText();
+    latestTextRef.current = text;
+    setLiveDraftText(text);
+    return text;
+  }, []);
 
   // Analyse-intent flow: set true by the "Analyze a paper" entries
   // (Analyze on a hub doc, paste-to-analyse, upload-to-analyse). When
@@ -3743,6 +3755,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
     if (!openDocId) return;
     // Keep the latest text snapshot for the analyzer call.
     latestTextRef.current = payload.text;
+    setLiveDraftText(payload.text);
     const res = await fetch(`${API_URL}/documents/${openDocId}/content`, {
       method: 'PUT',
       headers: { ...authHeaders(), 'Content-Type': 'application/json' },
@@ -4029,6 +4042,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
         setAnalyzerError("Couldn't locate that passage in the current draft. It may have been edited. Re-run analysis and try again.");
         return;
       }
+      syncLiveDraftFromEditor();
       setAppliedRevisions((prev) => {
         const next = new Map(prev);
         next.set(annotationId, { originalText, replacementText: cached });
@@ -4111,6 +4125,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
         setAnalyzerError("Couldn't locate that passage in the current draft. It may have been edited. Re-run analysis and try again.");
         return;
       }
+      syncLiveDraftFromEditor();
       setAppliedRevisions((prev) => {
         const next = new Map(prev);
         next.set(annotationId, { originalText, replacementText: replacement });
@@ -4123,7 +4138,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
     } finally {
       setApplyingAnnotationId(null);
     }
-  }, [analyzerResult, applyingAnnotationId, appliedRevisions, openDoc, openDocId, persistAppliedRevisions, user]);
+  }, [analyzerResult, applyingAnnotationId, appliedRevisions, openDoc, openDocId, persistAppliedRevisions, user, syncLiveDraftFromEditor]);
 
   // ─── Revert revision ────────────────────────────────────────
   // Always returns the card to the un-applied state so the user is
@@ -4137,6 +4152,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
     const rec = appliedRevisions.get(annotationId);
     if (!rec) return;
     const ok = revertAnnotationRevision(editorRef.current, rec.replacementText, rec.originalText);
+    if (ok) syncLiveDraftFromEditor();
     // Clear applied state regardless — the toggle must always work.
     setAppliedRevisions((prev) => {
       const next = new Map(prev);
@@ -4149,7 +4165,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
     } else {
       setAnalyzerError("Auto-revert couldn't find the revised text (it was edited further). Press ⌘Z to undo, or edit it back — re-applying will reuse the saved revision instantly.");
     }
-  }, [appliedRevisions, openDocId, persistAppliedRevisions]);
+  }, [appliedRevisions, openDocId, persistAppliedRevisions, syncLiveDraftFromEditor]);
 
   // ─── Full report ────────────────────────────────────────────
   // Open the SAVED comprehensive analysis in the legacy /analysis
@@ -4206,7 +4222,9 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
   // WITHOUT resetting analysis — so content load / report-return
   // never nukes restored annotations.
   useEffect(() => {
-    latestTextRef.current = openDoc?.contentText ?? '';
+    const t = openDoc?.contentText ?? '';
+    latestTextRef.current = t;
+    setLiveDraftText(t);
   }, [openDoc?.contentText]);
 
   // ─── Restore previously-saved analysis on open ───────────────
@@ -4428,10 +4446,11 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
           onApplyRevision={handleApplyRevision}
           onRevertRevision={handleRevertRevision}
           appliedAnnotationIds={new Set(appliedRevisions.keys())}
+          appliedRevisions={Object.fromEntries(appliedRevisions)}
           applyingAnnotationId={applyingAnnotationId}
           onOpenFullReport={handleOpenFullReport}
           onOpenClassicReport={handleOpenFullReport}
-          documentText={latestTextRef.current || openDoc.contentText || ''}
+          documentText={liveDraftText || latestTextRef.current || openDoc.contentText || ''}
           wordLimit={isPaidPlan(user) || !FREE_EDITOR_WORD_LIMIT ? null : FREE_EDITOR_WORD_LIMIT}
           onUpgrade={() => { trackEvent('upgrade_clicked', { source: 'analyzer_panel' }); openUpgradePaywall('analyzer_panel'); }}
           analysesLeft={analysesLeft}

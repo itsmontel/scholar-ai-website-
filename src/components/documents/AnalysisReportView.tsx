@@ -213,6 +213,7 @@ export default function AnalysisReportView({
   revisionsLocked,
   selectedAnnotationId,
   appliedAnnotationIds,
+  appliedRevisions,
   applyingAnnotationId,
   onSelectAnnotation,
   onApplyRevision,
@@ -228,6 +229,7 @@ export default function AnalysisReportView({
   revisionsLocked: boolean;
   selectedAnnotationId?: string | null;
   appliedAnnotationIds?: Set<string>;
+  appliedRevisions?: Record<string, { originalText: string; replacementText: string }>;
   applyingAnnotationId?: string | null;
   onSelectAnnotation?: (id: string) => void;
   onApplyRevision?: (id: string) => void;
@@ -253,10 +255,33 @@ export default function AnalysisReportView({
 
   const revisedDraftRanges = useMemo(() => {
     if (!appliedAnnotationIds?.size) return [];
-    return annotations
-      .filter((a) => appliedAnnotationIds.has(a.id))
-      .map((a) => ({ start: a.startIndex, end: a.endIndex }));
-  }, [annotations, appliedAnnotationIds]);
+    const ranges: { start: number; end: number }[] = [];
+    for (const a of annotations) {
+      if (!appliedAnnotationIds.has(a.id)) continue;
+      const rec = appliedRevisions?.[a.id];
+      const needle = rec?.replacementText || '';
+      if (needle && documentText.includes(needle)) {
+        let idx = documentText.indexOf(needle);
+        let next = documentText.indexOf(needle, idx + 1);
+        if (next !== -1) {
+          let best = idx;
+          let bestDist = Math.abs(idx - (a.startIndex || 0));
+          while (next !== -1) {
+            const d = Math.abs(next - (a.startIndex || 0));
+            if (d < bestDist) { best = next; bestDist = d; }
+            next = documentText.indexOf(needle, next + 1);
+          }
+          idx = best;
+        }
+        ranges.push({ start: idx, end: idx + needle.length });
+        continue;
+      }
+      if (typeof a.startIndex === 'number' && typeof a.endIndex === 'number' && a.endIndex > a.startIndex) {
+        ranges.push({ start: a.startIndex, end: a.endIndex });
+      }
+    }
+    return ranges;
+  }, [annotations, appliedAnnotationIds, appliedRevisions, documentText]);
 
   const firstInsight = useMemo(() => {
     if (revisionsLocked || !narrative) return '';
