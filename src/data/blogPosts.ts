@@ -27,6 +27,21 @@ export const BLOG_DEFAULT_AUTHOR_BIO =
 
 export const blogPostList: BlogPostMeta[] = [
   {
+    slug: 'first-week-of-college-freshman-tips',
+    title: 'First Week of College: What US Freshmen Should Actually Do',
+    description:
+      'Classes just started. Week-one searches that matter: how to read a syllabus, take lecture notes, email a professor, write a discussion post, and switch from high-school writing.',
+    date: '2026-09-06',
+    author: 'WriteScholar Team',
+    readTime: '12 min read',
+    category: 'Guides',
+    keyTakeaways: [
+      'Week one is not orientation filler. The syllabus, notes system, and first LMS post set the grade you get in October.',
+      'College writing is a claim plus evidence. High-school summary, padding, and last-minute MLA are the usual freshman misses.',
+      'Email the professor like a short memo, go to office hours with one question, and grade the first draft against the rubric before you submit.',
+    ],
+  },
+  {
     slug: 'first-college-paper-fall-semester',
     title: 'First College Paper of the Semester: A 3-Week Plan After Classes Start',
     description:

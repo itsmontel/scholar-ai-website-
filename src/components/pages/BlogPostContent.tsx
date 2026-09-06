@@ -431,11 +431,162 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
   };
 
   switch (slug) {
+    case 'first-week-of-college-freshman-tips':
+      return (
+        <>
+          <p className={p}>
+            Move-in is over. You have a campus ID that does not scan yet, four PDFs called &quot;Syllabus_FINAL_v3,&quot; and a group chat asking where the dining hall actually is. That is week one of college in the US: late August into early September, depending on the campus, and a flood of searches that have nothing to do with dorm checklists.
+          </p>
+          <p className={p}>
+            Freshmen do not type &quot;how to become a better student.&quot; They type <em>how to read a syllabus</em>, <em>how to take notes in college</em>, <em>how to email a professor</em>, <em>what are office hours</em>, <em>how to write a discussion post</em>, and <em>college vs high school</em>. Those queries are the same job: figure out the rules before the first graded thing arrives. Here is what to do with them.
+          </p>
+
+          <EssayAnalysisIllustration />
+
+          <h2 className={h2}>Read the syllabus like a contract, not orientation homework</h2>
+          <p className={p}>
+            &quot;What is a syllabus&quot; is one of the most honest freshman searches. In high school, the first week packet was a vibe. In college, the syllabus is the contract: grade weights, late policy, attendance, citation style, AI rules, and the dates that will ruin a long weekend if you ignore them.
+          </p>
+          <p className={p}>
+            For every course, write down five facts on day one: how the grade is built (exams vs papers vs participation), the late-work rule, the citation style, whether drafts or revisions are allowed, and the date of the first graded thing. That first thing is often not a paper. It is a quiz, a lab, or a 250-word discussion board post due Friday of week one.
+          </p>
+          <p className={p}>
+            If two documents disagree, the LMS module usually wins over the PDF you downloaded at orientation. If you still cannot find the first due date, that is an office-hours question, not a guess. Students lose easy September points by writing a fine paper in the wrong format: MLA in an APA course, a reflection when the prompt said &quot;evaluate,&quot; three pages when the cap was 1,200 words. Our comparison of <a href="/blog/mla-vs-apa-vs-chicago-citation-style" className={internalLink}>MLA, APA, and Chicago</a> is a two-minute check before you format a single heading.
+          </p>
+
+          <h2 className={h2}>College vs high school: the switch that actually matters</h2>
+          <p className={p}>
+            &quot;College vs high school&quot; is a huge search in the first two weeks because the building looks like school and the grading does not. High school rewarded completion, length, and a tidy five-paragraph shape. College readers reward a claim someone could disagree with, evidence that is cited, and a paper that answers the verb in the prompt.
+          </p>
+          <p className={p}>
+            In English 101 and other freshman composition courses, that switch shows up immediately. A high-school essay often summarises the reading and saves the point for the last paragraph. A college paper states the point early and uses the reading as evidence. If a roommate can tell you the topic but not the argument, you still wrote a report.
+          </p>
+          <p className={p}>
+            The other half of the switch is time. High school built review into class. College assumes you will see the material again on your own. Rereading slides the night before a quiz feels like studying and tests recognition, not recall. If you want the research behind that, use our guide to <a href="/blog/how-to-study-effectively-complete-guide" className={internalLink}>how to study effectively</a>. Week one only needs a smaller version: after each lecture, write the question the class was answering, one claim the professor stressed, and one example they used.
+          </p>
+
+          <h2 className={h2}>How to take notes in college without rewriting the slides</h2>
+          <p className={p}>
+            Freshmen search &quot;how to take notes in college&quot; after the first 75-minute lecture that did not pause. You do not need a perfect system on Tuesday. You need one place the notes live, and a ten-minute pass the same day so the file is usable in week four.
+          </p>
+          <p className={p}>
+            Capture claims, not sentences. If the professor says the same idea three ways, write it once and star it. Mark anything they write on the board, anything they say &quot;this will be on the exam,&quot; and any name or study they linger on. Leave a blank for the example you will look up later instead of stalling the whole page.
+          </p>
+          <p className={p}>
+            That night, turn the mess into something you can quiz. A structured study guide beats a prettier notebook. Our walkthrough on <a href="/blog/turn-lecture-notes-into-study-guide" className={internalLink}>turning lecture notes into a study guide</a> is built for this window, and a <a href="/study-pack" onClick={handleNavigate('study-pack')} className={internalLink}>study pack</a> from those notes gives you a short lesson, flashcards, and a quiz without rebuilding the semester from scratch.
+          </p>
+          <p className={p}>
+            Do not wait until &quot;things settle.&quot; Clubs start, shifts get scheduled, and the first Friday of football season arrives. The file you start in week one is why week five is review instead of archaeology.
+          </p>
+
+          <h2 className={h2}>How to write a discussion post that is not a throwaway</h2>
+          <p className={p}>
+            A lot of first-year courses ease in with a Canvas or Blackboard post: 200 to 300 words, reply to two classmates, due before you have unpacked. Students treat those as busywork and then wonder why the first real paper feels like a different sport.
+          </p>
+          <p className={p}>
+            Write the discussion post as a miniature college paper. Open with a claim, not &quot;I found this reading interesting.&quot; Quote or paraphrase one specific line from the assigned text. Say what you think it means. Then say what it does not settle. That last move is analysis, and it is the muscle English 101 will test at 1,200 words.
+          </p>
+          <p className={p}>
+            Skip the closer that says you look forward to everyone&apos;s thoughts. End on the implication or the question the reading leaves open. Keep the file. When the longer paper arrives, you already have claims you can expand instead of starting from a blank document on a Sunday night.
+          </p>
+
+          <h2 className={h2}>How to email a professor, and what office hours are for</h2>
+          <p className={p}>
+            &quot;How to email a professor&quot; spikes every August because nobody taught the format. Subject line: course code plus the actual issue (&quot;ENGL 101 — discussion post due date&quot;). First line: your full name and section. Then the question in two or three sentences. Attach the screenshot if it is an LMS problem. Sign with the name on the roster.
+          </p>
+          <p className={p}>
+            Do not send five paragraphs of life story. Do not email at 12:40 a.m. asking them to explain the whole reading. Do not ask a question the syllabus answers in bold. Those emails get a slower reply because they read like you did not look.
+          </p>
+          <p className={p}>
+            Office hours are the scheduled time the instructor is paid to talk to you. They are not detention and they are not only for students who are failing. Bring one artifact: the prompt, the quiz you missed, or a draft paragraph. Ask one concrete question: &quot;Does this claim answer the prompt, or am I still summarising?&quot; That conversation does more for the first paper than another hour of highlighting.
+          </p>
+          <p className={p}>
+            If you are anxious about walking in, email first and say you will come to Thursday&apos;s hours with that question. Showing up once in week one makes week six much easier, when the grade is already in motion.
+          </p>
+
+          <h2 className={h2}>The first assignment is closer than it feels</h2>
+          <p className={p}>
+            On most US campuses, a short response, lab, or source-based essay lands between week two and week four. Seminar and writing-intensive courses can assign something in the first ten days. Treat any date on the syllabus as real even if the professor has not mentioned it again.
+          </p>
+          <p className={p}>
+            You do not need to draft it on night one. You do need the prompt in a note you will actually open, a one-sentence claim a classmate could disagree with, and the two or three sources you are allowed to use. That is the start of college writing. The full three-week sequence lives in our guide to the <a href="/blog/first-college-paper-fall-semester" className={internalLink}>first college paper of the semester</a>.
+          </p>
+          <p className={p}>
+            When a draft exists, do not stop at spellcheck. Mechanics are a slice of the rubric. The grade lives in thesis, evidence, and structure. A <a href="/blog/grade-my-essay-before-submitting" className={internalLink}>pre-submission grade check</a> is for those categories, and an <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>essay editor</a> keeps the comments on the sentences you still have time to fix.
+          </p>
+
+          <h2 className={h2}>GPA math in week one, before you need it</h2>
+          <p className={p}>
+            &quot;How to calculate GPA&quot; is a panic search after the first midterm. Do the math now, while the numbers are still hypothetical. A four-credit lab and a three-credit seminar are not the same miss. Credit hours weight the average; a C in the heavy course moves the term GPA more than an A in a one-credit seminar.
+          </p>
+          <p className={p}>
+            Find the grading scale on each syllabus (some still use plus/minus, some do not) and put the credit hours in one place. Our <a href="/tools/gpa-calculator" onClick={handleNavigate('gpa-calculator')} className={internalLink}>GPA calculator</a> is enough for semester and cumulative estimates. The point is not to obsess. The point is to know which courses can sink the term if you treat them like electives.
+          </p>
+
+          <h2 className={h2}>AI in the first week, without handing in someone else&apos;s voice</h2>
+          <p className={p}>
+            The other freshman search, usually at 11 p.m., is some version of &quot;write my discussion post.&quot; A lot of syllabi now have an AI paragraph. Read it before you paste a prompt into a chatbot. On most campuses, feedback on a draft you wrote is treated differently from generated text you could not explain in office hours.
+          </p>
+          <p className={p}>
+            Use tools where they are actually good in September: turning messy notes into a quiz, catching a missing citation style, or showing you that paragraph three never supports the claim. Do not invent a source, a lab result, or a personal story. First assignments are short. There is nowhere to hide a fake quotation. The same line is in our guide to <a href="/blog/ai-writing-assistant-for-students" className={internalLink}>AI writing assistants for students</a>.
+          </p>
+
+          <h2 className={h2}>A week-one checklist you can finish in an hour</h2>
+          <p className={p}>
+            Do this once per course, in order.
+          </p>
+          <p className={p}>
+            One: download the syllabus and the first prompt; write the five facts above at the top of a note. Two: pick one notes file per class, not five apps. Three: after the next lecture, write the question, the claim, and the example. Four: if a discussion post is due, draft a claim-plus-source paragraph before you reply to anyone. Five: put office hours on your calendar and draft one email in the short format, even if you do not send it yet. Six: if a paper is already on the calendar, outline a one-sentence thesis and stop. Grammar later.
+          </p>
+          <p className={p}>
+            That is the whole difference between a freshman who looks organised in October and one who is still hunting the prompt on the night before it is due.
+          </p>
+
+          <h2 className={h2}>Start the semester with a system, not a Sunday panic</h2>
+          <p className={p}>
+            <a href="/study-pack" onClick={handleNavigate('study-pack')} className={internalLink}>WriteScholar&apos;s study pack</a> turns lecture notes into a lesson, flashcards, and a quiz. When the first paper lands, the <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>essay editor</a> reads the draft the way a professor would: thesis, evidence, structure, and citations. See <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for the current first-month offer.
+          </p>
+          <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
+            Get ready for week one →
+          </a>
+
+          <BlogFaqAccordion
+            items={[
+              {
+                question: 'When does the first week of college start in the US?',
+                answer:
+                  'Most campuses start the fall term in mid-to-late August or the week of Labor Day. Some quarters start later. Use your academic calendar, not a national average. Orientation week and the first week of classes are not the same thing: graded work can start as soon as classes do.',
+              },
+              {
+                question: 'What should I do in the first week of college if I feel behind already?',
+                answer:
+                  'Do not try to build a perfect system. Read each syllabus for the first due date and the grade weights, pick one notes file per class, and show up to the next lecture with a way to capture claims. One office-hours visit with a specific question beats a weekend of unstructured catching up.',
+              },
+              {
+                question: 'How is college writing different from high school?',
+                answer:
+                  'College papers lead with a claim and use readings as evidence. High-school essays often summarise, pad for length, and treat citations as optional formatting. Answer the verb in the prompt, cite the style on the syllabus, and check thesis and evidence before you polish sentences.',
+              },
+              {
+                question: 'How do I write an email to a professor?',
+                answer:
+                  'Use the course code in the subject line, identify your name and section in the first sentence, ask one clear question, and keep it under a short paragraph. Do not ask something the syllabus already answers. For longer help, go to office hours with the prompt or a draft in hand.',
+              },
+              {
+                question: 'Is it okay to use AI on freshman assignments?',
+                answer:
+                  'On most campuses, feedback on writing you did yourself is treated differently from generated text. Read the AI policy on the syllabus. Never submit prose you could not explain, and never invent sources. If the policy is silent, ask in office hours before week three, not after a flag.',
+              },
+            ]}
+          />
+        </>
+      );
+
     case 'first-college-paper-fall-semester':
       return (
         <>
           <p className={p}>
-            Classes just started back across the US. Dorms smell like disinfectant and instant ramen. You have a syllabus stack, a campus map you will never look at again, and at least one professor who already mentioned a paper due in week three. That first assignment is not a warm-up in the way students hope. It is how the course decides what kind of writer you are.
+            Classes just started back across the US. Dorms smell like disinfectant and instant ramen. You have a syllabus stack, a campus map you will never look at again, and at least one professor who already mentioned a paper due in week three. That first assignment is not a warm-up in the way students hope. It is how the course decides what kind of writer you are. If you are still in week one and the paper is not assigned yet, start with our <a href="/blog/first-week-of-college-freshman-tips" className={internalLink}>first week of college tips</a> and come back when the prompt lands.
           </p>
           <p className={p}>
             Summer writing is emails, group chats, and maybe a personal statement you already submitted. College writing is a prompt, a citation style, and a reader who has seen this assignment a hundred times. Here is how to treat the first three weeks so the first paper does not become the grade you spend October recovering from.
