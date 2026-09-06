@@ -58,8 +58,8 @@ const PLAN_LIMITS = {
     lessonWordsPerMonth: 999999,
     lessonGenerationsPerMonth: 99,
     lessonMaxWordsPerGeneration: 10000,
-    // Essay analysis uses OPENAI_PREMIUM_MODEL (default gpt-5-mini); same tier as former Premium
-    aiModel: 'gpt-5-mini',
+    // Essay analysis uses OPENAI_PREMIUM_MODEL (default gpt-5.6-luna)
+    aiModel: 'gpt-5.6-luna',
     maxDocumentSize: 100 * 1024 * 1024, // 100MB per file
     maxTotalStorage: 100 * 1024 * 1024, // 100MB total library storage
     name: 'Pro',
@@ -83,7 +83,7 @@ const PLAN_LIMITS = {
     lessonWordsPerMonth: 4999999,
     lessonGenerationsPerMonth: 499,
     lessonMaxWordsPerGeneration: 10000,
-    aiModel: 'gpt-5-mini',
+    aiModel: 'gpt-5.6-luna',
     maxDocumentSize: 100 * 1024 * 1024,
     maxTotalStorage: 1024 * 1024 * 1024, // 1GB library total
     name: 'Premium',

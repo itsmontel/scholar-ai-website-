@@ -12,25 +12,36 @@ const subscriptionService = require('./subscriptionService');
  *  - Both analysis prompts demand strict JSON, so we force
  *    `response_format: json_object` for clean, fence-free, parseable output.
  */
-function buildChatParams(model, messages, maxTokens, reasoningEffort = null, temperature = 0.3) {
+function buildChatParams(model, messages, maxTokens, reasoningEffort = null, temperature = 0.3, extra = {}) {
   const isReasoning = /^(gpt-5|o[0-9])/i.test(model);
   if (isReasoning) {
     const params = {
       model,
       messages,
       max_completion_tokens: maxTokens,
-      response_format: { type: 'json_object' },
     };
+    if (extra.json !== false) params.response_format = { type: 'json_object' };
     if (reasoningEffort) params.reasoning_effort = reasoningEffort;
     return params;
   }
   // Classic path: leave exactly as it worked before (no response_format —
   // the parser already strips any markdown fences from the {...} block).
-  return {
+  const params = {
     model,
     messages,
     max_tokens: maxTokens,
     temperature,
+  };
+  if (extra.json === true) params.response_format = { type: 'json_object' };
+  return params;
+}
+
+const STUDY_PACK_MODEL = 'gpt-5.6-luna';
+
+function studyPackAi() {
+  return {
+    model: process.env.OPENAI_STUDY_PACK_MODEL || STUDY_PACK_MODEL,
+    reasoningEffort: process.env.OPENAI_STUDY_PACK_REASONING_EFFORT || 'low',
   };
 }
 
@@ -324,34 +335,19 @@ class AIAnalysisService {
         return await this.mockAnalysis(documentId, content, analysisType, userId);
       }
 
-      // Model ladder (overridable via env):
-      //   Free          → gpt-4o-mini   (classic, fast, reliable)
-      //   Pro + Premium → gpt-5.4-mini  at LOW reasoning effort —
-      //                   sharper, better-targeted annotations than 4o-mini
-      //                   at a good cost (~4¢/analysis).
-      // Reasoning tokens share the OUTPUT budget, so paid gets a LARGE
+      // Essay analysis uses gpt-5.6-luna for every plan (override with
+      // OPENAI_STANDARD_MODEL / OPENAI_PREMIUM_MODEL if needed).
+      // Reasoning tokens share the OUTPUT budget, so luna gets a LARGE
       // max_completion_tokens (reasoning + the JSON must both fit). If the
       // model still truncates (finish_reason 'length') or returns unparseable
       // output, we transparently re-run on gpt-4o-mini below — so the user
       // can never end up with no rubric / annotations.
-      // The free budget has to scale with the document. The prompt asks
-      // for up to 45 annotations (text + comment + suggestion each), a
-      // 6-part rubric and the rewrites — on a long paper that does not
-      // fit in a flat 8k, and a truncated response means annotations
-      // simply stop partway through the essay. That reads to the user as
-      // "it only analysed half my paper", which is exactly what it did.
-      const classicBudgetFor = (text) => {
-        const words = String(text || '').split(/\s+/).length;
-        if (words > 5000) return 16000;
-        if (words > 3000) return 14000;
-        if (words > 1500) return 12000;
-        return 10000;
-      };
+      const ANALYSIS_MODEL = 'gpt-5.6-luna';
 
       let userPlan = 'free';
-      let selectedModel = process.env.OPENAI_MODEL || 'gpt-4o-mini';
-      let maxTokens = classicBudgetFor(content);
-      let reasoningEffort = null; // only set for the paid reasoning model
+      let selectedModel = process.env.OPENAI_STANDARD_MODEL || ANALYSIS_MODEL;
+      let maxTokens = parseInt(process.env.OPENAI_STANDARD_MAX_TOKENS, 10) || 28000;
+      let reasoningEffort = process.env.OPENAI_REASONING_EFFORT || 'medium';
 
       try {
         const { plan } = await subscriptionService.getUserSubscriptionDetails(userId);
@@ -359,16 +355,16 @@ class AIAnalysisService {
         userPlan = subscriptionService.isPaidSubscriptionTier(plan) ? effPlan : 'free';
 
         if (subscriptionService.isPaidSubscriptionTier(plan)) {
-          selectedModel = process.env.OPENAI_PREMIUM_MODEL || 'gpt-5.4-mini';
-          reasoningEffort = process.env.OPENAI_REASONING_EFFORT || 'low';
-          maxTokens = parseInt(process.env.OPENAI_PREMIUM_MAX_TOKENS, 10) || 32000;
+          selectedModel = process.env.OPENAI_PREMIUM_MODEL || ANALYSIS_MODEL;
+          reasoningEffort = process.env.OPENAI_REASONING_EFFORT || 'medium';
+          maxTokens = parseInt(process.env.OPENAI_PREMIUM_MAX_TOKENS, 10) || 36000;
         } else {
-          selectedModel = process.env.OPENAI_STANDARD_MODEL || 'gpt-4o-mini';
-          reasoningEffort = null;
-          maxTokens = classicBudgetFor(content);
+          selectedModel = process.env.OPENAI_STANDARD_MODEL || ANALYSIS_MODEL;
+          reasoningEffort = process.env.OPENAI_REASONING_EFFORT || 'medium';
+          maxTokens = parseInt(process.env.OPENAI_STANDARD_MAX_TOKENS, 10) || 28000;
         }
       } catch (planErr) {
-        // If plan lookup fails, keep free defaults
+        // If plan lookup fails, keep luna defaults
         console.log('Could not fetch plan, using defaults');
       }
 
@@ -490,19 +486,17 @@ class AIAnalysisService {
         return this.mockRubricAnalysis();
       }
 
-      let selectedModel = process.env.OPENAI_STANDARD_MODEL || 'gpt-4o-mini';
-      let maxTokens = 6000;
-      let reasoningEffort = null;
+      const ANALYSIS_MODEL = 'gpt-5.6-luna';
+      let selectedModel = process.env.OPENAI_STANDARD_MODEL || ANALYSIS_MODEL;
+      let maxTokens = parseInt(process.env.OPENAI_STANDARD_MAX_TOKENS, 10) || 20000;
+      let reasoningEffort = process.env.OPENAI_REASONING_EFFORT || 'medium';
 
       try {
         const { plan } = await subscriptionService.getUserSubscriptionDetails(userId);
         if (subscriptionService.isPaidSubscriptionTier(plan)) {
-          // Paid → gpt-5.4-mini at LOW reasoning effort, with a large
-          // budget so the reasoning + JSON both fit (falls back to
-          // gpt-4o-mini if it truncates or returns unparseable output).
-          selectedModel = process.env.OPENAI_PREMIUM_MODEL || 'gpt-5.4-mini';
-          reasoningEffort = process.env.OPENAI_REASONING_EFFORT || 'low';
-          maxTokens = parseInt(process.env.OPENAI_PREMIUM_MAX_TOKENS, 10) || 24000;
+          selectedModel = process.env.OPENAI_PREMIUM_MODEL || ANALYSIS_MODEL;
+          reasoningEffort = process.env.OPENAI_REASONING_EFFORT || 'medium';
+          maxTokens = parseInt(process.env.OPENAI_PREMIUM_MAX_TOKENS, 10) || 28000;
         }
       } catch (planErr) {
         console.log('Could not fetch plan for rubric analysis, using defaults');
@@ -4291,7 +4285,7 @@ IMPORTANT:
    * @param {number} displayCount - Number to show per attempt (e.g. 10); if omitted, same as bankCount
    * @returns {Object} Quiz with questions array (full bank) and displayCount
    */
-  async generateQuiz(text, quizType = 'mixed', difficulty = 'medium', bankCount = 10, displayCount = null, userPlan = 'pro') {
+  async generateQuiz(text, quizType = 'mixed', difficulty = 'medium', bankCount = 10, displayCount = null, userPlan = 'pro', ai = null) {
     const questionCount = bankCount;
     if (displayCount == null) displayCount = bankCount;
     if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
@@ -4299,7 +4293,9 @@ IMPORTANT:
       throw new Error('OpenAI API key not configured');
     }
 
-    const selectedModel = 'gpt-4.1-nano'; // All plans use nano (premium keeps mini only for AI essay analysis)
+    const selectedModel = ai?.model || 'gpt-4.1-nano';
+    const reasoningEffort = ai?.reasoningEffort || null;
+    const maxTokens = reasoningEffort ? 14000 : 8000;
 
     const difficultyInstructions = {
       easy: 'Create straightforward questions that test basic recall and comprehension. Focus on main ideas and explicit facts.',
@@ -4364,15 +4360,19 @@ CRITICAL RULES:
 DO NOT include any text outside the JSON object.`;
 
     try {
-      const completion = await this.openai.chat.completions.create({
-        model: selectedModel,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Generate a ${difficulty} difficulty quiz with ${questionCount} ${quizType === 'mixed' ? 'mixed-type' : quizType.replace('_', ' ')} questions based on this text:\n\n${text}` }
-        ],
-        max_tokens: 8000,
-        temperature: 0.7,
-      });
+      const completion = await this.openai.chat.completions.create(
+        buildChatParams(
+          selectedModel,
+          [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: `Generate a ${difficulty} difficulty quiz with ${questionCount} ${quizType === 'mixed' ? 'mixed-type' : quizType.replace('_', ' ')} questions based on this text:\n\n${text}` }
+          ],
+          maxTokens,
+          reasoningEffort,
+          0.7,
+          { json: true },
+        )
+      );
 
       const responseText = completion.choices[0]?.message?.content;
       if (!responseText) {
@@ -4408,12 +4408,14 @@ DO NOT include any text outside the JSON object.`;
       throw new Error('Failed to generate quiz: ' + error.message);
     }
   }
-  async generateFlashcards(text, cardCount = 15, userPlan = 'pro') {
+  async generateFlashcards(text, cardCount = 15, userPlan = 'pro', ai = null) {
     if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
       throw new Error('OpenAI API key not configured');
     }
 
-    const selectedModel = 'gpt-4.1-nano'; // All plans use nano (premium keeps mini only for AI essay analysis)
+    const selectedModel = ai?.model || 'gpt-4.1-nano';
+    const reasoningEffort = ai?.reasoningEffort || null;
+    const maxTokens = reasoningEffort ? 8000 : 3000;
 
     const systemPrompt = `You are an expert study-aid creator. Generate exactly ${cardCount} flashcards from the provided text.
 
@@ -4441,15 +4443,19 @@ Return valid JSON in this EXACT format:
 DO NOT include any text outside the JSON object.`;
 
     try {
-      const completion = await this.openai.chat.completions.create({
-        model: selectedModel,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Generate ${cardCount} flashcards from this text:\n\n${text}` }
-        ],
-        max_tokens: 3000,
-        temperature: 0.7,
-      });
+      const completion = await this.openai.chat.completions.create(
+        buildChatParams(
+          selectedModel,
+          [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: `Generate ${cardCount} flashcards from this text:\n\n${text}` }
+          ],
+          maxTokens,
+          reasoningEffort,
+          0.7,
+          { json: true },
+        )
+      );
 
       const responseText = completion.choices[0].message.content.trim();
       let result;
@@ -4475,12 +4481,14 @@ DO NOT include any text outside the JSON object.`;
     }
   }
 
-  async generateCrossword(text, wordCount = 12, userPlan = 'pro') {
+  async generateCrossword(text, wordCount = 12, userPlan = 'pro', ai = null) {
     if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
       throw new Error('OpenAI API key not configured');
     }
 
-    const selectedModel = 'gpt-4.1-nano'; // All plans use nano (premium keeps mini only for AI essay analysis)
+    const selectedModel = ai?.model || 'gpt-4.1-nano';
+    const reasoningEffort = ai?.reasoningEffort || null;
+    const maxTokens = reasoningEffort ? 6000 : 2000;
 
     const systemPrompt = `You are an expert crossword puzzle creator for educational content. Extract exactly ${wordCount} key terms from the provided text and create clues for them.
 
@@ -4510,15 +4518,19 @@ CRITICAL: Every "word" value must be a single word with ONLY uppercase A-Z lette
 DO NOT include any text outside the JSON object.`;
 
     try {
-      const completion = await this.openai.chat.completions.create({
-        model: selectedModel,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Extract ${wordCount} key terms and create crossword clues from this text:\n\n${text}` }
-        ],
-        max_tokens: 2000,
-        temperature: 0.7,
-      });
+      const completion = await this.openai.chat.completions.create(
+        buildChatParams(
+          selectedModel,
+          [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: `Extract ${wordCount} key terms and create crossword clues from this text:\n\n${text}` }
+          ],
+          maxTokens,
+          reasoningEffort,
+          0.7,
+          { json: true },
+        )
+      );
 
       const responseText = completion.choices[0].message.content.trim();
       let result;
@@ -4695,12 +4707,14 @@ DO NOT include any text outside the JSON object.`;
     return { grid: trimmed, placedWords: adjusted, size: Math.max(maxR - minR + 1, maxC - minC + 1) };
   }
 
-  async generateReflexQuestions(inputType, content, userPlan = 'free') {
+  async generateReflexQuestions(inputType, content, userPlan = 'free', ai = null) {
     if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
       throw new Error('OpenAI API key not configured');
     }
 
-    const selectedModel = 'gpt-4.1-nano'; // All plans use nano (premium keeps mini only for AI essay analysis)
+    const selectedModel = ai?.model || 'gpt-4.1-nano';
+    const reasoningEffort = ai?.reasoningEffort || null;
+    const maxTokens = reasoningEffort ? 8000 : 3000;
 
     const systemPrompt = `You are a quiz question generator for a fast-paced arcade-style reflex game.
 
@@ -4734,16 +4748,19 @@ DO NOT include any text outside the JSON object.`;
       : `Generate 20 fast-paced quiz questions from these study notes. Use only the content below (first 10,000 words):\n\n${content.trim().split(/\s+/).slice(0, 10000).join(' ')}`;
 
     try {
-      const completion = await this.openai.chat.completions.create({
-        model: selectedModel,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-        max_tokens: 3000,
-        temperature: 0.6,
-        response_format: { type: 'json_object' },
-      });
+      const completion = await this.openai.chat.completions.create(
+        buildChatParams(
+          selectedModel,
+          [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt }
+          ],
+          maxTokens,
+          reasoningEffort,
+          0.6,
+          { json: true },
+        )
+      );
 
       const responseText = completion.choices[0]?.message?.content;
       if (!responseText) throw new Error('No response from AI');
@@ -4782,12 +4799,14 @@ DO NOT include any text outside the JSON object.`;
     }
   }
 
-  async generateWordTowerQuestions(inputType, content, userPlan = 'free') {
+  async generateWordTowerQuestions(inputType, content, userPlan = 'free', ai = null) {
     if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
       throw new Error('OpenAI API key not configured');
     }
 
-    const selectedModel = 'gpt-4.1-nano';
+    const selectedModel = ai?.model || 'gpt-4.1-nano';
+    const reasoningEffort = ai?.reasoningEffort || null;
+    const maxTokens = reasoningEffort ? 8000 : 3000;
 
     const systemPrompt = `You are generating questions for a falling-block study game called Word Tower. The player must catch correct answers and dodge wrong ones.
 
@@ -4823,16 +4842,19 @@ DO NOT include any text outside the JSON object.`;
       : `Generate 15 Word Tower questions from these study notes. Use only the content below (first 10,000 words):\n\n${content.trim().split(/\s+/).slice(0, 10000).join(' ')}`;
 
     try {
-      const completion = await this.openai.chat.completions.create({
-        model: selectedModel,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-        max_tokens: 3000,
-        temperature: 0.5,
-        response_format: { type: 'json_object' },
-      });
+      const completion = await this.openai.chat.completions.create(
+        buildChatParams(
+          selectedModel,
+          [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt }
+          ],
+          maxTokens,
+          reasoningEffort,
+          0.5,
+          { json: true },
+        )
+      );
 
       const responseText = completion.choices[0]?.message?.content;
       if (!responseText) throw new Error('No response from AI');
@@ -4938,12 +4960,14 @@ DO NOT include any text outside the JSON object.`;
    * `correctAnswer + distractors`, then shuffles with the no-3-in-a-row
    * safety rule before display.
    */
-  async generateWordBlitzQuestions(inputType, content, userPlan = 'free') {
+  async generateWordBlitzQuestions(inputType, content, userPlan = 'free', ai = null) {
     if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
       throw new Error('OpenAI API key not configured');
     }
 
-    const selectedModel = 'gpt-4.1-nano';
+    const selectedModel = ai?.model || 'gpt-4.1-nano';
+    const reasoningEffort = ai?.reasoningEffort || null;
+    const maxTokens = reasoningEffort ? 10000 : 3000;
 
     const systemPrompt = `You are generating questions for a 60-second fill-in-the-blank study game called Word Blitz. Players read a sentence with one word missing and tap the correct answer from 4 choices.
 
@@ -4979,19 +5003,19 @@ DO NOT include any text outside the JSON object.`;
       : `Generate 25 Word Blitz fill-in-the-blank questions from these study notes. Use only the content below (first 10,000 words):\n\n${content.trim().split(/\s+/).slice(0, 10000).join(' ')}`;
 
     try {
-      const completion = await this.openai.chat.completions.create({
-        model: selectedModel,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-        max_tokens: 3000,
-        // 0.4 is recommended in the spec — slightly lower than the other
-        // games because Word Blitz's "blank must be unambiguous" constraint is
-        // strict and benefits from more deterministic output.
-        temperature: 0.4,
-        response_format: { type: 'json_object' },
-      });
+      const completion = await this.openai.chat.completions.create(
+        buildChatParams(
+          selectedModel,
+          [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt }
+          ],
+          maxTokens,
+          reasoningEffort,
+          0.4,
+          { json: true },
+        )
+      );
 
       const responseText = completion.choices[0]?.message?.content;
       if (!responseText) throw new Error('No response from AI');
@@ -5255,17 +5279,22 @@ Rules:
   }
 
   // Helper: generate a single lesson with specific style prompt
-  async generateSingleLesson(systemPrompt, userMessage, model, style) {
+  async generateSingleLesson(systemPrompt, userMessage, model, style, reasoningEffort = null) {
     try {
-      const completion = await this.openai.chat.completions.create({
-        model: model,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userMessage }
-        ],
-        max_tokens: 8000,
-        temperature: 0.8, // Slightly higher for more variety
-      });
+      const maxTokens = reasoningEffort ? 14000 : 8000;
+      const completion = await this.openai.chat.completions.create(
+        buildChatParams(
+          model,
+          [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userMessage }
+          ],
+          maxTokens,
+          reasoningEffort,
+          0.8,
+          { json: true },
+        )
+      );
 
       const responseText = completion.choices[0]?.message?.content;
       if (!responseText) throw new Error(`No response for ${style} lesson`);
@@ -5399,12 +5428,13 @@ Rules:
     }
   }
 
-  async generateVisualLesson(text, userPlan = 'free') {
+  async generateVisualLesson(text, userPlan = 'free', ai = null) {
     if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
       throw new Error('OpenAI API key not configured');
     }
 
-    const selectedModel = 'gpt-4.1-nano';
+    const selectedModel = ai?.model || 'gpt-4.1-nano';
+    const reasoningEffort = ai?.reasoningEffort || null;
     const words = text.trim().split(/\s+/);
     const first10kWords = words.slice(0, 10000).join(' ');
     const wordCount = Math.min(words.length, 10000);
@@ -5447,7 +5477,7 @@ Rules:
 
     const userMessage = `Transform this study material into a FUN, emoji-rich visual cards lesson. Make it feel like scrolling through engaging social media content. Material:\n\n${first10kWords}`;
 
-    return this.generateSingleLesson(systemPrompt, userMessage, selectedModel, 'visual');
+    return this.generateSingleLesson(systemPrompt, userMessage, selectedModel, 'visual', reasoningEffort);
   }
 
   /**
@@ -5494,7 +5524,7 @@ Rules:
    * the source material the rest of the pipeline (lesson, quiz, flashcards,
    * crossword, arcade games) builds on. Returns clean plain-text notes.
    */
-  async generateStudyNotesFromTopic(topic, userPlan = 'free') {
+  async generateStudyNotesFromTopic(topic, userPlan = 'free', ai = null) {
     if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === 'your_openai_api_key_here') {
       throw new Error('OpenAI API key not configured');
     }
@@ -5502,7 +5532,9 @@ Rules:
     const cleanTopic = String(topic || '').trim();
     if (!cleanTopic) throw new Error('A topic is required to generate study notes');
 
-    const selectedModel = 'gpt-4.1-nano';
+    const selectedModel = ai?.model || 'gpt-4.1-nano';
+    const reasoningEffort = ai?.reasoningEffort || null;
+    const maxTokens = reasoningEffort ? 6000 : 2500;
 
     const systemPrompt = `You are an expert tutor and study-notes writer. Given a topic a student wants to learn, write clear, comprehensive, and factually accurate study notes that fully cover the topic at an introductory-to-intermediate level.
 
@@ -5522,15 +5554,19 @@ Write ONLY the study notes themselves. Do not add a preamble, a title line like 
     const userMessage = `Write detailed study notes a student can revise from for this topic:\n\n${cleanTopic}`;
 
     try {
-      const completion = await this.openai.chat.completions.create({
-        model: selectedModel,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userMessage },
-        ],
-        max_tokens: 2500,
-        temperature: 0.5,
-      });
+      const completion = await this.openai.chat.completions.create(
+        buildChatParams(
+          selectedModel,
+          [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userMessage },
+          ],
+          maxTokens,
+          reasoningEffort,
+          0.5,
+          { json: false },
+        )
+      );
 
       const raw = completion.choices?.[0]?.message?.content?.trim();
       if (!raw) throw new Error('No response from AI');
@@ -5556,6 +5592,8 @@ Write ONLY the study notes themselves. Do not add a preamble, a title line like 
   }
 
   async generateStudyPack(input, userPlan = 'free', options = {}) {
+    const packAi = studyPackAi();
+    console.log(`[AI] Study pack using ${packAi.model} reasoning=${packAi.reasoningEffort}`);
     const inputType = options.inputType === 'topic' ? 'topic' : 'notes';
 
     // Topic mode: the user typed what they want to study (e.g. "Plato's
@@ -5569,7 +5607,7 @@ Write ONLY the study notes themselves. Do not add a preamble, a title line like 
     let text = input;
     if (inputType === 'topic') {
       sourceTopic = String(input || '').trim();
-      text = await this.withRetries('topic-notes', () => this.generateStudyNotesFromTopic(sourceTopic, userPlan));
+      text = await this.withRetries('topic-notes', () => this.generateStudyNotesFromTopic(sourceTopic, userPlan, packAi));
     }
 
     const words = text.trim().split(/\s+/);
@@ -5583,13 +5621,13 @@ Write ONLY the study notes themselves. Do not add a preamble, a title line like 
     // doesn't permanently strip a tool from the pack. With 3 attempts per
     // tool, the per-tool failure rate drops from ~5% to <0.02%.
     const results = await Promise.allSettled([
-      this.withRetries('quiz', () => this.generateQuiz(text, 'mixed', 'medium', quizCount, quizCount, userPlan)),
-      this.withRetries('flashcards', () => this.generateFlashcards(text, flashcardCount, userPlan)),
-      this.withRetries('crossword', () => this.generateCrossword(text, crosswordWordCount, userPlan)),
-      this.withRetries('lesson', () => this.generateVisualLesson(text, userPlan)),
-      this.withRetries('craterBlast', () => this.generateReflexQuestions('notes', text, userPlan)),
-      this.withRetries('wordTower', () => this.generateWordTowerQuestions('notes', text, userPlan)),
-      this.withRetries('wordBlitz', () => this.generateWordBlitzQuestions('notes', text, userPlan)),
+      this.withRetries('quiz', () => this.generateQuiz(text, 'mixed', 'medium', quizCount, quizCount, userPlan, packAi)),
+      this.withRetries('flashcards', () => this.generateFlashcards(text, flashcardCount, userPlan, packAi)),
+      this.withRetries('crossword', () => this.generateCrossword(text, crosswordWordCount, userPlan, packAi)),
+      this.withRetries('lesson', () => this.generateVisualLesson(text, userPlan, packAi)),
+      this.withRetries('craterBlast', () => this.generateReflexQuestions('notes', text, userPlan, packAi)),
+      this.withRetries('wordTower', () => this.generateWordTowerQuestions('notes', text, userPlan, packAi)),
+      this.withRetries('wordBlitz', () => this.generateWordBlitzQuestions('notes', text, userPlan, packAi)),
     ]);
 
     const [quizR, flashR, crossR, lessonR, craterR, towerR, blitzR] = results;

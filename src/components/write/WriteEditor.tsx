@@ -53,7 +53,7 @@ interface WriteEditorProps {
    */
   annotations?: AnnotatorAnnotation[];
   /** Free-tier highlight gate: only show highlights in the first
-   *  `annotationPreviewRatio` of the document (e.g. 0.5 = first half).
+   *  `annotationPreviewRatio` of the document (unused; colors are always shown).
    *  null/undefined = show all (paid). */
   annotationPreviewRatio?: number | null;
   /** Currently-highlighted annotation id (e.g. user clicked a panel card). */

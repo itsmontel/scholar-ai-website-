@@ -257,48 +257,17 @@ const SoftPaywall = ({
 
   const handleDismiss = () => {
     if (hard) return;
-    if (!showLastChance) {
-      // Burn the welcome-paywall flag on every BRANCH-3 dismissal.
-      // After this, future paywalls skip the one-shot urgency badge and
-      // Last-chance pop-up. The NEWCUSTOMER first-month price itself
-      // remains as long as the user is still a new customer.
-      if (showDiscount) {
-        try {
-          localStorage.setItem(FIRST_PAYWALL_DISCOUNT_SHOWN_KEY, '1');
-        } catch {
-          /* ignore */
-        }
-      }
-
-      // Last-chance is a one-shot goodwill pop-up reserved for the
-      // first dismissal ever (i.e. right after the user finishes
-      // onboarding). It only ever shows on the welcome-discount
-      // paywall — never on the subsequent plain pitches — so we
-      // explicitly gate it by `showDiscount` as well as the existing
-      // LAST_CHANCE_PAYWALL_SHOWN_KEY belt-and-suspenders flag.
-      if (!showDiscount) {
-        setExiting(true);
-        setTimeout(onDismiss, 350);
-        return;
-      }
-      let alreadyShown = false;
+    if (showDiscount) {
       try {
-        alreadyShown = localStorage.getItem(LAST_CHANCE_PAYWALL_SHOWN_KEY) === '1';
+        localStorage.setItem(FIRST_PAYWALL_DISCOUNT_SHOWN_KEY, '1');
       } catch {
         /* ignore */
       }
-      if (alreadyShown) {
-        setExiting(true);
-        setTimeout(onDismiss, 350);
-        return;
-      }
-      try {
-        localStorage.setItem(LAST_CHANCE_PAYWALL_SHOWN_KEY, '1');
-      } catch {
-        /* ignore */
-      }
-      setShowLastChance(true);
-      return;
+    }
+    try {
+      localStorage.setItem(LAST_CHANCE_PAYWALL_SHOWN_KEY, '1');
+    } catch {
+      /* ignore */
     }
     setExiting(true);
     setTimeout(onDismiss, 350);

@@ -689,18 +689,11 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
     return activationConcernDone && activationImproveDone;
   }, [activationConcernDone, activationImproveDone]);
 
-  /** Free plan: show first ~50% of essay + matching annotations; full analysis still runs server-side. */
+  /** Free plan: full paper + all highlight colors; comments stay Pro. */
   const isFreePreview = useMemo(
     () => currentPlan === 'free' && !isActivationTutorial,
     [currentPlan, isActivationTutorial]
   );
-
-  const freePreviewCharCutoff = useMemo(() => {
-    if (!isFreePreview) return null;
-    const len = (documentContent || '').length;
-    if (len < 2) return null;
-    return Math.floor(len * 0.5);
-  }, [isFreePreview, documentContent]);
 
   /** Free plan: first ~50% of comprehensive narrative — shown as readable text; remainder is gated (all free sessions). */
   const freeComprehensiveAnalysisPreviewMd = useMemo(() => {
@@ -727,37 +720,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
     return analysisResult.slice(cut);
   }, [analysisResult, currentPlan]);
 
-  const annotationsForRender = useMemo((): Annotation[] => {
-    if (freePreviewCharCutoff == null) return annotations;
-    return annotations
-      .filter(
-        (a) =>
-          a.startIndex >= 0 &&
-          a.endIndex > a.startIndex &&
-          a.endIndex <= documentContent.length &&
-          a.startIndex < freePreviewCharCutoff
-      )
-      .map((a) => {
-        const end = Math.min(a.endIndex, freePreviewCharCutoff);
-        return {
-          ...a,
-          endIndex: end,
-          text: documentContent.slice(a.startIndex, end),
-        };
-      });
-  }, [annotations, freePreviewCharCutoff, documentContent]);
-
-  /** Locked annotations for free users — those beyond the 50% cutoff (teaser preview in sidebar) */
-  const lockedAnnotationsForTeaser = useMemo((): Annotation[] => {
-    if (!isFreePreview || freePreviewCharCutoff == null) return [];
-    return annotations.filter(
-      (a) =>
-        a.startIndex >= 0 &&
-        a.endIndex > a.startIndex &&
-        a.endIndex <= documentContent.length &&
-        a.startIndex >= freePreviewCharCutoff
-    );
-  }, [annotations, freePreviewCharCutoff, documentContent, isFreePreview]);
+  const annotationsForRender = annotations;
 
   useEffect(() => {
     if (!user?.id) return;
@@ -2858,64 +2821,16 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
       return start;
     });
 
-    /** Inline banner shown at the 40% mark where annotations stop (free users see full paper, annotations only on first 40%) */
-    const freeAnnotationCutoffBanner =
-      isFreePreview && freePreviewCharCutoff != null && freePreviewCharCutoff < displayContent.length ? (
-        <div className="my-6 relative overflow-hidden rounded-2xl border-2 border-dashed border-[#A560E8]/50 bg-[#F3EAFF] dark:border-[#8A48C7]/50 dark:bg-[#A560E8]/10">
-          <div className="relative z-10 flex flex-col sm:flex-row items-center gap-4 px-5 py-5 sm:py-4">
-            {/* Left: Visual indicator showing annotation colors */}
-            <div className="flex items-center gap-1.5 shrink-0">
-              <div className="w-3 h-3 rounded-full bg-[#A560E8] ring-2 ring-[#A560E8]/30" title="Strengths" />
-              <div className="w-3 h-3 rounded-full bg-[#A560E8] ring-2 ring-[#A560E8]/30" title="Improvements" />
-              <div className="w-3 h-3 rounded-full bg-[#FF4B4B] ring-2 ring-[#FF4B4B]/30" title="Concerns" />
-              <svg className="w-5 h-5 text-[#A560E8] ml-1" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-            </div>
-            {/* Middle: Message — explicitly tells free users that annotations
-                STOP here and they won't see feedback on the rest unless they
-                upgrade. Earlier copy was misleading ("Annotations continue
-                on 60%") because it sounded like more were coming. */}
-            <div className="flex-1 text-center sm:text-left">
-              <p className="text-sm font-extrabold text-stone-800 dark:text-stone-100">
-                Annotations stop here on the free plan
-              </p>
-              <p className="text-xs text-stone-600 dark:text-stone-400 mt-0.5">
-                {Math.round((1 - (freePreviewCharCutoff / displayContent.length)) * 100)}% of your paper has{' '}
-                <span className="font-bold text-[#8A48C7] dark:text-[#FFB347]">{annotations.filter(a => a.startIndex >= freePreviewCharCutoff).length} more feedback points</span>{' '}
-                hidden below. Upgrade to Pro to unlock them.
-              </p>
-            </div>
-            {/* Right: CTA */}
-            <button
-              type="button"
-              onClick={startProMonthlyCheckout}
-              disabled={checkoutRedirecting}
-              className="shrink-0 rounded-xl bg-[#A560E8] px-4 py-2 text-sm font-extrabold text-white border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 hover:bg-[#8A48C7] disabled:cursor-wait disabled:opacity-60 transition-all"
-            >
-              {checkoutRedirecting ? 'Opening…' : 'Unlock all annotations'}
-            </button>
-          </div>
-        </div>
-      ) : null;
-
     if (annotationsForRender.length === 0) {
-      let bannerInserted = false;
       return (
         <div className="text-gray-700 leading-relaxed">
           {paragraphs.map((paragraph, index) => {
             const paragraphStart = paragraphStarts[index] ?? 0;
-            const isPastCutoff = isFreePreview && freePreviewCharCutoff != null && paragraphStart >= freePreviewCharCutoff;
-            const shouldShowBanner = !bannerInserted && isFreePreview && freePreviewCharCutoff != null && paragraphStart >= freePreviewCharCutoff;
-            if (shouldShowBanner) bannerInserted = true;
             if (!paragraph.trim()) return null;
             return (
-              <React.Fragment key={index}>
-                {shouldShowBanner && freeAnnotationCutoffBanner}
-                <p className={`mb-4 text-justify ${isPastCutoff ? 'text-stone-500 dark:text-stone-400' : ''}`}>
-                  {renderParagraphChunkWithRevision(paragraph, paragraphStart, `no-anno-p-${index}`)}
-                </p>
-              </React.Fragment>
+              <p key={index} className="mb-4 text-justify">
+                {renderParagraphChunkWithRevision(paragraph, paragraphStart, `no-anno-p-${index}`)}
+              </p>
             );
           })}
         </div>
@@ -2940,30 +2855,14 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
 
     console.log('Valid annotations for rendering:', sortedAnnotations.length);
 
-    let bannerInserted = false;
     return (
       <div className="text-stone-700 leading-relaxed">
         {paragraphs.map((paragraph, paragraphIndex) => {
           const paragraphStart = paragraphStarts[paragraphIndex] ?? 0;
           const paragraphEnd = paragraphStart + paragraph.length;
-          const isPastCutoff = isFreePreview && freePreviewCharCutoff != null && paragraphStart >= freePreviewCharCutoff;
-          const shouldShowBanner = !bannerInserted && isFreePreview && freePreviewCharCutoff != null && paragraphStart >= freePreviewCharCutoff;
-          if (shouldShowBanner) bannerInserted = true;
           
           if (!paragraph.length) return null;
           const effectiveParagraphEnd = paragraphEnd;
-          
-          // For paragraphs past the cutoff, render as plain text with faded styling
-          if (isPastCutoff) {
-            return (
-              <React.Fragment key={paragraphIndex}>
-                {shouldShowBanner && freeAnnotationCutoffBanner}
-                <p className="mb-4 text-justify text-stone-500 dark:text-stone-400">
-                  {renderParagraphChunkWithRevision(paragraph, paragraphStart, `p-${paragraphIndex}`)}
-                </p>
-              </React.Fragment>
-            );
-          }
           
           const paragraphAnnotations = sortedAnnotations.filter((annotation) => {
             return annotation.startIndex < effectiveParagraphEnd && annotation.endIndex > paragraphStart;
@@ -2971,12 +2870,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
 
           if (paragraphAnnotations.length === 0) {
             return (
-              <React.Fragment key={paragraphIndex}>
-                {shouldShowBanner && freeAnnotationCutoffBanner}
-                <p className="mb-4 text-justify">
-                  {renderParagraphChunkWithRevision(paragraph, paragraphStart, `p-${paragraphIndex}`)}
-                </p>
-              </React.Fragment>
+              <p key={paragraphIndex} className="mb-4 text-justify">
+                {renderParagraphChunkWithRevision(paragraph, paragraphStart, `p-${paragraphIndex}`)}
+              </p>
             );
           }
 
@@ -3039,10 +2935,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                 onMouseLeave={() => setHoveredAnnotation(null)}
                 onClick={() => scrollAnnotationPanelToCard(annotation.id)}
                 title={
-                  lockedFeatures.includes('full_annotations') && !isFreePreview
-                    ? annotation.type === 'strong'
-                      ? 'Upgrade to Pro to see why this sentence works and what makes it effective'
-                      : 'Upgrade to Pro for concrete feedback on how to improve this sentence'
+                  isFreePreview || lockedFeatures.includes('full_annotations')
+                    ? 'Unlock this comment on Pro'
                     : `${annotation.type.toUpperCase()}: ${annotation.comment}`
                 }
               >
@@ -3087,12 +2981,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
           }
 
           return (
-            <React.Fragment key={paragraphIndex}>
-              {shouldShowBanner && freeAnnotationCutoffBanner}
-              <p className="mb-4 text-justify">
-                {parts}
-              </p>
-            </React.Fragment>
+            <p key={paragraphIndex} className="mb-4 text-justify">
+              {parts}
+            </p>
           );
         })}
       </div>
@@ -3899,6 +3790,14 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                               </span>
                             </div>
                           </div>
+                          <button
+                            type="button"
+                            onClick={startProMonthlyCheckout}
+                            disabled={checkoutRedirecting}
+                            className="mt-2 w-full rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] px-3 py-2 text-[11px] font-extrabold text-white border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-px disabled:opacity-60 transition-all"
+                          >
+                            Unlock {row.label}
+                          </button>
                         </div>
                       ))}
                     </div>
@@ -4011,11 +3910,19 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                     {isFreePreview && (
                       <div className="mb-4 rounded-xl border-2 border-[#A560E8]/30 bg-[#F3EAFF] dark:bg-[#A560E8]/10 dark:border-[#8A48C7]/40 px-3 py-2.5">
                         <p className="text-xs font-semibold text-stone-800 dark:text-stone-100 leading-snug">
-                          Full paper shown · Annotations on first ~40%
+                          Colors on the full paper · comments on Pro
                         </p>
                         <p className="text-[11px] text-stone-600 dark:text-stone-400 mt-1.5 leading-relaxed">
-                          {`You can read your entire paper. Upgrade to Pro to unlock ${lockedAnnotationsForTeaser.length} more annotations—full feedback, rewrites, and grade-boosting fixes on the whole draft.`}
+                          Hover a highlight on the left to upgrade. Comments, suggested fixes, and apply-revision stay locked until Pro.
                         </p>
+                        <button
+                          type="button"
+                          onClick={startProMonthlyCheckout}
+                          disabled={checkoutRedirecting}
+                          className="mt-2.5 w-full rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] px-3 py-2 text-[12px] font-extrabold text-white border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-px disabled:opacity-60 transition-all"
+                        >
+                          {checkoutRedirecting ? 'Opening…' : 'Unlock all comments'}
+                        </button>
                       </div>
                     )}
                     {writeScholarUndo && revisionNoticeMeta && !isFreePreview && (
@@ -4097,6 +4004,8 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                         )}
                       </p>
                     )}
+                    <div className="relative">
+                    <div className={isFreePreview ? 'blur-[6px] select-none pointer-events-none' : undefined} aria-hidden={isFreePreview || undefined}>
                     {/* Strong Points */}
                     <div>
                       <div className="flex items-center space-x-2 mb-3">
@@ -4318,71 +4227,27 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                       </div>
                     </div>
                     </div>
-                    </>
-                    )}
-
-                    {/* Locked annotations teaser — show free users what they're missing (annotations beyond 40%) */}
-                    {isFreePreview && lockedAnnotationsForTeaser.length > 0 && (
-                      <div className="mt-6 pt-5 border-t-2 border-dashed border-[#A560E8]/40 dark:border-[#8A48C7]/50">
-                        <div className="flex items-center gap-2 mb-4">
-                          <svg className="w-5 h-5 text-[#A560E8]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                          </svg>
-                          <h4 className="font-bold text-stone-900 dark:text-stone-100">
-                            +{lockedAnnotationsForTeaser.length} more annotations locked
-                          </h4>
+                    </div>
+                    {isFreePreview && annotations.length > 0 && (
+                      <div className="absolute inset-0 flex items-start justify-center pt-10 bg-gradient-to-b from-stone-50/30 via-stone-50/85 to-stone-50 dark:from-stone-900/20 dark:via-stone-900/85 dark:to-stone-900">
+                        <div className="mx-3 w-full rounded-2xl border-2 border-b-4 border-[#7733B5] bg-white dark:bg-stone-900 px-4 py-5 text-center shadow-[0_16px_36px_-18px_rgba(119,51,181,0.45)]">
+                          <p className="text-sm font-extrabold text-stone-900 dark:text-stone-50">Comments are a Pro feature</p>
+                          <p className="mt-1.5 text-[12px] font-bold text-stone-500 dark:text-stone-400 leading-snug">
+                            {annotations.length} notes on this paper — unlock them to see what to fix and apply revisions.
+                          </p>
+                          <button
+                            type="button"
+                            onClick={startProMonthlyCheckout}
+                            disabled={checkoutRedirecting}
+                            className="mt-3 w-full rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] px-4 py-2.5 text-[13px] font-extrabold text-white border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-px disabled:opacity-60 transition-all"
+                          >
+                            {checkoutRedirecting ? 'Opening…' : 'Unlock all annotations'}
+                          </button>
                         </div>
-                        <p className="text-xs text-stone-600 dark:text-stone-400 mb-4 leading-relaxed">
-                          Your paper has more feedback waiting. Here&apos;s a preview of what you&apos;ll unlock:
-                        </p>
-                        <div className="space-y-2">
-                          {lockedAnnotationsForTeaser.slice(0, 4).map((annotation) => {
-                            const borderColor = {
-                              strong: 'border-emerald-400',
-                              improve: 'border-amber-400',
-                              concern: 'border-red-400',
-                            }[annotation.type];
-                            const iconBg = {
-                              strong: 'bg-emerald-100 dark:bg-emerald-900/40',
-                              improve: 'bg-amber-100 dark:bg-amber-900/40',
-                              concern: 'bg-red-100 dark:bg-red-900/40',
-                            }[annotation.type];
-                            return (
-                              <div
-                                key={annotation.id}
-                                className={`relative rounded-xl p-3 border-l-4 ${borderColor} bg-white/80 dark:bg-stone-800/60 shadow-sm overflow-hidden`}
-                              >
-                                <div className="flex items-start gap-2">
-                                  <div className={`flex shrink-0 items-center justify-center w-6 h-6 rounded-lg ${iconBg}`}>
-                                    {getAnnotationIcon(annotation.type)}
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-xs font-medium text-stone-700 dark:text-stone-300 blur-[5px] select-none pointer-events-none" aria-hidden>
-                                      {annotation.comment.slice(0, 60)}...
-                                    </p>
-                                  </div>
-                                </div>
-                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-white/60 dark:via-stone-900/20 dark:to-stone-900/60" />
-                              </div>
-                            );
-                          })}
-                          {lockedAnnotationsForTeaser.length > 4 && (
-                            <p className="text-xs text-center text-stone-500 dark:text-stone-400 py-2">
-                              +{lockedAnnotationsForTeaser.length - 4} more feedback points…
-                            </p>
-                          )}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={startProMonthlyCheckout}
-                          disabled={checkoutRedirecting}
-                          className="mt-4 w-full rounded-xl bg-[#A560E8] px-4 py-2.5 text-sm font-extrabold text-white border-2 border-b-4 border-[#8A48C7] active:border-b-2 active:translate-y-0.5 hover:bg-[#8A48C7] disabled:cursor-wait disabled:opacity-60 transition-all"
-                        >
-                          {checkoutRedirecting
-                            ? 'Opening checkout…'
-                            : `Unlock all ${lockedAnnotationsForTeaser.length} annotations`}
-                        </button>
                       </div>
+                    )}
+                    </div>
+                    </>
                     )}
 
                     {/* Free: fake sidebar only when we are not showing the real ~40% preview */}
@@ -5014,7 +4879,9 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
         {/* Hover Tooltip - Mobile Responsive */}
         {hoveredAnnotation && analysisResult && (
           <div 
-            className={`fixed pointer-events-none transition-all duration-200 ${
+            className={`fixed transition-all duration-200 ${
+              isFreePreview ? 'pointer-events-auto' : 'pointer-events-none'
+            } ${
               activationPaperHoverSubtree ? 'z-[230]' : 'z-50'
             }`}
             style={{
@@ -5033,7 +4900,7 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                 concern: 'Serious concern'
               };
               
-              const isLimitedTooltip = lockedFeatures.includes('full_annotations') && !isFreePreview;
+              const isLimitedTooltip = isFreePreview || lockedFeatures.includes('full_annotations');
               
               return (
                 <div className={`relative rounded-xl px-3 py-2 shadow-xl mb-2 ${
@@ -5064,11 +4931,19 @@ const AnalysisPage: React.FC<AnalysisPageProps> = ({ onNavigate, user, onLogout,
                     </>
                   )}
                   {isLimitedTooltip && (
-                    <p className="text-white/90 text-xs mt-1 leading-snug">
-                      {annotation.type === 'strong'
-                        ? 'Upgrade to Pro to see why this sentence works well and how to build on it.'
-                        : 'Upgrade to Pro for specific feedback on how to improve this sentence.'}
-                    </p>
+                    <>
+                      <p className="text-white/90 text-xs mt-1 leading-snug">
+                        Subscribe to Pro to see this comment and how to fix it.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={startProMonthlyCheckout}
+                        disabled={checkoutRedirecting}
+                        className="mt-2.5 w-full rounded-xl bg-[#FFC800] hover:bg-[#F0BC00] px-3 py-2 text-[11px] font-extrabold uppercase tracking-wide text-[#5A4500] border-2 border-b-[3px] border-[#D4A300] active:border-b-2 active:translate-y-px disabled:opacity-60 transition-all"
+                      >
+                        {checkoutRedirecting ? 'Opening…' : 'Unlock comments on Pro'}
+                      </button>
+                    </>
                   )}
                   {!isMobileDevice() && (
                     <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full">

@@ -108,13 +108,9 @@ export interface AnalyzerHighlightsOptions {
   onAnnotationClick?: (annotationId: string) => void;
   /** Fires when the user hovers over a decorated span (with bounding rect for tooltip positioning). */
   onAnnotationHover?: (annotationId: string | null, rect: DOMRect | null) => void;
-  /** Free-tier divider: a "you've seen 50% — upgrade" marker is
-   *  injected into the doc at this fraction (e.g. 0.5 = halfway).
-   *  Highlights are NOT hidden — the second half stays visible but
-   *  locked (handled per-annotation via `annotation.locked`).
-   *  null/undefined = no divider (paid). */
+  /** Unused. Colors always render for the full paper. */
   previewRatio?: number | null;
-  /** Click handler for the divider's "Upgrade to Pro" button. */
+  /** Upgrade CTA for locked comment tooltips (handled in the page). */
   onUpgrade?: () => void;
 }
 
@@ -192,22 +188,16 @@ function decorationsFromAnnotations(
   doc: PmNode,
   annotations: AnnotatorAnnotation[],
   selectedAnnotationId: string | null,
-  previewRatio: number | null = null,
-  onUpgrade?: () => void,
+  _previewRatio: number | null = null,
+  _onUpgrade?: () => void,
 ): DecorationSet {
   if (!annotations.length) return DecorationSet.empty;
   const spans = buildPlainOffsetIndex(doc);
-  // Total plain length of the CURRENT doc — used only to place the
-  // free-tier "50% preview" divider. Highlights are NOT hidden; the
-  // second half stays visible but locked per-annotation downstream.
-  const totalPlain = spans.length ? spans[spans.length - 1].plainTo : 0;
   const norm = (s: string) => s.replace(/\s+/g, ' ').trim().toLowerCase();
   const decorations: Decoration[] = [];
   for (const ann of annotations) {
-    // Free tier: second-half ("locked") annotations get NO inline
-    // highlight in the editor. They still appear in the side panel
-    // (blurred) and the 50% divider below marks the boundary.
-    if (ann.locked) continue;
+    // Show every highlight, including free-tier locked notes. Comments
+    // and fixes stay gated in the tooltip / side panel — colors stay.
     let from = plainToPm(spans, ann.startIndex);
     let to = plainToPm(spans, ann.endIndex);
     // The stored offsets drift: nested blocks (lists / blockquotes)
@@ -241,66 +231,6 @@ function decorationsFromAnnotations(
         'data-annotation-id': ann.id,
       }),
     );
-  }
-
-  // Free-tier "you've reached 50%" divider, injected into the doc at
-  // the preview boundary. Highlights past it stay visible but locked.
-  if (
-    previewRatio != null &&
-    previewRatio > 0 &&
-    previewRatio < 1 &&
-    totalPlain > 0
-  ) {
-    const cut = Math.floor(totalPlain * previewRatio);
-    let markerPos = plainToPm(spans, cut);
-    if (markerPos == null) {
-      const s = spans.find((sp) => sp.plainFrom >= cut);
-      markerPos = s ? s.pmFrom : spans.length ? spans[spans.length - 1].pmTo : null;
-    }
-    if (markerPos != null) {
-      const pos = Math.max(0, Math.min(markerPos, doc.content.size));
-      decorations.push(
-        Decoration.widget(
-          pos,
-          () => {
-            const wrap = document.createElement('div');
-            wrap.contentEditable = 'false';
-            wrap.className = 'ws-preview-divider my-7 select-none';
-            const inner = document.createElement('div');
-            inner.className =
-              'relative rounded-2xl border-2 border-dashed border-[#A560E8]/50 bg-[#F3EAFF]/70 dark:bg-[#A560E8]/10 px-5 py-4 text-center';
-            const h = document.createElement('p');
-            h.className =
-              'text-[13px] font-extrabold text-[#7733B5] dark:text-[#C9A0F0]';
-            h.textContent = "You've reached the 50% free preview";
-            const sub = document.createElement('p');
-            sub.className =
-              'mt-1 text-[12px] font-bold text-stone-500 dark:text-stone-400';
-            sub.textContent =
-              'Feedback and one-click fixes for the rest of your paper are locked. Upgrade to Pro to unlock them all.';
-            inner.appendChild(h);
-            inner.appendChild(sub);
-            if (onUpgrade) {
-              const btn = document.createElement('button');
-              btn.type = 'button';
-              btn.textContent = 'Upgrade to Pro';
-              btn.className =
-                'mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] text-white text-[12px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all';
-              btn.addEventListener('mousedown', (e) => e.preventDefault());
-              btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onUpgrade();
-              });
-              inner.appendChild(btn);
-            }
-            wrap.appendChild(inner);
-            return wrap;
-          },
-          { side: 1, key: 'ws-preview-divider' },
-        ),
-      );
-    }
   }
 
   return DecorationSet.create(doc, decorations);

@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     last_login TIMESTAMP WITH TIME ZONE,
+    last_active_at TIMESTAMP WITH TIME ZONE,
     free_library_expiry_started_at TIMESTAMP WITH TIME ZONE,
     is_active BOOLEAN DEFAULT true,
     email_verified BOOLEAN DEFAULT false,
@@ -129,8 +130,18 @@ CREATE TABLE IF NOT EXISTS email_subscriptions (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Permanent marketing blocklist — never send promo emails to these addresses.
+CREATE TABLE IF NOT EXISTS marketing_email_unsubscribes (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    email VARCHAR(255) UNIQUE NOT NULL,
+    source VARCHAR(50) DEFAULT 'unsubscribe_page',
+    unsubscribed_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_last_active_at ON users(last_active_at);
 CREATE INDEX IF NOT EXISTS idx_users_stripe_customer_id ON users(stripe_customer_id);
 CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
 CREATE INDEX IF NOT EXISTS idx_subscriptions_stripe_id ON subscriptions(stripe_subscription_id);
@@ -146,6 +157,7 @@ CREATE INDEX IF NOT EXISTS idx_email_subscriptions_email ON email_subscriptions(
 CREATE INDEX IF NOT EXISTS idx_email_subscriptions_user_id ON email_subscriptions(user_id);
 CREATE INDEX IF NOT EXISTS idx_email_subscriptions_is_subscribed ON email_subscriptions(is_subscribed);
 CREATE INDEX IF NOT EXISTS idx_email_subscriptions_type ON email_subscriptions(subscription_type);
+CREATE INDEX IF NOT EXISTS idx_marketing_email_unsubscribes_email ON marketing_email_unsubscribes(email);
 
 -- Triggers for updated_at timestamps
 CREATE OR REPLACE FUNCTION update_updated_at_column()

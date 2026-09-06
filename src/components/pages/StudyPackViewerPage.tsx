@@ -1,4 +1,4 @@
-import { useState, useEffect, Suspense, lazy } from 'react';
+import { useState, useEffect, useMemo, Suspense, lazy } from 'react';
 import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import FlashcardViewer from '../common/FlashcardViewer';
 import LessonViewer from '../common/LessonViewer';
@@ -36,10 +36,60 @@ const STORAGE_KEY = 'writescholar_study_pack_viewer';
 const RETURN_TAB_KEY = 'writescholar_study_pack_return_tab';
 const RETURN_STATE_KEY = 'writescholar_study_pack_return_state';
 
-/** Free users get the first half of the deck / quiz; the rest unlocks with Pro. */
+const FULL_ACCESS_MS = 24 * 60 * 60 * 1000;
+
+/** Free users get the first half of the deck / quiz after the 24h window. */
 function freePreviewCount(total: number): number {
   if (total <= 0) return 0;
   return Math.max(1, Math.ceil(total / 2));
+}
+
+function parseCreatedAt(value: unknown): number | null {
+  if (!value) return null;
+  const t = Date.parse(String(value));
+  return Number.isNaN(t) ? null : t;
+}
+
+function resolveCreatedAt(data: Record<string, unknown> | null | undefined): number | null {
+  if (!data) return null;
+  const nested = data.questions && typeof data.questions === 'object' && !Array.isArray(data.questions)
+    ? (data.questions as Record<string, unknown>)
+    : null;
+  return (
+    parseCreatedAt(data.created_at) ||
+    parseCreatedAt(data.createdAt) ||
+    parseCreatedAt(nested?.created_at) ||
+    parseCreatedAt(nested?.createdAt)
+  );
+}
+
+function normalizeViewerPack(raw: { data: any; title?: string } | null): { data: any; title: string } | null {
+  if (!raw?.data) return raw ? { data: raw.data, title: raw.title || 'Study Pack' } : null;
+  const d = raw.data;
+  const nested = d.questions;
+  const looksNested =
+    nested &&
+    typeof nested === 'object' &&
+    !Array.isArray(nested) &&
+    (nested.quiz || nested.flashcards || nested.lesson || nested.originalNotes);
+  const data = looksNested
+    ? { ...nested, created_at: d.created_at || d.createdAt || nested.created_at || nested.createdAt, id: d.id }
+    : { ...d };
+  if (!data.created_at && (d.created_at || d.createdAt)) {
+    data.created_at = d.created_at || d.createdAt;
+  }
+  return { data, title: raw.title || 'Study Pack' };
+}
+
+function formatCountdown(ms: number): string {
+  const clamped = Math.max(0, ms);
+  const totalSec = Math.floor(clamped / 1000);
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  if (h > 0) return `${h}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
+  if (m > 0) return `${m}m ${String(s).padStart(2, '0')}s`;
+  return `${s}s`;
 }
 
 interface StudyPackViewerPageProps {
@@ -62,9 +112,10 @@ function safeParseStorage(key: string): { data: any; title?: string } | null {
 
 const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyPackViewerPageProps) => {
   const [pack, setPack] = useState<{ data: any; title: string } | null>(() => {
-    if (initialData?.data) return { data: initialData.data, title: initialData.title || 'Study Pack' };
-    return safeParseStorage(STORAGE_KEY);
+    if (initialData?.data) return normalizeViewerPack({ data: initialData.data, title: initialData.title || 'Study Pack' });
+    return normalizeViewerPack(safeParseStorage(STORAGE_KEY));
   });
+  const [now, setNow] = useState(() => Date.now());
   const [activeTab, setActiveTab] = useState<TabKey>(() => {
     try {
       const data = initialData?.data ?? safeParseStorage(STORAGE_KEY)?.data;
@@ -79,10 +130,10 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
 
   useEffect(() => {
     if (initialData?.data) {
-      setPack({ data: initialData.data, title: initialData.title || 'Study Pack' });
+      setPack(normalizeViewerPack({ data: initialData.data, title: initialData.title || 'Study Pack' }));
       return;
     }
-    const fromStorage = safeParseStorage(STORAGE_KEY);
+    const fromStorage = normalizeViewerPack(safeParseStorage(STORAGE_KEY));
     if (fromStorage) setPack(fromStorage);
   }, [initialData]);
 
@@ -111,9 +162,22 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
 
   const plan = (user?.plan || 'free').toLowerCase();
   const isPaidUser = plan === 'pro' || plan === 'premium';
-  // Free users get notes, lesson, half the flashcards, and half the quiz.
-  // Games stay Pro-locked. Driven off each tab's `proOnly` flag.
-  const isLocked = (key: TabKey) => !isPaidUser && (TABS.find((t) => t.key === key)?.proOnly ?? false);
+  const createdAtMs = useMemo(() => resolveCreatedAt(pack?.data), [pack]);
+  const trialEndsAt = createdAtMs == null ? null : createdAtMs + FULL_ACCESS_MS;
+  const remainingMs = trialEndsAt == null ? 0 : trialEndsAt - now;
+  const hasTrialAccess = !isPaidUser && createdAtMs != null && remainingMs > 0;
+  const trialExpired = !isPaidUser && createdAtMs != null && remainingMs <= 0;
+  const hasFullAccess = isPaidUser || hasTrialAccess;
+  // Free: full pack for 24h after create, then notes + lesson + half the
+  // cards/quiz. Games stay Pro-locked after the window.
+  const isLocked = (key: TabKey) => !hasFullAccess && (TABS.find((t) => t.key === key)?.proOnly ?? false);
+
+  useEffect(() => {
+    if (isPaidUser || createdAtMs == null) return;
+    if (Date.now() >= createdAtMs + FULL_ACCESS_MS) return;
+    const id = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(id);
+  }, [isPaidUser, createdAtMs]);
 
   // Funnel: free user opened a Pro-locked tab (quiz / games) — the moment
   // they see the lock screen instead of content.
@@ -122,12 +186,12 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
       trackEvent('lock_viewed', { feature: 'study_pack', tab: activeTab });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, isPaidUser]);
+  }, [activeTab, isPaidUser, hasFullAccess]);
 
   const handleOpenFull = (tab: TabKey, state?: { questionIndex?: number; slideIndex?: number }) => {
     const d = pack?.data?.[tab];
     if (!d) return;
-    if (isLocked(tab) || (!isPaidUser && (tab === 'quiz' || tab === 'flashcards'))) {
+    if (isLocked(tab) || (!hasFullAccess && (tab === 'quiz' || tab === 'flashcards'))) {
       openUpgradePaywall('study_pack_preview_enlarge');
       return;
     }
@@ -294,7 +358,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
       : 'flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm border-2 border-b-4 active:border-b-2 active:translate-y-0.5 transition-all';
     return (
       <>
-        {isPaidUser ? (
+        {hasFullAccess ? (
           <>
             <button onClick={() => setExportFormatTarget('pdf')} className={`${btnBase} bg-[#FF4B4B] text-white border-[#E04343]`}>
               <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
@@ -391,7 +455,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
         />
       )}
       {activeTab === 'flashcards' && hasData('flashcards') && !isLocked('flashcards') && (() => {
-        const previewCount = isPaidUser ? flashcardCards.length : freePreviewCount(flashcardCards.length);
+        const previewCount = hasFullAccess ? flashcardCards.length : freePreviewCount(flashcardCards.length);
         const lockedCount = Math.max(0, flashcardCards.length - previewCount);
         const visibleCards = flashcardCards.slice(0, previewCount);
         return (
@@ -399,7 +463,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
           <FlashcardViewer
             initialCards={visibleCards}
             title={packTitle}
-            onEnlarge={isPaidUser ? () => handleOpenFull('flashcards') : () => { trackEvent('upgrade_clicked', { source: 'study_pack_flashcard_enlarge' }); openUpgradePaywall('study_pack_flashcard_enlarge'); }}
+            onEnlarge={hasFullAccess ? () => handleOpenFull('flashcards') : () => { trackEvent('upgrade_clicked', { source: 'study_pack_flashcard_enlarge' }); openUpgradePaywall('study_pack_flashcard_enlarge'); }}
           />
           {lockedCount > 0 && (
             <div className="mt-4 max-w-xl mx-auto rounded-2xl border-2 border-[#FF9600]/40 bg-gradient-to-br from-[#FFF4E0] to-white dark:from-[#FF9600]/12 dark:to-stone-900 p-4 sm:p-5 text-center">
@@ -423,7 +487,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
       })()}
       {activeTab === 'quiz' && hasData('quiz') && !isLocked('quiz') && (() => {
         const allQuestions = Array.isArray(pack.data.quiz?.questions) ? pack.data.quiz.questions : [];
-        const previewCount = isPaidUser ? allQuestions.length : freePreviewCount(allQuestions.length);
+        const previewCount = hasFullAccess ? allQuestions.length : freePreviewCount(allQuestions.length);
         const lockedCount = Math.max(0, allQuestions.length - previewCount);
         const visibleQuestions = allQuestions.slice(0, previewCount);
         return (
@@ -431,7 +495,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
           <QuizViewer
             questions={visibleQuestions}
             title={pack.data.quiz?.title || packTitle}
-            onEnlarge={isPaidUser ? (state) => handleOpenFull('quiz', state) : () => { trackEvent('upgrade_clicked', { source: 'study_pack_quiz_enlarge' }); openUpgradePaywall('study_pack_quiz_enlarge'); }}
+            onEnlarge={hasFullAccess ? (state) => handleOpenFull('quiz', state) : () => { trackEvent('upgrade_clicked', { source: 'study_pack_quiz_enlarge' }); openUpgradePaywall('study_pack_quiz_enlarge'); }}
             initialQuestionIndex={returnState?.questionIndex}
           />
           {lockedCount > 0 && (
@@ -636,7 +700,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
 
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-6">
         {/* Back + Title */}
-        <div className="relative flex items-start sm:items-center gap-2 min-w-0 mb-6">
+        <div className="relative flex items-start sm:items-center gap-2 min-w-0 mb-4">
           <button
             onClick={() => onNavigate('dashboard')}
             className="p-2.5 rounded-xl bg-white dark:bg-stone-800 border-2 border-b-4 border-stone-300 dark:border-stone-600 text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700 active:border-b-2 active:translate-y-0.5 transition-all shrink-0"
@@ -661,6 +725,67 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
             className="hidden sm:block pointer-events-none w-16 md:w-20 lg:w-24 h-auto shrink-0 -mt-2"
           />
         </div>
+
+        {hasTrialAccess && (
+          <div className="mb-5 rounded-2xl border-2 border-b-4 border-[#D97F00] bg-gradient-to-br from-[#FFF4E0] to-white dark:from-[#FF9600]/15 dark:to-stone-900 px-4 py-3.5 sm:px-5 sm:py-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#D97F00] dark:text-[#FFB84D]">
+                  24-hour full access
+                </p>
+                <p className="mt-0.5 text-[13px] sm:text-[14px] font-extrabold text-stone-800 dark:text-stone-100 leading-snug">
+                  Everything is unlocked for {formatCountdown(remainingMs)}
+                </p>
+                <p className="mt-1 text-[12px] font-bold text-stone-600 dark:text-stone-400 leading-snug">
+                  Games, full flashcards, full quiz, crossword, and export. After that this pack goes back to the free preview.
+                </p>
+              </div>
+              <div className="flex flex-col items-stretch sm:items-end gap-2 shrink-0">
+                <span className={`tabular-nums text-center sm:text-right text-lg sm:text-xl font-extrabold ${remainingMs < 60 * 60 * 1000 ? 'text-[#FF4B4B]' : 'text-[#D97F00] dark:text-[#FFB84D]'}`}>
+                  {formatCountdown(remainingMs)}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    trackEvent('upgrade_clicked', { source: 'study_pack_24h_banner' });
+                    openUpgradePaywall('study_pack_24h_banner');
+                  }}
+                  className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-[#FF9600] hover:bg-[#D97F00] text-white text-[12px] font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all"
+                >
+                  Keep it unlocked
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {trialExpired && (
+          <div className="mb-5 rounded-2xl border-2 border-b-4 border-[#A560E8]/40 bg-gradient-to-br from-[#F3EAFF] to-white dark:from-[#A560E8]/12 dark:to-stone-900 px-4 py-3.5 sm:px-5 sm:py-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#8A48C7] dark:text-[#C9A0F0]">
+                  24-hour access ended
+                </p>
+                <p className="mt-0.5 text-[13px] sm:text-[14px] font-extrabold text-stone-800 dark:text-stone-100 leading-snug">
+                  This pack is back to the free preview
+                </p>
+                <p className="mt-1 text-[12px] font-bold text-stone-600 dark:text-stone-400 leading-snug">
+                  Half the flashcards and quiz stay open. Games, the rest of the deck, and export unlock on Pro.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  trackEvent('upgrade_clicked', { source: 'study_pack_24h_expired' });
+                  openUpgradePaywall('study_pack_24h_expired');
+                }}
+                className="shrink-0 inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] text-white text-[12px] font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
+              >
+                Unlock forever
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Mobile: export + horizontal tabs (below lg) */}
         <div className="lg:hidden">

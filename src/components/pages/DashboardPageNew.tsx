@@ -910,14 +910,11 @@ const Dashboard = ({ onNavigate, user, onLogout }: DashboardProps) => {
       {isFree && (
         <div
           role="region"
-          aria-label="Limited time promotion"
+          aria-label="First month discount"
           className="hidden md:block border-b-2 border-[#FF9600]/30 bg-[#FFF4E0] dark:bg-[#FF9600]/10"
         >
           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3">
             <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-center">
-              <span className="inline-flex items-center gap-1.5 rounded-xl bg-[#FF9600] px-2.5 py-1 text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-white border-b-2 border-[#D97F00]">
-                ⭐ Limited Time
-              </span>
               <p className="text-sm sm:text-base font-bold text-stone-800 dark:text-stone-100">
                 <span className="text-[#FF4B4B]">50% off</span> your first month on monthly plans · use code{' '}
                 <span className="inline-flex items-center rounded-lg border-2 border-b-4 border-stone-300 dark:border-stone-600 bg-white dark:bg-stone-800 px-2 py-0.5 font-mono font-extrabold text-[#A560E8] tracking-wide">

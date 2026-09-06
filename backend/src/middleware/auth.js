@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const userService = require('../services/userService');
 const subscriptionService = require('../services/subscriptionService');
+const { touchLastActive } = require('../services/userActivityService');
 
 const authenticateToken = async (req, res, next) => {
   try {
@@ -39,6 +40,8 @@ const authenticateToken = async (req, res, next) => {
     if (!user.free_library_expiry_started_at) {
       await subscriptionService.startFreeLibraryExpiryClock(user.id, user);
     }
+    // Fire-and-forget — throttled to one write per 15 min per user.
+    touchLastActive(user);
     next();
   } catch (error) {
     if (error.name === 'JsonWebTokenError') {

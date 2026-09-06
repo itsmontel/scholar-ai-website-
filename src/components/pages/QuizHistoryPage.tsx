@@ -283,9 +283,9 @@ const QuizHistoryPage = ({ onNavigate, user, onLogout, initialFilter: initialFil
   const startStudyTool = (tool: StudyTool) => {
     if (tool.quiz_type === 'study_pack') {
       try {
-        const packData = (tool.questions || tool) as { quiz?: { title?: string }; flashcards?: { title?: string }; lesson?: { title?: string } };
+        const packData = (tool.questions || tool) as { quiz?: { title?: string }; flashcards?: { title?: string }; lesson?: { title?: string }; created_at?: string };
         sessionStorage.setItem('writescholar_study_pack_viewer', JSON.stringify({
-          data: packData,
+          data: { ...packData, created_at: packData.created_at || tool.created_at },
           title: tool.title || packData?.quiz?.title || packData?.flashcards?.title || packData?.lesson?.title || 'Study Pack',
         }));
       } catch (_) {}

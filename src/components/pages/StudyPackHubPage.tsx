@@ -101,9 +101,9 @@ const StudyPackHubPage: React.FC<StudyPackHubPageProps> = ({ onNavigate, user, o
         title="Study packs"
         subtitle="Turn your notes into flashcards, quizzes, crosswords & more."
         mascotSrc="/mascot-study.webp"
-        themeColor="#58CC02"
-        themeBorderColor="#46A302"
-        themeBgColor="#E5F8D0"
+        themeColor="#FF9600"
+        themeBorderColor="#D97F00"
+        themeBgColor="#FFF4E0"
         createLabel="+ Create new study pack"
         createSubLabel="Paste your notes — get a full pack in seconds"
         onCreate={() => onNavigate('study-pack')}

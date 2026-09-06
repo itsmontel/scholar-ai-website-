@@ -2973,10 +2973,11 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
       if (data?.[0]) console.log('Study pack saved:', data[0].id);
     }).catch(err => console.error('Failed to save study pack:', err));
 
+    const createdAt = new Date().toISOString();
     res.json({
       success: true,
       message: 'Study pack generated successfully',
-      data: pack,
+      data: { ...pack, created_at: createdAt },
       generationsUsed: generationsUsed + 1,
       generationLimit,
       generationsRemaining: Math.max(0, generationLimit - generationsUsed - 1),

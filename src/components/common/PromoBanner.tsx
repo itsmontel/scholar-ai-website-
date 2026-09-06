@@ -50,7 +50,7 @@ export default function PromoBanner({
   return (
     <div
       role="region"
-      aria-label="Limited time promotion"
+      aria-label="First month discount"
       className={
         isGold
           ? 'relative overflow-hidden border-b-2 border-[#D4A300] bg-[#FFC800]'
@@ -65,15 +65,6 @@ export default function PromoBanner({
       )}
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 pr-11 sm:pr-12">
         <div className="flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1.5 text-center">
-          <span
-            className={
-              isGold
-                ? 'inline-flex items-center gap-1 rounded-full bg-[#5A4500]/12 px-2 py-0.5 text-[9px] sm:text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#5A4500]'
-                : 'inline-flex items-center gap-1 rounded-full bg-white/18 px-2 py-0.5 text-[9px] sm:text-[10px] font-extrabold uppercase tracking-[0.14em] text-white'
-            }
-          >
-            New students
-          </span>
           <p
             className={`text-[12px] sm:text-[13px] font-extrabold ${isGold ? 'text-[#3C3C3C]' : 'text-white'}`}
             style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}

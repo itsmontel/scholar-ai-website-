@@ -7,6 +7,7 @@ const { query } = require('../database/connection');
 // subscriptionService — same helper is used by syncCheckoutSessionForUser and
 // reconcileSubscriptions, so all paths converge on identical logic.
 const { resolveEffectivePlan } = subscriptionService;
+const { isMarketingEmailBlocked } = require('../services/marketingUnsubscribeService');
 
 async function persistLibraryForeverIfPaid(userId, plan) {
   if (!userId || !subscriptionService.isPaidSubscriptionTier(plan)) return;
@@ -282,7 +283,10 @@ async function handleSubscriptionUpdated(subscription) {
     if (plan === 'free' && user.email) {
       try {
         const normalizedEmail = user.email.toLowerCase().trim();
-        
+
+        if (await isMarketingEmailBlocked(normalizedEmail)) {
+          // Permanent blocklist — never re-add for marketing.
+        } else {
         // Check if email is already unsubscribed
         const unsubscribeCheck = await query(
           'SELECT id, is_subscribed FROM email_subscriptions WHERE email = $1',
@@ -305,6 +309,7 @@ async function handleSubscriptionUpdated(subscription) {
             'UPDATE email_subscriptions SET user_id = $1, updated_at = CURRENT_TIMESTAMP WHERE email = $2',
             [user.id, normalizedEmail]
           );
+        }
         }
       } catch (emailSubError) {
         console.error('Error adding user to email subscription list after webhook update:', emailSubError);
@@ -358,7 +363,10 @@ async function handleSubscriptionDeleted(subscription) {
     if (userEmailResult.rows.length > 0 && userEmailResult.rows[0].email) {
       try {
         const normalizedEmail = userEmailResult.rows[0].email.toLowerCase().trim();
-        
+
+        if (await isMarketingEmailBlocked(normalizedEmail)) {
+          // Permanent blocklist — never re-add for marketing.
+        } else {
         // Check if email is already unsubscribed
         const unsubscribeCheck = await query(
           'SELECT id, is_subscribed FROM email_subscriptions WHERE email = $1',
@@ -381,6 +389,7 @@ async function handleSubscriptionDeleted(subscription) {
             'UPDATE email_subscriptions SET user_id = $1, updated_at = CURRENT_TIMESTAMP WHERE email = $2',
             [user.id, normalizedEmail]
           );
+        }
         }
       } catch (emailSubError) {
         console.error('Error adding user to email subscription list after webhook downgrade:', emailSubError);

@@ -126,6 +126,23 @@ type HubStudyPack = {
   expiresAt?: string | null;
 };
 
+type HubCitation = {
+  id: string;
+  title: string;
+  createdAt: string;
+  style?: string;
+  count: number;
+  expiresAt?: string | null;
+  searchResults?: {
+    citations?: unknown[];
+    keywords?: string[];
+    searchStrategies?: string[];
+    researchTopic?: string;
+    citationStyle?: string;
+    yearRange?: string;
+  };
+};
+
 type DocSummary = {
   id: string;
   title: string;
@@ -803,7 +820,7 @@ function DocumentRow({
   elevated?: boolean;
   /** First-run after onboarding — this is the paper they just analysed. */
   highlighted?: boolean;
-  kind?: 'document' | 'pack';
+  kind?: 'document' | 'pack' | 'citation';
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuPos, setMenuPos] = useState<{ top: number; right: number } | null>(null);
@@ -841,12 +858,26 @@ function DocumentRow({
   }, [menuOpen, placeMenu]);
 
   const isPack = kind === 'pack';
+  const isCite = kind === 'citation';
   const expiryLabel = expiresInLabel(doc.expiresAt);
   const words = isPack
     ? 'Study pack'
-    : doc.wordCount
-      ? `${doc.wordCount.toLocaleString()} words`
-      : 'Empty';
+    : isCite
+      ? (doc.wordCount ? `${doc.wordCount.toLocaleString()} sources` : 'Citations')
+      : doc.wordCount
+        ? `${doc.wordCount.toLocaleString()} words`
+        : 'Empty';
+  const iconWrap = elevated
+    ? isPack
+      ? 'shrink-0 flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[#FFF4E0] to-[#FFE4B8] text-[#D97F00] dark:from-[#FF9600]/25 dark:to-[#FF9600]/10 dark:text-[#FFB84D] ring-1 ring-[#FF9600]/35 dark:ring-[#FF9600]/25 transition-transform duration-200 group-hover:scale-105'
+      : isCite
+        ? 'shrink-0 flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[#DDF4FF] to-[#C5ECFF] text-[#1899D6] dark:from-[#1CB0F6]/25 dark:to-[#1CB0F6]/10 dark:text-[#7DD3FC] ring-1 ring-[#1CB0F6]/35 dark:ring-[#1CB0F6]/25 transition-transform duration-200 group-hover:scale-105'
+        : 'shrink-0 flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[#F3EAFF] to-[#E9DBFF] text-[#8A48C7] dark:from-[#A560E8]/25 dark:to-[#A560E8]/10 dark:text-[#C9A0F0] ring-1 ring-[#C9A0F0]/35 dark:ring-[#A560E8]/25 transition-transform duration-200 group-hover:scale-105'
+    : isPack
+      ? 'shrink-0 flex h-10 w-10 items-center justify-center rounded-xl bg-[#FFF4E0] text-[#FF9600] dark:bg-[#FF9600]/15 dark:text-[#FFB84D] transition-colors group-hover:bg-[#FFE8C0] dark:group-hover:bg-[#FF9600]/25'
+      : isCite
+        ? 'shrink-0 flex h-10 w-10 items-center justify-center rounded-xl bg-[#DDF4FF] text-[#1CB0F6] dark:bg-[#1CB0F6]/15 dark:text-[#7DD3FC] transition-colors group-hover:bg-[#C5ECFF] dark:group-hover:bg-[#1CB0F6]/25'
+        : 'shrink-0 flex h-10 w-10 items-center justify-center rounded-xl bg-[#F3EAFF] text-[#A560E8] dark:bg-[#A560E8]/15 dark:text-[#C9A0F0] transition-colors group-hover:bg-[#EADCFB] dark:group-hover:bg-[#A560E8]/25';
   const showMenu = Boolean(onDownload || onDelete);
 
   return (
@@ -858,9 +889,17 @@ function DocumentRow({
       aria-label={`Open ${doc.title || 'Untitled'}`}
       className={
         highlighted
-          ? 'group relative flex items-center gap-3.5 sm:gap-4 px-4 sm:px-5 py-4 cursor-pointer rounded-2xl border-2 border-[#A560E8] bg-white dark:bg-stone-900 shadow-[0_16px_36px_-18px_rgba(119,51,181,0.55)] ring-4 ring-[#A560E8]/15 motion-safe:animate-[hubDocPulse_1.8s_ease-in-out_infinite] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A560E8]/40'
+          ? isPack
+            ? 'group relative flex items-center gap-3.5 sm:gap-4 px-4 sm:px-5 py-4 cursor-pointer rounded-2xl border-2 border-[#FF9600] bg-white dark:bg-stone-900 shadow-[0_16px_36px_-18px_rgba(217,127,0,0.45)] ring-4 ring-[#FF9600]/15 motion-safe:animate-[hubDocPulse_1.8s_ease-in-out_infinite] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF9600]/40'
+            : isCite
+              ? 'group relative flex items-center gap-3.5 sm:gap-4 px-4 sm:px-5 py-4 cursor-pointer rounded-2xl border-2 border-[#1CB0F6] bg-white dark:bg-stone-900 shadow-[0_16px_36px_-18px_rgba(28,176,246,0.45)] ring-4 ring-[#1CB0F6]/15 motion-safe:animate-[hubDocPulse_1.8s_ease-in-out_infinite] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1CB0F6]/40'
+              : 'group relative flex items-center gap-3.5 sm:gap-4 px-4 sm:px-5 py-4 cursor-pointer rounded-2xl border-2 border-[#A560E8] bg-white dark:bg-stone-900 shadow-[0_16px_36px_-18px_rgba(119,51,181,0.55)] ring-4 ring-[#A560E8]/15 motion-safe:animate-[hubDocPulse_1.8s_ease-in-out_infinite] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A560E8]/40'
           : elevated
-          ? 'group relative flex items-center gap-3.5 sm:gap-4 px-4 sm:px-5 py-4 cursor-pointer rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-[0_1px_2px_rgba(60,40,90,0.04)] hover:border-[#C9A0F0] dark:hover:border-[#A560E8]/40 hover:shadow-[0_14px_28px_-20px_rgba(90,45,140,0.45)] hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A560E8]/40'
+          ? isPack
+            ? 'group relative flex items-center gap-3.5 sm:gap-4 px-4 sm:px-5 py-4 cursor-pointer rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-[0_1px_2px_rgba(60,40,90,0.04)] hover:border-[#FF9600] dark:hover:border-[#FF9600]/40 hover:shadow-[0_14px_28px_-20px_rgba(217,127,0,0.45)] hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF9600]/40'
+            : isCite
+              ? 'group relative flex items-center gap-3.5 sm:gap-4 px-4 sm:px-5 py-4 cursor-pointer rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-[0_1px_2px_rgba(60,40,90,0.04)] hover:border-[#1CB0F6] dark:hover:border-[#1CB0F6]/40 hover:shadow-[0_14px_28px_-20px_rgba(28,176,246,0.45)] hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1CB0F6]/40'
+              : 'group relative flex items-center gap-3.5 sm:gap-4 px-4 sm:px-5 py-4 cursor-pointer rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-white dark:bg-stone-900 shadow-[0_1px_2px_rgba(60,40,90,0.04)] hover:border-[#C9A0F0] dark:hover:border-[#A560E8]/40 hover:shadow-[0_14px_28px_-20px_rgba(90,45,140,0.45)] hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A560E8]/40'
           : 'group relative flex items-center gap-3.5 px-4 sm:px-5 py-3.5 cursor-pointer transition-colors hover:bg-[#FBF8FF] dark:hover:bg-stone-800/60 focus:outline-none focus-visible:bg-[#F5EEFE] dark:focus-visible:bg-stone-800 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#A560E8]/40'
       }
     >
@@ -871,17 +910,14 @@ function DocumentRow({
         />
       )}
 
-      <span
-        className={
-          elevated
-            ? 'shrink-0 flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[#F3EAFF] to-[#E9DBFF] text-[#8A48C7] dark:from-[#A560E8]/25 dark:to-[#A560E8]/10 dark:text-[#C9A0F0] ring-1 ring-[#C9A0F0]/35 dark:ring-[#A560E8]/25 transition-transform duration-200 group-hover:scale-105'
-            : 'shrink-0 flex h-10 w-10 items-center justify-center rounded-xl bg-[#F3EAFF] text-[#A560E8] dark:bg-[#A560E8]/15 dark:text-[#C9A0F0] transition-colors group-hover:bg-[#EADCFB] dark:group-hover:bg-[#A560E8]/25'
-        }
-        aria-hidden
-      >
+      <span className={iconWrap} aria-hidden>
         {isPack ? (
           <svg className={elevated ? 'w-[22px] h-[22px]' : 'w-5 h-5'} fill="none" stroke="currentColor" strokeWidth={1.9} viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 3l9 4.5-9 4.5-9-4.5L12 3zM3 12l9 4.5L21 12M3 16.5L12 21l9-4.5" />
+          </svg>
+        ) : isCite ? (
+          <svg className={elevated ? 'w-[22px] h-[22px]' : 'w-5 h-5'} fill="none" stroke="currentColor" strokeWidth={1.9} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 006.5 22H20V2H6.5A2.5 2.5 0 004 4.5v15z" />
           </svg>
         ) : (
           <svg className={elevated ? 'w-[22px] h-[22px]' : 'w-5 h-5'} fill="none" stroke="currentColor" strokeWidth={1.9} viewBox="0 0 24 24">
@@ -891,7 +927,13 @@ function DocumentRow({
       </span>
 
       <div className="min-w-0 flex-1">
-        <p className="text-[14.5px] font-extrabold text-stone-800 dark:text-stone-100 leading-tight truncate transition-colors group-hover:text-[#7733B5] dark:group-hover:text-[#C9A0F0]">
+        <p className={`text-[14.5px] font-extrabold text-stone-800 dark:text-stone-100 leading-tight truncate transition-colors ${
+          isPack
+            ? 'group-hover:text-[#D97F00] dark:group-hover:text-[#FFB84D]'
+            : isCite
+              ? 'group-hover:text-[#1899D6] dark:group-hover:text-[#7DD3FC]'
+              : 'group-hover:text-[#7733B5] dark:group-hover:text-[#C9A0F0]'
+        }`}>
           {doc.title || 'Untitled'}
         </p>
         {highlighted && (
@@ -936,11 +978,19 @@ function DocumentRow({
         onClick={(e) => { e.stopPropagation(); onOpen(); }}
         className={
           highlighted
-            ? 'shrink-0 hidden sm:inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-[#A560E8] text-white text-[13px] font-extrabold hover:bg-[#7733B5] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A560E8]/45'
-            : 'shrink-0 hidden sm:inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#8A48C7] dark:text-[#C9A0F0] text-[13px] font-extrabold hover:bg-[#A560E8] hover:text-white dark:hover:bg-[#A560E8] dark:hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A560E8]/45'
+            ? isPack
+              ? 'shrink-0 hidden sm:inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-[#FF9600] text-white text-[13px] font-extrabold hover:bg-[#D97F00] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF9600]/45'
+              : isCite
+                ? 'shrink-0 hidden sm:inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-[#1CB0F6] text-white text-[13px] font-extrabold hover:bg-[#1899D6] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1CB0F6]/45'
+                : 'shrink-0 hidden sm:inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-[#A560E8] text-white text-[13px] font-extrabold hover:bg-[#7733B5] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A560E8]/45'
+            : isPack
+              ? 'shrink-0 hidden sm:inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-[#FFF4E0] dark:bg-[#FF9600]/15 text-[#D97F00] dark:text-[#FFB84D] text-[13px] font-extrabold hover:bg-[#FF9600] hover:text-white dark:hover:bg-[#FF9600] dark:hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF9600]/45'
+              : isCite
+                ? 'shrink-0 hidden sm:inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-[#DDF4FF] dark:bg-[#1CB0F6]/15 text-[#1899D6] dark:text-[#7DD3FC] text-[13px] font-extrabold hover:bg-[#1CB0F6] hover:text-white dark:hover:bg-[#1CB0F6] dark:hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1CB0F6]/45'
+                : 'shrink-0 hidden sm:inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#8A48C7] dark:text-[#C9A0F0] text-[13px] font-extrabold hover:bg-[#A560E8] hover:text-white dark:hover:bg-[#A560E8] dark:hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#A560E8]/45'
         }
       >
-        {highlighted ? (isPack ? 'Open pack' : 'See notes') : 'Open'}
+        {highlighted ? (isPack ? 'Open pack' : isCite ? 'Open search' : 'See notes') : 'Open'}
         <svg className="w-3.5 h-3.5 opacity-80" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
           <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
         </svg>
@@ -972,7 +1022,7 @@ function DocumentRow({
               onClick={() => { setMenuOpen(false); onOpen(); }}
               className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-[13px] font-bold text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
             >
-              {isPack ? <I.Pack /> : <I.Doc />} Open
+              {isPack ? <I.Pack /> : isCite ? <I.Cite /> : <I.Doc />} Open
             </button>
             {onDownload && (
               <button
@@ -1030,11 +1080,13 @@ function DocumentRowSkeleton({ elevated = false }: { elevated?: boolean }) {
 function DocumentsHub({
   docs,
   packs,
+  citations = [],
   packsLoading,
   loading,
   onNew,
   onOpen,
   onOpenPack,
+  onOpenCitation,
   onUpload,
   onDownload,
   onDelete,
@@ -1053,11 +1105,13 @@ function DocumentsHub({
 }: {
   docs: DocSummary[];
   packs: HubStudyPack[];
+  citations?: HubCitation[];
   packsLoading?: boolean;
   loading: boolean;
   onNew: () => void;
   onOpen: (id: string) => void;
   onOpenPack: (pack: HubStudyPack) => void;
+  onOpenCitation?: (cite: HubCitation) => void;
   onUpload: (file: File) => void;
   onDownload: (id: string) => void;
   onDelete: (id: string) => void;
@@ -1155,7 +1209,8 @@ function DocumentsHub({
   const recentItems = useMemo(() => {
     type Item =
       | { kind: 'doc'; id: string; at: number; doc: DocSummary; highlighted: boolean }
-      | { kind: 'pack'; id: string; at: number; pack: HubStudyPack; highlighted: boolean };
+      | { kind: 'pack'; id: string; at: number; pack: HubStudyPack; highlighted: boolean }
+      | { kind: 'citation'; id: string; at: number; cite: HubCitation; highlighted: boolean };
 
     const items: Item[] = [
       ...docs.map((d) => ({
@@ -1170,6 +1225,13 @@ function DocumentsHub({
         id: `pack-${p.id}`,
         at: new Date(p.createdAt).getTime() || 0,
         pack: p,
+        highlighted: false,
+      })),
+      ...citations.map((c) => ({
+        kind: 'citation' as const,
+        id: `cite-${c.id}`,
+        at: new Date(c.createdAt).getTime() || 0,
+        cite: c,
         highlighted: false,
       })),
     ];
@@ -1191,10 +1253,10 @@ function DocumentsHub({
       return b.at - a.at;
     });
     return items.slice(0, 5);
-  }, [docs, packs, highlightDocId, highlightPack]);
+  }, [docs, packs, citations, highlightDocId, highlightPack]);
 
   const recentsLoading = loading || (Boolean(packsLoading) && docs.length === 0 && packs.length === 0);
-  const recentsCount = docs.length + packs.length;
+  const recentsCount = docs.length + packs.length + citations.length;
 
   const combinedExpiry = useMemo(() => {
     if (isPaidUser) return null;
@@ -1784,6 +1846,23 @@ function DocumentsHub({
                       expiresAt: item.pack.expiresAt,
                     }}
                     onOpen={() => onOpenPack(item.pack)}
+                    onUpgrade={() => onNavigate('pricing')}
+                  />
+                ) : item.kind === 'citation' ? (
+                  <DocumentRow
+                    key={item.id}
+                    kind="citation"
+                    elevated
+                    highlighted={item.highlighted}
+                    doc={{
+                      id: item.cite.id,
+                      title: item.cite.title,
+                      wordCount: item.cite.count,
+                      lastEditedAt: item.cite.createdAt,
+                      updatedAt: item.cite.createdAt,
+                      expiresAt: item.cite.expiresAt,
+                    }}
+                    onOpen={() => onOpenCitation?.(item.cite)}
                     onUpgrade={() => onNavigate('pricing')}
                   />
                 ) : (
@@ -2491,7 +2570,7 @@ function DocumentEditorView({
           initialHtml={initialHtml}
           onSave={handleContentSave}
           annotations={editorAnnotations}
-          annotationPreviewRatio={revisionsLocked ? 0.5 : null}
+          annotationPreviewRatio={null}
           selectedAnnotationId={selectedAnnotationId}
           onAnnotationClick={(id) => onSelectAnnotation(id)}
           onAnnotationHover={onAnnotationHover}
@@ -2667,13 +2746,13 @@ function DocumentEditorView({
 
                 {revisionsLocked && !noAnalysesLeft && (
                   <p className="mx-auto mt-4 max-w-[16rem] text-[11.5px] font-medium text-stone-400 dark:text-stone-500 leading-relaxed">
-                    Free preview: grade estimate, issue counts &amp; top fixes.{' '}
+                    See every highlight for free. Comments and fixes unlock on Pro.{' '}
                     <button
                       type="button"
                       onClick={onUpgrade}
                       className="font-extrabold text-[#8A48C7] dark:text-[#C9A0F0] underline decoration-[#A560E8]/40 underline-offset-2 hover:decoration-[#A560E8] transition-colors"
                     >
-                      Unlock the full report
+                      Unlock comments
                     </button>
                   </p>
                 )}
@@ -2693,33 +2772,41 @@ function DocumentEditorView({
           mouseout events. Hidden on touch devices (no real hover). */}
       {editorMode === 'draft' && hoveredAnnotation && hoverRect && (
         <div
-          aria-hidden
-          className="hidden lg:block fixed z-50 max-w-[320px] p-3 rounded-2xl bg-[#3C3C3C] dark:bg-stone-800 text-white border-2 border-b-4 border-[#2a2a2a] shadow-[0_18px_42px_-12px_rgba(0,0,0,0.45)] pointer-events-none ws-tooltip-in"
+          className={`hidden lg:block fixed z-50 max-w-[320px] p-3 rounded-2xl bg-[#3C3C3C] dark:bg-stone-800 text-white border-2 border-b-4 border-[#2a2a2a] shadow-[0_18px_42px_-12px_rgba(0,0,0,0.45)] ws-tooltip-in ${revisionsLocked ? 'pointer-events-auto' : 'pointer-events-none'}`}
           style={{
             left: Math.min(window.innerWidth - 340, Math.max(20, hoverRect.left + hoverRect.width / 2 - 160)),
             top: Math.max(20, hoverRect.top - 12),
             transform: 'translateY(-100%)',
           }}
         >
-          {hoveredAnnotation.comment && (
-            <p className="text-[12px] font-bold leading-snug">{hoveredAnnotation.comment}</p>
-          )}
-          {hoveredAnnotation.suggestion && (
-            hoveredAnnotation.locked ? (
-              <p className="mt-1.5 pt-1.5 border-t border-white/15 inline-flex items-center gap-1.5 text-[11px] font-extrabold text-[#FFC800] leading-snug">
-                <svg className="w-3 h-3 shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
-                  <rect x="5" y="11" width="14" height="9" rx="2" />
-                  <path strokeLinecap="round" d="M8 11V8a4 4 0 0 1 8 0v3" />
-                </svg>
-                Unlock the suggested fix with Pro
+          {revisionsLocked || hoveredAnnotation.locked ? (
+            <>
+              <p className="text-[11px] font-extrabold uppercase tracking-wider text-[#FFC800]">
+                {hoveredAnnotation.type === 'strong' ? 'Strength' : hoveredAnnotation.type === 'improve' ? 'Needs improvement' : 'Concern'}
               </p>
-            ) : (
-              <p className="mt-1.5 pt-1.5 border-t border-white/15 text-[11px] leading-snug">
-                <span className="font-extrabold text-[#FFC800]">Try:</span> {hoveredAnnotation.suggestion}
+              <p className="mt-1 text-[12px] font-bold leading-snug text-white/90">
+                Subscribe to Pro to see this comment and how to fix it.
               </p>
-            )
+              <button
+                type="button"
+                onClick={onUpgrade}
+                className="mt-2.5 w-full rounded-xl bg-[#FFC800] hover:bg-[#F0BC00] px-3 py-2 text-[11px] font-extrabold uppercase tracking-wide text-[#5A4500] border-2 border-b-[3px] border-[#D4A300] active:border-b-2 active:translate-y-px transition-all"
+              >
+                Unlock comments on Pro
+              </button>
+            </>
+          ) : (
+            <>
+              {hoveredAnnotation.comment && (
+                <p className="text-[12px] font-bold leading-snug">{hoveredAnnotation.comment}</p>
+              )}
+              {hoveredAnnotation.suggestion && (
+                <p className="mt-1.5 pt-1.5 border-t border-white/15 text-[11px] leading-snug">
+                  <span className="font-extrabold text-[#FFC800]">Try:</span> {hoveredAnnotation.suggestion}
+                </p>
+              )}
+            </>
           )}
-          {/* Caret pointing down to the underline */}
           <span
             aria-hidden
             className="absolute left-1/2 -bottom-[7px] -translate-x-1/2 w-3 h-3 rotate-45 bg-[#3C3C3C] dark:bg-stone-800 border-r-2 border-b-2 border-[#2a2a2a]"
@@ -3001,12 +3088,32 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
     } catch { /* ignore */ }
   }, []);
 
+  const openHubCitation = useCallback((cite: HubCitation) => {
+    if (cite.searchResults) {
+      try {
+        localStorage.setItem('citationSearchResults', JSON.stringify({
+          citations: cite.searchResults.citations ?? [],
+          keywords: cite.searchResults.keywords ?? [],
+          searchStrategies: cite.searchResults.searchStrategies ?? [],
+          researchTopic: cite.title || cite.searchResults.researchTopic || '',
+          citationStyle: cite.style || cite.searchResults.citationStyle || 'APA',
+          yearRange: cite.searchResults.yearRange,
+        }));
+      } catch { /* ignore */ }
+    }
+    onNavigate('citation-results');
+  }, [onNavigate]);
+
   const openHubStudyPack = useCallback((pack: HubStudyPack) => {
+    const base = (pack.questions && typeof pack.questions === 'object' && !Array.isArray(pack.questions))
+      ? pack.questions as Record<string, unknown>
+      : { questions: pack.questions };
+    const packPayload = { ...base, created_at: pack.createdAt };
     try {
-      sessionStorage.setItem(STUDY_PACK_VIEWER_KEY, JSON.stringify({ data: pack.questions, title: pack.title }));
+      sessionStorage.setItem(STUDY_PACK_VIEWER_KEY, JSON.stringify({ data: packPayload, title: pack.title }));
     } catch { /* noop */ }
     if (highlightPack) clearOnboardingHighlight();
-    onNavigate('study-pack-viewer', undefined, { studyPack: { data: pack.questions, title: pack.title } });
+    onNavigate('study-pack-viewer', undefined, { studyPack: { data: packPayload, title: pack.title } });
   }, [onNavigate, highlightPack, clearOnboardingHighlight]);
 
   const openOnboardingStudyPack = useCallback(() => {
@@ -3128,6 +3235,8 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
   const [docList, setDocList] = useState<DocSummary[]>([]);
   const [packList, setPackList] = useState<HubStudyPack[]>([]);
   const [packsLoading, setPacksLoading] = useState(false);
+  const [citeList, setCiteList] = useState<HubCitation[]>([]);
+  const [citesLoading, setCitesLoading] = useState(false);
   const [listLoading, setListLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
@@ -3311,6 +3420,38 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
   }, []);
 
   useEffect(() => { if (view === 'hub') void refreshPacks(); }, [view, refreshPacks]);
+
+  const refreshCites = useCallback(async () => {
+    setCitesLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/analysis/citation-history?limit=10`, { headers: authHeaders(), cache: 'no-store' });
+      if (!res.ok) return;
+      const json = await res.json().catch(() => null);
+      const rows: unknown[] = Array.isArray(json) ? json : (json?.data ?? json?.history ?? []);
+      const objs = rows.filter((r): r is Record<string, unknown> => !!r && typeof r === 'object');
+      setCiteList(
+        objs.map((r) => {
+          const results = (r.search_results ?? r.searchResults ?? null) as HubCitation['searchResults'] | null;
+          const citations = results && Array.isArray(results.citations) ? results.citations : [];
+          return {
+            id: String(r.id ?? ''),
+            title: String(r.research_topic ?? r.researchTopic ?? r.title ?? 'Citation search'),
+            createdAt: String(r.created_at ?? r.createdAt ?? new Date().toISOString()),
+            style: typeof r.citation_style === 'string' ? r.citation_style : (typeof r.citationStyle === 'string' ? r.citationStyle : undefined),
+            count: citations.length,
+            expiresAt: (r.expires_at ?? r.expiresAt ?? null) as string | null,
+            searchResults: results ?? undefined,
+          };
+        }).filter((c) => c.id),
+      );
+    } catch {
+      /* recents stay docs + packs if this fails */
+    } finally {
+      setCitesLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { if (view === 'hub') void refreshCites(); }, [view, refreshCites]);
 
   const hubPacks = useMemo(() => {
     if (!highlightPack) return packList;
@@ -3778,15 +3919,11 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
       // path. Normalise into the AnalyzerResult shape the panel
       // wants.
       const payload = json?.data ?? json;
-      // Free tier: everything from the document midpoint onward is
-      // locked (blurred comment, hidden fix, gated Apply, locked
-      // tooltip). Paid users lock nothing.
-      const lockFromIndex = isPaidPlan(user)
-        ? Number.POSITIVE_INFINITY
-        : Math.floor((text?.length || 0) / 2);
+      // Free tier: every annotation is visible as a color, but the
+      // comment / suggested fix stay locked. Paid users lock nothing.
       const annotations = normalizeAnnotations(payload?.annotations).map((a) => ({
         ...a,
-        locked: a.startIndex >= lockFromIndex,
+        locked: !isPaidPlan(user),
       }));
       const rubricRaw = payload?.grade_rubric ?? payload?.rubric ?? [];
       setAnalyzerResult({
@@ -4101,16 +4238,9 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
           ar.gradeRubric != null ||
           typeof ar.result === 'string';
         if (!hasPayload) return;
-        // Recompute the free-tier positional lock on restore too —
-        // otherwise closing the full report (which re-hydrates from
-        // the saved row) un-gated every annotation for free users.
-        const restoreText = latestTextRef.current || openDoc?.contentText || '';
-        const restoreLockFromIndex = isPaidPlan(user)
-          ? Number.POSITIVE_INFINITY
-          : Math.floor((restoreText.length || 0) / 2);
         const annotations = normalizeAnnotations(ar.annotations).map((a) => ({
           ...a,
-          locked: a.startIndex >= restoreLockFromIndex,
+          locked: !isPaidPlan(user),
         }));
         if (cancelled) return;
         setAnalyzerResult({
@@ -4427,11 +4557,13 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
           <DocumentsHub
             docs={docList}
             packs={hubPacks}
-            packsLoading={packsLoading}
+            citations={citeList}
+            packsLoading={packsLoading || citesLoading}
             loading={listLoading}
             onNew={requestBlankDraft}
             onOpen={handleOpenDoc}
             onOpenPack={openHubStudyPack}
+            onOpenCitation={openHubCitation}
             onUpload={(f: File) => { if (trialGated) { onTrialGate?.(); return; } handleUpload(f); }}
             onDownload={handleDownload}
             onDelete={(id) => setConfirmDeleteId(id)}

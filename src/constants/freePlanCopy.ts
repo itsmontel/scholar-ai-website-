@@ -6,8 +6,9 @@
  *
  * ─── IMPORTANT: read before editing ───────────────────────────────────
  * With FREEMIUM_PREVIEW = true, free users can run essay analysis and
- * study packs twice each and see a genuine partial result (~50% of essay
- * annotations / half the pack unlocked).
+ * study packs twice each. Essay analysis shows every highlight color;
+ * comments, suggested fixes, and apply-revision stay Pro. Study packs
+ * still unlock about half the deck.
  * Unlocking the rest is a paid Pro checkout — currently 50% off the first
  * month (NEWCUSTOMER), no free trial (see src/config/pricing.ts).
  */
@@ -30,40 +31,40 @@ export const TRIAL_CTA_FOOTNOTE_LONG =
 
 /** Bullet list for pricing cards, billing plan picker, landing pricing grid */
 export const FREE_PLAN_FEATURE_BULLETS = [
-  '2 free essay analyses — first half of annotations free (full markup with Pro)',
-  '2 free study packs — lesson + half the flashcards & quiz (games with Pro)',
+  '2 free essay analyses — all highlight colors (comments & fixes with Pro)',
+  '2 free study packs — everything unlocked for 24 hours (then half the deck)',
   '1 free citation search — 3 sources (full list with Pro)',
   '3 documents/mo, 5k-word summarizer, 2MB storage',
 ] as const;
 
 /** Shorter bullets where space is tight (billing sidebar) */
 export const FREE_PLAN_FEATURE_BULLETS_COMPACT = [
-  '2 free analyses (first half free; full markup with Pro)',
-  '2 free study packs (lesson + half the cards & quiz; games with Pro)',
+  '2 free analyses (all colors; comments & fixes with Pro)',
+  '2 free study packs (24 hours full access, then half the cards & quiz)',
   '1 free citation search (3 sources; full list with Pro)',
   '3 documents/mo, 5k summarizer, 2MB storage',
 ] as const;
 
 /** “What you don’t get” row on the pricing page Free card */
 export const FREE_PLAN_LIMITATIONS = [
-  'Second half of annotations & one-click apply revisions (Pro)',
+  'Comments, suggested fixes & one-click apply revisions (Pro)',
   'Quiz, games & full flashcard decks (Pro)',
   'Full citation lists & PDF/Word export (Pro)',
 ] as const;
 
 /** FAQ / long-form answer */
 export const FREE_PLAN_FAQ_ANSWER =
-  'Creating an account is free and takes no card. You get two free essay analyses (first half of line-by-line feedback), two free study packs (lesson plus the first half of the flashcards and quiz), and one citation search that shows three sources. Unlock the rest with Pro — new customers get 50% off the first month ($9.99 instead of $19.99), then the regular rate. Standalone study utilities (word counter, citation generator, GPA calculator, Pomodoro, and more) stay free with no subscription.';
+  'Creating an account is free and takes no card. You get two free essay analyses (every highlight color on the full paper; comments and one-click fixes unlock with Pro), two free study packs (lesson plus the first half of the flashcards and quiz), and one citation search that shows three sources. Unlock the rest with Pro — new customers get 50% off the first month ($9.99 instead of $19.99), then the regular rate. Standalone study utilities (word counter, citation generator, GPA calculator, Pomodoro, and more) stay free with no subscription.';
 
 /** Legal / Terms of Service single bullet */
 export const FREE_PLAN_TERMS_BULLET =
-  '3 documents per month; 2 one-time AI essay analysis previews (first ~50% of annotations free — full markup, rubric scores, and apply-revisions unlock with Pro); 2 one-time study pack previews (full lesson and first half of flashcards and quiz — arcade games, remaining cards/questions, and export unlock with Pro); 1 one-time citation search preview (first 3 sources — full list unlocks with Pro); 5,000 words/month for the Paper Summarizer; 2MB total document library storage';
+  '3 documents per month; 2 one-time AI essay analysis previews (all highlight colors on the full paper — comments, rubric scores, and apply-revisions unlock with Pro); 2 one-time study pack previews (full lesson and first half of flashcards and quiz — arcade games, remaining cards/questions, and export unlock with Pro); 1 one-time citation search preview (first 3 sources — full list unlocks with Pro); 5,000 words/month for the Paper Summarizer; 2MB total document library storage';
 
 /** Account page “What’s included” bullets */
 export const FREE_PLAN_ACCOUNT_BULLETS = [
   '3 documents per month',
-  '2 free essay analyses — first half of annotations (full markup with Pro)',
-  '2 free study packs — lesson + half the flashcards & quiz (games with Pro)',
+  '2 free essay analyses — all highlight colors (comments & fixes with Pro)',
+  '2 free study packs — everything unlocked for 24 hours (then half the deck)',
   '1 free citation search — 3 sources (full list with Pro)',
   '5,000 Paper Summarizer words per month',
   '2MB document library storage',
@@ -71,11 +72,11 @@ export const FREE_PLAN_ACCOUNT_BULLETS = [
 
 /** Study-pack-specific one-liner */
 export const FREE_PLAN_STUDY_PACK_LINE =
-  '2 free packs: full lesson + half the flashcards & quiz — games & the rest with Pro';
+  '2 free packs: everything unlocked for 24 hours, then half the cards & quiz';
 
 /** Analysis-specific one-liner */
 export const FREE_PLAN_ANALYSIS_LINE =
-  '2 free analyses: first half of feedback free — full markup with Pro';
+  '2 free analyses: all highlight colors — comments & fixes with Pro';
 
 /** Citations-specific one-liner */
 export const FREE_PLAN_CITATIONS_LINE =
@@ -83,11 +84,11 @@ export const FREE_PLAN_CITATIONS_LINE =
 
 /** Landing CTA footnote */
 export const FREE_PLAN_LANDING_CTA =
-  'Start free — see half your feedback · Pro from $9.99 first month';
+  'Start free — see every highlight · Pro from $9.99 first month';
 
 /** Landing FAQ: analysis timing */
 export const FREE_PLAN_FAQ_ANALYSIS_TIMING =
-  'Usually under 60 seconds. Write or paste your essay, hit Analyze, and you get your estimated grade plus the first half of line-by-line feedback free. Unlock the rest of the markup with Pro — 50% off your first month for new customers.';
+  'Usually under 60 seconds. Write or paste your essay, hit Analyze, and you get every green, amber, and red highlight on the full paper. Comments, suggested fixes, and apply-revision unlock with Pro — 50% off your first month for new customers.';
 
 /** Landing FAQ: study tools */
 export const FREE_PLAN_FAQ_STUDY_TOOLS =
@@ -95,4 +96,4 @@ export const FREE_PLAN_FAQ_STUDY_TOOLS =
 
 /** Landing FAQ: Free vs Pro vs Premium */
 export const FREE_PLAN_FAQ_PLAN_COMPARE =
-  'Free: two essay analyses and two study packs (half the essay markup; study-pack lesson + half the cards and quiz), one citation search (3 sources), plus standalone utilities with no card. Pro: full markup and apply-revisions, 99 combined analyses / study packs / citations per month, all citation styles, PDF and Word export, uploads up to 100MB, and every study tool unlocked — new customers get 50% off the first month ($9.99), then $19.99/mo. Premium: 5x the Pro usage at 499 actions a month, unlimited research-paper summarising, and 1GB of library storage.';
+  'Free: two essay analyses and two study packs (all essay highlight colors; comments and fixes with Pro; study-pack lesson + half the cards and quiz), one citation search (3 sources), plus standalone utilities with no card. Pro: comments, suggested fixes, and apply-revisions, 99 combined analyses / study packs / citations per month, all citation styles, PDF and Word export, uploads up to 100MB, and every study tool unlocked — new customers get 50% off the first month ($9.99), then $19.99/mo. Premium: 5x the Pro usage at 499 actions a month, unlimited research-paper summarising, and 1GB of library storage.';

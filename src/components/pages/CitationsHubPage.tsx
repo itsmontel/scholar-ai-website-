@@ -112,9 +112,9 @@ const CitationsHubPage: React.FC<CitationsHubPageProps> = ({ onNavigate, user, o
         title="Citations"
         subtitle="Find peer-reviewed sources in APA, MLA, Chicago & more."
         mascotSrc="/mascot-thinking.webp"
-        themeColor="#FF9600"
-        themeBorderColor="#D97F00"
-        themeBgColor="#FFF4E0"
+        themeColor="#1CB0F6"
+        themeBorderColor="#1899D6"
+        themeBgColor="#DDF4FF"
         createLabel="+ Find new citations"
         createSubLabel="Search by topic — get formatted, real sources"
         onCreate={() => onNavigate('citations')}

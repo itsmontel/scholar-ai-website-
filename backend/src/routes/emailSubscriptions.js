@@ -3,6 +3,10 @@ const router = express.Router();
 const { query, getSupabase } = require('../database/connection');
 const { authenticateToken } = require('../middleware/auth');
 const { emailSubscriptionLimiter } = require('../middleware/rateLimiting');
+const {
+  isMarketingEmailBlocked,
+  blockMarketingEmail,
+} = require('../services/marketingUnsubscribeService');
 const Joi = require('joi');
 
 // Email validation schema
@@ -52,6 +56,14 @@ router.post('/add', emailSubscriptionLimiter, async (req, res) => {
           message: 'Invalid user ID format'
         });
       }
+    }
+
+    // Permanent blocklist — never re-add opted-out addresses.
+    if (await isMarketingEmailBlocked(normalizedEmail)) {
+      return res.status(400).json({
+        success: false,
+        message: 'This email has been unsubscribed and cannot be added again'
+      });
     }
 
     // Check if email already exists
@@ -108,6 +120,37 @@ router.post('/add', emailSubscriptionLimiter, async (req, res) => {
   }
 });
 
+async function performUnsubscribe(normalizedEmail, source = 'unsubscribe_page') {
+  // Permanent blocklist — source of truth for "never email again".
+  const blocked = await blockMarketingEmail(normalizedEmail, source);
+
+  const existingResult = await query(
+    'SELECT id, is_subscribed FROM email_subscriptions WHERE email = $1',
+    [normalizedEmail]
+  );
+
+  if (existingResult.rows.length === 0) {
+    await query(
+      `INSERT INTO email_subscriptions (email, is_subscribed, unsubscribed_at, created_at, updated_at)
+       VALUES ($1, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
+      [normalizedEmail]
+    );
+    return { ...blocked, email: normalizedEmail, unsubscribed: true, created: true };
+  }
+
+  const result = await query(
+    `UPDATE email_subscriptions 
+     SET is_subscribed = false, 
+         unsubscribed_at = CURRENT_TIMESTAMP,
+         updated_at = CURRENT_TIMESTAMP
+     WHERE email = $1
+     RETURNING id, email, is_subscribed, unsubscribed_at`,
+    [normalizedEmail]
+  );
+
+  return { ...result.rows[0], blocked_at: blocked.unsubscribed_at, source: blocked.source };
+}
+
 // @route   POST /api/email-subscriptions/unsubscribe
 // @desc    Unsubscribe email from marketing emails
 // @access  Public (but rate limited - standard practice for unsubscribe links)
@@ -115,7 +158,6 @@ router.post('/unsubscribe', emailSubscriptionLimiter, async (req, res) => {
   try {
     const { email } = req.body;
 
-    // Validate email format
     let normalizedEmail;
     try {
       normalizedEmail = validateEmail(email);
@@ -126,43 +168,12 @@ router.post('/unsubscribe', emailSubscriptionLimiter, async (req, res) => {
       });
     }
 
-    // Check if email exists in subscriptions
-    const existingResult = await query(
-      'SELECT id, is_subscribed FROM email_subscriptions WHERE email = $1',
-      [normalizedEmail]
-    );
-
-    if (existingResult.rows.length === 0) {
-      // If email doesn't exist, create an entry with is_subscribed = false
-      // This prevents them from being added in the future
-      await query(
-        `INSERT INTO email_subscriptions (email, is_subscribed, unsubscribed_at, created_at, updated_at)
-         VALUES ($1, false, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
-        [normalizedEmail]
-      );
-
-      return res.json({
-        success: true,
-        message: 'Email unsubscribed successfully',
-        data: { email: normalizedEmail, unsubscribed: true }
-      });
-    }
-
-    // Update existing subscription to unsubscribed
-    const result = await query(
-      `UPDATE email_subscriptions 
-       SET is_subscribed = false, 
-           unsubscribed_at = CURRENT_TIMESTAMP,
-           updated_at = CURRENT_TIMESTAMP
-       WHERE email = $1
-       RETURNING id, email, is_subscribed, unsubscribed_at`,
-      [normalizedEmail]
-    );
+    const data = await performUnsubscribe(normalizedEmail, 'unsubscribe_page');
 
     res.json({
       success: true,
       message: 'Email unsubscribed successfully',
-      data: result.rows[0]
+      data
     });
   } catch (error) {
     console.error('Error unsubscribing email:', error);
@@ -170,6 +181,30 @@ router.post('/unsubscribe', emailSubscriptionLimiter, async (req, res) => {
       success: false,
       message: 'Failed to unsubscribe email'
     });
+  }
+});
+
+// @route   GET /api/email-subscriptions/unsubscribe
+// @desc    One-click unsubscribe from email links (redirects to the site)
+// @access  Public
+router.get('/unsubscribe', emailSubscriptionLimiter, async (req, res) => {
+  const frontend = (process.env.FRONTEND_URL || 'https://writescholar.com').replace(/\/$/, '');
+
+  try {
+    const { email } = req.query;
+
+    let normalizedEmail;
+    try {
+      normalizedEmail = validateEmail(email);
+    } catch (error) {
+      return res.redirect(`${frontend}/unsubscribe?error=${encodeURIComponent(error.message)}`);
+    }
+
+    await performUnsubscribe(normalizedEmail, 'email_link');
+    return res.redirect(`${frontend}/unsubscribe?success=1`);
+  } catch (error) {
+    console.error('Error unsubscribing email (GET):', error);
+    return res.redirect(`${frontend}/unsubscribe?error=${encodeURIComponent('Failed to unsubscribe. Please try again.')}`);
   }
 });
 
@@ -203,6 +238,10 @@ router.get('/list', authenticateToken, emailSubscriptionLimiter, async (req, res
           (u.subscription_plan = 'free' OR u.subscription_plan IS NULL OR s.id IS NULL)
           AND u.email IS NOT NULL
           AND TRIM(u.email) != ''
+          AND NOT EXISTS (
+            SELECT 1 FROM marketing_email_unsubscribes mu
+            WHERE LOWER(TRIM(mu.email)) = LOWER(TRIM(u.email))
+          )
       `;
 
       const params = [];
@@ -238,6 +277,10 @@ router.get('/list', authenticateToken, emailSubscriptionLimiter, async (req, res
       FROM email_subscriptions es
       LEFT JOIN users u ON es.user_id = u.id
       WHERE es.subscription_type = $1
+        AND NOT EXISTS (
+          SELECT 1 FROM marketing_email_unsubscribes mu
+          WHERE mu.email = es.email
+        )
     `;
 
     const params = [subscription_type];
@@ -367,6 +410,24 @@ router.get('/check', emailSubscriptionLimiter, async (req, res) => {
       });
     }
 
+    if (await isMarketingEmailBlocked(normalizedEmail)) {
+      const blocked = await query(
+        'SELECT email, source, unsubscribed_at FROM marketing_email_unsubscribes WHERE email = $1',
+        [normalizedEmail]
+      );
+      return res.json({
+        success: true,
+        data: {
+          email: normalizedEmail,
+          is_subscribed: false,
+          blocked: true,
+          exists: true,
+          unsubscribed_at: blocked.rows[0]?.unsubscribed_at ?? null,
+          source: blocked.rows[0]?.source ?? null,
+        }
+      });
+    }
+
     const result = await query(
       'SELECT id, email, is_subscribed, unsubscribed_at FROM email_subscriptions WHERE email = $1',
       [normalizedEmail]
@@ -375,7 +436,7 @@ router.get('/check', emailSubscriptionLimiter, async (req, res) => {
     if (result.rows.length === 0) {
       return res.json({
         success: true,
-        data: { email: normalizedEmail, is_subscribed: null, exists: false }
+        data: { email: normalizedEmail, is_subscribed: null, exists: false, blocked: false }
       });
     }
 
@@ -385,7 +446,8 @@ router.get('/check', emailSubscriptionLimiter, async (req, res) => {
         email: result.rows[0].email,
         is_subscribed: result.rows[0].is_subscribed,
         unsubscribed_at: result.rows[0].unsubscribed_at,
-        exists: true
+        exists: true,
+        blocked: result.rows[0].is_subscribed === false,
       }
     });
   } catch (error) {
@@ -393,6 +455,31 @@ router.get('/check', emailSubscriptionLimiter, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to check email subscription'
+    });
+  }
+});
+
+// @route   GET /api/email-subscriptions/blocked
+// @desc    Permanent marketing blocklist (for exports / verification)
+// @access  Private
+router.get('/blocked', authenticateToken, emailSubscriptionLimiter, async (req, res) => {
+  try {
+    const result = await query(
+      `SELECT email, source, unsubscribed_at, created_at
+       FROM marketing_email_unsubscribes
+       ORDER BY unsubscribed_at DESC`
+    );
+
+    res.json({
+      success: true,
+      data: result.rows,
+      count: result.rows.length,
+    });
+  } catch (error) {
+    console.error('Error fetching marketing blocklist:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch marketing blocklist'
     });
   }
 });

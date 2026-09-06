@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Footer from '../common/Footer';
 import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 
@@ -6,38 +6,28 @@ interface UnsubscribePageProps {
   onNavigate: (page: string) => void;
 }
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const UnsubscribePage = ({ onNavigate }: UnsubscribePageProps) => {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const autoStartedRef = useRef(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!email) {
-      setError('Please enter your email address');
-      return;
-    }
-
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setError('Please enter a valid email address');
-      return;
-    }
-
+  const unsubscribe = useCallback(async (targetEmail: string) => {
     setIsLoading(true);
     setError('');
     setSuccess(false);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/email-subscriptions/unsubscribe`, {
+      const response = await fetch(`${API_URL}/email-subscriptions/unsubscribe`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: targetEmail }),
       });
 
       const data = await response.json();
@@ -48,12 +38,66 @@ const UnsubscribePage = ({ onNavigate }: UnsubscribePageProps) => {
 
       setSuccess(true);
       setEmail('');
-    } catch (error) {
-      console.error('Unsubscribe error:', error);
-      setError(error instanceof Error ? error.message : 'Failed to unsubscribe. Please try again.');
+      try {
+        window.history.replaceState({}, '', '/unsubscribe?success=1');
+      } catch {
+        /* ignore */
+      }
+    } catch (err) {
+      console.error('Unsubscribe error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to unsubscribe. Please try again.');
     } finally {
       setIsLoading(false);
     }
+  }, []);
+
+  useEffect(() => {
+    if (autoStartedRef.current) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const successParam = params.get('success');
+    const errorParam = params.get('error');
+    const emailParam = params.get('email')?.trim() ?? '';
+
+    if (successParam === '1') {
+      setSuccess(true);
+      autoStartedRef.current = true;
+      return;
+    }
+
+    if (errorParam) {
+      setError(decodeURIComponent(errorParam));
+      autoStartedRef.current = true;
+      return;
+    }
+
+    if (!emailParam) return;
+
+    autoStartedRef.current = true;
+    setEmail(emailParam);
+
+    if (!EMAIL_REGEX.test(emailParam)) {
+      setError('This unsubscribe link looks invalid. Enter your email below instead.');
+      return;
+    }
+
+    void unsubscribe(emailParam);
+  }, [unsubscribe]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!email) {
+      setError('Please enter your email address');
+      return;
+    }
+
+    if (!EMAIL_REGEX.test(email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
+    await unsubscribe(email);
   };
 
   return (
@@ -89,7 +133,9 @@ const UnsubscribePage = ({ onNavigate }: UnsubscribePageProps) => {
                 Unsubscribe from emails
               </h1>
               <p className="text-stone-600 dark:text-stone-400 text-sm sm:text-base font-medium">
-                We&apos;re sorry to see you go. Enter your email address to unsubscribe from our marketing emails.
+                {isLoading
+                  ? 'Unsubscribing you now…'
+                  : 'We&apos;re sorry to see you go. Enter your email address to unsubscribe from our marketing emails.'}
               </p>
             </div>
 
@@ -108,6 +154,11 @@ const UnsubscribePage = ({ onNavigate }: UnsubscribePageProps) => {
                   onClick={() => {
                     setSuccess(false);
                     setEmail('');
+                    try {
+                      window.history.replaceState({}, '', '/unsubscribe');
+                    } catch {
+                      /* ignore */
+                    }
                   }}
                   className="text-[#A560E8] hover:text-[#7733B5] font-extrabold"
                 >
@@ -168,11 +219,9 @@ const UnsubscribePage = ({ onNavigate }: UnsubscribePageProps) => {
         </div>
       </div>
 
-      {/* Footer */}
       <Footer onNavigate={onNavigate} />
     </div>
   );
 };
 
 export default UnsubscribePage;
-

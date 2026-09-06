@@ -53,8 +53,7 @@ interface AnalyzerPanelProps {
   /** Free tier — show a lock cue on Apply; the click is intercepted
    *  upstream to open the teased upgrade modal. */
   revisionsLocked?: boolean;
-  /** Upgrade CTA — used by the free-tier "highlights limited to the
-   *  first half" banner. */
+  /** Upgrade CTA — used by locked comments / rubric paywall buttons. */
   onUpgrade?: () => void;
 }
 
@@ -270,6 +269,15 @@ function ScoreCard({
                     </span>
                   </div>
                 </div>
+                {onUpgrade && (
+                  <button
+                    type="button"
+                    onClick={onUpgrade}
+                    className="mt-1.5 w-full rounded-lg bg-[#A560E8] hover:bg-[#8A48C7] px-2 py-1.5 text-[10px] font-extrabold text-white border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-px transition-all"
+                  >
+                    Unlock {humanizeLabel(r.category)}
+                  </button>
+                )}
               </div>
             );
           })}
@@ -311,8 +319,7 @@ function AnnotationCard({
   onClick: () => void;
   onApply?: () => void;
   onRevert?: () => void;
-  /** Positional free gate (second half) — blurs comment + hides the
-   *  suggestion. */
+  /** Free gate — blurs comment + hides the suggestion. */
   locked?: boolean;
   /** Global free gate — Apply revision is Pro-only for the whole
    *  document regardless of position. */
@@ -534,10 +541,10 @@ export default function AnalyzerPanel({
                     <rect x="5" y="11" width="14" height="9" rx="2" />
                     <path strokeLinecap="round" d="M8 11V8a4 4 0 0 1 8 0v3" />
                   </svg>
-                  Highlights end halfway
+                  Colors are free — comments are Pro
                 </p>
                 <p className="mt-1 text-[11.5px] font-bold text-stone-600 dark:text-stone-300 leading-snug">
-                  Free shows highlights for the first half of your paper. Upgrade to Pro to reveal every highlight through the conclusion.
+                  Green, amber, and red mark the whole paper. Hover any highlight or upgrade to read the notes and one-click fixes.
                 </p>
                 {onUpgrade && (
                   <button
@@ -545,17 +552,17 @@ export default function AnalyzerPanel({
                     onClick={onUpgrade}
                     className="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] text-white text-[11px] font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
                   >
-                    Upgrade to Pro
+                    Unlock comments on Pro
                   </button>
                 )}
               </div>
             )}
 
             {result.topSuggestions && result.topSuggestions.length > 0 && (
-              <div className="rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 px-4 py-3">
+              <div className="relative rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 px-4 py-3 overflow-hidden">
                 <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#A560E8] mb-2">Top suggestions</p>
-                <ul className="space-y-1.5">
-                  {(revisionsLocked ? result.topSuggestions.slice(0, 3) : result.topSuggestions).map((s, i) => (
+                <ul className={`space-y-1.5 ${revisionsLocked ? 'blur-[5px] select-none pointer-events-none' : ''}`} aria-hidden={revisionsLocked || undefined}>
+                  {result.topSuggestions.map((s, i) => (
                     <li key={i} className="flex gap-2 text-[12px] font-bold text-stone-700 dark:text-stone-300 leading-snug">
                       <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-md bg-[#A560E8] text-white text-[9px] font-extrabold mt-0.5" aria-hidden>
                         {i + 1}
@@ -564,51 +571,74 @@ export default function AnalyzerPanel({
                     </li>
                   ))}
                 </ul>
-                {revisionsLocked && result.topSuggestions.length > 3 && (
-                  <p className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-extrabold text-[#8A48C7] dark:text-[#C9A0F0]">
-                    <svg className="w-3 h-3 shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
-                      <rect x="5" y="11" width="14" height="9" rx="2" />
-                      <path strokeLinecap="round" d="M8 11V8a4 4 0 0 1 8 0v3" />
-                    </svg>
-                    +{result.topSuggestions.length - 3} more with Pro
-                  </p>
+                {revisionsLocked && onUpgrade && (
+                  <div className="absolute inset-x-0 bottom-0 top-7 flex items-center justify-center bg-gradient-to-b from-white/30 via-white/85 to-white dark:from-stone-900/20 dark:via-stone-900/85 dark:to-stone-900">
+                    <button
+                      type="button"
+                      onClick={onUpgrade}
+                      className="mx-3 w-full rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] px-3 py-2 text-[11px] font-extrabold uppercase tracking-wide text-white border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-px transition-all"
+                    >
+                      Unlock suggestions
+                    </button>
+                  </div>
                 )}
               </div>
             )}
 
             {/* Annotation groups */}
-            {(['concern', 'improve', 'strong'] as AnnotationType[]).map((type) => {
-              const list = grouped[type];
-              if (!list.length) return null;
-              const meta = TYPE_META[type];
-              return (
-                <div key={type}>
-                  <div className="flex items-center gap-2 mb-2 px-1">
-                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[10px] font-extrabold uppercase tracking-wider ${meta.chip}`}>
-                      <span className={`inline-block w-1.5 h-1.5 rounded-full ${meta.dot}`} aria-hidden />
-                      {meta.label}
-                    </span>
-                    <span className="text-[11px] font-bold text-stone-500 dark:text-stone-400 tabular-nums">{list.length}</span>
-                  </div>
-                  <div className="space-y-2">
-                    {list.map((ann) => (
-                      <AnnotationCard
-                        key={ann.id}
-                        ann={ann}
-                        selected={ann.id === selectedAnnotationId}
-                        applied={appliedAnnotationIds?.has(ann.id) ?? false}
-                        applying={applyingAnnotationId === ann.id}
-                        onClick={() => onAnnotationClick(ann.id)}
-                        onApply={onApplyRevision ? () => onApplyRevision(ann.id) : undefined}
-                        onRevert={onRevertRevision ? () => onRevertRevision(ann.id) : undefined}
-                        locked={!!ann.locked}
-                        applyLocked={revisionsLocked}
-                      />
-                    ))}
+            <div className="relative">
+              <div className={revisionsLocked ? 'blur-[5px] select-none pointer-events-none' : undefined} aria-hidden={revisionsLocked || undefined}>
+                {(['concern', 'improve', 'strong'] as AnnotationType[]).map((type) => {
+                  const list = grouped[type];
+                  if (!list.length) return null;
+                  const meta = TYPE_META[type];
+                  return (
+                    <div key={type} className="mb-4">
+                      <div className="flex items-center gap-2 mb-2 px-1">
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[10px] font-extrabold uppercase tracking-wider ${meta.chip}`}>
+                          <span className={`inline-block w-1.5 h-1.5 rounded-full ${meta.dot}`} aria-hidden />
+                          {meta.label}
+                        </span>
+                        <span className="text-[11px] font-bold text-stone-500 dark:text-stone-400 tabular-nums">{list.length}</span>
+                      </div>
+                      <div className="space-y-2">
+                        {list.map((ann) => (
+                          <AnnotationCard
+                            key={ann.id}
+                            ann={ann}
+                            selected={ann.id === selectedAnnotationId}
+                            applied={appliedAnnotationIds?.has(ann.id) ?? false}
+                            applying={applyingAnnotationId === ann.id}
+                            onClick={() => onAnnotationClick(ann.id)}
+                            onApply={onApplyRevision ? () => onApplyRevision(ann.id) : undefined}
+                            onRevert={onRevertRevision ? () => onRevertRevision(ann.id) : undefined}
+                            locked={revisionsLocked || !!ann.locked}
+                            applyLocked={revisionsLocked}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              {revisionsLocked && (result.annotations ?? []).length > 0 && onUpgrade && (
+                <div className="absolute inset-0 flex items-start justify-center pt-8 bg-gradient-to-b from-white/40 via-white/80 to-white dark:from-stone-900/30 dark:via-stone-900/80 dark:to-stone-900">
+                  <div className="mx-2 w-full max-w-[16rem] rounded-2xl border-2 border-b-4 border-[#7733B5] bg-white dark:bg-stone-900 px-4 py-4 text-center shadow-[0_16px_36px_-18px_rgba(119,51,181,0.5)]">
+                    <p className="text-[12px] font-extrabold text-stone-900 dark:text-stone-50">Comments are a Pro feature</p>
+                    <p className="mt-1 text-[11px] font-bold text-stone-500 dark:text-stone-400 leading-snug">
+                      See every note and apply one-click fixes on the whole draft.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={onUpgrade}
+                      className="mt-3 w-full rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] px-3 py-2 text-[11px] font-extrabold uppercase tracking-wide text-white border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-px transition-all"
+                    >
+                      Unlock feedback
+                    </button>
                   </div>
                 </div>
-              );
-            })}
+              )}
+            </div>
 
             {(result.annotations ?? []).length === 0 && (
               <div className="text-center py-8 text-[12px] text-stone-500 dark:text-stone-400">

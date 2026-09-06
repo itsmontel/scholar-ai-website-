@@ -12,6 +12,7 @@ const {
   validateLogin 
 } = require('../middleware/validation');
 const emailService = require('../services/emailService');
+const { isMarketingEmailBlocked } = require('../services/marketingUnsubscribeService');
 const { parseDeviceFromUserAgent } = require('../utils/deviceParser');
 const userService = require('../services/userService');
 const streakService = require('../services/streakService');
@@ -114,7 +115,10 @@ router.post('/register', validateRegister, async (req, res) => {
     // Add user to email subscription list (only if they haven't unsubscribed)
     try {
       const normalizedEmail = email.toLowerCase().trim();
-      
+
+      if (await isMarketingEmailBlocked(normalizedEmail)) {
+        // Permanent blocklist — never re-add for marketing.
+      } else {
       // Check if email is already unsubscribed
       const unsubscribeCheck = await query(
         'SELECT id, is_subscribed FROM email_subscriptions WHERE email = $1',
@@ -137,6 +141,7 @@ router.post('/register', validateRegister, async (req, res) => {
         );
       }
       // If email is unsubscribed, don't add them back
+      }
     } catch (emailSubError) {
       console.error('Error adding user to email subscription list:', emailSubError);
       // Don't fail registration if email subscription fails
@@ -218,7 +223,8 @@ router.post('/login', validateLogin, async (req, res) => {
     }
 
     // Update last login
-    await userService.updateUser(user.id, { last_login: new Date().toISOString() });
+    const now = new Date().toISOString();
+    await userService.updateUser(user.id, { last_login: now, last_active_at: now });
 
     // Record streak activity (fire and forget)
     streakService.recordLogin(user.id).catch(() => {});
@@ -308,7 +314,8 @@ router.post('/apple', async (req, res) => {
         });
       }
       // Existing account (email/password or a prior Apple sign-in) — log in.
-      await userService.updateUser(user.id, { last_login: new Date().toISOString() });
+      const now = new Date().toISOString();
+    await userService.updateUser(user.id, { last_login: now, last_active_at: now });
     }
 
     // Record streak activity (fire and forget)
@@ -794,6 +801,11 @@ router.get('/google/callback',
   passport.authenticate('google', { session: false }),
   async (req, res) => {
     try {
+      const now = new Date().toISOString();
+      await userService.updateUser(req.user.id, { last_login: now, last_active_at: now });
+      req.user.last_login = now;
+      req.user.last_active_at = now;
+
       // Record streak activity (fire and forget)
       streakService.recordLogin(req.user.id).catch(() => {});
 

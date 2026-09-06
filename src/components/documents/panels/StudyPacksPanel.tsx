@@ -366,17 +366,22 @@ export default function StudyPacksPanel({ onNavigate }: { onNavigate: (page: str
               <button
                 key={r.id}
                 type="button"
-                onClick={() => openViewer(r.questions, r.title)}
-                className="group flex items-center gap-3 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-4 text-left hover:-translate-y-0.5 hover:border-[#A560E8]/40 active:border-b-2 active:translate-y-0.5 transition-all"
+                onClick={() => {
+                  const q = (r.questions && typeof r.questions === 'object' && !Array.isArray(r.questions))
+                    ? r.questions as Record<string, unknown>
+                    : { questions: r.questions };
+                  openViewer({ ...q, created_at: r.created_at }, r.title);
+                }}
+                className="group flex items-center gap-3 rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 p-4 text-left hover:-translate-y-0.5 hover:border-[#FF9600]/40 active:border-b-2 active:translate-y-0.5 transition-all"
               >
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#A560E8]">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#FFF4E0] dark:bg-[#FF9600]/15 text-[#FF9600]">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.1} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 3l9 4.5-9 4.5-9-4.5L12 3zM3 12l9 4.5L21 12M3 16.5L12 21l9-4.5" /></svg>
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-extrabold text-stone-800 dark:text-stone-100 truncate">{r.title}</span>
                   <span className="block text-[11px] font-bold text-stone-400 mt-0.5">{timeAgo(r.created_at)}</span>
                 </span>
-                <span className="text-stone-300 group-hover:text-[#A560E8] transition-colors">
+                <span className="text-stone-300 group-hover:text-[#FF9600] transition-colors">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
                 </span>
               </button>

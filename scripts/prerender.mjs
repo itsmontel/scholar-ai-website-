@@ -30,6 +30,7 @@ const staticRoutes = [
   '/press',
   '/privacy',
   '/terms',
+  '/unsubscribe',
   '/login',
   '/signup',
   // AI tools (essay analyzer first)
