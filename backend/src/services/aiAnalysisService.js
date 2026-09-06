@@ -5753,6 +5753,7 @@ Write ONLY the study notes themselves. Do not add a preamble, a title line like 
     }
 
     const model = process.env.OPENAI_STANDARD_MODEL || 'gpt-4.1-mini';
+    const isReasoning = /^(gpt-5|o[0-9])/i.test(model);
     const ctxChars = 1400;
     const start = Math.max(0, Number(startIndex) || 0);
     const end = Math.min(fullDocument.length, Number(endIndex) || 0);
@@ -5793,18 +5794,21 @@ ${after}
 
 Output JSON only: {"replacement":"..."}`;
 
-    const completion = await this.openai.chat.completions.create({
-      model,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-      ],
-      max_tokens: 2500,
-      temperature: 0.35,
-      response_format: { type: 'json_object' },
-    });
+    const completion = await this.openai.chat.completions.create(
+      buildChatParams(
+        model,
+        [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
+        isReasoning ? 4000 : 2500,
+        isReasoning ? 'low' : null,
+        0.35,
+        { json: true },
+      )
+    );
 
-    const raw = completion.choices[0]?.message?.content?.trim() || '{}';
+    const raw = completionMessageText(completion).trim() || '{}';
     let parsed;
     try {
       parsed = JSON.parse(raw);
