@@ -117,8 +117,70 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
       url: canonicalUrl,
     });
 
+    if (post.slug === 'how-to-write-an-essay-or-assignment') {
+      injectJsonLd('blog-post-howto', {
+        '@context': 'https://schema.org',
+        '@type': 'HowTo',
+        name: post.title,
+        description: post.description,
+        image: ogImage,
+        totalTime: 'PT4H',
+        step: [
+          { '@type': 'HowToStep', position: 1, name: 'Decode the assignment brief', text: 'Underline the task verb, the object of the assignment, and the constraints (word count, sources, citation style). Rewrite the prompt as one question you can answer in a sentence.' },
+          { '@type': 'HowToStep', position: 2, name: 'Write a thesis someone could disagree with', text: 'Turn the topic into a claim a classmate could reasonably argue against. Match the thesis type to the assignment: argue, analyse, or explain.' },
+          { '@type': 'HowToStep', position: 3, name: 'Outline the body first', text: 'Give each body paragraph one job: claim, cited evidence, and a sentence tying the evidence back to the thesis. Skip the introduction until the middle exists.' },
+          { '@type': 'HowToStep', position: 4, name: 'Gather evidence you can cite', text: 'Start with assigned readings and course materials. Record citations as you take notes. Do not invent sources.' },
+          { '@type': 'HowToStep', position: 5, name: 'Draft the body, then the opening', text: 'Write ugly body paragraphs on purpose. Then write the introduction, conclusion, and title so they match the argument you actually made.' },
+          { '@type': 'HowToStep', position: 6, name: 'Cite in one style and revise against the rubric', text: 'Keep in-text citations and the reference list in one style. Fix thesis, evidence, and structure before grammar. Check the draft against the rubric before you submit.' },
+        ],
+      });
+      injectJsonLd('blog-post-faq', {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          {
+            '@type': 'Question',
+            name: 'How do you write an essay step by step?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Decode the prompt and underline the task verb. Write a one-sentence thesis a classmate could disagree with. Outline body paragraphs with a claim and a source each. Draft the body first, then the introduction and conclusion. Cite in one style. Revise against the rubric before you polish grammar.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'How do you start an essay or assignment?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Do not start with a dictionary definition or a sweeping history. Start by answering the brief in one sentence, then write the first body paragraph that supports that sentence. Write the opening last, once you know what you actually argued.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'How is writing an assignment different from writing an essay?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'The process is the same: prompt, claim, evidence, constraints. The packaging changes. A lab report uses required sections. A memo leads with a recommendation. A discussion post is a miniature essay. Always follow the format on the brief.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'Can I use ChatGPT or other AI to write my essay in 2026?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'On most campuses, feedback on a draft you wrote is treated differently from generated text. Read your syllabus. Never submit prose you could not explain, and never invent sources.',
+            },
+          },
+        ],
+      });
+    } else {
+      removeJsonLd('blog-post-howto');
+      removeJsonLd('blog-post-faq');
+    }
+
     return () => {
       removeJsonLd('blog-post');
+      removeJsonLd('blog-post-howto');
+      removeJsonLd('blog-post-faq');
     };
   }, [post]);
 

@@ -431,6 +431,215 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
   };
 
   switch (slug) {
+    case 'how-to-write-an-essay-or-assignment':
+      return (
+        <>
+          <p className={p}>
+            Students still search <em>how to write an essay</em> and <em>how to write an assignment</em> like those are two different sports. In 2026 they are the same job with different packaging. A 1,200-word English paper, a 500-word discussion post, a lab write-up, and a take-home exam question all get graded on whether you answered the prompt, supported a claim, and followed the rules on the syllabus.
+          </p>
+          <p className={p}>
+            What changed is the environment around that job. Professors now assume you have a chatbot. Syllabi have AI paragraphs. Fluency is cheap. A paper that sounds finished but never argues still gets a C. This is the process that still works: decode the brief, write a thesis, outline, draft the body, cite as you go, then revise against the rubric. Grammar last.
+          </p>
+
+          <EssayAnalysisIllustration />
+
+          <h2 className={h2}>What a good essay or assignment means in 2026</h2>
+          <p className={p}>
+            High school rewarded completion, length, and a tidy five-paragraph shape. College and university readers reward a claim someone could disagree with, evidence that is cited, and a paper that matches the verb in the prompt. &quot;Evaluate&quot; is not &quot;summarise.&quot; &quot;Compare&quot; is not two reports stapled together. &quot;Reflect&quot; is not a diary dump with a reading bolted on at the end.
+          </p>
+          <p className={p}>
+            The other 2026 difference is detection of emptiness, not only of cheating. Generated prose is often grammatical, generic, and slightly too even. Instructors notice when every paragraph has the same rhythm and none of them quote the assigned text. Your advantage is specificity: the lecture example, the page number, the counterargument your classmate actually made. If a roommate can tell you the topic but not the argument, you still wrote a report. Our guide to the <a href="/blog/first-college-paper-fall-semester" className={internalLink}>first college paper of the semester</a> is the calendar version of this. This page is the writing version.
+          </p>
+          <p className={p}>
+            Before you type a word, find three facts: the due date and word or page range, the citation style, and the two rubric categories worth the most points. If those categories are thesis and evidence, your first hours belong there, not on a prettier title. If you are still in week one and the prompt has not landed, start with our <a href="/blog/first-week-of-college-freshman-tips" className={internalLink}>first week of college tips</a>.
+          </p>
+
+          <h2 className={h2}>Step 1: decode the assignment brief</h2>
+          <p className={p}>
+            Print the prompt or put it at the top of the file. Underline the task verb: analyse, argue, compare, evaluate, explain, reflect, report, design. Then underline the object: which text, which weeks of the course, which dataset, which case. Then underline the constraints: word count, sources you may use, format, whether first person is allowed.
+          </p>
+          <p className={p}>
+            If two documents disagree, the LMS module usually wins over the PDF from orientation. If the prompt is a mess of bullet points, rewrite it as one question you can answer in a sentence. That sentence is what you will check against every paragraph later. Students lose easy points by writing a fine paper in the wrong format: MLA in an APA course, a personal response when the prompt said &quot;evaluate,&quot; three pages when the cap was 1,200 words. Our comparison of <a href="/blog/mla-vs-apa-vs-chicago-citation-style" className={internalLink}>MLA, APA, and Chicago</a> is a two-minute check before you format a heading.
+          </p>
+          <p className={p}>
+            For assignments that are not essays (problem sets with written parts, lab reports, policy memos, annotated bibliographies), the same decode still applies. The &quot;thesis&quot; might be a finding, a recommendation, or a methods claim. You still need one sentence that answers the brief. If you cannot write that sentence, you are not ready to outline. You are stalling.
+          </p>
+
+          <h2 className={h2}>Step 2: write a thesis someone could disagree with</h2>
+          <p className={p}>
+            A topic is &quot;social media and mental health.&quot; A thesis is &quot;Instagram&apos;s public-like counts, not time on the app, are what this study&apos;s anxiety measure actually tracks.&quot; The test is simple: could a classmate who did the same reading argue the opposite without being silly? If not, you wrote a label, not a claim.
+          </p>
+          <p className={p}>
+            Match the thesis to the assignment type. Argumentative papers take a position. Analytical papers interpret how a text or dataset works. Expository papers explain a process or concept without picking a fight. Admissions essays are a different genre entirely; they are scored on voice and specificity, not on this coursework rubric. For coursework, the claim should show up early, usually by the end of the first paragraph in a short paper, and by the end of the introduction in a longer one.
+          </p>
+          <p className={p}>
+            Do not marry the first thesis. Draft a working claim, outline, then rewrite the claim so it matches the evidence you actually have. The clearest thesis often appears after a messy first draft. If you want examples by type, use our guide to <a href="/blog/how-to-write-a-thesis-statement" className={internalLink}>how to write a thesis statement</a>, or start from an <a href="/tools/thesis-generator" onClick={handleNavigate('thesis-generator')} className={internalLink}>thesis generator</a> and then make the sentence specific enough that it could only belong to this prompt.
+          </p>
+
+          <h2 className={h2}>Step 3: outline the body before you write the opening</h2>
+          <p className={p}>
+            Introductions written first become throat-clearing: dictionary definitions, &quot;since the dawn of time,&quot; and a paragraph of plot summary. Outline the middle instead. Each body paragraph gets one job: a claim (topic sentence), evidence (quote, data, or example with a citation), and a sentence that ties the evidence back to the thesis. If a paragraph cannot do that job, it is not a paragraph yet.
+          </p>
+          <p className={p}>
+            A short college essay (800 to 1,500 words) usually needs three to five body paragraphs, not because five is magic, but because that is how many distinct reasons you can support without repeating yourself. A longer assignment needs sections, not a ballooned five-paragraph template. If the prompt asks for counterargument, give it a real paragraph, not a straw man you knock down in two sentences.
+          </p>
+          <p className={p}>
+            Put the outline in a list you can reorder. If two points say the same thing, merge them. If a point has no source, either find one or cut it. An <a href="/tools/essay-outline" onClick={handleNavigate('essay-outline')} className={internalLink}>essay outline</a> is useful here only after the claim exists. Outlining a topic with no thesis produces a table of contents for a Wikipedia page.
+          </p>
+
+          <h2 className={h2}>Step 4: gather evidence you can actually cite</h2>
+          <p className={p}>
+            Start with what the course already gave you: the assigned reading, lecture, lab data, or case. Professors notice when you ignore the set text and Google a random article that agrees with you. For research papers, use the library database your syllabus names, not the first three hits that confirm your hunch. Write the citation the moment you take a note. Midnight paraphrasing is how accidental plagiarism happens.
+          </p>
+          <p className={p}>
+            Quote when the exact wording matters. Paraphrase when you need the idea. In both cases you cite. Changing a few words is not paraphrasing; it is a mosaic of someone else&apos;s sentences. Our guide to <a href="/blog/how-to-avoid-plagiarism" className={internalLink}>how to avoid plagiarism</a> is the full version of that line. Common knowledge (water boils at 100°C, World War II ended in 1945) does not need a citation. Your professor&apos;s argument from Tuesday does.
+          </p>
+          <p className={p}>
+            Never invent a source, a page number, or a study. Chatbots will fabricate all three with a straight face. If you cannot open the PDF, you cannot cite it. A <a href="/citations" onClick={handleNavigate('citations')} className={internalLink}>citation checker</a> catches format drift. It will not save you from a fake DOI.
+          </p>
+
+          <h2 className={h2}>Step 5: draft the body first, ugly on purpose</h2>
+          <p className={p}>
+            Write the paragraphs from your outline in any order. Skip the sentences you cannot finish. Leave &quot;cite later&quot; notes only if the source is already in your list; otherwise you will forget. This draft is for structure, not for sounding smart. Sounding smart is how students stall for three hours on paragraph one.
+          </p>
+          <p className={p}>
+            Keep one idea per paragraph. If you need &quot;also&quot; in the fourth sentence, you probably started a second paragraph inside the first. After a quote or paraphrase, do not stop. The next sentence is the analysis: what the evidence shows that a skimming reader would miss, and how it supports the thesis. Dropping a quote and moving on is the most common C+ move in first-year writing.
+          </p>
+          <p className={p}>
+            Aim under the word count on draft one if you pad by habit. High school rewarded length. College readers reward a claim that arrives on time. A <a href="/tools/word-counter" onClick={handleNavigate('word-counter')} className={internalLink}>word counter</a> tells you the number. The outline tells you what can go: the run-up, the plot summary of the reading, and the paragraph that restates the introduction.
+          </p>
+
+          <h2 className={h2}>Step 6: write the introduction, conclusion, and title last</h2>
+          <p className={p}>
+            Once the body exists, the introduction has a job: name the question, give only the context the reader needs, and state the thesis. Skip the dictionary. Skip the historical sweep unless the course is history and the sweep is the argument. In a short paper, the introduction can be one tight paragraph. In a research paper, it can take a page and still should not summarise every source.
+          </p>
+          <p className={p}>
+            The conclusion is not a copy-paste of the introduction with &quot;in conclusion&quot; glued on. Restate the claim in the terms you earned in the body, then say what follows: a limit of the evidence, a question the paper cannot settle, or a consequence for the case you analysed. Do not introduce a brand-new argument in the last five lines. Do not apologise (&quot;this is just my opinion&quot;).
+          </p>
+          <p className={p}>
+            Titles should be specific. &quot;Essay 1&quot; and &quot;Social Media Paper&quot; tell the grader you did not care. A title that includes the key terms of the thesis helps you, too: if the title does not match the claim, one of them is wrong. For APA papers, the title page has extra rules; use the <a href="/blog/how-to-write-apa-research-paper" className={internalLink}>APA research paper walkthrough</a> when that is the assigned format.
+          </p>
+
+          <h2 className={h2}>Step 7: cite in one style, all the way through</h2>
+          <p className={p}>
+            Pick the style on the syllabus and stay in it. Mixing MLA in-text citations with an APA reference list is a gift to a tired marker. Every in-text citation needs a matching entry. Every entry should be something you actually used. Alphabetical order, hanging indents, and italics are the easy points; missing years and author order are where databases lie to you.
+          </p>
+          <p className={p}>
+            Generate the skeleton with a <a href="/tools/citation-generator" onClick={handleNavigate('citation-generator')} className={internalLink}>citation generator</a>, then check author names, dates, and DOIs against the source. Generators guess. For a longer research paper, build the reference list as you draft so you are not reconstructing a bibliography at 1 a.m. Our <a href="/blog/citation-checker-academic-writing" className={internalLink}>citation checker guide</a> is the pass to run when the argument is stable and the format is the remaining risk.
+          </p>
+
+          <h2 className={h2}>Step 8: revise the argument, then polish the sentences</h2>
+          <p className={p}>
+            Readable is not the same as argued. Read the prompt again, then the thesis, then the first sentence of every body paragraph. If those first sentences do not add up to the thesis, you have a structure problem, not a comma problem. Fix order and evidence before you hunt for typos. Reverse that sequence and you will perfect paragraphs your professor will still cross out.
+          </p>
+          <p className={p}>
+            Next, grade the draft against the rubric, not against your feelings about the all-nighter. Thesis, evidence, structure, style, mechanics: those are the categories that move marks. A <a href="/blog/grade-my-essay-before-submitting" className={internalLink}>pre-submission grade check</a> is built for that triage. Fix the two weakest categories, re-read, then do a grammar pass. A <a href="/tools/grammar-checker" onClick={handleNavigate('grammar-checker')} className={internalLink}>grammar checker</a> is useful after the argument exists. It is a stall if you run it on an empty outline.
+          </p>
+          <p className={p}>
+            Read the introduction and conclusion side by side. They should use the same key terms. Read one paragraph aloud. If you run out of breath, the sentence is too long. Sleep if you can. Fresh eyes catch the claim you never actually stated. If you want professor-style notes on the sentences that are costing you the mark, an <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>essay editor</a> is the last structural pass, not a substitute for reading the prompt.
+          </p>
+
+          <h2 className={h2}>How to write an assignment that is not a standard essay</h2>
+          <p className={p}>
+            <strong>Discussion posts and reading responses.</strong> Treat them as miniature papers. Open with a claim, not &quot;I found this interesting.&quot; Quote or paraphrase one specific line. Say what it means, then what it does not settle. Skip the closer that says you look forward to everyone&apos;s thoughts.
+          </p>
+          <p className={p}>
+            <strong>Lab reports and methods write-ups.</strong> The &quot;thesis&quot; is the finding plus the condition it holds under. Follow the required sections (abstract, methods, results, discussion) even if that feels rigid. Do not hide the result in a story. Cite the protocol and any outside paper you used to interpret the data.
+          </p>
+          <p className={p}>
+            <strong>Problem sets with written explanation.</strong> Show the reasoning in the order the marker will check. A correct number with no steps is a gamble. Name the formula, plug in the values, state the unit. If the course wants a sentence of interpretation, write that sentence; do not assume the number speaks.
+          </p>
+          <p className={p}>
+            <strong>Presentations, posters, and memos.</strong> Same decode: audience, claim, evidence, constraint (time or word count). One slide or paragraph, one job. If you need lecture notes turned into something you can rehearse, a <a href="/study-pack" onClick={handleNavigate('study-pack')} className={internalLink}>study pack</a> from those notes is faster than rereading slides the night before.
+          </p>
+          <p className={p}>
+            Genre-specific walkthroughs live under our writing guides: <a href="/guides/how-to-write-argumentative-essay" className={internalLink}>argumentative</a>, <a href="/guides/how-to-write-analytical-essay" className={internalLink}>analytical</a>, <a href="/guides/how-to-write-research-paper" className={internalLink}>research paper</a>, and the rest. Use this page for the shared process; use those pages when the shape of the paper is the whole assignment.
+          </p>
+
+          <h2 className={h2}>How to use AI on an essay in 2026 without handing in someone else&apos;s voice</h2>
+          <p className={p}>
+            The line that stays safe on most syllabi: you write the draft, a tool tells you where a stranger would get lost, you rewrite the weak parts yourself. Feedback on your sentences is different from generated pages you could not explain in office hours. Read the AI policy before you paste a prompt into a chatbot, not after a flag. When the policy is silent, ask. The same boundary is in our guide to <a href="/blog/ai-writing-assistant-for-students" className={internalLink}>AI writing assistants for students</a>.
+          </p>
+          <p className={p}>
+            Use AI where it is actually good: spotting a missing thesis, a paragraph with no evidence, a citation style that drifted, or notes that should become a quiz. Do not use it to invent a personal story, a lab result, or a source. Short assignments have nowhere to hide a fake quotation. If you could not answer &quot;where did this claim come from&quot; without opening the chat, it does not belong in the file.
+          </p>
+          <p className={p}>
+            Detectors are noisy, especially for non-native English. Do not treat a detector score as a grade, and do not try to &quot;humanise&quot; generated text to beat one. That is still submitting work that is not yours. Write the paper. Get comments. Revise. That is the 2026 version of academic integrity, not a cat-and-mouse game with a probability bar.
+          </p>
+
+          <h2 className={h2}>A step-by-step timeline you can actually keep</h2>
+          <p className={p}>
+            Stretch or compress this to the due date. Keep the order. Editing before you have a claim is how papers stay vague.
+          </p>
+          <p className={p}>
+            <strong>Days 1 to 2: brief and claim.</strong> Decode the prompt. Write the one-sentence thesis. List the sources you are allowed to use. If you cannot name them, you are not writing yet.
+          </p>
+          <p className={p}>
+            <strong>Days 3 to 4: outline and ugly draft.</strong> Body paragraphs only. Evidence in each one. Leave the introduction until the middle exists. If you are stuck on wording, keep going.
+          </p>
+          <p className={p}>
+            <strong>Days 5 to 6: revise against the rubric.</strong> Reorder. Cut repetition. Fix the two weakest categories. Citation pass. Then grammar. Then word count.
+          </p>
+          <p className={p}>
+            <strong>Due date morning: emergency fixes only.</strong> No new arguments. Export or print. Open the file you are about to upload. Name it something a human can identify, not <em>FinalFinal2</em>.
+          </p>
+          <p className={p}>
+            If the whole thing is due tonight, do a compressed version of the same order: claim, three body paragraphs with sources, intro, citations, one rubric pass. Do not spend the first hour on the hook. For study-heavy courses, pair this with <a href="/blog/how-to-study-effectively-complete-guide" className={internalLink}>how to study effectively</a> so the paper is not your first contact with the material.
+          </p>
+
+          <h2 className={h2}>A night-before checklist</h2>
+          <p className={p}>
+            Do this in order. One: quote the prompt at the top of the file and check that the thesis answers that sentence, not a neighbouring one. Two: every body paragraph has a claim and a source, not just a vibe. Three: in-text citations match the reference list, names, years, and style. Four: introduction and conclusion use the same key terms. Five: you are inside the word count, not fashionably over it. Six: you uploaded the version you just read.
+          </p>
+          <p className={p}>
+            If you still have forty minutes, run one more structural pass and fix only the two lowest rubric categories. Do not rewrite the whole paper at 11 p.m. A sharper thesis beats a new introduction you have not proofread.
+          </p>
+
+          <h2 className={h2}>Write the draft, then check it like a professor would</h2>
+          <p className={p}>
+            <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>WriteScholar&apos;s essay editor</a> reads a draft the way a marker would: thesis, evidence, structure, and citations, with notes on the sentences that are costing you the mark. Use it after you have a real draft, not instead of one. See <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for the current first-month offer.
+          </p>
+          <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
+            Check my essay before I submit →
+          </a>
+
+          <BlogFaqAccordion
+            items={[
+              {
+                question: 'How do you write an essay step by step?',
+                answer:
+                  'Decode the prompt and underline the task verb. Write a one-sentence thesis a classmate could disagree with. Outline body paragraphs with a claim and a source each. Draft the body first, then the introduction and conclusion. Cite in one style. Revise against the rubric (thesis, evidence, structure) before you polish grammar.',
+              },
+              {
+                question: 'How do you start an essay or assignment?',
+                answer:
+                  'Do not start with a dictionary definition or a sweeping history. Start by answering the brief in one sentence, then write the first body paragraph that supports that sentence. Write the opening last, once you know what you actually argued.',
+              },
+              {
+                question: 'How is writing an assignment different from writing an essay?',
+                answer:
+                  'The process is the same: prompt, claim, evidence, constraints. The packaging changes. A lab report uses required sections. A memo leads with a recommendation. A discussion post is a miniature essay. Always follow the format on the brief; do not force a five-paragraph template onto a methods write-up.',
+              },
+              {
+                question: 'How long should an essay be?',
+                answer:
+                  'As long as the brief says, including citations unless the syllabus excludes them. If there is a range, land inside it. Going 400 words over is usually repetition, not richness. Going far under usually means you summarised instead of analysing.',
+              },
+              {
+                question: 'Can I use ChatGPT or other AI to write my essay in 2026?',
+                answer:
+                  'On most campuses, feedback on a draft you wrote is treated differently from generated text. Read your syllabus. Never submit prose you could not explain, and never invent sources. Using AI to outline or to flag weak paragraphs is not the same as pasting the prompt and handing in the output.',
+              },
+              {
+                question: 'What is the best essay structure?',
+                answer:
+                  'For short argumentative and analytical papers: introduction with thesis, body paragraphs that each make one point with evidence, optional counterargument, conclusion. Longer papers need section headings that match the assignment. The five-paragraph essay is a training wheel, not a rule for every university paper.',
+              },
+            ]}
+          />
+        </>
+      );
+
     case 'first-week-of-college-freshman-tips':
       return (
         <>
@@ -509,7 +718,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             On most US campuses, a short response, lab, or source-based essay lands between week two and week four. Seminar and writing-intensive courses can assign something in the first ten days. Treat any date on the syllabus as real even if the professor has not mentioned it again.
           </p>
           <p className={p}>
-            You do not need to draft it on night one. You do need the prompt in a note you will actually open, a one-sentence claim a classmate could disagree with, and the two or three sources you are allowed to use. That is the start of college writing. The full three-week sequence lives in our guide to the <a href="/blog/first-college-paper-fall-semester" className={internalLink}>first college paper of the semester</a>.
+            You do not need to draft it on night one. You do need the prompt in a note you will actually open, a one-sentence claim a classmate could disagree with, and the two or three sources you are allowed to use. That is the start of college writing. The full process is in <a href="/blog/how-to-write-an-essay-or-assignment" className={internalLink}>how to write an essay or assignment</a>. The three-week calendar for paper one lives in our guide to the <a href="/blog/first-college-paper-fall-semester" className={internalLink}>first college paper of the semester</a>.
           </p>
           <p className={p}>
             When a draft exists, do not stop at spellcheck. Mechanics are a slice of the rubric. The grade lives in thesis, evidence, and structure. A <a href="/blog/grade-my-essay-before-submitting" className={internalLink}>pre-submission grade check</a> is for those categories, and an <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>essay editor</a> keeps the comments on the sentences you still have time to fix.
@@ -589,7 +798,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             Classes just started back across the US. Dorms smell like disinfectant and instant ramen. You have a syllabus stack, a campus map you will never look at again, and at least one professor who already mentioned a paper due in week three. That first assignment is not a warm-up in the way students hope. It is how the course decides what kind of writer you are. If you are still in week one and the paper is not assigned yet, start with our <a href="/blog/first-week-of-college-freshman-tips" className={internalLink}>first week of college tips</a> and come back when the prompt lands.
           </p>
           <p className={p}>
-            Summer writing is emails, group chats, and maybe a personal statement you already submitted. College writing is a prompt, a citation style, and a reader who has seen this assignment a hundred times. Here is how to treat the first three weeks so the first paper does not become the grade you spend October recovering from.
+            Summer writing is emails, group chats, and maybe a personal statement you already submitted. College writing is a prompt, a citation style, and a reader who has seen this assignment a hundred times. For the full writing process, use <a href="/blog/how-to-write-an-essay-or-assignment" className={internalLink}>how to write an essay or assignment in 2026</a>. Here is how to treat the first three weeks so the first paper does not become the grade you spend October recovering from.
           </p>
 
           <EssayAnalysisIllustration />
@@ -2367,7 +2576,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             A thesis statement is the single sentence (or occasionally two) that tells your reader what your paper argues and why it matters. Every essay, research paper, or analytical piece needs one. A weak thesis leads to a weak paper; a clear, specific, arguable thesis gives your writing direction and makes it easier to stay focused from introduction to conclusion. Whether you&apos;re writing a five-paragraph essay for a class assignment or a 20-page research paper for publication, the thesis statement serves as the backbone of your entire argument.
           </p>
           <p className={p}>
-            This comprehensive guide explains what makes a thesis statement work, how to write one for different essay types, and common mistakes to avoid. We&apos;ll include concrete examples for argumentative, analytical, and expository essays so you can see the difference between a vague claim and a strong one. By the end, you&apos;ll have a clear process for crafting thesis statements that give your writing focus and clarity.
+            This comprehensive guide explains what makes a thesis statement work, how to write one for different essay types, and common mistakes to avoid. We&apos;ll include concrete examples for argumentative, analytical, and expository essays so you can see the difference between a vague claim and a strong one. For the rest of the paper around that sentence, use <a href="/blog/how-to-write-an-essay-or-assignment" className={internalLink}>how to write an essay or assignment</a>. By the end, you&apos;ll have a clear process for crafting thesis statements that give your writing focus and clarity.
           </p>
 
           <h2 className={h2}>What a thesis statement does</h2>

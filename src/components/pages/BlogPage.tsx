@@ -54,6 +54,28 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
     ];
     const color = colors[index % colors.length];
 
+    if (post.slug.includes('how-to-write-an-essay-or-assignment')) {
+      return (
+        <svg viewBox="0 0 200 140" fill="none" className="w-full h-full">
+          <rect width="200" height="140" fill="#F3EAFF" />
+          <rect x="24" y="22" width="68" height="96" rx="5" fill="white" stroke="#A560E8" strokeWidth="2" />
+          <line x1="34" y1="40" x2="82" y2="40" stroke="#7733B5" strokeWidth="2.5" />
+          <line x1="34" y1="54" x2="80" y2="54" stroke="#C9A0F0" strokeWidth="2" />
+          <line x1="34" y1="66" x2="76" y2="66" stroke="#C9A0F0" strokeWidth="2" />
+          <line x1="34" y1="78" x2="80" y2="78" stroke="#E9DBFF" strokeWidth="2" />
+          <line x1="34" y1="90" x2="70" y2="90" stroke="#E9DBFF" strokeWidth="2" />
+          <rect x="104" y="28" width="72" height="22" rx="4" fill="white" stroke="#7733B5" strokeWidth="2" />
+          <text x="140" y="43" textAnchor="middle" fontSize="9" fill="#7733B5" fontWeight="bold">1 PROMPT</text>
+          <rect x="104" y="56" width="72" height="22" rx="4" fill="white" stroke="#A560E8" strokeWidth="2" />
+          <text x="140" y="71" textAnchor="middle" fontSize="9" fill="#8A48C7" fontWeight="bold">2 THESIS</text>
+          <rect x="104" y="84" width="72" height="22" rx="4" fill="white" stroke="#C9A0F0" strokeWidth="2" />
+          <text x="140" y="99" textAnchor="middle" fontSize="9" fill="#7733B5" fontWeight="bold">3 DRAFT</text>
+          <circle cx="176" cy="118" r="12" fill="#A560E8" />
+          <path d="M171 118 L175 122 L183 112" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      );
+    }
+
     if (post.slug.includes('first-week-of-college')) {
       return (
         <svg viewBox="0 0 200 140" fill="none" className="w-full h-full">

@@ -1087,6 +1087,7 @@ function essayGuidePage(g: EssayGuideMeta): ProgrammaticPageConfig {
     // /essay-grader, /ai-essay-grader and /grade-my-essay here), and these 10
     // guide pages are the largest block of essay-intent internal links we own.
     related: [
+      { label: 'How to write an essay or assignment', href: '/blog/how-to-write-an-essay-or-assignment', teaser: 'The 2026 step-by-step process for any prompt.' },
       { label: 'AI College Essay Grader', href: '/ai-essay-editor', teaser: 'Write your essay and see the grade update as you revise.' },
       { label: 'AI Essay Checker', href: '/tools/analyze', teaser: 'Get rubric-based feedback and a polished revision.' },
       { label: 'Thesis Generator', href: '/tools/thesis-generator', teaser: 'Build a strong thesis statement.' },

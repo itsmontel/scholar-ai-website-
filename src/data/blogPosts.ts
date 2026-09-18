@@ -27,6 +27,21 @@ export const BLOG_DEFAULT_AUTHOR_BIO =
 
 export const blogPostList: BlogPostMeta[] = [
   {
+    slug: 'how-to-write-an-essay-or-assignment',
+    title: 'How to Write an Essay or Assignment in 2026 (Step by Step)',
+    description:
+      'How to write an essay or assignment in 2026: decode the prompt, write a thesis, outline, draft, cite, and revise. How to use AI without cheating.',
+    date: '2026-09-18',
+    author: 'WriteScholar Team',
+    readTime: '14 min read',
+    category: 'Guides',
+    keyTakeaways: [
+      'The assignment is the verb in the prompt plus the rubric. A fluent paper that summarises the reading still fails if it does not argue, analyse, or evaluate as asked.',
+      'Write a claim someone could disagree with, outline body paragraphs with evidence, then draft the middle first. Intros, titles, and grammar come after the argument exists.',
+      'In 2026, AI is useful for feedback on your draft and dangerous as a ghostwriter. Cite as you go, then grade the paper against the rubric before you submit.',
+    ],
+  },
+  {
     slug: 'first-week-of-college-freshman-tips',
     title: 'First Week of College: What US Freshmen Should Actually Do',
     description:
