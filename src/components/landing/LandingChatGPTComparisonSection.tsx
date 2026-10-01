@@ -66,7 +66,7 @@ export default function LandingChatGPTComparisonSection({ onNavigate }: LandingC
               </span>
             </h2>
             <p className="text-sm sm:text-base text-[#777] dark:text-stone-300 leading-relaxed max-w-2xl mx-auto">
-              ChatGPT is a general chat box. WriteScholar is a full academic workspace: essay feedback, a real editor, study packs, arcade mode, and daily review in one place.
+              ChatGPT gives you generic answers. WriteScholar gets you the grade: feedback on your own draft, revision built from your own notes, and the habit to keep showing up.
             </p>
           </div>
 

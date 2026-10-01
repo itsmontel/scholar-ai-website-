@@ -54,21 +54,21 @@ interface SoftPaywallProps {
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 const FEATURES = [
-  { text: 'Unlock full annotations, one-click revisions, your whole paper & rubric score', icon: '🔓', color: '#A560E8' },
-  { text: '99 combined analyses, study packs & citations/mo', icon: '📝', color: '#A560E8' },
-  { text: 'Full study tools: quiz, flashcards, crossword, Crater Blast & Word Tower', icon: '🎯', color: '#FF9600' },
-  { text: 'Summarise unlimited research papers', icon: '📚', color: '#58CC02' },
-  { text: 'Export to PDF & Word', icon: '📄', color: '#FF4B4B' },
-  { text: 'Upload full dissertations and long papers', icon: '⚡', color: '#FF9600' },
+  { text: 'Know exactly what’s costing you marks — every comment, rewrite & your rubric score', icon: '🔓', color: '#A560E8' },
+  { text: 'Fix it in one click, straight into your draft', icon: '✍️', color: '#A560E8' },
+  { text: 'Walk into exams ready — full flashcards, quizzes & study games', icon: '🎯', color: '#FF9600' },
+  { text: 'Get through any reading in minutes, not evenings', icon: '📚', color: '#58CC02' },
+  { text: 'References done right, exported to Word & PDF', icon: '📄', color: '#FF4B4B' },
+  { text: 'Enough for every assignment: 99 checks, packs & citations a month', icon: '⚡', color: '#FF9600' },
 ];
 
 const PREMIUM_FEATURES = [
-  { text: 'Everything in Pro, with higher monthly limits', icon: '✨', color: '#FF9600' },
-  { text: '499 combined analyses, study packs & citations/mo', icon: '📝', color: '#A560E8' },
-  { text: 'Summarise unlimited research papers', icon: '📚', color: '#58CC02' },
-  { text: '1GB document library storage (100MB max per upload)', icon: '💾', color: '#1CB0F6' },
-  { text: 'Full quiz, flashcards & study tools', icon: '🎯', color: '#FF9600' },
-  { text: 'Export PDF & Word; Apply WriteScholar revisions', icon: '📄', color: '#FF4B4B' },
+  { text: 'Everything in Pro, for your heaviest research terms', icon: '✨', color: '#FF9600' },
+  { text: 'Never hit a limit mid-deadline: 499 checks, packs & citations a month', icon: '📝', color: '#A560E8' },
+  { text: 'Summarise every paper on your reading list, no cap', icon: '📚', color: '#58CC02' },
+  { text: 'Keep every draft and source in one place (1GB storage)', icon: '💾', color: '#1CB0F6' },
+  { text: 'Walk into exams ready — full flashcards, quizzes & study games', icon: '🎯', color: '#FF9600' },
+  { text: 'Know what to fix and apply it in one click', icon: '📄', color: '#FF4B4B' },
 ];
 
 const SOCIAL_PROOF = [
@@ -552,13 +552,13 @@ const SoftPaywall = ({
                 <div className="rounded-xl bg-[#E5F8D0] dark:bg-[#58CC02]/15 border-2 border-b-[3px] border-[#46A302] px-3 py-2.5">
                   <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#46A302] mb-0.5">If you stay</p>
                   <p className="text-[12px] font-extrabold text-[#3C3C3C] dark:text-stone-100 leading-tight">
-                    {checkoutPlan === 'premium' ? '499' : '99'} analyses, study packs &amp; citations every month
+                    Every assignment checked and fixed before you hand it in
                   </p>
                 </div>
                 <div className="rounded-xl bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-2 border-b-[3px] border-[#FF4B4B]/60 px-3 py-2.5">
                   <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#FF4B4B] mb-0.5">If you leave</p>
                   <p className="text-[12px] font-extrabold text-[#3C3C3C] dark:text-stone-100 leading-tight">
-                    Back to free limits. No full study packs, no one-click revisions.
+                    You&apos;ll see what&apos;s wrong, but not how to fix it.
                   </p>
                 </div>
                 <div className="rounded-xl bg-[#DDF4FF] dark:bg-[#1CB0F6]/15 border-2 border-b-[3px] border-[#1CB0F6]/70 px-3 py-2.5">
@@ -637,7 +637,7 @@ const SoftPaywall = ({
                   className="text-2xl sm:text-3xl font-extrabold text-[#3C3C3C] dark:text-stone-50 mb-1.5 leading-tight"
                   style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                 >
-                  {variant === 'postTutorial' ? <>Get the grade you actually deserve, {firstName}.</> : <>Upgrade WriteScholar, {firstName}</>}
+                  {variant === 'postTutorial' ? <>Get the grade you actually deserve, {firstName}.</> : <>Stop leaving marks on the table, {firstName}.</>}
                 </h2>
                 <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 font-bold leading-snug">
                   {variant === 'postTutorial' ? (
@@ -747,13 +747,13 @@ const SoftPaywall = ({
               >
                 {variant === 'postTutorial'
                   ? <>Get the grade you actually deserve, {firstName}.</>
-                  : showTrial ? <>Try WriteScholar <span className="text-[#58CC02]">free</span>, {firstName}</> : <>Upgrade to {planName}, {firstName}</>}
+                  : showTrial ? <>Try WriteScholar <span className="text-[#58CC02]">free</span>, {firstName}</> : <>Stop leaving marks on the table, {firstName}.</>}
               </h2>
               <p className="text-stone-500 dark:text-stone-400 text-sm sm:text-[0.9375rem] font-bold leading-relaxed">
                 {variant === 'postTutorial' ? (
                   showTrial
                     ? <>Start a <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{TRIAL_DAYS}-day free trial</span> on {planName}. Essay analysis, study packs, citations, and arcade mode. Cancel anytime.</>
-                    : <>Upgrade to {planName} for essay analysis, study packs, citations, and arcade mode. Cancel anytime.</>
+                    : <>{planName} shows you exactly what to fix, gets you exam-ready, and sorts your references. Cancel anytime.</>
                 ) : showTrial ? (
                   <>Try {planName} free for <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{TRIAL_DAYS} days</span>. Cancel anytime.</>
                 ) : showDiscount ? (

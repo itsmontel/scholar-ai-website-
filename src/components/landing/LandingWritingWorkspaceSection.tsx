@@ -196,9 +196,9 @@ export default function LandingWritingWorkspaceSection({ onNavigate }: LandingWr
               className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-[#3C3C3C] dark:text-white tracking-tight leading-[1.1] mb-4"
               style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
             >
-              <span className="block">Not just a grader.</span>
+              <span className="block">Not just a grade.</span>
               <span className="relative inline-block mt-1 sm:mt-1.5 text-[#A560E8]">
-                A full writing workspace.
+                A better essay.
                 <svg
                   className="absolute -bottom-1.5 left-0 w-full h-2 text-[#A560E8]"
                   viewBox="0 0 200 8"
@@ -216,7 +216,7 @@ export default function LandingWritingWorkspaceSection({ onNavigate }: LandingWr
               </span>
             </h2>
             <p className="text-base sm:text-xl text-[#777] dark:text-stone-300 leading-relaxed max-w-2xl mx-auto" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-              Write your essay in a real editor with live, professor-style feedback in the margin. Apply suggested fixes straight into your draft, then export a perfectly formatted Word doc.
+              See what your professor will mark down while you&apos;re still writing. Apply the fixes straight into your draft, then hand in a perfectly formatted Word doc.
             </p>
           </div>
         </LandingScrollReveal>

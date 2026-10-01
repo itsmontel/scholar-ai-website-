@@ -213,16 +213,16 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
     {
       id: 'pro',
       name: 'Pro',
-      description: 'Most popular for students',
+      description: 'Hand in your best work, every time',
       monthlyPrice: 19.99,
       yearlyPrice: 199.99,
       features: [
-        '99 combined analyses, study packs & citations/mo',
-        '999,999 words Paper Summarizer',
-        'All citation styles, PDF/Word export',
-        'Quiz, flashcards, crossword & Crater Blast',
-        '100MB total library storage; uploads up to 100MB per file',
-        'Full annotations & feedback; Apply WriteScholar revisions into your draft'
+        'Know exactly what’s costing you marks — every comment, rewrite & one-click fix',
+        'See your score and rubric breakdown before your professor does',
+        'Walk into exams ready — full flashcards, quizzes, crossword & Crater Blast',
+        'References done right — every citation style, plus PDF/Word export',
+        'Get through any reading in minutes with the Paper Summarizer',
+        'Enough for every assignment: 99 essay checks, study packs & citations a month (100MB uploads)'
       ],
       limitations: [],
       popular: true,
@@ -236,14 +236,14 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
     {
       id: 'premium',
       name: 'Premium',
-      description: 'Higher limits + more storage',
+      description: 'For dissertation and heavy-research terms',
       monthlyPrice: 39.99,
       yearlyPrice: 399.99,
       features: [
         'Everything in Pro',
-        '499 combined analyses, study packs & citations/mo — great for heavy citation use',
-        'Summarise unlimited research papers',
-        '1GB total document library storage'
+        'Never hit a limit mid-deadline: 499 essay checks, study packs & citations a month',
+        'Summarise every paper on your reading list, no cap',
+        'Keep every draft and source in one place with 1GB of storage'
       ],
       limitations: [],
       popular: false,
@@ -338,10 +338,10 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
               id="pricing-page-heading"
               className="dash-serif text-[2rem] sm:text-[2.6rem] lg:text-[3rem] font-extrabold text-stone-900 dark:text-stone-50 mb-4 tracking-tight leading-[1.05]"
             >
-              Simple, transparent pricing
+              Stop losing marks you could have kept
             </h1>
             <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed font-medium">
-              Start free, upgrade when you need more analyses, citations, and study tools.
+              Start free and see what&apos;s holding your grade back. Upgrade when you want to know exactly how to fix it.
             </p>
           </div>
 
@@ -625,12 +625,12 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
             <h2
               className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-stone-900 dark:text-stone-50 mb-4 tracking-tight leading-[1.15]"
             >
-              {user ? 'Continue with WriteScholar' : 'Ready to improve your academic writing?'}
+              {user ? 'Your next assignment is waiting' : 'Ready to hand in your best work yet?'}
             </h2>
             <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 mb-8 max-w-xl mx-auto leading-relaxed">
               {user
-                ? 'Go to your dashboard to analyze documents, find citations, and use study tools.'
-                : 'Subscribe to Pro or Premium anytime. Cancel anytime.'}
+                ? 'Drop it into your dashboard and see exactly what to fix before it’s due.'
+                : 'Start free, no card needed. Upgrade only when you want the full fixes. Cancel anytime.'}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center">
               {user ? (

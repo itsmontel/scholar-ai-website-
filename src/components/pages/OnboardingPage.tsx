@@ -376,11 +376,11 @@ const PLANS: Record<PlanId, Plan> = {
     emoji: '⭐',
     popular: true,
     features: [
-      'Full annotations on every paper',
-      'One-click apply revisions',
-      'Estimated grade + full rubric',
-      'Flashcards, quizzes & study packs',
-      'Citation finder — APA, MLA & Chicago',
+      'Know exactly what’s costing you marks',
+      'Fix it in one click, straight into your draft',
+      'See your score before your professor does',
+      'Walk into exams ready with flashcards & quizzes',
+      'References done right — APA, MLA & Chicago',
     ],
     monthly: {
       firstCyclePrice: '$9.99',
@@ -401,9 +401,9 @@ const PLANS: Record<PlanId, Plan> = {
     emoji: '💎',
     features: [
       'Everything in Pro',
-      '5× monthly usage (499 actions)',
-      'Unlimited paper summarisation',
-      '1GB library storage',
+      'Never hit a limit mid-deadline (499 actions/mo)',
+      'Summarise your whole reading list, no cap',
+      'Every draft and source in one place (1GB)',
     ],
     monthly: {
       firstCyclePrice: '$19.99',
@@ -445,14 +445,14 @@ function getInitialPhase(forceTrialGate = false, paywallOverlay = false): Phase 
 /* ─── Paywall: full 8-tool showcase ─── */
 type ToolBadge = 'Free' | 'Pro' | 'Game';
 const PAYWALL_TOOLS: { title: string; desc: string; video?: string; image?: string; badge: ToolBadge; color: string; borderColor: string }[] = [
-  { title: 'Essay Analyzer', desc: 'Line-by-line feedback & rubric scores',  video: '/writescholar-essay-checker-demo.mp4',   badge: 'Pro',  color: '#A560E8', borderColor: '#8A48C7' },
-  { title: 'Flashcards',     desc: 'AI-built decks from your notes',         video: '/hero-flashcards.mp4',                   badge: 'Free', color: '#A560E8', borderColor: '#7733B5' },
-  { title: 'Quizzes',        desc: 'MCQ, true/false & fill-in-the-blank',    video: '/hero-quiz.mp4',                         badge: 'Free', color: '#8A48C7', borderColor: '#7733B5' },
-  { title: 'Citations',      desc: 'APA, MLA, Chicago — real sources',       video: '/writescholar-citation-finder-demo.mp4', badge: 'Pro',  color: '#8A48C7', borderColor: '#7733B5' },
-  { title: 'Crater Blast',   desc: 'Boss-battle quiz arcade',                video: '/writescholar-crater-blast-demo.mp4',    badge: 'Game', color: '#B57AF0', borderColor: '#8A48C7' },
-  { title: 'Word Blitz',     desc: '60-second fill-the-blank speedrun',      video: '/hero-word-blitz.mp4',                   badge: 'Game', color: '#A560E8', borderColor: '#7733B5' },
-  { title: 'Smart Editor',   desc: 'AI rewrites, grammar & clarity inline',  image: '/WriterPic.png',                         badge: 'Pro',  color: '#A560E8', borderColor: '#8A48C7' },
-  { title: 'Word Tower',     desc: 'Stack words, beat your streak',          video: '/hero-word-tower.mp4',                   badge: 'Game', color: '#B57AF0', borderColor: '#8A48C7' },
+  { title: 'Essay Analyzer', desc: 'Know what’s costing you marks',          video: '/writescholar-essay-checker-demo.mp4',   badge: 'Pro',  color: '#A560E8', borderColor: '#8A48C7' },
+  { title: 'Flashcards',     desc: 'Remember it on exam day',                video: '/hero-flashcards.mp4',                   badge: 'Free', color: '#A560E8', borderColor: '#7733B5' },
+  { title: 'Quizzes',        desc: 'Find your gaps before the exam does',    video: '/hero-quiz.mp4',                         badge: 'Free', color: '#8A48C7', borderColor: '#7733B5' },
+  { title: 'Citations',      desc: 'References done right, no scramble',     video: '/writescholar-citation-finder-demo.mp4', badge: 'Pro',  color: '#8A48C7', borderColor: '#7733B5' },
+  { title: 'Crater Blast',   desc: 'Revision you’ll actually want to do',    video: '/writescholar-crater-blast-demo.mp4',    badge: 'Game', color: '#B57AF0', borderColor: '#8A48C7' },
+  { title: 'Word Blitz',     desc: 'Faster recall under exam pressure',      video: '/hero-word-blitz.mp4',                   badge: 'Game', color: '#A560E8', borderColor: '#7733B5' },
+  { title: 'Smart Editor',   desc: 'Fix your draft as you write',            image: '/WriterPic.png',                         badge: 'Pro',  color: '#A560E8', borderColor: '#8A48C7' },
+  { title: 'Word Tower',     desc: 'Keep the streak, keep the habit',        video: '/hero-word-tower.mp4',                   badge: 'Game', color: '#B57AF0', borderColor: '#8A48C7' },
 ];
 
 const TOOL_BADGE_STYLE: Record<ToolBadge, { bg: string; border: string }> = {
@@ -3403,7 +3403,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
               <div className="flex items-center justify-center gap-2 border-t border-[#E6D4F5] dark:border-[#A560E8]/25 bg-[#F7EEFF] dark:bg-[#A560E8]/10 px-4 py-3">
                 <span className="text-sm" aria-hidden>🔒</span>
                 <p className="text-[12px] font-extrabold text-[#7733B5] dark:text-[#C9A0F0]">
-                  Full rubric · every note · one-click fixes
+                  See exactly what&apos;s costing you marks, and fix it in one click
                 </p>
               </div>
             </section>
@@ -3461,7 +3461,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                   </svg>
                 </button>
                 <p className="mt-1.5 text-center text-[11px] font-bold text-stone-400 dark:text-stone-500">
-                  First half free · unlock the rest with Pro (50% off first month)
+                  Every highlight is free · the fixes unlock with Pro (50% off first month)
                 </p>
               </>
             ) : (
@@ -3955,13 +3955,13 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
               </div>
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border-2 border-[#A560E8]/40 bg-[#F3EAFF] text-[#A560E8] text-[10px] font-extrabold uppercase tracking-wider mb-3">
                 <span aria-hidden>✨</span>
-                Everything you get
+                What changes for you
               </span>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#3C3C3C] dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                Eight tools. <span className="text-[#A560E8]">Designed for success.</span>
+                Better grades. <span className="text-[#A560E8]">Fewer all-nighters.</span>
               </h1>
               <p className="mt-2 text-stone-500 dark:text-stone-400 font-bold text-sm sm:text-base max-w-xl mx-auto">
-                From our flagship essay feedback to arcade mode, your full academic toolkit lives in one place.
+                Know what to fix before you submit, remember it on exam day, and get your references right — all in one place.
               </p>
             </div>
 
@@ -4063,7 +4063,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
             {/* Closing reassurance — frames the next step without pressuring */}
             <div className="rounded-2xl border-2 border-b-4 border-[#7733B5] bg-[#F3EAFF] dark:bg-[#A560E8]/10 px-4 sm:px-5 py-4 sm:py-5 text-center mb-2">
               <p className="text-sm sm:text-base font-extrabold text-[#3C3C3C] dark:text-stone-100" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                Ready to unlock all 8 tools?
+                Ready for your best grades yet?
               </p>
               <p className="mt-1 text-xs sm:text-sm font-bold text-stone-600 dark:text-stone-400">
                 Unlock everything with Pro. Cancel anytime.

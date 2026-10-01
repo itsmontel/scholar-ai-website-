@@ -92,7 +92,7 @@ export default function LandingGamesSection({ onNavigate }: LandingGamesSectionP
                   className="mt-1.5 text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-[1.05] tracking-tight"
                   style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                 >
-                  Arcade mode
+                  Studying you&apos;ll actually want to do
                 </h2>
                 <p className="mt-2 text-[13px] sm:text-base font-bold text-white/90 leading-snug max-w-2xl">
                   Drill recall the fun way. Load them with your own notes via Study Packs.

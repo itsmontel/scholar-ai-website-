@@ -250,9 +250,9 @@ export default function LandingHowItWorksSection({ onNavigate }: LandingHowItWor
               className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-stone-900 dark:text-white tracking-tight leading-[1.1]"
               style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
             >
-              How your notes become a complete{' '}
+              From messy notes to{' '}
               <span className="relative inline-block text-[#A560E8]">
-                study system
+                exam-ready
                 <svg
                   className="absolute -bottom-1.5 left-0 w-full h-2 text-[#A560E8]"
                   viewBox="0 0 200 8"
@@ -264,7 +264,7 @@ export default function LandingHowItWorksSection({ onNavigate }: LandingHowItWor
               </span>
             </h2>
             <p className="mt-5 text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed">
-              Into personalized, AI-powered{' '}
+              With personalized, AI-powered{' '}
               <span
                 key={activeIdx}
                 className="inline-block font-extrabold motion-safe:animate-fade-slide-in"

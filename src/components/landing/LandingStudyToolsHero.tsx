@@ -565,9 +565,9 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
               className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-stone-900 dark:text-white tracking-tight leading-[1.1]"
               style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
             >
-              Unleash the power of your{' '}
+              Walk into every exam{' '}
               <span className="relative inline-block text-[#A560E8]">
-                course materials
+                already knowing it
                 <svg
                   className="absolute -bottom-1.5 left-0 w-full h-2 text-[#A560E8]"
                   viewBox="0 0 200 8"
@@ -580,7 +580,7 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
               .
             </h2>
             <p className="mt-4 text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed">
-              Upload your materials once and unlock a suite of tools designed to help you understand faster, retain longer, and stress less.
+              Upload your notes once. Understand faster, remember longer, and stop cramming the night before.
             </p>
           </div>
         </LandingScrollReveal>
@@ -621,7 +621,7 @@ export default function LandingStudyToolsHero({ onNavigate }: LandingStudyToolsH
           <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
             <p className="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.18em] text-[#A560E8] mb-2">Every tool, in detail</p>
             <h3 className="text-2xl sm:text-3xl font-extrabold text-stone-900 dark:text-white tracking-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-              Transform your notes into powerful study tools
+              Everything you need to remember it on exam day
             </h3>
           </div>
         </LandingScrollReveal>

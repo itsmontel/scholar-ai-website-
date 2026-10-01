@@ -536,15 +536,15 @@ export default function LandingCitationsShowcase({ onNavigate }: LandingCitation
             className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-[#3C3C3C] tracking-tight leading-[1.08] mb-5"
             style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
           >
-            Find{' '}
+            Every reference{' '}
             <span className="text-[#1CB0F6]">
-              academic sources
-            </span>{' '}
-            in seconds
+              done right
+            </span>
+            , in seconds
           </h2>
           <p className="text-base sm:text-xl text-[#777777] leading-relaxed max-w-2xl mx-auto font-normal mb-4">
-            Not just feedback on drafts — search real literature, then copy APA, MLA, or Chicago in one tap. Peer-reviewed
-            picks, filter by year, export-ready references.
+            No more 2am source hunts or marks lost on formatting. Find real peer-reviewed literature, then copy APA, MLA, or
+            Chicago in one tap.
           </p>
           <FeatureTickRow items={['APA', 'MLA', 'Chicago', 'Peer-reviewed', 'Export-ready']} />
           <p className="text-xs text-[#AFAFAF] mt-3 min-h-[1.25rem]" aria-live="polite">

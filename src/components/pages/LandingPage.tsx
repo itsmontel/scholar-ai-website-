@@ -1524,11 +1524,11 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   <button
                     type="button"
                     onClick={() => onNavigate('signup')}
-                    aria-label="Start free, get the A"
+                    aria-label="Grade my essay free"
                     className="group/btn inline-flex items-center justify-center px-7 py-3.5 sm:px-9 sm:py-[18px] lg:px-11 lg:py-[22px] rounded-2xl bg-[#58CC02] hover:bg-[#61E002] text-white font-extrabold text-base sm:text-[18px] lg:text-xl border-2 border-b-4 border-[#46A302] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 whitespace-nowrap shadow-[0_8px_28px_-6px_rgba(88,204,2,0.55)] hover:shadow-[0_12px_36px_-6px_rgba(88,204,2,0.75)]"
                     style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                   >
-                    Get started today
+                    Grade my essay free
                     <svg className="ml-2 w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 group-hover/btn:translate-x-1" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
@@ -2518,10 +2518,10 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               className="text-2xl sm:text-3xl lg:text-[2.35rem] font-extrabold text-stone-900 dark:text-stone-50 mb-4 tracking-tight leading-tight"
               style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
             >
-              Simple, transparent pricing
+              Stop losing marks you could have kept
             </h2>
             <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed">
-              Start free, upgrade when you need more analyses, citations, and study tools.
+              Start free and see what&apos;s holding your grade back. Upgrade when you want to know exactly how to fix it.
             </p>
           </div>
 
@@ -2559,7 +2559,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 </span>
               </div>
               <h3 className="font-semibold text-xl text-stone-900 dark:text-stone-100 mb-1 pt-1">Pro</h3>
-              <p className="text-sm text-stone-500 dark:text-stone-400 mb-6">Most popular for students</p>
+              <p className="text-sm text-stone-500 dark:text-stone-400 mb-6">Hand in your best work, every time</p>
               {/* Price block — struck-through "was" $39.99 sits above
                   the active $19.99 (matches the pricing + billing pages
                   so all three surfaces tell the same discount story). */}
@@ -2580,31 +2580,31 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   <svg className="w-5 h-5 flex-shrink-0 text-[#A560E8] dark:text-[#A560E8] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>99 combined analyses, study packs &amp; citations/mo</span>
+                  <span>Know exactly what&apos;s costing you marks, and fix it in one click</span>
                 </li>
                 <li className="flex gap-2">
                   <svg className="w-5 h-5 flex-shrink-0 text-[#A560E8] dark:text-[#A560E8] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>999,999 words Paper Summarizer; uploads up to 100MB</span>
+                  <span>See your score and rubric breakdown before your professor does</span>
                 </li>
                 <li className="flex gap-2">
                   <svg className="w-5 h-5 flex-shrink-0 text-[#A560E8] dark:text-[#A560E8] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>Quiz, flashcards, crossword, Crater Blast &amp; Word Tower</span>
+                  <span>Walk into exams ready with full flashcards, quizzes &amp; study games</span>
                 </li>
                 <li className="flex gap-2">
                   <svg className="w-5 h-5 flex-shrink-0 text-[#A560E8] dark:text-[#A560E8] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>All citation styles, PDF/Word export</span>
+                  <span>References done right in every style, exported to Word &amp; PDF</span>
                 </li>
                 <li className="flex gap-2">
                   <svg className="w-5 h-5 flex-shrink-0 text-[#A560E8] dark:text-[#A560E8] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>Apply WriteScholar revisions into your draft</span>
+                  <span>Enough for every assignment: 99 checks, study packs &amp; citations a month</span>
                 </li>
               </ul>
               <button
@@ -2623,7 +2623,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 </span>
               </div>
               <h3 className="font-semibold text-xl text-stone-900 dark:text-stone-100 mb-1 pt-1">Premium</h3>
-              <p className="text-sm text-stone-500 dark:text-stone-400 mb-6">Heavy essays &amp; citations</p>
+              <p className="text-sm text-stone-500 dark:text-stone-400 mb-6">For dissertation and heavy-research terms</p>
               {/* Price block — struck-through "was" $59.99 sits above
                   the active $39.99 (matches Pro card + pricing/billing
                   pages). */}
@@ -2650,13 +2650,13 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   <svg className="w-5 h-5 flex-shrink-0 text-[#E0AC00] dark:text-[#F0C419] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>499 combined analyses, study packs &amp; citations/mo—ideal for citation-heavy work</span>
+                  <span>Never hit a limit mid-deadline: 499 checks, study packs &amp; citations a month</span>
                 </li>
                 <li className="flex gap-2">
                   <svg className="w-5 h-5 flex-shrink-0 text-[#E0AC00] dark:text-[#F0C419] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>Summarise unlimited research papers; 1GB library storage</span>
+                  <span>Summarise your whole reading list, no cap, with 1GB of storage</span>
                 </li>
               </ul>
               <button
