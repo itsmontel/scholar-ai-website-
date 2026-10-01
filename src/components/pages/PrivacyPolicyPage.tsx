@@ -179,9 +179,9 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate, user,
               <p>We retain data for as long as necessary to provide the service:</p>
               <ul className="list-disc list-inside space-y-2 ml-4">
                 <li><strong className="text-stone-700 dark:text-stone-300">Account data:</strong> Retained while your account is active. <strong className="text-stone-700 dark:text-stone-300">When you delete your account, all account data is permanently and immediately removed — there is no recovery period and we cannot restore deleted accounts.</strong></li>
-                <li><strong className="text-stone-700 dark:text-stone-300">Uploaded documents:</strong> Retained until you delete them or your account.</li>
-                <li><strong className="text-stone-700 dark:text-stone-300">Study pack history (quizzes, flashcards, crosswords, lessons):</strong> Study materials are automatically deleted after 30 days.</li>
-                <li><strong className="text-stone-700 dark:text-stone-300">Citation history and analysis history:</strong> Retained until deleted by you or as part of periodic cleanup.</li>
+                <li><strong className="text-stone-700 dark:text-stone-300">Uploaded documents:</strong> Kept until you delete them or your account. Documents are not removed on a schedule.</li>
+                <li><strong className="text-stone-700 dark:text-stone-300">Study packs and citation searches:</strong> Kept for as long as a paid plan is active. On the free plan they are deleted 30 days after they are created. If a paid plan ends, existing study packs and citation searches are deleted 30 days after that downgrade.</li>
+                <li><strong className="text-stone-700 dark:text-stone-300">Analysis history:</strong> Retained until deleted by you or as part of account deletion.</li>
                 <li><strong className="text-stone-700 dark:text-stone-300">Monthly usage records:</strong> Retained for billing verification and limit enforcement.</li>
                 <li><strong className="text-stone-700 dark:text-stone-300">Email subscription records:</strong> Retained to honour unsubscribe requests; unsubscribing prevents you from being re-added.</li>
               </ul>
@@ -203,7 +203,7 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate, user,
                 <li><strong className="text-stone-700 dark:text-stone-300">Restrict Processing:</strong> Ask us to limit how we use your personal data (for example, while a correction request is being reviewed)</li>
                 <li><strong className="text-stone-700 dark:text-stone-300">Object:</strong> Object to processing of your personal data for direct marketing or where we rely on legitimate interests</li>
                 <li><strong className="text-stone-700 dark:text-stone-300">Unsubscribe:</strong> Opt out of marketing emails at any time via the unsubscribe link or Settings</li>
-                <li><strong className="text-stone-700 dark:text-stone-300">Data Portability:</strong> Request a copy of your data in a structured, machine-readable format by contacting privacy@writescholar.com</li>
+                <li><strong className="text-stone-700 dark:text-stone-300">Data Portability:</strong> Request a copy of your data in a structured, machine-readable format by contacting anthonywritescholar@gmail.com</li>
                 <li><strong className="text-stone-700 dark:text-stone-300">Withdraw Consent:</strong> Stop using the service and delete your account at any time</li>
               </ul>
               <p>
@@ -213,7 +213,7 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate, user,
               </p>
               <div className="border-2 border-b-4 border-[#1CB0F6]/30 bg-[#DDF4FF] dark:bg-[#1CB0F6]/10 p-4 rounded-xl mt-2">
                 <p className="text-stone-700 dark:text-stone-300">
-                  <strong className="font-extrabold">California residents (CCPA / CPRA):</strong> If you are a California resident, you have additional rights including: (1) the right to know what personal information we collect, use, and disclose about you; (2) the right to request deletion of your personal information; (3) the right to opt out of the sale or sharing of your personal information; and (4) the right not to be discriminated against for exercising these rights. <strong className="font-extrabold">We do not sell your personal information and we do not share it for cross-context behavioural advertising.</strong> To exercise your CCPA rights, contact privacy@writescholar.com.
+                  <strong className="font-extrabold">California residents (CCPA / CPRA):</strong> If you are a California resident, you have additional rights including: (1) the right to know what personal information we collect, use, and disclose about you; (2) the right to request deletion of your personal information; (3) the right to opt out of the sale or sharing of your personal information; and (4) the right not to be discriminated against for exercising these rights. <strong className="font-extrabold">We do not sell your personal information and we do not share it for cross-context behavioural advertising.</strong> To exercise your CCPA rights, contact anthonywritescholar@gmail.com.
                 </p>
               </div>
             </div>
@@ -254,7 +254,7 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate, user,
               <p>
                 If we become aware that we have collected information from a user below the applicable
                 minimum age, we will delete that information promptly. Parents or guardians who believe
-                their child has provided us with personal data may contact privacy@writescholar.com.
+                their child has provided us with personal data may contact anthonywritescholar@gmail.com.
               </p>
             </div>
           </section>
@@ -285,8 +285,8 @@ const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate, user,
                 If you have any questions about this privacy policy or your personal data, please contact us:
               </p>
               <div className="border-2 border-b-4 border-[#1CB0F6]/30 bg-[#DDF4FF] dark:bg-[#1CB0F6]/10 p-5 rounded-xl">
-                <p className="text-stone-700 dark:text-stone-300"><strong>Privacy enquiries:</strong> privacy@writescholar.com</p>
-                <p className="text-stone-700 dark:text-stone-300 mt-1"><strong>General support:</strong> support@writescholar.com</p>
+                <p className="text-stone-700 dark:text-stone-300"><strong>Privacy enquiries:</strong> anthonywritescholar@gmail.com</p>
+                <p className="text-stone-700 dark:text-stone-300 mt-1"><strong>General support:</strong> anthonywritescholar@gmail.com</p>
               </div>
             </div>
           </section>

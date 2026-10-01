@@ -1,16 +1,5 @@
 const { v4: uuidv4 } = require('uuid');
 const { createClient } = require('@supabase/supabase-js');
-const subscriptionService = require('./subscriptionService');
-
-function getExpiresAt30Days() {
-  return new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-}
-
-function isExpired(expiresAt) {
-  if (!expiresAt) return false;
-  const t = new Date(expiresAt).getTime();
-  return Number.isFinite(t) && t <= Date.now();
-}
 
 class DocumentService {
   constructor() {
@@ -35,15 +24,8 @@ class DocumentService {
    */
   async createDocument(documentData) {
     try {
-      let expiresAt = documentData.expiresAt;
-      if (expiresAt === undefined) {
-        try {
-          const keep = await subscriptionService.userKeepsLibraryForever(documentData.userId);
-          expiresAt = keep ? null : getExpiresAt30Days();
-        } catch {
-          expiresAt = getExpiresAt30Days();
-        }
-      }
+      // Essays stay on the account. Only study packs and citations expire.
+      const expiresAt = null;
       const payload = {
           id: uuidv4(),
           user_id: documentData.userId,
@@ -132,7 +114,6 @@ class DocumentService {
         .from('documents')
         .select('*')
         .eq('user_id', userId)
-        .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
         .order(sortBy, { ascending: sortOrder === 'asc' })
         .range(offset, offset + limit - 1);
 
@@ -167,11 +148,10 @@ class DocumentService {
    * @returns {Promise<number>}
    */
   async countUserDocuments(userId) {
-    const { count, error } = await this.getSupabaseClient()
+      const { count, error } = await this.getSupabaseClient()
       .from('documents')
       .select('id', { count: 'exact', head: true })
-      .eq('user_id', userId)
-      .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`);
+      .eq('user_id', userId);
     if (error) throw error;
     return count || 0;
   }
@@ -196,7 +176,6 @@ class DocumentService {
       }
 
       if (!data) return null;
-      if (isExpired(data.expires_at)) return null;
       return data;
     } catch (error) {
       console.error('Error getting document by ID:', error);
@@ -363,8 +342,7 @@ class DocumentService {
         .limit(20);
 
       if (error) throw error;
-      const now = Date.now();
-      return (data || []).filter((d) => !d.expires_at || new Date(d.expires_at).getTime() > now);
+      return data || [];
     } catch (error) {
       console.error('Error searching documents:', error);
       throw error;
@@ -395,24 +373,23 @@ class DocumentService {
   }
 
   /**
-   * Delete free-user documents whose 30-day window has passed.
-   * Permanent rows (expires_at null) are never touched.
+   * Documents are kept forever. Clear any 30-day expiry that was
+   * stamped by the old free-plan rule so the cleanup job cannot delete them.
    */
   async cleanupExpiredDocuments() {
     try {
-      const now = new Date().toISOString();
       const { data, error } = await this.getSupabaseClient()
         .from('documents')
-        .delete()
+        .update({ expires_at: null, updated_at: new Date().toISOString() })
         .not('expires_at', 'is', null)
-        .lt('expires_at', now)
         .select('id');
       if (error) throw error;
-      console.log(`Cleaned up ${data?.length || 0} expired documents`);
-      return { deleted: data?.length || 0 };
+      const cleared = data?.length || 0;
+      if (cleared) console.log(`Cleared expiry on ${cleared} documents (essays are kept)`);
+      return { deleted: 0, cleared };
     } catch (error) {
       console.error('Database error in cleanupExpiredDocuments:', error);
-      return { deleted: 0 };
+      return { deleted: 0, cleared: 0 };
     }
   }
 }

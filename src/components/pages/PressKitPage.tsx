@@ -65,11 +65,11 @@ const PressKitPage = ({ onNavigate, user, onLogout }: PressKitPageProps) => {
               className="hidden md:block absolute right-full -mr-2 lg:-mr-3 -bottom-8 lg:-bottom-10 w-24 lg:w-28 h-auto pointer-events-none"
             />
             <a
-              href="mailto:press@writescholar.com"
-              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-2xl font-extrabold text-white border-2 border-b-4 transition-transform hover:-translate-y-0.5 active:translate-y-0 active:border-b-2 text-[15px] bg-[#A560E8] border-[#8A48C7] shadow-md"
+              href="mailto:anthonywritescholar@gmail.com"
+              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-2xl font-extrabold text-white border-2 border-b-4 transition-transform hover:-translate-y-0.5 active:translate-y-0 active:border-b-2 text-[15px] bg-[#A560E8] border-[#8A48C7] shadow-md break-all max-w-full"
               style={{ boxShadow: '0 6px 16px -4px rgba(165, 96, 232, 0.4)' }}
             >
-              Email press@writescholar.com
+              Email anthonywritescholar@gmail.com
               <span aria-hidden>→</span>
             </a>
           </div>
@@ -98,7 +98,7 @@ const PressKitPage = ({ onNavigate, user, onLogout }: PressKitPageProps) => {
           </Section>
 
           {/* Logo + brand assets */}
-          <Section heading="Logo &amp; brand assets" subtitle="Right-click the logo to save. For SVG/EPS or custom variants, email press@writescholar.com.">
+          <Section heading="Logo &amp; brand assets" subtitle="Right-click the logo to save. For SVG/EPS or custom variants, email anthonywritescholar@gmail.com.">
             <div className="max-w-md">
               <BrandAsset
                 title="Primary logo"
@@ -182,10 +182,10 @@ const PressKitPage = ({ onNavigate, user, onLogout }: PressKitPageProps) => {
                 For interviews, custom assets, exclusive data, or anything else:
               </p>
               <a
-                href="mailto:press@writescholar.com"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl font-extrabold text-white border-2 border-b-4 transition-transform hover:-translate-y-0.5 active:translate-y-0 active:border-b-2 text-[15px] bg-[#A560E8] border-[#8A48C7]"
+                href="mailto:anthonywritescholar@gmail.com"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl font-extrabold text-white border-2 border-b-4 transition-transform hover:-translate-y-0.5 active:translate-y-0 active:border-b-2 text-[15px] bg-[#A560E8] border-[#8A48C7] break-all max-w-full"
               >
-                press@writescholar.com
+                anthonywritescholar@gmail.com
               </a>
               <p className="text-[12px] text-stone-500 dark:text-stone-400 mt-3">
                 Typical response time: 24 hours on weekdays.

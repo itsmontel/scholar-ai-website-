@@ -115,6 +115,18 @@ function mergeStats(existing, incoming) {
     }
   }
 
+  // One-time 24-hour price window. Keep the earliest stamp; clients cannot move it.
+  const flashKey = 'flash_offer_started_at';
+  const existingFlash = existing[flashKey];
+  const incomingFlash = incoming[flashKey];
+  if (existingFlash || incomingFlash) {
+    if (existingFlash && incomingFlash) {
+      merged[flashKey] = new Date(existingFlash) <= new Date(incomingFlash) ? existingFlash : incomingFlash;
+    } else {
+      merged[flashKey] = existingFlash || incomingFlash;
+    }
+  }
+
   return merged;
 }
 

@@ -148,7 +148,7 @@ class EmailService {
     console.log(`   USER: ${process.env.EMAIL_USER ? '*** (hidden)' : 'NOT SET'}`);
     console.log(`   PASS: ${process.env.EMAIL_PASS ? '****' : 'NOT SET'}`);
     console.log(`   FROM: ${process.env.EMAIL_FROM || (process.env.EMAIL_USER ? '*** (hidden)' : 'NOT SET')}`);
-    console.log(`   REPLY_TO: ${process.env.EMAIL_REPLY_TO || 'support@writescholar.com'}`);
+    console.log(`   REPLY_TO: ${process.env.EMAIL_REPLY_TO || 'anthonywritescholar@gmail.com'}`);
     console.log(`   Valid Config: ${hasValidConfig ? 'YES' : 'NO'}`);
 
     if (hasValidConfig) {
@@ -205,7 +205,7 @@ class EmailService {
       const { mascotUrl } = getEmailAssets();
 
       const fromAddress = process.env.EMAIL_FROM || process.env.EMAIL_USER;
-      const replyToAddress = process.env.EMAIL_REPLY_TO || 'support@writescholar.com';
+      const replyToAddress = process.env.EMAIL_REPLY_TO || 'anthonywritescholar@gmail.com';
       const mailOptions = {
         from: `"WriteScholar" <${fromAddress}>`,
         to: email,
@@ -327,7 +327,7 @@ class EmailService {
       const { mascotUrl } = getEmailAssets();
 
       const fromAddress = process.env.EMAIL_FROM || process.env.EMAIL_USER;
-      const replyToAddress = process.env.EMAIL_REPLY_TO || 'support@writescholar.com';
+      const replyToAddress = process.env.EMAIL_REPLY_TO || 'anthonywritescholar@gmail.com';
       const mailOptions = {
         from: `"WriteScholar" <${fromAddress}>`,
         to: email,
@@ -441,7 +441,7 @@ class EmailService {
 
     try {
       const fromAddress = process.env.EMAIL_FROM || process.env.EMAIL_USER;
-      const replyToAddress = process.env.EMAIL_REPLY_TO || 'support@writescholar.com';
+      const replyToAddress = process.env.EMAIL_REPLY_TO || 'anthonywritescholar@gmail.com';
       const { frontendUrl, mascotUrl } = getEmailAssets();
       const pdfUrl = `${frontendUrl}/downloads/writescholar-ultimate-study-tips-guide.pdf`;
       const loginUrl = `${frontendUrl}/login`;
@@ -552,7 +552,7 @@ class EmailService {
                       <td style="background-color: ${EMAIL_COLORS.surfaceSoft}; padding: 20px 32px; border-top: 2px solid ${EMAIL_COLORS.border};">
                         <p style="margin: 0; font-size: 13px; font-weight: 600; color: ${EMAIL_COLORS.textMuted}; text-align: center; line-height: 1.55;">
                           Questions? Reply to this email or contact<br>
-                          <a href="mailto:support@writescholar.com" style="color: ${EMAIL_COLORS.purple}; font-weight: 800; text-decoration: none;">support@writescholar.com</a>
+                          <a href="mailto:anthonywritescholar@gmail.com" style="color: ${EMAIL_COLORS.purple}; font-weight: 800; text-decoration: none;">anthonywritescholar@gmail.com</a>
                         </p>
                       </td>
                     </tr>
@@ -602,7 +602,7 @@ class EmailService {
 
     try {
       const fromAddress = process.env.EMAIL_FROM || process.env.EMAIL_USER;
-      const replyToAddress = process.env.EMAIL_REPLY_TO || 'support@writescholar.com';
+      const replyToAddress = process.env.EMAIL_REPLY_TO || 'anthonywritescholar@gmail.com';
       const { frontendUrl, mascotUrl } = getEmailAssets();
       const accountUrl = `${frontendUrl}/account`;
 
@@ -771,7 +771,7 @@ class EmailService {
 
     try {
       const fromAddress = process.env.EMAIL_FROM || process.env.EMAIL_USER;
-      const replyToAddress = process.env.EMAIL_REPLY_TO || 'support@writescholar.com';
+      const replyToAddress = process.env.EMAIL_REPLY_TO || 'anthonywritescholar@gmail.com';
       const { frontendUrl, mascotUrl } = getEmailAssets();
       const accountUrl = `${frontendUrl}/account`;
       const dashboardUrl = `${frontendUrl}/dashboard`;
@@ -937,7 +937,7 @@ class EmailService {
 
     try {
       const fromAddress = process.env.EMAIL_FROM || process.env.EMAIL_USER;
-      const replyToAddress = process.env.EMAIL_REPLY_TO || 'support@writescholar.com';
+      const replyToAddress = process.env.EMAIL_REPLY_TO || 'anthonywritescholar@gmail.com';
       const { frontendUrl, mascotUrl } = getEmailAssets();
 
       const firstName = (opts.firstName || '').trim();
@@ -1081,7 +1081,7 @@ class EmailService {
 
     try {
       const fromAddress = process.env.EMAIL_FROM || process.env.EMAIL_USER;
-      const replyToAddress = process.env.EMAIL_REPLY_TO || 'support@writescholar.com';
+      const replyToAddress = process.env.EMAIL_REPLY_TO || 'anthonywritescholar@gmail.com';
       const { frontendUrl, mascotUrl } = getEmailAssets();
       // ?upgrade=1 opens the soft paywall on arrival (EMAIL_UPGRADE_PENDING_KEY
       // in CompleteAcademicAIApp) so the CTA matches "unlock my results".

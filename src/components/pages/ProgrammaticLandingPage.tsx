@@ -1084,10 +1084,14 @@ const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) 
                   Built into WriteScholar
                 </div>
                 <h2 className="text-lg sm:text-xl font-extrabold text-stone-900 dark:text-stone-50 mb-1.5">
-                  Flashcards, quizzes, and AI feedback in one app
+                  {config.type === 'subject'
+                    ? 'Remember the lecture. Know what is costing you marks.'
+                    : 'Flashcards, quizzes, and AI feedback in one app'}
                 </h2>
                 <p className="text-stone-700 dark:text-stone-300 text-[14px] leading-relaxed">
-                  Preview free. 50% off first month. Used by 50,000+ college students.
+                  {config.type === 'subject'
+                    ? 'Start free and see the gaps before the exam does. Unlock the full fixes when you want them.'
+                    : 'Preview free. 50% off first month. Used by 50,000+ college students.'}
                 </p>
               </div>
               <a
@@ -1195,10 +1199,12 @@ const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) 
               </div>
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-900 dark:text-stone-50 mb-3">
-              Ready to try it free?
+              {config.type === 'subject' ? 'Ready to remember it on exam day?' : 'Ready to try it free?'}
             </h2>
             <p className="text-stone-700 dark:text-stone-300 max-w-md mx-auto mb-6 leading-relaxed text-[15px]">
-              Preview free, then unlock Pro at 50% off your first month. Cancel anytime. WriteScholar takes your notes and turns them into the study tools you actually use.
+              {config.type === 'subject'
+                ? 'Paste this week’s notes and walk into the exam already knowing the material. See what is costing you marks before you hand the paper in. Start free, no card needed.'
+                : 'Preview free, then unlock Pro at 50% off your first month. Cancel anytime. WriteScholar takes your notes and turns them into the study tools you actually use.'}
             </p>
             <a
               href={hrefForPage(config.primaryCta.page)}

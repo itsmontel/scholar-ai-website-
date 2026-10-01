@@ -117,6 +117,19 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
       }
     }
 
+    // First-day flash offer upgrades the welcome discount for Pro monthly.
+    // The welcome code stays as the fallback in case the coupon is missing.
+    let flashCouponId = null;
+    const welcomeOrNone =
+      !effectivePromoCode || WELCOME_PROMO_CODES.includes(effectivePromoCode.toUpperCase());
+    if (planType === 'pro' && billingCycle === 'monthly' && welcomeOrNone) {
+      const flashEndsAt = await subscriptionService.getFlashOfferEndsAt(user);
+      if (flashEndsAt) {
+        flashCouponId = subscriptionService.FLASH_COUPON_ID;
+        if (!effectivePromoCode) effectivePromoCode = 'NEWCUSTOMER';
+      }
+    }
+
     const trialDays =
       trialPeriodDays != null &&
       Number.isFinite(Number(trialPeriodDays)) &&
@@ -142,6 +155,7 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
       {
         trialPeriodDays: trialDays,
         embedded: isEmbedded,
+        ...(flashCouponId ? { couponId: flashCouponId } : {}),
         ...(embeddedReturnUrl ? { returnUrl: embeddedReturnUrl } : {})
       }
     );
@@ -819,9 +833,14 @@ router.get('/trial-eligibility', authenticateToken, async (req, res) => {
       trialReason = 'Has prior subscription history';
     }
 
+    const flashEndsAt = trialEligible ? await subscriptionService.getFlashOfferEndsAt(user) : null;
+
+    res.set('Cache-Control', 'private, no-store');
+    res.set('Vary', 'Authorization');
     res.json({
       success: true,
       trialEligible,
+      flashOfferEndsAt: flashEndsAt ? new Date(flashEndsAt).toISOString() : null,
       off10Eligible: false,
       /** @deprecated retained for older clients; always false */
       eligible: false,

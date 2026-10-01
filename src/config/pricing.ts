@@ -38,6 +38,17 @@ export const FIRST_MONTH_PRICE: Record<string, number> = { pro: 9.99, premium: 1
 export const STANDARD_MONTHLY_PRICE: Record<string, number> = { pro: 19.99, premium: 39.99 };
 
 /**
+ * First-day flash offer: Pro monthly first month at this price for 24
+ * hours. New accounts start at signup. Older accounts that have never
+ * had a paid plan start the first time they come back. The backend owns
+ * the deadline and applies the Stripe coupon (STRIPE_FLASH_COUPON_ID,
+ * $15 off once); the client only displays the deadline returned from
+ * /subscriptions/trial-eligibility.
+ */
+export const FLASH_FIRST_MONTH_PRICE = 4.99;
+export const FLASH_OFFER_HOURS = 24;
+
+/**
  * Length of the card-required free trial, in days.
  * 0 = no trial — charge the (possibly discounted) first invoice immediately.
  */

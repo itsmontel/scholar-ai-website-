@@ -431,6 +431,200 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
   };
 
   switch (slug) {
+    case 'how-to-write-a-good-introduction':
+      return (
+        <>
+          <p className={p}>
+            Students still open a blank document and try to invent a hook. In 2026 that first paragraph is where a lot of papers lose the reader, and where a lot of generated prose gives itself away. A good introduction is not a warm-up. It tells a stranger what question you are answering and what you claim, in the smallest amount of context that claim needs.
+          </p>
+          <p className={p}>
+            Write it last. The body is where you find out what you actually argued. The opening is where you say that argument cleanly. This page is the paragraph. The rest of the paper is in <a href="/blog/how-to-write-an-essay-or-assignment" className={internalLink}>how to write an essay or assignment</a>. The sentence at the end of the opening is in <a href="/blog/how-to-write-a-thesis-statement" className={internalLink}>how to write a thesis statement</a>.
+          </p>
+
+          <WritingIllustration />
+
+          <h2 className={h2}>What a good introduction does in 2026</h2>
+          <p className={p}>
+            High school rewarded a hook, three sentences of background, and a thesis that listed the body paragraphs. College and university readers reward a claim they can test against the rest of the paper. Fluency is cheap now. A chatbot will produce a grammatical opening in ten seconds. Instructors have read &quot;In today&apos;s society&quot; and &quot;Since the dawn of time&quot; enough times this term to stop trusting an opening that could belong to any prompt.
+          </p>
+          <p className={p}>
+            Your advantage is specificity. Name the text, the dataset, the case, or the weeks of the course the prompt actually assigned. If a roommate can tell you the topic after reading the first paragraph but cannot tell you the argument, the introduction is still a label. The full writing process around that test is the <a href="/blog/first-college-paper-fall-semester" className={internalLink}>first college paper of the semester</a>. This page is only the opening.
+          </p>
+
+          <h2 className={h2}>The three jobs, in order</h2>
+          <p className={p}>
+            <strong>Context.</strong> Give the reader only what they need in order to understand the claim. For a short essay that is often one or two sentences: which text, which debate, which result. For a research paper it can be the gap in the literature, still in a few sentences, not a tour of every source you read. Background that does not change how someone reads the thesis is throat-clearing.
+          </p>
+          <p className={p}>
+            <strong>The question.</strong> The prompt already asked something. Your introduction should make that question visible in your own words, using the verb on the brief: analyse, argue, compare, evaluate, explain. If the brief says evaluate and your opening only describes, you have answered a neighbouring assignment. Underline that verb before you write the first sentence.
+          </p>
+          <p className={p}>
+            <strong>The thesis.</strong> One sentence a classmate who did the reading could disagree with. It usually lands at the end of the introduction, after the context has made it intelligible. A topic is &quot;sleep and grades.&quot; A thesis is &quot;In this sample, nights under six hours predicted lower quiz scores only on material from that week&apos;s lecture, not on the textbook chapter.&quot; If you want the tests for vague, obvious, and announcement theses, use the <a href="/blog/how-to-write-a-thesis-statement" className={internalLink}>thesis statement guide</a> or draft a starting sentence with a <a href="/tools/thesis-generator" onClick={handleNavigate('thesis-generator')} className={internalLink}>thesis generator</a> and then make it specific enough that it could only belong to this paper.
+          </p>
+
+          <h2 className={h2}>Write the introduction after the body exists</h2>
+          <p className={p}>
+            Openings written first become plot summary, dictionary definitions, and a thesis you have to abandon once the evidence shows up. Draft the middle from an outline. Each body paragraph gets a claim, a source, and a sentence that ties the evidence back to the working thesis. When those paragraphs exist, you know which terms the introduction has to use.
+          </p>
+          <p className={p}>
+            Then write the opening to match the paper you have, not the paper you planned on night one. If the body narrowed the claim, the introduction has to narrow with it. Students lose an easy revision by leaving a broad thesis at the top of a paper that actually argues something smaller and better. An <a href="/tools/essay-outline" onClick={handleNavigate('essay-outline')} className={internalLink}>outline</a> is useful before the draft. It is a stall if you use it to decorate a hook.
+          </p>
+
+          <h2 className={h2}>A process you can follow the night you write it</h2>
+          <p className={p}>
+            <strong>1. Put the prompt at the top of the file.</strong> One sentence, in your words: what are you being asked to do? If you cannot write it, you are not ready for an introduction.
+          </p>
+          <p className={p}>
+            <strong>2. Write the thesis that the body actually supports.</strong> Read the first sentence of each body paragraph. Those sentences should add up to the claim. If they do not, fix the body or change the claim. Do not paper over the gap with a smoother opening.
+          </p>
+          <p className={p}>
+            <strong>3. Add only the context that thesis needs.</strong> Ask what a reader who missed lecture would have to know for the claim to make sense. That is the opening. Everything else can wait for a body paragraph, or it can be cut.
+          </p>
+          <p className={p}>
+            <strong>4. Put the thesis last in the introduction.</strong> In a short paper the whole introduction can be one paragraph, and the claim is the final sentence. In a longer paper you can take most of a page and still end the section on the claim, not on a promise to &quot;explore&quot; the topic.
+          </p>
+          <p className={p}>
+            <strong>5. Read it against the conclusion.</strong> Same key terms. Same claim. The conclusion can add a limit or a consequence. It should not introduce a new argument, and it should not be the introduction with &quot;in conclusion&quot; glued on.
+          </p>
+
+          <h2 className={h2}>Weak openings and the version that would get read</h2>
+          <h3 className={h3}>Argumentative</h3>
+          <p className={p}>
+            <em>Since the beginning of time, humans have communicated. In today&apos;s society, social media is everywhere. This essay will discuss the effects of Instagram on teenagers.</em>
+          </p>
+          <p className={p}>
+            Nobody disagrees. The announcement tells the reader you do not have a claim yet. A usable opening names the actual dispute:
+          </p>
+          <p className={p}>
+            <em>Schools that ban phones in class still leave Instagram&apos;s public like-counts untouched, and those counts are what this course&apos;s anxiety readings actually tracked. The ban treats screen time as the problem. The data treats being seen as the problem.</em>
+          </p>
+          <h3 className={h3}>Analytical</h3>
+          <p className={p}>
+            <em>The Great Gatsby is a novel by F. Scott Fitzgerald, published in 1925. It is about the American Dream. This paper will analyse the symbolism.</em>
+          </p>
+          <p className={p}>
+            That is a book report cover. An analytical introduction makes an interpretive claim the rest of the paper can test:
+          </p>
+          <p className={p}>
+            <em>The green light at the end of Daisy&apos;s dock is not a symbol of hope Gatsby almost reaches. It is the mechanism that keeps him rowing: visible, close, and useless as a destination.</em>
+          </p>
+          <h3 className={h3}>A results-driven paper</h3>
+          <p className={p}>
+            <em>Sleep is very important for college students. Many students do not get enough sleep. This paper will look at sleep and grades.</em>
+          </p>
+          <p className={p}>
+            Lead with the finding and the condition it holds under. Methods and caveats belong in the body, but the introduction should already say what you found:
+          </p>
+          <p className={p}>
+            <em>Among the 214 undergraduates in this sample, nights under six hours predicted lower next-day quiz scores only when the quiz covered that week&apos;s lecture, not when it covered the textbook chapter. Sleep loss here tracked attention in class, not a general grade penalty.</em>
+          </p>
+
+          <h2 className={h2}>What to leave out</h2>
+          <p className={p}>
+            <strong>The dictionary.</strong> &quot;According to Oxford, justice means…&quot; is a stall unless the paper is about how a definition changed. If the course gave you a definition, use that one and cite it.
+          </p>
+          <p className={p}>
+            <strong>The historical sweep.</strong> &quot;Throughout history, scholars have debated…&quot; fills a line and tells the grader nothing about this prompt. Use history when the history is the argument, as in a history course, not as a runway.
+          </p>
+          <p className={p}>
+            <strong>The announcement.</strong> &quot;This essay will discuss,&quot; &quot;I will explore,&quot; and &quot;The purpose of this paper is to.&quot; Make the claim. The paper is the discussion.
+          </p>
+          <p className={p}>
+            <strong>A full summary of the reading.</strong> A clause of context is enough. The body is where you quote, paraphrase, and analyse. Dropping the entire plot into paragraph one leaves you nothing to do later except repeat it.
+          </p>
+          <p className={p}>
+            <strong>A quote with no claim attached.</strong> An epigraph you never use is decoration. If you open on a line from the text, the next sentence has to say what that line is doing in your argument.
+          </p>
+          <p className={p}>
+            <strong>An apology.</strong> &quot;This is just my opinion&quot; and &quot;I am not an expert&quot; train the reader to discount the thesis. Academic writing already treats the claim as yours. You do not have to announce that.
+          </p>
+
+          <h2 className={h2}>How long the opening should be</h2>
+          <p className={p}>
+            <strong>Short essays and discussion posts (about 250 to 1,500 words).</strong> One paragraph. Sometimes two. Context, then the thesis. A discussion post can do the job in the first two sentences: a claim, then the line from the reading you are using. Skip the closer that says you look forward to everyone&apos;s thoughts.
+          </p>
+          <p className={p}>
+            <strong>Research papers.</strong> The introduction can run most of a page and still should not summarise every article. End on the claim and, if the prompt asks, a one-sentence map of the sections. APA papers have extra rules for the title page and the order of sections. Use the <a href="/blog/how-to-write-apa-research-paper" className={internalLink}>APA research paper walkthrough</a> when that format is assigned. The introduction itself still has the same three jobs.
+          </p>
+          <p className={p}>
+            <strong>Lab reports.</strong> Often a purpose plus a hypothesis, not a story about why science matters. Follow the headings the lab manual requires. The &quot;hook&quot; is the question the experiment was built to answer.
+          </p>
+          <p className={p}>
+            <strong>Admissions essays.</strong> Different genre. Readers score voice and a specific scene, not a coursework thesis. Do not paste this structure onto a personal statement. That revision routine is in the <a href="/blog/college-admission-essay-grader" className={internalLink}>college admission essay guide</a>.
+          </p>
+
+          <h2 className={h2}>Hooks, and why most of them fail</h2>
+          <p className={p}>
+            A hook is one sentence that earns the next sentence. It is optional. The thesis is not. The hooks that fail are the ones every section of the course is submitting this week: a rhetorical question you never answer, &quot;imagine a world where,&quot; a shocking statistic with no source, and a famous quote that has nothing to do with the prompt.
+          </p>
+          <p className={p}>
+            If you want a first sentence that is not the thesis, make it a concrete piece of the paper: a line from the text, the result in one clause, the policy you are evaluating, the misconception the lecture spent Tuesday undoing. Then get to the claim. A clever opening that delays the argument by half a page costs more than it earns on a short assignment.
+          </p>
+
+          <h2 className={h2}>How to use AI on an introduction in 2026</h2>
+          <p className={p}>
+            Ask a chatbot to &quot;write me a hook&quot; and you will get a paragraph that could sit on top of five hundred other essays. &quot;In an increasingly interconnected world&quot; is now a tell. So is a perfectly even rhythm and a thesis that says the topic is &quot;complex and multifaceted&quot; without taking a side. Generated openings are fluent and empty. Professors notice the emptiness faster than a detector does.
+          </p>
+          <p className={p}>
+            The use that still fits most syllabi: you write the paragraph, then ask whether a stranger can state the claim and whether the opening answers the verb in the prompt. You rewrite the weak sentences yourself. Feedback on a draft you wrote is different from submitting prose you could not explain in office hours. The same line is in our guide to <a href="/blog/ai-writing-assistant-for-students" className={internalLink}>AI writing assistants for students</a>. Read the AI policy on your syllabus before you paste the prompt into a chat.
+          </p>
+          <p className={p}>
+            Do not use a tool to invent a personal anecdote, a quotation, or a study. Short introductions have nowhere to hide a fake sentence. If you cannot point to the page the claim came from, it does not belong in paragraph one.
+          </p>
+
+          <h2 className={h2}>A five-minute check before you submit</h2>
+          <p className={p}>
+            Read only the introduction, out loud, as if you have not seen the rest. One: can you underline the thesis? Two: does it answer the prompt, not a nearby topic? Three: is there a dictionary, a historical sweep, or &quot;this essay will&quot;? Cut those. Four: does every context sentence earn its place, or is one of them a summary you repeat later? Five: do the introduction and the conclusion use the same key terms?
+          </p>
+          <p className={p}>
+            If the thesis is missing, no amount of polish on sentence one will save the paper. Fix the claim, then the context around it. A <a href="/blog/grade-my-essay-before-submitting" className={internalLink}>pre-submission grade check</a> is for that triage across the whole draft. The introduction is just the first place a marker looks.
+          </p>
+
+          <h2 className={h2}>Check the opening the way a marker would</h2>
+          <p className={p}>
+            <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>WriteScholar&apos;s essay editor</a> reads the draft for thesis, evidence, and structure, including whether the opening actually states a claim the body supports. Use it after the paragraph is yours. See <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for the current first-month offer.
+          </p>
+          <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
+            Check my introduction before I submit →
+          </a>
+
+          <BlogFaqAccordion
+            items={[
+              {
+                question: 'How long should an introduction be?',
+                answer:
+                  'For a short college essay, usually one paragraph, sometimes two. For a research paper, up to about a page. Length is not the test. The introduction is long enough when a stranger knows the question and your claim, and short enough that you have not summarised the whole paper.',
+              },
+              {
+                question: 'Should I write the introduction first?',
+                answer:
+                  'Write a working thesis first if you need a direction, then draft the body. Write the introduction after you know what the body actually argued. Openings written first tend to become definitions, plot summary, and a thesis you later abandon.',
+              },
+              {
+                question: 'Do I need a hook?',
+                answer:
+                  'No. A hook is one sentence that earns the next sentence. A rhetorical question, a famous quote, or "imagine a world" usually does not. If the prompt is analytical, you can open on the text. If you have a result, you can open on the result. The thesis is the required part.',
+              },
+              {
+                question: 'Where does the thesis go in the introduction?',
+                answer:
+                  'Usually the last sentence of the introduction, after the context that makes the claim intelligible. In a one-paragraph opening, that means the final sentence. Do not save the claim for the conclusion.',
+              },
+              {
+                question: 'What should I not put in an introduction?',
+                answer:
+                  'A dictionary definition, a "throughout history" sweep, "this essay will discuss," a full plot summary, a quote you never use, and an apology such as "this is just my opinion." Those lines delay the claim.',
+              },
+              {
+                question: 'Can I use AI to write my introduction in 2026?',
+                answer:
+                  'On most campuses, feedback on a paragraph you wrote is treated differently from generated text. A chatbot hook is easy to spot because it fits any prompt. Read your syllabus. Rewrite the opening yourself, and do not invent quotations or studies.',
+              },
+            ]}
+          />
+        </>
+      );
+
     case 'how-to-write-an-essay-or-assignment':
       return (
         <>
@@ -511,7 +705,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <h2 className={h2}>Step 6: write the introduction, conclusion, and title last</h2>
           <p className={p}>
-            Once the body exists, the introduction has a job: name the question, give only the context the reader needs, and state the thesis. Skip the dictionary. Skip the historical sweep unless the course is history and the sweep is the argument. In a short paper, the introduction can be one tight paragraph. In a research paper, it can take a page and still should not summarise every source.
+            Once the body exists, the introduction has a job: name the question, give only the context the reader needs, and state the thesis. Skip the dictionary. Skip the historical sweep unless the course is history and the sweep is the argument. In a short paper, the introduction can be one tight paragraph. In a research paper, it can take a page and still should not summarise every source. The paragraph-level version is <a href="/blog/how-to-write-a-good-introduction" className={internalLink}>how to write a good introduction</a>.
           </p>
           <p className={p}>
             The conclusion is not a copy-paste of the introduction with &quot;in conclusion&quot; glued on. Restate the claim in the terms you earned in the body, then say what follows: a limit of the evidence, a question the paper cannot settle, or a consequence for the case you analysed. Do not introduce a brand-new argument in the last five lines. Do not apologise (&quot;this is just my opinion&quot;).
@@ -2576,7 +2770,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             A thesis statement is the single sentence (or occasionally two) that tells your reader what your paper argues and why it matters. Every essay, research paper, or analytical piece needs one. A weak thesis leads to a weak paper; a clear, specific, arguable thesis gives your writing direction and makes it easier to stay focused from introduction to conclusion. Whether you&apos;re writing a five-paragraph essay for a class assignment or a 20-page research paper for publication, the thesis statement serves as the backbone of your entire argument.
           </p>
           <p className={p}>
-            This comprehensive guide explains what makes a thesis statement work, how to write one for different essay types, and common mistakes to avoid. We&apos;ll include concrete examples for argumentative, analytical, and expository essays so you can see the difference between a vague claim and a strong one. For the rest of the paper around that sentence, use <a href="/blog/how-to-write-an-essay-or-assignment" className={internalLink}>how to write an essay or assignment</a>. By the end, you&apos;ll have a clear process for crafting thesis statements that give your writing focus and clarity.
+            This comprehensive guide explains what makes a thesis statement work, how to write one for different essay types, and common mistakes to avoid. We&apos;ll include concrete examples for argumentative, analytical, and expository essays so you can see the difference between a vague claim and a strong one. For the rest of the paper around that sentence, use <a href="/blog/how-to-write-an-essay-or-assignment" className={internalLink}>how to write an essay or assignment</a>. For the paragraph the thesis sits in, use <a href="/blog/how-to-write-a-good-introduction" className={internalLink}>how to write a good introduction</a>. By the end, you&apos;ll have a clear process for crafting thesis statements that give your writing focus and clarity.
           </p>
 
           <h2 className={h2}>What a thesis statement does</h2>

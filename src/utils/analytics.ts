@@ -67,6 +67,9 @@ export type AnalyticsEvent =
   | 'cancel_save_offer_view'
   | 'cancel_save_offer_accept'
   | 'cancel_confirmed'
+  // — First-day flash offer —
+  | 'flash_offer_view'
+  | 'flash_offer_cta_click'
   // — Dashboard —
   | 'dashboard_file_upload_start'
   | 'dashboard_file_upload_success'

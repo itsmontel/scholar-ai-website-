@@ -21,6 +21,8 @@ import { WorkspaceShell } from '../workspace/WorkspaceShell';
 import DashboardTopBar from '../common/DashboardTopBar';
 import Footer from '../common/Footer';
 import PromoBanner from '../common/PromoBanner';
+import FlashOfferBanner from '../common/FlashOfferBanner';
+import { useFlashOffer } from '../../hooks/useFlashOffer';
 import GenerationOverlay from '../common/GenerationOverlay';
 import ViewportAutoplayVideo from '../common/ViewportAutoplayVideo';
 import { consumePendingWorkspaceView, WS_SWITCH_VIEW_EVENT } from '../workspace/workspaceNavigate';
@@ -155,7 +157,7 @@ type DocSummary = {
   createdAt: string;
   updatedAt: string;
   lastEditedAt: string | null;
-  /** Free never-paid docs expire; null means keep forever. */
+  /** Documents are kept. Study packs and citations expire on the free plan. */
   expiresAt?: string | null;
   /** Plain-text snippet of the document body (server-trimmed). */
   contentPreview: string;
@@ -859,7 +861,7 @@ function DocumentRow({
 
   const isPack = kind === 'pack';
   const isCite = kind === 'citation';
-  const expiryLabel = expiresInLabel(doc.expiresAt);
+  const expiryLabel = kind === 'document' ? null : expiresInLabel(doc.expiresAt);
   const words = isPack
     ? 'Study pack'
     : isCite
@@ -1095,6 +1097,7 @@ function DocumentsHub({
   usage,
   onSwitchView,
   onNavigate,
+  offerBanner,
   topBar,
   highlightDocId,
   highlightPack,
@@ -1123,6 +1126,8 @@ function DocumentsHub({
   /** Top-level navigation (e.g. to /pricing) — used by the expiry
       urgency banner so it can route free users to upgrade. */
   onNavigate: (page: string) => void;
+  /** Time-limited upgrade offer shown under the greeting. */
+  offerBanner?: React.ReactNode;
   /** Account controls (Saved Materials / Pomodoro / avatar). Sits in
       the greeting row so the header reads as one band. */
   topBar?: React.ReactNode;
@@ -1260,26 +1265,16 @@ function DocumentsHub({
 
   const combinedExpiry = useMemo(() => {
     if (isPaidUser) return null;
-    const now = Date.now();
-    const toDays = (iso: string) => Math.ceil((new Date(iso).getTime() - now) / 86_400_000);
-    const docDays = docs
-      .map((d) => d.expiresAt)
-      .filter((d): d is string => typeof d === 'string' && d.length > 0)
-      .map(toDays)
-      .filter((d) => d >= 0);
     const materialCount = expiryInfo?.materialCount ?? 0;
     const citationCount = expiryInfo?.citationCount ?? 0;
-    const documentCount = docDays.length;
-    if (materialCount + citationCount + documentCount === 0) return null;
-    const days: number[] = [...docDays];
-    if (expiryInfo) days.push(expiryInfo.soonestDays);
+    if (materialCount + citationCount === 0) return null;
     return {
       materialCount,
       citationCount,
-      documentCount,
-      soonestDays: Math.min(...days),
+      documentCount: 0,
+      soonestDays: expiryInfo?.soonestDays ?? 0,
     };
-  }, [docs, expiryInfo, isPaidUser]);
+  }, [expiryInfo, isPaidUser]);
 
   /* Quiet launch tiles — icon + copy only. Colour lives in the tools
    * themselves; the hub stays monochrome so nothing competes with the
@@ -1463,6 +1458,8 @@ function DocumentsHub({
           )}
         </div>
       )}
+
+      {offerBanner && <div className="mb-7 sm:mb-8">{offerBanner}</div>}
 
       {/* ─── Free-plan expiry nudge ─────────────────────────────── */}
       {!isPaidUser && combinedExpiry && (() => {
@@ -4392,9 +4389,13 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
     if (view === 'editor' && openDocId) void refreshUsage();
   }, [view, openDocId, refreshUsage]);
 
-  const promoBanner = !isPaidPlan(user) ? (
+  const flashOffer = useFlashOffer(!isPaidPlan(user));
+
+  const promoBanner = isPaidPlan(user) ? undefined : flashOffer.active ? (
+    <FlashOfferBanner offer={flashOffer} variant="strip" onNavigatePricing={() => onNavigate('pricing')} />
+  ) : (
     <PromoBanner variant="app" onCta={() => onNavigate('pricing')} ctaLabel="Unlock Pro" />
-  ) : undefined;
+  );
 
   // ─── Render ───────────────────────────────────────────────────
   const handleRailSelect = (v: WorkspaceView) => {
@@ -4591,6 +4592,11 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
             usage={docUsage}
             onSwitchView={handleRailSelect}
             onNavigate={onNavigate}
+            offerBanner={
+              flashOffer.active && !isPaidPlan(user) ? (
+                <FlashOfferBanner offer={flashOffer} variant="hero" onNavigatePricing={() => onNavigate('pricing')} />
+              ) : undefined
+            }
             topBar={dashboardTopBar}
             highlightDocId={highlightDocId}
             highlightPack={highlightPack}

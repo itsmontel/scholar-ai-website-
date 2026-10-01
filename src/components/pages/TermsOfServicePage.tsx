@@ -108,7 +108,7 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
                 <li>Verify your email address to activate your account</li>
                 <li>Maintain the security of your account credentials</li>
                 <li>Be responsible for all activities under your account</li>
-                <li>Notify us immediately of any unauthorized use at support@writescholar.com</li>
+                <li>Notify us immediately of any unauthorized use at anthonywritescholar@gmail.com</li>
               </ul>
               <p>
                 You may register using an email and password or via Google OAuth. You must be at least
@@ -181,7 +181,7 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
                 <li>You may upgrade or downgrade your plan at any time through your Billing settings</li>
                 <li>Promotional codes may be applied at checkout and are subject to their own terms</li>
                 <li>
-                  <strong className="text-stone-700 dark:text-stone-300">14-day refund window:</strong> If you cancel a new paid subscription within 14 days of your initial purchase, you may request a full refund — regardless of where you live. To request a refund within this window, email <a href="mailto:support@writescholar.com" className="font-bold hover:underline" style={{ color: '#1CB0F6' }}>support@writescholar.com</a> from the email address on the account. Refunds are typically processed within 5–10 business days back to your original payment method.
+                  <strong className="text-stone-700 dark:text-stone-300">14-day refund window:</strong> If you cancel a new paid subscription within 14 days of your initial purchase, you may request a full refund — regardless of where you live. To request a refund within this window, email <a href="mailto:anthonywritescholar@gmail.com" className="font-bold hover:underline" style={{ color: '#1CB0F6' }}>anthonywritescholar@gmail.com</a> from the email address on the account. Refunds are typically processed within 5–10 business days back to your original payment method.
                 </li>
                 <li>After the 14-day window has passed, fees are non-refundable except where required by applicable consumer-protection law in your jurisdiction</li>
                 <li>We reserve the right to change pricing with 30 days' notice to existing subscribers</li>
@@ -300,8 +300,8 @@ const TermsOfServicePage: React.FC<TermsOfServicePageProps> = ({ onNavigate, use
             <div className="space-y-4 text-stone-600 dark:text-stone-400 leading-relaxed">
               <p>If you have any questions about these terms, please contact us at:</p>
               <div className="border-2 border-b-4 rounded-xl p-4" style={{ borderColor: '#A560E8', backgroundColor: '#F3EAFF' }}>
-                <p className="dark:text-stone-800"><strong className="font-extrabold" style={{ color: '#8A48C7' }}>Email:</strong> legal@writescholar.com</p>
-                <p className="dark:text-stone-800"><strong className="font-extrabold" style={{ color: '#8A48C7' }}>Support:</strong> support@writescholar.com</p>
+                <p className="dark:text-stone-800"><strong className="font-extrabold" style={{ color: '#8A48C7' }}>Email:</strong> anthonywritescholar@gmail.com</p>
+                <p className="dark:text-stone-800"><strong className="font-extrabold" style={{ color: '#8A48C7' }}>Support:</strong> anthonywritescholar@gmail.com</p>
               </div>
             </div>
           </div>

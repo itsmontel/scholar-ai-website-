@@ -176,14 +176,30 @@ const startServer = async () => {
       
       // Run citation cleanup immediately on startup
       const subscriptionService = require('./services/subscriptionService');
-      subscriptionService.cleanupOldCitations()
-        .then(() => console.log('✅ Initial citation cleanup completed'))
-        .catch(error => console.error('❌ Initial citation cleanup failed:', error));
-
-      // Schedule citation cleanup to run daily (every 24 hours)
-      setInterval(async () => {
-        console.log('🧹 Running scheduled citation cleanup...');
+      const aiAnalysisService = require('./services/aiAnalysisService');
+      const cleanupStudyMaterials = async () => {
         await subscriptionService.cleanupOldCitations();
+        await aiAnalysisService.cleanupExpiredQuizzes();
+        await aiAnalysisService.cleanupExpiredLessons();
+      };
+      cleanupStudyMaterials()
+        .then(() => console.log('✅ Initial study-material cleanup completed'))
+        .catch(error => console.error('❌ Initial study-material cleanup failed:', error));
+
+      // Essays are kept. Clear any 30-day expiry stamped by the old rule.
+      try {
+        const documentService = require('./services/documentService');
+        documentService.cleanupExpiredDocuments()
+          .then(() => console.log('✅ Document expiry cleared (essays are kept)'))
+          .catch((error) => console.error('❌ Document expiry clear failed:', error));
+      } catch (error) {
+        console.error('❌ Document expiry clear failed:', error);
+      }
+
+      // Schedule study-pack and citation cleanup daily
+      setInterval(async () => {
+        console.log('🧹 Running scheduled study-material cleanup...');
+        await cleanupStudyMaterials();
       }, 24 * 60 * 60 * 1000); // 24 hours in milliseconds
 
       // Reconcile paid users with Stripe state on startup, then daily.

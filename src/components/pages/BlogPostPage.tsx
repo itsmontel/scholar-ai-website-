@@ -172,6 +172,68 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
           },
         ],
       });
+    } else if (post.slug === 'how-to-write-a-good-introduction') {
+      injectJsonLd('blog-post-howto', {
+        '@context': 'https://schema.org',
+        '@type': 'HowTo',
+        name: post.title,
+        description: post.description,
+        image: ogImage,
+        totalTime: 'PT45M',
+        step: [
+          { '@type': 'HowToStep', position: 1, name: 'Put the prompt in one sentence', text: 'Rewrite the brief as the question you are being asked to answer, and underline the task verb.' },
+          { '@type': 'HowToStep', position: 2, name: 'Write the thesis the body actually supports', text: 'Read the first sentence of each body paragraph. Those sentences should add up to one claim a classmate could disagree with.' },
+          { '@type': 'HowToStep', position: 3, name: 'Add only the context that thesis needs', text: 'Include what a reader who missed lecture would need in order to understand the claim. Cut background that does not change how they read it.' },
+          { '@type': 'HowToStep', position: 4, name: 'Put the thesis last in the introduction', text: 'In a short paper the introduction can be one paragraph and the claim is the final sentence. Do not announce that the essay will discuss the topic.' },
+          { '@type': 'HowToStep', position: 5, name: 'Read the introduction against the conclusion', text: 'Use the same key terms and the same claim. The conclusion can add a limit or a consequence. It should not introduce a new argument.' },
+        ],
+      });
+      injectJsonLd('blog-post-faq', {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          {
+            '@type': 'Question',
+            name: 'How long should an introduction be?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'For a short college essay, usually one paragraph, sometimes two. For a research paper, up to about a page. The introduction is long enough when a stranger knows the question and your claim.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'Should I write the introduction first?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Write a working thesis if you need a direction, then draft the body. Write the introduction after you know what the body actually argued.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'Do I need a hook?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'No. A hook is optional. The thesis is not. Rhetorical questions, famous quotes, and "imagine a world" usually delay the claim.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'Where does the thesis go in the introduction?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Usually the last sentence of the introduction, after the context that makes the claim intelligible. Do not save the claim for the conclusion.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'Can I use AI to write my introduction in 2026?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'On most campuses, feedback on a paragraph you wrote is treated differently from generated text. A chatbot hook is easy to spot because it fits any prompt. Rewrite the opening yourself.',
+            },
+          },
+        ],
+      });
     } else {
       removeJsonLd('blog-post-howto');
       removeJsonLd('blog-post-faq');

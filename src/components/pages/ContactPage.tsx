@@ -57,11 +57,11 @@ const ContactPage = ({ onNavigate, user, onLogout }: ContactPageProps) => {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <h3 className="text-sm font-bold text-stone-700 dark:text-stone-300 mb-2 uppercase tracking-wide">Email Address</h3>
-                <p className="text-xl sm:text-2xl font-extrabold text-[#A560E8]">support@writescholar.com</p>
+                <p className="text-xl sm:text-2xl font-extrabold text-[#A560E8] break-all">anthonywritescholar@gmail.com</p>
                 <p className="text-sm text-stone-600 dark:text-stone-400 mt-1 font-semibold">We respond within 24 hours</p>
               </div>
               <button
-                onClick={() => copyToClipboard('support@writescholar.com')}
+                onClick={() => copyToClipboard('anthonywritescholar@gmail.com')}
                 className="shrink-0 inline-flex items-center justify-center gap-2 bg-white dark:bg-stone-800 hover:bg-stone-50 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 px-4 py-2.5 rounded-xl border-2 border-b-4 border-stone-200 dark:border-stone-600 active:border-b-2 active:translate-y-0.5 transition-all font-extrabold uppercase tracking-wide text-sm"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -155,7 +155,7 @@ const ContactPage = ({ onNavigate, user, onLogout }: ContactPageProps) => {
           <div className="mt-8 bg-stone-50 dark:bg-stone-800 border-2 border-stone-200 dark:border-stone-700 rounded-xl p-6">
             <h3 className="text-sm font-bold text-stone-700 dark:text-stone-300 uppercase tracking-wide mb-4">Email Template</h3>
             <div className="bg-white dark:bg-stone-900 border-2 border-stone-200 dark:border-stone-600 rounded-xl p-4 font-mono text-sm text-stone-700 dark:text-stone-300 space-y-2">
-              <div><strong>To:</strong> support@writescholar.com</div>
+              <div><strong>To:</strong> anthonywritescholar@gmail.com</div>
               <div><strong>Subject:</strong> [CATEGORY] - Brief description of your issue</div>
               <div className="border-t-2 border-stone-200 dark:border-stone-600 pt-2 mt-2">
                 <div><strong>Hi WriteScholar Support,</strong></div>
@@ -168,7 +168,7 @@ const ContactPage = ({ onNavigate, user, onLogout }: ContactPageProps) => {
               </div>
             </div>
             <button
-              onClick={() => copyToClipboard(`To: support@writescholar.com
+              onClick={() => copyToClipboard(`To: anthonywritescholar@gmail.com
 Subject: [CATEGORY] - Brief description of your issue
 
 Hi WriteScholar Support,
@@ -200,7 +200,7 @@ Best regards,
               </svg>
             </div>
             <h3 className="text-base font-extrabold text-stone-800 dark:text-stone-100 mb-2">Email Support</h3>
-            <p className="text-stone-600 dark:text-stone-400 text-sm mb-1 font-semibold">support@writescholar.com</p>
+            <p className="text-stone-600 dark:text-stone-400 text-sm mb-1 font-semibold break-all">anthonywritescholar@gmail.com</p>
             <p className="text-xs text-stone-500 dark:text-stone-500 font-semibold">We respond within 24 hours</p>
           </div>
 

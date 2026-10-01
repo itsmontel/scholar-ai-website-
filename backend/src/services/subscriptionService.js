@@ -529,9 +529,9 @@ const checkTrialEligibility = async (email) => {
 // is only written on the `customer.subscription.created` webhook (a real
 // trial/paid subscription), so abandoned checkouts never count here.
 /**
- * True if this account has ever been on a paid plan. Used so library
- * items (documents, study packs, citations) stay forever after the
- * first paid month — even if they later cancel back to Free.
+ * True if this account has ever been on a paid plan.
+ * Study packs and citations follow the current plan: they expire 30
+ * days after a downgrade. Documents are kept either way.
  */
 const userKeepsLibraryForever = async (userId) => {
   if (!userId) return false;
@@ -564,15 +564,110 @@ const userKeepsLibraryForever = async (userId) => {
 
 let freeLibraryExpiryColumnMissing = false;
 
+const STUDY_EXPIRY_TABLES = ['quizzes', 'citation_searches', 'lesson_plans'];
+const freeExpiryChecked = new Set();
+
+/** Essays never expire. Drop a previously stamped expires_at. */
+const clearDocumentExpiry = async (userId) => {
+  let q = supabaseServiceRole.from('documents').update({ expires_at: null }).not('expires_at', 'is', null);
+  if (userId) q = q.eq('user_id', userId);
+  const { error } = await q;
+  if (error) {
+    const msg = `${error.message || ''}`.toLowerCase();
+    if (msg.includes('expires_at')) return;
+    throw error;
+  }
+};
+
 /**
- * Never-paid Free users: existing library rows stay (expires_at null)
- * until they next use the app. Then we stamp a 30-day window so items
- * are not deleted while they are away. Idempotent via
- * users.free_library_expiry_started_at.
+ * Free accounts: study packs and citations with no deadline get 30 days.
+ * shortenLater pulls in anything that would otherwise outlive a downgrade.
+ */
+const stampStudyMaterialExpiry = async (userId, expiresAt, shortenLater) => {
+  const jobs = [];
+  for (const table of STUDY_EXPIRY_TABLES) {
+    jobs.push(
+      supabaseServiceRole.from(table).update({ expires_at: expiresAt }).eq('user_id', userId).is('expires_at', null)
+    );
+    if (shortenLater) {
+      jobs.push(
+        supabaseServiceRole.from(table).update({ expires_at: expiresAt }).eq('user_id', userId).gt('expires_at', expiresAt)
+      );
+    }
+  }
+  const results = await Promise.all(jobs);
+  for (const { error } of results) {
+    if (!error) continue;
+    const msg = `${error.message || ''}`.toLowerCase();
+    if (msg.includes('expires_at') || msg.includes('does not exist') || msg.includes('schema cache')) continue;
+    throw error;
+  }
+};
+
+/**
+ * Paid → Free: every study pack and citation lasts 30 days from the
+ * downgrade, then is deleted. Documents are left in place.
+ */
+const startDowngradeMaterialExpiry = async (userId) => {
+  if (!userId) return;
+  freeExpiryChecked.delete(userId);
+  const now = new Date();
+  const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+  await stampStudyMaterialExpiry(userId, expiresAt, true);
+  await clearDocumentExpiry(userId);
+  await supabaseServiceRole
+    .from('users')
+    .update({ free_library_expiry_started_at: now.toISOString() })
+    .eq('id', userId);
+  freeExpiryChecked.add(userId);
+};
+
+/** Paid again: drop the free-plan clock so the next downgrade starts fresh. */
+const noteLibraryKeptForever = async (userId) => {
+  if (!userId) return;
+  freeExpiryChecked.delete(userId);
+  await supabaseServiceRole
+    .from('users')
+    .update({ free_library_expiry_started_at: null })
+    .eq('id', userId);
+};
+
+/** Current paid plan: essays, study packs, and citations have no expiry. */
+const ensurePaidLibraryPermanent = async (userId, plan) => {
+  if (!userId || !isPaidSubscriptionTier(plan)) return;
+  try {
+    const documentService = require('./documentService');
+    await documentService.makeUserDocumentsPermanent(userId);
+  } catch (err) {
+    console.error('Error persisting documents after paid conversion:', err);
+  }
+  try {
+    const aiAnalysisService = require('./aiAnalysisService');
+    await aiAnalysisService.makeUserMaterialsPermanent(userId);
+  } catch (err) {
+    console.error('Error persisting study materials after paid conversion:', err);
+  }
+  try {
+    await noteLibraryKeptForever(userId);
+  } catch (err) {
+    console.error('Error clearing free library expiry flag:', err);
+  }
+};
+
+/**
+ * Free users: study packs and saved citations last 30 days. Documents
+ * do not. A paid account skips this; downgrade starts a new window.
  */
 const startFreeLibraryExpiryClock = async (userId, userRow = null) => {
   if (!userId || freeLibraryExpiryColumnMissing) return;
-  if (userRow && userRow.free_library_expiry_started_at) return;
+  if (isPaidSubscriptionTier(userRow?.subscription_plan)) {
+    freeExpiryChecked.delete(userId);
+    if (userRow?.free_library_expiry_started_at) {
+      await supabaseServiceRole.from('users').update({ free_library_expiry_started_at: null }).eq('id', userId);
+    }
+    return;
+  }
+  if (freeExpiryChecked.has(userId)) return;
 
   const columnMissing = (err) => {
     const msg = `${err?.message || ''}`.toLowerCase();
@@ -580,44 +675,21 @@ const startFreeLibraryExpiryClock = async (userId, userRow = null) => {
   };
 
   try {
-    const { data: fresh, error: readErr } = await supabaseServiceRole
-      .from('users')
-      .select('free_library_expiry_started_at')
-      .eq('id', userId)
-      .maybeSingle();
-    if (readErr) {
-      if (columnMissing(readErr)) {
-        freeLibraryExpiryColumnMissing = true;
-        return;
-      }
-      throw readErr;
-    }
-    if (fresh?.free_library_expiry_started_at) return;
+    const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    await stampStudyMaterialExpiry(userId, expiresAt, false);
+    await clearDocumentExpiry(userId);
 
-    const now = new Date().toISOString();
-    const keepForever = await userKeepsLibraryForever(userId);
-    if (!keepForever) {
-      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-      await Promise.all([
-        supabaseServiceRole.from('documents').update({ expires_at: expiresAt, updated_at: now }).eq('user_id', userId).is('expires_at', null),
-        supabaseServiceRole.from('quizzes').update({ expires_at: expiresAt }).eq('user_id', userId).is('expires_at', null),
-        supabaseServiceRole.from('citation_searches').update({ expires_at: expiresAt }).eq('user_id', userId).is('expires_at', null),
-        supabaseServiceRole.from('lesson_plans').update({ expires_at: expiresAt }).eq('user_id', userId).is('expires_at', null),
-      ]);
-    }
-
-    const { error: flagErr } = await supabaseServiceRole
-      .from('users')
-      .update({ free_library_expiry_started_at: now })
-      .eq('id', userId)
-      .is('free_library_expiry_started_at', null);
-    if (flagErr) {
-      if (columnMissing(flagErr)) {
+    if (!userRow?.free_library_expiry_started_at) {
+      const { error: flagErr } = await supabaseServiceRole
+        .from('users')
+        .update({ free_library_expiry_started_at: new Date().toISOString() })
+        .eq('id', userId)
+        .is('free_library_expiry_started_at', null);
+      if (flagErr && columnMissing(flagErr)) {
         freeLibraryExpiryColumnMissing = true;
-        return;
       }
-      console.error('Error marking library expiry clock started:', flagErr);
     }
+    freeExpiryChecked.add(userId);
   } catch (err) {
     console.error('Error starting free library expiry clock:', err);
   }
@@ -626,13 +698,102 @@ const startFreeLibraryExpiryClock = async (userId, userRow = null) => {
 const hasEverSubscribed = async (userId) => {
   if (!userId) return false;
   try {
-    const result = await query('SELECT 1 FROM subscriptions WHERE user_id = $1 LIMIT 1', [userId]);
-    return result.rows.length > 0;
+    const { data, error } = await supabaseServiceRole
+      .from('subscriptions')
+      .select('id')
+      .eq('user_id', userId)
+      .limit(1);
+    if (error) throw error;
+    return Array.isArray(data) && data.length > 0;
   } catch (err) {
     console.error('Error in hasEverSubscribed:', err);
     // Fall back to the trial_usage signal (don't suppress the paywall on a
     // transient DB error — that would let it leak away for everyone).
     return false;
+  }
+};
+
+// First-day flash offer: Pro monthly for $4.99 the first month, for 24 hours.
+// New accounts: the window starts at signup. Older accounts that have never
+// had a paid plan: the window starts the first time they come back, and is
+// not restarted on later logins. Anyone who has ever had Pro, Premium, or
+// Focus does not get it. Applied as a Stripe coupon (not a promotion code)
+// so it cannot be typed in after the window closes.
+const FLASH_OFFER_HOURS = Number(process.env.FLASH_OFFER_HOURS) > 0 ? Number(process.env.FLASH_OFFER_HOURS) : 24;
+const FLASH_COUPON_ID = (process.env.STRIPE_FLASH_COUPON_ID || 'FIRSTDAY499').trim();
+const FLASH_OFFER_MS = FLASH_OFFER_HOURS * 60 * 60 * 1000;
+const PAID_SUBSCRIPTION_STATUSES = ['active', 'trialing', 'canceled', 'cancelled', 'past_due', 'paused', 'unpaid'];
+
+/** True when this account has ever had a real paid plan, including a canceled one. */
+const hasEverHadPaidPlan = async (userId) => {
+  if (!userId) return false;
+  const { data, error } = await supabaseServiceRole
+    .from('subscriptions')
+    .select('plan, status')
+    .eq('user_id', userId)
+    .limit(50);
+  if (error) throw error;
+  return (data || []).some((row) => {
+    const plan = String(row.plan || '').toLowerCase();
+    const status = String(row.status || '').toLowerCase();
+    const paidPlan = plan === 'pro' || plan === 'premium' || plan === 'starter' || plan === 'focus';
+    return paidPlan && PAID_SUBSCRIPTION_STATUSES.includes(status);
+  });
+};
+
+const FLASH_OFFER_STAT_KEY = 'flash_offer_started_at';
+
+/**
+ * Stamp the offer start once, on the achievements row (merged so later
+ * badge syncs cannot clear it). New signups keep their signup time so the
+ * window does not get extended. Everyone else starts now.
+ */
+const ensureFlashOfferStarted = async (user) => {
+  const { data: existing, error: readErr } = await supabaseServiceRole
+    .from('user_achievements')
+    .select('stats')
+    .eq('user_id', user.id)
+    .maybeSingle();
+  if (readErr) throw readErr;
+  const stats = existing?.stats && typeof existing.stats === 'object' ? existing.stats : {};
+  if (typeof stats[FLASH_OFFER_STAT_KEY] === 'string' && stats[FLASH_OFFER_STAT_KEY]) {
+    return stats[FLASH_OFFER_STAT_KEY];
+  }
+
+  const createdMs = user.created_at ? new Date(user.created_at).getTime() : NaN;
+  const stillInSignupWindow = Number.isFinite(createdMs) && Date.now() < createdMs + FLASH_OFFER_MS;
+  const startIso = stillInSignupWindow ? new Date(createdMs).toISOString() : new Date().toISOString();
+  const nextStats = { ...stats, [FLASH_OFFER_STAT_KEY]: startIso };
+  const now = new Date().toISOString();
+
+  const write = existing
+    ? supabaseServiceRole
+        .from('user_achievements')
+        .update({ stats: nextStats, updated_at: now })
+        .eq('user_id', user.id)
+    : supabaseServiceRole
+        .from('user_achievements')
+        .insert({ user_id: user.id, stats: nextStats, unlocked_badges: {}, updated_at: now });
+  const { error: writeErr } = await write;
+  if (writeErr) throw writeErr;
+  return startIso;
+};
+
+/** Deadline (ms epoch) of the user's flash offer, or null when they are not eligible right now. */
+const getFlashOfferEndsAt = async (user) => {
+  if (!user?.id) return null;
+  if (isPaidSubscriptionTier(user.subscription_plan)) return null;
+  try {
+    if (await hasEverHadPaidPlan(user.id)) return null;
+    const startedAt = await ensureFlashOfferStarted(user);
+    const startedMs = new Date(startedAt).getTime();
+    if (!Number.isFinite(startedMs)) return null;
+    const endsAt = startedMs + FLASH_OFFER_MS;
+    if (Date.now() >= endsAt) return null;
+    return endsAt;
+  } catch (err) {
+    console.error('getFlashOfferEndsAt: eligibility check failed:', err);
+    return null;
   }
 };
 
@@ -823,8 +984,24 @@ const createCheckoutSession = async (
       sessionConfig.cancel_url = finalCancelUrl;
     }
 
+    // options.couponId wins over the promo code; if the coupon is missing
+    // or invalid in Stripe we fall through to the promo code below.
+    if (options.couponId) {
+      try {
+        const coupon = await stripe.coupons.retrieve(options.couponId);
+        if (coupon && coupon.valid) {
+          delete sessionConfig.allow_promotion_codes;
+          sessionConfig.discounts = [{ coupon: coupon.id }];
+        } else {
+          console.warn(`Coupon "${options.couponId}" is not valid; falling back to promo code`);
+        }
+      } catch (couponError) {
+        console.warn(`Coupon "${options.couponId}" could not be loaded; falling back to promo code:`, couponError.message);
+      }
+    }
+
     // If a specific promo code is provided in the request, apply it directly
-    if (effectivePromo) {
+    if (effectivePromo && !sessionConfig.discounts) {
       try {
         // Find the promotion code in Stripe
         const promoCodes = await stripe.promotionCodes.list({
@@ -1694,16 +1871,27 @@ const reconcileSubscriptions = async () => {
     // refunded users we want to keep on Pro). The cron will not touch them
     // even if their Stripe subscription is canceled or absent.
     // See add_manual_grant_column.sql migration.
-    const result = await query(
-      `SELECT id, email, stripe_customer_id, subscription_plan
-         FROM users
-        WHERE subscription_plan IS NOT NULL
-          AND subscription_plan != 'free'
-          AND stripe_customer_id IS NOT NULL
-          AND manual_grant = false`
-    );
+    // The SQL helper drops WHERE clauses it cannot parse (`!=`), which
+    // pulled in free accounts. Use the Supabase filters instead.
+    let { data: paidRows, error: paidErr } = await supabaseServiceRole
+      .from('users')
+      .select('id, email, stripe_customer_id, subscription_plan, manual_grant')
+      .not('subscription_plan', 'is', null)
+      .neq('subscription_plan', 'free')
+      .not('stripe_customer_id', 'is', null);
+    if (paidErr && `${paidErr.message || ''}`.toLowerCase().includes('manual_grant')) {
+      const retry = await supabaseServiceRole
+        .from('users')
+        .select('id, email, stripe_customer_id, subscription_plan')
+        .not('subscription_plan', 'is', null)
+        .neq('subscription_plan', 'free')
+        .not('stripe_customer_id', 'is', null);
+      paidRows = retry.data;
+      paidErr = retry.error;
+    }
+    if (paidErr) throw paidErr;
 
-    const allUsers = result.rows || [];
+    const allUsers = (paidRows || []).filter((u) => u.manual_grant !== true);
     // Some legacy rows have stripe_customer_id = '' (empty string), which
     // passes the IS NOT NULL filter but breaks Stripe's API. Drop them here.
     const users = allUsers.filter((u) => {
@@ -1733,6 +1921,9 @@ const reconcileSubscriptions = async () => {
 
         if (hasAccess) continue;
 
+        const previousPlan = `${user.subscription_plan || ''}`.toLowerCase();
+        if (!previousPlan || previousPlan === 'free') continue;
+
         // Stripe says no access, but our DB has them on a paid tier — downgrade.
         const newestSub = stripeSubs.data[0];
         const dbStatus = newestSub?.status || 'canceled';
@@ -1761,6 +1952,8 @@ const reconcileSubscriptions = async () => {
           .eq('user_id', user.id)
           .neq('status', 'canceled');
         if (subErr) throw subErr;
+
+        await startDowngradeMaterialExpiry(user.id);
 
         console.log(
           `🔄 Reconcile: downgraded user ${user.id} (${user.email}) from ${user.subscription_plan} → free (Stripe status: ${dbStatus})`
@@ -1842,6 +2035,7 @@ const syncCheckoutSessionForUser = async (sessionId, appUserId) => {
       'UPDATE users SET subscription_plan = $1, subscription_status = $2, onboarding_completed = true WHERE id = $3',
       [plan, subscription.status, userRow.id]
     );
+    await ensurePaidLibraryPermanent(userRow.id, plan);
 
     try {
       const cancelAtPeriodEnd = Boolean(subscription.cancel_at_period_end);
@@ -1904,8 +2098,14 @@ module.exports = {
   getPlanLimits,
   checkTrialEligibility,
   hasEverSubscribed,
+  FLASH_OFFER_HOURS,
+  FLASH_COUPON_ID,
+  getFlashOfferEndsAt,
   userKeepsLibraryForever,
   startFreeLibraryExpiryClock,
+  startDowngradeMaterialExpiry,
+  noteLibraryKeptForever,
+  ensurePaidLibraryPermanent,
   checkOff10Eligibility,
   recordTrialUsage,
   recordTrialDecline,

@@ -27,6 +27,21 @@ export const BLOG_DEFAULT_AUTHOR_BIO =
 
 export const blogPostList: BlogPostMeta[] = [
   {
+    slug: 'how-to-write-a-good-introduction',
+    title: 'How to Write a Good Introduction in 2026',
+    description:
+      'How to write a good introduction in 2026: context, the question, and a thesis. What to cut, weak vs strong examples, and why the opening is written last.',
+    date: '2026-09-25',
+    author: 'WriteScholar Team',
+    readTime: '11 min read',
+    category: 'Guides',
+    keyTakeaways: [
+      'A good introduction does three jobs: the context a stranger needs, the question the paper answers, and a thesis someone could disagree with.',
+      'Write the body first. Openings written first turn into dictionary definitions, plot summary, and “this essay will discuss.”',
+      'In 2026 a chatbot hook is a tell. Use a tool to check whether the opening answers the prompt, then rewrite the paragraph yourself.',
+    ],
+  },
+  {
     slug: 'how-to-write-an-essay-or-assignment',
     title: 'How to Write an Essay or Assignment in 2026 (Step by Step)',
     description:

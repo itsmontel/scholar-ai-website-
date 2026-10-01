@@ -5,7 +5,8 @@ import {
 } from '../../constants/freePlanCopy';
 import Footer from '../common/Footer';
 import CancelRetentionModal from '../common/CancelRetentionModal';
-import { FIRST_MONTH_PRICE, signupPromoCode, showSignupDiscount } from '../../config/pricing';
+import { FIRST_MONTH_PRICE, FLASH_FIRST_MONTH_PRICE, signupPromoCode, showSignupDiscount } from '../../config/pricing';
+import { useFlashOffer } from '../../hooks/useFlashOffer';
 
 interface BillingPageProps {
   onNavigate?: (page: string) => void;
@@ -59,6 +60,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
   // the NEWCUSTOMER first-month discount. Backend re-verifies at
   // checkout, so an optimistic default is safe.
   const [newCustomer, setNewCustomer] = useState<boolean>(false);
+  const flashOffer = useFlashOffer(currentPlan === 'free');
   const [usageStats, setUsageStats] = useState<UsageStats>({
     documentsUploaded: 0,
     documentsAnalyzed: 0,
@@ -442,14 +444,23 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
                       ${plan.price.toFixed(2)}
                     </span>
                     <span className="text-4xl font-extrabold text-stone-800">
-                      ${(FIRST_MONTH_PRICE[plan.id] ?? plan.price).toFixed(2)}
+                      ${(plan.id === 'pro' && flashOffer.active
+                        ? FLASH_FIRST_MONTH_PRICE
+                        : FIRST_MONTH_PRICE[plan.id] ?? plan.price
+                      ).toFixed(2)}
                     </span>
                     <span className="text-stone-500 text-sm">
                       first month, then ${plan.price.toFixed(2)}/mo
                     </span>
-                    <span className="text-[#46A302] text-xs font-extrabold">
-                      NEWCUSTOMER discount applied at checkout
-                    </span>
+                    {plan.id === 'pro' && flashOffer.active ? (
+                      <span className="inline-flex items-center rounded-lg bg-[#FF4B4B] px-2 py-0.5 font-mono text-xs font-extrabold tabular-nums text-white">
+                        First-day price ends in {flashOffer.hours}:{flashOffer.minutes}:{flashOffer.seconds}
+                      </span>
+                    ) : (
+                      <span className="text-[#46A302] text-xs font-extrabold">
+                        NEWCUSTOMER discount applied at checkout
+                      </span>
+                    )}
                   </div>
                 ) : plan.id !== 'free' && billingCycle === 'yearly' ? (
                   /* Yearly price display — mirrors the pricing page:

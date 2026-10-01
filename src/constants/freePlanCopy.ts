@@ -19,7 +19,7 @@ export const FREE_PLAN_SUMMARY_SHORT =
 
 /** Subtitle under pricing / billing Free cards */
 export const FREE_PLAN_DESCRIPTION =
-  'Find out what’s holding your grade back — two free essay checks and two study packs. Pro shows you exactly how to fix it, 50% off your first month.';
+  'Find out what’s holding your grade back. Two free essay checks and two study packs. Pro shows you exactly how to fix it, 50% off your first month.';
 
 /** Reusable upgrade line. Use this wherever a CTA needs a friction note. */
 export const TRIAL_CTA_FOOTNOTE =
@@ -47,7 +47,7 @@ export const FREE_PLAN_FEATURE_BULLETS_COMPACT = [
 
 /** “What you don’t get” row on the pricing page Free card */
 export const FREE_PLAN_LIMITATIONS = [
-  'How to fix each flagged sentence — comments, rewrites & one-click apply (Pro)',
+  'How to fix each flagged sentence: comments, rewrites, and one-click apply (Pro)',
   'The full deck, quiz & games to lock it in before the exam (Pro)',
   'Full source lists & export so your references are done (Pro)',
 ] as const;

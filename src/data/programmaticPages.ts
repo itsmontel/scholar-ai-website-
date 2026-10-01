@@ -27,7 +27,7 @@ const PRO_PRICING_CELL = '50% off first month · $19.99/mo Pro';
 
 /** Short free-plan explainer for alternative-page FAQs. */
 const FREE_PLAN_PROG_SHORT =
-  'A free account gets you the standalone utilities (word counter, citation generator, thesis helper, outline, grammar check, GPA calculator) with no card. AI features include a free preview (essay analysis, study packs, citation finder); unlock the rest with Pro — 50% off the first month ($9.99), then $19.99/mo.';
+  'A free account lets you see what is holding your grade back: a preview of essay feedback, a study pack, and a citation search, plus standalone utilities with no card. Pro shows you exactly how to fix it. 50% off the first month ($9.99), then $19.99/mo.';
 
 /** Signup step copy — preview first, then discounted Pro. */
 const FREE_SIGNUP_STEP =
@@ -298,7 +298,7 @@ function subjectPage(s: SubjectMeta): ProgrammaticPageConfig {
     .map((x) => ({
       label: `${x.name} study tools`,
       href: `/study/${x.slug}`,
-      teaser: `Flashcards, quizzes, and summaries for ${x.niceName}.`,
+      teaser: `Remember ${x.niceName} on exam day, not the night before.`,
     }));
   // STEM students mostly write research papers; humanities students write analytical/argumentative essays
   const guideLink = STEM_SUBJECTS.has(s.slug)
@@ -308,20 +308,20 @@ function subjectPage(s: SubjectMeta): ProgrammaticPageConfig {
   return {
     slug: s.slug,
     type: 'subject',
-    metaTitle: `${s.name} Study Tools, Free Flashcards, Quizzes, Notes | WriteScholar`,
-    metaDescription: `Study ${s.niceName} smarter with AI tools. Turn ${s.niceName} lecture notes into flashcards, quizzes, and summaries. Preview free, then Pro at 50% off first month.`,
-    h1: `Study ${s.name} smarter, built for ${s.niceName} students`,
-    subtitle: `AI tools that turn your ${s.niceName} notes into flashcards, quizzes, and summaries. Preview free, then unlock Pro at 50% off your first month.`,
+    metaTitle: `${s.name} Study Tools for Exam Day | WriteScholar`,
+    metaDescription: `Remember ${s.niceName} on exam day. Turn lecture notes into flashcards and quizzes, and see what is costing you marks before you submit. Start free.`,
+    h1: `Walk into your ${s.name} exam already knowing it`,
+    subtitle: `Paste this week's ${s.niceName} notes. Leave with the terms, problems, and arguments you can actually recall when the exam starts.`,
     eyebrow: `${s.name} study tools`,
     accent: s.accent,
     intro: s.intro,
     sections: [
       {
         type: 'list',
-        heading: `What ${s.niceName} students use WriteScholar for`,
+        heading: `The ${s.niceName} topics that fade before the exam`,
         items: s.topics.map((topic) => ({
           title: topic,
-          body: `Paste your ${topic.toLowerCase()} notes into WriteScholar to instantly generate flashcards, quiz questions, and concept summaries. The AI extracts key terms and definitions automatically.`,
+          body: `Stop re-reading ${topic.toLowerCase()} the night before. Paste your notes and get flashcards and quizzes that make it stick for the exam.`,
         })),
       },
       // Hand-written deep-dive content (real flashcards, exam questions) for
@@ -329,8 +329,8 @@ function subjectPage(s: SubjectMeta): ProgrammaticPageConfig {
       ...(s.deepDive ?? []),
       {
         type: 'paragraph',
-        heading: `Course examples, ${s.name} classes WriteScholar handles`,
-        body: `${s.courses.join('. ')}. Whether you're in an intro survey class or a senior seminar, paste your lecture notes or textbook chapters in and let WriteScholar build the study tools. ${s.name} courses tend to be cumulative, what you learn in week 1 shows up on the final, so spaced-repetition flashcards (built into our flashcard maker) become essential by mid-term.`,
+        heading: `The ${s.name} courses where this pays off`,
+        body: `${s.courses.join('. ')}. ${s.name} is cumulative: what you learn in week 1 shows up on the final. Paste the lecture or the chapter and you get recall practice that keeps earlier material from fading by mid-term.`,
       },
       {
         type: 'list',
@@ -339,12 +339,12 @@ function subjectPage(s: SubjectMeta): ProgrammaticPageConfig {
       },
       {
         type: 'steps',
-        heading: `How to get started with ${s.niceName} on WriteScholar`,
+        heading: `How to get exam-ready in ${s.niceName}`,
         steps: [
-          { title: 'Upload your notes', body: `Drop in lecture notes, textbook chapters, or even a screenshot of a slide. WriteScholar handles PDF, DOCX, and plain text.` },
-          { title: 'Generate study tools', body: `Pick what you want, flashcards for terminology, a quiz for self-testing, a summary for review, or all three at once with our Study Pack feature.` },
-          { title: 'Study with active recall', body: `Active recall (flashcards + quizzes) outperforms passive review (rereading) by 50%+ on retention. The first ${s.niceName} exam after switching to active recall is usually a noticeable grade jump.` },
-          { title: 'Track your weak spots', body: `WriteScholar tracks which questions you get wrong and prioritises them in future sessions. By exam time, you\'ve drilled exactly the topics you struggle with.` },
+          { title: 'Drop in this week\'s notes', body: `A lecture, a textbook chapter, or a slide deck. PDF, Word, or plain text.` },
+          { title: 'See what you do not know yet', body: `Terms become flashcards, gaps become a quiz, and the night-before review becomes a short summary. Or all three from one paste.` },
+          { title: 'Remember it on exam day', body: `Testing yourself beats re-reading. The first ${s.niceName} exam after you switch to active recall is usually where the grade moves.` },
+          { title: 'Drill the questions you miss', body: `Wrong answers come back until you get them right, so exam week is spent on your weak spots, not the material you already know.` },
         ],
       },
     ],
@@ -352,7 +352,7 @@ function subjectPage(s: SubjectMeta): ProgrammaticPageConfig {
       { question: `Is WriteScholar free for ${s.niceName} students?`, answer: freeSubjectFaqAnswer(s.niceName) },
       { question: `Will it work with my professor's lecture slides?`, answer: `Yes. Paste the slide content as text or upload the PDF directly. WriteScholar parses the slides and pulls out concepts, terms, and questions automatically.` },
       { question: `Can I use WriteScholar on my phone?`, answer: `Yes. The web app is mobile-responsive, and we have native iOS and Android apps with the same study tools, flashcards work especially well on phones for spaced-repetition during commutes.` },
-      { question: `How is this different from Quizlet?`, answer: `Quizlet requires you to manually build flashcard decks. WriteScholar auto-generates them from your notes in seconds. We also include the AI essay checker, summarizer, and quiz generator that Quizlet doesn't have.` },
+      { question: `How is this different from Quizlet?`, answer: `Quizlet makes you type every card yourself, then paywalls the practice modes. WriteScholar turns the notes you already have into recall practice in seconds, and also shows you what is costing you marks on the essay before you hand it in.` },
       { question: `Is it safe to use for ${s.niceName} coursework?`, answer: `Yes. WriteScholar generates study tools from YOUR notes, it's not generating answers to homework or essays. Used as a study aid (flashcards, quizzes), it's the same as building flashcards by hand, just faster.` },
       { question: `What if I'm taking ${s.niceName} at a UK or AU university?`, answer: `WriteScholar works for any English-language ${s.niceName} curriculum, UK, AU, US, Canada, and most international schools. Course numbering and terminology may differ but the core material is the same.` },
     ],
@@ -363,11 +363,11 @@ function subjectPage(s: SubjectMeta): ProgrammaticPageConfig {
       // One subject-relevant writing guide.
       guideLink,
       // Then 3 high-leverage tool links.
-      { label: 'AI Flashcard Maker', href: '/tools/create-flashcards', teaser: `Build flashcard decks from your ${s.niceName} notes.` },
-      { label: 'AI Quiz Generator', href: '/tools/quiz-generator', teaser: `Generate ${s.niceName} practice quizzes from notes.` },
-      { label: 'AI Summarizer', href: '/tools/summarizer', teaser: `Condense long ${s.niceName} chapters fast.` },
+      { label: 'AI Flashcard Maker', href: '/tools/create-flashcards', teaser: `Remember ${s.niceName} terms instead of re-reading them.` },
+      { label: 'AI Quiz Generator', href: '/tools/quiz-generator', teaser: `Find the gaps before the ${s.niceName} exam does.` },
+      { label: 'AI Summarizer', href: '/tools/summarizer', teaser: `Get through a ${s.niceName} chapter in minutes, then actually remember it.` },
     ],
-    primaryCta: { label: `Preview ${s.niceName} tools free`, page: 'signup' },
+    primaryCta: { label: 'Get exam-ready free', page: 'signup' },
     secondaryCta: { label: 'See all tools', page: 'more-tools' },
   };
 }
@@ -1088,6 +1088,7 @@ function essayGuidePage(g: EssayGuideMeta): ProgrammaticPageConfig {
     // guide pages are the largest block of essay-intent internal links we own.
     related: [
       { label: 'How to write an essay or assignment', href: '/blog/how-to-write-an-essay-or-assignment', teaser: 'The 2026 step-by-step process for any prompt.' },
+      { label: 'How to write a good introduction', href: '/blog/how-to-write-a-good-introduction', teaser: 'Context, question, and thesis. Write the opening last.' },
       { label: 'AI College Essay Grader', href: '/ai-essay-editor', teaser: 'Write your essay and see the grade update as you revise.' },
       { label: 'AI Essay Checker', href: '/tools/analyze', teaser: 'Get rubric-based feedback and a polished revision.' },
       { label: 'Thesis Generator', href: '/tools/thesis-generator', teaser: 'Build a strong thesis statement.' },

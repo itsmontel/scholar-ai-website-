@@ -14,7 +14,8 @@ import {
 // on first paint so the conversion event isn't racing the script load.
 import { trackTrialConversion } from '../../utils/gtag';
 import BadgeCreature from '../common/BadgeCreature';
-import { signupPromoCode, showSignupDiscount, STANDARD_MONTHLY_PRICE, FIRST_MONTH_PRICE, TRIAL_DAYS, UPGRADE_CTA_FOOTNOTE } from '../../config/pricing';
+import { signupPromoCode, showSignupDiscount, STANDARD_MONTHLY_PRICE, FIRST_MONTH_PRICE, FLASH_FIRST_MONTH_PRICE, TRIAL_DAYS, UPGRADE_CTA_FOOTNOTE } from '../../config/pricing';
+import { useFlashOffer } from '../../hooks/useFlashOffer';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -380,7 +381,7 @@ const PLANS: Record<PlanId, Plan> = {
       'Fix it in one click, straight into your draft',
       'See your score before your professor does',
       'Walk into exams ready with flashcards & quizzes',
-      'References done right — APA, MLA & Chicago',
+      'References done right in APA, MLA, and Chicago',
     ],
     monthly: {
       firstCyclePrice: '$9.99',
@@ -1133,6 +1134,8 @@ function OnboardingSignOutButton({ onLogout }: { onLogout?: () => void }) {
    Main component
    ═══════════════════════════════════════════════════════════════ */
 const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, testMode = false, forceTrialGate = false, paywallOverlay = false, onClose }: OnboardingPageProps) => {
+  const flashOffer = useFlashOffer(!testMode);
+  const proFirstMonth = flashOffer.active ? FLASH_FIRST_MONTH_PRICE : FIRST_MONTH_PRICE.pro;
   const [phase, setPhase] = useState<Phase>(() => getInitialPhase(forceTrialGate, paywallOverlay));
   const [displayName, setDisplayName] = useState(user?.name || '');
   const [username, setUsername] = useState(user?.username || '');
@@ -2415,17 +2418,19 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                   <div className="flex-1 min-w-0">
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#C9A0F0]/15 border-2 border-[#C9A0F0]/45 text-[#7733B5] text-[10px] font-extrabold uppercase tracking-[0.18em] mb-2 shadow-[0_4px_14px_-4px_rgba(122,52,182,0.45)]">
                       <span aria-hidden>✨</span>{' '}
-                      {TRIAL_DAYS > 0 ? `${TRIAL_DAYS}-day free trial` : '50% off first month'}
+                      {TRIAL_DAYS > 0 ? `${TRIAL_DAYS}-day free trial` : flashOffer.active ? '$4.99 first month' : '50% off first month'}
                     </span>
                     <h1 className="text-[1.6rem] sm:text-[1.85rem] lg:text-[2rem] xl:text-[2.2rem] font-extrabold leading-[1.05] tracking-tight text-[#3C3C3C] dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                       {TRIAL_DAYS > 0
                         ? `Try Pro free for ${TRIAL_DAYS} days${firstName ? `, ${firstName}` : ''}`
-                        : `Get Pro for $${FIRST_MONTH_PRICE.pro}${firstName ? `, ${firstName}` : ''}`}
+                        : `Get Pro for $${proFirstMonth}${firstName ? `, ${firstName}` : ''}`}
                     </h1>
                     <p className="mt-2 text-stone-600 dark:text-stone-400 text-[13px] sm:text-sm font-bold">
                       {TRIAL_DAYS > 0
                         ? '$0 today · Cancel anytime · Apple Pay · Google Pay · all major cards'
-                        : `50% off first month · then $${STANDARD_MONTHLY_PRICE.pro}/mo · Cancel anytime`}
+                        : flashOffer.active
+                          ? `$${proFirstMonth} your first month · then $${STANDARD_MONTHLY_PRICE.pro}/mo · Cancel anytime`
+                          : `50% off first month · then $${STANDARD_MONTHLY_PRICE.pro}/mo · Cancel anytime`}
                     </p>
                   </div>
                 </div>
@@ -2523,6 +2528,9 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                   {(showPremium ? (['pro', 'premium'] as const) : (['pro'] as const)).map((planId) => {
                     const plan = PLANS[planId];
                     const cycleData = plan[billingCycle];
+                    const flashPro = flashOffer.active && planId === 'pro' && billingCycle === 'monthly';
+                    const firstPrice = flashPro ? `$${FLASH_FIRST_MONTH_PRICE}` : cycleData.firstCyclePrice;
+                    const offLabel = flashPro ? '75% off' : '50% off';
                     const isSelected = selectedPlanId === planId;
                     return (
                       <button
@@ -2577,7 +2585,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                             {TRIAL_DAYS > 0
                               ? '$0'
                               : showSignupDiscount(true, billingCycle)
-                                ? cycleData.firstCyclePrice
+                                ? firstPrice
                                 : cycleData.rolloverPrice}
                           </span>
                           <span className="text-xs font-bold text-stone-500 dark:text-stone-400">
@@ -2596,10 +2604,10 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                                     {cycleData.rolloverPrice}
                                   </span>{' '}
                                   <span className="font-extrabold text-[#7733B5]">
-                                    {cycleData.firstCyclePrice}
+                                    {firstPrice}
                                   </span>{' '}
                                   <span className="inline-flex items-center rounded-md bg-[#7733B5]/12 px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-[#7733B5]">
-                                    50% off {cycleData.firstCycleLabel}
+                                    {offLabel} {cycleData.firstCycleLabel}
                                   </span>
                                 </>
                               ) : (
@@ -2617,10 +2625,10 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                                 {cycleData.rolloverPrice}
                               </span>{' '}
                               <span className="font-extrabold text-[#7733B5]">
-                                {cycleData.firstCyclePrice}
+                                {firstPrice}
                               </span>{' '}
                               <span className="inline-flex items-center rounded-md bg-[#7733B5]/12 px-1.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-[#7733B5]">
-                                50% off {cycleData.firstCycleLabel}
+                                {offLabel} {cycleData.firstCycleLabel}
                               </span>
                               {' · then '}
                               {cycleData.rolloverPrice}
@@ -2703,7 +2711,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                     <>
                       {TRIAL_DAYS > 0
                         ? `Start my ${TRIAL_DAYS}-day free trial`
-                        : `Unlock Pro — $${FIRST_MONTH_PRICE.pro} first month`}
+                        : `Unlock Pro — $${proFirstMonth} first month`}
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                       </svg>
@@ -2737,10 +2745,10 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
               ? 'Opening secure checkout…'
               : TRIAL_DAYS > 0
                 ? `Start my ${TRIAL_DAYS}-day free trial`
-                : `Unlock Pro — $${FIRST_MONTH_PRICE.pro} first month`}
+                : `Unlock Pro — $${proFirstMonth} first month`}
           </button>
           <p className="mt-1.5 text-center text-[10px] font-bold text-stone-400 dark:text-stone-500">
-            {TRIAL_DAYS > 0 ? '$0 today · Cancel anytime' : '50% off first month · Cancel anytime'}
+            {TRIAL_DAYS > 0 ? '$0 today · Cancel anytime' : flashOffer.active ? `$${proFirstMonth} first month · Cancel anytime` : '50% off first month · Cancel anytime'}
           </p>
         </div>
       </>
@@ -3461,7 +3469,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                   </svg>
                 </button>
                 <p className="mt-1.5 text-center text-[11px] font-bold text-stone-400 dark:text-stone-500">
-                  Every highlight is free · the fixes unlock with Pro (50% off first month)
+                  Every highlight is free · the fixes unlock with Pro ({flashOffer.active ? `$${FLASH_FIRST_MONTH_PRICE} first month` : '50% off first month'})
                 </p>
               </>
             ) : (
@@ -3858,7 +3866,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                   </svg>
                 </button>
                 <p className="mt-1.5 text-center text-[11px] font-bold text-stone-400 dark:text-stone-500">
-                  Open it from the hub · unlock the rest with Pro (50% off first month)
+                  Open it from the hub · unlock the rest with Pro ({flashOffer.active ? `$${FLASH_FIRST_MONTH_PRICE} first month` : '50% off first month'})
                 </p>
               </>
             ) : (
@@ -3961,7 +3969,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                 Better grades. <span className="text-[#A560E8]">Fewer all-nighters.</span>
               </h1>
               <p className="mt-2 text-stone-500 dark:text-stone-400 font-bold text-sm sm:text-base max-w-xl mx-auto">
-                Know what to fix before you submit, remember it on exam day, and get your references right — all in one place.
+                Know what to fix before you submit, remember it on exam day, and get your references right, all in one place.
               </p>
             </div>
 
@@ -4265,7 +4273,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                     <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-white dark:bg-stone-900 border-2 border-b-[3px] border-[#8A48C7] text-[#7733B5] font-extrabold tabular-nums tracking-wider">
                       NEWCUSTOMER
                     </span>{' '}
-                    is already on your order. $19.99/mo becomes $9.99 for your first month — nothing to type in.
+                    is already on your order. $19.99/mo becomes {flashOffer.active ? `$${FLASH_FIRST_MONTH_PRICE}` : '$9.99'} for your first month — nothing to type in.
                   </p>
                 </div>
               </div>
@@ -4280,8 +4288,8 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
               </p>
               <p className="relative mt-1 text-sm font-bold text-stone-600 dark:text-stone-400">
                 <span className="line-through decoration-2 decoration-[#A560E8] text-stone-400">$19.99/mo</span>{' '}
-                <span className="text-[#7733B5] font-extrabold">$9.99/mo</span>{' '}
-                <span className="text-[#7733B5] font-extrabold">(50% off applied)</span>
+                <span className="text-[#7733B5] font-extrabold">${flashOffer.active ? FLASH_FIRST_MONTH_PRICE : '9.99'}/mo</span>{' '}
+                <span className="text-[#7733B5] font-extrabold">({flashOffer.active ? '75% off applied' : '50% off applied'})</span>
               </p>
               <button
                 type="button"

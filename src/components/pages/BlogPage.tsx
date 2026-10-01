@@ -54,6 +54,27 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
     ];
     const color = colors[index % colors.length];
 
+    if (post.slug.includes('how-to-write-a-good-introduction')) {
+      return (
+        <svg viewBox="0 0 200 140" fill="none" className="w-full h-full">
+          <rect width="200" height="140" fill="#F3EAFF" />
+          <rect x="28" y="22" width="78" height="96" rx="5" fill="white" stroke="#A560E8" strokeWidth="2" />
+          <rect x="38" y="34" width="58" height="36" rx="3" fill="#F3EAFF" stroke="#C9A0F0" strokeWidth="1.5" />
+          <line x1="46" y1="46" x2="88" y2="46" stroke="#A560E8" strokeWidth="2" />
+          <line x1="46" y1="56" x2="80" y2="56" stroke="#C9A0F0" strokeWidth="2" />
+          <line x1="38" y1="82" x2="96" y2="82" stroke="#E9DBFF" strokeWidth="2" />
+          <line x1="38" y1="94" x2="90" y2="94" stroke="#E9DBFF" strokeWidth="2" />
+          <line x1="38" y1="106" x2="78" y2="106" stroke="#E9DBFF" strokeWidth="2" />
+          <rect x="118" y="36" width="58" height="22" rx="4" fill="white" stroke="#7733B5" strokeWidth="2" />
+          <text x="147" y="51" textAnchor="middle" fontSize="8" fill="#7733B5" fontWeight="bold">CONTEXT</text>
+          <rect x="118" y="64" width="58" height="22" rx="4" fill="white" stroke="#A560E8" strokeWidth="2" />
+          <text x="147" y="79" textAnchor="middle" fontSize="8" fill="#8A48C7" fontWeight="bold">QUESTION</text>
+          <rect x="118" y="92" width="58" height="22" rx="4" fill="#A560E8" />
+          <text x="147" y="107" textAnchor="middle" fontSize="8" fill="white" fontWeight="bold">THESIS</text>
+        </svg>
+      );
+    }
+
     if (post.slug.includes('how-to-write-an-essay-or-assignment')) {
       return (
         <svg viewBox="0 0 200 140" fill="none" className="w-full h-full">

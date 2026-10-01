@@ -56,6 +56,10 @@ export function WorkspaceShell({
   /** Optional site footer at the bottom of the content column. */
   footer?: ReactNode;
 }) {
+  // The toolbar is pinned to the top-right of the content column. A
+  // banner occupies that same corner, so when one is present the toolbar
+  // sits in normal flow underneath it instead of covering the strip.
+  const floatingTopBar = Boolean(topBar) && !banner;
   return (
     <div className="flex w-full min-h-screen items-stretch">
       <WorkspaceSidebar
@@ -84,14 +88,20 @@ export function WorkspaceShell({
       <div className="relative flex flex-col flex-1 min-w-0">
         {banner}
         {topBar && (
-          <div className="pointer-events-none absolute top-3 right-3 sm:top-4 sm:right-4 lg:top-5 lg:right-5 z-50">
-            <div className="pointer-events-auto">{topBar}</div>
-          </div>
+          floatingTopBar ? (
+            <div className="pointer-events-none absolute top-3 right-3 sm:top-4 sm:right-4 lg:top-5 lg:right-5 z-50">
+              <div className="pointer-events-auto">{topBar}</div>
+            </div>
+          ) : (
+            <div className="relative z-40 flex justify-end px-3 py-2 sm:px-4 sm:py-2.5">
+              {topBar}
+            </div>
+          )
         )}
         {bare ? (
           children
         ) : (
-          <div className={`flex-1 px-4 sm:px-7 lg:px-10 ${topBar ? 'pt-16 sm:pt-20 lg:pt-4 pb-6 sm:pb-9' : 'py-6 sm:py-9'}`}>
+          <div className={`flex-1 px-4 sm:px-7 lg:px-10 ${floatingTopBar ? 'pt-16 sm:pt-20 lg:pt-4 pb-6 sm:pb-9' : 'py-6 sm:py-9'}`}>
             <div className="max-w-[1500px]">{children}</div>
           </div>
         )}

@@ -37,9 +37,7 @@ const authenticateToken = async (req, res, next) => {
 
     // Add user to request object
     req.user = user;
-    if (!user.free_library_expiry_started_at) {
-      await subscriptionService.startFreeLibraryExpiryClock(user.id, user);
-    }
+    await subscriptionService.startFreeLibraryExpiryClock(user.id, user);
     // Fire-and-forget — throttled to one write per 15 min per user.
     touchLastActive(user);
     next();

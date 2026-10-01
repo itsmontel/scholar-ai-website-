@@ -123,11 +123,10 @@ function getExpiresAt30Days() {
   return expiresAt.toISOString();
 }
 
-async function libraryExpiresAt(userId, userPlan = 'free') {
+async function libraryExpiresAt(_userId, userPlan = 'free') {
+  // Only the current paid plan keeps new study packs and citations.
+  // A downgrade back to Free starts a fresh 30-day window.
   if (subscriptionService.isPaidSubscriptionTier(userPlan || 'free')) return null;
-  try {
-    if (userId && await subscriptionService.userKeepsLibraryForever(userId)) return null;
-  } catch { /* treat as free */ }
   return getExpiresAt30Days();
 }
 

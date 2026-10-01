@@ -10,19 +10,7 @@ const { resolveEffectivePlan } = subscriptionService;
 const { isMarketingEmailBlocked } = require('../services/marketingUnsubscribeService');
 
 async function persistLibraryForeverIfPaid(userId, plan) {
-  if (!userId || !subscriptionService.isPaidSubscriptionTier(plan)) return;
-  try {
-    const documentService = require('../services/documentService');
-    await documentService.makeUserDocumentsPermanent(userId);
-  } catch (err) {
-    console.error('Error persisting documents after paid conversion:', err);
-  }
-  try {
-    const aiAnalysisService = require('../services/aiAnalysisService');
-    await aiAnalysisService.makeUserMaterialsPermanent(userId);
-  } catch (err) {
-    console.error('Error persisting study materials after paid conversion:', err);
-  }
+  await subscriptionService.ensurePaidLibraryPermanent(userId, plan);
 }
 
 // @route   GET /api/webhooks/test
@@ -277,7 +265,11 @@ async function handleSubscriptionUpdated(subscription) {
       'UPDATE users SET subscription_plan = $1, subscription_status = $2 WHERE id = $3',
       [plan, subscription.status, user.id]
     );
-    await persistLibraryForeverIfPaid(user.id, plan);
+    if (plan === 'free') {
+      await subscriptionService.startDowngradeMaterialExpiry(user.id);
+    } else {
+      await persistLibraryForeverIfPaid(user.id, plan);
+    }
 
     // If user downgraded to free plan, add them to email subscription list (if not unsubscribed)
     if (plan === 'free' && user.email) {
@@ -358,6 +350,7 @@ async function handleSubscriptionDeleted(subscription) {
       'UPDATE users SET subscription_plan = $1, subscription_status = $2 WHERE id = $3',
       ['free', 'canceled', user.id]
     );
+    await subscriptionService.startDowngradeMaterialExpiry(user.id);
 
     // Add user to email subscription list if they haven't unsubscribed
     if (userEmailResult.rows.length > 0 && userEmailResult.rows[0].email) {

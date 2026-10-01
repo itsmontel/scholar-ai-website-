@@ -11,8 +11,10 @@ import {
 import { trackEvent } from '../../utils/analytics';
 import {
   WELCOME_PROMO_CODE as CONFIG_WELCOME_PROMO_CODE,
+  FLASH_FIRST_MONTH_PRICE,
   showSignupDiscount,
 } from '../../config/pricing';
+import { useFlashOffer } from '../../hooks/useFlashOffer';
 
 /* ═══════════════════════════════════════════════════════════════
    SoftPaywall — Duolingo-style upsell modal.
@@ -54,9 +56,9 @@ interface SoftPaywallProps {
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 const FEATURES = [
-  { text: 'Know exactly what’s costing you marks — every comment, rewrite & your rubric score', icon: '🔓', color: '#A560E8' },
+  { text: 'Know exactly what’s costing you marks: every comment, rewrite, and your rubric score', icon: '🔓', color: '#A560E8' },
   { text: 'Fix it in one click, straight into your draft', icon: '✍️', color: '#A560E8' },
-  { text: 'Walk into exams ready — full flashcards, quizzes & study games', icon: '🎯', color: '#FF9600' },
+  { text: 'Walk into exams ready with full flashcards, quizzes, and study games', icon: '🎯', color: '#FF9600' },
   { text: 'Get through any reading in minutes, not evenings', icon: '📚', color: '#58CC02' },
   { text: 'References done right, exported to Word & PDF', icon: '📄', color: '#FF4B4B' },
   { text: 'Enough for every assignment: 99 checks, packs & citations a month', icon: '⚡', color: '#FF9600' },
@@ -67,7 +69,7 @@ const PREMIUM_FEATURES = [
   { text: 'Never hit a limit mid-deadline: 499 checks, packs & citations a month', icon: '📝', color: '#A560E8' },
   { text: 'Summarise every paper on your reading list, no cap', icon: '📚', color: '#58CC02' },
   { text: 'Keep every draft and source in one place (1GB storage)', icon: '💾', color: '#1CB0F6' },
-  { text: 'Walk into exams ready — full flashcards, quizzes & study games', icon: '🎯', color: '#FF9600' },
+  { text: 'Walk into exams ready with full flashcards, quizzes, and study games', icon: '🎯', color: '#FF9600' },
   { text: 'Know what to fix and apply it in one click', icon: '📄', color: '#FF4B4B' },
 ];
 
@@ -202,6 +204,7 @@ const SoftPaywall = ({
    *  policy in src/config/pricing.ts currently reserves the discount for
    *  the cancel-flow save offer, so this is normally false. */
   const showDiscount = !hard && newCustomerEligible && showSignupDiscount(true, 'monthly');
+  const flashOffer = useFlashOffer(!hard);
 
   useEffect(() => {
     if (hard) setShowLastChance(false);
@@ -214,23 +217,29 @@ const SoftPaywall = ({
     return () => clearInterval(intervalRef.current);
   }, []);
 
+  const flashActive = showDiscount && checkoutPlan === 'pro' && flashOffer.active;
+  const flashPrice = `$${FLASH_FIRST_MONTH_PRICE}`;
   const monthlyPrice = checkoutPlan === 'premium' ? PREMIUM_MONTHLY : PRO_MONTHLY;
-  const monthlyWas = checkoutPlan === 'premium' ? PREMIUM_MONTHLY_WAS : PRO_MONTHLY_WAS;
+  const monthlyWas = flashActive ? PRO_MONTHLY : checkoutPlan === 'premium' ? PREMIUM_MONTHLY_WAS : PRO_MONTHLY_WAS;
   // First soft paywall (BRANCH 3) — NEWCUSTOMER discount applied. Pro
   // $9.99 first month (vs $39.99 anchor), Premium $29.99 first month
   // (vs $59.99 anchor). Both save $30 vs the original "was" price.
-  const firstPaywallFirstMonth =
-    checkoutPlan === 'premium' ? FIRST_PAYWALL_PREMIUM_FIRST_MONTH : FIRST_PAYWALL_PRO_FIRST_MONTH;
+  // During the first-day flash offer Pro is $4.99 against the real $19.99.
+  const firstPaywallFirstMonth = flashActive
+    ? flashPrice
+    : checkoutPlan === 'premium' ? FIRST_PAYWALL_PREMIUM_FIRST_MONTH : FIRST_PAYWALL_PRO_FIRST_MONTH;
   const firstPaywallSavedUsd = (
     parseFloat(monthlyWas.slice(1)) - parseFloat(firstPaywallFirstMonth.slice(1))
   ).toFixed(0);
   // Last-chance branch (BRANCH 1) — deeper one-shot discount. Anchored
   // against the original "was" price for max savings impact. Pro saves
   // $30, Premium saves $40 (vs the first-paywall $30 on Premium).
-  const lastChanceFirstMonth =
-    checkoutPlan === 'premium' ? LAST_CHANCE_PREMIUM_FIRST_MONTH : LAST_CHANCE_PRO_FIRST_MONTH;
-  const lastChanceWas =
-    checkoutPlan === 'premium' ? LAST_CHANCE_PREMIUM_WAS : LAST_CHANCE_PRO_WAS;
+  const lastChanceFirstMonth = flashActive
+    ? flashPrice
+    : checkoutPlan === 'premium' ? LAST_CHANCE_PREMIUM_FIRST_MONTH : LAST_CHANCE_PRO_FIRST_MONTH;
+  const lastChanceWas = flashActive
+    ? PRO_MONTHLY
+    : checkoutPlan === 'premium' ? LAST_CHANCE_PREMIUM_WAS : LAST_CHANCE_PRO_WAS;
   const lastChanceSavedUsd = (
     parseFloat(lastChanceWas.slice(1)) - parseFloat(lastChanceFirstMonth.slice(1))
   ).toFixed(0);
@@ -782,7 +791,15 @@ const SoftPaywall = ({
                   post-onboarding paywall; later paywalls keep the
                   discounted price (while eligible) but drop the
                   urgency framing since "today only" would be false. */}
-              {!showTrial && showDiscount && !discountAlreadyConsumed && (
+              {!showTrial && flashActive && (
+                <div className="mb-2.5">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#FF4B4B] text-white text-[10px] font-extrabold uppercase tracking-[0.14em] border-2 border-b-[3px] border-[#D93B3B] shadow-sm tabular-nums">
+                    <span aria-hidden>⏰</span>
+                    First-day price · ends in {flashOffer.hours}:{flashOffer.minutes}:{flashOffer.seconds}
+                  </span>
+                </div>
+              )}
+              {!showTrial && showDiscount && !flashActive && !discountAlreadyConsumed && (
                 <div className="mb-2.5">
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#FF4B4B] text-white text-[10px] font-extrabold uppercase tracking-[0.14em] border-2 border-b-[3px] border-[#D93B3B] shadow-sm">
                     <span aria-hidden>⏰</span>

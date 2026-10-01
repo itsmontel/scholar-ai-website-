@@ -8,7 +8,8 @@ import {
 import Header from '../common/Header';
 import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
-import { FIRST_MONTH_PRICE, signupPromoCode, showSignupDiscount } from '../../config/pricing';
+import { FIRST_MONTH_PRICE, FLASH_FIRST_MONTH_PRICE, signupPromoCode, showSignupDiscount } from '../../config/pricing';
+import { useFlashOffer } from '../../hooks/useFlashOffer';
 
 interface PricingPageProps {
   onNavigate: (page: string) => void;
@@ -31,6 +32,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
   // Logged-out visitors are treated as new customers (the discount is
   // the acquisition pitch); logged-in users get a real eligibility check.
   const [newCustomer, setNewCustomer] = useState<boolean>(true);
+  const flashOffer = useFlashOffer(!!user);
   /**
    * Promo code carried in from a campaign link, e.g. the winback email's
    * /pricing?promo=COMEBACK50. Applied on top of the normal signup
@@ -217,10 +219,10 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       monthlyPrice: 19.99,
       yearlyPrice: 199.99,
       features: [
-        'Know exactly what’s costing you marks — every comment, rewrite & one-click fix',
+        'Know exactly what’s costing you marks: every comment, rewrite, and one-click fix',
         'See your score and rubric breakdown before your professor does',
-        'Walk into exams ready — full flashcards, quizzes, crossword & Crater Blast',
-        'References done right — every citation style, plus PDF/Word export',
+        'Walk into exams ready with full flashcards, quizzes, crossword, and Crater Blast',
+        'References done right in every citation style, plus PDF/Word export',
         'Get through any reading in minutes with the Paper Summarizer',
         'Enough for every assignment: 99 essay checks, study packs & citations a month (100MB uploads)'
       ],
@@ -447,14 +449,23 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                           ${plan.monthlyPrice.toFixed(2)}
                         </span>
                         <span className="text-4xl font-bold text-stone-800 dark:text-stone-100">
-                          ${(FIRST_MONTH_PRICE[plan.id] ?? plan.monthlyPrice).toFixed(2)}
+                          ${(plan.id === 'pro' && flashOffer.active && !campaignPromo
+                            ? FLASH_FIRST_MONTH_PRICE
+                            : FIRST_MONTH_PRICE[plan.id] ?? plan.monthlyPrice
+                          ).toFixed(2)}
                         </span>
                         <span className="text-stone-500 dark:text-stone-400 text-sm">
                           first month, then ${plan.monthlyPrice.toFixed(2)}/mo
                         </span>
-                        <span className="text-[#46A302] text-xs font-extrabold">
-                          NEWCUSTOMER discount applied at checkout
-                        </span>
+                        {plan.id === 'pro' && flashOffer.active && !campaignPromo ? (
+                          <span className="inline-flex items-center rounded-lg bg-[#FF4B4B] px-2 py-0.5 font-mono text-xs font-extrabold tabular-nums text-white">
+                            First-day price ends in {flashOffer.hours}:{flashOffer.minutes}:{flashOffer.seconds}
+                          </span>
+                        ) : (
+                          <span className="text-[#46A302] text-xs font-extrabold">
+                            NEWCUSTOMER discount applied at checkout
+                          </span>
+                        )}
                       </div>
                     ) : (
                       /* Returning customers see the plain standard price. */
