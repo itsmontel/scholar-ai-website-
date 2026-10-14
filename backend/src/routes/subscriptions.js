@@ -93,6 +93,29 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
 
     let effectivePromoCode = typeof promoCode === 'string' && promoCode.trim() ? promoCode.trim() : null;
 
+    // The free trial (3 days, 3 credits) is the front-door offer. One per
+    // email, and never for an account that has subscribed before. When the
+    // trial applies, no first-invoice discount rides along: it would only
+    // discount the $0 trial invoice and make the price after the trial
+    // look different from what we show.
+    let trialDays =
+      trialPeriodDays != null &&
+      Number.isFinite(Number(trialPeriodDays)) &&
+      Number(trialPeriodDays) > 0
+        ? Number(trialPeriodDays)
+        : 0;
+    if (trialDays > 0) {
+      try {
+        const trialEligibility = await subscriptionService.checkTrialEligibility(user.email);
+        const everSubscribed = await subscriptionService.hasEverSubscribed(userId);
+        if (!trialEligibility.eligible || everSubscribed) trialDays = 0;
+      } catch (trialCheckError) {
+        console.error('create-checkout-session: trial eligibility check failed:', trialCheckError);
+        trialDays = 0;
+      }
+    }
+    if (trialDays > 0) effectivePromoCode = null;
+
     // NEWCUSTOMER (legacy alias: MAY2026) is the auto-applied welcome
     // discount for first-time customers. The frontend decides whether to
     // show the discounted price optimistically; this is the authoritative
@@ -122,20 +145,13 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
     let flashCouponId = null;
     const welcomeOrNone =
       !effectivePromoCode || WELCOME_PROMO_CODES.includes(effectivePromoCode.toUpperCase());
-    if (planType === 'pro' && billingCycle === 'monthly' && welcomeOrNone) {
+    if (trialDays === 0 && planType === 'pro' && billingCycle === 'monthly' && welcomeOrNone) {
       const flashEndsAt = await subscriptionService.getFlashOfferEndsAt(user);
       if (flashEndsAt) {
         flashCouponId = subscriptionService.FLASH_COUPON_ID;
         if (!effectivePromoCode) effectivePromoCode = 'NEWCUSTOMER';
       }
     }
-
-    const trialDays =
-      trialPeriodDays != null &&
-      Number.isFinite(Number(trialPeriodDays)) &&
-      Number(trialPeriodDays) > 0
-        ? Number(trialPeriodDays)
-        : 0;
 
     // Optional promoCode in body applies that code when provided.
     const embeddedReturnUrl =
@@ -833,13 +849,18 @@ router.get('/trial-eligibility', authenticateToken, async (req, res) => {
       trialReason = 'Has prior subscription history';
     }
 
-    const flashEndsAt = trialEligible ? await subscriptionService.getFlashOfferEndsAt(user) : null;
+    // The 3-day trial is the offer for new accounts. The first-day $4.99
+    // flash offer only remains for never-paid accounts that can't trial.
+    const flashEndsAt = trialEligible ? null : await subscriptionService.getFlashOfferEndsAt(user);
+    const creditService = require('../services/creditService');
 
     res.set('Cache-Control', 'private, no-store');
     res.set('Vary', 'Authorization');
     res.json({
       success: true,
       trialEligible,
+      trialDays: creditService.TRIAL_DAYS,
+      trialCredits: creditService.TRIAL_CREDITS,
       flashOfferEndsAt: flashEndsAt ? new Date(flashEndsAt).toISOString() : null,
       off10Eligible: false,
       /** @deprecated retained for older clients; always false */
@@ -932,9 +953,38 @@ router.get('/usage', authenticateToken, async (req, res) => {
 
     // Pro/Premium: combined pool (analyses + citations + study packs) and combined words (humanize + summarize)
     let combinedActionsUsed, combinedActionsRemaining, combinedWordsUsed, combinedWordsRemaining;
+    // Credits: 1 per analysis, study pack or citation search. Paid plans
+    // include rollover and the trial's 3 credits; free accounts have none.
+    const creditService = require('../services/creditService');
+    let credits;
+    try {
+      credits = await creditService.getCreditState(userId);
+    } catch (creditErr) {
+      console.error('usage: credit state failed:', creditErr);
+      const fallbackTotal = isPaid ? planLimits.combinedActionsPerMonth || 0 : 0;
+      const fallbackUsed = isPaid ? documentsAnalyzed + citationSearchesUsed + studyPacksGenerated : 0;
+      credits = {
+        plan: isPaid ? subscriptionService.normalizePlanForLimits(subscriptionDetails.plan) : 'free',
+        total: fallbackTotal,
+        used: fallbackUsed,
+        remaining: Math.max(0, fallbackTotal - fallbackUsed),
+        rollover: 0,
+        allowance: fallbackTotal,
+        cap: creditService.CREDIT_CAP,
+        isTrial: false,
+        isPaused: false,
+        cancelAtPeriodEnd: false,
+        nextTopUp: fallbackTotal,
+        wouldLoseAtRenewal: 0,
+        periodEnd,
+        daysUntilReset,
+        trialCredits: creditService.TRIAL_CREDITS,
+        trialDays: creditService.TRIAL_DAYS,
+      };
+    }
     if (isPaid && planLimits.combinedActionsPerMonth) {
-      combinedActionsUsed = documentsAnalyzed + citationSearchesUsed + studyPacksGenerated;
-      combinedActionsRemaining = Math.max(0, planLimits.combinedActionsPerMonth - combinedActionsUsed);
+      combinedActionsUsed = credits.used;
+      combinedActionsRemaining = credits.remaining;
 
       // Get humanize + summarize words for combined words pool
       const { data: humanizeData } = await supabaseServiceRole
@@ -979,7 +1029,8 @@ router.get('/usage', authenticateToken, async (req, res) => {
       daysUntilReset,
       // Free preview counters (analyses / citations / study packs) never
       // reset — the frontend should show "one-time previews", not a timer.
-      previewsAreLifetime: isFreePlan && subscriptionService.FREE_PREVIEW_LIFETIME
+      previewsAreLifetime: isFreePlan && subscriptionService.FREE_PREVIEW_LIFETIME,
+      credits
     };
     if (isPaid) {
       payload.combinedActionsUsed = combinedActionsUsed;

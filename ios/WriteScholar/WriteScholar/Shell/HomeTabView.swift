@@ -33,6 +33,8 @@ struct HomeTabView: View {
     @State private var celebrateGoalHit: Int = 0
     @State private var streak: StreakAPI.StreakInfo?
     @State private var hasUnseenActivity = false
+    @State private var usage: UsageAPI.Usage?
+    @Environment(\.openURL) private var openURL
 
     @StateObject private var dailyGoal = DailyGoalStore.shared
     @ObservedObject private var library = LibraryStore.shared
@@ -47,6 +49,9 @@ struct HomeTabView: View {
             ScrollView {
                 VStack(spacing: 20) {
                     greetingRow.wsStaggerEntry(0)
+                    if let usage, !usage.isPaid {
+                        trialCard.wsStaggerEntry(1)
+                    }
                     dailyGoalCard.wsStaggerEntry(1)
                     statChips.wsStaggerEntry(2)
                     continueStudying.wsStaggerEntry(3)
@@ -64,6 +69,7 @@ struct HomeTabView: View {
         }
         .task {
             computeUnseenActivity()
+            await OnboardingAnswers.uploadIfNeeded()
             await refreshAll()
         }
         .onChange(of: dailyGoal.goalJustHit) { _, newValue in
@@ -121,6 +127,10 @@ struct HomeTabView: View {
                     .foregroundStyle(WSColor.foregroundMuted)
             }
             Spacer()
+            if let usage {
+                CreditChip(text: usage.credits?.isTrial == true ? "\(usage.creditsRemaining) free" : "\(usage.creditsRemaining)")
+                    .accessibilityLabel("\(usage.creditsRemaining) credits")
+            }
             Button {
                 Haptics.light()
                 showHistorySheet = true
@@ -166,6 +176,32 @@ struct HomeTabView: View {
             .accessibilityLabel("Open settings")
         }
         .padding(.top, 4)
+    }
+
+    // MARK: - Free trial card (free accounts have no credits)
+
+    private var trialCard: some View {
+        let fromOnboarding = UserDefaults.standard.bool(forKey: TrialIntent.key)
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                ForEach(0..<OnboardingContent.trialCredits, id: \.self) { _ in CreditCoin(size: 26) }
+            }
+            Text(fromOnboarding ? "Your plan is ready. Start your free trial." : "Start your free trial")
+                .wsHeadline(.medium, weight: .black)
+                .foregroundStyle(WSColor.duoText)
+            Text("\(OnboardingContent.trialDays) days free with \(OnboardingContent.trialCredits) credits for essay feedback, study packs and citations. Then \(OnboardingContent.proMonthlyPrice)/mo for \(OnboardingContent.proMonthlyCredits) credits. Unused credits roll over.")
+                .wsBody(.small, weight: .bold)
+                .foregroundStyle(WSColor.foregroundMuted)
+            Button {
+                Haptics.medium()
+                if let url = URL(string: "https://writescholar.com/pricing") { openURL(url) }
+            } label: {
+                Text("Start my free trial").frame(maxWidth: .infinity)
+            }
+            .buttonStyle(WSDuoPrimaryButtonStyle())
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .wsChunkyCard(accent: Color(hex: 0xF3DB93), fillColor: Color(hex: 0xFFF6DB))
     }
 
     private func computeUnseenActivity() {
@@ -420,9 +456,15 @@ struct HomeTabView: View {
     private func refreshAll() async {
         await withTaskGroup(of: Void.self) { group in
             group.addTask { await refreshStreak() }
+            group.addTask { await refreshUsage() }
             group.addTask { await session.refreshAchievements() }
             group.addTask { await LibraryStore.shared.syncFromBackend() }
         }
+    }
+
+    private func refreshUsage() async {
+        guard session.state.user?.isLocalGuestAccount != true else { return }
+        if let fresh = try? await UsageAPI.fetch() { usage = fresh }
     }
 
     private func refreshStreak() async {

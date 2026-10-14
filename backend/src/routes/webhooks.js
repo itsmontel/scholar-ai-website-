@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const subscriptionService = require('../services/subscriptionService');
+const creditService = require('../services/creditService');
 const { query } = require('../database/connection');
 
 // Single source of truth for status-aware plan resolution lives in
@@ -85,6 +86,23 @@ router.post('/stripe', express.raw({ type: 'application/json' }), async (req, re
     res.status(500).json({ error: 'Webhook processing failed' });
   }
 });
+
+/**
+ * Keep the credit balance in step with the subscription. Paid: apply any
+ * rollover now rather than on the user's next visit. Free: reset to 0.
+ * Never fails the webhook.
+ */
+async function syncCredits(userId, plan, subscription) {
+  try {
+    if (subscriptionService.isPaidSubscriptionTier(plan)) {
+      await creditService.getCreditState(userId, { subscription });
+    } else {
+      await creditService.resetCredits(userId);
+    }
+  } catch (err) {
+    console.error('Webhook: credit sync failed (non-fatal):', err);
+  }
+}
 
 // Handle successful checkout session
 async function handleCheckoutSessionCompleted(session) {
@@ -212,6 +230,7 @@ async function handleSubscriptionCreated(subscription) {
       [plan, subscription.status, user.id]
     );
     await persistLibraryForeverIfPaid(user.id, plan);
+    await syncCredits(user.id, plan, subscription);
 
   } catch (error) {
     console.error('Error handling subscription created:', error);
@@ -270,6 +289,8 @@ async function handleSubscriptionUpdated(subscription) {
     } else {
       await persistLibraryForeverIfPaid(user.id, plan);
     }
+    // Renewals roll unused credits into the new period; a lapsed plan resets them.
+    await syncCredits(user.id, plan, subscription);
 
     // If user downgraded to free plan, add them to email subscription list (if not unsubscribed)
     if (plan === 'free' && user.email) {
@@ -351,6 +372,8 @@ async function handleSubscriptionDeleted(subscription) {
       ['free', 'canceled', user.id]
     );
     await subscriptionService.startDowngradeMaterialExpiry(user.id);
+    // Cancelling ends the plan and its credits: the balance goes back to 0.
+    await syncCredits(user.id, 'free', subscription);
 
     // Add user to email subscription list if they haven't unsubscribed
     if (userEmailResult.rows.length > 0 && userEmailResult.rows[0].email) {

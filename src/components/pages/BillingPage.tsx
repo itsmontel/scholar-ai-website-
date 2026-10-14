@@ -5,7 +5,7 @@ import {
 } from '../../constants/freePlanCopy';
 import Footer from '../common/Footer';
 import CancelRetentionModal from '../common/CancelRetentionModal';
-import { FIRST_MONTH_PRICE, FLASH_FIRST_MONTH_PRICE, signupPromoCode, showSignupDiscount } from '../../config/pricing';
+import { FIRST_MONTH_PRICE, FLASH_FIRST_MONTH_PRICE, signupPromoCode, showSignupDiscount, TRIAL_DAYS, CHECKOUT_OFFER_KEY } from '../../config/pricing';
 import { useFlashOffer } from '../../hooks/useFlashOffer';
 
 interface BillingPageProps {
@@ -92,7 +92,8 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       description: 'Most popular for students',
       icon: '🚀',
       features: [
-        '99 combined analyses, study packs & citations/mo',
+        '99 credits/mo for analyses, study packs & citations',
+        'Unused credits roll over, up to 499',
         '999,999 words Paper Summarizer',
         'All citation styles, PDF/Word export',
         'Quiz, flashcards, crossword & Crater Blast',
@@ -111,7 +112,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
       icon: '✨',
       features: [
         'Everything in Pro',
-        '499 combined analyses, study packs & citations/mo',
+        '199 credits/mo, rolling over up to 499',
         'Summarise unlimited research papers',
         '1GB total library storage',
         'Built for heavy essay and citation workloads'
@@ -215,6 +216,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
             billingCycle: billingCycle,
             successUrl: `${window.location.origin}/billing?success=true`,
             cancelUrl: `${window.location.origin}/dashboard?payment=cancelled`,
+            ...(newCustomer && TRIAL_DAYS > 0 ? { trialPeriodDays: TRIAL_DAYS } : {}),
             ...(signupPromoCode(newCustomer, billingCycle) ?? {}),
           })
         });
@@ -222,6 +224,12 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
         const data = await response.json();
         
         if (data.success && data.data?.checkoutUrl) {
+          try {
+            sessionStorage.setItem(
+              CHECKOUT_OFFER_KEY,
+              JSON.stringify(newCustomer && TRIAL_DAYS > 0 ? { kind: 'trial' } : { kind: 'paid', plan: planId }),
+            );
+          } catch { /* ignore */ }
           window.location.href = data.data.checkoutUrl;
         } else {
           throw new Error(data.message || 'Failed to create checkout session');
@@ -420,7 +428,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
               {plan.id === 'premium' && (
                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                   <span className="bg-[#FFC800] text-[#6B27A3] px-4 py-1 rounded-xl text-xs font-extrabold border-2 border-[#D4A300]">
-                    5× usage
+                    2× credits
                   </span>
                 </div>
               )}
@@ -604,10 +612,10 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
               <div className="text-2xl font-extrabold text-stone-800 mb-1">
                 {(currentPlan === 'pro' || currentPlan === 'premium') && usageStats.combinedActionsRemaining != null
                   ? (usageStats.combinedActionsRemaining === -1 ? '∞' : usageStats.combinedActionsRemaining)
-                  : (usageStats.analysesRemaining === -1 ? '∞' : usageStats.analysesRemaining)}
+                  : 0}
               </div>
               <div className="text-xs text-stone-500">
-                {currentPlan === 'free' ? 'free previews remaining (one-time)' : (currentPlan === 'pro' || currentPlan === 'premium') ? `${currentPlan === 'premium' ? 499 : 99} combined/month` : 'combined/month'}
+                {currentPlan === 'free' ? 'credits · start the free trial for 3' : 'credits left · unused credits roll over'}
               </div>
             </div>
 

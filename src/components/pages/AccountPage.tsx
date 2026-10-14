@@ -531,9 +531,9 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                     {userStats.subscriptionPlan === 'free'
                       ? 'Preview analyses, study packs & citations on your own work'
                       : userStats.subscriptionPlan === 'pro'
-                      ? '99 combined/mo (analyses, study packs & citations)'
+                      ? '99 credits/mo for analyses, study packs & citations · rolls over up to 499'
                       : userStats.subscriptionPlan === 'premium'
-                      ? '499 combined/mo; 1GB library storage'
+                      ? '199 credits/mo, rolling over up to 499; 1GB library storage'
                       : 'Basic features included'
                     }
                   </div>
@@ -554,7 +554,8 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                   )}
                   {userStats.subscriptionPlan === 'pro' && (
                     <>
-                      <div>• 99 combined (analyses, study packs & citations) per month</div>
+                      <div>• 99 credits per month (1 per analysis, study pack or citation search)</div>
+                      <div>• Unused credits roll over, up to 499</div>
                       <div>• 100MB total library storage</div>
                       <div>• 999,999 Paper Summarizer words per month</div>
                       <div>• Uploads up to 100MB per file</div>
@@ -566,8 +567,8 @@ const AccountPage = ({ onNavigate, user, onLogout, onUserUpdate }: AccountPagePr
                   )}
                   {userStats.subscriptionPlan === 'premium' && (
                     <>
-                      <div>• Everything in Pro, 5× usage</div>
-                      <div>• 499 combined (analyses, study packs & citations) per month</div>
+                      <div>• Everything in Pro, 2× the credits</div>
+                      <div>• 199 credits per month, rolling over up to 499</div>
                       <div>• Summarise unlimited research papers</div>
                       <div>• 1GB total library storage</div>
                       <div>• Uploads up to 100MB per file</div>

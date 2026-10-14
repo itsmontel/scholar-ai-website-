@@ -11,7 +11,24 @@
  * of OnboardingPage). Auto-dismisses after `durationMs` and calls
  * `onDone` so the parent can unmount it.
  */
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import CreditCoin from './CreditCoin';
+import { CHECKOUT_OFFER_KEY, MONTHLY_CREDITS, TRIAL_CREDITS, TRIAL_DAYS } from '../../config/pricing';
+import { RECOMMENDATIONS, type Path } from '../onboarding/onboardingContent';
+
+type CheckoutOffer = { kind: 'trial' | 'paid'; plan?: string; path?: Path };
+
+/** What the user just bought, as noted right before the Stripe redirect. */
+function readCheckoutOffer(): CheckoutOffer | null {
+  try {
+    const raw = sessionStorage.getItem(CHECKOUT_OFFER_KEY);
+    const parsed = raw ? JSON.parse(raw) : null;
+    if (parsed && (parsed.kind === 'trial' || parsed.kind === 'paid')) return parsed as CheckoutOffer;
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
 
 const CONFETTI_COLORS = ['#58CC02', '#1CB0F6', '#FF9600', '#FF4B4B', '#A560E8', '#FFD700'];
 
@@ -22,24 +39,39 @@ interface PostCheckoutWelcomeOverlayProps {
   onDone: () => void;
   /** Visible duration in ms. Defaults to 2400ms to match the in-onboarding `TRANSITION_MS`. */
   durationMs?: number;
+  /** Credit celebration CTA: open the tool the onboarding recommended. */
+  onStartRecommended?: (tool: 'analyze' | 'study-pack') => void;
 }
 
 export default function PostCheckoutWelcomeOverlay({
   firstName,
   onDone,
   durationMs = 2400,
+  onStartRecommended,
 }: PostCheckoutWelcomeOverlayProps) {
+  // Credits celebration ("3 credits are yours!") when we know what was
+  // bought; otherwise the original auto-dismissing welcome.
+  const [offer] = useState<CheckoutOffer | null>(readCheckoutOffer);
+  const credits = offer?.kind === 'trial' ? TRIAL_CREDITS : offer ? MONTHLY_CREDITS[offer.plan || 'pro'] ?? MONTHLY_CREDITS.pro : 0;
+  const rec = RECOMMENDATIONS[offer?.path ?? 'both'];
+
   useEffect(() => {
+    try {
+      sessionStorage.removeItem(CHECKOUT_OFFER_KEY);
+    } catch {
+      /* ignore */
+    }
+    if (offer) return;
     const t = setTimeout(onDone, durationMs);
     return () => clearTimeout(t);
-  }, [onDone, durationMs]);
+  }, [onDone, durationMs, offer]);
 
   return (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-white dark:bg-stone-950"
-      role="status"
+      role={offer ? 'dialog' : 'status'}
       aria-live="polite"
-      aria-label="Welcome to WriteScholar"
+      aria-label={offer ? `${credits} credits are yours` : 'Welcome to WriteScholar'}
     >
       {/* Animated radial gradient background — slow hue cycle */}
       <div className="absolute inset-0 pcw-bg-cycle" aria-hidden />
@@ -143,6 +175,44 @@ export default function PostCheckoutWelcomeOverlay({
           </div>
         </div>
 
+        {offer ? (
+          <div style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+            <div className="flex justify-center gap-2 mb-3" aria-hidden>
+              {Array.from({ length: Math.min(credits, 3) }, (_, i) => (
+                <CreditCoin key={i} size={40} className="pcw-coin" style={{ animationDelay: `${0.35 + i * 0.15}s` }} />
+              ))}
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-[#3C3C3C] dark:text-stone-50 leading-tight">
+              <span className="inline-block pcw-word" style={{ animationDelay: '0.5s' }}>{credits}</span>{' '}
+              <span className="inline-block pcw-word" style={{ animationDelay: '0.58s' }}>credits</span>{' '}
+              <span className="inline-block pcw-word" style={{ animationDelay: '0.66s' }}>are</span>{' '}
+              <span className="inline-block pcw-word text-[#A560E8]" style={{ animationDelay: '0.78s' }}>yours!</span>
+            </h1>
+            <p className="mt-3 text-stone-500 dark:text-stone-400 font-bold text-base pcw-subtitle">
+              {offer.kind === 'trial'
+                ? `Your ${TRIAL_DAYS}-day trial has started${firstName ? `, ${firstName}` : ''}. Use your first credit while your deadline's fresh.`
+                : `Welcome to ${offer.plan === 'premium' ? 'Premium' : 'Pro'}${firstName ? `, ${firstName}` : ''}. Unused credits roll over every month.`}
+            </p>
+            <div className="mt-7 flex flex-col gap-2 pcw-subtitle">
+              <button
+                type="button"
+                onClick={() => (onStartRecommended ? onStartRecommended(rec.tool) : onDone())}
+                className="w-full py-3.5 rounded-2xl bg-[#A560E8] hover:bg-[#7733B5] text-white text-base font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
+              >
+                {rec.start}
+              </button>
+              <p className="text-[13px] font-bold text-stone-500 dark:text-stone-400">Uses 1 credit · {Math.max(0, credits - 1)} left after</p>
+              <button
+                type="button"
+                onClick={onDone}
+                className="py-2 text-[14px] font-extrabold text-stone-400 hover:text-stone-600 dark:hover:text-stone-300"
+              >
+                Go to my dashboard
+              </button>
+            </div>
+          </div>
+        ) : (
+        <>
         {/* Cascading H1 — each word fades in on its own delay */}
         <h1
           className="text-3xl sm:text-4xl font-extrabold text-[#3C3C3C] dark:text-stone-50 leading-tight"
@@ -176,6 +246,8 @@ export default function PostCheckoutWelcomeOverlay({
             Loading your dashboard…
           </p>
         </div>
+        </>
+        )}
       </div>
 
       <style>{`
@@ -244,6 +316,16 @@ export default function PostCheckoutWelcomeOverlay({
         @keyframes pcwShimmer {
           0%   { transform: translateX(-100%); }
           100% { transform: translateX(200%); }
+        }
+        @keyframes pcwCoin {
+          0%   { transform: scale(0) rotate(-40deg); opacity: 0; }
+          70%  { transform: scale(1.18) rotate(8deg); opacity: 1; }
+          100% { transform: scale(1) rotate(0); opacity: 1; }
+        }
+        .pcw-coin { animation: pcwCoin 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+        @media (prefers-reduced-motion: reduce) {
+          .pcw-coin, .pcw-word, .pcw-subtitle, .pcw-scale-in { animation: none !important; opacity: 1; transform: none; }
+          .pcw-ring-pulse, .pcw-glow-pulse, .pcw-mascot-bounce, .pcw-bg-cycle, .pcw-confetti-fall, .pcw-shimmer { animation: none !important; }
         }
         .pcw-shimmer {
           background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.45) 50%, transparent 100%);

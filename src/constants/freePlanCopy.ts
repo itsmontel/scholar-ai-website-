@@ -5,95 +5,94 @@
  * the actual product gates.
  *
  * ─── IMPORTANT: read before editing ───────────────────────────────────
- * With FREEMIUM_PREVIEW = true, free users can run essay analysis and
- * study packs twice each. Essay analysis shows every highlight color;
- * comments, suggested fixes, and apply-revision stay Pro. Study packs
- * still unlock about half the deck.
- * Unlocking the rest is a paid Pro checkout — currently 50% off the first
- * month (NEWCUSTOMER), no free trial (see src/config/pricing.ts).
+ * Credits: an essay analysis, a study pack and a citation search each
+ * cost 1 credit. A free account has no credits — the 3-day free trial
+ * gives 3, then Pro is $19.99/mo for 99 credits (Premium $39.99 for
+ * 199). Unused credits roll over each month, up to 499. The writing
+ * editor and the standalone utilities stay free.
+ * See src/config/pricing.ts and backend/src/services/creditService.js.
  */
 
 /** One-line summary for account headers, chips, etc. */
 export const FREE_PLAN_SUMMARY_SHORT =
-  'Free previews of essay feedback, study packs & citations — unlock Pro at 50% off';
+  'Free writing tools · start the 3-day trial for 3 credits';
 
 /** Subtitle under pricing / billing Free cards */
 export const FREE_PLAN_DESCRIPTION =
-  'Find out what’s holding your grade back. Two free essay checks and two study packs. Pro shows you exactly how to fix it, 50% off your first month.';
+  'Write and organise for free. Start the 3-day free trial to get 3 credits for essay feedback, study packs and citations.';
 
 /** Reusable upgrade line. Use this wherever a CTA needs a friction note. */
 export const TRIAL_CTA_FOOTNOTE =
-  '50% off first month · then $19.99/mo · Cancel anytime';
+  '3-day free trial · 3 credits · then $19.99/mo · Cancel anytime';
 
 /** Slightly longer version where there is room for the honest detail. */
 export const TRIAL_CTA_FOOTNOTE_LONG =
-  'Free to try. Unlock Pro at 50% off your first month ($9.99), then $19.99/mo — cancel anytime.';
+  'Try it free for 3 days with 3 credits, then $19.99/mo for 99 credits a month. Unused credits roll over. Cancel anytime.';
 
 /** Bullet list for pricing cards, billing plan picker, landing pricing grid */
 export const FREE_PLAN_FEATURE_BULLETS = [
-  '2 free essay analyses — all highlight colors (comments & fixes with Pro)',
-  '2 free study packs — everything unlocked for 24 hours (then half the deck)',
-  '1 free citation search — 3 sources (full list with Pro)',
+  'Writing editor with no word limit',
+  '3-day free trial with 3 credits',
+  '1 credit = 1 essay analysis, study pack or citation search',
   '3 documents/mo, 5k-word summarizer, 2MB storage',
 ] as const;
 
 /** Shorter bullets where space is tight (billing sidebar) */
 export const FREE_PLAN_FEATURE_BULLETS_COMPACT = [
-  '2 free analyses (all colors; comments & fixes with Pro)',
-  '2 free study packs (24 hours full access, then half the cards & quiz)',
-  '1 free citation search (3 sources; full list with Pro)',
+  'Writing editor, no word limit',
+  '3-day free trial with 3 credits',
+  '1 credit per analysis, study pack or citation search',
   '3 documents/mo, 5k summarizer, 2MB storage',
 ] as const;
 
 /** “What you don’t get” row on the pricing page Free card */
 export const FREE_PLAN_LIMITATIONS = [
-  'How to fix each flagged sentence: comments, rewrites, and one-click apply (Pro)',
-  'The full deck, quiz & games to lock it in before the exam (Pro)',
+  'Monthly credits for essay feedback, study packs & citations (Pro)',
+  'Credits that roll over month to month (Pro)',
   'Full source lists & export so your references are done (Pro)',
 ] as const;
 
 /** FAQ / long-form answer */
 export const FREE_PLAN_FAQ_ANSWER =
-  'Creating an account is free and takes no card. You get two free essay analyses (every highlight color on the full paper; comments and one-click fixes unlock with Pro), two free study packs (lesson plus the first half of the flashcards and quiz), and one citation search that shows three sources. Unlock the rest with Pro — new customers get 50% off the first month ($9.99 instead of $19.99), then the regular rate. Standalone study utilities (word counter, citation generator, GPA calculator, Pomodoro, and more) stay free with no subscription.';
+  'Creating an account is free and takes no card. The writing editor and the standalone study utilities (word counter, citation generator, GPA calculator, Pomodoro, and more) stay free. Essay feedback, study packs and citation searches use credits: start the 3-day free trial to get 3 credits, then Pro is $19.99/mo for 99 credits a month. Unused credits roll over, up to 499.';
 
 /** Legal / Terms of Service single bullet */
 export const FREE_PLAN_TERMS_BULLET =
-  '3 documents per month; 2 one-time AI essay analysis previews (all highlight colors on the full paper — comments, rubric scores, and apply-revisions unlock with Pro); 2 one-time study pack previews (full lesson and first half of flashcards and quiz — arcade games, remaining cards/questions, and export unlock with Pro); 1 one-time citation search preview (first 3 sources — full list unlocks with Pro); 5,000 words/month for the Paper Summarizer; 2MB total document library storage';
+  '3 documents per month; no credits for AI essay analysis, study packs or citation searches (the 3-day free trial includes 3 credits); 5,000 words/month for the Paper Summarizer; 2MB total document library storage';
 
 /** Account page “What’s included” bullets */
 export const FREE_PLAN_ACCOUNT_BULLETS = [
   '3 documents per month',
-  '2 free essay analyses — all highlight colors (comments & fixes with Pro)',
-  '2 free study packs — everything unlocked for 24 hours (then half the deck)',
-  '1 free citation search — 3 sources (full list with Pro)',
+  'Writing editor with no word limit',
+  '0 credits: start the 3-day trial for 3',
   '5,000 Paper Summarizer words per month',
   '2MB document library storage',
 ] as const;
 
 /** Study-pack-specific one-liner */
 export const FREE_PLAN_STUDY_PACK_LINE =
-  '2 free packs: everything unlocked for 24 hours, then half the cards & quiz';
+  '1 credit per study pack · 3 free credits with the 3-day trial';
 
 /** Analysis-specific one-liner */
 export const FREE_PLAN_ANALYSIS_LINE =
-  '2 free analyses: all highlight colors — comments & fixes with Pro';
+  '1 credit per analysis · 3 free credits with the 3-day trial';
 
 /** Citations-specific one-liner */
 export const FREE_PLAN_CITATIONS_LINE =
-  '1 free search: 3 full sources — unlock the full list with Pro';
+  '1 credit per search · 3 free credits with the 3-day trial';
 
 /** Landing CTA footnote */
 export const FREE_PLAN_LANDING_CTA =
-  'Start free — see every highlight · Pro from $9.99 first month';
+  'Start your 3-day free trial · 3 credits · Cancel anytime';
 
 /** Landing FAQ: analysis timing */
 export const FREE_PLAN_FAQ_ANALYSIS_TIMING =
-  'Usually under 60 seconds. Write or paste your essay, hit Analyze, and you get every green, amber, and red highlight on the full paper. Comments, suggested fixes, and apply-revision unlock with Pro — 50% off your first month for new customers.';
+  'Usually under 60 seconds. Write or paste your essay, hit Analyze, and you get every green, amber, and red highlight, comments, suggested fixes and a grade estimate. Each analysis uses 1 credit, and the 3-day free trial includes 3.';
 
 /** Landing FAQ: study tools */
 export const FREE_PLAN_FAQ_STUDY_TOOLS =
-  'Yes. Study Pack turns any notes into a lesson, flashcards, quiz, crossword, and arcade games. Your free preview includes the lesson plus the first half of the flashcards and quiz; games and the rest of the deck unlock with Pro (50% off first month for new customers). Simpler utilities like the Pomodoro timer and GPA calculator stay free with no subscription.';
+  'Yes. Study Pack turns any notes into a lesson, flashcards, quiz, crossword, and arcade games. Each pack uses 1 credit, and the 3-day free trial includes 3. Simpler utilities like the Pomodoro timer and GPA calculator stay free with no subscription.';
 
 /** Landing FAQ: Free vs Pro vs Premium */
 export const FREE_PLAN_FAQ_PLAN_COMPARE =
-  'Free: two essay analyses and two study packs (all essay highlight colors; comments and fixes with Pro; study-pack lesson + half the cards and quiz), one citation search (3 sources), plus standalone utilities with no card. Pro: comments, suggested fixes, and apply-revisions, 99 combined analyses / study packs / citations per month, all citation styles, PDF and Word export, uploads up to 100MB, and every study tool unlocked — new customers get 50% off the first month ($9.99), then $19.99/mo. Premium: 5x the Pro usage at 499 actions a month, unlimited research-paper summarising, and 1GB of library storage.';
+  'Every essay analysis, study pack and citation search costs 1 credit. Free: the writing editor and standalone utilities, no credits. Free trial: 3 days with 3 credits. Pro: $19.99/mo for 99 credits a month, all citation styles, PDF and Word export, uploads up to 100MB, and every study tool. Premium: $39.99/mo for 199 credits a month, unlimited research-paper summarising, and 1GB of library storage. Unused credits roll over every month, up to 499.';

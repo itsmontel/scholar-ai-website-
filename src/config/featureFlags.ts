@@ -21,16 +21,17 @@ export const SKIP_ONBOARDING_STRIPE = false;
  *   false = the hard trial gate (current). A free, never-trialed user is
  *           blocked from the core AI tools — Essay Analyzer, Citation Finder,
  *           Study Packs, and the writing workspace — until they start the
- *           card-required 7-day trial. Standalone free utilities under
+ *           card-required 3-day trial (3 credits). Standalone free utilities under
  *           /tools/* (word counter, GPA calc, pomodoro, etc.) stay open.
  *
  * History: hard gate (card before tools) got signups but near-zero trials.
- * Freemium preview (run the tool, lock ~half the payoff) is the live model
- * again: onboarding has no paywall; the trial ask happens on the locked
- * analysis / study-pack / citations result in-product. Flip to false to
- * restore the hard gate — plumbing stays wired either way.
+ * Freemium preview (run the tool, lock ~half the payoff) followed. Now the
+ * hard gate is back with the credit system: free accounts have 0 credits,
+ * and the question-by-question onboarding ends on the 3-day trial
+ * (3 credits). Flip to true to restore the preview model — plumbing stays
+ * wired either way (free credit limits live in PLAN_LIMITS.free).
  */
-export const FREEMIUM_PREVIEW = true;
+export const FREEMIUM_PREVIEW = false;
 
 /**
  * Free-tier in-app writing editor allowance, in words.

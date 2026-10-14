@@ -5,6 +5,10 @@
  *   Active subscriber:  pause 30 days → 50% off next month → confirm
  *   Trialing user:      50% off first month → confirm
  *
+ * Credits: pausing keeps the balance (no new credits while paused);
+ * cancelling resets it to 0 when the plan ends. Both steps say how many
+ * credits are at stake, which is the strongest reason to pause instead.
+ *
  * Trial users skip the pause step (pausing a trial is meaningless) but
  * DO get the discount — this is the single highest-intent moment to
  * spend it. They've used the product for a few days and are looking at
@@ -23,6 +27,8 @@
 import { useEffect, useState } from 'react';
 import { trackEvent } from '../../utils/analytics';
 import { FIRST_MONTH_PRICE, STANDARD_MONTHLY_PRICE } from '../../config/pricing';
+import CreditCoin from './CreditCoin';
+import { notifyCreditsChanged, parseCreditState, shortDate, type CreditState } from '../../utils/credits';
 
 interface CancelRetentionModalProps {
   /** Controls visibility. Parent toggles to true when the user clicks the cancel link. */
@@ -65,6 +71,27 @@ export default function CancelRetentionModal({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [credits, setCredits] = useState<CreditState | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const token = localStorage.getItem('authToken');
+        const res = await fetch(`${apiUrl}/subscriptions/usage`, { headers: { Authorization: `Bearer ${token}` } });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!cancelled) setCredits(parseCreditState(data.credits));
+      } catch {
+        /* the flow works without the number */
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [open, apiUrl]);
+
+  const savedCredits = credits?.remaining ?? 0;
+  const rolledOver = credits?.rollover ?? 0;
 
   // Reset the modal to its initial step every time it re-opens — so
   // a user who pauses, then re-opens cancel, doesn't land at the
@@ -106,7 +133,12 @@ export default function CancelRetentionModal({
       });
       const data = await res.json().catch(() => null);
       if (!res.ok) throw new Error((data && typeof data.message === 'string' && data.message) || 'Could not pause subscription');
-      setSuccessMsg("You're paused for 30 days. We'll see you when you're back.");
+      setSuccessMsg(
+        savedCredits > 0
+          ? `You're paused for 30 days. Your ${savedCredits} credits are safe until you're back.`
+          : "You're paused for 30 days. We'll see you when you're back.",
+      );
+      notifyCreditsChanged();
       setStep('success');
       onMutate?.();
     } catch (e) {
@@ -155,11 +187,12 @@ export default function CancelRetentionModal({
       if (!res.ok) throw new Error((data && typeof data.message === 'string' && data.message) || 'Could not cancel subscription');
       setSuccessMsg(
         isTrialing
-          ? "Trial cancelled. You'll keep Pro access until your trial period ends — no charge."
-          : "Subscription cancelled. You'll keep Pro access until the end of your current billing period.",
+          ? "Trial cancelled. You'll keep access until your trial period ends — no charge."
+          : `Subscription cancelled. You'll keep Pro access until the end of your current billing period${savedCredits > 0 ? `, and your ${savedCredits} credits until then` : ''}.`,
       );
       setStep('success');
-      trackEvent('cancel_confirmed', { status: subscriptionStatus ?? null });
+      notifyCreditsChanged();
+      trackEvent('cancel_confirmed', { status: subscriptionStatus ?? null, credits: savedCredits });
       onMutate?.();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not cancel subscription');
@@ -200,13 +233,33 @@ export default function CancelRetentionModal({
           {/* ─── Step 1: Pause for 30 days ─── */}
           {step === 'pause' && (
             <div className="text-center">
-              <div className="text-5xl mb-3" aria-hidden>⏸️</div>
+              <img src="/mascot-sad.webp" alt="" width="88" height="88" className="mx-auto mb-2 w-[88px] h-[88px] object-contain" />
               <h2 id="retention-modal-title" className="text-[1.45rem] sm:text-[1.6rem] font-extrabold leading-tight tracking-tight text-[#3C3C3C] dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                Need a break?
+                {savedCredits > 0 ? <>Wait! You&apos;ve saved up <span className="text-[#A560E8]">{savedCredits} credits</span>.</> : 'Need a break?'}
               </h2>
-              <p className="mt-2 text-[13.5px] sm:text-sm font-bold text-stone-600 dark:text-stone-300 leading-relaxed">
-                Pause WriteScholar Pro for <span className="text-[#A560E8]">30 days</span>. No charges during the pause — you keep all your work and pick up right where you left off.
-              </p>
+              {rolledOver > 0 && (
+                <p className="mt-1 text-[12.5px] font-bold text-stone-500 dark:text-stone-400">Including {rolledOver} that rolled over from earlier months.</p>
+              )}
+              <div className="mt-4 space-y-2.5 text-left">
+                <div className="flex gap-3 items-start rounded-2xl border-2 border-b-4 border-[#A560E8] bg-[#F3EAFF] dark:bg-[#A560E8]/15 px-3.5 py-3">
+                  <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#A560E8] text-white" aria-hidden>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" viewBox="0 0 24 24"><path d="M9 6v12M15 6v12" /></svg>
+                  </span>
+                  <div>
+                    <p className="text-[14px] font-extrabold text-[#3C3C3C] dark:text-stone-100">Pause for 30 days <span className="ml-1 rounded-full bg-[#58CC02] px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-white align-middle">Keeps your credits</span></p>
+                    <p className="mt-0.5 text-[12.5px] font-bold leading-snug text-stone-600 dark:text-stone-300">No charges while you&apos;re paused.{savedCredits > 0 ? ` All ${savedCredits} credits are waiting when you're back.` : ' Pick up right where you left off.'}</p>
+                  </div>
+                </div>
+                <div className="flex gap-3 items-start rounded-2xl border-2 border-stone-200 dark:border-stone-700 px-3.5 py-3">
+                  <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#FFE8E8] text-[#C62828]" aria-hidden>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                  </span>
+                  <div>
+                    <p className="text-[14px] font-extrabold text-[#3C3C3C] dark:text-stone-100">Cancel</p>
+                    <p className="mt-0.5 text-[12.5px] font-bold leading-snug text-stone-600 dark:text-stone-300">Your credits reset to <span className="text-[#C62828]">0</span> when your plan ends. Rejoining later starts from scratch.</p>
+                  </div>
+                </div>
+              </div>
               {error && (
                 <div className="mt-4 rounded-xl bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-2 border-[#FF4B4B]/30 px-3 py-2 text-[12px] text-[#FF4B4B] font-bold">
                   {error}
@@ -219,7 +272,7 @@ export default function CancelRetentionModal({
                   disabled={busy}
                   className="w-full py-3 px-4 rounded-2xl bg-[#58CC02] hover:bg-[#46A302] disabled:opacity-60 disabled:cursor-not-allowed text-white text-[13px] sm:text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all"
                 >
-                  {busy ? 'Pausing…' : 'Yes, pause for 30 days'}
+                  {busy ? 'Pausing…' : savedCredits > 0 ? 'Pause and keep my credits' : 'Yes, pause for 30 days'}
                 </button>
                 <button
                   type="button"
@@ -287,14 +340,33 @@ export default function CancelRetentionModal({
           {/* ─── Step 3: Final confirm ─── */}
           {step === 'confirm' && (
             <div className="text-center">
-              <div className="text-5xl mb-3" aria-hidden>👋</div>
               <h2 id="retention-modal-title" className="text-[1.45rem] sm:text-[1.6rem] font-extrabold leading-tight tracking-tight text-[#3C3C3C] dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                {isTrialing ? 'Cancel your free trial?' : 'Cancel subscription?'}
+                {savedCredits > 0
+                  ? `Cancel and lose all ${savedCredits} credits?`
+                  : isTrialing ? 'Cancel your free trial?' : 'Cancel subscription?'}
               </h2>
-              <p className="mt-2 text-[13.5px] sm:text-sm font-bold text-stone-600 dark:text-stone-300 leading-relaxed">
+              {savedCredits > 0 && (
+                <div className="mt-4 flex items-center justify-center gap-5 rounded-2xl border-2 border-[#F3DB93] bg-[#FFF6DB] dark:bg-[#F5B70A]/10 py-3.5">
+                  <div className="flex flex-col items-center gap-1">
+                    <CreditCoin size={40} />
+                    <span className="text-[26px] leading-none font-black text-[#3C3C3C] dark:text-stone-100 tabular-nums">{savedCredits}</span>
+                    <span className="text-[11px] font-extrabold text-[#6B4E00] dark:text-[#F5D670]">credits now</span>
+                  </div>
+                  <svg width="40" height="20" viewBox="0 0 34 18" fill="none" stroke="#C62828" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M2 9h28" /><path d="M23 2l7 7-7 7" /></svg>
+                  <div className="flex flex-col items-center gap-1">
+                    <span className="h-10 w-10 rounded-full border-[3px] border-dashed border-stone-300 dark:border-stone-600" aria-hidden />
+                    <span className="text-[26px] leading-none font-black text-[#C62828]">0</span>
+                    <span className="text-[11px] font-extrabold text-stone-500 dark:text-stone-400">after it ends</span>
+                  </div>
+                </div>
+              )}
+              <p className="mt-3 text-[13.5px] sm:text-sm font-bold text-stone-600 dark:text-stone-300 leading-relaxed">
                 {isTrialing
-                  ? "You'll keep Pro access until your trial period ends — and you won't be charged. You can resubscribe anytime."
-                  : "You'll keep Pro access until the end of your current billing period, then drop back to the free plan. You can resubscribe anytime."}
+                  ? "You'll keep access until your trial period ends, and you won't be charged."
+                  : `You'll keep Pro access until ${shortDate(credits?.periodEnd ?? null) ?? 'the end of your current billing period'}, then drop back to the free plan.`}
+                {savedCredits > 0
+                  ? ` Your credits${rolledOver > 0 ? `, including the ${rolledOver} you rolled over,` : ''} reset to 0 then. Pausing keeps them.`
+                  : ' You can resubscribe anytime.'}
               </p>
               {error && (
                 <div className="mt-4 rounded-xl bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-2 border-[#FF4B4B]/30 px-3 py-2 text-[12px] text-[#FF4B4B] font-bold">
@@ -308,7 +380,7 @@ export default function CancelRetentionModal({
                   disabled={busy}
                   className="w-full py-3 px-4 rounded-2xl bg-[#58CC02] hover:bg-[#46A302] disabled:opacity-60 disabled:cursor-not-allowed text-white text-[13px] sm:text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all"
                 >
-                  {isTrialing ? 'Keep my trial' : 'Keep my plan'}
+                  {savedCredits > 0 ? `Keep my ${savedCredits} credits` : isTrialing ? 'Keep my trial' : 'Keep my plan'}
                 </button>
                 <button
                   type="button"
@@ -316,7 +388,7 @@ export default function CancelRetentionModal({
                   disabled={busy}
                   className="w-full py-3 px-4 rounded-2xl bg-white dark:bg-stone-900 hover:bg-[#FFE8E8] dark:hover:bg-[#FF4B4B]/10 text-[#FF4B4B] text-[12.5px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#FF4B4B]/50 hover:border-[#FF4B4B] disabled:opacity-60 disabled:cursor-not-allowed active:border-b-2 active:translate-y-0.5 transition-all"
                 >
-                  {busy ? 'Cancelling…' : 'Yes, cancel anyway'}
+                  {busy ? 'Cancelling…' : savedCredits > 0 ? 'Yes, cancel and reset to 0' : 'Yes, cancel anyway'}
                 </button>
               </div>
             </div>

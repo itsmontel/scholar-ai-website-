@@ -13,6 +13,8 @@ import {
   WELCOME_PROMO_CODE as CONFIG_WELCOME_PROMO_CODE,
   FLASH_FIRST_MONTH_PRICE,
   showSignupDiscount,
+  TRIAL_DAYS as APP_TRIAL_DAYS,
+  CHECKOUT_OFFER_KEY,
 } from '../../config/pricing';
 import { useFlashOffer } from '../../hooks/useFlashOffer';
 
@@ -61,12 +63,12 @@ const FEATURES = [
   { text: 'Walk into exams ready with full flashcards, quizzes, and study games', icon: '🎯', color: '#FF9600' },
   { text: 'Get through any reading in minutes, not evenings', icon: '📚', color: '#58CC02' },
   { text: 'References done right, exported to Word & PDF', icon: '📄', color: '#FF4B4B' },
-  { text: 'Enough for every assignment: 99 checks, packs & citations a month', icon: '⚡', color: '#FF9600' },
+  { text: '99 credits a month for essays, study packs & citations, and unused credits roll over', icon: '⚡', color: '#FF9600' },
 ];
 
 const PREMIUM_FEATURES = [
   { text: 'Everything in Pro, for your heaviest research terms', icon: '✨', color: '#FF9600' },
-  { text: 'Never hit a limit mid-deadline: 499 checks, packs & citations a month', icon: '📝', color: '#A560E8' },
+  { text: '199 credits a month for finals and thesis season, rolling over up to 499', icon: '📝', color: '#A560E8' },
   { text: 'Summarise every paper on your reading list, no cap', icon: '📚', color: '#58CC02' },
   { text: 'Keep every draft and source in one place (1GB storage)', icon: '💾', color: '#1CB0F6' },
   { text: 'Walk into exams ready with full flashcards, quizzes, and study games', icon: '🎯', color: '#FF9600' },
@@ -79,7 +81,7 @@ const SOCIAL_PROOF = [
   '#1 rated AI study platform by students',
 ];
 
-const TRIAL_DAYS = 7;
+const TRIAL_DAYS = APP_TRIAL_DAYS;
 const PRO_MONTHLY = '$19.99';
 const PREMIUM_MONTHLY = '$39.99';
 // Struck-through "was" prices shown next to the active price to make
@@ -188,11 +190,11 @@ const SoftPaywall = ({
     };
   }, [canStartFreeTrialProp]);
 
-  // Free trial offering disabled site-wide — force the non-trial path so
-  // all downstream copy (CTAs, paywall body, last-chance modal) renders
-  // the subscribe-now variant. Eligibility is repurposed below as the
-  // NEWCUSTOMER discount check (never trialed = never subscribed).
-  const showTrial = false;
+  // The 3-day trial (3 credits) is the offer for anyone who hasn't had
+  // one; everyone else gets the subscribe-now copy. null eligibility
+  // (still loading) shows the trial; the backend only grants it to
+  // eligible accounts, so the worst case is copy, never a wrong charge.
+  const showTrial = TRIAL_DAYS > 0 && (canStartFreeTrialProp ?? fetchedTrialEligible) !== false;
   // New-customer check: trial-eligibility doubles as "has never trialed
   // OR subscribed" (the endpoint backstops with hasEverSubscribed).
   // null = still loading → render the discount optimistically; the
@@ -306,7 +308,8 @@ const SoftPaywall = ({
           billingCycle: 'monthly',
           successUrl,
           cancelUrl,
-          ...(code ? { promoCode: code } : {}),
+          ...(showTrial ? { trialPeriodDays: TRIAL_DAYS } : {}),
+          ...(code && !showTrial ? { promoCode: code } : {}),
         }),
       });
 
@@ -315,6 +318,11 @@ const SoftPaywall = ({
 
       const url = data?.data?.checkoutUrl;
       if (url) {
+        try {
+          sessionStorage.setItem(CHECKOUT_OFFER_KEY, JSON.stringify(showTrial ? { kind: 'trial' } : { kind: 'paid', plan: planType }));
+        } catch {
+          /* ignore */
+        }
         if (hard || variant === 'postTutorial') {
           try {
             sessionStorage.setItem(CHECKOUT_FROM_TUTORIAL_PAYWALL_KEY, '1');
@@ -684,16 +692,16 @@ const SoftPaywall = ({
                   )}
                 </div>
                 <p className="text-sm text-[#3C3C3C] dark:text-stone-100 font-extrabold mb-1">
-                  {showTrial ? <>{TRIAL_DAYS}-day free trial · {planName}</> : <>Upgrade to {planName}</>}
+                  {showTrial ? <>{TRIAL_DAYS}-day free trial · 3 credits · {planName}</> : <>Upgrade to {planName}</>}
                 </p>
                 <p className="text-[11px] sm:text-xs text-stone-500 dark:text-stone-400 mb-2.5 font-bold leading-snug">
                   {showTrial
-                    ? <>Then {monthlyPrice}/mo if you continue. Cancel before the trial ends to pay nothing.</>
-                    : <>{monthlyPrice}/mo. Cancel anytime.</>}
+                    ? <>Then {monthlyPrice}/mo for {checkoutPlan === 'premium' ? 199 : 99} credits if you continue. Cancel before the trial ends to pay nothing.</>
+                    : <>{monthlyPrice}/mo · {checkoutPlan === 'premium' ? 199 : 99} credits a month · unused credits roll over. Cancel anytime.</>}
                 </p>
                 {checkoutPlan === 'premium' && (
                   <p className="text-[11px] sm:text-xs text-[#D97F00] font-extrabold mb-2.5 leading-snug">
-                    Premium adds 5× usage caps and 1GB library — details below.
+                    Premium doubles your credits to 199 a month and adds a 1GB library. Details below.
                   </p>
                 )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-2.5 gap-y-1.5">
@@ -761,10 +769,10 @@ const SoftPaywall = ({
               <p className="text-stone-500 dark:text-stone-400 text-sm sm:text-[0.9375rem] font-bold leading-relaxed">
                 {variant === 'postTutorial' ? (
                   showTrial
-                    ? <>Start a <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{TRIAL_DAYS}-day free trial</span> on {planName}. Essay analysis, study packs, citations, and arcade mode. Cancel anytime.</>
+                    ? <>Start a <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{TRIAL_DAYS}-day free trial</span> with 3 credits for essay analysis, study packs and citations. Cancel anytime.</>
                     : <>{planName} shows you exactly what to fix, gets you exam-ready, and sorts your references. Cancel anytime.</>
                 ) : showTrial ? (
-                  <>Try {planName} free for <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{TRIAL_DAYS} days</span>. Cancel anytime.</>
+                  <>Try {planName} free for <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{TRIAL_DAYS} days</span> with 3 credits. Cancel anytime.</>
                 ) : showDiscount ? (
                   <>Get {planName} for <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{firstPaywallFirstMonth} your first month</span>, then {monthlyPrice}/mo. Cancel anytime.</>
                 ) : (

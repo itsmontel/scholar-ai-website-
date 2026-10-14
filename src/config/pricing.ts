@@ -2,9 +2,11 @@
  * Pricing & discount policy — one place that decides WHERE the welcome
  * discount is allowed to appear.
  *
- * Current front-door offer: 50% off the first month (NEWCUSTOMER), no
- * free trial. Soft paywall, pricing, billing, and onboarding checkout
- * all read this flag so the story stays consistent.
+ * Current front-door offer: a 3-day free trial with 3 credits, then Pro
+ * at $19.99/mo for 99 credits. No first-month discount at signup (it
+ * would only discount the $0 trial invoice). Soft paywall, pricing,
+ * billing, and onboarding checkout all read these values so the story
+ * stays consistent.
  *
  * Exit (cancel flow / post-lapse winback) can still reuse the same
  * coupon as a save offer for users who already paid.
@@ -27,9 +29,10 @@ export const WELCOME_PROMO_CODE = 'NEWCUSTOMER';
 
 /**
  * Whether acquisition surfaces auto-apply WELCOME_PROMO_CODE.
- * true = 50% off first month is the front-door offer (current).
+ * true = 50% off first month is the front-door offer. Off while the
+ * 3-day trial is the front-door offer (current).
  */
-export const WELCOME_DISCOUNT_AT_SIGNUP = true;
+export const WELCOME_DISCOUNT_AT_SIGNUP = false;
 
 /** First-month price per plan when the discount IS applied. */
 export const FIRST_MONTH_PRICE: Record<string, number> = { pro: 9.99, premium: 19.99 };
@@ -51,8 +54,24 @@ export const FLASH_OFFER_HOURS = 24;
 /**
  * Length of the card-required free trial, in days.
  * 0 = no trial — charge the (possibly discounted) first invoice immediately.
+ * Must match TRIAL_DAYS in backend/src/services/creditService.js.
  */
-export const TRIAL_DAYS = 0;
+export const TRIAL_DAYS = 3;
+
+/**
+ * Credits. An essay analysis, a study pack and a citation search each
+ * cost 1. Unused credits roll over each month, up to CREDIT_CAP.
+ * Mirrors backend/src/services/creditService.js.
+ */
+export const TRIAL_CREDITS = 3;
+export const MONTHLY_CREDITS: Record<string, number> = { pro: 99, premium: 199 };
+export const CREDIT_CAP = 499;
+
+/**
+ * sessionStorage key set right before redirecting to Stripe, so the
+ * post-checkout celebration knows whether it was the trial or a paid plan.
+ */
+export const CHECKOUT_OFFER_KEY = 'ws_checkout_offer';
 
 /**
  * Promo code to send with a checkout session from an ACQUISITION surface.
@@ -88,5 +107,5 @@ export function showSignupDiscount(
 export const UPGRADE_CTA_FOOTNOTE = WELCOME_DISCOUNT_AT_SIGNUP
   ? `50% off first month · then $${STANDARD_MONTHLY_PRICE.pro}/mo · Cancel anytime`
   : TRIAL_DAYS > 0
-    ? `${TRIAL_DAYS}-day free trial · $0 today · Cancel anytime`
+    ? `${TRIAL_DAYS}-day free trial · ${TRIAL_CREDITS} credits · $0 today · Cancel anytime`
     : `From $${STANDARD_MONTHLY_PRICE.pro}/mo · Cancel anytime`;

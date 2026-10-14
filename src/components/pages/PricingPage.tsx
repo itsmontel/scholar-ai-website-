@@ -8,7 +8,7 @@ import {
 import Header from '../common/Header';
 import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
-import { FIRST_MONTH_PRICE, FLASH_FIRST_MONTH_PRICE, signupPromoCode, showSignupDiscount } from '../../config/pricing';
+import { FIRST_MONTH_PRICE, FLASH_FIRST_MONTH_PRICE, signupPromoCode, showSignupDiscount, TRIAL_DAYS, CHECKOUT_OFFER_KEY } from '../../config/pricing';
 import { useFlashOffer } from '../../hooks/useFlashOffer';
 
 interface PricingPageProps {
@@ -141,6 +141,9 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
             billingCycle: billingCycle as 'monthly' | 'yearly',
             successUrl: `${window.location.origin}/dashboard?payment=success`,
             cancelUrl: `${window.location.origin}/dashboard?payment=cancelled`,
+            // New customers start with the 3-day trial (3 credits). The
+            // backend drops it for anyone who has trialed or paid before.
+            ...(newCustomer && TRIAL_DAYS > 0 ? { trialPeriodDays: TRIAL_DAYS } : {}),
             ...(campaignPromo
               ? { promoCode: campaignPromo }
               : signupPromoCode(newCustomer, billingCycle === 'yearly' ? 'yearly' : 'monthly') ?? {}),
@@ -149,6 +152,12 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
 
         const data = await response.json();
         if (data.success && data.data?.checkoutUrl) {
+          try {
+            sessionStorage.setItem(
+              CHECKOUT_OFFER_KEY,
+              JSON.stringify(newCustomer && TRIAL_DAYS > 0 ? { kind: 'trial' } : { kind: 'paid', plan: planId }),
+            );
+          } catch { /* ignore */ }
           window.location.href = data.data.checkoutUrl;
         } else {
           throw new Error(data.message || 'Failed to create checkout session');
@@ -224,14 +233,15 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
         'Walk into exams ready with full flashcards, quizzes, crossword, and Crater Blast',
         'References done right in every citation style, plus PDF/Word export',
         'Get through any reading in minutes with the Paper Summarizer',
-        'Enough for every assignment: 99 essay checks, study packs & citations a month (100MB uploads)'
+        '99 credits a month for essay checks, study packs & citations (100MB uploads)',
+        'Unused credits roll over every month, up to 499'
       ],
       limitations: [],
       popular: true,
       buttonText: !user
-        ? 'Start with Pro'
+        ? 'Start free trial'
         : currentPlan === 'free'
-          ? 'Upgrade to Pro'
+          ? newCustomer && TRIAL_DAYS > 0 ? `Start ${TRIAL_DAYS}-day free trial` : 'Upgrade to Pro'
           : 'Switch to Pro',
       buttonAction: () => handlePlanAction('pro'),
     },
@@ -243,7 +253,8 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       yearlyPrice: 399.99,
       features: [
         'Everything in Pro',
-        'Never hit a limit mid-deadline: 499 essay checks, study packs & citations a month',
+        '199 credits a month for finals, dissertations and heavy research terms',
+        'Hit the 499 rollover cap twice as fast',
         'Summarise every paper on your reading list, no cap',
         'Keep every draft and source in one place with 1GB of storage'
       ],
@@ -265,11 +276,11 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
     },
     {
       question: "What does Pro include?",
-      answer: "Pro includes 99 combined actions per month (analyses, study packs & citations), 999,999 words for the Paper Summarizer, uploads up to 100MB per file, 100MB total library storage, all citation styles, full annotations and feedback, Apply WriteScholar revisions into your draft, and full access to quizzes, flashcards, crossword & Crater Blast."
+      answer: "Pro includes 99 credits per month (1 credit = 1 essay analysis, study pack or citation search), and unused credits roll over up to 499. It also includes 999,999 words for the Paper Summarizer, uploads up to 100MB per file, 100MB total library storage, all citation styles, full annotations and feedback, Apply WriteScholar revisions into your draft, and full access to quizzes, flashcards, crossword & Crater Blast."
     },
     {
       question: "What does Premium add?",
-      answer: "Premium includes everything in Pro with 5× usage: 499 combined actions per month, unlimited research-paper summarisation, and 1GB total library storage for your document library."
+      answer: "Premium includes everything in Pro with 199 credits per month (rolling over up to 499), unlimited research-paper summarisation, and 1GB total library storage for your document library."
     },
     {
       question: "Can I change my plan after subscribing?",
@@ -423,7 +434,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
               {plan.id === 'premium' && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                   <span className="bg-[#FFC800] text-[#6B27A3] px-3 py-1 rounded-xl text-xs font-extrabold border-2 border-[#D4A300]">
-                    5× usage
+                    2× credits
                   </span>
                 </div>
               )}

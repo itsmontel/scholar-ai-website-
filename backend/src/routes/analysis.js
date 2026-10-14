@@ -1250,8 +1250,8 @@ router.post('/citation-search', authenticateToken, async (req, res) => {
       return res.status(429).json({
         success: false,
         message: isPaidAnalysisTier(userPlan)
-          ? `You've used all ${limitCheck.limit} combined actions (analyses, study packs & citations) this period. Limit resets when your billing renews.`
-          : `You've used your ${limitCheck.limit} free citation search previews. Upgrade to Pro for full source lists every month.`,
+          ? "You're out of credits for now. Your credits top up when your plan renews, and anything you don't use rolls over."
+          : 'Citation searches use credits. Start your free 3-day trial to get 3 credits, or get Pro for 99 credits a month.',
         limit: limitCheck.limit,
         usage: limitCheck.usage,
         remaining: limitCheck.remaining,
@@ -1360,7 +1360,10 @@ router.post('/citation-review', authenticateToken, validateCitationReview, async
     if (!limitCheck.allowed) {
       return res.status(429).json({
         success: false,
-        message: 'Analysis limit reached for this period. Please upgrade your plan or wait until your period resets.',
+        message: isPaidAnalysisTier(userPlan)
+          ? "You're out of credits for now. Your credits top up when your plan renews, and anything you don't use rolls over."
+          : 'Essay analysis uses credits. Start your free 3-day trial to get 3 credits, or get Pro for 99 credits a month.',
+        upgrade: !isPaidAnalysisTier(userPlan),
         limit: limitCheck.limit,
         usage: limitCheck.usage
       });
@@ -1754,8 +1757,8 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
           return res.status(403).json({
             success: false,
             message: useCombined
-              ? `Combined action limit exceeded for this period. You have used ${analysisCheck.usage}/${analysisCheck.limit} (analyses, study packs & citations). Limit resets when your billing renews.`
-              : `You've used your ${analysisCheck.limit} free analysis previews. Upgrade to Pro for full analyses every month.`,
+              ? `You're out of credits for now (${analysisCheck.usage} of ${analysisCheck.limit} used). Your credits top up when your plan renews, and anything you don't use rolls over.`
+              : 'Essay analysis uses credits. Start your free 3-day trial to get 3 credits, or get Pro for 99 credits a month.',
             upgrade: true,
             usage: {
               limit: analysisCheck.limit,
@@ -2881,7 +2884,7 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
       if (!combinedCheck.allowed) {
         return res.status(429).json({
           success: false,
-          message: `You've used all ${combinedCheck.limit} combined actions (analyses, study packs & citations) this period. Limit resets when your billing period renews.`,
+          message: "You're out of credits for now. Your credits top up when your plan renews, and anything you don't use rolls over.",
           generationsUsed: combinedCheck.usage,
           generationLimit: combinedCheck.limit,
           generationsRemaining: 0,
@@ -2903,12 +2906,12 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
         .gte('created_at', freePackPeriodStart);
 
       generationsUsed = usageError ? 0 : (usageData || []).length;
-      generationLimit = planLimits.studyPackGenerationsPerMonth || planLimits.quizGenerationsPerMonth;
+      generationLimit = (planLimits.studyPackGenerationsPerMonth ?? planLimits.quizGenerationsPerMonth);
 
       if (generationLimit !== -1 && generationsUsed >= generationLimit) {
         return res.status(429).json({
           success: false,
-          message: `You've used your ${generationLimit} free study pack preview${generationLimit === 1 ? '' : 's'}. Upgrade to Pro for 99 combined analyses, study packs & citations every month.`,
+          message: 'Study packs use credits. Start your free 3-day trial to get 3 credits, or get Pro for 99 credits a month.',
           generationsUsed,
           generationLimit,
           generationsRemaining: 0,
@@ -3037,7 +3040,7 @@ router.get('/study-pack-usage', authenticateToken, async (req, res) => {
       .gte('created_at', periodStart);
 
     const generationsUsed = usageError ? 0 : (usageData || []).length;
-    const generationLimit = planLimits.studyPackGenerationsPerMonth || planLimits.quizGenerationsPerMonth;
+    const generationLimit = (planLimits.studyPackGenerationsPerMonth ?? planLimits.quizGenerationsPerMonth);
     res.json({
       success: true,
       data: {

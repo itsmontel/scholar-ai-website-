@@ -2604,7 +2604,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   <svg className="w-5 h-5 flex-shrink-0 text-[#A560E8] dark:text-[#A560E8] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>Enough for every assignment: 99 checks, study packs &amp; citations a month</span>
+                  <span>99 credits a month for essay checks, study packs &amp; citations. Unused credits roll over</span>
                 </li>
               </ul>
               <button
@@ -2619,7 +2619,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
             <div className="relative rounded-3xl border-2 border-[#E0AC00]/70 dark:border-[#D4A300]/60 bg-[#FFF7DB]/70 dark:bg-[#FFC800]/10 shadow-[0_24px_60px_-30px_rgba(160,120,0,0.40)] p-6 sm:p-8 flex flex-col sm:col-span-2 lg:col-span-1">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                 <span className="bg-[#FFC800] text-[#5A4500] px-3 py-1 rounded-full text-xs font-extrabold border-2 border-[#D4A300]">
-                  5× usage
+                  2× credits
                 </span>
               </div>
               <h3 className="font-semibold text-xl text-stone-900 dark:text-stone-100 mb-1 pt-1">Premium</h3>
@@ -2650,7 +2650,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   <svg className="w-5 h-5 flex-shrink-0 text-[#E0AC00] dark:text-[#F0C419] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>Never hit a limit mid-deadline: 499 checks, study packs &amp; citations a month</span>
+                  <span>199 credits a month for finals and thesis season, rolling over up to 499</span>
                 </li>
                 <li className="flex gap-2">
                   <svg className="w-5 h-5 flex-shrink-0 text-[#E0AC00] dark:text-[#F0C419] mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>

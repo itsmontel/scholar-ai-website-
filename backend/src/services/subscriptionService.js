@@ -16,17 +16,21 @@ const supabaseServiceRole = createClient(
 
 // Plan limits configuration
 // Study packs: one generation creates quiz + flashcards + crossword + lesson + crater blast
+//
+// Credits: an essay analysis, a study pack and a citation search each cost
+// 1 credit (see creditService). Pro gets 99 a month, Premium 199, the 3-day
+// trial 3. Free accounts get none: the trial is how you try the AI tools.
 const PLAN_LIMITS = {
   free: {
     documentsPerMonth: 3,
     maxDocuments: 3, // hard cap on TOTAL documents owned (not monthly)
-    // TWO lifetime analyses + TWO study packs — enough to feel the
-    // product twice (onboarding + a second real run) before the ask.
-    analysesPerMonth: 2,
-    citationSearchesPerMonth: 1,
+    // No free credits. Analyses, study packs and citation searches start
+    // with the 3-day trial (3 credits).
+    analysesPerMonth: 0,
+    citationSearchesPerMonth: 0,
     humanizeWordsPerMonth: 5000,
     summarizeWordsPerMonth: 5000,
-    studyPackGenerationsPerMonth: 2,
+    studyPackGenerationsPerMonth: 0,
     studyPackMaxWordsPerGeneration: 5000,
     quizWordsPerMonth: 15000,
     quizGenerationsPerMonth: 1,
@@ -43,7 +47,7 @@ const PLAN_LIMITS = {
   pro: {
     documentsPerMonth: -1,
     maxDocuments: 99, // hard cap on TOTAL documents owned
-    combinedActionsPerMonth: 99, // analyses + study packs + citations share this pool
+    combinedActionsPerMonth: 99, // monthly credits: analyses + study packs + citations share this pool
     combinedWordsPerMonth: 999999, // Paper Summarizer word pool
     analysesPerMonth: 99, // used for combined check
     citationSearchesPerMonth: 99,
@@ -68,20 +72,20 @@ const PLAN_LIMITS = {
   premium: {
     documentsPerMonth: -1,
     maxDocuments: 99, // hard cap on TOTAL documents owned
-    combinedActionsPerMonth: 499,
+    combinedActionsPerMonth: 199, // monthly credits
     combinedWordsPerMonth: 4999999,
-    analysesPerMonth: 499,
-    citationSearchesPerMonth: 499,
+    analysesPerMonth: 199,
+    citationSearchesPerMonth: 199,
     humanizeWordsPerMonth: 4999999,
     summarizeWordsPerMonth: 4999999,
-    studyPackGenerationsPerMonth: 499,
+    studyPackGenerationsPerMonth: 199,
     studyPackMaxWordsPerGeneration: 10000,
     quizWordsPerMonth: 4999999,
-    quizGenerationsPerMonth: 499,
+    quizGenerationsPerMonth: 199,
     quizMaxWordsPerGeneration: 10000,
     craterBlastMaxWordsPerGeneration: 10000,
     lessonWordsPerMonth: 4999999,
-    lessonGenerationsPerMonth: 499,
+    lessonGenerationsPerMonth: 199,
     lessonMaxWordsPerGeneration: 10000,
     aiModel: 'gpt-5.6-luna',
     maxDocumentSize: 100 * 1024 * 1024,
@@ -378,25 +382,25 @@ const getRemainingUsage = async (userId, limitType) => {
   return result.remaining;
 };
 
-// For Pro/Premium: combined pool of analyses + study packs + citations
+// For Pro/Premium (and trials): the credit balance. Analyses, study packs
+// and citations each cost 1 credit. limit = credits available this period
+// (monthly credits + rollover, or 3 on a trial), usage = credits spent.
 const checkCombinedActionsLimit = async (userId) => {
   try {
     const { plan } = await getUserSubscriptionDetails(userId);
     const effPlan = normalizePlanForLimits(plan);
-    const planLimits = PLAN_LIMITS[effPlan] || PLAN_LIMITS.free;
-    const limit = planLimits.combinedActionsPerMonth;
-    if (!limit || limit === -1 || !isPaidSubscriptionTier(effPlan)) {
+    if (!isPaidSubscriptionTier(effPlan)) {
       return { allowed: true, limit: -1, usage: 0, remaining: -1 };
     }
-    const { periodStart } = await getUsagePeriod(userId);
-    const [analyses, citations, studyPacks] = await Promise.all([
-      supabaseServiceRole.from('document_analyses').select('id').eq('user_id', userId).gte('created_at', periodStart),
-      supabaseServiceRole.from('citation_searches').select('id').eq('user_id', userId).gte('created_at', periodStart),
-      supabaseServiceRole.from('quiz_usage').select('id').eq('user_id', userId).eq('quiz_type', 'study_pack').gte('created_at', periodStart)
-    ]);
-    const used = (analyses.data?.length || 0) + (citations.data?.length || 0) + (studyPacks.data?.length || 0);
-    const remaining = Math.max(0, limit - used);
-    return { allowed: used < limit, limit, usage: used, remaining };
+    const creditService = require('./creditService');
+    const credits = await creditService.getCreditState(userId);
+    return {
+      allowed: credits.remaining > 0,
+      limit: credits.total,
+      usage: credits.used,
+      remaining: credits.remaining,
+      credits,
+    };
   } catch (err) {
     console.error('checkCombinedActionsLimit:', err);
     return { allowed: true, limit: -1, usage: 0, remaining: -1 };
@@ -1954,6 +1958,7 @@ const reconcileSubscriptions = async () => {
         if (subErr) throw subErr;
 
         await startDowngradeMaterialExpiry(user.id);
+        await require('./creditService').resetCredits(user.id);
 
         console.log(
           `🔄 Reconcile: downgraded user ${user.id} (${user.email}) from ${user.subscription_plan} → free (Stripe status: ${dbStatus})`
@@ -2113,6 +2118,7 @@ module.exports = {
   createCheckoutSession,
   syncCheckoutSessionForUser,
   getStripeSubscription,
+  getActiveSubscriptionByCustomer,
   updateStripeSubscription,
   cancelStripeSubscription,
   pauseStripeSubscription,

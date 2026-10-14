@@ -896,7 +896,9 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
   const isPaidUser = usageStats.plan === 'pro' || usageStats.plan === 'premium' || usageStats.plan === 'focus';
   const isFreeUser = usageStats.plan === 'free';
   const combinedActionsRemaining = (usageStats as { combinedActionsRemaining?: number }).combinedActionsRemaining;
+  // Credits available this period, including rollover (and 3 on a trial).
   const combinedActionsMonthlyCap =
+    (usageStats as { credits?: { total?: number } }).credits?.total ??
     (usageStats.planLimits as { combinedActionsPerMonth?: number })?.combinedActionsPerMonth ?? 99;
   const combinedPoolExhausted =
     isPaidUser &&
@@ -1052,7 +1054,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
     if (studyPackSectionExhausted) {
       setStudyPackError(
         combinedPoolExhausted
-          ? `You've used all ${combinedActionsMonthlyCap} combined actions (analyses, study packs & citations) this billing period. Your limit resets when your plan renews.`
+          ? "You're out of credits for now. Your credits top up when your plan renews, and anything you don't use rolls over."
           : "You've used all study pack generations this period. Upgrade for more."
       );
       return;
@@ -2247,7 +2249,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                     Unlock everything with Pro!
                   </h3>
                   <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-0.5 font-bold">
-                    99 actions/mo, every tool, larger uploads — students get 50% off 🎉
+                    99 credits a month, every tool, larger uploads. Unused credits roll over.
                   </p>
                 </div>
                 <button
@@ -3101,7 +3103,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                 <h3 className="text-lg sm:text-xl font-bold mb-1 sm:mb-2">Monthly Limit Reached</h3>
                 <p className="text-amber-100 dark:text-amber-100/90 mb-1 text-sm sm:text-base">
                   {combinedPoolExhausted
-                    ? `You've used all ${combinedActionsMonthlyCap} combined actions (analyses, study packs & citations) this billing period. Your limit resets when your plan renews.`
+                    ? "You're out of credits for now. Your credits top up when your plan renews, and anything you don't use rolls over."
                     : `You've used all ${quizUsage.generationLimit} study pack generations this period. Upgrade for more!`}
                 </p>
                 <p className="text-amber-200/90 text-xs sm:text-sm mb-3 sm:mb-4">{getResetsInText(usageStats.daysUntilReset ?? quizUsage.daysUntilReset)}</p>
@@ -3136,10 +3138,10 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                           {combinedActionsRemaining != null ? combinedActionsRemaining : quizUsage.generationsRemaining}
                           /
                           {combinedActionsMonthlyCap}{' '}
-                          combined actions left this month
+                          credits left
                         </p>
                         <p className="text-amber-600 dark:text-amber-400 text-[10px] sm:text-xs mt-0.5 line-clamp-2">
-                          Analyses, study packs & citations share one pool (resets with your billing period).
+                          1 credit per analysis, study pack or citation. Unused credits roll over.
                         </p>
                       </>
                     )}
@@ -4357,7 +4359,8 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
             combinedActionsPerMonth?: number;
           };
           const combinedRemaining = (usageStats as { combinedActionsRemaining?: number }).combinedActionsRemaining;
-          const combinedLimit = planLimits?.combinedActionsPerMonth ?? 99;
+          const combinedLimit =
+            (usageStats as { credits?: { total?: number } }).credits?.total ?? planLimits?.combinedActionsPerMonth ?? 99;
 
           type Bar = {
             key: string;
@@ -4544,7 +4547,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                             <span className="text-[10px] sm:text-xs text-violet-100 font-medium">Save 20+ hours / month</span>
                           </div>
                           <h4 className="text-base sm:text-lg font-bold text-white leading-tight mb-1" style={{ fontFamily: "'EB Garamond', Georgia, serif" }}>
-                            Unlock 99 actions / month + every Pro tool
+                            Unlock 99 credits a month + every Pro tool
                           </h4>
                           <p className="text-violet-100/95 text-[12px] sm:text-sm leading-snug">
                             Crater Blast · Word Tower · Crosswords · Focus Mode · Larger uploads · Priority feedback.
@@ -4650,7 +4653,7 @@ const Dashboard = ({ onNavigate, user, onLogout, initialMode = 'analyze' }: Dash
                   Unlock everything
                 </h4>
                 <p className="text-[11px] font-bold text-gray-600 dark:text-gray-300 leading-snug mb-3">
-                  99 actions/mo, every tool, larger uploads.
+                  99 credits a month, every tool, larger uploads.
                 </p>
                 <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-extrabold rounded-xl shadow-sm border-b-2 border-orange-600 uppercase tracking-wide">
                   See Pro

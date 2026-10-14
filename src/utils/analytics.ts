@@ -57,6 +57,8 @@ export type AnalyticsEvent =
   | 'onboarding_survey_source_select'
   | 'onboarding_survey_goal_select'
   | 'onboarding_survey_complete'
+  | 'onboarding_v2_step'
+  | 'credits_pill_open'
   | 'onboarding_tour_essay_analyze'
   | 'onboarding_tour_flashcard_flip'
   | 'onboarding_tour_badge_unlock'

@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { getUsagePeriodFooterText } from '../../utils/usageReset';
+import CreditsPill from './CreditsPill';
+import { CREDITS_CHANGED_EVENT, parseCreditState, type CreditState } from '../../utils/credits';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -82,6 +84,7 @@ interface TopBarUsageStats {
   daysUntilReset?: number;
   /** Free preview counters are one-time and never reset. */
   previewsAreLifetime?: boolean;
+  credits: CreditState | null;
 }
 
 function usageLeftColor(n: number): string {
@@ -120,6 +123,19 @@ export default function DashboardTopBar({
   // ─── Usage stats (same /subscriptions/usage endpoint as Header) ─
   const [usageStats, setUsageStats] = useState<TopBarUsageStats | null>(null);
   const [loadingUsage, setLoadingUsage] = useState(false);
+  const [usageVersion, setUsageVersion] = useState(0);
+  // Refresh the credit counter after anything spends a credit, and when
+  // the tab comes back into focus (e.g. after a generation in another tab).
+  useEffect(() => {
+    const bump = () => setUsageVersion((v) => v + 1);
+    const onVisible = () => { if (document.visibilityState === 'visible') bump(); };
+    window.addEventListener(CREDITS_CHANGED_EVENT, bump);
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      window.removeEventListener(CREDITS_CHANGED_EVENT, bump);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, []);
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
@@ -139,13 +155,14 @@ export default function DashboardTopBar({
           combinedActionsRemaining: data.combinedActionsRemaining,
           daysUntilReset: data.daysUntilReset,
           previewsAreLifetime: data.previewsAreLifetime === true,
+          credits: parseCreditState(data.credits),
         });
       } catch { /* chip stays empty */ } finally {
         if (!cancelled) setLoadingUsage(false);
       }
     })();
     return () => { cancelled = true; };
-  }, [user]);
+  }, [user, usageVersion]);
 
   const usagePlan = (usageStats?.plan ?? plan).toLowerCase();
   const isPaidUsage = usagePlan === 'pro' || usagePlan === 'premium' || usagePlan === 'focus';
@@ -347,19 +364,14 @@ export default function DashboardTopBar({
         </>
       )}
 
-      {/* Upgrade (free) or plan badge (paid on compact pages) */}
-      {!isPaid ? (
-        <button
-          type="button"
-          onClick={() => onNavigate('pricing')}
-          className="inline-flex items-center gap-1.5 px-4 h-10 sm:h-11 rounded-full bg-gradient-to-br from-[#B57AF0] to-[#8A48C7] text-white text-[13px] sm:text-[14px] font-extrabold hover:scale-[1.03] transition-transform duration-200 shadow-[0_10px_22px_-10px_rgba(122,52,182,0.8)]"
-        >
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.75} viewBox="0 0 24 24" aria-hidden>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-          </svg>
-          Upgrade
-        </button>
-      ) : isCompact ? (
+      {/* Credits: the balance everyone checks first. Free accounts get the
+          "Get more" state, which opens the trial. */}
+      {user && (
+        <CreditsPill credits={usageStats?.credits ?? null} loading={loadingUsage} onNavigate={onNavigate} />
+      )}
+
+      {/* Plan badge (paid on compact pages) */}
+      {!isPaid ? null : isCompact ? (
         <span className="inline-flex items-center gap-1.5 px-3.5 h-10 sm:h-11 rounded-2xl bg-gradient-to-b from-[#F3EAFF] to-[#E8D9FF] dark:from-[#A560E8]/25 dark:to-[#A560E8]/15 text-[#7733B5] dark:text-[#C9A0F0] text-[12px] sm:text-[13px] font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#A560E8]/35">
           <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
             <path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7-6.3-4.6L5.7 21 8 14 2 9.4h7.6z" />
@@ -600,44 +612,23 @@ export default function DashboardTopBar({
                         {fmtUsageLeft(usageStats.uploadsRemaining)} <span className="text-[10px] font-bold text-stone-400">left</span>
                       </p>
                     </div>
-                    {showCombined ? (
-                      <div className="rounded-xl bg-[#F3EAFF]/60 dark:bg-[#A560E8]/15 border border-[#A560E8]/25 px-2.5 py-2">
-                        <p className="text-[9px] font-extrabold uppercase tracking-wider text-stone-400">Actions</p>
-                        <p className={`text-sm font-extrabold tabular-nums ${usageLeftColor(usageStats.combinedActionsRemaining ?? 0)}`}>
-                          {fmtUsageLeft(usageStats.combinedActionsRemaining ?? 0)} <span className="text-[10px] font-bold text-stone-400">left</span>
-                        </p>
-                        <p className="text-[8.5px] font-bold text-stone-400 leading-tight mt-0.5">Analyses · packs · cites</p>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="rounded-xl bg-stone-50 dark:bg-stone-800/80 border border-stone-200/80 dark:border-stone-700 px-2.5 py-2">
-                          <p className="text-[9px] font-extrabold uppercase tracking-wider text-stone-400">Previews</p>
-                          <p className={`text-sm font-extrabold tabular-nums ${usageLeftColor(usageStats.analysesRemaining)}`}>
-                            {fmtUsageLeft(usageStats.analysesRemaining)} <span className="text-[10px] font-bold text-stone-400">left</span>
-                          </p>
-                        </div>
-                        <div className="rounded-xl bg-stone-50 dark:bg-stone-800/80 border border-stone-200/80 dark:border-stone-700 px-2.5 py-2">
-                          <p className="text-[9px] font-extrabold uppercase tracking-wider text-stone-400">Cites</p>
-                          <p className={`text-sm font-extrabold tabular-nums ${usageLeftColor(usageStats.citationsRemaining)}`}>
-                            {fmtUsageLeft(usageStats.citationsRemaining)} <span className="text-[10px] font-bold text-stone-400">left</span>
-                          </p>
-                        </div>
-                        <div className="rounded-xl bg-stone-50 dark:bg-stone-800/80 border border-stone-200/80 dark:border-stone-700 px-2.5 py-2 col-span-2">
-                          <p className="text-[9px] font-extrabold uppercase tracking-wider text-stone-400">Packs</p>
-                          <p className={`text-sm font-extrabold tabular-nums ${usageLeftColor(usageStats.studyPacksRemaining)}`}>
-                            {fmtUsageLeft(usageStats.studyPacksRemaining)} <span className="text-[10px] font-bold text-stone-400">left</span>
-                          </p>
-                        </div>
-                      </>
-                    )}
+                    <div className="rounded-xl bg-[#FFF6DB]/80 dark:bg-[#F5B70A]/10 border border-[#F3DB93] dark:border-[#F5B70A]/30 px-2.5 py-2">
+                      <p className="text-[9px] font-extrabold uppercase tracking-wider text-stone-400">Credits</p>
+                      <p className={`text-sm font-extrabold tabular-nums ${usageLeftColor(usageStats.credits?.remaining ?? (showCombined ? usageStats.combinedActionsRemaining ?? 0 : 0))}`}>
+                        {usageStats.credits?.remaining ?? (showCombined ? usageStats.combinedActionsRemaining ?? 0 : 0)} <span className="text-[10px] font-bold text-stone-400">left</span>
+                      </p>
+                      <p className="text-[8.5px] font-bold text-stone-400 leading-tight mt-0.5">Essays · packs · cites</p>
+                    </div>
                   </div>
                   {(() => {
                     // Free previews never reset — only uploads do. Don't show
                     // a blanket "Resets in N days" under one-time counters.
-                    const footer = getUsagePeriodFooterText(
-                      usageStats.previewsAreLifetime === true,
-                      usageStats.daysUntilReset
-                    );
+                    const footer = isPaidUsage && usageStats.credits && usageStats.credits.rollover > 0
+                      ? `${usageStats.credits.rollover} rolled over · unused credits carry into next month`
+                      : getUsagePeriodFooterText(
+                          usageStats.previewsAreLifetime === true,
+                          usageStats.daysUntilReset
+                        );
                     return footer ? (
                       <p className="mt-2 text-center text-[10px] font-bold text-stone-400">{footer}</p>
                     ) : null;
@@ -651,7 +642,7 @@ export default function DashboardTopBar({
                       <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
                       </svg>
-                      Get more usage
+                      Get credits
                     </button>
                   )}
                 </>

@@ -67,7 +67,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({
         <div className="p-6 bg-gradient-to-r from-violet-50 to-violet-50">
           <div className="text-center">
             <div className="text-4xl font-bold text-gray-900">
-              £{getPlanPrice()}
+              ${getPlanPrice()}
             </div>
             <div className="text-gray-600">
               per {billingCycle === 'monthly' ? 'month' : 'year'}

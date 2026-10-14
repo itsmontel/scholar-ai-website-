@@ -14,8 +14,10 @@ import {
 // on first paint so the conversion event isn't racing the script load.
 import { trackTrialConversion } from '../../utils/gtag';
 import BadgeCreature from '../common/BadgeCreature';
-import { signupPromoCode, showSignupDiscount, STANDARD_MONTHLY_PRICE, FIRST_MONTH_PRICE, FLASH_FIRST_MONTH_PRICE, TRIAL_DAYS, UPGRADE_CTA_FOOTNOTE } from '../../config/pricing';
+import { signupPromoCode, showSignupDiscount, STANDARD_MONTHLY_PRICE, FIRST_MONTH_PRICE, FLASH_FIRST_MONTH_PRICE, TRIAL_DAYS, UPGRADE_CTA_FOOTNOTE, CHECKOUT_OFFER_KEY, TRIAL_CREDITS, MONTHLY_CREDITS } from '../../config/pricing';
 import { useFlashOffer } from '../../hooks/useFlashOffer';
+import CreditsOnboardingFlow, { PLAN_STEP } from '../onboarding/CreditsOnboardingFlow';
+import { surveyPayload, pathFor, type OnboardingAnswers } from '../onboarding/onboardingContent';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -166,6 +168,8 @@ interface OnboardingPageProps {
 }
 
 type Phase =
+  // The question-by-question flow (CreditsOnboardingFlow). First-run default.
+  | 'flow'
   | 'intro'
   | 'celebrate'
   | 'profile'
@@ -377,8 +381,8 @@ const PLANS: Record<PlanId, Plan> = {
     emoji: '⭐',
     popular: true,
     features: [
-      'Know exactly what’s costing you marks',
-      'Fix it in one click, straight into your draft',
+      '99 credits a month for essays, study packs & citations',
+      'Unused credits roll over, up to 499',
       'See your score before your professor does',
       'Walk into exams ready with flashcards & quizzes',
       'References done right in APA, MLA, and Chicago',
@@ -402,8 +406,8 @@ const PLANS: Record<PlanId, Plan> = {
     emoji: '💎',
     features: [
       'Everything in Pro',
-      'Never hit a limit mid-deadline (499 actions/mo)',
-      'Summarise your whole reading list, no cap',
+      '199 credits a month, built for finals and thesis season',
+      'Reach the 499 rollover cap twice as fast',
       'Every draft and source in one place (1GB)',
     ],
     monthly: {
@@ -434,13 +438,14 @@ function getInitialPhase(forceTrialGate = false, paywallOverlay = false): Phase 
   if (params.get('preview') === 'aha') return 'analyze-input';
   if (params.get('preview') === 'pack') return 'studypack-input';
   if (params.get('preview') === 'profile') return 'profile';
+  if (params.get('preview') === 'intro') return 'intro';
   const sid = params.get('session_id');
   if (sid) return 'verifying';
   // Existing free user who never trialed → straight to the trial screen,
   // UNLESS we're hiding end paywalls: then let them onto the dashboard, where
   // the paywall pops up a couple of seconds later.
   if (forceTrialGate) return HIDE_END_PAYWALLS ? 'transition' : 'checkout';
-  return 'intro';
+  return 'flow';
 }
 
 /* ─── Paywall: full 8-tool showcase ─── */
@@ -1135,7 +1140,11 @@ function OnboardingSignOutButton({ onLogout }: { onLogout?: () => void }) {
    ═══════════════════════════════════════════════════════════════ */
 const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, testMode = false, forceTrialGate = false, paywallOverlay = false, onClose }: OnboardingPageProps) => {
   const flashOffer = useFlashOffer(!testMode);
-  const proFirstMonth = flashOffer.active ? FLASH_FIRST_MONTH_PRICE : FIRST_MONTH_PRICE.pro;
+  const proFirstMonth = flashOffer.active
+    ? FLASH_FIRST_MONTH_PRICE
+    : showSignupDiscount(true, 'monthly')
+      ? FIRST_MONTH_PRICE.pro
+      : STANDARD_MONTHLY_PRICE.pro;
   const [phase, setPhase] = useState<Phase>(() => getInitialPhase(forceTrialGate, paywallOverlay));
   const [displayName, setDisplayName] = useState(user?.name || '');
   const [username, setUsername] = useState(user?.username || '');
@@ -1199,6 +1208,8 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
      Link automatically). Stripe redirects back to
      /dashboard?payment=success on success. */
   const [trialEligible, setTrialEligible] = useState<boolean | null>(null);
+  /** Show the trial offer unless we know this account already had one. */
+  const offerTrial = TRIAL_DAYS > 0 && trialEligible !== false;
   const [startingTrial, setStartingTrial] = useState(false);
   const [trialError, setTrialError] = useState<string | null>(null);
 
@@ -1363,7 +1374,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
           setProfileNotice(data.message || 'We could not confirm that checkout. You can upgrade anytime from Billing.');
           setPhase('profile');
         } else {
-          setEmbeddedError(data.message || 'We could not confirm your subscription yet. Please try again.');
+          setTrialError(data.message || 'We could not confirm your subscription yet. Please try again.');
           setPhase('checkout');
         }
       } catch {
@@ -1373,7 +1384,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
             setProfileNotice('Something went wrong confirming payment. You can try again from Billing.');
             setPhase('profile');
           } else {
-            setEmbeddedError('Something went wrong confirming payment.');
+            setTrialError('Something went wrong confirming payment.');
             setPhase('checkout');
           }
         }
@@ -1384,7 +1395,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
 
   /* ─── Checkout trial eligibility ─── */
   useEffect(() => {
-    if (phase !== 'checkout') return;
+    if (phase !== 'checkout' && phase !== 'flow') return;
     if (testMode) { setTrialEligible(true); return; }
     let cancelled = false;
     (async () => {
@@ -2053,6 +2064,85 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
     goToPhase('transition');
   };
 
+  /* ─── Question-by-question flow (phase 'flow') ─── */
+  const [flowInitialStep] = useState<number | undefined>(() => {
+    if (typeof window === 'undefined') return undefined;
+    return new URLSearchParams(window.location.search).get('preview') === 'plan' ? PLAN_STEP : undefined;
+  });
+
+  /** Answers are in: save them (analytics + dashboard personalisation). */
+  const handleFlowAnswersReady = (answers: OnboardingAnswers) => {
+    const payload = surveyPayload(answers);
+    trackEvent('onboarding_survey_complete', {
+      source: payload.referralSource,
+      path: pathFor(answers),
+      level: answers.level ?? null,
+      current: answers.current ?? null,
+      target: answers.target ?? null,
+    });
+    if (testMode) return;
+    if (user?.id) saveFeatureInterests(user.id, payload.featureInterests);
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+    void fetch(`${API_URL}/users/onboarding-survey`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(payload),
+    })
+      .then((res) => {
+        if (!res.ok) console.error(`[onboarding-survey] Save failed with HTTP ${res.status}`);
+      })
+      .catch((e) => console.warn('[onboarding-survey] Network error (non-blocking):', e));
+  };
+
+  /** Plan screen CTA: the 3-day trial (or Pro straight away if they've trialed before). */
+  const handleFlowStartTrial = async (answers: OnboardingAnswers) => {
+    if (startingTrial) return;
+    const withTrial = TRIAL_DAYS > 0 && trialEligible !== false;
+    trackEvent('onboarding_choose_trial', { path: pathFor(answers), trial: withTrial });
+    trackEvent('paywall_view', { source: 'onboarding_plan' });
+    setTrialError(null);
+    if (testMode) {
+      onComplete?.();
+      return;
+    }
+    setStartingTrial(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) { onNavigate('login'); return; }
+      try {
+        sessionStorage.setItem(CHECKOUT_OFFER_KEY, JSON.stringify(withTrial ? { kind: 'trial', path: pathFor(answers) } : { kind: 'paid', plan: 'pro', path: pathFor(answers) }));
+      } catch { /* ignore */ }
+      const res = await fetch(`${API_URL}/subscriptions/create-checkout-session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          planType: 'pro',
+          billingCycle: 'monthly',
+          successUrl: `${window.location.origin}/dashboard?payment=success`,
+          cancelUrl: `${window.location.origin}/onboarding?preview=plan`,
+          ...(withTrial ? { trialPeriodDays: TRIAL_DAYS } : {}),
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      const url = data?.data?.checkoutUrl;
+      if (!res.ok || !url) {
+        setTrialError((data && typeof data.message === 'string' && data.message) || 'We could not start checkout. Please try again.');
+        setStartingTrial(false);
+        return;
+      }
+      window.location.href = url;
+    } catch {
+      setTrialError('We could not start checkout. Please try again.');
+      setStartingTrial(false);
+    }
+  };
+
+  const handleFlowLookAround = (answers: OnboardingAnswers) => {
+    trackEvent('onboarding_choose_free', { path: pathFor(answers) });
+    goToPhase('transition');
+  };
+
   /* ─── Start checkout → Stripe-hosted Checkout ───
      Front-door offer is 50% off first month (NEWCUSTOMER) with no free
      trial when TRIAL_DAYS === 0. See src/config/pricing.ts. */
@@ -2075,6 +2165,12 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
     try {
       const token = localStorage.getItem('authToken');
       if (!token) { onNavigate('login'); return; }
+      try {
+        sessionStorage.setItem(
+          CHECKOUT_OFFER_KEY,
+          JSON.stringify(offerTrial ? { kind: 'trial' } : { kind: 'paid', plan: selectedPlanId }),
+        );
+      } catch { /* ignore */ }
       const successUrl = `${window.location.origin}/dashboard?payment=success`;
       const cancelUrl = `${window.location.origin}/onboarding?preview=checkout`;
       const res = await fetch(`${API_URL}/subscriptions/create-checkout-session`, {
@@ -2085,7 +2181,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
           billingCycle,
           successUrl,
           cancelUrl,
-          ...(TRIAL_DAYS > 0 ? { trialPeriodDays: TRIAL_DAYS } : {}),
+          ...(offerTrial ? { trialPeriodDays: TRIAL_DAYS } : {}),
           ...(signupPromo ?? {}),
         }),
       });
@@ -2147,6 +2243,26 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
       )}
     </>
   );
+
+  /* ─── QUESTION-BY-QUESTION FLOW ─── */
+  if (phase === 'flow') {
+    return (
+      <div className={`transition-opacity duration-200 ${phaseVisible ? 'opacity-100' : 'opacity-0'}`}>
+        <CreditsOnboardingFlow
+          userKey={testMode ? 'preview' : user?.id || 'anon'}
+          firstName={firstName || undefined}
+          trialEligible={trialEligible}
+          starting={startingTrial}
+          error={trialError}
+          initialStep={flowInitialStep}
+          onAnswersReady={handleFlowAnswersReady}
+          onStartTrial={(a) => void handleFlowStartTrial(a)}
+          onLookAround={handleFlowLookAround}
+          onLogout={onLogout}
+        />
+      </div>
+    );
+  }
 
   /* ─── VERIFYING ─── */
   if (phase === 'verifying') {
@@ -2418,19 +2534,29 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                   <div className="flex-1 min-w-0">
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#C9A0F0]/15 border-2 border-[#C9A0F0]/45 text-[#7733B5] text-[10px] font-extrabold uppercase tracking-[0.18em] mb-2 shadow-[0_4px_14px_-4px_rgba(122,52,182,0.45)]">
                       <span aria-hidden>✨</span>{' '}
-                      {TRIAL_DAYS > 0 ? `${TRIAL_DAYS}-day free trial` : flashOffer.active ? '$4.99 first month' : '50% off first month'}
+                      {offerTrial
+                        ? `${TRIAL_DAYS}-day free trial · ${TRIAL_CREDITS} credits`
+                        : flashOffer.active
+                          ? '$4.99 first month'
+                          : showSignupDiscount(true, 'monthly')
+                            ? '50% off first month'
+                            : `${MONTHLY_CREDITS.pro} credits a month`}
                     </span>
                     <h1 className="text-[1.6rem] sm:text-[1.85rem] lg:text-[2rem] xl:text-[2.2rem] font-extrabold leading-[1.05] tracking-tight text-[#3C3C3C] dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                      {TRIAL_DAYS > 0
+                      {offerTrial
                         ? `Try Pro free for ${TRIAL_DAYS} days${firstName ? `, ${firstName}` : ''}`
-                        : `Get Pro for $${proFirstMonth}${firstName ? `, ${firstName}` : ''}`}
+                        : proFirstMonth < STANDARD_MONTHLY_PRICE.pro
+                          ? `Get Pro for $${proFirstMonth}${firstName ? `, ${firstName}` : ''}`
+                          : `Keep going with Pro${firstName ? `, ${firstName}` : ''}`}
                     </h1>
                     <p className="mt-2 text-stone-600 dark:text-stone-400 text-[13px] sm:text-sm font-bold">
-                      {TRIAL_DAYS > 0
-                        ? '$0 today · Cancel anytime · Apple Pay · Google Pay · all major cards'
+                      {offerTrial
+                        ? `$0 today · ${TRIAL_CREDITS} credits to try everything · Cancel anytime`
                         : flashOffer.active
                           ? `$${proFirstMonth} your first month · then $${STANDARD_MONTHLY_PRICE.pro}/mo · Cancel anytime`
-                          : `50% off first month · then $${STANDARD_MONTHLY_PRICE.pro}/mo · Cancel anytime`}
+                          : showSignupDiscount(true, 'monthly')
+                            ? `50% off first month · then $${STANDARD_MONTHLY_PRICE.pro}/mo · Cancel anytime`
+                            : `$${STANDARD_MONTHLY_PRICE.pro}/mo · ${MONTHLY_CREDITS.pro} credits a month · unused credits roll over`}
                     </p>
                   </div>
                 </div>
@@ -2459,7 +2585,12 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                 {/* Value bullets — moved out of pricing card so the right
                     column stays compact and the form stays above the fold. */}
                 <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-2 pt-1">
-                  {['Full annotations on every paper', 'One-click apply revisions', 'Estimated grade + full rubric', '99 analyses · 100MB uploads'].map((b) => (
+                  {[
+                    '1 credit = 1 essay check, study pack or citation search',
+                    'Full annotations + one-click fixes',
+                    `${MONTHLY_CREDITS.pro} credits a month on Pro`,
+                    'Unused credits roll over (up to 499)',
+                  ].map((b) => (
                     <li key={b} className="flex items-start gap-1.5 text-[12.5px] font-bold text-stone-700 dark:text-stone-300">
                       <svg className="w-4 h-4 mt-0.5 shrink-0 text-[#A560E8]" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                       <span>{b}</span>
@@ -2582,20 +2713,20 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                             className="text-[1.85rem] sm:text-[2rem] font-extrabold leading-none text-[#A560E8]"
                             style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                           >
-                            {TRIAL_DAYS > 0
+                            {offerTrial
                               ? '$0'
                               : showSignupDiscount(true, billingCycle)
                                 ? firstPrice
                                 : cycleData.rolloverPrice}
                           </span>
                           <span className="text-xs font-bold text-stone-500 dark:text-stone-400">
-                            {TRIAL_DAYS > 0 ? 'today' : cycleData.firstCycleLabel.replace('first ', '/')}
+                            {offerTrial ? 'today' : cycleData.firstCycleLabel.replace('first ', '/')}
                           </span>
                         </div>
 
                         {/* Must match exactly what Stripe charges. */}
                         <p className="mt-1 text-[11.5px] font-bold text-stone-500 dark:text-stone-400 leading-snug">
-                          {TRIAL_DAYS > 0 ? (
+                          {offerTrial ? (
                             <>
                               {TRIAL_DAYS} days free, then{' '}
                               {showSignupDiscount(true, billingCycle) ? (
@@ -2666,7 +2797,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                       onClick={() => setShowPremium(true)}
                       className="w-full text-center py-2 text-[12px] font-extrabold text-[#A560E8] hover:text-[#8A48C7] underline underline-offset-4 decoration-[#A560E8]/40 hover:decoration-[#A560E8] transition-colors"
                     >
-                      Compare Premium (5× usage)
+                      Compare Premium (2× the credits)
                     </button>
                   )}
                 </div>
@@ -2709,9 +2840,11 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                     </>
                   ) : (
                     <>
-                      {TRIAL_DAYS > 0
+                      {offerTrial
                         ? `Start my ${TRIAL_DAYS}-day free trial`
-                        : `Unlock Pro — $${proFirstMonth} first month`}
+                        : proFirstMonth < STANDARD_MONTHLY_PRICE.pro
+                          ? `Unlock Pro — $${proFirstMonth} first month`
+                          : `Get Pro — $${STANDARD_MONTHLY_PRICE.pro}/mo`}
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                       </svg>
@@ -2720,10 +2853,12 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                 </button>
 
                 <p className="text-center text-[10.5px] font-bold text-stone-400 dark:text-stone-500">
-                  {TRIAL_DAYS > 0
+                  {offerTrial
                     ? <>🔒 $0 today · We&apos;ll email you 24h before any charge · Renews at{' '}
                       {PLANS[selectedPlanId][billingCycle].rolloverPrice}{PLANS[selectedPlanId][billingCycle].rolloverSuffix} · Cancel anytime</>
-                    : <>🔒 Code NEWCUSTOMER auto-applied · Then {PLANS[selectedPlanId][billingCycle].rolloverPrice}{PLANS[selectedPlanId][billingCycle].rolloverSuffix} · Cancel anytime</>}
+                    : showSignupDiscount(true, billingCycle)
+                      ? <>🔒 Code NEWCUSTOMER auto-applied · Then {PLANS[selectedPlanId][billingCycle].rolloverPrice}{PLANS[selectedPlanId][billingCycle].rolloverSuffix} · Cancel anytime</>
+                      : <>🔒 {PLANS[selectedPlanId][billingCycle].rolloverPrice}{PLANS[selectedPlanId][billingCycle].rolloverSuffix.replace(' after', '')} · Unused credits roll over · Cancel anytime</>}
                 </p>
 
               </div>
@@ -2743,12 +2878,20 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
           >
             {startingTrial
               ? 'Opening secure checkout…'
-              : TRIAL_DAYS > 0
+              : offerTrial
                 ? `Start my ${TRIAL_DAYS}-day free trial`
-                : `Unlock Pro — $${proFirstMonth} first month`}
+                : proFirstMonth < STANDARD_MONTHLY_PRICE.pro
+                  ? `Unlock Pro — $${proFirstMonth} first month`
+                  : `Get Pro — $${STANDARD_MONTHLY_PRICE.pro}/mo`}
           </button>
           <p className="mt-1.5 text-center text-[10px] font-bold text-stone-400 dark:text-stone-500">
-            {TRIAL_DAYS > 0 ? '$0 today · Cancel anytime' : flashOffer.active ? `$${proFirstMonth} first month · Cancel anytime` : '50% off first month · Cancel anytime'}
+            {offerTrial
+              ? `$0 today · ${TRIAL_CREDITS} credits · Cancel anytime`
+              : flashOffer.active
+                ? `$${proFirstMonth} first month · Cancel anytime`
+                : showSignupDiscount(true, 'monthly')
+                  ? '50% off first month · Cancel anytime'
+                  : `${MONTHLY_CREDITS.pro} credits a month · Cancel anytime`}
           </p>
         </div>
       </>
@@ -3387,7 +3530,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                       <div className="min-w-0 flex-1">
                         <p className="text-[13.5px] font-extrabold text-[#3C3C3C] dark:text-stone-100">Exact score / 100</p>
                         <p className="mt-0.5 text-[11px] font-bold text-[#A560E8]">
-                          {TRIAL_DAYS > 0 ? 'Unlock with free trial' : 'Unlock with Pro'}
+                          {offerTrial ? 'Unlock with free trial' : 'Unlock with Pro'}
                         </p>
                       </div>
                       <span className="text-lg font-black tracking-widest text-[#D2B3EE] blur-[2px] select-none" aria-hidden>??</span>
@@ -3812,7 +3955,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                         {lockedCards} more {lockedCards === 1 ? 'card' : 'cards'} + full quiz
                       </p>
                       <p className="mt-0.5 text-[11px] font-bold text-[#A560E8]">
-                        {TRIAL_DAYS > 0 ? 'Unlock with free trial' : 'Unlock with Pro'}
+                        {offerTrial ? 'Unlock with free trial' : 'Unlock with Pro'}
                       </p>
                     </div>
                   </div>

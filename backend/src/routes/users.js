@@ -128,7 +128,7 @@ router.put('/profile', authenticateToken, validateUpdateProfile, async (req, res
 // @access  Private
 router.post('/onboarding-survey', authenticateToken, async (req, res) => {
   try {
-    const { referralSource, useGoal, featureInterests } = req.body || {};
+    const { referralSource, useGoal, featureInterests, answers } = req.body || {};
 
     // Allowlists — keep the analytics dimensions clean and prevent
     // free-text injection from skewing the marketing dashboards.
@@ -146,20 +146,56 @@ router.post('/onboarding-survey', authenticateToken, async (req, res) => {
       ? featureInterests.filter((f) => typeof f === 'string' && ALLOWED_FEATURES.includes(f))
       : [];
 
+    // The question-by-question onboarding (web and iOS). Same allowlist
+    // rule: unknown keys and values are dropped.
+    const ANSWER_OPTIONS = {
+      level: ['underclass', 'upperclass', 'masters', 'other'],
+      pressure: ['essay', 'exam', 'both'],
+      current: ['A', 'B', 'C', 'D'],
+      target: ['A', 'Aminus', 'B', 'pass'],
+      confidence: ['1', '2', '3', '4', '5'],
+      deadline: ['week', 'twoweeks', 'month', 'none'],
+    };
+    const ANSWER_MULTI = {
+      struggles: ['marker', 'structure', 'start', 'refs', 'remember', 'time'],
+      life: ['sleep', 'friends', 'gym', 'work', 'off'],
+    };
+    let cleanAnswers = null;
+    if (answers && typeof answers === 'object' && !Array.isArray(answers)) {
+      cleanAnswers = {};
+      for (const [key, allowed] of Object.entries(ANSWER_OPTIONS)) {
+        if (typeof answers[key] === 'string' && allowed.includes(answers[key])) cleanAnswers[key] = answers[key];
+      }
+      for (const [key, allowed] of Object.entries(ANSWER_MULTI)) {
+        if (Array.isArray(answers[key])) {
+          cleanAnswers[key] = [...new Set(answers[key].filter((v) => typeof v === 'string' && allowed.includes(v)))];
+        }
+      }
+    }
+
     const supabase = createClient(
       process.env.SUPABASE_URL,
       process.env.SUPABASE_SERVICE_ROLE_KEY
     );
 
-    const { error } = await supabase
+    const row = {
+      user_id: req.user.id,
+      referral_source: cleanSource,
+      use_goal: cleanGoal,
+      feature_interests: cleanFeatures,
+      submitted_at: new Date().toISOString(),
+      ...(cleanAnswers ? { answers: cleanAnswers } : {}),
+    };
+    let { error } = await supabase
       .from('onboarding_survey_responses')
-      .upsert({
-        user_id: req.user.id,
-        referral_source: cleanSource,
-        use_goal: cleanGoal,
-        feature_interests: cleanFeatures,
-        submitted_at: new Date().toISOString(),
-      }, { onConflict: 'user_id' });
+      .upsert(row, { onConflict: 'user_id' });
+    // Before migrations/20261014_credit_rollover.sql adds the answers column.
+    if (error && cleanAnswers && `${error.message || ''}`.toLowerCase().includes('answers')) {
+      delete row.answers;
+      ({ error } = await supabase
+        .from('onboarding_survey_responses')
+        .upsert(row, { onConflict: 'user_id' }));
+    }
 
     if (error) {
       console.error('[onboarding-survey] Supabase error:', error.message);

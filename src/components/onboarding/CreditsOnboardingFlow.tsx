@@ -1,0 +1,640 @@
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import CreditCoin from '../common/CreditCoin';
+import { trackEvent } from '../../utils/analytics';
+import {
+  QUESTIONS,
+  SOURCE_QUESTION,
+  RECOMMENDATIONS,
+  TRIAL_CREDIT_PLAN,
+  TRIAL_CREDITS,
+  PRO_MONTHLY_CREDITS,
+  CREDIT_CAP,
+  LIFE_SHORT,
+  bubbleFor,
+  empathyFor,
+  gradeJump,
+  lifeLineFor,
+  outcomesFor,
+  pathFor,
+  type OnboardingAnswers,
+  type OnboardingQuestion,
+} from './onboardingContent';
+import { STANDARD_MONTHLY_PRICE, TRIAL_DAYS } from '../../config/pricing';
+
+/* ═══════════════════════════════════════════════════════════════
+   The question-by-question onboarding (same flow as the iOS app).
+
+     0      Welcome: the B → A promise
+     1–8    Questions, Scholar replies to every answer
+     9      "We hear you": their answers played back
+     10–11  Outcomes, chosen by what's weighing on them
+     12     Their week now vs. with WriteScholar
+     13     How did you find us?
+     14     Building your plan
+     15     Plan + 3 free credits → start the trial
+
+   Answers live in localStorage so a cancelled Stripe checkout comes
+   back to the plan instead of the first question.
+   ═══════════════════════════════════════════════════════════════ */
+
+export const PLAN_STEP = 15;
+const S = { WELCOME: 0, EMPATHY: 9, OUT_A: 10, OUT_B: 11, LIFE: 12, SOURCE: 13, BUILD: 14, PLAN: PLAN_STEP };
+const STORAGE_PREFIX = 'ws_onboarding_v2_';
+
+export function storedOnboardingAnswers(userKey: string): OnboardingAnswers | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_PREFIX + userKey);
+    const parsed = raw ? JSON.parse(raw) : null;
+    return parsed && typeof parsed.answers === 'object' ? (parsed.answers as OnboardingAnswers) : null;
+  } catch {
+    return null;
+  }
+}
+
+function questionAt(step: number): OnboardingQuestion | null {
+  if (step >= 1 && step <= QUESTIONS.length) return QUESTIONS[step - 1];
+  if (step === S.SOURCE) return SOURCE_QUESTION;
+  return null;
+}
+
+interface Props {
+  /** Scopes the saved answers (user id, or 'preview'). */
+  userKey: string;
+  firstName?: string;
+  /** null while unknown: assume the trial is available. */
+  trialEligible: boolean | null;
+  starting: boolean;
+  error: string | null;
+  initialStep?: number;
+  onStartTrial: (answers: OnboardingAnswers) => void;
+  onLookAround: (answers: OnboardingAnswers) => void;
+  /** Called once, when the last question is answered. */
+  onAnswersReady: (answers: OnboardingAnswers) => void;
+  onLogout?: () => void;
+}
+
+export default function CreditsOnboardingFlow({
+  userKey,
+  firstName,
+  trialEligible,
+  starting,
+  error,
+  initialStep,
+  onStartTrial,
+  onLookAround,
+  onAnswersReady,
+  onLogout,
+}: Props) {
+  const saved = useMemo(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_PREFIX + userKey);
+      return raw ? (JSON.parse(raw) as { step?: number; answers?: OnboardingAnswers }) : null;
+    } catch {
+      return null;
+    }
+  }, [userKey]);
+  const [answers, setAnswers] = useState<OnboardingAnswers>(saved?.answers ?? {});
+  const [step, setStep] = useState<number>(() => {
+    if (typeof initialStep === 'number') return initialStep;
+    const s = saved?.step;
+    // Never resume mid-animation; the building screen restarts itself.
+    return typeof s === 'number' && s >= 0 && s <= S.PLAN ? (s === S.BUILD ? S.PLAN : s) : 0;
+  });
+  const [buildTick, setBuildTick] = useState(0);
+  const reportedRef = useRef(false);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_PREFIX + userKey, JSON.stringify({ step, answers }));
+    } catch {
+      /* ignore */
+    }
+  }, [step, answers, userKey]);
+
+  useEffect(() => {
+    trackEvent('onboarding_v2_step', { step });
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0 });
+  }, [step]);
+
+  useEffect(() => {
+    if (step !== S.BUILD) return;
+    setBuildTick(0);
+    const id = window.setInterval(() => {
+      setBuildTick((t) => {
+        if (t >= 4) {
+          window.clearInterval(id);
+          setStep(S.PLAN);
+          return t;
+        }
+        return t + 1;
+      });
+    }, 700);
+    return () => window.clearInterval(id);
+  }, [step]);
+
+  const q = questionAt(step);
+  const path = pathFor(answers);
+  const { from, to } = gradeJump(answers);
+  const [outA, outB] = outcomesFor(path);
+  const rec = RECOMMENDATIONS[path];
+  const offerTrial = trialEligible !== false && TRIAL_DAYS > 0;
+  const progress = Math.round((Math.min(step, S.PLAN) / S.PLAN) * 100);
+
+  const go = (n: number) => setStep(Math.max(0, Math.min(S.PLAN, n)));
+  const next = () => {
+    if (step === S.SOURCE && !reportedRef.current) {
+      reportedRef.current = true;
+      onAnswersReady(answers);
+    }
+    go(step + 1);
+  };
+  const back = () => go(step === S.PLAN ? S.SOURCE : step - 1);
+
+  const pick = (question: OnboardingQuestion, id: string) => {
+    setAnswers((prev) => {
+      if (question.multi) {
+        const cur = (prev[question.key] as string[] | undefined) ?? [];
+        const nextList = cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id];
+        return { ...prev, [question.key]: nextList };
+      }
+      return { ...prev, [question.key]: id };
+    });
+  };
+
+  const hasAnswer = (() => {
+    if (!q) return true;
+    const v = answers[q.key];
+    return Array.isArray(v) ? v.length > 0 : Boolean(v);
+  })();
+
+  const showTopBar = step !== S.WELCOME && step !== S.BUILD;
+
+  return (
+    <div className="relative min-h-[100dvh] flex flex-col bg-gradient-to-br from-[#FAF7FF] via-[#FBF7FF] to-[#F3EAFF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 text-[#3C3C3C] dark:text-stone-100" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+      <div className="absolute inset-0 pointer-events-none wso-bg-cycle" aria-hidden />
+
+      {showTopBar && (
+        <div className="relative z-10">
+          <div className="bg-white dark:bg-stone-900 border-b-2 border-[#E5E5E5] dark:border-stone-800 px-3 sm:px-5 py-2.5 flex items-center gap-2">
+            <button type="button" onClick={back} aria-label="Back" className="w-11 h-11 flex items-center justify-center rounded-xl text-stone-400 hover:text-stone-700 dark:hover:text-stone-200">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+            </button>
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-800">
+                <img src="/main-logo.png" alt="WriteScholar" className="w-full h-full object-contain" width="120" height="120" />
+              </div>
+              <span className="hidden min-[360px]:inline text-lg font-extrabold tracking-tight">WriteScholar</span>
+            </div>
+            <span className="ml-auto inline-flex items-center gap-1.5 h-8 pl-1.5 pr-3 rounded-full bg-[#FFF6DB] border-2 border-[#F3DB93] text-[13px] font-black text-[#7A5A00]">
+              <CreditCoin size={18} />
+              {TRIAL_CREDITS} free
+            </span>
+            {onLogout && (
+              <button type="button" onClick={onLogout} className="hidden sm:inline-flex h-9 px-3 items-center rounded-xl text-[12px] font-extrabold uppercase tracking-wide text-stone-400 hover:text-stone-700 dark:hover:text-stone-200">
+                Sign out
+              </button>
+            )}
+          </div>
+          <div className="h-3 bg-[#E5E5E5] dark:bg-stone-800 overflow-hidden">
+            <div className="relative h-full bg-[#A560E8] rounded-r-full transition-all duration-500 ease-out overflow-hidden" style={{ width: `${progress}%` }}>
+              <div className="absolute inset-0 wso-shimmer" aria-hidden />
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div key={step} className="relative z-[1] flex-1 flex flex-col min-h-0">
+        {step === S.WELCOME && (
+          <Welcome onNext={next} onLogout={onLogout} />
+        )}
+
+        {q && (
+          <Screen
+            footer={
+              <PrimaryButton onClick={next} disabled={!hasAnswer}>Continue</PrimaryButton>
+            }
+          >
+            <div className="flex items-end gap-2.5">
+              <img src="/mascot-sm.png" alt="" className="w-14 h-14 shrink-0 wso-bob" width="56" height="56" />
+              <div className="wso-bubble flex-1 bg-white dark:bg-stone-900 border-2 border-[#E5E5E5] dark:border-stone-700 rounded-[18px] rounded-bl-[4px] px-3.5 py-2.5 text-[14px] leading-snug font-bold text-[#4B4B4B] dark:text-stone-200">
+                {bubbleFor(q, answers)}
+              </div>
+            </div>
+            <div className="text-[12px] font-black uppercase tracking-[0.12em] text-[#7733B5] dark:text-[#C9A0F0]">{q.eyebrow}</div>
+            <h1 className="-mt-1.5 text-[25px] sm:text-[28px] leading-[1.18] font-black tracking-tight">{q.title}</h1>
+            {q.multi && <div className="-mt-1.5 text-[13px] font-bold text-stone-500 dark:text-stone-400">Pick as many as you like</div>}
+            <div className="flex flex-col gap-2.5" role={q.multi ? 'group' : 'radiogroup'} aria-label={q.title}>
+              {q.options.map((o, i) => {
+                const v = answers[q.key];
+                const selected = Array.isArray(v) ? v.includes(o.id) : v === o.id;
+                return (
+                  <button
+                    key={o.id}
+                    type="button"
+                    role={q.multi ? 'checkbox' : 'radio'}
+                    aria-checked={selected}
+                    onClick={() => pick(q, o.id)}
+                    className={`wso-card-in w-full min-h-[58px] flex items-center gap-3.5 px-3.5 py-2.5 rounded-2xl border-2 border-b-4 text-left transition-all active:translate-y-0.5 hover:-translate-y-px ${
+                      selected
+                        ? 'bg-[#F3EAFF] dark:bg-[#A560E8]/15 border-[#A560E8]'
+                        : 'bg-white dark:bg-stone-900 border-[#E5E5E5] dark:border-stone-700'
+                    }`}
+                    style={{ animationDelay: `${0.08 + i * 0.05}s` }}
+                  >
+                    <span
+                      className={`w-8 h-8 shrink-0 flex items-center justify-center border-2 font-black text-[15px] ${
+                        q.multi ? 'rounded-[9px]' : o.badge ? 'rounded-[10px]' : 'rounded-full'
+                      } ${selected ? 'bg-[#A560E8] border-[#A560E8] text-white' : 'bg-white dark:bg-stone-800 border-[#E5E5E5] dark:border-stone-600 text-stone-500'}`}
+                    >
+                      {o.badge && !(selected && q.multi) ? o.badge : selected ? (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={3.4} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+                      ) : null}
+                    </span>
+                    <span className="flex-1 flex flex-col gap-0.5">
+                      <span className="text-[16px] font-extrabold">{o.label}</span>
+                      {o.sub && <span className="text-[13px] font-semibold text-stone-500 dark:text-stone-400 leading-snug">{o.sub}</span>}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            {q.key === 'target' && answers.target && answers.target !== 'pass' && (
+              <div className="wso-scale-in flex items-center justify-center gap-3.5 p-3.5 rounded-2xl bg-[#F3EAFF] dark:bg-[#A560E8]/15 border-2 border-[#E4D2F8] dark:border-[#A560E8]/30">
+                <GradeTile grade={from} muted />
+                <Arrow />
+                <GradeTile grade={to} />
+              </div>
+            )}
+          </Screen>
+        )}
+
+        {step === S.EMPATHY && (() => {
+          const e = empathyFor(answers);
+          return (
+            <Screen centered footer={<PrimaryButton onClick={next}>Show me how</PrimaryButton>}>
+              <img src="/mascot-thinking.webp" alt="" className="wso-scale-in w-36 h-36 mx-auto object-contain" width="144" height="144" />
+              <div className="text-[12px] font-black uppercase tracking-[0.12em] text-[#7733B5] dark:text-[#C9A0F0]">We hear you</div>
+              <h1 className="-mt-1 text-[27px] leading-[1.15] font-black tracking-tight">{e.title}</h1>
+              <p className="wso-subtitle text-[15px] leading-relaxed font-semibold text-stone-500 dark:text-stone-400">{e.body}</p>
+              <div className="wso-card-in text-left bg-white dark:bg-stone-900 border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 rounded-2xl px-4 py-3.5 flex flex-col gap-2.5" style={{ animationDelay: '0.5s' }}>
+                {e.points.map((p) => (
+                  <div key={p} className="flex gap-2.5 items-start text-[14px] font-bold leading-snug text-[#4B4B4B] dark:text-stone-200">
+                    <span className="w-[22px] h-[22px] mt-px shrink-0 rounded-full bg-[#A560E8] flex items-center justify-center">
+                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" strokeWidth={4} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+                    </span>
+                    <span>{p}</span>
+                  </div>
+                ))}
+              </div>
+            </Screen>
+          );
+        })()}
+
+        {(step === S.OUT_A || step === S.OUT_B) && (() => {
+          const o = step === S.OUT_A ? outA : outB;
+          return (
+            <Screen footer={<PrimaryButton onClick={next}>Continue</PrimaryButton>}>
+              <Tag>{o.tag}</Tag>
+              <h1 className="-mt-0.5 text-[27px] leading-[1.12] font-black tracking-tight">{o.title}</h1>
+              <div className="wso-card-in rounded-2xl overflow-hidden border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white aspect-[16/10]">
+                <video src={o.video} autoPlay muted loop playsInline aria-label={o.videoLabel} className="w-full h-full object-cover object-left-top" />
+              </div>
+              {o.showsScore && (
+                <div className="wso-card-in flex items-center gap-3 px-3.5 py-3 rounded-2xl bg-white dark:bg-stone-900 border-2 border-[#E5E5E5] dark:border-stone-700" style={{ animationDelay: '0.2s' }}>
+                  <div className="flex-1">
+                    <div className="text-[12px] font-extrabold text-stone-500 dark:text-stone-400">Example draft</div>
+                    <div className="text-[20px] font-black text-stone-400">B · 80/100</div>
+                  </div>
+                  <Arrow />
+                  <div className="flex-1 text-right">
+                    <div className="text-[12px] font-extrabold text-stone-500 dark:text-stone-400">After the fixes</div>
+                    <div className="text-[20px] font-black text-[#7733B5] dark:text-[#C9A0F0]">A · 90/100</div>
+                  </div>
+                </div>
+              )}
+              <ul className="flex flex-col gap-2.5">
+                {o.points.map((p) => (
+                  <li key={p} className="flex gap-2.5 items-start text-[14px] font-bold leading-snug text-[#4B4B4B] dark:text-stone-200">
+                    <Check />
+                    <span>{p}</span>
+                  </li>
+                ))}
+              </ul>
+              {o.mascot && (
+                <div className="wso-bubble flex gap-2.5 items-center px-3.5 py-3 rounded-2xl bg-[#F3EAFF] dark:bg-[#A560E8]/15" style={{ animationDelay: '0.4s' }}>
+                  <img src="/mascot-sm.png" alt="" className="w-10 h-10 shrink-0" width="40" height="40" />
+                  <span className="text-[14px] font-extrabold leading-snug">{o.mascot}</span>
+                </div>
+              )}
+            </Screen>
+          );
+        })()}
+
+        {step === S.LIFE && (() => {
+          const picks = answers.life?.length ? answers.life : ['friends', 'sleep'];
+          const before = ['Essay', 'Essay', 'Cram', 'Essay', 'Stress', 'Cram', 'Essay'];
+          const after: (number | 'study')[] = ['study', 0, 'study', 1, 0, 1, 'study'];
+          const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+          return (
+            <Screen footer={<PrimaryButton onClick={next}>I want that</PrimaryButton>}>
+              <Tag>The real outcome</Tag>
+              <h1 className="-mt-0.5 text-[27px] leading-[1.12] font-black tracking-tight">Better grades. And your evenings back.</h1>
+              <p className="text-[15px] leading-relaxed font-semibold text-stone-500 dark:text-stone-400">No more rewriting the same essay at 2am, guessing if it&apos;s good enough.</p>
+              <Week title="Your week now" days={days} cells={before.map((l) => ({ label: l, tone: 'grey' as const }))} />
+              <div className="flex justify-center -my-1" aria-hidden>
+                <svg className="w-6 h-6 text-[#A560E8]" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14M6 13l6 6 6-6" /></svg>
+              </div>
+              <Week
+                highlight
+                title="Your week with WriteScholar"
+                days={days}
+                cells={after.map((p) => (p === 'study'
+                  ? { label: '20 min', tone: 'purple' as const }
+                  : { label: LIFE_SHORT[picks[p % picks.length]] ?? 'Free', tone: 'gold' as const }))}
+              />
+              <p className="text-center text-[14px] font-extrabold leading-snug text-[#4B4B4B] dark:text-stone-200">{lifeLineFor(answers)}</p>
+            </Screen>
+          );
+        })()}
+
+        {step === S.BUILD && (
+          <div className="flex-1 flex flex-col items-center justify-center gap-5 px-7 py-10 text-center max-w-md mx-auto w-full">
+            <div className="relative w-44 h-44 flex items-center justify-center">
+              <span className="absolute inset-2 rounded-full border-[3px] border-[#A560E8]/45 wso-ring" aria-hidden />
+              <span className="absolute inset-2 rounded-full border-[3px] border-[#A560E8]/35 wso-ring" style={{ animationDelay: '1.1s' }} aria-hidden />
+              <img src="/mascot-thinking.webp" alt="" className="relative w-40 h-40 object-contain" width="160" height="160" />
+            </div>
+            <h1 className="text-[26px] font-black tracking-tight">Building your plan…</h1>
+            <div className="relative w-full h-3.5 rounded-full bg-[#E5E5E5] dark:bg-stone-800 overflow-hidden" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.min(100, buildTick * 25)}>
+              <div className="relative h-full bg-[#A560E8] rounded-full transition-all duration-500 overflow-hidden" style={{ width: `${Math.min(100, buildTick * 25)}%` }}>
+                <div className="absolute inset-0 wso-shimmer" aria-hidden />
+              </div>
+            </div>
+            <ul className="w-full flex flex-col gap-3 text-left">
+              {['Reading your answers', `Matching your goal: ${from} to ${to}`, 'Choosing where to start', `Planning your ${TRIAL_CREDITS} free credits`].map((label, i) => {
+                const done = buildTick > i;
+                return (
+                  <li key={label} className="flex items-center gap-3 text-[15px] font-extrabold">
+                    <span className={`w-[26px] h-[26px] shrink-0 rounded-full flex items-center justify-center ${done ? 'bg-[#58CC02]' : 'bg-white dark:bg-stone-800 border-2 border-[#E5E5E5] dark:border-stone-600'}`}>
+                      {done && <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" strokeWidth={3.6} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M5 12.5l4.5 4.5L19 7.5" /></svg>}
+                    </span>
+                    <span className={done ? '' : 'text-stone-400'}>{label}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
+
+        {step === S.PLAN && (
+          <Screen
+            footer={
+              <>
+                <PrimaryButton onClick={() => onStartTrial(answers)} disabled={starting}>
+                  {starting ? 'Opening secure checkout…' : offerTrial ? 'Start my free trial' : `Get Pro · $${STANDARD_MONTHLY_PRICE.pro}/mo`}
+                </PrimaryButton>
+                <p className="mt-2 text-center text-[12px] leading-snug font-bold text-stone-500 dark:text-stone-400">
+                  {offerTrial
+                    ? `${TRIAL_DAYS} days free with ${TRIAL_CREDITS} credits · then $${STANDARD_MONTHLY_PRICE.pro}/mo for ${PRO_MONTHLY_CREDITS} credits · cancel anytime. We'll email you before it ends.`
+                    : `${PRO_MONTHLY_CREDITS} credits a month · unused credits roll over · cancel anytime`}
+                </p>
+                <button type="button" onClick={() => onLookAround(answers)} className="mt-1 w-full py-2 text-[13px] font-extrabold text-stone-400 hover:text-stone-600 dark:hover:text-stone-300">
+                  Look around first
+                </button>
+              </>
+            }
+          >
+            <div className="flex items-center gap-3">
+              <img src="/mascot-pointing.webp" alt="" className="w-14 h-14 shrink-0 object-contain wso-bob" width="56" height="56" />
+              <div>
+                <div className="text-[12px] font-black uppercase tracking-[0.12em] text-[#7733B5] dark:text-[#C9A0F0]">Your plan is ready{firstName ? `, ${firstName}` : ''}</div>
+                <h1 className="mt-0.5 text-[24px] leading-[1.12] font-black tracking-tight">{from} to {to}, without losing your evenings</h1>
+              </div>
+            </div>
+
+            <div className="wso-card-in bg-[#A560E8] border-2 border-b-4 border-[#7733B5] text-white rounded-2xl p-4 flex flex-col gap-2">
+              <span className="self-start px-2.5 py-1 rounded-full bg-white text-[#7733B5] text-[11px] font-black tracking-wide">START HERE</span>
+              <div className="text-[21px] font-black leading-tight">{rec.title}</div>
+              <div className="text-[14px] font-bold leading-relaxed">{rec.body}</div>
+            </div>
+
+            {offerTrial && (
+              <div className="wso-card-in bg-[#FFF6DB] dark:bg-[#F5B70A]/10 border-2 border-b-4 border-[#F3DB93] dark:border-[#F5B70A]/40 rounded-2xl px-4 py-3.5 flex flex-col gap-2.5" style={{ animationDelay: '0.15s' }}>
+                <div className="flex items-center justify-between">
+                  <div className="text-[17px] font-black">Your {TRIAL_CREDITS} free credits</div>
+                  <div className="flex gap-0.5">
+                    {Array.from({ length: TRIAL_CREDITS }, (_, i) => (
+                      <CreditCoin key={i} size={22} className="wso-coin" style={{ animationDelay: `${0.3 + i * 0.15}s` }} />
+                    ))}
+                  </div>
+                </div>
+                {TRIAL_CREDIT_PLAN[path].map((c, i) => (
+                  <div key={c.label} className="flex items-center gap-2.5 text-[14px] font-bold">
+                    <span className="w-[22px] h-[22px] shrink-0 rounded-full bg-[#F5B70A] text-[#3C2A00] text-[12px] font-black flex items-center justify-center">{i + 1}</span>
+                    <span className="flex-1">{c.label}</span>
+                    <span className="text-[12px] font-black text-[#7A5A00] dark:text-[#F5D670]">{c.when}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="wso-card-in bg-white dark:bg-stone-900 border-2 border-[#E5E5E5] dark:border-stone-700 rounded-2xl px-4 py-3.5 flex flex-col gap-2" style={{ animationDelay: '0.3s' }}>
+              <div className="text-[14px] font-black">How credits work</div>
+              <div className="flex gap-2 text-[13px] font-bold leading-snug text-[#4B4B4B] dark:text-stone-300">
+                <CreditCoin size={16} className="mt-px" />
+                1 credit = 1 essay analysis, study pack or citation search
+              </div>
+              <div className="flex gap-2 text-[13px] font-bold leading-snug text-[#4B4B4B] dark:text-stone-300">
+                <svg className="w-4 h-4 mt-px shrink-0 text-[#7733B5] dark:text-[#C9A0F0]" fill="none" stroke="currentColor" strokeWidth={2.8} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16" /><path d="M3 21v-5h5" /></svg>
+                Unused credits roll over every month, up to {CREDIT_CAP}
+              </div>
+            </div>
+
+            {error && (
+              <div role="alert" className="rounded-xl bg-[#F3EAFF] dark:bg-[#A560E8]/10 border-2 border-[#A560E8]/30 px-3 py-2.5 text-[13px] text-[#7733B5] dark:text-[#C9A0F0] font-bold">
+                {error}
+              </div>
+            )}
+          </Screen>
+        )}
+      </div>
+
+      <style>{FLOW_CSS}</style>
+    </div>
+  );
+}
+
+/* ─── Pieces ─── */
+
+function Welcome({ onNext, onLogout }: { onNext: () => void; onLogout?: () => void }) {
+  const words: { w: string; tone?: 'muted' | 'accent' }[] = [
+    { w: "Let's" }, { w: 'turn' }, { w: 'your' }, { w: 'B', tone: 'muted' }, { w: 'into' }, { w: 'an' }, { w: 'A.', tone: 'accent' },
+  ];
+  return (
+    <>
+      <div className="h-1.5 bg-gradient-to-r from-[#A560E8] via-[#8A48C7] to-[#A560E8]" aria-hidden />
+      {onLogout && (
+        <div className="flex justify-end px-4 pt-3">
+          <button type="button" onClick={onLogout} className="h-9 px-3 rounded-xl text-[12px] font-extrabold uppercase tracking-wide text-stone-400 hover:text-stone-700 dark:hover:text-stone-200">
+            Sign out
+          </button>
+        </div>
+      )}
+      <div className="flex-1 flex flex-col items-center justify-center gap-3 px-6 py-6 text-center">
+        <div className="wso-bubble relative bg-white dark:bg-stone-900 border-2 border-[#E5E5E5] dark:border-stone-700 rounded-3xl px-5 py-3 shadow-md">
+          <p className="text-[17px] font-extrabold">Hi! I&apos;m Scholar. Let&apos;s get you that A.</p>
+          <span className="absolute left-1/2 -bottom-2 -ml-[7px] w-3.5 h-3.5 bg-white dark:bg-stone-900 border-r-2 border-b-2 border-[#E5E5E5] dark:border-stone-700 rotate-45" aria-hidden />
+        </div>
+        <div className="relative w-[210px] h-[210px] mt-3 flex items-center justify-center">
+          <span className="absolute inset-5 rounded-full bg-[radial-gradient(circle,rgba(165,96,232,0.35),transparent_70%)] wso-glow" aria-hidden />
+          <span className="absolute inset-2.5 rounded-full border-[3px] border-[#A560E8]/45 wso-ring" aria-hidden />
+          <span className="absolute inset-2.5 rounded-full border-[3px] border-[#A560E8]/35 wso-ring" style={{ animationDelay: '1.1s' }} aria-hidden />
+          <img src="/mascot-celebrating.webp" alt="Scholar the mascot waving hello" className="relative w-[190px] h-[190px] object-contain wso-bob" width="190" height="190" />
+        </div>
+        <h1 className="mt-3 text-[34px] sm:text-[40px] leading-[1.08] font-black tracking-tight max-w-md">
+          {words.map(({ w, tone }, i) => (
+            <span key={i}>
+              <span className={`inline-block wso-word ${tone === 'muted' ? 'text-stone-400' : tone === 'accent' ? 'text-[#A560E8]' : ''}`} style={{ animationDelay: `${0.1 + i * 0.08}s` }}>{w}</span>{' '}
+            </span>
+          ))}
+        </h1>
+        <p className="wso-subtitle text-[16px] leading-relaxed font-semibold text-stone-500 dark:text-stone-400 max-w-[320px]">
+          A few quick questions about your grades, your deadlines and your life. Then we&apos;ll build your plan.
+        </p>
+      </div>
+      <Footer>
+        <PrimaryButton onClick={onNext}>Let&apos;s go</PrimaryButton>
+      </Footer>
+    </>
+  );
+}
+
+function Screen({ children, footer, centered = false }: { children: ReactNode; footer: ReactNode; centered?: boolean }) {
+  return (
+    <>
+      <div className={`wso-slide-in flex-1 w-full max-w-[560px] mx-auto px-5 pt-5 pb-6 flex flex-col gap-3.5 ${centered ? 'text-center' : ''}`}>
+        {children}
+      </div>
+      <Footer>{footer}</Footer>
+    </>
+  );
+}
+
+function Footer({ children }: { children: ReactNode }) {
+  return (
+    <div className="sticky bottom-0 z-10 bg-white/95 dark:bg-stone-900/95 backdrop-blur border-t-2 border-[#E5E5E5] dark:border-stone-800 px-5 pt-3.5 pb-[max(1rem,env(safe-area-inset-bottom))]">
+      <div className="max-w-[560px] mx-auto">{children}</div>
+    </div>
+  );
+}
+
+function PrimaryButton({ children, onClick, disabled = false }: { children: ReactNode; onClick: () => void; disabled?: boolean }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={`w-full h-[54px] rounded-2xl border-2 border-b-4 text-[16px] font-extrabold uppercase tracking-wide transition-all ${
+        disabled
+          ? 'bg-[#E5E5E5] dark:bg-stone-800 border-[#E5E5E5] dark:border-stone-700 text-stone-500 cursor-not-allowed'
+          : 'bg-[#A560E8] hover:bg-[#7733B5] border-[#7733B5] text-white active:border-b-2 active:translate-y-0.5'
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function Tag({ children }: { children: ReactNode }) {
+  return (
+    <span className="self-start px-3 py-1 rounded-full bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#7733B5] dark:text-[#C9A0F0] text-[12px] font-black uppercase tracking-wide">
+      {children}
+    </span>
+  );
+}
+
+function Check() {
+  return (
+    <svg className="w-5 h-5 shrink-0 text-[#A560E8]" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5 12.5l4.5 4.5L19 7.5" />
+    </svg>
+  );
+}
+
+function Arrow() {
+  return (
+    <svg width="34" height="18" viewBox="0 0 34 18" fill="none" stroke="#A560E8" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M2 9h28" /><path d="M23 2l7 7-7 7" />
+    </svg>
+  );
+}
+
+function GradeTile({ grade, muted = false }: { grade: string; muted?: boolean }) {
+  return (
+    <span className={`min-w-[50px] h-[50px] px-1.5 rounded-[14px] border-2 border-b-4 flex items-center justify-center text-[24px] font-black ${
+      muted ? 'bg-white dark:bg-stone-800 border-[#E5E5E5] dark:border-stone-600 text-stone-400' : 'bg-[#A560E8] border-[#7733B5] text-white'
+    }`}>
+      {grade}
+    </span>
+  );
+}
+
+function Week({ title, days, cells, highlight = false }: { title: string; days: string[]; cells: { label: string; tone: 'grey' | 'purple' | 'gold' }[]; highlight?: boolean }) {
+  const toneClass = {
+    grey: 'bg-[#EDEDED] dark:bg-stone-800 border-[#DCDCDC] dark:border-stone-700 text-stone-500',
+    purple: 'bg-[#F3EAFF] dark:bg-[#A560E8]/15 border-[#E4D2F8] dark:border-[#A560E8]/30 text-[#7733B5] dark:text-[#C9A0F0]',
+    gold: 'bg-[#FFF1C2] dark:bg-[#F5B70A]/15 border-[#F3DB93] dark:border-[#F5B70A]/40 text-[#6B4E00] dark:text-[#F5D670]',
+  };
+  return (
+    <div className={`wso-card-in bg-white dark:bg-stone-900 border-2 border-b-4 rounded-2xl p-3.5 flex flex-col gap-2.5 ${highlight ? 'border-[#A560E8]' : 'border-[#E5E5E5] dark:border-stone-700'}`} style={highlight ? { animationDelay: '0.25s' } : undefined}>
+      <div className={`text-[13px] font-black ${highlight ? 'text-[#7733B5] dark:text-[#C9A0F0]' : 'text-stone-500 dark:text-stone-400'}`}>{title}</div>
+      <div className="grid grid-cols-7 gap-1.5">
+        {cells.map((c, i) => (
+          <div key={i} className="flex flex-col items-center gap-1">
+            <span className="text-[11px] font-extrabold text-stone-500 dark:text-stone-400">{days[i]}</span>
+            <span className={`w-full h-14 rounded-[10px] border-2 flex items-end justify-center pb-1.5 text-[9px] font-black uppercase tracking-wide ${toneClass[c.tone]}`}>
+              {c.label}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* Same motion as the dashboard / old onboarding (ob-* keyframes),
+   prefixed so the two can live side by side. */
+const FLOW_CSS = `
+@keyframes wsoBgCycle {
+  0%, 100% { background: radial-gradient(ellipse at 30% 30%, rgba(165,96,232,0.22), transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(138,72,199,0.16), transparent 60%); }
+  33%      { background: radial-gradient(ellipse at 70% 30%, rgba(181,122,240,0.20), transparent 60%), radial-gradient(ellipse at 30% 70%, rgba(119,51,181,0.16), transparent 60%); }
+  66%      { background: radial-gradient(ellipse at 50% 80%, rgba(201,160,240,0.18), transparent 60%), radial-gradient(ellipse at 50% 20%, rgba(165,96,232,0.18), transparent 60%); }
+}
+.wso-bg-cycle { animation: wsoBgCycle 6s ease-in-out infinite; }
+@keyframes wsoRing { 0% { transform: scale(0.8); opacity: 0.9; } 70%, 100% { transform: scale(1.25); opacity: 0; } }
+.wso-ring { animation: wsoRing 2.2s cubic-bezier(0.16, 1, 0.3, 1) infinite; }
+@keyframes wsoGlow { 0%, 100% { opacity: 0.6; transform: scale(1); } 50% { opacity: 0.85; transform: scale(1.08); } }
+.wso-glow { animation: wsoGlow 2.4s ease-in-out infinite; }
+@keyframes wsoBob { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-6px) scale(1.02); } }
+.wso-bob { animation: wsoBob 2.4s ease-in-out infinite; }
+@keyframes wsoWord { 0% { transform: translateY(18px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+.wso-word { animation: wsoWord 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+@keyframes wsoSubtitle { 0% { transform: translateY(8px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+.wso-subtitle { animation: wsoSubtitle 0.5s ease-out 0.6s both; }
+@keyframes wsoBubble { 0% { transform: scale(0.6) translateY(10px); opacity: 0; } 60% { transform: scale(1.05) translateY(-2px); opacity: 1; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
+.wso-bubble { animation: wsoBubble 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s backwards; }
+@keyframes wsoScaleIn { 0% { transform: scale(0.6); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+.wso-scale-in { animation: wsoScaleIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+@keyframes wsoSlideIn { 0% { opacity: 0; transform: translateX(28px); } 100% { opacity: 1; transform: none; } }
+.wso-slide-in { animation: wsoSlideIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes wsoCardIn { 0% { opacity: 0; transform: translateY(14px) scale(0.97); } 100% { opacity: 1; transform: none; } }
+.wso-card-in { animation: wsoCardIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+@keyframes wsoCoin { 0% { transform: scale(0) rotate(-40deg); opacity: 0; } 70% { transform: scale(1.18) rotate(8deg); opacity: 1; } 100% { transform: scale(1) rotate(0); } }
+.wso-coin { animation: wsoCoin 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+@keyframes wsoShimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
+.wso-shimmer { background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent); animation: wsoShimmer 1.4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .wso-bg-cycle, .wso-ring, .wso-glow, .wso-bob, .wso-shimmer { animation: none !important; }
+  .wso-word, .wso-subtitle, .wso-bubble, .wso-scale-in, .wso-slide-in, .wso-card-in, .wso-coin { animation: none !important; opacity: 1; transform: none; }
+}
+`;

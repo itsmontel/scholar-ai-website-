@@ -1886,6 +1886,13 @@ const AcademicAIApp = () => {
                 : undefined)
             }
             onDone={() => setShowPostCheckoutWelcome(false)}
+            onStartRecommended={(tool) => {
+              setShowPostCheckoutWelcome(false);
+              navigateWorkspaceView(
+                navigateTo as (page: string, slug?: string, options?: unknown) => void,
+                tool === 'study-pack' ? 'study-packs' : 'analyze',
+              );
+            }}
           />
         </Suspense>
       )}
