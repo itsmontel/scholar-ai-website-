@@ -15,7 +15,10 @@ import {
   gradeJump,
   lifeLineFor,
   outcomesFor,
+  outcomeScholar,
   pathFor,
+  QUESTION_SCHOLAR,
+  SCHOLAR,
   type OnboardingAnswers,
   type OnboardingQuestion,
 } from './onboardingContent';
@@ -48,6 +51,22 @@ export function storedOnboardingAnswers(userKey: string): OnboardingAnswers | nu
     return parsed && typeof parsed.answers === 'object' ? (parsed.answers as OnboardingAnswers) : null;
   } catch {
     return null;
+  }
+}
+
+/** The Scholar animation for a step (also used to preload the next one). */
+function scholarForStep(step: number, answers: OnboardingAnswers): string {
+  const q = questionAt(step);
+  if (q) return QUESTION_SCHOLAR[q.key];
+  const [outA, outB] = outcomesFor(pathFor(answers));
+  switch (step) {
+    case S.WELCOME: return SCHOLAR.celebrating;
+    case S.EMPATHY: return SCHOLAR.thinking;
+    case S.OUT_A: return outcomeScholar(outA).src;
+    case S.OUT_B: return outcomeScholar(outB).src;
+    case S.LIFE: return SCHOLAR.dance;
+    case S.BUILD: return SCHOLAR.juggling;
+    default: return SCHOLAR.jumpingJoy;
   }
 }
 
@@ -168,34 +187,51 @@ export default function CreditsOnboardingFlow({
   })();
 
   const showTopBar = step !== S.WELCOME && step !== S.BUILD;
+  const scholar = scholarForStep(step, answers);
+  const nextScholar = step < S.PLAN ? scholarForStep(step + 1, answers) : null;
 
   return (
     <div className="relative min-h-[100dvh] flex flex-col bg-gradient-to-br from-[#FAF7FF] via-[#FBF7FF] to-[#F3EAFF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 text-[#3C3C3C] dark:text-stone-100" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
       <div className="absolute inset-0 pointer-events-none wso-bg-cycle" aria-hidden />
+      <div className="hidden lg:block absolute -top-40 left-[8%] h-[28rem] w-[28rem] rounded-full bg-[#A560E8]/15 blur-3xl pointer-events-none" aria-hidden />
+      <div className="hidden lg:block absolute bottom-0 right-[5%] h-[24rem] w-[24rem] rounded-full bg-[#F5B70A]/10 blur-3xl pointer-events-none" aria-hidden />
+      {/* Warm the next animation so it plays the moment the step changes. */}
+      {nextScholar && nextScholar !== scholar && <img src={nextScholar} alt="" aria-hidden className="hidden" />}
 
       {showTopBar && (
         <div className="relative z-10">
-          <div className="bg-white dark:bg-stone-900 border-b-2 border-[#E5E5E5] dark:border-stone-800 px-3 sm:px-5 py-2.5 flex items-center gap-2">
-            <button type="button" onClick={back} aria-label="Back" className="w-11 h-11 flex items-center justify-center rounded-xl text-stone-400 hover:text-stone-700 dark:hover:text-stone-200">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
-            </button>
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-800">
-                <img src="/main-logo.png" alt="WriteScholar" className="w-full h-full object-contain" width="120" height="120" />
-              </div>
-              <span className="hidden min-[360px]:inline text-lg font-extrabold tracking-tight">WriteScholar</span>
-            </div>
-            <span className="ml-auto inline-flex items-center gap-1.5 h-8 pl-1.5 pr-3 rounded-full bg-[#FFF6DB] border-2 border-[#F3DB93] text-[13px] font-black text-[#7A5A00]">
-              <CreditCoin size={18} />
-              {TRIAL_CREDITS} free
-            </span>
-            {onLogout && (
-              <button type="button" onClick={onLogout} className="hidden sm:inline-flex h-9 px-3 items-center rounded-xl text-[12px] font-extrabold uppercase tracking-wide text-stone-400 hover:text-stone-700 dark:hover:text-stone-200">
-                Sign out
+          <div className="bg-white/95 dark:bg-stone-900/95 backdrop-blur border-b-2 border-[#E5E5E5] dark:border-stone-800">
+            <div className="mx-auto w-full max-w-6xl px-3 sm:px-5 lg:px-10 py-2.5 flex items-center gap-2 lg:gap-4">
+              <button type="button" onClick={back} aria-label="Back" className="w-11 h-11 flex items-center justify-center rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 dark:hover:text-stone-200 transition-colors">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
               </button>
-            )}
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-800">
+                  <img src="/main-logo.png" alt="WriteScholar" className="w-full h-full object-contain" width="120" height="120" />
+                </div>
+                <span className="hidden min-[360px]:inline text-lg font-extrabold tracking-tight">WriteScholar</span>
+              </div>
+              {/* Desktop: progress sits in the bar itself. */}
+              <div className="hidden lg:flex flex-1 items-center gap-3 px-6" aria-hidden>
+                <div className="relative flex-1 h-3.5 rounded-full bg-[#ECE6F3] dark:bg-stone-800 overflow-hidden">
+                  <div className="relative h-full bg-[#A560E8] rounded-full transition-all duration-500 ease-out overflow-hidden" style={{ width: `${progress}%` }}>
+                    <div className="absolute inset-0 wso-shimmer" />
+                  </div>
+                </div>
+                <span className="text-[12px] font-black text-stone-400 tabular-nums w-10 text-right">{progress}%</span>
+              </div>
+              <span className="ml-auto lg:ml-0 inline-flex items-center gap-1.5 h-8 pl-1.5 pr-3 rounded-full bg-[#FFF6DB] border-2 border-[#F3DB93] text-[13px] font-black text-[#7A5A00]">
+                <CreditCoin size={18} />
+                {TRIAL_CREDITS} free
+              </span>
+              {onLogout && (
+                <button type="button" onClick={onLogout} className="hidden sm:inline-flex h-9 px-3 items-center rounded-xl text-[12px] font-extrabold uppercase tracking-wide text-stone-400 hover:text-stone-700 dark:hover:text-stone-200">
+                  Sign out
+                </button>
+              )}
+            </div>
           </div>
-          <div className="h-3 bg-[#E5E5E5] dark:bg-stone-800 overflow-hidden">
+          <div className="lg:hidden h-3 bg-[#E5E5E5] dark:bg-stone-800 overflow-hidden">
             <div className="relative h-full bg-[#A560E8] rounded-r-full transition-all duration-500 ease-out overflow-hidden" style={{ width: `${progress}%` }}>
               <div className="absolute inset-0 wso-shimmer" aria-hidden />
             </div>
@@ -205,25 +241,24 @@ export default function CreditsOnboardingFlow({
 
       <div key={step} className="relative z-[1] flex-1 flex flex-col min-h-0">
         {step === S.WELCOME && (
-          <Welcome onNext={next} onLogout={onLogout} />
+          <Welcome onNext={next} onLogout={onLogout} firstName={firstName} />
         )}
 
         {q && (
           <Screen
-            footer={
-              <PrimaryButton onClick={next} disabled={!hasAnswer}>Continue</PrimaryButton>
-            }
+            stage={{ src: scholar, bubble: bubbleFor(q, answers) }}
+            footer={<PrimaryButton onClick={next} disabled={!hasAnswer}>Continue</PrimaryButton>}
           >
-            <div className="flex items-end gap-2.5">
-              <img src="/mascot-sm.png" alt="" className="w-14 h-14 shrink-0 wso-bob" width="56" height="56" />
-              <div className="wso-bubble flex-1 bg-white dark:bg-stone-900 border-2 border-[#E5E5E5] dark:border-stone-700 rounded-[18px] rounded-bl-[4px] px-3.5 py-2.5 text-[14px] leading-snug font-bold text-[#4B4B4B] dark:text-stone-200">
+            <div className="lg:hidden flex items-end gap-2.5">
+              <img src={scholar} alt="" className="w-16 h-16 shrink-0 object-contain" width="64" height="64" />
+              <div key={bubbleFor(q, answers)} className="wso-bubble flex-1 bg-white dark:bg-stone-900 border-2 border-[#E5E5E5] dark:border-stone-700 rounded-[18px] rounded-bl-[4px] px-3.5 py-2.5 text-[14px] leading-snug font-bold text-[#4B4B4B] dark:text-stone-200">
                 {bubbleFor(q, answers)}
               </div>
             </div>
-            <div className="text-[12px] font-black uppercase tracking-[0.12em] text-[#7733B5] dark:text-[#C9A0F0]">{q.eyebrow}</div>
-            <h1 className="-mt-1.5 text-[25px] sm:text-[28px] leading-[1.18] font-black tracking-tight">{q.title}</h1>
-            {q.multi && <div className="-mt-1.5 text-[13px] font-bold text-stone-500 dark:text-stone-400">Pick as many as you like</div>}
-            <div className="flex flex-col gap-2.5" role={q.multi ? 'group' : 'radiogroup'} aria-label={q.title}>
+            <Eyebrow>{q.eyebrow}</Eyebrow>
+            <h1 className="-mt-1.5 text-[25px] sm:text-[28px] lg:text-[34px] leading-[1.15] font-black tracking-tight">{q.title}</h1>
+            {q.multi && <div className="-mt-1.5 text-[13px] lg:text-[14px] font-bold text-stone-500 dark:text-stone-400">Pick as many as you like</div>}
+            <div className={`grid gap-2.5 lg:gap-3 ${q.options.length > 5 && !q.options.some((o) => o.sub) ? 'lg:grid-cols-2' : ''}`} role={q.multi ? 'group' : 'radiogroup'} aria-label={q.title}>
               {q.options.map((o, i) => {
                 const v = answers[q.key];
                 const selected = Array.isArray(v) ? v.includes(o.id) : v === o.id;
@@ -234,10 +269,10 @@ export default function CreditsOnboardingFlow({
                     role={q.multi ? 'checkbox' : 'radio'}
                     aria-checked={selected}
                     onClick={() => pick(q, o.id)}
-                    className={`wso-card-in w-full min-h-[58px] flex items-center gap-3.5 px-3.5 py-2.5 rounded-2xl border-2 border-b-4 text-left transition-all active:translate-y-0.5 hover:-translate-y-px ${
+                    className={`wso-card-in w-full min-h-[58px] lg:min-h-[64px] flex items-center gap-3.5 px-3.5 lg:px-4 py-2.5 rounded-2xl border-2 border-b-4 text-left transition-all active:translate-y-0.5 hover:-translate-y-px ${
                       selected
-                        ? 'bg-[#F3EAFF] dark:bg-[#A560E8]/15 border-[#A560E8]'
-                        : 'bg-white dark:bg-stone-900 border-[#E5E5E5] dark:border-stone-700'
+                        ? 'bg-[#F3EAFF] dark:bg-[#A560E8]/15 border-[#A560E8] shadow-[0_10px_24px_-16px_rgba(119,51,181,0.7)]'
+                        : 'bg-white dark:bg-stone-900 border-[#E5E5E5] dark:border-stone-700 hover:border-[#D4BEF3]'
                     }`}
                     style={{ animationDelay: `${0.08 + i * 0.05}s` }}
                   >
@@ -271,14 +306,17 @@ export default function CreditsOnboardingFlow({
         {step === S.EMPATHY && (() => {
           const e = empathyFor(answers);
           return (
-            <Screen centered footer={<PrimaryButton onClick={next}>Show me how</PrimaryButton>}>
-              <img src="/mascot-thinking.webp" alt="" className="wso-scale-in w-36 h-36 mx-auto object-contain" width="144" height="144" />
-              <div className="text-[12px] font-black uppercase tracking-[0.12em] text-[#7733B5] dark:text-[#C9A0F0]">We hear you</div>
-              <h1 className="-mt-1 text-[27px] leading-[1.15] font-black tracking-tight">{e.title}</h1>
-              <p className="wso-subtitle text-[15px] leading-relaxed font-semibold text-stone-500 dark:text-stone-400">{e.body}</p>
-              <div className="wso-card-in text-left bg-white dark:bg-stone-900 border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 rounded-2xl px-4 py-3.5 flex flex-col gap-2.5" style={{ animationDelay: '0.5s' }}>
+            <Screen
+              stage={{ src: scholar, bubble: "I get it. Let me show you how we fix that." }}
+              footer={<PrimaryButton onClick={next}>Show me how</PrimaryButton>}
+            >
+              <img src={scholar} alt="" className="lg:hidden wso-scale-in w-36 h-36 mx-auto object-contain" width="144" height="144" />
+              <Eyebrow className="text-center lg:text-left">We hear you</Eyebrow>
+              <h1 className="-mt-1 text-[27px] lg:text-[34px] leading-[1.15] font-black tracking-tight text-center lg:text-left">{e.title}</h1>
+              <p className="wso-subtitle text-[15px] lg:text-[16px] leading-relaxed font-semibold text-stone-500 dark:text-stone-400 text-center lg:text-left">{e.body}</p>
+              <div className="wso-card-in bg-white dark:bg-stone-900 lg:bg-[#FBF8FF] lg:dark:bg-stone-800/60 border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 rounded-2xl px-4 py-3.5 flex flex-col gap-2.5" style={{ animationDelay: '0.5s' }}>
                 {e.points.map((p) => (
-                  <div key={p} className="flex gap-2.5 items-start text-[14px] font-bold leading-snug text-[#4B4B4B] dark:text-stone-200">
+                  <div key={p} className="flex gap-2.5 items-start text-[14px] lg:text-[15px] font-bold leading-snug text-[#4B4B4B] dark:text-stone-200">
                     <span className="w-[22px] h-[22px] mt-px shrink-0 rounded-full bg-[#A560E8] flex items-center justify-center">
                       <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" strokeWidth={4} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M5 12.5l4.5 4.5L19 7.5" /></svg>
                     </span>
@@ -292,10 +330,11 @@ export default function CreditsOnboardingFlow({
 
         {(step === S.OUT_A || step === S.OUT_B) && (() => {
           const o = step === S.OUT_A ? outA : outB;
+          const sc = outcomeScholar(o);
           return (
-            <Screen footer={<PrimaryButton onClick={next}>Continue</PrimaryButton>}>
+            <Screen stage={{ src: sc.src, bubble: sc.line }} footer={<PrimaryButton onClick={next}>Continue</PrimaryButton>}>
               <Tag>{o.tag}</Tag>
-              <h1 className="-mt-0.5 text-[27px] leading-[1.12] font-black tracking-tight">{o.title}</h1>
+              <h1 className="-mt-0.5 text-[27px] lg:text-[34px] leading-[1.12] font-black tracking-tight">{o.title}</h1>
               <div className="wso-card-in rounded-2xl overflow-hidden border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white aspect-[16/10]">
                 <video src={o.video} autoPlay muted loop playsInline aria-label={o.videoLabel} className="w-full h-full object-cover object-left-top" />
               </div>
@@ -314,18 +353,16 @@ export default function CreditsOnboardingFlow({
               )}
               <ul className="flex flex-col gap-2.5">
                 {o.points.map((p) => (
-                  <li key={p} className="flex gap-2.5 items-start text-[14px] font-bold leading-snug text-[#4B4B4B] dark:text-stone-200">
+                  <li key={p} className="flex gap-2.5 items-start text-[14px] lg:text-[15px] font-bold leading-snug text-[#4B4B4B] dark:text-stone-200">
                     <Check />
                     <span>{p}</span>
                   </li>
                 ))}
               </ul>
-              {o.mascot && (
-                <div className="wso-bubble flex gap-2.5 items-center px-3.5 py-3 rounded-2xl bg-[#F3EAFF] dark:bg-[#A560E8]/15" style={{ animationDelay: '0.4s' }}>
-                  <img src="/mascot-sm.png" alt="" className="w-10 h-10 shrink-0" width="40" height="40" />
-                  <span className="text-[14px] font-extrabold leading-snug">{o.mascot}</span>
-                </div>
-              )}
+              <div className="lg:hidden wso-bubble flex gap-2.5 items-center px-3.5 py-3 rounded-2xl bg-[#F3EAFF] dark:bg-[#A560E8]/15" style={{ animationDelay: '0.4s' }}>
+                <img src={sc.src} alt="" className="w-12 h-12 shrink-0 object-contain" width="48" height="48" />
+                <span className="text-[14px] font-extrabold leading-snug">{sc.line}</span>
+              </div>
             </Screen>
           );
         })()}
@@ -336,10 +373,10 @@ export default function CreditsOnboardingFlow({
           const after: (number | 'study')[] = ['study', 0, 'study', 1, 0, 1, 'study'];
           const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
           return (
-            <Screen footer={<PrimaryButton onClick={next}>I want that</PrimaryButton>}>
+            <Screen stage={{ src: scholar, bubble: lifeLineFor(answers) }} footer={<PrimaryButton onClick={next}>I want that</PrimaryButton>}>
               <Tag>The real outcome</Tag>
-              <h1 className="-mt-0.5 text-[27px] leading-[1.12] font-black tracking-tight">Better grades. And your evenings back.</h1>
-              <p className="text-[15px] leading-relaxed font-semibold text-stone-500 dark:text-stone-400">No more rewriting the same essay at 2am, guessing if it&apos;s good enough.</p>
+              <h1 className="-mt-0.5 text-[27px] lg:text-[34px] leading-[1.12] font-black tracking-tight">Better grades. And your evenings back.</h1>
+              <p className="text-[15px] lg:text-[16px] leading-relaxed font-semibold text-stone-500 dark:text-stone-400">No more rewriting the same essay at 2am, guessing if it&apos;s good enough.</p>
               <Week title="Your week now" days={days} cells={before.map((l) => ({ label: l, tone: 'grey' as const }))} />
               <div className="flex justify-center -my-1" aria-hidden>
                 <svg className="w-6 h-6 text-[#A560E8]" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14M6 13l6 6 6-6" /></svg>
@@ -352,31 +389,27 @@ export default function CreditsOnboardingFlow({
                   ? { label: '20 min', tone: 'purple' as const }
                   : { label: LIFE_SHORT[picks[p % picks.length]] ?? 'Free', tone: 'gold' as const }))}
               />
-              <p className="text-center text-[14px] font-extrabold leading-snug text-[#4B4B4B] dark:text-stone-200">{lifeLineFor(answers)}</p>
+              <p className="lg:hidden text-center text-[14px] font-extrabold leading-snug text-[#4B4B4B] dark:text-stone-200">{lifeLineFor(answers)}</p>
             </Screen>
           );
         })()}
 
         {step === S.BUILD && (
-          <div className="flex-1 flex flex-col items-center justify-center gap-5 px-7 py-10 text-center max-w-md mx-auto w-full">
-            <div className="relative w-44 h-44 flex items-center justify-center">
-              <span className="absolute inset-2 rounded-full border-[3px] border-[#A560E8]/45 wso-ring" aria-hidden />
-              <span className="absolute inset-2 rounded-full border-[3px] border-[#A560E8]/35 wso-ring" style={{ animationDelay: '1.1s' }} aria-hidden />
-              <img src="/mascot-thinking.webp" alt="" className="relative w-40 h-40 object-contain" width="160" height="160" />
-            </div>
-            <h1 className="text-[26px] font-black tracking-tight">Building your plan…</h1>
+          <div className="flex-1 flex flex-col items-center justify-center gap-5 px-7 py-10 text-center max-w-md lg:max-w-lg mx-auto w-full">
+            <ScholarStage src={scholar} size="build" />
+            <h1 className="text-[26px] lg:text-[34px] font-black tracking-tight">Building your plan…</h1>
             <div className="relative w-full h-3.5 rounded-full bg-[#E5E5E5] dark:bg-stone-800 overflow-hidden" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.min(100, buildTick * 25)}>
               <div className="relative h-full bg-[#A560E8] rounded-full transition-all duration-500 overflow-hidden" style={{ width: `${Math.min(100, buildTick * 25)}%` }}>
                 <div className="absolute inset-0 wso-shimmer" aria-hidden />
               </div>
             </div>
-            <ul className="w-full flex flex-col gap-3 text-left">
+            <ul className="w-full flex flex-col gap-3 text-left lg:bg-white/80 lg:dark:bg-stone-900/80 lg:border-2 lg:border-[#EADFF8] lg:dark:border-stone-700 lg:rounded-3xl lg:p-6">
               {['Reading your answers', `Matching your goal: ${from} to ${to}`, 'Choosing where to start', `Planning your ${TRIAL_CREDITS} free credits`].map((label, i) => {
                 const done = buildTick > i;
                 return (
-                  <li key={label} className="flex items-center gap-3 text-[15px] font-extrabold">
-                    <span className={`w-[26px] h-[26px] shrink-0 rounded-full flex items-center justify-center ${done ? 'bg-[#58CC02]' : 'bg-white dark:bg-stone-800 border-2 border-[#E5E5E5] dark:border-stone-600'}`}>
-                      {done && <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" strokeWidth={3.6} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M5 12.5l4.5 4.5L19 7.5" /></svg>}
+                  <li key={label} className="flex items-center gap-3 text-[15px] lg:text-[16px] font-extrabold">
+                    <span className={`w-[26px] h-[26px] shrink-0 rounded-full flex items-center justify-center transition-colors ${done ? 'bg-[#58CC02]' : 'bg-white dark:bg-stone-800 border-2 border-[#E5E5E5] dark:border-stone-600'}`}>
+                      {done && <svg className="w-3.5 h-3.5 text-white wso-scale-in" fill="none" stroke="currentColor" strokeWidth={3.6} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M5 12.5l4.5 4.5L19 7.5" /></svg>}
                     </span>
                     <span className={done ? '' : 'text-stone-400'}>{label}</span>
                   </li>
@@ -388,6 +421,7 @@ export default function CreditsOnboardingFlow({
 
         {step === S.PLAN && (
           <Screen
+            stage={{ src: scholar, bubble: `Your plan is ready${firstName ? `, ${firstName}` : ''}! Let's get you that ${to === 'Pass' ? 'pass' : to}.` }}
             footer={
               <>
                 <PrimaryButton onClick={() => onStartTrial(answers)} disabled={starting}>
@@ -405,21 +439,21 @@ export default function CreditsOnboardingFlow({
             }
           >
             <div className="flex items-center gap-3">
-              <img src="/mascot-pointing.webp" alt="" className="w-14 h-14 shrink-0 object-contain wso-bob" width="56" height="56" />
+              <img src={scholar} alt="" className="lg:hidden w-16 h-16 shrink-0 object-contain" width="64" height="64" />
               <div>
-                <div className="text-[12px] font-black uppercase tracking-[0.12em] text-[#7733B5] dark:text-[#C9A0F0]">Your plan is ready{firstName ? `, ${firstName}` : ''}</div>
-                <h1 className="mt-0.5 text-[24px] leading-[1.12] font-black tracking-tight">{from} to {to}, without losing your evenings</h1>
+                <Eyebrow>Your plan is ready{firstName ? `, ${firstName}` : ''}</Eyebrow>
+                <h1 className="mt-0.5 text-[24px] lg:text-[32px] leading-[1.12] font-black tracking-tight">{from} to {to}, without losing your evenings</h1>
               </div>
             </div>
 
-            <div className="wso-card-in bg-[#A560E8] border-2 border-b-4 border-[#7733B5] text-white rounded-2xl p-4 flex flex-col gap-2">
+            <div className="wso-card-in bg-[#A560E8] border-2 border-b-4 border-[#7733B5] text-white rounded-2xl p-4 lg:p-5 flex flex-col gap-2">
               <span className="self-start px-2.5 py-1 rounded-full bg-white text-[#7733B5] text-[11px] font-black tracking-wide">START HERE</span>
-              <div className="text-[21px] font-black leading-tight">{rec.title}</div>
-              <div className="text-[14px] font-bold leading-relaxed">{rec.body}</div>
+              <div className="text-[21px] lg:text-[23px] font-black leading-tight">{rec.title}</div>
+              <div className="text-[14px] lg:text-[15px] font-bold leading-relaxed">{rec.body}</div>
             </div>
 
             {offerTrial && (
-              <div className="wso-card-in bg-[#FFF6DB] dark:bg-[#F5B70A]/10 border-2 border-b-4 border-[#F3DB93] dark:border-[#F5B70A]/40 rounded-2xl px-4 py-3.5 flex flex-col gap-2.5" style={{ animationDelay: '0.15s' }}>
+              <div className="wso-card-in bg-[#FFF6DB] dark:bg-[#F5B70A]/10 border-2 border-b-4 border-[#F3DB93] dark:border-[#F5B70A]/40 rounded-2xl px-4 py-3.5 lg:px-5 lg:py-4 flex flex-col gap-2.5" style={{ animationDelay: '0.15s' }}>
                 <div className="flex items-center justify-between">
                   <div className="text-[17px] font-black">Your {TRIAL_CREDITS} free credits</div>
                   <div className="flex gap-0.5">
@@ -438,7 +472,7 @@ export default function CreditsOnboardingFlow({
               </div>
             )}
 
-            <div className="wso-card-in bg-white dark:bg-stone-900 border-2 border-[#E5E5E5] dark:border-stone-700 rounded-2xl px-4 py-3.5 flex flex-col gap-2" style={{ animationDelay: '0.3s' }}>
+            <div className="wso-card-in bg-white dark:bg-stone-900 lg:bg-[#FBF8FF] lg:dark:bg-stone-800/60 border-2 border-[#E5E5E5] dark:border-stone-700 rounded-2xl px-4 py-3.5 flex flex-col gap-2" style={{ animationDelay: '0.3s' }}>
               <div className="text-[14px] font-black">How credits work</div>
               <div className="flex gap-2 text-[13px] font-bold leading-snug text-[#4B4B4B] dark:text-stone-300">
                 <CreditCoin size={16} className="mt-px" />
@@ -466,63 +500,142 @@ export default function CreditsOnboardingFlow({
 
 /* ─── Pieces ─── */
 
-function Welcome({ onNext, onLogout }: { onNext: () => void; onLogout?: () => void }) {
+const WELCOME_PROMISES = [
+  { label: 'Know your grade before you hand it in', icon: 'M4 19V5M4 19h16M8 15l4-4 3 3 5-6' },
+  { label: 'Actually remember it on exam day', icon: 'M12 3a6 6 0 0 0-3.5 10.9V17h7v-3.1A6 6 0 0 0 12 3zM9.5 21h5' },
+  { label: 'Get your evenings back', icon: 'M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z' },
+];
+
+function Welcome({ onNext, onLogout, firstName }: { onNext: () => void; onLogout?: () => void; firstName?: string }) {
   const words: { w: string; tone?: 'muted' | 'accent' }[] = [
     { w: "Let's" }, { w: 'turn' }, { w: 'your' }, { w: 'B', tone: 'muted' }, { w: 'into' }, { w: 'an' }, { w: 'A.', tone: 'accent' },
   ];
+  const headline = (
+    <h1 className="text-[34px] sm:text-[40px] lg:text-[60px] leading-[1.05] font-black tracking-tight">
+      {words.map(({ w, tone }, i) => (
+        <span key={i}>
+          <span className={`inline-block wso-word ${tone === 'muted' ? 'text-stone-400' : tone === 'accent' ? 'text-[#A560E8]' : ''}`} style={{ animationDelay: `${0.1 + i * 0.08}s` }}>{w}</span>{' '}
+        </span>
+      ))}
+    </h1>
+  );
+  const greeting = `Hi${firstName ? ` ${firstName}` : ''}! I'm Scholar. Let's get you that A.`;
   return (
     <>
       <div className="h-1.5 bg-gradient-to-r from-[#A560E8] via-[#8A48C7] to-[#A560E8]" aria-hidden />
-      {onLogout && (
-        <div className="flex justify-end px-4 pt-3">
-          <button type="button" onClick={onLogout} className="h-9 px-3 rounded-xl text-[12px] font-extrabold uppercase tracking-wide text-stone-400 hover:text-stone-700 dark:hover:text-stone-200">
+      <div className="mx-auto w-full max-w-6xl flex items-center justify-between px-4 lg:px-10 pt-3">
+        <div className="hidden lg:flex items-center gap-2.5">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-800">
+            <img src="/main-logo.png" alt="" className="w-full h-full object-contain" width="120" height="120" />
+          </div>
+          <span className="text-xl font-extrabold tracking-tight">WriteScholar</span>
+        </div>
+        {onLogout && (
+          <button type="button" onClick={onLogout} className="ml-auto h-9 px-3 rounded-xl text-[12px] font-extrabold uppercase tracking-wide text-stone-400 hover:text-stone-700 dark:hover:text-stone-200">
             Sign out
           </button>
-        </div>
-      )}
-      <div className="flex-1 flex flex-col items-center justify-center gap-3 px-6 py-6 text-center">
-        <div className="wso-bubble relative bg-white dark:bg-stone-900 border-2 border-[#E5E5E5] dark:border-stone-700 rounded-3xl px-5 py-3 shadow-md">
-          <p className="text-[17px] font-extrabold">Hi! I&apos;m Scholar. Let&apos;s get you that A.</p>
-          <span className="absolute left-1/2 -bottom-2 -ml-[7px] w-3.5 h-3.5 bg-white dark:bg-stone-900 border-r-2 border-b-2 border-[#E5E5E5] dark:border-stone-700 rotate-45" aria-hidden />
-        </div>
-        <div className="relative w-[210px] h-[210px] mt-3 flex items-center justify-center">
-          <span className="absolute inset-5 rounded-full bg-[radial-gradient(circle,rgba(165,96,232,0.35),transparent_70%)] wso-glow" aria-hidden />
-          <span className="absolute inset-2.5 rounded-full border-[3px] border-[#A560E8]/45 wso-ring" aria-hidden />
-          <span className="absolute inset-2.5 rounded-full border-[3px] border-[#A560E8]/35 wso-ring" style={{ animationDelay: '1.1s' }} aria-hidden />
-          <img src="/mascot-celebrating.webp" alt="Scholar the mascot waving hello" className="relative w-[190px] h-[190px] object-contain wso-bob" width="190" height="190" />
-        </div>
-        <h1 className="mt-3 text-[34px] sm:text-[40px] leading-[1.08] font-black tracking-tight max-w-md">
-          {words.map(({ w, tone }, i) => (
-            <span key={i}>
-              <span className={`inline-block wso-word ${tone === 'muted' ? 'text-stone-400' : tone === 'accent' ? 'text-[#A560E8]' : ''}`} style={{ animationDelay: `${0.1 + i * 0.08}s` }}>{w}</span>{' '}
-            </span>
-          ))}
-        </h1>
+        )}
+      </div>
+
+      {/* Phone */}
+      <div className="lg:hidden flex-1 flex flex-col items-center justify-center gap-3 px-6 py-6 text-center">
+        <SpeechBubble text={greeting} />
+        <ScholarStage src={SCHOLAR.celebrating} size="welcome-sm" alt="Scholar the mascot waving hello" />
+        <div className="mt-3 max-w-md">{headline}</div>
         <p className="wso-subtitle text-[16px] leading-relaxed font-semibold text-stone-500 dark:text-stone-400 max-w-[320px]">
           A few quick questions about your grades, your deadlines and your life. Then we&apos;ll build your plan.
         </p>
       </div>
-      <Footer>
+      <Footer className="lg:hidden">
         <PrimaryButton onClick={onNext}>Let&apos;s go</PrimaryButton>
       </Footer>
+
+      {/* Desktop */}
+      <div className="hidden lg:grid flex-1 mx-auto w-full max-w-6xl px-10 py-10 grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] gap-16 items-center">
+        <div className="flex flex-col items-center gap-5">
+          <SpeechBubble text={greeting} large />
+          <ScholarStage src={SCHOLAR.celebrating} size="lg" alt="Scholar the mascot waving hello" />
+        </div>
+        <div className="flex flex-col gap-6">
+          <span className="self-start inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white dark:bg-stone-900 border-2 border-[#EADFF8] dark:border-stone-700 text-[12px] font-black uppercase tracking-[0.12em] text-[#7733B5] dark:text-[#C9A0F0]">
+            <CreditCoin size={18} /> {TRIAL_CREDITS} free credits waiting
+          </span>
+          {headline}
+          <p className="wso-subtitle text-[18px] leading-relaxed font-semibold text-stone-500 dark:text-stone-400 max-w-[30rem]">
+            A few quick questions about your grades, your deadlines and your life. Then we&apos;ll build a plan that fits you.
+          </p>
+          <ul className="flex flex-col gap-3">
+            {WELCOME_PROMISES.map((p, i) => (
+              <li key={p.label} className="wso-card-in flex items-center gap-3 text-[16px] font-extrabold" style={{ animationDelay: `${0.7 + i * 0.1}s` }}>
+                <span className="w-10 h-10 rounded-xl bg-[#F3EAFF] dark:bg-[#A560E8]/15 border-2 border-[#E4D2F8] dark:border-[#A560E8]/30 flex items-center justify-center shrink-0">
+                  <svg className="w-5 h-5 text-[#7733B5] dark:text-[#C9A0F0]" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden><path d={p.icon} /></svg>
+                </span>
+                {p.label}
+              </li>
+            ))}
+          </ul>
+          <div className="flex items-center gap-4 pt-2">
+            <div className="w-72"><PrimaryButton onClick={onNext}>Let&apos;s go</PrimaryButton></div>
+            <span className="text-[13px] font-bold text-stone-400">Takes about a minute</span>
+          </div>
+        </div>
+      </div>
     </>
   );
 }
 
-function Screen({ children, footer, centered = false }: { children: ReactNode; footer: ReactNode; centered?: boolean }) {
+/** Desktop left column: the animated Scholar with what they're saying. */
+function ScholarStage({ src, size, alt = '' }: { src: string; size: 'lg' | 'build' | 'welcome-sm'; alt?: string }) {
+  const box = size === 'lg' ? 'w-[340px] h-[340px] xl:w-[380px] xl:h-[380px]' : size === 'build' ? 'w-44 h-44 lg:w-64 lg:h-64' : 'w-[210px] h-[210px]';
+  const img = size === 'lg' ? 'w-[300px] h-[300px] xl:w-[340px] xl:h-[340px]' : size === 'build' ? 'w-40 h-40 lg:w-56 lg:h-56' : 'w-[190px] h-[190px]';
+  return (
+    <div className={`relative ${box} flex items-center justify-center shrink-0`}>
+      <span className="absolute inset-[12%] rounded-full bg-[radial-gradient(circle,rgba(165,96,232,0.32),transparent_70%)] wso-glow" aria-hidden />
+      <span className="absolute inset-[4%] rounded-full border-[3px] border-[#A560E8]/40 wso-ring" aria-hidden />
+      <span className="absolute inset-[4%] rounded-full border-[3px] border-[#A560E8]/30 wso-ring" style={{ animationDelay: '1.1s' }} aria-hidden />
+      <span className="absolute bottom-[3%] left-1/2 -translate-x-1/2 w-1/2 h-4 rounded-[50%] bg-[#7733B5]/15 blur-md" aria-hidden />
+      <img src={src} alt={alt} className={`relative ${img} object-contain wso-bob`} />
+    </div>
+  );
+}
+
+function SpeechBubble({ text, large = false }: { text: string; large?: boolean }) {
+  return (
+    <div
+      key={text}
+      className={`wso-bubble relative bg-white dark:bg-stone-900 border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 text-center font-extrabold [text-wrap:balance] ${
+        large
+          ? 'max-w-[400px] rounded-[26px] px-6 py-4 text-[19px] leading-snug shadow-[0_20px_44px_-26px_rgba(119,51,181,0.55)]'
+          : 'rounded-3xl px-5 py-3 text-[17px] shadow-md'
+      }`}
+    >
+      {text}
+      <span className="absolute left-1/2 -bottom-[9px] -ml-[8px] w-4 h-4 bg-white dark:bg-stone-900 border-r-2 border-b-[3px] border-[#E5E5E5] dark:border-stone-700 rotate-45" aria-hidden />
+    </div>
+  );
+}
+
+function Screen({ children, footer, stage }: { children: ReactNode; footer: ReactNode; stage: { src: string; bubble: string } }) {
   return (
     <>
-      <div className={`wso-slide-in flex-1 w-full max-w-[560px] mx-auto px-5 pt-5 pb-6 flex flex-col gap-3.5 ${centered ? 'text-center' : ''}`}>
-        {children}
+      <div className="wso-slide-in flex-1 w-full mx-auto max-w-[560px] lg:max-w-6xl px-5 pt-5 pb-6 lg:px-10 lg:py-12 lg:grid lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.1fr)] lg:gap-14 xl:gap-20 lg:items-center">
+        <div className="hidden lg:flex flex-col items-center gap-5 lg:sticky lg:top-28 self-center">
+          <SpeechBubble text={stage.bubble} large />
+          <ScholarStage src={stage.src} size="lg" />
+        </div>
+        <div className="flex flex-col gap-3.5 lg:gap-4 lg:rounded-[32px] lg:bg-white/95 lg:dark:bg-stone-900/95 lg:border-2 lg:border-b-[6px] lg:border-[#EADFF8] lg:dark:border-stone-700 lg:p-9 lg:shadow-[0_40px_90px_-45px_rgba(119,51,181,0.55)]">
+          {children}
+          <div className="hidden lg:block pt-3">{footer}</div>
+        </div>
       </div>
-      <Footer>{footer}</Footer>
+      <Footer className="lg:hidden">{footer}</Footer>
     </>
   );
 }
 
-function Footer({ children }: { children: ReactNode }) {
+function Footer({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
-    <div className="sticky bottom-0 z-10 bg-white/95 dark:bg-stone-900/95 backdrop-blur border-t-2 border-[#E5E5E5] dark:border-stone-800 px-5 pt-3.5 pb-[max(1rem,env(safe-area-inset-bottom))]">
+    <div className={`sticky bottom-0 z-10 bg-white/95 dark:bg-stone-900/95 backdrop-blur border-t-2 border-[#E5E5E5] dark:border-stone-800 px-5 pt-3.5 pb-[max(1rem,env(safe-area-inset-bottom))] ${className}`}>
       <div className="max-w-[560px] mx-auto">{children}</div>
     </div>
   );
@@ -534,14 +647,20 @@ function PrimaryButton({ children, onClick, disabled = false }: { children: Reac
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`w-full h-[54px] rounded-2xl border-2 border-b-4 text-[16px] font-extrabold uppercase tracking-wide transition-all ${
+      className={`w-full h-[54px] lg:h-[58px] rounded-2xl border-2 border-b-4 text-[16px] font-extrabold uppercase tracking-wide transition-all ${
         disabled
           ? 'bg-[#E5E5E5] dark:bg-stone-800 border-[#E5E5E5] dark:border-stone-700 text-stone-500 cursor-not-allowed'
-          : 'bg-[#A560E8] hover:bg-[#7733B5] border-[#7733B5] text-white active:border-b-2 active:translate-y-0.5'
+          : 'bg-[#A560E8] hover:bg-[#7733B5] border-[#7733B5] text-white active:border-b-2 active:translate-y-0.5 shadow-[0_14px_30px_-16px_rgba(119,51,181,0.8)]'
       }`}
     >
       {children}
     </button>
+  );
+}
+
+function Eyebrow({ children, className = '' }: { children: ReactNode; className?: string }) {
+  return (
+    <div className={`text-[12px] lg:text-[13px] font-black uppercase tracking-[0.12em] text-[#7733B5] dark:text-[#C9A0F0] ${className}`}>{children}</div>
   );
 }
 

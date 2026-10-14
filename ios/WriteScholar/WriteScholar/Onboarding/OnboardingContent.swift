@@ -210,6 +210,23 @@ enum OnboardingContent {
         let points: [String]
         var showsScore: Bool = false
         var mascot: String? = nil
+        /// Scholar animation (Resources/*.webp) shown with this outcome.
+        var scholar: String = "mascot-study"
+    }
+
+    /// Which Scholar animation plays on each question (same as the website).
+    static func scholar(for key: OnboardingKey) -> String {
+        switch key {
+        case .level: return "mascot-study"
+        case .pressure: return "mascot-thinking"
+        case .current: return "mascot-study"
+        case .target: return "mascot-jumping-joy"
+        case .confidence: return "mascot-paper"
+        case .struggles: return "mascot-juggling"
+        case .deadline: return "mascot-laptop"
+        case .life: return "mascot-dance"
+        case .source: return "mascot-celebrating"
+        }
     }
 
     private static let essayOutcome = Outcome(
@@ -217,7 +234,7 @@ enum OnboardingContent {
         points: ["Every sentence color-coded: strong, needs work, needs revising",
                  "A grade estimate out of 100, checked against your rubric",
                  "The exact fix for each weak line. Apply it, re-check, submit."],
-        showsScore: true)
+        showsScore: true, mascot: "Watch this. Every line gets marked before your professor sees it.", scholar: "mascot-paper")
     private static let studyOutcome = Outcome(
         tag: "Study Packs", title: "Turn your notes into a lesson, flashcards and a quiz", video: "hero-flashcards",
         points: ["Upload lecture notes, slides or a study guide",
@@ -229,7 +246,7 @@ enum OnboardingContent {
         points: ["Quizzes built from your own notes, not generic ones",
                  "See exactly which topics you are shaky on",
                  "Daily Review keeps it fresh until exam day"],
-        mascot: "Walk in knowing what is coming. That is what calm feels like.")
+        mascot: "Walk in knowing what is coming. That is what calm feels like.", scholar: "mascot-laptop")
     private static let studyAfterEssay = Outcome(
         tag: "Study Packs", title: "And when exams come, actually remember it", video: "hero-flashcards",
         points: studyOutcome.points,

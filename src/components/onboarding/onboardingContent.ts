@@ -382,3 +382,38 @@ export function surveyPayload(a: OnboardingAnswers) {
     answers: a,
   };
 }
+
+/* ─── Scholar animations ───
+   Animated WEBPs in /public, one per moment so the mascot reacts to
+   where the user is. The iOS app uses the same files (Resources/). */
+export const SCHOLAR = {
+  celebrating: '/mascot-celebrating.webp',
+  thinking: '/mascot-thinking.webp',
+  study: '/mascot-study.webp',
+  laptop: '/mascot-laptop.webp',
+  paper: '/mascot-paper.webp',
+  dance: '/mascot-dance.webp',
+  juggling: '/mascot-juggling.webp',
+  jumpingJoy: '/mascot-jumping-joy.webp',
+  walking: '/mascot-walking.webp',
+} as const;
+
+/** Which animation plays on each question. */
+export const QUESTION_SCHOLAR: Record<keyof OnboardingAnswers, string> = {
+  level: SCHOLAR.walking,
+  pressure: SCHOLAR.thinking,
+  current: SCHOLAR.study,
+  target: SCHOLAR.jumpingJoy,
+  confidence: SCHOLAR.paper,
+  struggles: SCHOLAR.juggling,
+  deadline: SCHOLAR.laptop,
+  life: SCHOLAR.dance,
+  source: SCHOLAR.celebrating,
+};
+
+/** Animation + line for the outcome screens. */
+export function outcomeScholar(o: Outcome): { src: string; line: string } {
+  if (o.showsScore) return { src: SCHOLAR.paper, line: 'Watch this. Every line gets marked before your professor sees it.' };
+  if (o.video.includes('quiz')) return { src: SCHOLAR.laptop, line: o.mascot ?? 'Find the gaps now, not in the exam room.' };
+  return { src: SCHOLAR.study, line: o.mascot ?? 'Your notes, turned into something you will remember.' };
+}

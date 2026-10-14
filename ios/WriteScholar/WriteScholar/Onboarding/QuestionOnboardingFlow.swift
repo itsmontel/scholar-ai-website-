@@ -153,7 +153,7 @@ struct QuestionOnboardingFlow: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
                     HStack(alignment: .bottom, spacing: 10) {
-                        Image.bundleResource("mascot-sm").resizable().scaledToFit().frame(width: 54, height: 54)
+                        WSAnimatedImage(name: OnboardingContent.scholar(for: q.key)).frame(width: 60, height: 60)
                         WSSpeechBubble(text: OnboardingContent.bubble(for: q, answers), tail: .leading,
                                        fillColor: .white, strokeColor: WSColor.duoBorder, maxWidth: .infinity)
                             .id(OnboardingContent.bubble(for: q, answers))
@@ -256,7 +256,7 @@ struct QuestionOnboardingFlow: View {
                     }
                     if let m = o.mascot {
                         HStack(spacing: 10) {
-                            Image.bundleResource("mascot-sm").resizable().scaledToFit().frame(width: 40, height: 40)
+                            WSAnimatedImage(name: o.scholar).frame(width: 48, height: 48)
                             Text(m).wsBody(.small, weight: .heavy).foregroundStyle(WSColor.duoText)
                         }
                         .padding(12)
@@ -307,7 +307,7 @@ struct QuestionOnboardingFlow: View {
             Spacer()
             ZStack {
                 PulseRings()
-                WSAnimatedImage(name: "mascot-thinking").frame(width: 150, height: 150)
+                WSAnimatedImage(name: "mascot-juggling").frame(width: 150, height: 150)
             }
             .frame(width: 180, height: 180)
             Text("Building your plan…").wsHeadline(.large, weight: .black).foregroundStyle(WSColor.duoText)
@@ -336,7 +336,7 @@ struct QuestionOnboardingFlow: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
                     HStack(spacing: 12) {
-                        WSAnimatedImage(name: "mascot-pointing").frame(width: 56, height: 56)
+                        WSAnimatedImage(name: "mascot-jumping-joy").frame(width: 64, height: 64)
                         VStack(alignment: .leading, spacing: 2) {
                             Text("YOUR PLAN IS READY").wsEyebrow().foregroundStyle(WSColor.duoPurple)
                             Text("\(j.from) to \(j.to), without losing your evenings")
