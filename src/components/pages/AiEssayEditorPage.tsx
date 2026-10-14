@@ -91,8 +91,8 @@ const FAQS = [
     a: 'It is an estimate designed to catch the weak-thesis, no-evidence and waffly-paragraph problems before you submit. It is not a guarantee of the mark your professor will give and it does not replace them, it helps you hand in a stronger draft.',
   },
   {
-    q: 'Is it free?',
-    a: 'You can preview it on a real essay of your own for free — grade estimate, issues, and the first half of the markup. Unlock the full rubric and one-click fixes with Pro at 50% off your first month ($9.99), then $19.99/mo. Cancel anytime.',
+    q: 'Is it free to try?',
+    a: 'You can try it free for 3 days. The trial gives you 3 credits, and each essay analysis uses 1, so you can grade up to three of your own essays with the full rubric and one-click fixes. After that, Pro is $19.99/mo for 99 credits, and unused credits roll over. Cancel anytime.',
   },
   {
     q: 'Does it work for university and college essays?',
@@ -115,7 +115,7 @@ const AiEssayEditorPage = ({ onNavigate, user, onLogout }: AiEssayEditorPageProp
       description:
         'Write your essay in a real editor and get an estimated professor-style grade, a full rubric, and line-by-line fixes you apply to your draft in one click. Word in, Word out.',
       url: `${SITE_ORIGIN}/ai-essay-editor`,
-      priceLabel: 'Free',
+      usesCredits: true,
     });
     injectJsonLd('ai-essay-editor-faq', {
       '@context': 'https://schema.org',
@@ -170,7 +170,7 @@ const AiEssayEditorPage = ({ onNavigate, user, onLogout }: AiEssayEditorPageProp
             <div className="mt-8 flex flex-col items-center gap-3">
               {cta}
               <p className="text-[12px] sm:text-sm font-bold text-stone-500 dark:text-stone-400">
-                Preview free · 50% off first month · Cancel anytime. The grade is an estimate to sharpen your draft, not a guarantee.
+                3-day free trial · 3 credits · Cancel anytime. The grade is an estimate to sharpen your draft, not a guarantee.
               </p>
             </div>
           </div>

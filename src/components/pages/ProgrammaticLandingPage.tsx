@@ -1090,8 +1090,8 @@ const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) 
                 </h2>
                 <p className="text-stone-700 dark:text-stone-300 text-[14px] leading-relaxed">
                   {config.type === 'subject'
-                    ? 'Start free and see the gaps before the exam does. Unlock the full fixes when you want them.'
-                    : 'Preview free. 50% off first month. Used by 50,000+ college students.'}
+                    ? 'Try it free for 3 days and see the gaps before the exam does. 3 credits, cancel anytime.'
+                    : 'Try it free for 3 days with 3 credits. Used by 50,000+ college students.'}
                 </p>
               </div>
               <a
@@ -1203,8 +1203,8 @@ const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) 
             </h2>
             <p className="text-stone-700 dark:text-stone-300 max-w-md mx-auto mb-6 leading-relaxed text-[15px]">
               {config.type === 'subject'
-                ? 'Paste this week’s notes and walk into the exam already knowing the material. See what is costing you marks before you hand the paper in. Start free, no card needed.'
-                : 'Preview free, then unlock Pro at 50% off your first month. Cancel anytime. WriteScholar takes your notes and turns them into the study tools you actually use.'}
+                ? 'Paste this week’s notes and walk into the exam already knowing the material. See what is costing you marks before you hand the paper in. Try it free for 3 days.'
+                : 'Try it free for 3 days with 3 credits, then Pro is $19.99/mo. Cancel anytime. WriteScholar takes your notes and turns them into the study tools you actually use.'}
             </p>
             <a
               href={hrefForPage(config.primaryCta.page)}

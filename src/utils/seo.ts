@@ -213,11 +213,38 @@ export interface ProductSchemaInput {
   image?: string;
   /** "Free", "Freemium", or a $ amount. Defaults to Freemium. */
   priceLabel?: string;
+  /**
+   * Tool spends credits (essay analysis, study packs, citation search):
+   * describe the paid plans and the free trial instead of a $0 offer.
+   */
+  usesCredits?: boolean;
   /** Star rating (e.g. 4.8). Optional. */
   ratingValue?: number;
   /** Review count. Required if ratingValue is set. */
   ratingCount?: number;
 }
+
+/** Pro and Premium as schema.org offers. Keep in sync with index.html. */
+const CREDIT_PLAN_OFFERS = [
+  { name: 'Pro — 99 credits a month', price: '19.99', note: '3-day free trial with 3 credits, then 99 credits a month.' },
+  { name: 'Premium — 199 credits a month', price: '39.99', note: '199 credits a month.' },
+].map(({ name, price, note }) => ({
+  '@type': 'Offer',
+  name,
+  description: `${note} Unused credits roll over, up to 499.`,
+  price,
+  priceCurrency: 'USD',
+  category: 'subscription',
+  availability: 'https://schema.org/InStock',
+  url: `${SITE_ORIGIN}/pricing`,
+  priceSpecification: {
+    '@type': 'UnitPriceSpecification',
+    price,
+    priceCurrency: 'USD',
+    billingDuration: 'P1M',
+    unitCode: 'MON',
+  },
+}));
 
 /**
  * Inject SoftwareApplication schema for a single tool page. Helps Google
@@ -236,13 +263,15 @@ export function injectToolProductSchema(input: ProductSchemaInput): void {
     applicationCategory: 'EducationalApplication',
     operatingSystem: 'Web',
     inLanguage: 'en',
-    isAccessibleForFree: true,
-    offers: {
-      '@type': 'Offer',
-      price: '0',
-      priceCurrency: 'USD',
-      availability: 'https://schema.org/InStock',
-    },
+    isAccessibleForFree: !input.usesCredits,
+    offers: input.usesCredits
+      ? CREDIT_PLAN_OFFERS
+      : {
+          '@type': 'Offer',
+          price: '0',
+          priceCurrency: 'USD',
+          availability: 'https://schema.org/InStock',
+        },
     publisher: {
       '@type': 'Organization',
       name: 'WriteScholar',

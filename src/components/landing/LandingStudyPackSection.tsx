@@ -59,7 +59,7 @@ export default function LandingStudyPackSection({ onNavigate }: LandingStudyPack
                 ))}
               </ul>
               <p className="text-sm text-stone-500 dark:text-stone-400 leading-relaxed">
-                {FREE_PLAN_STUDY_PACK_LINE} Same flow as your dashboard — try it free, unlock the full deck and quiz with Pro.
+                {FREE_PLAN_STUDY_PACK_LINE} Same flow as your dashboard, with the full deck, quiz and games.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 pt-1">
                 <button
@@ -77,7 +77,7 @@ export default function LandingStudyPackSection({ onNavigate }: LandingStudyPack
                   onClick={() => onNavigate('signup')}
                   className="inline-flex items-center justify-center px-6 py-3.5 border border-stone-300/90 dark:border-stone-600 text-stone-800 dark:text-stone-200 font-semibold rounded-xl hover:bg-stone-100/80 dark:hover:bg-stone-800/50 transition-colors text-base"
                 >
-                  Create free account
+                  Try it free for 3 days
                 </button>
               </div>
             </div>

@@ -94,6 +94,13 @@ const FAQPage: React.FC<FAQPageProps> = ({ onNavigate, user, onLogout }) => {
       tags: ['getting-started', 'signup', 'first-time']
     },
     {
+      id: 101,
+      category: 'getting-started',
+      question: 'How do credits and the free trial work?',
+      answer: 'Every essay analysis, study pack and citation search uses 1 credit. Start the 3-day free trial to get 3 credits. After that, Pro is $19.99/month for 99 credits and Premium is $39.99/month for 199 credits. Unused credits roll over each month, up to 499. Pausing your plan keeps your credits; cancelling resets them to 0. The writing editor and the free utilities never use credits.',
+      tags: ['getting-started', 'credits', 'trial', 'pricing', 'billing']
+    },
+    {
       id: 2,
       category: 'analysis',
       question: 'What types of analysis does WriteScholar provide?',

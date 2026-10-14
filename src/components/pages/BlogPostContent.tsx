@@ -1532,7 +1532,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
               {
                 question: 'Can I check my grade more than once?',
                 answer:
-                  'Yes — and you should. The grade-check → revise → re-check loop is the whole point. On WriteScholar, free accounts get preview analyses to see how it works on their own writing; Pro removes the practical limits for weekly papers.',
+                  'Yes — and you should. The grade-check → revise → re-check loop is the whole point. On WriteScholar, the 3-day free trial gives you 3 credits (1 per analysis) to try it on your own writing, and Pro gives you 99 a month for weekly papers, with unused credits rolling over.',
               },
               {
                 question: 'Does it work for research papers and longer essays?',
@@ -2199,7 +2199,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             For flashcards, you can study them directly in the browser with a flip-card interface, or export them for offline use. Quizzes give you immediate feedback on each question, with explanations for correct answers. Crosswords can be solved interactively online or printed for pencil-and-paper solving. All your generated materials are saved to your account, so you can return to them anytime.
           </p>
           <p className={p}>
-            The best part? You can try all of these tools for free. WriteScholar offers a generous free tier that lets you experience the power of AI-generated study materials before committing to a subscription. See our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing page</a> for details on what&apos;s included at each level.
+            The best part? You can try all of these tools for free. WriteScholar&apos;s 3-day free trial gives you 3 credits to build study packs from your own notes before committing to a subscription. See our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing page</a> for details on what&apos;s included at each level.
           </p>
 
           <ExpandedAiStudyTools handleNavigate={handleNavigate} />

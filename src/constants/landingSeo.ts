@@ -15,12 +15,12 @@
  * Description rules:
  *   - 150-160 chars (Google's mobile cutoff)
  *   - Lead with the result ("Paste your essay, ..."), not the feature
- *   - End with a risk-reversal phrase to lift CTR. With FREEMIUM_PREVIEW
- *     live, "see half your feedback free" is honest — the rest unlocks
- *     with Pro at 50% off the first month (NEWCUSTOMER).
+ *   - End with a risk-reversal phrase to lift CTR. The front-door offer
+ *     is the 3-day free trial with 3 credits (src/config/pricing.ts), so
+ *     say that and nothing about free previews or first-month discounts.
  */
 export const LANDING_PAGE_TITLE =
   "AI Essay Grader — Turn B Essays Into A's | WriteScholar";
 
 export const LANDING_META_DESCRIPTION =
-  "Paste your essay, get a professor-style grade and line-by-line fixes. See the first half free — unlock the rest with Pro at 50% off your first month.";
+  "Get a professor-style grade and line-by-line fixes on your essay, plus study packs and citations. Try it free for 3 days with 3 credits. Cancel anytime.";

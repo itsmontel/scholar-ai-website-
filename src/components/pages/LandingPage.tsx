@@ -2523,7 +2523,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               Stop losing marks you could have kept
             </h2>
             <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed">
-              Start free and see what&apos;s holding your grade back. Upgrade when you want to know exactly how to fix it.
+              Try it free for 3 days with 3 credits. Every essay analysis, study pack or citation search uses 1 credit, and unused credits roll over.
             </p>
           </div>
 
@@ -2672,7 +2672,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           </div>
 
           <p className="text-center text-sm text-stone-500 dark:text-stone-500 mt-8 max-w-xl mx-auto">
-            Free to start. Pro and Premium upgrades available with monthly or yearly billing.{' '}
+            Try it free for 3 days with 3 credits. Pro and Premium available with monthly or yearly billing.{' '}
             <button
               type="button"
               onClick={() => onNavigate('pricing')}
@@ -2971,7 +2971,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 </span>
                 <div>
                   <p className="text-amber-800 font-semibold text-sm">{FREE_PLAN_STUDY_PACK_LINE}</p>
-                  <p className="text-amber-600 text-xs mt-0.5">Sign up free — preview on your notes, upgrade for quiz &amp; games</p>
+                  <p className="text-amber-600 text-xs mt-0.5">Try it free for 3 days — 3 credits for your own notes</p>
                 </div>
               </div>
             </div>

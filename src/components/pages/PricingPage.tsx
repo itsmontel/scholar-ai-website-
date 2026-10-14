@@ -354,7 +354,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
               Stop losing marks you could have kept
             </h1>
             <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed font-medium">
-              Start free and see what&apos;s holding your grade back. Upgrade when you want to know exactly how to fix it.
+              Try it free for 3 days with 3 credits. Every essay analysis, study pack or citation search uses 1 credit, and unused credits roll over.
             </p>
           </div>
 
@@ -652,7 +652,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
             <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 mb-8 max-w-xl mx-auto leading-relaxed">
               {user
                 ? 'Drop it into your dashboard and see exactly what to fix before it’s due.'
-                : 'Start free, no card needed. Upgrade only when you want the full fixes. Cancel anytime.'}
+                : 'Try it free for 3 days with 3 credits. Cancel anytime before it ends and you pay nothing.'}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center">
               {user ? (

@@ -63,6 +63,7 @@ const CitationsPage = ({ onNavigate, user, onLogout, embedded = false, onEmbedde
     injectToolProductSchema({
       name: 'Citation Finder',
       description: 'AI citation finder for college research papers — surface real, peer-reviewed sources with formatted citations in APA, MLA, Chicago, Harvard, and IEEE.',
+      usesCredits: true,
     });
     return () => removeJsonLd('tool-product');
   }, [embedded]);

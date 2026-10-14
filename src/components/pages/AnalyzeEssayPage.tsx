@@ -45,6 +45,7 @@ const AnalyzeEssayPage = ({ onNavigate, user, onLogout, embedded = false }: Anal
     injectToolProductSchema({
       name: 'AI Essay Checker',
       description: 'AI essay grader with professor-style feedback — overall grade, rubric breakdown (thesis, structure, evidence, style, mechanics), line-by-line annotations, and a polished revision.',
+      usesCredits: true,
     });
     return () => removeJsonLd('tool-product');
   }, []);
