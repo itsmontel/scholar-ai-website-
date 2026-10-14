@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { WELCOME_DISCOUNT_AT_SIGNUP, WELCOME_PROMO_CODE } from '../../config/pricing';
+import { WELCOME_DISCOUNT_AT_SIGNUP, WELCOME_PROMO_CODE, TRIAL_CREDITS, TRIAL_DAYS } from '../../config/pricing';
 
 interface PromoBannerProps {
   /** Promo code shown in the chip (also used to scope the dismissal cookie). */
@@ -14,8 +14,10 @@ interface PromoBannerProps {
 }
 
 /**
- * First-month discount banner. Landing uses brand gold; the dashboard
- * keeps the purple workspace strip.
+ * Front-door offer banner. While the free trial is the offer it promotes
+ * the trial (3 days, 3 credits); when the welcome discount is on it shows
+ * the 50% off code instead. Landing uses brand gold; the dashboard keeps
+ * the purple workspace strip.
  */
 export default function PromoBanner({
   code = WELCOME_PROMO_CODE,
@@ -23,7 +25,10 @@ export default function PromoBanner({
   onCta,
   ctaLabel = 'Claim 50% off',
 }: PromoBannerProps) {
-  const storageKey = `ws_promo_dismissed_${variant}_${code}`;
+  const trialMode = !WELCOME_DISCOUNT_AT_SIGNUP && TRIAL_DAYS > 0;
+  const storageKey = trialMode
+    ? `ws_promo_dismissed_${variant}_trial${TRIAL_DAYS}`
+    : `ws_promo_dismissed_${variant}_${code}`;
 
   const [dismissed, setDismissed] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
@@ -34,7 +39,7 @@ export default function PromoBanner({
     }
   });
 
-  if (!WELCOME_DISCOUNT_AT_SIGNUP || dismissed) return null;
+  if ((!WELCOME_DISCOUNT_AT_SIGNUP && !trialMode) || dismissed) return null;
 
   const handleDismiss = () => {
     try {
@@ -50,7 +55,7 @@ export default function PromoBanner({
   return (
     <div
       role="region"
-      aria-label="First month discount"
+      aria-label={trialMode ? 'Free trial' : 'First month discount'}
       className={
         isGold
           ? 'relative overflow-hidden border-b-2 border-[#D4A300] bg-[#FFC800]'
@@ -69,6 +74,15 @@ export default function PromoBanner({
             className={`text-[12px] sm:text-[13px] font-extrabold ${isGold ? 'text-[#3C3C3C]' : 'text-white'}`}
             style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
           >
+            {trialMode ? (
+              <>
+                <span className={isGold ? 'text-[#5A4500]' : 'text-white'}>Try it free for {TRIAL_DAYS} days</span>
+                <span className="hidden sm:inline">
+                  {' '}· {TRIAL_CREDITS} credits to grade your next paper or build a study pack
+                </span>
+              </>
+            ) : (
+            <>
             <span className={isGold ? 'text-[#5A4500]' : 'text-white'}>50% off</span>
             {' '}your first month
             {' '}
@@ -81,6 +95,8 @@ export default function PromoBanner({
             >
               {code}
             </span>
+            </>
+            )}
           </p>
           {onCta && (
             <button

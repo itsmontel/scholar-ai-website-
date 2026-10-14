@@ -611,6 +611,8 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
   // Gold promo bar: hidden on the purple hero, then pins under the
   // header. Use scrollY — CSS `zoom` on the landing body makes
   // getBoundingClientRect unreliable on desktop.
+  const landingPlan = (user?.plan ?? user?.subscription_plan ?? 'free').toLowerCase();
+  const isPaidLandingUser = landingPlan === 'pro' || landingPlan === 'premium';
   const [pastHero, setPastHero] = useState(false);
   useEffect(() => {
     const update = () => setPastHero(window.scrollY > 420);
@@ -1217,12 +1219,12 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
   return (
     <>
       <Header onNavigate={onNavigate} user={user} sticky={true} currentPage="landing" opaqueHeader={false} />
-      {pastHero && (
+      {pastHero && !isPaidLandingUser && (
         <div className="fixed inset-x-0 z-[110] top-[3.5rem] sm:top-[4.25rem] landing-promo-slide pointer-events-auto">
           <PromoBanner
             variant="gold"
             onCta={() => onNavigate(user ? 'pricing' : 'signup')}
-            ctaLabel={user ? 'Unlock Pro' : 'Get 50% off'}
+            ctaLabel={user ? 'Start my free trial' : 'Claim 3 free credits'}
           />
         </div>
       )}
@@ -1524,11 +1526,11 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   <button
                     type="button"
                     onClick={() => onNavigate('signup')}
-                    aria-label="Grade my essay free"
+                    aria-label="Try WriteScholar free for 3 days"
                     className="group/btn inline-flex items-center justify-center px-7 py-3.5 sm:px-9 sm:py-[18px] lg:px-11 lg:py-[22px] rounded-2xl bg-[#58CC02] hover:bg-[#61E002] text-white font-extrabold text-base sm:text-[18px] lg:text-xl border-2 border-b-4 border-[#46A302] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 whitespace-nowrap shadow-[0_8px_28px_-6px_rgba(88,204,2,0.55)] hover:shadow-[0_12px_36px_-6px_rgba(88,204,2,0.75)]"
                     style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                   >
-                    Grade my essay free
+                    Try it free for 3 days
                     <svg className="ml-2 w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 group-hover/btn:translate-x-1" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
@@ -1552,7 +1554,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     the action is fast + free of payment friction. White
                     text reads cleanly on the purple hero bg. */}
                 <p className="mt-3 sm:mt-4 text-[10px] sm:text-[11px] font-semibold text-white/85">
-                  About 30 seconds to get started. No payment today.
+                  Sign up in 30 seconds · 3 free credits · No payment today
                 </p>
 
                 {/* ─── MOBILE TILE GRID — 4 landscape videos, md:hidden

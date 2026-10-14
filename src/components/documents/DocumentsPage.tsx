@@ -4394,7 +4394,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
   const promoBanner = isPaidPlan(user) ? undefined : flashOffer.active ? (
     <FlashOfferBanner offer={flashOffer} variant="strip" onNavigatePricing={() => onNavigate('pricing')} />
   ) : (
-    <PromoBanner variant="app" onCta={() => onNavigate('pricing')} ctaLabel="Unlock Pro" />
+    <PromoBanner variant="app" onCta={() => window.dispatchEvent(new CustomEvent('writescholar-open-paywall', { detail: { force: true, trigger: 'promo_banner' } }))} ctaLabel="Start my free trial" />
   );
 
   // ─── Render ───────────────────────────────────────────────────
