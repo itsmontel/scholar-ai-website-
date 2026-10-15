@@ -431,6 +431,379 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
   };
 
   switch (slug) {
+    case 'what-does-critically-evaluate-mean':
+      return (
+        <>
+          <p className={p}>
+            Students search <em>what does critically evaluate mean</em> because the brief used a verb they cannot translate into a paragraph. It looks like &quot;give your opinion.&quot; It is not. It looks like &quot;summarise the reading, then say whether you agree.&quot; That is still a neighbouring assignment. Critically evaluate means you judge something against named criteria, using evidence, and you end on a verdict a marker can mark.
+          </p>
+          <p className={p}>
+            This page is the verb. The rest of the paper is in <a href="/blog/how-to-write-an-essay-or-assignment" className={internalLink}>how to write an essay or assignment</a>. The sentence at the end of the opening is in <a href="/blog/how-to-write-a-thesis-statement" className={internalLink}>how to write a thesis statement</a>. The opening paragraph is in <a href="/blog/how-to-write-a-good-introduction" className={internalLink}>how to write a good introduction</a>.
+          </p>
+
+          <WritingIllustration />
+
+          <h2 className={h2}>What critically evaluate actually means</h2>
+          <p className={p}>
+            Judge. Weigh. Decide. Those are the three words markers use when they mean this verb. You are not reporting what a source says. You are deciding how far that source, theory, policy, method, or claim holds, under what conditions, and why a reasonable reader should accept your verdict.
+          </p>
+          <p className={p}>
+            Criteria come first. A judgement without criteria is a vibe. &quot;This article is convincing&quot; is not evaluation unless you said what convincing means in this course: sample size, missing counterevidence, internal logic, relevance to the case, fit with the set text. The criterion has to be one a classmate who did the reading could also apply. If only you can see why you won, you have not evaluated. You have announced a preference.
+          </p>
+          <p className={p}>
+            Then evidence that could have gone the other way. If every paragraph only supports your side, you argued. The brief asked you to evaluate. Evaluation has to survive the strongest objection you can fairly state. Then a verdict. Hedge if the evidence is mixed. Do not hide. &quot;The policy is more effective at reducing X than Y, and the study does not show Z&quot; is a verdict. &quot;There are advantages and disadvantages&quot; is a shrug.
+          </p>
+
+          <h2 className={h2}>What it is not</h2>
+          <p className={p}>
+            <strong>Describe</strong> says what the thing is. <strong>Explain</strong> says how it works. <strong>Summarise</strong> retells the source in fewer words. <strong>Analyse</strong> shows how the parts work together. <strong>Discuss</strong> maps a range of views. <strong>Argue</strong> takes one side and defends it. <strong>Critically evaluate</strong> judges against criteria, including the best case against you, and still chooses.
+          </p>
+          <p className={p}>
+            High school often rewarded a balanced list: three strengths, three weaknesses, a conclusion that both sides have a point. University markers call that discuss, or they call it fence-sitting. A critically evaluate paper can be even-handed about the evidence and still end on a side. Even-handed is the method. The verdict is the job.
+          </p>
+          <p className={p}>
+            &quot;I personally feel&quot; is not critical. Some courses allow first person when you are naming a criterion or a limit. First person is not a substitute for a source. If you cannot point to a page, a result, or a feature of the object, the feeling does not count.
+          </p>
+
+          <h2 className={h2}>Critically evaluate vs analyse, discuss, compare, assess</h2>
+          <p className={p}>
+            <strong>Analyse</strong> asks how it works. You might take a poem apart, or a method, or a dataset, and show the mechanism. You can analyse without judging whether the thing succeeds. Critically evaluate starts after that work: given how it works, how well does it do the job you named?
+          </p>
+          <p className={p}>
+            <strong>Discuss</strong> asks for range. You can finish a discuss paper having shown three schools of thought and never picked one. Critically evaluate uses that range as material. The marker still wants to know which account you trust more, and on what test.
+          </p>
+          <p className={p}>
+            <strong>Compare</strong> asks for sameness and difference. Two summaries stapled together is not a comparison. Two evaluations that never meet is not one either. If the brief says compare and critically evaluate, the comparison is in service of a verdict: which of the two holds up better against the same criteria.
+          </p>
+          <p className={p}>
+            <strong>Assess</strong> and <strong>evaluate</strong> are close. Assess often means weigh how far something meets a standard the course already gave you. Critically evaluate adds the critical part: you also test the standard, the method, or the source, not only the object against a rubric you treat as gospel. If the prompt says &quot;critically evaluate the evidence for X,&quot; the evidence is on trial, not only X.
+          </p>
+          <p className={p}>
+            Underline the verb before you outline. A fluent paper that summarises the reading still fails if the brief said critically evaluate. That decode step is the first move in <a href="/blog/how-to-write-an-essay-or-assignment" className={internalLink}>how to write an essay or assignment</a>.
+          </p>
+
+          <h2 className={h2}>The three moves every critically evaluate paper needs</h2>
+          <p className={p}>
+            <strong>1. Name the object and the criteria.</strong> The object is the thing on trial: this study, this policy, this theory, this chapter, this method. The criteria are the tests you will use. Write both in the introduction. If you cannot name the tests in one sentence, you are not ready to judge. You are still collecting opinions.
+          </p>
+          <p className={p}>
+            <strong>2. Weigh the best evidence on both sides.</strong> Use the set text, the lecture, the data you were given. Do not Google a blog that already agrees with you and call it critical. Quote or paraphrase the strongest point against your verdict, then say what it does and does not overturn. A straw man you knock down in two sentences is not a counterargument. It is a pose.
+          </p>
+          <p className={p}>
+            <strong>3. Deliver a verdict the rest of the paper can serve.</strong> The thesis is the judgement, not the topic. A topic is &quot;the Stanford prison experiment.&quot; A verdict is &quot;Zimbardo&apos;s study cannot support claims about ordinary cruelty because the demand characteristics were never controlled, even though the footage still shows how roles were cued.&quot; A classmate who did the reading should be able to disagree without being silly. If you want tests for vague and announcement theses, use the <a href="/blog/how-to-write-a-thesis-statement" className={internalLink}>thesis statement guide</a>.
+          </p>
+
+          <h2 className={h2}>How to structure it</h2>
+          <p className={p}>
+            The introduction names the object, the criteria, and the verdict. On a short essay that is one paragraph. Do not write a hook paragraph and then an evaluation paragraph. The claim should appear before the opening ends. Write that opening last, once the body has shown you which criteria you actually used. The paragraph-level version is <a href="/blog/how-to-write-a-good-introduction" className={internalLink}>how to write a good introduction</a>. Sentence one, if you need it, is in <a href="/blog/how-to-start-an-essay" className={internalLink}>how to start an essay</a>.
+          </p>
+          <p className={p}>
+            Each body paragraph does one job. The first sentence is a mini-verdict, not a topic label. &quot;Sample size is the first problem&quot; is a topic. &quot;A sample of 18 undergraduates cannot support a claim about ordinary people in general, and that is the claim the paper is famous for&quot; is a judgement. Then evidence you can cite. Then one sentence that says what the evidence does not prove. Then a sentence that ties the mini-verdict back to the overall claim.
+          </p>
+          <p className={p}>
+            That last sentence is the one students skip. They drop a quote and move on. The marker already read the quote. They are marking what you do with it. If you need &quot;also&quot; in the fourth sentence, you started a second paragraph inside the first. Split it.
+          </p>
+          <p className={p}>
+            Give the strongest objection a real paragraph, not a clause. State it fairly. Then say whether it limits your verdict or overturns it. If it overturns the verdict, change the verdict. Markers notice when a counterargument exists only so you can say &quot;however&quot; and continue as before.
+          </p>
+          <p className={p}>
+            The conclusion restates the verdict with the limit. No new criterion. No &quot;in today&apos;s society.&quot; If the introduction and the conclusion could swap places and still make sense, you are close. If they use different key terms, you evaluated two different things.
+          </p>
+
+          <h2 className={h2}>Weak answers and the version that would get marked</h2>
+          <h3 className={h3}>A psychology paper</h3>
+          <p className={p}>
+            <em>The Stanford prison experiment is a famous study. It showed that people become cruel in roles. There are some ethical issues. However, it is still useful. In conclusion, there are strengths and weaknesses.</em>
+          </p>
+          <p className={p}>
+            That describes fame, restates the headline finding, and never judges. Name a criterion, then a verdict:
+          </p>
+          <p className={p}>
+            <em>Zimbardo&apos;s study is a weak basis for claims about ordinary cruelty. The guards were cued toward brutality, the sample cannot generalise, and later replications failed to produce the same collapse. It remains useful as a warning about demand characteristics, not as evidence of a natural role-effect.</em>
+          </p>
+          <h3 className={h3}>A policy or history paper</h3>
+          <p className={p}>
+            <em>The New Deal had many programs. Some people liked it and some people did not. It helped some Americans. Critics said it did not go far enough. Both sides make good points.</em>
+          </p>
+          <p className={p}>
+            Both sides is discuss. Pick the test the prompt implied, unemployment, recovery speed, who was left out, and judge:
+          </p>
+          <p className={p}>
+            <em>As a recovery program, the New Deal looks stronger on banking stability than on unemployment, which stayed high until wartime spending. As a fairness program it looks weaker still: agricultural and domestic workers, disproportionately Black, were written out of Social Security at the start. The verdict depends on which job you think the policy had. This paper treats recovery as the job, and on that test the record is mixed, not a triumph.</em>
+          </p>
+          <h3 className={h3}>A literature or theory paper</h3>
+          <p className={p}>
+            <em>Freud&apos;s theory of the unconscious is very influential. Some psychologists still use it. Others say it is unscientific. I think it is interesting but outdated.</em>
+          </p>
+          <p className={p}>
+            Influential is not a criterion for whether the theory holds. Interesting is not one either. Name the test the course uses:
+          </p>
+          <p className={p}>
+            <em>As a clinical story, Freud still names conflicts later therapies kept. As a testable account of mind, the theory fails the course&apos;s own standard: claims that cannot be wrong are not claims this method can evaluate. This paper therefore treats Freud as a historical vocabulary, not as evidence.</em>
+          </p>
+
+          <h2 className={h2}>Mistakes that look like evaluation</h2>
+          <p className={p}>
+            <strong>Fence-sitting.</strong> You listed strengths and weaknesses and refused to say which side the evidence favours. A limited verdict is still a verdict. &quot;The study supports X in this sample and cannot speak to Y&quot; is a judgement. &quot;More research is needed&quot; is a cliché unless you say which test is missing.
+          </p>
+          <p className={p}>
+            <strong>The rant.</strong> You took a side on page one and never let a contrary source speak. That can be a fine argumentative paper. It is a weak critically evaluate paper, because the marker cannot see that you weighed anything.
+          </p>
+          <p className={p}>
+            <strong>The two-column dump.</strong> Strengths in one half, weaknesses in the other, no sentence that puts them on the same scale. Synthesis is the evaluation. The list is the notes.
+          </p>
+          <p className={p}>
+            <strong>Evaluating the topic instead of the object.</strong> The brief asked you to evaluate a study, a chapter, a policy, a method. You wrote about whether social media is bad, or whether war is wrong, or whether the author is famous. Fame, popularity, and moral disgust are not usually the criteria on the rubric.
+          </p>
+          <p className={p}>
+            <strong>Using the author&apos;s conclusion as your verdict.</strong> Repeating that the researchers &quot;found a significant effect&quot; is summary. Asking whether that effect survives the sample, the missing control, and the claim in the abstract is evaluation.
+          </p>
+          <p className={p}>
+            <strong>Fake balance.</strong> One weak criticism, then a long defence, so it looks even. Markers read weights, not paragraph counts. If the objection is real, give it the space it deserves. If it is not, do not invent one so the essay looks &quot;critical.&quot;
+          </p>
+
+          <h2 className={h2}>How to use AI on an evaluate prompt in 2026</h2>
+          <p className={p}>
+            Ask a chatbot to critically evaluate a source and you will get a sandwich: on the one hand, on the other, and a last paragraph that calls the issue complex and multifaceted. That is discuss. It is also a tell. Instructors have read that rhythm enough times this term to stop trusting a paper that never chooses.
+          </p>
+          <p className={p}>
+            The use that still fits most syllabi: you write the verdict and the criteria, then ask whether a stranger can tell what you decided, and whether any paragraph could be deleted without changing the judgement. You rewrite the weak paragraphs yourself. Feedback on a draft you wrote is different from submitting a balanced overview you could not defend in office hours. The same line is in our guide to <a href="/blog/ai-writing-assistant-for-students" className={internalLink}>AI writing assistants for students</a>. Read the AI policy on your syllabus before you paste the brief into a chat.
+          </p>
+          <p className={p}>
+            Do not use a tool to invent a study, a limitation, or a critic. Evaluation has nowhere to hide a fake source. If you cannot open the PDF, you cannot weigh it. A <a href="/citations" onClick={handleNavigate('citations')} className={internalLink}>citation checker</a> catches format drift. It will not save you from a fabricated DOI.
+          </p>
+
+          <h2 className={h2}>A check before you submit</h2>
+          <p className={p}>
+            Read only the thesis, the first sentence of every body paragraph, and the last sentence of the conclusion. One: can you underline a verdict, not a topic? Two: can you name the criteria without looking back at the brief? Three: is there a paragraph that fairly states the case against you? Four: does any paragraph only summarise? Cut that one or turn it into a judgement. Five: do the introduction and the conclusion use the same object and the same tests? If they drifted, you evaluated two assignments.
+          </p>
+          <p className={p}>
+            A <a href="/blog/grade-my-essay-before-submitting" className={internalLink}>pre-submission grade check</a> is for that triage across the whole draft. The verb is just the first place a marker looks.
+          </p>
+
+          <h2 className={h2}>Check whether you actually evaluated</h2>
+          <p className={p}>
+            <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>WriteScholar&apos;s essay editor</a> reads the draft for thesis, evidence, and structure, including whether the claim is a judgement the body supports. Use it after the verdict is yours. See <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for the current first-month offer.
+          </p>
+          <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
+            Check my evaluation before I submit →
+          </a>
+
+          <BlogFaqAccordion
+            items={[
+              {
+                question: 'What does critically evaluate mean?',
+                answer:
+                  'It means judge something against named criteria, using evidence, and end on a verdict a marker can mark. You weigh the strongest case for and against, then decide how far the claim, source, method, or policy holds. A summary plus "I agree" is not it.',
+              },
+              {
+                question: 'How do you critically evaluate in an essay?',
+                answer:
+                  'Name the object and the tests in the introduction, and state the verdict there. Give each body paragraph a mini-judgement, cited evidence, and a sentence about what that evidence does not prove. Include a fair counterargument. Restate the verdict with its limit in the conclusion.',
+              },
+              {
+                question: 'What is the difference between analyse and critically evaluate?',
+                answer:
+                  'Analyse shows how the parts work. You can finish an analysis without saying whether the thing succeeds. Critically evaluate starts after that work: given how it works, how well does it do the job you named, and on what evidence?',
+              },
+              {
+                question: 'Does critically evaluate mean I have to be negative?',
+                answer:
+                  'No. Critical means you tested it, not that you disliked it. A positive verdict still has to survive the strongest objection. Praise with no test is description. Attack with no test is a rant.',
+              },
+              {
+                question: 'Can I use "I" when I critically evaluate?',
+                answer:
+                  'Follow the syllabus. Some courses allow first person when you name a criterion or a limit. "I think" is not a criterion. If you cannot point to a page, a result, or a feature of the object, the feeling does not count.',
+              },
+              {
+                question: 'Can I use AI to critically evaluate a source in 2026?',
+                answer:
+                  'On most campuses, feedback on a draft you wrote is treated differently from generated text. A chatbot evaluation is easy to spot because it never chooses. Read your syllabus. Write the judgement yourself, and do not invent studies or critics.',
+              },
+            ]}
+          />
+        </>
+      );
+
+    case 'how-to-start-an-essay':
+      return (
+        <>
+          <p className={p}>
+            Students search <em>how to start an essay</em>, <em>how to write a hook</em>, and <em>how to write the perfect introduction</em> as if those were three different assignments. They are the same stuck moment: the cursor is in paragraph one and nothing you type sounds like it belongs to this paper. A hook is one sentence that earns the next sentence. It is not the introduction. Context, the question, and the thesis are in <a href="/blog/how-to-write-a-good-introduction" className={internalLink}>how to write a good introduction</a>. This page is sentence one.
+          </p>
+          <p className={p}>
+            In 2026 that sentence is also where generated prose gives itself away. A chatbot will open on &quot;In today&apos;s society&quot; or a rhetorical question it never answers. Instructors have read both enough times this term to stop trusting an opening that could sit on any prompt. Your advantage is a first line that could only belong to this draft.
+          </p>
+
+          <WritingIllustration />
+
+          <h2 className={h2}>What a hook is, and what it is not</h2>
+          <p className={p}>
+            A hook earns the next sentence. That is the whole job. If the second sentence has to explain the first, or apologise for it, the hook failed. If a classmate can delete sentence one and the paragraph still makes sense, you did not need a hook. The thesis still has to be there. The hook does not.
+          </p>
+          <p className={p}>
+            High school taught a menu: question, quote, statistic, anecdote, definition. College readers are not grading you on whether you picked from the menu. They are grading whether sentence one is doing work the rest of the paper uses. A shocking statistic with no source, a famous quote you never return to, and a personal story the prompt did not ask for are all decorations. They delay the claim.
+          </p>
+          <p className={p}>
+            The sentence at the end of the opening is a different job. That one has to be a claim someone who did the reading could disagree with. If you only need that sentence, use <a href="/blog/how-to-write-a-thesis-statement" className={internalLink}>how to write a thesis statement</a>. Do not spend the first half of the paragraph trying to be interesting while the claim is still a topic.
+          </p>
+
+          <h2 className={h2}>Write the first sentence after you know the claim</h2>
+          <p className={p}>
+            Openings invented first become plot summary, dictionary definitions, and a hook you have to abandon once the evidence shows up. Draft the body. Read the first sentence of each body paragraph. Those sentences should add up to one claim. Then write sentence one so it points at that claim, not at the topic you thought you had on night one.
+          </p>
+          <p className={p}>
+            If you are blocked, skip the hook and write the thesis. You can add a first sentence later, or you can leave the claim as the opening. A paper that starts on the argument is easier to read than a paper that starts on a clever line the argument never uses. The full order of the draft is in <a href="/blog/how-to-write-an-essay-or-assignment" className={internalLink}>how to write an essay or assignment</a>.
+          </p>
+
+          <h2 className={h2}>Five ways to start that still get read</h2>
+          <p className={p}>
+            <strong>A line from the assigned text.</strong> Quote a short clause, then say what that clause is doing in your argument. The quote is not the hook by itself. The next sentence is. If you cannot say what the line is doing, you are not ready to open on it.
+          </p>
+          <p className={p}>
+            <strong>The result, in one clause.</strong> Lab reports, data papers, and many social science assignments should open on what you found, with the condition it holds under. Methods belong later. &quot;Sleep matters&quot; is not a result. &quot;Nights under six hours predicted lower quiz scores only on that week&apos;s lecture&quot; is.
+          </p>
+          <p className={p}>
+            <strong>The misconception the course already undid.</strong> Name the wrong idea the lecture, the reading, or the prompt spent time correcting, then say what you are claiming instead. This works when the wrong idea is specific to the course. &quot;Many people think social media is bad&quot; is not a misconception. It is a shrug.
+          </p>
+          <p className={p}>
+            <strong>A number you can cite, and that the paper actually uses.</strong> One figure, with a source you can point to, is a hook when the argument turns on that figure. A number you found in a listicle, or a number you do not mention again, is a stall. If you cannot put an author and a year next to it, do not open on it.
+          </p>
+          <p className={p}>
+            <strong>The case, policy, or scene the prompt named.</strong> Start inside the thing you were asked to write about: the bill, the patient case, the scene, the dataset, the week of the course. A roommate should be able to tell which assignment this is from sentence one. If they can only tell the subject, you started too far away.
+          </p>
+
+          <h2 className={h2}>Openings professors skip</h2>
+          <p className={p}>
+            <strong>The rhetorical question.</strong> &quot;Have you ever wondered why people lie?&quot; The reader has not, and you are about to answer a question the prompt did not ask. If the prompt is a question, restate it as a claim. Do not ask it back.
+          </p>
+          <p className={p}>
+            <strong>&quot;Imagine a world.&quot;</strong> A hypothetical the paper never returns to. It also sounds like every other essay in the pile.
+          </p>
+          <p className={p}>
+            <strong>The historical sweep.</strong> &quot;Since the dawn of time&quot; and &quot;Throughout history, scholars have debated&quot; fill a line and name no text, no date, and no claim. Use history when the course is history and the history is the argument.
+          </p>
+          <p className={p}>
+            <strong>The dictionary.</strong> &quot;According to Oxford, justice means…&quot; is a stall unless the paper is about how a definition changed. If the course gave you a definition, use that one and cite it, in the body, not as a hook.
+          </p>
+          <p className={p}>
+            <strong>A famous quote with no job.</strong> Einstein, Shakespeare, and a random inspirational line are the same move: borrowed authority, then a topic sentence that ignores the quote. An epigraph you never use is decoration.
+          </p>
+          <p className={p}>
+            <strong>The announcement.</strong> &quot;This essay will discuss&quot; is not a hook. It tells the reader you do not have a claim yet. Make the claim.
+          </p>
+
+          <h2 className={h2}>Weak first lines and the version that would get read</h2>
+          <h3 className={h3}>Argumentative</h3>
+          <p className={p}>
+            <em>Have you ever scrolled Instagram and felt worse? In today&apos;s society, social media is everywhere. This essay will discuss its effects on teenagers.</em>
+          </p>
+          <p className={p}>
+            The question is not the assignment, and the announcement is not a claim. Start inside the dispute the paper actually has:
+          </p>
+          <p className={p}>
+            <em>Schools that ban phones in class still leave Instagram&apos;s public like-counts untouched, and those counts are what this course&apos;s anxiety readings actually tracked.</em>
+          </p>
+          <h3 className={h3}>A literary essay</h3>
+          <p className={p}>
+            <em>The Great Gatsby, a novel by F. Scott Fitzgerald, is a masterpiece of American literature. It is about the American Dream.</em>
+          </p>
+          <p className={p}>
+            That could open any paper on the book. Open on the line you are about to use:
+          </p>
+          <p className={p}>
+            <em>Gatsby stretches his arms toward the green light and the novel does not let him arrive. The light stays a mechanism, not a destination.</em>
+          </p>
+          <h3 className={h3}>A paper with a result</h3>
+          <p className={p}>
+            <em>Sleep is very important for college students. Did you know that many students are sleep deprived?</em>
+          </p>
+          <p className={p}>
+            Lead with the finding. The reader can care about sleep after they know what you measured:
+          </p>
+          <p className={p}>
+            <em>In this sample of 214 undergraduates, nights under six hours predicted lower next-day quiz scores only when the quiz covered that week&apos;s lecture.</em>
+          </p>
+
+          <h2 className={h2}>Where the first sentence sits</h2>
+          <p className={p}>
+            On a short essay, sentence one is the hook or the thesis, and the introduction is still one paragraph. Do not write a hook paragraph and then an introduction paragraph. You will have used a third of an 800-word paper before the claim appears.
+          </p>
+          <p className={p}>
+            On a research paper, you can take a few sentences of context before the claim, and sentence one should still be doing one of the five jobs above. A page of background that could be cut without changing the thesis is throat-clearing, even if the first line is vivid.
+          </p>
+          <p className={p}>
+            On a discussion post, two sentences is the whole opening: the claim, then the line from the reading. Skip the hook. Skip the closer that says you look forward to everyone&apos;s thoughts.
+          </p>
+          <p className={p}>
+            On a personal statement, this page does not apply. Admissions readers want a specific scene and a voice, not a coursework thesis. That revision routine is in the <a href="/blog/college-admission-essay-grader" className={internalLink}>college admission essay guide</a>.
+          </p>
+
+          <h2 className={h2}>How to use AI on a first sentence in 2026</h2>
+          <p className={p}>
+            Ask a chatbot for a hook and you will get a sentence that fits five hundred other essays. &quot;In an increasingly interconnected world&quot; is now a tell. So is a perfectly balanced rhetorical question, and a thesis that calls the topic &quot;complex and multifaceted&quot; without taking a side. Generated openings are fluent and empty. Professors notice the emptiness faster than a detector does.
+          </p>
+          <p className={p}>
+            The use that still fits most syllabi: you write the sentence, then ask whether a stranger can tell which assignment this is, and whether the next sentence has to apologise for it. You rewrite it yourself. Feedback on a line you wrote is different from submitting a line you could not explain in office hours. The same line is in our guide to <a href="/blog/ai-writing-assistant-for-students" className={internalLink}>AI writing assistants for students</a>. Read the AI policy on your syllabus before you paste the prompt into a chat.
+          </p>
+          <p className={p}>
+            Do not use a tool to invent a quotation, a statistic, or a personal scene. Sentence one has nowhere to hide a fake detail. If you cannot point to the page it came from, it does not belong at the top of the paper.
+          </p>
+
+          <h2 className={h2}>A check before you submit</h2>
+          <p className={p}>
+            Read only the first two sentences, out loud. One: could this opening sit on a different prompt in the same course? If yes, it is too broad. Two: does sentence two use sentence one, or ignore it? Three: is there a question, a dictionary, or &quot;this essay will&quot;? Cut those. Four: can you underline the claim within the first paragraph? If the claim is missing, no hook will save the paper. Fix the claim, then decide whether sentence one is still earning its place.
+          </p>
+          <p className={p}>
+            A <a href="/blog/grade-my-essay-before-submitting" className={internalLink}>pre-submission grade check</a> is for that triage across the whole draft. The first sentence is just the first place a marker looks.
+          </p>
+
+          <h2 className={h2}>Check the opening the way a marker would</h2>
+          <p className={p}>
+            <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>WriteScholar&apos;s essay editor</a> reads the draft for thesis, evidence, and structure, including whether the opening actually states a claim the body supports. Use it after the first sentence is yours. See <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for the current first-month offer.
+          </p>
+          <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
+            Check my opening before I submit →
+          </a>
+
+          <BlogFaqAccordion
+            items={[
+              {
+                question: 'How do you start an essay?',
+                answer:
+                  'Start with one sentence that could only belong to this paper: a line from the text, the result, the case, or the misconception the course already corrected. Then get to the claim. If you do not have a claim yet, write the body first and come back to sentence one.',
+              },
+              {
+                question: 'What is a good hook for an essay?',
+                answer:
+                  'A good hook earns the next sentence. It is specific to this assignment. A rhetorical question, a famous quote you never use, and "since the dawn of time" do not earn anything. The hook is optional. The thesis is not.',
+              },
+              {
+                question: 'How long should a hook be?',
+                answer:
+                  'One sentence, sometimes two. On a short essay, do not give the hook its own paragraph. The introduction is still one paragraph, and the claim should appear before the paragraph ends.',
+              },
+              {
+                question: 'Should I start an essay with a question?',
+                answer:
+                  'Usually no. A question you immediately answer is a delay. A question you never answer is a stall. If the prompt is already a question, answer it with a claim instead of asking it back.',
+              },
+              {
+                question: 'Can I start an essay with a quote?',
+                answer:
+                  'Yes, if the quote is from the text or source you were assigned, it is short, and the next sentence says what that line is doing in your argument. A famous quote with no job is decoration.',
+              },
+              {
+                question: 'Can I use AI to write my hook in 2026?',
+                answer:
+                  'On most campuses, feedback on a sentence you wrote is treated differently from generated text. A chatbot hook is easy to spot because it fits any prompt. Read your syllabus. Rewrite the line yourself, and do not invent quotations or statistics.',
+              },
+            ]}
+          />
+        </>
+      );
+
     case 'how-to-write-a-good-introduction':
       return (
         <>
@@ -456,7 +829,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             <strong>Context.</strong> Give the reader only what they need in order to understand the claim. For a short essay that is often one or two sentences: which text, which debate, which result. For a research paper it can be the gap in the literature, still in a few sentences, not a tour of every source you read. Background that does not change how someone reads the thesis is throat-clearing.
           </p>
           <p className={p}>
-            <strong>The question.</strong> The prompt already asked something. Your introduction should make that question visible in your own words, using the verb on the brief: analyse, argue, compare, evaluate, explain. If the brief says evaluate and your opening only describes, you have answered a neighbouring assignment. Underline that verb before you write the first sentence.
+            <strong>The question.</strong> The prompt already asked something. Your introduction should make that question visible in your own words, using the verb on the brief: analyse, argue, compare, evaluate, explain. If the brief says evaluate and your opening only describes, you have answered a neighbouring assignment. Underline that verb before you write the first sentence. If the verb is critically evaluate, start with <a href="/blog/what-does-critically-evaluate-mean" className={internalLink}>what that actually requires</a>.
           </p>
           <p className={p}>
             <strong>The thesis.</strong> One sentence a classmate who did the reading could disagree with. It usually lands at the end of the introduction, after the context has made it intelligible. A topic is &quot;sleep and grades.&quot; A thesis is &quot;In this sample, nights under six hours predicted lower quiz scores only on material from that week&apos;s lecture, not on the textbook chapter.&quot; If you want the tests for vague, obvious, and announcement theses, use the <a href="/blog/how-to-write-a-thesis-statement" className={internalLink}>thesis statement guide</a> or draft a starting sentence with a <a href="/tools/thesis-generator" onClick={handleNavigate('thesis-generator')} className={internalLink}>thesis generator</a> and then make it specific enough that it could only belong to this paper.
@@ -558,7 +931,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             A hook is one sentence that earns the next sentence. It is optional. The thesis is not. The hooks that fail are the ones every section of the course is submitting this week: a rhetorical question you never answer, &quot;imagine a world where,&quot; a shocking statistic with no source, and a famous quote that has nothing to do with the prompt.
           </p>
           <p className={p}>
-            If you want a first sentence that is not the thesis, make it a concrete piece of the paper: a line from the text, the result in one clause, the policy you are evaluating, the misconception the lecture spent Tuesday undoing. Then get to the claim. A clever opening that delays the argument by half a page costs more than it earns on a short assignment.
+            If you want a first sentence that is not the thesis, make it a concrete piece of the paper: a line from the text, the result in one clause, the policy you are evaluating, the misconception the lecture spent Tuesday undoing. Then get to the claim. A clever opening that delays the argument by half a page costs more than it earns on a short assignment. The types, and the examples, are in <a href="/blog/how-to-start-an-essay" className={internalLink}>how to start an essay</a>.
           </p>
 
           <h2 className={h2}>How to use AI on an introduction in 2026</h2>
@@ -639,7 +1012,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <h2 className={h2}>What a good essay or assignment means in 2026</h2>
           <p className={p}>
-            High school rewarded completion, length, and a tidy five-paragraph shape. College and university readers reward a claim someone could disagree with, evidence that is cited, and a paper that matches the verb in the prompt. &quot;Evaluate&quot; is not &quot;summarise.&quot; &quot;Compare&quot; is not two reports stapled together. &quot;Reflect&quot; is not a diary dump with a reading bolted on at the end.
+            High school rewarded completion, length, and a tidy five-paragraph shape. College and university readers reward a claim someone could disagree with, evidence that is cited, and a paper that matches the verb in the prompt. &quot;Evaluate&quot; is not &quot;summarise.&quot; The full version of that verb is in <a href="/blog/what-does-critically-evaluate-mean" className={internalLink}>what critically evaluate means</a>. &quot;Compare&quot; is not two reports stapled together. &quot;Reflect&quot; is not a diary dump with a reading bolted on at the end.
           </p>
           <p className={p}>
             The other 2026 difference is detection of emptiness, not only of cheating. Generated prose is often grammatical, generic, and slightly too even. Instructors notice when every paragraph has the same rhythm and none of them quote the assigned text. Your advantage is specificity: the lecture example, the page number, the counterargument your classmate actually made. If a roommate can tell you the topic but not the argument, you still wrote a report. Our guide to the <a href="/blog/first-college-paper-fall-semester" className={internalLink}>first college paper of the semester</a> is the calendar version of this. This page is the writing version.

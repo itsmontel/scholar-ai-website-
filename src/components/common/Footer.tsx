@@ -344,6 +344,8 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               <ul className="space-y-2">
                 <li><a href="/blog/how-to-write-an-essay-or-assignment" className="text-stone-400 hover:text-white text-sm transition-colors">How to write an essay or assignment</a></li>
                 <li><a href="/blog/how-to-write-a-good-introduction" className="text-stone-400 hover:text-white text-sm transition-colors">How to write a good introduction</a></li>
+                <li><a href="/blog/how-to-start-an-essay" className="text-stone-400 hover:text-white text-sm transition-colors">How to start an essay</a></li>
+                <li><a href="/blog/what-does-critically-evaluate-mean" className="text-stone-400 hover:text-white text-sm transition-colors">What critically evaluate means</a></li>
                 <li><a href="/guides/how-to-write-argumentative-essay" className="text-stone-400 hover:text-white text-sm transition-colors">How to write an argumentative essay</a></li>
                 <li><a href="/guides/how-to-write-thesis-statement" className="text-stone-400 hover:text-white text-sm transition-colors">How to write a thesis statement</a></li>
                 <li><a href="/guides/how-to-write-research-paper" className="text-stone-400 hover:text-white text-sm transition-colors">How to write a research paper</a></li>

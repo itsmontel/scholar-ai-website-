@@ -1089,6 +1089,8 @@ function essayGuidePage(g: EssayGuideMeta): ProgrammaticPageConfig {
     related: [
       { label: 'How to write an essay or assignment', href: '/blog/how-to-write-an-essay-or-assignment', teaser: 'The 2026 step-by-step process for any prompt.' },
       { label: 'How to write a good introduction', href: '/blog/how-to-write-a-good-introduction', teaser: 'Context, question, and thesis. Write the opening last.' },
+      { label: 'How to start an essay', href: '/blog/how-to-start-an-essay', teaser: 'A hook that earns the next sentence, then the claim.' },
+      { label: 'What critically evaluate means', href: '/blog/what-does-critically-evaluate-mean', teaser: 'Judge against criteria, then take a side a marker can mark.' },
       { label: 'AI College Essay Grader', href: '/ai-essay-editor', teaser: 'Write your essay and see the grade update as you revise.' },
       { label: 'AI Essay Checker', href: '/tools/analyze', teaser: 'Get rubric-based feedback and a polished revision.' },
       { label: 'Thesis Generator', href: '/tools/thesis-generator', teaser: 'Build a strong thesis statement.' },

@@ -172,6 +172,114 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ onNavigate, user, onLogout 
           },
         ],
       });
+    } else if (post.slug === 'what-does-critically-evaluate-mean') {
+      injectJsonLd('blog-post-howto', {
+        '@context': 'https://schema.org',
+        '@type': 'HowTo',
+        name: post.title,
+        description: post.description,
+        image: ogImage,
+        totalTime: 'PT45M',
+        step: [
+          { '@type': 'HowToStep', position: 1, name: 'Name the object and the criteria', text: 'Write down the thing on trial and the tests you will use. If you cannot name the tests in one sentence, you are not ready to judge.' },
+          { '@type': 'HowToStep', position: 2, name: 'Write a verdict someone could disagree with', text: 'Turn the topic into a judgement a classmate who did the reading could argue against. Hedge if the evidence is mixed. Do not hide behind advantages and disadvantages.' },
+          { '@type': 'HowToStep', position: 3, name: 'Give each body paragraph a mini-verdict', text: 'Start with a judgement, then cited evidence, then a sentence about what that evidence does not prove, then a tie back to the overall claim.' },
+          { '@type': 'HowToStep', position: 4, name: 'State the strongest objection fairly', text: 'Give the best case against you a real paragraph. Say whether it limits the verdict or overturns it. If it overturns it, change the verdict.' },
+          { '@type': 'HowToStep', position: 5, name: 'Check the verb before you submit', text: 'Underline a verdict in the thesis. Confirm the introduction and conclusion use the same object and tests. Cut paragraphs that only summarise.' },
+        ],
+      });
+      injectJsonLd('blog-post-faq', {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          {
+            '@type': 'Question',
+            name: 'What does critically evaluate mean?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'It means judge something against named criteria, using evidence, and end on a verdict a marker can mark. You weigh the strongest case for and against, then decide how far the claim, source, method, or policy holds. A summary plus "I agree" is not it.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'How do you critically evaluate in an essay?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Name the object and the tests in the introduction, and state the verdict there. Give each body paragraph a mini-judgement, cited evidence, and a sentence about what that evidence does not prove. Include a fair counterargument. Restate the verdict with its limit in the conclusion.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'What is the difference between analyse and critically evaluate?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Analyse shows how the parts work. You can finish an analysis without saying whether the thing succeeds. Critically evaluate starts after that work: given how it works, how well does it do the job you named, and on what evidence?',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'Can I use AI to critically evaluate a source in 2026?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'On most campuses, feedback on a draft you wrote is treated differently from generated text. A chatbot evaluation is easy to spot because it never chooses. Write the judgement yourself, and do not invent studies or critics.',
+            },
+          },
+        ],
+      });
+    } else if (post.slug === 'how-to-start-an-essay') {
+      injectJsonLd('blog-post-howto', {
+        '@context': 'https://schema.org',
+        '@type': 'HowTo',
+        name: post.title,
+        description: post.description,
+        image: ogImage,
+        totalTime: 'PT20M',
+        step: [
+          { '@type': 'HowToStep', position: 1, name: 'Know the claim first', text: 'Read the first sentence of each body paragraph. Those sentences should add up to one claim. Write sentence one so it points at that claim.' },
+          { '@type': 'HowToStep', position: 2, name: 'Pick one concrete piece of this paper', text: 'Use a line from the assigned text, the result, the case or policy the prompt named, a sourced number the paper actually uses, or the misconception the course already corrected.' },
+          { '@type': 'HowToStep', position: 3, name: 'Write one sentence', text: 'A hook earns the next sentence. If sentence two has to explain or apologise for sentence one, cut it.' },
+          { '@type': 'HowToStep', position: 4, name: 'Get to the claim in the same paragraph', text: 'On a short essay the hook does not get its own paragraph. The thesis should appear before the introduction ends.' },
+          { '@type': 'HowToStep', position: 5, name: 'Cut anything that could open a different essay', text: 'Delete rhetorical questions, dictionary definitions, historical sweeps, famous quotes you never use, and announcements that the essay will discuss the topic.' },
+        ],
+      });
+      injectJsonLd('blog-post-faq', {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          {
+            '@type': 'Question',
+            name: 'How do you start an essay?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Start with one sentence that could only belong to this paper: a line from the text, the result, the case, or the misconception the course already corrected. Then get to the claim. If you do not have a claim yet, write the body first.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'What is a good hook for an essay?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'A good hook earns the next sentence and is specific to this assignment. A rhetorical question, an unused famous quote, and "since the dawn of time" do not. The hook is optional. The thesis is not.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'Should I start an essay with a question?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'Usually no. Answer the prompt with a claim instead of asking a question back. A question you never answer is a stall.',
+            },
+          },
+          {
+            '@type': 'Question',
+            name: 'Can I use AI to write my hook in 2026?',
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: 'On most campuses, feedback on a sentence you wrote is treated differently from generated text. A chatbot hook is easy to spot because it fits any prompt. Rewrite the line yourself.',
+            },
+          },
+        ],
+      });
     } else if (post.slug === 'how-to-write-a-good-introduction') {
       injectJsonLd('blog-post-howto', {
         '@context': 'https://schema.org',

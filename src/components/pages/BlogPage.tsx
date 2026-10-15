@@ -54,6 +54,40 @@ const BlogPage = ({ onNavigate, user, onLogout }: BlogPageProps) => {
     ];
     const color = colors[index % colors.length];
 
+    if (post.slug.includes('what-does-critically-evaluate-mean')) {
+      return (
+        <svg viewBox="0 0 200 140" fill="none" className="w-full h-full">
+          <rect width="200" height="140" fill="#F3EAFF" />
+          <rect x="22" y="32" width="68" height="78" rx="5" fill="white" stroke="#A560E8" strokeWidth="2" />
+          <text x="56" y="50" textAnchor="middle" fontSize="8" fill="#7733B5" fontWeight="bold">FOR</text>
+          <line x1="32" y1="62" x2="80" y2="62" stroke="#C9A0F0" strokeWidth="2" />
+          <line x1="32" y1="74" x2="76" y2="74" stroke="#E9DBFF" strokeWidth="2" />
+          <line x1="32" y1="86" x2="72" y2="86" stroke="#E9DBFF" strokeWidth="2" />
+          <rect x="110" y="32" width="68" height="78" rx="5" fill="white" stroke="#7733B5" strokeWidth="2" />
+          <text x="144" y="50" textAnchor="middle" fontSize="8" fill="#7733B5" fontWeight="bold">AGAINST</text>
+          <line x1="120" y1="62" x2="168" y2="62" stroke="#C9A0F0" strokeWidth="2" />
+          <line x1="120" y1="74" x2="164" y2="74" stroke="#E9DBFF" strokeWidth="2" />
+          <line x1="120" y1="86" x2="158" y2="86" stroke="#E9DBFF" strokeWidth="2" />
+          <rect x="58" y="104" width="84" height="22" rx="11" fill="#A560E8" />
+          <text x="100" y="119" textAnchor="middle" fontSize="9" fill="white" fontWeight="bold">VERDICT</text>
+        </svg>
+      );
+    }
+
+    if (post.slug.includes('how-to-start-an-essay')) {
+      return (
+        <svg viewBox="0 0 200 140" fill="none" className="w-full h-full">
+          <rect width="200" height="140" fill="#F3EAFF" />
+          <rect x="36" y="28" width="128" height="84" rx="6" fill="white" stroke="#A560E8" strokeWidth="2" />
+          <rect x="48" y="42" width="72" height="14" rx="3" fill="#A560E8" />
+          <text x="84" y="52" textAnchor="middle" fontSize="8" fill="white" fontWeight="bold">HOOK</text>
+          <line x1="48" y1="70" x2="148" y2="70" stroke="#E9DBFF" strokeWidth="2" />
+          <line x1="48" y1="82" x2="136" y2="82" stroke="#E9DBFF" strokeWidth="2" />
+          <line x1="48" y1="94" x2="120" y2="94" stroke="#C9A0F0" strokeWidth="2.5" />
+        </svg>
+      );
+    }
+
     if (post.slug.includes('how-to-write-a-good-introduction')) {
       return (
         <svg viewBox="0 0 200 140" fill="none" className="w-full h-full">

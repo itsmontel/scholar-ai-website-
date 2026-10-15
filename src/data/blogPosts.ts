@@ -27,6 +27,36 @@ export const BLOG_DEFAULT_AUTHOR_BIO =
 
 export const blogPostList: BlogPostMeta[] = [
   {
+    slug: 'what-does-critically-evaluate-mean',
+    title: 'What Does Critically Evaluate Mean in an Essay? (2026)',
+    description:
+      'Critically evaluate means judge a claim against named criteria, with evidence, then take a side a marker can mark. Not a summary, not a rant. Weak vs strong examples, and how to tell if you answered the verb.',
+    date: '2026-10-15',
+    author: 'WriteScholar Team',
+    readTime: '11 min read',
+    category: 'Guides',
+    keyTakeaways: [
+      'Critically evaluate is a verdict plus the reasons. Describe and summarise are neighbouring assignments. If a classmate cannot tell what you decided, you have not evaluated.',
+      'Name your criteria, weigh the strongest evidence for and against, then judge. A list of pros and cons with no winner is discuss, not evaluate.',
+      'In 2026 a chatbot will give you a balanced overview that never chooses. That is a tell. Write the judgement yourself, then check whether every paragraph serves it.',
+    ],
+  },
+  {
+    slug: 'how-to-start-an-essay',
+    title: 'How to Start an Essay in 2026',
+    description:
+      'How to start an essay in 2026: a hook that earns the next sentence, then the claim. Weak vs strong openings, what professors skip, and why a chatbot hook is a tell.',
+    date: '2026-10-13',
+    author: 'WriteScholar Team',
+    readTime: '9 min read',
+    category: 'Guides',
+    keyTakeaways: [
+      'A hook is one sentence that earns the next sentence. It is optional. The claim is not. People searching for the perfect introduction are usually stuck on sentence one.',
+      'Start from a concrete piece of this paper: a line from the text, the result, the case, or the misconception the lecture undid. Not from a question you never answer.',
+      'Write the first sentence after you know the claim. In 2026 a generated hook is a tell because it could sit on any prompt.',
+    ],
+  },
+  {
     slug: 'how-to-write-a-good-introduction',
     title: 'How to Write a Good Introduction in 2026',
     description:
