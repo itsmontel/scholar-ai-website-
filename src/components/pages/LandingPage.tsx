@@ -557,19 +557,16 @@ const HERO_STUDY_GAMES_PLAYLIST = [
 
 /**
  * Hero side tile: a feature clip in a white card with a yellow lip,
- * tilted a little and gently drifting. Outer div drifts, inner figure
- * carries the tilt so the two transforms don't fight.
+ * gently drifting.
  */
 const HeroTile = ({
   label,
-  tilt,
   delay = '0s',
   compact = false,
   className = '',
   children,
 }: {
   label: string;
-  tilt: 'left' | 'right';
   delay?: string;
   compact?: boolean;
   className?: string;
@@ -580,7 +577,7 @@ const HeroTile = ({
     style={{ animationDelay: delay }}
   >
     <figure
-      className={`m-0 overflow-hidden bg-white border-[#FFC800] ${compact ? 'rounded-xl border-2 border-b-4' : 'rounded-[20px] border-[3px] border-b-[6px]'} shadow-[0_18px_40px_-18px_rgba(40,0,80,0.6)] ${tilt === 'left' ? '-rotate-2' : 'rotate-2'}`}
+      className={`m-0 overflow-hidden bg-white border-[#FFC800] ${compact ? 'rounded-xl border-2 border-b-4' : 'rounded-[20px] border-[3px] border-b-[6px]'} shadow-[0_18px_40px_-18px_rgba(40,0,80,0.6)]`}
     >
       <div className="relative aspect-[16/10] w-full bg-[#1C1030]">{children}</div>
       <figcaption
@@ -1355,11 +1352,11 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   only, with the tiles in a 2×2 grid under Scholar. */}
               <div className="relative z-10 w-full md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.45fr)_minmax(0,1fr)] md:items-center md:gap-6 lg:gap-12">
 
-                <div className="hidden md:flex flex-col items-start gap-7 lg:gap-9" aria-hidden>
-                  <HeroTile label="Essay Analyzer" tilt="left" className="ml-4 lg:ml-10">
+                <div className="hidden md:flex flex-col items-start gap-14 lg:gap-20" aria-hidden>
+                  <HeroTile label="Essay Analyzer" className="ml-4 lg:ml-10">
                     <img src="/WriterPic.png" alt="" loading="eager" decoding="async" className="absolute inset-0 w-full h-full object-cover object-[88%_8%]" />
                   </HeroTile>
-                  <HeroTile label="Fun Study Games" tilt="right" delay="2.4s">
+                  <HeroTile label="Fun Study Games" delay="2.4s">
                     <HeroStudyGamesVideo />
                   </HeroTile>
                 </div>
@@ -1439,7 +1436,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     </button>
                   </div>
 
-                  <p className="mt-3 sm:mt-4 text-[12px] sm:text-[14px] font-bold text-[#EBDDFB]">
+                  <p className="mt-3 sm:mt-4 text-[11px] sm:text-[12.5px] font-bold text-[#EBDDFB]">
                     Sign up in 30 seconds · 3 free credits · No payment today
                   </p>
 
@@ -1460,26 +1457,26 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
 
                   {/* ─── MOBILE TILE GRID — the same four tiles, 2×2. */}
                   <div className="md:hidden mt-6 grid grid-cols-2 gap-3 w-full max-w-[22rem] mx-auto" aria-hidden>
-                    <HeroTile label="Essay Analyzer" tilt="left" compact>
+                    <HeroTile label="Essay Analyzer" compact>
                       <img src="/WriterPic.png" alt="" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover object-[88%_8%]" />
                     </HeroTile>
-                    <HeroTile label="Notes to Quiz" tilt="right" compact delay="1.2s">
+                    <HeroTile label="Notes to Quiz" compact delay="1.2s">
                       <video src="/hero-quiz.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
                     </HeroTile>
-                    <HeroTile label="Fun Study Games" tilt="right" compact delay="2.4s">
+                    <HeroTile label="Fun Study Games" compact delay="2.4s">
                       <HeroStudyGamesVideo />
                     </HeroTile>
-                    <HeroTile label="Notes to Flashcards" tilt="left" compact delay="3.6s">
+                    <HeroTile label="Notes to Flashcards" compact delay="3.6s">
                       <video src="/hero-flashcards.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
                     </HeroTile>
                   </div>
                 </div>
 
-                <div className="hidden md:flex flex-col items-end gap-7 lg:gap-9" aria-hidden>
-                  <HeroTile label="Notes to Quiz" tilt="right" delay="1.6s" className="mr-4 lg:mr-10">
+                <div className="hidden md:flex flex-col items-end gap-14 lg:gap-20" aria-hidden>
+                  <HeroTile label="Notes to Quiz" delay="1.6s" className="mr-4 lg:mr-10">
                     <video src="/hero-quiz.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
                   </HeroTile>
-                  <HeroTile label="Notes to Flashcards" tilt="left" delay="0.8s">
+                  <HeroTile label="Notes to Flashcards" delay="0.8s">
                     <video src="/hero-flashcards.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
                   </HeroTile>
                 </div>
@@ -1496,12 +1493,12 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 ].map((s, i) => (
                   <div key={s.value} className={`flex items-baseline gap-2 ${i > 0 ? 'sm:border-l-2 sm:border-white/25 sm:pl-8 lg:pl-12' : ''}`}>
                     <span
-                      className="text-xl sm:text-[1.65rem] font-black text-white tabular-nums tracking-tight"
+                      className="text-lg sm:text-[1.35rem] font-black text-white tabular-nums tracking-tight"
                       style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                     >
                       {s.value}
                     </span>
-                    <span className="text-[12px] sm:text-sm font-bold text-[#EBDDFB]">{s.label}</span>
+                    <span className="text-[11px] sm:text-[12.5px] font-bold text-[#EBDDFB]">{s.label}</span>
                   </div>
                 ))}
               </div>
