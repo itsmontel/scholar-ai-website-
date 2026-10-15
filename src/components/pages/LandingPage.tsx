@@ -1407,7 +1407,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                       type="button"
                       onClick={() => onNavigate('signup')}
                       aria-label="Try WriteScholar free for 3 days"
-                      className="group/btn inline-flex items-center justify-center px-7 py-3.5 sm:px-9 sm:py-4 rounded-2xl bg-[#58CC02] hover:bg-[#61E002] text-white font-extrabold text-base sm:text-[19px] border-2 border-b-4 border-[#46A302] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 whitespace-nowrap shadow-[0_8px_28px_-6px_rgba(88,204,2,0.55)] hover:shadow-[0_12px_36px_-6px_rgba(88,204,2,0.75)]"
+                      className="group/btn inline-flex items-center justify-center px-8 py-4 sm:px-10 sm:py-[18px] lg:px-11 lg:py-5 rounded-2xl bg-[#58CC02] hover:bg-[#61E002] text-white font-extrabold text-[17px] sm:text-[20px] lg:text-[21px] border-2 border-b-4 border-[#46A302] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 whitespace-nowrap shadow-[0_8px_28px_-6px_rgba(88,204,2,0.55)] hover:shadow-[0_12px_36px_-6px_rgba(88,204,2,0.75)]"
                       style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                     >
                       Try it free for 3 days
@@ -1420,14 +1420,14 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                       type="button"
                       onClick={() => onNavigate('login')}
                       aria-label="Log in to WriteScholar"
-                      className="inline-flex items-center justify-center px-5 py-2.5 sm:px-8 sm:py-4 rounded-2xl bg-white text-[#6B27A3] font-extrabold text-sm sm:text-[18px] border-2 border-b-4 border-stone-300 hover:bg-stone-50 hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 whitespace-nowrap shadow-[0_8px_28px_-6px_rgba(255,255,255,0.30)]"
+                      className="inline-flex items-center justify-center px-6 py-3 sm:px-9 sm:py-[18px] lg:px-10 lg:py-5 rounded-2xl bg-white text-[#6B27A3] font-extrabold text-[15px] sm:text-[19px] lg:text-[20px] border-2 border-b-4 border-stone-300 hover:bg-stone-50 hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 whitespace-nowrap shadow-[0_8px_28px_-6px_rgba(255,255,255,0.30)]"
                       style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                     >
                       Log in
                     </button>
                   </div>
 
-                  <p className="mt-3 sm:mt-4 text-[11px] sm:text-[12.5px] font-bold text-[#EBDDFB]">
+                  <p className="mt-3 sm:mt-4 text-[10.5px] sm:text-[11.5px] font-bold text-[#EBDDFB]">
                     Sign up in 30 seconds · 3 free credits · No payment today
                   </p>
 
