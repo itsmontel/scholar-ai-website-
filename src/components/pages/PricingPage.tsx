@@ -144,9 +144,13 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
             // New customers start with the 3-day trial (3 credits). The
             // backend drops it for anyone who has trialed or paid before.
             ...(newCustomer && TRIAL_DAYS > 0 ? { trialPeriodDays: TRIAL_DAYS } : {}),
-            ...(campaignPromo
-              ? { promoCode: campaignPromo }
-              : signupPromoCode(newCustomer, billingCycle === 'yearly' ? 'yearly' : 'monthly') ?? {}),
+            // Trial checkout is list price after the trial. Campaign
+            // codes (winback) only attach when there is no trial.
+            ...(!newCustomer || TRIAL_DAYS <= 0
+              ? (campaignPromo
+                  ? { promoCode: campaignPromo }
+                  : signupPromoCode(newCustomer, billingCycle === 'yearly' ? 'yearly' : 'monthly') ?? {})
+              : {}),
           })
         });
 

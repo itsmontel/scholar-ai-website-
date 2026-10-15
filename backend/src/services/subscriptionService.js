@@ -1022,8 +1022,6 @@ const createCheckoutSession = async (
         billingCycle,
         source: 'writescholar'
       },
-      // Allow customers to enter promo codes at checkout
-      allow_promotion_codes: true
     };
 
     if (embedded) {
@@ -1034,44 +1032,42 @@ const createCheckoutSession = async (
       sessionConfig.cancel_url = finalCancelUrl;
     }
 
-    // options.couponId wins over the promo code; if the coupon is missing
-    // or invalid in Stripe we fall through to the promo code below.
-    if (options.couponId) {
-      try {
-        const coupon = await stripe.coupons.retrieve(options.couponId);
-        if (coupon && coupon.valid) {
-          delete sessionConfig.allow_promotion_codes;
-          sessionConfig.discounts = [{ coupon: coupon.id }];
-        } else {
-          console.warn(`Coupon "${options.couponId}" is not valid; falling back to promo code`);
+    // A `once` coupon on a trial subscription hits the first *paid*
+    // invoice, not the $0 trial invoice. Trial checkout is always list
+    // price after the trial. Winback/campaign codes still apply when
+    // there is no trial. No promo-code box on Checkout.
+    if (trialPeriodDays === 0) {
+      if (options.couponId) {
+        try {
+          const coupon = await stripe.coupons.retrieve(options.couponId);
+          if (coupon && coupon.valid) {
+            sessionConfig.discounts = [{ coupon: coupon.id }];
+          } else {
+            console.warn(`Coupon "${options.couponId}" is not valid; falling back to promo code`);
+          }
+        } catch (couponError) {
+          console.warn(`Coupon "${options.couponId}" could not be loaded; falling back to promo code:`, couponError.message);
         }
-      } catch (couponError) {
-        console.warn(`Coupon "${options.couponId}" could not be loaded; falling back to promo code:`, couponError.message);
       }
-    }
 
-    // If a specific promo code is provided in the request, apply it directly
-    if (effectivePromo && !sessionConfig.discounts) {
-      try {
-        // Find the promotion code in Stripe
-        const promoCodes = await stripe.promotionCodes.list({
-          code: effectivePromo,
-          active: true,
-          limit: 1
-        });
+      if (effectivePromo && !sessionConfig.discounts) {
+        try {
+          const promoCodes = await stripe.promotionCodes.list({
+            code: effectivePromo,
+            active: true,
+            limit: 1
+          });
 
-        if (promoCodes.data.length > 0) {
-          // Stripe does not allow both `discounts` and `allow_promotion_codes` simultaneously
-          delete sessionConfig.allow_promotion_codes;
-          sessionConfig.discounts = [{
-            promotion_code: promoCodes.data[0].id
-          }];
-        } else {
-          console.warn(`Promo code "${effectivePromo}" not found or inactive`);
+          if (promoCodes.data.length > 0) {
+            sessionConfig.discounts = [{
+              promotion_code: promoCodes.data[0].id
+            }];
+          } else {
+            console.warn(`Promo code "${effectivePromo}" not found or inactive`);
+          }
+        } catch (promoError) {
+          console.error('Error applying promo code:', promoError);
         }
-      } catch (promoError) {
-        console.error('Error applying promo code:', promoError);
-        // Continue without promo code if there's an error
       }
     }
     

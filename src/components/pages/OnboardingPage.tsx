@@ -119,11 +119,8 @@ interface OnboardingAnalysis {
  * Pairs with FREEMIUM_PREVIEW=false for the hard gate. Current: true.
  */
 const HIDE_END_PAYWALLS = true;
-/* Promo code silently pre-applied to checkout when the user clicks the
-   trial CTA from the hard paywall. NEWCUSTOMER = 50% off the first
-   invoice only ($19.99 → $9.99 first month). The backend strips it for
-   users with prior subscription history. */
-const HARD_PAYWALL_PROMO_CODE = 'NEWCUSTOMER';
+/* Hard-paywall checkout used to auto-apply NEWCUSTOMER (50% off first
+   paid invoice). The front-door offer is the 3-day trial at list price. */
 
 /* ═══════════════════════════════════════════════════════════════
    OnboardingPage — Duolingo-style interactive onboarding
@@ -2028,11 +2025,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
       } catch { /* assume not eligible */ }
       const successUrl = `${window.location.origin}/dashboard?payment=success`;
       const cancelUrl = `${window.location.origin}/onboarding?preview=checkout`;
-      // Soft paywall / hard paywall: auto-apply NEWCUSTOMER when the
-      // welcome discount is the front-door offer (see pricing.ts).
-      const promoCode =
-        signupPromoCode(true, 'monthly')?.promoCode ??
-        (phase === 'paywall-hard' ? HARD_PAYWALL_PROMO_CODE : undefined);
+      const promoCode = signupPromoCode(true, 'monthly')?.promoCode;
       const res = await fetch(`${API_URL}/subscriptions/create-checkout-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -2147,8 +2140,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
   };
 
   /* ─── Start checkout → Stripe-hosted Checkout ───
-     Front-door offer is 50% off first month (NEWCUSTOMER) with no free
-     trial when TRIAL_DAYS === 0. See src/config/pricing.ts. */
+     Front-door offer is the 3-day trial, then list price. See pricing.ts. */
   const handleSubscribeChoice = async () => {
     if (startingTrial) return;
     setTrialError(null);
@@ -4301,11 +4293,11 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                 Last chance{firstName ? `, ${firstName}` : ''}!
               </span>
               <h1 className="text-2xl sm:text-3xl lg:text-[2.25rem] font-extrabold text-[#3C3C3C] dark:text-stone-50 leading-tight" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                Don&apos;t miss out on{' '}
-                <span className="text-[#A560E8]">50% off Pro</span>
+                Don&apos;t miss your{' '}
+                <span className="text-[#A560E8]">{TRIAL_DAYS}-day free trial</span>
               </h1>
               <p className="mt-3 text-base sm:text-lg text-stone-600 dark:text-stone-400 font-bold leading-snug max-w-md">
-                An exclusive <em className="not-italic text-[#A560E8]">50% off</em> — only on this screen.
+                ${STANDARD_MONTHLY_PRICE.pro}/mo after the trial. Cancel anytime.
               </p>
             </div>
 
@@ -4397,29 +4389,19 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
               </ul>
             </div>
 
-            {/* PROMO BANNER — 50%-off code is silently pre-applied to
-                the checkout session via HARD_PAYWALL_PROMO_CODE. The
-                copy below tells the user the code is already on their
-                order so they don't have to type anything at Stripe. */}
             <div className="relative rounded-2xl border-2 border-b-4 border-[#8A48C7] bg-[#F3EAFF] dark:bg-[#C9A0F0]/10 p-4 sm:p-5 mb-4 overflow-hidden">
               <div className="pointer-events-none absolute -top-10 -right-10 w-28 h-28 rounded-full bg-[#C9A0F0]/30 blur-2xl" aria-hidden />
               <div className="relative flex items-center gap-3 sm:gap-4">
-                <span aria-hidden className="text-2xl sm:text-3xl shrink-0">🎟️</span>
+                <span aria-hidden className="text-2xl sm:text-3xl shrink-0">✦</span>
                 <div className="flex-1 min-w-0 text-left">
                   <p className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#7733B5]">
-                    <span className="inline-flex items-center gap-1">
-                      <span aria-hidden>✓</span> Code applied to your checkout
-                    </span>
+                    {TRIAL_DAYS} days free · then full price
                   </p>
                   <p className="mt-0.5 text-sm sm:text-base font-extrabold text-[#3C3C3C] dark:text-stone-100 leading-snug" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                    Save <span className="text-[#7733B5]">50%</span> on your first monthly plan after the trial
+                    ${STANDARD_MONTHLY_PRICE.pro}/mo after the trial. No coupon.
                   </p>
                   <p className="mt-1 text-[11px] sm:text-xs font-bold text-stone-700 dark:text-stone-300">
-                    Code{' '}
-                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-white dark:bg-stone-900 border-2 border-b-[3px] border-[#8A48C7] text-[#7733B5] font-extrabold tabular-nums tracking-wider">
-                      NEWCUSTOMER
-                    </span>{' '}
-                    is already on your order. $19.99/mo becomes {flashOffer.active ? `$${FLASH_FIRST_MONTH_PRICE}` : '$9.99'} for your first month — nothing to type in.
+                    $0 today. Then Pro at list price. Cancel anytime before it renews.
                   </p>
                 </div>
               </div>
@@ -4433,9 +4415,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                 Upgrade to Pro
               </p>
               <p className="relative mt-1 text-sm font-bold text-stone-600 dark:text-stone-400">
-                <span className="line-through decoration-2 decoration-[#A560E8] text-stone-400">$19.99/mo</span>{' '}
-                <span className="text-[#7733B5] font-extrabold">${flashOffer.active ? FLASH_FIRST_MONTH_PRICE : '9.99'}/mo</span>{' '}
-                <span className="text-[#7733B5] font-extrabold">({flashOffer.active ? '75% off applied' : '50% off applied'})</span>
+                $0 today · then <span className="text-[#7733B5] font-extrabold">${STANDARD_MONTHLY_PRICE.pro}/mo</span>
               </p>
               <button
                 type="button"
