@@ -557,16 +557,19 @@ const HERO_STUDY_GAMES_PLAYLIST = [
 
 /**
  * Hero side tile: a feature clip in a white card with a yellow lip and
- * a warm yellow glow, gently drifting.
+ * a warm yellow glow, tilted a little and gently drifting. Outer div
+ * drifts, inner figure carries the tilt so the two transforms don't fight.
  */
 const HeroTile = ({
   label,
+  tilt,
   delay = '0s',
   compact = false,
   className = '',
   children,
 }: {
   label: string;
+  tilt: 'left' | 'right';
   delay?: string;
   compact?: boolean;
   className?: string;
@@ -577,7 +580,7 @@ const HeroTile = ({
     style={{ animationDelay: delay }}
   >
     <figure
-      className={`m-0 overflow-hidden bg-white border-[#FFC800] ${compact ? 'rounded-xl border-2 border-b-4 shadow-[0_10px_22px_-8px_rgba(0,0,0,0.35)]' : 'rounded-[20px] border-[3px] border-b-[6px] shadow-[0_20px_46px_-12px_rgba(255,200,0,0.55)]'}`}
+      className={`m-0 overflow-hidden bg-white border-[#FFC800] ${compact ? 'rounded-xl border-2 border-b-4 shadow-[0_10px_22px_-8px_rgba(0,0,0,0.35)]' : 'rounded-[20px] border-[3px] border-b-[6px] shadow-[0_20px_46px_-12px_rgba(255,200,0,0.55)]'} ${tilt === 'left' ? '-rotate-[3deg]' : 'rotate-[3deg]'}`}
     >
       <div className="relative aspect-[16/10] w-full bg-[#1C1030]">{children}</div>
       <figcaption
@@ -1302,11 +1305,13 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           aria-hidden
         >
           {/* Base — purple gradient, light at the top to deep at the
-              bottom. Two flat circles in between shades sit behind
-              Scholar: three purples in all. */}
+              bottom. Two flat circles, anchored on the CTA below, sit
+              in between shades behind Scholar: three purples in all. */}
           <div className="absolute inset-0 bg-gradient-to-b from-[#A863EA] via-[#8E48CF] via-[38%] to-[#5E1F96] dark:from-[#4A1B70] dark:via-[#3A1457] dark:to-[#2A0E40]" />
-          <div className="absolute left-1/2 -translate-x-1/2 top-[560px] md:top-[470px] lg:top-[500px] h-[1100px] w-[1100px] rounded-full bg-[#8A45C8] dark:bg-[#3E1660]" />
-          <div className="absolute left-1/2 -translate-x-1/2 top-[680px] md:top-[590px] lg:top-[620px] h-[760px] w-[760px] rounded-full bg-[#9652D3] dark:bg-[#47196E]" />
+          {/* Clipped by this layer, so each disc reads as a semicircle
+              that ends with the hero instead of spilling onto the next section. */}
+          <div className="absolute left-1/2 -translate-x-1/2 top-[400px] md:top-[310px] lg:top-[340px] h-[1100px] w-[1100px] rounded-full bg-[#8A45C8] dark:bg-[#3E1660]" />
+          <div className="absolute left-1/2 -translate-x-1/2 top-[520px] md:top-[430px] lg:top-[460px] h-[760px] w-[760px] rounded-full bg-[#9652D3] dark:bg-[#47196E]" />
 
           {/* ─── FADE INTO THE NEXT SECTION ─────────────────────────
               Eases the purple into #E7D6F3, the exact lilac the
@@ -1314,12 +1319,30 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               25% brand-purple wash; dark: #2B123C), so there is no
               cream band or border line at the seam. */}
           <div
-            className="absolute inset-x-0 bottom-0 h-44 sm:h-52 lg:h-56 pointer-events-none bg-[linear-gradient(to_bottom,rgba(231,214,243,0)_0%,rgba(231,214,243,0.08)_18%,rgba(231,214,243,0.28)_38%,rgba(231,214,243,0.58)_60%,rgba(231,214,243,0.85)_80%,#E7D6F3_100%)] dark:bg-[linear-gradient(to_bottom,rgba(43,18,60,0)_0%,rgba(43,18,60,0.3)_40%,rgba(43,18,60,0.8)_80%,#2B123C_100%)]"
+            className="absolute inset-x-0 bottom-0 h-24 sm:h-28 lg:h-32 pointer-events-none bg-[linear-gradient(to_bottom,rgba(231,214,243,0)_0%,rgba(231,214,243,0)_40%,rgba(231,214,243,0.18)_62%,rgba(231,214,243,0.55)_82%,#E7D6F3_100%)] dark:bg-[linear-gradient(to_bottom,rgba(43,18,60,0)_0%,rgba(43,18,60,0)_40%,rgba(43,18,60,0.35)_75%,#2B123C_100%)]"
             aria-hidden
           />
         </div>
 
-        <div className="relative z-10 flex flex-col items-center justify-start px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 lg:pt-4 pb-8 sm:pb-0 min-w-0">
+        <div className="relative z-10 flex flex-col items-center justify-start px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 lg:pt-20 pb-4 sm:pb-0 min-w-0">
+          {/* Absolutely placed so it sits in the top padding and does
+              not push the headline, tiles, or CTA down. */}
+          <div className="absolute left-1/2 top-3 sm:top-4 z-20 -translate-x-1/2 inline-flex items-center gap-1.5 sm:gap-2 rounded-full border-2 border-b-[3px] border-stone-300 bg-white pl-1 pr-2.5 sm:pr-3 py-0.5 sm:py-1 shadow-[0_8px_20px_-8px_rgba(0,0,0,0.32)]">
+            <span
+              className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-full border-2 border-b-[3px] border-[#46A302] bg-[#58CC02] shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]"
+              aria-hidden
+            >
+              <svg className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
+              </svg>
+            </span>
+            <span
+              className="text-[10.5px] sm:text-[12px] font-extrabold text-stone-800 whitespace-nowrap tracking-tight"
+              style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+            >
+              Trusted by <span className="text-[#58CC02] tabular-nums">50,000+</span> students worldwide
+            </span>
+          </div>
           <div className="w-full min-w-0 max-w-[1400px] xl:mx-auto">
             {/* ─── REDESIGNED HERO ──────────────────────────────────
                 Knowunity-style centered layout: single H1 + CTA in the
@@ -1335,74 +1358,80 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 so the section's downstream closing tags stay balanced
                 — that wrapper used to host the lg:grid. */}
             <div className="flex flex-col items-stretch w-full">
-            <div className="relative w-full mx-auto px-0 sm:px-2 pt-2 pb-4 sm:pt-3 sm:pb-4">
+            <div className="relative w-full mx-auto px-0 sm:px-2 pt-0 pb-2 sm:pb-3">
 
-              {/* ─── THREE COLUMNS (md+) ─────────────────────────────
-                  Four feature tiles flank the centre column, two per
-                  side, gently floating. Phones get the centre column
-                  only, with the tiles in a 2×2 grid under Scholar. */}
-              <div className="relative z-10 w-full md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.45fr)_minmax(0,1fr)] md:items-center md:gap-6 lg:gap-12">
-
-                <div className="hidden md:flex flex-col items-start gap-14 lg:gap-20" aria-hidden>
-                  <HeroTile label="Essay Analyzer" className="ml-4 lg:ml-10">
+              {/* Four feature tiles sit in the corners so they don't
+                  stretch the hero. Phones use the 2×2 grid under Scholar. */}
+              <div className="hidden md:block pointer-events-none" aria-hidden>
+                <div className="absolute left-0 lg:left-2 top-2 lg:top-3 w-[13rem] lg:w-[15rem]">
+                  <HeroTile label="Essay Analyzer" tilt="left">
                     <img src="/WriterPic.png" alt="" loading="eager" decoding="async" className="absolute inset-0 w-full h-full object-cover object-[88%_8%]" />
                   </HeroTile>
-                  <HeroTile label="Fun Study Games" delay="2.4s">
+                </div>
+                <div className="absolute left-4 lg:left-8 top-[44%] lg:top-[46%] w-[13rem] lg:w-[15rem]">
+                  <HeroTile label="Fun Study Games" tilt="right" delay="2.4s">
                     <HeroStudyGamesVideo />
                   </HeroTile>
                 </div>
+                <div className="absolute right-0 lg:right-2 top-2 lg:top-3 w-[13rem] lg:w-[15rem]">
+                  <HeroTile label="Notes to Quiz" tilt="right" delay="1.6s">
+                    <video src="/hero-quiz.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
+                  </HeroTile>
+                </div>
+                <div className="absolute right-4 lg:right-8 top-[44%] lg:top-[46%] w-[13rem] lg:w-[15rem]">
+                  <HeroTile label="Notes to Flashcards" tilt="left" delay="0.8s">
+                    <video src="/hero-flashcards.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
+                  </HeroTile>
+                </div>
+              </div>
 
-                {/* ─── CENTRE: trust pill, headline, CTA, Scholar ─── */}
-                <div className="relative flex flex-col items-center text-center w-full mx-auto pt-4 pb-1 sm:pt-6 md:pt-0 opacity-0 animate-hero-card-enter">
-                  {/* Chunky Duolingo-style white pill: thick bottom
-                      border for a 3D lip, bold copy, green users chip. */}
-                  <div className="mb-4 sm:mb-5 inline-flex items-center gap-2 sm:gap-2.5 rounded-full border-2 border-b-[4px] border-stone-300 bg-white pl-1 pr-3.5 sm:pr-4 py-1 sm:py-1.5 shadow-[0_8px_20px_-8px_rgba(0,0,0,0.32)]">
+              {/* Headline sits above the tiles so it can be large.
+                  The centre column is too narrow for this title. */}
+              <div className="relative z-10 flex flex-col items-center text-center w-full pt-1 sm:pt-2 md:pt-0 opacity-0 animate-hero-card-enter">
+                {/* Two lines. Line 1 stays one line; line 2 is the grade. */}
+                <h1
+                  className="w-full font-black tracking-[-0.035em] leading-[0.98] text-white"
+                  style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+                >
+                  <span className="block whitespace-nowrap text-[1.85rem] min-[390px]:text-[2rem] sm:text-[2.75rem] md:text-[3rem] lg:text-[3.55rem] xl:text-[4.15rem]">
+                    Turn your grades from
+                  </span>
+                  <span className="relative mt-1 sm:mt-2 inline-block whitespace-nowrap text-[#FFD84D] text-[2.55rem] min-[390px]:text-[2.8rem] sm:text-[3.7rem] md:text-[4rem] lg:text-[4.7rem] xl:text-[5.4rem]">
+                    B to{' '}
                     <span
-                      className="flex h-6 w-6 sm:h-7 sm:w-7 shrink-0 items-center justify-center rounded-full border-2 border-b-[3px] border-[#46A302] bg-[#58CC02] shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]"
+                      className="relative inline-flex items-center justify-center align-baseline rounded-2xl bg-[#58CC02] text-white font-extrabold leading-none w-[0.95em] h-[0.95em] border-2 border-b-[5px] border-[#46A302] motion-safe:animate-[hero-a-wiggle_4.5s_ease-in-out_infinite] shadow-[0_10px_30px_-4px_rgba(88,204,2,0.75)] ring-4 ring-white/20"
+                      style={{ verticalAlign: '-0.06em' }}
                       aria-hidden
                     >
-                      <svg className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-white" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
-                      </svg>
+                      A
+                      <span className="absolute -top-1.5 -right-1.5 text-[0.28em] text-[#FFC800] motion-safe:animate-pulse" aria-hidden>
+                        ✦
+                      </span>
                     </span>
-                    <span
-                      className="text-[12px] sm:text-[14px] font-extrabold text-stone-800 whitespace-nowrap tracking-tight"
-                      style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+                    <span className="sr-only">A with WriteScholar</span>
+                    <svg
+                      className="absolute left-0 -bottom-2 sm:-bottom-3 w-full h-3 sm:h-5 text-[#FFC800]"
+                      viewBox="0 0 300 18"
+                      preserveAspectRatio="none"
+                      aria-hidden
                     >
-                      Trusted by <span className="text-[#58CC02] tabular-nums">50,000+</span> students worldwide
-                    </span>
-                  </div>
+                      <path d="M4 12 C 80 2, 200 2, 296 10" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
+                    </svg>
+                  </span>
+                </h1>
+                <h2
+                  className="mt-7 sm:mt-8 max-w-[38rem] text-base sm:text-lg lg:text-[1.15rem] font-semibold text-white/90 leading-snug"
+                  style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+                >
+                  <span className="font-extrabold text-[#FFC800]">WriteScholar</span> the all-in-one AI study system to{' '}
+                  <span className="font-extrabold text-white">write better essays</span>,{' '}
+                  <span className="font-extrabold text-white">study smarter</span>, and{' '}
+                  <span className="font-extrabold text-[#FFC800]">get higher grades.</span>
+                </h2>
+              </div>
 
-                  {/* ─── HEADLINE — the outcome, not the features. Works
-                      for every student whatever grade they have now. */}
-                  <h1
-                    className="text-[2.6rem] xs:text-[2.9rem] sm:text-[3.4rem] lg:text-[3.9rem] xl:text-[4.3rem] font-black tracking-[-0.03em] leading-none text-white"
-                    style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                  >
-                    <span className="block">Better grades.</span>
-                    <span className="relative inline-block mt-1 text-[#FFD84D]">
-                      Less stress.
-                      <svg
-                        className="absolute left-0 -bottom-3 sm:-bottom-4 w-full h-3 sm:h-4 text-[#FFC800]"
-                        viewBox="0 0 300 18"
-                        preserveAspectRatio="none"
-                        aria-hidden
-                      >
-                        <path d="M4 12 C 80 2, 200 2, 296 10" fill="none" stroke="currentColor" strokeWidth="6" strokeLinecap="round" />
-                      </svg>
-                    </span>
-                  </h1>
-
-                  <h2
-                    className="mt-5 sm:mt-6 max-w-[38rem] text-base sm:text-lg lg:text-[1.15rem] font-semibold text-white/90 leading-snug"
-                    style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                  >
-                    The all-in-one AI study system to{' '}
-                    <span className="font-extrabold text-white">write better essays</span>,{' '}
-                    <span className="font-extrabold text-white">study smarter</span>, and{' '}
-                    <span className="font-extrabold text-[#FFC800]">get higher grades.</span>
-                  </h2>
-
+              {/* ─── CENTRE: CTA, Scholar, stats ─── */}
+              <div className="relative z-10 flex flex-col items-center text-center w-full mx-auto pb-1 opacity-0 animate-hero-card-enter">
                   {/* ─── CTA + LOGIN ROW — green trial button pops on the
                       purple; white "Log in" keeps the Duolingo lip. */}
                   <div className="mt-5 sm:mt-6 flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
@@ -1430,13 +1459,13 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     </button>
                   </div>
 
-                  <p className="mt-3 sm:mt-4 text-[10.5px] sm:text-[11.5px] font-bold text-[#EBDDFB]">
+                  <p className="mt-2 sm:mt-2.5 text-[10.5px] sm:text-[11.5px] font-bold text-[#EBDDFB]">
                     Sign up in 30 seconds · 3 free credits · No payment today
                   </p>
 
                   {/* ─── SCHOLAR — celebrating on a white disc inside a
                       pulsing ring, over the inner purple circle. */}
-                  <div className="relative mt-3 grid place-items-center w-[136px] h-[136px] sm:w-[144px] sm:h-[144px]" aria-hidden>
+                  <div className="relative mt-2 grid place-items-center w-[136px] h-[136px] sm:w-[144px] sm:h-[144px]" aria-hidden>
                     <span className="absolute inset-[3%] rounded-full border-4 border-white/35 landing-scholar-ring" />
                     <span className="absolute inset-[9%] rounded-full bg-white border-b-[5px] border-[#E4D2F8] shadow-[0_14px_30px_-10px_rgba(40,0,80,0.55)]" />
                     <img
@@ -1449,55 +1478,42 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     />
                   </div>
 
+                  {/* ─── STATS STRIP — sits under Scholar so it stays
+                      on the same screen as the mascot. */}
+                  <div className="relative z-10 mt-2 sm:mt-2.5 flex w-max flex-nowrap items-center justify-center gap-x-3 sm:gap-x-5">
+                    {[
+                      { value: '50,000+', label: 'students worldwide' },
+                      { value: '91%', label: 'report better grades' },
+                      { value: '60 sec', label: 'to your first grade' },
+                    ].map((s, i) => (
+                      <div key={s.value} className={`flex shrink-0 items-baseline gap-1.5 whitespace-nowrap ${i > 0 ? 'border-l-2 border-white/25 pl-3 sm:pl-5' : ''}`}>
+                        <span
+                          className="text-[15px] sm:text-[1.15rem] font-black text-white tabular-nums tracking-tight"
+                          style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+                        >
+                          {s.value}
+                        </span>
+                        <span className="text-[10px] sm:text-[11.5px] font-bold text-[#EBDDFB] whitespace-nowrap">{s.label}</span>
+                      </div>
+                    ))}
+                  </div>
+
                   {/* ─── MOBILE TILE GRID — the same four tiles, 2×2. */}
-                  <div className="md:hidden mt-6 grid grid-cols-2 gap-3 w-full max-w-[22rem] mx-auto" aria-hidden>
-                    <HeroTile label="Essay Analyzer" compact>
+                  <div className="md:hidden mt-4 grid grid-cols-2 gap-3 w-full max-w-[22rem] mx-auto" aria-hidden>
+                    <HeroTile label="Essay Analyzer" tilt="left" compact>
                       <img src="/WriterPic.png" alt="" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover object-[88%_8%]" />
                     </HeroTile>
-                    <HeroTile label="Notes to Quiz" compact delay="1.2s">
+                    <HeroTile label="Notes to Quiz" tilt="right" compact delay="1.2s">
                       <video src="/hero-quiz.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
                     </HeroTile>
-                    <HeroTile label="Fun Study Games" compact delay="2.4s">
+                    <HeroTile label="Fun Study Games" tilt="right" compact delay="2.4s">
                       <HeroStudyGamesVideo />
                     </HeroTile>
-                    <HeroTile label="Notes to Flashcards" compact delay="3.6s">
+                    <HeroTile label="Notes to Flashcards" tilt="left" compact delay="3.6s">
                       <video src="/hero-flashcards.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
                     </HeroTile>
                   </div>
-                </div>
-
-                <div className="hidden md:flex flex-col items-end gap-14 lg:gap-20" aria-hidden>
-                  <HeroTile label="Notes to Quiz" delay="1.6s" className="mr-4 lg:mr-10">
-                    <video src="/hero-quiz.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
-                  </HeroTile>
-                  <HeroTile label="Notes to Flashcards" delay="0.8s">
-                    <video src="/hero-flashcards.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
-                  </HeroTile>
-                </div>
               </div>
-
-              {/* ─── STATS STRIP — proof in numbers. Only claims already
-                  made elsewhere on the site (50K+ students, 91% better
-                  grades, 60-second analysis). */}
-              <div className="relative z-10 mt-5 sm:mt-3 flex flex-wrap items-center justify-center gap-x-8 sm:gap-x-12 gap-y-3">
-                {[
-                  { value: '50,000+', label: 'students worldwide' },
-                  { value: '91%', label: 'report better grades' },
-                  { value: '60 sec', label: 'to your first grade' },
-                ].map((s, i) => (
-                  <div key={s.value} className={`flex items-baseline gap-2 ${i > 0 ? 'sm:border-l-2 sm:border-white/25 sm:pl-8 lg:pl-12' : ''}`}>
-                    <span
-                      className="text-lg sm:text-[1.35rem] font-black text-white tabular-nums tracking-tight"
-                      style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                    >
-                      {s.value}
-                    </span>
-                    <span className="text-[11px] sm:text-[12.5px] font-bold text-[#EBDDFB]">{s.label}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="h-6 sm:h-5" aria-hidden />
 
               {/* ─── FEATURE ICONS ROW — bottom of hero (Knowunity-style)
                   Each entry is a custom SVG illustration (NOT a generic
@@ -1505,7 +1521,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   border, no background — pure icon + text floating on
                   the purple field. Custom-drawn so the hero feels unique
                   to WriteScholar instead of generic, per user brief. */}
-              <div className="relative z-10 w-full max-w-5xl mx-auto -mt-3 sm:-mt-2 pb-24 sm:pb-32 px-4">
+              <div className="relative z-10 w-full max-w-5xl mx-auto mt-1 sm:mt-1.5 pb-16 sm:pb-20 lg:pb-24 px-4">
                 <div className="flex flex-wrap items-start justify-center gap-x-5 gap-y-4 sm:gap-x-8 sm:gap-y-5">
                   {[
                     {
