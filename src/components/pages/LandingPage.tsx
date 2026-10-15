@@ -1440,18 +1440,18 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     Sign up in 30 seconds · 3 free credits · No payment today
                   </p>
 
-                  {/* ─── SCHOLAR — celebrating inside a pulsing ring, sat
-                      over the inner purple circle of the background. */}
-                  <div className="relative mt-3 grid place-items-center w-[160px] h-[160px] sm:w-[170px] sm:h-[170px]" aria-hidden>
+                  {/* ─── SCHOLAR — celebrating on a white disc inside a
+                      pulsing ring, over the inner purple circle. */}
+                  <div className="relative mt-3 grid place-items-center w-[136px] h-[136px] sm:w-[144px] sm:h-[144px]" aria-hidden>
                     <span className="absolute inset-[3%] rounded-full border-4 border-white/35 landing-scholar-ring" />
-                    <span className="absolute inset-[11%] rounded-full bg-white/[0.12]" />
+                    <span className="absolute inset-[9%] rounded-full bg-white border-b-[5px] border-[#E4D2F8] shadow-[0_14px_30px_-10px_rgba(40,0,80,0.55)]" />
                     <img
                       src="/mascot-celebrating.webp"
                       alt=""
                       width={180}
                       height={180}
                       decoding="async"
-                      className="relative w-[140px] h-[140px] sm:w-[152px] sm:h-[152px] object-contain"
+                      className="relative w-[104px] h-[104px] sm:w-[110px] sm:h-[110px] object-contain"
                     />
                   </div>
 
