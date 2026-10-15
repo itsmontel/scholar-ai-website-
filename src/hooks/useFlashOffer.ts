@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { FLASH_OFFER_ENABLED } from '../config/pricing';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -38,7 +39,8 @@ const pad = (n: number) => String(n).padStart(2, '0');
  * Live countdown for the 24-hour $4.99 Pro offer. `active` is true only
  * while the backend-issued deadline is in the future.
  */
-export function useFlashOffer(enabled = true): FlashOffer {
+export function useFlashOffer(requested = true): FlashOffer {
+  const enabled = requested && FLASH_OFFER_ENABLED;
   const [endsAt, setEndsAt] = useState<number | null>(null);
   const [now, setNow] = useState(() => Date.now());
 

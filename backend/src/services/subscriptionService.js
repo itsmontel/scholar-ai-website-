@@ -770,6 +770,11 @@ const hasEverSubscribed = async (userId) => {
 // so it cannot be typed in after the window closes.
 const FLASH_OFFER_HOURS = Number(process.env.FLASH_OFFER_HOURS) > 0 ? Number(process.env.FLASH_OFFER_HOURS) : 24;
 const FLASH_COUPON_ID = (process.env.STRIPE_FLASH_COUPON_ID || 'FIRSTDAY499').trim();
+// Kill switch. Retired 2026-10-13: the 24h $4.99 deal is gone; new customers
+// get the NEWCUSTOMER 50% first month instead. With this false the checkout
+// route never applies the flash coupon (it falls back to the welcome code) and
+// /trial-eligibility reports no deadline, so every countdown in the UI hides.
+const FLASH_OFFER_ENABLED = process.env.FLASH_OFFER_ENABLED === 'true';
 const FLASH_OFFER_MS = FLASH_OFFER_HOURS * 60 * 60 * 1000;
 const PAID_SUBSCRIPTION_STATUSES = ['active', 'trialing', 'canceled', 'cancelled', 'past_due', 'paused', 'unpaid'];
 
@@ -830,6 +835,7 @@ const ensureFlashOfferStarted = async (user) => {
 
 /** Deadline (ms epoch) of the user's flash offer, or null when they are not eligible right now. */
 const getFlashOfferEndsAt = async (user) => {
+  if (!FLASH_OFFER_ENABLED) return null;
   if (!user?.id) return null;
   if (isPaidSubscriptionTier(user.subscription_plan)) return null;
   try {

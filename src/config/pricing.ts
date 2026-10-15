@@ -48,6 +48,13 @@ export const STANDARD_MONTHLY_PRICE: Record<string, number> = { pro: 19.99, prem
  * $15 off once); the client only displays the deadline returned from
  * /subscriptions/trial-eligibility.
  */
+/**
+ * Retired 2026-10-13. New customers get 50% off the first month
+ * (WELCOME_PROMO_CODE) and nothing else. Mirrors FLASH_OFFER_ENABLED in
+ * backend/src/services/subscriptionService.js; this copy hides the UI even
+ * if the frontend ships before the backend does.
+ */
+export const FLASH_OFFER_ENABLED = false;
 export const FLASH_FIRST_MONTH_PRICE = 4.99;
 export const FLASH_OFFER_HOURS = 24;
 
