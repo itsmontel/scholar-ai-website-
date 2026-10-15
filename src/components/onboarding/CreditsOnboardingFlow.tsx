@@ -9,7 +9,6 @@ import {
   TRIAL_CREDITS,
   PRO_MONTHLY_CREDITS,
   CREDIT_CAP,
-  LIFE_SHORT,
   bubbleFor,
   empathyFor,
   goalLine,
@@ -19,7 +18,6 @@ import {
   planHeadline,
   WELCOME_HEADLINE,
   welcomeGreeting,
-  lifeLineFor,
   outcomesFor,
   outcomeScholar,
   pathFor,
@@ -37,7 +35,7 @@ import { STANDARD_MONTHLY_PRICE, TRIAL_DAYS } from '../../config/pricing';
      1–8    Questions, Scholar replies to every answer
      9      "We hear you": their answers played back
      10–11  Outcomes, chosen by what's weighing on them
-     12     Their week now vs. with WriteScholar
+     12     (skipped) week comparison — didn't fit the flow
      13     How did you find us?
      14     Building your plan
      15     Plan + 3 free credits → start the trial
@@ -123,7 +121,10 @@ export default function CreditsOnboardingFlow({
     if (typeof initialStep === 'number') return initialStep;
     const s = saved?.step;
     // Never resume mid-animation; the building screen restarts itself.
-    return typeof s === 'number' && s >= 0 && s <= S.PLAN ? (s === S.BUILD ? S.PLAN : s) : 0;
+    if (typeof s !== 'number' || s < 0 || s > S.PLAN) return 0;
+    if (s === S.BUILD) return S.PLAN;
+    if (s === S.LIFE) return S.SOURCE;
+    return s;
   });
   const [buildTick, setBuildTick] = useState(0);
   const reportedRef = useRef(false);
@@ -148,14 +149,19 @@ export default function CreditsOnboardingFlow({
       setBuildTick((t) => {
         if (t >= 4) {
           window.clearInterval(id);
-          setStep(S.PLAN);
           return t;
         }
         return t + 1;
       });
-    }, 700);
+    }, 1300);
     return () => window.clearInterval(id);
   }, [step]);
+
+  useEffect(() => {
+    if (step !== S.BUILD || buildTick < 4) return;
+    const id = window.setTimeout(() => setStep(S.PLAN), 1600);
+    return () => window.clearTimeout(id);
+  }, [step, buildTick]);
 
   const q = questionAt(step);
   const path = pathFor(answers);
@@ -171,9 +177,19 @@ export default function CreditsOnboardingFlow({
       reportedRef.current = true;
       onAnswersReady(answers);
     }
+    if (step === S.OUT_B) {
+      go(S.SOURCE);
+      return;
+    }
     go(step + 1);
   };
-  const back = () => go(step === S.PLAN ? S.SOURCE : step - 1);
+  const back = () => {
+    if (step === S.SOURCE) {
+      go(S.OUT_B);
+      return;
+    }
+    go(step === S.PLAN ? S.SOURCE : step - 1);
+  };
 
   const pick = (question: OnboardingQuestion, id: string) => {
     setAnswers((prev) => {
@@ -194,7 +210,16 @@ export default function CreditsOnboardingFlow({
 
   const showTopBar = step !== S.WELCOME && step !== S.BUILD;
   const scholar = scholarForStep(step, answers);
-  const nextScholar = step < S.PLAN ? scholarForStep(step + 1, answers) : null;
+  const following = step === S.OUT_B ? S.SOURCE : step + 1;
+  const nextScholar = step < S.PLAN ? scholarForStep(following, answers) : null;
+  const [desktop, setDesktop] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)');
+    const sync = () => setDesktop(mq.matches);
+    sync();
+    mq.addEventListener('change', sync);
+    return () => mq.removeEventListener('change', sync);
+  }, []);
 
   return (
     <div className="relative min-h-[100dvh] flex flex-col bg-gradient-to-br from-[#FAF7FF] via-[#FBF7FF] to-[#F3EAFF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 text-[#3C3C3C] dark:text-stone-100" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
@@ -342,7 +367,7 @@ export default function CreditsOnboardingFlow({
               <Tag>{o.tag}</Tag>
               <h1 className="-mt-0.5 text-[27px] lg:text-[34px] leading-[1.12] font-black tracking-tight">{o.title}</h1>
               <div className="wso-card-in rounded-2xl overflow-hidden border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white aspect-[16/10]">
-                <video src={o.video} autoPlay muted loop playsInline aria-label={o.videoLabel} className="w-full h-full object-cover object-left-top" />
+                <video key={desktop && o.desktopVideo ? o.desktopVideo : o.video} src={desktop && o.desktopVideo ? o.desktopVideo : o.video} autoPlay muted loop playsInline aria-label={o.videoLabel} className="w-full h-full object-cover object-left-top" />
               </div>
               {o.showsScore && (
                 <div className="wso-card-in flex items-center gap-3 px-3.5 py-3 rounded-2xl bg-white dark:bg-stone-900 border-2 border-[#E5E5E5] dark:border-stone-700" style={{ animationDelay: '0.2s' }}>
@@ -373,40 +398,30 @@ export default function CreditsOnboardingFlow({
           );
         })()}
 
-        {step === S.LIFE && (() => {
-          const picks = answers.life?.length ? answers.life : ['friends', 'sleep'];
-          const before = ['Essay', 'Essay', 'Cram', 'Essay', 'Stress', 'Cram', 'Essay'];
-          const after: (number | 'study')[] = ['study', 0, 'study', 1, 0, 1, 'study'];
-          const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+        {step === S.BUILD && (() => {
+          const built = buildTick >= 4;
           return (
-            <Screen stage={{ src: scholar, bubble: lifeLineFor(answers) }} footer={<PrimaryButton onClick={next}>I want that</PrimaryButton>}>
-              <Tag>The real outcome</Tag>
-              <h1 className="-mt-0.5 text-[27px] lg:text-[34px] leading-[1.12] font-black tracking-tight">Better grades. And your evenings back.</h1>
-              <p className="text-[15px] lg:text-[16px] leading-relaxed font-semibold text-stone-500 dark:text-stone-400">No more rewriting the same essay at 2am, guessing if it&apos;s good enough.</p>
-              <Week title="Your week now" days={days} cells={before.map((l) => ({ label: l, tone: 'grey' as const }))} />
-              <div className="flex justify-center -my-1" aria-hidden>
-                <svg className="w-6 h-6 text-[#A560E8]" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14M6 13l6 6 6-6" /></svg>
-              </div>
-              <Week
-                highlight
-                title="Your week with WriteScholar"
-                days={days}
-                cells={after.map((p) => (p === 'study'
-                  ? { label: '20 min', tone: 'purple' as const }
-                  : { label: LIFE_SHORT[picks[p % picks.length]] ?? 'Free', tone: 'gold' as const }))}
-              />
-              <p className="lg:hidden text-center text-[14px] font-extrabold leading-snug text-[#4B4B4B] dark:text-stone-200">{lifeLineFor(answers)}</p>
-            </Screen>
-          );
-        })()}
-
-        {step === S.BUILD && (
           <div className="flex-1 flex flex-col items-center justify-center gap-5 px-7 py-10 text-center max-w-md lg:max-w-lg mx-auto w-full">
-            <ScholarStage src={scholar} size="build" />
-            <h1 className="text-[26px] lg:text-[34px] font-black tracking-tight">Building your plan…</h1>
+            {built ? (
+              <div className="relative w-44 h-44 lg:w-64 lg:h-64 flex items-center justify-center shrink-0" aria-hidden>
+                <span className="absolute inset-[12%] rounded-full bg-[radial-gradient(circle,rgba(88,204,2,0.38),transparent_70%)]" />
+                <span className="absolute inset-[8%] rounded-full border-[3px] border-[#58CC02]/45 wso-ring" />
+                <span className="w-28 h-28 lg:w-36 lg:h-36 rounded-full bg-[#58CC02] border-2 border-b-[6px] border-[#46A302] flex items-center justify-center wso-check-pop shadow-[0_16px_36px_-14px_rgba(70,163,2,0.9)]">
+                  <svg className="w-14 h-14 lg:w-[72px] lg:h-[72px] text-white" fill="none" stroke="currentColor" strokeWidth={3.4} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 12.5l4.5 4.5L19 7.5" />
+                  </svg>
+                </span>
+              </div>
+            ) : (
+              <ScholarStage src={scholar} size="build" />
+            )}
+            <h1 className="text-[26px] lg:text-[34px] font-black tracking-tight" aria-live="polite">
+              {built ? 'Done!' : 'Building your plan…'}
+            </h1>
+            {built && <p className="text-[15px] lg:text-[16px] font-extrabold text-stone-500 dark:text-stone-400 -mt-2">Your plan is ready</p>}
             <div className="relative w-full h-3.5 rounded-full bg-[#E5E5E5] dark:bg-stone-800 overflow-hidden" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.min(100, buildTick * 25)}>
-              <div className="relative h-full bg-[#A560E8] rounded-full transition-all duration-500 overflow-hidden" style={{ width: `${Math.min(100, buildTick * 25)}%` }}>
-                <div className="absolute inset-0 wso-shimmer" aria-hidden />
+              <div className={`relative h-full rounded-full transition-all duration-500 overflow-hidden ${built ? 'bg-[#58CC02]' : 'bg-[#A560E8]'}`} style={{ width: `${Math.min(100, buildTick * 25)}%` }}>
+                {!built && <div className="absolute inset-0 wso-shimmer" aria-hidden />}
               </div>
             </div>
             <ul className="w-full flex flex-col gap-3 text-left lg:bg-white/80 lg:dark:bg-stone-900/80 lg:border-2 lg:border-[#EADFF8] lg:dark:border-stone-700 lg:rounded-3xl lg:p-6">
@@ -423,7 +438,8 @@ export default function CreditsOnboardingFlow({
               })}
             </ul>
           </div>
-        )}
+          );
+        })()}
 
         {step === S.PLAN && (
           <Screen
@@ -701,29 +717,6 @@ function GradeTile({ grade, muted = false }: { grade: string; muted?: boolean })
   );
 }
 
-function Week({ title, days, cells, highlight = false }: { title: string; days: string[]; cells: { label: string; tone: 'grey' | 'purple' | 'gold' }[]; highlight?: boolean }) {
-  const toneClass = {
-    grey: 'bg-[#EDEDED] dark:bg-stone-800 border-[#DCDCDC] dark:border-stone-700 text-stone-500',
-    purple: 'bg-[#F3EAFF] dark:bg-[#A560E8]/15 border-[#E4D2F8] dark:border-[#A560E8]/30 text-[#7733B5] dark:text-[#C9A0F0]',
-    gold: 'bg-[#FFF1C2] dark:bg-[#F5B70A]/15 border-[#F3DB93] dark:border-[#F5B70A]/40 text-[#6B4E00] dark:text-[#F5D670]',
-  };
-  return (
-    <div className={`wso-card-in bg-white dark:bg-stone-900 border-2 border-b-4 rounded-2xl p-3.5 flex flex-col gap-2.5 ${highlight ? 'border-[#A560E8]' : 'border-[#E5E5E5] dark:border-stone-700'}`} style={highlight ? { animationDelay: '0.25s' } : undefined}>
-      <div className={`text-[13px] font-black ${highlight ? 'text-[#7733B5] dark:text-[#C9A0F0]' : 'text-stone-500 dark:text-stone-400'}`}>{title}</div>
-      <div className="grid grid-cols-7 gap-1.5">
-        {cells.map((c, i) => (
-          <div key={i} className="flex flex-col items-center gap-1">
-            <span className="text-[11px] font-extrabold text-stone-500 dark:text-stone-400">{days[i]}</span>
-            <span className={`w-full h-14 rounded-[10px] border-2 flex items-end justify-center pb-1.5 text-[9px] font-black uppercase tracking-wide ${toneClass[c.tone]}`}>
-              {c.label}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 /* Same motion as the dashboard / old onboarding (ob-* keyframes),
    prefixed so the two can live side by side. */
 const FLOW_CSS = `
@@ -747,6 +740,8 @@ const FLOW_CSS = `
 .wso-bubble { animation: wsoBubble 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s backwards; }
 @keyframes wsoScaleIn { 0% { transform: scale(0.6); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 .wso-scale-in { animation: wsoScaleIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+@keyframes wsoCheckPop { 0% { transform: scale(0.4); opacity: 0; } 55% { transform: scale(1.12); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+.wso-check-pop { animation: wsoCheckPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
 @keyframes wsoSlideIn { 0% { opacity: 0; transform: translateX(28px); } 100% { opacity: 1; transform: none; } }
 .wso-slide-in { animation: wsoSlideIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
 @keyframes wsoCardIn { 0% { opacity: 0; transform: translateY(14px) scale(0.97); } 100% { opacity: 1; transform: none; } }
@@ -757,6 +752,6 @@ const FLOW_CSS = `
 .wso-shimmer { background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent); animation: wsoShimmer 1.4s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) {
   .wso-bg-cycle, .wso-ring, .wso-glow, .wso-bob, .wso-shimmer { animation: none !important; }
-  .wso-word, .wso-subtitle, .wso-bubble, .wso-scale-in, .wso-slide-in, .wso-card-in, .wso-coin { animation: none !important; opacity: 1; transform: none; }
+  .wso-word, .wso-subtitle, .wso-bubble, .wso-scale-in, .wso-check-pop, .wso-slide-in, .wso-card-in, .wso-coin { animation: none !important; opacity: 1; transform: none; }
 }
 `;

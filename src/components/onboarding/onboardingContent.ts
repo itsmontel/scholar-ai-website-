@@ -171,6 +171,8 @@ export interface Outcome {
   tag: string;
   title: string;
   video: string;
+  /** Larger desktop clip. Falls back to `video` on phones. */
+  desktopVideo?: string;
   videoLabel: string;
   points: string[];
   /** Essay outcome shows an example before/after score. */
@@ -182,6 +184,7 @@ const ESSAY_OUTCOME: Outcome = {
   tag: 'Essay Feedback',
   title: 'See your grade before your professor does',
   video: '/hero-essay.mp4',
+  desktopVideo: '/CapstoneVidKenzie.mp4',
   videoLabel: 'Essay Feedback marking a draft line by line',
   points: [
     'Every sentence color-coded: strong, needs work, needs revising',

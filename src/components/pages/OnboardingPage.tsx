@@ -2067,7 +2067,10 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
   /* ─── Question-by-question flow (phase 'flow') ─── */
   const [flowInitialStep] = useState<number | undefined>(() => {
     if (typeof window === 'undefined') return undefined;
-    return new URLSearchParams(window.location.search).get('preview') === 'plan' ? PLAN_STEP : undefined;
+    const preview = new URLSearchParams(window.location.search).get('preview');
+    if (preview === 'plan') return PLAN_STEP;
+    if (preview === 'build') return PLAN_STEP - 1;
+    return undefined;
   });
 
   /** Answers are in: save them (analytics + dashboard personalisation). */
