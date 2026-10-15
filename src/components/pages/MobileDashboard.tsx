@@ -443,7 +443,7 @@ const MobileDashboard = ({
 
   const subtitle = isNewUser
     ? "Let's start with your first essay."
-    : "Let's turn that B into an A.";
+    : "Let's make this your best paper yet.";
 
   const formCardRef = useRef<HTMLDivElement>(null);
   useEffect(() => {

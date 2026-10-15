@@ -764,7 +764,7 @@ const SoftPaywall = ({
               >
                 {variant === 'postTutorial'
                   ? <>Get the grade you actually deserve, {firstName}.</>
-                  : showTrial ? <>Try WriteScholar <span className="text-[#58CC02]">free</span>, {firstName}</> : <>Stop leaving marks on the table, {firstName}.</>}
+                  : showTrial ? <>Make this your best semester yet, {firstName}.</> : <>Stop leaving marks on the table, {firstName}.</>}
               </h2>
               <p className="text-stone-500 dark:text-stone-400 text-sm sm:text-[0.9375rem] font-bold leading-relaxed">
                 {variant === 'postTutorial' ? (

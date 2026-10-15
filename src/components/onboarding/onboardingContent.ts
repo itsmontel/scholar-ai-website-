@@ -322,11 +322,67 @@ export function gradeJump(a: OnboardingAnswers): { from: string; to: string } {
   return { from, to };
 }
 
+const GRADE_RANK: Record<string, number> = { A: 0, 'A−': 1, 'B+': 2, B: 3, C: 4, D: 5 };
+
+/**
+ * What they're after: climbing to a higher grade, keeping the one they
+ * have (already at or above the target), or just passing. Headlines key
+ * off this so we never promise "B to A" to someone who didn't say B.
+ */
+export type GradeGoal = 'climb' | 'keep' | 'pass';
+
+export function gradeGoal(a: OnboardingAnswers): GradeGoal {
+  if (a.target === 'pass') return 'pass';
+  const { from, to } = gradeJump(a);
+  if (!a.current) return 'climb';
+  return (GRADE_RANK[from] ?? 3) <= (GRADE_RANK[to] ?? 0) ? 'keep' : 'climb';
+}
+
+/** Welcome headline: an outcome every student wants, whatever their grades. */
+export const WELCOME_HEADLINE: { w: string; tone?: 'muted' | 'accent'; br?: boolean }[] = [
+  { w: 'Better', tone: 'accent' }, { w: 'grades.', tone: 'accent', br: true }, { w: 'Less' }, { w: 'stress.' },
+];
+
+export function welcomeGreeting(firstName?: string): string {
+  return `Hi${firstName ? ` ${firstName}` : ''}! I'm Scholar. Let's make this your best semester yet.`;
+}
+
+/** Headline on the plan (paywall) screen, from what they told us. */
+export function planHeadline(a: OnboardingAnswers): string {
+  const { from, to } = gradeJump(a);
+  switch (gradeGoal(a)) {
+    case 'pass': return 'A calm pass, without losing your evenings';
+    case 'keep': return `Stay at ${article(to)}, without losing your evenings`;
+    default: return a.current ? `${from} to ${to}, without losing your evenings` : `Your best grades yet, without losing your evenings`;
+  }
+}
+
+export function planBubble(a: OnboardingAnswers, firstName?: string): string {
+  const ready = `Your plan is ready${firstName ? `, ${firstName}` : ''}!`;
+  const { to } = gradeJump(a);
+  switch (gradeGoal(a)) {
+    case 'pass': return `${ready} Let's get you over the line.`;
+    case 'keep': return `${ready} Let's keep you at the top.`;
+    default: return `${ready} Let's get you that ${to}.`;
+  }
+}
+
+/** Line in the "Building your plan" checklist. */
+export function goalLine(a: OnboardingAnswers): string {
+  const { from, to } = gradeJump(a);
+  switch (gradeGoal(a)) {
+    case 'pass': return 'Matching your goal: a calm pass';
+    case 'keep': return `Matching your goal: staying at ${article(to)}`;
+    default: return a.current ? `Matching your goal: ${from} to ${to}` : `Matching your goal: ${article(to)}`;
+  }
+}
+
 /** What Scholar says on a question screen, given the answers so far. */
 export function bubbleFor(q: OnboardingQuestion, a: OnboardingAnswers): string {
   const value = a[q.key];
   if (q.key === 'target' && typeof value === 'string') {
     if (value === 'pass') return "No shame in that. We'll get you over the line, calmly.";
+    if (gradeGoal(a) === 'keep') return "Then let's keep you there, with less stress.";
     const { from, to } = gradeJump(a);
     return `From ${from} to ${to}? That jump is exactly what we are built for.`;
   }

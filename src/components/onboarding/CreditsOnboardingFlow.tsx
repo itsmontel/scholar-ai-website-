@@ -12,7 +12,13 @@ import {
   LIFE_SHORT,
   bubbleFor,
   empathyFor,
+  goalLine,
+  gradeGoal,
   gradeJump,
+  planBubble,
+  planHeadline,
+  WELCOME_HEADLINE,
+  welcomeGreeting,
   lifeLineFor,
   outcomesFor,
   outcomeScholar,
@@ -27,7 +33,7 @@ import { STANDARD_MONTHLY_PRICE, TRIAL_DAYS } from '../../config/pricing';
 /* ═══════════════════════════════════════════════════════════════
    The question-by-question onboarding (same flow as the iOS app).
 
-     0      Welcome: the B → A promise
+     0      Welcome: better grades, less stress
      1–8    Questions, Scholar replies to every answer
      9      "We hear you": their answers played back
      10–11  Outcomes, chosen by what's weighing on them
@@ -293,7 +299,7 @@ export default function CreditsOnboardingFlow({
                 );
               })}
             </div>
-            {q.key === 'target' && answers.target && answers.target !== 'pass' && (
+            {q.key === 'target' && answers.target && gradeGoal(answers) === 'climb' && (
               <div className="wso-scale-in flex items-center justify-center gap-3.5 p-3.5 rounded-2xl bg-[#F3EAFF] dark:bg-[#A560E8]/15 border-2 border-[#E4D2F8] dark:border-[#A560E8]/30">
                 <GradeTile grade={from} muted />
                 <Arrow />
@@ -404,7 +410,7 @@ export default function CreditsOnboardingFlow({
               </div>
             </div>
             <ul className="w-full flex flex-col gap-3 text-left lg:bg-white/80 lg:dark:bg-stone-900/80 lg:border-2 lg:border-[#EADFF8] lg:dark:border-stone-700 lg:rounded-3xl lg:p-6">
-              {['Reading your answers', `Matching your goal: ${from} to ${to}`, 'Choosing where to start', `Planning your ${TRIAL_CREDITS} free credits`].map((label, i) => {
+              {['Reading your answers', goalLine(answers), 'Choosing where to start', `Planning your ${TRIAL_CREDITS} free credits`].map((label, i) => {
                 const done = buildTick > i;
                 return (
                   <li key={label} className="flex items-center gap-3 text-[15px] lg:text-[16px] font-extrabold">
@@ -421,7 +427,7 @@ export default function CreditsOnboardingFlow({
 
         {step === S.PLAN && (
           <Screen
-            stage={{ src: scholar, bubble: `Your plan is ready${firstName ? `, ${firstName}` : ''}! Let's get you that ${to === 'Pass' ? 'pass' : to}.` }}
+            stage={{ src: scholar, bubble: planBubble(answers, firstName) }}
             footer={
               <>
                 <PrimaryButton onClick={() => onStartTrial(answers)} disabled={starting}>
@@ -442,7 +448,7 @@ export default function CreditsOnboardingFlow({
               <img src={scholar} alt="" className="lg:hidden w-16 h-16 shrink-0 object-contain" width="64" height="64" />
               <div>
                 <Eyebrow>Your plan is ready{firstName ? `, ${firstName}` : ''}</Eyebrow>
-                <h1 className="mt-0.5 text-[24px] lg:text-[32px] leading-[1.12] font-black tracking-tight">{from} to {to}, without losing your evenings</h1>
+                <h1 className="mt-0.5 text-[24px] lg:text-[32px] leading-[1.12] font-black tracking-tight">{planHeadline(answers)}</h1>
               </div>
             </div>
 
@@ -507,19 +513,16 @@ const WELCOME_PROMISES = [
 ];
 
 function Welcome({ onNext, onLogout, firstName }: { onNext: () => void; onLogout?: () => void; firstName?: string }) {
-  const words: { w: string; tone?: 'muted' | 'accent' }[] = [
-    { w: "Let's" }, { w: 'turn' }, { w: 'your' }, { w: 'B', tone: 'muted' }, { w: 'into' }, { w: 'an' }, { w: 'A.', tone: 'accent' },
-  ];
   const headline = (
     <h1 className="text-[34px] sm:text-[40px] lg:text-[60px] leading-[1.05] font-black tracking-tight">
-      {words.map(({ w, tone }, i) => (
+      {WELCOME_HEADLINE.map(({ w, tone, br }, i) => (
         <span key={i}>
-          <span className={`inline-block wso-word ${tone === 'muted' ? 'text-stone-400' : tone === 'accent' ? 'text-[#A560E8]' : ''}`} style={{ animationDelay: `${0.1 + i * 0.08}s` }}>{w}</span>{' '}
+          <span className={`inline-block wso-word ${tone === 'muted' ? 'text-stone-400' : tone === 'accent' ? 'text-[#A560E8]' : ''}`} style={{ animationDelay: `${0.1 + i * 0.08}s` }}>{w}</span>{br ? <br /> : ' '}
         </span>
       ))}
     </h1>
   );
-  const greeting = `Hi${firstName ? ` ${firstName}` : ''}! I'm Scholar. Let's get you that A.`;
+  const greeting = welcomeGreeting(firstName);
   return (
     <>
       <div className="h-1.5 bg-gradient-to-r from-[#A560E8] via-[#8A48C7] to-[#A560E8]" aria-hidden />

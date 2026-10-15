@@ -5,7 +5,7 @@
 //  The question-by-question onboarding, same flow as the website
 //  (src/components/onboarding/CreditsOnboardingFlow.tsx):
 //
-//    0      Welcome: the B → A promise
+//    0      Welcome: better grades, less stress
 //    1–8    Questions, Scholar replies to every answer
 //    9      "We hear you": their answers played back
 //    10–11  Outcomes, chosen by what's weighing on them
@@ -116,7 +116,7 @@ struct QuestionOnboardingFlow: View {
     private var welcome: some View {
         VStack(spacing: 14) {
             Spacer()
-            WSSpeechBubble(text: "Hi! I'm Scholar. Let's get you that A.", tail: .none,
+            WSSpeechBubble(text: OnboardingContent.welcomeGreeting, tail: .none,
                            fillColor: .white, strokeColor: WSColor.duoBorder, maxWidth: 300)
                 .wsStaggerEntry(0)
             ZStack {
@@ -124,10 +124,8 @@ struct QuestionOnboardingFlow: View {
                 WSAnimatedImage(name: "mascot-celebrating").frame(width: 190, height: 190)
             }
             .frame(width: 220, height: 220)
-            (Text("Let's turn your ").foregroundStyle(WSColor.duoText)
-             + Text("B").foregroundStyle(WSColor.foregroundMuted)
-             + Text(" into an ").foregroundStyle(WSColor.duoText)
-             + Text("A.").foregroundStyle(WSColor.duoPurple))
+            (Text("Better grades.\n").foregroundStyle(WSColor.duoPurple)
+             + Text("Less stress.").foregroundStyle(WSColor.duoText))
                 .wsHeadline(.huge, weight: .black)
                 .multilineTextAlignment(.center)
                 .wsStaggerEntry(1)
@@ -173,7 +171,7 @@ struct QuestionOnboardingFlow: View {
                         }
                         .wsStaggerEntry(idx + 1)
                     }
-                    if q.key == .target, let t = answers.value(.target), t != "pass" {
+                    if q.key == .target, answers.value(.target) != nil, OnboardingContent.gradeGoal(answers) == .climb {
                         let j = OnboardingContent.gradeJump(answers)
                         HStack(spacing: 14) {
                             GradeTile(grade: j.from, muted: true)
@@ -301,8 +299,7 @@ struct QuestionOnboardingFlow: View {
     }
 
     private var buildScreen: some View {
-        let j = OnboardingContent.gradeJump(answers)
-        let labels = ["Reading your answers", "Matching your goal: \(j.from) to \(j.to)", "Choosing where to start", "Planning your \(OnboardingContent.trialCredits) free credits"]
+        let labels = ["Reading your answers", OnboardingContent.goalLine(answers), "Choosing where to start", "Planning your \(OnboardingContent.trialCredits) free credits"]
         return VStack(spacing: 18) {
             Spacer()
             ZStack {
@@ -330,7 +327,6 @@ struct QuestionOnboardingFlow: View {
     }
 
     private var planScreen: some View {
-        let j = OnboardingContent.gradeJump(answers)
         let rec = OnboardingContent.recommendation(for: answers.path)
         return VStack(spacing: 0) {
             ScrollView {
@@ -339,7 +335,7 @@ struct QuestionOnboardingFlow: View {
                         WSAnimatedImage(name: "mascot-jumping-joy").frame(width: 64, height: 64)
                         VStack(alignment: .leading, spacing: 2) {
                             Text("YOUR PLAN IS READY").wsEyebrow().foregroundStyle(WSColor.duoPurple)
-                            Text("\(j.from) to \(j.to), without losing your evenings")
+                            Text(OnboardingContent.planHeadline(answers))
                                 .wsHeadline(.medium, weight: .black).foregroundStyle(WSColor.duoText)
                         }
                     }

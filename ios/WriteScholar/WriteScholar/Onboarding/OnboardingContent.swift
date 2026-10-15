@@ -303,11 +303,56 @@ enum OnboardingContent {
         return (from, to)
     }
 
+    /// Climbing to a higher grade, keeping the one they have, or just
+    /// passing. Headlines key off this so we never promise "B to A" to
+    /// someone who didn't say B. Mirrors gradeGoal in onboardingContent.ts.
+    enum GradeGoal { case climb, keep, pass }
+
+    private static let gradeRank: [String: Int] = ["A": 0, "A−": 1, "B+": 2, "B": 3, "C": 4, "D": 5]
+
+    static func gradeGoal(_ a: OnboardingAnswers) -> GradeGoal {
+        if a.value(.target) == "pass" { return .pass }
+        guard a.value(.current) != nil else { return .climb }
+        let j = gradeJump(a)
+        return (gradeRank[j.from] ?? 3) <= (gradeRank[j.to] ?? 0) ? .keep : .climb
+    }
+
+    private static func withArticle(_ grade: String) -> String {
+        (grade.hasPrefix("A") ? "an " : "a ") + grade
+    }
+
+    static let welcomeGreeting = "Hi! I'm Scholar. Let's make this your best semester yet."
+
+    /// Headline on the plan (paywall) screen.
+    static func planHeadline(_ a: OnboardingAnswers) -> String {
+        let j = gradeJump(a)
+        switch gradeGoal(a) {
+        case .pass: return "A calm pass, without losing your evenings"
+        case .keep: return "Stay at \(withArticle(j.to)), without losing your evenings"
+        case .climb:
+            return a.value(.current) != nil
+                ? "\(j.from) to \(j.to), without losing your evenings"
+                : "Your best grades yet, without losing your evenings"
+        }
+    }
+
+    /// Line in the "Building your plan" checklist.
+    static func goalLine(_ a: OnboardingAnswers) -> String {
+        let j = gradeJump(a)
+        switch gradeGoal(a) {
+        case .pass: return "Matching your goal: a calm pass"
+        case .keep: return "Matching your goal: staying at \(withArticle(j.to))"
+        case .climb:
+            return a.value(.current) != nil ? "Matching your goal: \(j.from) to \(j.to)" : "Matching your goal: \(withArticle(j.to))"
+        }
+    }
+
     static func bubble(for q: OnboardingQuestion, _ a: OnboardingAnswers) -> String {
         switch q.key {
         case .target:
             guard let v = a.value(.target) else { return q.prompt }
             if v == "pass" { return "No shame in that. We'll get you over the line, calmly." }
+            if gradeGoal(a) == .keep { return "Then let's keep you there, with less stress." }
             let j = gradeJump(a)
             return "From \(j.from) to \(j.to)? That jump is exactly what we are built for."
         case .struggles:
