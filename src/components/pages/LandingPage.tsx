@@ -1394,10 +1394,13 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </h1>
 
                   <h2
-                    className="mt-5 sm:mt-6 max-w-[34rem] text-base sm:text-lg lg:text-[1.15rem] font-bold text-[#F3E8FF] leading-snug"
+                    className="mt-5 sm:mt-6 max-w-[38rem] text-base sm:text-lg lg:text-[1.15rem] font-semibold text-white/90 leading-snug"
                     style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                   >
-                    Hand in essays you know are good, walk into exams ready, and get your evenings back.
+                    The all-in-one AI study system to{' '}
+                    <span className="font-extrabold text-white">write better essays</span>,{' '}
+                    <span className="font-extrabold text-white">study smarter</span>, and{' '}
+                    <span className="font-extrabold text-[#FFC800]">get higher grades.</span>
                   </h2>
 
                   {/* ─── CTA + LOGIN ROW — green trial button pops on the
