@@ -556,8 +556,8 @@ const HERO_STUDY_GAMES_PLAYLIST = [
 ] as const;
 
 /**
- * Hero side tile: a feature clip in a white card with a yellow lip,
- * gently drifting.
+ * Hero side tile: a feature clip in a white card with a yellow lip and
+ * a warm yellow glow, gently drifting.
  */
 const HeroTile = ({
   label,
@@ -577,7 +577,7 @@ const HeroTile = ({
     style={{ animationDelay: delay }}
   >
     <figure
-      className={`m-0 overflow-hidden bg-white border-[#FFC800] ${compact ? 'rounded-xl border-2 border-b-4' : 'rounded-[20px] border-[3px] border-b-[6px]'} shadow-[0_18px_40px_-18px_rgba(40,0,80,0.6)]`}
+      className={`m-0 overflow-hidden bg-white border-[#FFC800] ${compact ? 'rounded-xl border-2 border-b-4 shadow-[0_10px_22px_-8px_rgba(0,0,0,0.35)]' : 'rounded-[20px] border-[3px] border-b-[6px] shadow-[0_20px_46px_-12px_rgba(255,200,0,0.55)]'}`}
     >
       <div className="relative aspect-[16/10] w-full bg-[#1C1030]">{children}</div>
       <figcaption
