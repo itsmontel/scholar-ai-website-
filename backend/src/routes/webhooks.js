@@ -232,6 +232,17 @@ async function handleSubscriptionCreated(subscription) {
     await persistLibraryForeverIfPaid(user.id, plan);
     await syncCredits(user.id, plan, subscription);
 
+    // checkout.session.completed records this too. Recording it here as
+    // well means one missed webhook can't leave a trial unrecorded, which
+    // would let the same email trial again after deleting the account.
+    if (subscription.status === 'trialing' && user.email) {
+      try {
+        await subscriptionService.recordTrialUsage(user.email, subscription.customer, plan);
+      } catch (trialError) {
+        console.error('Error recording trial usage from subscription.created (non-fatal):', trialError);
+      }
+    }
+
   } catch (error) {
     console.error('Error handling subscription created:', error);
   }

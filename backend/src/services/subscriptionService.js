@@ -1,6 +1,7 @@
 const { createClient } = require('@supabase/supabase-js');
 const { query } = require('../database/connection');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const { canonicalEmail } = require('../utils/canonicalEmail');
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -450,19 +451,71 @@ const getPlanLimits = async (userId) => {
   }
 };
 
+/* ─── trial_usage: one free trial per inbox ─────────────────────────
+ * A row per email that has had a trial (or the first-time discount, or
+ * declined the trial). It has no link to users, so deleting an account
+ * and signing up again with the same email still finds it. Rows also
+ * carry email_canonical (see utils/canonicalEmail) so Gmail dots and
+ * "+tag" aliases of the same inbox match too.
+ */
+let trialCanonicalColumnMissing = false;
+
+const isMissingCanonicalColumn = (err) =>
+  /email_canonical/i.test(`${err?.message || ''} ${err?.details || ''} ${err?.hint || ''}`);
+
+/** Escape LIKE wildcards so "j_doe@x.com" only matches itself. */
+const likeExact = (value) => value.replace(/[\\%_]/g, (c) => `\\${c}`);
+
+/**
+ * The trial_usage row for this person, matching the email in any case or
+ * the same inbox under an alias. Resolves to { row, error }; row is null
+ * when there is none.
+ */
+const findTrialUsage = async (email, columns = 'id') => {
+  const normalized = String(email || '').toLowerCase().trim();
+  const exact = await supabaseServiceRole
+    .from('trial_usage')
+    .select(columns)
+    .ilike('email', likeExact(normalized))
+    .limit(1)
+    .maybeSingle();
+  if (exact.error && exact.error.code !== 'PGRST116') return { row: null, error: exact.error };
+  if (exact.data) return { row: exact.data, error: null };
+  if (trialCanonicalColumnMissing) return { row: null, error: null };
+
+  const alias = await supabaseServiceRole
+    .from('trial_usage')
+    .select(columns)
+    .eq('email_canonical', canonicalEmail(normalized))
+    .limit(1)
+    .maybeSingle();
+  if (alias.error) {
+    if (isMissingCanonicalColumn(alias.error)) {
+      // Migration 20261015 not run yet: exact matching still works.
+      trialCanonicalColumnMissing = true;
+      return { row: null, error: null };
+    }
+    if (alias.error.code !== 'PGRST116') return { row: null, error: alias.error };
+  }
+  return { row: alias.data || null, error: null };
+};
+
+/** Insert or update a trial_usage row, with email_canonical when the column exists. */
+const writeTrialUsage = async (write, fields, email) => {
+  if (!trialCanonicalColumnMissing) {
+    const result = await write({ ...fields, email_canonical: canonicalEmail(email) });
+    if (!result.error || !isMissingCanonicalColumn(result.error)) return result;
+    trialCanonicalColumnMissing = true;
+  }
+  return write(fields);
+};
+
 /** First-time $10 off (OFF10) on Pro/Premium: still allowed after user forfeits the 7-day trial (`trial_plan: declined`). */
 const checkOff10Eligibility = async (email) => {
   try {
-    const normalizedEmail = email.toLowerCase().trim();
+    const { row, error } = await findTrialUsage(email, 'trial_plan');
 
-    const { data: row, error } = await supabaseServiceRole
-      .from('trial_usage')
-      .select('trial_plan')
-      .ilike('email', normalizedEmail)
-      .limit(1)
-      .maybeSingle();
-
-    if (error && error.code !== 'PGRST116') {
+    if (error) {
       console.error('Error checking OFF10 eligibility:', error);
       return { eligible: false, reason: 'Error checking eligibility' };
     }
@@ -489,22 +542,14 @@ const checkOff10Eligibility = async (email) => {
   }
 };
 
-// 7-day Stripe trial: not available if any trial_usage row exists (including declined/forfeited).
+// Free trial: not available if any trial_usage row exists for this inbox (including declined/forfeited).
 // Returns true if eligible, false if they've already interacted with trial/discount tracking
 const checkTrialEligibility = async (email) => {
   try {
-    const normalizedEmail = email.toLowerCase().trim();
-    
-    // Check if this email has ever used a trial (service role bypasses RLS)
-    const { data: existingTrial, error } = await supabaseServiceRole
-      .from('trial_usage')
-      .select('id, trial_started_at')
-      .ilike('email', normalizedEmail)
-      .limit(1)
-      .single();
+    // Has this email, or another alias of the same inbox, ever had a trial?
+    const { row: existingTrial, error } = await findTrialUsage(email, 'id, trial_started_at');
 
-    if (error && error.code !== 'PGRST116') {
-      // PGRST116 = no rows found, which is what we want
+    if (error) {
       console.error('Error checking trial eligibility:', error);
       // On error, be conservative and don't give trial
       return { eligible: false, reason: 'Error checking eligibility' };
@@ -813,26 +858,18 @@ const recordTrialUsage = async (email, stripeCustomerId, planType) => {
       trial_started_at: now
     };
 
-    const { data: existing, error: selErr } = await supabaseServiceRole
-      .from('trial_usage')
-      .select('id')
-      .ilike('email', normalizedEmail)
-      .limit(1)
-      .maybeSingle();
+    const { row: existing, error: selErr } = await findTrialUsage(normalizedEmail, 'id');
 
-    if (selErr && selErr.code !== 'PGRST116') {
+    if (selErr) {
       console.error('Error looking up trial_usage:', selErr);
     }
 
     if (existing?.id) {
-      const { error: upErr } = await supabaseServiceRole
-        .from('trial_usage')
-        .update({
-          stripe_customer_id: stripeCustomerId,
-          trial_plan: planType,
-          trial_started_at: now
-        })
-        .eq('id', existing.id);
+      const { error: upErr } = await writeTrialUsage(
+        (fields) => supabaseServiceRole.from('trial_usage').update(fields).eq('id', existing.id),
+        { stripe_customer_id: stripeCustomerId, trial_plan: planType, trial_started_at: now },
+        normalizedEmail,
+      );
       if (upErr) {
         console.error('Error updating trial usage:', upErr);
         return { success: false, error: upErr.message };
@@ -840,7 +877,11 @@ const recordTrialUsage = async (email, stripeCustomerId, planType) => {
       return { success: true, updated: true };
     }
 
-    const { error } = await supabaseServiceRole.from('trial_usage').insert(row);
+    const { error } = await writeTrialUsage(
+      (fields) => supabaseServiceRole.from('trial_usage').insert(fields),
+      row,
+      normalizedEmail,
+    );
 
     if (error) {
       if (error.code === '23505') {
@@ -861,23 +902,22 @@ const recordTrialUsage = async (email, stripeCustomerId, planType) => {
 const recordTrialDecline = async (email) => {
   try {
     const normalizedEmail = email.toLowerCase().trim();
-    const { data: existing } = await supabaseServiceRole
-      .from('trial_usage')
-      .select('id')
-      .ilike('email', normalizedEmail)
-      .limit(1)
-      .maybeSingle();
+    const { row: existing } = await findTrialUsage(normalizedEmail, 'id');
 
     if (existing?.id) {
       return { success: true, alreadyRecorded: true };
     }
 
-    const { error } = await supabaseServiceRole.from('trial_usage').insert({
-      email: normalizedEmail,
-      stripe_customer_id: null,
-      trial_plan: 'declined',
-      trial_started_at: new Date().toISOString()
-    });
+    const { error } = await writeTrialUsage(
+      (fields) => supabaseServiceRole.from('trial_usage').insert(fields),
+      {
+        email: normalizedEmail,
+        stripe_customer_id: null,
+        trial_plan: 'declined',
+        trial_started_at: new Date().toISOString()
+      },
+      normalizedEmail,
+    );
 
     if (error) {
       if (error.code === '23505') {
