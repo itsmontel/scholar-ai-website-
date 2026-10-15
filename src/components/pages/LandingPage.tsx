@@ -1283,7 +1283,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           everything below the hero (analyzer demo, before/after, etc.)
           sits on the standard light-theme background. The purple hero
           area is now scoped to a fixed-height wrapper at the top. */}
-      <section className="relative flex flex-col overflow-x-clip overflow-hidden border-b border-stone-200/90 dark:border-stone-800 xl:overflow-visible bg-[#FCFBF7] dark:bg-[#0c0a09]">
+      <section className="relative flex flex-col overflow-x-clip overflow-hidden xl:overflow-visible bg-[#E7D6F3] dark:bg-[#2B123C]">
         {/* ─── HERO BACKGROUND — SINGLE-COLOUR PURPLE (BOUNDED) ─────
             Per user brief: the purple background only spans the hero
             portion (H1 + CTA + tiles + feature-icons row). After that
@@ -1308,22 +1308,13 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           <div className="absolute left-1/2 -translate-x-1/2 top-[560px] md:top-[470px] lg:top-[500px] h-[1100px] w-[1100px] rounded-full bg-[#8A45C8] dark:bg-[#3E1660]" />
           <div className="absolute left-1/2 -translate-x-1/2 top-[680px] md:top-[590px] lg:top-[620px] h-[760px] w-[760px] rounded-full bg-[#9652D3] dark:bg-[#47196E]" />
 
-          {/* ─── INTERNAL FADE → CREAM ──────────────────────────────
-              Vertical gradient pinned to the BOTTOM of the purple
-              wrapper that fades the purple bg into cream WITHIN the
-              wrapper itself. Replaces the previous external fade
-              (which started AFTER the wrapper, so cream couldn't
-              emerge until the wrapper ended — felt too abrupt /
-              "too late" per user feedback).
-              `from-transparent from-30%` keeps the upper 30% of the
-              fade region fully transparent so the wrapper's deep
-              purple still reads behind the feature-icons row that
-              sits in this zone. Cream emerges over the lower 70%
-              and is fully opaque at the wrapper's bottom edge — so
-              by the time the wrapper "ends" the eye already sees
-              cream, no hard seam. */}
+          {/* ─── FADE INTO THE NEXT SECTION ─────────────────────────
+              Eases the purple into #E7D6F3, the exact lilac the
+              universities section starts with (its cream base under a
+              25% brand-purple wash; dark: #2B123C), so there is no
+              cream band or border line at the seam. */}
           <div
-            className="absolute inset-x-0 bottom-0 h-44 sm:h-48 lg:h-52 xl:h-56 bg-gradient-to-b from-transparent from-65% to-[#FCFBF7] dark:to-[#0c0a09] pointer-events-none"
+            className="absolute inset-x-0 bottom-0 h-44 sm:h-52 lg:h-56 pointer-events-none bg-[linear-gradient(to_bottom,rgba(231,214,243,0)_0%,rgba(231,214,243,0.08)_18%,rgba(231,214,243,0.28)_38%,rgba(231,214,243,0.58)_60%,rgba(231,214,243,0.85)_80%,#E7D6F3_100%)] dark:bg-[linear-gradient(to_bottom,rgba(43,18,60,0)_0%,rgba(43,18,60,0.3)_40%,rgba(43,18,60,0.8)_80%,#2B123C_100%)]"
             aria-hidden
           />
         </div>
@@ -1511,7 +1502,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   border, no background — pure icon + text floating on
                   the purple field. Custom-drawn so the hero feels unique
                   to WriteScholar instead of generic, per user brief. */}
-              <div className="relative z-10 w-full max-w-5xl mx-auto -mt-3 sm:-mt-2 pb-14 sm:pb-20 px-4">
+              <div className="relative z-10 w-full max-w-5xl mx-auto -mt-3 sm:-mt-2 pb-24 sm:pb-32 px-4">
                 <div className="flex flex-wrap items-start justify-center gap-x-5 gap-y-4 sm:gap-x-8 sm:gap-y-5">
                   {[
                     {
