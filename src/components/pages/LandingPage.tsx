@@ -1479,23 +1479,35 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </div>
 
                   {/* ─── STATS STRIP — sits under Scholar so it stays
-                      on the same screen as the mascot. */}
-                  <div className="relative z-10 mt-2 sm:mt-2.5 flex w-max flex-nowrap items-center justify-center gap-x-3 sm:gap-x-5">
-                    {[
-                      { value: '50,000+', label: 'students worldwide' },
-                      { value: '91%', label: 'report better grades' },
-                      { value: '60 sec', label: 'to your first grade' },
-                    ].map((s, i) => (
-                      <div key={s.value} className={`flex shrink-0 items-baseline gap-1.5 whitespace-nowrap ${i > 0 ? 'border-l-2 border-white/25 pl-3 sm:pl-5' : ''}`}>
-                        <span
-                          className="text-[15px] sm:text-[1.15rem] font-black text-white tabular-nums tracking-tight"
-                          style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                        >
-                          {s.value}
-                        </span>
-                        <span className="text-[10px] sm:text-[11.5px] font-bold text-[#EBDDFB] whitespace-nowrap">{s.label}</span>
-                      </div>
-                    ))}
+                      on the same screen as the mascot. Phones wrap to
+                      two lines (50k + 91% on top, 60 sec below) so
+                      nothing is clipped; sm+ stays one row. */}
+                  <div className="relative z-10 mt-2 sm:mt-2.5 flex w-full flex-col items-center gap-y-1 sm:w-max sm:flex-row sm:justify-center sm:gap-x-5 sm:gap-y-0">
+                    <div className="flex items-center justify-center gap-x-2.5 min-[380px]:gap-x-3 sm:gap-x-5">
+                      {[
+                        { value: '50,000+', label: 'students worldwide' },
+                        { value: '91%', label: 'report better grades' },
+                      ].map((s, i) => (
+                        <div key={s.value} className={`flex shrink-0 items-baseline gap-1 sm:gap-1.5 whitespace-nowrap ${i > 0 ? 'border-l-2 border-white/25 pl-2.5 min-[380px]:pl-3 sm:pl-5' : ''}`}>
+                          <span
+                            className="text-[15px] sm:text-[1.15rem] font-black text-white tabular-nums tracking-tight"
+                            style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+                          >
+                            {s.value}
+                          </span>
+                          <span className="text-[10px] sm:text-[11.5px] font-bold text-[#EBDDFB] whitespace-nowrap">{s.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex shrink-0 items-baseline justify-center gap-1 sm:gap-1.5 whitespace-nowrap sm:border-l-2 sm:border-white/25 sm:pl-5">
+                      <span
+                        className="text-[15px] sm:text-[1.15rem] font-black text-white tabular-nums tracking-tight"
+                        style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+                      >
+                        60 sec
+                      </span>
+                      <span className="text-[10px] sm:text-[11.5px] font-bold text-[#EBDDFB] whitespace-nowrap">to your first grade</span>
+                    </div>
                   </div>
 
                   {/* ─── MOBILE TILE GRID — the same four tiles, 2×2. */}
