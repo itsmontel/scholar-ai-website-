@@ -92,12 +92,13 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
     }
 
     let effectivePromoCode = typeof promoCode === 'string' && promoCode.trim() ? promoCode.trim() : null;
+    const WELCOME_PROMO_CODES = ['NEWCUSTOMER', 'MAY2026'];
 
     // The free trial (3 days, 3 credits) is the front-door offer. One per
-    // email, and never for an account that has subscribed before. When the
-    // trial applies, no first-invoice discount rides along: it would only
-    // discount the $0 trial invoice and make the price after the trial
-    // look different from what we show.
+    // email, and never for an account that has subscribed before.
+    // NEWCUSTOMER may ride with the trial: a `once` coupon applies to the
+    // first paid invoice after the trial ($19.99 → $9.99), not the $0
+    // trial invoice. Other campaign codes stay off trial sessions.
     let trialDays =
       trialPeriodDays != null &&
       Number.isFinite(Number(trialPeriodDays)) &&
@@ -114,7 +115,13 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
         trialDays = 0;
       }
     }
-    if (trialDays > 0) effectivePromoCode = null;
+    if (
+      trialDays > 0 &&
+      effectivePromoCode &&
+      !WELCOME_PROMO_CODES.includes(effectivePromoCode.toUpperCase())
+    ) {
+      effectivePromoCode = null;
+    }
 
     // NEWCUSTOMER (legacy alias: MAY2026) is the auto-applied welcome
     // discount for first-time customers. The frontend decides whether to
@@ -122,7 +129,6 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
     // check — anyone who has ever trialed or subscribed (even pre-tracking
     // legacy accounts) gets the code silently stripped so churned users
     // can't re-subscribe at the new-customer price.
-    const WELCOME_PROMO_CODES = ['NEWCUSTOMER', 'MAY2026'];
     if (effectivePromoCode && WELCOME_PROMO_CODES.includes(effectivePromoCode.toUpperCase())) {
       try {
         const trialEligibility = await subscriptionService.checkTrialEligibility(user.email);

@@ -2,11 +2,11 @@
  * Pricing & discount policy — one place that decides WHERE the welcome
  * discount is allowed to appear.
  *
- * Current front-door offer: a 3-day free trial with 3 credits, then Pro
- * at $19.99/mo for 99 credits. No first-month discount at signup (it
- * would only discount the $0 trial invoice). Soft paywall, pricing,
- * billing, and onboarding checkout all read these values so the story
- * stays consistent.
+ * Current front-door offer: a 3-day free trial with 3 credits, then 50%
+ * off the first paid month on onboarding checkout (NEWCUSTOMER), then
+ * Pro at $19.99/mo. A `once` coupon on a trial hits the first paid
+ * invoice, not the $0 trial invoice. Pricing/billing/soft paywall stay
+ * on list price unless WELCOME_DISCOUNT_AT_SIGNUP is on.
  *
  * Exit (cancel flow / post-lapse winback) can still reuse the same
  * coupon as a save offer for users who already paid.
@@ -96,6 +96,18 @@ export function signupPromoCode(
   // whole year rather than a month.
   if (billingCycle !== 'monthly') return undefined;
   if (!newCustomer) return undefined;
+  return { promoCode: WELCOME_PROMO_CODE };
+}
+
+/**
+ * Onboarding Stripe Checkout always auto-applies NEWCUSTOMER on monthly
+ * Pro/Premium. The backend strips it for anyone who has already trialed
+ * or subscribed. Yearly is excluded so we do not halve a whole year.
+ */
+export function onboardingCheckoutPromo(
+  billingCycle: 'monthly' | 'yearly' = 'monthly'
+): { promoCode: string } | undefined {
+  if (billingCycle !== 'monthly') return undefined;
   return { promoCode: WELCOME_PROMO_CODE };
 }
 

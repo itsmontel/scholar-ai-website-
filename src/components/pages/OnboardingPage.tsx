@@ -14,7 +14,7 @@ import {
 // on first paint so the conversion event isn't racing the script load.
 import { trackTrialConversion } from '../../utils/gtag';
 import BadgeCreature from '../common/BadgeCreature';
-import { signupPromoCode, showSignupDiscount, STANDARD_MONTHLY_PRICE, FIRST_MONTH_PRICE, FLASH_FIRST_MONTH_PRICE, TRIAL_DAYS, UPGRADE_CTA_FOOTNOTE, CHECKOUT_OFFER_KEY, TRIAL_CREDITS, MONTHLY_CREDITS } from '../../config/pricing';
+import { signupPromoCode, onboardingCheckoutPromo, showSignupDiscount, STANDARD_MONTHLY_PRICE, FIRST_MONTH_PRICE, FLASH_FIRST_MONTH_PRICE, TRIAL_DAYS, UPGRADE_CTA_FOOTNOTE, CHECKOUT_OFFER_KEY, TRIAL_CREDITS, MONTHLY_CREDITS } from '../../config/pricing';
 import { useFlashOffer } from '../../hooks/useFlashOffer';
 import CreditsOnboardingFlow, { PLAN_STEP } from '../onboarding/CreditsOnboardingFlow';
 import { surveyPayload, pathFor, type OnboardingAnswers } from '../onboarding/onboardingContent';
@@ -120,7 +120,8 @@ interface OnboardingAnalysis {
  */
 const HIDE_END_PAYWALLS = true;
 /* Hard-paywall checkout used to auto-apply NEWCUSTOMER (50% off first
-   paid invoice). The front-door offer is the 3-day trial at list price. */
+   paid invoice). The front-door offer is the 3-day trial, then 50% off
+   the first paid month via NEWCUSTOMER. */
 
 /* ═══════════════════════════════════════════════════════════════
    OnboardingPage — Duolingo-style interactive onboarding
@@ -2025,7 +2026,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
       } catch { /* assume not eligible */ }
       const successUrl = `${window.location.origin}/dashboard?payment=success`;
       const cancelUrl = `${window.location.origin}/onboarding?preview=checkout`;
-      const promoCode = signupPromoCode(true, 'monthly')?.promoCode;
+      const promoCode = onboardingCheckoutPromo('monthly')?.promoCode;
       const res = await fetch(`${API_URL}/subscriptions/create-checkout-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -2118,6 +2119,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
           successUrl: `${window.location.origin}/dashboard?payment=success`,
           cancelUrl: `${window.location.origin}/onboarding?preview=plan`,
           ...(withTrial ? { trialPeriodDays: TRIAL_DAYS } : {}),
+          ...onboardingCheckoutPromo('monthly'),
         }),
       });
       const data = await res.json().catch(() => null);
@@ -2140,11 +2142,14 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
   };
 
   /* ─── Start checkout → Stripe-hosted Checkout ───
-     Front-door offer is the 3-day trial, then list price. See pricing.ts. */
+     Front-door offer is the 3-day trial, then 50% off the first paid
+     month (NEWCUSTOMER). See pricing.ts. */
   const handleSubscribeChoice = async () => {
     if (startingTrial) return;
     setTrialError(null);
-    const signupPromo = signupPromoCode(true, billingCycle);
+    const signupPromo = paywallOverlay
+      ? signupPromoCode(true, billingCycle)
+      : onboardingCheckoutPromo(billingCycle) ?? signupPromoCode(true, billingCycle);
     trackEvent('onboarding_choose_subscription', {
       plan: selectedPlanId,
       cycle: billingCycle,
@@ -4297,7 +4302,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                 <span className="text-[#A560E8]">{TRIAL_DAYS}-day free trial</span>
               </h1>
               <p className="mt-3 text-base sm:text-lg text-stone-600 dark:text-stone-400 font-bold leading-snug max-w-md">
-                ${STANDARD_MONTHLY_PRICE.pro}/mo after the trial. Cancel anytime.
+                Then ${FIRST_MONTH_PRICE.pro} for the first month, ${STANDARD_MONTHLY_PRICE.pro}/mo after. Cancel anytime.
               </p>
             </div>
 
@@ -4395,13 +4400,13 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                 <span aria-hidden className="text-2xl sm:text-3xl shrink-0">✦</span>
                 <div className="flex-1 min-w-0 text-left">
                   <p className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-[0.18em] text-[#7733B5]">
-                    {TRIAL_DAYS} days free · then full price
+                    {TRIAL_DAYS} days free · then 50% off
                   </p>
                   <p className="mt-0.5 text-sm sm:text-base font-extrabold text-[#3C3C3C] dark:text-stone-100 leading-snug" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-                    ${STANDARD_MONTHLY_PRICE.pro}/mo after the trial. No coupon.
+                    ${FIRST_MONTH_PRICE.pro} for the first month, then ${STANDARD_MONTHLY_PRICE.pro}/mo
                   </p>
                   <p className="mt-1 text-[11px] sm:text-xs font-bold text-stone-700 dark:text-stone-300">
-                    $0 today. Then Pro at list price. Cancel anytime before it renews.
+                    Code NEWCUSTOMER is applied at checkout. $0 today. Cancel anytime before it renews.
                   </p>
                 </div>
               </div>
@@ -4415,7 +4420,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
                 Upgrade to Pro
               </p>
               <p className="relative mt-1 text-sm font-bold text-stone-600 dark:text-stone-400">
-                $0 today · then <span className="text-[#7733B5] font-extrabold">${STANDARD_MONTHLY_PRICE.pro}/mo</span>
+                $0 today · then <span className="text-[#7733B5] font-extrabold">${FIRST_MONTH_PRICE.pro}</span> first month · then ${STANDARD_MONTHLY_PRICE.pro}/mo
               </p>
               <button
                 type="button"

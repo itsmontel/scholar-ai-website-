@@ -1032,42 +1032,39 @@ const createCheckoutSession = async (
       sessionConfig.cancel_url = finalCancelUrl;
     }
 
-    // A `once` coupon on a trial subscription hits the first *paid*
-    // invoice, not the $0 trial invoice. Trial checkout is always list
-    // price after the trial. Winback/campaign codes still apply when
-    // there is no trial. No promo-code box on Checkout.
-    if (trialPeriodDays === 0) {
-      if (options.couponId) {
-        try {
-          const coupon = await stripe.coupons.retrieve(options.couponId);
-          if (coupon && coupon.valid) {
-            sessionConfig.discounts = [{ coupon: coupon.id }];
-          } else {
-            console.warn(`Coupon "${options.couponId}" is not valid; falling back to promo code`);
-          }
-        } catch (couponError) {
-          console.warn(`Coupon "${options.couponId}" could not be loaded; falling back to promo code:`, couponError.message);
+    // No promo-code box on Checkout. Flash coupons stay off trial
+    // sessions. NEWCUSTOMER may ride with a trial so the first paid
+    // month is 50% off, then list price.
+    if (trialPeriodDays === 0 && options.couponId) {
+      try {
+        const coupon = await stripe.coupons.retrieve(options.couponId);
+        if (coupon && coupon.valid) {
+          sessionConfig.discounts = [{ coupon: coupon.id }];
+        } else {
+          console.warn(`Coupon "${options.couponId}" is not valid; falling back to promo code`);
         }
+      } catch (couponError) {
+        console.warn(`Coupon "${options.couponId}" could not be loaded; falling back to promo code:`, couponError.message);
       }
+    }
 
-      if (effectivePromo && !sessionConfig.discounts) {
-        try {
-          const promoCodes = await stripe.promotionCodes.list({
-            code: effectivePromo,
-            active: true,
-            limit: 1
-          });
+    if (effectivePromo && !sessionConfig.discounts) {
+      try {
+        const promoCodes = await stripe.promotionCodes.list({
+          code: effectivePromo,
+          active: true,
+          limit: 1
+        });
 
-          if (promoCodes.data.length > 0) {
-            sessionConfig.discounts = [{
-              promotion_code: promoCodes.data[0].id
-            }];
-          } else {
-            console.warn(`Promo code "${effectivePromo}" not found or inactive`);
-          }
-        } catch (promoError) {
-          console.error('Error applying promo code:', promoError);
+        if (promoCodes.data.length > 0) {
+          sessionConfig.discounts = [{
+            promotion_code: promoCodes.data[0].id
+          }];
+        } else {
+          console.warn(`Promo code "${effectivePromo}" not found or inactive`);
         }
+      } catch (promoError) {
+        console.error('Error applying promo code:', promoError);
       }
     }
     

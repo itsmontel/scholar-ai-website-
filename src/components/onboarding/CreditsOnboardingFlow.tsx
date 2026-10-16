@@ -26,7 +26,7 @@ import {
   type OnboardingAnswers,
   type OnboardingQuestion,
 } from './onboardingContent';
-import { STANDARD_MONTHLY_PRICE, TRIAL_DAYS } from '../../config/pricing';
+import { FIRST_MONTH_PRICE, STANDARD_MONTHLY_PRICE, TRIAL_DAYS } from '../../config/pricing';
 
 /* ═══════════════════════════════════════════════════════════════
    The question-by-question onboarding (same flow as the iOS app).
@@ -451,7 +451,7 @@ export default function CreditsOnboardingFlow({
                 </PrimaryButton>
                 <p className="mt-2 text-center text-[12px] leading-snug font-bold text-stone-500 dark:text-stone-400">
                   {offerTrial
-                    ? `${TRIAL_DAYS} days free with ${TRIAL_CREDITS} credits · then $${STANDARD_MONTHLY_PRICE.pro}/mo for ${PRO_MONTHLY_CREDITS} credits · cancel anytime. We'll email you before it ends.`
+                    ? `${TRIAL_DAYS} days free with ${TRIAL_CREDITS} credits · then $${FIRST_MONTH_PRICE.pro} for the first month (50% off) · then $${STANDARD_MONTHLY_PRICE.pro}/mo · cancel anytime. We'll email you before it ends.`
                     : `${PRO_MONTHLY_CREDITS} credits a month · unused credits roll over · cancel anytime`}
                 </p>
                 <button type="button" onClick={() => onLookAround(answers)} className="mt-1 w-full py-2 text-[13px] font-extrabold text-stone-400 hover:text-stone-600 dark:hover:text-stone-300">
