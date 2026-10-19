@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { WELCOME_DISCOUNT_AT_SIGNUP, WELCOME_PROMO_CODE, TRIAL_CREDITS, TRIAL_DAYS } from '../../config/pricing';
+import { WELCOME_DISCOUNT_AT_SIGNUP, WELCOME_PROMO_CODE, TRIAL_DAYS } from '../../config/pricing';
 
 interface PromoBannerProps {
   /** Promo code shown in the chip (also used to scope the dismissal cookie). */
@@ -14,10 +14,9 @@ interface PromoBannerProps {
 }
 
 /**
- * Front-door offer banner. While the free trial is the offer it promotes
- * the trial (3 days, 3 credits); when the welcome discount is on it shows
- * the 50% off code instead. Landing uses brand gold; the dashboard keeps
- * the purple workspace strip.
+ * Front-door offer banner. Trial mode sells the grade (not credits);
+ * when the welcome discount is on it shows the 50% off code instead.
+ * Landing uses brand gold; the dashboard keeps the purple workspace strip.
  */
 export default function PromoBanner({
   code = WELCOME_PROMO_CODE,
@@ -27,7 +26,7 @@ export default function PromoBanner({
 }: PromoBannerProps) {
   const trialMode = !WELCOME_DISCOUNT_AT_SIGNUP && TRIAL_DAYS > 0;
   const storageKey = trialMode
-    ? `ws_promo_dismissed_${variant}_trial${TRIAL_DAYS}`
+    ? `ws_promo_dismissed_${variant}_grade_essay`
     : `ws_promo_dismissed_${variant}_${code}`;
 
   const [dismissed, setDismissed] = useState<boolean>(() => {
@@ -76,9 +75,9 @@ export default function PromoBanner({
           >
             {trialMode ? (
               <>
-                <span className={isGold ? 'text-[#5A4500]' : 'text-white'}>Try it free for {TRIAL_DAYS} days</span>
+                <span className={isGold ? 'text-[#5A4500]' : 'text-white'}>See your grade before you submit</span>
                 <span className="hidden sm:inline">
-                  {' '}· {TRIAL_CREDITS} credits to grade your next paper or build a study pack
+                  {' '}· professor-style feedback in 60 seconds
                 </span>
               </>
             ) : (

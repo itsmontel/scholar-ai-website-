@@ -1262,7 +1262,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           <PromoBanner
             variant="gold"
             onCta={() => onNavigate(user ? 'pricing' : 'signup')}
-            ctaLabel={user ? 'Start my free trial' : 'Claim 3 free credits'}
+            ctaLabel={user ? 'Start my free trial' : 'Grade my essay'}
           />
         </div>
       )}
@@ -1286,7 +1286,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           everything below the hero (analyzer demo, before/after, etc.)
           sits on the standard light-theme background. The purple hero
           area is now scoped to a fixed-height wrapper at the top. */}
-      <section className="relative flex flex-col overflow-x-clip overflow-hidden xl:overflow-visible bg-[#E7D6F3] dark:bg-[#2B123C]">
+      <section className="landing-hero-zoom relative flex flex-col overflow-x-clip overflow-hidden xl:overflow-visible bg-[#E7D6F3] dark:bg-[#2B123C]">
         {/* ─── HERO BACKGROUND — SINGLE-COLOUR PURPLE (BOUNDED) ─────
             Per user brief: the purple background only spans the hero
             portion (H1 + CTA + tiles + feature-icons row). After that
@@ -1438,11 +1438,11 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     <button
                       type="button"
                       onClick={() => onNavigate('signup')}
-                      aria-label="Try WriteScholar free for 3 days"
+                      aria-label="Grade my essay free"
                       className="group/btn inline-flex items-center justify-center px-8 py-4 sm:px-10 sm:py-[18px] lg:px-11 lg:py-5 rounded-2xl bg-[#58CC02] hover:bg-[#61E002] text-white font-extrabold text-[17px] sm:text-[20px] lg:text-[21px] border-2 border-b-4 border-[#46A302] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 whitespace-nowrap shadow-[0_8px_28px_-6px_rgba(88,204,2,0.55)] hover:shadow-[0_12px_36px_-6px_rgba(88,204,2,0.75)]"
                       style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                     >
-                      Try it free for 3 days
+                      Grade my essay free
                       <svg className="ml-2 w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 group-hover/btn:translate-x-1" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                       </svg>
@@ -1460,7 +1460,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </div>
 
                   <p className="mt-2 sm:mt-2.5 text-[10.5px] sm:text-[11.5px] font-bold text-[#EBDDFB]">
-                    Sign up in 30 seconds · 3 free credits · No payment today
+                    About 30 seconds to get started. No payment today.
                   </p>
 
                   {/* ─── SCHOLAR — celebrating on a white disc inside a
@@ -3039,7 +3039,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-[#58CC02] hover:bg-[#61E002] px-4 py-3 text-white font-extrabold text-[15px] border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all"
               style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
             >
-              Get started today
+              Grade my essay free
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
