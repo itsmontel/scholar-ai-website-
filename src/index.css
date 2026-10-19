@@ -29,10 +29,11 @@
    Threshold matches Tailwind's `lg` breakpoint.
    2026-05-26: Bumped 0.81 → 0.891 (+10%) per user brief — the previous
    value made everything read a touch small on standard 1440px monitors.
-   2026-10-19: Hero gets another 10% zoom-out on top of 0.891 (~0.80
-   effective) so the H1, tiles, and Scholar match the rest of the page. */
+   2026-10-19: Hero gets another zoom-out on top of 0.891 so the H1,
+   tiles, and Scholar don't overpower the rest of the page. Set to 0.945
+   (5% up from 0.9) so it reads a touch larger without matching the old size. */
 .landing-hero-zoom {
-  zoom: 0.9;
+  zoom: 0.945;
 }
 @media (min-width: 1024px) {
   .landing-desktop-zoom {
@@ -40,7 +41,8 @@
   }
   /* Everything below the hero gets an extra ~10% zoom-out (nests on top
      of the 0.891 above → ~0.80 effective). The hero uses landing-hero-zoom
-     for the same 10% so it no longer reads oversized vs the rest. */
+     (0.945) so it sits a little larger than the rest without matching
+     the old oversized size. */
   .landing-downstream-zoom {
     zoom: 0.9;
   }
