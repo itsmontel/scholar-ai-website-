@@ -1324,10 +1324,10 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           />
         </div>
 
-        <div className="relative z-10 flex flex-col items-center justify-start px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 lg:pt-20 pb-4 sm:pb-0 min-w-0">
+        <div className="relative z-10 flex flex-col items-center justify-start px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 lg:pt-32 pb-4 sm:pb-0 min-w-0">
           {/* Absolutely placed so it sits in the top padding and does
               not push the headline, tiles, or CTA down. */}
-          <div className="absolute left-1/2 top-3 sm:top-4 z-20 -translate-x-1/2 inline-flex items-center gap-1.5 sm:gap-2 rounded-full border-2 border-b-[3px] border-stone-300 bg-white pl-1 pr-2.5 sm:pr-3 py-0.5 sm:py-1 shadow-[0_8px_20px_-8px_rgba(0,0,0,0.32)]">
+          <div className="absolute left-1/2 top-8 sm:top-10 lg:top-12 z-20 -translate-x-1/2 inline-flex items-center gap-1.5 sm:gap-2 rounded-full border-2 border-b-[3px] border-stone-300 bg-white pl-1 pr-2.5 sm:pr-3 py-0.5 sm:py-1 shadow-[0_8px_20px_-8px_rgba(0,0,0,0.32)]">
             <span
               className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-full border-2 border-b-[3px] border-[#46A302] bg-[#58CC02] shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]"
               aria-hidden
@@ -1363,22 +1363,22 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               {/* Four feature tiles sit in the corners so they don't
                   stretch the hero. Phones use the 2×2 grid under Scholar. */}
               <div className="hidden md:block pointer-events-none" aria-hidden>
-                <div className="absolute left-0 lg:left-2 top-2 lg:top-3 w-[13rem] lg:w-[15rem]">
+                <div className="absolute left-0 lg:left-2 -top-10 lg:-top-12 w-[13rem] lg:w-[15rem]">
                   <HeroTile label="Essay Analyzer" tilt="left">
                     <img src="/WriterPic.png" alt="" loading="eager" decoding="async" className="absolute inset-0 w-full h-full object-cover object-[88%_8%]" />
                   </HeroTile>
                 </div>
-                <div className="absolute left-4 lg:left-8 top-[44%] lg:top-[46%] w-[13rem] lg:w-[15rem]">
+                <div className="absolute left-4 lg:left-8 top-[34%] lg:top-[36%] w-[13rem] lg:w-[15rem]">
                   <HeroTile label="Fun Study Games" tilt="right" delay="2.4s">
                     <HeroStudyGamesVideo />
                   </HeroTile>
                 </div>
-                <div className="absolute right-0 lg:right-2 top-2 lg:top-3 w-[13rem] lg:w-[15rem]">
+                <div className="absolute right-0 lg:right-2 -top-10 lg:-top-12 w-[13rem] lg:w-[15rem]">
                   <HeroTile label="Notes to Quiz" tilt="right" delay="1.6s">
                     <video src="/hero-quiz.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
                   </HeroTile>
                 </div>
-                <div className="absolute right-4 lg:right-8 top-[44%] lg:top-[46%] w-[13rem] lg:w-[15rem]">
+                <div className="absolute right-4 lg:right-8 top-[34%] lg:top-[36%] w-[13rem] lg:w-[15rem]">
                   <HeroTile label="Notes to Flashcards" tilt="left" delay="0.8s">
                     <video src="/hero-flashcards.mp4" autoPlay muted loop playsInline preload="metadata" className="absolute inset-0 w-full h-full object-cover" />
                   </HeroTile>
@@ -1420,7 +1420,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   </span>
                 </h1>
                 <h2
-                  className="mt-7 sm:mt-8 max-w-[38rem] text-base sm:text-lg lg:text-[1.15rem] font-semibold text-white/90 leading-snug"
+                  className="mt-8 sm:mt-10 max-w-[38rem] text-base sm:text-lg lg:text-[1.15rem] font-semibold text-white/90 leading-snug"
                   style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                 >
                   <span className="font-extrabold text-[#FFC800]">WriteScholar</span> the all-in-one AI study system to{' '}
@@ -1434,16 +1434,16 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               <div className="relative z-10 flex flex-col items-center text-center w-full mx-auto pb-1 opacity-0 animate-hero-card-enter">
                   {/* ─── CTA + LOGIN ROW — green trial button pops on the
                       purple; white "Log in" keeps the Duolingo lip. */}
-                  <div className="mt-5 sm:mt-6 flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
+                  <div className="mt-10 sm:mt-14 flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
                     <button
                       type="button"
                       onClick={() => onNavigate('signup')}
                       aria-label="Grade my essay free"
-                      className="group/btn inline-flex items-center justify-center px-8 py-4 sm:px-10 sm:py-[18px] lg:px-11 lg:py-5 rounded-2xl bg-[#58CC02] hover:bg-[#61E002] text-white font-extrabold text-[17px] sm:text-[20px] lg:text-[21px] border-2 border-b-4 border-[#46A302] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 whitespace-nowrap shadow-[0_8px_28px_-6px_rgba(88,204,2,0.55)] hover:shadow-[0_12px_36px_-6px_rgba(88,204,2,0.75)]"
+                      className="group/btn inline-flex items-center justify-center px-10 py-5 sm:px-12 sm:py-[22px] lg:px-14 lg:py-6 rounded-2xl bg-[#58CC02] hover:bg-[#61E002] text-white font-extrabold text-[19px] sm:text-[22px] lg:text-[24px] border-2 border-b-4 border-[#46A302] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all duration-150 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 whitespace-nowrap shadow-[0_8px_28px_-6px_rgba(88,204,2,0.55)] hover:shadow-[0_12px_36px_-6px_rgba(88,204,2,0.75)]"
                       style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
                     >
                       Grade my essay free
-                      <svg className="ml-2 w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 group-hover/btn:translate-x-1" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
+                      <svg className="ml-2.5 w-5 h-5 sm:w-6 sm:h-6 transition-transform duration-200 group-hover/btn:translate-x-1" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24" aria-hidden>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                       </svg>
                     </button>
@@ -1459,30 +1459,14 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                     </button>
                   </div>
 
-                  <p className="mt-2 sm:mt-2.5 text-[10.5px] sm:text-[11.5px] font-bold text-[#EBDDFB]">
+                  <p className="mt-3 sm:mt-3.5 text-[10.5px] sm:text-[11.5px] font-bold text-[#EBDDFB]">
                     About 30 seconds to get started. No payment today.
                   </p>
 
-                  {/* ─── SCHOLAR — celebrating on a white disc inside a
-                      pulsing ring, over the inner purple circle. */}
-                  <div className="relative mt-2 grid place-items-center w-[136px] h-[136px] sm:w-[144px] sm:h-[144px]" aria-hidden>
-                    <span className="absolute inset-[3%] rounded-full border-4 border-white/35 landing-scholar-ring" />
-                    <span className="absolute inset-[9%] rounded-full bg-white border-b-[5px] border-[#E4D2F8] shadow-[0_14px_30px_-10px_rgba(40,0,80,0.55)]" />
-                    <img
-                      src="/mascot-celebrating.webp"
-                      alt=""
-                      width={180}
-                      height={180}
-                      decoding="async"
-                      className="relative w-[104px] h-[104px] sm:w-[110px] sm:h-[110px] object-contain"
-                    />
-                  </div>
-
-                  {/* ─── STATS STRIP — sits under Scholar so it stays
-                      on the same screen as the mascot. Phones wrap to
+                  {/* ─── STATS STRIP — under the CTA. Phones wrap to
                       two lines (50k + 91% on top, 60 sec below) so
                       nothing is clipped; sm+ stays one row. */}
-                  <div className="relative z-10 mt-2 sm:mt-2.5 flex w-full flex-col items-center gap-y-1 sm:w-max sm:flex-row sm:justify-center sm:gap-x-5 sm:gap-y-0">
+                  <div className="relative z-10 mt-6 sm:mt-8 flex w-full flex-col items-center gap-y-1 sm:w-max sm:flex-row sm:justify-center sm:gap-x-5 sm:gap-y-0">
                     <div className="flex items-center justify-center gap-x-2.5 min-[380px]:gap-x-3 sm:gap-x-5">
                       {[
                         { value: '50,000+', label: 'students worldwide' },
@@ -1533,7 +1517,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                   border, no background — pure icon + text floating on
                   the purple field. Custom-drawn so the hero feels unique
                   to WriteScholar instead of generic, per user brief. */}
-              <div className="relative z-10 w-full max-w-5xl mx-auto mt-1 sm:mt-1.5 pb-16 sm:pb-20 lg:pb-24 px-4">
+              <div className="relative z-10 w-full max-w-5xl mx-auto mt-6 sm:mt-8 pb-16 sm:pb-20 lg:pb-24 px-4">
                 <div className="flex flex-wrap items-start justify-center gap-x-5 gap-y-4 sm:gap-x-8 sm:gap-y-5">
                   {[
                     {
