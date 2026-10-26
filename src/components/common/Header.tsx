@@ -614,8 +614,8 @@ const Header: React.FC<HeaderProps> = ({
                             ) : (
                               <div className="bg-stone-50 dark:bg-stone-700/50 rounded-lg p-2">
                                 <span className="text-[10px] text-stone-500 dark:text-stone-400 uppercase tracking-wide">Credits</span>
-                                <div className="text-sm font-semibold text-red-600">0 left</div>
-                                <span className="text-[10px] text-stone-500 dark:text-stone-400">Start the free trial for 3</span>
+                                <div className={`text-sm font-semibold ${usageStats.analysesRemaining > 0 ? 'text-[#8A48C7]' : 'text-red-600'}`}>{Math.max(0, usageStats.analysesRemaining)} left</div>
+                                <span className="text-[10px] text-stone-500 dark:text-stone-400">{usageStats.analysesRemaining > 0 ? 'Free credits, first 7 days' : 'Get 99 a month on Pro'}</span>
                               </div>
                             )}
                           </div>

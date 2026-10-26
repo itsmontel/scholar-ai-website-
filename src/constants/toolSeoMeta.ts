@@ -25,22 +25,22 @@ export const TOOL_SEO_META = {
   analyze: {
     title: 'AI Essay Checker — Feedback in Seconds | WriteScholar',
     description:
-      'Paste your essay and get professor-style feedback with a grade, rubric scores, and line-by-line fixes. 1 credit per essay. Try it free for 3 days.',
+      'Paste your essay and get professor-style feedback with a grade, rubric scores, and line-by-line fixes. 1 credit per essay. 3 free credits, no card.',
   },
   'ai-essay-editor': {
     title: 'AI Essay Editor — Write, Grade & Fix Essays | WriteScholar',
     description:
-      'Write your essay in a real editor and get a professor-style grade, a full rubric, and one-click line-by-line fixes. Word in, Word out. Try it free for 3 days.',
+      'Write your essay in a real editor and get a professor-style grade, a full rubric, and one-click line-by-line fixes. Word in, Word out. Start free with 3 credits.',
   },
   citations: {
     title: 'Citation Finder — APA, MLA, Chicago | WriteScholar',
     description:
-      'Find peer-reviewed sources for research papers in seconds and export APA, MLA, Chicago, or Harvard citations. 1 credit per search. Try it free for 3 days.',
+      'Find peer-reviewed sources for research papers in seconds and export APA, MLA, Chicago, or Harvard citations. 1 credit per search. 3 free credits, no card.',
   },
   'study-pack': {
     title: 'AI Study Pack — Flashcards, Quiz & Lesson | WriteScholar',
     description:
-      'Paste your notes once and get a lesson, flashcards, a quiz, and study games. 1 credit per study pack. Try it free for 3 days with 3 credits.',
+      'Paste your notes once and get a lesson, flashcards, a quiz, and study games. 1 credit per study pack. Start free with 3 credits, no card.',
   },
   summarizer: {
     title: 'AI Summarizer for Papers & Readings | WriteScholar',

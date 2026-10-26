@@ -56,7 +56,12 @@ export const DashboardWelcomeToast: React.FC<DashboardWelcomeToastProps> = ({
       /* ignore */
     }
 
-    const t = window.setTimeout(() => setVisible(true), ENTRY_DELAY_MS);
+    const t = window.setTimeout(() => {
+      // Onboarding can hand off straight into their graded essay
+      // (/documents/:id); "drop in an essay" would be wrong there.
+      if (window.location.pathname.startsWith('/documents/')) return;
+      setVisible(true);
+    }, ENTRY_DELAY_MS);
     return () => window.clearTimeout(t);
   }, [currentPage, user?.id, user?.onboardingCompleted, paywallOpen, seenKey]);
 

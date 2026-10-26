@@ -226,7 +226,7 @@ export interface ProductSchemaInput {
 
 /** Pro and Premium as schema.org offers. Keep in sync with index.html. */
 const CREDIT_PLAN_OFFERS = [
-  { name: 'Pro — 99 credits a month', price: '19.99', note: '3-day free trial with 3 credits, then 99 credits a month.' },
+  { name: 'Pro — 99 credits a month', price: '19.99', note: '3 free credits to start, then 99 credits a month. 50% off the first month.' },
   { name: 'Premium — 199 credits a month', price: '39.99', note: '199 credits a month.' },
 ].map(({ name, price, note }) => ({
   '@type': 'Offer',

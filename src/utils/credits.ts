@@ -24,6 +24,13 @@ export interface CreditState {
   daysUntilReset: number | null;
   trialCredits: number;
   trialDays: number;
+  /** Free accounts: credits granted for the free week (0 once they have had a trial or plan). */
+  freeCredits: number;
+  freeCreditDays: number;
+  /** When the free credits stop working. null when there are none. */
+  freeExpiresAt: string | null;
+  freeDaysLeft: number | null;
+  freeExpired: boolean;
 }
 
 /** Fired after anything that spends a credit, so counters refresh. */
@@ -58,7 +65,20 @@ export function parseCreditState(raw: unknown): CreditState | null {
     daysUntilReset: typeof c.daysUntilReset === 'number' ? c.daysUntilReset : null,
     trialCredits: num(c.trialCredits, 3),
     trialDays: num(c.trialDays, 3),
+    freeCredits: num(c.freeCredits),
+    freeCreditDays: num(c.freeCreditDays, 7),
+    freeExpiresAt: typeof c.freeExpiresAt === 'string' ? c.freeExpiresAt : null,
+    freeDaysLeft: typeof c.freeDaysLeft === 'number' ? c.freeDaysLeft : null,
+    freeExpired: c.freeExpired === true,
   };
+}
+
+/** "6 days left" / "1 day left" / "Last day" for the free week. */
+export function freeDaysLeftLabel(credits: Pick<CreditState, 'freeDaysLeft' | 'freeExpiresAt'>): string | null {
+  if (!credits.freeExpiresAt || credits.freeDaysLeft == null) return null;
+  const msLeft = Date.parse(credits.freeExpiresAt) - Date.now();
+  if (Number.isFinite(msLeft) && msLeft > 0 && msLeft < 24 * 60 * 60 * 1000) return 'Last day';
+  return credits.freeDaysLeft === 1 ? '1 day left' : `${credits.freeDaysLeft} days left`;
 }
 
 /** "Nov 3" */

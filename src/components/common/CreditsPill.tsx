@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import CreditCoin from './CreditCoin';
 import { trackEvent } from '../../utils/analytics';
-import { isPaidCreditPlan, shortDate, type CreditState } from '../../utils/credits';
-import { MONTHLY_CREDITS, TRIAL_CREDITS, TRIAL_DAYS } from '../../config/pricing';
+import { freeDaysLeftLabel, isPaidCreditPlan, shortDate, type CreditState } from '../../utils/credits';
+import { MONTHLY_CREDITS, TRIAL_CREDITS, TRIAL_DAYS, WELCOME_DISCOUNT_AT_SIGNUP } from '../../config/pricing';
 
 /**
  * Top-right credit counter + its dropdown. One credit = one essay
- * analysis, study pack or citation search. Shows the trial's free
- * credits, the paid balance (with rollover), a low/empty state, and
- * the 499 cap.
+ * analysis, study pack or citation search. Shows the free week's
+ * credits (and when they expire), the trial's credits, the paid balance
+ * (with rollover), a low/empty state, and the 499 cap.
  */
 export default function CreditsPill({
   credits,
@@ -42,16 +42,19 @@ export default function CreditsPill({
 
   const paid = credits ? isPaidCreditPlan(credits.plan) : false;
   const remaining = credits?.remaining ?? 0;
+  /** Never-paid account inside (or just past) its free week. */
+  const freeWeek = !paid && !!credits && credits.freeCredits > 0;
+  const freeLive = freeWeek && !credits?.freeExpired;
   const atCap = paid && !!credits && credits.total >= credits.cap;
   const low = paid && !credits?.isTrial && remaining <= 3;
-  const empty = !paid || remaining <= 0;
+  const empty = (!paid && !freeLive) || remaining <= 0;
 
   const openPaywall = () => {
     setOpen(false);
     window.dispatchEvent(new CustomEvent('writescholar-open-paywall', { detail: { force: true, trigger: 'credits_pill' } }));
   };
 
-  const pillTone = !paid
+  const pillTone = !paid && !(freeLive && remaining > 0)
     ? 'bg-white dark:bg-stone-900 border-[#E5E5E5] dark:border-stone-700'
     : atCap
       ? 'bg-[#F3EAFF] dark:bg-[#A560E8]/15 border-[#A560E8]'
@@ -60,7 +63,7 @@ export default function CreditsPill({
         : 'bg-[#FFF6DB] dark:bg-[#F5B70A]/10 border-[#F3DB93] dark:border-[#F5B70A]/40';
 
   const label = !paid
-    ? 'credits'
+    ? freeLive ? 'free' : 'credits'
     : credits?.isTrial
       ? 'free'
       : low
@@ -100,7 +103,11 @@ export default function CreditsPill({
             <p className="text-[16px] font-black">Your credits</p>
             <p className="text-[12px] font-extrabold text-stone-500 dark:text-stone-400">
               {!paid
-                ? 'No plan yet'
+                ? freeLive && credits
+                  ? freeDaysLeftLabel(credits) ?? ''
+                  : freeWeek && credits
+                    ? `Expired ${shortDate(credits.freeExpiresAt) ?? ''}`.trim()
+                    : 'No plan yet'
                 : credits?.isTrial
                   ? `Trial ends ${shortDate(credits.periodEnd) ?? 'soon'}`
                   : credits?.isPaused
@@ -116,9 +123,17 @@ export default function CreditsPill({
           <div className="flex items-baseline gap-2">
             <span className="text-[44px] leading-none font-black tracking-tight tabular-nums">{remaining}</span>
             <span className="text-[14px] font-extrabold text-stone-500 dark:text-stone-400">
-              {!paid ? 'credits' : credits?.isTrial ? `of ${credits.total} free` : `of ${credits?.cap ?? 499} max`}
+              {!paid ? (freeWeek && credits ? `of ${credits.total} free` : 'credits') : credits?.isTrial ? `of ${credits.total} free` : `of ${credits?.cap ?? 499} max`}
             </span>
           </div>
+
+          {freeWeek && credits && (
+            <div className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${Math.max(1, credits.total)}, minmax(0, 1fr))` }} aria-hidden>
+              {Array.from({ length: Math.max(1, credits.total) }, (_, i) => (
+                <span key={i} className={`h-2.5 rounded-full ${credits.freeExpired || i < credits.used ? 'bg-[#E5E5E5] dark:bg-stone-700' : 'bg-[#F5B70A]'}`} />
+              ))}
+            </div>
+          )}
 
           {paid && credits && (
             credits.isTrial ? (
@@ -154,6 +169,17 @@ export default function CreditsPill({
             <Note tone="warn">You&apos;re near the {credits.cap} cap. Use {credits.wouldLoseAtRenewal} credits before {shortDate(credits.periodEnd) ?? 'your renewal'} or they won&apos;t carry over.</Note>
           )}
 
+          {freeLive && credits && (
+            <Note tone={remaining <= 0 ? 'warn' : 'info'}>
+              {remaining > 0
+                ? `Use them by ${shortDate(credits.freeExpiresAt) ?? 'the end of the week'} or they expire. Free grades show your grade and every highlight; Pro opens the comments, section scores and fixes.`
+                : `You've used your ${credits.total} free credits. Pro gives you ${MONTHLY_CREDITS.pro} a month and opens every comment and fix.`}
+            </Note>
+          )}
+          {freeWeek && credits?.freeExpired && (
+            <Note tone="warn">Your free credits expired on {shortDate(credits.freeExpiresAt) ?? 'day 7'}. Pro gives you {MONTHLY_CREDITS.pro} a month, and anything you don&apos;t use rolls over.</Note>
+          )}
+
           <Note>
             1 credit = 1 essay analysis, study pack or citation search.
             {paid ? ` Unused credits roll over every month, up to ${credits?.cap ?? 499}.` : ''}
@@ -161,7 +187,11 @@ export default function CreditsPill({
 
           {!paid ? (
             <button type="button" onClick={openPaywall} className="h-12 rounded-2xl bg-[#A560E8] hover:bg-[#7733B5] border-2 border-b-4 border-[#7733B5] text-white text-[14px] font-extrabold uppercase tracking-wide active:border-b-2">
-              {TRIAL_DAYS > 0 ? `Start free trial · ${TRIAL_CREDITS} credits` : `Get ${MONTHLY_CREDITS.pro} credits a month`}
+              {TRIAL_DAYS > 0
+                ? `Start free trial · ${TRIAL_CREDITS} credits`
+                : WELCOME_DISCOUNT_AT_SIGNUP && freeWeek
+                  ? 'Get Pro · 50% off month 1'
+                  : `Get ${MONTHLY_CREDITS.pro} credits a month`}
             </button>
           ) : credits?.isTrial ? (
             <button type="button" onClick={() => { setOpen(false); onNavigate('billing'); }} className="h-12 rounded-2xl bg-[#A560E8] hover:bg-[#7733B5] border-2 border-b-4 border-[#7733B5] text-white text-[14px] font-extrabold uppercase tracking-wide active:border-b-2">

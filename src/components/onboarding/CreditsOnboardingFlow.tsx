@@ -1,13 +1,11 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type HTMLAttributes, type ReactNode } from 'react';
 import CreditCoin from '../common/CreditCoin';
 import { trackEvent } from '../../utils/analytics';
 import {
   QUESTIONS,
   SOURCE_QUESTION,
   RECOMMENDATIONS,
-  TRIAL_CREDIT_PLAN,
-  TRIAL_CREDITS,
-  PRO_MONTHLY_CREDITS,
+  FREE_CREDIT_PLAN,
   CREDIT_CAP,
   bubbleFor,
   empathyFor,
@@ -26,7 +24,7 @@ import {
   type OnboardingAnswers,
   type OnboardingQuestion,
 } from './onboardingContent';
-import { FIRST_MONTH_PRICE, STANDARD_MONTHLY_PRICE, TRIAL_DAYS } from '../../config/pricing';
+import { FREE_CREDITS, FREE_CREDIT_DAYS } from '../../config/pricing';
 
 /* ═══════════════════════════════════════════════════════════════
    The question-by-question onboarding (same flow as the iOS app).
@@ -38,10 +36,11 @@ import { FIRST_MONTH_PRICE, STANDARD_MONTHLY_PRICE, TRIAL_DAYS } from '../../con
      12     (skipped) week comparison — didn't fit the flow
      13     How did you find us?
      14     Building your plan
-     15     Plan + 3 free credits → start the trial
+     15     Plan + 3 free credits → upload their essay or notes
 
-   Answers live in localStorage so a cancelled Stripe checkout comes
-   back to the plan instead of the first question.
+   No paywall here: the plan screen sends them to grade their own essay
+   (or build a pack from their notes) with a free credit. Answers live in
+   localStorage so leaving and coming back resumes at the plan.
    ═══════════════════════════════════════════════════════════════ */
 
 export const PLAN_STEP = 15;
@@ -84,12 +83,9 @@ interface Props {
   /** Scopes the saved answers (user id, or 'preview'). */
   userKey: string;
   firstName?: string;
-  /** null while unknown: assume the trial is available. */
-  trialEligible: boolean | null;
-  starting: boolean;
-  error: string | null;
   initialStep?: number;
-  onStartTrial: (answers: OnboardingAnswers) => void;
+  /** Plan screen CTA: go upload their essay or notes. */
+  onStart: (answers: OnboardingAnswers) => void;
   onLookAround: (answers: OnboardingAnswers) => void;
   /** Called once, when the last question is answered. */
   onAnswersReady: (answers: OnboardingAnswers) => void;
@@ -99,11 +95,8 @@ interface Props {
 export default function CreditsOnboardingFlow({
   userKey,
   firstName,
-  trialEligible,
-  starting,
-  error,
   initialStep,
-  onStartTrial,
+  onStart,
   onLookAround,
   onAnswersReady,
   onLogout,
@@ -168,7 +161,6 @@ export default function CreditsOnboardingFlow({
   const { from, to } = gradeJump(answers);
   const [outA, outB] = outcomesFor(path);
   const rec = RECOMMENDATIONS[path];
-  const offerTrial = trialEligible !== false && TRIAL_DAYS > 0;
   const progress = Math.round((Math.min(step, S.PLAN) / S.PLAN) * 100);
 
   const go = (n: number) => setStep(Math.max(0, Math.min(S.PLAN, n)));
@@ -222,53 +214,11 @@ export default function CreditsOnboardingFlow({
   }, []);
 
   return (
-    <div className="relative min-h-[100dvh] flex flex-col bg-gradient-to-br from-[#FAF7FF] via-[#FBF7FF] to-[#F3EAFF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 text-[#3C3C3C] dark:text-stone-100" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
-      <div className="absolute inset-0 pointer-events-none wso-bg-cycle" aria-hidden />
-      <div className="hidden lg:block absolute -top-40 left-[8%] h-[28rem] w-[28rem] rounded-full bg-[#A560E8]/15 blur-3xl pointer-events-none" aria-hidden />
-      <div className="hidden lg:block absolute bottom-0 right-[5%] h-[24rem] w-[24rem] rounded-full bg-[#F5B70A]/10 blur-3xl pointer-events-none" aria-hidden />
+    <FlowShell
+      topBar={showTopBar ? <FlowTopBar progress={progress} onBack={back} onLogout={onLogout} credits={FREE_CREDITS} /> : null}
+    >
       {/* Warm the next animation so it plays the moment the step changes. */}
       {nextScholar && nextScholar !== scholar && <img src={nextScholar} alt="" aria-hidden className="hidden" />}
-
-      {showTopBar && (
-        <div className="relative z-10">
-          <div className="bg-white/95 dark:bg-stone-900/95 backdrop-blur border-b-2 border-[#E5E5E5] dark:border-stone-800">
-            <div className="mx-auto w-full max-w-6xl px-3 sm:px-5 lg:px-10 py-2.5 flex items-center gap-2 lg:gap-4">
-              <button type="button" onClick={back} aria-label="Back" className="w-11 h-11 flex items-center justify-center rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 dark:hover:text-stone-200 transition-colors">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
-              </button>
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-800">
-                  <img src="/main-logo.png" alt="WriteScholar" className="w-full h-full object-contain" width="120" height="120" />
-                </div>
-                <span className="hidden min-[360px]:inline text-lg font-extrabold tracking-tight">WriteScholar</span>
-              </div>
-              {/* Desktop: progress sits in the bar itself. */}
-              <div className="hidden lg:flex flex-1 items-center gap-3 px-6" aria-hidden>
-                <div className="relative flex-1 h-3.5 rounded-full bg-[#ECE6F3] dark:bg-stone-800 overflow-hidden">
-                  <div className="relative h-full bg-[#A560E8] rounded-full transition-all duration-500 ease-out overflow-hidden" style={{ width: `${progress}%` }}>
-                    <div className="absolute inset-0 wso-shimmer" />
-                  </div>
-                </div>
-                <span className="text-[12px] font-black text-stone-400 tabular-nums w-10 text-right">{progress}%</span>
-              </div>
-              <span className="ml-auto lg:ml-0 inline-flex items-center gap-1.5 h-8 pl-1.5 pr-3 rounded-full bg-[#FFF6DB] border-2 border-[#F3DB93] text-[13px] font-black text-[#7A5A00]">
-                <CreditCoin size={18} />
-                {TRIAL_CREDITS} free
-              </span>
-              {onLogout && (
-                <button type="button" onClick={onLogout} className="hidden sm:inline-flex h-9 px-3 items-center rounded-xl text-[12px] font-extrabold uppercase tracking-wide text-stone-400 hover:text-stone-700 dark:hover:text-stone-200">
-                  Sign out
-                </button>
-              )}
-            </div>
-          </div>
-          <div className="lg:hidden h-3 bg-[#E5E5E5] dark:bg-stone-800 overflow-hidden">
-            <div className="relative h-full bg-[#A560E8] rounded-r-full transition-all duration-500 ease-out overflow-hidden" style={{ width: `${progress}%` }}>
-              <div className="absolute inset-0 wso-shimmer" aria-hidden />
-            </div>
-          </div>
-        </div>
-      )}
 
       <div key={step} className="relative z-[1] flex-1 flex flex-col min-h-0">
         {step === S.WELCOME && (
@@ -425,7 +375,7 @@ export default function CreditsOnboardingFlow({
               </div>
             </div>
             <ul className="w-full flex flex-col gap-3 text-left lg:bg-white/80 lg:dark:bg-stone-900/80 lg:border-2 lg:border-[#EADFF8] lg:dark:border-stone-700 lg:rounded-3xl lg:p-6">
-              {['Reading your answers', goalLine(answers), 'Choosing where to start', `Planning your ${TRIAL_CREDITS} free credits`].map((label, i) => {
+              {['Reading your answers', goalLine(answers), 'Choosing where to start', `Planning your ${FREE_CREDITS} free credits`].map((label, i) => {
                 const done = buildTick > i;
                 return (
                   <li key={label} className="flex items-center gap-3 text-[15px] lg:text-[16px] font-extrabold">
@@ -446,13 +396,11 @@ export default function CreditsOnboardingFlow({
             stage={{ src: scholar, bubble: planBubble(answers, firstName) }}
             footer={
               <>
-                <PrimaryButton onClick={() => onStartTrial(answers)} disabled={starting}>
-                  {starting ? 'Opening secure checkout…' : offerTrial ? 'Start my free trial' : `Get Pro · $${STANDARD_MONTHLY_PRICE.pro}/mo`}
+                <PrimaryButton onClick={() => onStart(answers)}>
+                  {rec.tool === 'study-pack' ? 'Make my study pack' : 'Grade my essay'}
                 </PrimaryButton>
                 <p className="mt-2 text-center text-[12px] leading-snug font-bold text-stone-500 dark:text-stone-400">
-                  {offerTrial
-                    ? `${TRIAL_DAYS} days free with ${TRIAL_CREDITS} credits · then $${FIRST_MONTH_PRICE.pro} for the first month (50% off) · then $${STANDARD_MONTHLY_PRICE.pro}/mo · cancel anytime. We'll email you before it ends.`
-                    : `${PRO_MONTHLY_CREDITS} credits a month · unused credits roll over · cancel anytime`}
+                  Free · uses 1 of your {FREE_CREDITS} credits · no card needed
                 </p>
                 <button type="button" onClick={() => onLookAround(answers)} className="mt-1 w-full py-2 text-[13px] font-extrabold text-stone-400 hover:text-stone-600 dark:hover:text-stone-300">
                   Look around first
@@ -474,53 +422,140 @@ export default function CreditsOnboardingFlow({
               <div className="text-[14px] lg:text-[15px] font-bold leading-relaxed">{rec.body}</div>
             </div>
 
-            {offerTrial && (
-              <div className="wso-card-in bg-[#FFF6DB] dark:bg-[#F5B70A]/10 border-2 border-b-4 border-[#F3DB93] dark:border-[#F5B70A]/40 rounded-2xl px-4 py-3.5 lg:px-5 lg:py-4 flex flex-col gap-2.5" style={{ animationDelay: '0.15s' }}>
-                <div className="flex items-center justify-between">
-                  <div className="text-[17px] font-black">Your {TRIAL_CREDITS} free credits</div>
-                  <div className="flex gap-0.5">
-                    {Array.from({ length: TRIAL_CREDITS }, (_, i) => (
-                      <CreditCoin key={i} size={22} className="wso-coin" style={{ animationDelay: `${0.3 + i * 0.15}s` }} />
-                    ))}
-                  </div>
+            <div className="wso-card-in bg-[#FFF6DB] dark:bg-[#F5B70A]/10 border-2 border-b-4 border-[#F3DB93] dark:border-[#F5B70A]/40 rounded-2xl px-4 py-3.5 lg:px-5 lg:py-4 flex flex-col gap-2.5" style={{ animationDelay: '0.15s' }}>
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <div className="text-[17px] font-black">Your {FREE_CREDITS} free credits</div>
+                  <div className="text-[12px] font-extrabold text-[#7A5A00] dark:text-[#F5D670]">Use them within {FREE_CREDIT_DAYS} days</div>
                 </div>
-                {TRIAL_CREDIT_PLAN[path].map((c, i) => (
-                  <div key={c.label} className="flex items-center gap-2.5 text-[14px] font-bold">
-                    <span className="w-[22px] h-[22px] shrink-0 rounded-full bg-[#F5B70A] text-[#3C2A00] text-[12px] font-black flex items-center justify-center">{i + 1}</span>
-                    <span className="flex-1">{c.label}</span>
-                    <span className="text-[12px] font-black text-[#7A5A00] dark:text-[#F5D670]">{c.when}</span>
-                  </div>
-                ))}
+                <div className="flex gap-0.5">
+                  {Array.from({ length: FREE_CREDITS }, (_, i) => (
+                    <CreditCoin key={i} size={22} className="wso-coin" style={{ animationDelay: `${0.3 + i * 0.15}s` }} />
+                  ))}
+                </div>
               </div>
-            )}
+              {FREE_CREDIT_PLAN[path].map((c, i) => (
+                <div key={c.label} className="flex items-center gap-2.5 text-[14px] font-bold">
+                  <span className="w-[22px] h-[22px] shrink-0 rounded-full bg-[#F5B70A] text-[#3C2A00] text-[12px] font-black flex items-center justify-center">{i + 1}</span>
+                  <span className="flex-1">{c.label}</span>
+                  <span className="text-[12px] font-black text-[#7A5A00] dark:text-[#F5D670]">{c.when}</span>
+                </div>
+              ))}
+            </div>
 
             <div className="wso-card-in bg-white dark:bg-stone-900 lg:bg-[#FBF8FF] lg:dark:bg-stone-800/60 border-2 border-[#E5E5E5] dark:border-stone-700 rounded-2xl px-4 py-3.5 flex flex-col gap-2" style={{ animationDelay: '0.3s' }}>
               <div className="text-[14px] font-black">How credits work</div>
               <div className="flex gap-2 text-[13px] font-bold leading-snug text-[#4B4B4B] dark:text-stone-300">
                 <CreditCoin size={16} className="mt-px" />
-                1 credit = 1 essay analysis, study pack or citation search
+                1 credit = 1 essay grade, study pack or citation search
               </div>
               <div className="flex gap-2 text-[13px] font-bold leading-snug text-[#4B4B4B] dark:text-stone-300">
                 <svg className="w-4 h-4 mt-px shrink-0 text-[#7733B5] dark:text-[#C9A0F0]" fill="none" stroke="currentColor" strokeWidth={2.8} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16" /><path d="M3 21v-5h5" /></svg>
-                Unused credits roll over every month, up to {CREDIT_CAP}
+                Pro adds every comment and fix, plus 99 credits a month that roll over (up to {CREDIT_CAP})
               </div>
             </div>
-
-            {error && (
-              <div role="alert" className="rounded-xl bg-[#F3EAFF] dark:bg-[#A560E8]/10 border-2 border-[#A560E8]/30 px-3 py-2.5 text-[13px] text-[#7733B5] dark:text-[#C9A0F0] font-bold">
-                {error}
-              </div>
-            )}
           </Screen>
         )}
       </div>
+    </FlowShell>
+  );
+}
 
+/* ─── Pieces ─── */
+
+/**
+ * Page frame for every onboarding step: the lavender wash, the slow
+ * colour cycle and the soft blobs, plus the flow's motion CSS. The
+ * upload / working steps in OnboardingPage use it too, so the whole
+ * onboarding reads as one flow.
+ */
+export function FlowShell({
+  topBar,
+  children,
+  dropHandlers,
+}: {
+  topBar?: ReactNode;
+  children: ReactNode;
+  dropHandlers?: Pick<HTMLAttributes<HTMLDivElement>, 'onDragOver' | 'onDragLeave' | 'onDrop'>;
+}) {
+  return (
+    <div
+      className="relative min-h-[100dvh] flex flex-col bg-gradient-to-br from-[#FAF7FF] via-[#FBF7FF] to-[#F3EAFF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 text-[#3C3C3C] dark:text-stone-100"
+      style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
+      {...dropHandlers}
+    >
+      <div className="absolute inset-0 pointer-events-none wso-bg-cycle" aria-hidden />
+      <div className="hidden lg:block absolute -top-40 left-[8%] h-[28rem] w-[28rem] rounded-full bg-[#A560E8]/15 blur-3xl pointer-events-none" aria-hidden />
+      <div className="hidden lg:block absolute bottom-0 right-[5%] h-[24rem] w-[24rem] rounded-full bg-[#F5B70A]/10 blur-3xl pointer-events-none" aria-hidden />
+      {topBar}
+      {children}
       <style>{FLOW_CSS}</style>
     </div>
   );
 }
 
-/* ─── Pieces ─── */
+/** Logo, progress and the free-credit pill. No back button when onBack is omitted. */
+export function FlowTopBar({
+  progress,
+  onBack,
+  onLogout,
+  credits,
+}: {
+  progress: number;
+  onBack?: () => void;
+  onLogout?: () => void;
+  /** Free credits to show in the pill; omit to hide it. */
+  credits?: number | null;
+}) {
+  return (
+    <div className="relative z-10">
+      <div className="bg-white/95 dark:bg-stone-900/95 backdrop-blur border-b-2 border-[#E5E5E5] dark:border-stone-800">
+        <div className="mx-auto w-full max-w-6xl px-3 sm:px-5 lg:px-10 py-2.5 flex items-center gap-2 lg:gap-4">
+          {onBack ? (
+            <button type="button" onClick={onBack} aria-label="Back" className="w-11 h-11 flex items-center justify-center rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 dark:hover:text-stone-200 transition-colors">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+            </button>
+          ) : (
+            <span className="w-2 h-11 lg:w-11" aria-hidden />
+          )}
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center overflow-hidden border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-800">
+              <img src="/main-logo.png" alt="WriteScholar" className="w-full h-full object-contain" width="120" height="120" />
+            </div>
+            <span className="hidden min-[360px]:inline text-lg font-extrabold tracking-tight">WriteScholar</span>
+          </div>
+          {/* Desktop: progress sits in the bar itself. */}
+          <div className="hidden lg:flex flex-1 items-center gap-3 px-6" aria-hidden>
+            <div className="relative flex-1 h-3.5 rounded-full bg-[#ECE6F3] dark:bg-stone-800 overflow-hidden">
+              <div className="relative h-full bg-[#A560E8] rounded-full transition-all duration-500 ease-out overflow-hidden" style={{ width: `${progress}%` }}>
+                <div className="absolute inset-0 wso-shimmer" />
+              </div>
+            </div>
+            <span className="text-[12px] font-black text-stone-400 tabular-nums w-10 text-right">{progress}%</span>
+          </div>
+          <div className="ml-auto lg:ml-0 flex items-center gap-1">
+            {credits != null && (
+              <span className="inline-flex items-center gap-1.5 h-8 pl-1.5 pr-3 rounded-full bg-[#FFF6DB] border-2 border-[#F3DB93] text-[13px] font-black text-[#7A5A00]">
+                <CreditCoin size={18} />
+                {credits} free
+              </span>
+            )}
+            {onLogout && (
+              <button type="button" onClick={onLogout} className="hidden sm:inline-flex h-9 px-3 items-center rounded-xl text-[12px] font-extrabold uppercase tracking-wide text-stone-400 hover:text-stone-700 dark:hover:text-stone-200">
+                Sign out
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+      <div className="lg:hidden h-3 bg-[#E5E5E5] dark:bg-stone-800 overflow-hidden">
+        <div className="relative h-full bg-[#A560E8] rounded-r-full transition-all duration-500 ease-out overflow-hidden" style={{ width: `${progress}%` }}>
+          <div className="absolute inset-0 wso-shimmer" aria-hidden />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const WELCOME_PROMISES = [
   { label: 'Know your grade before you hand it in', icon: 'M4 19V5M4 19h16M8 15l4-4 3 3 5-6' },
@@ -577,7 +612,7 @@ function Welcome({ onNext, onLogout, firstName }: { onNext: () => void; onLogout
         </div>
         <div className="flex flex-col gap-6">
           <span className="self-start inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white dark:bg-stone-900 border-2 border-[#EADFF8] dark:border-stone-700 text-[12px] font-black uppercase tracking-[0.12em] text-[#7733B5] dark:text-[#C9A0F0]">
-            <CreditCoin size={18} /> {TRIAL_CREDITS} free credits waiting
+            <CreditCoin size={18} /> {FREE_CREDITS} free credits waiting
           </span>
           {headline}
           <p className="wso-subtitle text-[18px] leading-relaxed font-semibold text-stone-500 dark:text-stone-400 max-w-[30rem]">
@@ -604,7 +639,7 @@ function Welcome({ onNext, onLogout, firstName }: { onNext: () => void; onLogout
 }
 
 /** Desktop left column: the animated Scholar with what they're saying. */
-function ScholarStage({ src, size, alt = '' }: { src: string; size: 'lg' | 'build' | 'welcome-sm'; alt?: string }) {
+export function ScholarStage({ src, size, alt = '' }: { src: string; size: 'lg' | 'build' | 'welcome-sm'; alt?: string }) {
   const box = size === 'lg' ? 'w-[340px] h-[340px] xl:w-[380px] xl:h-[380px]' : size === 'build' ? 'w-44 h-44 lg:w-64 lg:h-64' : 'w-[210px] h-[210px]';
   const img = size === 'lg' ? 'w-[300px] h-[300px] xl:w-[340px] xl:h-[340px]' : size === 'build' ? 'w-40 h-40 lg:w-56 lg:h-56' : 'w-[190px] h-[190px]';
   return (
@@ -618,7 +653,7 @@ function ScholarStage({ src, size, alt = '' }: { src: string; size: 'lg' | 'buil
   );
 }
 
-function SpeechBubble({ text, large = false }: { text: string; large?: boolean }) {
+export function SpeechBubble({ text, large = false }: { text: string; large?: boolean }) {
   return (
     <div
       key={text}
@@ -634,7 +669,7 @@ function SpeechBubble({ text, large = false }: { text: string; large?: boolean }
   );
 }
 
-function Screen({ children, footer, stage }: { children: ReactNode; footer: ReactNode; stage: { src: string; bubble: string } }) {
+export function Screen({ children, footer, stage }: { children: ReactNode; footer: ReactNode; stage: { src: string; bubble: string } }) {
   return (
     <>
       <div className="wso-slide-in flex-1 w-full mx-auto max-w-[560px] lg:max-w-6xl px-5 pt-5 pb-6 lg:px-10 lg:py-12 lg:grid lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.1fr)] lg:gap-14 xl:gap-20 lg:items-center">
@@ -652,7 +687,7 @@ function Screen({ children, footer, stage }: { children: ReactNode; footer: Reac
   );
 }
 
-function Footer({ children, className = '' }: { children: ReactNode; className?: string }) {
+export function Footer({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
     <div className={`sticky bottom-0 z-10 bg-white/95 dark:bg-stone-900/95 backdrop-blur border-t-2 border-[#E5E5E5] dark:border-stone-800 px-5 pt-3.5 pb-[max(1rem,env(safe-area-inset-bottom))] ${className}`}>
       <div className="max-w-[560px] mx-auto">{children}</div>
@@ -660,7 +695,7 @@ function Footer({ children, className = '' }: { children: ReactNode; className?:
   );
 }
 
-function PrimaryButton({ children, onClick, disabled = false }: { children: ReactNode; onClick: () => void; disabled?: boolean }) {
+export function PrimaryButton({ children, onClick, disabled = false }: { children: ReactNode; onClick: () => void; disabled?: boolean }) {
   return (
     <button
       type="button"
@@ -677,7 +712,7 @@ function PrimaryButton({ children, onClick, disabled = false }: { children: Reac
   );
 }
 
-function Eyebrow({ children, className = '' }: { children: ReactNode; className?: string }) {
+export function Eyebrow({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
     <div className={`text-[12px] lg:text-[13px] font-black uppercase tracking-[0.12em] text-[#7733B5] dark:text-[#C9A0F0] ${className}`}>{children}</div>
   );
@@ -719,7 +754,7 @@ function GradeTile({ grade, muted = false }: { grade: string; muted?: boolean })
 
 /* Same motion as the dashboard / old onboarding (ob-* keyframes),
    prefixed so the two can live side by side. */
-const FLOW_CSS = `
+export const FLOW_CSS = `
 @keyframes wsoBgCycle {
   0%, 100% { background: radial-gradient(ellipse at 30% 30%, rgba(165,96,232,0.22), transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(138,72,199,0.16), transparent 60%); }
   33%      { background: radial-gradient(ellipse at 70% 30%, rgba(181,122,240,0.20), transparent 60%), radial-gradient(ellipse at 30% 70%, rgba(119,51,181,0.16), transparent 60%); }

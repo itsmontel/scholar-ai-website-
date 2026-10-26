@@ -8,15 +8,18 @@ import {
   HUB_NUDGE_AFTER_ONBOARDING_KEY,
   HIGHLIGHT_PACK_AFTER_ONBOARDING_KEY,
   STUDY_PACK_VIEWER_KEY,
+  OPEN_EDITOR_AFTER_ONBOARDING_KEY,
+  OPEN_PACK_AFTER_ONBOARDING_KEY,
 } from '../../utils/featureInterests';
 // Static import: see CompleteAcademicAIApp.tsx for why we don't dynamic-
 // import the gtag helper. Short version — ensures gtag.js starts loading
 // on first paint so the conversion event isn't racing the script load.
 import { trackTrialConversion } from '../../utils/gtag';
 import BadgeCreature from '../common/BadgeCreature';
-import { signupPromoCode, onboardingCheckoutPromo, showSignupDiscount, STANDARD_MONTHLY_PRICE, FIRST_MONTH_PRICE, FLASH_FIRST_MONTH_PRICE, TRIAL_DAYS, UPGRADE_CTA_FOOTNOTE, CHECKOUT_OFFER_KEY, TRIAL_CREDITS, MONTHLY_CREDITS } from '../../config/pricing';
+import { signupPromoCode, onboardingCheckoutPromo, showSignupDiscount, STANDARD_MONTHLY_PRICE, FIRST_MONTH_PRICE, FLASH_FIRST_MONTH_PRICE, TRIAL_DAYS, UPGRADE_CTA_FOOTNOTE, CHECKOUT_OFFER_KEY, TRIAL_CREDITS, MONTHLY_CREDITS, FREE_CREDITS } from '../../config/pricing';
 import { useFlashOffer } from '../../hooks/useFlashOffer';
 import CreditsOnboardingFlow, { PLAN_STEP } from '../onboarding/CreditsOnboardingFlow';
+import { OnboardingUploadStep, OnboardingWorkingStep } from '../onboarding/OnboardingUploadStep';
 import { surveyPayload, pathFor, type OnboardingAnswers } from '../onboarding/onboardingContent';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
@@ -25,6 +28,8 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
  *  the analyzer has nothing useful to say, and a weak first result is
  *  worse than asking the user to paste more. */
 const MIN_ESSAY_WORDS = 50;
+/** Most the onboarding grade takes in one go (the analyzer accepts ~100k characters). */
+const MAX_ESSAY_WORDS = 10000;
 
 /** Narration for the analysing screen. Named after what the analyzer
  *  genuinely does, so the wait feels like work rather than a hang. */
@@ -49,6 +54,8 @@ const ANALYSIS_STEP_MS = 5500;
 const MIN_ANALYSIS_MS = ANALYSIS_STEPS.length * ANALYSIS_STEP_MS;
 
 const MIN_NOTES_WORDS = 50;
+/** Free study packs: PLAN_LIMITS.free.studyPackMaxWordsPerGeneration on the backend. */
+const MAX_NOTES_WORDS = 5000;
 
 const STUDY_PACK_STEPS = [
   { icon: '📖', label: 'Reading your notes' },
@@ -58,56 +65,6 @@ const STUDY_PACK_STEPS = [
 ] as const;
 
 const MIN_STUDY_PACK_MS = STUDY_PACK_STEPS.length * ANALYSIS_STEP_MS;
-
-interface OnboardingStudyPack {
-  title: string;
-  lessonPreview: string;
-  cards: { front: string; back: string }[];
-  cardCount: number;
-  quizCount: number;
-  slideCount: number;
-  wordCount: number;
-}
-
-function lessonPreviewFromPack(data: Record<string, unknown>): string {
-  const lesson = data.lesson;
-  if (!lesson || typeof lesson !== 'object') return '';
-  const slides = (lesson as { slides?: unknown }).slides;
-  if (!Array.isArray(slides) || slides.length === 0) {
-    const title = (lesson as { title?: unknown }).title;
-    return typeof title === 'string' ? title : '';
-  }
-  const first = slides[0];
-  if (typeof first === 'string') return first;
-  if (first && typeof first === 'object') {
-    const s = first as Record<string, unknown>;
-    const body = s.content ?? s.body ?? s.text ?? s.title;
-    if (typeof body === 'string' && body.trim()) return body;
-    const bullets = s.bullets;
-    if (Array.isArray(bullets)) return bullets.filter((b): b is string => typeof b === 'string').slice(0, 3).join(' · ');
-  }
-  return '';
-}
-
-/** Shape we keep from POST /analysis/analyze for the result screen.
- *  Deliberately narrow — the onboarding screen shows the headline
- *  numbers and keeps the report body locked, so it has no use for the
- *  full annotation payload beyond counting it. */
-interface OnboardingAnalysis {
-  /** Predicted grade, e.g. "B+". Null when the model didn't return one. */
-  gradeEstimate: string | null;
-  /** Score out of 100. */
-  overallScore: number | null;
-  /** How many issues the analyzer found in their draft. */
-  issueCount: number;
-  /** Top suggestions — we show the first one and lock the rest. */
-  topSuggestions: string[];
-  /** Word count of the analysed draft, for the result header. */
-  wordCount: number;
-  /** Library document id — the backend creates this so the marked
-   *  essay appears in My Documents after they start the trial. */
-  documentId: string | null;
-}
 
 /**
  * When true, `paywall-hard` and `checkout` short-circuit to the dashboard
@@ -184,9 +141,7 @@ type Phase =
   | 'daily-review-results'
   // Real analysis on the user's own essay, run before the card ask.
   | 'analyze-input'
-  | 'analyze-result'
   | 'studypack-input'
-  | 'studypack-result'
   | 'value-prop'
   | 'paywall-hard'
   | 'checkout'
@@ -217,9 +172,7 @@ const PHASE_STEP: Record<string, number> = {
   // The user's own essay, analysed for real. This is the aha moment
   // and it sits immediately before the card ask on purpose.
   'analyze-input': 8,
-  'analyze-result': 9,
   'studypack-input': 8,
-  'studypack-result': 9,
   // Value-prop is the fallback pitch for users who skipped the analysis
   // (no essay to hand). It builds the "everything you get" case with
   // social proof so the paywall doesn't land cold.
@@ -1211,7 +1164,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
   const [startingTrial, setStartingTrial] = useState(false);
   const [trialError, setTrialError] = useState<string | null>(null);
 
-  /* ─── Real essay analysis (analyze-input / analyze-result) ───
+  /* ─── Real essay analysis (analyze-input) ───
      The user's own essay, run through the production analyzer before
      we ask for a card. Everything here is real: the grade estimate,
      the issue count, and the annotations behind the lock all come from
@@ -1227,16 +1180,13 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
     try { return localStorage.getItem('writescholar_last_analysis_grading_style') === 'uk' ? 'uk' : 'us'; } catch { return 'us'; }
   });
   const [essayParsing, setEssayParsing] = useState(false);
-  const [essayDropActive, setEssayDropActive] = useState(false);
   const [analysisRunning, setAnalysisRunning] = useState(false);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
-  const [analysisResult, setAnalysisResult] = useState<OnboardingAnalysis | null>(null);
   // Which named stage the progress screen is showing. A real analysis
   // takes 30–60s, and a bare spinner that long reads as "broken" — so we
   // narrate the actual pipeline instead. Cosmetic: the request is a
   // single call, so these are timed, not reported by the server.
   const [analysisStep, setAnalysisStep] = useState(0);
-  const essayFileInputRef = useRef<HTMLInputElement>(null);
   const essayWordCount = useMemo(
     () => essayInput.trim().split(/\s+/).filter(Boolean).length,
     [essayInput],
@@ -1245,12 +1195,9 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
   const [notesInput, setNotesInput] = useState('');
   const [notesFileName, setNotesFileName] = useState<string | null>(null);
   const [notesParsing, setNotesParsing] = useState(false);
-  const [notesDropActive, setNotesDropActive] = useState(false);
   const [packRunning, setPackRunning] = useState(false);
   const [packError, setPackError] = useState<string | null>(null);
-  const [packResult, setPackResult] = useState<OnboardingStudyPack | null>(null);
   const [packStep, setPackStep] = useState(0);
-  const notesFileInputRef = useRef<HTMLInputElement>(null);
   const notesWordCount = useMemo(
     () => notesInput.trim().split(/\s+/).filter(Boolean).length,
     [notesInput],
@@ -1646,6 +1593,23 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
   };
 
   /**
+   * After the first grade (or pack) there is no summary page: onboarding
+   * finishes and the dashboard opens the real thing, the marked-up essay
+   * in the editor or the pack in the viewer (see DocumentsPage).
+   */
+  const finishIntoResult = (target: { essayDocumentId?: string | null; pack?: boolean }) => {
+    try {
+      sessionStorage.removeItem('writescholar_ws_pending_view');
+      sessionStorage.removeItem(HIGHLIGHT_PACK_AFTER_ONBOARDING_KEY);
+      if (target.essayDocumentId) sessionStorage.setItem(OPEN_EDITOR_AFTER_ONBOARDING_KEY, target.essayDocumentId);
+      if (target.pack) sessionStorage.setItem(OPEN_PACK_AFTER_ONBOARDING_KEY, '1');
+    } catch { /* ignore */ }
+    trackEvent('onboarding_complete');
+    setPhase('done');
+    onComplete?.();
+  };
+
+  /**
    * Run the production analyzer on the user's own essay.
    *
    * This is the aha moment the trial ask is built on, so it uses the
@@ -1657,6 +1621,10 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
     const content = essayInput.trim();
     if (essayWordCount < MIN_ESSAY_WORDS) {
       setAnalysisError(`Add at least ${MIN_ESSAY_WORDS} words so the analysis has something to work with.`);
+      return;
+    }
+    if (essayWordCount > MAX_ESSAY_WORDS) {
+      setAnalysisError(`Keep it under ${MAX_ESSAY_WORDS.toLocaleString()} words. Try one chapter or section at a time.`);
       return;
     }
     setAnalysisError(null);
@@ -1675,16 +1643,8 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
     if (testMode) {
       // Preview route — no API call, no quota spent.
       await holdForFloor();
-      setAnalysisResult({
-        gradeEstimate: 'B',
-        overallScore: 78,
-        issueCount: 12,
-        topSuggestions: ['Sharpen the thesis so it states a position, not a topic.'],
-        wordCount: essayWordCount,
-        documentId: null,
-      });
       setAnalysisRunning(false);
-      goToPhase('analyze-result');
+      finishIntoResult({});
       return;
     }
 
@@ -1721,9 +1681,6 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
       // already persisted to documents + analyses by the backend.
       const d = data?.data || {};
       const annotations = Array.isArray(d.annotations) ? d.annotations : [];
-      const suggestions = Array.isArray(d.top_suggestions)
-        ? d.top_suggestions.filter((s: unknown): s is string => typeof s === 'string' && s.trim().length > 0)
-        : [];
       const scoreRaw = d.overall_score;
       const overallScore =
         typeof scoreRaw === 'number' && Number.isFinite(scoreRaw)
@@ -1749,15 +1706,13 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
         throw new Error('Analysis came back empty. Please try again with a longer draft.');
       }
 
+      const typeCounts = { strong: 0, improve: 0, concern: 0 };
+      for (const a of annotations) {
+        const t = (a as { type?: unknown })?.type;
+        if (t === 'strong' || t === 'improve' || t === 'concern') typeCounts[t] += 1;
+      }
+
       await holdForFloor();
-      setAnalysisResult({
-        gradeEstimate,
-        overallScore,
-        issueCount: annotations.length,
-        topSuggestions: suggestions,
-        wordCount: essayWordCount,
-        documentId,
-      });
       try { localStorage.setItem('writescholar_editor_citation_style', essayCitationStyle); } catch { /* noop */ }
       try { localStorage.setItem('writescholar_last_analysis_grading_style', essayGradingStyle); } catch { /* noop */ }
       trackEvent('onboarding_aha_complete', {
@@ -1772,8 +1727,11 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
         source: 'onboarding',
         annotations: annotations.length,
         documentId,
+        ...typeCounts,
       });
-      goToPhase('analyze-result');
+      // Straight into the real thing: their essay in the editor, every
+      // line marked, the grade in the panel beside it.
+      finishIntoResult({ essayDocumentId: documentId });
     } catch (e) {
       setAnalysisError(e instanceof Error ? e.message : 'We could not analyse that right now.');
     } finally {
@@ -1785,7 +1743,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
    *  dead-ending someone who signed up on their phone. */
   const handleSkipAnalysis = () => {
     trackEvent('onboarding_aha_skip', { hadText: essayWordCount > 0 });
-    goToPhase('value-prop');
+    goToPhase('transition');
   };
 
   const handleNotesFile = async (file: File) => {
@@ -1837,6 +1795,10 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
       setPackError(`Add at least ${MIN_NOTES_WORDS} words so we have enough to build a pack.`);
       return;
     }
+    if (notesWordCount > MAX_NOTES_WORDS) {
+      setPackError(`Keep your notes under ${MAX_NOTES_WORDS.toLocaleString()} words for a free pack. Try one topic at a time.`);
+      return;
+    }
     setPackError(null);
     setPackRunning(true);
     trackEvent('onboarding_aha_generate', { kind: 'study_pack', words: notesWordCount, source: notesFileName ? 'upload' : 'paste' });
@@ -1867,17 +1829,8 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
       };
       const title = titleFromFile || titleFromText;
       stashPackForHub({ data: demoData, title });
-      setPackResult({
-        title,
-        lessonPreview: 'Your notes become a short lesson, then cards you can actually review.',
-        cards: demoCards,
-        cardCount: demoCards.length,
-        quizCount: 3,
-        slideCount: 1,
-        wordCount: notesWordCount,
-      });
       setPackRunning(false);
-      goToPhase('studypack-result');
+      finishIntoResult({ pack: true });
       return;
     }
 
@@ -1926,17 +1879,9 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
 
       await holdForFloor();
       stashPackForHub({ data: d, title });
-      setPackResult({
-        title,
-        lessonPreview: lessonPreviewFromPack(d),
-        cards,
-        cardCount: cards.length,
-        quizCount: questions.length,
-        slideCount: slides.length,
-        wordCount: notesWordCount,
-      });
       trackEvent('onboarding_aha_complete', { kind: 'study_pack', cards: cards.length, quiz: questions.length, title });
-      goToPhase('studypack-result');
+      // Straight into the pack viewer: the lesson first.
+      finishIntoResult({ pack: true });
     } catch (e) {
       setPackError(e instanceof Error ? e.message : 'We could not build that study pack right now.');
     } finally {
@@ -1946,7 +1891,7 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
 
   const handleSkipStudyPack = () => {
     trackEvent('onboarding_aha_skip', { kind: 'study_pack', hadText: notesWordCount > 0 });
-    goToPhase('value-prop');
+    goToPhase('transition');
   };
 
   /* ─── Interactive tour handlers ─── */
@@ -2092,48 +2037,12 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
       .catch((e) => console.warn('[onboarding-survey] Network error (non-blocking):', e));
   };
 
-  /** Plan screen CTA: the 3-day trial (or Pro straight away if they've trialed before). */
-  const handleFlowStartTrial = async (answers: OnboardingAnswers) => {
-    if (startingTrial) return;
-    const withTrial = TRIAL_DAYS > 0 && trialEligible !== false;
-    trackEvent('onboarding_choose_trial', { path: pathFor(answers), trial: withTrial });
-    trackEvent('paywall_view', { source: 'onboarding_plan' });
-    setTrialError(null);
-    if (testMode) {
-      onComplete?.();
-      return;
-    }
-    setStartingTrial(true);
-    try {
-      const token = localStorage.getItem('authToken');
-      if (!token) { onNavigate('login'); return; }
-      try {
-        sessionStorage.setItem(CHECKOUT_OFFER_KEY, JSON.stringify(withTrial ? { kind: 'trial', path: pathFor(answers) } : { kind: 'paid', plan: 'pro', path: pathFor(answers) }));
-      } catch { /* ignore */ }
-      const res = await fetch(`${API_URL}/subscriptions/create-checkout-session`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({
-          planType: 'pro',
-          billingCycle: 'monthly',
-          successUrl: `${window.location.origin}/dashboard?payment=success`,
-          cancelUrl: `${window.location.origin}/onboarding?preview=plan`,
-          ...(withTrial ? { trialPeriodDays: TRIAL_DAYS } : {}),
-          ...onboardingCheckoutPromo('monthly'),
-        }),
-      });
-      const data = await res.json().catch(() => null);
-      const url = data?.data?.checkoutUrl;
-      if (!res.ok || !url) {
-        setTrialError((data && typeof data.message === 'string' && data.message) || 'We could not start checkout. Please try again.');
-        setStartingTrial(false);
-        return;
-      }
-      window.location.href = url;
-    } catch {
-      setTrialError('We could not start checkout. Please try again.');
-      setStartingTrial(false);
-    }
+  /** Plan screen CTA: no checkout. Essay people grade their own draft,
+   *  exam people build a pack from their notes, both with a free credit. */
+  const handleFlowStart = (answers: OnboardingAnswers) => {
+    const path = pathFor(answers);
+    trackEvent('onboarding_choose_first_upload', { path });
+    goToPhase(path === 'exam' ? 'studypack-input' : 'analyze-input');
   };
 
   const handleFlowLookAround = (answers: OnboardingAnswers) => {
@@ -2251,12 +2160,9 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
         <CreditsOnboardingFlow
           userKey={testMode ? 'preview' : user?.id || 'anon'}
           firstName={firstName || undefined}
-          trialEligible={trialEligible}
-          starting={startingTrial}
-          error={trialError}
           initialStep={flowInitialStep}
           onAnswersReady={handleFlowAnswersReady}
-          onStartTrial={(a) => void handleFlowStartTrial(a)}
+          onStart={handleFlowStart}
           onLookAround={handleFlowLookAround}
           onLogout={onLogout}
         />
@@ -3104,943 +3010,89 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
     );
   }
 
-  /* ─── ANALYZE-INPUT — the user's own essay, before the card ask ───
+  /* ─── ANALYZE-INPUT — the user's own essay ───
      Everything up to here has been us talking. This is the first screen
-     where the product does something for them, and it's deliberately
-     the last screen before checkout: the trial ask lands much better
-     against a grade they just watched appear on their own work than
-     against a feature list. Skippable, because plenty of people sign up
-     on a phone with no essay to hand and dead-ending them is worse than
-     falling back to the generic pitch. ─── */
+     where the product does something for them: their own essay, graded
+     with a free credit. Same stage as the questions so it reads as the
+     last step of the flow. Skippable, because plenty of people sign up
+     on a phone with no essay to hand. ─── */
   if (phase === 'analyze-input') {
-    const notEnoughWords = essayWordCount < MIN_ESSAY_WORDS;
-    const progressPct = Math.min(100, (essayWordCount / MIN_ESSAY_WORDS) * 100);
-
-    /* Analysing takes real time, so it gets the whole screen and a
-       narrated stepper. Sharing the screen with an editable textarea
-       would invite edits that the in-flight request can't reflect. */
-    if (analysisRunning) {
-      return (
-        <div className="relative h-screen bg-gradient-to-br from-[#FAF7FF] via-[#FBF7FF] to-[#F3EAFF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 flex flex-col overflow-hidden">
-          <OnboardingAura />
-          <TopBar />
-
-          <div className="flex-1 flex flex-col items-center justify-center px-5 py-8">
-            <div className="w-full max-w-md">
-              <div className="flex justify-center mb-6">
-                <MascotGif src="/mascot-thinking.webp" alt="" size={130} bordered borderColor="#A560E8" bgColor="#F3EAFF" />
-              </div>
-
-              <h1
-                className="text-center text-2xl sm:text-[1.9rem] font-extrabold text-[#3C3C3C] dark:text-stone-50 leading-tight"
-                style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-              >
-                Marking your essay…
-              </h1>
-              <p className="mt-2 text-center text-sm font-bold text-stone-500 dark:text-stone-400">
-                {essayWordCount.toLocaleString()} words · usually under a minute
-              </p>
-
-              <div className="mt-6 rounded-3xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900 p-3 space-y-1.5">
-                {ANALYSIS_STEPS.map((s, i) => {
-                  const done = i < analysisStep;
-                  const active = i === analysisStep;
-                  return (
-                    <div
-                      key={s.label}
-                      className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-all duration-300 ${
-                        active
-                          ? 'bg-[#F3EAFF] dark:bg-[#A560E8]/15 border-2 border-[#A560E8]/40'
-                          : 'border-2 border-transparent'
-                      }`}
-                    >
-                      <span
-                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-[15px] transition-all ${
-                          done || active
-                            ? 'bg-[#A560E8] text-white'
-                            : 'bg-[#F5F5F5] dark:bg-stone-800 text-stone-400'
-                        }`}
-                        aria-hidden
-                      >
-                        {done ? '✓' : s.icon}
-                      </span>
-                      <span
-                        className={`flex-1 text-[13.5px] font-extrabold ${
-                          done
-                            ? 'text-stone-400 dark:text-stone-500'
-                            : active
-                              ? 'text-[#3C3C3C] dark:text-stone-100'
-                              : 'text-stone-400 dark:text-stone-600'
-                        }`}
-                      >
-                        {s.label}
-                      </span>
-                      {active && (
-                        <span className="h-4 w-4 shrink-0 rounded-full border-2 border-[#A560E8]/30 border-t-[#A560E8] animate-spin" aria-hidden />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-
-              <p className="mt-5 text-center text-[12px] font-bold text-stone-400 dark:text-stone-500">
-                Hang tight — don&apos;t close this page.
-              </p>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
     return (
-      <div
-        className="relative h-screen bg-gradient-to-br from-[#FAF7FF] via-[#FBF7FF] to-[#F3EAFF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 flex flex-col overflow-hidden"
-        onDragOver={(e) => { e.preventDefault(); setEssayDropActive(true); }}
-        onDragLeave={(e) => {
-          // Only clear when the pointer actually leaves the page, not on
-          // every child boundary crossing.
-          if (e.currentTarget === e.target) setEssayDropActive(false);
-        }}
-        onDrop={(e) => {
-          e.preventDefault();
-          setEssayDropActive(false);
-          const f = e.dataTransfer.files?.[0];
-          if (f) void handleEssayFile(f);
-        }}
-      >
-        <OnboardingAura />
-        <TopBar />
-
-        <div className="flex-1 overflow-y-auto">
-          <div className="px-4 sm:px-6 pt-5 pb-6 max-w-xl mx-auto w-full ob-fade-in">
-            {/* Header — deliberately compact so the input is above the
-                fold on a laptop. */}
-            <div className="text-center mb-5">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border-2 border-[#A560E8]/40 bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#A560E8] text-[10px] font-extrabold uppercase tracking-wider mb-2.5">
-                <span aria-hidden>✨</span>
-                Your free analysis
-              </span>
-              <h1
-                className="text-2xl sm:text-[1.9rem] font-extrabold text-[#3C3C3C] dark:text-stone-50 leading-tight"
-                style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-              >
-                Let&apos;s grade <span className="text-[#A560E8]">your essay</span>
-              </h1>
-              <p className="mt-1.5 text-stone-500 dark:text-stone-400 font-bold text-[13.5px] sm:text-sm max-w-md mx-auto">
-                Any draft, however rough. Takes about a minute.
-              </p>
-            </div>
-
-            {/* What comes back. Sets the payoff before we ask for effort. */}
-            <div className="mb-4 flex flex-wrap items-center justify-center gap-1.5">
-              {['Predicted grade', 'What to fix', 'Rubric breakdown'].map((f) => (
-                <span
-                  key={f}
-                  className="inline-flex items-center gap-1.5 rounded-full border-2 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900 px-2.5 py-1 text-[11.5px] font-extrabold text-stone-600 dark:text-stone-300"
-                >
-                  <svg className="w-3 h-3 text-[#A560E8]" fill="none" stroke="currentColor" strokeWidth={3.5} viewBox="0 0 24 24" aria-hidden>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                  {f}
-                </span>
-              ))}
-            </div>
-
-            <div
-              className={`relative rounded-3xl border-2 border-b-4 bg-white dark:bg-stone-900 p-3 sm:p-3.5 transition-colors ${
-                essayDropActive
-                  ? 'border-[#A560E8] bg-[#FBF7FF] dark:bg-[#A560E8]/10'
-                  : 'border-[#E5E5E5] dark:border-stone-700'
-              }`}
-            >
-              <textarea
-                value={essayInput}
-                onChange={(e) => { setEssayInput(e.target.value); setAnalysisError(null); }}
-                disabled={essayParsing}
-                rows={9}
-                placeholder={'Paste your essay here…\n\nOr drag a PDF or Word file anywhere on this page.'}
-                className="w-full resize-none rounded-2xl bg-[#FAFAFA] dark:bg-stone-950 px-4 py-3.5 text-[14px] font-semibold leading-relaxed text-[#3C3C3C] dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-600 border-2 border-transparent focus:border-[#A560E8]/50 focus:outline-none transition-colors disabled:opacity-60"
-              />
-
-              {/* Progress toward the minimum — a bar reads as "keep
-                  going", where a bare "50 minimum" reads as a rejection. */}
-              <div className="mt-2.5 px-1">
-                <div className="flex items-baseline justify-between gap-2 mb-1.5">
-                  <span className="min-w-0 flex items-center gap-1.5 text-[12px] font-extrabold text-stone-500 dark:text-stone-400">
-                    {essayFileName && (
-                      <>
-                        <span aria-hidden>📄</span>
-                        <span className="truncate max-w-[150px] text-[#A560E8]">{essayFileName}</span>
-                        <span className="text-stone-300 dark:text-stone-600" aria-hidden>·</span>
-                      </>
-                    )}
-                    <span className="shrink-0">
-                      {essayWordCount.toLocaleString()} {essayWordCount === 1 ? 'word' : 'words'}
-                    </span>
-                  </span>
-                  <span className={`text-[11.5px] font-extrabold ${notEnoughWords ? 'text-stone-400 dark:text-stone-500' : 'text-[#A560E8]'}`}>
-                    {notEnoughWords ? `${MIN_ESSAY_WORDS - essayWordCount} more to go` : 'Ready to analyse'}
-                  </span>
-                </div>
-                <div className="h-2 rounded-full bg-[#F0F0F0] dark:bg-stone-800 overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-[#A560E8] transition-all duration-300"
-                    style={{ width: `${progressPct}%` }}
-                  />
-                </div>
-              </div>
-
-              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                <div>
-                  <label htmlFor="ob-cite-style" className="block text-[10px] font-extrabold uppercase tracking-[0.16em] text-stone-400 dark:text-stone-500 mb-1.5">
-                    Citation style
-                  </label>
-                  <select
-                    id="ob-cite-style"
-                    value={essayCitationStyle}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      setEssayCitationStyle(v);
-                      try { localStorage.setItem('writescholar_editor_citation_style', v); } catch { /* noop */ }
-                    }}
-                    disabled={essayParsing}
-                    className="w-full px-3 py-2 rounded-xl border-2 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-950 text-[13px] font-bold text-[#3C3C3C] dark:text-stone-100 focus:outline-none focus:border-[#A560E8]/50 disabled:opacity-60"
-                  >
-                    <option value="None">None (no citations required)</option>
-                    <option value="APA">APA</option>
-                    <option value="Harvard">Harvard</option>
-                    <option value="Chicago">Chicago</option>
-                    <option value="MLA">MLA</option>
-                    <option value="IEEE">IEEE</option>
-                    <option value="Vancouver">Vancouver</option>
-                  </select>
-                </div>
-                <div>
-                  <span className="block text-[10px] font-extrabold uppercase tracking-[0.16em] text-stone-400 dark:text-stone-500 mb-1.5">
-                    Grade format
-                  </span>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {([
-                      { id: 'us' as const, label: 'US (A–F)' },
-                      { id: 'uk' as const, label: 'UK (class)' },
-                    ]).map((g) => (
-                      <button
-                        key={g.id}
-                        type="button"
-                        disabled={essayParsing}
-                        onClick={() => {
-                          setEssayGradingStyle(g.id);
-                          try { localStorage.setItem('writescholar_last_analysis_grading_style', g.id); } catch { /* noop */ }
-                        }}
-                        className={`px-2 py-2 rounded-xl text-[12.5px] font-extrabold border-2 transition-all disabled:opacity-60 ${
-                          essayGradingStyle === g.id
-                            ? 'bg-[#A560E8] text-white border-[#7733B5]'
-                            : 'bg-white dark:bg-stone-950 text-stone-600 dark:text-stone-300 border-[#E5E5E5] dark:border-stone-700 hover:border-[#A560E8]/40'
-                        }`}
-                      >
-                        {g.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Upload as a real target, not a buried text link. */}
-              <button
-                type="button"
-                onClick={() => essayFileInputRef.current?.click()}
-                disabled={essayParsing}
-                className="mt-3 w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900 hover:border-[#A560E8]/50 hover:bg-[#FBF7FF] dark:hover:bg-[#A560E8]/10 text-[12.5px] font-extrabold text-stone-600 dark:text-stone-300 active:border-b-2 active:translate-y-0.5 disabled:opacity-60 transition-all"
-              >
-                {essayParsing ? (
-                  <>
-                    <span className="h-3.5 w-3.5 rounded-full border-2 border-[#A560E8]/30 border-t-[#A560E8] animate-spin" aria-hidden />
-                    Reading your file…
-                  </>
-                ) : (
-                  <>
-                    <span aria-hidden>📎</span>
-                    {essayFileName ? 'Choose a different file' : 'Upload PDF, Word or TXT'}
-                  </>
-                )}
-              </button>
-              <input
-                ref={essayFileInputRef}
-                type="file"
-                accept=".pdf,.doc,.docx,.txt"
-                className="hidden"
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) void handleEssayFile(f);
-                  e.target.value = '';
-                }}
-              />
-
-              {analysisError && (
-                <div className="mt-3 rounded-2xl bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-2 border-[#FF4B4B]/30 px-3 py-2.5 text-[12.5px] text-[#FF4B4B] font-bold">
-                  {analysisError}
-                </div>
-              )}
-
-              {/* Full-card drop affordance */}
-              {essayDropActive && (
-                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-3xl bg-[#F3EAFF]/95 dark:bg-[#A560E8]/25 border-2 border-dashed border-[#A560E8] pointer-events-none">
-                  <span className="text-3xl mb-1.5" aria-hidden>📄</span>
-                  <p className="text-[14px] font-extrabold text-[#7733B5] dark:text-[#E9DBFF]">Drop your essay to upload</p>
-                </div>
-              )}
-            </div>
-
-            <p className="mt-3 text-center text-[11.5px] font-bold text-stone-400 dark:text-stone-500">
-              🔒 Private to your account · never used to train models
-            </p>
-          </div>
-        </div>
-
-        {/* Sticky action bar — matches the intro/celebrate pattern so the
-            primary action is always reachable without scrolling. */}
-        <div className="relative z-10 border-t-2 border-[#E5E5E5] dark:border-stone-800 bg-white dark:bg-stone-900 px-5 sm:px-8 py-3.5 sm:py-4">
-          <div className="max-w-xl mx-auto">
-            <button
-              type="button"
-              onClick={handleRunOnboardingAnalysis}
-              disabled={essayParsing || notEnoughWords}
-              className="w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-[#A560E8] hover:bg-[#7733B5] disabled:opacity-40 disabled:cursor-not-allowed text-white text-[15px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
-            >
-              Analyse my essay
-            </button>
-            {/* Escape hatch, deliberately quiet: this run is the aha
-                moment the trial ask depends on, so it shouldn't compete
-                with the primary action — but dead-ending someone who
-                signed up on a phone with no draft is worse. */}
-            <button
-              type="button"
-              onClick={handleSkipAnalysis}
-              className="mt-1 w-full py-1.5 text-[11.5px] font-bold text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
-            >
-              I don&apos;t have an essay right now
-            </button>
-          </div>
-        </div>
+      <div className={`transition-opacity duration-200 ${phaseVisible ? 'opacity-100' : 'opacity-0'}`}>
+        {analysisRunning ? (
+          <OnboardingWorkingStep
+            kind="essay"
+            wordCount={essayWordCount}
+            steps={ANALYSIS_STEPS.map((s) => s.label)}
+            activeStep={analysisStep}
+            onLogout={onLogout}
+          />
+        ) : (
+          <OnboardingUploadStep
+            kind="essay"
+            text={essayInput}
+            onTextChange={(v) => { setEssayInput(v); setAnalysisError(null); }}
+            fileName={essayFileName}
+            onFile={(f) => void handleEssayFile(f)}
+            onClearFile={() => { setEssayFileName(null); setEssayInput(''); setAnalysisError(null); }}
+            parsing={essayParsing}
+            error={analysisError}
+            wordCount={essayWordCount}
+            minWords={MIN_ESSAY_WORDS}
+            maxWords={MAX_ESSAY_WORDS}
+            citationStyle={essayCitationStyle}
+            onCitationStyleChange={(v) => {
+              setEssayCitationStyle(v);
+              try { localStorage.setItem('writescholar_editor_citation_style', v); } catch { /* noop */ }
+            }}
+            gradingStyle={essayGradingStyle}
+            onGradingStyleChange={(g) => {
+              setEssayGradingStyle(g);
+              try { localStorage.setItem('writescholar_last_analysis_grading_style', g); } catch { /* noop */ }
+            }}
+            freeCredits={FREE_CREDITS}
+            onSubmit={() => void handleRunOnboardingAnalysis()}
+            onSkip={handleSkipAnalysis}
+            onBack={() => goToPhase('flow')}
+            onLogout={onLogout}
+          />
+        )}
       </div>
     );
   }
 
-  /* ─── ANALYZE-RESULT — teaser grade, locked score ───
-     Letter grade is the hero. Annotation count proves we read the
-     paper. Exact /100 stays locked so curiosity drives the trial. ─── */
-  if (phase === 'analyze-result' && analysisResult) {
-    const { gradeEstimate, overallScore, issueCount, topSuggestions, wordCount, documentId } = analysisResult;
-    const topFix = topSuggestions[0] ?? null;
-    const hasScore = overallScore !== null;
-    // API often returns "B (80-89%)" — only the letter fits the seal;
-    // keep any range as a quiet subtitle underneath.
-    const gradeRaw = (gradeEstimate || '').trim();
-    const gradeLetterMatch = gradeRaw.match(/^([A-F][+-]?|Pass|Fail|First|2:1|2:2|3rd)/i);
-    const gradeLetter = gradeLetterMatch?.[1] || (gradeRaw ? gradeRaw.split(/\s|\(/)[0] : '—');
-
-    return (
-      <div className="relative h-screen bg-gradient-to-br from-[#FAF7FF] via-[#FBF7FF] to-[#F3EAFF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 flex flex-col overflow-hidden">
-        <OnboardingAura />
-        <TopBar />
-
-        <div className="flex-1 overflow-y-auto">
-          <div className="px-4 sm:px-6 py-4 max-w-[34rem] mx-auto w-full ob-fade-in">
-            {/* Celebration and outcome read as one composed header. */}
-            <div className="mb-3.5 flex items-center justify-center gap-[1.125rem]">
-              <div className="ob-result-mascot relative flex h-[106px] w-[106px] shrink-0 items-center justify-center rounded-full bg-white dark:bg-stone-900 shadow-[0_16px_34px_-18px_rgba(119,51,181,0.7)]">
-                <span className="absolute inset-0 rounded-full border-[5px] border-[#DAB8FA]" aria-hidden />
-                <span className="absolute inset-[9px] rounded-full border border-[#EAD8FB]" aria-hidden />
-                <span className="ob-result-orbit absolute left-1/2 top-1/2 h-3.5 w-3.5 rounded-full bg-[#A560E8] ring-[3px] ring-white dark:ring-stone-900" aria-hidden />
-                <img
-                  src="/mascot-jumping-joy.webp"
-                  alt=""
-                  width={86}
-                  height={86}
-                  className="relative h-[86px] w-[86px] object-contain"
-                  loading="eager"
-                  decoding="async"
-                />
-              </div>
-              <div className="min-w-0">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#EADCF8] dark:bg-[#A560E8]/15 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.17em] text-[#7733B5] dark:text-[#C9A0F0]">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#A560E8]" aria-hidden />
-                  Analysis complete
-                </span>
-                <h1
-                  className="mt-1.5 text-[1.8rem] sm:text-[1.95rem] font-extrabold leading-[1.05] text-[#2F2538] dark:text-stone-50"
-                  style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                >
-                  Your paper is<br /><span className="text-[#A560E8]">ready to improve.</span>
-                </h1>
-                <p className="mt-1.5 text-[12.5px] font-bold text-stone-500 dark:text-stone-400">
-                  {wordCount.toLocaleString()} words reviewed{documentId ? ' · saved' : ''}
-                </p>
-              </div>
-            </div>
-
-            {/* Professor-style report preview. */}
-            <section className="relative overflow-hidden rounded-[26px] border-2 border-b-[5px] border-[#D8BDF2] dark:border-[#A560E8]/35 bg-white dark:bg-stone-900 shadow-[0_24px_55px_-32px_rgba(84,35,133,0.7)]">
-              <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-[#C9A0F0] via-[#A560E8] to-[#7733B5]" aria-hidden />
-
-              <div className="flex items-center justify-between border-b border-[#EEE4F7] dark:border-stone-700 px-4 pb-3 pt-[1.125rem]">
-                <div className="flex items-center gap-2.5">
-                  <span className="flex h-[2.375rem] w-[2.375rem] items-center justify-center rounded-xl bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[15px]" aria-hidden>✎</span>
-                  <div>
-                    <p className="text-[13px] font-extrabold text-[#3C3C3C] dark:text-stone-100">Essay feedback report</p>
-                    <p className="text-[11px] font-bold text-stone-400 dark:text-stone-500">Professor-style analysis</p>
-                  </div>
-                </div>
-                <span className="rounded-full bg-[#F3EAFF] dark:bg-[#A560E8]/15 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide text-[#7733B5] dark:text-[#C9A0F0]">
-                  Preview
-                </span>
-              </div>
-
-              <div className="grid grid-cols-[122px_1fr] sm:grid-cols-[138px_1fr]">
-                {/* Grade seal — letter only */}
-                <div className="flex flex-col items-center justify-center border-r border-[#EEE4F7] dark:border-stone-700 bg-gradient-to-b from-[#FBF7FF] to-white dark:from-[#A560E8]/10 dark:to-stone-900 px-2.5 py-4">
-                  <div className="relative flex h-[86px] w-[86px] shrink-0 items-center justify-center overflow-hidden rounded-full border-[5px] border-[#A560E8] bg-white dark:bg-stone-900 shadow-[inset_0_0_0_4px_#F3EAFF,0_10px_24px_-15px_rgba(119,51,181,0.8)]">
-                    <span
-                      className={`font-black leading-none text-[#7733B5] dark:text-[#C9A0F0] ${
-                        gradeLetter.length > 2 ? 'text-[1.5rem]' : gradeLetter.length > 1 ? 'text-[2.35rem]' : 'text-[2.95rem]'
-                      }`}
-                      style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                    >
-                      {gradeLetter}
-                    </span>
-                  </div>
-                  <p className="mt-2 text-center text-[10px] font-extrabold uppercase tracking-[0.12em] text-stone-500 dark:text-stone-400">
-                    Predicted grade
-                  </p>
-                </div>
-
-                <div className="divide-y divide-[#EEE4F7] dark:divide-stone-700">
-                  <div className="flex items-center gap-3 px-4 py-4">
-                    <span className="flex h-[2.625rem] w-[2.625rem] shrink-0 items-center justify-center rounded-xl bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[15px] font-black text-[#7733B5] dark:text-[#C9A0F0]">
-                      {issueCount}
-                    </span>
-                    <div>
-                      <p className="text-[13.5px] font-extrabold text-[#3C3C3C] dark:text-stone-100">{issueCount === 1 ? 'Annotation found' : 'Annotations found'}</p>
-                      <p className="mt-0.5 text-[11px] font-bold text-stone-400 dark:text-stone-500">Marked throughout your draft</p>
-                    </div>
-                  </div>
-                  {hasScore && (
-                    <div className="flex items-center gap-3 bg-[#FCF9FF] dark:bg-[#A560E8]/5 px-4 py-4">
-                      <span className="flex h-[2.625rem] w-[2.625rem] shrink-0 items-center justify-center rounded-xl bg-[#EADCF8] dark:bg-[#A560E8]/20 text-base" aria-hidden>🔒</span>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[13.5px] font-extrabold text-[#3C3C3C] dark:text-stone-100">Exact score / 100</p>
-                        <p className="mt-0.5 text-[11px] font-bold text-[#A560E8]">
-                          {offerTrial ? 'Unlock with free trial' : 'Unlock with Pro'}
-                        </p>
-                      </div>
-                      <span className="text-lg font-black tracking-widest text-[#D2B3EE] blur-[2px] select-none" aria-hidden>??</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {topFix && (
-                <div className="border-t border-[#EEE4F7] dark:border-stone-700 px-4 py-3.5">
-                  <div className="flex items-start gap-2.5">
-                    <span className="mt-0.5 text-[#A560E8]" aria-hidden>◆</span>
-                    <div className="min-w-0">
-                      <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#A560E8]">First improvement</p>
-                      <p className="mt-1 text-[13.5px] font-bold leading-relaxed text-[#3C3C3C] dark:text-stone-100 line-clamp-3">{topFix}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex items-center justify-center gap-2 border-t border-[#E6D4F5] dark:border-[#A560E8]/25 bg-[#F7EEFF] dark:bg-[#A560E8]/10 px-4 py-3">
-                <span className="text-sm" aria-hidden>🔒</span>
-                <p className="text-[12px] font-extrabold text-[#7733B5] dark:text-[#C9A0F0]">
-                  See exactly what&apos;s costing you marks, and fix it in one click
-                </p>
-              </div>
-            </section>
-          </div>
-          <style>{`
-            @keyframes obResultOrbit {
-              from { transform: translate(-50%, -50%) rotate(0deg) translateX(54px) rotate(0deg); }
-              to { transform: translate(-50%, -50%) rotate(360deg) translateX(54px) rotate(-360deg); }
-            }
-            @keyframes obResultMascotPulse {
-              0%, 100% { box-shadow: 0 0 0 0 rgba(165,96,232,.12), 0 16px 34px -18px rgba(119,51,181,.7); }
-              50% { box-shadow: 0 0 0 8px rgba(165,96,232,.07), 0 18px 38px -16px rgba(119,51,181,.75); }
-            }
-            .ob-result-orbit { animation: obResultOrbit 5s linear infinite; }
-            .ob-result-mascot { animation: obResultMascotPulse 2.4s ease-in-out infinite; }
-            @media (prefers-reduced-motion: reduce) {
-              .ob-result-orbit, .ob-result-mascot { animation: none; }
-            }
-          `}</style>
-        </div>
-
-        {/* Sticky CTA */}
-        <div className="relative z-10 border-t-2 border-[#E5E5E5] dark:border-stone-800 bg-white dark:bg-stone-900 px-4 sm:px-6 py-3 sm:py-3.5">
-          <div className="max-w-[34rem] mx-auto">
-            {trialError && !HIDE_END_PAYWALLS && (
-              <div className="mb-2.5 rounded-xl bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-2 border-[#FF4B4B]/30 px-3 py-2 text-[12px] text-[#FF4B4B] font-bold">
-                {trialError}
-              </div>
-            )}
-            {HIDE_END_PAYWALLS ? (
-              <>
-                <button
-                  type="button"
-                  onClick={() => {
-                    trackEvent('onboarding_aha_continue_dashboard', {
-                      issueCount,
-                      hasDocument: Boolean(documentId),
-                    });
-                    // Land on the hub with this paper highlighted — they
-                    // choose to open the markup, so the dashboard still
-                    // reads as home.
-                    if (documentId) {
-                      try {
-                        sessionStorage.setItem('writescholar_ws_pending_view', 'hub');
-                        sessionStorage.setItem('writescholar_open_doc_after_onboarding', documentId);
-                      } catch { /* ignore */ }
-                    }
-                    goToPhase('transition');
-                  }}
-                  className="w-full inline-flex items-center justify-center gap-2 py-[0.9375rem] rounded-2xl bg-[#A560E8] hover:bg-[#7733B5] text-white text-[15px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
-                >
-                  See full feedback in your dashboard
-                  <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </button>
-                <p className="mt-1.5 text-center text-[11px] font-bold text-stone-400 dark:text-stone-500">
-                  Every highlight is free · the fixes unlock with Pro ({flashOffer.active ? `$${FLASH_FIRST_MONTH_PRICE} first month` : '50% off first month'})
-                </p>
-              </>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={() => void handleSubscribeChoice()}
-                  disabled={startingTrial}
-                  className="w-full inline-flex items-center justify-center gap-2 py-[0.9375rem] rounded-2xl bg-[#A560E8] hover:bg-[#7733B5] disabled:opacity-60 disabled:cursor-not-allowed text-white text-[15px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
-                >
-                  {startingTrial ? (
-                    <>
-                      <span className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white animate-spin" aria-hidden />
-                      Opening secure checkout…
-                    </>
-                  ) : (
-                    <>
-                      Unlock score &amp; full markup
-                      <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                      </svg>
-                    </>
-                  )}
-                </button>
-                <p className="mt-1.5 text-center text-[11px] font-bold text-stone-400 dark:text-stone-500">
-                  {UPGRADE_CTA_FOOTNOTE}
-                </p>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  /* ─── STUDYPACK-INPUT — notes → real study pack, same aha slot as essay. ─── */
+  /* ─── STUDYPACK-INPUT — notes → real study pack, same slot as the essay. ─── */
   if (phase === 'studypack-input') {
-    const notEnoughWords = notesWordCount < MIN_NOTES_WORDS;
-    const progressPct = Math.min(100, (notesWordCount / MIN_NOTES_WORDS) * 100);
-
-    if (packRunning) {
-      return (
-        <div className="relative h-screen bg-gradient-to-br from-[#FAF7FF] via-[#FBF7FF] to-[#F3EAFF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 flex flex-col overflow-hidden">
-          <OnboardingAura />
-          <TopBar />
-
-          <div className="flex-1 flex flex-col items-center justify-center px-5 py-8">
-            <div className="w-full max-w-md">
-              <div className="flex justify-center mb-6">
-                <MascotGif src="/mascot-thinking.webp" alt="" size={130} bordered borderColor="#A560E8" bgColor="#F3EAFF" />
-              </div>
-
-              <h1
-                className="text-center text-2xl sm:text-[1.9rem] font-extrabold text-[#3C3C3C] dark:text-stone-50 leading-tight"
-                style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-              >
-                Building your study pack…
-              </h1>
-              <p className="mt-2 text-center text-sm font-bold text-stone-500 dark:text-stone-400">
-                {notesWordCount.toLocaleString()} words · usually under a minute
-              </p>
-
-              <div className="mt-6 rounded-3xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900 p-3 space-y-1.5">
-                {STUDY_PACK_STEPS.map((s, i) => {
-                  const done = i < packStep;
-                  const active = i === packStep;
-                  return (
-                    <div
-                      key={s.label}
-                      className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 transition-all duration-300 ${
-                        active
-                          ? 'bg-[#F3EAFF] dark:bg-[#A560E8]/15 border-2 border-[#A560E8]/40'
-                          : 'border-2 border-transparent'
-                      }`}
-                    >
-                      <span className="text-lg" aria-hidden>{s.icon}</span>
-                      <span className={`flex-1 text-[13.5px] font-extrabold ${active ? 'text-[#7733B5] dark:text-[#C9A0F0]' : done ? 'text-stone-500 dark:text-stone-400' : 'text-stone-400 dark:text-stone-500'}`}>
-                        {s.label}
-                      </span>
-                      {done ? (
-                        <span className="text-[#A560E8]" aria-hidden>✓</span>
-                      ) : active ? (
-                        <span className="h-3.5 w-3.5 rounded-full border-2 border-[#A560E8]/30 border-t-[#A560E8] animate-spin" aria-hidden />
-                      ) : null}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
     return (
-      <div
-        className="relative h-screen bg-gradient-to-br from-[#FAF7FF] via-[#FBF7FF] to-[#F3EAFF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 flex flex-col overflow-hidden"
-        onDragOver={(e) => { e.preventDefault(); setNotesDropActive(true); }}
-        onDragLeave={(e) => {
-          if (e.currentTarget === e.target) setNotesDropActive(false);
-        }}
-        onDrop={(e) => {
-          e.preventDefault();
-          setNotesDropActive(false);
-          const f = e.dataTransfer.files?.[0];
-          if (f) void handleNotesFile(f);
-        }}
-      >
-        <OnboardingAura />
-        <TopBar />
-
-        <div className="flex-1 overflow-y-auto">
-          <div className="px-4 sm:px-6 pt-5 pb-6 max-w-xl mx-auto w-full ob-fade-in">
-            <div className="text-center mb-5">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border-2 border-[#A560E8]/40 bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[#A560E8] text-[10px] font-extrabold uppercase tracking-wider mb-2.5">
-                <span aria-hidden>✨</span>
-                Your free study pack
-              </span>
-              <h1
-                className="text-2xl sm:text-[1.9rem] font-extrabold text-[#3C3C3C] dark:text-stone-50 leading-tight"
-                style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-              >
-                Turn notes into a <span className="text-[#A560E8]">study pack</span>
-              </h1>
-              <p className="mt-1.5 text-stone-500 dark:text-stone-400 font-bold text-[13.5px] sm:text-sm max-w-md mx-auto">
-                Lesson, flashcards, and a quiz — usually under a minute.
-              </p>
-            </div>
-
-            <div className="mb-4 flex flex-wrap items-center justify-center gap-1.5">
-              {['Lesson', 'Flashcards', 'Quiz'].map((f) => (
-                <span
-                  key={f}
-                  className="inline-flex items-center gap-1.5 rounded-full border-2 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900 px-2.5 py-1 text-[11.5px] font-extrabold text-stone-600 dark:text-stone-300"
-                >
-                  <svg className="w-3 h-3 text-[#A560E8]" fill="none" stroke="currentColor" strokeWidth={3.5} viewBox="0 0 24 24" aria-hidden>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                  {f}
-                </span>
-              ))}
-            </div>
-
-            <div
-              className={`relative rounded-3xl border-2 border-b-4 bg-white dark:bg-stone-900 p-3 sm:p-3.5 transition-colors ${
-                notesDropActive
-                  ? 'border-[#A560E8] bg-[#FBF7FF] dark:bg-[#A560E8]/10'
-                  : 'border-[#E5E5E5] dark:border-stone-700'
-              }`}
-            >
-              <textarea
-                value={notesInput}
-                onChange={(e) => { setNotesInput(e.target.value); setPackError(null); }}
-                disabled={notesParsing}
-                rows={9}
-                placeholder={'Paste your notes here…\n\nOr drag a PDF or Word file anywhere on this page.'}
-                className="w-full resize-none rounded-2xl bg-[#FAFAFA] dark:bg-stone-950 px-4 py-3.5 text-[14px] font-semibold leading-relaxed text-[#3C3C3C] dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-600 border-2 border-transparent focus:border-[#A560E8]/50 focus:outline-none transition-colors disabled:opacity-60"
-              />
-
-              <div className="mt-2.5 px-1">
-                <div className="flex items-baseline justify-between gap-2 mb-1.5">
-                  <span className="min-w-0 flex items-center gap-1.5 text-[12px] font-extrabold text-stone-500 dark:text-stone-400">
-                    {notesFileName && (
-                      <>
-                        <span aria-hidden>📄</span>
-                        <span className="truncate max-w-[150px] text-[#A560E8]">{notesFileName}</span>
-                        <span className="text-stone-300 dark:text-stone-600" aria-hidden>·</span>
-                      </>
-                    )}
-                    <span className="shrink-0">
-                      {notesWordCount.toLocaleString()} {notesWordCount === 1 ? 'word' : 'words'}
-                    </span>
-                  </span>
-                  <span className={`text-[11.5px] font-extrabold ${notEnoughWords ? 'text-stone-400 dark:text-stone-500' : 'text-[#A560E8]'}`}>
-                    {notEnoughWords ? `${MIN_NOTES_WORDS - notesWordCount} more to go` : 'Ready to build'}
-                  </span>
-                </div>
-                <div className="h-2 rounded-full bg-[#F0F0F0] dark:bg-stone-800 overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-[#A560E8] transition-all duration-300"
-                    style={{ width: `${progressPct}%` }}
-                  />
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => notesFileInputRef.current?.click()}
-                disabled={notesParsing}
-                className="mt-3 w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-2xl border-2 border-b-4 border-[#E5E5E5] dark:border-stone-700 bg-white dark:bg-stone-900 hover:border-[#A560E8]/50 hover:bg-[#FBF7FF] dark:hover:bg-[#A560E8]/10 text-[12.5px] font-extrabold text-stone-600 dark:text-stone-300 active:border-b-2 active:translate-y-0.5 disabled:opacity-60 transition-all"
-              >
-                {notesParsing ? (
-                  <>
-                    <span className="h-3.5 w-3.5 rounded-full border-2 border-[#A560E8]/30 border-t-[#A560E8] animate-spin" aria-hidden />
-                    Reading your file…
-                  </>
-                ) : (
-                  <>
-                    <span aria-hidden>📎</span>
-                    {notesFileName ? 'Choose a different file' : 'Upload PDF, Word or TXT'}
-                  </>
-                )}
-              </button>
-              <input
-                ref={notesFileInputRef}
-                type="file"
-                accept=".pdf,.doc,.docx,.txt"
-                className="hidden"
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) void handleNotesFile(f);
-                  e.target.value = '';
-                }}
-              />
-
-              {packError && (
-                <div className="mt-3 rounded-2xl bg-[#FFE8E8] dark:bg-[#FF4B4B]/10 border-2 border-[#FF4B4B]/30 px-3 py-2.5 text-[12.5px] text-[#FF4B4B] font-bold">
-                  {packError}
-                </div>
-              )}
-
-              {notesDropActive && (
-                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-3xl bg-[#F3EAFF]/95 dark:bg-[#A560E8]/25 border-2 border-dashed border-[#A560E8] pointer-events-none">
-                  <span className="text-3xl mb-1.5" aria-hidden>📄</span>
-                  <p className="text-[14px] font-extrabold text-[#7733B5] dark:text-[#E9DBFF]">Drop your notes to upload</p>
-                </div>
-              )}
-            </div>
-
-            <p className="mt-3 text-center text-[11.5px] font-bold text-stone-400 dark:text-stone-500">
-              🔒 Private to your account · never used to train models
-            </p>
-          </div>
-        </div>
-
-        <div className="relative z-10 border-t-2 border-[#E5E5E5] dark:border-stone-800 bg-white dark:bg-stone-900 px-5 sm:px-8 py-3.5 sm:py-4">
-          <div className="max-w-xl mx-auto">
-            <button
-              type="button"
-              onClick={() => void handleRunOnboardingStudyPack()}
-              disabled={notesParsing || notEnoughWords}
-              className="w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-[#A560E8] hover:bg-[#7733B5] disabled:opacity-40 disabled:cursor-not-allowed text-white text-[15px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
-            >
-              Build my study pack
-            </button>
-            <button
-              type="button"
-              onClick={handleSkipStudyPack}
-              className="mt-1 w-full py-1.5 text-[11.5px] font-bold text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
-            >
-              I don&apos;t have notes right now
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  /* ─── STUDYPACK-RESULT — lesson + first cards, rest locked. ─── */
-  if (phase === 'studypack-result' && packResult) {
-    const previewCount = Math.max(1, Math.ceil((packResult.cards.length || packResult.cardCount) / 2));
-    const previewCards = packResult.cards.slice(0, previewCount);
-    const lockedCards = Math.max(0, packResult.cardCount - previewCards.length);
-
-    return (
-      <div className="relative h-screen bg-gradient-to-br from-[#FAF7FF] via-[#FBF7FF] to-[#F3EAFF] dark:from-stone-950 dark:via-stone-950 dark:to-stone-900 flex flex-col overflow-hidden">
-        <OnboardingAura />
-        <TopBar />
-
-        <div className="flex-1 overflow-y-auto">
-          <div className="px-4 sm:px-6 py-4 max-w-[34rem] mx-auto w-full ob-fade-in">
-            <div className="mb-3.5 flex items-center justify-center gap-[1.125rem]">
-              <div className="ob-result-mascot relative flex h-[106px] w-[106px] shrink-0 items-center justify-center rounded-full bg-white dark:bg-stone-900 shadow-[0_16px_34px_-18px_rgba(119,51,181,0.7)]">
-                <span className="absolute inset-0 rounded-full border-[5px] border-[#DAB8FA]" aria-hidden />
-                <span className="absolute inset-[9px] rounded-full border border-[#EAD8FB]" aria-hidden />
-                <span className="ob-result-orbit absolute left-1/2 top-1/2 h-3.5 w-3.5 rounded-full bg-[#A560E8] ring-[3px] ring-white dark:ring-stone-900" aria-hidden />
-                <img
-                  src="/mascot-jumping-joy.webp"
-                  alt=""
-                  width={86}
-                  height={86}
-                  className="relative h-[86px] w-[86px] object-contain"
-                  loading="eager"
-                  decoding="async"
-                />
-              </div>
-              <div className="min-w-0">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#EADCF8] dark:bg-[#A560E8]/15 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.17em] text-[#7733B5] dark:text-[#C9A0F0]">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#A560E8]" aria-hidden />
-                  Pack ready
-                </span>
-                <h1
-                  className="mt-1.5 text-[1.8rem] sm:text-[1.95rem] font-extrabold leading-[1.05] text-[#2F2538] dark:text-stone-50"
-                  style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
-                >
-                  Your study pack is<br /><span className="text-[#A560E8]">ready to open.</span>
-                </h1>
-                <p className="mt-1.5 text-[12.5px] font-bold text-stone-500 dark:text-stone-400">
-                  {packResult.wordCount.toLocaleString()} words · {packResult.cardCount} cards
-                  {packResult.quizCount > 0 ? ` · ${packResult.quizCount} quiz Qs` : ''}
-                </p>
-              </div>
-            </div>
-
-            <section className="relative overflow-hidden rounded-[26px] border-2 border-b-[5px] border-[#D8BDF2] dark:border-[#A560E8]/35 bg-white dark:bg-stone-900 shadow-[0_24px_55px_-32px_rgba(84,35,133,0.7)]">
-              <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-[#C9A0F0] via-[#A560E8] to-[#7733B5]" aria-hidden />
-
-              <div className="flex items-center justify-between border-b border-[#EEE4F7] dark:border-stone-700 px-4 pb-3 pt-[1.125rem]">
-                <div className="flex items-center gap-2.5">
-                  <span className="flex h-[2.375rem] w-[2.375rem] items-center justify-center rounded-xl bg-[#F3EAFF] dark:bg-[#A560E8]/15 text-[15px]" aria-hidden>🃏</span>
-                  <div>
-                    <p className="text-[13px] font-extrabold text-[#3C3C3C] dark:text-stone-100 line-clamp-1">{packResult.title}</p>
-                    <p className="text-[11px] font-bold text-stone-400 dark:text-stone-500">Lesson + cards preview</p>
-                  </div>
-                </div>
-                <span className="rounded-full bg-[#F3EAFF] dark:bg-[#A560E8]/15 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide text-[#7733B5] dark:text-[#C9A0F0]">
-                  Preview
-                </span>
-              </div>
-
-              {packResult.lessonPreview && (
-                <div className="border-b border-[#EEE4F7] dark:border-stone-700 px-4 py-3.5">
-                  <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#A560E8]">First lesson beat</p>
-                  <p className="mt-1 text-[13.5px] font-bold leading-relaxed text-[#3C3C3C] dark:text-stone-100 line-clamp-3">{packResult.lessonPreview}</p>
-                </div>
-              )}
-
-              <div className="divide-y divide-[#EEE4F7] dark:divide-stone-700">
-                {previewCards.map((c, i) => (
-                  <div key={`${c.front}-${i}`} className="px-4 py-3">
-                    <p className="text-[12.5px] font-extrabold text-[#3C3C3C] dark:text-stone-100">{c.front}</p>
-                    <p className="mt-0.5 text-[12px] font-bold text-stone-500 dark:text-stone-400 line-clamp-2">{c.back}</p>
-                  </div>
-                ))}
-                {lockedCards > 0 && (
-                  <div className="flex items-center gap-3 bg-[#FCF9FF] dark:bg-[#A560E8]/5 px-4 py-4">
-                    <span className="flex h-[2.625rem] w-[2.625rem] shrink-0 items-center justify-center rounded-xl bg-[#EADCF8] dark:bg-[#A560E8]/20 text-base" aria-hidden>🔒</span>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[13.5px] font-extrabold text-[#3C3C3C] dark:text-stone-100">
-                        {lockedCards} more {lockedCards === 1 ? 'card' : 'cards'} + full quiz
-                      </p>
-                      <p className="mt-0.5 text-[11px] font-bold text-[#A560E8]">
-                        {offerTrial ? 'Unlock with free trial' : 'Unlock with Pro'}
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex items-center justify-center gap-2 border-t border-[#E6D4F5] dark:border-[#A560E8]/25 bg-[#F7EEFF] dark:bg-[#A560E8]/10 px-4 py-3">
-                <span className="text-sm" aria-hidden>🔒</span>
-                <p className="text-[12px] font-extrabold text-[#7733B5] dark:text-[#C9A0F0]">
-                  Full deck · quiz · games from this pack
-                </p>
-              </div>
-            </section>
-          </div>
-          <style>{`
-            @keyframes obResultOrbit {
-              from { transform: translate(-50%, -50%) rotate(0deg) translateX(54px) rotate(0deg); }
-              to { transform: translate(-50%, -50%) rotate(360deg) translateX(54px) rotate(-360deg); }
-            }
-            @keyframes obResultMascotPulse {
-              0%, 100% { box-shadow: 0 0 0 0 rgba(165,96,232,.12), 0 16px 34px -18px rgba(119,51,181,.7); }
-              50% { box-shadow: 0 0 0 8px rgba(165,96,232,.07), 0 18px 38px -16px rgba(119,51,181,.75); }
-            }
-            .ob-result-orbit { animation: obResultOrbit 5s linear infinite; }
-            .ob-result-mascot { animation: obResultMascotPulse 2.4s ease-in-out infinite; }
-            @media (prefers-reduced-motion: reduce) {
-              .ob-result-orbit, .ob-result-mascot { animation: none; }
-            }
-          `}</style>
-        </div>
-
-        <div className="relative z-10 border-t-2 border-[#E5E5E5] dark:border-stone-800 bg-white dark:bg-stone-900 px-4 sm:px-6 py-3 sm:py-3.5">
-          <div className="max-w-[34rem] mx-auto">
-            {HIDE_END_PAYWALLS ? (
-              <>
-                <button
-                  type="button"
-                  onClick={() => {
-                    trackEvent('onboarding_aha_continue_dashboard', { kind: 'study_pack' });
-                    try {
-                      sessionStorage.setItem('writescholar_ws_pending_view', 'hub');
-                      sessionStorage.setItem(HIGHLIGHT_PACK_AFTER_ONBOARDING_KEY, '1');
-                    } catch { /* ignore */ }
-                    goToPhase('transition');
-                  }}
-                  className="w-full inline-flex items-center justify-center gap-2 py-[0.9375rem] rounded-2xl bg-[#A560E8] hover:bg-[#7733B5] text-white text-[15px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
-                >
-                  See your pack in the dashboard
-                  <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </button>
-                <p className="mt-1.5 text-center text-[11px] font-bold text-stone-400 dark:text-stone-500">
-                  Open it from the hub · unlock the rest with Pro ({flashOffer.active ? `$${FLASH_FIRST_MONTH_PRICE} first month` : '50% off first month'})
-                </p>
-              </>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={() => void handleSubscribeChoice()}
-                  disabled={startingTrial}
-                  className="w-full inline-flex items-center justify-center gap-2 py-[0.9375rem] rounded-2xl bg-[#A560E8] hover:bg-[#7733B5] disabled:opacity-60 disabled:cursor-not-allowed text-white text-[15px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
-                >
-                  {startingTrial ? (
-                    <>
-                      <span className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white animate-spin" aria-hidden />
-                      Opening secure checkout…
-                    </>
-                  ) : (
-                    <>
-                      Unlock full pack
-                      <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                      </svg>
-                    </>
-                  )}
-                </button>
-                <p className="mt-1.5 text-center text-[11px] font-bold text-stone-400 dark:text-stone-500">
-                  {UPGRADE_CTA_FOOTNOTE}
-                </p>
-              </>
-            )}
-          </div>
-        </div>
+      <div className={`transition-opacity duration-200 ${phaseVisible ? 'opacity-100' : 'opacity-0'}`}>
+        {packRunning ? (
+          <OnboardingWorkingStep
+            kind="notes"
+            wordCount={notesWordCount}
+            steps={STUDY_PACK_STEPS.map((s) => s.label)}
+            activeStep={packStep}
+            onLogout={onLogout}
+          />
+        ) : (
+          <OnboardingUploadStep
+            kind="notes"
+            text={notesInput}
+            onTextChange={(v) => { setNotesInput(v); setPackError(null); }}
+            fileName={notesFileName}
+            onFile={(f) => void handleNotesFile(f)}
+            onClearFile={() => { setNotesFileName(null); setNotesInput(''); setPackError(null); }}
+            parsing={notesParsing}
+            error={packError}
+            wordCount={notesWordCount}
+            minWords={MIN_NOTES_WORDS}
+            maxWords={MAX_NOTES_WORDS}
+            freeCredits={FREE_CREDITS}
+            onSubmit={() => void handleRunOnboardingStudyPack()}
+            onSkip={handleSkipStudyPack}
+            onBack={() => goToPhase('flow')}
+            onLogout={onLogout}
+          />
+        )}
       </div>
     );
   }

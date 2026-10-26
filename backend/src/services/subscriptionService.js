@@ -383,16 +383,11 @@ const getRemainingUsage = async (userId, limitType) => {
   return result.remaining;
 };
 
-// For Pro/Premium (and trials): the credit balance. Analyses, study packs
-// and citations each cost 1 credit. limit = credits available this period
-// (monthly credits + rollover, or 3 on a trial), usage = credits spent.
+// The credit balance. Analyses, study packs and citations each cost 1
+// credit. limit = credits available this period (monthly credits +
+// rollover, 3 on a trial, or the free week's 3), usage = credits spent.
 const checkCombinedActionsLimit = async (userId) => {
   try {
-    const { plan } = await getUserSubscriptionDetails(userId);
-    const effPlan = normalizePlanForLimits(plan);
-    if (!isPaidSubscriptionTier(effPlan)) {
-      return { allowed: true, limit: -1, usage: 0, remaining: -1 };
-    }
     const creditService = require('./creditService');
     const credits = await creditService.getCreditState(userId);
     return {
@@ -2142,6 +2137,7 @@ module.exports = {
   getPlanLimits,
   checkTrialEligibility,
   hasEverSubscribed,
+  hasEverHadPaidPlan,
   FLASH_OFFER_HOURS,
   FLASH_COUPON_ID,
   getFlashOfferEndsAt,

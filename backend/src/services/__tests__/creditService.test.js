@@ -4,12 +4,25 @@
  * are replaced with an in-memory fake.
  */
 
-const mockDb = { user: {}, actions: [] };
+const mockDb = { user: {}, actions: [], achievements: null };
 
 function mockQuery(table) {
   const filters = [];
   let update = null;
+  let insert = null;
   const run = () => {
+    if (table === 'user_achievements') {
+      if (insert) {
+        if (mockDb.achievements) return { error: { message: 'duplicate key value' } };
+        mockDb.achievements = { ...insert };
+        return { error: null };
+      }
+      if (update) {
+        mockDb.achievements = { ...mockDb.achievements, ...update };
+        return { error: null };
+      }
+      return { data: mockDb.achievements ? { ...mockDb.achievements } : null, error: null };
+    }
     if (table === 'users') {
       if (update) {
         for (const [op, key, value] of filters) {
@@ -34,6 +47,7 @@ function mockQuery(table) {
   const api = {
     select: () => api,
     update: (v) => { update = v; return api; },
+    insert: (v) => { insert = v; return api; },
     eq: (k, v) => { filters.push(['eq', k, v]); return api; },
     is: (k, v) => { filters.push(['is', k, v]); return api; },
     gte: (k, v) => { filters.push(['gte', k, v]); return api; },
@@ -49,9 +63,10 @@ function mockQuery(table) {
 
 jest.mock('@supabase/supabase-js', () => ({ createClient: () => ({ from: (t) => mockQuery(t) }) }));
 
-const mockState = { plan: 'pro', sub: null };
+const mockState = { plan: 'pro', sub: null, everPaid: false };
 jest.mock('../subscriptionService', () => ({
   getUserSubscriptionDetails: async () => ({ plan: mockState.plan, stripeCustomerId: 'cus_test' }),
+  hasEverHadPaidPlan: async () => mockState.everPaid,
   normalizePlanForLimits: (p) => p,
   isPaidSubscriptionTier: (p) => p === 'pro' || p === 'premium',
   getActiveSubscriptionByCustomer: async () => mockState.sub,
@@ -71,8 +86,10 @@ const spend = (n, day, kind = 'analysis') => { for (let i = 0; i < n; i++) mockD
 beforeEach(() => {
   mockDb.user = { credits_rollover: 0, credits_period_start: null, credits_period_allowance: null };
   mockDb.actions = [];
+  mockDb.achievements = null;
   mockState.plan = 'pro';
   mockState.sub = null;
+  mockState.everPaid = false;
 });
 
 test('the trial has 3 credits and leftovers roll into the first paid month', async () => {
@@ -145,8 +162,50 @@ test('cancelling resets the balance to 0', async () => {
   expect([c.rollover, c.total]).toEqual([0, 99]);
 });
 
-test('free accounts have no credits', async () => {
+const HOUR_MS = 60 * 60 * 1000;
+const agoIso = (ms) => new Date(Date.now() - ms).toISOString();
+
+test('a new free account gets 3 credits to use within 7 days', async () => {
   mockState.plan = 'free';
+  let c = await credits.getCreditState('u1');
+  expect([c.total, c.used, c.remaining, c.freeDaysLeft, c.freeExpired]).toEqual([3, 0, 3, 7, false]);
+  const startedAt = mockDb.achievements.stats.free_credits_started_at;
+  expect(c.freeExpiresAt).toBe(new Date(Date.parse(startedAt) + 7 * 24 * HOUR_MS).toISOString());
+
+  mockDb.actions.push({ kind: 'analysis', at: new Date(Date.parse(startedAt) + 1000).toISOString() });
+  mockDb.actions.push({ kind: 'pack', at: new Date(Date.parse(startedAt) + 2000).toISOString() });
+  c = await credits.getCreditState('u1');
+  expect([c.used, c.remaining]).toEqual([2, 1]);
+  // The stamp is written once.
+  expect(mockDb.achievements.stats.free_credits_started_at).toBe(startedAt);
+});
+
+test('free credits ignore what was used before the week started', async () => {
+  mockState.plan = 'free';
+  mockDb.actions.push({ kind: 'analysis', at: agoIso(30 * 24 * HOUR_MS) });
   const c = await credits.getCreditState('u1');
-  expect([c.total, c.remaining]).toEqual([0, 0]);
+  expect([c.used, c.remaining]).toEqual([0, 3]);
+});
+
+test('free credits expire after 7 days', async () => {
+  mockState.plan = 'free';
+  mockDb.achievements = { stats: { free_credits_started_at: agoIso(8 * 24 * HOUR_MS), uploads_count: 2 }, unlocked_badges: {} };
+  const c = await credits.getCreditState('u1');
+  expect([c.remaining, c.freeDaysLeft, c.freeExpired]).toEqual([0, 0, true]);
+});
+
+test('the stamp keeps the other achievement stats', async () => {
+  mockState.plan = 'free';
+  mockDb.achievements = { stats: { uploads_count: 4 }, unlocked_badges: {} };
+  await credits.getCreditState('u1');
+  expect(mockDb.achievements.stats.uploads_count).toBe(4);
+  expect(typeof mockDb.achievements.stats.free_credits_started_at).toBe('string');
+});
+
+test('accounts that have had a trial or paid plan get no free credits', async () => {
+  mockState.plan = 'free';
+  mockState.everPaid = true;
+  const c = await credits.getCreditState('u1');
+  expect([c.total, c.remaining, c.freeExpiresAt]).toEqual([0, 0, null]);
+  expect(mockDb.achievements).toBeNull();
 });

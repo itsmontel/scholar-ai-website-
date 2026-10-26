@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import type { AnnotatorAnnotation, AnnotationType } from './analyzerExtension';
+import { UPGRADE_CTA_FOOTNOTE } from '../../config/pricing';
 
 /* ═══════════════════════════════════════════════════════════════
    AnalyzerPanel — side panel rendered next to the editor when an
@@ -26,9 +27,12 @@ export interface AnalyzerResult {
   gradeEstimate?: string | null;
   clarityRating?: number | null;
   topSuggestions?: string[];
-  rubric?: Array<{ category: string; score?: number; maxScore?: number; feedback?: string }>;
+  /** `bar` (0–1, rounded) replaces `score` on the free preview. */
+  rubric?: Array<{ category: string; score?: number; maxScore?: number; feedback?: string; bar?: number }>;
   /** Long-form write-up from the comprehensive analysis (markdown). */
   comprehensiveText?: string;
+  /** Free preview: how many top fixes the server held back. */
+  lockedTopSuggestions?: number;
 }
 
 interface AnalyzerPanelProps {
@@ -50,11 +54,12 @@ interface AnalyzerPanelProps {
   appliedAnnotationIds?: Set<string>;
   /** Annotation id whose revision is mid-flight (button spinner). */
   applyingAnnotationId?: string | null;
-  /** Free tier — show a lock cue on Apply; the click is intercepted
-   *  upstream to open the teased upgrade modal. */
+  /** Free tier — the preview: grade and highlights show, comments,
+   *  section scores and fixes are locked (the server never sent them).
+   *  Apply is intercepted upstream to open the teased upgrade modal. */
   revisionsLocked?: boolean;
-  /** Upgrade CTA — used by locked comments / rubric paywall buttons. */
-  onUpgrade?: () => void;
+  /** Upgrade CTA. `source` says which locked block was clicked. */
+  onUpgrade?: (source?: string) => void;
 }
 
 const TYPE_META: Record<AnnotationType, { label: string; chip: string; bar: string; dot: string }> = {
@@ -78,8 +83,6 @@ const TYPE_META: Record<AnnotationType, { label: string; chip: string; bar: stri
   },
 };
 
-const FREE_RUBRIC_PREVIEW_KEYS = ['thesis_and_argument', 'analysis_and_critical_thinking'];
-
 const RUBRIC_CATEGORY_STYLES: Record<string, { accent: string }> = {
   thesis_and_argument: { accent: 'border-l-[#A560E8]' },
   response_to_question: { accent: 'border-l-[#FFC800]' },
@@ -93,16 +96,40 @@ function rubricStyleFor(category: string) {
   return RUBRIC_CATEGORY_STYLES[category.trim().toLowerCase()] ?? RUBRIC_CATEGORY_STYLES.thesis_and_argument;
 }
 
-function splitRubricForFreePreview(rubric: NonNullable<AnalyzerResult['rubric']>) {
-  const unlocked = [...rubric]
-    .sort((a, b) => {
-      const ai = FREE_RUBRIC_PREVIEW_KEYS.indexOf(a.category);
-      const bi = FREE_RUBRIC_PREVIEW_KEYS.indexOf(b.category);
-      return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
-    })
-    .slice(0, 2);
-  const locked = rubric.filter((r) => !unlocked.some((u) => u.category === r.category));
-  return { unlocked, locked };
+/* Placeholder copy that sits under the blur in the free preview. The
+   real comments never reach the browser; these only give the blur a
+   natural shape. */
+const LOCKED_COMMENT_FILLER: Record<AnnotationType, string[]> = {
+  strong: [
+    'This works because it states the point plainly and ties it straight back to your argument.',
+    'Strong choice here: the evidence is specific and you explain why it matters.',
+    'A clear, confident line that sets up the rest of the paragraph well.',
+  ],
+  improve: [
+    'This makes a claim without showing the reader why it is true. Add the step that connects it to your evidence.',
+    'The idea is right but the wording is vague. Name exactly what you mean so the point lands.',
+    'This sentence is doing two jobs at once. Split it so each idea gets its own support.',
+  ],
+  concern: [
+    'This weakens the argument because it contradicts what you said in the opening paragraph.',
+    'A marker will stop here: the claim is too broad and nothing in the essay backs it up.',
+    'This drifts away from the question. Cut it or link it back to your thesis.',
+  ],
+};
+const LOCKED_RUBRIC_FILLER = 'Specific feedback on this part of your essay, with what to change to move it up a band.';
+const LOCKED_FIX_FILLER = [
+  'Rewrite your thesis so it answers the question directly',
+  'Back the second body paragraph with a quote and explain it',
+  'Cut the repetition in your conclusion and end on your argument',
+];
+
+function LockIcon({ className = 'w-3 h-3' }: { className?: string }) {
+  return (
+    <svg className={`${className} shrink-0`} fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+      <rect x="5" y="11" width="14" height="9" rx="2" />
+      <path strokeLinecap="round" d="M8 11V8a4 4 0 0 1 8 0v3" />
+    </svg>
+  );
 }
 
 /* Rubric category keys arrive snake_cased from the model
@@ -153,19 +180,11 @@ function ScoreCard({
   rubric?: AnalyzerResult['rubric'];
   onRerun: () => void;
   loading: boolean;
-  /** Free plan — show the full paid layout but mask the numbers
-      (grade, /100 score, per-category rubric scores, clarity) with
-      "?" so free users get a feel for the paid breakdown. */
+  /** Free preview — the grade shows, every section score is locked
+      ("?/20", feedback blurred). */
   locked?: boolean;
-  onUpgrade?: () => void;
+  onUpgrade?: (source?: string) => void;
 }) {
-  const { unlockedRubric, lockedRubric } = useMemo(() => {
-    if (!rubric?.length) return { unlockedRubric: [] as NonNullable<typeof rubric>, lockedRubric: [] as NonNullable<typeof rubric> };
-    if (!locked) return { unlockedRubric: rubric, lockedRubric: [] as NonNullable<typeof rubric> };
-    const { unlocked, locked: lockedCategories } = splitRubricForFreePreview(rubric);
-    return { unlockedRubric: unlocked, lockedRubric: lockedCategories };
-  }, [rubric, locked]);
-
   return (
     <div className="rounded-2xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 overflow-hidden">
       <div className="bg-gradient-to-br from-[#A560E8] to-[#7733B5] text-white px-4 py-3.5">
@@ -185,51 +204,73 @@ function ScoreCard({
           {locked ? (
             <button
               type="button"
-              onClick={onUpgrade}
-              className="rounded-xl bg-[#FFC800] hover:bg-[#F0BC00] border-2 border-b-[3px] border-[#D4A300] active:border-b-2 active:translate-y-px px-3 py-2 text-left transition-all shadow-[0_6px_18px_-6px_rgba(255,200,0,0.5)]"
+              onClick={() => onUpgrade?.('exact_score')}
+              title="Your exact score is on Pro"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-white/15 hover:bg-white/25 px-2.5 py-1.5 transition-colors"
             >
-              <span className="block text-[13px] font-extrabold leading-snug text-[#5A4500]">Unlock your estimated grade</span>
-              <span className="block mt-0.5 text-[10px] font-bold text-[#6B5200]/90">Letter grade & /100 score on Pro</span>
+              <LockIcon className="w-3.5 h-3.5" />
+              <span className="text-xl font-extrabold tabular-nums leading-none blur-[5px] select-none" aria-hidden>00</span>
+              <span className="text-xs font-extrabold text-white/75">/100</span>
             </button>
-          ) : (
-            <>
-              {typeof overallScore === 'number' && (
-                <span className="text-2xl sm:text-3xl font-extrabold tabular-nums leading-none">
-                  {overallScore}
-                  <span className="text-xs font-extrabold text-white/75">/100</span>
-                </span>
-              )}
-              {gradeEstimate && (
-                <span className="ml-auto inline-flex items-center justify-center px-2.5 py-1 rounded-xl bg-[#FFC800] text-[#6B27A3] text-lg font-extrabold leading-none border-2 border-b-[3px] border-[#D4A300]">
-                  {gradeEstimate}
-                </span>
-              )}
-            </>
+          ) : typeof overallScore === 'number' && (
+            <span className="text-2xl sm:text-3xl font-extrabold tabular-nums leading-none">
+              {overallScore}
+              <span className="text-xs font-extrabold text-white/75">/100</span>
+            </span>
+          )}
+          {gradeEstimate && (
+            <span className="ml-auto inline-flex items-center justify-center px-2.5 py-1 rounded-xl bg-[#FFC800] text-[#6B27A3] text-lg font-extrabold leading-none border-2 border-b-[3px] border-[#D4A300]">
+              {gradeEstimate}
+            </span>
           )}
         </div>
-        {(locked || typeof overallScore === 'number' || gradeEstimate) && (
+        {(typeof overallScore === 'number' || gradeEstimate) && (
           <p className="mt-1.5 text-[10px] font-bold text-white/70 leading-snug">
             {locked
-              ? 'Your grade and full rubric unlock on Pro — tap above to see them.'
+              ? 'Your estimated grade. Pro shows your exact score, what is holding it back and how to raise it.'
               : 'Estimated grade & score — an AI guide for revision, not your official grade.'}
           </p>
         )}
       </div>
       {rubric && rubric.length > 0 && (
         <div className="px-3 py-3 space-y-2">
-          {unlockedRubric.map((r) => {
+          {locked && (
+            <div className="flex items-center justify-between px-0.5">
+              <span className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-stone-400">Section scores</span>
+              <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider text-[#A560E8]">
+                <LockIcon /> Pro
+              </span>
+            </div>
+          )}
+          {rubric.map((r) => {
             const max = r.maxScore || 100;
-            const pct = typeof r.score === 'number' ? Math.round((r.score / max) * 100) : 0;
             const style = rubricStyleFor(r.category);
+            if (locked) {
+              return (
+                <button
+                  key={r.category}
+                  type="button"
+                  onClick={() => onUpgrade?.('section_score')}
+                  className={`block w-full text-left rounded-xl border border-stone-200 dark:border-stone-700 border-l-[3px] ${style.accent} bg-white dark:bg-stone-900/80 px-2.5 py-2 hover:bg-[#FAF6FF] dark:hover:bg-stone-800/60 transition-colors`}
+                >
+                  <span className="flex justify-between text-[11px] font-bold text-stone-700 dark:text-stone-300 mb-1">
+                    <span>{humanizeLabel(r.category)}</span>
+                    <span className="tabular-nums text-stone-400">?/{max}</span>
+                  </span>
+                  <span className="block h-1.5 rounded-full bg-stone-100 dark:bg-stone-700 overflow-hidden" aria-hidden>
+                    {typeof r.bar === 'number' && (
+                      <span className="block h-full rounded-full bg-[#A560E8]" style={{ width: `${Math.round(r.bar * 100)}%` }} />
+                    )}
+                  </span>
+                  <span className="mt-1 block text-[10px] text-stone-500 leading-snug blur-[4px] select-none" aria-hidden>
+                    {LOCKED_RUBRIC_FILLER}
+                  </span>
+                </button>
+              );
+            }
+            const pct = typeof r.score === 'number' ? Math.round((r.score / max) * 100) : 0;
             return (
-              <div
-                key={r.category}
-                className={
-                  locked
-                    ? `rounded-xl border border-stone-200 dark:border-stone-700 border-l-[3px] ${style.accent} bg-white dark:bg-stone-900/80 px-2.5 py-2`
-                    : undefined
-                }
-              >
+              <div key={r.category}>
                 <div className="flex justify-between text-[11px] font-bold text-stone-700 dark:text-stone-300 mb-1">
                   <span>{humanizeLabel(r.category)}</span>
                   {typeof r.score === 'number' && (
@@ -247,54 +288,20 @@ function ScoreCard({
               </div>
             );
           })}
-          {lockedRubric.map((r) => {
-            const max = r.maxScore || 100;
-            const style = rubricStyleFor(r.category);
-            return (
-              <div
-                key={r.category}
-                className={`rounded-xl border border-stone-200 dark:border-stone-700 border-l-[3px] ${style.accent} bg-white dark:bg-stone-900/80 px-2.5 py-2`}
-              >
-                <div className="flex justify-between text-[11px] font-bold text-stone-700 dark:text-stone-300 mb-1">
-                  <span>{humanizeLabel(r.category)}</span>
-                  <span className="tabular-nums text-stone-400">?/{max}</span>
-                </div>
-                <div className="relative min-h-[2.75rem] overflow-hidden rounded-lg">
-                  <p className="text-[10px] text-stone-500 blur-[5px] select-none leading-snug" aria-hidden>
-                    {r.feedback || 'Personalized feedback for this category unlocks on Pro.'}
-                  </p>
-                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-white/90 via-white/45 to-transparent dark:from-stone-900/90 dark:via-stone-900/45">
-                    <span className="rounded-full border border-[#A560E8] bg-[#F3EAFF] px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-[#A560E8] dark:border-[#8A48C7] dark:bg-[#A560E8]/20 dark:text-[#C9A0F0]">
-                      Pro
-                    </span>
-                  </div>
-                </div>
-                {onUpgrade && (
-                  <button
-                    type="button"
-                    onClick={onUpgrade}
-                    className="mt-1.5 w-full rounded-lg bg-[#A560E8] hover:bg-[#8A48C7] px-2 py-1.5 text-[10px] font-extrabold text-white border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-px transition-all"
-                  >
-                    Unlock {humanizeLabel(r.category)}
-                  </button>
-                )}
-              </div>
-            );
-          })}
-          {locked && lockedRubric.length > 0 && onUpgrade && (
+          {locked && onUpgrade && (
             <button
               type="button"
-              onClick={onUpgrade}
-              className="mt-1 w-full rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] px-3 py-2 text-[11px] font-extrabold text-white border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-px transition-all"
+              onClick={() => onUpgrade('section_scores')}
+              className="mt-1 w-full rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] px-3 py-2 text-[11px] font-extrabold uppercase tracking-wide text-white border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-px transition-all"
             >
-              Unlock remaining {lockedRubric.length} categories
+              See your {rubric.length} section scores
             </button>
           )}
         </div>
       )}
-      {typeof clarityRating === 'number' && (
+      {typeof clarityRating === 'number' && !locked && (
         <div className="px-4 py-2 border-t border-stone-100 dark:border-stone-800 text-[11px] font-bold text-stone-500 dark:text-stone-400">
-          Clarity rating: <span className="tabular-nums text-stone-700 dark:text-stone-200">{locked ? '?' : clarityRating}/10</span>
+          Clarity rating: <span className="tabular-nums text-stone-700 dark:text-stone-200">{clarityRating}/10</span>
         </div>
       )}
     </div>
@@ -319,16 +326,24 @@ function AnnotationCard({
   onClick: () => void;
   onApply?: () => void;
   onRevert?: () => void;
-  /** Free gate — blurs comment + hides the suggestion. */
+  /** Free gate — the quote stays, the comment is blurred filler and
+   *  the suggestion is replaced by a lock line. */
   locked?: boolean;
   /** Global free gate — Apply revision is Pro-only for the whole
    *  document regardless of position. */
   applyLocked?: boolean;
 }) {
   const meta = TYPE_META[ann.type] ?? TYPE_META.improve;
+  const fixable = ann.type === 'improve' || ann.type === 'concern';
   // Only "improve" / "concern" cards have an Apply button — strong
-  // points have no rewrite to apply.
-  const canApply = !!onApply && (ann.type === 'improve' || ann.type === 'concern') && !!ann.suggestion?.trim();
+  // points have no rewrite to apply. On the free preview the button
+  // stays as an upgrade cue even though the fix itself was held back.
+  const canApply = !!onApply && fixable && (applyLocked || !!ann.suggestion?.trim());
+  const filler = useMemo(() => {
+    const options = LOCKED_COMMENT_FILLER[ann.type] ?? LOCKED_COMMENT_FILLER.improve;
+    const seed = [...String(ann.id)].reduce((n, ch) => n + ch.charCodeAt(0), 0);
+    return options[seed % options.length];
+  }, [ann.id, ann.type]);
   return (
     <div
       data-card-annotation-id={ann.id}
@@ -355,31 +370,27 @@ function AnnotationCard({
         {ann.text && (
           <p className="text-[11px] italic text-stone-500 dark:text-stone-400 mb-1.5 line-clamp-2 leading-snug">"{ann.text}"</p>
         )}
-        {(() => {
-          const blurC = locked && (ann.type === 'improve' || ann.type === 'concern');
-          return (
-            <p
-              className={`text-[12px] font-bold text-stone-800 dark:text-stone-100 leading-snug ${blurC ? 'blur-[4px] select-none' : ''}`}
-              aria-hidden={blurC || undefined}
-            >
+        {locked ? (
+          <>
+            <p className="text-[12px] font-bold text-stone-800 dark:text-stone-100 leading-snug blur-[4px] select-none" aria-hidden>
+              {ann.comment || filler}
+            </p>
+            <p className="mt-1.5 inline-flex items-center gap-1.5 text-[11px] font-extrabold text-[#8A48C7] dark:text-[#C9A0F0]">
+              <LockIcon />
+              {fixable ? 'Why, and how to fix it · Pro' : 'Why this works · Pro'}
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="text-[12px] font-bold text-stone-800 dark:text-stone-100 leading-snug">
               {ann.comment}
             </p>
-          );
-        })()}
-        {ann.suggestion && (
-          locked ? (
-            <p className="mt-1.5 inline-flex items-center gap-1.5 text-[11px] font-extrabold text-[#8A48C7] dark:text-[#C9A0F0]">
-              <svg className="w-3 h-3 shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
-                <rect x="5" y="11" width="14" height="9" rx="2" />
-                <path strokeLinecap="round" d="M8 11V8a4 4 0 0 1 8 0v3" />
-              </svg>
-              Unlock WriteScholar's suggested fix with Pro
-            </p>
-          ) : (
-            <p className="mt-1 text-[11px] text-stone-600 dark:text-stone-300 leading-snug">
-              <span className="font-extrabold text-[#A560E8]">Try:</span> {ann.suggestion}
-            </p>
-          )
+            {ann.suggestion && (
+              <p className="mt-1 text-[11px] text-stone-600 dark:text-stone-300 leading-snug">
+                <span className="font-extrabold text-[#A560E8]">Try:</span> {ann.suggestion}
+              </p>
+            )}
+          </>
         )}
       </button>
       {canApply && (
@@ -419,11 +430,8 @@ function AnnotationCard({
                 </>
               ) : applyLocked ? (
                 <>
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
-                    <rect x="5" y="11" width="14" height="9" rx="2" />
-                    <path strokeLinecap="round" d="M8 11V8a4 4 0 0 1 8 0v3" />
-                  </svg>
-                  Apply revision
+                  <LockIcon />
+                  Fix it for me
                   <span className="ml-0.5 px-1 py-px rounded bg-white/25 text-[8px] leading-none tracking-wide">PRO</span>
                 </>
               ) : (
@@ -479,11 +487,15 @@ export default function AnalyzerPanel({
           {onOpenFullReport && result && (
             <button
               type="button"
-              onClick={onOpenFullReport}
-              title="Open the full read-only report"
+              onClick={revisionsLocked ? () => onUpgrade?.('full_report') : onOpenFullReport}
+              title={revisionsLocked ? 'The full written report is on Pro' : 'Open the full read-only report'}
               className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#F3EAFF] hover:bg-[#A560E8]/20 text-[#7733B5] dark:bg-[#A560E8]/15 dark:hover:bg-[#A560E8]/25 dark:text-[#C390F2] text-[10px] font-extrabold uppercase tracking-wider border border-[#A560E8]/30 transition-colors"
             >
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M14 3h7m0 0v7m0-7L10 14M5 5h6v2H7v10h10v-4h2v6H5z" /></svg>
+              {revisionsLocked ? (
+                <LockIcon />
+              ) : (
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.25} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M14 3h7m0 0v7m0-7L10 14M5 5h6v2H7v10h10v-4h2v6H5z" /></svg>
+              )}
               Report
             </button>
           )}
@@ -534,34 +546,69 @@ export default function AnalyzerPanel({
               />
             </div>
 
-            {revisionsLocked && (
-              <div className="rounded-2xl border-2 border-[#A560E8]/30 bg-gradient-to-br from-[#F3EAFF] to-white dark:from-[#A560E8]/12 dark:to-stone-900 px-4 py-3">
-                <p className="inline-flex items-center gap-1.5 text-[12px] font-extrabold text-[#7733B5] dark:text-[#C9A0F0]">
-                  <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
-                    <rect x="5" y="11" width="14" height="9" rx="2" />
-                    <path strokeLinecap="round" d="M8 11V8a4 4 0 0 1 8 0v3" />
-                  </svg>
-                  Colors are free — comments are Pro
+            {revisionsLocked && (result.annotations ?? []).length > 0 && (
+              <div className="rounded-2xl border-2 border-b-4 border-[#A560E8]/40 bg-[#F3EAFF] dark:bg-[#A560E8]/12 px-4 py-3.5">
+                <p className="inline-flex items-center gap-1.5 text-[13px] font-extrabold text-[#5B2391] dark:text-[#DCC2F7]">
+                  <LockIcon className="w-3.5 h-3.5" />
+                  {(result.annotations ?? []).length} notes on this draft
                 </p>
-                <p className="mt-1 text-[11.5px] font-bold text-stone-600 dark:text-stone-300 leading-snug">
-                  Green, amber, and red mark the whole paper. Hover any highlight or upgrade to read the notes and one-click fixes.
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {(['concern', 'improve', 'strong'] as AnnotationType[]).map((type) =>
+                    grouped[type].length ? (
+                      <span key={type} className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md border text-[10px] font-extrabold uppercase tracking-wider ${TYPE_META[type].chip}`}>
+                        <span className={`inline-block w-1.5 h-1.5 rounded-full ${TYPE_META[type].dot}`} aria-hidden />
+                        {grouped[type].length} {type === 'concern' ? (grouped[type].length === 1 ? 'concern' : 'concerns') : type === 'improve' ? 'to improve' : grouped[type].length === 1 ? 'strength' : 'strengths'}
+                      </span>
+                    ) : null
+                  )}
+                </div>
+                <p className="mt-2 text-[11.5px] font-bold text-stone-600 dark:text-stone-300 leading-snug">
+                  The colours show you where. Pro shows you why, and rewrites each one for you in a click.
                 </p>
                 {onUpgrade && (
                   <button
                     type="button"
-                    onClick={onUpgrade}
-                    className="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] text-white text-[11px] font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
+                    onClick={() => onUpgrade('notes_summary')}
+                    className="mt-3 w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] text-white text-[11px] font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
                   >
-                    Unlock comments on Pro
+                    Unlock all {(result.annotations ?? []).length} notes
                   </button>
                 )}
               </div>
             )}
 
+            {revisionsLocked && (result.lockedTopSuggestions ?? 0) > 0 && (
+              <button
+                type="button"
+                onClick={() => onUpgrade?.('top_fixes')}
+                className="block w-full text-left rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 px-4 py-3 hover:border-[#A560E8]/50 transition-colors"
+              >
+                <span className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#A560E8]">
+                    Your top {result.lockedTopSuggestions} {result.lockedTopSuggestions === 1 ? 'fix' : 'fixes'}
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider text-[#A560E8]">
+                    <LockIcon /> Pro
+                  </span>
+                </span>
+                <span className="block space-y-1.5" aria-hidden>
+                  {Array.from({ length: result.lockedTopSuggestions ?? 0 }, (_, i) => (
+                    <span key={i} className="flex gap-2 text-[12px] font-bold text-stone-700 dark:text-stone-300 leading-snug">
+                      <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-md bg-[#A560E8] text-white text-[9px] font-extrabold mt-0.5">{i + 1}</span>
+                      <span className="blur-[4px] select-none">{LOCKED_FIX_FILLER[i % LOCKED_FIX_FILLER.length]}</span>
+                    </span>
+                  ))}
+                </span>
+                <span className="mt-2.5 block text-[11px] font-extrabold text-[#8A48C7] dark:text-[#C9A0F0]">
+                  The changes that move your grade the most →
+                </span>
+              </button>
+            )}
+
             {result.topSuggestions && result.topSuggestions.length > 0 && (
               <div className="relative rounded-2xl border-2 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 px-4 py-3 overflow-hidden">
                 <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#A560E8] mb-2">Top suggestions</p>
-                <ul className={`space-y-1.5 ${revisionsLocked ? 'blur-[5px] select-none pointer-events-none' : ''}`} aria-hidden={revisionsLocked || undefined}>
+                <ul className="space-y-1.5">
                   {result.topSuggestions.map((s, i) => (
                     <li key={i} className="flex gap-2 text-[12px] font-bold text-stone-700 dark:text-stone-300 leading-snug">
                       <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-md bg-[#A560E8] text-white text-[9px] font-extrabold mt-0.5" aria-hidden>
@@ -571,73 +618,45 @@ export default function AnalyzerPanel({
                     </li>
                   ))}
                 </ul>
-                {revisionsLocked && onUpgrade && (
-                  <div className="absolute inset-x-0 bottom-0 top-7 flex items-center justify-center bg-gradient-to-b from-white/30 via-white/85 to-white dark:from-stone-900/20 dark:via-stone-900/85 dark:to-stone-900">
-                    <button
-                      type="button"
-                      onClick={onUpgrade}
-                      className="mx-3 w-full rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] px-3 py-2 text-[11px] font-extrabold uppercase tracking-wide text-white border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-px transition-all"
-                    >
-                      Unlock suggestions
-                    </button>
-                  </div>
-                )}
               </div>
             )}
 
-            {/* Annotation groups */}
-            <div className="relative">
-              <div className={revisionsLocked ? 'blur-[5px] select-none pointer-events-none' : undefined} aria-hidden={revisionsLocked || undefined}>
-                {(['concern', 'improve', 'strong'] as AnnotationType[]).map((type) => {
-                  const list = grouped[type];
-                  if (!list.length) return null;
-                  const meta = TYPE_META[type];
-                  return (
-                    <div key={type} className="mb-4">
-                      <div className="flex items-center gap-2 mb-2 px-1">
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[10px] font-extrabold uppercase tracking-wider ${meta.chip}`}>
-                          <span className={`inline-block w-1.5 h-1.5 rounded-full ${meta.dot}`} aria-hidden />
-                          {meta.label}
-                        </span>
-                        <span className="text-[11px] font-bold text-stone-500 dark:text-stone-400 tabular-nums">{list.length}</span>
-                      </div>
-                      <div className="space-y-2">
-                        {list.map((ann) => (
-                          <AnnotationCard
-                            key={ann.id}
-                            ann={ann}
-                            selected={ann.id === selectedAnnotationId}
-                            applied={appliedAnnotationIds?.has(ann.id) ?? false}
-                            applying={applyingAnnotationId === ann.id}
-                            onClick={() => onAnnotationClick(ann.id)}
-                            onApply={onApplyRevision ? () => onApplyRevision(ann.id) : undefined}
-                            onRevert={onRevertRevision ? () => onRevertRevision(ann.id) : undefined}
-                            locked={revisionsLocked || !!ann.locked}
-                            applyLocked={revisionsLocked}
-                          />
-                        ))}
-                      </div>
+            {/* Annotation groups — on the free preview each card keeps
+                its quote (click to jump to the highlight) and blurs the
+                comment. */}
+            <div>
+              {(['concern', 'improve', 'strong'] as AnnotationType[]).map((type) => {
+                const list = grouped[type];
+                if (!list.length) return null;
+                const meta = TYPE_META[type];
+                return (
+                  <div key={type} className="mb-4">
+                    <div className="flex items-center gap-2 mb-2 px-1">
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[10px] font-extrabold uppercase tracking-wider ${meta.chip}`}>
+                        <span className={`inline-block w-1.5 h-1.5 rounded-full ${meta.dot}`} aria-hidden />
+                        {meta.label}
+                      </span>
+                      <span className="text-[11px] font-bold text-stone-500 dark:text-stone-400 tabular-nums">{list.length}</span>
                     </div>
-                  );
-                })}
-              </div>
-              {revisionsLocked && (result.annotations ?? []).length > 0 && onUpgrade && (
-                <div className="absolute inset-0 flex items-start justify-center pt-8 bg-gradient-to-b from-white/40 via-white/80 to-white dark:from-stone-900/30 dark:via-stone-900/80 dark:to-stone-900">
-                  <div className="mx-2 w-full max-w-[16rem] rounded-2xl border-2 border-b-4 border-[#7733B5] bg-white dark:bg-stone-900 px-4 py-4 text-center shadow-[0_16px_36px_-18px_rgba(119,51,181,0.5)]">
-                    <p className="text-[12px] font-extrabold text-stone-900 dark:text-stone-50">Comments are a Pro feature</p>
-                    <p className="mt-1 text-[11px] font-bold text-stone-500 dark:text-stone-400 leading-snug">
-                      See every note and apply one-click fixes on the whole draft.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={onUpgrade}
-                      className="mt-3 w-full rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] px-3 py-2 text-[11px] font-extrabold uppercase tracking-wide text-white border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-px transition-all"
-                    >
-                      Unlock feedback
-                    </button>
+                    <div className="space-y-2">
+                      {list.map((ann) => (
+                        <AnnotationCard
+                          key={ann.id}
+                          ann={ann}
+                          selected={ann.id === selectedAnnotationId}
+                          applied={appliedAnnotationIds?.has(ann.id) ?? false}
+                          applying={applyingAnnotationId === ann.id}
+                          onClick={() => onAnnotationClick(ann.id)}
+                          onApply={onApplyRevision ? () => onApplyRevision(ann.id) : undefined}
+                          onRevert={onRevertRevision ? () => onRevertRevision(ann.id) : undefined}
+                          locked={revisionsLocked || !!ann.locked}
+                          applyLocked={revisionsLocked}
+                        />
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })}
             </div>
 
             {(result.annotations ?? []).length === 0 && (
@@ -661,6 +680,20 @@ export default function AnalyzerPanel({
           </div>
         )}
       </div>
+
+      {/* Free preview: the upgrade stays in reach while scrolling the notes. */}
+      {revisionsLocked && result && !loading && onUpgrade && (
+        <div className="shrink-0 border-t border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 px-4 pt-3 pb-3.5">
+          <button
+            type="button"
+            onClick={() => onUpgrade('panel_footer')}
+            className="w-full inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-[#58CC02] hover:bg-[#46A302] text-white text-[12px] font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#46A302] active:border-b-2 active:translate-y-0.5 transition-all"
+          >
+            Unlock every comment and fix
+          </button>
+          <p className="mt-1.5 text-center text-[10px] font-bold text-stone-400 dark:text-stone-500">{UPGRADE_CTA_FOOTNOTE}</p>
+        </div>
+      )}
 
     </div>
   );

@@ -84,3 +84,7 @@ export function hubNudgeForInterests(interests: string[]): HubNudgeTool | null {
 export const HUB_NUDGE_AFTER_ONBOARDING_KEY = 'writescholar_hub_nudge_after_onboarding';
 export const HIGHLIGHT_PACK_AFTER_ONBOARDING_KEY = 'writescholar_highlight_pack_after_onboarding';
 export const STUDY_PACK_VIEWER_KEY = 'writescholar_study_pack_viewer';
+/** One-shot: open this document in the editor (with its analysis) right after onboarding. */
+export const OPEN_EDITOR_AFTER_ONBOARDING_KEY = 'writescholar_open_editor_after_onboarding';
+/** One-shot: open the pack stashed under STUDY_PACK_VIEWER_KEY right after onboarding. */
+export const OPEN_PACK_AFTER_ONBOARDING_KEY = 'writescholar_open_pack_after_onboarding';

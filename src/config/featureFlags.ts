@@ -25,13 +25,15 @@ export const SKIP_ONBOARDING_STRIPE = false;
  *           /tools/* (word counter, GPA calc, pomodoro, etc.) stay open.
  *
  * History: hard gate (card before tools) got signups but near-zero trials.
- * Freemium preview (run the tool, lock ~half the payoff) followed. Now the
- * hard gate is back with the credit system: free accounts have 0 credits,
- * and the question-by-question onboarding ends on the 3-day trial
- * (3 credits). Flip to true to restore the preview model — plumbing stays
- * wired either way (free credit limits live in PLAN_LIMITS.free).
+ * Freemium preview (run the tool, lock ~half the payoff) followed, then the
+ * hard gate again with the credit system and a 3-day trial at the end of
+ * onboarding, which did not convert either. Current (2026-10-26): preview
+ * again, paid for with free credits. New accounts get 3 credits to use
+ * within 7 days (backend creditService). An essay grade shows every
+ * highlight and the overall grade, with the comments and section scores
+ * locked on the server; a study pack opens its lesson and quiz.
  */
-export const FREEMIUM_PREVIEW = false;
+export const FREEMIUM_PREVIEW = true;
 
 /**
  * Free-tier in-app writing editor allowance, in words.

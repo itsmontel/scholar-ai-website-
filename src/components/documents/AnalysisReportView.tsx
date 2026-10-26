@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useRef, useState, type ReactNode } from 'react';
 import DOMPurify from 'dompurify';
 import type { AnalyzerResult } from './AnalyzerPanel';
 import { normalizeAnnotationType, type AnnotationType } from './analyzerExtension';
@@ -240,6 +240,18 @@ export default function AnalysisReportView({
   onOpenClassicReport?: () => void;
 }) {
   const [hoveredAnnotation, setHoveredAnnotation] = useState<string | null>(null);
+  // Free preview: the tooltip holds an Unlock button, so give the pointer
+  // time to reach it before it closes.
+  const hideTimerRef = useRef<number | null>(null);
+  const cancelHide = () => {
+    if (hideTimerRef.current != null) window.clearTimeout(hideTimerRef.current);
+    hideTimerRef.current = null;
+  };
+  const hideHover = (delayMs: number) => {
+    cancelHide();
+    if (delayMs <= 0) { setHoveredAnnotation(null); return; }
+    hideTimerRef.current = window.setTimeout(() => { hideTimerRef.current = null; setHoveredAnnotation(null); }, delayMs);
+  };
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
   const rawNarrative = (result.comprehensiveText || '').trim();
@@ -299,20 +311,13 @@ export default function AnalysisReportView({
     return annotationsForRender;
   };
 
+  // Free preview: every section score is locked (the server sends none).
   const rubricRows = result.rubric ?? [];
-  const previewKeys = ['thesis_and_argument', 'analysis_and_critical_thinking'];
-  const unlockedRubric = revisionsLocked
-    ? [...rubricRows].sort((a, b) => {
-        const ai = previewKeys.indexOf(a.category);
-        const bi = previewKeys.indexOf(b.category);
-        return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
-      }).slice(0, 2)
-    : rubricRows;
-  const lockedRubric = revisionsLocked
-    ? rubricRows.filter((r) => !unlockedRubric.some((u) => u.category === r.category))
-    : [];
+  const unlockedRubric = revisionsLocked ? [] : rubricRows;
+  const lockedRubric = revisionsLocked ? rubricRows : [];
 
   const handleAnnotationHover = (e: React.MouseEvent, annotationId: string) => {
+    cancelHide();
     setHoveredAnnotation(annotationId);
     const rect = e.currentTarget.getBoundingClientRect();
     if (isMobileDevice()) {
@@ -460,7 +465,7 @@ export default function AnalysisReportView({
                   selectedAnnotationId === annotation.id ? 'ring-2 ring-offset-2 ring-[#A560E8] rounded-sm' : ''
                 }`}
                 onMouseEnter={(e) => handleAnnotationHover(e, annotation.id)}
-                onMouseLeave={() => setHoveredAnnotation(null)}
+                onMouseLeave={() => hideHover(revisionsLocked ? 450 : 0)}
                 onClick={() => scrollAnnotationPanelToCard(annotation.id)}
                 title={isFreePreview ? 'Unlock this comment on Pro' : `${annoType.toUpperCase()}: ${annotation.comment || ''}`}
               >
@@ -541,41 +546,42 @@ export default function AnalysisReportView({
       <div className="rounded-3xl border-2 border-b-4 border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 overflow-hidden">
         <div className="bg-gradient-to-br from-[#A560E8] to-[#7733B5] text-white px-4 sm:px-6 py-5">
           <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-white/80">Estimated Academic Assessment</p>
-          {revisionsLocked ? (
-            <div className="mt-3 flex flex-wrap items-center gap-4">
+          <div className="mt-3 flex flex-wrap items-end gap-5">
+            {result.gradeEstimate && (
+              <div>
+                <p className="text-4xl sm:text-[2.75rem] font-extrabold leading-none">{result.gradeEstimate}</p>
+                <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-white/70">Estimated grade</p>
+              </div>
+            )}
+            {typeof result.overallScore === 'number' && (
+              <div>
+                <p className="text-3xl font-extrabold tabular-nums leading-none">
+                  {Math.round(result.overallScore)}
+                  <span className="text-sm text-white/70">/100</span>
+                </p>
+                <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-white/70">Estimated score</p>
+              </div>
+            )}
+            {revisionsLocked && (
+              <button type="button" onClick={onUpgrade} className="text-left" title="Your exact score is on Pro">
+                <p className="text-3xl font-extrabold tabular-nums leading-none">
+                  <span className="blur-[6px] select-none" aria-hidden>00</span>
+                  <span className="text-sm text-white/70">/100</span>
+                </p>
+                <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-white/70">Exact score · Pro</p>
+              </button>
+            )}
+            {revisionsLocked && (
               <button
                 type="button"
                 onClick={onUpgrade}
-                className="rounded-xl bg-[#FFC800] hover:bg-[#F0BC00] border-2 border-b-4 border-[#D4A300] hover:border-[#C49A00] active:border-b-2 active:translate-y-0.5 px-4 py-3 text-left transition-all shadow-[0_8px_24px_-8px_rgba(255,200,0,0.55)]"
+                className="rounded-xl bg-[#FFC800] hover:bg-[#F0BC00] border-2 border-b-4 border-[#D4A300] active:border-b-2 active:translate-y-0.5 px-4 py-2.5 text-left transition-all"
               >
-                <p className="text-base font-extrabold leading-snug text-[#5A4500]">Unlock your estimated grade</p>
-                <p className="mt-1 text-xs font-bold text-[#6B5200]/90 leading-snug">
-                  Pro shows your letter grade and /100 score — the same rubric professors use.
-                </p>
+                <p className="text-[13px] font-extrabold leading-snug text-[#5A4500]">See what is holding it back</p>
+                <p className="mt-0.5 text-[11px] font-bold text-[#6B5200]/90 leading-snug">Every comment, section score and fix on Pro</p>
               </button>
-              <p className="text-xs font-semibold text-white/75 max-w-sm leading-snug">
-                An AI estimate of how a professor might grade this — use it to squeeze out every point before you submit.
-              </p>
-            </div>
-          ) : (
-            <div className="mt-3 flex flex-wrap items-end gap-5">
-              {result.gradeEstimate && (
-                <div>
-                  <p className="text-4xl sm:text-[2.75rem] font-extrabold leading-none">{result.gradeEstimate}</p>
-                  <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-white/70">Estimated grade</p>
-                </div>
-              )}
-              {typeof result.overallScore === 'number' && (
-                <div>
-                  <p className="text-3xl font-extrabold tabular-nums leading-none">
-                    {Math.round(result.overallScore)}
-                    <span className="text-sm text-white/70">/100</span>
-                  </p>
-                  <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-white/70">Estimated score</p>
-                </div>
-              )}
-            </div>
-          )}
+            )}
+          </div>
           {firstInsight && <p className="mt-4 max-w-3xl text-[15px] font-semibold leading-relaxed text-white/95">{firstInsight}</p>}
           <p className="mt-3 text-[11px] font-bold text-white/65 leading-snug">
             WriteScholar&apos;s grade is an AI estimate to guide revision — not your official grade.
@@ -617,6 +623,11 @@ export default function AnalysisReportView({
                     <div className="flex justify-between items-start gap-2 mb-1.5">
                       <span className="text-[13px] font-extrabold text-stone-800 dark:text-stone-100 leading-snug">{humanizeLabel(r.category)}</span>
                       <span className="tabular-nums text-[13px] font-extrabold text-stone-400 shrink-0">?/{r.maxScore || 100}</span>
+                    </div>
+                    <div className="mb-2 h-2 rounded-full bg-stone-100 dark:bg-stone-700 overflow-hidden" aria-hidden>
+                      {typeof r.bar === 'number' && (
+                        <div className="h-full rounded-full bg-[#A560E8]" style={{ width: `${Math.round(r.bar * 100)}%` }} />
+                      )}
                     </div>
                     <div className="relative min-h-[3.5rem] overflow-hidden rounded-lg">
                       <p className="text-[12px] text-stone-500 blur-[6px] select-none" aria-hidden>
@@ -725,7 +736,9 @@ export default function AnalysisReportView({
                                 className={`bg-white dark:bg-stone-900 rounded-xl p-4 border-l-4 ${section.border} shadow-sm hover:shadow-md transition-all cursor-pointer ${selected ? `ring-2 ${section.ring}` : ''}`}
                                 onClick={() => scrollDocumentToHighlight(annotation.id)}
                               >
-                                <p className="text-sm text-gray-700 dark:text-stone-200 font-medium mb-1">{annotation.comment}</p>
+                                <p className="text-sm text-gray-700 dark:text-stone-200 font-medium mb-1">
+                                  {annotation.comment || (isFreePreview ? 'What a marker would say about this line, and the change that fixes it.' : '')}
+                                </p>
                                 {annotation.suggestion && <p className="text-xs text-gray-500 dark:text-stone-400 italic">{annotation.suggestion}</p>}
                                 {canApply && onApplyRevision && (
                                   applied ? (
@@ -782,6 +795,33 @@ export default function AnalysisReportView({
             </div>
           </div>
         </div>
+
+        {!narrative && isFreePreview && (
+          <div className="p-5 sm:p-7">
+            <h3 className="text-lg font-extrabold text-stone-900 dark:text-stone-50 mb-1" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
+              Comprehensive Academic Analysis
+            </h3>
+            <p className="text-[13px] font-semibold text-stone-500 mb-4">
+              Your full written report is ready: what works, what to fix, and why.
+            </p>
+            <div className="relative select-none">
+              <div className="space-y-3 text-sm text-stone-600 dark:text-stone-300 blur-[6px] opacity-70 pointer-events-none" aria-hidden>
+                <p>Your essay opens with a clear position and the first body paragraph supports it well, but the argument loses focus in the middle section where the evidence stops being connected back to the thesis.</p>
+                <p>The strongest move you make is in the second paragraph. The weakest point is the conclusion, which repeats the introduction instead of showing what the reader should now believe.</p>
+                <p>To move up a grade band, tighten the thesis, add analysis after each quote, and end on the consequence of your argument.</p>
+              </div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <button
+                  type="button"
+                  onClick={onUpgrade}
+                  className="rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] px-5 py-2.5 text-sm font-extrabold text-white border-2 border-b-4 border-[#7733B5]"
+                >
+                  Read the full report on Pro
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {narrative && (
           <div className="p-5 sm:p-7">
@@ -847,6 +887,8 @@ export default function AnalysisReportView({
 
       {hoveredAnnotationData && (
         <div
+          onMouseEnter={cancelHide}
+          onMouseLeave={() => hideHover(200)}
           className={`fixed transition-all duration-200 z-50 ${isFreePreview ? 'pointer-events-auto' : 'pointer-events-none'}`}
           style={{
             left: tooltipPosition.x,
@@ -870,14 +912,16 @@ export default function AnalysisReportView({
             {isFreePreview ? (
               <>
                 <p className={`mt-1.5 text-white/90 ${isMobileDevice() ? 'text-sm' : 'text-xs'}`}>
-                  Subscribe to Pro to see this comment and how to fix it.
+                  {hoveredAnnotationData.type === 'strong'
+                    ? 'See why this line works so you can do it again.'
+                    : 'See what a marker would say here, and fix it in one click.'}
                 </p>
                 <button
                   type="button"
                   onClick={onUpgrade}
                   className="mt-2.5 w-full rounded-xl bg-[#FFC800] hover:bg-[#F0BC00] px-3 py-2 text-[11px] font-extrabold uppercase tracking-wide text-[#5A4500] border-2 border-b-[3px] border-[#D4A300] active:border-b-2 active:translate-y-px transition-all"
                 >
-                  Unlock comments on Pro
+                  Unlock this comment
                 </button>
               </>
             ) : (

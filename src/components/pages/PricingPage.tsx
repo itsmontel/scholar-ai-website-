@@ -243,7 +243,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       limitations: [],
       popular: true,
       buttonText: !user
-        ? 'Start free trial'
+        ? 'Get Pro'
         : currentPlan === 'free'
           ? newCustomer && TRIAL_DAYS > 0 ? `Start ${TRIAL_DAYS}-day free trial` : 'Upgrade to Pro'
           : 'Switch to Pro',
@@ -358,7 +358,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
               Stop losing marks you could have kept
             </h1>
             <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed font-medium">
-              Try it free for 3 days with 3 credits. Every essay analysis, study pack or citation search uses 1 credit, and unused credits roll over.
+              Start with 3 free credits, no card needed. Every essay analysis, study pack or citation search uses 1 credit, and on Pro unused credits roll over.
             </p>
           </div>
 
@@ -656,7 +656,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
             <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 mb-8 max-w-xl mx-auto leading-relaxed">
               {user
                 ? 'Drop it into your dashboard and see exactly what to fix before it’s due.'
-                : 'Try it free for 3 days with 3 credits. Cancel anytime before it ends and you pay nothing.'}
+                : 'Start with 3 free credits, no card needed. Upgrade when you want the comments and fixes.'}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center">
               {user ? (

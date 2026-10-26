@@ -47,6 +47,7 @@ const {
 const aiAnalysisService = require('../services/aiAnalysisService');
 const documentService = require('../services/documentService');
 const subscriptionService = require('../services/subscriptionService');
+const { isGradedFeedback, redactAnalysisPayload, redactAnalysisRow } = require('../services/analysisRedaction');
 
 /** Paid analysis tier: 'pro' | 'premium'; else 'free'. */
 const isPaidAnalysisTier = (plan) => plan === 'pro' || plan === 'premium';
@@ -56,6 +57,17 @@ const getEffectivePlan = (req) => {
   const n = subscriptionService.normalizePlanForLimits(p);
   if (n === 'pro' || n === 'premium') return n;
   return 'free';
+};
+
+// Copy for a failed credit check (checkCombinedActionsLimit result).
+const outOfCreditsMessage = (limitCheck) => {
+  const c = limitCheck?.credits;
+  if (c && c.plan !== 'free') {
+    return "You're out of credits for now. Your credits top up when your plan renews, and anything you don't use rolls over.";
+  }
+  if (c?.freeExpired) return 'Your free credits have expired. Get Pro for 99 credits a month to keep going.';
+  if (c?.freeCredits) return `You've used your ${c.freeCredits} free credits. Get Pro for 99 credits a month to keep going.`;
+  return 'This uses credits. Get Pro for 99 credits a month.';
 };
 
 // @route   GET /api/analysis/humanize-usage
@@ -1243,15 +1255,11 @@ router.post('/citation-search', authenticateToken, async (req, res) => {
     const numCitations = numberOfCitations || 10;
 
     const userPlan = getEffectivePlan(req);
-    const limitCheck = isPaidAnalysisTier(userPlan)
-      ? await subscriptionService.checkCombinedActionsLimit(userId)
-      : await subscriptionService.checkLimit(userId, 'citationSearchesPerMonth');
+    const limitCheck = await subscriptionService.checkCombinedActionsLimit(userId);
     if (!limitCheck.allowed) {
       return res.status(429).json({
         success: false,
-        message: isPaidAnalysisTier(userPlan)
-          ? "You're out of credits for now. Your credits top up when your plan renews, and anything you don't use rolls over."
-          : 'Citation searches use credits. Start your free 3-day trial to get 3 credits, or get Pro for 99 credits a month.',
+        message: outOfCreditsMessage(limitCheck),
         limit: limitCheck.limit,
         usage: limitCheck.usage,
         remaining: limitCheck.remaining,
@@ -1354,15 +1362,11 @@ router.post('/citation-review', authenticateToken, validateCitationReview, async
 
     // Check user's analysis limits (citation review counts toward monthly limit)
     const userPlan = getEffectivePlan(req);
-    const limitCheck = isPaidAnalysisTier(userPlan)
-      ? await subscriptionService.checkCombinedActionsLimit(userId)
-      : await subscriptionService.checkLimit(userId, 'analysesPerMonth');
+    const limitCheck = await subscriptionService.checkCombinedActionsLimit(userId);
     if (!limitCheck.allowed) {
       return res.status(429).json({
         success: false,
-        message: isPaidAnalysisTier(userPlan)
-          ? "You're out of credits for now. Your credits top up when your plan renews, and anything you don't use rolls over."
-          : 'Essay analysis uses credits. Start your free 3-day trial to get 3 credits, or get Pro for 99 credits a month.',
+        message: outOfCreditsMessage(limitCheck),
         upgrade: !isPaidAnalysisTier(userPlan),
         limit: limitCheck.limit,
         usage: limitCheck.usage
@@ -1413,89 +1417,6 @@ router.post('/citation-review', authenticateToken, validateCitationReview, async
       success: false,
       message: 'Citation review failed',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
-  }
-});
-
-// @route   POST /api/analysis/simple-analyze
-// @desc    Simple analysis endpoint (bypasses external dependencies)
-// @access  Private
-router.post('/simple-analyze', authenticateToken, async (req, res) => {
-  try {
-    const { documentId, content, analysisType, citationStyle, gradingStyle = 'us' } = req.body;
-    const userId = req.user.id;
-
-    console.log('=== SIMPLE ANALYSIS REQUEST ===');
-    console.log('Received documentId:', documentId);
-    console.log('Received content length:', content?.length);
-    console.log('User ID:', userId);
-
-    let analysisContent = '';
-    let analysisDocumentId = documentId;
-
-    if (content && !documentId) {
-      analysisContent = content;
-      analysisDocumentId = null;
-    } else if (documentId) {
-      // Get document content from database
-      try {
-        const document = await documentService.getDocumentById(documentId, userId);
-        if (!document) {
-          return res.status(404).json({
-            success: false,
-            message: 'Document not found'
-          });
-        }
-        analysisContent = document.content_text || '';
-      } catch (error) {
-        console.error('Error fetching document:', error);
-        return res.status(500).json({
-          success: false,
-          message: 'Failed to fetch document content'
-        });
-      }
-    } else {
-      return res.status(400).json({
-        success: false,
-        message: 'Either documentId or content must be provided'
-      });
-    }
-
-    // Perform actual AI analysis
-    try {
-      const analysisResult = await aiAnalysisService.analyzeDocument(
-        analysisDocumentId,
-        analysisContent,
-        analysisType,
-        userId,
-        citationStyle,
-        gradingStyle
-      );
-
-      console.log('✅ AI analysis completed');
-
-      // Record streak activity (fire and forget)
-
-      res.status(200).json({
-        success: true,
-        message: 'Document analyzed successfully',
-        data: analysisResult
-      });
-    } catch (error) {
-      console.error('AI analysis failed:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Analysis failed',
-        error: error.message
-      });
-    }
-
-  } catch (error) {
-    console.error('SIMPLE Analysis Error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to perform analysis',
-      error: error.message
     });
   }
 });
@@ -1735,30 +1656,26 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
       planLimits = subscriptionService.PLAN_LIMITS.free;
     }
     
-    // Check monthly limit: paid tier uses combined pool; free uses analysesPerMonth
+    // Credit check: 1 credit per analysis on every plan (free accounts
+    // spend their free week's credits).
     const rawPlan = (await subscriptionService.getUserSubscriptionDetails(userId)).plan;
     const normalizedPaid = subscriptionService.normalizePlanForLimits(rawPlan);
     const userPlan = subscriptionService.isPaidSubscriptionTier(rawPlan)
       ? normalizedPaid
       : 'free';
     const useCombined = subscriptionService.isPaidSubscriptionTier(rawPlan);
-    if (useCombined ? (planLimits.combinedActionsPerMonth != null && planLimits.combinedActionsPerMonth !== -1) : (planLimits.analysesPerMonth !== -1)) {
+    if (!useCombined || (planLimits.combinedActionsPerMonth != null && planLimits.combinedActionsPerMonth !== -1)) {
       try {
         const timeoutPromise = new Promise((_, reject) => {
           setTimeout(() => reject(new Error('Analysis check timeout')), 3000);
         });
-        
-        const analysisCheckPromise = useCombined
-          ? subscriptionService.checkCombinedActionsLimit(userId)
-          : subscriptionService.checkLimit(userId, 'analysesPerMonth');
-        const analysisCheck = await Promise.race([analysisCheckPromise, timeoutPromise]);
-        
+
+        const analysisCheck = await Promise.race([subscriptionService.checkCombinedActionsLimit(userId), timeoutPromise]);
+
         if (!analysisCheck.allowed) {
           return res.status(403).json({
             success: false,
-            message: useCombined
-              ? `You're out of credits for now (${analysisCheck.usage} of ${analysisCheck.limit} used). Your credits top up when your plan renews, and anything you don't use rolls over.`
-              : 'Essay analysis uses credits. Start your free 3-day trial to get 3 credits, or get Pro for 99 credits a month.',
+            message: outOfCreditsMessage(analysisCheck),
             upgrade: true,
             usage: {
               limit: analysisCheck.limit,
@@ -1842,23 +1759,22 @@ router.post('/analyze', authenticateToken, validateCreateAnalysis, async (req, r
 
     const isPaidUser = subscriptionService.isPaidSubscriptionTier(rawPlan);
 
-    const lockedFeatures = !isPaidUser
-      ? ['full_annotations', 'grade_rubric', 'specific_rewrites', 'export', 'history']
-      : [];
+    const data = {
+      ...analysisResult,
+      documentId: analysisDocumentId,
+      grade_rubric: analysisResult.grade_rubric ?? null,
+      specific_rewrites: analysisResult.specific_rewrites ?? null,
+      annotations: analysisResult.annotations || [],
+      isContentLimited: false,
+      lockedFeatures: [],
+      rubricAlignment: rubricAlignment
+    };
 
     res.json({
       success: true,
       message: 'Analysis completed successfully',
-      data: {
-        ...analysisResult,
-        documentId: analysisDocumentId,
-        grade_rubric: analysisResult.grade_rubric ?? null,
-        specific_rewrites: isPaidUser ? analysisResult.specific_rewrites : null,
-        annotations: analysisResult.annotations || [],
-        isContentLimited: false,
-        lockedFeatures,
-        rubricAlignment: rubricAlignment
-      }
+      // Free accounts get the preview: highlights and the grade, no comments.
+      data: !isPaidUser && isGradedFeedback(analysisType) ? redactAnalysisPayload(data) : data
     });
 
   } catch (error) {
@@ -1941,10 +1857,11 @@ router.get('/history', authenticateToken, validateGetAnalysisHistory, async (req
     // they already own. If a stricter back-end gate is ever needed,
     // restore the 403 block plus the `subscriptionService` lookup.
     const analysisHistory = await aiAnalysisService.getAnalysisHistory(userId, limit);
+    const isPaidUser = isPaidAnalysisTier(getEffectivePlan(req));
 
     res.json({
       success: true,
-      data: analysisHistory
+      data: isPaidUser ? analysisHistory : analysisHistory.map(redactAnalysisRow)
     });
 
   } catch (error) {
@@ -2234,7 +2151,7 @@ router.get('/:analysisId', authenticateToken, validateAnalysisId, async (req, re
 
     res.json({
       success: true,
-      data: analysis
+      data: isPaidAnalysisTier(getEffectivePlan(req)) ? analysis : redactAnalysisRow(analysis)
     });
 
   } catch (error) {
@@ -2290,14 +2207,16 @@ router.get('/document/:documentId', authenticateToken, async (req, res) => {
       throw error;
     }
 
+    const rows = isPaidAnalysisTier(getEffectivePlan(req)) ? data || [] : (data || []).map(redactAnalysisRow);
+
     // Separate analyses by type and get the most recent of each
-    const comprehensiveAnalyses = data?.filter(analysis => 
+    const comprehensiveAnalyses = rows.filter(analysis =>
       analysis.analysis_type === 'comprehensive' || analysis.analysis_type === 'general'
-    ) || [];
+    );
     
-    const citationAnalyses = data?.filter(analysis => 
+    const citationAnalyses = rows.filter(analysis => 
       analysis.analysis_type === 'citation_review'
-    ) || [];
+    );
 
     // Get the most recent of each type
     const latestComprehensive = comprehensiveAnalyses.length > 0 ? comprehensiveAnalyses[0] : null;
@@ -2306,7 +2225,7 @@ router.get('/document/:documentId', authenticateToken, async (req, res) => {
     res.json({
       success: true,
       data: {
-        all: data || [],
+        all: rows,
         comprehensive: latestComprehensive,
         citation: latestCitation,
         hasComprehensive: !!latestComprehensive,
@@ -2873,51 +2792,19 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
     );
 
-    const { periodStart } = await subscriptionService.getUsagePeriod(userId);
-
-    let generationsUsed, generationLimit;
-    // Pro / Premium: combined actions pool; Free: study packs only
-    if (subscriptionService.isPaidSubscriptionTier(dbPlan)) {
-      const combinedCheck = await subscriptionService.checkCombinedActionsLimit(userId);
-      generationsUsed = combinedCheck.usage;
-      generationLimit = combinedCheck.limit;
-      if (!combinedCheck.allowed) {
-        return res.status(429).json({
-          success: false,
-          message: "You're out of credits for now. Your credits top up when your plan renews, and anything you don't use rolls over.",
-          generationsUsed: combinedCheck.usage,
-          generationLimit: combinedCheck.limit,
-          generationsRemaining: 0,
-          upgrade: false,
-          showPaywall: true
-        });
-      }
-    } else {
-      // Free preview: study packs are one-time tastes — counted over the
-      // account lifetime (no monthly reset). See FREE_PREVIEW_LIFETIME.
-      const freePackPeriodStart = subscriptionService.FREE_PREVIEW_LIFETIME
-        ? subscriptionService.FREE_LIFETIME_EPOCH
-        : periodStart;
-      const { data: usageData, error: usageError } = await supabase
-        .from('quiz_usage')
-        .select('id')
-        .eq('user_id', userId)
-        .eq('quiz_type', 'study_pack')
-        .gte('created_at', freePackPeriodStart);
-
-      generationsUsed = usageError ? 0 : (usageData || []).length;
-      generationLimit = (planLimits.studyPackGenerationsPerMonth ?? planLimits.quizGenerationsPerMonth);
-
-      if (generationLimit !== -1 && generationsUsed >= generationLimit) {
-        return res.status(429).json({
-          success: false,
-          message: 'Study packs use credits. Start your free 3-day trial to get 3 credits, or get Pro for 99 credits a month.',
-          generationsUsed,
-          generationLimit,
-          generationsRemaining: 0,
-          upgrade: true
-        });
-      }
+    // 1 credit per study pack on every plan (free accounts spend their
+    // free week's credits).
+    const combinedCheck = await subscriptionService.checkCombinedActionsLimit(userId);
+    if (!combinedCheck.allowed) {
+      return res.status(429).json({
+        success: false,
+        message: outOfCreditsMessage(combinedCheck),
+        generationsUsed: combinedCheck.usage,
+        generationLimit: combinedCheck.limit,
+        generationsRemaining: 0,
+        upgrade: !subscriptionService.isPaidSubscriptionTier(dbPlan),
+        showPaywall: true
+      });
     }
 
     const pack = await aiAnalysisService.generateStudyPack(
@@ -2981,9 +2868,9 @@ router.post('/generate-study-pack', authenticateToken, async (req, res) => {
       success: true,
       message: 'Study pack generated successfully',
       data: { ...pack, created_at: createdAt },
-      generationsUsed: generationsUsed + 1,
-      generationLimit,
-      generationsRemaining: Math.max(0, generationLimit - generationsUsed - 1),
+      generationsUsed: combinedCheck.usage + 1,
+      generationLimit: combinedCheck.limit,
+      generationsRemaining: combinedCheck.remaining === -1 ? -1 : Math.max(0, combinedCheck.remaining - 1),
     });
   } catch (error) {
     console.error('Generate study pack error:', error);
@@ -3005,52 +2892,22 @@ router.get('/study-pack-usage', authenticateToken, async (req, res) => {
     const normalizedPlan = subscriptionService.normalizePlanForLimits(dbPlan);
     const planLimits = subscriptionService.PLAN_LIMITS[normalizedPlan] || subscriptionService.PLAN_LIMITS.free;
 
-    const { createClient } = require('@supabase/supabase-js');
-    const supabase = createClient(
-      process.env.SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
-    );
-
-    const { periodStart, daysUntilReset } = await subscriptionService.getUsagePeriod(userId);
+    const { daysUntilReset } = await subscriptionService.getUsagePeriod(userId);
 
     const maxWords = planLimits.studyPackMaxWordsPerGeneration || planLimits.quizMaxWordsPerGeneration || 5000;
 
-    // Paid tier: same combined pool as POST /generate-study-pack (analyses + citations + study packs)
-    if (subscriptionService.isPaidSubscriptionTier(dbPlan)) {
-      const combined = await subscriptionService.checkCombinedActionsLimit(userId);
-      return res.json({
-        success: true,
-        data: {
-          generationsUsed: combined.usage,
-          generationLimit: combined.limit,
-          generationsRemaining: combined.remaining,
-          maxWordsPerGeneration: maxWords,
-          plan: normalizedPlan,
-          daysUntilReset,
-          pool: 'combined',
-        },
-      });
-    }
-
-    const { data: usageData, error: usageError } = await supabase
-      .from('quiz_usage')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('quiz_type', 'study_pack')
-      .gte('created_at', periodStart);
-
-    const generationsUsed = usageError ? 0 : (usageData || []).length;
-    const generationLimit = (planLimits.studyPackGenerationsPerMonth ?? planLimits.quizGenerationsPerMonth);
+    // Same credit balance as POST /generate-study-pack (analyses + citations + study packs)
+    const combined = await subscriptionService.checkCombinedActionsLimit(userId);
     res.json({
       success: true,
       data: {
-        generationsUsed,
-        generationLimit,
-        generationsRemaining: Math.max(0, generationLimit - generationsUsed),
+        generationsUsed: combined.usage,
+        generationLimit: combined.limit,
+        generationsRemaining: combined.remaining,
         maxWordsPerGeneration: maxWords,
         plan: normalizedPlan,
-        daysUntilReset,
-        pool: 'study_pack',
+        daysUntilReset: combined.credits?.freeExpiresAt ? combined.credits.freeDaysLeft : daysUntilReset,
+        pool: 'combined',
       },
     });
   } catch (error) {

@@ -10,6 +10,7 @@ import { trackSignupConversion, trackPaidConversion } from '../utils/gtag';
 import { HIDE_FRIENDS, HIDE_STREAK_AND_BADGES, FREEMIUM_PREVIEW } from '../config/featureFlags';
 import { persistOnboardingToServer, persistTutorialToServer } from '../utils/onboarding';
 import { trackEvent } from '../utils/analytics';
+import type { EssayUnlockSummary } from '../utils/paywall';
 import { lazyWithRetry } from '../utils/lazyWithRetry';
 import { LANDING_META_DESCRIPTION, LANDING_PAGE_TITLE } from '../constants/landingSeo';
 
@@ -293,6 +294,8 @@ const AcademicAIApp = () => {
   const [studyPackInitialData, setStudyPackInitialData] = useState<{ data: any; title?: string } | null>(null);
   /** Opened when API returns upgrade/limit (403/429) so user can subscribe after canceling Stripe */
   const [apiLimitPaywallOpen, setApiLimitPaywallOpen] = useState(() => readInitialSoftPaywallOpen(initialAuth.user));
+  /** Set when the paywall was opened from a free essay preview. */
+  const [paywallEssayUnlock, setPaywallEssayUnlock] = useState<EssayUnlockSummary | null>(null);
   /** Post-onboarding trial gate. Free, never-trialed users can browse the
    *  real dashboard; any create / upload / tool action opens the full-page
    *  hard-paywall overlay. `trialGateOpen` controls that overlay. */
@@ -449,7 +452,7 @@ const AcademicAIApp = () => {
     'study-pack': TOOL_SEO_META['study-pack'],
     features: { title: 'Features — Essay Feedback & Study Tools | WriteScholar', description: 'Write in a real editor and get a professor-style grade with a full rubric and one-click line-by-line fixes. Plus citations, summarizer, and study tools in one workspace.' },
     'focus-mode': { title: 'Focus Mode — Block Sites Until You Study | WriteScholar', description: 'Block TikTok, YouTube, and distracting sites until you answer questions from your own notes. Free: 3 sites; Pro: unlimited.' },
-    pricing: { title: 'Pricing — Try Free for 3 Days, Then $19.99/mo | WriteScholar', description: 'Try WriteScholar free for 3 days with 3 credits. Pro is $19.99/mo for 99 credits, Premium $39.99/mo for 199. 1 credit = 1 essay, study pack or citation search.' },
+    pricing: { title: 'Pricing — 3 Free Credits, Then $19.99/mo | WriteScholar', description: 'Start free with 3 credits, no card. Pro is $9.99 your first month, then $19.99/mo for 99 credits; Premium $39.99/mo for 199. 1 credit = 1 essay, pack or search.' },
     about: { title: 'About WriteScholar | Study & Writing Help for Students', description: 'WriteScholar helps students improve drafts before deadlines: professor-style essay feedback, citations, quizzes, flashcards, and distraction blocking in one app.' },
     'why-students-choose': { title: 'WriteScholar vs Grammarly vs QuillBot for College Writing | 2026', description: 'Honest comparison: essay feedback and rubrics vs grammar-only tools. See which fits research papers and coursework.' },
     'study-tools-comparison': { title: 'WriteScholar vs Quizlet vs Knowt — College Study Tools | 2026', description: 'Why students add WriteScholar for essay feedback and rubrics, not just flashcards. Side-by-side features vs Quizlet and Knowt.' },
@@ -459,7 +462,7 @@ const AcademicAIApp = () => {
     privacy: { title: 'Privacy Policy | WriteScholar', description: 'WriteScholar privacy policy and data handling.' },
     terms: { title: 'Terms of Service | WriteScholar', description: 'WriteScholar terms of service.' },
     login: { title: 'Log In | WriteScholar', description: 'Log in for college essay feedback, study packs, summarizer, citations, and more.' },
-    signup: { title: 'Sign Up — Try It Free for 3 Days | WriteScholar', description: 'Create your account and start a 3-day free trial with 3 credits for essay feedback, study packs, and citations. Cancel anytime.' },
+    signup: { title: 'Sign Up Free — 3 Credits, No Card | WriteScholar', description: 'Create your free account and get 3 credits to grade an essay or build a study pack in your first week. No card needed.' },
     blog: { title: 'College Study Tips & Writing Guides | WriteScholar Blog', description: 'Practical guides: essays, citations, study strategies, and academic writing—without the fluff.' },
     'word-counter': TOOL_SEO_META['word-counter'],
     'citation-generator-tool': TOOL_SEO_META['citation-generator-tool'],
@@ -682,9 +685,10 @@ const AcademicAIApp = () => {
       }
       // force=true ⇒ user-initiated (limit hit / locked-content click):
       // always show — the cooldown only protects against unprompted nags.
-      const detail = (e as CustomEvent).detail as { force?: boolean; trigger?: string } | undefined;
+      const detail = (e as CustomEvent).detail as { force?: boolean; trigger?: string; essayUnlock?: EssayUnlockSummary } | undefined;
       const force = detail?.force === true;
       const paywallTrigger = detail?.trigger;
+      setPaywallEssayUnlock(detail?.essayUnlock ?? null);
       // [soft-paywall-debug] Temporary trace — see comment at
       // handleOnboardingComplete dispatch site.
       console.log('[soft-paywall] listener invoked', force ? '(forced — user action)' : '', paywallTrigger || '');
@@ -1914,6 +1918,7 @@ const AcademicAIApp = () => {
       {apiLimitPaywallOpen && isLoggedIn && user && (
         <SoftPaywall
           variant="postTutorial"
+          essayUnlock={paywallEssayUnlock}
           userName={
             user.firstName?.trim() ||
             (user.name?.trim() && !user.name.includes('@') ? user.name.trim().split(/\s+/)[0] ?? '' : '') ||

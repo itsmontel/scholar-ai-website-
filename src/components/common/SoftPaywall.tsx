@@ -17,6 +17,7 @@ import {
   CHECKOUT_OFFER_KEY,
 } from '../../config/pricing';
 import { useFlashOffer } from '../../hooks/useFlashOffer';
+import type { EssayUnlockSummary } from '../../utils/paywall';
 
 /* ═══════════════════════════════════════════════════════════════
    SoftPaywall — Duolingo-style upsell modal.
@@ -53,6 +54,8 @@ interface SoftPaywallProps {
    * Omit to fetch eligibility inside this component (default).
    */
   canStartFreeTrial?: boolean | null;
+  /** Opened from a free essay preview: name what unlocks for this paper. */
+  essayUnlock?: EssayUnlockSummary | null;
 }
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
@@ -84,13 +87,6 @@ const SOCIAL_PROOF = [
 const TRIAL_DAYS = APP_TRIAL_DAYS;
 const PRO_MONTHLY = '$19.99';
 const PREMIUM_MONTHLY = '$39.99';
-// Struck-through "was" prices shown next to the active price to make
-// the discount story explicit. Matches the strikethrough treatment on
-// the pricing / billing / landing pages so all four surfaces tell the
-// same story: Pro was $39.99 → now $19.99, Premium was $59.99 → now
-// $39.99.
-const PRO_MONTHLY_WAS = '$39.99';
-const PREMIUM_MONTHLY_WAS = '$59.99';
 
 // ─── NEWCUSTOMER welcome discount (new-customer first month) ─────────
 // One promo code across every surface (soft paywall, pricing, billing,
@@ -130,6 +126,7 @@ const SoftPaywall = ({
   variant = 'default',
   hard = false,
   canStartFreeTrial: canStartFreeTrialProp,
+  essayUnlock = null,
 }: SoftPaywallProps) => {
   const [checkoutPlan, setCheckoutPlan] = useState<'pro' | 'premium'>('pro');
   const [fetchedTrialEligible, setFetchedTrialEligible] = useState<boolean | null>(null);
@@ -222,17 +219,14 @@ const SoftPaywall = ({
   const flashActive = showDiscount && checkoutPlan === 'pro' && flashOffer.active;
   const flashPrice = `$${FLASH_FIRST_MONTH_PRICE}`;
   const monthlyPrice = checkoutPlan === 'premium' ? PREMIUM_MONTHLY : PRO_MONTHLY;
-  const monthlyWas = flashActive ? PRO_MONTHLY : checkoutPlan === 'premium' ? PREMIUM_MONTHLY_WAS : PRO_MONTHLY_WAS;
-  // First soft paywall (BRANCH 3) — NEWCUSTOMER discount applied. Pro
-  // $9.99 first month (vs $39.99 anchor), Premium $29.99 first month
-  // (vs $59.99 anchor). Both save $30 vs the original "was" price.
+  // The struck-through price is the real monthly price, the same anchor
+  // the pricing page uses: Pro $19.99 → $9.99, Premium $39.99 → $19.99.
+  const monthlyWas = monthlyPrice;
+  // First soft paywall (BRANCH 3) — NEWCUSTOMER discount applied.
   // During the first-day flash offer Pro is $4.99 against the real $19.99.
   const firstPaywallFirstMonth = flashActive
     ? flashPrice
     : checkoutPlan === 'premium' ? FIRST_PAYWALL_PREMIUM_FIRST_MONTH : FIRST_PAYWALL_PRO_FIRST_MONTH;
-  const firstPaywallSavedUsd = (
-    parseFloat(monthlyWas.slice(1)) - parseFloat(firstPaywallFirstMonth.slice(1))
-  ).toFixed(0);
   // Last-chance branch (BRANCH 1) — deeper one-shot discount. Anchored
   // against the original "was" price for max savings impact. Pro saves
   // $30, Premium saves $40 (vs the first-paywall $30 on Premium).
@@ -762,12 +756,18 @@ const SoftPaywall = ({
                 className="text-2xl sm:text-[1.85rem] font-extrabold text-[#3C3C3C] dark:text-stone-50 mb-2 leading-tight"
                 style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}
               >
-                {variant === 'postTutorial'
-                  ? <>Get the grade you actually deserve, {firstName}.</>
-                  : showTrial ? <>Make this your best semester yet, {firstName}.</> : <>Stop leaving marks on the table, {firstName}.</>}
+                {essayUnlock
+                  ? <>You&apos;ve seen where. Now see how to fix it, {firstName}.</>
+                  : variant === 'postTutorial'
+                    ? <>Get the grade you actually deserve, {firstName}.</>
+                    : showTrial ? <>Make this your best semester yet, {firstName}.</> : <>Stop leaving marks on the table, {firstName}.</>}
               </h2>
               <p className="text-stone-500 dark:text-stone-400 text-sm sm:text-[0.9375rem] font-bold leading-relaxed">
-                {variant === 'postTutorial' ? (
+                {essayUnlock && !showTrial ? (
+                  showDiscount
+                    ? <>Get {planName} for <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{firstPaywallFirstMonth} your first month</span>, then {monthlyPrice}/mo. Cancel anytime.</>
+                    : <>Subscribe to {planName} to read every note on this essay. Cancel anytime.</>
+                ) : variant === 'postTutorial' ? (
                   showTrial
                     ? <>Start a <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{TRIAL_DAYS}-day free trial</span> with 3 credits for essay analysis, study packs and citations. Cancel anytime.</>
                     : <>{planName} shows you exactly what to fix, gets you exam-ready, and sorts your references. Cancel anytime.</>
@@ -780,6 +780,26 @@ const SoftPaywall = ({
                 )}
               </p>
             </div>
+
+            {essayUnlock && (
+              <div className="mb-3 rounded-2xl border-2 border-[#A560E8]/30 bg-[#F3EAFF] dark:bg-[#A560E8]/12 px-4 py-3 text-center">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#8A48C7] dark:text-[#C9A0F0]">
+                  Waiting in your {essayUnlock.grade ? `${essayUnlock.grade} ` : ''}essay
+                </p>
+                <div className="mt-1.5 grid grid-cols-3 gap-2">
+                  {[
+                    { n: essayUnlock.notes, label: essayUnlock.notes === 1 ? 'comment' : 'comments' },
+                    { n: essayUnlock.sections, label: essayUnlock.sections === 1 ? 'section score' : 'section scores' },
+                    { n: essayUnlock.fixes, label: essayUnlock.fixes === 1 ? 'top fix' : 'top fixes' },
+                  ].map((item) => (
+                    <div key={item.label}>
+                      <p className="text-xl font-extrabold tabular-nums text-[#3C3C3C] dark:text-stone-50 leading-none">{item.n}</p>
+                      <p className="mt-0.5 text-[10.5px] font-bold text-stone-500 dark:text-stone-400 leading-tight">{item.label}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="mb-3"><PlanToggle /></div>
 
@@ -810,8 +830,8 @@ const SoftPaywall = ({
               {!showTrial && showDiscount && !flashActive && !discountAlreadyConsumed && (
                 <div className="mb-2.5">
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#FF4B4B] text-white text-[10px] font-extrabold uppercase tracking-[0.14em] border-2 border-b-[3px] border-[#D93B3B] shadow-sm">
-                    <span aria-hidden>⏰</span>
-                    Save ${firstPaywallSavedUsd} today only
+                    <span aria-hidden>%</span>
+                    50% off your first month
                   </span>
                 </div>
               )}

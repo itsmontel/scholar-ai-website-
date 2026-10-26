@@ -42,7 +42,6 @@ export interface OnboardingAnswers {
   source?: string;
 }
 
-export const TRIAL_CREDITS = 3;
 export const PRO_MONTHLY_CREDITS = 99;
 export const PREMIUM_MONTHLY_CREDITS = 199;
 export const CREDIT_CAP = 499;
@@ -241,7 +240,7 @@ export interface Recommendation {
 export const RECOMMENDATIONS: Record<Path, Recommendation> = {
   essay: {
     title: 'Essay Feedback',
-    body: 'Upload your draft and see the grade it is heading for, every line costing you points, and the fix, before your professor grades it.',
+    body: 'Upload your draft and see the grade it is heading for, with every line marked green, amber or red, before your professor grades it.',
     start: 'Analyze my first paper',
     tool: 'analyze',
   },
@@ -253,28 +252,28 @@ export const RECOMMENDATIONS: Record<Path, Recommendation> = {
   },
   both: {
     title: 'Essay Feedback, then Study Packs',
-    body: 'Fix the paper that is due first, then turn your notes into flashcards and a quiz for the exam after it.',
+    body: 'Grade the paper that is due first, then turn your notes into a lesson and a quiz for the exam after it.',
     start: 'Analyze my first paper',
     tool: 'analyze',
   },
 };
 
-/** How the 3 trial credits are suggested, per path. */
-export const TRIAL_CREDIT_PLAN: Record<Path, { label: string; when: string }[]> = {
+/** How the free week's 3 credits are suggested, per path. */
+export const FREE_CREDIT_PLAN: Record<Path, { label: string; when: string }[]> = {
   essay: [
-    { label: 'Analyze your current draft', when: 'Today' },
-    { label: 'Re-check it after your fixes', when: 'Tomorrow' },
-    { label: 'Study pack from your lecture notes', when: 'Day 3' },
+    { label: 'Grade your current draft', when: 'Today' },
+    { label: 'Grade your next paper', when: 'This week' },
+    { label: 'Study pack from your lecture notes', when: 'By day 7' },
   ],
   exam: [
     { label: 'Study pack from your hardest topic', when: 'Today' },
-    { label: 'Study pack from your next topic', when: 'Tomorrow' },
-    { label: 'Study pack from your study guide', when: 'Day 3' },
+    { label: 'Study pack from your next topic', when: 'This week' },
+    { label: 'Study pack from your study guide', when: 'By day 7' },
   ],
   both: [
-    { label: 'Analyze your current draft', when: 'Today' },
-    { label: 'Re-check it after your fixes', when: 'Tomorrow' },
-    { label: 'Study pack for your next exam', when: 'Day 3' },
+    { label: 'Grade your current draft', when: 'Today' },
+    { label: 'Study pack for your next exam', when: 'This week' },
+    { label: 'Grade your next paper', when: 'By day 7' },
   ],
 };
 

@@ -241,7 +241,7 @@ const FeaturesPage = ({ onNavigate, user, onLogout }: FeaturesPageProps) => {
                   { value: '5+', label: 'AI Tools' },
                   { value: '50K+', label: 'Students' },
                   { value: '6', label: 'Citation Styles' },
-                  { value: '3 days', label: 'Free Trial' },
+                  { value: '3', label: 'Free Credits' },
                 ].map((stat, i) => (
                   <div key={i} className="text-center p-4 rounded-2xl bg-white/60 dark:bg-stone-800/50">
                     <div className="text-3xl sm:text-4xl font-bold text-[#A560E8]">{stat.value}</div>

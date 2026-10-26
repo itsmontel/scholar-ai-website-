@@ -1009,11 +1009,16 @@ router.get('/usage', authenticateToken, async (req, res) => {
       combinedWordsRemaining = Math.max(0, (planLimits.combinedWordsPerMonth || 0) - combinedWordsUsed);
     }
 
-    // Calculate remaining usage (legacy per-feature for free plan)
+    // Remaining usage. Analyses, citations and study packs all spend the
+    // same credits, so free accounts see their free-week balance on each.
     const uploadsRemaining = planLimits.documentsPerMonth === -1 ? -1 : Math.max(0, planLimits.documentsPerMonth - documentsUploaded);
-    const analysesRemaining = planLimits.analysesPerMonth === -1 ? -1 : Math.max(0, planLimits.analysesPerMonth - documentsAnalyzed);
-    const citationsRemaining = planLimits.citationSearchesPerMonth === -1 ? -1 : Math.max(0, planLimits.citationSearchesPerMonth - citationSearchesUsed);
-    const studyPacksRemaining = planLimits.studyPackGenerationsPerMonth === -1 ? -1 : Math.max(0, planLimits.studyPackGenerationsPerMonth - studyPacksGenerated);
+    const creditFeatureRemaining = (limit, used) => {
+      if (!isPaid) return credits.remaining;
+      return limit === -1 ? -1 : Math.max(0, limit - used);
+    };
+    const analysesRemaining = creditFeatureRemaining(planLimits.analysesPerMonth, documentsAnalyzed);
+    const citationsRemaining = creditFeatureRemaining(planLimits.citationSearchesPerMonth, citationSearchesUsed);
+    const studyPacksRemaining = creditFeatureRemaining(planLimits.studyPackGenerationsPerMonth, studyPacksGenerated);
     const storageRemaining = planLimits.maxTotalStorage ? Math.max(0, planLimits.maxTotalStorage - storageUsed) : -1;
 
     const payload = {
@@ -1033,9 +1038,9 @@ router.get('/usage', authenticateToken, async (req, res) => {
       planLimits,
       periodEnd,
       daysUntilReset,
-      // Free preview counters (analyses / citations / study packs) never
-      // reset — the frontend should show "one-time previews", not a timer.
-      previewsAreLifetime: isFreePlan && subscriptionService.FREE_PREVIEW_LIFETIME,
+      // Free accounts spend free-week credits that expire (credits.freeExpiresAt);
+      // nothing is a lifetime preview any more.
+      previewsAreLifetime: false,
       credits
     };
     if (isPaid) {

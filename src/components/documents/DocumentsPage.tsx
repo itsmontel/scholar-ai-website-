@@ -27,7 +27,7 @@ import GenerationOverlay from '../common/GenerationOverlay';
 import ViewportAutoplayVideo from '../common/ViewportAutoplayVideo';
 import { consumePendingWorkspaceView, WS_SWITCH_VIEW_EVENT } from '../workspace/workspaceNavigate';
 import { trackEvent, trackFunnelStep } from '../../utils/analytics';
-import { openUpgradePaywall } from '../../utils/paywall';
+import { openUpgradePaywall, type EssayUnlockSummary } from '../../utils/paywall';
 import {
   getOnboardingCompletedAt,
   isFirstRunFastPathDone,
@@ -38,6 +38,8 @@ import {
   HUB_NUDGE_AFTER_ONBOARDING_KEY,
   HIGHLIGHT_PACK_AFTER_ONBOARDING_KEY,
   STUDY_PACK_VIEWER_KEY,
+  OPEN_EDITOR_AFTER_ONBOARDING_KEY,
+  OPEN_PACK_AFTER_ONBOARDING_KEY,
 } from '../../utils/featureInterests';
 
 /* ═══════════════════════════════════════════════════════════════
@@ -2263,6 +2265,7 @@ function normalizeRubricRows(raw: unknown): NonNullable<AnalyzerResult['rubric']
             score: typeof v?.score === 'number' ? v.score : undefined,
             maxScore: typeof v?.maxScore === 'number' ? v.maxScore : typeof v?.max_score === 'number' ? v.max_score : undefined,
             feedback: typeof v?.feedback === 'string' ? v.feedback : undefined,
+            bar: typeof v?.bar === 'number' ? v.bar : undefined,
           };
         })
       : [];
@@ -2271,7 +2274,14 @@ function normalizeRubricRows(raw: unknown): NonNullable<AnalyzerResult['rubric']
     score: typeof r.score === 'number' ? r.score : undefined,
     maxScore: typeof r.maxScore === 'number' ? r.maxScore : undefined,
     feedback: typeof r.feedback === 'string' ? r.feedback : undefined,
+    bar: typeof (r as { bar?: unknown }).bar === 'number' ? (r as { bar: number }).bar : undefined,
   }));
+}
+
+/** Free preview: how many top fixes the server held back (analysisRedaction.js). */
+function lockedTopSuggestionCount(payload: unknown): number | undefined {
+  const counts = (payload as { lockedCounts?: { topSuggestions?: unknown } } | null)?.lockedCounts;
+  return typeof counts?.topSuggestions === 'number' ? counts.topSuggestions : undefined;
 }
 
 /* ─── EDITOR view ───────────────────────────────────────────── */
@@ -2292,6 +2302,7 @@ function DocumentEditorView({
   selectedAnnotationId,
   onSelectAnnotation,
   onAnnotationHover,
+  onTooltipHover,
   hoverAnnotationId,
   hoverRect,
   onEditorReady,
@@ -2327,6 +2338,8 @@ function DocumentEditorView({
   selectedAnnotationId: string | null;
   onSelectAnnotation: (id: string | null) => void;
   onAnnotationHover: (id: string | null, rect: DOMRect | null) => void;
+  /** Pointer entered (true) or left (false) the hover tooltip. */
+  onTooltipHover: (inside: boolean) => void;
   hoverAnnotationId: string | null;
   hoverRect: DOMRect | null;
   onEditorReady: (editor: Editor) => void;
@@ -2339,7 +2352,8 @@ function DocumentEditorView({
   onOpenClassicReport?: () => void;
   documentText: string;
   wordLimit: number | null;
-  onUpgrade: () => void;
+  /** `source` names the locked block that was clicked (analytics + paywall copy). */
+  onUpgrade: (source?: string) => void;
   analysesLeft: number | null;
   revisionsLocked: boolean;
   revisionPaywallAnn: { text: string; suggestion: string } | null;
@@ -2383,11 +2397,14 @@ function DocumentEditorView({
   }, [docId]);
 
   useEffect(() => {
-    if (wasAnalyzingRef.current && !analyzerLoading && analyzerResult && !analyzerError) {
+    // Paid: a fresh analysis opens the full report. Free: stay on the
+    // draft, where the highlights, the locked panel and the end-of-essay
+    // paywall live.
+    if (wasAnalyzingRef.current && !analyzerLoading && analyzerResult && !analyzerError && !revisionsLocked) {
       setEditorMode('report');
     }
     wasAnalyzingRef.current = analyzerLoading;
-  }, [analyzerLoading, analyzerResult, analyzerError]);
+  }, [analyzerLoading, analyzerResult, analyzerError, revisionsLocked]);
 
   const openReport = useCallback(() => {
     if (analyzerResult) setEditorMode('report');
@@ -2621,14 +2638,14 @@ function DocumentEditorView({
                 ) : (
                   <button
                     type="button"
-                    onClick={analysesLeft === 0 ? onUpgrade : undefined}
+                    onClick={analysesLeft === 0 ? () => onUpgrade('credits_chip') : undefined}
                     title={
                       analysesLeft === 0
                         ? revisionsLocked
-                          ? 'You\u2019ve used your free analysis previews — upgrade for more'
+                          ? 'Your free credits are used up or expired — upgrade for more'
                           : 'No analyses left this month — upgrade for more'
                         : revisionsLocked
-                          ? `${analysesLeft} free ${analysesLeft === 1 ? 'analysis preview' : 'analysis previews'} left (one-time, no monthly reset)`
+                          ? `${analysesLeft} free ${analysesLeft === 1 ? 'credit' : 'credits'} left (they expire 7 days after you join)`
                           : `${analysesLeft} ${analysesLeft === 1 ? 'analysis' : 'analyses'} left this month`
                     }
                     className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-wider border-2 ${
@@ -2639,7 +2656,11 @@ function DocumentEditorView({
                           : 'bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 border-transparent cursor-default'
                     }`}
                   >
-                    {analysesLeft === 0 ? 'No analyses left' : `${analysesLeft} ${analysesLeft === 1 ? 'analysis' : 'analyses'} left`}
+                    {analysesLeft === 0
+                      ? revisionsLocked ? 'No free credits left' : 'No analyses left'
+                      : revisionsLocked
+                        ? `${analysesLeft} free ${analysesLeft === 1 ? 'credit' : 'credits'}`
+                        : `${analysesLeft} ${analysesLeft === 1 ? 'analysis' : 'analyses'} left`}
                   </button>
                 )
               )}
@@ -2746,19 +2767,21 @@ function DocumentEditorView({
 
                 {revisionsLocked && !noAnalysesLeft && (
                   <p className="mx-auto mt-4 max-w-[16rem] text-[11.5px] font-medium text-stone-400 dark:text-stone-500 leading-relaxed">
-                    See every highlight for free. Comments and fixes unlock on Pro.{' '}
+                    Free grades show your grade and every highlight. Comments and fixes unlock on Pro.{' '}
                     <button
                       type="button"
-                      onClick={onUpgrade}
+                      onClick={() => onUpgrade('analyze_intro')}
                       className="font-extrabold text-[#8A48C7] dark:text-[#C9A0F0] underline decoration-[#A560E8]/40 underline-offset-2 hover:decoration-[#A560E8] transition-colors"
                     >
                       Unlock comments
                     </button>
                   </p>
                 )}
-                {typeof analysesLeft === 'number' && !noAnalysesLeft && (
+                {typeof analysesLeft === 'number' && analysesLeft >= 0 && !noAnalysesLeft && (
                   <p className="mt-3 text-[11px] font-bold text-stone-400 dark:text-stone-500 tabular-nums">
-                    {analysesLeft} free {analysesLeft === 1 ? 'analysis' : 'analyses'} left
+                    {revisionsLocked
+                      ? `${analysesLeft} free ${analysesLeft === 1 ? 'credit' : 'credits'} left · 1 per essay`
+                      : `${analysesLeft} ${analysesLeft === 1 ? 'credit' : 'credits'} left`}
                   </p>
                 )}
               </div>
@@ -2772,6 +2795,8 @@ function DocumentEditorView({
           mouseout events. Hidden on touch devices (no real hover). */}
       {editorMode === 'draft' && hoveredAnnotation && hoverRect && (
         <div
+          onMouseEnter={() => onTooltipHover(true)}
+          onMouseLeave={() => onTooltipHover(false)}
           className={`hidden lg:block fixed z-50 max-w-[320px] p-3 rounded-2xl bg-[#3C3C3C] dark:bg-stone-800 text-white border-2 border-b-4 border-[#2a2a2a] shadow-[0_18px_42px_-12px_rgba(0,0,0,0.45)] ws-tooltip-in ${revisionsLocked ? 'pointer-events-auto' : 'pointer-events-none'}`}
           style={{
             left: Math.min(window.innerWidth - 340, Math.max(20, hoverRect.left + hoverRect.width / 2 - 160)),
@@ -2781,18 +2806,29 @@ function DocumentEditorView({
         >
           {revisionsLocked || hoveredAnnotation.locked ? (
             <>
-              <p className="text-[11px] font-extrabold uppercase tracking-wider text-[#FFC800]">
+              <p className="inline-flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider text-[#FFC800]">
+                <svg className="w-3 h-3 shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden>
+                  <rect x="5" y="11" width="14" height="9" rx="2" />
+                  <path strokeLinecap="round" d="M8 11V8a4 4 0 0 1 8 0v3" />
+                </svg>
                 {hoveredAnnotation.type === 'strong' ? 'Strength' : hoveredAnnotation.type === 'improve' ? 'Needs improvement' : 'Concern'}
               </p>
-              <p className="mt-1 text-[12px] font-bold leading-snug text-white/90">
-                Subscribe to Pro to see this comment and how to fix it.
+              <p className="mt-1 text-[12px] font-bold leading-snug text-white/90 blur-[4px] select-none" aria-hidden>
+                {hoveredAnnotation.type === 'strong'
+                  ? 'This works because it makes the point clearly and ties it back to your argument.'
+                  : 'A marker would pull you up here. This is what is wrong, and the exact change that fixes it.'}
+              </p>
+              <p className="mt-1.5 text-[12px] font-bold leading-snug text-white">
+                {hoveredAnnotation.type === 'strong'
+                  ? 'See why this line works so you can do it again.'
+                  : 'See what a marker would say here, and fix it in one click.'}
               </p>
               <button
                 type="button"
-                onClick={onUpgrade}
+                onClick={() => onUpgrade('highlight_hover')}
                 className="mt-2.5 w-full rounded-xl bg-[#FFC800] hover:bg-[#F0BC00] px-3 py-2 text-[11px] font-extrabold uppercase tracking-wide text-[#5A4500] border-2 border-b-[3px] border-[#D4A300] active:border-b-2 active:translate-y-px transition-all"
               >
-                Unlock comments on Pro
+                Unlock this comment
               </button>
             </>
           ) : (
@@ -2863,7 +2899,7 @@ function DocumentEditorView({
               <h3 className="text-lg font-extrabold text-stone-900 dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                 {noAnalysesLeft
                   ? revisionsLocked
-                    ? 'Free previews used up'
+                    ? 'Out of free credits'
                     : 'No analyses left this month'
                   : isReanalyze ? 'Re-analyze this draft?' : 'Analyze this draft?'}
               </h3>
@@ -2872,7 +2908,7 @@ function DocumentEditorView({
             {noAnalysesLeft ? (
               <p className="text-sm text-stone-600 dark:text-stone-300 font-medium leading-relaxed">
                 {revisionsLocked
-                  ? 'You\u2019ve used your free analysis previews — they\u2019re one-time and don\u2019t reset. Upgrade to keep analyzing your papers.'
+                  ? 'Your free credits are used up or have expired. Pro gives you 99 credits a month, opens every comment and fix, and unused credits roll over.'
                   : 'You\u2019ve used all your analyses for this billing period. Upgrade for more, or wait until your allowance resets.'}
               </p>
             ) : (
@@ -2887,10 +2923,10 @@ function DocumentEditorView({
                     <li className="flex gap-2"><span className="text-[#FF4B4B] font-extrabold">•</span><span><strong>Replaces</strong> your current feedback and clears any revisions you've already applied.</span></li>
                   )}
                   <li className="flex gap-2"><span className="text-[#A560E8] font-extrabold">•</span><span>
-                    Uses <strong>one analysis</strong>
+                    Uses <strong>1 credit</strong>
                     {typeof analysesLeft === 'number' && analysesLeft >= 0
                       ? revisionsLocked
-                        ? ` — you have ${analysesLeft} free ${analysesLeft === 1 ? 'preview' : 'previews'} left (one-time).`
+                        ? ` — you have ${analysesLeft} free ${analysesLeft === 1 ? 'credit' : 'credits'} left.`
                         : ` — you have ${analysesLeft} left this month.`
                       : '.'}
                   </span></li>
@@ -3058,8 +3094,14 @@ function DocumentEditorView({
 
 /* ─── Page shell — owns the hub ⇄ editor view state ──────── */
 export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout, user, onEditorActiveChange, trialGated, onTrialGate }: DocumentsPageProps) {
-  const [view, setView] = useState<WorkspaceView>(initialDocumentId ? 'editor' : 'hub');
-  const [openDocId, setOpenDocId] = useState<string | null>(initialDocumentId ?? null);
+  // The essay graded in onboarding opens straight into the editor. Read
+  // here, cleared in an effect below (initializers must stay pure).
+  const [onboardingEditorDocId] = useState<string | null>(() => {
+    if (initialDocumentId) return null;
+    try { return sessionStorage.getItem(OPEN_EDITOR_AFTER_ONBOARDING_KEY); } catch { return null; }
+  });
+  const [view, setView] = useState<WorkspaceView>(initialDocumentId || onboardingEditorDocId ? 'editor' : 'hub');
+  const [openDocId, setOpenDocId] = useState<string | null>(initialDocumentId ?? onboardingEditorDocId ?? null);
   const [highlightDocId, setHighlightDocId] = useState<string | null>(() => {
     if (initialDocumentId) return null;
     try { return sessionStorage.getItem('writescholar_open_doc_after_onboarding'); } catch { return null; }
@@ -3138,7 +3180,22 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
   }, [highlightTool, clearOnboardingHighlight]);
 
   useEffect(() => {
-    if (initialDocumentId) return;
+    if (!onboardingEditorDocId) return;
+    try { sessionStorage.removeItem(OPEN_EDITOR_AFTER_ONBOARDING_KEY); } catch { /* ignore */ }
+    try { window.history.replaceState({}, '', `/documents/${onboardingEditorDocId}`); } catch { /* ignore */ }
+  }, [onboardingEditorDocId]);
+
+  useEffect(() => {
+    if (initialDocumentId || onboardingEditorDocId) return;
+    // The pack built in onboarding opens straight into the viewer.
+    try {
+      if (sessionStorage.getItem(OPEN_PACK_AFTER_ONBOARDING_KEY) === '1') {
+        sessionStorage.removeItem(OPEN_PACK_AFTER_ONBOARDING_KEY);
+        sessionStorage.removeItem('writescholar_ws_pending_view');
+        openOnboardingStudyPack();
+        return;
+      }
+    } catch { /* ignore */ }
     // After onboarding essay analysis: stay on the hub and light up
     // that paper so they know where it lives, then open markup on click.
     try {
@@ -3184,7 +3241,8 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
       }
     }
     setView(pending);
-  }, [initialDocumentId, user?.id]);
+    // openOnboardingStudyPack is left out on purpose: the handoff keys are one-shot.
+  }, [initialDocumentId, onboardingEditorDocId, user?.id]);
 
   // First-run after onboarding / trial start: stay on the main hub.
   // We used to deep-link into Analyze (or whichever tool they picked in
@@ -3195,7 +3253,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
   const [firstRunNudge, setFirstRunNudge] = useState<WorkspaceView | null>(null);
   useEffect(() => {
     const userId = user?.id;
-    if (!userId || initialDocumentId || trialGated) return;
+    if (!userId || initialDocumentId || onboardingEditorDocId || trialGated) return;
     try {
       if (isFirstRunFastPathDone(userId)) return;
       const completedAt = getOnboardingCompletedAt(userId);
@@ -3207,7 +3265,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
     setView('hub');
     setFirstRunNudge(null);
     trackEvent('first_action_prompt_cta_click', { cta: 'auto_fast_path', view: 'hub' });
-  }, [user?.id, initialDocumentId, trialGated]);
+  }, [user?.id, initialDocumentId, onboardingEditorDocId, trialGated]);
 
   // Listen for direct view-switch events fired by navigateWorkspaceView
   // when DocumentsPage is already mounted (e.g. "Start review" popup
@@ -3290,6 +3348,43 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
   // rect (used to position the tooltip near the underline).
   const [hoverAnnotationId, setHoverAnnotationId] = useState<string | null>(null);
   const [hoverRect, setHoverRect] = useState<DOMRect | null>(null);
+  // Free users get an Unlock button inside the tooltip, so leaving the
+  // highlight must not close it straight away: give the pointer time to
+  // reach the tooltip, and keep it open while the pointer is on it.
+  const hoverHideTimerRef = useRef<number | null>(null);
+  const clearHoverHide = () => {
+    if (hoverHideTimerRef.current != null) {
+      window.clearTimeout(hoverHideTimerRef.current);
+      hoverHideTimerRef.current = null;
+    }
+  };
+  const scheduleHoverHide = (delayMs: number) => {
+    clearHoverHide();
+    hoverHideTimerRef.current = window.setTimeout(() => {
+      hoverHideTimerRef.current = null;
+      setHoverAnnotationId(null);
+      setHoverRect(null);
+    }, delayMs);
+  };
+  const handleAnnotationHover = (id: string | null, rect: DOMRect | null) => {
+    if (id) {
+      clearHoverHide();
+      setHoverAnnotationId(id);
+      setHoverRect(rect);
+      return;
+    }
+    if (!isPaidPlan(user)) {
+      scheduleHoverHide(450);
+      return;
+    }
+    clearHoverHide();
+    setHoverAnnotationId(null);
+    setHoverRect(null);
+  };
+  const handleTooltipHover = (inside: boolean) => {
+    if (inside) clearHoverHide();
+    else scheduleHoverHide(200);
+  };
   // Applied revisions, keyed by annotation id. We keep the
   // original + replacement text so the user can revert (positions
   // shift after edits, so revert is text-search based). Reset on
@@ -3304,7 +3399,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
   // Soft paywall shown once after a free user's first editor analysis
   // finishes. Dismissible — they keep the (gated) editor afterwards.
   const [showSoftPaywall, setShowSoftPaywall] = useState(false);
-  const softPaywallSeenRef = useRef(false);
+  const paidPlan = isPaidPlan(user);
   // Bumped to ask DocumentEditorView to open its analyze-confirm
   // modal (with the citation/grade picker) from the upload nudge.
   const [analyzeConfirmSignal, setAnalyzeConfirmSignal] = useState(0);
@@ -3944,6 +4039,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
         topSuggestions: normalizeTopSuggestions(payload?.top_suggestions),
         comprehensiveText: extractComprehensiveText(payload as Record<string, unknown>),
         rubric: normalizeRubricRows(rubricRaw),
+        lockedTopSuggestions: lockedTopSuggestionCount(payload),
       });
       persistLastAnalysisGradingStyle(gradingStyle);
       try { localStorage.setItem('writescholar_editor_citation_style', citationStyle); } catch { /* noop */ }
@@ -4266,6 +4362,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
           topSuggestions: normalizeTopSuggestions(ar.top_suggestions),
           comprehensiveText: extractComprehensiveText(ar),
           rubric: normalizeRubricRows(ar.grade_rubric ?? ar.gradeRubric),
+          lockedTopSuggestions: lockedTopSuggestionCount(ar),
         });
         // Restore which revisions were already applied (+ the original
         // text needed to revert) so refresh / another device keeps the
@@ -4306,7 +4403,8 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
       }
     })();
     return () => { cancelled = true; };
-  }, [openDocId]);
+    // paidPlan: after upgrading, fetch again so the full feedback replaces the preview.
+  }, [openDocId, paidPlan]);
 
   // ─── Auto-analyse on analyse-intent entries ──────────────────
   // When the user came in via an "Analyze a paper" door (Analyze on
@@ -4328,60 +4426,63 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
     void handleAnalyzeInEditor();
   }, [view, openDocId, openDoc, priorAnalysisChecked, analyzerResult, analyzerLoading, handleAnalyzeInEditor]);
 
-  // Soft paywall — fire when a free user, after an analysis, has
-  // scrolled ~65% of the way through their paper (NOT at the 50%
-  // divider — that popped too early and startled people).
-  //
-  //   • FIRST time ever they cross 65%: always show — this is the
-  //     welcome-discount moment. SoftPaywall itself renders the
-  //     $9.99 first-month offer + the one-shot "last chance" pop-up
-  //     (its FIRST_PAYWALL_DISCOUNT_SHOWN_KEY logic), so the daily
-  //     cap must NOT swallow it.
-  //   • After that: plain $19.99 (SoftPaywall's discount flag is
-  //     spent), capped to once per calendar day per browser.
-  // Dismissible; they keep the (gated) editor afterwards.
+  // What this essay's free preview is holding back — named on the paywall.
+  const essayUnlock = useMemo<EssayUnlockSummary | null>(() => {
+    if (!analyzerResult || paidPlan) return null;
+    return {
+      notes: analyzerResult.annotations.length,
+      sections: analyzerResult.rubric?.length ?? 0,
+      fixes: analyzerResult.lockedTopSuggestions ?? 0,
+      grade: analyzerResult.gradeEstimate ?? null,
+    };
+  }, [analyzerResult, paidPlan]);
+
+  // End-of-essay paywall: once a free user has read their marked-up
+  // essay to the last line, open the paywall. Once per essay per
+  // session. A short essay that already fits on screen waits until
+  // they have had a moment with the highlights.
   useEffect(() => {
-    if (isPaidPlan(user)) return;
-    if (softPaywallSeenRef.current) return;
-    if (!analyzerResult) return;
-    const todayKey = new Date().toISOString().slice(0, 10);
-    let firstTime = true;
+    if (paidPlan || !analyzerResult || !openDocId) return;
+    const seenKey = `ws_essay_end_paywall_${openDocId}`;
     try {
-      firstTime = localStorage.getItem('ws_editor_softpaywall_first') !== '1';
-      // Subsequent times only: at most once per day. The first ever
-      // crossing always shows (the discount moment).
-      if (!firstTime && localStorage.getItem('ws_editor_softpaywall_day') === todayKey) return;
-    } catch { /* localStorage unavailable — fall through, ref still caps it */ }
+      if (sessionStorage.getItem(seenKey) === '1') return;
+    } catch { /* storage unavailable: show at most once per mount */ }
     const root = editorRef.current?.view?.dom as HTMLElement | undefined;
     if (!root) return;
-    const SCROLL_THRESHOLD = 0.65; // ~65% of the paper scrolled past the fold
+    const resultShownAt = Date.now();
+    const SHORT_ESSAY_WAIT_MS = 15000;
+    let scrolled = false;
+    let fired = false;
     let ticking = false;
     const check = () => {
       ticking = false;
-      if (softPaywallSeenRef.current) return;
+      if (fired) return;
       const rect = root.getBoundingClientRect();
       if (rect.height <= 0) return;
-      // Fraction of the prose that has scrolled above the viewport top.
-      const scrolled = -rect.top / rect.height;
-      if (scrolled >= SCROLL_THRESHOLD) {
-        softPaywallSeenRef.current = true;
-        try {
-          localStorage.setItem('ws_editor_softpaywall_first', '1');
-          localStorage.setItem('ws_editor_softpaywall_day', todayKey);
-        } catch { /* ignore */ }
-        setShowSoftPaywall(true);
-        window.removeEventListener('scroll', onScroll);
-      }
+      const lastLineOnScreen = rect.bottom <= window.innerHeight - 24;
+      if (!lastLineOnScreen) return;
+      if (!scrolled && Date.now() - resultShownAt < SHORT_ESSAY_WAIT_MS) return;
+      fired = true;
+      try { sessionStorage.setItem(seenKey, '1'); } catch { /* ignore */ }
+      trackEvent('paywall_view', { trigger: 'essay_end' });
+      setShowSoftPaywall(true);
+      stop();
     };
     const onScroll = () => {
+      scrolled = true;
       if (ticking) return;
       ticking = true;
       requestAnimationFrame(check);
     };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll(); // in case the doc is already scrolled past the threshold
-    return () => window.removeEventListener('scroll', onScroll);
-  }, [analyzerResult, user]);
+    // Capture catches scrolls inside the editor's own scroll container too.
+    window.addEventListener('scroll', onScroll, { passive: true, capture: true });
+    const poll = window.setInterval(check, 2500);
+    function stop() {
+      window.removeEventListener('scroll', onScroll, { capture: true });
+      window.clearInterval(poll);
+    }
+    return stop;
+  }, [analyzerResult, paidPlan, openDocId]);
 
   // Pull the remaining-analyses count whenever a document opens so
   // the editor's top-right chip is accurate before they analyze.
@@ -4394,7 +4495,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
   const promoBanner = isPaidPlan(user) ? undefined : flashOffer.active ? (
     <FlashOfferBanner offer={flashOffer} variant="strip" onNavigatePricing={() => onNavigate('pricing')} />
   ) : (
-    <PromoBanner variant="app" onCta={() => window.dispatchEvent(new CustomEvent('writescholar-open-paywall', { detail: { force: true, trigger: 'promo_banner' } }))} ctaLabel="Start my free trial" />
+    <PromoBanner variant="app" onCta={() => window.dispatchEvent(new CustomEvent('writescholar-open-paywall', { detail: { force: true, trigger: 'promo_banner' } }))} />
   );
 
   // ─── Render ───────────────────────────────────────────────────
@@ -4440,7 +4541,8 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
           onReopenAnalyzer={() => setAnalyzerOpen(true)}
           selectedAnnotationId={selectedAnnotationId}
           onSelectAnnotation={setSelectedAnnotationId}
-          onAnnotationHover={(id, rect) => { setHoverAnnotationId(id); setHoverRect(rect); }}
+          onAnnotationHover={handleAnnotationHover}
+          onTooltipHover={handleTooltipHover}
           hoverAnnotationId={hoverAnnotationId}
           hoverRect={hoverRect}
           onEditorReady={(ed) => { editorRef.current = ed; }}
@@ -4453,7 +4555,11 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
           onOpenClassicReport={handleOpenFullReport}
           documentText={liveDraftText || latestTextRef.current || openDoc.contentText || ''}
           wordLimit={isPaidPlan(user) || !FREE_EDITOR_WORD_LIMIT ? null : FREE_EDITOR_WORD_LIMIT}
-          onUpgrade={() => { trackEvent('upgrade_clicked', { source: 'analyzer_panel' }); openUpgradePaywall('analyzer_panel'); }}
+          onUpgrade={(source?: string) => {
+            const trigger = typeof source === 'string' ? `analyzer_${source}` : 'analyzer_panel';
+            trackEvent('upgrade_clicked', { source: trigger });
+            openUpgradePaywall(trigger, { essayUnlock: essayUnlock ?? undefined });
+          }}
           analysesLeft={analysesLeft}
           revisionsLocked={!isPaidPlan(user)}
           revisionPaywallAnn={revisionPaywallAnn}
@@ -4511,6 +4617,7 @@ export default function DocumentsPage({ initialDocumentId, onNavigate, onLogout,
             onStartTrial={() => {}}
             onDismiss={() => setShowSoftPaywall(false)}
             onNavigate={onNavigate}
+            essayUnlock={essayUnlock}
           />
         )}
       </WorkspaceShell>

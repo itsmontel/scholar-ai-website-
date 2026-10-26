@@ -1114,7 +1114,7 @@ class EmailService {
             ? `${firstName}, your study pack is still waiting`
             : 'Your study pack is still waiting',
           headline: `Your pack is ready${greetingName} 🃏`,
-          body: 'Yesterday WriteScholar turned your notes into a lesson and flashcards — the quiz, games, and the rest of your deck are still locked. Unlock them and actually test yourself before the exam.',
+          body: 'Yesterday WriteScholar turned your notes into a lesson, a quiz and flashcards. The rest of your deck, the crossword and the study games are still locked. Unlock them and drill it until it sticks before the exam.',
           preheader: 'Your study pack is built — the quiz and full deck are still waiting.',
         },
       };
@@ -1122,7 +1122,7 @@ class EmailService {
 
       const valueRows = [
         { emoji: '📝', title: 'Every fix, applied',     desc: 'Full line-by-line annotations + one-click apply into your draft.', color: EMAIL_COLORS.purple, soft: EMAIL_COLORS.purpleSoft, dark: EMAIL_COLORS.purpleDark },
-        { emoji: '🃏', title: 'Full study packs',        desc: 'Quiz, arcade games, and the whole flashcard deck — unlocked.',     color: EMAIL_COLORS.orange, soft: EMAIL_COLORS.orangeSoft, dark: EMAIL_COLORS.orangeDark },
+        { emoji: '🃏', title: 'Full study packs',        desc: 'The whole flashcard deck, the crossword and the arcade games, unlocked.',     color: EMAIL_COLORS.orange, soft: EMAIL_COLORS.orangeSoft, dark: EMAIL_COLORS.orangeDark },
         { emoji: '📚', title: 'Complete source lists',   desc: 'Every citation for your topic, plus PDF & Word export.',           color: EMAIL_COLORS.blue,   soft: EMAIL_COLORS.blueSoft,   dark: EMAIL_COLORS.blueDark },
       ];
       const valueRowsHtml = valueRows.map((f) => `

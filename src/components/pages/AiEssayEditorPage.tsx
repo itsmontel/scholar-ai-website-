@@ -92,7 +92,7 @@ const FAQS = [
   },
   {
     q: 'Is it free to try?',
-    a: 'You can try it free for 3 days. The trial gives you 3 credits, and each essay analysis uses 1, so you can grade up to three of your own essays with the full rubric and one-click fixes. After that, Pro is $19.99/mo for 99 credits, and unused credits roll over. Cancel anytime.',
+    a: 'Yes. New accounts get 3 free credits to use within 7 days, no card needed, and each essay analysis uses 1. A free grade shows your letter grade and every green, amber and red highlight. Pro adds every comment, the full rubric and one-click fixes: $9.99 for your first month, then $19.99/mo for 99 credits, and unused credits roll over. Cancel anytime.',
   },
   {
     q: 'Does it work for university and college essays?',
@@ -170,7 +170,7 @@ const AiEssayEditorPage = ({ onNavigate, user, onLogout }: AiEssayEditorPageProp
             <div className="mt-8 flex flex-col items-center gap-3">
               {cta}
               <p className="text-[12px] sm:text-sm font-bold text-stone-500 dark:text-stone-400">
-                3-day free trial · 3 credits · Cancel anytime. The grade is an estimate to sharpen your draft, not a guarantee.
+                3 free credits · no card needed. The grade is an estimate to sharpen your draft, not a guarantee.
               </p>
             </div>
           </div>

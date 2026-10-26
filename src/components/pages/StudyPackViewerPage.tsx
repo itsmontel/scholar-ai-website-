@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, Suspense, lazy } from 'react';
+import { useState, useEffect, Suspense, lazy } from 'react';
 import LoggedInPageShell from '../workspace/LoggedInPageShell';
 import FlashcardViewer from '../common/FlashcardViewer';
 import LessonViewer from '../common/LessonViewer';
@@ -10,6 +10,7 @@ import RandomMascotLoader from '../common/RandomMascotLoader';
 import { exportStudyPackSegment } from '../../utils/studyPackExport';
 import { trackEvent } from '../../utils/analytics';
 import { openUpgradePaywall } from '../../utils/paywall';
+import { FREE_PACK_FLASHCARDS, UPGRADE_CTA_FOOTNOTE } from '../../config/pricing';
 
 // Game pages, lazy-loaded so they only ship when the user actually
 // taps "Start Game" inside the viewer. Both pages already support a
@@ -36,32 +37,6 @@ const STORAGE_KEY = 'writescholar_study_pack_viewer';
 const RETURN_TAB_KEY = 'writescholar_study_pack_return_tab';
 const RETURN_STATE_KEY = 'writescholar_study_pack_return_state';
 
-const FULL_ACCESS_MS = 24 * 60 * 60 * 1000;
-
-/** Free users get the first half of the deck / quiz after the 24h window. */
-function freePreviewCount(total: number): number {
-  if (total <= 0) return 0;
-  return Math.max(1, Math.ceil(total / 2));
-}
-
-function parseCreatedAt(value: unknown): number | null {
-  if (!value) return null;
-  const t = Date.parse(String(value));
-  return Number.isNaN(t) ? null : t;
-}
-
-function resolveCreatedAt(data: Record<string, unknown> | null | undefined): number | null {
-  if (!data) return null;
-  const nested = data.questions && typeof data.questions === 'object' && !Array.isArray(data.questions)
-    ? (data.questions as Record<string, unknown>)
-    : null;
-  return (
-    parseCreatedAt(data.created_at) ||
-    parseCreatedAt(data.createdAt) ||
-    parseCreatedAt(nested?.created_at) ||
-    parseCreatedAt(nested?.createdAt)
-  );
-}
 
 function normalizeViewerPack(raw: { data: any; title?: string } | null): { data: any; title: string } | null {
   if (!raw?.data) return raw ? { data: raw.data, title: raw.title || 'Study Pack' } : null;
@@ -79,17 +54,6 @@ function normalizeViewerPack(raw: { data: any; title?: string } | null): { data:
     data.created_at = d.created_at || d.createdAt;
   }
   return { data, title: raw.title || 'Study Pack' };
-}
-
-function formatCountdown(ms: number): string {
-  const clamped = Math.max(0, ms);
-  const totalSec = Math.floor(clamped / 1000);
-  const h = Math.floor(totalSec / 3600);
-  const m = Math.floor((totalSec % 3600) / 60);
-  const s = totalSec % 60;
-  if (h > 0) return `${h}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
-  if (m > 0) return `${m}m ${String(s).padStart(2, '0')}s`;
-  return `${s}s`;
 }
 
 interface StudyPackViewerPageProps {
@@ -115,7 +79,6 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
     if (initialData?.data) return normalizeViewerPack({ data: initialData.data, title: initialData.title || 'Study Pack' });
     return normalizeViewerPack(safeParseStorage(STORAGE_KEY));
   });
-  const [now, setNow] = useState(() => Date.now());
   const [activeTab, setActiveTab] = useState<TabKey>(() => {
     try {
       const data = initialData?.data ?? safeParseStorage(STORAGE_KEY)?.data;
@@ -162,22 +125,11 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
 
   const plan = (user?.plan || 'free').toLowerCase();
   const isPaidUser = plan === 'pro' || plan === 'premium';
-  const createdAtMs = useMemo(() => resolveCreatedAt(pack?.data), [pack]);
-  const trialEndsAt = createdAtMs == null ? null : createdAtMs + FULL_ACCESS_MS;
-  const remainingMs = trialEndsAt == null ? 0 : trialEndsAt - now;
-  const hasTrialAccess = !isPaidUser && createdAtMs != null && remainingMs > 0;
-  const trialExpired = !isPaidUser && createdAtMs != null && remainingMs <= 0;
-  const hasFullAccess = isPaidUser || hasTrialAccess;
-  // Free: full pack for 24h after create, then notes + lesson + half the
-  // cards/quiz. Games stay Pro-locked after the window.
+  const hasFullAccess = isPaidUser;
+  // Free preview: notes, the full lesson and the full quiz, plus the first
+  // FREE_PACK_FLASHCARDS cards. The rest of the deck, the crossword, the
+  // games and export are Pro.
   const isLocked = (key: TabKey) => !hasFullAccess && (TABS.find((t) => t.key === key)?.proOnly ?? false);
-
-  useEffect(() => {
-    if (isPaidUser || createdAtMs == null) return;
-    if (Date.now() >= createdAtMs + FULL_ACCESS_MS) return;
-    const id = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(id);
-  }, [isPaidUser, createdAtMs]);
 
   // Funnel: free user opened a Pro-locked tab (quiz / games) — the moment
   // they see the lock screen instead of content.
@@ -191,7 +143,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
   const handleOpenFull = (tab: TabKey, state?: { questionIndex?: number; slideIndex?: number }) => {
     const d = pack?.data?.[tab];
     if (!d) return;
-    if (isLocked(tab) || (!hasFullAccess && (tab === 'quiz' || tab === 'flashcards'))) {
+    if (isLocked(tab) || (!hasFullAccess && tab === 'flashcards')) {
       openUpgradePaywall('study_pack_preview_enlarge');
       return;
     }
@@ -370,12 +322,16 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
             </button>
           </>
         ) : (
-          <button onClick={() => onNavigate('pricing')} className={`${btnBase} bg-[#FF9600] text-white border-[#D97F00]`} title="Upgrade to export to PDF and Word">
+          <button
+            onClick={() => { trackEvent('upgrade_clicked', { source: 'study_pack_export' }); openUpgradePaywall('study_pack_export'); }}
+            className={`${btnBase} bg-[#FF9600] text-white border-[#D97F00]`}
+            title="Export to PDF, Word and JSON on Pro"
+          >
             <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-            Upgrade
+            Export · Pro
           </button>
         )}
-        {hasData('flashcards') && (
+        {hasFullAccess && hasData('flashcards') && (
           <button onClick={() => exportStudyPackSegment(pack.data, packTitle, 'flashcards', 'json')} className={`${btnBase} bg-[#58CC02] text-white border-[#46A302]`}>
             <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm3 10a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm-2-4a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1z" clipRule="evenodd"/></svg>
             JSON
@@ -455,7 +411,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
         />
       )}
       {activeTab === 'flashcards' && hasData('flashcards') && !isLocked('flashcards') && (() => {
-        const previewCount = hasFullAccess ? flashcardCards.length : freePreviewCount(flashcardCards.length);
+        const previewCount = hasFullAccess ? flashcardCards.length : Math.min(flashcardCards.length, FREE_PACK_FLASHCARDS);
         const lockedCount = Math.max(0, flashcardCards.length - previewCount);
         const visibleCards = flashcardCards.slice(0, previewCount);
         return (
@@ -471,7 +427,7 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
                 +{lockedCount} more flashcard{lockedCount === 1 ? '' : 's'} in this deck
               </p>
               <p className="mt-1 text-[12px] font-bold text-stone-600 dark:text-stone-300 leading-snug">
-                Free includes the first half. Unlock the full deck and study games with Pro.
+                Free includes the first {FREE_PACK_FLASHCARDS}. Unlock the full deck, the crossword and the study games with Pro.
               </p>
                   <button
                     type="button"
@@ -486,32 +442,30 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
         );
       })()}
       {activeTab === 'quiz' && hasData('quiz') && !isLocked('quiz') && (() => {
+        // The quiz is free in full: testing yourself is what proves the pack works.
         const allQuestions = Array.isArray(pack.data.quiz?.questions) ? pack.data.quiz.questions : [];
-        const previewCount = hasFullAccess ? allQuestions.length : freePreviewCount(allQuestions.length);
-        const lockedCount = Math.max(0, allQuestions.length - previewCount);
-        const visibleQuestions = allQuestions.slice(0, previewCount);
         return (
         <div className="p-4">
           <QuizViewer
-            questions={visibleQuestions}
+            questions={allQuestions}
             title={pack.data.quiz?.title || packTitle}
-            onEnlarge={hasFullAccess ? (state) => handleOpenFull('quiz', state) : () => { trackEvent('upgrade_clicked', { source: 'study_pack_quiz_enlarge' }); openUpgradePaywall('study_pack_quiz_enlarge'); }}
+            onEnlarge={(state) => handleOpenFull('quiz', state)}
             initialQuestionIndex={returnState?.questionIndex}
           />
-          {lockedCount > 0 && (
-            <div className="mt-4 max-w-xl mx-auto rounded-2xl border-2 border-[#FF9600]/40 bg-gradient-to-br from-[#FFF4E0] to-white dark:from-[#FF9600]/12 dark:to-stone-900 p-4 sm:p-5 text-center">
-              <p className="text-[14px] font-extrabold text-[#D97F00] dark:text-[#FFB84D]">
-                +{lockedCount} more question{lockedCount === 1 ? '' : 's'} in this quiz
+          {!hasFullAccess && (
+            <div className="mt-4 max-w-xl mx-auto rounded-2xl border-2 border-[#A560E8]/30 bg-[#F3EAFF] dark:bg-[#A560E8]/12 p-4 sm:p-5 text-center">
+              <p className="text-[14px] font-extrabold text-[#7733B5] dark:text-[#C9A0F0]">
+                Lock it in with games
               </p>
               <p className="mt-1 text-[12px] font-bold text-stone-600 dark:text-stone-300 leading-snug">
-                Free includes the first half. Unlock the rest of the quiz and study games with Pro.
+                Crater Blast, Word Tower and Word Blitz drill these same questions until they stick. Pro.
               </p>
               <button
                 type="button"
                 onClick={() => { trackEvent('upgrade_clicked', { source: 'study_pack_quiz_banner' }); openUpgradePaywall('study_pack_quiz_banner'); }}
-                className="mt-3 inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#FF9600] hover:bg-[#D97F00] text-white text-[12px] font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all"
+                className="mt-3 inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] text-white text-[12px] font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
               >
-                Unlock all {allQuestions.length} questions
+                Unlock the games
               </button>
             </div>
           )}
@@ -726,63 +680,35 @@ const StudyPackViewerPage = ({ onNavigate, user, onLogout, initialData }: StudyP
           />
         </div>
 
-        {hasTrialAccess && (
-          <div className="mb-5 rounded-2xl border-2 border-b-4 border-[#D97F00] bg-gradient-to-br from-[#FFF4E0] to-white dark:from-[#FF9600]/15 dark:to-stone-900 px-4 py-3.5 sm:px-5 sm:py-4">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-              <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#D97F00] dark:text-[#FFB84D]">
-                  24-hour full access
-                </p>
-                <p className="mt-0.5 text-[13px] sm:text-[14px] font-extrabold text-stone-800 dark:text-stone-100 leading-snug">
-                  Everything is unlocked for {formatCountdown(remainingMs)}
-                </p>
-                <p className="mt-1 text-[12px] font-bold text-stone-600 dark:text-stone-400 leading-snug">
-                  Games, full flashcards, full quiz, crossword, and export. After that this pack goes back to the free preview.
-                </p>
-              </div>
-              <div className="flex flex-col items-stretch sm:items-end gap-2 shrink-0">
-                <span className={`tabular-nums text-center sm:text-right text-lg sm:text-xl font-extrabold ${remainingMs < 60 * 60 * 1000 ? 'text-[#FF4B4B]' : 'text-[#D97F00] dark:text-[#FFB84D]'}`}>
-                  {formatCountdown(remainingMs)}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    trackEvent('upgrade_clicked', { source: 'study_pack_24h_banner' });
-                    openUpgradePaywall('study_pack_24h_banner');
-                  }}
-                  className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-[#FF9600] hover:bg-[#D97F00] text-white text-[12px] font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#D97F00] active:border-b-2 active:translate-y-0.5 transition-all"
-                >
-                  Keep it unlocked
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {trialExpired && (
-          <div className="mb-5 rounded-2xl border-2 border-b-4 border-[#A560E8]/40 bg-gradient-to-br from-[#F3EAFF] to-white dark:from-[#A560E8]/12 dark:to-stone-900 px-4 py-3.5 sm:px-5 sm:py-4">
+        {!hasFullAccess && (
+          <div className="mb-5 rounded-2xl border-2 border-b-4 border-[#A560E8]/40 bg-[#F3EAFF] dark:bg-[#A560E8]/12 px-4 py-3.5 sm:px-5 sm:py-4">
             <div className="flex flex-col sm:flex-row sm:items-center gap-3">
               <div className="flex-1 min-w-0">
                 <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#8A48C7] dark:text-[#C9A0F0]">
-                  24-hour access ended
+                  Free preview
                 </p>
                 <p className="mt-0.5 text-[13px] sm:text-[14px] font-extrabold text-stone-800 dark:text-stone-100 leading-snug">
-                  This pack is back to the free preview
+                  The lesson and the full quiz are yours. Start there.
                 </p>
                 <p className="mt-1 text-[12px] font-bold text-stone-600 dark:text-stone-400 leading-snug">
-                  Half the flashcards and quiz stay open. Games, the rest of the deck, and export unlock on Pro.
+                  {flashcardCards.length > FREE_PACK_FLASHCARDS
+                    ? `Pro opens all ${flashcardCards.length} flashcards, the crossword, 3 study games and export.`
+                    : 'Pro opens the crossword, 3 study games and export.'}
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  trackEvent('upgrade_clicked', { source: 'study_pack_24h_expired' });
-                  openUpgradePaywall('study_pack_24h_expired');
-                }}
-                className="shrink-0 inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] text-white text-[12px] font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
-              >
-                Unlock forever
-              </button>
+              <div className="flex flex-col items-stretch sm:items-end gap-1 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    trackEvent('upgrade_clicked', { source: 'study_pack_preview_banner' });
+                    openUpgradePaywall('study_pack_preview_banner');
+                  }}
+                  className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-[#A560E8] hover:bg-[#8A48C7] text-white text-[12px] font-extrabold uppercase tracking-wide border-2 border-b-[3px] border-[#7733B5] active:border-b-2 active:translate-y-0.5 transition-all"
+                >
+                  Unlock the full pack
+                </button>
+                <span className="text-center sm:text-right text-[10px] font-bold text-stone-400 dark:text-stone-500">{UPGRADE_CTA_FOOTNOTE}</span>
+              </div>
             </div>
           </div>
         )}

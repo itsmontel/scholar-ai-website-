@@ -12,10 +12,18 @@
  * checkout directly — a much shorter path than bouncing the user out
  * to the pricing page.
  */
-export function openUpgradePaywall(trigger: string) {
+export function openUpgradePaywall(trigger: string, context?: { essayUnlock?: EssayUnlockSummary }) {
   window.dispatchEvent(
     new CustomEvent('writescholar-open-paywall', {
-      detail: { force: true, trigger },
+      detail: { force: true, trigger, ...(context?.essayUnlock ? { essayUnlock: context.essayUnlock } : {}) },
     })
   );
+}
+
+/** What a free essay preview is holding back, so the paywall can name it. */
+export interface EssayUnlockSummary {
+  notes: number;
+  sections: number;
+  fixes: number;
+  grade?: string | null;
 }

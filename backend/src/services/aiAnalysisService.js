@@ -5862,7 +5862,19 @@ Output JSON only: {"replacement":"..."}`;
 
     const row = rows[0];
     const ar = row.analysis_results || {};
-    const list = annotations || [];
+    // An editor opened before upgrading still holds the free preview
+    // (comments blanked by analysisRedaction). Keep the saved wording.
+    const storedById = new Map((Array.isArray(ar.annotations) ? ar.annotations : []).map((a) => [String(a?.id), a]));
+    const list = (annotations || []).map((a) => {
+      const stored = storedById.get(String(a?.id));
+      if (!stored || !(a?.locked || !a?.comment)) return a;
+      const { locked, ...rest } = a;
+      return {
+        ...rest,
+        comment: a.comment || stored.comment || '',
+        suggestion: a.suggestion || stored.suggestion || '',
+      };
+    });
     const strongPoints = list.filter((a) => a.type === 'strong').map((a) => ({
       text: a.text,
       explanation: a.comment,

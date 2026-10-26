@@ -601,7 +601,7 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
             <div className="bg-[#F3EAFF] dark:bg-[#A560E8]/10 border-2 border-[#A560E8]/30 rounded-2xl p-5">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-extrabold text-stone-800 dark:text-stone-200 text-sm">
-                  {currentPlan === 'pro' || currentPlan === 'premium' ? 'Combined actions' : 'Analysis previews'}
+                  {currentPlan === 'pro' || currentPlan === 'premium' ? 'Combined actions' : 'Free credits'}
                 </h3>
                 <div className="w-8 h-8 bg-[#A560E8] rounded-xl border-b-2 border-[#8A48C7] flex items-center justify-center">
                   <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -612,10 +612,10 @@ const BillingPage: React.FC<BillingPageProps> = ({ onNavigate, user, onLogout })
               <div className="text-2xl font-extrabold text-stone-800 mb-1">
                 {(currentPlan === 'pro' || currentPlan === 'premium') && usageStats.combinedActionsRemaining != null
                   ? (usageStats.combinedActionsRemaining === -1 ? '∞' : usageStats.combinedActionsRemaining)
-                  : 0}
+                  : Math.max(0, usageStats.analysesRemaining ?? 0)}
               </div>
               <div className="text-xs text-stone-500">
-                {currentPlan === 'free' ? 'credits · start the free trial for 3' : 'credits left · unused credits roll over'}
+                {currentPlan === 'free' ? 'free credits left · use them in your first 7 days' : 'credits left · unused credits roll over'}
               </div>
             </div>
 

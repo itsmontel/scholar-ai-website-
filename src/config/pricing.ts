@@ -2,11 +2,10 @@
  * Pricing & discount policy — one place that decides WHERE the welcome
  * discount is allowed to appear.
  *
- * Current front-door offer: a 3-day free trial with 3 credits, then 50%
- * off the first paid month on onboarding checkout (NEWCUSTOMER), then
- * Pro at $19.99/mo. A `once` coupon on a trial hits the first paid
- * invoice, not the $0 trial invoice. Pricing/billing/soft paywall stay
- * on list price unless WELCOME_DISCOUNT_AT_SIGNUP is on.
+ * Current front-door offer (2026-10-26): no card and no trial. Every new
+ * account gets FREE_CREDITS to use within FREE_CREDIT_DAYS, which buy the
+ * preview (essay highlights + grade, study pack lesson + quiz). Upgrading
+ * is Pro at 50% off the first month (NEWCUSTOMER, $9.99), then $19.99/mo.
  *
  * Exit (cancel flow / post-lapse winback) can still reuse the same
  * coupon as a save offer for users who already paid.
@@ -29,10 +28,9 @@ export const WELCOME_PROMO_CODE = 'NEWCUSTOMER';
 
 /**
  * Whether acquisition surfaces auto-apply WELCOME_PROMO_CODE.
- * true = 50% off first month is the front-door offer. Off while the
- * 3-day trial is the front-door offer (current).
+ * true = 50% off first month is the front-door offer (current).
  */
-export const WELCOME_DISCOUNT_AT_SIGNUP = false;
+export const WELCOME_DISCOUNT_AT_SIGNUP = true;
 
 /** First-month price per plan when the discount IS applied. */
 export const FIRST_MONTH_PRICE: Record<string, number> = { pro: 9.99, premium: 19.99 };
@@ -60,10 +58,11 @@ export const FLASH_OFFER_HOURS = 24;
 
 /**
  * Length of the card-required free trial, in days.
- * 0 = no trial — charge the (possibly discounted) first invoice immediately.
- * Must match TRIAL_DAYS in backend/src/services/creditService.js.
+ * 0 = no trial — charge the (possibly discounted) first invoice immediately
+ * (current: the free credits replaced the trial). Trials already running
+ * finish as before with TRIAL_CREDITS.
  */
-export const TRIAL_DAYS = 3;
+export const TRIAL_DAYS = 0;
 
 /**
  * Credits. An essay analysis, a study pack and a citation search each
@@ -71,6 +70,14 @@ export const TRIAL_DAYS = 3;
  * Mirrors backend/src/services/creditService.js.
  */
 export const TRIAL_CREDITS = 3;
+/** Never-paid accounts: credits to use within FREE_CREDIT_DAYS of their first visit. */
+export const FREE_CREDITS = 3;
+export const FREE_CREDIT_DAYS = 7;
+/**
+ * Free study packs open the full lesson and quiz plus this many
+ * flashcards; the rest of the deck, the crossword and the games are Pro.
+ */
+export const FREE_PACK_FLASHCARDS = 5;
 export const MONTHLY_CREDITS: Record<string, number> = { pro: 99, premium: 199 };
 export const CREDIT_CAP = 499;
 

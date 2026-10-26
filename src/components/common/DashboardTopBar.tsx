@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { getUsagePeriodFooterText } from '../../utils/usageReset';
 import CreditsPill from './CreditsPill';
-import { CREDITS_CHANGED_EVENT, parseCreditState, type CreditState } from '../../utils/credits';
+import { CREDITS_CHANGED_EVENT, parseCreditState, shortDate, type CreditState } from '../../utils/credits';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -623,12 +623,17 @@ export default function DashboardTopBar({
                   {(() => {
                     // Free previews never reset — only uploads do. Don't show
                     // a blanket "Resets in N days" under one-time counters.
-                    const footer = isPaidUsage && usageStats.credits && usageStats.credits.rollover > 0
-                      ? `${usageStats.credits.rollover} rolled over · unused credits carry into next month`
-                      : getUsagePeriodFooterText(
-                          usageStats.previewsAreLifetime === true,
-                          usageStats.daysUntilReset
-                        );
+                    const c = usageStats.credits;
+                    const footer = isPaidUsage && c && c.rollover > 0
+                      ? `${c.rollover} rolled over · unused credits carry into next month`
+                      : !isPaidUsage && c?.freeExpiresAt
+                        ? c.freeExpired
+                          ? `Free credits expired ${shortDate(c.freeExpiresAt) ?? ''}`.trim()
+                          : `Free credits expire ${shortDate(c.freeExpiresAt) ?? 'in 7 days'}`
+                        : getUsagePeriodFooterText(
+                            usageStats.previewsAreLifetime === true,
+                            usageStats.daysUntilReset
+                          );
                     return footer ? (
                       <p className="mt-2 text-center text-[10px] font-bold text-stone-400">{footer}</p>
                     ) : null;
