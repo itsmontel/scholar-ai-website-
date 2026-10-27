@@ -2045,6 +2045,50 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
     goToPhase(path === 'exam' ? 'studypack-input' : 'analyze-input');
   };
 
+  /** Plan screen CTA in the $1 trial model: Stripe checkout for Pro with
+   *  the trial ($1 today, full price when it ends). No discount code. */
+  const handleFlowStartTrial = async (answers: OnboardingAnswers) => {
+    if (startingTrial) return;
+    const withTrial = TRIAL_DAYS > 0 && trialEligible !== false;
+    trackEvent('onboarding_choose_trial', { path: pathFor(answers), trial: withTrial });
+    trackEvent('paywall_view', { source: 'onboarding_plan' });
+    setTrialError(null);
+    if (testMode) {
+      onComplete?.();
+      return;
+    }
+    setStartingTrial(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) { onNavigate('login'); return; }
+      try {
+        sessionStorage.setItem(CHECKOUT_OFFER_KEY, JSON.stringify(withTrial ? { kind: 'trial', path: pathFor(answers) } : { kind: 'paid', plan: 'pro', path: pathFor(answers) }));
+      } catch { /* ignore */ }
+      const res = await fetch(`${API_URL}/subscriptions/create-checkout-session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          planType: 'pro',
+          billingCycle: 'monthly',
+          successUrl: `${window.location.origin}/dashboard?payment=success`,
+          cancelUrl: `${window.location.origin}/onboarding?preview=plan`,
+          ...(withTrial ? { trialPeriodDays: TRIAL_DAYS } : {}),
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      const url = data?.data?.checkoutUrl;
+      if (!res.ok || !url) {
+        setTrialError((data && typeof data.message === 'string' && data.message) || 'We could not start checkout. Please try again.');
+        setStartingTrial(false);
+        return;
+      }
+      window.location.href = url;
+    } catch {
+      setTrialError('We could not start checkout. Please try again.');
+      setStartingTrial(false);
+    }
+  };
+
   const handleFlowLookAround = (answers: OnboardingAnswers) => {
     trackEvent('onboarding_choose_free', { path: pathFor(answers) });
     goToPhase('transition');
@@ -2163,6 +2207,9 @@ const OnboardingPage = ({ user, onComplete, onUserUpdate, onNavigate, onLogout, 
           initialStep={flowInitialStep}
           onAnswersReady={handleFlowAnswersReady}
           onStart={handleFlowStart}
+          onStartTrial={(a) => void handleFlowStartTrial(a)}
+          starting={startingTrial}
+          error={trialError}
           onLookAround={handleFlowLookAround}
           onLogout={onLogout}
         />

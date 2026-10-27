@@ -723,7 +723,7 @@ class EmailService {
                     </tr>
                   </table>
                   <p style="margin: 16px 0 0 0; font-size: 11px; font-weight: 600; color: ${EMAIL_COLORS.textMuted}; text-align: center;">
-                    WriteScholar · You received this because you started a free trial.
+                    WriteScholar · You received this because you started a trial.
                   </p>
                 </td>
               </tr>
@@ -881,7 +881,7 @@ class EmailService {
                           <tr>
                             <td style="background-color: ${EMAIL_COLORS.bg}; border: 2px solid ${EMAIL_COLORS.border}; border-radius: 14px; padding: 14px 16px;">
                               <p style="margin: 0; font-size: 12.5px; font-weight: 600; color: ${EMAIL_COLORS.textMuted}; line-height: 1.55; text-align: center;">
-                                Heads up: your free trial ends in 2 days${firstChargeAt ? ` on <strong style="color: ${EMAIL_COLORS.text};">${firstChargeAt}</strong>` : ''}${firstChargeAmount ? `, when your card is charged <strong style="color: ${EMAIL_COLORS.text};">${firstChargeAmount}</strong>` : ''}. Not for you? <a href="${accountUrl}" style="color: ${EMAIL_COLORS.purple}; font-weight: 800; text-decoration: underline;">Cancel in one click</a> — you won&apos;t be charged a penny.
+                                Heads up: your trial ends in 2 days${firstChargeAt ? ` on <strong style="color: ${EMAIL_COLORS.text};">${firstChargeAt}</strong>` : ''}${firstChargeAmount ? `, when your card is charged <strong style="color: ${EMAIL_COLORS.text};">${firstChargeAmount}</strong>` : ''}. Not for you? <a href="${accountUrl}" style="color: ${EMAIL_COLORS.purple}; font-weight: 800; text-decoration: underline;">Cancel in one click</a> — you won&apos;t be charged a penny.
                               </p>
                             </td>
                           </tr>
@@ -894,7 +894,7 @@ class EmailService {
                     </tr>
                   </table>
                   <p style="margin: 16px 0 0 0; font-size: 11px; font-weight: 600; color: ${EMAIL_COLORS.textMuted}; text-align: center;">
-                    WriteScholar · You received this because you started a free trial.
+                    WriteScholar · You received this because you started a trial.
                   </p>
                 </td>
               </tr>

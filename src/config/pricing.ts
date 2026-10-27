@@ -2,10 +2,10 @@
  * Pricing & discount policy — one place that decides WHERE the welcome
  * discount is allowed to appear.
  *
- * Current front-door offer (2026-10-26): no card and no trial. Every new
- * account gets FREE_CREDITS to use within FREE_CREDIT_DAYS, which buy the
- * preview (essay highlights + grade, study pack lesson + quiz). Upgrading
- * is Pro at 50% off the first month (NEWCUSTOMER, $9.99), then $19.99/mo.
+ * Current front-door offer (2026-10-27): a $1 trial. TRIAL_PRICE today
+ * buys TRIAL_DAYS of Pro with TRIAL_CREDITS, everything unlocked; then
+ * Pro bills at the full $19.99/mo. No discount code rides with it, and
+ * there are no free credits (FREE_CREDITS = 0).
  *
  * Exit (cancel flow / post-lapse winback) can still reuse the same
  * coupon as a save offer for users who already paid.
@@ -28,9 +28,9 @@ export const WELCOME_PROMO_CODE = 'NEWCUSTOMER';
 
 /**
  * Whether acquisition surfaces auto-apply WELCOME_PROMO_CODE.
- * true = 50% off first month is the front-door offer (current).
+ * false while the $1 trial is the front-door offer (current).
  */
-export const WELCOME_DISCOUNT_AT_SIGNUP = true;
+export const WELCOME_DISCOUNT_AT_SIGNUP = false;
 
 /** First-month price per plan when the discount IS applied. */
 export const FIRST_MONTH_PRICE: Record<string, number> = { pro: 9.99, premium: 19.99 };
@@ -57,21 +57,21 @@ export const FLASH_FIRST_MONTH_PRICE = 4.99;
 export const FLASH_OFFER_HOURS = 24;
 
 /**
- * Length of the card-required free trial, in days.
- * 0 = no trial — charge the (possibly discounted) first invoice immediately
- * (current: the free credits replaced the trial). Trials already running
- * finish as before with TRIAL_CREDITS.
+ * Length of the card-required trial, in days. 0 = no trial.
+ * Must match TRIAL_DAYS in backend/src/services/creditService.js.
  */
-export const TRIAL_DAYS = 0;
+export const TRIAL_DAYS = 7;
+/** Charged today to start the trial (backend TRIAL_FEE_CENTS). */
+export const TRIAL_PRICE = 1;
 
 /**
  * Credits. An essay analysis, a study pack and a citation search each
  * cost 1. Unused credits roll over each month, up to CREDIT_CAP.
  * Mirrors backend/src/services/creditService.js.
  */
-export const TRIAL_CREDITS = 3;
-/** Never-paid accounts: credits to use within FREE_CREDIT_DAYS of their first visit. */
-export const FREE_CREDITS = 3;
+export const TRIAL_CREDITS = 5;
+/** Never-paid accounts: credits to use within FREE_CREDIT_DAYS of their first visit (0 = off, current). */
+export const FREE_CREDITS = 0;
 export const FREE_CREDIT_DAYS = 7;
 /**
  * Free study packs open the full lesson and quiz plus this many
@@ -133,5 +133,5 @@ export function showSignupDiscount(
 export const UPGRADE_CTA_FOOTNOTE = WELCOME_DISCOUNT_AT_SIGNUP
   ? `50% off first month · then $${STANDARD_MONTHLY_PRICE.pro}/mo · Cancel anytime`
   : TRIAL_DAYS > 0
-    ? `${TRIAL_DAYS}-day free trial · ${TRIAL_CREDITS} credits · $0 today · Cancel anytime`
+    ? `$${TRIAL_PRICE} for ${TRIAL_DAYS} days · ${TRIAL_CREDITS} credits · then $${STANDARD_MONTHLY_PRICE.pro}/mo · Cancel anytime`
     : `From $${STANDARD_MONTHLY_PRICE.pro}/mo · Cancel anytime`;

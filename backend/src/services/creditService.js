@@ -2,8 +2,8 @@
  * Credits
  *
  * Every essay analysis, study pack and citation search costs 1 credit.
- *   Free     3 credits, use within 7 days of signup (never-paid accounts)
- *   Trial    3 credits (3-day trial)
+ *   Free     FREE_CREDITS within 7 days (never-paid accounts; 0 = off, current)
+ *   Trial    5 credits ($1, 7-day trial)
  *   Pro      99 credits per billing period
  *   Premium  199 credits per billing period
  *
@@ -32,10 +32,14 @@ const supabaseServiceRole = createClient(
 );
 
 const CREDIT_CAP = 499;
-const TRIAL_CREDITS = 3;
-const TRIAL_DAYS = 3;
+const TRIAL_CREDITS = 5;
+const TRIAL_DAYS = 7;
 const MONTHLY_CREDITS = { pro: 99, premium: 199 };
-const FREE_CREDITS = 3;
+// Free week for never-paid accounts. Off since the $1 trial became the
+// way in (2026-10-27); set FREE_CREDITS=3 to bring it back.
+const FREE_CREDITS = process.env.FREE_CREDITS != null && process.env.FREE_CREDITS !== '' && Number.isFinite(Number(process.env.FREE_CREDITS))
+  ? Math.max(0, Math.floor(Number(process.env.FREE_CREDITS)))
+  : 0;
 const FREE_CREDIT_DAYS = 7;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const FREE_CREDITS_STAT_KEY = 'free_credits_started_at';
@@ -264,6 +268,7 @@ async function signupTime(userId) {
 async function freeCreditState(userId) {
   const subscriptionService = require('./subscriptionService');
   const base = freeState();
+  if (FREE_CREDITS <= 0) return base;
   if (await subscriptionService.hasEverHadPaidPlan(userId)) return base;
 
   let start;

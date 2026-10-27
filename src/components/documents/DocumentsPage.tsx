@@ -2642,7 +2642,7 @@ function DocumentEditorView({
                     title={
                       analysesLeft === 0
                         ? revisionsLocked
-                          ? 'Your free credits are used up or expired — upgrade for more'
+                          ? 'No credits yet — try everything for $1'
                           : 'No analyses left this month — upgrade for more'
                         : revisionsLocked
                           ? `${analysesLeft} free ${analysesLeft === 1 ? 'credit' : 'credits'} left (they expire 7 days after you join)`
@@ -2657,7 +2657,7 @@ function DocumentEditorView({
                     }`}
                   >
                     {analysesLeft === 0
-                      ? revisionsLocked ? 'No free credits left' : 'No analyses left'
+                      ? revisionsLocked ? 'Try it for $1' : 'No analyses left'
                       : revisionsLocked
                         ? `${analysesLeft} free ${analysesLeft === 1 ? 'credit' : 'credits'}`
                         : `${analysesLeft} ${analysesLeft === 1 ? 'analysis' : 'analyses'} left`}
@@ -2761,7 +2761,7 @@ function DocumentEditorView({
                   className="group mt-7 w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-gradient-to-br from-[#A560E8] to-[#7733B5] text-white text-sm font-extrabold uppercase tracking-wide border-2 border-b-4 border-[#7733B5] hover:-translate-y-0.5 active:border-b-2 active:translate-y-0.5 transition-all shadow-[0_12px_26px_-14px_rgba(122,51,181,0.5)]"
                 >
                   <I.Sparkle />
-                  {noAnalysesLeft ? 'Upgrade to analyze' : 'Run full analysis'}
+                  {noAnalysesLeft ? (revisionsLocked ? 'Try it for $1' : 'Upgrade to analyze') : 'Run full analysis'}
                   <svg className="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" aria-hidden><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                 </button>
 
@@ -2899,7 +2899,7 @@ function DocumentEditorView({
               <h3 className="text-lg font-extrabold text-stone-900 dark:text-stone-50" style={{ fontFamily: '"Nunito", system-ui, sans-serif' }}>
                 {noAnalysesLeft
                   ? revisionsLocked
-                    ? 'Out of free credits'
+                    ? 'Try everything for $1'
                     : 'No analyses left this month'
                   : isReanalyze ? 'Re-analyze this draft?' : 'Analyze this draft?'}
               </h3>
@@ -2908,7 +2908,7 @@ function DocumentEditorView({
             {noAnalysesLeft ? (
               <p className="text-sm text-stone-600 dark:text-stone-300 font-medium leading-relaxed">
                 {revisionsLocked
-                  ? 'Your free credits are used up or have expired. Pro gives you 99 credits a month, opens every comment and fix, and unused credits roll over.'
+                  ? 'Grading uses credits. Start your 7-day trial for $1: 5 credits, every comment, section score and one-click fix unlocked. Then Pro is $19.99/mo, cancel anytime.'
                   : 'You\u2019ve used all your analyses for this billing period. Upgrade for more, or wait until your allowance resets.'}
               </p>
             ) : (

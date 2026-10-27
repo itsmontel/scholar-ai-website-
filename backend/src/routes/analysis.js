@@ -67,7 +67,7 @@ const outOfCreditsMessage = (limitCheck) => {
   }
   if (c?.freeExpired) return 'Your free credits have expired. Get Pro for 99 credits a month to keep going.';
   if (c?.freeCredits) return `You've used your ${c.freeCredits} free credits. Get Pro for 99 credits a month to keep going.`;
-  return 'This uses credits. Get Pro for 99 credits a month.';
+  return 'This uses credits. Try everything for $1: 7 days and 5 credits, then Pro is $19.99/mo.';
 };
 
 // @route   GET /api/analysis/humanize-usage

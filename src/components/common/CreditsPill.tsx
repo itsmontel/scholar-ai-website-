@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import CreditCoin from './CreditCoin';
 import { trackEvent } from '../../utils/analytics';
 import { freeDaysLeftLabel, isPaidCreditPlan, shortDate, type CreditState } from '../../utils/credits';
-import { MONTHLY_CREDITS, TRIAL_CREDITS, TRIAL_DAYS, WELCOME_DISCOUNT_AT_SIGNUP } from '../../config/pricing';
+import { MONTHLY_CREDITS, TRIAL_CREDITS, TRIAL_DAYS, TRIAL_PRICE, WELCOME_DISCOUNT_AT_SIGNUP } from '../../config/pricing';
 
 /**
  * Top-right credit counter + its dropdown. One credit = one essay
@@ -188,7 +188,7 @@ export default function CreditsPill({
           {!paid ? (
             <button type="button" onClick={openPaywall} className="h-12 rounded-2xl bg-[#A560E8] hover:bg-[#7733B5] border-2 border-b-4 border-[#7733B5] text-white text-[14px] font-extrabold uppercase tracking-wide active:border-b-2">
               {TRIAL_DAYS > 0
-                ? `Start free trial · ${TRIAL_CREDITS} credits`
+                ? `Try ${TRIAL_DAYS} days for $${TRIAL_PRICE} · ${TRIAL_CREDITS} credits`
                 : WELCOME_DISCOUNT_AT_SIGNUP && freeWeek
                   ? 'Get Pro · 50% off month 1'
                   : `Get ${MONTHLY_CREDITS.pro} credits a month`}

@@ -85,7 +85,7 @@ const WhyStudentsChoosePage: React.FC<WhyStudentsChoosePageProps> = ({ onNavigat
                 { feature: 'Academic Source Finder', ws: true, grammarly: true, quillbot: false },
                 { feature: 'Focus Mode (Puzzle/Quiz to Unlock)', ws: true, grammarly: false, quillbot: false },
                 { feature: 'Free Tools Available', ws: '8 Tools', grammarly: 'Limited', quillbot: 'Several', alt: true },
-                { feature: 'Starting Price', ws: '3 free credits, then $19.99/mo', grammarly: '$12/mo', quillbot: '$9.95/mo' },
+                { feature: 'Starting Price', ws: '$1 trial, then $19.99/mo', grammarly: '$12/mo', quillbot: '$9.95/mo' },
               ].map((row, i) => (
                 <div key={i} className={`grid grid-cols-4 items-center ${row.alt ? 'bg-[#EAFFD6]/50 dark:bg-[#58CC02]/10' : ''}`}>
                   <div className="p-4 sm:p-6">

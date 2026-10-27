@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { WELCOME_DISCOUNT_AT_SIGNUP, WELCOME_PROMO_CODE, TRIAL_DAYS } from '../../config/pricing';
+import { WELCOME_DISCOUNT_AT_SIGNUP, WELCOME_PROMO_CODE, TRIAL_DAYS, TRIAL_PRICE, TRIAL_CREDITS } from '../../config/pricing';
 
 interface PromoBannerProps {
   /** Promo code shown in the chip (also used to scope the dismissal cookie). */
@@ -14,19 +14,20 @@ interface PromoBannerProps {
 }
 
 /**
- * Front-door offer banner. Trial mode sells the grade (not credits);
- * when the welcome discount is on it shows the 50% off code instead.
+ * Front-door offer banner. Trial mode sells the $1 trial; when the
+ * welcome discount is on it shows the 50% off code instead.
  * Landing uses brand gold; the dashboard keeps the purple workspace strip.
  */
 export default function PromoBanner({
   code = WELCOME_PROMO_CODE,
   variant = 'app',
   onCta,
-  ctaLabel = 'Claim 50% off',
+  ctaLabel,
 }: PromoBannerProps) {
   const trialMode = !WELCOME_DISCOUNT_AT_SIGNUP && TRIAL_DAYS > 0;
+  const label = ctaLabel ?? (trialMode ? `Try it for $${TRIAL_PRICE}` : 'Claim 50% off');
   const storageKey = trialMode
-    ? `ws_promo_dismissed_${variant}_grade_essay`
+    ? `ws_promo_dismissed_${variant}_trial_${TRIAL_PRICE}`
     : `ws_promo_dismissed_${variant}_${code}`;
 
   const [dismissed, setDismissed] = useState<boolean>(() => {
@@ -54,7 +55,7 @@ export default function PromoBanner({
   return (
     <div
       role="region"
-      aria-label={trialMode ? 'Free trial' : 'First month discount'}
+      aria-label={trialMode ? `$${TRIAL_PRICE} trial` : 'First month discount'}
       className={
         isGold
           ? 'relative overflow-hidden border-b-2 border-[#D4A300] bg-[#FFC800]'
@@ -75,10 +76,9 @@ export default function PromoBanner({
           >
             {trialMode ? (
               <>
-                <span className={isGold ? 'text-[#5A4500]' : 'text-white'}>See your grade before you submit</span>
-                <span className="hidden sm:inline">
-                  {' '}· professor-style feedback in 60 seconds
-                </span>
+                <span className={isGold ? 'text-[#5A4500]' : 'text-[#FFD84D]'}>Try everything for ${TRIAL_PRICE}</span>
+                {' '}· {TRIAL_DAYS} days, {TRIAL_CREDITS} credits
+                <span className="hidden sm:inline"> · every comment and fix unlocked</span>
               </>
             ) : (
             <>
@@ -107,7 +107,7 @@ export default function PromoBanner({
                   : 'inline-flex items-center rounded-xl bg-white px-2.5 py-1 text-[11px] font-extrabold text-[#7733B5] border-2 border-b-[3px] border-[#E9DBFF] hover:bg-[#FBF7FF] active:border-b-2 active:translate-y-px transition-all'
               }
             >
-              {ctaLabel}
+              {label}
             </button>
           )}
         </div>

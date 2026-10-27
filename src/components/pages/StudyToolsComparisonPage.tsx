@@ -34,8 +34,8 @@ const StudyToolsComparisonPage: React.FC<StudyToolsComparisonPageProps> = ({ onN
     { feature: 'Import Quizlet Sets', ws: false, quizlet: true, knowt: true },
     { feature: 'Community/Shared Study Sets', ws: false, quizlet: true, knowt: true },
     { feature: 'Spaced Repetition', ws: false, quizlet: true, knowt: true },
-    { feature: 'Free Tier', ws: '3 free credits + tools', quizlet: 'Limited, ads', knowt: 'Unlimited notes' },
-    { feature: 'Starting Price', ws: 'Free credits, then $19.99/mo', quizlet: '$7.99/mo', knowt: 'Free / $4.99/mo' },
+    { feature: 'Free Tier', ws: 'Free tools + $1 trial', quizlet: 'Limited, ads', knowt: 'Unlimited notes' },
+    { feature: 'Starting Price', ws: '$1 trial, then $19.99/mo', quizlet: '$7.99/mo', knowt: 'Free / $4.99/mo' },
   ];
 
   const renderCell = (value: CellValue, isWs = false) => {

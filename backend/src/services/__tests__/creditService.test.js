@@ -4,6 +4,9 @@
  * are replaced with an in-memory fake.
  */
 
+// Exercise the free-week logic with it switched on.
+process.env.FREE_CREDITS = '3';
+
 const mockDb = { user: {}, actions: [], achievements: null };
 
 function mockQuery(table) {
@@ -92,15 +95,15 @@ beforeEach(() => {
   mockState.everPaid = false;
 });
 
-test('the trial has 3 credits and leftovers roll into the first paid month', async () => {
-  mockState.sub = sub('trialing', 0, 3);
+test('the trial has 5 credits and leftovers roll into the first paid month', async () => {
+  mockState.sub = sub('trialing', 0, 7);
   let c = await credits.getCreditState('u1');
-  expect([c.total, c.remaining, c.isTrial]).toEqual([3, 3, true]);
+  expect([c.total, c.remaining, c.isTrial]).toEqual([5, 5, true]);
 
   spend(2, 1, 'pack');
-  mockState.sub = sub('active', 3, 33);
+  mockState.sub = sub('active', 7, 37);
   c = await credits.getCreditState('u1');
-  expect([c.rollover, c.allowance, c.total]).toEqual([1, 99, 100]);
+  expect([c.rollover, c.allowance, c.total]).toEqual([3, 99, 102]);
 });
 
 test('unused credits roll over and stop at 499', async () => {

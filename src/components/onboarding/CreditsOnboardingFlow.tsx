@@ -24,7 +24,10 @@ import {
   type OnboardingAnswers,
   type OnboardingQuestion,
 } from './onboardingContent';
-import { FREE_CREDITS, FREE_CREDIT_DAYS } from '../../config/pricing';
+import { FREE_CREDITS, FREE_CREDIT_DAYS, STANDARD_MONTHLY_PRICE, TRIAL_CREDITS, TRIAL_DAYS, TRIAL_PRICE } from '../../config/pricing';
+
+/** No free credits: the plan screen sells the $1 trial instead of a free first upload. */
+const PAID_TRIAL = FREE_CREDITS <= 0;
 
 /* ═══════════════════════════════════════════════════════════════
    The question-by-question onboarding (same flow as the iOS app).
@@ -84,8 +87,13 @@ interface Props {
   userKey: string;
   firstName?: string;
   initialStep?: number;
-  /** Plan screen CTA: go upload their essay or notes. */
+  /** Plan screen CTA when free credits are on: go upload their essay or notes. */
   onStart: (answers: OnboardingAnswers) => void;
+  /** Plan screen CTA in the $1 trial model: open checkout. */
+  onStartTrial: (answers: OnboardingAnswers) => void;
+  /** Checkout is opening. */
+  starting?: boolean;
+  error?: string | null;
   onLookAround: (answers: OnboardingAnswers) => void;
   /** Called once, when the last question is answered. */
   onAnswersReady: (answers: OnboardingAnswers) => void;
@@ -97,6 +105,9 @@ export default function CreditsOnboardingFlow({
   firstName,
   initialStep,
   onStart,
+  onStartTrial,
+  starting = false,
+  error = null,
   onLookAround,
   onAnswersReady,
   onLogout,
@@ -215,7 +226,7 @@ export default function CreditsOnboardingFlow({
 
   return (
     <FlowShell
-      topBar={showTopBar ? <FlowTopBar progress={progress} onBack={back} onLogout={onLogout} credits={FREE_CREDITS} /> : null}
+      topBar={showTopBar ? <FlowTopBar progress={progress} onBack={back} onLogout={onLogout} credits={FREE_CREDITS > 0 ? FREE_CREDITS : null} /> : null}
     >
       {/* Warm the next animation so it plays the moment the step changes. */}
       {nextScholar && nextScholar !== scholar && <img src={nextScholar} alt="" aria-hidden className="hidden" />}
@@ -375,7 +386,7 @@ export default function CreditsOnboardingFlow({
               </div>
             </div>
             <ul className="w-full flex flex-col gap-3 text-left lg:bg-white/80 lg:dark:bg-stone-900/80 lg:border-2 lg:border-[#EADFF8] lg:dark:border-stone-700 lg:rounded-3xl lg:p-6">
-              {['Reading your answers', goalLine(answers), 'Choosing where to start', `Planning your ${FREE_CREDITS} free credits`].map((label, i) => {
+              {['Reading your answers', goalLine(answers), 'Choosing where to start', PAID_TRIAL ? `Planning your ${TRIAL_DAYS} days` : `Planning your ${FREE_CREDITS} free credits`].map((label, i) => {
                 const done = buildTick > i;
                 return (
                   <li key={label} className="flex items-center gap-3 text-[15px] lg:text-[16px] font-extrabold">
@@ -396,12 +407,25 @@ export default function CreditsOnboardingFlow({
             stage={{ src: scholar, bubble: planBubble(answers, firstName) }}
             footer={
               <>
-                <PrimaryButton onClick={() => onStart(answers)}>
-                  {rec.tool === 'study-pack' ? 'Make my study pack' : 'Grade my essay'}
-                </PrimaryButton>
-                <p className="mt-2 text-center text-[12px] leading-snug font-bold text-stone-500 dark:text-stone-400">
-                  Free · uses 1 of your {FREE_CREDITS} credits · no card needed
-                </p>
+                {PAID_TRIAL ? (
+                  <>
+                    <PrimaryButton onClick={() => onStartTrial(answers)} disabled={starting}>
+                      {starting ? 'Opening secure checkout…' : `Try everything for $${TRIAL_PRICE}`}
+                    </PrimaryButton>
+                    <p className="mt-2 text-center text-[12px] leading-snug font-bold text-stone-500 dark:text-stone-400">
+                      ${TRIAL_PRICE} today · {TRIAL_DAYS} days · {TRIAL_CREDITS} credits · then ${STANDARD_MONTHLY_PRICE.pro}/mo · cancel anytime. We&apos;ll email you before it renews.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <PrimaryButton onClick={() => onStart(answers)}>
+                      {rec.tool === 'study-pack' ? 'Make my study pack' : 'Grade my essay'}
+                    </PrimaryButton>
+                    <p className="mt-2 text-center text-[12px] leading-snug font-bold text-stone-500 dark:text-stone-400">
+                      Free · uses 1 of your {FREE_CREDITS} credits · no card needed
+                    </p>
+                  </>
+                )}
                 <button type="button" onClick={() => onLookAround(answers)} className="mt-1 w-full py-2 text-[13px] font-extrabold text-stone-400 hover:text-stone-600 dark:hover:text-stone-300">
                   Look around first
                 </button>
@@ -425,11 +449,15 @@ export default function CreditsOnboardingFlow({
             <div className="wso-card-in bg-[#FFF6DB] dark:bg-[#F5B70A]/10 border-2 border-b-4 border-[#F3DB93] dark:border-[#F5B70A]/40 rounded-2xl px-4 py-3.5 lg:px-5 lg:py-4 flex flex-col gap-2.5" style={{ animationDelay: '0.15s' }}>
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <div className="text-[17px] font-black">Your {FREE_CREDITS} free credits</div>
-                  <div className="text-[12px] font-extrabold text-[#7A5A00] dark:text-[#F5D670]">Use them within {FREE_CREDIT_DAYS} days</div>
+                  <div className="text-[17px] font-black">
+                    {PAID_TRIAL ? `Your ${TRIAL_DAYS} days for $${TRIAL_PRICE}` : `Your ${FREE_CREDITS} free credits`}
+                  </div>
+                  <div className="text-[12px] font-extrabold text-[#7A5A00] dark:text-[#F5D670]">
+                    {PAID_TRIAL ? `${TRIAL_CREDITS} credits · every comment and fix unlocked` : `Use them within ${FREE_CREDIT_DAYS} days`}
+                  </div>
                 </div>
                 <div className="flex gap-0.5">
-                  {Array.from({ length: FREE_CREDITS }, (_, i) => (
+                  {Array.from({ length: PAID_TRIAL ? TRIAL_CREDITS : FREE_CREDITS }, (_, i) => (
                     <CreditCoin key={i} size={22} className="wso-coin" style={{ animationDelay: `${0.3 + i * 0.15}s` }} />
                   ))}
                 </div>
@@ -442,6 +470,12 @@ export default function CreditsOnboardingFlow({
                 </div>
               ))}
             </div>
+
+            {error && (
+              <div role="alert" className="rounded-xl bg-[#F3EAFF] dark:bg-[#A560E8]/10 border-2 border-[#A560E8]/30 px-3 py-2.5 text-[13px] text-[#7733B5] dark:text-[#C9A0F0] font-bold">
+                {error}
+              </div>
+            )}
 
             <div className="wso-card-in bg-white dark:bg-stone-900 lg:bg-[#FBF8FF] lg:dark:bg-stone-800/60 border-2 border-[#E5E5E5] dark:border-stone-700 rounded-2xl px-4 py-3.5 flex flex-col gap-2" style={{ animationDelay: '0.3s' }}>
               <div className="text-[14px] font-black">How credits work</div>
@@ -612,7 +646,7 @@ function Welcome({ onNext, onLogout, firstName }: { onNext: () => void; onLogout
         </div>
         <div className="flex flex-col gap-6">
           <span className="self-start inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white dark:bg-stone-900 border-2 border-[#EADFF8] dark:border-stone-700 text-[12px] font-black uppercase tracking-[0.12em] text-[#7733B5] dark:text-[#C9A0F0]">
-            <CreditCoin size={18} /> {FREE_CREDITS} free credits waiting
+            <CreditCoin size={18} /> {PAID_TRIAL ? `Try everything for $${TRIAL_PRICE}` : `${FREE_CREDITS} free credits waiting`}
           </span>
           {headline}
           <p className="wso-subtitle text-[18px] leading-relaxed font-semibold text-stone-500 dark:text-stone-400 max-w-[30rem]">

@@ -27,11 +27,10 @@ export const SKIP_ONBOARDING_STRIPE = false;
  * History: hard gate (card before tools) got signups but near-zero trials.
  * Freemium preview (run the tool, lock ~half the payoff) followed, then the
  * hard gate again with the credit system and a 3-day trial at the end of
- * onboarding, which did not convert either. Current (2026-10-26): preview
- * again, paid for with free credits. New accounts get 3 credits to use
- * within 7 days (backend creditService). An essay grade shows every
- * highlight and the overall grade, with the comments and section scores
- * locked on the server; a study pack opens its lesson and quiz.
+ * onboarding, which did not convert either. 2026-10-26: free credits with
+ * a server-locked preview. Current (2026-10-27): no free credits; the way
+ * in is the $1, 7-day trial (5 credits). This stays true so free users
+ * can still browse the real app and hit the soft paywall on any action.
  */
 export const FREEMIUM_PREVIEW = true;
 

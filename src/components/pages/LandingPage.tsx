@@ -1262,7 +1262,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           <PromoBanner
             variant="gold"
             onCta={() => onNavigate(user ? 'pricing' : 'signup')}
-            ctaLabel={user ? 'Claim 50% off' : 'Grade my essay'}
+            ctaLabel={user ? undefined : 'Start for $1'}
           />
         </div>
       )}
@@ -2406,7 +2406,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
               Stop losing marks you could have kept
             </h2>
             <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed">
-              Start with 3 free credits, no card needed. Every essay analysis, study pack or citation search uses 1 credit, and on Pro unused credits roll over.
+              Try everything for $1: 7 days and 5 credits. Every essay analysis, study pack or citation search uses 1 credit, and unused credits roll over.
             </p>
           </div>
 
@@ -2555,7 +2555,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           </div>
 
           <p className="text-center text-sm text-stone-500 dark:text-stone-500 mt-8 max-w-xl mx-auto">
-            Start with 3 free credits, no card needed. Pro and Premium available with monthly or yearly billing.{' '}
+            Try everything for $1 for 7 days. Pro and Premium available with monthly or yearly billing.{' '}
             <button
               type="button"
               onClick={() => onNavigate('pricing')}
@@ -2854,7 +2854,7 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
                 </span>
                 <div>
                   <p className="text-amber-800 font-semibold text-sm">{FREE_PLAN_STUDY_PACK_LINE}</p>
-                  <p className="text-amber-600 text-xs mt-0.5">3 free credits for your own notes, no card needed</p>
+                  <p className="text-amber-600 text-xs mt-0.5">Try it on your own notes for $1</p>
                 </div>
               </div>
             </div>

@@ -94,11 +94,10 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
     let effectivePromoCode = typeof promoCode === 'string' && promoCode.trim() ? promoCode.trim() : null;
     const WELCOME_PROMO_CODES = ['NEWCUSTOMER', 'MAY2026'];
 
-    // The free trial (3 days, 3 credits) is the front-door offer. One per
-    // email, and never for an account that has subscribed before.
-    // NEWCUSTOMER may ride with the trial: a `once` coupon applies to the
-    // first paid invoice after the trial ($19.99 → $9.99), not the $0
-    // trial invoice. Other campaign codes stay off trial sessions.
+    // The $1 trial (7 days, 5 credits) is the front-door offer. One per
+    // email, and never for an account that has subscribed before. The $1
+    // is a one-off line item (createCheckoutSession); the plan then bills
+    // at full price when the trial ends.
     let trialDays =
       trialPeriodDays != null &&
       Number.isFinite(Number(trialPeriodDays)) &&
@@ -115,13 +114,8 @@ router.post('/create-checkout-session', authenticateToken, async (req, res) => {
         trialDays = 0;
       }
     }
-    if (
-      trialDays > 0 &&
-      effectivePromoCode &&
-      !WELCOME_PROMO_CODES.includes(effectivePromoCode.toUpperCase())
-    ) {
-      effectivePromoCode = null;
-    }
+    // The $1 trial carries no discount code of any kind.
+    if (trialDays > 0) effectivePromoCode = null;
 
     // NEWCUSTOMER (legacy alias: MAY2026) is the auto-applied welcome
     // discount for first-time customers. The frontend decides whether to

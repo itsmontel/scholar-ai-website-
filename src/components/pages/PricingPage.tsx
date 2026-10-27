@@ -8,7 +8,7 @@ import {
 import Header from '../common/Header';
 import { WriteScholarEditorialBackgroundLayers } from '../common/WriteScholarEditorialBackground';
 import Footer from '../common/Footer';
-import { FIRST_MONTH_PRICE, FLASH_FIRST_MONTH_PRICE, signupPromoCode, showSignupDiscount, TRIAL_DAYS, CHECKOUT_OFFER_KEY } from '../../config/pricing';
+import { FIRST_MONTH_PRICE, FLASH_FIRST_MONTH_PRICE, signupPromoCode, showSignupDiscount, TRIAL_DAYS, TRIAL_PRICE, TRIAL_CREDITS, CHECKOUT_OFFER_KEY } from '../../config/pricing';
 import { useFlashOffer } from '../../hooks/useFlashOffer';
 
 interface PricingPageProps {
@@ -141,7 +141,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
             billingCycle: billingCycle as 'monthly' | 'yearly',
             successUrl: `${window.location.origin}/dashboard?payment=success`,
             cancelUrl: `${window.location.origin}/dashboard?payment=cancelled`,
-            // New customers start with the 3-day trial (3 credits). The
+            // New customers start with the $1 trial (7 days, 5 credits). The
             // backend drops it for anyone who has trialed or paid before.
             ...(newCustomer && TRIAL_DAYS > 0 ? { trialPeriodDays: TRIAL_DAYS } : {}),
             // Trial checkout is list price after the trial. Campaign
@@ -243,9 +243,9 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       limitations: [],
       popular: true,
       buttonText: !user
-        ? 'Get Pro'
+        ? `Try ${TRIAL_DAYS} days for $${TRIAL_PRICE}`
         : currentPlan === 'free'
-          ? newCustomer && TRIAL_DAYS > 0 ? `Start ${TRIAL_DAYS}-day free trial` : 'Upgrade to Pro'
+          ? newCustomer && TRIAL_DAYS > 0 ? `Try ${TRIAL_DAYS} days for $${TRIAL_PRICE}` : 'Upgrade to Pro'
           : 'Switch to Pro',
       buttonAction: () => handlePlanAction('pro'),
     },
@@ -265,9 +265,9 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
       limitations: [],
       popular: false,
       buttonText: !user
-        ? 'Start with Premium'
+        ? `Try Premium for $${TRIAL_PRICE}`
         : currentPlan === 'free'
-          ? 'Upgrade to Premium'
+          ? newCustomer && TRIAL_DAYS > 0 ? `Try Premium for $${TRIAL_PRICE}` : 'Upgrade to Premium'
           : 'Switch to Premium',
       buttonAction: () => handlePlanAction('premium'),
     }
@@ -358,7 +358,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
               Stop losing marks you could have kept
             </h1>
             <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 leading-relaxed font-medium">
-              Start with 3 free credits, no card needed. Every essay analysis, study pack or citation search uses 1 credit, and on Pro unused credits roll over.
+              Try everything for $1: 7 days and 5 credits. Every essay analysis, study pack or citation search uses 1 credit, and unused credits roll over.
             </p>
           </div>
 
@@ -481,6 +481,20 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
                             NEWCUSTOMER discount applied at checkout
                           </span>
                         )}
+                      </div>
+                    ) : newCustomer && TRIAL_DAYS > 0 && (plan.id === 'pro' || plan.id === 'premium') ? (
+                      /* New customers: the $1 trial leads, then the real price. */
+                      <div className="flex flex-col items-center gap-1">
+                        <span className="text-4xl font-bold text-stone-800 dark:text-stone-100">
+                          ${TRIAL_PRICE}
+                          <span className="ml-1 text-base font-bold text-stone-500 dark:text-stone-400">for {TRIAL_DAYS} days</span>
+                        </span>
+                        <span className="text-stone-500 dark:text-stone-400 text-sm">
+                          then ${plan.monthlyPrice.toFixed(2)}/mo
+                        </span>
+                        <span className="text-[#46A302] text-xs font-extrabold">
+                          {TRIAL_CREDITS} credits, everything unlocked · cancel anytime
+                        </span>
                       </div>
                     ) : (
                       /* Returning customers see the plain standard price. */
@@ -656,7 +670,7 @@ const PricingPage = ({ onNavigate, user, onLogout }: PricingPageProps) => {
             <p className="text-base sm:text-lg text-stone-600 dark:text-stone-400 mb-8 max-w-xl mx-auto leading-relaxed">
               {user
                 ? 'Drop it into your dashboard and see exactly what to fix before it’s due.'
-                : 'Start with 3 free credits, no card needed. Upgrade when you want the comments and fixes.'}
+                : 'Try everything for $1 for 7 days. Cancel anytime.'}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center">
               {user ? (

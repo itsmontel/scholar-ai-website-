@@ -14,6 +14,8 @@ import {
   FLASH_FIRST_MONTH_PRICE,
   showSignupDiscount,
   TRIAL_DAYS as APP_TRIAL_DAYS,
+  TRIAL_CREDITS,
+  TRIAL_PRICE,
   CHECKOUT_OFFER_KEY,
 } from '../../config/pricing';
 import { useFlashOffer } from '../../hooks/useFlashOffer';
@@ -443,7 +445,7 @@ const SoftPaywall = ({
       ) : (
         <>
           {showTrial
-            ? 'Start for free'
+            ? `Try everything for $${TRIAL_PRICE}`
             : showLastChance
               ? `Get ${planName} for a discounted ${lastChanceFirstMonth}`
               : showDiscount
@@ -674,8 +676,8 @@ const SoftPaywall = ({
                 <div className="pr-16 flex items-baseline gap-2 mb-0.5 flex-wrap">
                   {showTrial ? (
                     <>
-                      <span className="text-4xl sm:text-5xl font-extrabold text-[#58CC02] tabular-nums">$0</span>
-                      <span className="text-base text-[#3C3C3C] dark:text-stone-200 font-extrabold">today</span>
+                      <span className="text-4xl sm:text-5xl font-extrabold text-[#58CC02] tabular-nums">${TRIAL_PRICE}</span>
+                      <span className="text-base text-[#3C3C3C] dark:text-stone-200 font-extrabold">for {TRIAL_DAYS} days</span>
                     </>
                   ) : (
                     <>
@@ -686,11 +688,11 @@ const SoftPaywall = ({
                   )}
                 </div>
                 <p className="text-sm text-[#3C3C3C] dark:text-stone-100 font-extrabold mb-1">
-                  {showTrial ? <>{TRIAL_DAYS}-day free trial · 3 credits · {planName}</> : <>Upgrade to {planName}</>}
+                  {showTrial ? <>{TRIAL_DAYS}-day trial · {TRIAL_CREDITS} credits · {planName}</> : <>Upgrade to {planName}</>}
                 </p>
                 <p className="text-[11px] sm:text-xs text-stone-500 dark:text-stone-400 mb-2.5 font-bold leading-snug">
                   {showTrial
-                    ? <>Then {monthlyPrice}/mo for {checkoutPlan === 'premium' ? 199 : 99} credits if you continue. Cancel before the trial ends to pay nothing.</>
+                    ? <>Then {monthlyPrice}/mo for {checkoutPlan === 'premium' ? 199 : 99} credits if you continue. Cancel before day {TRIAL_DAYS} and you won&apos;t be charged again.</>
                     : <>{monthlyPrice}/mo · {checkoutPlan === 'premium' ? 199 : 99} credits a month · unused credits roll over. Cancel anytime.</>}
                 </p>
                 {checkoutPlan === 'premium' && (
@@ -726,7 +728,7 @@ const SoftPaywall = ({
                 </p>
               )}
               <p className="text-[10px] text-center text-stone-400 dark:text-stone-500 font-bold">
-                {showTrial ? "This step can't be skipped — start your free trial to continue." : "This step can't be skipped — subscribe to continue."}
+                {showTrial ? `This step can't be skipped — start your $${TRIAL_PRICE} trial to continue.` : "This step can't be skipped — subscribe to continue."}
               </p>
             </div>
           </>
@@ -763,16 +765,18 @@ const SoftPaywall = ({
                     : showTrial ? <>Make this your best semester yet, {firstName}.</> : <>Stop leaving marks on the table, {firstName}.</>}
               </h2>
               <p className="text-stone-500 dark:text-stone-400 text-sm sm:text-[0.9375rem] font-bold leading-relaxed">
-                {essayUnlock && !showTrial ? (
+                {essayUnlock && showTrial ? (
+                  <>Unlock every note, your exact score and one-click fixes: <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">${TRIAL_PRICE} for {TRIAL_DAYS} days</span>, then {monthlyPrice}/mo. Cancel anytime.</>
+                ) : essayUnlock ? (
                   showDiscount
                     ? <>Get {planName} for <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{firstPaywallFirstMonth} your first month</span>, then {monthlyPrice}/mo. Cancel anytime.</>
                     : <>Subscribe to {planName} to read every note on this essay. Cancel anytime.</>
                 ) : variant === 'postTutorial' ? (
                   showTrial
-                    ? <>Start a <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{TRIAL_DAYS}-day free trial</span> with 3 credits for essay analysis, study packs and citations. Cancel anytime.</>
+                    ? <>Try everything for <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">${TRIAL_PRICE}</span>: {TRIAL_DAYS} days and {TRIAL_CREDITS} credits for essay feedback, study packs and citations. Cancel anytime.</>
                     : <>{planName} shows you exactly what to fix, gets you exam-ready, and sorts your references. Cancel anytime.</>
                 ) : showTrial ? (
-                  <>Try {planName} free for <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{TRIAL_DAYS} days</span> with 3 credits. Cancel anytime.</>
+                  <>Try {planName} for <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">${TRIAL_PRICE}</span>: {TRIAL_DAYS} days and {TRIAL_CREDITS} credits, everything unlocked. Cancel anytime.</>
                 ) : showDiscount ? (
                   <>Get {planName} for <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{firstPaywallFirstMonth} your first month</span>, then {monthlyPrice}/mo. Cancel anytime.</>
                 ) : (
@@ -839,8 +843,8 @@ const SoftPaywall = ({
               <div className="flex items-baseline gap-2 mb-1 flex-wrap">
                 {showTrial ? (
                   <>
-                    <span className="text-4xl sm:text-5xl font-extrabold text-[#58CC02] tabular-nums">$0</span>
-                    <span className="text-base text-[#3C3C3C] dark:text-stone-200 font-extrabold">today</span>
+                    <span className="text-4xl sm:text-5xl font-extrabold text-[#58CC02] tabular-nums">${TRIAL_PRICE}</span>
+                    <span className="text-base text-[#3C3C3C] dark:text-stone-200 font-extrabold">for {TRIAL_DAYS} days</span>
                   </>
                 ) : showDiscount ? (
                   <>
@@ -856,11 +860,11 @@ const SoftPaywall = ({
                 )}
               </div>
               <p className="text-sm text-[#3C3C3C] dark:text-stone-100 font-extrabold mb-1">
-                {showTrial ? <>{TRIAL_DAYS}-day free trial · {planName}</> : <>Upgrade to {planName}</>}
+                {showTrial ? <>{TRIAL_DAYS}-day trial · {TRIAL_CREDITS} credits · {planName}</> : <>Upgrade to {planName}</>}
               </p>
               <p className="text-xs text-stone-500 dark:text-stone-400 font-bold mb-4 leading-snug">
                 {showTrial
-                  ? <>After your free trial: <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{monthlyPrice}/mo</span>. Cancel before the trial ends and you won&apos;t be charged.</>
+                  ? <>After {TRIAL_DAYS} days: <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{monthlyPrice}/mo</span>. Cancel before then and you won&apos;t be charged again.</>
                   : showDiscount
                     ? <>After first month: <span className="font-extrabold text-[#3C3C3C] dark:text-stone-200">{monthlyPrice}/mo</span>. Cancel anytime.</>
                     : <>Cancel anytime.</>}

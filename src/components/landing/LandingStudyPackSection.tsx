@@ -77,7 +77,7 @@ export default function LandingStudyPackSection({ onNavigate }: LandingStudyPack
                   onClick={() => onNavigate('signup')}
                   className="inline-flex items-center justify-center px-6 py-3.5 border border-stone-300/90 dark:border-stone-600 text-stone-800 dark:text-stone-200 font-semibold rounded-xl hover:bg-stone-100/80 dark:hover:bg-stone-800/50 transition-colors text-base"
                 >
-                  Try it free, no card
+                  Try it for $1
                 </button>
               </div>
             </div>

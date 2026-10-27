@@ -16,10 +16,10 @@
  *   - 150-160 chars (Google's mobile cutoff)
  *   - Lead with the result ("Paste your essay, ..."), not the feature
  *   - End with a risk-reversal phrase to lift CTR. The front-door offer
- *     is 3 free credits with no card (src/config/pricing.ts), so say that.
+ *     is the $1, 7-day trial (src/config/pricing.ts), so say that.
  */
 export const LANDING_PAGE_TITLE =
   "AI Essay Grader — Turn B Essays Into A's | WriteScholar";
 
 export const LANDING_META_DESCRIPTION =
-  "Get a professor-style grade and line-by-line fixes on your essay, plus study packs and citations. Start free with 3 credits, no card needed.";
+  "Get a professor-style grade and line-by-line fixes on your essay, plus study packs and citations. Try everything for $1 for 7 days.";

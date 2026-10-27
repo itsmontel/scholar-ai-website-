@@ -954,6 +954,12 @@ const createStripeCustomer = async (email, name) => {
 // Create checkout session
 // options.trialPeriodDays: e.g. 7 — free trial before billing.
 // Optional promoCode in the request applies that Stripe promotion code at checkout.
+/** One-off fee charged when a trial starts ($1). 0 = free trial. */
+const TRIAL_FEE_CENTS = Number.isFinite(Number(process.env.TRIAL_FEE_CENTS)) && process.env.TRIAL_FEE_CENTS !== ''
+  ? Math.max(0, Math.round(Number(process.env.TRIAL_FEE_CENTS)))
+  : 100;
+const TRIAL_FEE_CURRENCY = (process.env.TRIAL_FEE_CURRENCY || 'usd').toLowerCase();
+
 const createCheckoutSession = async (
   customerId,
   planType,
@@ -978,7 +984,9 @@ const createCheckoutSession = async (
       }
     }
 
-    const effectivePromo = promoCode;
+    // The $1 trial is the offer on its own: no discount code rides with it,
+    // so the plan starts at full price when the trial ends.
+    const effectivePromo = trialPeriodDays > 0 ? null : promoCode;
 
     // Get price ID based on plan and billing cycle
     const priceId = getPriceId(planType, billingCycle);
@@ -1000,6 +1008,19 @@ const createCheckoutSession = async (
           price: priceId,
           quantity: 1,
         },
+        // Trial fee, charged today. A one-time item in a subscription
+        // Checkout lands on the first invoice, so it is paid now while the
+        // plan itself only starts billing when the trial ends.
+        ...(trialPeriodDays > 0 && TRIAL_FEE_CENTS > 0
+          ? [{
+              price_data: {
+                currency: TRIAL_FEE_CURRENCY,
+                unit_amount: TRIAL_FEE_CENTS,
+                product_data: { name: `WriteScholar ${trialPeriodDays}-day trial` },
+              },
+              quantity: 1,
+            }]
+          : []),
       ],
       mode: 'subscription',
       subscription_data: {
@@ -1027,9 +1048,8 @@ const createCheckoutSession = async (
       sessionConfig.cancel_url = finalCancelUrl;
     }
 
-    // No promo-code box on Checkout. Flash coupons stay off trial
-    // sessions. NEWCUSTOMER may ride with a trial so the first paid
-    // month is 50% off, then list price.
+    // No promo-code box on Checkout. Coupons and codes stay off trial
+    // sessions (see effectivePromo above).
     if (trialPeriodDays === 0 && options.couponId) {
       try {
         const coupon = await stripe.coupons.retrieve(options.couponId);
