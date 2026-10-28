@@ -15,15 +15,20 @@ import { useState } from 'react';
 
 // Positive-vibes only — sad mascot is intentionally excluded so the
 // loading screen never feels punitive when a slow network loads.
+//
+// Static 280px stills (frame 0 of each animated WebP, 14-27KB) rather than
+// the animations themselves (1-3.6MB each). A loader shows exactly when the
+// network is slow, so it must not compete with the chunk it is waiting for;
+// the CSS bob below keeps it feeling alive.
 const POSITIVE_MASCOTS = [
-  '/mascot-celebrating.webp',
-  '/mascot-jumping-joy.webp',
-  '/mascot-juggling.webp',
-  '/mascot-dance.webp',
-  '/mascot-laptop.webp',
-  '/mascot-paper.webp',
-  '/mascot-study.webp',
-  '/mascot-thinking.webp',
+  '/mascot-celebrating-still.webp',
+  '/mascot-jumping-joy-still.webp',
+  '/mascot-juggling-still.webp',
+  '/mascot-dance-still.webp',
+  '/mascot-laptop-still.webp',
+  '/mascot-paper-still.webp',
+  '/mascot-study-still.webp',
+  '/mascot-thinking-still.webp',
 ];
 
 interface RandomMascotLoaderProps {
@@ -51,8 +56,8 @@ const RandomMascotLoader = ({ size = 140, text = 'Loading…' }: RandomMascotLoa
         decoding="async"
         width={size}
         height={size}
-        style={{ width: size, height: size }}
-        className="object-contain drop-shadow-[0_18px_30px_rgba(124,58,237,0.30)]"
+        style={{ width: size, height: size, animationDuration: '1.8s' }}
+        className="object-contain motion-safe:animate-mobile-mascot-bob drop-shadow-[0_18px_30px_rgba(124,58,237,0.30)]"
       />
       {text && (
         <p className="animate-pulse text-stone-500 dark:text-stone-400 text-sm font-medium">
