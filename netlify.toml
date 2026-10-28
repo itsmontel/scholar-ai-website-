@@ -47,6 +47,21 @@
   status = 301
   force = true
 [[redirects]]
+  from = "/ai-essay-editor"
+  to = "/essay-grader"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/ai-essay-grader"
+  to = "/essay-grader"
+  status = 301
+  force = true
+[[redirects]]
+  from = "/grade-my-essay"
+  to = "/essay-grader"
+  status = 301
+  force = true
+[[redirects]]
   from = "/word-counter"
   to = "/tools/word-counter"
   status = 301

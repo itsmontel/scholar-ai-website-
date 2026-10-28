@@ -1082,16 +1082,17 @@ function essayGuidePage(g: EssayGuideMeta): ProgrammaticPageConfig {
       },
     ],
     faqs: g.faqs,
-    // /ai-essay-editor leads deliberately: it is the canonical money page for
+    // /essay-grader leads deliberately: it is the canonical money page for
     // "essay grader" intent (see PATH_ALIASES in src/utils/seo.ts, which points
-    // /essay-grader, /ai-essay-grader and /grade-my-essay here), and these 10
+    // /ai-essay-editor, /ai-essay-grader and /grade-my-essay here), and these 10
     // guide pages are the largest block of essay-intent internal links we own.
     related: [
       { label: 'How to write an essay or assignment', href: '/blog/how-to-write-an-essay-or-assignment', teaser: 'The 2026 step-by-step process for any prompt.' },
       { label: 'How to write a good introduction', href: '/blog/how-to-write-a-good-introduction', teaser: 'Context, question, and thesis. Write the opening last.' },
       { label: 'How to start an essay', href: '/blog/how-to-start-an-essay', teaser: 'A hook that earns the next sentence, then the claim.' },
       { label: 'What critically evaluate means', href: '/blog/what-does-critically-evaluate-mean', teaser: 'Judge against criteria, then take a side a marker can mark.' },
-      { label: 'AI College Essay Grader', href: '/ai-essay-editor', teaser: 'Write your essay and see the grade update as you revise.' },
+      { label: 'Essay Grader', href: '/essay-grader', teaser: 'See your grade and fix it before you submit.' },
+      { label: 'College Essay Grader', href: '/college-essay-grader', teaser: 'Personal statements and Common App essays.' },
       { label: 'AI Essay Checker', href: '/tools/analyze', teaser: 'Get rubric-based feedback and a polished revision.' },
       { label: 'Thesis Generator', href: '/tools/thesis-generator', teaser: 'Build a strong thesis statement.' },
       { label: 'Essay Outline Generator', href: '/tools/essay-outline', teaser: 'Get a structured outline in 30 seconds.' },
@@ -1127,7 +1128,7 @@ const bestPages: ProgrammaticPageConfig[] = [
         pick: {
           name: 'WriteScholar',
           badge: 'Best overall',
-          why: 'The only grader in the test that scores five rubric categories with sub-criteria, calibrates against real college grade distributions, and marks up specific lines you can fix in one click. Preview it on your own essay before paying anything.',
+          why: 'The only grader in the test that scores five rubric categories with sub-criteria, calibrates against real college grade distributions, and marks up specific lines you can fix in one click. Try it on your own essays for $1 before committing.',
         },
         runnerUp: { name: 'ProWritingAid', why: 'deepest style and structure reports, but it never gives you a grade.' },
         budget: { name: 'ChatGPT', why: '$20/mo and endlessly flexible, though grades run inflated and vary run to run.' },
@@ -1179,10 +1180,11 @@ const bestPages: ProgrammaticPageConfig[] = [
       { question: 'What\'s the catch with the $1 trial?', answer: 'It costs $1 for 7 days and gives you 5 credits; each essay analysis uses 1, with your grade, every comment, the rubric and one-click fixes unlocked. After that, Pro is $19.99/mo for 99 credits, and unused credits roll over.' },
       { question: 'Can AI graders grade as well as professors?', answer: 'Not yet. Top AI graders (WriteScholar, top-tier ChatGPT prompts) match professors ~75% of the time on overall grade, less on nuanced feedback. They\'re a useful first pass; not a replacement.' },
       { question: 'Which is best for med school applications?', answer: 'For high-stakes essays, get human feedback (admissions counsellor, mentor, English teacher). AI graders are useful for early drafts and grammar passes.' },
-      { question: 'Is WriteScholar genuinely better, or are you biased?', answer: 'I built it, so yes I\'m biased. The honest pitch: grade your own essays free first, then Pro is $19.99/mo — cheaper than Grammarly Premium, with 5-category rubric scoring most tools skip. For workplace writing, Grammarly is better. For creative work, neither.' },
+      { question: 'Is WriteScholar genuinely better, or are you biased?', answer: 'I built it, so yes I\'m biased. The honest pitch: try it on your own essays for $1 first, then Pro is $19.99/mo — cheaper than Grammarly Premium, with 5-category rubric scoring most tools skip. For workplace writing, Grammarly is better. For creative work, neither.' },
     ],
     related: [
-      { label: 'AI College Essay Grader', href: '/ai-essay-editor', teaser: 'Write, grade and fix your essay in one place.' },
+      { label: 'Essay Grader', href: '/essay-grader', teaser: 'Write, grade and fix your essay in one place.' },
+      { label: 'College Essay Grader', href: '/college-essay-grader', teaser: 'For personal statements and application essays.' },
       { label: 'AI Essay Checker', href: '/tools/analyze', teaser: 'Paste a finished draft for a one-off check.' },
       { label: 'Best flashcard app for med school', href: '/best/flashcard-app-for-medical-school', teaser: 'Top flashcard tools compared.' },
       { label: 'Grammarly alternative', href: '/alternatives/grammarly', teaser: 'WriteScholar vs Grammarly side by side.' },
@@ -1745,6 +1747,120 @@ function wordCountGuidePage(g: WordCountGuideMeta): ProgrammaticPageConfig {
   };
 }
 
+/* ─── LANDING PAGES, /[slug] ──────────────────────────────────── */
+// Top-level money pages for essay-analysis intent. /essay-grader is its own
+// component (AiEssayEditorPage); these cover the narrower intents around it.
+
+const landingPages: ProgrammaticPageConfig[] = [
+  {
+    // "college essay grader", "personal statement grader", "college
+    // application essay grader", "common app essay grader", "college essay
+    // checker", "rate my college essay", "grade my college essay"
+    slug: 'college-essay-grader',
+    type: 'landing',
+    metaTitle: 'College Essay Grader for Personal Statements | WriteScholar',
+    metaDescription: 'Grade your college essay or personal statement before you apply. Line-by-line notes on generic sentences, thin reflection and structure. Try it for $1.',
+    h1: 'College essay grader for personal statements',
+    subtitle: 'Find the generic sentences, the thin reflection and the paragraph that loses the reader before an admissions officer does.',
+    eyebrow: 'College essay grader',
+    accent: '#A560E8',
+    intro: 'A college application essay is not graded like coursework. Nobody marks your thesis out of ten. An admissions reader spends a few minutes on it and comes away with one impression: do I know this person now, and do I like how they think? WriteScholar reads your personal statement line by line and shows you where that impression is being lost: sentences any applicant could have written, paragraphs that tell a story without saying what it meant, and an ending that repeats the opening instead of landing. You get an overall grade, a rubric breakdown and notes tied to your exact sentences, so you can rewrite in your own words before you hit submit.',
+    sections: [
+      {
+        type: 'list',
+        heading: 'What the college essay grader looks for',
+        items: [
+          { title: 'Specific detail over general claims', body: 'Every sentence that could appear in someone else\'s essay gets flagged. "I learned the value of hard work" says nothing; the moment you describe what the work actually was says everything.' },
+          { title: 'Reflection, not just story', body: 'Most first drafts narrate an experience and stop. The grader marks the paragraphs that describe what happened without saying what changed in how you think.' },
+          { title: 'A clear thread', body: 'A strong personal statement has one idea running through it. Paragraphs that wander from that idea, or introduce a second one, get noted.' },
+          { title: 'An opening that earns attention', body: 'Openings that start with a dictionary definition, a famous quote or "Ever since I was young" are flagged, with a note on what to lead with instead.' },
+          { title: 'An ending that lands', body: 'If your last paragraph restates the first, you get a note on how to close by looking forward instead of summarising.' },
+          { title: 'Clarity and mechanics', body: 'Wordy sentences, clichés, hedging and typos are marked last, because they matter least, but an admissions reader still notices them.' },
+        ],
+      },
+      {
+        type: 'examples',
+        heading: 'Personal statement fixes, before and after',
+        examples: [
+          {
+            label: 'Generic claim',
+            before: 'Volunteering at the hospital taught me the importance of compassion and hard work.',
+            after: 'By my third Saturday on the ward I knew which patients wanted to talk and which only wanted the blinds closed.',
+            explanation: 'The first sentence could be in ten thousand essays. The second shows compassion through a detail only you could know, and the reader draws the conclusion themselves.',
+          },
+          {
+            label: 'Story without reflection',
+            before: 'We lost the final by one point. The bus ride home was silent, and the next season we trained harder than ever.',
+            after: 'We lost the final by one point, and on the silent bus ride home I realised I had spent the whole game playing not to lose. The next season I started taking the shots I used to pass up.',
+            explanation: 'The draft narrates what happened. The revision says what changed in how you think, which is the part admissions readers are actually looking for.',
+          },
+          {
+            label: 'Weak opening',
+            before: 'Webster\'s Dictionary defines resilience as "the ability to recover quickly from difficulties."',
+            after: 'The first time I rebuilt the engine it took eleven weekends. The second time it took four, and it still would not start.',
+            explanation: 'Definition openings are among the most common in admissions essays. Starting in the middle of a real moment makes the reader want the next sentence.',
+          },
+        ],
+      },
+      {
+        type: 'comparison',
+        heading: 'College essay vs coursework essay',
+        intro: 'The grader reads both, but they are judged on different things.',
+        columns: ['', 'Coursework essay', 'College application essay'],
+        rows: [
+          { feature: 'What is judged', values: ['Your argument and evidence', 'Who you are and how you think'] },
+          { feature: 'Typical length', values: ['1,000 to 5,000 words', '650 words (Common App), 350 per UC prompt'] },
+          { feature: 'Voice', values: ['Formal, third person', 'Personal, first person'] },
+          { feature: 'Evidence', values: ['Sources and citations', 'Specific moments from your life'] },
+          { feature: 'Biggest mistake', values: ['A thesis that is not arguable', 'Sentences any applicant could write'] },
+        ],
+        plain: true,
+      },
+      {
+        type: 'steps',
+        heading: 'How to grade your college essay',
+        steps: [
+          { title: 'Paste your essay', body: 'Paste your personal statement or import it from Word or Google Docs. Common App, Coalition, UC personal insight questions, UCAS and supplemental essays all work.' },
+          { title: 'Add the prompt', body: 'Paste the essay prompt in the rubric box and the grader also checks whether your essay actually answers the question that was asked.' },
+          { title: 'Read the line notes first', body: 'You get an overall grade and a rubric breakdown, but the notes on your exact sentences are where the real fixes are. Start with the ones marked as generic or missing reflection.' },
+          { title: 'Rewrite in your own words, then re-grade', body: 'Make the changes yourself so the essay still sounds like you, then run it again to see what improved.' },
+        ],
+      },
+      {
+        type: 'demo',
+        heading: 'See the grader on a real essay',
+        caption: 'Switch samples, hover the highlights and check the rubric. Same view you get in the app.',
+      },
+      {
+        type: 'paragraph',
+        heading: 'Use it alongside human readers, not instead of them',
+        body: 'A college essay grader is fastest at the problems every draft has: generic sentences, missing reflection, a slow opening, a summary ending. It can read your fifth draft at midnight when nobody else will. It cannot tell you whether the story you chose is the right one to tell, and it does not know you. Show your near-final draft to a counsellor, a teacher or someone who knows you well, and use the grader for the rounds in between. Never paste in an essay someone else wrote: admissions offices are looking for your voice, and the grader is built to help you sharpen it, not replace it.',
+      },
+    ],
+    faqs: [
+      { question: 'Can AI grade a college essay accurately?', answer: 'It is reliable at spotting the common problems: generic sentences, thin reflection, weak openings and endings, wordiness and typos. It cannot judge whether your story is the most compelling one you could tell. Treat the grade as an estimate and the line notes as the useful part.' },
+      { question: 'Does it work for the Common App personal statement?', answer: 'Yes. Paste your Common App essay (up to 650 words) and add the prompt you chose. It also works for Coalition essays, UC personal insight questions, UCAS personal statements and supplemental essays.' },
+      { question: 'Will colleges know I used a college essay grader?', answer: 'Getting feedback on your own writing is what counsellors, teachers and parents have always done. WriteScholar gives you notes; you rewrite in your own words, so the essay stays yours. It does not write the essay for you.' },
+      { question: 'Can it check if my essay answers the prompt?', answer: 'Yes. Paste the prompt into the rubric box with your essay and you get a check of how well the essay addresses it, alongside the normal grade and line notes.' },
+      { question: 'How much does it cost?', answer: '$1 gets you a 7-day trial with 5 credits, and each essay analysis uses 1, so you can grade a draft, revise and grade it again. After that, Pro is $19.99/mo for 99 credits. Cancel anytime.' },
+      { question: 'Can it grade supplemental essays and short answers?', answer: 'Yes. "Why this college" essays, activity descriptions and short answers of 150 to 350 words all work, though very short answers get fewer line notes because there is less to comment on.' },
+      { question: 'Is my personal statement kept private?', answer: 'Yes. Your essays stay private to your account and are never used to train AI.' },
+      { question: 'What about grad school statements of purpose?', answer: 'Those work too. A statement of purpose is closer to coursework than a personal statement, so the grade and rubric are especially useful for checking that your research interests and fit are argued clearly.' },
+    ],
+    related: [
+      { label: 'Essay Grader', href: '/essay-grader', teaser: 'Grade any essay or paper before you submit.' },
+      { label: 'How to write a college essay', href: '/guides/how-to-write-college-essay', teaser: 'Structure, prompts and examples, step by step.' },
+      { label: 'College admission essay grader', href: '/blog/college-admission-essay-grader', teaser: 'Check your personal statement first.' },
+      { label: 'Best AI essay graders for college', href: '/best/ai-essay-grader-for-college', teaser: 'Five tools compared honestly.' },
+      { label: 'How accurate are AI essay graders?', href: '/blog/how-accurate-are-ai-essay-graders', teaser: 'A straight answer on what to trust.' },
+      { label: 'Grade my essay before submitting', href: '/blog/grade-my-essay-before-submitting', teaser: 'A 10-minute pre-submission check.' },
+    ],
+    primaryCta: { label: 'Grade my college essay', page: 'signup' },
+    secondaryCta: { label: 'How the essay grader works', page: 'ai-essay-editor' },
+    datePublished: '2026-10-28',
+  },
+];
+
 /* ─── Build the master list ────────────────────────────────────── */
 
 export const PROGRAMMATIC_PAGES: ProgrammaticPageConfig[] = [
@@ -1757,6 +1873,7 @@ export const PROGRAMMATIC_PAGES: ProgrammaticPageConfig[] = [
   ...ESSAY_GUIDES_META.map(essayGuidePage),
   ...WORD_COUNT_GUIDES_META.map(wordCountGuidePage),
   ...bestPages,
+  ...landingPages,
 ];
 
 /* ─── Lookup helpers ───────────────────────────────────────────── */
@@ -1770,8 +1887,13 @@ export const PROGRAMMATIC_PAGES: ProgrammaticPageConfig[] = [
  *   /alternatives/[slug]
  *   /guides/[slug]
  *   /best/[slug]
+ *   /[slug]          (type 'landing', top-level money pages)
  */
 export function getProgrammaticPageByPath(pathname: string): ProgrammaticPageConfig | null {
+  const topLevel = pathname.match(/^\/([^/?#]+)\/?$/);
+  if (topLevel) {
+    return PROGRAMMATIC_PAGES.find((p) => p.type === 'landing' && p.slug === topLevel[1]) || null;
+  }
   const match = pathname.match(/^\/(study|alternatives|guides|best)\/([^/?#]+)/);
   if (!match) return null;
   const [, prefix, slug] = match;
@@ -1788,6 +1910,7 @@ export function getProgrammaticPageByPath(pathname: string): ProgrammaticPageCon
 /** All programmatic page paths, used by sitemap generator and prerender. */
 export function getAllProgrammaticPaths(): string[] {
   return PROGRAMMATIC_PAGES.map((p) => {
+    if (p.type === 'landing') return `/${p.slug}`;
     const prefix = { subject: 'study', alternative: 'alternatives', guide: 'guides', best: 'best' }[p.type];
     return `/${prefix}/${p.slug}`;
   });

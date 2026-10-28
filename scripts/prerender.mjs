@@ -9,6 +9,7 @@ import handler from 'serve-handler';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { execSync } from 'child_process';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DIST = path.resolve(__dirname, '../dist');
@@ -17,7 +18,7 @@ const PORT = 34567;
 const staticRoutes = [
   '/',
   '/features',
-  '/ai-essay-editor',
+  '/essay-grader',
   '/pricing',
   '/about',
   '/why-students-choose',
@@ -107,6 +108,10 @@ try {
   const bestMatches = [...content.matchAll(/slug:\s*'([^']+)'[\s\S]{0,200}?type:\s*'best'/g)];
   bestMatches.forEach((m) => programmaticPaths.push(`/best/${m[1]}`));
 
+  // Top-level landing pages — type: 'landing', served at /[slug]
+  const landingMatches = [...content.matchAll(/slug:\s*'([^']+)'[\s\S]{0,200}?type:\s*'landing'/g)];
+  landingMatches.forEach((m) => programmaticPaths.push(`/${m[1]}`));
+
   console.log(`Found ${programmaticPaths.length} programmatic SEO pages`);
 } catch (e) {
   console.warn('Could not auto-detect programmatic pages:', e.message);
@@ -119,12 +124,23 @@ async function prerender() {
   const server = createServer((req, res) => {
     return handler(req, res, {
       public: DIST,
+      // Without this, serve-handler would serve pages already prerendered
+      // in this run (foo.html) instead of the fresh SPA shell.
+      cleanUrls: false,
       rewrites: [{ source: '**', destination: '/index.html' }],
     });
   });
 
   await new Promise((resolve) => server.listen(PORT, resolve));
   console.log(`Static server running on http://localhost:${PORT}`);
+
+  // Netlify caches node_modules between builds but not ~/.cache, so the
+  // Chrome that puppeteer downloads on install vanishes and every launch
+  // failed silently. .puppeteerrc.cjs keeps the browser inside
+  // node_modules/.cache; this makes sure it is there (a no-op once cached).
+  if (process.env.NETLIFY) {
+    execSync('npx puppeteer browsers install', { stdio: 'inherit' });
+  }
 
   let browser;
   try {
@@ -156,15 +172,13 @@ async function prerender() {
   }
 
   async function waitForRouteContent(page, route) {
-    if (route === '/blog') {
-      await page.waitForSelector('section[aria-label="Blog posts"] article', { timeout: 25000 });
-      return;
-    }
-    if (route.startsWith('/blog/')) {
-      await page.waitForSelector('article h1', { timeout: 25000 });
+    if (route.startsWith('/blog')) {
+      // Blog data loads after first paint; the page's own h1 means it's in.
+      await page.waitForSelector('#root h1', { timeout: 25000 });
     }
   }
 
+  const wrongCanonical = [];
   for (const route of allRoutes) {
     const url = `http://localhost:${PORT}${route}`;
     console.log(`Prerendering: ${route}`);
@@ -202,9 +216,23 @@ async function prerender() {
     let html = await page.content();
     html = html.replace(/http:\/\/localhost:\d+/g, 'https://writescholar.com');
 
-    // Homepage: replace Vite's dist/index.html with prerendered HTML. Other routes: write to dist/<route>/index.html
-    const outputPath = route === '/' ? path.join(DIST, 'index.html') : path.join(DIST, route, 'index.html');
-    if (route !== '/') fs.mkdirSync(path.join(DIST, route), { recursive: true });
+    // index.html's <noscript> fallback describes the homepage. Every other
+    // route now ships its own rendered content, so drop it there.
+    if (route !== '/') {
+      html = html.replace(/<noscript>\s*<h1>[\s\S]*?<\/noscript>/, '');
+    }
+
+    const canonical = html.match(/<link rel="canonical" href="([^"]+)"/)?.[1];
+    if (route !== '/' && canonical === 'https://writescholar.com/') {
+      wrongCanonical.push(route);
+    }
+
+    // Homepage replaces Vite's dist/index.html. Other routes go to
+    // dist/<route>.html: Netlify serves that at /<route> as-is, whereas a
+    // dist/<route>/index.html gets 301'd to /<route>/, which contradicts the
+    // slashless canonical URL.
+    const outputPath = route === '/' ? path.join(DIST, 'index.html') : path.join(DIST, `${route}.html`);
+    fs.mkdirSync(path.dirname(outputPath), { recursive: true });
     fs.writeFileSync(outputPath, html);
 
     await page.close();
@@ -214,10 +242,20 @@ async function prerender() {
   await browser.close();
   server.close();
   console.log(`\nPrerendered ${allRoutes.length} pages!`);
+  if (wrongCanonical.length) {
+    console.warn(`⚠️ ${wrongCanonical.length} routes still point their canonical at the homepage: ${wrongCanonical.join(', ')}`);
+  }
 }
 
 prerender().catch((err) => {
   console.error('Prerender failed:', err.message);
+  // Without prerendered HTML every URL serves the homepage shell, whose
+  // canonical tells Google each page is a copy of the homepage. That shipped
+  // silently for months, so on Netlify a failure now fails the deploy (the
+  // previous deploy stays live). Set PRERENDER_OPTIONAL=1 to ship anyway.
+  if (process.env.NETLIFY && !process.env.PRERENDER_OPTIONAL) {
+    process.exit(1);
+  }
   console.warn('Build will continue. Deploying SPA without prerendered HTML. Fix Puppeteer/Chrome to enable prerendering.');
   process.exit(0);
 });

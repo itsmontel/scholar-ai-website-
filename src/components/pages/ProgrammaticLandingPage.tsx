@@ -29,7 +29,7 @@ export interface ProgrammaticPageConfig {
   /** URL slug fragment (no leading/trailing slash) — e.g. "biology" or "quizlet" */
   slug: string;
   /** Page type — drives layout choices and schema */
-  type: 'subject' | 'alternative' | 'guide' | 'best';
+  type: 'subject' | 'alternative' | 'guide' | 'best' | 'landing';
   /** SEO <title> — keep ≤60 chars where possible */
   metaTitle: string;
   /** SEO meta description — 150-160 chars for SERP */
@@ -877,6 +877,7 @@ function pickHeroMascot(type: string): string {
     case 'alternative':   return '/mascot-juggling.webp';
     case 'guide':         return '/mascot-paper.webp';
     case 'best':          return '/mascot-jumping-joy.webp';
+    case 'landing':       return '/mascot-paper.webp';
     default:              return '/mascot-laptop.webp';
   }
 }
@@ -1199,12 +1200,18 @@ const ProgrammaticLandingPage = ({ config, onNavigate, user, onLogout }: Props) 
               </div>
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-900 dark:text-stone-50 mb-3">
-              {config.type === 'subject' ? 'Ready to remember it on exam day?' : 'Ready to try it free?'}
+              {config.type === 'subject'
+                ? 'Ready to remember it on exam day?'
+                : config.type === 'landing'
+                  ? 'Ready to see your grade?'
+                  : 'Ready to try it free?'}
             </h2>
             <p className="text-stone-700 dark:text-stone-300 max-w-md mx-auto mb-6 leading-relaxed text-[15px]">
               {config.type === 'subject'
                 ? 'Paste this week’s notes and walk into the exam already knowing the material. See what is costing you marks before you hand the paper in. Try it for $1.'
-                : 'Try everything for $1 for 7 days, then Pro is $19.99/mo. Cancel anytime. WriteScholar takes your notes and turns them into the study tools you actually use.'}
+                : config.type === 'landing'
+                  ? 'Paste your essay and get a grade, a rubric and line-by-line notes in about a minute. Try it for $1 for 7 days, then Pro is $19.99/mo. Cancel anytime.'
+                  : 'Try everything for $1 for 7 days, then Pro is $19.99/mo. Cancel anytime. WriteScholar takes your notes and turns them into the study tools you actually use.'}
             </p>
             <a
               href={hrefForPage(config.primaryCta.page)}

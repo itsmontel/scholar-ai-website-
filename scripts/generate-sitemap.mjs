@@ -29,7 +29,7 @@ const today = new Date().toISOString().slice(0, 10);
 const staticRoutes = [
   { loc: '/',                                 priority: '1.0',  changefreq: 'weekly',  lastmod: today },
   { loc: '/features',                         priority: '0.9',  changefreq: 'monthly', lastmod: today },
-  { loc: '/ai-essay-editor',                  priority: '0.97', changefreq: 'weekly',  lastmod: today },
+  { loc: '/essay-grader',                     priority: '0.97', changefreq: 'weekly',  lastmod: today },
   { loc: '/pricing',                          priority: '0.9',  changefreq: 'monthly', lastmod: today },
   { loc: '/about',                            priority: '0.6',  changefreq: 'monthly', lastmod: today },
   { loc: '/why-students-choose',              priority: '0.7',  changefreq: 'monthly', lastmod: today },
@@ -120,6 +120,10 @@ function readProgrammaticPages() {
   // Best pages — find configs with type: 'best'
   const bestMatches = [...src.matchAll(/slug:\s*'([^']+)'[\s\S]{0,200}?type:\s*'best'/g)];
   bestMatches.forEach((m) => pages.push({ path: `/best/${m[1]}` }));
+
+  // Top-level landing pages — type: 'landing', served at /[slug]
+  const landingMatches = [...src.matchAll(/slug:\s*'([^']+)'[\s\S]{0,200}?type:\s*'landing'/g)];
+  landingMatches.forEach((m) => pages.push({ path: `/${m[1]}` }));
 
   return pages;
 }

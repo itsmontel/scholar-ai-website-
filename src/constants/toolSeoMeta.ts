@@ -12,9 +12,10 @@
  *   - Audience/use-case qualifier where it fits ("for Essays & Papers"),
  *     because bare generic titles ("Word Counter") compete with thousands
  *     of identical pages
- *   - Head-term ownership: homepage owns "AI essay grader";
- *     /ai-essay-editor owns "AI essay editor"; /tools/analyze owns
- *     "AI essay checker". Never lead two pages with the same head term.
+ *   - Head-term ownership: /essay-grader owns "essay grader" and
+ *     "grade my essay"; /college-essay-grader owns "college essay grader"
+ *     and "personal statement grader"; /tools/analyze owns "AI essay
+ *     checker". Never lead two pages with the same head term.
  */
 export interface PageSeoMeta {
   title: string;
@@ -28,9 +29,9 @@ export const TOOL_SEO_META = {
       'Paste your essay and get professor-style feedback with a grade, rubric scores, and line-by-line fixes. 1 credit per essay. Try it for $1.',
   },
   'ai-essay-editor': {
-    title: 'AI Essay Editor — Write, Grade & Fix Essays | WriteScholar',
+    title: 'Essay Grader: Grade My Essay Online | WriteScholar',
     description:
-      'Write your essay in a real editor and get a professor-style grade, a full rubric, and one-click line-by-line fixes. Word in, Word out. Try it for $1.',
+      'Get an estimated grade, a 5-part rubric and line-by-line fixes on your essay in about 60 seconds, before you submit. Try the essay grader for $1.',
   },
   citations: {
     title: 'Citation Finder — APA, MLA, Chicago | WriteScholar',

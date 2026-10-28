@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { WELCOME_DISCOUNT_AT_SIGNUP, WELCOME_PROMO_CODE, TRIAL_DAYS, TRIAL_PRICE, TRIAL_CREDITS } from '../../config/pricing';
+import { WELCOME_DISCOUNT_AT_SIGNUP, WELCOME_PROMO_CODE, TRIAL_DAYS, TRIAL_PRICE } from '../../config/pricing';
 
 interface PromoBannerProps {
   /** Promo code shown in the chip (also used to scope the dismissal cookie). */
@@ -25,7 +25,7 @@ export default function PromoBanner({
   ctaLabel,
 }: PromoBannerProps) {
   const trialMode = !WELCOME_DISCOUNT_AT_SIGNUP && TRIAL_DAYS > 0;
-  const label = ctaLabel ?? (trialMode ? `Try it for $${TRIAL_PRICE}` : 'Claim 50% off');
+  const label = ctaLabel ?? (trialMode ? 'Claim offer' : 'Claim 50% off');
   const storageKey = trialMode
     ? `ws_promo_dismissed_${variant}_trial_${TRIAL_PRICE}`
     : `ws_promo_dismissed_${variant}_${code}`;
@@ -76,9 +76,8 @@ export default function PromoBanner({
           >
             {trialMode ? (
               <>
-                <span className={isGold ? 'text-[#5A4500]' : 'text-[#FFD84D]'}>Try everything for ${TRIAL_PRICE}</span>
-                {' '}· {TRIAL_DAYS} days, {TRIAL_CREDITS} credits
-                <span className="hidden sm:inline"> · every comment and fix unlocked</span>
+                <span className={isGold ? 'text-[#5A4500]' : 'text-[#FFD84D]'}>New student offer:</span>
+                {' '}Try everything for ${TRIAL_PRICE} today
               </>
             ) : (
             <>

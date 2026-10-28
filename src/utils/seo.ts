@@ -17,9 +17,9 @@ function deriveOgImageAlt(title: string): string {
 /** Alternate public paths → single canonical path (matches sitemap / internal links). */
 const PATH_ALIASES: Record<string, string> = {
   '/compare': '/why-students-choose',
-  '/essay-grader': '/ai-essay-editor',
-  '/ai-essay-grader': '/ai-essay-editor',
-  '/grade-my-essay': '/ai-essay-editor',
+  '/ai-essay-editor': '/essay-grader',
+  '/ai-essay-grader': '/essay-grader',
+  '/grade-my-essay': '/essay-grader',
   '/study-tools-comparison': '/vs-quizlet-knowt',
   '/compare-study-tools': '/vs-quizlet-knowt',
   '/focus': '/focus-mode',

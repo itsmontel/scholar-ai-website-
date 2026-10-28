@@ -26,7 +26,7 @@ const PAGE_HREF: Record<string, string> = {
   'why-students-choose': '/why-students-choose',
   'study-tools-comparison': '/vs-quizlet-knowt',
   'more-tools': '/more-tools',
-  'ai-essay-editor': '/ai-essay-editor',
+  'ai-essay-editor': '/essay-grader',
   // Tools
   analyze: '/tools/analyze',
   citations: '/tools/citations',

@@ -1040,7 +1040,7 @@ const AcademicAIApp = () => {
     'why-students-choose': '/why-students-choose',
     'study-tools-comparison': '/vs-quizlet-knowt',
     'study-tools': '/study-tools',
-    'ai-essay-editor': '/ai-essay-editor',
+    'ai-essay-editor': '/essay-grader',
   };
 
   const navigateTo = (page: string, slug?: string, options?: { quizHistoryFilter?: 'all' | 'quiz' | 'flashcards' | 'crossword' | 'crater_blast'; studyPack?: { data: any; title?: string }; unlockQuizQuery?: string }) => {
@@ -1056,7 +1056,7 @@ const AcademicAIApp = () => {
     // Programmatic SEO routes — caller passes a URL path like "/study/biology"
     // instead of a page name. Map it to the 'programmatic' page; the
     // ProgrammaticLandingPage component looks up the config by URL pathname.
-    if (page.startsWith('/study/') || page.startsWith('/alternatives/') || page.startsWith('/guides/') || page.startsWith('/best/')) {
+    if (page.startsWith('/study/') || page.startsWith('/alternatives/') || page.startsWith('/guides/') || page.startsWith('/best/') || page === '/college-essay-grader') {
       setCurrentPage('programmatic');
       window.history.pushState({}, '', page);
       window.scrollTo(0, 0);

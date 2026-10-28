@@ -360,6 +360,8 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             <div>
               <p className="text-stone-300 text-xs font-extrabold uppercase tracking-wider mb-3">Best for</p>
               <ul className="space-y-2">
+                <li><a href="/essay-grader" className="text-stone-400 hover:text-white text-sm transition-colors">Essay grader</a></li>
+                <li><a href="/college-essay-grader" className="text-stone-400 hover:text-white text-sm transition-colors">College essay grader</a></li>
                 <li><a href="/best/ai-essay-grader-for-college" className="text-stone-400 hover:text-white text-sm transition-colors">Best AI essay grader for college</a></li>
                 <li><a href="/best/flashcard-app-for-medical-school" className="text-stone-400 hover:text-white text-sm transition-colors">Best flashcard app for med school</a></li>
                 <li><a href="/best/study-app-for-college" className="text-stone-400 hover:text-white text-sm transition-colors">Best study app for college</a></li>

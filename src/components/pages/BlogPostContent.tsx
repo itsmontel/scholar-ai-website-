@@ -187,7 +187,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <h2 className={h2}>Turn your notes into a finals study pack</h2>
           <p className={p}>
-            The slowest part of this plan is turning a semester of notes into things you can test yourself with. <a href="/tools/study-pack" onClick={handleNavigate('study-pack')} className={internalLink}>WriteScholar&apos;s Study Pack</a> does that part for you: paste or upload your lecture notes and get a lesson summary, flashcards, a practice quiz and a crossword built from your own material, so you can spend your time on recall instead of formatting. If a final paper is on your list too, the <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>essay editor</a> gives you an estimated grade and line-by-line feedback before you submit. You can <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>try everything for $1</a> for 7 days, which covers finals week.
+            The slowest part of this plan is turning a semester of notes into things you can test yourself with. <a href="/tools/study-pack" onClick={handleNavigate('study-pack')} className={internalLink}>WriteScholar&apos;s Study Pack</a> does that part for you: paste or upload your lecture notes and get a lesson summary, flashcards, a practice quiz and a crossword built from your own material, so you can spend your time on recall instead of formatting. If a final paper is on your list too, the <a href="/essay-grader" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>essay editor</a> gives you an estimated grade and line-by-line feedback before you submit. You can <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>try everything for $1</a> for 7 days, which covers finals week.
           </p>
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Make my finals study pack →
@@ -352,7 +352,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <h2 className={h2}>Get feedback on your own draft</h2>
           <p className={p}>
-            <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>WriteScholar&apos;s essay editor</a> gives professor-style feedback on writing you did yourself: an estimated grade, a rubric breakdown, and every line marked green, amber or red, so you can see where the argument is weak and fix it in your own words. Your essays stay private to your account and are never used to train AI. You can <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>try everything for $1</a> for 7 days.
+            <a href="/essay-grader" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>WriteScholar&apos;s essay editor</a> gives professor-style feedback on writing you did yourself: an estimated grade, a rubric breakdown, and every line marked green, amber or red, so you can see where the argument is weak and fix it in your own words. Your essays stay private to your account and are never used to train AI. You can <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>try everything for $1</a> for 7 days.
           </p>
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Check my essay before I submit →
@@ -547,7 +547,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <h2 className={h2}>Check whether you actually evaluated</h2>
           <p className={p}>
-            <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>WriteScholar&apos;s essay editor</a> reads the draft for thesis, evidence, and structure, including whether the claim is a judgement the body supports. Use it after the verdict is yours. See <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for the current first-month offer.
+            <a href="/essay-grader" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>WriteScholar&apos;s essay editor</a> reads the draft for thesis, evidence, and structure, including whether the claim is a judgement the body supports. Use it after the verdict is yours. See <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for the current first-month offer.
           </p>
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Check my evaluation before I submit →
@@ -725,7 +725,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <h2 className={h2}>Check the opening the way a marker would</h2>
           <p className={p}>
-            <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>WriteScholar&apos;s essay editor</a> reads the draft for thesis, evidence, and structure, including whether the opening actually states a claim the body supports. Use it after the first sentence is yours. See <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for the current first-month offer.
+            <a href="/essay-grader" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>WriteScholar&apos;s essay editor</a> reads the draft for thesis, evidence, and structure, including whether the opening actually states a claim the body supports. Use it after the first sentence is yours. See <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for the current first-month offer.
           </p>
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Check my opening before I submit →
@@ -919,7 +919,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <h2 className={h2}>Check the opening the way a marker would</h2>
           <p className={p}>
-            <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>WriteScholar&apos;s essay editor</a> reads the draft for thesis, evidence, and structure, including whether the opening actually states a claim the body supports. Use it after the paragraph is yours. See <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for the current first-month offer.
+            <a href="/essay-grader" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>WriteScholar&apos;s essay editor</a> reads the draft for thesis, evidence, and structure, including whether the opening actually states a claim the body supports. Use it after the paragraph is yours. See <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for the current first-month offer.
           </p>
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Check my introduction before I submit →
@@ -1067,7 +1067,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             Next, grade the draft against the rubric, not against your feelings about the all-nighter. Thesis, evidence, structure, style, mechanics: those are the categories that move marks. A <a href="/blog/grade-my-essay-before-submitting" className={internalLink}>pre-submission grade check</a> is built for that triage. Fix the two weakest categories, re-read, then do a grammar pass. A <a href="/tools/grammar-checker" onClick={handleNavigate('grammar-checker')} className={internalLink}>grammar checker</a> is useful after the argument exists. It is a stall if you run it on an empty outline.
           </p>
           <p className={p}>
-            Read the introduction and conclusion side by side. They should use the same key terms. Read one paragraph aloud. If you run out of breath, the sentence is too long. Sleep if you can. Fresh eyes catch the claim you never actually stated. If you want professor-style notes on the sentences that are costing you the mark, an <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>essay editor</a> is the last structural pass, not a substitute for reading the prompt.
+            Read the introduction and conclusion side by side. They should use the same key terms. Read one paragraph aloud. If you run out of breath, the sentence is too long. Sleep if you can. Fresh eyes catch the claim you never actually stated. If you want professor-style notes on the sentences that are costing you the mark, an <a href="/essay-grader" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>essay editor</a> is the last structural pass, not a substitute for reading the prompt.
           </p>
 
           <h2 className={h2}>How to write an assignment that is not a standard essay</h2>
@@ -1128,7 +1128,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <h2 className={h2}>Write the draft, then check it like a professor would</h2>
           <p className={p}>
-            <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>WriteScholar&apos;s essay editor</a> reads a draft the way a marker would: thesis, evidence, structure, and citations, with notes on the sentences that are costing you the mark. Use it after you have a real draft, not instead of one. See <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for the current first-month offer.
+            <a href="/essay-grader" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>WriteScholar&apos;s essay editor</a> reads a draft the way a marker would: thesis, evidence, structure, and citations, with notes on the sentences that are costing you the mark. Use it after you have a real draft, not instead of one. See <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for the current first-month offer.
           </p>
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Check my essay before I submit →
@@ -1252,7 +1252,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             You do not need to draft it on night one. You do need the prompt in a note you will actually open, a one-sentence claim a classmate could disagree with, and the two or three sources you are allowed to use. That is the start of college writing. The full process is in <a href="/blog/how-to-write-an-essay-or-assignment" className={internalLink}>how to write an essay or assignment</a>. The three-week calendar for paper one lives in our guide to the <a href="/blog/first-college-paper-fall-semester" className={internalLink}>first college paper of the semester</a>.
           </p>
           <p className={p}>
-            When a draft exists, do not stop at spellcheck. Mechanics are a slice of the rubric. The grade lives in thesis, evidence, and structure. A <a href="/blog/grade-my-essay-before-submitting" className={internalLink}>pre-submission grade check</a> is for those categories, and an <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>essay editor</a> keeps the comments on the sentences you still have time to fix.
+            When a draft exists, do not stop at spellcheck. Mechanics are a slice of the rubric. The grade lives in thesis, evidence, and structure. A <a href="/blog/grade-my-essay-before-submitting" className={internalLink}>pre-submission grade check</a> is for those categories, and an <a href="/essay-grader" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>essay editor</a> keeps the comments on the sentences you still have time to fix.
           </p>
 
           <h2 className={h2}>GPA math in week one, before you need it</h2>
@@ -1284,7 +1284,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <h2 className={h2}>Start the semester with a system, not a Sunday panic</h2>
           <p className={p}>
-            <a href="/study-pack" onClick={handleNavigate('study-pack')} className={internalLink}>WriteScholar&apos;s study pack</a> turns lecture notes into a lesson, flashcards, and a quiz. When the first paper lands, the <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>essay editor</a> reads the draft the way a professor would: thesis, evidence, structure, and citations. See <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for the current first-month offer.
+            <a href="/study-pack" onClick={handleNavigate('study-pack')} className={internalLink}>WriteScholar&apos;s study pack</a> turns lecture notes into a lesson, flashcards, and a quiz. When the first paper lands, the <a href="/essay-grader" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>essay editor</a> reads the draft the way a professor would: thesis, evidence, structure, and citations. See <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for the current first-month offer.
           </p>
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Get ready for week one →
@@ -1422,7 +1422,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             One: quote the prompt at the top of the file and check that your thesis answers that sentence, not a neighbouring one. Two: every body paragraph has a claim and a source, not just a vibe. Three: in-text citations match the reference list, names, years, and style. Four: the introduction and conclusion use the same key terms. Five: you are inside the word count, not fashionably over it. Six: the file name is not <em>FinalFinal2</em>, and you uploaded the version you just read.
           </p>
           <p className={p}>
-            If you still have forty minutes, run one more structural pass in an <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>essay editor</a> and fix only the two lowest rubric categories. Do not rewrite the whole paper at 11 p.m. First impressions are easier to improve with a sharper thesis than with a new introduction you have not proofread.
+            If you still have forty minutes, run one more structural pass in an <a href="/essay-grader" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>essay editor</a> and fix only the two lowest rubric categories. Do not rewrite the whole paper at 11 p.m. First impressions are easier to improve with a sharper thesis than with a new introduction you have not proofread.
           </p>
 
           <h2 className={h2}>After you get the grade back</h2>
@@ -1435,7 +1435,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <h2 className={h2}>Check the draft while the semester is still early</h2>
           <p className={p}>
-            <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>WriteScholar&apos;s essay editor</a> reads a draft the way a professor would: thesis, evidence, structure, and citations, with notes on the sentences that are costing you the mark. Use it on paper one so paper two starts from a higher baseline. See <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for the current first-month offer.
+            <a href="/essay-grader" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>WriteScholar&apos;s essay editor</a> reads a draft the way a professor would: thesis, evidence, structure, and citations, with notes on the sentences that are costing you the mark. Use it on paper one so paper two starts from a higher baseline. See <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for the current first-month offer.
           </p>
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Check my first paper →
@@ -1491,7 +1491,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             <strong>Criterion-referenced scoring</strong> asks something narrower: does this essay state a position in the opening paragraph, is each claim supported by cited evidence, do paragraphs open with topic sentences. Each judgement is small, concrete and checkable. Accuracy on those individual questions is much higher, and the results are far more stable between runs.
           </p>
           <p className={p}>
-            The practical consequence: a tool that gives you five category scores with reasons is doing something more defensible than one that gives you a single grade, even if the second one feels more satisfying. This is why our <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>AI essay grader</a> reports a category breakdown alongside the estimate rather than the number alone.
+            The practical consequence: a tool that gives you five category scores with reasons is doing something more defensible than one that gives you a single grade, even if the second one feels more satisfying. This is why our <a href="/essay-grader" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>AI essay grader</a> reports a category breakdown alongside the estimate rather than the number alone.
           </p>
 
           <h2 className={h2}>Why two tools give the same essay different grades</h2>
@@ -1613,7 +1613,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <h2 className={h2}>See the categories, not just a grade</h2>
           <p className={p}>
-            <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>WriteScholar</a> scores five rubric categories with reasons attached, marks the specific lines behind each judgement, and lets you paste your professor&apos;s own rubric so the analysis matches what you are actually being marked on. See <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for the current first-month offer.
+            <a href="/essay-grader" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>WriteScholar</a> scores five rubric categories with reasons attached, marks the specific lines behind each judgement, and lets you paste your professor&apos;s own rubric so the analysis matches what you are actually being marked on. See <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for the current first-month offer.
           </p>
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Grade my essay →
@@ -1724,7 +1724,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             <strong>Pass 1, story only.</strong> No editing. Ask one question: is the thing I am writing about actually the most interesting thing I could write about? This is the highest-leverage pass and the one everybody skips. A well-edited essay about the wrong subject stays a bad essay.
           </p>
           <p className={p}>
-            <strong>Pass 2, specificity.</strong> Go line by line and mark every sentence that could appear in someone else&apos;s essay. &quot;I learned to persevere&quot; goes. &quot;I rewrote the grant application eleven times and my hands shook when I read it aloud&quot; stays. Aim to cut or replace at least a third of the generic sentences. Run the draft through an <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>AI essay editor</a> at this stage: the structural read tells you where the reflection is thin, and you can rewrite in place rather than switching between windows.
+            <strong>Pass 2, specificity.</strong> Go line by line and mark every sentence that could appear in someone else&apos;s essay. &quot;I learned to persevere&quot; goes. &quot;I rewrote the grant application eleven times and my hands shook when I read it aloud&quot; stays. Aim to cut or replace at least a third of the generic sentences. Run the draft through an <a href="/college-essay-grader" onClick={handleNavigate('/college-essay-grader')} className={internalLink}>college essay grader</a> at this stage: the structural read tells you where the reflection is thin, and you can rewrite in place rather than switching between windows.
           </p>
           <p className={p}>
             <strong>Pass 3, sentences.</strong> Now the mechanical work. Tighten the opening, kill throat-clearing, fix the word count, check the rhythm by reading aloud. A <a href="/tools/grammar-checker" onClick={handleNavigate('grammar-checker')} className={internalLink}>grammar checker</a> handles the last mile, and the <a href="/tools/readability-score" onClick={handleNavigate('readability-score')} className={internalLink}>readability score</a> catches sentences that have grown to 60 words without you noticing.
@@ -1771,7 +1771,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <h2 className={h2}>Check the draft while you can still change it</h2>
           <p className={p}>
-            <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>WriteScholar&apos;s essay editor</a> gives you a structural read on your personal statement: where reflection runs thin, which paragraphs summarise instead of thinking, and line-level notes you can apply or ignore one at a time. You write it, it tells you where a tired reader would stop. See <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for the current first-month offer.
+            <a href="/college-essay-grader" onClick={handleNavigate('/college-essay-grader')} className={internalLink}>WriteScholar&apos;s college essay grader</a> gives you a structural read on your personal statement: where reflection runs thin, which paragraphs summarise instead of thinking, and line-level notes you can apply or ignore one at a time. You write it, it tells you where a tired reader would stop. See <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for the current first-month offer.
           </p>
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Check my personal statement →
@@ -1837,7 +1837,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             You do not need an hour. You need a focused loop:
           </p>
           <p className={p}>
-            <strong>Minutes 0–2: run the grade check.</strong> Paste your draft (or import the Word doc) into an <a href="/tools/analyze" onClick={handleNavigate('analyze')} className={internalLink}>AI essay checker</a>. You get an estimated grade, category scores, and line-level annotations. If you would rather keep drafting and revising in one place, the <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>AI college essay grader</a> runs the same check inside a real editor, so the grade updates as you rewrite.
+            <strong>Minutes 0–2: run the grade check.</strong> Paste your draft (or import the Word doc) into an <a href="/tools/analyze" onClick={handleNavigate('analyze')} className={internalLink}>AI essay checker</a>. You get an estimated grade, category scores, and line-level annotations. If you would rather keep drafting and revising in one place, the <a href="/essay-grader" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>AI college essay grader</a> runs the same check inside a real editor, so the grade updates as you rewrite.
           </p>
           <p className={p}>
             <strong>Minutes 2–12: fix the two lowest categories.</strong> Ignore everything else. If evidence scored lowest, strengthen or replace the weakest two pieces of support — the <a href="/tools/citations" onClick={handleNavigate('citations')} className={internalLink}>citation finder</a> can surface a peer-reviewed source in a minute. If structure scored lowest, fix topic sentences and transitions first; they are the cheapest structural repairs.
@@ -1969,7 +1969,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             You finish your essay and hit submit. A week later your professor returns it covered in red. The thesis needs work. Your argument drifts in paragraph three. The conclusion does not quite land. You wish someone had caught these issues before you turned it in.
           </p>
           <p className={p}>
-            An AI essay checker does exactly that. Paste your draft, click analyze, and get professor-style feedback in seconds. Not generic corrections. Targeted comments on structure, clarity, argument strength, and academic tone. The kind of feedback that used to require office hours or a writing center appointment. WriteScholar&apos;s <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>AI essay editor</a> gives you one-click access to the analyzer: paste your text and get results in under a minute.
+            An AI essay checker does exactly that. Paste your draft, click analyze, and get professor-style feedback in seconds. Not generic corrections. Targeted comments on structure, clarity, argument strength, and academic tone. The kind of feedback that used to require office hours or a writing center appointment. WriteScholar&apos;s <a href="/essay-grader" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>AI essay editor</a> gives you one-click access to the analyzer: paste your text and get results in under a minute.
           </p>
 
           <EssayAnalysisIllustration />
@@ -2034,7 +2034,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             The biggest mistake students make is turning in first drafts. A single pass with an AI essay checker catches issues you would have missed. Weak thesis. Flabby transitions. Missing evidence. Citation errors. The fixes are usually quick. A stronger draft goes in. Better feedback comes back from your professor. Need to stay focused while you revise? <a href="/focus-mode" onClick={handleNavigate('focus-mode')} className={internalLink}>Focus Mode</a> blocks distracting sites until you study or solve a puzzle. Fewer tabs, fewer rabbit holes.
           </p>
           <p className={p}>
-            <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>WriteScholar&apos;s AI college essay grader</a> gives you professor-style feedback in seconds. Inline annotations mark strengths, improvements, and concerns. The grade-level rubric scores your work against academic criteria. Add your assignment rubric and the analysis aligns to your professor&apos;s expectations. Built for college and university students. See our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for details. Free plan includes two analysis previews — see your grade and what to fix before upgrading.
+            <a href="/essay-grader" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>WriteScholar&apos;s AI college essay grader</a> gives you professor-style feedback in seconds. Inline annotations mark strengths, improvements, and concerns. The grade-level rubric scores your work against academic criteria. Add your assignment rubric and the analysis aligns to your professor&apos;s expectations. Built for college and university students. See our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing</a> for details. You can try it for $1 for 7 days.
           </p>
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Check your essay free →
@@ -3767,7 +3767,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
 
           <h2 className={h2}>Find the right tool for your writing</h2>
           <p className={p}>
-            WriteScholar combines grammar and style feedback with citation checking and structure analysis, giving you one place to improve your academic writing from draft to submission. The <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>AI essay editor</a> is where those pieces come together: you write the draft, it grades against a rubric, and you apply the fixes without leaving the page. Our tool is built specifically for students and researchers, with support for APA, MLA, Chicago, Harvard, IEEE, and Vancouver citation styles. Check our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing plans</a> to see which option fits your needs, or explore our <a href="/features" onClick={handleNavigate('features')} className={internalLink}>full feature list</a>.
+            WriteScholar combines grammar and style feedback with citation checking and structure analysis, giving you one place to improve your academic writing from draft to submission. The <a href="/essay-grader" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>AI essay editor</a> is where those pieces come together: you write the draft, it grades against a rubric, and you apply the fixes without leaving the page. Our tool is built specifically for students and researchers, with support for APA, MLA, Chicago, Harvard, IEEE, and Vancouver citation styles. Check our <a href="/pricing" onClick={handleNavigate('pricing')} className={internalLink}>pricing plans</a> to see which option fits your needs, or explore our <a href="/features" onClick={handleNavigate('features')} className={internalLink}>full feature list</a>.
           </p>
           <a href="/signup" onClick={handleNavigate('signup')} className={ctaButton}>
             Try WriteScholar Free →
@@ -4419,7 +4419,7 @@ const BlogPostContent: React.FC<BlogPostContentProps> = ({ slug, onNavigate }) =
             Open a private browser tab and type what you actually need: <em>essay checker</em>, <em>plagiarism checker</em>, <em>grade my essay</em>, <em>APA format</em>, <em>homework help</em>, or <em>research paper help</em>. The autocomplete suggestions are a map of student stress, and every phrase points to a real writing or study problem hiding underneath.
           </p>
           <p className={p}>
-            This guide translates those searches into a practical workflow. You will see which tools match which intent, how to combine a <strong className="text-stone-800 dark:text-stone-200">grammar checker for academic writing</strong> with deeper feedback, and how to stay on the right side of academic integrity while you improve your draft. When you are ready to run analysis on your own text, start from the <a href="/tools/analyze" onClick={handleNavigate('analyze')} className={internalLink}>essay analysis</a> flow, or draft it inside the <a href="/ai-essay-editor" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>AI essay editor</a> so the grade updates as you write.
+            This guide translates those searches into a practical workflow. You will see which tools match which intent, how to combine a <strong className="text-stone-800 dark:text-stone-200">grammar checker for academic writing</strong> with deeper feedback, and how to stay on the right side of academic integrity while you improve your draft. When you are ready to run analysis on your own text, start from the <a href="/tools/analyze" onClick={handleNavigate('analyze')} className={internalLink}>essay analysis</a> flow, or draft it inside the <a href="/essay-grader" onClick={handleNavigate('ai-essay-editor')} className={internalLink}>AI essay editor</a> so the grade updates as you write.
           </p>
 
           <EssayAnalysisIllustration />

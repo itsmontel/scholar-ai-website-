@@ -5,6 +5,7 @@ export function getPageFromPath(pathname: string): string {
   const p = pathname.replace(/\/$/, '') || '/';
   if (/^\/embed\//.test(p)) return 'embed';
   if (/^\/(study|alternatives|guides|best)\//.test(p)) return 'programmatic';
+  if (p === '/college-essay-grader') return 'programmatic';
   if (p === '/email-verification') return 'email-verification';
   if (p === '/onboarding') return 'onboarding';
   if (p === '/onboarding-test') return 'onboarding-test';

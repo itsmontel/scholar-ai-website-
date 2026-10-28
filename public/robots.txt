@@ -1,7 +1,7 @@
 User-agent: *
 Allow: /
 Allow: /features
-Allow: /ai-essay-editor
+Allow: /essay-grader
 Allow: /pricing
 Allow: /about
 Allow: /why-students-choose

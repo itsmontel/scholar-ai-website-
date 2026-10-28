@@ -1262,7 +1262,6 @@ const LandingPage = ({ onNavigate, user }: LandingPageProps) => {
           <PromoBanner
             variant="gold"
             onCta={() => onNavigate(user ? 'pricing' : 'signup')}
-            ctaLabel={user ? undefined : 'Start for $1'}
           />
         </div>
       )}
