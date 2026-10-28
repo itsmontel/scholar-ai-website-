@@ -1016,7 +1016,7 @@ const createCheckoutSession = async (
               price_data: {
                 currency: TRIAL_FEE_CURRENCY,
                 unit_amount: TRIAL_FEE_CENTS,
-                product_data: { name: `WriteScholar ${trialPeriodDays}-day trial` },
+                product_data: { name: `${trialPeriodDays}-day Pro trial, paid today` },
               },
               quantity: 1,
             }]
@@ -1039,6 +1039,29 @@ const createCheckoutSession = async (
         source: 'writescholar'
       },
     };
+
+    // Stripe labels any trialing plan "7 days free" and that label can't be
+    // changed, which reads as a contradiction next to the $1 fee. Spell out
+    // what is charged when, right above the Pay button.
+    if (trialPeriodDays > 0 && TRIAL_FEE_CENTS > 0) {
+      const fee = `$${(TRIAL_FEE_CENTS / 100).toFixed(2).replace(/\.00$/, '')}`;
+      const firstBill = new Date(Date.now() + trialPeriodDays * 86400000)
+        .toLocaleDateString('en-US', { month: 'long', day: 'numeric', timeZone: 'UTC' });
+      let renewal = '';
+      try {
+        const price = await stripe.prices.retrieve(priceId);
+        if (price.unit_amount && price.recurring?.interval) {
+          renewal = ` at $${(price.unit_amount / 100).toFixed(2)}/${price.recurring.interval}`;
+        }
+      } catch (priceError) {
+        console.warn('Trial checkout: could not load plan price for the note:', priceError.message);
+      }
+      sessionConfig.custom_text = {
+        submit: {
+          message: `You pay ${fee} today for ${trialPeriodDays} days of Pro. Your plan then renews${renewal} on ${firstBill}. Cancel any time before then and you won't be charged again.`,
+        },
+      };
+    }
 
     if (embedded) {
       sessionConfig.ui_mode = 'embedded';

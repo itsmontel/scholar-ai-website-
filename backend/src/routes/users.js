@@ -6,6 +6,17 @@ const { authenticateToken } = require('../middleware/auth');
 const { validateUpdateProfile, validateChangePassword } = require('../middleware/validation');
 const userService = require('../services/userService');
 const achievementsService = require('../services/achievementsService');
+const stripeService = require('../services/stripeService');
+const appleAuthService = require('../services/appleAuthService');
+const documentService = require('../services/documentService');
+
+// Same selection as routes/documents.js, so account deletion removes files
+// from wherever uploads were stored.
+const storageService = process.env.USE_SUPABASE_STORAGE === 'true'
+  ? require('../services/supabaseStorage')
+  : process.env.NODE_ENV === 'production'
+    ? require('../services/s3Service')
+    : require('../services/mockS3Service');
 
 const router = express.Router();
 
@@ -595,9 +606,67 @@ router.delete('/account', authenticateToken, async (req, res) => {
       process.env.SUPABASE_SERVICE_ROLE_KEY
     );
 
-    // Note: Deletes from users table only. trial_usage is intentionally NOT deleted —
-    // it tracks emails that have used the first-time offer, so re-registering with the same
-    // email cannot grant another discount.
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (userError || !user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Account not found'
+      });
+    }
+
+    // 1. Stop billing first. If Stripe can't cancel, keep the account so the
+    //    user isn't charged for something they can no longer sign in to.
+    if (user.stripe_customer_id) {
+      try {
+        const subs = await stripeService.stripe.subscriptions.list({
+          customer: user.stripe_customer_id,
+          status: 'all',
+          limit: 100
+        });
+        const live = subs.data.filter((s) => !['canceled', 'incomplete_expired'].includes(s.status));
+        for (const sub of live) {
+          await stripeService.stripe.subscriptions.cancel(sub.id);
+        }
+      } catch (stripeError) {
+        console.error('Delete account: Stripe cancel failed:', stripeError.message);
+        return res.status(502).json({
+          success: false,
+          message: "We couldn't cancel your subscription, so your account was not deleted. Please try again or contact support."
+        });
+      }
+    }
+
+    // 2. Revoke Sign in with Apple (best effort; Apple tokens expire anyway).
+    if (user.apple_refresh_token) {
+      try {
+        await appleAuthService.revokeRefreshToken(user.apple_refresh_token);
+      } catch (appleError) {
+        console.error('Delete account: Apple revoke failed:', appleError.message);
+      }
+    }
+
+    // 3. Remove uploaded files. Rows go with the user via ON DELETE CASCADE,
+    //    but storage objects don't. Pasted documents have no stored file.
+    const { data: documents } = await supabase
+      .from('documents')
+      .select('*')
+      .eq('user_id', userId);
+    for (const document of documents || []) {
+      if (document.s3_key && !documentService.isPastedDocument(document)) {
+        await storageService.deleteFile(document.s3_key).catch((fileError) => {
+          console.error('Delete account: file delete failed:', fileError.message);
+        });
+      }
+    }
+
+    // trial_usage is intentionally NOT deleted: it tracks emails that have used
+    // the first-time offer, so re-registering with the same email cannot grant
+    // another discount. Everything keyed to users(id) cascades.
     const { error } = await supabase
       .from('users')
       .delete()
@@ -605,6 +674,20 @@ router.delete('/account', authenticateToken, async (req, res) => {
 
     if (error) {
       throw error;
+    }
+
+    // email_subscriptions only nulls its user_id on delete, which would keep a
+    // deleted user on the marketing list, so clear it by email. Runs after the
+    // user row is gone so a late Stripe "subscription deleted" webhook (which
+    // adds downgraded users to the list) can't re-add them.
+    if (user.email) {
+      const { error: emailError } = await supabase
+        .from('email_subscriptions')
+        .delete()
+        .eq('email', user.email.toLowerCase());
+      if (emailError) {
+        console.error('Delete account: email subscription cleanup failed:', emailError.message);
+      }
     }
 
     res.json({

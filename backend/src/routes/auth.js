@@ -16,6 +16,7 @@ const { isMarketingEmailBlocked } = require('../services/marketingUnsubscribeSer
 const { parseDeviceFromUserAgent } = require('../utils/deviceParser');
 const userService = require('../services/userService');
 const streakService = require('../services/streakService');
+const appleAuthService = require('../services/appleAuthService');
 
 const router = express.Router();
 
@@ -266,7 +267,7 @@ router.post('/login', validateLogin, async (req, res) => {
 // @access  Public
 router.post('/apple', async (req, res) => {
   try {
-    const { identityToken, firstName, lastName, email: bodyEmail } = req.body;
+    const { identityToken, authorizationCode, firstName, lastName, email: bodyEmail } = req.body;
 
     if (!identityToken) {
       return res.status(400).json({ success: false, message: 'Missing Apple identity token' });
@@ -316,6 +317,17 @@ router.post('/apple', async (req, res) => {
       // Existing account (email/password or a prior Apple sign-in) — log in.
       const now = new Date().toISOString();
     await userService.updateUser(user.id, { last_login: now, last_active_at: now });
+    }
+
+    // Keep a refresh token so account deletion can revoke it. Never blocks
+    // sign-in: a failed exchange only means there is nothing to revoke later.
+    try {
+      const refreshToken = await appleAuthService.exchangeAuthorizationCode(authorizationCode);
+      if (refreshToken) {
+        await userService.updateUser(user.id, { apple_refresh_token: refreshToken });
+      }
+    } catch (exchangeError) {
+      console.error('Apple refresh token not stored:', exchangeError.message);
     }
 
     // Record streak activity (fire and forget)
