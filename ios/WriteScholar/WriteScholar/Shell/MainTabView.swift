@@ -2,20 +2,21 @@
 //  MainTabView.swift
 //  WriteScholar
 //
-//  Prototype shell — a custom bottom bar:
+//  Sticker arcade shell — a custom bottom bar:
 //
-//      Home  |  My Stuff  |  ⊕  |  Review  |  Profile
+//      Home  |  Packs  |  Arcade  |  Essays  |  Focus
 //
-//  The center ⊕ opens the "What would you like to work on?" tool picker.
-//  Study Packs, Arcade and Focus are launched as presented routes from Home
-//  or the picker, rather than living as their own permanent tabs.
+//  Each tab stays alive once visited so a half-played pack or a pasted
+//  essay survives a tab switch. Library, Review, Profile and the Smart
+//  Editor are presented as sheets from Home and the tool picker.
 //
 
 import SwiftUI
 
-/// A feature the shell can launch from Home or the ⊕ tool picker.
+/// A feature the shell can launch from Home or the tool picker.
 enum AppRoute: Identifiable, Hashable {
     case studyPacks, arcade, focus, smartEditor, essayAnalyzer, library
+    case review, profile
     var id: String { String(describing: self) }
 }
 
@@ -27,158 +28,194 @@ struct MainTabView: View {
     @EnvironmentObject var session: AuthSession
 
     @State private var selectedTab: Tab = .home
+    @State private var visited: Set<Tab> = [.home]
     @State private var showToolPicker = false
     @State private var route: AppRoute?
     /// Route chosen from the tool picker, presented after the picker
     /// finishes dismissing (avoids the double-sheet race).
     @State private var pendingRoute: AppRoute?
+    /// Bumped to rebuild the Packs tab when a tool-picker intent (create,
+    /// flashcards, quiz) needs the container to re-read it.
+    @State private var packsEpoch = 0
 
-    enum Tab: Hashable { case home, myStuff, review, profile }
+    enum Tab: Hashable, CaseIterable { case home, packs, arcade, essays, focus }
 
     var body: some View {
-        content
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(WSColor.background.ignoresSafeArea())
-            .safeAreaInset(edge: .bottom, spacing: 0) {
-                WSTabBar(selected: $selectedTab, onPlus: { showToolPicker = true })
+        ZStack {
+            ForEach(Tab.allCases, id: \.self) { tab in
+                if visited.contains(tab) {
+                    tabContent(tab)
+                        .opacity(selectedTab == tab ? 1 : 0)
+                        .allowsHitTesting(selectedTab == tab)
+                        .accessibilityHidden(selectedTab != tab)
+                }
             }
-            // Keep the bar anchored below the keyboard instead of riding it up.
-            .ignoresSafeArea(.keyboard, edges: .bottom)
-            .sheet(isPresented: $showToolPicker, onDismiss: {
-                // Present the destination only after UIKit finished tearing
-                // down the picker — a timed delay used to silently no-op.
-                if let p = pendingRoute { pendingRoute = nil; go(p) }
-            }) {
-                ToolPickerSheet(onSelect: { picked in
-                    pendingRoute = picked
-                    showToolPicker = false
-                })
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background((selectedTab == .arcade ? WSColor.arcadeNight : WSColor.background).ignoresSafeArea())
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            WSTabBar(selected: $selectedTab, dark: selectedTab == .arcade) { tab in
+                select(tab)
+            }
+        }
+        // Keep the bar anchored below the keyboard instead of riding it up.
+        .ignoresSafeArea(.keyboard, edges: .bottom)
+        .sheet(isPresented: $showToolPicker, onDismiss: {
+            // Present the destination only after UIKit finished tearing
+            // down the picker — a timed delay used to silently no-op.
+            if let p = pendingRoute { pendingRoute = nil; go(p) }
+        }) {
+            ToolPickerSheet(onSelect: { picked in
+                pendingRoute = picked
+                showToolPicker = false
+            })
+            .presentationDragIndicator(.visible)
+        }
+        .sheet(item: $route) { r in
+            routeDestination(r)
+                .environmentObject(session)
                 .presentationDragIndicator(.visible)
-            }
-            .sheet(item: $route) { r in
-                routeDestination(r)
-                    .environmentObject(session)
-                    .presentationDragIndicator(.visible)
-            }
+        }
     }
 
-    @ViewBuilder private var content: some View {
-        switch selectedTab {
+    @ViewBuilder private func tabContent(_ tab: Tab) -> some View {
+        switch tab {
         case .home:
             HomeTabView(onboardingComplete: $onboardingComplete,
                         onRoute: { go($0) },
                         onOpenToolPicker: { showToolPicker = true })
-        case .myStuff:
-            LibraryTabView(
-                onJumpToTab: { dest in
-                    switch dest {
-                    case .study:    go(.studyPacks)
-                    case .games:    go(.arcade)
-                    case .focus:    go(.focus)
-                    case .analyzer: go(.essayAnalyzer)
-                    case .editor:   go(.smartEditor)
-                    }
-                },
-                onOpenToolPicker: { showToolPicker = true })
-        case .review:
-            DailyReviewView(onStartReview: { go(.studyPacks) })
-        case .profile:
-            ProfileView(user: user, onboardingComplete: $onboardingComplete, onSignOut: onSignOut)
+        case .packs:
+            StudyTabContainer(onOpenFocus: { select(.focus) })
+                .id(packsEpoch)
+        case .arcade:
+            GamesTabView()
+        case .essays:
+            AnalyzeTabContainer()
+        case .focus:
+            FocusTabView()
         }
     }
 
-    /// `.library` switches tab; everything else is presented as a route sheet.
+    private func select(_ tab: Tab) {
+        // Hidden tabs stay alive, so drop any focused field before leaving
+        // one; otherwise its keyboard follows you to the next tab.
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        visited.insert(tab)
+        withAnimation(.wsBounceTight) { selectedTab = tab }
+    }
+
+    /// Tab features switch tab; everything else is presented as a sheet.
     private func go(_ r: AppRoute) {
-        if r == .library {
-            withAnimation(.wsBounceTight) { selectedTab = .myStuff }
-        } else {
+        switch r {
+        case .studyPacks:
+            if StudyLaunchIntent.pending != nil, visited.contains(.packs) { packsEpoch += 1 }
+            select(.packs)
+        case .arcade:        select(.arcade)
+        case .focus:         select(.focus)
+        case .essayAnalyzer: select(.essays)
+        case .smartEditor, .library, .review, .profile:
             route = r
         }
     }
 
     @ViewBuilder private func routeDestination(_ r: AppRoute) -> some View {
         switch r {
-        case .studyPacks: StudyTabContainer()
-        case .arcade:     GamesTabView()
-        case .focus:      FocusTabView()
         case .smartEditor:
             NavigationStack { SmartEditorView() }
-        case .essayAnalyzer:
-            AnalyzeTabContainer()
         case .library:
+            LibraryTabView(
+                onJumpToTab: { dest in
+                    route = nil
+                    switch dest {
+                    case .study:    select(.packs)
+                    case .games:    select(.arcade)
+                    case .focus:    select(.focus)
+                    case .analyzer: select(.essays)
+                    case .editor:
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { route = .smartEditor }
+                    }
+                },
+                onOpenToolPicker: {
+                    route = nil
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { showToolPicker = true }
+                })
+        case .review:
+            DailyReviewView(onStartReview: {
+                route = nil
+                select(.packs)
+            })
+        case .profile:
+            ProfileView(user: user, onboardingComplete: $onboardingComplete, onSignOut: onSignOut)
+        case .studyPacks, .arcade, .focus, .essayAnalyzer:
             EmptyView()   // handled by the tab switch in go(_:)
         }
     }
 }
 
-// MARK: - Custom bottom bar with center ⊕
+// MARK: - Sticker bottom bar
 
 private struct WSTabBar: View {
     @Binding var selected: MainTabView.Tab
-    var onPlus: () -> Void
+    /// Arcade tab paints the bar in its night palette.
+    var dark: Bool
+    var onSelect: (MainTabView.Tab) -> Void
 
     var body: some View {
-        HStack(alignment: .bottom, spacing: 0) {
-            tabButton(.home,    icon: "house.fill",  label: "Home")
-            tabButton(.myStuff, icon: "folder.fill", label: "My Stuff")
-            plusButton
-            tabButton(.review,  icon: "checklist",   label: "Review")
-            tabButton(.profile, icon: "person.fill", label: "Profile")
+        HStack(alignment: .top, spacing: 0) {
+            tabButton(.home,   icon: "house",                label: "Home")
+            tabButton(.packs,  icon: "square.stack.3d.up",   label: "Packs")
+            tabButton(.arcade, icon: "gamecontroller",       label: "Arcade")
+            tabButton(.essays, icon: "pencil.line",          label: "Essays", fills: false)
+            tabButton(.focus,  icon: "bolt",                 label: "Focus")
         }
         .padding(.horizontal, 6)
         .padding(.top, 10)
+        .padding(.bottom, 2)
         .frame(maxWidth: .infinity)
         .background(
-            WSColor.backgroundElevated
-                .shadow(color: Color.black.opacity(0.06), radius: 12, y: -3)
+            (dark ? Color(hex: 0x1E1640) : WSColor.backgroundElevated)
+                .overlay(alignment: .top) {
+                    Rectangle().fill(dark ? Color.black : WSColor.ink).frame(height: WSSticker.stroke)
+                }
                 .ignoresSafeArea(edges: .bottom)
         )
+        .animation(.easeInOut(duration: 0.25), value: dark)
     }
 
-    private func tabButton(_ tab: MainTabView.Tab, icon: String, label: String) -> some View {
+    private func tabButton(_ tab: MainTabView.Tab, icon: String, label: String, fills: Bool = true) -> some View {
         let active = selected == tab
+        let idle = dark ? Color(hex: 0xB9AEE0) : WSColor.foregroundMuted
         return Button {
             Haptics.selection()
-            withAnimation(.wsBounceTight) { selected = tab }
+            onSelect(tab)
         } label: {
-            VStack(spacing: 4) {
-                Image(systemName: icon)
-                    .font(.system(size: 21, weight: .semibold))
-                    .symbolEffect(.bounce, value: active)
-                    .scaleEffect(active ? 1.1 : 1.0)
-                    .animation(.wsBounceTight, value: active)
+            VStack(spacing: 3) {
+                ZStack {
+                    if active {
+                        Capsule()
+                            .fill(WSColor.lime)
+                            .overlay(Capsule().strokeBorder(dark ? Color.black : WSColor.ink, lineWidth: 2))
+                            .frame(width: 52, height: 30)
+                            .transition(.scale(scale: 0.4).combined(with: .opacity))
+                    }
+                    Image(systemName: active && fills ? icon + ".fill" : icon)
+                        .font(.system(size: active ? 17 : 19, weight: .bold))
+                        .foregroundStyle(active ? WSColor.inkText : idle)
+                        .symbolEffect(.bounce, value: active)
+                }
+                .frame(height: 30)
                 Text(label)
-                    .font(WSFont.sans(10, weight: .bold))
+                    .font(WSFont.sans(11, weight: active ? .heavy : .bold))
+                    .foregroundStyle(active ? (dark ? WSColor.lime : WSColor.foreground) : idle)
             }
-            .foregroundStyle(active ? WSColor.duoPurple : WSColor.foregroundMuted.opacity(0.6))
             .frame(maxWidth: .infinity)
             .padding(.bottom, 4)
             .contentShape(Rectangle())
+            .animation(.wsBounceTight, value: active)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(label)
         .accessibilityAddTraits(active ? [.isSelected] : [])
-    }
-
-    private var plusButton: some View {
-        Button {
-            Haptics.medium()
-            onPlus()
-        } label: {
-            ZStack {
-                Circle()
-                    .fill(WSColor.duoPurple)
-                    .frame(width: 56, height: 56)
-                    .shadow(color: WSColor.duoPurple.opacity(0.45), radius: 12, y: 5)
-                Image(systemName: "plus")
-                    .font(.system(size: 26, weight: .bold))
-                    .foregroundStyle(.white)
-            }
-        }
-        .buttonStyle(WSBouncyButtonStyle())
-        .frame(maxWidth: .infinity)
-        .offset(y: -16)
-        .accessibilityLabel("Create — choose a tool")
     }
 }
 

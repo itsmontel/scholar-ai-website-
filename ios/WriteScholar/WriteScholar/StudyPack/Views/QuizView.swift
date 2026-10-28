@@ -22,11 +22,11 @@ struct QuizView: View {
     @State private var fillBlankAnswer: String = ""
     @State private var answers: [Int: String] = [:]        // qIndex → chosen
     @State private var didAwardCompletion = false
-    @State private var celebrate: Int = 0
     @State private var startedAt = Date()
     @State private var finalElapsed: String = ""
-    @State private var ringProgress: Double = 0
     @State private var reviewing = false
+    @State private var combo = 0
+    @State private var bestCombo = 0
 
     private var questions: [QuizQuestion] { quiz.questions }
     private var total: Int { questions.count }
@@ -39,7 +39,7 @@ struct QuizView: View {
                 EmptyStateView(
                     icon: "checkmark.bubble",
                     title: "No quiz",
-                    message: "This study pack didn't include a quiz — try regenerating with longer notes."
+                    message: "This study pack didn't include a quiz. Try regenerating with longer notes."
                 )
             } else if qIndex >= total {
                 if reviewing {
@@ -51,8 +51,6 @@ struct QuizView: View {
                 questionScreen
             }
 
-            WSConfettiView(trigger: $celebrate)
-                .allowsHitTesting(false)
         }
     }
 
@@ -73,7 +71,7 @@ struct QuizView: View {
                     }
                     Spacer(minLength: 0)
                 }
-                .padding(.horizontal, 16)
+                .padding(.horizontal, 20)
                 .padding(.vertical, 12)
             }
             .scrollDismissesKeyboard(.interactively)
@@ -92,37 +90,45 @@ struct QuizView: View {
         DailyGoalStore.shared.record(.quizCompleted, title: title,
                                      subtitle: "\(correctCount)/\(total) · \(percent)%")
         if percent == 100 {
-            DailyGoalStore.shared.record(.quizPerfectScore, title: title, subtitle: "100% — perfect run")
+            DailyGoalStore.shared.record(.quizPerfectScore, title: title, subtitle: "100%, perfect run")
         }
         StudyPackProgressStore.shared.recordQuizScore(correct: correctCount)
-        // Always celebrate finishing — a bigger burst for a strong score.
-        celebrate += 1
-        // Sweep the ring from 0 → final.
-        ringProgress = 0
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-            withAnimation(.spring(response: 0.9, dampingFraction: 0.8)) {
-                ringProgress = total == 0 ? 0 : Double(correctCount) / Double(total)
-            }
-        }
+        // The win screen runs its own confetti + slam on appear.
     }
 
     // MARK: - Header
 
     private var progressHeader: some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text(quiz.title ?? "Quiz")
-                    .wsBody(.large, weight: .bold)
-                    .foregroundStyle(WSColor.foreground)
-                    .lineLimit(1)
-                Spacer()
-                Text("Question \(qIndex + 1) of \(total)")
-                    .wsBody(.small, weight: .bold)
+            HStack(spacing: 8) {
+                Text("Q\(qIndex + 1)")
+                    .font(WSFont.headline(15, weight: .black))
+                    .foregroundStyle(WSColor.inkText)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .wsStickerCapsule(fill: WSColor.lime, depth: 2)
+                Text("of \(total)")
+                    .font(WSFont.sans(14, weight: .heavy))
                     .foregroundStyle(WSColor.foregroundMuted)
+                Spacer()
+                if combo >= 2 {
+                    HStack(spacing: 4) {
+                        WSFlameIcon(size: 14)
+                        Text("x\(combo) combo")
+                            .font(WSFont.headline(14, weight: .black))
+                            .contentTransition(.numericText())
+                    }
+                    .foregroundStyle(WSColor.inkText)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .wsStickerCapsule(fill: WSColor.orange, depth: 2)
+                    .transition(.scale.combined(with: .opacity))
+                }
             }
+            .animation(.wsBouncePop, value: combo)
             // Fills as each question is answered so bar and label stay in sync.
-            WSProgressBar(fraction: Double(qIndex + (revealed ? 1 : 0)) / Double(max(total, 1)),
-                          tint: WSColor.duoPurple, height: 12)
+            WSStripeBar(fraction: Double(qIndex + (revealed ? 1 : 0)) / Double(max(total, 1)),
+                        fill: WSColor.purple, height: 14)
         }
     }
 
@@ -133,22 +139,26 @@ struct QuizView: View {
         return VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Text((q.type?.rawValue ?? "question").replacingOccurrences(of: "_", with: " ").uppercased())
-                    .font(WSFont.sans(10, weight: .black))
-                    .tracking(2.2)
-                    .foregroundStyle(WSColor.duoPurple)
+                    .font(WSFont.sans(11, weight: .black))
+                    .tracking(1.3)
+                    .foregroundStyle(WSColor.inkText)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
                     .background(
-                        Capsule().fill(WSColor.duoPurpleLight)
-                            .overlay(Capsule().stroke(WSColor.duoPurple.opacity(0.35), lineWidth: 1.5))
+                        ZStack {
+                            Capsule().fill(WSColor.pink)
+                            Capsule().strokeBorder(WSColor.ink, lineWidth: 2)
+                        }
                     )
                 Spacer()
             }
 
             Text(q.question)
-                .font(WSFont.headline(18, weight: .black))
+                .font(WSFont.headline(24, weight: .black))
+                .tracking(-0.4)
                 .foregroundStyle(WSColor.foreground)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
 
             VStack(spacing: 10) {
                 if let opts = q.options, !opts.isEmpty {
@@ -163,8 +173,7 @@ struct QuizView: View {
                 }
             }
         }
-        .padding(20)
-        .wsChunkyCard(cornerRadius: 22)
+        .padding(.vertical, 6)
     }
 
     private func optionState(option: String, correctAnswer: String) -> WSChunkyOptionState {
@@ -189,9 +198,9 @@ struct QuizView: View {
             accessory: {
                 WSChunkyOptionLetter(
                     letter: letter,
-                    fillColor: filled ? Color.white.opacity(0.22) : WSColor.surface,
-                    foreground: filled ? .white : WSColor.foregroundMuted,
-                    strokeColor: filled ? Color.white.opacity(0.3) : WSColor.duoBorder
+                    fillColor: filled ? Color.white : WSColor.lilacDeep,
+                    foreground: WSColor.inkText,
+                    strokeColor: WSColor.ink
                 )
             }
         )
@@ -206,6 +215,16 @@ struct QuizView: View {
         lastAnswerCorrect = option.lowercased() == correctAnswer.lowercased()
         withAnimation(.wsBouncePop) { revealed = true }
         if lastAnswerCorrect { correctCount += 1; Haptics.success() } else { Haptics.warning() }
+        bumpCombo()
+    }
+
+    private func bumpCombo() {
+        if lastAnswerCorrect {
+            combo += 1
+            bestCombo = max(bestCombo, combo)
+        } else {
+            combo = 0
+        }
     }
 
     private func fillBlankInput() -> some View {
@@ -221,30 +240,30 @@ struct QuizView: View {
         lastAnswerCorrect = fillBlankAnswer.trimmingCharacters(in: .whitespacesAndNewlines)
             .caseInsensitiveCompare(q.correctAnswer.trimmingCharacters(in: .whitespacesAndNewlines)) == .orderedSame
         if lastAnswerCorrect { correctCount += 1; Haptics.success() } else { Haptics.warning() }
+        bumpCombo()
         withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) { revealed = true }
     }
 
     private func explanationBanner(_ exp: String) -> some View {
-        HStack(alignment: .top, spacing: 10) {
-            Image(systemName: lastAnswerCorrect ? "lightbulb.fill" : "info.circle.fill")
-                .foregroundStyle(lastAnswerCorrect ? WSColor.duoGreen : WSColor.duoRed)
-                .font(.system(size: 18, weight: .heavy))
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: lastAnswerCorrect ? "checkmark" : "xmark")
+                .font(.system(size: 16, weight: .black))
+                .foregroundStyle(WSColor.inkText)
+                .frame(width: 38, height: 38)
+                .wsStickerCircle(fill: .white)
             VStack(alignment: .leading, spacing: 4) {
-                Text(lastAnswerCorrect ? "Nice one!" : "Not quite")
-                    .font(WSFont.sans(13, weight: .black))
-                    .foregroundStyle(lastAnswerCorrect ? WSColor.duoGreenDark : WSColor.duoRedDark)
+                Text(lastAnswerCorrect ? "Nailed it." : "Not quite.")
+                    .font(WSFont.headline(20, weight: .black))
                 Text(exp)
-                    .font(WSFont.sans(13, weight: .bold))
-                    .foregroundStyle(WSColor.foreground)
+                    .font(WSFont.sans(14, weight: .bold))
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
+        .foregroundStyle(WSColor.inkText)
         .padding(14)
-        .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(lastAnswerCorrect ? WSColor.duoGreenLight : WSColor.duoRedLight)
-        )
-        .transition(.opacity.combined(with: .move(edge: .bottom)))
+        .wsSticker(fill: lastAnswerCorrect ? WSColor.lime : WSColor.pinkSoft, radius: 20)
+        .transition(.move(edge: .bottom).combined(with: .opacity))
     }
 
     // MARK: - Bottom CTA (pinned)
@@ -263,15 +282,16 @@ struct QuizView: View {
                     }
                     .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(WSDuoPrimaryButtonStyle(fullWidth: true))
+                .buttonStyle(WSStickerButtonStyle(fill: WSColor.inkText, foreground: .white))
             }
         } else if isFillBlank {
             pinned {
                 Button { checkFillBlank() } label: {
                     Text("Check answer").frame(maxWidth: .infinity)
                 }
-                .buttonStyle(WSDuoInfoButtonStyle(fullWidth: true))
+                .buttonStyle(WSStickerButtonStyle(fill: WSColor.purple, foreground: .white))
                 .disabled(fillBlankAnswer.isEmpty)
+                .opacity(fillBlankAnswer.isEmpty ? 0.5 : 1)
             }
         }
         // MC/TF before reveal: tapping an option is the action — no bar.
@@ -279,14 +299,10 @@ struct QuizView: View {
 
     private func pinned<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
         content()
-            .padding(.horizontal, 16)
-            .padding(.top, 12)
+            .padding(.horizontal, 20)
+            .padding(.top, 10)
             .padding(.bottom, 8)
-            .background(
-                WSColor.backgroundElevated
-                    .shadow(color: Color.black.opacity(0.06), radius: 10, y: -3)
-                    .ignoresSafeArea(edges: .bottom)
-            )
+            .background(WSColor.background.ignoresSafeArea(edges: .bottom))
     }
 
     private func advanceQuestion() {
@@ -303,64 +319,35 @@ struct QuizView: View {
 
     private var scoreScreen: some View {
         let percentage = total == 0 ? 0 : Int(round(Double(correctCount) / Double(total) * 100))
-        let incorrect = max(0, total - correctCount)
-        let percentile = min(96, Int(Double(percentage) * 0.95))
-
-        return ScrollView {
-            VStack(spacing: 20) {
-                Text("Quiz complete! 🎉")
-                    .wsHeadline(.large, weight: .black)
-                    .foregroundStyle(WSColor.foreground)
-                    .padding(.top, 14)
-
-                WSProgressRing(progress: ringProgress,
-                               tint: WSColor.duoPurple,
-                               size: 176, lineWidth: 14,
-                               centerTitle: "\(correctCount) / \(total)",
-                               centerSubtitle: "\(percentage)%")
-                    .padding(.vertical, 4)
-
-                VStack(spacing: 6) {
-                    Text("Great job!")
-                        .wsHeadline(.small, weight: .black)
-                        .foregroundStyle(WSColor.foreground)
-                    if percentile > 0 {
-                        Text("You scored higher than \(percentile)% of students")
-                            .wsBody(.medium, weight: .semibold)
-                            .foregroundStyle(WSColor.foregroundMuted)
-                            .multilineTextAlignment(.center)
-                    }
-                }
-                .padding(.horizontal, 24)
-
-                HStack(spacing: 10) {
-                    WSStatChip(icon: "checkmark.circle.fill", value: "\(correctCount)", label: "Correct",   tint: WSColor.duoGreen)
-                    WSStatChip(icon: "xmark.circle.fill",     value: "\(incorrect)",    label: "Incorrect", tint: WSColor.duoRed)
-                    WSStatChip(icon: "clock.fill",            value: finalElapsed,      label: "Time",      tint: WSColor.duoBlue)
-                }
-
-                VStack(spacing: 10) {
-                    Button {
-                        Haptics.medium()
-                        reviewing = true
-                    } label: {
-                        Label("Review answers", systemImage: "list.bullet.rectangle.portrait")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(WSDuoPrimaryButtonStyle(fullWidth: true))
-
-                    Button {
-                        restart()
-                    } label: {
-                        Label("Retake quiz", systemImage: "arrow.counterclockwise")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(WSDuoSecondaryButtonStyle(fullWidth: true))
-                }
-                .padding(.top, 6)
+        let xp = DailyGoalStore.Activity.quizCompleted.xp
+            + (percentage == 100 ? DailyGoalStore.Activity.quizPerfectScore.xp : 0)
+        let title = quiz.title ?? "Quiz"
+        return WSWinScreen(
+            headline: percentage >= 80 ? "LOCKED\nIN." : (percentage >= 50 ? "NICE\nRUN." : "RUN IT\nBACK."),
+            subline: percentage >= 80 ? "\(title) done. Scholar is proud of you."
+                   : percentage >= 50 ? "\(title) done. A retake gets you over the line."
+                   : "\(title) done. Review the misses, then go again.",
+            stats: [
+                WSWinStat(label: "XP earned", value: "+\(xp)", fill: WSColor.lime),
+                WSWinStat(label: "Score", value: "\(correctCount)/\(total)", fill: WSColor.orange),
+                WSWinStat(label: "Accuracy", value: "\(percentage)%", fill: WSColor.sky),
+                WSWinStat(label: "Best combo", value: "x\(bestCombo)", fill: WSColor.pink),
+            ]
+        ) {
+            Button {
+                Haptics.medium()
+                reviewing = true
+            } label: {
+                Label("Review answers", systemImage: "list.bullet.rectangle.portrait")
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 24)
+            .buttonStyle(WSStickerButtonStyle(fill: .white, foreground: WSColor.inkText, radius: 20, height: 60))
+
+            Button {
+                restart()
+            } label: {
+                Label("Run it again", systemImage: "arrow.counterclockwise")
+            }
+            .buttonStyle(WSStickerButtonStyle(fill: WSColor.lime, foreground: WSColor.inkText, radius: 20, height: 60))
         }
     }
 
@@ -371,9 +358,10 @@ struct QuizView: View {
         revealed = false
         fillBlankAnswer = ""
         answers = [:]
+        combo = 0
+        bestCombo = 0
         didAwardCompletion = false
         reviewing = false
-        ringProgress = 0
         startedAt = Date()
         Haptics.medium()
     }
@@ -392,9 +380,9 @@ struct QuizView: View {
                             .font(.system(size: 16, weight: .black))
                             .foregroundStyle(WSColor.foreground)
                             .frame(width: 38, height: 38)
-                            .background(Circle().fill(WSColor.backgroundElevated).shadow(color: .black.opacity(0.05), radius: 5, y: 2))
+                            .wsStickerCircle(fill: WSColor.backgroundElevated)
                     }
-                    .buttonStyle(WSBouncyButtonStyle())
+                    .buttonStyle(WSStickerPressStyle())
                     Spacer()
                     Text("Review answers")
                         .wsHeadline(.small, weight: .black)
@@ -417,9 +405,11 @@ struct QuizView: View {
         let wasCorrect = userAnswer?.lowercased() == q.correctAnswer.lowercased()
         return VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 8) {
-                Image(systemName: wasCorrect ? "checkmark.circle.fill" : "xmark.circle.fill")
-                    .foregroundStyle(wasCorrect ? WSColor.duoGreen : WSColor.duoRed)
-                    .font(.system(size: 16, weight: .bold))
+                Image(systemName: wasCorrect ? "checkmark" : "xmark")
+                    .font(.system(size: 11, weight: .black))
+                    .foregroundStyle(WSColor.inkText)
+                    .frame(width: 24, height: 24)
+                    .wsStickerCircle(fill: wasCorrect ? WSColor.lime : WSColor.pink)
                 Text("Question \(index + 1)")
                     .font(WSFont.sans(11, weight: .black))
                     .tracking(0.6)
@@ -430,9 +420,9 @@ struct QuizView: View {
                 .foregroundStyle(WSColor.foreground)
 
             if !wasCorrect, let ua = userAnswer, !ua.isEmpty {
-                answerLine(label: "Your answer", value: ua, color: WSColor.duoRed)
+                answerLine(label: "Your answer", value: ua, color: WSColor.pinkSoft)
             }
-            answerLine(label: "Correct answer", value: q.correctAnswer, color: WSColor.duoGreen)
+            answerLine(label: "Correct answer", value: q.correctAnswer, color: WSColor.lime)
 
             if let exp = q.explanation, !exp.isEmpty {
                 Text(exp)
@@ -449,16 +439,16 @@ struct QuizView: View {
         HStack(spacing: 8) {
             Text(label)
                 .font(WSFont.sans(11, weight: .black))
-                .foregroundStyle(color)
                 .frame(width: 108, alignment: .leading)
             Text(value)
-                .wsBody(.small, weight: .semibold)
-                .foregroundStyle(WSColor.foreground)
+                .wsBody(.small, weight: .bold)
             Spacer(minLength: 0)
         }
+        .foregroundStyle(WSColor.inkText)
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
-        .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(color.opacity(0.10)))
+        .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(color))
+        .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(WSColor.ink, lineWidth: 2))
     }
 
     private var elapsedString: String {

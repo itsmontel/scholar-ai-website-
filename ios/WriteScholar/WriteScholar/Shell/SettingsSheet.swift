@@ -14,6 +14,11 @@ struct SettingsSheet: View {
     var onSignOut: () -> Void
 
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var session: AuthSession
+
+    @State private var showDeleteConfirm = false
+    @State private var deleting = false
+    @State private var deleteError: String?
 
     var body: some View {
         NavigationStack {
@@ -21,12 +26,14 @@ struct SettingsSheet: View {
                 WSColor.background.ignoresSafeArea()
 
                 VStack(spacing: 0) {
-                    WSChunkyRibbon(color: WSColor.duoPurple)
                     ScrollView {
                         VStack(spacing: 22) {
                             accountCard
                             settingsList
                             signOutButton
+                            if !user.isLocalGuestAccount {
+                                deleteAccountButton
+                            }
                             appVersion
                         }
                         .padding(.horizontal, 20)
@@ -43,9 +50,11 @@ struct SettingsSheet: View {
                         Haptics.light()
                         dismiss()
                     } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 22, weight: .semibold))
-                            .foregroundStyle(WSColor.duoBorder)
+                        Image(systemName: "xmark")
+                            .font(.system(size: 12, weight: .black))
+                            .foregroundStyle(WSColor.foreground)
+                            .frame(width: 32, height: 32)
+                            .wsStickerCircle(fill: WSColor.backgroundElevated)
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("Close")
@@ -58,37 +67,29 @@ struct SettingsSheet: View {
 
     private var accountCard: some View {
         HStack(spacing: 14) {
-            ZStack {
-                Circle()
-                    .fill(WSColor.duoGreen)
-                    .frame(width: 64, height: 64)
-                Circle()
-                    .stroke(WSColor.duoGreenDark, lineWidth: 2)
-                    .frame(width: 64, height: 64)
-                Text(initial)
-                    .font(WSFont.headline(26, weight: .black))
-                    .foregroundStyle(.white)
-            }
+            Text(initial)
+                .font(WSFont.headline(28, weight: .black))
+                .foregroundStyle(WSColor.inkText)
+                .frame(width: 64, height: 64)
+                .wsStickerCircle(fill: WSColor.lime, depth: 3)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(user.displayName)
-                    .font(WSFont.headline(15, weight: .black))
-                    .foregroundStyle(WSColor.duoText)
+                    .font(WSFont.headline(18, weight: .black))
+                    .foregroundStyle(WSColor.foreground)
                 Text(user.email)
                     .font(WSFont.sans(13))
                     .foregroundStyle(WSColor.duoText.opacity(0.55))
                 HStack(spacing: 6) {
                     Image(systemName: user.isPro ? "crown.fill" : "leaf.fill")
-                        .foregroundStyle(user.isPro ? WSColor.duoOrange : WSColor.duoGreen)
                     Text(user.isPro ? "Pro" : "Free")
-                        .font(WSFont.headline(11, weight: .black))
-                        .foregroundStyle(WSColor.duoText)
+                        .font(WSFont.headline(12, weight: .black))
                 }
-                .padding(.horizontal, 8)
+                .foregroundStyle(WSColor.inkText)
+                .padding(.horizontal, 9)
                 .padding(.vertical, 3)
-                .background(
-                    Capsule().fill(user.isPro ? WSColor.duoOrangeLight : WSColor.duoGreenLight)
-                )
+                .background(Capsule().fill(user.isPro ? WSColor.sun : WSColor.lime))
+                .overlay(Capsule().strokeBorder(WSColor.ink, lineWidth: 2))
             }
             Spacer()
         }
@@ -109,7 +110,7 @@ struct SettingsSheet: View {
                     url: "https://writescholar.com/dashboard")
             linkRow(icon: "questionmark.circle", tint: WSColor.duoBlue,   label: "Help center",
                     url: "https://writescholar.com/help")
-            linkRow(icon: "lock.shield",         tint: WSColor.duoText.opacity(0.5), label: "Privacy & terms",
+            linkRow(icon: "lock.shield",         tint: WSColor.lilacDeep, label: "Privacy & terms",
                     url: "https://writescholar.com/privacy")
             Button {
                 Haptics.light()
@@ -118,7 +119,7 @@ struct SettingsSheet: View {
             } label: {
                 settingsRow(icon: "sparkles",        tint: WSColor.duoPurple,   label: "Replay onboarding")
             }
-            .buttonStyle(.plain)
+            .buttonStyle(WSStickerPressStyle())
         }
     }
 
@@ -134,21 +135,23 @@ struct SettingsSheet: View {
 
     private func settingsRow(icon: String, tint: Color, label: String) -> some View {
         HStack(spacing: 14) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .fill(tint.opacity(0.12))
-                    .frame(width: 34, height: 34)
-                Image(systemName: icon)
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundStyle(tint)
-            }
+            Image(systemName: icon)
+                .font(.system(size: 15, weight: .black))
+                .foregroundStyle(WSColor.inkText)
+                .frame(width: 36, height: 36)
+                .background(
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 11, style: .continuous).fill(WSStickerTint.face(for: tint))
+                        RoundedRectangle(cornerRadius: 11, style: .continuous).strokeBorder(WSColor.ink, lineWidth: 2)
+                    }
+                )
             Text(label)
-                .font(WSFont.headline(15, weight: .black))
-                .foregroundStyle(WSColor.duoText)
+                .font(WSFont.headline(16, weight: .black))
+                .foregroundStyle(WSColor.foreground)
             Spacer()
             Image(systemName: "chevron.right")
-                .font(.system(size: 13, weight: .bold))
-                .foregroundStyle(WSColor.duoBorder)
+                .font(.system(size: 13, weight: .black))
+                .foregroundStyle(WSColor.foreground)
         }
         .wsChunkyCard(
             cornerRadius: 16,
@@ -170,10 +173,62 @@ struct SettingsSheet: View {
         .buttonStyle(WSDuoDangerButtonStyle())
     }
 
+    // MARK: - Delete account (App Store guideline 5.1.1(v))
+
+    private var deleteAccountButton: some View {
+        Button {
+            Haptics.warning()
+            showDeleteConfirm = true
+        } label: {
+            HStack(spacing: 8) {
+                if deleting {
+                    ProgressView().tint(WSColor.foregroundMuted)
+                } else {
+                    Image(systemName: "trash")
+                }
+                Text(deleting ? "Deleting…" : "Delete account")
+            }
+            .font(WSFont.sans(14, weight: .heavy))
+            .foregroundStyle(WSColor.foregroundMuted)
+            .frame(minHeight: 44)
+        }
+        .buttonStyle(.plain)
+        .disabled(deleting)
+        .accessibilityHint("Permanently deletes your WriteScholar account")
+        .alert("Delete your account?", isPresented: $showDeleteConfirm) {
+            Button("Delete forever", role: .destructive) { deleteAccount() }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This permanently deletes your WriteScholar account and the essays, study packs and progress saved to it. Any paid plan is cancelled too, so you won't be charged again. It can't be undone.")
+        }
+        .alert("Couldn't delete your account",
+               isPresented: Binding(get: { deleteError != nil },
+                                    set: { if !$0 { deleteError = nil } })) {
+            Button("OK", role: .cancel) { deleteError = nil }
+        } message: {
+            Text(deleteError ?? "")
+        }
+    }
+
+    private func deleteAccount() {
+        deleting = true
+        Task {
+            do {
+                try await session.deleteAccount()
+                deleting = false
+                Haptics.success()
+                dismiss()
+            } catch {
+                deleting = false
+                deleteError = error.localizedDescription
+            }
+        }
+    }
+
     private var appVersion: some View {
         Text("WriteScholar iOS · v1.0")
             .font(WSFont.sans(11, weight: .bold))
-            .foregroundStyle(WSColor.duoText.opacity(0.4))
+            .foregroundStyle(WSColor.foregroundMuted)
             .padding(.top, 8)
     }
 }
@@ -190,4 +245,5 @@ struct SettingsSheet: View {
         onboardingComplete: .constant(true),
         onSignOut: {}
     )
+    .environmentObject(AuthSession())
 }

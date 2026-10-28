@@ -48,19 +48,9 @@ struct WSCardModifier: ViewModifier {
         content
             .padding(.horizontal, horizontalPadding)
             .padding(.vertical, verticalPadding)
-            .background(
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .fill(WSColor.backgroundElevated)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                            .stroke(showBorder ? WSColor.hairline : .clear, lineWidth: 1)
-                    )
-                    .shadow(
-                        color: WSColor.duoPurple.opacity(elevation.shadowOpacity),
-                        radius: elevation.shadowRadius,
-                        y: elevation.shadowY
-                    )
-            )
+            .wsSticker(fill: WSColor.backgroundElevated,
+                       radius: cornerRadius,
+                       depth: elevation == .low ? 3 : (elevation == .high ? 6 : 4))
     }
 }
 

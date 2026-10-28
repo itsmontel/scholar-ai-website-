@@ -71,9 +71,20 @@ final class FocusManager: ObservableObject {
     /// be shown and whether shields will actually be enforced.
     @Published var authorizationStatus: AuthorizationStatus = .notDetermined
 
+    // MARK: Study Mode (one question before an app opens)
+
+    @Published private(set) var studyConfig: StudyModeConfig = .default
+    /// Apps that never ask a question in "All apps" mode.
+    @Published private(set) var allowedSelection: FamilyActivitySelection = FamilyActivitySelection()
+    @Published private(set) var studyDeckCount: Int = 0
+    @Published private(set) var studyPackCount: Int = 0
+    @Published private(set) var studyUsesTopicBanks: Bool = false
+    /// The question the next gated app will ask, for the in-app preview.
+    @Published private(set) var studyNextQuestion: StudyGateQuestion? = nil
+    @Published private(set) var studyToday: StudyModeDayStats = StudyModeDayStats()
+
     // MARK: - Private
 
-    private let store = ManagedSettingsStore(named: .init("WriteScholarFocus"))
     private let authCenter = AuthorizationCenter.shared
     private var cancellables = Set<AnyCancellable>()
     private var reblockTimer: Timer?
@@ -83,6 +94,7 @@ final class FocusManager: ObservableObject {
     private init() {
         authorizationStatus = authCenter.authorizationStatus
         loadFromDefaults()
+        loadStudyMode()
 
         // Mirror future authorization status changes
         authCenter.$authorizationStatus
@@ -116,6 +128,15 @@ final class FocusManager: ObservableObject {
     var isCurrentlyUnlocked: Bool {
         guard let until = unlockUntil else { return false }
         return Date() < until
+    }
+
+    /// True when opening at least one app will ask a question.
+    var isStudyModeGating: Bool {
+        studyConfig.isOn && (studyConfig.scope == .allApps || hasBlockedApps)
+    }
+
+    var allowedAppsCount: Int {
+        allowedSelection.applicationTokens.count + allowedSelection.categoryTokens.count
     }
 
     /// The headline status string shown on the Focus tab.
@@ -183,34 +204,97 @@ final class FocusManager: ObservableObject {
 
     // MARK: - Apply / remove shields
 
-    /// Apply shields based on current state. Safe to call even when not
-    /// authorized — the underlying ManagedSettings call will simply
-    /// have no effect without the entitlement.
+    /// Apply the question screen based on current state. Safe to call even
+    /// when not authorized: Screen Time ignores it without the entitlement.
+    /// StudyGateEngine reads the persisted state, so persist first.
     func applyBlockingState() {
-        guard hasBlockedApps else {
-            store.shield.applications = nil
-            store.shield.applicationCategories = nil
-            store.shield.webDomains = nil
-            store.shield.webDomainCategories = nil
-            return
-        }
+        StudyGateEngine.apply()
+    }
 
-        if isCurrentlyUnlocked {
-            // Inside an unlock window — lift the shield
-            store.shield.applications = nil
-            store.shield.applicationCategories = nil
-            store.shield.webDomains = nil
-            store.shield.webDomainCategories = nil
-        } else {
-            store.shield.applications = blockedSelection.applicationTokens
-            if !blockedSelection.categoryTokens.isEmpty {
-                store.shield.applicationCategories = .specific(blockedSelection.categoryTokens)
-            } else {
-                store.shield.applicationCategories = nil
-            }
-            store.shield.webDomains = blockedSelection.webDomainTokens.isEmpty
-                ? nil : blockedSelection.webDomainTokens
-        }
+    // MARK: - Study Mode
+
+    func setStudyMode(on: Bool) {
+        var config = studyConfig
+        config.isOn = on
+        saveStudyConfig(config)
+        if on { rebuildStudyDeck() }
+    }
+
+    func setStudyScope(_ scope: StudyModeScope) {
+        var config = studyConfig
+        config.scope = scope
+        saveStudyConfig(config)
+    }
+
+    func setStudyUnlockMinutes(_ minutes: Int) {
+        var config = studyConfig
+        config.unlockMinutes = minutes
+        saveStudyConfig(config)
+    }
+
+    /// Empty = every pack.
+    func setStudyPacks(_ packIDs: [String]) {
+        var config = studyConfig
+        config.packIDs = packIDs
+        saveStudyConfig(config)
+        rebuildStudyDeck()
+    }
+
+    func updateAllowedSelection(_ selection: FamilyActivitySelection) {
+        allowedSelection = selection
+        StudyGateEngine.allowedSelection = selection
+        applyBlockingState()
+    }
+
+    /// Rebuilds the question deck from the current study packs. Cheap
+    /// (local JSON only), so it runs whenever the app comes forward.
+    func rebuildStudyDeck() {
+        let result = StudyModeDeckBuilder.build(config: studyConfig, topics: settings.selectedTopics)
+        StudyModeStore.replaceDeck(result.questions)
+        studyDeckCount = result.questions.count
+        studyPackCount = result.packCount
+        studyUsesTopicBanks = result.usesTopicBanks
+        studyNextQuestion = StudyModeStore.currentQuestion()
+    }
+
+    /// Called when the app comes to the foreground: picks up answers given
+    /// on the question screen, drops finished unlocks, refreshes the deck.
+    func refreshStudyMode() {
+        loadStudyMode()
+        rebuildStudyDeck()
+        applyBlockingState()
+    }
+
+    /// Right answers happen on Apple's question screen, in an extension
+    /// that can't reach DailyGoalStore. When the app comes back we credit
+    /// any new ones: 2 XP each, logged once.
+    private func awardQuestionScreenXP() {
+        let key = "ws.study.xpAwarded." + Self.todayKey()
+        let alreadyAwarded = UserDefaults.standard.integer(forKey: key)
+        let delta = studyToday.right - alreadyAwarded
+        guard delta > 0 else { return }
+        UserDefaults.standard.set(studyToday.right, forKey: key)
+        DailyGoalStore.shared.record(
+            .focusUnlock,
+            xp: delta * 2,
+            title: "Study Mode",
+            subtitle: "\(delta) right before an app opened"
+        )
+    }
+
+    private func saveStudyConfig(_ config: StudyModeConfig) {
+        studyConfig = config
+        StudyGateEngine.config = config
+        applyBlockingState()
+    }
+
+    private func loadStudyMode() {
+        studyConfig = StudyGateEngine.config
+        allowedSelection = StudyGateEngine.allowedSelection
+        studyToday = StudyModeStore.todayStats
+        awardQuestionScreenXP()
+        studyNextQuestion = StudyModeStore.currentQuestion()
+        studyDeckCount = StudyModeStore.deck.count
     }
 
     // MARK: - Challenge result
@@ -229,6 +313,10 @@ final class FocusManager: ObservableObject {
             persist(updatingDailyKey: today)
             applyBlockingState()
             scheduleReblockIfNeeded()
+            // Relock even if WriteScholar is closed when the window ends.
+            if let until = unlockUntil {
+                StudyGateEngine.scheduleRelock(id: StudyGateEngine.globalTimerPrefix + UUID().uuidString, at: until)
+            }
             // Award daily-goal XP for the unlock challenge win + log
             // a richer entry to the History sheet.
             DailyGoalStore.shared.record(

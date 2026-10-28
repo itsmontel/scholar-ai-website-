@@ -113,17 +113,19 @@ struct FocusUnlockChallenge: View {
                     dismiss()
                 } label: {
                     Image(systemName: "xmark")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundStyle(WSColor.duoText.opacity(0.4))
+                        .font(.system(size: 13, weight: .black))
+                        .foregroundStyle(WSColor.foreground)
+                        .frame(width: 34, height: 34)
+                        .wsStickerCircle(fill: WSColor.backgroundElevated)
                 }
+                .buttonStyle(WSStickerPressStyle())
 
                 // Progress bar across the questions
-                WSProgressBar(
+                WSStripeBar(
                     fraction: Double(index) / Double(max(1, totalQuestions)),
-                    tint: WSColor.duoGreen,
+                    fill: WSColor.purple,
                     height: 14
                 )
-                .animation(.spring(response: 0.35), value: index)
 
                 // Hearts row (lives)
                 HStack(spacing: 2) {
@@ -131,7 +133,7 @@ struct FocusUnlockChallenge: View {
                     ForEach(0..<max(1, totalHearts + 1), id: \.self) { i in
                         Image(systemName: i < (totalHearts + 1 - missed) ? "heart.fill" : "heart")
                             .font(.system(size: 14, weight: .bold))
-                            .foregroundStyle(i < (totalHearts + 1 - missed) ? WSColor.duoRed : WSColor.duoBorder)
+                            .foregroundStyle(i < (totalHearts + 1 - missed) ? WSColor.pink : WSColor.foregroundMuted.opacity(0.4))
                     }
                 }
 
@@ -140,16 +142,15 @@ struct FocusUnlockChallenge: View {
                     Image(systemName: "timer")
                         .font(.system(size: 11, weight: .bold))
                     Text("\(secondsLeft)s")
-                        .font(WSFont.sans(12, weight: .bold))
+                        .font(WSFont.headline(13, weight: .black))
+                        .monospacedDigit()
                 }
-                .foregroundStyle(secondsLeft <= 5 ? WSColor.duoRed : WSColor.duoText.opacity(0.55))
+                .foregroundStyle(WSColor.inkText)
                 .padding(.horizontal, 8)
                 .padding(.vertical, 4)
-                .background(
-                    Capsule()
-                        .fill(secondsLeft <= 5 ? WSColor.duoRedLight : WSColor.backgroundElevated)
-                        .overlay(Capsule().stroke(secondsLeft <= 5 ? WSColor.duoRed : WSColor.duoBorder, lineWidth: 2))
-                )
+                .background(Capsule().fill(secondsLeft <= 5 ? WSColor.pink : WSColor.sun))
+                .overlay(Capsule().strokeBorder(WSColor.ink, lineWidth: 2))
+                .modifier(WSWrongShake(active: secondsLeft <= 5))
             }
         }
     }
@@ -213,38 +214,27 @@ struct FocusUnlockChallenge: View {
 
     private func letterFill(for state: WSChunkyOptionState) -> Color {
         switch state {
-        case .selected: return WSColor.duoBlue.opacity(0.18)
-        case .correct, .wrong: return Color.white.opacity(0.25)
-        default:        return WSColor.duoSurface
+        case .selected, .correct, .wrong: return Color.white
+        default:        return WSColor.lilacDeep
         }
     }
 
     private func letterForeground(for state: WSChunkyOptionState) -> Color {
         switch state {
-        case .selected: return WSColor.duoBlueDark
-        case .correct, .wrong: return Color.white
-        default:        return WSColor.duoText.opacity(0.65)
+        default:        return WSColor.inkText
         }
     }
 
     private func explanationCard(text: String, isCorrect: Bool) -> some View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: isCorrect ? "lightbulb.fill" : "info.circle.fill")
-                .foregroundStyle(isCorrect ? WSColor.duoGreen : WSColor.duoOrange)
             Text(text)
-                .wsBody(.small)
-                .foregroundStyle(WSColor.duoText)
+                .wsBody(.small, weight: .bold)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .foregroundStyle(WSColor.inkText)
         .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(isCorrect ? WSColor.duoGreenLight : WSColor.duoOrangeLight)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .stroke(isCorrect ? WSColor.duoGreen.opacity(0.3) : WSColor.duoOrange.opacity(0.3), lineWidth: 1)
-                )
-        )
+        .wsSticker(fill: isCorrect ? WSColor.lime : WSColor.pinkSoft, radius: 16, depth: 3)
     }
 
     private func shuffledOptions(for q: QuizQuestion) -> [String] {
@@ -278,8 +268,13 @@ struct FocusUnlockChallenge: View {
     private func flashcardView(_ card: Flashcard) -> some View {
         VStack(spacing: 14) {
             Text(revealed ? "ANSWER" : "RECALL THE ANSWER")
-                .wsEyebrow()
-                .foregroundStyle(WSColor.duoPurple)
+                .font(WSFont.sans(11, weight: .black))
+                .tracking(1.3)
+                .foregroundStyle(WSColor.inkText)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .background(RoundedRectangle(cornerRadius: 9).fill(revealed ? WSColor.lime : WSColor.pink))
+                .overlay(RoundedRectangle(cornerRadius: 9).strokeBorder(WSColor.ink, lineWidth: 2))
                 .padding(.top, 24)
 
             Button {
@@ -291,21 +286,20 @@ struct FocusUnlockChallenge: View {
                 }
             } label: {
                 Text(revealed ? card.back : card.front)
-                    .wsHeadline(.medium, weight: .black)
-                    .foregroundStyle(WSColor.duoText)
+                    .font(WSFont.headline(24, weight: .black))
+                    .foregroundStyle(WSColor.foreground)
                     .multilineTextAlignment(.center)
                     .padding(20)
-                    .frame(maxWidth: .infinity)
+                    .frame(maxWidth: .infinity, minHeight: 200)
+                    .wsSticker(radius: 26, depth: 6)
             }
-            .buttonStyle(.plain)
-            .frame(minHeight: 200)
-            .wsChunkyCard(accent: WSColor.duoPurple)
+            .buttonStyle(WSStickerPressStyle(tilt: 0))
             .padding(.horizontal, 4)
 
             if !revealed {
                 Text("Tap the card to reveal the answer")
                     .wsBody(.caption)
-                    .foregroundStyle(WSColor.duoText.opacity(0.55))
+                    .foregroundStyle(WSColor.foregroundMuted)
             } else {
                 HStack(spacing: 10) {
                     Button {
@@ -382,7 +376,7 @@ struct FocusUnlockChallenge: View {
             onFinish(.bailedOut)
             dismiss()
         } label: {
-            Text("I'll wait — close this")
+            Text("I'll wait. Close this")
         }
         .buttonStyle(WSDuoSecondaryButtonStyle(fullWidth: true))
         .padding(.top, 12)
@@ -395,22 +389,30 @@ struct FocusUnlockChallenge: View {
             Spacer(minLength: 8)
 
             ZStack {
-                Circle()
-                    .fill(result.didUnlock ? WSColor.duoGreenLight : WSColor.duoRedLight)
-                    .frame(width: 120, height: 120)
+                if result.didUnlock {
+                    WSStarburst(points: 16, inset: 0.86)
+                        .fill(WSColor.lime)
+                        .overlay(WSStarburst(points: 16, inset: 0.86).stroke(WSColor.ink, lineWidth: 2.5))
+                        .frame(width: 170, height: 170)
+                        .wsSpin(period: 20)
+                }
                 Image(systemName: result.didUnlock ? "lock.open.fill" : "lock.fill")
-                    .font(.system(size: 50, weight: .heavy))
-                    .foregroundStyle(result.didUnlock ? WSColor.duoGreen : WSColor.duoRed)
+                    .font(.system(size: 48, weight: .heavy))
+                    .foregroundStyle(WSColor.inkText)
+                    .frame(width: 120, height: 120)
+                    .wsStickerCircle(fill: result.didUnlock ? .white : WSColor.pinkSoft, depth: 5)
             }
+            .frame(height: 170)
 
-            Text(result.didUnlock ? "Unlocked!" : "Not quite")
-                .wsHeadline(.large, weight: .black)
-                .foregroundStyle(WSColor.duoText)
+            Text(result.didUnlock ? "You're in." : "Not quite.")
+                .font(WSFont.headline(44, weight: .black))
+                .tracking(-1.6)
+                .foregroundStyle(WSColor.foreground)
 
             Text(resultsBlurb(for: result))
-                .wsBody(.medium)
+                .wsBody(.medium, weight: .semibold)
                 .multilineTextAlignment(.center)
-                .foregroundStyle(WSColor.duoText.opacity(0.65))
+                .foregroundStyle(WSColor.foregroundMuted)
                 .padding(.horizontal, 24)
 
             scoreSummary(for: result)
@@ -422,16 +424,16 @@ struct FocusUnlockChallenge: View {
                         onFinish(result)
                         dismiss()
                     } label: {
-                        Label("Apps unlocked — done", systemImage: "checkmark.circle.fill")
+                        Label("Let's go", systemImage: "checkmark.circle.fill")
                     }
-                    .buttonStyle(WSDuoSuccessButtonStyle())
+                    .buttonStyle(WSStickerButtonStyle(fill: WSColor.lime, foreground: WSColor.inkText))
                 } else {
                     Button {
                         startChallenge()
                     } label: {
                         Label("Try again", systemImage: "arrow.clockwise")
                     }
-                    .buttonStyle(WSDuoPrimaryButtonStyle())
+                    .buttonStyle(WSStickerButtonStyle(fill: WSColor.purple, foreground: .white))
 
                     Button {
                         onFinish(result)
@@ -439,7 +441,7 @@ struct FocusUnlockChallenge: View {
                     } label: {
                         Text("I can wait")
                     }
-                    .buttonStyle(WSDuoSecondaryButtonStyle(fullWidth: true))
+                    .buttonStyle(WSStickerButtonStyle(fill: WSColor.backgroundElevated, foreground: WSColor.foreground))
                 }
             }
             .padding(.horizontal, 4)
@@ -457,7 +459,7 @@ struct FocusUnlockChallenge: View {
             return "Apps are unlocked for the next \(manager.settings.unlockDuration.label). They'll relock automatically."
         case .failed(_, _, let cooldown):
             let mins = Int(cooldown / 60)
-            return "Got \(correctCount) of \(manager.settings.difficulty.totalQuestions). You can try again in \(mins) min — or close this and stay focused."
+            return "Got \(correctCount) of \(manager.settings.difficulty.totalQuestions). You can try again in \(mins) min, or close this and stay focused."
         case .bailedOut:
             return ""
         }
@@ -468,30 +470,33 @@ struct FocusUnlockChallenge: View {
         let total = manager.settings.difficulty.totalQuestions
         let needed = manager.settings.difficulty.requiredCorrect
         HStack(spacing: 14) {
-            scoreChip(label: "Correct",  value: "\(correctCount)/\(total)", tint: WSColor.duoGreen)
-            scoreChip(label: "Required", value: "\(needed)/\(total)",       tint: WSColor.duoPurple)
+            scoreChip(label: "Correct",  value: "\(correctCount)/\(total)", tint: WSColor.lime)
+            scoreChip(label: "Required", value: "\(needed)/\(total)",       tint: WSColor.sky)
         }
     }
 
     private func scoreChip(label: String, value: String, tint: Color) -> some View {
         VStack(spacing: 4) {
             Text(value)
-                .font(WSFont.headline(22))
-                .foregroundStyle(WSColor.duoText)
-            Text(label)
-                .font(WSFont.sans(11, weight: .bold))
-                .foregroundStyle(WSColor.duoText.opacity(0.55))
+                .font(WSFont.headline(26, weight: .black))
+            Text(label.uppercased())
+                .font(WSFont.sans(11, weight: .black))
+                .tracking(1.2)
         }
+        .foregroundStyle(WSColor.inkText)
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
-        .wsChunkyCard(cornerRadius: 14, horizontalPadding: 0, verticalPadding: 12, lipHeight: 4, accent: tint)
+        .wsChunkyCard(cornerRadius: 18, horizontalPadding: 0, verticalPadding: 12, fillColor: tint)
     }
 
     // MARK: - Setup
 
     private func startChallenge() {
-        quizQuestions = FocusSampleQuestions.randomQuizSet()
-        flashcards    = FocusSampleQuestions.randomFlashcardSet()
+        // Your own study packs first; the sample bank only fills in when
+        // the packs don't have enough questions yet.
+        let packQuiz  = StudyModeDeckBuilder.challengeQuiz(config: manager.studyConfig)
+        let packCards = StudyModeDeckBuilder.challengeFlashcards(config: manager.studyConfig)
+        quizQuestions = packQuiz.isEmpty ? FocusSampleQuestions.randomQuizSet() : packQuiz
+        flashcards    = packCards.isEmpty ? FocusSampleQuestions.randomFlashcardSet() : packCards
         index = 0
         correctCount = 0
         revealed = false

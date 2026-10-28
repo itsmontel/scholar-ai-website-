@@ -150,6 +150,13 @@ final class APIClient: @unchecked Sendable {
         return try await performRaw(request)
     }
 
+    /// DELETE an endpoint whose response is a bare `{ success, message }`
+    /// acknowledgement (no `data` field), e.g. /users/account.
+    func deleteRaw<T: Decodable>(path: String, requiresAuth: Bool = true) async throws -> T {
+        let request = try makeRequest(path: path, method: "DELETE", body: Optional<Empty>.none, requiresAuth: requiresAuth)
+        return try await performRaw(request)
+    }
+
     private func performRaw<T: Decodable>(_ request: URLRequest) async throws -> T {
         let data: Data
         let response: URLResponse

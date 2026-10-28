@@ -118,16 +118,9 @@ struct CraterBlastView: View {
 
     private var duoBackdrop: some View {
         ZStack {
-            // Bold Duolingo orange-to-red dark background
-            LinearGradient(
-                colors: [
-                    Color(hex: 0x1A1A2E),
-                    WSColor.duoOrangeDark.opacity(0.25),
-                    Color(hex: 0x1A1A2E)
-                ],
-                startPoint: .top, endPoint: .bottom
-            )
-            .ignoresSafeArea()
+            // Arcade night, same as the Arcade hub.
+            WSColor.arcadeNight
+                .ignoresSafeArea()
 
             // Subtle star dots
             Canvas { ctx, size in
@@ -153,134 +146,98 @@ struct CraterBlastView: View {
     private func gameLayer(geo: GeometryProxy) -> some View {
         VStack(spacing: 0) {
             hudBar
-                .padding(.horizontal, 16)
-                .padding(.top, 8)
+                .padding(.leading, 62)   // clears the sticker close button
+                .padding(.trailing, 16)
+                .padding(.top, 14)
 
             duoProgressBar
-                .frame(height: 12)
                 .padding(.horizontal, 16)
-                .padding(.top, 6)
+                .padding(.top, 10)
 
             if let q = question {
                 questionCard(q.prompt)
                     .padding(.horizontal, 16)
-                    .padding(.top, 8)
+                    .padding(.top, 10)
             }
 
             playArea(geo: geo)
         }
     }
 
-    // MARK: - HUD (Duolingo-style top bar)
+    // MARK: - HUD (sticker top bar)
 
     private var hudBar: some View {
-        HStack(spacing: 10) {
-            // Question counter pill
-            HStack(spacing: 4) {
-                Image(systemName: "questionmark.circle.fill")
-                    .foregroundStyle(WSColor.duoOrange)
-                Text("Q\(qIndex + 1)/\(craterBlast.questions.count)")
-                    .font(WSFont.sans(12, weight: .bold))
-                    .foregroundStyle(.white)
-            }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 5)
-            .background(
-                Capsule().fill(Color.white.opacity(0.12))
-                    .overlay(Capsule().stroke(Color.white.opacity(0.08), lineWidth: 1))
-            )
+        HStack(spacing: 8) {
+            Text("Q\(qIndex + 1)/\(craterBlast.questions.count)")
+                .font(WSFont.headline(14, weight: .black))
+                .foregroundStyle(WSColor.inkText)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .wsStickerCapsule(fill: WSColor.sky, depth: 2)
 
-            Spacer()
+            Spacer(minLength: 4)
 
-            // Score -- big and bold
             Text("\(score)")
-                .font(WSFont.headline(28, weight: .black))
-                .foregroundStyle(WSColor.duoOrange)
-                .shadow(color: WSColor.duoOrange.opacity(0.4), radius: 8)
+                .font(WSFont.headline(30, weight: .black))
+                .foregroundStyle(WSColor.lime)
+                .contentTransition(.numericText())
+                .animation(.wsBouncePop, value: score)
 
-            Spacer()
+            Spacer(minLength: 4)
 
-            // Streak flame
-            if streak >= 3 {
-                HStack(spacing: 4) {
-                    Image(systemName: "flame.fill").foregroundStyle(WSColor.duoOrange)
-                    Text("\(streak)x")
-                        .font(WSFont.sans(13, weight: .bold))
-                        .foregroundStyle(.white)
+            if streak >= 2 {
+                HStack(spacing: 3) {
+                    WSFlameIcon(size: 13)
+                    Text("x\(streak)")
+                        .font(WSFont.headline(14, weight: .black))
                 }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(
-                    Capsule().fill(WSColor.duoOrange.opacity(0.25))
-                        .overlay(Capsule().stroke(WSColor.duoOrange.opacity(0.4), lineWidth: 1))
-                )
+                .foregroundStyle(WSColor.inkText)
+                .padding(.horizontal, 9)
+                .padding(.vertical, 5)
+                .wsStickerCapsule(fill: WSColor.orange, depth: 2)
+                .transition(.scale.combined(with: .opacity))
             }
 
-            // Hearts (Duolingo-style)
-            WSHeartsRow(lives: lives, total: initialLives)
+            HStack(spacing: 2) {
+                ForEach(0..<initialLives, id: \.self) { i in
+                    Image(systemName: i < lives ? "heart.fill" : "heart")
+                        .font(.system(size: 17, weight: .black))
+                        .foregroundStyle(i < lives ? WSColor.pink : Color.white.opacity(0.3))
+                        .scaleEffect(i < lives ? 1 : 0.85)
+                }
+            }
+            .animation(.wsBouncePop, value: lives)
+            .accessibilityLabel("\(lives) lives left")
         }
+        .animation(.wsBouncePop, value: streak >= 2)
     }
 
-    // MARK: - Duolingo progress bar (chunky rounded)
+    // MARK: - Fall timer bar
 
     private var duoProgressBar: some View {
-        GeometryReader { geo in
-            let elapsed = Date().timeIntervalSince(roundStartTime)
-            let progress = min(elapsed / fallDuration, 1.0)
-
-            ZStack(alignment: .leading) {
-                // Track
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(Color.white.opacity(0.10))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .stroke(Color.white.opacity(0.06), lineWidth: 1)
-                    )
-
-                // Fill -- green to orange to red as time runs out
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(progressBarColor(for: progress))
-                    .frame(width: max(12, geo.size.width * (1 - progress)))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .stroke(Color.white.opacity(0.25), lineWidth: 1)
-                    )
-                    .shadow(color: progressBarColor(for: progress).opacity(0.5), radius: 4, y: 2)
-            }
-        }
+        let elapsed = Date().timeIntervalSince(roundStartTime)
+        let progress = min(elapsed / fallDuration, 1.0)
+        return WSStripeBar(fraction: 1 - progress, fill: progressBarColor(for: progress),
+                           track: Color.white.opacity(0.12), height: 14)
     }
 
     private func progressBarColor(for progress: Double) -> Color {
-        if progress < 0.5 { return WSColor.duoGreen }
-        if progress < 0.75 { return WSColor.duoOrange }
-        return WSColor.duoRed
+        if progress < 0.5 { return WSColor.lime }
+        if progress < 0.75 { return WSColor.orange }
+        return WSColor.pink
     }
 
-    // MARK: - Question card (Duo style)
+    // MARK: - Question card
 
     private func questionCard(_ prompt: String) -> some View {
         Text(prompt)
-            .font(WSFont.sans(17, weight: .bold))
-            .foregroundStyle(.white)
+            .font(WSFont.headline(19, weight: .black))
+            .foregroundStyle(WSColor.inkText)
             .multilineTextAlignment(.center)
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
             .frame(maxWidth: .infinity)
-            .background(
-                ZStack(alignment: .top) {
-                    // Bottom lip for 3D effect
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(Color.white.opacity(0.06))
-                        .padding(.top, 4)
-                    // Top face
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(Color.white.opacity(0.12))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                .stroke(Color.white.opacity(0.10), lineWidth: 1.5)
-                        )
-                }
-            )
+            .wsSticker(fill: WSColor.lilac, radius: 18, depth: 4, stroke: .black)
     }
 
     // MARK: - Play area
@@ -295,14 +252,12 @@ struct CraterBlastView: View {
             ZStack {
             Color.clear
 
-            // Danger zone at bottom
-            Rectangle()
-                .fill(
-                    LinearGradient(colors: [.clear, WSColor.duoRed.opacity(0.12)],
-                                   startPoint: .top, endPoint: .bottom)
-                )
-                .frame(height: 80)
-                .position(x: areaWidth / 2, y: areaHeight - 40)
+            // Danger line near the bottom
+            Path { p in
+                p.move(to: CGPoint(x: 0, y: areaHeight - 70))
+                p.addLine(to: CGPoint(x: areaWidth, y: areaHeight - 70))
+            }
+            .stroke(WSColor.pink.opacity(0.5), style: StrokeStyle(lineWidth: 2.5, dash: [10, 8]))
 
             ForEach(craters) { crater in
                 craterView(crater: crater, areaWidth: areaWidth, areaHeight: areaHeight)
@@ -313,10 +268,7 @@ struct CraterBlastView: View {
             }
 
             ForEach(scorePopups) { popup in
-                Text("+\(popup.points)")
-                    .font(WSFont.headline(20, weight: .black))
-                    .foregroundStyle(WSColor.duoGreen)
-                    .shadow(color: .black.opacity(0.6), radius: 4)
+                WSStickerBadge(text: "+\(popup.points)", fill: WSColor.lime, size: 16, depth: 2, radius: 10)
                     .position(x: popup.x, y: popup.y)
             }
 
@@ -358,71 +310,41 @@ struct CraterBlastView: View {
         }
         let xPos = crater.xRatio * areaWidth
 
-        let (topFill, borderCol, glowCol, textCol) = craterDuoColors(for: crater.status)
+        let (topFill, textCol) = craterColors(for: crater.status)
 
         return ZStack {
-            // Bottom lip for 3D
             Circle()
-                .fill(borderCol)
+                .fill(Color.black)
                 .frame(width: craterSize, height: craterSize)
                 .offset(y: crater.status == .falling ? 4 : 2)
-
-            // Top face
             Circle()
                 .fill(topFill)
                 .frame(width: craterSize, height: craterSize)
-                .overlay(
-                    Circle()
-                        .stroke(Color.white.opacity(0.15), lineWidth: 1.5)
-                )
-                .shadow(color: glowCol, radius: crater.status == .falling ? 4 : 14)
+                .overlay(Circle().strokeBorder(Color.black, lineWidth: WSSticker.stroke))
 
-            // Answer text
             Text(crater.text)
-                .font(WSFont.sans(crater.text.count > 14 ? 9 : crater.text.count > 10 ? 10 : 12, weight: .bold))
+                .font(WSFont.headline(crater.text.count > 14 ? 10 : crater.text.count > 10 ? 11 : 13, weight: .black))
                 .foregroundStyle(textCol)
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
                 .minimumScaleFactor(0.6)
-                .frame(width: craterSize * 0.68)
+                .frame(width: craterSize * 0.7)
         }
         .position(x: xPos, y: yPos)
         .opacity(crater.status == .missed ? 0.3 : 1)
-        .scaleEffect(crater.status == .correct ? 1.15 : crater.status == .wrong ? 0.85 : 1)
+        .scaleEffect(crater.status == .correct ? 1.2 : crater.status == .wrong ? 0.85 : 1)
         .wsWobble(trigger: crater.status == .wrong ? wrongShakeTrigger : 0)
-        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: crater.status)
+        .animation(.spring(response: 0.3, dampingFraction: 0.55), value: crater.status)
     }
 
-    private func craterDuoColors(for status: CraterStatus) -> (Color, Color, Color, Color) {
+    /// Falling meteors rotate through the sticker palette so the field
+    /// reads like the Arcade preview; hits flip lime, misses flip pink.
+    private func craterColors(for status: CraterStatus) -> (Color, Color) {
         switch status {
-        case .falling:
-            return (
-                Color.white,
-                WSColor.duoBorder,
-                Color.white.opacity(0.15),
-                WSColor.duoText
-            )
-        case .correct:
-            return (
-                WSColor.duoGreen,
-                WSColor.duoGreenDark,
-                WSColor.duoGreen.opacity(0.6),
-                .white
-            )
-        case .wrong:
-            return (
-                WSColor.duoRed,
-                WSColor.duoRedDark,
-                WSColor.duoRed.opacity(0.6),
-                .white
-            )
-        case .missed:
-            return (
-                Color(hex: 0x94A3B8),
-                Color(hex: 0x64748B),
-                .clear,
-                Color.white.opacity(0.5)
-            )
+        case .falling: return (Color.white, WSColor.inkText)
+        case .correct: return (WSColor.lime, WSColor.inkText)
+        case .wrong:   return (WSColor.pink, WSColor.inkText)
+        case .missed:  return (Color(hex: 0x6B6290), Color.white.opacity(0.6))
         }
     }
 
@@ -430,22 +352,17 @@ struct CraterBlastView: View {
 
     private func explosionView(exp: Explosion) -> some View {
         ZStack {
+            WSStarburst(points: 10, inset: 0.6)
+                .fill(exp.isCorrect ? WSColor.lime : WSColor.pink)
+                .overlay(WSStarburst(points: 10, inset: 0.6).stroke(Color.black, lineWidth: 2.5))
+                .frame(width: 84, height: 84)
             Circle()
-                .fill(
-                    RadialGradient(
-                        colors: exp.isCorrect
-                            ? [WSColor.duoGreen.opacity(0.9), WSColor.duoGreen.opacity(0.3), .clear]
-                            : [WSColor.duoRed.opacity(0.9), WSColor.duoRed.opacity(0.3), .clear],
-                        center: .center, startRadius: 0, endRadius: 35
-                    )
-                )
-                .frame(width: 70, height: 70)
-
-            Circle()
-                .stroke(exp.isCorrect ? WSColor.duoGreen.opacity(0.7) : WSColor.duoRed.opacity(0.7), lineWidth: 2)
-                .frame(width: 50, height: 50)
+                .fill(WSColor.sun)
+                .overlay(Circle().strokeBorder(Color.black, lineWidth: 2))
+                .frame(width: 26, height: 26)
         }
         .position(x: exp.x, y: exp.y)
+        .transition(.scale(scale: 0.3).combined(with: .opacity))
     }
 
     // MARK: - Projectile view (Duo orange/gold)
@@ -457,15 +374,9 @@ struct CraterBlastView: View {
         let y = proj.startY + (proj.targetY - proj.startY) * t
 
         return Circle()
-            .fill(WSColor.duoOrange)
-            .frame(width: 16, height: 16)
-            .overlay(
-                Circle()
-                    .fill(Color.white.opacity(0.4))
-                    .frame(width: 8, height: 8)
-            )
-            .shadow(color: WSColor.duoOrange, radius: 12)
-            .shadow(color: WSColor.duoOrangeDark.opacity(0.5), radius: 24)
+            .fill(WSColor.sun)
+            .overlay(Circle().strokeBorder(Color.black, lineWidth: 2))
+            .frame(width: 18, height: 18)
             .position(x: x, y: y)
     }
 
@@ -478,37 +389,25 @@ struct CraterBlastView: View {
         return ZStack {
             VStack(spacing: 0) {
                 // Barrel
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(
-                        LinearGradient(colors: [WSColor.duoOrangeDark, WSColor.duoOrange, WSColor.duoOrangeDark],
-                                       startPoint: .leading, endPoint: .trailing)
-                    )
-                    .frame(width: 10, height: 50)
-
-                // Barrel tip
-                RoundedRectangle(cornerRadius: 3)
-                    .fill(WSColor.duoOrangeDark)
-                    .frame(width: 16, height: 6)
+                RoundedRectangle(cornerRadius: 5)
+                    .fill(WSColor.lime)
+                    .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(Color.black, lineWidth: 2.5))
+                    .frame(width: 16, height: 52)
             }
             .rotationEffect(.degrees(cannonAngle), anchor: .bottom)
-            .position(x: cannonX, y: cannonY - 25)
+            .position(x: cannonX, y: cannonY - 26)
 
-            // Base
-            VStack(spacing: -1) {
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(WSColor.duoOrange)
-                    .frame(width: 50, height: 22)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(WSColor.duoOrangeDark, lineWidth: 2)
-                    )
-                    .shadow(color: WSColor.duoOrange.opacity(0.5), radius: 8)
-
-                RoundedRectangle(cornerRadius: 6)
-                    .fill(WSColor.duoOrangeDark)
-                    .frame(width: 70, height: 10)
-            }
-            .position(x: cannonX, y: cannonY)
+            // Base: the purple dome from the Arcade preview
+            Ellipse()
+                .fill(Color.black)
+                .frame(width: 92, height: 50)
+                .offset(y: 4)
+                .position(x: cannonX, y: cannonY + 4)
+            Ellipse()
+                .fill(WSColor.purple)
+                .overlay(Ellipse().strokeBorder(Color.black, lineWidth: 2.5))
+                .frame(width: 92, height: 50)
+                .position(x: cannonX, y: cannonY + 4)
         }
     }
 
@@ -737,50 +636,30 @@ struct CraterBlastView: View {
         spawnRound(qIdx: qIndex)
     }
 
-    // MARK: - End screen (Duolingo celebration)
+    // MARK: - End screen
 
     private var endScreen: some View {
         let totalAnswered = correctCount + (initialLives - lives)
         let accuracy = totalAnswered > 0 ? Int(Double(correctCount) / Double(totalAnswered) * 100) : 0
 
-        return VStack(spacing: 22) {
-            WSAnimatedImage(name: "mascot-study", ext: "webp")
-                .frame(width: 160, height: 160)
-                .shadow(color: WSColor.duoOrange.opacity(0.5), radius: 22, y: 8)
-
-            VStack(spacing: 6) {
-                Text("Game Over")
-                    .wsHeadline(.large, weight: .black)
-                    .foregroundStyle(.white)
-                Text("\(score)")
-                    .font(WSFont.headline(44, weight: .black))
-                    .foregroundStyle(WSColor.duoOrange)
-                    .shadow(color: WSColor.duoOrange.opacity(0.5), radius: 12)
-                Text("TOTAL SCORE")
-                    .font(WSFont.sans(11, weight: .black))
-                    .tracking(1.5)
-                    .foregroundStyle(.white.opacity(0.5))
-            }
-
-            HStack(spacing: 12) {
-                duoStatBox(value: "\(correctCount)", label: "Hits", color: WSColor.duoGreen)
-                duoStatBox(value: "\(longestStreak)", label: "Best Streak", color: WSColor.duoOrange)
-                duoStatBox(value: "\(accuracy)%", label: "Accuracy", color: WSColor.duoBlue)
-            }
-            .padding(.horizontal, 24)
-
+        return WSWinScreen(
+            headline: correctCount >= 8 ? "CRATER\nCLEARED." : "GAME\nOVER.",
+            subline: correctCount > 0 ? "\(correctCount) direct hits. Run it back and beat \(score)." : "The meteors won this round. Go again.",
+            stats: [
+                WSWinStat(label: "Score", value: "\(score)", fill: WSColor.lime),
+                WSWinStat(label: "Hits", value: "\(correctCount)", fill: WSColor.sky),
+                WSWinStat(label: "Accuracy", value: "\(accuracy)%", fill: WSColor.orange),
+                WSWinStat(label: "Best streak", value: "x\(longestStreak)", fill: WSColor.pink),
+            ]
+        ) {
             Button {
                 resetGame()
                 Haptics.medium()
             } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: "arrow.counterclockwise")
-                    Text("Play again")
-                }
+                Label("Play again", systemImage: "arrow.counterclockwise")
             }
-            .buttonStyle(WSDuoWarnButtonStyle(fullWidth: false))
+            .buttonStyle(WSStickerButtonStyle(fill: WSColor.lime, foreground: WSColor.inkText, radius: 20, height: 60))
         }
-        .padding()
         .onAppear {
             // Award + log exactly once per game. The end screen only
             // appears once per match (resetGame() rebuilds state).
@@ -790,32 +669,6 @@ struct CraterBlastView: View {
                 subtitle: "Score \(score) \u{00B7} streak \(longestStreak)"
             )
         }
-    }
-
-    private func duoStatBox(value: String, label: String, color: Color) -> some View {
-        VStack(spacing: 4) {
-            Text(value)
-                .font(WSFont.headline(24, weight: .black))
-                .foregroundStyle(color)
-            Text(label)
-                .font(WSFont.sans(11, weight: .bold))
-                .foregroundStyle(.white.opacity(0.6))
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
-        .background(
-            ZStack(alignment: .top) {
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(color.opacity(0.08))
-                    .padding(.top, 3)
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(Color.white.opacity(0.08))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .stroke(color.opacity(0.25), lineWidth: 1.5)
-                    )
-            }
-        )
     }
 
     private func resetGame() {

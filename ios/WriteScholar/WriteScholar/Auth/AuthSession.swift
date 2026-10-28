@@ -161,4 +161,22 @@ final class AuthSession: ObservableObject {
         KeychainStore.shared.authToken = nil
         state = .unauthenticated
     }
+
+    // MARK: Delete account
+
+    private struct DeleteAck: Decodable {
+        let success: Bool
+        let message: String?
+    }
+
+    /// Permanently deletes the signed-in account on the server (App Store
+    /// guideline 5.1.1(v)), then signs out. Throws if the server refuses,
+    /// so the caller can keep the user signed in and show the error.
+    func deleteAccount() async throws {
+        let ack: DeleteAck = try await APIClient.shared.deleteRaw(path: "users/account")
+        guard ack.success else {
+            throw APIError.badStatus(code: 500, message: ack.message ?? "Couldn't delete your account.")
+        }
+        signOut()
+    }
 }

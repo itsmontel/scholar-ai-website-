@@ -42,11 +42,11 @@ struct StudyPackInputView: View {
         }
         var tint: Color {
             switch self {
-            case .topic:    return WSColor.duoPurple
-            case .notes:    return WSColor.duoGreen
-            case .document: return WSColor.duoBlue
-            case .photo:    return WSColor.duoOrange
-            case .youtube:  return WSColor.duoRed
+            case .topic:    return WSColor.lime
+            case .notes:    return WSColor.sky
+            case .document: return WSColor.sky
+            case .photo:    return WSColor.orange
+            case .youtube:  return WSColor.pink
             }
         }
         var isPrimary: Bool { self == .topic || self == .notes }
@@ -150,16 +150,19 @@ struct StudyPackInputView: View {
     private var titleRow: some View {
         HStack(alignment: .center, spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Study Pack")
-                    .font(WSFont.headline(26, weight: .black))
-                    .foregroundStyle(WSColor.duoText)
+                WSKicker(text: "New study pack")
+                Text("Notes in.\nQuiz out.")
+                    .font(WSFont.headline(36, weight: .black))
+                    .tracking(-1.2)
+                    .foregroundStyle(WSColor.foreground)
                 Text("Lesson · flashcards · quiz · games")
-                    .font(WSFont.sans(14, weight: .semibold))
+                    .font(WSFont.sans(14, weight: .bold))
                     .foregroundStyle(WSColor.foregroundMuted)
             }
             Spacer()
             WSAnimatedImage(name: "mascot-study", ext: "webp")
-                .frame(width: 52, height: 52)
+                .frame(width: 84, height: 84)
+                .wsMascotBob(amount: 6, rock: 3, duration: 1.2)
         }
     }
 
@@ -172,12 +175,8 @@ struct StudyPackInputView: View {
             segmentButton(.topic)
             segmentButton(.notes)
         }
-        .padding(4)
-        .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(WSColor.duoSurface)
-                .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(WSColor.duoBorder, lineWidth: 1.5))
-        )
+        .padding(5)
+        .wsSticker(fill: WSColor.lilacDeep, radius: 18, depth: 3)
     }
 
     private func segmentButton(_ m: InputMode) -> some View {
@@ -193,14 +192,15 @@ struct StudyPackInputView: View {
                 Image(systemName: m.icon)
                     .font(.system(size: 13, weight: .heavy))
                 Text(m == .topic ? "Topic" : "Paste notes")
-                    .font(WSFont.sans(14, weight: .black))
+                    .font(WSFont.headline(15, weight: .black))
             }
-            .foregroundStyle(on ? .white : WSColor.duoText)
+            .foregroundStyle(on ? WSColor.inkText : WSColor.foreground)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 12)
             .background(
-                RoundedRectangle(cornerRadius: 11, style: .continuous)
+                RoundedRectangle(cornerRadius: 13, style: .continuous)
                     .fill(on ? m.tint : Color.clear)
+                    .overlay(RoundedRectangle(cornerRadius: 13, style: .continuous).strokeBorder(on ? WSColor.ink : .clear, lineWidth: 2))
             )
         }
         .buttonStyle(.plain)
@@ -222,13 +222,14 @@ struct StudyPackInputView: View {
     private var topicInput: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("What do you want to study?")
-                .font(WSFont.sans(14, weight: .bold))
-                .foregroundStyle(WSColor.duoText)
+                .font(WSFont.headline(17, weight: .black))
+                .foregroundStyle(WSColor.foreground)
 
             TextField("e.g. The French Revolution", text: $topicText)
                 .font(WSFont.sans(17, weight: .semibold))
                 .padding(16)
                 .background(inputFieldBackground(focused: fieldFocused, tint: WSColor.duoPurple))
+                .padding(.bottom, 4)
                 .focused($fieldFocused)
                 .submitLabel(.go)
                 .onSubmit { if canSubmit { submit() } }
@@ -240,11 +241,12 @@ struct StudyPackInputView: View {
                         Haptics.light()
                     } label: {
                         Text(ex)
-                            .font(WSFont.sans(12, weight: .bold))
-                            .foregroundStyle(WSColor.duoPurple)
+                            .font(WSFont.sans(12, weight: .heavy))
+                            .foregroundStyle(WSColor.foreground)
                             .padding(.horizontal, 10)
                             .padding(.vertical, 6)
-                            .background(Capsule().fill(WSColor.duoPurpleLight))
+                            .background(Capsule().fill(WSColor.backgroundElevated))
+                            .overlay(Capsule().strokeBorder(WSColor.ink, lineWidth: 2))
                     }
                     .buttonStyle(.plain)
                 }
@@ -261,12 +263,12 @@ struct StudyPackInputView: View {
                 Spacer()
                 Text("\(notesWordCount) words")
                     .font(WSFont.sans(12, weight: .bold))
-                    .foregroundStyle(notesWordCount >= 50 ? WSColor.duoGreen : WSColor.foregroundMuted)
+                    .foregroundStyle(notesWordCount >= 50 ? WSColor.purpleInk : WSColor.foregroundMuted)
                 Button("Paste") {
                     if let p = UIPasteboard.general.string { notesText = p; Haptics.light() }
                 }
-                .font(WSFont.sans(12, weight: .bold))
-                .foregroundStyle(WSColor.duoGreen)
+                .font(WSFont.sans(12, weight: .heavy))
+                .foregroundStyle(WSColor.purpleInk)
             }
 
             ZStack(alignment: .topLeading) {
@@ -286,6 +288,7 @@ struct StudyPackInputView: View {
                     .padding(8)
             }
             .background(inputFieldBackground(focused: fieldFocused, tint: WSColor.duoGreen))
+            .padding(.bottom, 4)
         }
     }
 
@@ -337,6 +340,7 @@ struct StudyPackInputView: View {
                 .keyboardType(.URL)
                 .padding(16)
                 .background(inputFieldBackground(focused: fieldFocused, tint: WSColor.duoRed))
+                .padding(.bottom, 4)
                 .focused($fieldFocused)
         }
     }
@@ -389,9 +393,10 @@ struct StudyPackInputView: View {
                         } label: {
                             HStack(spacing: 12) {
                                 Image(systemName: alt.icon)
-                                    .font(.system(size: 16, weight: .heavy))
-                                    .foregroundStyle(alt.tint)
-                                    .frame(width: 28)
+                                    .font(.system(size: 14, weight: .black))
+                                    .foregroundStyle(WSColor.inkText)
+                                    .frame(width: 32, height: 32)
+                                    .wsStickerCircle(fill: alt.tint)
                                 Text(alt.label)
                                     .font(WSFont.sans(15, weight: .bold))
                                     .foregroundStyle(WSColor.duoText)
@@ -401,14 +406,7 @@ struct StudyPackInputView: View {
                                     .foregroundStyle(WSColor.foregroundMuted)
                             }
                             .padding(14)
-                            .background(
-                                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                    .fill(WSColor.backgroundElevated)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                            .stroke(WSColor.duoBorder, lineWidth: 1.5)
-                                    )
-                            )
+                            .wsSticker(radius: 16, depth: 3)
                         }
                         .buttonStyle(.plain)
                     }
@@ -423,9 +421,11 @@ struct StudyPackInputView: View {
         VStack(spacing: 0) {
             if let err = coordinator.errorMessage {
                 Text(err)
-                    .font(WSFont.sans(12, weight: .bold))
-                    .foregroundStyle(WSColor.duoRed)
+                    .font(WSFont.sans(13, weight: .bold))
+                    .foregroundStyle(WSColor.inkText)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(12)
+                    .wsSticker(fill: WSColor.pinkSoft, radius: 14, depth: 2)
                     .padding(.horizontal, 20)
                     .padding(.bottom, 8)
             }
@@ -436,22 +436,15 @@ struct StudyPackInputView: View {
             } label: {
                 HStack(spacing: 8) {
                     if preparingSource {
-                        ProgressView().tint(.white)
+                        ProgressView().tint(WSColor.inkText)
                     } else {
                         Image(systemName: "sparkles")
                     }
-                    Text(preparingSource ? "Preparing…" : "Generate pack")
-                        .font(WSFont.sans(17, weight: .black))
+                    Text(preparingSource ? "Preparing…" : "Make my pack")
                 }
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 16)
-                .background(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(canSubmit ? WSColor.duoGreen : WSColor.duoBorder)
-                )
             }
-            .buttonStyle(WSBouncyButtonStyle())
+            .buttonStyle(WSStickerButtonStyle(fill: canSubmit ? WSColor.lime : WSColor.lilacDeep, foreground: WSColor.inkText,
+                                              radius: 20, height: 60, font: WSFont.headline(19, weight: .black)))
             .disabled(!canSubmit)
             .padding(.horizontal, 20)
             .padding(.top, 12)
@@ -468,28 +461,33 @@ struct StudyPackInputView: View {
             }
         }
         .animation(.easeInOut(duration: 0.2), value: submitHint)
-        .background(WSColor.backgroundElevated.shadow(color: .black.opacity(0.06), radius: 12, y: -4))
+        .background(WSColor.background)
     }
 
     // MARK: - Helpers
 
     private func inputFieldBackground(focused: Bool, tint: Color) -> some View {
-        RoundedRectangle(cornerRadius: 14, style: .continuous)
-            .fill(WSColor.duoSurface)
-            .overlay(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(focused ? tint : WSColor.duoBorder, lineWidth: focused ? 2 : 1.5)
-            )
+        ZStack {
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(focused ? WSColor.purple : WSColor.ink)
+                .offset(y: 4)
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(WSColor.backgroundElevated)
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .strokeBorder(WSColor.ink, lineWidth: WSSticker.stroke)
+        }
     }
 
     private func pickRow(icon: String, label: String, tint: Color) -> some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
-                .font(.system(size: 22, weight: .bold))
-                .foregroundStyle(tint)
+                .font(.system(size: 18, weight: .black))
+                .foregroundStyle(WSColor.inkText)
+                .frame(width: 40, height: 40)
+                .wsStickerCircle(fill: WSStickerTint.face(for: tint))
             Text(label)
-                .font(WSFont.sans(15, weight: .bold))
-                .foregroundStyle(WSColor.duoText)
+                .font(WSFont.headline(16, weight: .black))
+                .foregroundStyle(WSColor.foreground)
             Spacer()
             Image(systemName: "chevron.right")
                 .font(.system(size: 12, weight: .bold))
@@ -498,8 +496,8 @@ struct StudyPackInputView: View {
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .strokeBorder(style: StrokeStyle(lineWidth: 1.5, dash: [6, 4]))
-                .foregroundStyle(tint.opacity(0.4))
+                .strokeBorder(style: StrokeStyle(lineWidth: 2.5, dash: [7, 5]))
+                .foregroundStyle(WSColor.ink.opacity(0.5))
         )
     }
 

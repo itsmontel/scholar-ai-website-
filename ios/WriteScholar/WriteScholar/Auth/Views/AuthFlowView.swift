@@ -12,13 +12,12 @@ import AuthenticationServices
 struct AuthFlowView: View {
     @EnvironmentObject var session: AuthSession
     @State private var path = NavigationPath()
-    @State private var mascotBob: CGFloat = 0
 
     var body: some View {
         NavigationStack(path: $path) {
             ZStack {
                 // Flat Duolingo surface — white top fading to a subtle purple tint
-                WSGradient.heroBackdrop.ignoresSafeArea()
+                WSColor.lilac.ignoresSafeArea()
 
                 VStack(spacing: 0) {
                     Spacer(minLength: 24)
@@ -51,11 +50,6 @@ struct AuthFlowView: View {
                     SignUpSuccessView(email: email, path: $path)
                 }
             }
-            .onAppear {
-                withAnimation(.easeInOut(duration: 2.6).repeatForever(autoreverses: true)) {
-                    mascotBob = -10
-                }
-            }
         }
     }
 
@@ -63,15 +57,13 @@ struct AuthFlowView: View {
 
     private var heroBlock: some View {
         VStack(spacing: 20) {
-            WSAnimatedImage(name: "mascot-dance", ext: "webp")
-                .frame(width: 160, height: 160)
-                .offset(y: mascotBob)
-                .shadow(color: WSColor.duoGreen.opacity(0.25), radius: 16, y: 8)
+            WSMascotHero(asset: "mascot-dance", size: 150, haloTint: WSColor.lime)
 
             VStack(spacing: 10) {
-                Text("Welcome to WriteScholar")
-                    .wsHeadline(.large, weight: .black)
-                    .foregroundStyle(WSColor.duoText)
+                Text("Save your\nprogress.")
+                    .font(WSFont.headline(42, weight: .black))
+                    .tracking(-1.4)
+                    .foregroundStyle(WSColor.foreground)
                     .multilineTextAlignment(.center)
 
                 Text("Sign in to keep your essays, study packs, and streaks in sync.")
@@ -99,20 +91,10 @@ struct AuthFlowView: View {
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .stroke(WSColor.duoBorder, lineWidth: 2)
+                    .strokeBorder(WSColor.ink, lineWidth: WSSticker.stroke)
             )
-            .overlay(
-                // Chunky bottom border for 3D lip effect
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .stroke(Color.black.opacity(0.15), lineWidth: 2)
-                    .offset(y: 3)
-                    .mask(
-                        VStack {
-                            Spacer()
-                            Rectangle().frame(height: 10)
-                        }
-                    )
-            )
+            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(WSColor.purple).offset(y: 4))
+            .padding(.bottom, 4)
 
             // Google — chunky card style button
             Button {
@@ -124,11 +106,11 @@ struct AuthFlowView: View {
                         .font(.system(size: 22, weight: .bold))
                         .foregroundStyle(Color(hex: 0xEA4335))
                     Text("Continue with Google")
-                        .font(WSFont.sans(15, weight: .bold))
-                        .foregroundStyle(WSColor.duoText)
+                        .font(WSFont.headline(17, weight: .black))
+                        .foregroundStyle(WSColor.foreground)
                 }
                 .frame(maxWidth: .infinity)
-                .frame(height: 56)
+                .frame(height: 30)
             }
             .buttonStyle(WSDuoSecondaryButtonStyle(fullWidth: true))
 
@@ -172,13 +154,10 @@ struct AuthFlowView: View {
             if let err = session.lastError {
                 Text(err)
                     .wsBody(.small, weight: .bold)
-                    .foregroundStyle(WSColor.duoRed)
+                    .foregroundStyle(WSColor.inkText)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 8)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(WSColor.duoRedLight)
-                    )
+                    .wsSticker(fill: WSColor.pinkSoft, radius: 12, depth: 2)
                     .transition(.opacity.combined(with: .scale(scale: 0.95)))
             }
         }

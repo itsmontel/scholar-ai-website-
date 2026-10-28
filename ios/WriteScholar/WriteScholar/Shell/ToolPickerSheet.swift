@@ -41,13 +41,15 @@ struct ToolPickerSheet: View {
     }
 
     private let tools: [Tool] = [
-        .init(icon: "pencil.and.scribble",           tint: WSColor.duoPurple, title: "Smart Editor",   subtitle: "Write & improve essays",     route: .smartEditor),
+        .init(icon: "pencil.and.scribble",           tint: WSColor.pink,      title: "Smart Editor",   subtitle: "Write & improve essays",     route: .smartEditor),
         .init(icon: "doc.text.magnifyingglass",      tint: WSColor.duoBlue,   title: "Essay Analyzer", subtitle: "Get AI feedback",            route: .essayAnalyzer),
         .init(icon: "rectangle.on.rectangle.angled", tint: WSColor.duoGreen,  title: "Flashcards",     subtitle: "Study notes & concepts",     route: .studyPacks, intent: .flashcards),
         .init(icon: "questionmark.circle.fill",      tint: WSColor.duoBlue,   title: "Quiz",           subtitle: "Test your knowledge",        route: .studyPacks, intent: .quiz),
         .init(icon: "folder.fill",                   tint: WSColor.duoPurple, title: "Study Pack",     subtitle: "Organize your notes",        route: .studyPacks, intent: .create),
         .init(icon: "gamecontroller.fill",           tint: WSColor.duoPink,   title: "Arcade Mode",    subtitle: "Learn by playing",           route: .arcade),
-        .init(icon: "shield.lefthalf.filled",        tint: WSColor.duoOrange, title: "Focus Mode",     subtitle: "Block apps until you study", route: .focus),
+        .init(icon: "bolt.fill",                     tint: WSColor.duoOrange, title: "Study Mode",     subtitle: "Earn your scroll time",      route: .focus),
+        .init(icon: "tray.full.fill",                tint: WSColor.sky,       title: "My Stuff",       subtitle: "Everything you've made",     route: .library),
+        .init(icon: "checklist",                     tint: WSColor.lime,      title: "Daily Review",   subtitle: "Cards due today",            route: .review),
     ]
 
     var body: some View {
@@ -64,15 +66,11 @@ struct ToolPickerSheet: View {
                     } label: {
                         Image(systemName: "xmark")
                             .font(.system(size: 13, weight: .black))
-                            .foregroundStyle(WSColor.foregroundMuted)
-                            .frame(width: 32, height: 32)
-                            .background(
-                                Circle()
-                                    .fill(WSColor.backgroundElevated)
-                                    .shadow(color: Color.black.opacity(0.06), radius: 5, y: 2)
-                            )
+                            .foregroundStyle(WSColor.foreground)
+                            .frame(width: 34, height: 34)
+                            .wsStickerCircle(fill: WSColor.backgroundElevated)
                     }
-                    .buttonStyle(WSBouncyButtonStyle())
+                    .buttonStyle(WSStickerPressStyle())
                     .accessibilityLabel("Close")
                 }
                 .padding(.top, 8)
@@ -90,7 +88,7 @@ struct ToolPickerSheet: View {
                                           title: tool.title,
                                           subtitle: tool.subtitle)
                         }
-                        .buttonStyle(WSBouncyButtonStyle())
+                        .buttonStyle(WSStickerPressStyle())
                         .wsStaggerEntry(i + 1)
                     }
                 }

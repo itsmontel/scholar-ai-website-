@@ -47,7 +47,6 @@ struct LibraryHero: View {
                 .frame(width: 100, height: 100)
                 .offset(x: 130, y: 140)
                 .rotationEffect(.degrees(8))
-                .shadow(color: WSColor.duoBlue.opacity(0.28), radius: 16, y: 8)
                 .wsStaggerEntry(1)
 
             // Streak badge floating top-left -- Duolingo orange
@@ -83,7 +82,6 @@ struct LibraryHero: View {
                 .overlay(
                     Capsule().stroke(WSColor.duoOrange.opacity(0.40), lineWidth: 2)
                 )
-                .shadow(color: WSColor.duoOrange.opacity(0.20), radius: 10, y: 4)
         )
     }
 

@@ -47,14 +47,12 @@ struct HistorySheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text("Recent Activity")
-                        .wsHeadline(.small, weight: .black)
-                        .foregroundStyle(WSColor.duoText)
+                    WSKicker(text: "Recent activity")
                 }
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Done") { dismiss() }
-                        .font(WSFont.sans(15, weight: .bold))
-                        .foregroundStyle(WSColor.duoPurple)
+                        .font(WSFont.sans(15, weight: .heavy))
+                        .foregroundStyle(WSColor.purpleInk)
                 }
             }
         }
@@ -65,18 +63,11 @@ struct HistorySheet: View {
     private var emptyState: some View {
         VStack(spacing: 18) {
             Spacer()
-            ZStack {
-                Circle()
-                    .fill(WSColor.duoPurpleLight)
-                    .frame(width: 110, height: 110)
-                Image(systemName: "clock.arrow.circlepath")
-                    .font(.system(size: 44, weight: .semibold))
-                    .foregroundStyle(WSColor.duoPurple)
-            }
+            WSMascotHero(asset: "mascot-thinking", size: 120, haloTint: WSColor.lime)
             Text("Nothing here yet")
-                .wsHeadline(.medium, weight: .black)
-                .foregroundStyle(WSColor.duoText)
-            Text("Finish a quiz, play a game, or generate a study pack and it'll show up in your timeline here.")
+                .font(WSFont.headline(24, weight: .black))
+                .foregroundStyle(WSColor.foreground)
+            Text("Finish a quiz, play a game or make a study pack and it shows up here.")
                 .wsBody(.medium)
                 .foregroundStyle(WSColor.foregroundMuted)
                 .multilineTextAlignment(.center)
@@ -117,7 +108,7 @@ struct HistorySheet: View {
     private func heroTile(value: String, label: String, color: Color) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(value)
-                .font(.system(size: 24, weight: .black, design: .rounded))
+                .font(WSFont.headline(24, weight: .black))
                 .foregroundStyle(color)
             Text(label)
                 .wsBody(.caption, weight: .bold)
@@ -151,19 +142,16 @@ struct HistorySheet: View {
         let capped = entry.xp == 0 && nominal > 0   // earned nothing despite a non-zero base
 
         return HStack(spacing: 14) {
-            ZStack {
-                Circle()
-                    .fill(activityTint(activity).opacity(0.16))
-                    .frame(width: 42, height: 42)
-                Image(systemName: activity.icon)
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundStyle(activityTint(activity))
-            }
+            Image(systemName: activity.icon)
+                .font(.system(size: 16, weight: .black))
+                .foregroundStyle(WSColor.inkText)
+                .frame(width: 42, height: 42)
+                .wsStickerCircle(fill: WSStickerTint.face(for: activityTint(activity)))
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(entry.title ?? activity.label)
-                    .wsBody(.medium, weight: .bold)
-                    .foregroundStyle(WSColor.duoText)
+                    .font(WSFont.headline(16, weight: .black))
+                    .foregroundStyle(WSColor.foreground)
                     .lineLimit(2)
                 if let sub = entry.subtitle, !sub.isEmpty {
                     Text(sub)
@@ -180,15 +168,19 @@ struct HistorySheet: View {
 
             VStack(alignment: .trailing, spacing: 2) {
                 Text("+\(entry.xp) XP")
-                    .wsBody(.caption, weight: .black)
-                    .foregroundStyle(entry.xp > 0 ? WSColor.duoGreen : WSColor.foregroundMuted)
+                    .font(WSFont.headline(13, weight: .black))
+                    .foregroundStyle(entry.xp > 0 ? WSColor.inkText : WSColor.foregroundMuted)
+                    .padding(.horizontal, entry.xp > 0 ? 8 : 0)
+                    .padding(.vertical, entry.xp > 0 ? 2 : 0)
+                    .background(Capsule().fill(entry.xp > 0 ? WSColor.lime : .clear))
+                    .overlay(Capsule().strokeBorder(entry.xp > 0 ? WSColor.ink : .clear, lineWidth: 1.5))
                 if capped {
                     Text("DAILY CAP")
-                        .font(.system(size: 9, weight: .black))
-                        .foregroundStyle(.white)
+                        .font(WSFont.sans(9, weight: .black))
+                        .foregroundStyle(WSColor.inkText)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
-                        .background(Capsule().fill(WSColor.duoOrange))
+                        .background(Capsule().fill(WSColor.orange))
                 }
                 Text(timeAgo(entry.at))
                     .wsBody(.caption, weight: .semibold)
@@ -196,14 +188,7 @@ struct HistorySheet: View {
             }
         }
         .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(WSColor.backgroundElevated)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .stroke(WSColor.duoBorder, lineWidth: 2)
-                )
-        )
+        .wsSticker(radius: 18, depth: 3)
     }
 
     /// Per-activity tint using Duolingo palette colors.

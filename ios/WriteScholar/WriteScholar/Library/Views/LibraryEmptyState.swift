@@ -30,7 +30,7 @@ struct LibraryEmptyState: View {
                     .foregroundStyle(WSColor.duoText)
                     .multilineTextAlignment(.center)
 
-                Text("Everything you build in WriteScholar — study packs, uploaded notes, and essays from the web app — all lands here automatically.")
+                Text("Everything you make in WriteScholar lands here: study packs, uploaded notes and essays from the web app.")
                     .wsBody(.medium)
                     .foregroundStyle(WSColor.duoText.opacity(0.65))
                     .multilineTextAlignment(.center)
@@ -106,7 +106,7 @@ struct LibraryEmptyState: View {
                     .foregroundStyle(tint)
             }
         }
-        .buttonStyle(WSBouncyButtonStyle())
+        .buttonStyle(WSStickerPressStyle())
         .wsChunkyCard(cornerRadius: 18, horizontalPadding: 14, verticalPadding: 14, lipHeight: 5, accent: tint)
     }
 

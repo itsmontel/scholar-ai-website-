@@ -58,7 +58,7 @@ struct DailyReviewView: View {
                         Text("View full activity").wsBody(.small, weight: .bold)
                         Image(systemName: "chevron.right").font(.system(size: 11, weight: .bold))
                     }
-                    .foregroundStyle(WSColor.duoPurple)
+                    .foregroundStyle(WSColor.purpleInk)
                 }
                 .buttonStyle(.plain)
                 .padding(.top, 2)
@@ -96,8 +96,9 @@ struct DailyReviewView: View {
     // MARK: - Title header
 
     private var header: some View {
-        Text("Daily Review")
-            .wsHeadline(.large, weight: .black)
+        Text("Daily Review.")
+            .font(WSFont.headline(36, weight: .black))
+            .tracking(-1)
             .foregroundStyle(WSColor.foreground)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.top, 4)
@@ -119,30 +120,25 @@ struct DailyReviewView: View {
     private var banner: some View {
         HStack(spacing: 14) {
             VStack(alignment: .leading, spacing: 4) {
-                Text(current > 0 ? "You're on a roll! 🔥" : "Let's get rolling 🔥")
-                    .wsHeadline(.small, weight: .black)
-                    .foregroundStyle(WSColor.foreground)
+                HStack(spacing: 6) {
+                    WSFlameIcon(size: 18, lit: current > 0)
+                    Text(current > 0 ? "You're on a roll." : "Let's get rolling.")
+                        .font(WSFont.headline(20, weight: .black))
+                }
+                .foregroundStyle(WSColor.inkText)
                 Text(bannerSubtitle)
                     .wsBody(.small, weight: .bold)
-                    .foregroundStyle(WSColor.foregroundMuted)
+                    .foregroundStyle(WSColor.inkMuted)
                     .redacted(reason: streakLoaded ? [] : .placeholder)
             }
             Spacer()
             WSAnimatedImage(name: "mascot-paper", ext: "webp")
                 .frame(width: 76, height: 76)
-                .wsBobbing()
+                .wsMascotBob(amount: 5, rock: 3, duration: 1.3)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
-        .background(
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .fill(WSColor.bannerCream)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 22, style: .continuous)
-                        .stroke(WSColor.duoYellow.opacity(0.35), lineWidth: 1.5)
-                )
-                .shadow(color: WSColor.duoYellow.opacity(0.18), radius: 12, y: 6)
-        )
+        .wsSticker(fill: Color(hex: 0xFFF1B8), radius: 24, depth: 4)
     }
 
     private var bannerSubtitle: String {
@@ -171,13 +167,14 @@ struct DailyReviewView: View {
                     Haptics.medium()
                     onStartReview()
                 } label: {
-                    Text("Create a study pack").frame(maxWidth: .infinity)
+                    Text("Create a study pack")
                 }
-                .buttonStyle(WSDuoPrimaryButtonStyle(fullWidth: true))
+                .buttonStyle(WSStickerButtonStyle(fill: WSColor.lime, foreground: WSColor.inkText))
             } else {
                 Text("\(dueCards.count)")
-                    .font(WSFont.headline(52, weight: .black))
-                    .foregroundStyle(WSColor.duoPurple)
+                    .font(WSFont.headline(72, weight: .black))
+                    .tracking(-2.5)
+                    .foregroundStyle(WSColor.purple)
                 Text("question\(dueCards.count == 1 ? "" : "s") left")
                     .wsHeadline(.small, weight: .black)
                     .foregroundStyle(WSColor.foreground)
@@ -188,9 +185,9 @@ struct DailyReviewView: View {
                     Haptics.medium()
                     reviewDeck = ReviewDeck(flashcards: Flashcards(title: "Daily Review", cards: dueCards))
                 } label: {
-                    Text("Start review").frame(maxWidth: .infinity)
+                    Label("Start review", systemImage: "play.fill")
                 }
-                .buttonStyle(WSDuoPrimaryButtonStyle(fullWidth: true))
+                .buttonStyle(WSStickerButtonStyle(fill: WSColor.lime, foreground: WSColor.inkText))
                 .padding(.top, 4)
             }
         }

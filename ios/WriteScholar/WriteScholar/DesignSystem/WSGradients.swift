@@ -2,8 +2,9 @@
 //  WSGradients.swift
 //  WriteScholar
 //
-//  Duolingo-style background washes. Flat/near-flat to match the solid
-//  color system — no more violet→fuchsia gradient sweeps.
+//  Background fills. The sticker redesign uses flat faces only, so every
+//  token here resolves to a single color (kept as LinearGradient so the
+//  call sites compile unchanged).
 //
 
 import SwiftUI
@@ -12,7 +13,7 @@ enum WSGradient {
     /// Brand accent — purple to purple-dark, used sparingly.
     static var brand: LinearGradient {
         LinearGradient(
-            colors: [WSColor.duoPurple, WSColor.duoPurpleDark],
+            colors: [WSColor.purple, WSColor.purple],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
@@ -21,34 +22,15 @@ enum WSGradient {
     /// Subtle background wash for hero sections — near-white with a purple tint.
     static var heroBackdrop: LinearGradient {
         LinearGradient(
-            colors: [
-                WSColor.background,
-                WSColor.background,
-                WSColor.duoPurpleLight.opacity(0.3)
-            ],
+            colors: [WSColor.background, WSColor.background],
             startPoint: .top,
             endPoint: .bottom
         )
     }
 
-    /// Per-page wash for onboarding. Each page gets a Duolingo-colored tint.
+    /// Onboarding page fill (flat lilac on every page).
     static func onboardingBackdrop(for index: Int) -> LinearGradient {
-        let palettes: [[Color]] = [
-            // 0: Green welcome
-            [Color.white, WSColor.duoGreenLight],
-            // 1: Purple essays
-            [Color.white, WSColor.duoPurpleLight],
-            // 2: Blue study tools
-            [Color.white, WSColor.duoBlueLight],
-            // 3: Green flashcards
-            [Color.white, WSColor.duoGreenLight],
-            // 4: Orange games
-            [Color.white, WSColor.duoOrangeLight],
-            // 5: Blue library
-            [Color.white, WSColor.duoBlueLight],
-            // 6: Green CTA finale
-            [WSColor.duoGreenLight, WSColor.duoGreen.opacity(0.15)]
-        ]
+        let palettes: [[Color]] = [[WSColor.lilac, WSColor.lilac]]
         let palette = palettes[index % palettes.count]
         return LinearGradient(
             colors: palette,
@@ -60,7 +42,7 @@ enum WSGradient {
     /// Green CTA gradient for primary buttons in special contexts.
     static var greenCTA: LinearGradient {
         LinearGradient(
-            colors: [WSColor.duoGreen, WSColor.duoGreenDark],
+            colors: [WSColor.lime, WSColor.lime],
             startPoint: .top,
             endPoint: .bottom
         )

@@ -40,44 +40,44 @@ struct WSDuoPalette {
     )
 
     static let secondary = WSDuoPalette(
-        topColor:   Color.white,
+        topColor:   WSColor.backgroundElevated,
         baseColor:  WSColor.duoBorder,
-        foreground: WSColor.duoText,
+        foreground: WSColor.foreground,
         glow:       WSColor.duoPurple.opacity(0.12)
     )
 
     static let success = WSDuoPalette(
-        topColor:   WSColor.duoGreen,
+        topColor:   WSColor.lime,
         baseColor:  WSColor.duoGreenDark,
-        foreground: .white,
+        foreground: WSColor.inkText,
         glow:       WSColor.duoGreen
     )
 
     static let warn = WSDuoPalette(
-        topColor:   WSColor.duoOrange,
+        topColor:   WSColor.orange,
         baseColor:  WSColor.duoOrangeDark,
-        foreground: .white,
+        foreground: WSColor.inkText,
         glow:       WSColor.duoOrange
     )
 
     static let danger = WSDuoPalette(
-        topColor:   WSColor.duoRed,
+        topColor:   WSColor.pink,
         baseColor:  WSColor.duoRedDark,
-        foreground: .white,
+        foreground: WSColor.inkText,
         glow:       WSColor.duoRed
     )
 
     static let info = WSDuoPalette(
-        topColor:   WSColor.duoBlue,
+        topColor:   WSColor.sky,
         baseColor:  WSColor.duoBlueDark,
-        foreground: .white,
+        foreground: WSColor.inkText,
         glow:       WSColor.duoBlue
     )
 
     static let pink = WSDuoPalette(
-        topColor:   WSColor.duoPink,
+        topColor:   WSColor.pink,
         baseColor:  WSColor.duoPinkDark,
-        foreground: .white,
+        foreground: WSColor.inkText,
         glow:       WSColor.duoPink
     )
 
@@ -96,29 +96,27 @@ struct WSDuoButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         let pressed = configuration.isPressed
+        let depth = max(3, lip)
+        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
 
-        // Soft-shadow button (prototype look): flat solid fill, rounded,
-        // title-case label. Press = a small scale-down + softer shadow,
-        // no vertical "lip slide". `lip` retained in the API but unused.
+        // Sticker button: ink outline + hard shadow; the face sinks into
+        // its shadow while pressed. `glow` is retained but unused.
         return configuration.label
-            .font(WSFont.sans(16, weight: .bold))
+            .font(WSFont.headline(17, weight: .black))
             .foregroundStyle(palette.foreground)
             .padding(.vertical, verticalPadding)
-            .padding(.horizontal, fullWidth ? 0 : 22)
+            .padding(.horizontal, fullWidth ? 12 : 22)
             .frame(maxWidth: fullWidth ? .infinity : nil)
             .background(
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .fill(palette.topColor)
-                    .overlay(
-                        // Subtle outline only for light (secondary) buttons
-                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                            .stroke(WSColor.hairline, lineWidth: palette.foreground == .white ? 0 : 1)
-                    )
+                ZStack {
+                    shape.fill(palette.topColor)
+                    shape.strokeBorder(WSColor.ink, lineWidth: WSSticker.stroke)
+                }
             )
-            .shadow(color: palette.glow.opacity(pressed ? 0.10 : 0.26),
-                    radius: pressed ? 4 : 12, y: pressed ? 2 : 6)
-            .scaleEffect(pressed ? 0.97 : 1.0)
-            .animation(.spring(response: 0.16, dampingFraction: 0.65), value: pressed)
+            .offset(y: pressed ? depth - 1 : 0)
+            .background(shape.fill(WSColor.ink).offset(y: depth))
+            .padding(.bottom, depth)
+            .animation(.spring(response: 0.14, dampingFraction: 0.7), value: pressed)
             .onChange(of: configuration.isPressed) { _, isPressed in
                 if isPressed { Haptics.light() }
             }
@@ -225,8 +223,8 @@ struct WSSecondaryButtonStyle: ButtonStyle {
 struct WSTertiaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(WSFont.sans(13, weight: .bold))
-            .foregroundStyle(WSColor.duoPurple)
+            .font(WSFont.sans(14, weight: .heavy))
+            .foregroundStyle(WSColor.purpleInk)
             .padding(.vertical, 8)
             .padding(.horizontal, 12)
             .opacity(configuration.isPressed ? 0.6 : 1.0)

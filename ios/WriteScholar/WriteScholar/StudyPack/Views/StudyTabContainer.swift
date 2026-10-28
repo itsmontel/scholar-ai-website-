@@ -67,15 +67,11 @@ struct StudyTabContainer: View {
                             } label: {
                                 Image(systemName: "square.grid.2x2")
                                     .font(.system(size: 15, weight: .bold))
-                                    .foregroundStyle(WSColor.duoPurple)
+                                    .foregroundStyle(WSColor.foreground)
                                     .frame(width: 38, height: 38)
-                                    .background(
-                                        Circle()
-                                            .fill(WSColor.backgroundElevated)
-                                            .shadow(color: Color.black.opacity(0.06), radius: 5, y: 2)
-                                    )
+                                    .wsStickerCircle(fill: WSColor.backgroundElevated)
                             }
-                            .buttonStyle(WSBouncyButtonStyle())
+                            .buttonStyle(WSStickerPressStyle())
                             .padding(.top, 14)
                             .padding(.trailing, 18)
                             .accessibilityLabel("Your packs")
@@ -131,21 +127,7 @@ struct StudyTabContainer: View {
                 case .wordTower(let p):   WordTowerView(wordTower: p)
                 case .wordBlitz(let p):   WordBlitzView(wordBlitz: p)
                 }
-                Button {
-                    Haptics.light()
-                    presentedGame = nil
-                } label: {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundStyle(WSColor.foreground)
-                        .padding(10)
-                        .background(Circle().fill(WSColor.backgroundElevated))
-                        .overlay(Circle().stroke(WSColor.hairline, lineWidth: 1))
-                        .shadow(color: Color.black.opacity(0.1), radius: 6, y: 2)
-                }
-                .buttonStyle(.plain)
-                .padding(.top, 14)
-                .padding(.leading, 14)
+                WSGameCloseButton { presentedGame = nil }
             }
         }
     }

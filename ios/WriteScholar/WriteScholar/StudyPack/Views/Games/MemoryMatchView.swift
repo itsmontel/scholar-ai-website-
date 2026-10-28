@@ -91,9 +91,10 @@ struct MemoryMatchView: View {
             Image(systemName: icon).font(.system(size: 11, weight: .black))
             Text(value).font(WSFont.sans(13, weight: .black)).monospacedDigit()
         }
-        .foregroundStyle(tint)
+        .foregroundStyle(WSColor.inkText)
         .padding(.horizontal, 10).padding(.vertical, 6)
-        .background(Capsule().fill(tint.opacity(0.12)))
+        .background(Capsule().fill(WSStickerTint.face(for: tint)))
+        .overlay(Capsule().strokeBorder(WSColor.ink, lineWidth: 2))
     }
 
     private func cardView(_ card: Card) -> some View {
@@ -104,31 +105,34 @@ struct MemoryMatchView: View {
         } label: {
             ZStack {
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(isUp ? (isMatched ? WSColor.duoGreenLight : WSColor.surfacePurple) : WSColor.duoPurple)
+                    .fill(WSColor.ink)
+                    .offset(y: 4)
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(isUp ? (isMatched ? WSColor.lime : WSColor.backgroundElevated) : WSColor.purple)
                     .overlay(
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(isMatched ? WSColor.duoGreen.opacity(0.4) : WSColor.duoPurple.opacity(0.2), lineWidth: 1.5)
+                            .strokeBorder(WSColor.ink, lineWidth: WSSticker.stroke)
                     )
-                    .shadow(color: Color.black.opacity(0.06), radius: 6, y: 3)
                 if isUp {
                     Text(card.text)
                         .font(WSFont.sans(card.isTerm ? 14 : 12, weight: card.isTerm ? .black : .bold))
-                        .foregroundStyle(isMatched ? WSColor.duoGreenDark : WSColor.foreground)
+                        .foregroundStyle(isMatched ? WSColor.inkText : WSColor.foreground)
                         .multilineTextAlignment(.center)
                         .minimumScaleFactor(0.5)
                         .padding(8)
                 } else {
                     Image(systemName: "questionmark")
-                        .font(.system(size: 22, weight: .black))
-                        .foregroundStyle(.white.opacity(0.85))
+                        .font(.system(size: 24, weight: .black))
+                        .foregroundStyle(WSColor.lime)
                 }
             }
             .frame(height: 96)
             .rotation3DEffect(.degrees(isUp ? 0 : 180), axis: (x: 0, y: 1, z: 0))
             .animation(.easeInOut(duration: 0.25), value: isUp)
-            .opacity(isMatched ? 0.65 : 1)
+            .scaleEffect(isMatched ? 0.96 : 1)
+            .animation(.wsBouncePop, value: isMatched)
         }
-        .buttonStyle(WSBouncyButtonStyle())
+        .buttonStyle(WSStickerPressStyle())
         .disabled(isMatched || busy)
     }
 

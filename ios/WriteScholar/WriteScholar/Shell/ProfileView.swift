@@ -63,63 +63,54 @@ struct ProfileView: View {
         }
         .sheet(isPresented: $showSettings) {
             SettingsSheet(user: user, onboardingComplete: $onboardingComplete, onSignOut: onSignOut)
+                .environmentObject(session)
                 .presentationDetents([.large])
         }
     }
 
-    // MARK: - Gradient header
+    // MARK: - Header card
 
     private var header: some View {
         VStack(spacing: 12) {
-            Circle()
-                .fill(.white)
-                .frame(width: 88, height: 88)
-                .overlay(
-                    WSAnimatedImage(name: "mascot-study", ext: "webp")
-                        .frame(width: 72, height: 72)
-                        .clipShape(Circle())
-                )
-                .shadow(color: Color.black.opacity(0.15), radius: 10, y: 5)
+            WSAnimatedImage(name: "mascot-study", ext: "webp")
+                .frame(width: 76, height: 76)
+                .frame(width: 92, height: 92)
+                .clipShape(Circle())
+                .wsStickerCircle(fill: WSColor.lime, depth: 4)
+                .padding(.bottom, 4)
+                .wsMascotBob(amount: 4, rock: 2, duration: 1.5)
 
             Text(user.displayName)
-                .wsHeadline(.medium, weight: .black)
+                .font(WSFont.headline(28, weight: .black))
+                .tracking(-0.8)
                 .foregroundStyle(.white)
 
             Text("Level \(level.level) · \(level.name)")
-                .font(WSFont.sans(12, weight: .black))
-                .foregroundStyle(.white)
+                .font(WSFont.headline(14, weight: .black))
+                .foregroundStyle(WSColor.inkText)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 5)
-                .background(Capsule().fill(.white.opacity(0.22)))
+                .wsStickerCapsule(fill: WSColor.lime, depth: 2)
 
             VStack(spacing: 6) {
                 HStack {
                     Text("\(formatted(totalXP)) XP")
-                        .wsBody(.small, weight: .black)
+                        .font(WSFont.headline(15, weight: .black))
                         .foregroundStyle(.white)
                     Spacer()
                     Text(isMaxLevel ? "Max level" : "\(formatted(totalXP)) / \(formatted(level.maxXP))")
                         .wsBody(.small, weight: .bold)
                         .foregroundStyle(.white.opacity(0.9))
                 }
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        Capsule().fill(.white.opacity(0.25)).frame(height: 12)
-                        Capsule().fill(.white)
-                            .frame(width: max(12, geo.size.width * levelFraction), height: 12)
-                    }
-                }
-                .frame(height: 12)
+                WSStripeBar(fraction: levelFraction, fill: WSColor.lime, track: Color.white.opacity(0.25), height: 14)
             }
-            .padding(.horizontal, 24)
+            .padding(.horizontal, 12)
             .padding(.top, 4)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 30)
+        .padding(.vertical, 26)
         .padding(.horizontal, 16)
-        .background(WSGradient.brand)
-        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-        .shadow(color: WSColor.duoPurple.opacity(0.3), radius: 16, y: 8)
+        .wsSticker(fill: WSColor.purple, radius: 28, depth: 5)
     }
 
     private func formatted(_ n: Int) -> String {
@@ -146,7 +137,7 @@ struct ProfileView: View {
                                    earned: earned,
                                    size: 58)
                     }
-                    .buttonStyle(WSBouncyButtonStyle())
+                    .buttonStyle(WSStickerPressStyle())
                 }
                 Spacer(minLength: 0)
             }
@@ -160,27 +151,33 @@ struct ProfileView: View {
             Button { Haptics.light(); showHistory = true } label: {
                 WSListRowCard(icon: "chart.bar.fill", iconTint: WSColor.duoBlue,
                               title: "Statistics", subtitle: "Your study insights")
-            }.buttonStyle(WSBouncyButtonStyle())
+            }.buttonStyle(WSStickerPressStyle())
 
             Button { Haptics.light(); showStreak = true } label: {
                 WSListRowCard(icon: "clock.fill", iconTint: WSColor.duoOrange,
                               title: "Study streak") {
-                    Text("\(streak?.currentStreak ?? 0) days 🔥")
-                        .wsBody(.small, weight: .black)
-                        .foregroundStyle(WSColor.duoOrange)
+                    HStack(spacing: 4) {
+                        WSFlameIcon(size: 13)
+                        Text("\(streak?.currentStreak ?? 0) days")
+                            .font(WSFont.headline(14, weight: .black))
+                    }
+                    .foregroundStyle(WSColor.inkText)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .wsStickerCapsule(fill: WSColor.orange, depth: 2)
                 }
-            }.buttonStyle(WSBouncyButtonStyle())
+            }.buttonStyle(WSStickerPressStyle())
 
             Button { Haptics.light(); showSettings = true } label: {
                 WSListRowCard(icon: "gearshape.fill", iconTint: WSColor.foregroundMuted, title: "Settings")
-            }.buttonStyle(WSBouncyButtonStyle())
+            }.buttonStyle(WSStickerPressStyle())
 
             Button {
                 Haptics.light()
                 if let u = URL(string: "https://writescholar.com/help") { UIApplication.shared.open(u) }
             } label: {
                 WSListRowCard(icon: "questionmark.circle.fill", iconTint: WSColor.duoGreen, title: "Help & support")
-            }.buttonStyle(WSBouncyButtonStyle())
+            }.buttonStyle(WSStickerPressStyle())
         }
     }
 

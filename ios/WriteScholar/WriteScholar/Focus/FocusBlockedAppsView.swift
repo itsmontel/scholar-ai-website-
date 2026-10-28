@@ -61,12 +61,12 @@ struct FocusBlockedAppsView: View {
                 }
                 .ignoresSafeArea(.keyboard, edges: .bottom)
             }
-            .navigationTitle("Apps to focus on")
+            .navigationTitle("Apps that ask")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
-                        .foregroundStyle(WSColor.duoText.opacity(0.55))
+                        .foregroundStyle(WSColor.foregroundMuted)
                 }
             }
             .familyActivityPicker(isPresented: $pickerVisible, selection: $draft)
@@ -77,7 +77,7 @@ struct FocusBlockedAppsView: View {
 
     private var intro: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("BLOCK LIST")
+            Text("STUDY MODE")
                 .wsEyebrow()
                 .foregroundStyle(WSColor.duoPurple)
                 .padding(.horizontal, 10)
@@ -88,9 +88,9 @@ struct FocusBlockedAppsView: View {
                 .wsHeadline(.medium, weight: .black)
                 .foregroundStyle(WSColor.duoText)
 
-            Text("They'll be shielded by Focus mode. To open one, you'll need to pass a quick \(manager.settings.challengeType.rawValue.lowercased()) challenge.")
+            Text("When you open one, it asks a question from your study packs first. Answer it right and the app opens.")
                 .wsBody(.medium)
-                .foregroundStyle(WSColor.duoText.opacity(0.65))
+                .foregroundStyle(WSColor.foregroundMuted)
         }
     }
 
@@ -106,9 +106,9 @@ struct FocusBlockedAppsView: View {
                     .wsHeadline(.small, weight: .black)
                     .foregroundStyle(WSColor.duoText)
             }
-            Text("WriteScholar uses Apple's Family Controls to shield apps you choose — without seeing what they are. Tap below and approve when iOS asks.")
+            Text("WriteScholar uses Apple's Screen Time to show your question when an app opens, without ever seeing which apps you chose. Tap below and approve when iOS asks.")
                 .wsBody(.small)
-                .foregroundStyle(WSColor.duoText.opacity(0.55))
+                .foregroundStyle(WSColor.foregroundMuted)
 
             Button {
                 requestingAuth = true
@@ -137,7 +137,7 @@ struct FocusBlockedAppsView: View {
     private var selectionSummary: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Currently blocking")
+                Text("Apps that ask")
                     .wsHeadline(.small, weight: .black)
                     .foregroundStyle(WSColor.duoText)
                 Spacer()
@@ -169,7 +169,7 @@ struct FocusBlockedAppsView: View {
                 pickerVisible = true
             } label: {
                 Label(draft.applicationTokens.isEmpty && draft.categoryTokens.isEmpty
-                      ? "Pick apps to block"
+                      ? "Choose apps"
                       : "Edit selection",
                       systemImage: "plus.circle.fill")
             }
@@ -216,7 +216,7 @@ struct FocusBlockedAppsView: View {
                 .fill(WSColor.backgroundElevated)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .stroke(WSColor.duoBorder, lineWidth: 2)
+                        .stroke(WSColor.ink, lineWidth: 2)
                 )
         )
     }
@@ -247,9 +247,9 @@ struct FocusBlockedAppsView: View {
                 }
             }
 
-            Text("Tap \"Pick apps to block\" above and search for these by name in Apple's picker.")
+            Text("Tap \"Choose apps\" above and search for these by name in Apple's picker.")
                 .wsBody(.caption)
-                .foregroundStyle(WSColor.duoText.opacity(0.55))
+                .foregroundStyle(WSColor.foregroundMuted)
                 .padding(.top, 2)
         }
         .wsChunkyCard(accent: WSColor.duoBlue)

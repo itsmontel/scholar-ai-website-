@@ -54,7 +54,6 @@ struct AchievementsGallerySheet: View {
                 WSColor.background.ignoresSafeArea()
 
                 VStack(spacing: 0) {
-                    WSChunkyRibbon(color: WSColor.duoPurple)
                     ScrollView {
                         LazyVStack(alignment: .leading, spacing: 22, pinnedViews: []) {
                             heroHeader
@@ -124,12 +123,12 @@ struct AchievementsGallerySheet: View {
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
                     Text("COLLECTION")
-                        .font(.system(size: 9, weight: .black, design: .rounded))
+                        .font(WSFont.headline(9, weight: .black))
                         .tracking(0.7)
                         .foregroundStyle(WSColor.foregroundMuted)
                     Spacer()
                     Text("\(Int(percent * 100))%")
-                        .font(.system(size: 11, weight: .black, design: .rounded))
+                        .font(WSFont.headline(11, weight: .black))
                         .foregroundStyle(WSColor.duoGreen)
                 }
                 WSXPBar(xpInLevel: unlockedCount, xpForLevel: totalCount, tint: WSColor.duoGreen, height: 12, showsLabel: false)
@@ -139,12 +138,12 @@ struct AchievementsGallerySheet: View {
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
                     Text("LEVEL \(level.level) PROGRESS")
-                        .font(.system(size: 9, weight: .black, design: .rounded))
+                        .font(WSFont.headline(9, weight: .black))
                         .tracking(0.7)
                         .foregroundStyle(WSColor.foregroundMuted)
                     Spacer()
                     Text(level.maxXP == .max ? "Top tier" : "\(xp - level.minXP)/\(xpForLevel) XP")
-                        .font(.system(size: 11, weight: .black, design: .rounded))
+                        .font(WSFont.headline(11, weight: .black))
                         .foregroundStyle(WSColor.duoOrange)
                 }
                 WSXPBar(xpInLevel: xpInLevel, xpForLevel: xpForLevel, tint: WSColor.duoOrange, height: 12, showsLabel: false)
@@ -169,26 +168,25 @@ struct AchievementsGallerySheet: View {
                         Text(f.label)
                             .wsBody(.small, weight: .black)
                         Text("\(matchCount(f))")
-                            .font(.system(size: 10, weight: .black, design: .rounded))
+                            .font(WSFont.headline(10, weight: .black))
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
-                            .background(
-                                Capsule()
-                                    .fill(active ? Color.white.opacity(0.25) : WSColor.duoSurface)
-                            )
-                            .foregroundStyle(active ? .white : WSColor.foregroundMuted)
+                            .background(Capsule().fill(active ? Color.white : WSColor.lilacDeep))
+                            .foregroundStyle(WSColor.inkText)
                     }
-                    .foregroundStyle(active ? .white : WSColor.duoText)
+                    .foregroundStyle(active ? WSColor.inkText : WSColor.foreground)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 9)
                     .background(
-                        Capsule()
-                            .fill(active ? WSColor.duoPurple : WSColor.backgroundElevated)
-                            .overlay(Capsule().stroke(active ? .clear : WSColor.duoBorder, lineWidth: 2))
-                            .shadow(color: active ? WSColor.duoPurple.opacity(0.40) : .clear, radius: 8, y: 3)
+                        ZStack {
+                            Capsule().fill(WSColor.ink).offset(y: active ? 3 : 2)
+                            Capsule().fill(active ? WSColor.lime : WSColor.backgroundElevated)
+                            Capsule().strokeBorder(WSColor.ink, lineWidth: 2)
+                        }
                     )
+                    .padding(.bottom, 3)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(WSStickerPressStyle())
             }
         }
     }
@@ -229,11 +227,11 @@ struct AchievementsGallerySheet: View {
     /// Maps rarity to Duolingo accent colors
     private static func rarityAccent(_ rarity: Achievement.Rarity) -> Color {
         switch rarity {
-        case .common:    return WSColor.duoGreen
-        case .uncommon:  return WSColor.duoBlue
-        case .rare:      return WSColor.duoPurple
-        case .epic:      return WSColor.duoOrange
-        case .legendary: return WSColor.duoRed
+        case .common:    return WSColor.lime
+        case .uncommon:  return WSColor.sky
+        case .rare:      return WSColor.purple
+        case .epic:      return WSColor.orange
+        case .legendary: return WSColor.pink
         }
     }
 
@@ -245,26 +243,19 @@ struct AchievementsGallerySheet: View {
                 HStack(spacing: 6) {
                     Image(systemName: group.icon)
                         .font(.system(size: 13, weight: .heavy))
-                        .foregroundStyle(.white)
                     Text(group.label)
-                        .font(.system(size: 14, weight: .black, design: .rounded))
-                        .foregroundStyle(.white)
+                        .font(WSFont.headline(15, weight: .black))
                 }
+                .foregroundStyle(WSColor.inkText)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
-                .background(
-                    Capsule().fill(group.tint)
-                        .shadow(color: group.tint.opacity(0.35), radius: 4, y: 2)
-                )
+                .wsStickerCapsule(fill: WSStickerTint.face(for: group.tint), depth: 2)
 
                 Spacer()
 
-                Text("\(groupUnlocked) / \(items.count)")
-                    .font(.system(size: 11, weight: .black, design: .rounded))
-                    .foregroundStyle(group.tint)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(Capsule().fill(group.tint.opacity(0.13)))
+                Text("\(groupUnlocked)/\(items.count)")
+                    .font(WSFont.headline(13, weight: .black))
+                    .foregroundStyle(WSColor.foreground)
             }
 
             let cols = [GridItem(.flexible(), spacing: 10),
@@ -282,7 +273,7 @@ struct AchievementsGallerySheet: View {
                             progress: item.progress(stats: stats)
                         )
                     }
-                    .buttonStyle(WSBouncyButtonStyle())
+                    .buttonStyle(WSStickerPressStyle())
                 }
             }
         }
@@ -299,11 +290,11 @@ struct AchievementTile: View {
     /// Maps rarity to Duolingo accent colors
     private var rarityColor: Color {
         switch achievement.rarity {
-        case .common:    return WSColor.duoGreen
-        case .uncommon:  return WSColor.duoBlue
-        case .rare:      return WSColor.duoPurple
-        case .epic:      return WSColor.duoOrange
-        case .legendary: return WSColor.duoRed
+        case .common:    return WSColor.lime
+        case .uncommon:  return WSColor.sky
+        case .rare:      return WSColor.purple
+        case .epic:      return WSColor.orange
+        case .legendary: return WSColor.pink
         }
     }
 
@@ -312,24 +303,17 @@ struct AchievementTile: View {
             ZStack {
                 // Outer ring
                 Circle()
-                    .fill(
-                        unlocked
-                            ? rarityColor
-                            : WSColor.duoSurface
-                    )
+                    .fill(WSColor.ink)
                     .frame(width: 64, height: 64)
-                    .overlay(
-                        Circle()
-                            .stroke(
-                                unlocked ? rarityColor.opacity(0.50) : WSColor.duoBorder,
-                                lineWidth: unlocked ? 3 : 2
-                            )
-                    )
-                    .shadow(color: unlocked ? rarityColor.opacity(0.45) : .clear, radius: 8, y: 3)
+                    .offset(y: unlocked ? 4 : 2)
+                Circle()
+                    .fill(unlocked ? rarityColor : WSColor.lilacDeep)
+                    .frame(width: 64, height: 64)
+                    .overlay(Circle().strokeBorder(WSColor.ink.opacity(unlocked ? 1 : 0.4), lineWidth: WSSticker.stroke))
 
                 Image(systemName: achievement.category.icon)
                     .font(.system(size: 22, weight: .heavy))
-                    .foregroundStyle(unlocked ? .white : WSColor.foregroundMuted)
+                    .foregroundStyle(unlocked ? (rarityColor == WSColor.purple ? .white : WSColor.inkText) : WSColor.foregroundMuted)
 
                 if !unlocked && progress > 0 {
                     Circle()
@@ -343,16 +327,17 @@ struct AchievementTile: View {
                 if !unlocked {
                     Image(systemName: "lock.fill")
                         .font(.system(size: 10, weight: .black))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(WSColor.inkText)
                         .padding(5)
-                        .background(Circle().fill(Color(hex: 0x94A3B8)))
+                        .background(Circle().fill(WSColor.sun))
+                        .overlay(Circle().strokeBorder(WSColor.ink, lineWidth: 1.5))
                         .offset(x: 22, y: 22)
                 }
             }
             .frame(height: 70)
 
             Text(achievement.name)
-                .font(.system(size: 11, weight: .black, design: .rounded))
+                .font(WSFont.headline(11, weight: .black))
                 .foregroundStyle(WSColor.duoText)
                 .lineLimit(1)
                 .truncationMode(.tail)
@@ -360,7 +345,7 @@ struct AchievementTile: View {
                 .frame(maxWidth: .infinity)
 
             Text(unlocked ? "+\(achievement.xp) XP" : achievement.conditionText)
-                .font(.system(size: 9, weight: .bold, design: .rounded))
+                .font(WSFont.headline(9, weight: .black))
                 .foregroundStyle(unlocked ? rarityColor : WSColor.foregroundMuted)
                 .lineLimit(2)
                 .multilineTextAlignment(.center)
@@ -391,11 +376,11 @@ struct AchievementDetailSheet: View {
     /// Maps rarity to Duolingo accent colors
     private var rarityColor: Color {
         switch achievement.rarity {
-        case .common:    return WSColor.duoGreen
-        case .uncommon:  return WSColor.duoBlue
-        case .rare:      return WSColor.duoPurple
-        case .epic:      return WSColor.duoOrange
-        case .legendary: return WSColor.duoRed
+        case .common:    return WSColor.lime
+        case .uncommon:  return WSColor.sky
+        case .rare:      return WSColor.purple
+        case .epic:      return WSColor.orange
+        case .legendary: return WSColor.pink
         }
     }
 
@@ -430,38 +415,38 @@ struct AchievementDetailSheet: View {
 
     private var bigBadge: some View {
         ZStack {
+            if isUnlocked {
+                WSStarburst(points: 16, inset: 0.86)
+                    .fill(WSColor.sun)
+                    .overlay(WSStarburst(points: 16, inset: 0.86).stroke(WSColor.ink, lineWidth: 2.5))
+                    .frame(width: 190, height: 190)
+                    .wsSpin(period: 20)
+            }
             Circle()
-                .fill(
-                    isUnlocked
-                        ? rarityColor
-                        : WSColor.duoSurface
-                )
+                .fill(isUnlocked ? rarityColor : WSColor.lilacDeep)
                 .frame(width: 140, height: 140)
-                .overlay(
-                    Circle().stroke(
-                        isUnlocked ? rarityColor.opacity(0.50) : WSColor.duoBorder,
-                        lineWidth: 4
-                    )
-                )
-                .shadow(color: isUnlocked ? rarityColor.opacity(0.45) : .clear, radius: 22, y: 8)
+                .overlay(Circle().strokeBorder(WSColor.ink, lineWidth: 3))
+                .background(Circle().fill(WSColor.ink).offset(y: 6))
 
             Image(systemName: achievement.category.icon)
                 .font(.system(size: 56, weight: .heavy))
-                .foregroundStyle(isUnlocked ? .white : WSColor.foregroundMuted)
+                .foregroundStyle(isUnlocked ? (rarityColor == WSColor.purple ? .white : WSColor.inkText) : WSColor.foregroundMuted)
 
             if isUnlocked {
-                Image(systemName: "checkmark.seal.fill")
-                    .font(.system(size: 28, weight: .black))
-                    .foregroundStyle(.white)
-                    .padding(8)
-                    .background(Circle().fill(WSColor.duoGreen))
+                Image(systemName: "checkmark")
+                    .font(.system(size: 22, weight: .black))
+                    .foregroundStyle(WSColor.inkText)
+                    .padding(10)
+                    .background(Circle().fill(WSColor.lime))
+                    .overlay(Circle().strokeBorder(WSColor.ink, lineWidth: 2.5))
                     .offset(x: 50, y: 50)
             } else {
                 Image(systemName: "lock.fill")
                     .font(.system(size: 20, weight: .black))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(WSColor.inkText)
                     .padding(10)
-                    .background(Circle().fill(Color(hex: 0x94A3B8)))
+                    .background(Circle().fill(WSColor.sun))
+                    .overlay(Circle().strokeBorder(WSColor.ink, lineWidth: 2.5))
                     .offset(x: 50, y: 50)
             }
         }
@@ -471,7 +456,7 @@ struct AchievementDetailSheet: View {
     private var headerInfo: some View {
         VStack(spacing: 6) {
             Text(achievement.rarity.label.uppercased())
-                .font(.system(size: 10, weight: .black, design: .rounded))
+                .font(WSFont.headline(10, weight: .black))
                 .tracking(0.8)
                 .foregroundStyle(.white)
                 .padding(.horizontal, 12)
@@ -495,12 +480,12 @@ struct AchievementDetailSheet: View {
                 Image(systemName: "hourglass")
                     .foregroundStyle(rarityColor)
                 Text("PROGRESS")
-                    .font(.system(size: 10, weight: .black, design: .rounded))
+                    .font(WSFont.headline(10, weight: .black))
                     .tracking(0.7)
                     .foregroundStyle(WSColor.foregroundMuted)
                 Spacer()
                 Text("\(Int(progress * 100))%")
-                    .font(.system(size: 12, weight: .black, design: .rounded))
+                    .font(WSFont.headline(12, weight: .black))
                     .foregroundStyle(rarityColor)
             }
             WSXPBar(xpInLevel: Int(progress * 100), xpForLevel: 100, tint: rarityColor, height: 12, showsLabel: false)
@@ -520,7 +505,7 @@ struct AchievementDetailSheet: View {
             }
             VStack(alignment: .leading, spacing: 2) {
                 Text(isUnlocked ? "Earned" : "Reward")
-                    .font(.system(size: 11, weight: .black, design: .rounded))
+                    .font(WSFont.headline(11, weight: .black))
                     .tracking(0.5)
                     .foregroundStyle(WSColor.foregroundMuted)
                 Text("+\(achievement.xp) XP")
@@ -539,7 +524,7 @@ struct AchievementDetailSheet: View {
                 Image(systemName: "info.circle.fill")
                     .foregroundStyle(WSColor.duoBlue)
                 Text("ABOUT")
-                    .font(.system(size: 10, weight: .black, design: .rounded))
+                    .font(WSFont.headline(10, weight: .black))
                     .tracking(0.7)
                     .foregroundStyle(WSColor.foregroundMuted)
             }

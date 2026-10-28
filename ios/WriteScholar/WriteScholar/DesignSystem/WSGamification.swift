@@ -35,62 +35,39 @@ struct WSStreakFlame: View {
     @State private var spin: Double = 0
 
     var body: some View {
-        let activeFlame  = WSColor.duoOrange
-        let activeRing   = WSColor.duoOrangeDark
-        let dormantTint  = Color(hex: 0x94A3B8)
-        let dormantRing  = Color(hex: 0xCBD5E1)
-        let chipFill     = activeToday ? WSColor.duoRed : dormantTint
-        let chipStroke   = activeToday ? WSColor.duoRedDark : Color(hex: 0x64748B)
-
         ZStack {
-            // Outer halo — soft solid wash via blur+opacity (no radial gradient)
-            Circle()
-                .fill((activeToday ? activeFlame : dormantTint).opacity(activeToday ? 0.32 : 0.18))
-                .frame(width: size * 1.6, height: size * 1.6)
-                .scaleEffect(pulse)
-                .blur(radius: 14)
+            WSStarburst(points: 16, inset: 0.86)
+                .fill(activeToday ? WSColor.sun : WSColor.lilacDeep)
+                .overlay(WSStarburst(points: 16, inset: 0.86).stroke(WSColor.ink, lineWidth: 2.5))
+                .frame(width: size * 1.3, height: size * 1.3)
+                .modifier(WSSpinIf(on: activeToday))
 
-            // Outer ring — solid color
             Circle()
-                .stroke(activeToday ? activeRing : dormantRing, lineWidth: 4)
+                .fill(activeToday ? WSColor.orange : WSColor.backgroundElevated)
+                .overlay(Circle().strokeBorder(WSColor.ink, lineWidth: WSSticker.stroke))
                 .frame(width: size, height: size)
 
-            // Inner fill — solid (was a radial gradient)
-            Circle()
-                .fill(activeToday ? Color(hex: 0xFFF4D8) : WSColor.surface)
-                .frame(width: size - 8, height: size - 8)
+            WSFlameIcon(size: size * 0.42, lit: activeToday)
 
-            // Flame icon — solid color
-            Image(systemName: "flame.fill")
-                .font(.system(size: size * 0.42, weight: .black))
-                .foregroundStyle(activeToday ? activeFlame : dormantTint)
-                .scaleEffect(pulse)
-                .rotationEffect(.degrees(spin))
-                .shadow(color: activeToday ? activeRing.opacity(0.55) : .clear, radius: 6)
-
-            // Streak count chip — solid red on red-dark with chunky border lip feel
             Text("\(count)")
-                .font(.system(size: size * 0.28, weight: .black, design: .rounded))
-                .foregroundStyle(.white)
+                .font(WSFont.headline(size * 0.28, weight: .black))
+                .foregroundStyle(WSColor.inkText)
                 .padding(.horizontal, max(7, size * 0.10))
                 .padding(.vertical, max(2, size * 0.05))
-                .background(
-                    Capsule()
-                        .fill(chipFill)
-                        .overlay(Capsule().stroke(chipStroke, lineWidth: 1.5))
-                        .shadow(color: .black.opacity(0.20), radius: 4, y: 2)
-                )
-                .offset(x: size * 0.30, y: size * 0.32)
+                .background(Capsule().fill(WSColor.lime))
+                .overlay(Capsule().strokeBorder(WSColor.ink, lineWidth: 2))
+                .rotationEffect(.degrees(-6))
+                .offset(x: size * 0.36, y: size * 0.36)
         }
-        .onAppear {
-            guard activeToday else { return }
-            withAnimation(.easeInOut(duration: 1.4).repeatForever(autoreverses: true)) {
-                pulse = 1.10
-            }
-            withAnimation(.easeInOut(duration: 4.0).repeatForever(autoreverses: true)) {
-                spin = 4
-            }
-        }
+        .frame(width: size * 1.3, height: size * 1.3)
+    }
+}
+
+/// Spins only when `on` (an active streak).
+private struct WSSpinIf: ViewModifier {
+    var on: Bool
+    func body(content: Content) -> some View {
+        if on { content.wsSpin(period: 20) } else { content }
     }
 }
 
@@ -119,38 +96,16 @@ struct WSXPBar: View {
                         Image(systemName: "bolt.fill")
                             .foregroundStyle(WSColor.duoOrangeDark)
                         Text("\(xpInLevel) / \(xpForLevel) XP")
-                            .font(.system(size: 12, weight: .black, design: .rounded))
+                            .font(WSFont.headline(12, weight: .black))
                             .foregroundStyle(WSColor.foreground)
                     }
                     Spacer()
                     Text("\(Int(fraction * 100))%")
-                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                        .font(WSFont.headline(11, weight: .black))
                         .foregroundStyle(tint)
                 }
             }
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    // Track
-                    RoundedRectangle(cornerRadius: height, style: .continuous)
-                        .fill(WSColor.surface)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: height, style: .continuous)
-                                .stroke(WSColor.hairline, lineWidth: 1)
-                        )
-
-                    // Fill — solid color, with a thin white inner stroke for sheen
-                    RoundedRectangle(cornerRadius: height, style: .continuous)
-                        .fill(tint)
-                        .frame(width: max(height, geo.size.width * fraction))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: height, style: .continuous)
-                                .stroke(.white.opacity(0.40), lineWidth: 1)
-                        )
-                        .shadow(color: tint.opacity(0.4), radius: 4, y: 2)
-                        .animation(.wsBouncePop, value: fraction)
-                }
-            }
-            .frame(height: height)
+            WSStripeBar(fraction: fraction, fill: WSStickerTint.face(for: tint), height: height)
         }
     }
 }
@@ -163,32 +118,17 @@ struct WSLevelBadge: View {
     var tint: Color = WSColor.brandPrimary
 
     var body: some View {
-        ZStack(alignment: .top) {
-            // 3D lip — darker tint a few pts below the top face
-            Circle()
-                .fill(tint.mix(with: .black, by: 0.22))
-                .frame(width: size, height: size)
-                .padding(.top, size * 0.08)
-
-            // Top face — solid color with white inner stroke
-            Circle()
-                .fill(tint)
-                .frame(width: size, height: size)
-                .overlay(Circle().stroke(.white.opacity(0.30), lineWidth: 2))
-                .shadow(color: tint.opacity(0.45), radius: 8, y: 3)
-
-            // Level number
-            VStack(spacing: 0) {
-                Text("LV")
-                    .font(.system(size: size * 0.16, weight: .black, design: .rounded))
-                    .tracking(1.0)
-                    .foregroundStyle(.white.opacity(0.85))
-                Text("\(level)")
-                    .font(.system(size: size * 0.42, weight: .black, design: .rounded))
-                    .foregroundStyle(.white)
-            }
-            .padding(.top, size * 0.18)
+        VStack(spacing: 0) {
+            Text("LV")
+                .font(WSFont.headline(size * 0.16, weight: .black))
+                .tracking(1.0)
+            Text("\(level)")
+                .font(WSFont.headline(size * 0.42, weight: .black))
         }
+        .foregroundStyle(tint == WSColor.brandPrimary ? Color.white : WSColor.inkText)
+        .frame(width: size, height: size)
+        .wsStickerCircle(fill: WSStickerTint.face(for: tint), depth: size * 0.07)
+        .padding(.bottom, size * 0.07)
     }
 }
 
@@ -205,23 +145,23 @@ struct WSDailyGoalRing: View {
         ZStack {
             // Track ring
             Circle()
-                .stroke(WSColor.duoBorder.opacity(0.55), lineWidth: 6)
+                .stroke(WSColor.lilacDeep, lineWidth: 8)
                 .frame(width: size, height: size)
 
-            // Progress arc — solid tint, no gradient
             Circle()
                 .trim(from: 0, to: max(0.001, min(1.0, progress)))
-                .stroke(tint,
-                        style: StrokeStyle(lineWidth: 6, lineCap: .round))
+                .stroke(WSStickerTint.face(for: tint),
+                        style: StrokeStyle(lineWidth: 8, lineCap: .round))
                 .rotationEffect(.degrees(-90))
                 .frame(width: size, height: size)
-                .shadow(color: tint.opacity(0.4), radius: 4, y: 1)
                 .animation(.wsBouncePop, value: progress)
 
-            // Center icon — solid color
+            Circle().strokeBorder(WSColor.ink, lineWidth: 2).frame(width: size + 8, height: size + 8)
+            Circle().strokeBorder(WSColor.ink, lineWidth: 2).frame(width: size - 8, height: size - 8)
+
             Image(systemName: icon)
-                .font(.system(size: size * 0.36, weight: .black))
-                .foregroundStyle(tint)
+                .font(.system(size: size * 0.32, weight: .black))
+                .foregroundStyle(WSColor.foreground)
         }
     }
 }
@@ -242,27 +182,24 @@ struct WSStreakWeekStrip: View {
             ForEach(Array(days.enumerated()), id: \.offset) { (i, active) in
                 VStack(spacing: 4) {
                     Text(labels[i])
-                        .font(.system(size: 9, weight: .black, design: .rounded))
+                        .font(WSFont.headline(9, weight: .black))
                         .tracking(0.6)
                         .foregroundStyle(i == todayIndex ? WSColor.foreground : WSColor.foregroundMuted)
 
                     ZStack {
                         Circle()
-                            .fill(active ? WSColor.duoOrange : WSColor.surface)
+                            .fill(active ? WSColor.orange : (i == todayIndex ? WSColor.lime : WSColor.backgroundElevated))
                             .overlay(
                                 Circle()
-                                    .stroke(active
-                                            ? WSColor.duoOrangeDark
-                                            : (i == todayIndex ? WSColor.brandPrimary : Color.clear),
-                                            lineWidth: 2)
+                                    .strokeBorder(WSColor.ink.opacity(active || i == todayIndex ? 1 : 0.3), lineWidth: 2)
                             )
-                            .frame(width: 26, height: 26)
+                            .frame(width: 28, height: 28)
                         if active {
                             Image(systemName: "flame.fill")
                                 .font(.system(size: 12, weight: .black))
-                                .foregroundStyle(.white)
+                                .foregroundStyle(WSColor.inkText)
                         } else if i == todayIndex {
-                            Circle().fill(WSColor.brandPrimary).frame(width: 6, height: 6)
+                            Circle().fill(WSColor.inkText).frame(width: 6, height: 6)
                         }
                     }
                 }
@@ -294,27 +231,23 @@ struct WSWeekCalendarStrip: View {
 
                 VStack(spacing: 6) {
                     Text(labels[i % 7])
-                        .font(.system(size: 10, weight: .black, design: .rounded))
+                        .font(WSFont.sans(11, weight: .black))
                         .tracking(0.6)
-                        .foregroundStyle(isToday ? WSColor.duoPurple : WSColor.foregroundMuted)
+                        .foregroundStyle(isToday ? WSColor.foreground : WSColor.foregroundMuted)
 
-                    ZStack {
-                        Circle()
-                            .fill(isToday ? WSColor.duoPurple : (active ? WSColor.duoPurpleLight : Color.clear))
-                            .frame(width: 34, height: 34)
-                        if isToday {
-                            Circle()
-                                .fill(WSColor.duoPurple.opacity(0.25))
-                                .frame(width: 42, height: 42)
-                                .blur(radius: 4)
-                            Circle()
-                                .fill(WSColor.duoPurple)
-                                .frame(width: 34, height: 34)
-                        }
-                        Text("\(dayNum)")
-                            .font(.system(size: 13, weight: .heavy, design: .rounded))
-                            .foregroundStyle(isToday ? .white : (active ? WSColor.duoPurpleDark : WSColor.foreground))
-                    }
+                    Text("\(dayNum)")
+                        .font(WSFont.headline(15, weight: .black))
+                        .foregroundStyle(isToday || active ? WSColor.inkText : WSColor.foreground)
+                        .frame(width: 38, height: 38)
+                        .background(
+                            ZStack {
+                                if isToday || active {
+                                    Circle().fill(WSColor.ink).offset(y: 3)
+                                }
+                                Circle().fill(isToday ? WSColor.lime : (active ? WSColor.orange : WSColor.backgroundElevated))
+                                Circle().strokeBorder(WSColor.ink.opacity(isToday || active ? 1 : 0.3), lineWidth: 2)
+                            }
+                        )
                 }
                 .frame(maxWidth: .infinity)
             }
@@ -354,18 +287,22 @@ struct WSHexBadge: View {
     var body: some View {
         ZStack {
             WSHexagonShape()
-                .fill(earned ? AnyShapeStyle(tint.gradient) : AnyShapeStyle(WSColor.surface))
+                .fill(WSColor.ink)
+                .frame(width: size, height: size * 1.1)
+                .offset(y: 3)
+            WSHexagonShape()
+                .fill(earned ? WSStickerTint.face(for: tint) : WSColor.lilacDeep)
                 .overlay(
                     WSHexagonShape()
-                        .stroke(earned ? Color.white.opacity(0.25) : WSColor.duoBorder, lineWidth: 1.5)
+                        .stroke(WSColor.ink, lineWidth: WSSticker.stroke)
                 )
                 .frame(width: size, height: size * 1.1)
-                .shadow(color: earned ? tint.opacity(0.35) : .clear, radius: 8, y: 4)
 
             Image(systemName: earned ? icon : "lock.fill")
                 .font(.system(size: size * 0.34, weight: .black))
-                .foregroundStyle(earned ? .white : WSColor.foregroundMuted.opacity(0.6))
+                .foregroundStyle(earned ? WSColor.inkText : WSColor.foregroundMuted.opacity(0.6))
         }
+        .padding(.bottom, 3)
     }
 }
 
@@ -418,18 +355,14 @@ struct WSGemChip: View {
         HStack(spacing: 4) {
             Image(systemName: icon)
                 .font(.system(size: compact ? 9 : 11, weight: .black))
-                .foregroundStyle(tint)
             Text("\(count)")
-                .font(.system(size: compact ? 11 : 13, weight: .black, design: .rounded))
-                .foregroundStyle(WSColor.foreground)
+                .font(WSFont.headline(compact ? 11 : 13, weight: .black))
         }
+        .foregroundStyle(WSColor.inkText)
         .padding(.horizontal, compact ? 8 : 10)
         .padding(.vertical, compact ? 3 : 5)
-        .background(
-            Capsule()
-                .fill(tint.opacity(0.14))
-                .overlay(Capsule().stroke(tint.opacity(0.40), lineWidth: 1))
-        )
+        .background(Capsule().fill(WSStickerTint.face(for: tint)))
+        .overlay(Capsule().strokeBorder(WSColor.ink, lineWidth: 2))
     }
 }
 
@@ -447,17 +380,15 @@ struct WSHeartsRow: View {
             ForEach(0..<total, id: \.self) { i in
                 Image(systemName: i < lives ? "heart.fill" : "heart")
                     .font(.system(size: 16, weight: .heavy))
-                    .foregroundStyle(i < lives ? WSColor.duoRed : Color(hex: 0xCBD5E1))
-                    .scaleEffect(i < lives ? 1.0 : 0.95)
+                    .foregroundStyle(i < lives ? WSColor.pink : WSColor.foregroundMuted.opacity(0.4))
+                    .scaleEffect(i < lives ? 1.0 : 0.85)
+                    .animation(.wsBouncePop, value: lives)
             }
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 5)
-        .background(
-            Capsule()
-                .fill(WSColor.backgroundElevated)
-                .overlay(Capsule().stroke(WSColor.hairline, lineWidth: 1))
-        )
+        .background(Capsule().fill(WSColor.backgroundElevated))
+        .overlay(Capsule().strokeBorder(WSColor.ink, lineWidth: 2))
         .onTapGesture { onTap?() }
     }
 }

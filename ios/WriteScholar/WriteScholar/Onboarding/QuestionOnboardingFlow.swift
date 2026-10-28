@@ -40,8 +40,7 @@ struct QuestionOnboardingFlow: View {
 
     var body: some View {
         ZStack {
-            LinearGradient(colors: [Color(hex: 0xFAF7FF), Color(hex: 0xF3EAFF)], startPoint: .topLeading, endPoint: .bottomTrailing)
-                .ignoresSafeArea()
+            WSColor.lilac.ignoresSafeArea()
 
             VStack(spacing: 0) {
                 if step != S.welcome && step != S.build { topBar }
@@ -69,25 +68,20 @@ struct QuestionOnboardingFlow: View {
             HStack(spacing: 10) {
                 Button { go(step == S.plan ? S.source : step - 1) } label: {
                     Image(systemName: "chevron.left")
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundStyle(WSColor.foregroundMuted)
-                        .frame(width: 44, height: 44)
+                        .font(.system(size: 15, weight: .black))
+                        .foregroundStyle(WSColor.foreground)
+                        .frame(width: 40, height: 40)
+                        .wsStickerCircle(fill: WSColor.backgroundElevated, depth: 3)
+                        .padding(.bottom, 3)
                 }
+                .buttonStyle(WSStickerPressStyle())
                 .accessibilityLabel("Back")
-                Image.bundleResource("main-logo")
-                    .resizable().scaledToFit()
-                    .frame(width: 32, height: 32)
-                    .background(RoundedRectangle(cornerRadius: 10).fill(Color.white))
-                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(WSColor.duoBorder, lineWidth: 2))
-                Text("WriteScholar").wsHeadline(.small, weight: .heavy).foregroundStyle(WSColor.duoText)
-                Spacer()
+                WSStripeBar(fraction: Double(min(step, S.plan)) / Double(S.plan), fill: WSColor.purple, height: 14)
                 CreditChip(text: "\(OnboardingContent.trialCredits) free")
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-            .background(WSColor.backgroundElevated)
-            WSProgressBar(fraction: Double(min(step, S.plan)) / Double(S.plan), tint: WSColor.duoPurple, height: 10)
-                .frame(height: 10)
+            .padding(.horizontal, 20)
+            .padding(.top, 6)
+            .padding(.bottom, 4)
         }
     }
 
@@ -117,18 +111,21 @@ struct QuestionOnboardingFlow: View {
         VStack(spacing: 14) {
             Spacer()
             WSSpeechBubble(text: OnboardingContent.welcomeGreeting, tail: .none,
-                           fillColor: .white, strokeColor: WSColor.duoBorder, maxWidth: 300)
-                .wsStaggerEntry(0)
+                           fillColor: .white, strokeColor: WSColor.ink, maxWidth: 300)
+                .rotationEffect(.degrees(-2))
+                .wsPop()
             ZStack {
                 PulseRings()
                 WSAnimatedImage(name: "mascot-celebrating").frame(width: 190, height: 190)
+                    .wsMascotBob(amount: 10, rock: 3, duration: 0.9)
             }
-            .frame(width: 220, height: 220)
-            (Text("Better grades.\n").foregroundStyle(WSColor.duoPurple)
-             + Text("Less stress.").foregroundStyle(WSColor.duoText))
-                .wsHeadline(.huge, weight: .black)
+            .frame(width: 230, height: 230)
+            (Text("Better grades.\n").foregroundStyle(WSColor.purple)
+             + Text("Less stress.").foregroundStyle(WSColor.foreground))
+                .font(WSFont.headline(46, weight: .black))
+                .tracking(-1.6)
                 .multilineTextAlignment(.center)
-                .wsStaggerEntry(1)
+                .wsPop(delay: 0.15)
             Text("A few quick questions about your grades, your deadlines and your life. Then we'll build your plan.")
                 .wsBody(.medium, weight: .semibold)
                 .foregroundStyle(WSColor.foregroundMuted)
@@ -153,13 +150,17 @@ struct QuestionOnboardingFlow: View {
                     HStack(alignment: .bottom, spacing: 10) {
                         WSAnimatedImage(name: OnboardingContent.scholar(for: q.key)).frame(width: 60, height: 60)
                         WSSpeechBubble(text: OnboardingContent.bubble(for: q, answers), tail: .leading,
-                                       fillColor: .white, strokeColor: WSColor.duoBorder, maxWidth: .infinity)
+                                       fillColor: .white, strokeColor: WSColor.ink, maxWidth: .infinity)
                             .id(OnboardingContent.bubble(for: q, answers))
                             .transition(.scale(scale: 0.8).combined(with: .opacity))
                     }
                     .animation(.wsBouncePop, value: OnboardingContent.bubble(for: q, answers))
-                    Text(q.eyebrow.uppercased()).wsEyebrow().foregroundStyle(WSColor.duoPurple)
-                    Text(q.title).wsHeadline(.large, weight: .black).foregroundStyle(WSColor.duoText)
+                    Tag(text: q.eyebrow)
+                    Text(q.title)
+                        .font(WSFont.headline(30, weight: .black))
+                        .tracking(-0.8)
+                        .foregroundStyle(WSColor.foreground)
+                        .fixedSize(horizontal: false, vertical: true)
                     if q.multi {
                         Text("Pick as many as you like").wsBody(.small, weight: .bold).foregroundStyle(WSColor.foregroundMuted)
                     }
@@ -169,18 +170,18 @@ struct QuestionOnboardingFlow: View {
                             withAnimation(.wsBounceTight) { answers.toggle(q, o.id) }
                             Haptics.light()
                         }
-                        .wsStaggerEntry(idx + 1)
+                        .wsPop(delay: 0.05 * Double(idx))
                     }
                     if q.key == .target, answers.value(.target) != nil, OnboardingContent.gradeGoal(answers) == .climb {
                         let j = OnboardingContent.gradeJump(answers)
                         HStack(spacing: 14) {
                             GradeTile(grade: j.from, muted: true)
-                            Image(systemName: "arrow.right").font(.system(size: 22, weight: .bold)).foregroundStyle(WSColor.duoPurple)
+                            Image(systemName: "arrow.right").font(.system(size: 22, weight: .black)).foregroundStyle(WSColor.foreground)
                             GradeTile(grade: j.to, muted: false)
                         }
                         .frame(maxWidth: .infinity)
                         .padding(14)
-                        .background(RoundedRectangle(cornerRadius: 16).fill(WSColor.duoPurpleLight))
+                        .wsSticker(fill: WSColor.lilacDeep, radius: 20, depth: 3)
                         .transition(.scale.combined(with: .opacity))
                     }
                 }
@@ -196,20 +197,29 @@ struct QuestionOnboardingFlow: View {
             ScrollView {
                 VStack(spacing: 14) {
                     WSAnimatedImage(name: "mascot-thinking").frame(width: 140, height: 140)
-                    Text("WE HEAR YOU").wsEyebrow().foregroundStyle(WSColor.duoPurple)
-                    Text(e.title).wsHeadline(.large, weight: .black).foregroundStyle(WSColor.duoText).multilineTextAlignment(.center)
+                        .wsMascotBob(amount: 5, rock: 2, duration: 1.6)
+                    Tag(text: "We hear you")
+                    Text(e.title)
+                        .font(WSFont.headline(30, weight: .black))
+                        .tracking(-0.8)
+                        .foregroundStyle(WSColor.foreground)
+                        .multilineTextAlignment(.center)
                     Text(e.body).wsBody(.medium, weight: .semibold).foregroundStyle(WSColor.foregroundMuted).multilineTextAlignment(.center)
                     VStack(alignment: .leading, spacing: 10) {
                         ForEach(e.points, id: \.self) { p in
                             HStack(alignment: .top, spacing: 10) {
-                                Image(systemName: "checkmark.circle.fill").foregroundStyle(WSColor.duoPurple)
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 11, weight: .black))
+                                    .foregroundStyle(WSColor.inkText)
+                                    .frame(width: 22, height: 22)
+                                    .wsStickerCircle(fill: WSColor.lime)
                                 Text(p).wsBody(.small, weight: .bold).foregroundStyle(WSColor.duoText)
                             }
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .wsChunkyCard(accent: WSColor.duoBorder)
-                    .wsStaggerEntry(2)
+                    .wsChunkyCard()
+                    .wsPop(delay: 0.15)
                 }
                 .padding(20)
             }
@@ -222,11 +232,18 @@ struct QuestionOnboardingFlow: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
                     Tag(text: o.tag)
-                    Text(o.title).wsHeadline(.large, weight: .black).foregroundStyle(WSColor.duoText)
+                    Text(o.title)
+                        .font(WSFont.headline(30, weight: .black))
+                        .tracking(-0.8)
+                        .foregroundStyle(WSColor.foreground)
+                        .fixedSize(horizontal: false, vertical: true)
                     LoopingVideoView(resourceName: o.video)
                         .aspectRatio(16 / 10, contentMode: .fit)
-                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                        .overlay(RoundedRectangle(cornerRadius: 16).stroke(WSColor.duoBorder, lineWidth: 2))
+                        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).strokeBorder(WSColor.ink, lineWidth: WSSticker.stroke))
+                        .background(RoundedRectangle(cornerRadius: 20, style: .continuous).fill(WSColor.ink).offset(y: 5))
+                        .padding(.bottom, 5)
+                        .rotationEffect(.degrees(-1))
                         .accessibilityLabel(o.tag)
                     if o.showsScore {
                         HStack {
@@ -239,16 +256,21 @@ struct QuestionOnboardingFlow: View {
                             Spacer()
                             VStack(alignment: .trailing, spacing: 2) {
                                 Text("After the fixes").wsBody(.caption, weight: .heavy).foregroundStyle(WSColor.foregroundMuted)
-                                Text("A · 90/100").wsHeadline(.small, weight: .black).foregroundStyle(WSColor.duoPurple)
+                                Text("A · 90/100").wsHeadline(.small, weight: .black).foregroundStyle(WSColor.inkText)
+                                    .padding(.horizontal, 8).padding(.vertical, 2)
+                                    .background(RoundedRectangle(cornerRadius: 8).fill(WSColor.lime))
                             }
                         }
                         .padding(14)
-                        .background(RoundedRectangle(cornerRadius: 16).fill(Color.white))
-                        .overlay(RoundedRectangle(cornerRadius: 16).stroke(WSColor.duoBorder, lineWidth: 2))
+                        .wsSticker(radius: 18, depth: 3)
                     }
                     ForEach(o.points, id: \.self) { p in
                         HStack(alignment: .top, spacing: 10) {
-                            Image(systemName: "checkmark").font(.system(size: 15, weight: .black)).foregroundStyle(WSColor.duoPurple)
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 11, weight: .black))
+                                .foregroundStyle(WSColor.inkText)
+                                .frame(width: 22, height: 22)
+                                .wsStickerCircle(fill: WSColor.lime)
                             Text(p).wsBody(.small, weight: .bold).foregroundStyle(WSColor.duoText)
                         }
                     }
@@ -258,7 +280,7 @@ struct QuestionOnboardingFlow: View {
                             Text(m).wsBody(.small, weight: .heavy).foregroundStyle(WSColor.duoText)
                         }
                         .padding(12)
-                        .background(RoundedRectangle(cornerRadius: 16).fill(WSColor.duoPurpleLight))
+                        .wsSticker(fill: WSColor.lilacDeep, radius: 18, depth: 3)
                     }
                 }
                 .padding(20)
@@ -276,17 +298,24 @@ struct QuestionOnboardingFlow: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
                     Tag(text: "The real outcome")
-                    Text("Better grades. And your evenings back.").wsHeadline(.large, weight: .black).foregroundStyle(WSColor.duoText)
+                    Text("Better grades. And your evenings back.")
+                        .font(WSFont.headline(30, weight: .black))
+                        .tracking(-0.8)
+                        .foregroundStyle(WSColor.foreground)
                     Text("No more rewriting the same essay at 2am, guessing if it's good enough.")
                         .wsBody(.medium, weight: .semibold).foregroundStyle(WSColor.foregroundMuted)
                     WeekRow(title: "Your week now", days: days,
                             cells: before.map { label -> (String, Color, Color) in (label, WSColor.duoBorder.opacity(0.6), WSColor.foregroundMuted) }, highlight: false)
-                    Image(systemName: "arrow.down").font(.system(size: 18, weight: .black)).foregroundStyle(WSColor.duoPurple)
+                    Image(systemName: "arrow.down")
+                        .font(.system(size: 16, weight: .black))
+                        .foregroundStyle(WSColor.inkText)
+                        .frame(width: 36, height: 36)
+                        .wsStickerCircle(fill: WSColor.lime)
                         .frame(maxWidth: .infinity)
                     WeekRow(title: "Your week with WriteScholar", days: days,
                             cells: afterPlan.map { p -> (String, Color, Color) in
-                                if let p { return (OnboardingContent.lifeShort[picks[p % picks.count]] ?? "Free", CreditChip.gold.opacity(0.3), Color(hex: 0x6B4E00)) }
-                                return ("20 min", WSColor.duoPurpleLight, WSColor.duoPurple)
+                                if let p { return (OnboardingContent.lifeShort[picks[p % picks.count]] ?? "Free", WSColor.lime, WSColor.inkText) }
+                                return ("20 min", WSColor.sky, WSColor.inkText)
                             }, highlight: true)
                     Text(OnboardingContent.lifeLine(answers))
                         .wsBody(.small, weight: .heavy).foregroundStyle(WSColor.duoText)
@@ -307,14 +336,20 @@ struct QuestionOnboardingFlow: View {
                 WSAnimatedImage(name: "mascot-juggling").frame(width: 150, height: 150)
             }
             .frame(width: 180, height: 180)
-            Text("Building your plan…").wsHeadline(.large, weight: .black).foregroundStyle(WSColor.duoText)
-            WSProgressBar(fraction: Double(buildTick) / 4, tint: WSColor.duoPurple, height: 14).frame(height: 14)
+            Text("Building your plan…")
+                .font(WSFont.headline(32, weight: .black))
+                .tracking(-0.9)
+                .foregroundStyle(WSColor.foreground)
+            WSStripeBar(fraction: Double(buildTick) / 4, fill: WSColor.purple, height: 16)
             VStack(alignment: .leading, spacing: 12) {
                 ForEach(Array(labels.enumerated()), id: \.offset) { i, l in
                     HStack(spacing: 12) {
-                        Image(systemName: buildTick > i ? "checkmark.circle.fill" : "circle")
-                            .font(.system(size: 24, weight: .bold))
-                            .foregroundStyle(buildTick > i ? WSColor.duoGreen : WSColor.duoBorder)
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 12, weight: .black))
+                            .foregroundStyle(buildTick > i ? WSColor.inkText : .clear)
+                            .frame(width: 28, height: 28)
+                            .wsStickerCircle(fill: buildTick > i ? WSColor.lime : WSColor.backgroundElevated)
+                            .scaleEffect(buildTick > i ? 1 : 0.85)
                         Text(l).wsBody(.medium, weight: .heavy)
                             .foregroundStyle(buildTick > i ? WSColor.duoText : WSColor.foregroundMuted)
                     }
@@ -332,44 +367,51 @@ struct QuestionOnboardingFlow: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
                     HStack(spacing: 12) {
-                        WSAnimatedImage(name: "mascot-jumping-joy").frame(width: 64, height: 64)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("YOUR PLAN IS READY").wsEyebrow().foregroundStyle(WSColor.duoPurple)
+                        WSAnimatedImage(name: "mascot-jumping-joy").frame(width: 72, height: 72)
+                            .wsMascotBob(amount: 6, rock: 3, duration: 0.8)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Tag(text: "Your plan is ready")
                             Text(OnboardingContent.planHeadline(answers))
-                                .wsHeadline(.medium, weight: .black).foregroundStyle(WSColor.duoText)
+                                .font(WSFont.headline(24, weight: .black))
+                                .tracking(-0.6)
+                                .foregroundStyle(WSColor.foreground)
                         }
                     }
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("START HERE").wsBody(.caption, weight: .black)
+                        Text("START HERE").font(WSFont.sans(11, weight: .black)).tracking(1.3)
                             .padding(.horizontal, 10).padding(.vertical, 4)
-                            .background(Capsule().fill(Color.white)).foregroundStyle(WSColor.duoPurple)
-                        Text(rec.title).wsHeadline(.medium, weight: .black)
+                            .background(Capsule().fill(WSColor.lime))
+                            .overlay(Capsule().strokeBorder(WSColor.ink, lineWidth: 2))
+                            .foregroundStyle(WSColor.inkText)
+                        Text(rec.title).font(WSFont.headline(22, weight: .black))
                         Text(rec.body).wsBody(.small, weight: .bold)
                     }
                     .foregroundStyle(Color.white)
                     .padding(16)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(RoundedRectangle(cornerRadius: 18).fill(WSColor.duoPurple))
-                    .background(RoundedRectangle(cornerRadius: 18).fill(WSColor.duoPurpleDark).offset(y: 4))
+                    .wsSticker(fill: WSColor.purple, radius: 22, depth: 5)
+                    .rotationEffect(.degrees(-1))
+                    .wsPop(delay: 0.1)
                     VStack(alignment: .leading, spacing: 10) {
                         HStack {
-                            Text("Your \(OnboardingContent.trialCredits) free credits").wsHeadline(.small, weight: .black).foregroundStyle(WSColor.duoText)
+                            Text("Your \(OnboardingContent.trialCredits) free credits").wsHeadline(.small, weight: .black).foregroundStyle(WSColor.inkText)
                             Spacer()
                             HStack(spacing: 2) { ForEach(0..<OnboardingContent.trialCredits, id: \.self) { _ in CreditCoin(size: 22) } }
                         }
                         ForEach(Array(OnboardingContent.trialPlan(for: answers.path).enumerated()), id: \.offset) { i, c in
                             HStack(spacing: 10) {
                                 Text("\(i + 1)").wsBody(.caption, weight: .black)
-                                    .frame(width: 22, height: 22).background(Circle().fill(CreditChip.gold))
-                                Text(c.label).wsBody(.small, weight: .bold).foregroundStyle(WSColor.duoText)
+                                    .foregroundStyle(WSColor.inkText)
+                                    .frame(width: 24, height: 24).wsStickerCircle(fill: WSColor.sun)
+                                Text(c.label).wsBody(.small, weight: .bold).foregroundStyle(WSColor.inkText)
                                 Spacer()
-                                Text(c.when).wsBody(.caption, weight: .black).foregroundStyle(Color(hex: 0x7A5A00))
+                                Text(c.when).wsBody(.caption, weight: .black).foregroundStyle(WSColor.inkMuted)
                             }
                         }
                     }
                     .padding(16)
-                    .background(RoundedRectangle(cornerRadius: 18).fill(Color(hex: 0xFFF6DB)))
-                    .overlay(RoundedRectangle(cornerRadius: 18).stroke(Color(hex: 0xF3DB93), lineWidth: 2))
+                    .wsSticker(fill: Color(hex: 0xFFF1B8), radius: 22, depth: 4)
+                    .wsPop(delay: 0.18)
                     VStack(alignment: .leading, spacing: 8) {
                         Text("How credits work").wsBody(.small, weight: .black).foregroundStyle(WSColor.duoText)
                         Label("1 credit = 1 essay analysis, study pack or citation search", systemImage: "circle.fill")
@@ -379,8 +421,7 @@ struct QuestionOnboardingFlow: View {
                     }
                     .padding(16)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(RoundedRectangle(cornerRadius: 18).fill(Color.white))
-                    .overlay(RoundedRectangle(cornerRadius: 18).stroke(WSColor.duoBorder, lineWidth: 2))
+                    .wsSticker(radius: 22, depth: 4)
                 }
                 .padding(20)
             }
@@ -404,13 +445,13 @@ struct QuestionOnboardingFlow: View {
             .padding(.horizontal, 20)
             .padding(.top, 12)
             .padding(.bottom, 12)
-            .background(WSColor.backgroundElevated.ignoresSafeArea(edges: .bottom))
-            .overlay(alignment: .top) { Rectangle().fill(WSColor.duoBorder).frame(height: 2) }
+            .background(WSColor.lilac.ignoresSafeArea(edges: .bottom))
     }
 
     private func primary(_ title: String, disabled: Bool = false, action: @escaping () -> Void) -> some View {
-        Button(action: action) { Text(title).frame(maxWidth: .infinity) }
-            .buttonStyle(WSDuoPrimaryButtonStyle())
+        Button(action: action) { Text(title) }
+            .buttonStyle(WSStickerButtonStyle(fill: WSColor.purple, foreground: .white, radius: 20, height: 60,
+                                              font: WSFont.headline(19, weight: .black)))
             .disabled(disabled)
             .opacity(disabled ? 0.45 : 1)
     }
@@ -459,20 +500,20 @@ private struct OptionRow: View {
             HStack(spacing: 14) {
                 ZStack {
                     RoundedRectangle(cornerRadius: multi ? 9 : (option.badge != nil ? 10 : 16))
-                        .fill(selected ? WSColor.duoPurple : Color.white)
+                        .fill(selected ? WSColor.inkText : WSColor.lilacDeep)
                         .overlay(RoundedRectangle(cornerRadius: multi ? 9 : (option.badge != nil ? 10 : 16))
-                            .stroke(selected ? WSColor.duoPurple : WSColor.duoBorder, lineWidth: 2))
+                            .strokeBorder(WSColor.ink, lineWidth: 2))
                     if let b = option.badge, !(selected && multi) {
-                        Text(b).font(WSFont.headline(15)).foregroundStyle(selected ? Color.white : WSColor.foregroundMuted)
+                        Text(b).font(WSFont.headline(15)).foregroundStyle(selected ? WSColor.lime : WSColor.foreground)
                     } else if selected {
-                        Image(systemName: "checkmark").font(.system(size: 14, weight: .black)).foregroundStyle(Color.white)
+                        Image(systemName: "checkmark").font(.system(size: 14, weight: .black)).foregroundStyle(WSColor.lime)
                     }
                 }
                 .frame(width: 32, height: 32)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(option.label).wsBody(.large, weight: .heavy).foregroundStyle(WSColor.duoText)
+                    Text(option.label).font(WSFont.headline(17, weight: .black)).foregroundStyle(selected ? WSColor.inkText : WSColor.foreground)
                     if let s = option.sub {
-                        Text(s).wsBody(.small, weight: .semibold).foregroundStyle(WSColor.foregroundMuted)
+                        Text(s).wsBody(.small, weight: .semibold).foregroundStyle(selected ? WSColor.inkMuted : WSColor.foregroundMuted)
                     }
                 }
                 .multilineTextAlignment(.leading)
@@ -481,11 +522,15 @@ private struct OptionRow: View {
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
             .frame(minHeight: 58)
-            .background(RoundedRectangle(cornerRadius: 16).fill(selected ? WSColor.duoPurpleLight : Color.white))
-            .overlay(RoundedRectangle(cornerRadius: 16).stroke(selected ? WSColor.duoPurple : WSColor.duoBorder, lineWidth: 2))
-            .background(RoundedRectangle(cornerRadius: 16).fill(selected ? WSColor.duoPurple : WSColor.duoBorder).offset(y: 3))
+            .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(selected ? WSColor.lime : WSColor.backgroundElevated))
+            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(WSColor.ink, lineWidth: WSSticker.stroke))
+            .offset(y: selected ? 2 : 0)
+            .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(WSColor.ink).offset(y: 4))
+            .padding(.bottom, 4)
+            .scaleEffect(selected ? 1.01 : 1)
+            .animation(.wsBounceTight, value: selected)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(WSStickerPressStyle(tilt: 0))
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
 }
@@ -496,21 +541,24 @@ private struct GradeTile: View {
     var body: some View {
         Text(grade)
             .font(WSFont.headline(24))
-            .foregroundStyle(muted ? WSColor.foregroundMuted : Color.white)
-            .frame(minWidth: 50, minHeight: 50)
+            .foregroundStyle(muted ? WSColor.inkMuted : WSColor.inkText)
+            .frame(minWidth: 54, minHeight: 54)
             .padding(.horizontal, 4)
-            .background(RoundedRectangle(cornerRadius: 14).fill(muted ? Color.white : WSColor.duoPurple))
-            .overlay(RoundedRectangle(cornerRadius: 14).stroke(muted ? WSColor.duoBorder : WSColor.duoPurpleDark, lineWidth: 2))
+            .wsSticker(fill: muted ? Color.white : WSColor.lime, radius: 16, depth: 3)
+            .rotationEffect(.degrees(muted ? -4 : 4))
     }
 }
 
 private struct Tag: View {
     let text: String
     var body: some View {
-        Text(text.uppercased()).wsBody(.caption, weight: .black)
-            .padding(.horizontal, 12).padding(.vertical, 5)
-            .background(Capsule().fill(WSColor.duoPurpleLight))
-            .foregroundStyle(WSColor.duoPurple)
+        Text(text.uppercased())
+            .font(WSFont.sans(11, weight: .black))
+            .tracking(1.3)
+            .padding(.horizontal, 10).padding(.vertical, 5)
+            .background(RoundedRectangle(cornerRadius: 9).fill(WSColor.pink))
+            .overlay(RoundedRectangle(cornerRadius: 9).strokeBorder(WSColor.ink, lineWidth: 2))
+            .foregroundStyle(WSColor.inkText)
     }
 }
 
@@ -521,7 +569,7 @@ private struct WeekRow: View {
     let highlight: Bool
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(title).wsBody(.small, weight: .black).foregroundStyle(highlight ? WSColor.duoPurple : WSColor.foregroundMuted)
+            Text(title).font(WSFont.headline(16, weight: .black)).foregroundStyle(highlight ? WSColor.foreground : WSColor.foregroundMuted)
             HStack(spacing: 5) {
                 ForEach(0..<min(days.count, cells.count), id: \.self) { i in
                     VStack(spacing: 4) {
@@ -533,24 +581,31 @@ private struct WeekRow: View {
                             .frame(maxWidth: .infinity, minHeight: 56, alignment: .bottom)
                             .padding(.bottom, 6)
                             .background(RoundedRectangle(cornerRadius: 10).fill(cells[i].1))
+                            .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(WSColor.ink.opacity(highlight ? 1 : 0.25), lineWidth: 2))
                     }
                 }
             }
         }
         .padding(14)
-        .background(RoundedRectangle(cornerRadius: 18).fill(Color.white))
-        .overlay(RoundedRectangle(cornerRadius: 18).stroke(highlight ? WSColor.duoPurple : WSColor.duoBorder, lineWidth: 2))
+        .wsSticker(radius: 20, depth: highlight ? 5 : 2)
     }
 }
 
+/// Spinning lime starburst + an ink ring that pings outward.
 private struct PulseRings: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var pulse = false
     var body: some View {
         ZStack {
-            Circle().fill(WSColor.duoPurple.opacity(0.18)).blur(radius: 18).scaleEffect(pulse ? 1.08 : 0.95)
-            Circle().stroke(WSColor.duoPurple.opacity(0.4), lineWidth: 3).scaleEffect(pulse ? 1.25 : 0.8).opacity(pulse ? 0 : 0.9)
+            WSStarburst(points: 16, inset: 0.86)
+                .fill(WSColor.lime)
+                .overlay(WSStarburst(points: 16, inset: 0.86).stroke(WSColor.ink, lineWidth: 2.5))
+                .padding(14)
+                .wsSpin(period: 20)
+            Circle().stroke(WSColor.ink, lineWidth: 2.5).scaleEffect(pulse ? 1.15 : 0.8).opacity(pulse ? 0 : 0.6)
         }
         .onAppear {
+            guard !reduceMotion else { return }
             withAnimation(.easeOut(duration: 2.2).repeatForever(autoreverses: false)) { pulse = true }
         }
         .accessibilityHidden(true)
@@ -561,7 +616,7 @@ private struct CoinLabelStyle: LabelStyle {
     func makeBody(configuration: Configuration) -> some View {
         HStack(alignment: .top, spacing: 8) {
             CreditCoin(size: 16)
-            configuration.title.wsBody(.small, weight: .bold).foregroundStyle(WSColor.duoText)
+            configuration.title.wsBody(.small, weight: .bold).foregroundStyle(WSColor.foreground)
         }
     }
 }
@@ -572,9 +627,9 @@ struct CreditCoin: View {
     var size: CGFloat = 24
     var body: some View {
         ZStack {
-            Circle().fill(CreditChip.gold)
-            Circle().stroke(Color(hex: 0xB7800A), lineWidth: size * 0.07).padding(size * 0.18)
-            Image(systemName: "bolt.fill").font(.system(size: size * 0.4, weight: .black)).foregroundStyle(Color(hex: 0x7A5A00))
+            Circle().fill(WSColor.sun)
+            Circle().strokeBorder(WSColor.ink, lineWidth: max(1.5, size * 0.08))
+            Image(systemName: "bolt.fill").font(.system(size: size * 0.42, weight: .black)).foregroundStyle(WSColor.inkText)
         }
         .frame(width: size, height: size)
         .accessibilityHidden(true)
@@ -587,12 +642,12 @@ struct CreditChip: View {
     var body: some View {
         HStack(spacing: 5) {
             CreditCoin(size: 18)
-            Text(text).font(WSFont.sans(13, weight: .black)).foregroundStyle(Color(hex: 0x7A5A00))
+            Text(text).font(WSFont.headline(14, weight: .black)).foregroundStyle(WSColor.inkText)
         }
         .padding(.leading, 5).padding(.trailing, 10)
         .frame(height: 32)
-        .background(Capsule().fill(Color(hex: 0xFFF6DB)))
-        .overlay(Capsule().stroke(Color(hex: 0xF3DB93), lineWidth: 2))
+        .background(Capsule().fill(Color(hex: 0xFFF1B8)))
+        .overlay(Capsule().strokeBorder(WSColor.ink, lineWidth: 2))
     }
 }
 

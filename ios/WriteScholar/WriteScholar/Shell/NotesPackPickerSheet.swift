@@ -75,7 +75,7 @@ struct NotesPackPickerSheet: View {
                     } label: {
                         eligibleRow(row)
                     }
-                    .buttonStyle(WSBouncyButtonStyle())
+                    .buttonStyle(WSStickerPressStyle())
                 }
 
                 if !ineligibleEntries.isEmpty {
@@ -90,7 +90,7 @@ struct NotesPackPickerSheet: View {
                     ForEach(ineligibleEntries) { item in
                         ineligibleRow(item)
                     }
-                    Text("\(gameLabel) is a Pro feature — packs you generated on the free plan won't include it.")
+                    Text("\(gameLabel) is a Pro feature. Packs you generated on the free plan won't include it.")
                         .font(WSFont.sans(11))
                         .foregroundStyle(WSColor.duoText.opacity(0.5))
                         .padding(.top, 6)
@@ -103,28 +103,23 @@ struct NotesPackPickerSheet: View {
 
     private func eligibleRow(_ row: PlayableRow) -> some View {
         HStack(spacing: 14) {
-            ZStack {
-                Circle()
-                    .fill(accent.opacity(0.12))
-                    .frame(width: 44, height: 44)
-                Image(systemName: gameIcon)
-                    .font(.system(size: 18, weight: .heavy))
-                    .foregroundStyle(accent)
-            }
+            WSPackCover(title: row.item.title, size: 56, radius: 14)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(row.item.title)
-                    .font(WSFont.headline(15, weight: .black))
-                    .foregroundStyle(WSColor.duoText)
+                    .font(WSFont.headline(16, weight: .black))
+                    .foregroundStyle(WSColor.foreground)
                     .lineLimit(2)
                 Text("\(row.questionCount) \(gameLabel) questions")
-                    .font(WSFont.sans(11, weight: .semibold))
-                    .foregroundStyle(WSColor.duoText.opacity(0.55))
+                    .font(WSFont.sans(12, weight: .bold))
+                    .foregroundStyle(WSColor.foregroundMuted)
             }
             Spacer()
             Image(systemName: "play.fill")
-                .foregroundStyle(accent)
-                .font(.system(size: 16, weight: .heavy))
+                .font(.system(size: 14, weight: .black))
+                .foregroundStyle(WSColor.inkText)
+                .frame(width: 40, height: 40)
+                .wsStickerCircle(fill: WSColor.lime, depth: 3)
         }
         .wsChunkyCard(
             cornerRadius: 16,
@@ -137,30 +132,20 @@ struct NotesPackPickerSheet: View {
 
     private func ineligibleRow(_ item: LibraryItem) -> some View {
         HStack(spacing: 14) {
-            ZStack {
-                Circle()
-                    .fill(WSColor.duoSurface)
-                    .frame(width: 36, height: 36)
-                Image(systemName: "lock.fill")
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundStyle(WSColor.duoBorder)
-            }
+            Image(systemName: "lock.fill")
+                .font(.system(size: 13, weight: .black))
+                .foregroundStyle(WSColor.inkText)
+                .frame(width: 34, height: 34)
+                .wsStickerCircle(fill: WSColor.sun)
             Text(item.title)
-                .font(WSFont.sans(13, weight: .semibold))
-                .foregroundStyle(WSColor.duoText.opacity(0.45))
+                .font(WSFont.sans(14, weight: .bold))
+                .foregroundStyle(WSColor.foregroundMuted)
                 .lineLimit(1)
             Spacer()
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
-        .background(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(WSColor.duoSurface)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .stroke(WSColor.duoBorder, lineWidth: 1)
-                )
-        )
+        .wsSticker(fill: WSColor.lilacDeep, radius: 16, depth: 2)
     }
 
     private var emptyState: some View {
@@ -168,24 +153,16 @@ struct NotesPackPickerSheet: View {
             Spacer()
 
             VStack(spacing: 16) {
-                ZStack {
-                    Circle()
-                        .fill(accent.opacity(0.10))
-                        .frame(width: 110, height: 110)
-                    Image(systemName: gameIcon)
-                        .font(.system(size: 44, weight: .heavy))
-                        .foregroundStyle(accent)
-                }
+                WSMascotHero(asset: "mascot-thinking", size: 110, haloTint: WSColor.lime)
                 Text("No packs ready for \(gameLabel)")
-                    .wsHeadline(.small, weight: .black)
-                    .foregroundStyle(WSColor.duoText)
-                Text("Generate a study pack from the Study tab — \(gameLabel) questions get attached automatically and packs you've made will show up here.")
-                    .font(WSFont.sans(15))
-                    .foregroundStyle(WSColor.duoText.opacity(0.55))
+                    .font(WSFont.headline(22, weight: .black))
+                    .foregroundStyle(WSColor.foreground)
+                Text("Make a study pack in the Packs tab. \(gameLabel) questions get added automatically, and your packs show up here.")
+                    .font(WSFont.sans(15, weight: .semibold))
+                    .foregroundStyle(WSColor.foregroundMuted)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 12)
             }
-            .wsChunkyCard(accent: accent)
             .padding(.horizontal, 6)
 
             Spacer()
@@ -273,11 +250,11 @@ struct NotesPackPickerSheet: View {
 
     private var navTitle: String {
         switch game {
-        case .craterBlast:      return "Pick a pack — Crater Blast"
-        case .wordTower:        return "Pick a pack — Word Tower"
-        case .wordBlitz:        return "Pick a pack — Word Blitz"
-        case .memoryMatchNotes: return "Pick a pack — Memory Match"
-        case .quizRunNotes:     return "Pick a pack — Quiz Run"
+        case .craterBlast:      return "Crater Blast: pick a pack"
+        case .wordTower:        return "Word Tower: pick a pack"
+        case .wordBlitz:        return "Word Blitz: pick a pack"
+        case .memoryMatchNotes: return "Memory Match: pick a pack"
+        case .quizRunNotes:     return "Quiz Run: pick a pack"
         }
     }
 }

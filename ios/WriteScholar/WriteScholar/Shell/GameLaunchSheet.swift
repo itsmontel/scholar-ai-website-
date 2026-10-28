@@ -27,15 +27,15 @@ struct GameLaunchSheet: View {
     var onPick: (GameMode) -> Void
     @Environment(\.dismiss) private var dismiss
 
+    private let modeFills: [Color] = [WSColor.lime, WSColor.sky, WSColor.orange, WSColor.pink, WSColor.sun, WSColor.purple]
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
                 hero
-                Text("Choose a mode")
-                    .wsBody(.small, weight: .black)
-                    .foregroundStyle(WSColor.foregroundMuted)
-                    .textCase(.uppercase)
-                    .tracking(1)
+                Text("Pick a mode")
+                    .font(WSFont.headline(22, weight: .black))
+                    .foregroundStyle(.white)
 
                 VStack(spacing: 12) {
                     ForEach(Array(modes.enumerated()), id: \.element.id) { (i, mode) in
@@ -44,46 +44,63 @@ struct GameLaunchSheet: View {
                             dismiss()
                             onPick(mode)
                         } label: {
-                            WSListRowCard(
-                                icon: mode.icon,
-                                iconTint: mode.source == .myNotes ? WSColor.duoPurple : game.tint,
-                                title: mode.label,
-                                subtitle: mode.source == .myNotes ? "Use a saved study pack" : nil
-                            )
+                            HStack(spacing: 14) {
+                                Image(systemName: mode.icon)
+                                    .font(.system(size: 17, weight: .black))
+                                    .foregroundStyle(WSColor.inkText)
+                                    .frame(width: 42, height: 42)
+                                    .background(Circle().fill(Color.white))
+                                    .overlay(Circle().strokeBorder(Color.black, lineWidth: WSSticker.stroke))
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(mode.label)
+                                        .font(WSFont.headline(18, weight: .black))
+                                    if mode.source == .myNotes {
+                                        Text("Built from a saved study pack")
+                                            .font(WSFont.sans(13, weight: .bold))
+                                    }
+                                }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                Image(systemName: "play.fill")
+                                    .font(.system(size: 14, weight: .black))
+                            }
+                            .foregroundStyle(mode.source == .myNotes ? .white : WSColor.inkText)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 12)
+                            .wsSticker(fill: mode.source == .myNotes ? WSColor.purple : modeFills[i % modeFills.count],
+                                       radius: 20, depth: 4, stroke: .black)
                         }
-                        .buttonStyle(WSBouncyButtonStyle())
-                        .wsStaggerEntry(i)
+                        .buttonStyle(WSStickerPressStyle())
+                        .wsPop(delay: 0.05 * Double(i))
                     }
                 }
             }
             .padding(20)
         }
-        .background(WSColor.background.ignoresSafeArea())
+        .background(WSColor.arcadeNight.ignoresSafeArea())
+        .environment(\.colorScheme, .dark)
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
     }
 
     private var hero: some View {
         HStack(spacing: 14) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(game.tint.opacity(0.16))
-                    .frame(width: 60, height: 60)
-                Image(systemName: game.icon)
-                    .font(.system(size: 26, weight: .bold))
-                    .foregroundStyle(game.tint)
-            }
+            ArcadePreview(game: game)
+                .frame(width: 110, height: 76)
+                .background(Color.black.opacity(0.35))
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(WSColor.lime, lineWidth: 2.5))
             VStack(alignment: .leading, spacing: 3) {
                 Text(game.title)
-                    .wsHeadline(.medium, weight: .black)
-                    .foregroundStyle(WSColor.foreground)
+                    .font(WSFont.headline(28, weight: .black))
+                    .tracking(-0.6)
+                    .foregroundStyle(WSColor.lime)
                 Text(game.blurb)
-                    .wsBody(.small)
-                    .foregroundStyle(WSColor.foregroundMuted)
+                    .font(WSFont.sans(14, weight: .bold))
+                    .foregroundStyle(Color(hex: 0xD9D2F2))
             }
             Spacer()
         }
-        .padding(.top, 6)
+        .padding(.top, 10)
     }
 }
 

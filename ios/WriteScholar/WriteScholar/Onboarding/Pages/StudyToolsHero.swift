@@ -54,7 +54,6 @@ struct StudyToolsHero: View {
                 .frame(width: 130, height: 130)
                 .offset(x: 120, y: -130 + mascotBob)
                 .rotationEffect(.degrees(8))
-                .shadow(color: WSColor.duoBlue.opacity(0.30), radius: 18, y: 8)
                 .wsStaggerEntry(1)
 
             // Floating chunky tool strip under the screenshot

@@ -62,7 +62,6 @@ struct GetStartedHero: View {
                                 .overlay(
                                     Capsule().stroke(pill.1.opacity(0.30), lineWidth: 1.5)
                                 )
-                                .shadow(color: pill.1.opacity(0.15), radius: 6, y: 2)
                         )
                         .offset(
                             x: cos(angle) * 145,
@@ -78,7 +77,6 @@ struct GetStartedHero: View {
             WSAnimatedImage(name: "mascot-dance", ext: "webp")
                 .frame(width: 180, height: 180)
                 .scaleEffect(badgeScale)
-                .shadow(color: WSColor.duoGreen.opacity(0.30), radius: 24, y: 10)
                 .wsStaggerEntry(1)
 
             // "7 days free trial" trophy floating top-right -- chunky green badge
@@ -123,7 +121,6 @@ struct GetStartedHero: View {
                     .fill(WSColor.duoGreen)
                     .overlay(Capsule().stroke(.white.opacity(0.20), lineWidth: 1.5))
             }
-            .shadow(color: WSColor.duoGreen.opacity(0.35), radius: 12, y: 6)
         )
     }
 }

@@ -39,11 +39,11 @@ enum AIAction: String, CaseIterable, Identifiable {
 
     var tint: Color {
         switch self {
-        case .improve:  return WSColor.duoPurple
-        case .grammar:  return WSColor.duoBlue
-        case .simplify: return WSColor.duoGreen
-        case .shorten:  return WSColor.duoOrange
-        case .expand:   return WSColor.duoRed
+        case .improve:  return WSColor.purple
+        case .grammar:  return WSColor.sky
+        case .simplify: return WSColor.lime
+        case .shorten:  return WSColor.orange
+        case .expand:   return WSColor.pink
         }
     }
 
@@ -100,17 +100,22 @@ struct SmartEditorView: View {
         VStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 6) {
                 TextField("Untitled essay", text: $title)
-                    .font(WSFont.headline(24, weight: .black))
+                    .font(WSFont.headline(30, weight: .black))
+                    .tracking(-0.8)
                     .foregroundStyle(WSColor.foreground)
                 Text(wordCountLabel)
-                    .wsBody(.small, weight: .bold)
-                    .foregroundStyle(WSColor.foregroundMuted)
+                    .font(WSFont.headline(13, weight: .black))
+                    .foregroundStyle(WSColor.inkText)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(Capsule().fill(WSColor.lime))
+                    .overlay(Capsule().strokeBorder(WSColor.ink, lineWidth: 2))
             }
             .padding(.horizontal, 20)
             .padding(.top, 12)
-            .padding(.bottom, 8)
+            .padding(.bottom, 10)
 
-            Divider()
+            Rectangle().fill(WSColor.ink).frame(height: 2)
 
             ZStack(alignment: .topLeading) {
                 if bodyText.isEmpty {
@@ -147,7 +152,7 @@ struct SmartEditorView: View {
                     } label: {
                         Image(systemName: "arrow.uturn.backward")
                     }
-                    .foregroundStyle(WSColor.duoPurple)
+                    .foregroundStyle(WSColor.purpleInk)
                     .accessibilityLabel("Undo replace")
                 }
                 Button {
@@ -156,12 +161,12 @@ struct SmartEditorView: View {
                 } label: {
                     Image(systemName: "arrow.clockwise")
                 }
-                .foregroundStyle(WSColor.duoPurple)
+                .foregroundStyle(WSColor.purpleInk)
                 .disabled(isEmpty && title.isEmpty)
                 .accessibilityLabel("Start over")
 
                 Button("Done") { dismiss() }
-                    .foregroundStyle(WSColor.duoPurple)
+                    .foregroundStyle(WSColor.purpleInk)
             }
             ToolbarItemGroup(placement: .keyboard) {
                 Spacer()
@@ -169,7 +174,7 @@ struct SmartEditorView: View {
                     bodyFocused = false
                 }
                 .font(WSFont.sans(15, weight: .bold))
-                .foregroundStyle(WSColor.duoPurple)
+                .foregroundStyle(WSColor.purpleInk)
             }
         }
         .confirmationDialog("Start a new essay?", isPresented: $showStartOver, titleVisibility: .visible) {
@@ -206,22 +211,18 @@ struct SmartEditorView: View {
                         run(action)
                     } label: {
                         VStack(spacing: 5) {
-                            Image(systemName: action.icon).font(.system(size: 17, weight: .bold))
-                            Text(action.rawValue).font(WSFont.sans(11, weight: .bold))
+                            Image(systemName: action.icon).font(.system(size: 17, weight: .black))
+                            Text(action.rawValue).font(WSFont.headline(12, weight: .black))
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.8)
                         }
-                        .foregroundStyle(isPrimary ? .white : action.tint)
-                        .frame(width: isPrimary ? 78 : 66)
+                        .foregroundStyle(isPrimary ? .white : WSColor.inkText)
+                        .frame(width: isPrimary ? 82 : 70)
                         .padding(.vertical, 10)
-                        .background(
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .fill(isPrimary ? AnyShapeStyle(action.tint) : AnyShapeStyle(action.tint.opacity(0.12)))
-                                .shadow(color: isPrimary ? action.tint.opacity(0.35) : .clear, radius: 8, y: 4)
-                        )
-                        .opacity(isEmpty ? 0.4 : 1)
+                        .wsSticker(fill: action.tint, radius: 18, depth: 4)
+                        .opacity(isEmpty ? 0.45 : 1)
                     }
-                    .buttonStyle(WSBouncyButtonStyle())
+                    .buttonStyle(WSStickerPressStyle())
                     .disabled(isEmpty)
                 }
             }
@@ -230,31 +231,27 @@ struct SmartEditorView: View {
         }
         .background(
             WSColor.backgroundElevated
-                .shadow(color: Color.black.opacity(0.05), radius: 8, y: -2)
+                .overlay(alignment: .top) { Rectangle().fill(WSColor.ink).frame(height: 2) }
                 .ignoresSafeArea(edges: .bottom)
         )
     }
 
     private var processingOverlay: some View {
         ZStack {
-            Color.black.opacity(0.15).ignoresSafeArea()
+            Color.black.opacity(0.25).ignoresSafeArea()
             VStack(spacing: 12) {
                 WSAnimatedImage(name: "mascot-laptop", ext: "webp")
-                    .frame(width: 84, height: 84)
-                    .wsBobbing()
+                    .frame(width: 96, height: 96)
+                    .wsMascotBob(amount: 5, rock: 3, duration: 0.8)
                 Text("\(running?.rawValue ?? "Working")…")
-                    .wsBody(.medium, weight: .bold)
+                    .font(WSFont.headline(22, weight: .black))
                     .foregroundStyle(WSColor.foreground)
                 Text("Polishing your writing")
-                    .wsBody(.small)
+                    .wsBody(.small, weight: .bold)
                     .foregroundStyle(WSColor.foregroundMuted)
             }
             .padding(28)
-            .background(
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .fill(WSColor.backgroundElevated)
-                    .shadow(color: Color.black.opacity(0.12), radius: 16, y: 6)
-            )
+            .wsSticker(radius: 26, depth: 6)
         }
     }
 
@@ -270,10 +267,11 @@ struct SmartEditorView: View {
                         Text("New wording is highlighted")
                             .font(WSFont.sans(12, weight: .black))
                     }
-                    .foregroundStyle(s.action.tint)
+                    .foregroundStyle(s.action == .improve ? .white : WSColor.inkText)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
-                    .background(Capsule().fill(s.action.tint.opacity(0.12)))
+                    .background(Capsule().fill(s.action.tint))
+                    .overlay(Capsule().strokeBorder(WSColor.ink, lineWidth: 2))
 
                     Text(EditorDiff.highlightedSuggestion(original: s.original,
                                                           suggested: s.suggested,
@@ -290,21 +288,21 @@ struct SmartEditorView: View {
             .safeAreaInset(edge: .bottom) {
                 HStack(spacing: 10) {
                     Button { suggestion = nil } label: {
-                        Text("Keep original").frame(maxWidth: .infinity)
+                        Text("Keep mine")
                     }
-                    .buttonStyle(WSDuoSecondaryButtonStyle(fullWidth: true))
+                    .buttonStyle(WSStickerButtonStyle(fill: WSColor.backgroundElevated, foreground: WSColor.foreground, height: 56))
                     Button {
                         undoText = bodyText
                         bodyText = s.suggested
                         suggestion = nil
                         Haptics.success()
                     } label: {
-                        Text("Replace").frame(maxWidth: .infinity)
+                        Text("Use this")
                     }
-                    .buttonStyle(WSDuoPrimaryButtonStyle(fullWidth: true))
+                    .buttonStyle(WSStickerButtonStyle(fill: WSColor.lime, foreground: WSColor.inkText, height: 56))
                 }
                 .padding(16)
-                .background(WSColor.backgroundElevated.ignoresSafeArea(edges: .bottom))
+                .background(WSColor.background.ignoresSafeArea(edges: .bottom))
             }
         }
     }

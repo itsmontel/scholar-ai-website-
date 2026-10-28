@@ -31,41 +31,36 @@ struct AnalyzeGeneratingView: View {
             VStack(spacing: 28) {
                 Spacer()
 
-                WSAnimatedImage(name: "mascot-paper", ext: "webp")
-                    .frame(width: 200, height: 200)
-                    .shadow(color: WSColor.duoGreen.opacity(0.35), radius: 28, y: 12)
-                    .wsBobbing()
+                WSMascotHero(asset: "mascot-paper", size: 180, haloTint: WSColor.pink)
 
-                VStack(spacing: 6) {
-                    Text("Reading your paper")
-                        .wsHeadline(.medium, weight: .black)
-                        .foregroundStyle(WSColor.duoText)
-                    Text("Usually 30-60 seconds.")
-                        .wsBody(.small)
+                VStack(spacing: 8) {
+                    Text("Grading your essay…")
+                        .font(WSFont.headline(34, weight: .black))
+                        .tracking(-1)
+                        .foregroundStyle(WSColor.foreground)
+                    Text("Usually 30 to 60 seconds.")
+                        .wsBody(.small, weight: .bold)
                         .foregroundStyle(WSColor.foregroundMuted)
                 }
 
                 HStack(spacing: 8) {
                     Image(systemName: Self.steps[stepIndex].icon)
-                        .foregroundStyle(WSColor.duoGreen)
+                        .font(.system(size: 14, weight: .black))
                     Text(Self.steps[stepIndex].text)
-                        .wsBody(.medium, weight: .semibold)
-                        .foregroundStyle(WSColor.duoText)
+                        .font(WSFont.headline(16, weight: .black))
                         .id(stepIndex)
                         .transition(.asymmetric(
                             insertion: .opacity.combined(with: .move(edge: .bottom)),
                             removal: .opacity.combined(with: .move(edge: .top))
                         ))
                 }
+                .foregroundStyle(WSColor.inkText)
                 .padding(.horizontal, 18)
                 .padding(.vertical, 12)
-                .background(
-                    Capsule().fill(WSColor.backgroundElevated)
-                        .overlay(Capsule().stroke(WSColor.duoBorder, lineWidth: 2))
-                )
+                .wsStickerCapsule(fill: WSColor.sky, depth: 3)
 
-                WSProgressBar(fraction: progress, tint: WSColor.duoGreen, height: 14)
-                    .padding(.horizontal, 32)
+                WSStripeBar(fraction: progress, fill: WSColor.pink, height: 18)
+                    .padding(.horizontal, 24)
 
                 Spacer()
             }

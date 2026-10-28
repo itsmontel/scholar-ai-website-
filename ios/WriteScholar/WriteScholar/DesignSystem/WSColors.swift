@@ -2,9 +2,9 @@
 //  WSColors.swift
 //  WriteScholar
 //
-//  Duolingo-style color tokens. Solid hex values matching the web app's
-//  Tailwind palette. Each color has a "main", "dark" (for 3D lip borders),
-//  and "light" (for tinted backgrounds) variant.
+//  Color tokens. The "sticker arcade" palette (ink, lilac, purple, lime,
+//  pink, sky, orange) drives the redesign; the older duo* tokens stay as
+//  aliases so untouched screens keep compiling.
 //
 //  Usage:
 //    .foregroundStyle(WSColor.duoGreen)
@@ -42,25 +42,48 @@ enum WSColor {
     static let duoPurpleDark  = Color(hex: 0x6246C9)
     static let duoPurpleLight = Color(hex: 0xEFEAFE)
 
-    /// Pink — arcade / games accent (matches the website's arcade section)
-    static let duoPink      = Color(hex: 0xEC4899)
-    static let duoPinkDark  = Color(hex: 0xDB2777)
-    static let duoPinkLight = Color(hex: 0xFCE7F3)
+    /// Pink — arcade / games accent
+    static let duoPink      = Color(hex: 0xFF5FA8)
+    static let duoPinkDark  = Color(hex: 0xE04790)
+    static let duoPinkLight = Color(hex: 0xFFD3E6)
 
     /// Yellow — XP, stars, streak milestones, Quiz Run accent
     static let duoYellow      = Color(hex: 0xFFC800)
     static let duoYellowDark  = Color(hex: 0xE6B400)
     static let duoYellowLight = Color(hex: 0xFFF6D6)
 
+    // MARK: - Sticker arcade palette
+
+    /// Outline + hard shadow ink. Stays near-black in dark mode so the
+    /// sticker edge still reads against the darker card faces.
+    static let ink        = Color(lightHex: 0x17112B, darkHex: 0x07040F)
+    /// Headline / body ink on light faces (always dark, for colored tiles).
+    static let inkText    = Color(hex: 0x17112B)
+    static let inkMuted   = Color(hex: 0x5D5577)
+    static let lilac      = Color(lightHex: 0xF3EEFF, darkHex: 0x120C24)
+    static let lilacDeep  = Color(lightHex: 0xEDE6FF, darkHex: 0x2A2148)
+    static let purple     = Color(hex: 0x7C5CE6)
+    static let purpleInk  = Color(hex: 0x4B2FB8)
+    static let lime       = Color(hex: 0xC8F53B)
+    static let pink       = Color(hex: 0xFF5FA8)
+    static let pinkSoft   = Color(hex: 0xFFD3E6)
+    static let sky        = Color(hex: 0x3DC5FF)
+    static let orange     = Color(hex: 0xFF9B3D)
+    static let sun        = Color(hex: 0xFFD23F)
+    /// Arcade night background + neon card faces.
+    static let arcadeNight = Color(hex: 0x120C24)
+    static let arcadeCard  = Color(hex: 0x1E1638)
+    static let arcadeLine  = Color(hex: 0x3A2F66)
+
     // MARK: - Neutrals (Duolingo-style)
 
     /// Dark text — #3C3C3C in light mode, warm near-white in dark mode.
     /// Adaptive so headings on card surfaces stay readable in dark mode.
-    static let duoText = Color(lightHex: 0x3C3C3C, darkHex: 0xF5F5F4)
-    /// Light border / dividers — #E5E5E5 light, stone-700 dark.
-    static let duoBorder = Color(lightHex: 0xE5E5E5, darkHex: 0x44403C)
-    /// Lavender page wash — matches the prototype's tinted background (was #F7F7F7)
-    static let duoSurface = Color(hex: 0xF6F4FE)
+    static let duoText = Color(lightHex: 0x17112B, darkHex: 0xF6F2FF)
+    /// Light border / dividers.
+    static let duoBorder = Color(lightHex: 0xD9D0F2, darkHex: 0x3A2F5E)
+    /// Lilac page wash.
+    static let duoSurface = Color(lightHex: 0xF3EEFF, darkHex: 0x120C24)
 
     // MARK: - Semantic aliases (used throughout the app)
 

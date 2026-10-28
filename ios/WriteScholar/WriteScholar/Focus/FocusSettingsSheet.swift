@@ -31,7 +31,6 @@ struct FocusSettingsSheet: View {
                 WSColor.background.ignoresSafeArea()
 
                 VStack(spacing: 0) {
-                    WSChunkyRibbon(color: WSColor.duoGreen)
                     ScrollView {
                         VStack(alignment: .leading, spacing: 18) {
                             challengeTypeSection
@@ -58,7 +57,7 @@ struct FocusSettingsSheet: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
-                        .foregroundStyle(WSColor.duoText.opacity(0.55))
+                        .foregroundStyle(WSColor.foregroundMuted)
                 }
             }
         }
@@ -100,7 +99,7 @@ struct FocusSettingsSheet: View {
                     .foregroundStyle(WSColor.duoText)
                 Text(type.blurb)
                     .wsBody(.caption)
-                    .foregroundStyle(WSColor.duoText.opacity(0.55))
+                    .foregroundStyle(WSColor.foregroundMuted)
                     .multilineTextAlignment(.center)
                     .frame(minHeight: 38)
             }
@@ -112,7 +111,7 @@ struct FocusSettingsSheet: View {
                     .fill(active ? type.tint.opacity(0.10) : WSColor.backgroundElevated)
                     .overlay(
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(active ? type.tint : WSColor.duoBorder, lineWidth: active ? 2 : 2)
+                            .stroke(WSColor.ink, lineWidth: active ? 2.5 : 2)
                     )
             )
         }
@@ -123,7 +122,7 @@ struct FocusSettingsSheet: View {
 
     private var topicBanksSection: some View {
         sectionCard(title: "Topic banks",
-                    subtitle: "Used when you don't have a study pack saved. Pick the categories the unlock challenge can pull from. All facts are timeless — nothing that drifts year-to-year.",
+                    subtitle: "Used when you don't have a study pack saved. Pick the categories the unlock challenge can pull from. All facts are timeless, so nothing goes out of date.",
                     accent: WSColor.duoBlue) {
             VStack(spacing: 10) {
                 let cols = [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8)]
@@ -137,9 +136,9 @@ struct FocusSettingsSheet: View {
                     HStack(spacing: 8) {
                         Image(systemName: "info.circle.fill")
                             .foregroundStyle(WSColor.duoOrange)
-                        Text("Pick at least one topic — otherwise we'll fall back to a small mixed sample bank.")
+                        Text("Pick at least one topic, or we'll use a small mixed sample bank.")
                             .wsBody(.caption)
-                            .foregroundStyle(WSColor.duoText.opacity(0.55))
+                            .foregroundStyle(WSColor.foregroundMuted)
                     }
                     .padding(10)
                     .background(
@@ -188,7 +187,7 @@ struct FocusSettingsSheet: View {
                     }
                     Spacer()
                     Image(systemName: active ? "checkmark.circle.fill" : "plus.circle")
-                        .foregroundStyle(active ? topic.tint : WSColor.duoText.opacity(0.35))
+                        .foregroundStyle(active ? topic.tint : WSColor.foregroundMuted)
                         .font(.system(size: 16, weight: .bold))
                 }
                 Text(topic.label)
@@ -196,7 +195,7 @@ struct FocusSettingsSheet: View {
                     .foregroundStyle(WSColor.duoText)
                 Text("\(FocusQuestionRegistry.count(for: topic)) questions")
                     .wsBody(.caption, weight: .semibold)
-                    .foregroundStyle(active ? topic.tint : WSColor.duoText.opacity(0.55))
+                    .foregroundStyle(active ? topic.tint : WSColor.foregroundMuted)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(12)
@@ -205,7 +204,7 @@ struct FocusSettingsSheet: View {
                     .fill(active ? topic.tint.opacity(0.10) : WSColor.backgroundElevated)
                     .overlay(
                         RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .stroke(active ? topic.tint : WSColor.duoBorder, lineWidth: 2)
+                            .stroke(WSColor.ink, lineWidth: active ? 2.5 : 2)
                     )
             )
         }
@@ -245,7 +244,7 @@ struct FocusSettingsSheet: View {
                         .foregroundStyle(WSColor.duoText)
                     Text(d.subtitle)
                         .wsBody(.caption)
-                        .foregroundStyle(WSColor.duoText.opacity(0.55))
+                        .foregroundStyle(WSColor.foregroundMuted)
                 }
                 Spacer()
                 Image(systemName: active ? "checkmark.circle.fill" : "circle")
@@ -258,7 +257,7 @@ struct FocusSettingsSheet: View {
                     .fill(active ? tint.opacity(0.08) : WSColor.backgroundElevated)
                     .overlay(
                         RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .stroke(active ? tint : WSColor.duoBorder, lineWidth: 2)
+                            .stroke(WSColor.ink, lineWidth: active ? 2.5 : 2)
                     )
             )
         }
@@ -280,13 +279,13 @@ struct FocusSettingsSheet: View {
                     } label: {
                         Text(d.label)
                             .font(WSFont.sans(13, weight: .bold))
-                            .foregroundStyle(active ? .white : WSColor.duoText)
+                            .foregroundStyle(active ? WSColor.inkText : WSColor.foreground)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 10)
                             .background(
                                 Capsule()
-                                    .fill(active ? WSColor.duoPurple : WSColor.backgroundElevated)
-                                    .overlay(Capsule().stroke(active ? WSColor.duoPurpleDark : WSColor.duoBorder, lineWidth: 2))
+                                    .fill(active ? WSColor.lime : WSColor.backgroundElevated)
+                                    .overlay(Capsule().stroke(WSColor.ink, lineWidth: active ? 2.5 : 2))
                             )
                     }
                     .buttonStyle(.plain)
@@ -327,7 +326,7 @@ struct FocusSettingsSheet: View {
                 .font(.system(size: 22))
             VStack(alignment: .leading, spacing: 2) {
                 Text(label).wsBody(.medium, weight: .semibold).foregroundStyle(WSColor.duoText)
-                Text(subtitle).wsBody(.caption).foregroundStyle(WSColor.duoText.opacity(0.55))
+                Text(subtitle).wsBody(.caption).foregroundStyle(WSColor.foregroundMuted)
             }
             Spacer()
         }
@@ -351,13 +350,13 @@ struct FocusSettingsSheet: View {
         } label: {
             Label("Reset to defaults", systemImage: "arrow.counterclockwise")
                 .font(WSFont.sans(13, weight: .bold))
-                .foregroundStyle(WSColor.duoText.opacity(0.55))
+                .foregroundStyle(WSColor.foregroundMuted)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 12)
                 .background(
                     Capsule()
                         .fill(WSColor.backgroundElevated)
-                        .overlay(Capsule().stroke(WSColor.duoBorder, lineWidth: 2))
+                        .overlay(Capsule().stroke(WSColor.ink, lineWidth: 2))
                 )
         }
         .buttonStyle(.plain)
@@ -407,7 +406,7 @@ struct FocusSettingsSheet: View {
                     .foregroundStyle(WSColor.duoText)
                 Text(subtitle)
                     .wsBody(.caption)
-                    .foregroundStyle(WSColor.duoText.opacity(0.55))
+                    .foregroundStyle(WSColor.foregroundMuted)
             }
             content()
         }

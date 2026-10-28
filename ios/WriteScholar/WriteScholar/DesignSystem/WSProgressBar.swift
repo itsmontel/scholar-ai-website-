@@ -31,65 +31,17 @@ struct WSProgressBar: View {
     var showsShimmer: Bool = true
     var trackColor: Color = WSColor.duoBorder.opacity(0.55)
 
-    @State private var shimmerPhase: Double = -0.4
-
     private var clamped: Double { min(1.0, max(0.0, fraction)) }
 
     var body: some View {
-        GeometryReader { geo in
-            let cornerRadius = height / 2
-
-            ZStack(alignment: .leading) {
-                // Track — darker base so the fill looks like it sits *in* a slot
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .fill(trackColor)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                            .stroke(WSColor.duoBorder, lineWidth: 1)
-                    )
-
-                // Fill (the actual progress)
-                if clamped > 0.0001 {
-                    ZStack(alignment: .leading) {
-                        // Flat soft fill (no 3D lip)
-                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                            .fill(tint)
-
-                        // Sliding white shimmer
-                        if showsShimmer {
-                            GeometryReader { fillGeo in
-                                let fillW = fillGeo.size.width
-                                let stripeW = max(20, fillW * 0.35)
-                                LinearGradient(
-                                    colors: [
-                                        Color.white.opacity(0),
-                                        Color.white.opacity(0.55),
-                                        Color.white.opacity(0)
-                                    ],
-                                    startPoint: .leading, endPoint: .trailing
-                                )
-                                .frame(width: stripeW, height: height)
-                                .offset(x: fillW * shimmerPhase)
-                                .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-                                .blendMode(.plusLighter)
-                            }
-                            .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-                        }
-                    }
-                    .frame(width: max(height, geo.size.width * clamped))
-                    .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-                    .animation(.spring(response: 0.45, dampingFraction: 0.78), value: clamped)
-                    .shadow(color: tint.opacity(0.35), radius: 4, y: 2)
-                }
-            }
-        }
-        .frame(height: height)
-        .onAppear {
-            guard showsShimmer else { return }
-            withAnimation(.linear(duration: 2.6).repeatForever(autoreverses: false)) {
-                shimmerPhase = 1.4
-            }
-        }
+        // Sticker restyle: ink-outlined capsule with marching stripes.
+        // `trackColor` / `showsShimmer` map onto the stripe bar's track and
+        // stripes so existing call sites keep their intent.
+        WSStripeBar(fraction: clamped,
+                    fill: WSStickerTint.face(for: tint),
+                    track: tint == .white ? Color.white.opacity(0.25) : WSColor.lilacDeep,
+                    height: height,
+                    stripes: showsShimmer)
     }
 }
 

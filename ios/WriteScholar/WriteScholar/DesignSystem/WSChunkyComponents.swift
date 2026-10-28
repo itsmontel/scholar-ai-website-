@@ -85,25 +85,25 @@ private extension WSChunkyOptionState {
             )
         case .correct:
             return WSChunkyOptionPalette(
-                topColor:    WSColor.duoGreen,
-                baseColor:   WSColor.duoGreenDark,
-                foreground:  Color.white,
-                strokeColor: WSColor.duoGreenDark,
+                topColor:    WSColor.lime,
+                baseColor:   WSColor.ink,
+                foreground:  WSColor.inkText,
+                strokeColor: WSColor.ink,
                 badgeIcon:   "checkmark",
                 badgeFill:   Color.white,
-                badgeStroke: WSColor.duoGreenDark,
-                badgeForeground: WSColor.duoGreen
+                badgeStroke: WSColor.ink,
+                badgeForeground: WSColor.inkText
             )
         case .wrong:
             return WSChunkyOptionPalette(
-                topColor:    WSColor.duoRed,
-                baseColor:   WSColor.duoRedDark,
-                foreground:  Color.white,
-                strokeColor: WSColor.duoRedDark,
+                topColor:    WSColor.pink,
+                baseColor:   WSColor.ink,
+                foreground:  WSColor.inkText,
+                strokeColor: WSColor.ink,
                 badgeIcon:   "xmark",
                 badgeFill:   Color.white,
-                badgeStroke: WSColor.duoRedDark,
-                badgeForeground: WSColor.duoRed
+                badgeStroke: WSColor.ink,
+                badgeForeground: WSColor.inkText
             )
         case .disabled:
             return WSChunkyOptionPalette(
@@ -147,7 +147,6 @@ struct WSChunkyOption<Accessory: View>: View {
     var body: some View {
         let palette = state.palette(selectedTint: selectedTint, selectedTintDark: selectedTintDark)
         let isLocked = state == .disabled || state == .correct || state == .wrong
-        let isFilled = state == .selected || state == .correct || state == .wrong
 
         Button {
             guard !isLocked else { return }
@@ -157,7 +156,7 @@ struct WSChunkyOption<Accessory: View>: View {
             HStack(spacing: 14) {
                 accessory()
                 Text(label)
-                    .font(WSFont.sans(15, weight: .heavy))
+                    .font(WSFont.sans(16, weight: .heavy))
                     .foregroundStyle(palette.foreground)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .multilineTextAlignment(.leading)
@@ -168,7 +167,7 @@ struct WSChunkyOption<Accessory: View>: View {
                         Circle()
                             .fill(palette.badgeFill)
                             .frame(width: 28, height: 28)
-                            .overlay(Circle().stroke(palette.badgeStroke.opacity(0.35), lineWidth: 1.5))
+                            .overlay(Circle().strokeBorder(WSColor.ink, lineWidth: 2))
                         Image(systemName: icon)
                             .font(.system(size: 12, weight: .black))
                             .foregroundStyle(palette.badgeForeground)
@@ -180,17 +179,22 @@ struct WSChunkyOption<Accessory: View>: View {
             .padding(.horizontal, horizontalPadding)
             .frame(maxWidth: .infinity)
             .background(
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .fill(palette.topColor)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                            .stroke(isFilled ? Color.white.opacity(0.15) : palette.strokeColor, lineWidth: 1.5)
-                    )
+                ZStack {
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .fill(palette.topColor)
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .strokeBorder(WSColor.ink.opacity(state == .disabled ? 0.35 : 1), lineWidth: WSSticker.stroke)
+                }
             )
-            .compositingGroup()
-            .shadow(color: isFilled ? palette.baseColor.opacity(pressed ? 0.15 : 0.35) : Color.black.opacity(pressed ? 0.02 : 0.06),
-                    radius: pressed ? 4 : 12, y: pressed ? 2 : 6)
-            .scaleEffect(pressed && !isLocked ? 0.98 : 1)
+            .offset(y: pressed && !isLocked ? 3 : 0)
+            .background(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .fill(WSColor.ink.opacity(state == .disabled ? 0.35 : 1))
+                    .offset(y: 4)
+            )
+            .padding(.bottom, 4)
+            .scaleEffect(state == .correct ? 1.02 : 1)
+            .modifier(WSWrongShake(active: state == .wrong))
             .animation(.spring(response: 0.18, dampingFraction: 0.62), value: pressed)
             .animation(.spring(response: 0.30, dampingFraction: 0.70), value: state)
         }
@@ -227,9 +231,9 @@ extension WSChunkyOption where Accessory == EmptyView {
 /// (e.g. white-on-translucent when the option is selected).
 struct WSChunkyOptionLetter: View {
     let letter: String
-    var fillColor: Color = WSColor.surface
-    var foreground: Color = WSColor.duoText
-    var strokeColor: Color = WSColor.duoBorder
+    var fillColor: Color = WSColor.lilacDeep
+    var foreground: Color = WSColor.foreground
+    var strokeColor: Color = WSColor.ink
 
     var body: some View {
         ZStack {
@@ -237,11 +241,11 @@ struct WSChunkyOptionLetter: View {
                 .fill(fillColor)
                 .overlay(
                     RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .stroke(strokeColor, lineWidth: 1)
+                        .strokeBorder(strokeColor, lineWidth: 2)
                 )
-                .frame(width: 26, height: 26)
+                .frame(width: 30, height: 30)
             Text(letter.uppercased())
-                .font(WSFont.sans(11, weight: .black))
+                .font(WSFont.headline(14, weight: .black))
                 .tracking(0.4)
                 .foregroundStyle(foreground)
         }
@@ -293,21 +297,18 @@ struct WSChunkyPill: View {
                     .tracking(0.3)
                     .lineLimit(1)
             }
-            .foregroundStyle(isSelected ? Color.white : WSColor.foregroundMuted)
+            .foregroundStyle(isSelected ? WSColor.inkText : WSColor.foreground)
             .padding(.vertical, verticalPadding)
             .padding(.horizontal, horizontalPadding)
             .background(
-                Capsule()
-                    .fill(isSelected ? tint : WSColor.backgroundElevated)
-                    .overlay(
-                        Capsule()
-                            .stroke(isSelected ? Color.clear : WSColor.hairline, lineWidth: 1)
-                    )
+                ZStack {
+                    Capsule().fill(isSelected ? WSColor.lime : WSColor.backgroundElevated)
+                    Capsule().strokeBorder(WSColor.ink, lineWidth: 2)
+                }
             )
-            .compositingGroup()
-            .shadow(color: isSelected ? tint.opacity(pressed ? 0.15 : 0.35) : Color.black.opacity(pressed ? 0.02 : 0.05),
-                    radius: pressed ? 3 : 8, y: pressed ? 1 : 4)
-            .scaleEffect(pressed ? 0.96 : 1)
+            .offset(y: pressed ? 2 : 0)
+            .background(Capsule().fill(WSColor.ink).offset(y: isSelected ? 3 : 2))
+            .padding(.bottom, 3)
             .animation(.spring(response: 0.18, dampingFraction: 0.62), value: pressed)
             .animation(.spring(response: 0.26, dampingFraction: 0.72), value: isSelected)
         }
@@ -349,8 +350,9 @@ struct WSChunkyRibbon: View {
             topTrailingRadius: cornerRadius,
             style: .continuous
         )
-        .fill(color)
-        .frame(height: height)
+        .fill(WSStickerTint.face(for: color))
+        .overlay(alignment: .bottom) { Rectangle().fill(WSColor.ink).frame(height: 2) }
+        .frame(height: height + 2)
     }
 }
 
@@ -366,24 +368,12 @@ struct WSChunkyIcon: View {
     var lip: CGFloat = 4
 
     var body: some View {
-        ZStack(alignment: .top) {
-            Circle()
-                .fill(tint.opacity(0.55).mix(with: Color.black, by: 0.15))
-                .frame(width: size, height: size)
-                .padding(.top, lip)
-
-            Circle()
-                .fill(tint)
-                .frame(width: size, height: size)
-                .overlay(Circle().stroke(.white.opacity(0.18), lineWidth: 1.5))
-                .overlay(
-                    Image(systemName: systemName)
-                        .font(.system(size: size * 0.42, weight: .black))
-                        .foregroundStyle(.white)
-                )
-        }
-        .compositingGroup()
-        .shadow(color: tint.opacity(0.30), radius: 6, y: 3)
+        Image(systemName: systemName)
+            .font(.system(size: size * 0.42, weight: .black))
+            .foregroundStyle(WSColor.inkText)
+            .frame(width: size, height: size)
+            .wsStickerCircle(fill: tint, depth: 3)
+            .padding(.bottom, 3)
     }
 }
 
@@ -399,16 +389,13 @@ struct WSChunkyStat: View {
 
     var body: some View {
         VStack(spacing: 8) {
-            ZStack {
-                Circle()
-                    .fill(tint.opacity(0.18))
-                    .frame(width: 38, height: 38)
-                Image(systemName: icon)
-                    .font(.system(size: 16, weight: .black))
-                    .foregroundStyle(tint)
-            }
+            Image(systemName: icon)
+                .font(.system(size: 16, weight: .black))
+                .foregroundStyle(WSColor.inkText)
+                .frame(width: 38, height: 38)
+                .wsStickerCircle(fill: tint)
             Text(value)
-                .font(WSFont.sans(20, weight: .black))
+                .font(WSFont.headline(24, weight: .black))
                 .foregroundStyle(WSColor.foreground)
             Text(label)
                 .font(WSFont.sans(11, weight: .heavy))
@@ -420,6 +407,29 @@ struct WSChunkyStat: View {
         }
         .frame(maxWidth: .infinity)
         .wsChunkyCard(cornerRadius: 18, accent: tint, fillColor: WSColor.backgroundElevated)
+    }
+}
+
+// MARK: - Wrong-answer shake
+
+/// One quick horizontal shake when `active` flips on.
+struct WSWrongShake: ViewModifier {
+    var active: Bool
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var x: CGFloat = 0
+
+    func body(content: Content) -> some View {
+        content
+            .offset(x: x)
+            .onChange(of: active) { _, on in
+                guard on, !reduceMotion else { return }
+                let steps: [CGFloat] = [-9, 8, -6, 4, 0]
+                for (i, v) in steps.enumerated() {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 0.07) {
+                        withAnimation(.easeInOut(duration: 0.07)) { x = v }
+                    }
+                }
+            }
     }
 }
 

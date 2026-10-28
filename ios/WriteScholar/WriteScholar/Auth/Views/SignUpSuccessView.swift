@@ -35,7 +35,6 @@ struct SignUpSuccessView: View {
                 WSAnimatedImage(name: "mascot-dance", ext: "webp")
                     .frame(width: 160, height: 160)
                     .wsBobbing(amount: 6, duration: 2.2)
-                    .shadow(color: WSColor.duoGreen.opacity(0.3), radius: 20, y: 8)
                     .wsStaggerEntry(0)
 
                 // Success message in a chunky card

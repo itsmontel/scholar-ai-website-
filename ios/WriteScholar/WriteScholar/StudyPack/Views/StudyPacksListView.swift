@@ -26,7 +26,6 @@ struct StudyPacksListView: View {
     /// Jump to the pack creator.
     var onNewPack: () -> Void
 
-    @Environment(\.dismiss) private var dismiss
     @ObservedObject private var library = LibraryStore.shared
 
     @State private var searchText = ""
@@ -78,32 +77,19 @@ struct StudyPacksListView: View {
     // MARK: - Header (‹ + centered title)
 
     private var header: some View {
-        HStack {
-            Button {
-                Haptics.light()
-                dismiss()
-            } label: {
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 16, weight: .black))
+        HStack(alignment: .bottom) {
+            VStack(alignment: .leading, spacing: 4) {
+                WSKicker(text: "\(packs.count) pack\(packs.count == 1 ? "" : "s")")
+                Text("Your packs.")
+                    .font(WSFont.headline(36, weight: .black))
+                    .tracking(-1)
                     .foregroundStyle(WSColor.foreground)
-                    .frame(width: 38, height: 38)
-                    .background(
-                        Circle()
-                            .fill(WSColor.backgroundElevated)
-                            .shadow(color: Color.black.opacity(0.05), radius: 5, y: 2)
-                    )
             }
-            .buttonStyle(WSBouncyButtonStyle())
-            .accessibilityLabel("Back")
-
             Spacer()
-            Text("Study Packs")
-                .wsHeadline(.medium, weight: .black)
-                .foregroundStyle(WSColor.foreground)
-            Spacer()
-
-            // Invisible twin keeps the title optically centered.
-            Color.clear.frame(width: 38, height: 38)
+            WSAnimatedImage(name: "mascot-study", ext: "webp")
+                .frame(width: 64, height: 64)
+                .wsMascotBob(amount: 5, rock: 3, duration: 1.3)
+                .accessibilityHidden(true)
         }
         .padding(.top, 6)
     }
@@ -149,14 +135,31 @@ struct StudyPacksListView: View {
             library.markOpened(item.id)
             onOpen(pack, item.id)
         } label: {
-            WSListRowCard(icon: "graduationcap.fill",
-                          iconTint: WSColor.duoPurple,
-                          title: item.title,
-                          subtitle: rowMeta(item),
-                          progress: item.progress ?? 0,
-                          progressTint: WSColor.duoPurple)
+            HStack(spacing: 14) {
+                WSPackCover(title: item.title, size: 74)
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(item.title)
+                        .font(WSFont.headline(17, weight: .black))
+                        .foregroundStyle(WSColor.foreground)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+                    Text(rowMeta(item))
+                        .font(WSFont.sans(12.5, weight: .bold))
+                        .foregroundStyle(WSColor.foregroundMuted)
+                        .lineLimit(1)
+                    WSStripeBar(fraction: item.progress ?? 0, fill: WSColor.purple, height: 10, stripes: false)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                Image(systemName: "play.fill")
+                    .font(.system(size: 15, weight: .black))
+                    .foregroundStyle(WSColor.inkText)
+                    .frame(width: 42, height: 42)
+                    .wsStickerCircle(fill: WSColor.lime, depth: 3)
+            }
+            .padding(12)
+            .wsSticker(radius: 22)
         }
-        .buttonStyle(WSBouncyButtonStyle())
+        .buttonStyle(WSStickerPressStyle())
     }
 
     /// "24 cards · Quiz · 12 qs · Edited 2d ago"
@@ -184,7 +187,7 @@ struct StudyPacksListView: View {
             } label: {
                 Text("Make my first pack")
             }
-            .buttonStyle(WSDuoPrimaryButtonStyle())
+            .buttonStyle(WSStickerButtonStyle(fill: WSColor.lime, foreground: WSColor.inkText))
         }
         .frame(maxWidth: .infinity)
         .padding(.top, 34)
@@ -217,18 +220,14 @@ struct StudyPacksListView: View {
                 Image(systemName: "plus")
                     .font(.system(size: 14, weight: .black))
                 Text("New pack")
-                    .font(WSFont.sans(15, weight: .black))
+                    .font(WSFont.headline(16, weight: .black))
             }
-            .foregroundStyle(.white)
+            .foregroundStyle(WSColor.inkText)
             .padding(.horizontal, 18)
             .padding(.vertical, 14)
-            .background(
-                Capsule()
-                    .fill(WSColor.duoPurple)
-                    .shadow(color: WSColor.duoPurple.opacity(0.4), radius: 12, y: 5)
-            )
+            .wsStickerCapsule(fill: WSColor.lime, depth: 4)
         }
-        .buttonStyle(WSBouncyButtonStyle())
+        .buttonStyle(WSStickerPressStyle())
         .padding(.trailing, 18)
         .padding(.bottom, 22)
         .accessibilityLabel("New pack")

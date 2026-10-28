@@ -57,21 +57,17 @@ struct WSTextField: View {
         .padding(.horizontal, 14)
         .padding(.vertical, 14)
         .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(WSColor.backgroundElevated)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .stroke(
-                            isFocused ? WSColor.duoPurple.opacity(0.7) : WSColor.hairline,
-                            lineWidth: isFocused ? 2 : 1
-                        )
-                )
-                .shadow(
-                    color: isFocused ? WSColor.duoPurple.opacity(0.2) : .clear,
-                    radius: isFocused ? 12 : 0,
-                    y: 3
-                )
+            ZStack {
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(isFocused ? WSColor.purple : WSColor.ink)
+                    .offset(y: 3)
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(WSColor.backgroundElevated)
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .strokeBorder(WSColor.ink, lineWidth: WSSticker.stroke)
+            }
         )
+        .padding(.bottom, 3)
         .animation(.easeInOut(duration: 0.18), value: isFocused)
     }
 }

@@ -36,20 +36,12 @@ struct WSChunkyCardModifier: ViewModifier {
     var fillColor: Color = WSColor.backgroundElevated
 
     func body(content: Content) -> some View {
-        // Soft-shadow card (prototype look): flat fill, generous radius, a
-        // diffuse shadow softly tinted by the accent. No 3D "lip".
-        // `lipHeight` is retained in the API but unused now.
-        let shadowTint = (accent ?? WSColor.duoPurple).opacity(0.16)
-
-        return content
+        // Sticker card: flat face, ink outline, hard offset shadow.
+        // `accent` and `lipHeight` are retained in the API but unused now.
+        content
             .padding(.horizontal, horizontalPadding)
             .padding(.vertical, verticalPadding)
-            .background(
-                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-                    .fill(fillColor)
-            )
-            .shadow(color: shadowTint, radius: 16, y: 8)
-            .shadow(color: Color.black.opacity(0.04), radius: 2, y: 1)
+            .wsSticker(fill: fillColor, radius: cornerRadius, depth: WSSticker.depth)
     }
 }
 

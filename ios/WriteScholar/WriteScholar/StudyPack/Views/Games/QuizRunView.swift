@@ -81,9 +81,10 @@ struct QuizRunView: View {
             Image(systemName: icon).font(.system(size: 12, weight: .black))
             Text(value).font(WSFont.sans(15, weight: .black)).monospacedDigit()
         }
-        .foregroundStyle(tint)
+        .foregroundStyle(WSColor.inkText)
         .padding(.horizontal, 12).padding(.vertical, 7)
-        .background(Capsule().fill(tint.opacity(0.14)))
+        .background(Capsule().fill(WSStickerTint.face(for: tint)))
+        .overlay(Capsule().strokeBorder(WSColor.ink, lineWidth: 2))
     }
 
     private func questionCard(_ q: QuizQuestion) -> some View {
@@ -93,11 +94,7 @@ struct QuizRunView: View {
             .multilineTextAlignment(.center)
             .frame(maxWidth: .infinity)
             .padding(22)
-            .background(
-                RoundedRectangle(cornerRadius: 22, style: .continuous)
-                    .fill(WSColor.surfacePurple)
-                    .shadow(color: Color.black.opacity(0.06), radius: 10, y: 4)
-            )
+            .wsSticker(fill: WSColor.backgroundElevated, radius: 24, depth: 5)
     }
 
     private func optionsGrid(_ q: QuizQuestion) -> some View {
@@ -110,13 +107,10 @@ struct QuizRunView: View {
                         .foregroundStyle(fg(opt, q))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
-                        .background(
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .fill(bg(opt, q))
-                                .shadow(color: Color.black.opacity(0.05), radius: 6, y: 3)
-                        )
+                        .wsSticker(fill: bg(opt, q), radius: 18, depth: 4)
+                        .modifier(WSWrongShake(active: locked == opt && opt.lowercased() != q.correctAnswer.lowercased()))
                 }
-                .buttonStyle(WSBouncyButtonStyle())
+                .buttonStyle(WSStickerPressStyle())
                 .disabled(locked != nil)
             }
         }
@@ -124,43 +118,36 @@ struct QuizRunView: View {
 
     private func bg(_ opt: String, _ q: QuizQuestion) -> Color {
         guard let locked else { return WSColor.backgroundElevated }
-        if opt.lowercased() == q.correctAnswer.lowercased() { return WSColor.duoGreen }
-        if opt == locked { return WSColor.duoRed }
+        if opt.lowercased() == q.correctAnswer.lowercased() { return WSColor.lime }
+        if opt == locked { return WSColor.pink }
         return WSColor.backgroundElevated
     }
 
     private func fg(_ opt: String, _ q: QuizQuestion) -> Color {
         guard let locked else { return WSColor.foreground }
-        if opt.lowercased() == q.correctAnswer.lowercased() { return .white }
-        if opt == locked { return .white }
+        if opt.lowercased() == q.correctAnswer.lowercased() { return WSColor.inkText }
+        if opt == locked { return WSColor.inkText }
         return WSColor.foregroundMuted
     }
 
     // MARK: - Game over
 
     private var gameOver: some View {
-        VStack(spacing: 20) {
-            Text("Time's up! ⏱️")
-                .wsHeadline(.large, weight: .black)
-                .foregroundStyle(WSColor.foreground)
-            WSProgressRing(progress: 1, tint: accent, size: 150, lineWidth: 12,
-                           centerTitle: "\(score)", centerSubtitle: "points")
-            if isNewHigh {
-                Text("New high score! 🏆")
-                    .wsBody(.medium, weight: .black)
-                    .foregroundStyle(WSColor.duoYellowDark)
-            }
-            HStack(spacing: 10) {
-                WSStatChip(icon: "checkmark.circle.fill", value: "\(correct)", label: "Correct", tint: WSColor.duoGreen)
-                WSStatChip(icon: "xmark.circle.fill", value: "\(wrong)", label: "Wrong", tint: WSColor.duoRed)
-                WSStatChip(icon: "flame.fill", value: "\(bestStreak)", label: "Best streak", tint: WSColor.duoOrange)
-            }
+        WSWinScreen(
+            headline: isNewHigh ? "NEW\nRECORD." : "TIME'S\nUP.",
+            subline: isNewHigh ? "You just beat your best. Screenshot it." : "Run it back and beat \(score).",
+            stats: [
+                WSWinStat(label: "Score", value: "\(score)", fill: WSColor.lime),
+                WSWinStat(label: "Correct", value: "\(correct)", fill: WSColor.sky),
+                WSWinStat(label: "Missed", value: "\(wrong)", fill: WSColor.pink),
+                WSWinStat(label: "Best streak", value: "x\(bestStreak)", fill: WSColor.orange),
+            ]
+        ) {
             Button { start() } label: {
-                Label("Play again", systemImage: "arrow.counterclockwise").frame(maxWidth: .infinity)
+                Label("Play again", systemImage: "arrow.counterclockwise")
             }
-            .buttonStyle(WSDuoPrimaryButtonStyle(fullWidth: true))
+            .buttonStyle(WSStickerButtonStyle(fill: WSColor.lime, foreground: WSColor.inkText, radius: 20, height: 60))
         }
-        .padding(24)
     }
 
     // MARK: - Logic

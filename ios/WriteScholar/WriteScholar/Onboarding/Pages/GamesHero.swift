@@ -47,7 +47,6 @@ struct GamesHero: View {
                 .frame(width: 130, height: 130)
                 .offset(x: -130, y: -120 + mascotBob)
                 .rotationEffect(.degrees(-8))
-                .shadow(color: WSColor.duoOrange.opacity(0.30), radius: 18, y: 8)
                 .wsStaggerEntry(2)
         }
         .onAppear {
@@ -73,7 +72,6 @@ struct GamesHero: View {
                 Image(systemName: "smallcircle.filled.circle.fill")
                     .font(.system(size: 38))
                     .foregroundStyle(WSColor.duoRed)
-                    .shadow(color: WSColor.duoRed.opacity(0.5), radius: 14)
 
                 Image(systemName: "burst.fill")
                     .font(.system(size: 18))

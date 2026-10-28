@@ -20,7 +20,7 @@ struct WSSpeechBubble: View {
     var tail: Tail = .leading
     var fillColor: Color = WSColor.duoGreenLight
     var strokeColor: Color = WSColor.duoGreen
-    var foreground: Color = WSColor.duoText
+    var foreground: Color = WSColor.inkText
     var maxWidth: CGFloat = 240
 
     enum Tail { case leading, trailing, none }
@@ -30,7 +30,7 @@ struct WSSpeechBubble: View {
             if tail == .leading { tailShape }
 
             Text(text)
-                .font(WSFont.sans(13, weight: .heavy))
+                .font(WSFont.sans(14, weight: .heavy))
                 .foregroundStyle(foreground)
                 .lineLimit(3)
                 .multilineTextAlignment(.leading)
@@ -39,16 +39,16 @@ struct WSSpeechBubble: View {
                 .padding(.vertical, 10)
                 .frame(maxWidth: maxWidth, alignment: .leading)
                 .background(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .fill(fillColor)
                         .overlay(
-                            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                .stroke(strokeColor, lineWidth: 2)
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .strokeBorder(strokeColor, lineWidth: WSSticker.stroke)
                         )
                 )
                 .background(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(strokeColor.opacity(0.4))
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(strokeColor)
                         .offset(y: 3)
                 )
 
@@ -62,7 +62,7 @@ struct WSSpeechBubble: View {
             .frame(width: 10, height: 14)
             .overlay(
                 Triangle()
-                    .stroke(strokeColor, lineWidth: 2)
+                    .stroke(strokeColor, lineWidth: WSSticker.stroke)
             )
     }
 }
@@ -119,7 +119,6 @@ struct WSTrustBadgeRow: View {
                             .fill(WSColor.backgroundElevated)
                             .overlay(Capsule().stroke(WSColor.duoBorder, lineWidth: 1))
                     )
-                    .shadow(color: Color.black.opacity(0.04), radius: 2, y: 1)
                 }
             }
             .padding(.horizontal, 4)

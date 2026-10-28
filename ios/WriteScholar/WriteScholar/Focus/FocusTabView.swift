@@ -4,17 +4,17 @@
 //
 //  Landing screen for the Focus tab — Duolingo-style design.
 //
-//    1. Top bar:           "FOCUS" eyebrow + mascot
-//    2. Status hero:       Big lock + "Focus is on / Unlocked / Off"
-//                          + countdown if currently unlocked
-//                          + primary CTA (pick apps / try unlock / settings)
-//    3. Stat tiles:        Apps blocked · Today's wins · Lifetime wins
-//    4. Settings preview:  Challenge type + duration + difficulty (tap -> sheet)
-//    5. How it works:      Three-step explainer
-//    6. Web sync hint:     Mentions site-blocking lives in the Chrome ext
+//    1. Mascot hero, settings button in its top-right corner
+//    2. Study Mode card:  on/off, all apps vs chosen apps, unlock length
+//    3. Preview:          a tappable copy of the question screen
+//    4. Stat tiles:       right today · missed today · questions ready
+//    5. Unlock everything: the 5-question challenge that opens every app
+//    6. How it works:     three-step explainer
+//    7. Web sync hint:    site gating lives in the Chrome extension
 //
 
 import SwiftUI
+import FamilyControls
 
 struct FocusTabView: View {
     @StateObject private var manager = FocusManager.shared
@@ -22,6 +22,9 @@ struct FocusTabView: View {
     @State private var showAppPicker  = false
     @State private var showSettings   = false
     @State private var showChallenge  = false
+    @State private var showPacks      = false
+    @State private var showAllowedPicker = false
+    @State private var allowedDraft   = FamilyActivitySelection()
 
     @State private var nowTick: Date = Date()
     private let countdownTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
@@ -33,10 +36,27 @@ struct FocusTabView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
                     mascotHero
-                    topBar
-                    statusHero
+                        .overlay(alignment: .topTrailing) { settingsButton }
+                    StudyModeCard(
+                        manager: manager,
+                        onChooseApps: { showAppPicker = true },
+                        onChooseAllowed: {
+                            allowedDraft = manager.allowedSelection
+                            showAllowedPicker = true
+                        }
+                    )
+                    StudyGatePreview(
+                        question: manager.studyNextQuestion,
+                        deckCount: manager.studyDeckCount,
+                        packCount: manager.studyPackCount,
+                        usesTopicBanks: manager.studyUsesTopicBanks,
+                        packsLabel: packsLabel,
+                        onChoosePacks: { showPacks = true }
+                    )
                     statTiles
-                    settingsPreview
+                    if manager.isStudyModeGating || manager.isCurrentlyUnlocked {
+                        unlockEverythingCard
+                    }
                     howItWorks
                     webSyncHint
                 }
@@ -45,10 +65,11 @@ struct FocusTabView: View {
                 .padding(.bottom, 32)
             }
             .refreshable {
-                manager.applyBlockingState()
+                manager.refreshStudyMode()
                 nowTick = Date()
             }
         }
+        .onAppear { manager.refreshStudyMode() }
         .onReceive(countdownTimer) { now in
             nowTick = now
         }
@@ -58,6 +79,13 @@ struct FocusTabView: View {
         .sheet(isPresented: $showSettings) {
             FocusSettingsSheet(manager: manager)
         }
+        .sheet(isPresented: $showPacks) {
+            StudyModePacksSheet(manager: manager)
+        }
+        .familyActivityPicker(isPresented: $showAllowedPicker, selection: $allowedDraft)
+        .onChange(of: showAllowedPicker) { _, isShowing in
+            if !isShowing { manager.updateAllowedSelection(allowedDraft) }
+        }
         .fullScreenCover(isPresented: $showChallenge) {
             FocusUnlockChallenge(manager: manager) { _ in
                 showChallenge = false
@@ -65,175 +93,71 @@ struct FocusTabView: View {
         }
     }
 
+    private var packsLabel: String {
+        let ids = manager.studyConfig.packIDs
+        if ids.isEmpty { return "all packs" }
+        return "\(ids.count) pack\(ids.count == 1 ? "" : "s")"
+    }
+
     // MARK: - Mascot hero (Duolingo-energy header with mascot-paper)
 
     private var mascotHero: some View {
-        VStack(spacing: 12) {
-            ZStack {
-                Circle()
-                    .fill(WSColor.duoBlueLight)
-                    .frame(width: 180, height: 180)
-
-                WSAnimatedImage(name: "mascot-paper", ext: "webp")
-                    .frame(width: 140, height: 140)
-                    .shadow(color: WSColor.duoBlue.opacity(0.30), radius: 16, y: 8)
-                    .wsBobbing(amount: 6, duration: 2.6)
-            }
-
-            VStack(spacing: 6) {
-                HStack(spacing: 6) {
-                    Image(systemName: "shield.lefthalf.filled")
-                        .font(.system(size: 11, weight: .heavy))
-                    Text("FOCUS")
-                        .font(WSFont.sans(11, weight: .black))
-                        .tracking(0.8)
-                }
-                .foregroundStyle(.white)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
+        VStack(spacing: 10) {
+            WSAnimatedImage(name: "mascot-paper", ext: "webp")
+                .frame(width: 150, height: 150)
+                .wsMascotBob(amount: 7, rock: 3, duration: 1.4)
                 .background(
-                    Capsule()
-                        .fill(WSColor.duoBlue)
-                        .shadow(color: WSColor.duoBlue.opacity(0.35), radius: 6, y: 3)
+                    WSStarburst(points: 16, inset: 0.86)
+                        .fill(WSColor.lime)
+                        .overlay(WSStarburst(points: 16, inset: 0.86).stroke(WSColor.ink, lineWidth: 2.5))
+                        .frame(width: 170, height: 170)
+                        .wsSpin(period: 24)
                 )
 
-                Text("Earn your ")
-                    .font(WSFont.headline(28))
-                    .foregroundStyle(WSColor.duoText)
+            VStack(spacing: 8) {
+                HStack(spacing: 6) {
+                    Image(systemName: "bolt.fill")
+                        .font(.system(size: 11, weight: .black))
+                    Text("STUDY MODE")
+                        .font(WSFont.sans(11, weight: .black))
+                        .tracking(1.2)
+                }
+                .foregroundStyle(WSColor.inkText)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .wsStickerCapsule(fill: WSColor.orange, depth: 2)
+
+                (Text("Earn your ")
+                    .foregroundStyle(WSColor.foreground)
                 +
-                Text("free time")
-                    .font(WSFont.headline(28))
-                    .foregroundStyle(WSColor.duoPurple)
+                Text("scroll time.")
+                    .foregroundStyle(WSColor.purple))
+                    .font(WSFont.headline(34, weight: .black))
+                    .tracking(-1)
+                    .multilineTextAlignment(.center)
             }
         }
         .frame(maxWidth: .infinity)
         .padding(.top, 4)
     }
 
-    // MARK: - Top bar (utility row -- settings only)
+    // MARK: - Settings button (top-right of the hero)
 
-    private var topBar: some View {
+    private var settingsButton: some View {
         HStack(spacing: 10) {
-            Spacer()
             Button {
                 Haptics.medium()
                 showSettings = true
             } label: {
-                ZStack {
-                    Circle().fill(WSColor.backgroundElevated).frame(width: 40, height: 40)
-                        .overlay(Circle().stroke(WSColor.duoBorder, lineWidth: 2))
-                    Image(systemName: "slider.horizontal.3")
-                        .foregroundStyle(WSColor.duoText)
-                        .font(.system(size: 15, weight: .bold))
-                }
+                Image(systemName: "slider.horizontal.3")
+                    .foregroundStyle(WSColor.foreground)
+                    .font(.system(size: 15, weight: .black))
+                    .frame(width: 40, height: 40)
+                    .wsStickerCircle(fill: WSColor.backgroundElevated, depth: 3)
+                    .padding(.bottom, 3)
             }
-            .buttonStyle(WSBouncyButtonStyle())
+            .buttonStyle(WSStickerPressStyle())
             .accessibilityLabel("Focus settings")
-        }
-    }
-
-    // MARK: - Status hero
-
-    private var statusHero: some View {
-        VStack(spacing: 14) {
-            ZStack {
-                Circle()
-                    .fill(heroBubbleColor.opacity(0.15))
-                    .frame(width: 130, height: 130)
-
-                Circle()
-                    .fill(WSColor.backgroundElevated)
-                    .frame(width: 100, height: 100)
-                    .overlay(
-                        Circle().stroke(heroBubbleColor, lineWidth: 3)
-                    )
-
-                Image(systemName: heroIcon)
-                    .font(.system(size: 44, weight: .heavy))
-                    .foregroundStyle(heroBubbleColor)
-            }
-            .padding(.top, 6)
-
-            Text(manager.statusHeadline)
-                .wsHeadline(.large, weight: .black)
-                .foregroundStyle(WSColor.duoText)
-
-            Text(heroSubtitle)
-                .wsBody(.medium)
-                .multilineTextAlignment(.center)
-                .foregroundStyle(WSColor.duoText.opacity(0.65))
-                .padding(.horizontal, 6)
-
-            heroCTA
-                .padding(.top, 6)
-        }
-        .frame(maxWidth: .infinity)
-        .wsChunkyCard(verticalPadding: 22, accent: heroBubbleColor)
-    }
-
-    private var heroIcon: String {
-        if !manager.hasBlockedApps { return "moon.zzz.fill" }
-        if !manager.isAuthorized   { return "exclamationmark.shield.fill" }
-        if manager.isCurrentlyUnlocked { return "lock.open.fill" }
-        return "lock.fill"
-    }
-
-    private var heroBubbleColor: Color {
-        if !manager.hasBlockedApps   { return WSColor.duoBorder }
-        if !manager.isAuthorized     { return WSColor.duoOrange }
-        if manager.isCurrentlyUnlocked { return WSColor.duoGreen }
-        return WSColor.duoPurple
-    }
-
-    private var heroSubtitle: String {
-        _ = nowTick
-        if !manager.hasBlockedApps {
-            return "Pick a few apps that pull you in. Focus mode shields them until you solve a quick challenge."
-        }
-        if !manager.isAuthorized {
-            return "Tap below to allow Apple Family Controls — that's what powers the shield."
-        }
-        if manager.isCurrentlyUnlocked {
-            return "Apps unlocked for \(manager.unlockTimeRemainingString). They'll relock automatically when the timer runs out."
-        }
-        return "\(manager.blockedItemsCount) item\(manager.blockedItemsCount == 1 ? "" : "s") shielded right now. Tap below if you genuinely need to open one."
-    }
-
-    @ViewBuilder
-    private var heroCTA: some View {
-        if !manager.hasBlockedApps {
-            Button {
-                Haptics.medium()
-                showAppPicker = true
-            } label: {
-                Label("Pick apps to block", systemImage: "plus.shield.fill")
-            }
-            .buttonStyle(WSDuoInfoButtonStyle())
-        } else if !manager.isAuthorized {
-            Button {
-                Haptics.medium()
-                Task { await manager.requestAuthorization() }
-            } label: {
-                Label("Allow Screen Time", systemImage: "lock.shield.fill")
-            }
-            .buttonStyle(WSDuoWarnButtonStyle())
-        } else if manager.isCurrentlyUnlocked {
-            VStack(spacing: 8) {
-                Text("Time remaining")
-                    .wsBody(.caption, weight: .semibold)
-                    .foregroundStyle(WSColor.duoText.opacity(0.55))
-                Text(manager.unlockTimeRemainingString)
-                    .font(WSFont.headline(28))
-                    .foregroundStyle(WSColor.duoGreen)
-            }
-        } else {
-            Button {
-                Haptics.medium()
-                showChallenge = true
-            } label: {
-                Label("Solve to unlock", systemImage: "puzzlepiece.fill")
-            }
-            .buttonStyle(WSDuoPrimaryButtonStyle())
         }
     }
 
@@ -242,139 +166,158 @@ struct FocusTabView: View {
     private var statTiles: some View {
         HStack(spacing: 10) {
             statTile(
-                icon: "shield.lefthalf.filled",
-                label: "Blocked",
-                value: "\(manager.blockedItemsCount)",
-                tint: WSColor.duoPurple
-            )
-            statTile(
                 icon: "checkmark.circle.fill",
-                label: "Today",
-                value: "\(manager.stats.challengesPassedToday)",
-                tint: WSColor.duoGreen
+                label: "Right today",
+                value: "\(manager.studyToday.right)",
+                tint: WSColor.lime
             )
             statTile(
-                icon: "trophy.fill",
-                label: "Total",
-                value: "\(manager.stats.totalChallengesPassed)",
-                tint: WSColor.duoOrange
+                icon: "arrow.uturn.backward.circle.fill",
+                label: "Missed",
+                value: "\(manager.studyToday.wrong)",
+                tint: WSColor.pink
+            )
+            statTile(
+                icon: "rectangle.stack.fill",
+                label: "Questions",
+                value: "\(manager.studyDeckCount)",
+                tint: WSColor.sky
             )
         }
     }
 
     private func statTile(icon: String, label: String, value: String, tint: Color) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            ZStack {
-                Circle().fill(tint.opacity(0.15)).frame(width: 36, height: 36)
-                Image(systemName: icon).foregroundStyle(tint).font(.system(size: 15, weight: .bold))
-            }
+            Image(systemName: icon)
+                .foregroundStyle(WSColor.inkText)
+                .font(.system(size: 15, weight: .black))
+                .frame(width: 36, height: 36)
+                .wsStickerCircle(fill: tint)
             Text(value)
-                .font(WSFont.headline(24))
-                .foregroundStyle(WSColor.duoText)
+                .font(WSFont.headline(28, weight: .black))
+                .foregroundStyle(WSColor.foreground)
+                .contentTransition(.numericText())
             Text(label.uppercased())
                 .font(WSFont.sans(10, weight: .black))
-                .foregroundStyle(WSColor.duoText.opacity(0.55))
+                .foregroundStyle(WSColor.foregroundMuted)
                 .tracking(0.5)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .wsChunkyCard(cornerRadius: 18, horizontalPadding: 14, verticalPadding: 14, lipHeight: 5, accent: tint)
+        .wsChunkyCard(cornerRadius: 20, horizontalPadding: 14, verticalPadding: 14)
     }
 
-    // MARK: - Settings preview
+    // MARK: - Unlock everything
 
-    private var settingsPreview: some View {
-        Button {
-            Haptics.medium()
-            showSettings = true
-        } label: {
-            HStack(alignment: .top, spacing: 12) {
-                ZStack {
-                    Circle().fill(manager.settings.challengeType.tint.opacity(0.15)).frame(width: 42, height: 42)
-                    Image(systemName: manager.settings.challengeType.icon)
-                        .foregroundStyle(manager.settings.challengeType.tint)
-                        .font(.system(size: 17, weight: .bold))
+    /// The original 5-question challenge, now the "I need my whole phone
+    /// for a while" option next to the one-question-per-app flow.
+    private var unlockEverythingCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 12) {
+                Image(systemName: manager.isCurrentlyUnlocked ? "lock.open.fill" : "bolt.fill")
+                    .font(.system(size: 17, weight: .black))
+                    .foregroundStyle(WSColor.inkText)
+                    .frame(width: 44, height: 44)
+                    .wsStickerCircle(fill: manager.isCurrentlyUnlocked ? WSColor.lime : WSColor.sky)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(manager.isCurrentlyUnlocked ? "Everything is open" : "Need everything open?")
+                        .font(WSFont.headline(17, weight: .black))
+                        .foregroundStyle(WSColor.foreground)
+                    Text(unlockEverythingDetail)
+                        .wsBody(.caption, weight: .semibold)
+                        .foregroundStyle(WSColor.foregroundMuted)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
+                Spacer(minLength: 0)
+            }
 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Challenge: \(manager.settings.challengeType.rawValue) · \(manager.settings.difficulty.label)")
-                        .wsBody(.medium, weight: .bold)
-                        .foregroundStyle(WSColor.duoText)
-                    Text("Unlocks for \(manager.settings.unlockDuration.label) per win — tap to change.")
-                        .wsBody(.caption)
-                        .foregroundStyle(WSColor.duoText.opacity(0.55))
+            if manager.isCurrentlyUnlocked {
+                Text(manager.unlockTimeRemainingString)
+                    .font(WSFont.headline(34, weight: .black))
+                    .foregroundStyle(WSColor.foreground)
+                    .monospacedDigit()
+                    .frame(maxWidth: .infinity)
+            } else {
+                HStack(spacing: 10) {
+                    Button {
+                        Haptics.medium()
+                        showChallenge = true
+                    } label: {
+                        Label("Take the challenge", systemImage: "play.fill")
+                    }
+                    .buttonStyle(WSStickerButtonStyle(fill: WSColor.sky, foreground: WSColor.inkText, radius: 999, depth: 3,
+                                                      fullWidth: false, height: 46, font: WSFont.headline(15, weight: .black)))
+
+                    Button {
+                        Haptics.medium()
+                        showSettings = true
+                    } label: {
+                        Text("Settings")
+                    }
+                    .buttonStyle(WSTertiaryButtonStyle())
                 }
-
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .foregroundStyle(WSColor.duoText.opacity(0.4))
-                    .font(.system(size: 13, weight: .bold))
             }
         }
-        .buttonStyle(WSBouncyButtonStyle())
-        .wsChunkyCard(horizontalPadding: 14, verticalPadding: 14, lipHeight: 5)
+        .wsChunkyCard(horizontalPadding: 14, verticalPadding: 14)
+    }
+
+    private var unlockEverythingDetail: String {
+        _ = nowTick
+        if manager.isCurrentlyUnlocked {
+            return "Apps won't ask questions until the timer runs out."
+        }
+        let s = manager.settings
+        return "Get \(s.difficulty.requiredCorrect) of \(s.difficulty.totalQuestions) right and every app opens for \(s.unlockDuration.label) without asking."
     }
 
     // MARK: - How it works
 
     private var howItWorks: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("How Focus mode works")
-                .wsHeadline(.small, weight: .black)
-                .foregroundStyle(WSColor.duoText)
+            Text("How Study Mode works")
+                .font(WSFont.headline(22, weight: .black))
+                .foregroundStyle(WSColor.foreground)
 
             stepRow(
                 num: 1,
-                title: "Pick your distractors",
-                blurb: "Apple's privacy-first picker lets you shield apps + categories without WriteScholar ever seeing the bundle IDs.",
-                icon: "hand.raised.fill",
-                tint: WSColor.duoPurple
+                title: "Choose your apps",
+                blurb: "All of them, or just the ones that pull you in. Apple's picker keeps the list private, even from us.",
+                icon: "hand.tap.fill",
+                tint: WSColor.pink
             )
             stepRow(
                 num: 2,
-                title: "iOS shields them",
-                blurb: "Tapping a blocked app shows the iOS shield. From there you bounce back here for a quick challenge.",
-                icon: "lock.shield.fill",
-                tint: WSColor.duoBlue
+                title: "Answer one question",
+                blurb: "Open one and it asks a question from your study packs first. Two answers, one tap.",
+                icon: "questionmark.bubble.fill",
+                tint: WSColor.sky
             )
             stepRow(
                 num: 3,
-                title: "Earn an unlock window",
-                blurb: "Pass 4 of 5 \(manager.settings.challengeType.rawValue.lowercased()) prompts and apps unlock for \(manager.settings.unlockDuration.label).",
+                title: "It opens for \(manager.studyConfig.unlockMinutes) min",
+                blurb: "Right answer and you're in. Wrong answer, you see the right one and get another go.",
                 icon: "lock.open.fill",
-                tint: WSColor.duoGreen
+                tint: WSColor.lime
             )
-
-            Button {
-                Haptics.medium()
-                showChallenge = true
-            } label: {
-                Label("Try a practice challenge", systemImage: "play.fill")
-            }
-            .buttonStyle(WSDuoPillButtonStyle(palette: .info))
-            .padding(.top, 4)
         }
-        .wsChunkyCard(accent: WSColor.duoBlue)
+        .wsChunkyCard()
     }
 
     private func stepRow(num: Int, title: String, blurb: String, icon: String, tint: Color) -> some View {
         HStack(alignment: .top, spacing: 12) {
-            ZStack {
-                Circle().fill(tint.opacity(0.15)).frame(width: 38, height: 38)
-                Image(systemName: icon).foregroundStyle(tint).font(.system(size: 14, weight: .bold))
-                Text("\(num)")
-                    .font(WSFont.sans(9, weight: .black))
-                    .foregroundStyle(.white)
-                    .padding(4)
-                    .background(Circle().fill(tint))
-                    .offset(x: 14, y: -14)
-            }
+            Text("\(num)")
+                .font(WSFont.headline(17, weight: .black))
+                .foregroundStyle(WSColor.inkText)
+                .frame(width: 38, height: 38)
+                .wsStickerCircle(fill: tint)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .wsBody(.medium, weight: .bold)
-                    .foregroundStyle(WSColor.duoText)
+                    .font(WSFont.headline(16, weight: .black))
+                    .foregroundStyle(WSColor.foreground)
                 Text(blurb)
-                    .wsBody(.caption)
-                    .foregroundStyle(WSColor.duoText.opacity(0.55))
+                    .wsBody(.caption, weight: .semibold)
+                    .foregroundStyle(WSColor.foregroundMuted)
             }
             Spacer()
         }
@@ -385,19 +328,21 @@ struct FocusTabView: View {
     private var webSyncHint: some View {
         HStack(spacing: 12) {
             Image(systemName: "globe")
-                .font(.system(size: 22, weight: .bold))
-                .foregroundStyle(WSColor.duoBlue)
+                .font(.system(size: 18, weight: .black))
+                .foregroundStyle(WSColor.inkText)
+                .frame(width: 42, height: 42)
+                .wsStickerCircle(fill: WSColor.sky)
             VStack(alignment: .leading, spacing: 2) {
-                Text("Block sites on desktop too")
-                    .wsBody(.small, weight: .bold)
-                    .foregroundStyle(WSColor.duoText)
-                Text("Install the WriteScholar Chrome extension to shield TikTok, YouTube and friends in the browser. Same unlock challenge, fully synced.")
-                    .wsBody(.caption)
-                    .foregroundStyle(WSColor.duoText.opacity(0.55))
+                Text("Study on desktop too")
+                    .font(WSFont.headline(16, weight: .black))
+                    .foregroundStyle(WSColor.foreground)
+                Text("Install the WriteScholar Chrome extension to get the same question before TikTok, YouTube and friends open in your browser.")
+                    .wsBody(.caption, weight: .semibold)
+                    .foregroundStyle(WSColor.foregroundMuted)
             }
             Spacer()
         }
-        .wsChunkyCard(horizontalPadding: 14, verticalPadding: 14, lipHeight: 5, accent: WSColor.duoBlue)
+        .wsChunkyCard(horizontalPadding: 14, verticalPadding: 14)
     }
 }
 

@@ -61,23 +61,25 @@ struct WSListRowCard<Trailing: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 14) {
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(iconTint.opacity(0.14))
+                Image(systemName: icon)
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundStyle(WSColor.inkText)
                     .frame(width: 48, height: 48)
-                    .overlay(
-                        Image(systemName: icon)
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundStyle(iconTint)
+                    .background(
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 15, style: .continuous).fill(WSStickerTint.face(for: iconTint))
+                            RoundedRectangle(cornerRadius: 15, style: .continuous).strokeBorder(WSColor.ink, lineWidth: WSSticker.stroke)
+                        }
                     )
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text(title)
-                        .wsBody(.large, weight: .bold)
+                        .font(WSFont.headline(17, weight: .black))
                         .foregroundStyle(WSColor.foreground)
                         .lineLimit(1)
                     if let subtitle {
                         Text(subtitle)
-                            .wsBody(.small)
+                            .wsBody(.small, weight: .bold)
                             .foregroundStyle(WSColor.foregroundMuted)
                             .lineLimit(2)
                     }
@@ -90,15 +92,7 @@ struct WSListRowCard<Trailing: View>: View {
             if let progress {
                 let clamped = min(1, max(0, progress))
                 HStack(spacing: 10) {
-                    GeometryReader { geo in
-                        ZStack(alignment: .leading) {
-                            Capsule().fill(progressTint.opacity(0.15))
-                            Capsule()
-                                .fill(progressTint)
-                                .frame(width: max(6, geo.size.width * clamped))
-                        }
-                    }
-                    .frame(height: 6)
+                    WSStripeBar(fraction: clamped, fill: WSStickerTint.face(for: progressTint), height: 10, stripes: false)
                     Text("\(Int(clamped * 100))%")
                         .wsBody(.caption, weight: .bold)
                         .foregroundStyle(WSColor.foregroundMuted)
@@ -107,7 +101,7 @@ struct WSListRowCard<Trailing: View>: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .wsChunkyCard(cornerRadius: 20)
+        .wsChunkyCard(cornerRadius: 22, horizontalPadding: 14, verticalPadding: 14)
     }
 }
 
@@ -167,7 +161,6 @@ struct WSSearchField: View {
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
                         .stroke(focused ? WSColor.duoPurple.opacity(0.5) : WSColor.hairline, lineWidth: focused ? 1.5 : 1)
                 )
-                .shadow(color: Color.black.opacity(0.04), radius: 8, y: 3)
         )
         .animation(.easeInOut(duration: 0.15), value: focused)
     }
@@ -186,15 +179,17 @@ struct WSStatChip: View {
     var body: some View {
         VStack(spacing: 6) {
             Image(systemName: icon)
-                .font(.system(size: 18, weight: .bold))
-                .foregroundStyle(tint)
+                .font(.system(size: 15, weight: .black))
+                .foregroundStyle(WSColor.inkText)
+                .frame(width: 32, height: 32)
+                .wsStickerCircle(fill: WSStickerTint.face(for: tint))
             Text(value)
-                .wsHeadline(.small, weight: .black)
+                .font(WSFont.headline(22, weight: .black))
                 .foregroundStyle(WSColor.foreground)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
             Text(label)
-                .wsBody(.small)
+                .wsBody(.small, weight: .bold)
                 .foregroundStyle(WSColor.foregroundMuted)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
@@ -220,16 +215,17 @@ struct WSSegmentedPills: View {
                     let isSel = opt == selection
                     Text(opt)
                         .wsBody(.small, weight: .bold)
-                        .foregroundStyle(isSel ? .white : WSColor.foregroundMuted)
+                        .foregroundStyle(isSel ? WSColor.inkText : WSColor.foreground)
                         .padding(.vertical, 8)
                         .padding(.horizontal, 16)
                         .background(
-                            Capsule()
-                                .fill(isSel ? tint : WSColor.backgroundElevated)
-                                .overlay(
-                                    Capsule().stroke(WSColor.hairline, lineWidth: isSel ? 0 : 1)
-                                )
+                            ZStack {
+                                Capsule().fill(WSColor.ink).offset(y: isSel ? 3 : 2)
+                                Capsule().fill(isSel ? WSColor.lime : WSColor.backgroundElevated)
+                                Capsule().strokeBorder(WSColor.ink, lineWidth: 2)
+                            }
                         )
+                        .padding(.bottom, 3)
                         .contentShape(Capsule())
                         .onTapGesture {
                             Haptics.selection()
@@ -257,7 +253,8 @@ struct WSSectionHeader: View {
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
             Text(title)
-                .wsHeadline(.small, weight: .black)
+                .font(WSFont.headline(22, weight: .black))
+                .tracking(-0.4)
                 .foregroundStyle(WSColor.foreground)
             Spacer()
             if let actionTitle, let action {
@@ -266,7 +263,7 @@ struct WSSectionHeader: View {
                         Text(actionTitle).wsBody(.small, weight: .bold)
                         Image(systemName: "chevron.right").font(.system(size: 11, weight: .bold))
                     }
-                    .foregroundStyle(WSColor.duoPurple)
+                    .foregroundStyle(WSColor.purpleInk)
                 }
                 .buttonStyle(.plain)
             } else if let note {
@@ -299,12 +296,17 @@ struct WSProgressRing: View {
     var body: some View {
         ZStack {
             Circle()
-                .stroke(WSColor.duoBorder.opacity(0.5), lineWidth: lineWidth)
+                .stroke(WSColor.lilacDeep, lineWidth: lineWidth)
             Circle()
                 .trim(from: 0, to: clamped)
-                .stroke(tint, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                .stroke(WSStickerTint.face(for: tint), style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                 .rotationEffect(.degrees(-90))
                 .animation(.spring(response: 0.5, dampingFraction: 0.8), value: clamped)
+            Circle()
+                .strokeBorder(WSColor.ink, lineWidth: 2)
+            Circle()
+                .strokeBorder(WSColor.ink, lineWidth: 2)
+                .padding(lineWidth)
             if let centerTitle {
                 VStack(spacing: 2) {
                     Text(centerTitle)
@@ -345,14 +347,16 @@ struct WSMascotHero: View {
 
     var body: some View {
         ZStack {
-            Circle()
-                .fill(haloTint.opacity(0.12))
-                .frame(width: size * 1.18, height: size * 1.18)
+            WSStarburst(points: 16, inset: 0.86)
+                .fill(WSStickerTint.face(for: haloTint) == WSColor.duoPurple ? WSColor.lime : WSStickerTint.face(for: haloTint))
+                .overlay(WSStarburst(points: 16, inset: 0.86).stroke(WSColor.ink, lineWidth: 2.5))
+                .frame(width: size * 1.12, height: size * 1.12)
+                .wsSpin(period: 24)
             Group {
                 if bob {
                     WSAnimatedImage(name: asset, ext: "webp")
                         .frame(width: size, height: size)
-                        .wsBobbing()
+                        .wsMascotBob(amount: 6, rock: 3, duration: 1.4)
                 } else {
                     WSAnimatedImage(name: asset, ext: "webp")
                         .frame(width: size, height: size)
@@ -391,4 +395,22 @@ extension View {
         .padding()
     }
     .wsScreenBackground()
+}
+
+
+// MARK: - Sticker tint mapping
+
+/// Maps the legacy duo* tints callers pass into the sticker palette, so
+/// old call sites pick up the new faces without each being rewritten.
+enum WSStickerTint {
+    static func face(for tint: Color) -> Color {
+        switch tint {
+        case WSColor.duoGreen, WSColor.duoGreenDark: return WSColor.lime
+        case WSColor.duoBlue, WSColor.duoBlueDark:   return WSColor.sky
+        case WSColor.duoOrange, WSColor.duoOrangeDark: return WSColor.orange
+        case WSColor.duoRed, WSColor.duoRedDark:     return WSColor.pink
+        case WSColor.duoYellow, WSColor.duoYellowDark: return WSColor.sun
+        default: return tint
+        }
+    }
 }

@@ -72,7 +72,7 @@ struct LibraryTabView: View {
             }
             Button("Cancel", role: .cancel) { deleteConfirmItem = nil }
         } message: {
-            Text("This won't delete the original — just removes it from your library shelf.")
+            Text("This won't delete the original. It just leaves your shelf.")
         }
         // Home's "Continue studying" rows land here with a pending item —
         // open its detail sheet so the tap truly resumes that item.
@@ -112,8 +112,9 @@ struct LibraryTabView: View {
 
     private var header: some View {
         HStack(alignment: .center, spacing: 10) {
-            Text("My Stuff")
-                .wsHeadline(.large, weight: .black)
+            Text("My Stuff.")
+                .font(WSFont.headline(34, weight: .black))
+                .tracking(-1)
                 .foregroundStyle(WSColor.foreground)
             Spacer()
 
@@ -125,18 +126,14 @@ struct LibraryTabView: View {
                 if store.isSyncing {
                     ProgressView()
                         .controlSize(.small)
-                        .tint(WSColor.duoPurple)
-                        .frame(width: 42, height: 42)
-                        .background(
-                            Circle()
-                                .fill(WSColor.backgroundElevated)
-                                .shadow(color: Color.black.opacity(0.05), radius: 6, y: 2)
-                        )
+                        .tint(WSColor.purple)
+                        .frame(width: 40, height: 40)
+                        .wsStickerCircle(fill: WSColor.backgroundElevated)
                 } else {
                     circleIcon("arrow.clockwise")
                 }
             }
-            .buttonStyle(WSBouncyButtonStyle())
+            .buttonStyle(WSStickerPressStyle())
             .disabled(store.isSyncing)
             .accessibilityLabel("Sync library")
 
@@ -152,7 +149,7 @@ struct LibraryTabView: View {
             } label: {
                 circleIcon(showSearch ? "xmark" : "magnifyingglass")
             }
-            .buttonStyle(WSBouncyButtonStyle())
+            .buttonStyle(WSStickerPressStyle())
 
             Menu {
                 Picker("Sort", selection: $store.sort) {
@@ -170,14 +167,10 @@ struct LibraryTabView: View {
 
     private func circleIcon(_ systemImage: String) -> some View {
         Image(systemName: systemImage)
-            .font(.system(size: 15, weight: .bold))
-            .foregroundStyle(WSColor.duoPurple)
-            .frame(width: 42, height: 42)
-            .background(
-                Circle()
-                    .fill(WSColor.backgroundElevated)
-                    .shadow(color: Color.black.opacity(0.05), radius: 6, y: 2)
-            )
+            .font(.system(size: 15, weight: .black))
+            .foregroundStyle(WSColor.foreground)
+            .frame(width: 40, height: 40)
+            .wsStickerCircle(fill: WSColor.backgroundElevated)
     }
 
     // MARK: - Floating "New" button
@@ -192,19 +185,15 @@ struct LibraryTabView: View {
                     onOpenToolPicker()
                 } label: {
                     HStack(spacing: 6) {
-                        Image(systemName: "plus").font(.system(size: 15, weight: .bold))
-                        Text("New").wsBody(.medium, weight: .bold)
+                        Image(systemName: "plus").font(.system(size: 15, weight: .black))
+                        Text("New").font(WSFont.headline(16, weight: .black))
                     }
-                    .foregroundStyle(.white)
+                    .foregroundStyle(WSColor.inkText)
                     .padding(.horizontal, 18)
                     .padding(.vertical, 13)
-                    .background(
-                        Capsule()
-                            .fill(WSColor.duoPurple)
-                            .shadow(color: WSColor.duoPurple.opacity(0.4), radius: 10, y: 5)
-                    )
+                    .wsStickerCapsule(fill: WSColor.lime, depth: 4)
                 }
-                .buttonStyle(WSBouncyButtonStyle())
+                .buttonStyle(WSStickerPressStyle())
                 .padding(.trailing, 18)
                 .padding(.bottom, 18)
             }
@@ -238,14 +227,7 @@ struct LibraryTabView: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
-        .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(WSColor.backgroundElevated)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .stroke(WSColor.duoPurple.opacity(0.40), lineWidth: 2)
-                )
-        )
+        .wsSticker(radius: 16, depth: 3)
         .transition(.opacity.combined(with: .move(edge: .top)))
     }
 
@@ -261,15 +243,18 @@ struct LibraryTabView: View {
                         withAnimation(.wsBouncePop) { store.filter = f }
                     } label: {
                         Text(filterShortLabel(f))
-                            .wsBody(.small, weight: .bold)
-                            .foregroundStyle(active ? .white : WSColor.foregroundMuted)
-                            .padding(.vertical, 9)
+                            .font(WSFont.headline(14, weight: .black))
+                            .foregroundStyle(active ? WSColor.inkText : WSColor.foreground)
+                            .padding(.vertical, 8)
                             .padding(.horizontal, 16)
                             .background(
-                                Capsule()
-                                    .fill(active ? segmentColor(for: f) : WSColor.backgroundElevated)
-                                    .overlay(Capsule().stroke(WSColor.hairline, lineWidth: active ? 0 : 1))
+                                ZStack {
+                                    Capsule().fill(WSColor.ink).offset(y: active ? 3 : 2)
+                                    Capsule().fill(active ? segmentColor(for: f) : WSColor.backgroundElevated)
+                                    Capsule().strokeBorder(WSColor.ink, lineWidth: 2)
+                                }
                             )
+                            .padding(.bottom, 3)
                     }
                     .buttonStyle(.plain)
                 }
@@ -279,10 +264,10 @@ struct LibraryTabView: View {
         }
     }
 
-    /// Active pill is always brand purple (mockup) — category color only
-    /// lives on the row tiles.
+    /// Active pill is always lime — category color only lives on the row
+    /// tiles.
     private func segmentColor(for f: LibraryFilter) -> Color {
-        WSColor.duoPurple
+        WSColor.lime
     }
 
     private func filterShortLabel(_ f: LibraryFilter) -> String {
@@ -380,7 +365,7 @@ struct LibraryTabView: View {
                 .background(
                     Capsule()
                         .fill(WSColor.backgroundElevated)
-                        .overlay(Capsule().stroke(WSColor.hairline, lineWidth: 1))
+                        .overlay(Capsule().strokeBorder(WSColor.ink, lineWidth: 2))
                 )
         }
         .padding(.top, 8)

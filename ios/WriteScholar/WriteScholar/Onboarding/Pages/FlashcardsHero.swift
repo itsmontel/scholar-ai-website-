@@ -55,7 +55,6 @@ struct FlashcardsHero: View {
                 .frame(width: 110, height: 110)
                 .offset(x: 130, y: -150)
                 .rotationEffect(.degrees(6))
-                .shadow(color: WSColor.duoGreen.opacity(0.28), radius: 16, y: 8)
                 .wsStaggerEntry(3)
         }
         .onAppear {
@@ -84,7 +83,6 @@ struct FlashcardsHero: View {
                 )
         }
         .compositingGroup()
-        .shadow(color: accent.opacity(0.12), radius: 10, y: 4)
     }
 }
 

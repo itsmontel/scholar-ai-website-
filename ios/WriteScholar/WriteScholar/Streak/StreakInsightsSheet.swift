@@ -68,7 +68,6 @@ struct StreakInsightsSheet: View {
                 WSColor.background.ignoresSafeArea()
 
                 VStack(spacing: 0) {
-                    WSChunkyRibbon(color: WSColor.duoOrange)
                     ScrollView {
                         VStack(spacing: 22) {
                             heroBlock
@@ -89,14 +88,12 @@ struct StreakInsightsSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text("Your Streak")
-                        .wsHeadline(.small, weight: .black)
-                        .foregroundStyle(WSColor.duoText)
+                    WSKicker(text: "Your streak")
                 }
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Close") { dismiss() }
-                        .font(WSFont.sans(15, weight: .bold))
-                        .foregroundStyle(WSColor.duoPurple)
+                        .font(WSFont.sans(15, weight: .heavy))
+                        .foregroundStyle(WSColor.purpleInk)
                 }
             }
         }
@@ -113,24 +110,25 @@ struct StreakInsightsSheet: View {
 
             VStack(spacing: 4) {
                 Text(active ? "On a roll!" : "Streak paused")
-                    .font(.system(size: 14, weight: .black, design: .rounded))
+                    .font(WSFont.headline(14, weight: .black))
                     .tracking(0.5)
-                    .foregroundStyle(active ? WSColor.duoOrange : WSColor.foregroundMuted)
+                    .foregroundStyle(active ? WSColor.lime : Color.white.opacity(0.8))
                 Text("\(count)-day streak")
-                    .wsHeadline(.huge, weight: .black)
-                    .foregroundStyle(WSColor.duoText)
+                    .font(WSFont.headline(38, weight: .black))
+                    .tracking(-1.2)
+                    .foregroundStyle(.white)
                 Text(active
-                    ? "You did something today -- the fire keeps burning."
+                    ? "You showed up today. The fire keeps burning."
                     : "Open a study pack today to keep your streak alive.")
-                    .wsBody(.small)
+                    .wsBody(.small, weight: .bold)
                     .multilineTextAlignment(.center)
-                    .foregroundStyle(WSColor.foregroundMuted)
+                    .foregroundStyle(.white)
                     .padding(.horizontal, 24)
             }
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 20)
-        .wsChunkyCard(verticalPadding: 0, accent: WSColor.duoOrange)
+        .wsChunkyCard(verticalPadding: 0, fillColor: WSColor.purple)
     }
 
     // MARK: - Stats row
@@ -155,16 +153,17 @@ struct StreakInsightsSheet: View {
 
     private func statTile(label: String, value: String, suffix: String, icon: String, tint: Color) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            ZStack {
-                Circle().fill(tint.opacity(0.16)).frame(width: 28, height: 28)
-                Image(systemName: icon).foregroundStyle(tint).font(.system(size: 12, weight: .heavy))
-            }
+            Image(systemName: icon)
+                .font(.system(size: 12, weight: .black))
+                .foregroundStyle(WSColor.inkText)
+                .frame(width: 28, height: 28)
+                .wsStickerCircle(fill: WSStickerTint.face(for: tint))
             Text(value)
-                .font(.system(size: 22, weight: .black, design: .rounded))
+                .font(WSFont.headline(22, weight: .black))
                 .foregroundStyle(WSColor.duoText)
                 .contentTransition(.numericText())
             Text(label.uppercased())
-                .font(.system(size: 8, weight: .black, design: .rounded))
+                .font(WSFont.headline(8, weight: .black))
                 .tracking(0.6)
                 .foregroundStyle(WSColor.foregroundMuted)
         }
@@ -187,7 +186,7 @@ struct StreakInsightsSheet: View {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("MONTH VIEW")
-                        .font(.system(size: 10, weight: .black, design: .rounded))
+                        .font(WSFont.headline(10, weight: .black))
                         .tracking(0.7)
                         .foregroundStyle(WSColor.foregroundMuted)
                     Text(monthHeader)
@@ -211,7 +210,7 @@ struct StreakInsightsSheet: View {
             HStack(spacing: 0) {
                 ForEach(weekdays, id: \.self) { d in
                     Text(d)
-                        .font(.system(size: 10, weight: .black, design: .rounded))
+                        .font(WSFont.headline(10, weight: .black))
                         .tracking(0.5)
                         .foregroundStyle(WSColor.foregroundMuted)
                         .frame(maxWidth: .infinity)
@@ -243,13 +242,9 @@ struct StreakInsightsSheet: View {
         Button(action: action) {
             Image(systemName: systemName)
                 .font(.system(size: 12, weight: .heavy))
-                .foregroundStyle(disabled ? WSColor.foregroundMuted.opacity(0.5) : WSColor.duoText)
-                .padding(8)
-                .background(
-                    Circle()
-                        .fill(WSColor.backgroundElevated)
-                        .overlay(Circle().stroke(WSColor.duoBorder, lineWidth: 2))
-                )
+                .foregroundStyle(disabled ? WSColor.foregroundMuted.opacity(0.5) : WSColor.foreground)
+                .frame(width: 32, height: 32)
+                .wsStickerCircle(fill: WSColor.backgroundElevated)
         }
         .buttonStyle(.plain)
         .disabled(disabled)
@@ -301,26 +296,26 @@ struct StreakInsightsSheet: View {
         ZStack {
             RoundedRectangle(cornerRadius: 9, style: .continuous)
                 .fill(
-                    cell.isActive ? WSColor.duoOrange : WSColor.duoSurface
+                    cell.isActive ? WSColor.orange : (cell.isToday ? WSColor.lime : WSColor.lilacDeep)
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 9, style: .continuous)
-                        .stroke(cell.isToday ? WSColor.duoPurple : .clear, lineWidth: 2)
+                        .strokeBorder(WSColor.ink.opacity(cell.isActive || cell.isToday ? 1 : 0), lineWidth: 2)
                 )
                 .opacity(cell.inMonth || cell.date != nil ? 1.0 : 0.0)
 
             if let date = cell.date {
                 let day = Calendar.current.component(.day, from: date)
                 Text("\(day)")
-                    .font(.system(size: 11, weight: .black, design: .rounded))
+                    .font(WSFont.headline(11, weight: .black))
                     .foregroundStyle(
-                        cell.isActive ? .white :
-                        cell.inMonth ? WSColor.duoText : WSColor.foregroundMuted.opacity(0.45)
+                        cell.isActive || cell.isToday ? WSColor.inkText :
+                        cell.inMonth ? WSColor.foreground : WSColor.foregroundMuted.opacity(0.45)
                     )
                 if cell.isActive {
                     Image(systemName: "flame.fill")
                         .font(.system(size: 7, weight: .black))
-                        .foregroundStyle(.white)
+                        .foregroundStyle(WSColor.inkText)
                         .offset(x: 8, y: -8)
                 }
             }
@@ -367,7 +362,7 @@ struct StreakInsightsSheet: View {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("YEAR AT A GLANCE")
-                        .font(.system(size: 10, weight: .black, design: .rounded))
+                        .font(WSFont.headline(10, weight: .black))
                         .tracking(0.7)
                         .foregroundStyle(WSColor.foregroundMuted)
                     Text("Last 52 weeks")
@@ -396,17 +391,17 @@ struct StreakInsightsSheet: View {
     private var heatmapLegend: some View {
         HStack(spacing: 4) {
             Text("less")
-                .font(.system(size: 8, weight: .bold, design: .rounded))
+                .font(WSFont.headline(8, weight: .black))
                 .foregroundStyle(WSColor.foregroundMuted)
             ForEach(0..<5, id: \.self) { i in
                 let intensity = Double(i) / 4.0
                 RoundedRectangle(cornerRadius: 3, style: .continuous)
-                    .fill(intensity == 0 ? WSColor.duoSurface :
-                          WSColor.duoOrange.opacity(0.30 + intensity * 0.70))
+                    .fill(intensity == 0 ? WSColor.lilacDeep :
+                          WSColor.orange.opacity(0.30 + intensity * 0.70))
                     .frame(width: 9, height: 9)
             }
             Text("more")
-                .font(.system(size: 8, weight: .bold, design: .rounded))
+                .font(WSFont.headline(8, weight: .black))
                 .foregroundStyle(WSColor.foregroundMuted)
         }
     }
@@ -457,14 +452,14 @@ struct StreakInsightsSheet: View {
         let isToday = date.map { Calendar.current.isDateInToday($0) } ?? false
 
         let intensity: Double = active ? 0.85 : 0.0
-        let fill: Color = intensity == 0 ? WSColor.duoSurface
-            : WSColor.duoOrange.opacity(0.30 + intensity * 0.70)
+        let fill: Color = intensity == 0 ? WSColor.lilacDeep
+            : WSColor.orange.opacity(0.30 + intensity * 0.70)
 
         return RoundedRectangle(cornerRadius: 3, style: .continuous)
             .fill(fill)
             .overlay(
                 RoundedRectangle(cornerRadius: 3, style: .continuous)
-                    .stroke(isToday ? WSColor.duoPurple : .clear, lineWidth: 1.5)
+                    .stroke(isToday ? WSColor.ink : .clear, lineWidth: 1.5)
             )
             .frame(width: 11, height: 11)
             .opacity(date == nil ? 0.0 : 1.0)
@@ -480,7 +475,7 @@ struct StreakInsightsSheet: View {
     private var insightsBlock: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("INSIGHTS")
-                .font(.system(size: 10, weight: .black, design: .rounded))
+                .font(WSFont.headline(10, weight: .black))
                 .tracking(0.7)
                 .foregroundStyle(WSColor.foregroundMuted)
             insightRow(
@@ -508,12 +503,13 @@ struct StreakInsightsSheet: View {
 
     private func insightRow(icon: String, tint: Color, title: String, body: String) -> some View {
         HStack(alignment: .top, spacing: 12) {
-            ZStack {
-                Circle().fill(tint.opacity(0.16)).frame(width: 36, height: 36)
-                Image(systemName: icon).foregroundStyle(tint).font(.system(size: 14, weight: .heavy))
-            }
+            Image(systemName: icon)
+                .font(.system(size: 14, weight: .black))
+                .foregroundStyle(WSColor.inkText)
+                .frame(width: 36, height: 36)
+                .wsStickerCircle(fill: WSStickerTint.face(for: tint))
             VStack(alignment: .leading, spacing: 2) {
-                Text(title).wsBody(.medium, weight: .black).foregroundStyle(WSColor.duoText)
+                Text(title).font(WSFont.headline(16, weight: .black)).foregroundStyle(WSColor.foreground)
                 Text(body).wsBody(.caption).foregroundStyle(WSColor.foregroundMuted)
             }
             Spacer(minLength: 0)
@@ -541,15 +537,15 @@ struct StreakInsightsSheet: View {
         let upcoming = upcomingStreakBadges
         return VStack(alignment: .leading, spacing: 12) {
             Text("NEXT MILESTONES")
-                .font(.system(size: 10, weight: .black, design: .rounded))
+                .font(WSFont.headline(10, weight: .black))
                 .tracking(0.7)
                 .foregroundStyle(WSColor.foregroundMuted)
 
             if upcoming.isEmpty {
                 HStack(spacing: 10) {
                     Image(systemName: "checkmark.seal.fill")
-                        .foregroundStyle(WSColor.duoGreen)
-                    Text("You've unlocked every streak badge -- legend!")
+                        .foregroundStyle(WSColor.purple)
+                    Text("You've unlocked every streak badge. Legend.")
                         .wsBody(.medium, weight: .bold)
                         .foregroundStyle(WSColor.duoText)
                 }
@@ -567,10 +563,9 @@ struct StreakInsightsSheet: View {
         let progress = ach.progress(stats: stats)
         return VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 10) {
-                ZStack {
-                    Circle().fill(WSColor.duoOrangeLight).frame(width: 32, height: 32)
-                    Image(systemName: "flame.fill").foregroundStyle(WSColor.duoOrange).font(.system(size: 13, weight: .heavy))
-                }
+                WSFlameIcon(size: 14)
+                    .frame(width: 34, height: 34)
+                    .wsStickerCircle(fill: WSColor.sun)
                 VStack(alignment: .leading, spacing: 1) {
                     Text(ach.name)
                         .wsBody(.medium, weight: .black)
@@ -581,10 +576,11 @@ struct StreakInsightsSheet: View {
                 }
                 Spacer()
                 Text("+\(ach.xp) XP")
-                    .font(.system(size: 11, weight: .black, design: .rounded))
-                    .foregroundStyle(WSColor.duoOrange)
+                    .font(WSFont.headline(11, weight: .black))
+                    .foregroundStyle(WSColor.inkText)
                     .padding(.horizontal, 8).padding(.vertical, 3)
-                    .background(Capsule().fill(WSColor.duoOrangeLight))
+                    .background(Capsule().fill(WSColor.lime))
+                    .overlay(Capsule().strokeBorder(WSColor.ink, lineWidth: 2))
             }
             WSXPBar(xpInLevel: Int(progress * 100), xpForLevel: 100, tint: WSColor.duoOrange, height: 8, showsLabel: false)
         }

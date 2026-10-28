@@ -95,12 +95,13 @@ struct WordBlitzView: View {
     private func statPill(icon: String, value: String, tint: Color) -> some View {
         HStack(spacing: 5) {
             Image(systemName: icon).font(.system(size: 13, weight: .bold))
-            Text(value).wsBody(.medium, weight: .bold)
+            Text(value).font(WSFont.headline(15, weight: .black)).monospacedDigit()
         }
-        .foregroundStyle(tint)
+        .foregroundStyle(WSColor.inkText)
         .padding(.horizontal, 12)
         .padding(.vertical, 7)
-        .background(Capsule().fill(tint.opacity(0.14)))
+        .background(Capsule().fill(WSStickerTint.face(for: tint)))
+        .overlay(Capsule().strokeBorder(WSColor.ink, lineWidth: 2))
     }
 
     private func sentenceCard(_ q: WordBlitzQuestion) -> some View {
@@ -112,7 +113,7 @@ struct WordBlitzView: View {
             + Text(revealCorrect ? q.correctAnswer : "______").foregroundColor(accent).bold()
             + Text(after)
         )
-        .wsBody(.large, weight: .semibold)
+        .font(WSFont.headline(22, weight: .black))
         .foregroundStyle(WSColor.foreground)
         .multilineTextAlignment(.center)
         .frame(maxWidth: .infinity)
@@ -126,16 +127,14 @@ struct WordBlitzView: View {
             ForEach(options, id: \.self) { opt in
                 Button { choose(opt, q: q) } label: {
                     Text(opt)
-                        .wsBody(.large, weight: .bold)
+                        .font(WSFont.headline(17, weight: .black))
                         .foregroundStyle(optionFg(opt, q))
                         .frame(maxWidth: .infinity, minHeight: 56)
                         .padding(.horizontal, 8)
-                        .background(
-                            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                .fill(optionBg(opt, q))
-                        )
+                        .wsSticker(fill: optionBg(opt, q), radius: 18, depth: 4)
+                        .modifier(WSWrongShake(active: optionState(opt, q) == 2))
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(WSStickerPressStyle())
                 .disabled(locked != nil)
             }
         }
@@ -150,38 +149,33 @@ struct WordBlitzView: View {
     }
     private func optionBg(_ opt: String, _ q: WordBlitzQuestion) -> Color {
         switch optionState(opt, q) {
-        case 1: return WSColor.duoGreen
-        case 2: return WSColor.duoRed
+        case 1: return WSColor.lime
+        case 2: return WSColor.pink
         default: return WSColor.backgroundElevated
         }
     }
     private func optionFg(_ opt: String, _ q: WordBlitzQuestion) -> Color {
-        optionState(opt, q) == 0 ? WSColor.foreground : .white
+        optionState(opt, q) == 0 ? WSColor.foreground : WSColor.inkText
     }
 
     // MARK: - Game over
 
     private var gameOver: some View {
-        VStack(spacing: 20) {
-            Text("Time's up! ⏱️")
-                .wsHeadline(.large, weight: .black)
-                .foregroundStyle(WSColor.foreground)
-            WSProgressRing(progress: 1, tint: accent, size: 150, lineWidth: 12,
-                           centerTitle: "\(score)", centerSubtitle: "points")
-            Text(isNewHigh ? "New high score! 🏆" : "\(score) point\(score == 1 ? "" : "s")")
-                .wsBody(.medium, weight: .bold)
-                .foregroundStyle(isNewHigh ? WSColor.duoYellowDark : WSColor.foregroundMuted)
-            HStack(spacing: 10) {
-                WSStatChip(icon: "checkmark.circle.fill", value: "\(correct)", label: "Correct",     tint: WSColor.duoGreen)
-                WSStatChip(icon: "xmark.circle.fill",     value: "\(wrong)",   label: "Wrong",       tint: WSColor.duoRed)
-                WSStatChip(icon: "flame.fill",            value: "\(longestStreak)", label: "Best streak", tint: WSColor.duoOrange)
-            }
+        WSWinScreen(
+            headline: isNewHigh ? "NEW\nRECORD." : "TIME'S\nUP.",
+            subline: isNewHigh ? "You just beat your best. Screenshot it." : "Run it back and beat \(score).",
+            stats: [
+                WSWinStat(label: "Score", value: "\(score)", fill: WSColor.lime),
+                WSWinStat(label: "Correct", value: "\(correct)", fill: WSColor.sky),
+                WSWinStat(label: "Missed", value: "\(wrong)", fill: WSColor.pink),
+                WSWinStat(label: "Best streak", value: "x\(longestStreak)", fill: WSColor.orange),
+            ]
+        ) {
             Button { start() } label: {
-                Label("Play again", systemImage: "arrow.counterclockwise").frame(maxWidth: .infinity)
+                Label("Play again", systemImage: "arrow.counterclockwise")
             }
-            .buttonStyle(WSDuoPrimaryButtonStyle(fullWidth: true))
+            .buttonStyle(WSStickerButtonStyle(fill: WSColor.lime, foreground: WSColor.inkText, radius: 20, height: 60))
         }
-        .padding(24)
     }
 
     // MARK: - Logic

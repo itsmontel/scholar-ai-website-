@@ -39,7 +39,6 @@ struct EssayAnalyzerHero: View {
                 .frame(width: 110, height: 110)
                 .offset(x: -130, y: -150 + mascotBob)
                 .rotationEffect(.degrees(-8))
-                .shadow(color: WSColor.duoPurple.opacity(0.28), radius: 16, y: 8)
                 .wsStaggerEntry(1)
 
             // Annotation pills around the screenshot -- Duolingo colors
@@ -127,7 +126,6 @@ struct AnnotationPill: View {
                     Capsule()
                         .stroke(tone.color.opacity(0.35), lineWidth: 2)
                 )
-                .shadow(color: tone.color.opacity(0.20), radius: 10, y: 4)
         )
     }
 }

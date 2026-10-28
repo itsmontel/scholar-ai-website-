@@ -30,6 +30,14 @@ targets:
       - path: WriteScholar
         excludes:
           - "Info.plist"
+      # Study Mode state + engine, also compiled into the StudyGate extensions.
+      - path: Shared
+    dependencies:
+      # Study Mode: the question screen, its answer buttons, and the timer
+      # that makes an app ask again when its unlock runs out.
+      - target: StudyGateConfiguration
+      - target: StudyGateAction
+      - target: StudyGateMonitor
     resources:
       - WriteScholar/Resources
       - WriteScholar/Assets.xcassets
@@ -72,13 +80,16 @@ targets:
         # iOS to load them. WSTypography.swift falls back to SF Pro Rounded
         # gracefully when these aren't available, so this list is only
         # populated when actual font files are present in Resources/.
-        # (EB Garamond was removed — the Duolingo redesign uses Nunito Black
-        # for headlines, never serifs.)
+        # Sticker arcade redesign: Bricolage Grotesque for headlines,
+        # DM Sans for body copy (both SIL Open Font License).
         UIAppFonts:
-          - "Nunito-Regular.ttf"
-          - "Nunito-SemiBold.ttf"
-          - "Nunito-Bold.ttf"
-          - "Nunito-Black.ttf"
+          - "BricolageGrotesque-SemiBold.ttf"
+          - "BricolageGrotesque-Bold.ttf"
+          - "BricolageGrotesque-ExtraBold.ttf"
+          - "DMSans-Regular.ttf"
+          - "DMSans-Medium.ttf"
+          - "DMSans-Bold.ttf"
+          - "DMSans-ExtraBold.ttf"
         # Light-status-bar so the violet hero looks right on launch
         UIStatusBarStyle: UIStatusBarStyleDarkContent
         UIViewControllerBasedStatusBarAppearance: true
@@ -98,6 +109,99 @@ targets:
         # Requires Apple to approve the entitlement request for this
         # bundle ID before real shielding works at runtime — UI is
         # safe to ship beforehand.
+        com.apple.developer.family-controls: true
+        com.apple.security.application-groups:
+          - group.com.writescholar.focus
+
+  # Study Mode: draws the question screen in front of a gated app.
+  StudyGateConfiguration:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: StudyGateConfiguration
+        excludes:
+          - "Info.plist"
+      - path: Shared
+    info:
+      path: StudyGateConfiguration/Info.plist
+      properties:
+        CFBundleDisplayName: StudyGateConfiguration
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.ManagedSettingsUI.shield-configuration-service
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).StudyGateConfigurationExtension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.writescholar.app.StudyGateConfiguration
+        TARGETED_DEVICE_FAMILY: "1,2"
+        APPLICATION_EXTENSION_API_ONLY: YES
+    entitlements:
+      path: StudyGateConfiguration/StudyGateConfiguration.entitlements
+      properties:
+        com.apple.developer.family-controls: true
+        com.apple.security.application-groups:
+          - group.com.writescholar.focus
+
+  # Study Mode: checks the answer and opens the app on a right one.
+  StudyGateAction:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: StudyGateAction
+        excludes:
+          - "Info.plist"
+      - path: Shared
+    info:
+      path: StudyGateAction/Info.plist
+      properties:
+        CFBundleDisplayName: StudyGateAction
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.ManagedSettings.shield-action-service
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).StudyGateActionExtension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.writescholar.app.StudyGateAction
+        TARGETED_DEVICE_FAMILY: "1,2"
+        APPLICATION_EXTENSION_API_ONLY: YES
+    entitlements:
+      path: StudyGateAction/StudyGateAction.entitlements
+      properties:
+        com.apple.developer.family-controls: true
+        com.apple.security.application-groups:
+          - group.com.writescholar.focus
+
+  # Study Mode: makes an app ask again when its unlock runs out.
+  StudyGateMonitor:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: StudyGateMonitor
+        excludes:
+          - "Info.plist"
+      - path: Shared
+    info:
+      path: StudyGateMonitor/Info.plist
+      properties:
+        CFBundleDisplayName: StudyGateMonitor
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.deviceactivity.monitor-extension
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).StudyGateMonitorExtension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.writescholar.app.StudyGateMonitor
+        TARGETED_DEVICE_FAMILY: "1,2"
+        APPLICATION_EXTENSION_API_ONLY: YES
+    entitlements:
+      path: StudyGateMonitor/StudyGateMonitor.entitlements
+      properties:
         com.apple.developer.family-controls: true
         com.apple.security.application-groups:
           - group.com.writescholar.focus

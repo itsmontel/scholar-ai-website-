@@ -38,19 +38,6 @@ struct LibraryItemCard: View {
         }
     }
 
-    private var tileIcon: String {
-        switch item.kind {
-        case .studyPack:     return "graduationcap.fill"
-        case .essayAnalysis: return "doc.text.magnifyingglass"
-        case .document:
-            switch docExtension {
-            case "pdf":          return "doc.richtext.fill"
-            case "doc", "docx":  return "doc.fill"
-            default:             return "doc.plaintext.fill"
-            }
-        }
-    }
-
     private var docExtension: String {
         (item.title as NSString).pathExtension.lowercased()
     }
@@ -103,22 +90,15 @@ struct LibraryItemCard: View {
     // MARK: - Icon block (pastel tile + saturated glyph)
 
     private var iconBlock: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(accentColor.opacity(0.14))
-                .frame(width: 48, height: 48)
-
-            Image(systemName: tileIcon)
-                .font(.system(size: 20, weight: .bold))
-                .foregroundStyle(accentColor)
-        }
+        WSPackCover(title: item.title, kind: item.kind, size: 52, radius: 15)
         .overlay(alignment: .topTrailing) {
             if item.isPinned {
                 Image(systemName: "pin.fill")
                     .font(.system(size: 8, weight: .black))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(WSColor.inkText)
                     .padding(4)
-                    .background(Circle().fill(WSColor.duoOrange))
+                    .background(Circle().fill(WSColor.orange))
+                    .overlay(Circle().strokeBorder(WSColor.ink, lineWidth: 1.5))
                     .offset(x: 5, y: -5)
             }
         }
@@ -129,7 +109,7 @@ struct LibraryItemCard: View {
     private var contentBlock: some View {
         VStack(alignment: .leading, spacing: 3) {
             Text(item.title)
-                .wsBody(.large, weight: .bold)
+                .font(WSFont.headline(17, weight: .black))
                 .foregroundStyle(WSColor.foreground)
                 .lineLimit(1)
                 .multilineTextAlignment(.leading)
@@ -181,13 +161,13 @@ struct LibraryChipRow: View {
                         Text(chip.label)
                             .font(WSFont.sans(11, weight: .semibold))
                     }
-                    .foregroundStyle(tint)
+                    .foregroundStyle(WSColor.foreground)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
                     .background(
                         Capsule()
-                            .fill(tint.opacity(0.10))
-                            .overlay(Capsule().stroke(tint.opacity(0.25), lineWidth: 1))
+                            .fill(WSColor.lilacDeep)
+                            .overlay(Capsule().strokeBorder(WSColor.ink, lineWidth: 1.5))
                     )
                 }
             }

@@ -94,7 +94,7 @@ struct LibraryItemDetailSheet: View {
                 }
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text("This won't delete the original — just removes it from your library shelf.")
+                Text("This won't delete the original. It just leaves your shelf.")
             }
         }
     }
@@ -158,7 +158,6 @@ struct LibraryItemDetailSheet: View {
                 .padding(18)
             }
             .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-            .shadow(color: accentColor.opacity(0.40), radius: 18, y: 8)
         }
     }
 

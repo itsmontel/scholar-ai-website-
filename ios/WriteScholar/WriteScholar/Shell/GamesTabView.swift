@@ -2,13 +2,14 @@
 //  GamesTabView.swift
 //  WriteScholar
 //
-//  Arcade Mode (prototype screen #11): a lavender hero + compact game
-//  rows (tile · name · desc · high score · Play pill). Tapping Play opens
-//  a mode sheet; picking a mode builds the pool and launches the game.
-//  High scores persist in GameScoreStore.
+//  Arcade: a dark neon room. "ARCADE_" header, a daily pick banner, a
+//  2x2 grid of game cards with live looping previews, and a wide Quiz Run
+//  card. Tapping a card opens the mode sheet; picking a mode builds the
+//  pool and launches the game. High scores persist in GameScoreStore.
 //
 
 import SwiftUI
+import ImageIO
 
 struct GamesTabView: View {
     @StateObject private var scores = GameScoreStore.shared
@@ -39,24 +40,36 @@ struct GamesTabView: View {
     /// Mockup row order.
     private let rows: [ArcadeGame] = [.wordBlitz, .craterBlast, .memoryMatch, .quizRun, .wordTower]
 
+    @StateObject private var dailyGoal = DailyGoalStore.shared
+
     var body: some View {
         ZStack {
-            WSColor.background.ignoresSafeArea()
+            WSColor.arcadeNight.ignoresSafeArea()
+            ArcadeGrid().ignoresSafeArea()
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
-                    heroCard.wsStaggerEntry(0)
-
-                    VStack(spacing: 12) {
-                        ForEach(Array(rows.enumerated()), id: \.element.id) { (i, game) in
-                            gameRow(game).wsStaggerEntry(i + 1)
-                        }
+                    header
+                    dailyPick.wsPop(delay: 0.05)
+                    Text("Pick a game")
+                        .font(WSFont.headline(22, weight: .black))
+                        .foregroundStyle(.white)
+                        .padding(.top, 2)
+                        .padding(.bottom, -4)
+                    LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
+                        gameCard(.craterBlast, fill: WSColor.sky, delay: 0.12)
+                        gameCard(.wordTower, fill: WSColor.lime, delay: 0.18)
+                        gameCard(.wordBlitz, fill: WSColor.orange, delay: 0.24)
+                        gameCard(.memoryMatch, fill: WSColor.pink, delay: 0.30)
                     }
+                    quizRunCard.wsPop(delay: 0.36)
                 }
-                .padding(.horizontal, 18)
-                .padding(.vertical, 16)
+                .padding(.horizontal, 20)
+                .padding(.top, 14)
+                .padding(.bottom, 28)
             }
         }
+        .environment(\.colorScheme, .dark)
         .sheet(item: $launchTarget) { game in
             GameLaunchSheet(game: game, modes: modes(for: game)) { mode in
                 pick(mode, for: game)
@@ -77,129 +90,176 @@ struct GamesTabView: View {
                 case .memoryMatch(let t, let pairs): MemoryMatchView(title: t, pairs: pairs)
                 case .quizRun(let t, let qs):        QuizRunView(title: t, questions: qs)
                 }
-                closeButton
+                WSGameCloseButton { presented = nil }
             }
         }
     }
 
-    private var closeButton: some View {
-        Button {
-            Haptics.light()
-            presented = nil
+    // MARK: - Header
+
+    private var header: some View {
+        HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 0) {
+                    Text("ARCADE")
+                    BlinkingCursor()
+                }
+                .font(WSFont.headline(48, weight: .black))
+                .tracking(-1.4)
+                .foregroundStyle(WSColor.lime)
+                Text("Every game runs on your notes.")
+                    .font(WSFont.sans(14.5, weight: .bold))
+                    .foregroundStyle(Color(hex: 0xD9D2F2))
+            }
+            Spacer()
+            HStack(spacing: 6) {
+                Image(systemName: "star.fill")
+                    .font(.system(size: 13, weight: .black))
+                Text("\(dailyGoal.todayXP) XP")
+                    .font(WSFont.headline(16, weight: .black))
+                    .contentTransition(.numericText())
+            }
+            .foregroundStyle(WSColor.inkText)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 7)
+            .background(
+                ZStack {
+                    Capsule().fill(Color.black).offset(y: 3)
+                    Capsule().fill(Color(hex: 0xFFC93D))
+                    Capsule().strokeBorder(Color.black, lineWidth: WSSticker.stroke)
+                }
+            )
+            .padding(.top, 8)
+            .wsPop(delay: 0.1)
+            .accessibilityLabel("\(dailyGoal.todayXP) XP today")
+        }
+    }
+
+    // MARK: - Daily pick
+
+    /// Rotates through the five games, one per day.
+    private var todaysPick: ArcadeGame {
+        let day = Calendar.current.ordinality(of: .day, in: .era, for: Date()) ?? 0
+        return rows[day % rows.count]
+    }
+
+    private var dailyPick: some View {
+        let game = todaysPick
+        let best = scores.highScore(for: game)
+        return Button {
+            Haptics.medium()
+            launchTarget = game
         } label: {
-            Image(systemName: "xmark")
-                .font(.system(size: 14, weight: .bold))
-                .foregroundStyle(WSColor.foreground)
-                .padding(10)
-                .background(Circle().fill(WSColor.backgroundElevated))
-                .overlay(Circle().stroke(WSColor.hairline, lineWidth: 1))
-                .shadow(color: Color.black.opacity(0.1), radius: 6, y: 2)
-        }
-        .buttonStyle(.plain)
-        .padding(.top, 14)
-        .padding(.leading, 14)
-    }
-
-    // MARK: - Hero
-
-    private var heroCard: some View {
-        VStack(spacing: 14) {
-            HStack {
+            HStack(spacing: 8) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Arcade Mode")
-                        .wsHeadline(.large, weight: .black)
-                        .foregroundStyle(WSColor.foreground)
-                    Text("Learn by playing fun games!")
-                        .wsBody(.small, weight: .bold)
-                        .foregroundStyle(WSColor.foregroundMuted)
+                    Text("TODAY'S PICK")
+                        .font(WSFont.sans(11, weight: .black))
+                        .tracking(1.5)
+                        .foregroundStyle(WSColor.lime)
+                        .padding(.horizontal, 9)
+                        .padding(.vertical, 4)
+                        .background(RoundedRectangle(cornerRadius: 8).fill(WSColor.inkText))
+                    Text(game.title)
+                        .font(WSFont.headline(27, weight: .black))
+                        .tracking(-0.5)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                    Text(best > 0 ? "Your best: \(formatted(best)). Beat it." : game.blurb)
+                        .font(WSFont.sans(13, weight: .heavy))
+                        .lineLimit(2)
+                    HStack(spacing: 6) {
+                        Image(systemName: "play.fill").font(.system(size: 12, weight: .black))
+                        Text("Play now").font(WSFont.headline(16, weight: .black))
+                    }
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 12).fill(Color.black).offset(y: 3)
+                            RoundedRectangle(cornerRadius: 12).fill(WSColor.lime)
+                            RoundedRectangle(cornerRadius: 12).strokeBorder(Color.black, lineWidth: WSSticker.stroke)
+                        }
+                    )
+                    .padding(.top, 6)
                 }
-                Spacer()
+                .frame(maxWidth: .infinity, alignment: .leading)
+                WSAnimatedImage(name: "mascot-juggling", ext: "webp")
+                    .frame(width: 124, height: 124)
+                    .wsMascotBob(amount: 5, rock: 4, duration: 1.1)
+                    .padding(.vertical, -14)
+                    .padding(.trailing, -10)
+                    .accessibilityHidden(true)
             }
-            controllerIllustration
-                .frame(height: 120)
-                .frame(maxWidth: .infinity)
+            .foregroundStyle(WSColor.inkText)
+            .padding(16)
+            .wsSticker(fill: WSColor.pink, radius: 26, depth: 6, stroke: .black)
         }
-        .padding(20)
-        .background(
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .fill(WSColor.surfacePurple)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 24, style: .continuous)
-                        .stroke(WSColor.duoPurple.opacity(0.15), lineWidth: 1.5)
-                )
-        )
+        .buttonStyle(WSStickerPressStyle())
     }
 
-    /// A layered controller illustration with floating doodles — stands in
-    /// for the mockup's game-controller art without a bespoke asset.
-    private var controllerIllustration: some View {
-        ZStack {
-            Circle().fill(WSColor.duoPurple.opacity(0.14)).frame(width: 108, height: 108)
-            Image(systemName: "gamecontroller.fill")
-                .font(.system(size: 52, weight: .bold))
-                .foregroundStyle(WSColor.duoPurple)
-                .rotationEffect(.degrees(-8))
-                .shadow(color: WSColor.duoPurple.opacity(0.3), radius: 10, y: 6)
+    // MARK: - Game cards
 
-            doodle("plus", tint: WSColor.duoGreen, size: 16, x: -74, y: -36, delay: 0)
-            doodle("puzzlepiece.fill", tint: WSColor.duoOrange, size: 18, x: 78, y: -28, delay: 0.5)
-            doodle("star.fill", tint: WSColor.duoYellowDark, size: 14, x: 66, y: 40, delay: 1.0)
-            doodle("bolt.fill", tint: WSColor.duoPink, size: 15, x: -70, y: 34, delay: 0.3)
-        }
-    }
-
-    private func doodle(_ symbol: String, tint: Color, size: CGFloat, x: CGFloat, y: CGFloat, delay: Double) -> some View {
-        Image(systemName: symbol)
-            .font(.system(size: size, weight: .bold))
-            .foregroundStyle(tint.opacity(0.8))
-            .offset(x: x, y: y)
-            .wsBobbing(amount: 5, duration: 2.6 + delay)
-    }
-
-    // MARK: - Game row
-
-    private func gameRow(_ game: ArcadeGame) -> some View {
+    private func gameCard(_ game: ArcadeGame, fill: Color, delay: Double) -> some View {
         let high = scores.highScore(for: game)
-        return HStack(spacing: 14) {
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(game.tint.opacity(0.14))
-                .frame(width: 48, height: 48)
-                .overlay(
-                    Image(systemName: game.icon)
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundStyle(game.tint)
-                )
-            VStack(alignment: .leading, spacing: 3) {
+        return Button {
+            Haptics.medium()
+            launchTarget = game
+        } label: {
+            VStack(alignment: .leading, spacing: 10) {
+                ArcadePreview(game: game)
+                    .frame(height: 96)
+                    .frame(maxWidth: .infinity)
+                    .background(WSColor.arcadeNight)
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Color.black, lineWidth: 2))
                 Text(game.title)
-                    .wsBody(.large, weight: .bold)
-                    .foregroundStyle(WSColor.foreground)
+                    .font(WSFont.headline(18, weight: .black))
                     .lineLimit(1)
-                Text(game.blurb)
-                    .wsBody(.small)
-                    .foregroundStyle(WSColor.foregroundMuted)
-                    .lineLimit(1)
-                Text(high > 0 ? "High score: \(formatted(high))" : "Not played yet")
-                    .wsBody(.caption, weight: .bold)
-                    .foregroundStyle(high > 0 ? game.tint : WSColor.foregroundMuted.opacity(0.7))
+                    .minimumScaleFactor(0.8)
+                Text(high > 0 ? "Best \(formatted(high))" : "New. Try it")
+                    .font(WSFont.sans(12.5, weight: .heavy))
             }
-            Spacer(minLength: 8)
-            Button {
-                Haptics.medium()
-                launchTarget = game
-            } label: {
-                HStack(spacing: 5) {
-                    Image(systemName: "play.fill").font(.system(size: 11, weight: .black))
-                    Text("Play").font(WSFont.sans(14, weight: .black))
-                }
-                .foregroundStyle(.white)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 9)
-                .background(Capsule().fill(WSColor.duoPurple).shadow(color: WSColor.duoPurple.opacity(0.35), radius: 6, y: 3))
-            }
-            .buttonStyle(WSBouncyButtonStyle())
+            .foregroundStyle(WSColor.inkText)
+            .padding(.horizontal, 10)
+            .padding(.top, 10)
+            .padding(.bottom, 12)
+            .wsSticker(fill: fill, radius: 22, depth: 5, stroke: .black)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .wsChunkyCard(cornerRadius: 20)
+        .buttonStyle(WSStickerPressStyle())
+        .wsPop(delay: delay)
+        .accessibilityLabel("\(game.title). \(high > 0 ? "Best \(high)" : "Not played yet")")
+    }
+
+    private var quizRunCard: some View {
+        let high = scores.highScore(for: .quizRun)
+        return Button {
+            Haptics.medium()
+            launchTarget = .quizRun
+        } label: {
+            HStack(spacing: 14) {
+                ArcadePreview(game: .quizRun)
+                    .frame(width: 130, height: 80)
+                    .background(WSColor.arcadeNight)
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Color.black, lineWidth: 2))
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Quiz Run")
+                        .font(WSFont.headline(20, weight: .black))
+                        .foregroundStyle(.white)
+                    Text("Answer to jump. Miss and you trip.")
+                        .font(WSFont.sans(13, weight: .bold))
+                        .foregroundStyle(Color(hex: 0xF3EEFF))
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text(high > 0 ? "Best \(formatted(high))" : "New. Try it")
+                        .font(WSFont.sans(12.5, weight: .heavy))
+                        .foregroundStyle(WSColor.lime)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .padding(12)
+            .wsSticker(fill: WSColor.purple, radius: 22, depth: 5, stroke: .black)
+        }
+        .buttonStyle(WSStickerPressStyle())
     }
 
     private func formatted(_ n: Int) -> String {
@@ -327,4 +387,196 @@ struct GamesTabView: View {
 
 #Preview {
     GamesTabView()
+}
+
+// MARK: - Arcade backdrop + previews
+
+/// Faint purple graph-paper grid behind the arcade.
+private struct ArcadeGrid: View {
+    var body: some View {
+        Canvas { ctx, size in
+            var p = Path()
+            stride(from: 0, through: size.width, by: 32).forEach { x in
+                p.move(to: CGPoint(x: x, y: 0)); p.addLine(to: CGPoint(x: x, y: size.height))
+            }
+            stride(from: 0, through: size.height, by: 32).forEach { y in
+                p.move(to: CGPoint(x: 0, y: y)); p.addLine(to: CGPoint(x: size.width, y: y))
+            }
+            ctx.stroke(p, with: .color(WSColor.purple.opacity(0.16)), lineWidth: 1.5)
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+}
+
+private struct BlinkingCursor: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    var body: some View {
+        TimelineView(.periodic(from: .now, by: 0.5)) { ctx in
+            let on = reduceMotion || Int(ctx.date.timeIntervalSinceReferenceDate * 2) % 2 == 0
+            Text("_").opacity(on ? 1 : 0)
+        }
+        .accessibilityHidden(true)
+    }
+}
+
+/// Tiny looping animation of each game, drawn in its dark well.
+struct ArcadePreview: View {
+    let game: ArcadeGame
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        TimelineView(.animation(paused: reduceMotion)) { ctx in
+            let t = reduceMotion ? 0.6 : ctx.date.timeIntervalSinceReferenceDate
+            GeometryReader { geo in
+                content(t: t, size: geo.size)
+            }
+        }
+        .accessibilityHidden(true)
+    }
+
+    @ViewBuilder
+    private func content(t: Double, size: CGSize) -> some View {
+        switch game {
+        case .craterBlast: meteors(t: t, size: size)
+        case .wordTower:   tower(t: t, size: size)
+        case .wordBlitz:   blitz(t: t)
+        case .memoryMatch: memory(t: t)
+        case .quizRun:     run(t: t, size: size)
+        }
+    }
+
+    private func phase(_ t: Double, period: Double, offset: Double = 0) -> Double {
+        let v = (t + offset).truncatingRemainder(dividingBy: period) / period
+        return v < 0 ? v + 1 : v
+    }
+
+    private func meteors(t: Double, size: CGSize) -> some View {
+        let colors = [WSColor.orange, WSColor.pink, WSColor.lime]
+        let xs: [CGFloat] = [0.22, 0.5, 0.78]
+        return ZStack {
+            ForEach(0..<3, id: \.self) { i in
+                let ph = phase(t, period: 1.8, offset: Double(i) * 0.6)
+                Circle()
+                    .fill(colors[i])
+                    .overlay(Circle().strokeBorder(Color.black, lineWidth: 2))
+                    .frame(width: 18, height: 18)
+                    .position(x: size.width * xs[i], y: -12 + (size.height + 24) * ph)
+                    .opacity(ph > 0.85 ? (1 - ph) / 0.15 : 1)
+            }
+            Ellipse()
+                .fill(WSColor.purple)
+                .overlay(Ellipse().strokeBorder(Color.black, lineWidth: 2))
+                .frame(width: 80, height: 44)
+                .position(x: size.width / 2, y: size.height + 6)
+        }
+    }
+
+    private func tower(t: Double, size: CGSize) -> some View {
+        let colors = [WSColor.orange, WSColor.sky, WSColor.pink, Color.white]
+        let widths: [CGFloat] = [70, 58, 46, 34]
+        let ph = phase(t, period: 3.2)
+        return ZStack {
+            ForEach(0..<4, id: \.self) { i in
+                let start = Double(i) * 0.2
+                let local = min(1, max(0, (ph - start) / 0.12))
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(colors[i])
+                    .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(Color.black, lineWidth: 2))
+                    .frame(width: widths[i], height: 16)
+                    .position(x: size.width / 2, y: (size.height - 14 - CGFloat(i) * 18) * local - 20 * (1 - local))
+                    .opacity(ph > 0.92 ? 0 : (local > 0 ? 1 : 0))
+            }
+        }
+    }
+
+    private func blitz(t: Double) -> some View {
+        let letters = Array("BLITZ")
+        return HStack(spacing: 4) {
+            ForEach(0..<5, id: \.self) { i in
+                let ph = phase(t, period: 1.6, offset: -Double(i) * 0.2)
+                let hop = ph < 0.25 ? sin(ph / 0.25 * .pi) : 0
+                Text(String(letters[i]))
+                    .font(WSFont.headline(15, weight: .black))
+                    .foregroundStyle(WSColor.inkText)
+                    .frame(width: 22, height: 26)
+                    .background(RoundedRectangle(cornerRadius: 5).fill(Color.white))
+                    .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(Color.black, lineWidth: 2))
+                    .offset(y: -10 * hop)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func memory(t: Double) -> some View {
+        HStack(spacing: 8) {
+            ForEach(0..<3, id: \.self) { i in
+                let ph = phase(t, period: 2.4, offset: -Double(i) * 0.35)
+                let angle = ph < 0.5 ? 0 : (ph < 0.6 ? (ph - 0.5) / 0.1 * 180 : (ph < 0.85 ? 180 : 180 + (ph - 0.85) / 0.15 * 180))
+                let faceUp = angle > 90 && angle < 270
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(faceUp ? WSColor.lime : WSColor.purple)
+                    .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Color.black, lineWidth: 2))
+                    .overlay(
+                        Image(systemName: faceUp ? "star.fill" : "questionmark")
+                            .font(.system(size: 13, weight: .black))
+                            .foregroundStyle(faceUp ? WSColor.inkText : Color.white)
+                            .scaleEffect(x: faceUp ? -1 : 1)
+                    )
+                    .frame(width: 30, height: 42)
+                    .rotation3DEffect(.degrees(angle), axis: (x: 0, y: 1, z: 0), perspective: 0.6)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func run(t: Double, size: CGSize) -> some View {
+        let ph = phase(t, period: 0.9)
+        let dash = CGFloat(phase(t, period: 0.5)) * 20
+        return ZStack {
+            Path { p in
+                var x = -dash
+                while x < size.width {
+                    p.move(to: CGPoint(x: x, y: size.height - 10))
+                    p.addLine(to: CGPoint(x: x + 10, y: size.height - 10))
+                    x += 20
+                }
+            }
+            .stroke(WSColor.lime, style: StrokeStyle(lineWidth: 4, lineCap: .round))
+            Image(uiImage: ArcadePreview.mascotStill ?? UIImage())
+                .resizable()
+                .scaledToFit()
+                .frame(width: 52, height: 52)
+                .position(x: size.width * 0.38, y: size.height - 38 - 22 * sin(ph * .pi))
+        }
+    }
+
+    /// First frame of the jumping mascot, decoded once.
+    static let mascotStill: UIImage? = {
+        guard let url = Bundle.main.url(forResource: "mascot-jumping-joy", withExtension: "webp"),
+              let src = CGImageSourceCreateWithURL(url as CFURL, nil),
+              let cg = CGImageSourceCreateImageAtIndex(src, 0, nil) else { return nil }
+        return UIImage(cgImage: cg)
+    }()
+}
+
+/// Sticker close button pinned over full-screen games.
+struct WSGameCloseButton: View {
+    var action: () -> Void
+    var body: some View {
+        Button {
+            Haptics.light()
+            action()
+        } label: {
+            Image(systemName: "xmark")
+                .font(.system(size: 14, weight: .black))
+                .foregroundStyle(WSColor.inkText)
+                .frame(width: 38, height: 38)
+                .wsStickerCircle(fill: .white, depth: 3)
+        }
+        .buttonStyle(WSStickerPressStyle())
+        .padding(.top, 14)
+        .padding(.leading, 14)
+        .accessibilityLabel("Close game")
+    }
 }

@@ -45,7 +45,15 @@ struct WriteScholarApp: App {
                     switch phase {
                     case .active:
                         if foregroundedAt == nil { foregroundedAt = Date() }
+                        // Pick up answers given on the question screen and
+                        // any packs made since, before the user leaves again.
+                        FocusManager.shared.refreshStudyMode()
                     case .inactive, .background:
+                        if phase == .background {
+                            // New packs made this session reach the question
+                            // screen as soon as the user leaves the app.
+                            FocusManager.shared.rebuildStudyDeck()
+                        }
                         if let start = foregroundedAt {
                             // Cap a single span at 4h so a device left open
                             // overnight doesn't record absurd study time.

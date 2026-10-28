@@ -48,25 +48,29 @@ struct AnalyzeInputView: View {
     private var headerBlock: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 10) {
-                Text("ANALYZE PAPER")
-                    .wsEyebrow()
-                    .foregroundStyle(.white)
+                Text("GRADE MY ESSAY")
+                    .font(WSFont.sans(11, weight: .black))
+                    .tracking(1.3)
+                    .foregroundStyle(WSColor.inkText)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
-                    .background(Capsule().fill(WSColor.duoPurple))
+                    .background(RoundedRectangle(cornerRadius: 9).fill(WSColor.pink))
+                    .overlay(RoundedRectangle(cornerRadius: 9).strokeBorder(WSColor.ink, lineWidth: 2))
                 Spacer()
                 WSAnimatedImage(name: "mascot-paper", ext: "webp")
-                    .frame(width: 56, height: 56)
-                    .shadow(color: WSColor.duoPurple.opacity(0.25), radius: 8, y: 4)
+                    .frame(width: 64, height: 64)
+                    .wsMascotBob(amount: 5, rock: 3, duration: 1.3)
             }
 
-            Text("Professor-style feedback in 60 seconds")
-                .wsHeadline(.large, weight: .black)
-                .foregroundStyle(WSColor.duoText)
+            Text("Know your grade before your professor does.")
+                .font(WSFont.headline(32, weight: .black))
+                .tracking(-1)
+                .foregroundStyle(WSColor.foreground)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
 
-            Text("Paste your essay or draft. We grade structure, clarity, argument, and citations -- section by section.")
-                .wsBody(.medium)
+            Text("Paste your essay or draft. We grade structure, clarity, argument and citations, section by section.")
+                .wsBody(.medium, weight: .semibold)
                 .foregroundStyle(WSColor.foregroundMuted)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -78,19 +82,19 @@ struct AnalyzeInputView: View {
         VStack(alignment: .leading, spacing: 0) {
             // Faux browser top-strip
             HStack(spacing: 6) {
-                Circle().fill(WSColor.duoRed).frame(width: 8, height: 8)
-                Circle().fill(WSColor.duoOrange).frame(width: 8, height: 8)
-                Circle().fill(WSColor.duoGreen).frame(width: 8, height: 8)
+                ForEach([WSColor.pink, WSColor.sun, WSColor.lime], id: \.self) { c in
+                    Circle().fill(c).overlay(Circle().strokeBorder(WSColor.ink, lineWidth: 1.5)).frame(width: 11, height: 11)
+                }
                 Spacer()
-                Text("writescholar.com . analyze")
-                    .wsBody(.caption, weight: .semibold)
+                Text("your-essay.docx")
+                    .font(WSFont.sans(12, weight: .heavy))
                     .foregroundStyle(WSColor.foregroundMuted)
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .background(WSColor.duoSurface)
+            .background(WSColor.lilacDeep)
             .overlay(alignment: .bottom) {
-                Rectangle().fill(WSColor.duoBorder).frame(height: 1)
+                Rectangle().fill(WSColor.ink).frame(height: 2)
             }
 
             ZStack(alignment: .topLeading) {
@@ -109,18 +113,17 @@ struct AnalyzeInputView: View {
                     .padding(.vertical, 10)
                     .frame(minHeight: 240, maxHeight: 360)
                     .wsBody(.medium)
-                    .foregroundStyle(WSColor.duoText)
+                    .foregroundStyle(WSColor.foreground)
             }
 
             HStack(spacing: 10) {
                 Text("\(wordCount) words")
-                    .wsBody(.caption, weight: .semibold)
-                    .foregroundStyle(wordCount >= 200 ? WSColor.duoGreen : WSColor.foregroundMuted)
+                    .font(WSFont.headline(13, weight: .black))
+                    .foregroundStyle(WSColor.inkText)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 4)
-                    .background(
-                        Capsule().fill(wordCount >= 200 ? WSColor.duoGreenLight : WSColor.duoSurface)
-                    )
+                    .background(Capsule().fill(wordCount >= 200 ? WSColor.lime : WSColor.backgroundElevated))
+                    .overlay(Capsule().strokeBorder(WSColor.ink, lineWidth: 2))
 
                 Text("Min 200")
                     .wsBody(.caption)
@@ -136,7 +139,7 @@ struct AnalyzeInputView: View {
                 } label: {
                     Label("Paste", systemImage: "doc.on.clipboard")
                         .wsBody(.caption, weight: .bold)
-                        .foregroundStyle(WSColor.duoPurple)
+                        .foregroundStyle(WSColor.purpleInk)
                 }
                 .buttonStyle(.plain)
 
@@ -154,18 +157,16 @@ struct AnalyzeInputView: View {
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .background(WSColor.duoSurface)
+            .background(WSColor.lilacDeep)
             .overlay(alignment: .top) {
-                Rectangle().fill(WSColor.duoBorder).frame(height: 1)
+                Rectangle().fill(WSColor.ink).frame(height: 2)
             }
         }
-        .wsChunkyCard(
-            cornerRadius: 22,
-            horizontalPadding: 0,
-            verticalPadding: 0,
-            accent: WSColor.duoPurple
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .background(WSColor.backgroundElevated)
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).strokeBorder(WSColor.ink, lineWidth: WSSticker.stroke))
+        .background(RoundedRectangle(cornerRadius: 24, style: .continuous).fill(editorFocused ? WSColor.purple : WSColor.ink).offset(y: 5))
+        .padding(.bottom, 5)
     }
 
     // MARK: - Grading style picker
@@ -173,8 +174,8 @@ struct AnalyzeInputView: View {
     private var gradingStyleRow: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Grading style")
-                .wsBody(.small, weight: .black)
-                .foregroundStyle(WSColor.duoText)
+                .font(WSFont.headline(17, weight: .black))
+                .foregroundStyle(WSColor.foreground)
 
             HStack(spacing: 8) {
                 ForEach(AnalyzeAPI.GradingStyle.allCases) { style in
@@ -186,18 +187,18 @@ struct AnalyzeInputView: View {
                         }
                     } label: {
                         Text(style.label)
-                            .wsBody(.caption, weight: .bold)
-                            .foregroundStyle(active ? .white : WSColor.duoText)
+                            .font(WSFont.headline(14, weight: .black))
+                            .foregroundStyle(active ? WSColor.inkText : WSColor.foreground)
                             .padding(.horizontal, 14)
                             .padding(.vertical, 8)
                             .background(
-                                Capsule()
-                                    .fill(active ? WSColor.duoPurple : WSColor.backgroundElevated)
-                                    .overlay(
-                                        Capsule().stroke(active ? .clear : WSColor.duoBorder, lineWidth: 2)
-                                    )
-                                    .shadow(color: active ? WSColor.duoPurple.opacity(0.3) : .clear, radius: 8, y: 3)
+                                ZStack {
+                                    Capsule().fill(WSColor.ink).offset(y: active ? 3 : 2)
+                                    Capsule().fill(active ? WSColor.lime : WSColor.backgroundElevated)
+                                    Capsule().strokeBorder(WSColor.ink, lineWidth: 2)
+                                }
                             )
+                            .padding(.bottom, 3)
                     }
                     .buttonStyle(.plain)
                 }
@@ -213,9 +214,10 @@ struct AnalyzeInputView: View {
             if let err = coordinator.errorMessage {
                 Text(err)
                     .wsBody(.small, weight: .semibold)
-                    .foregroundStyle(WSColor.duoRed)
+                    .foregroundStyle(WSColor.inkText)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 4)
+                    .padding(12)
+                    .wsSticker(fill: WSColor.pinkSoft, radius: 14, depth: 2)
             }
 
             Button {
@@ -224,17 +226,18 @@ struct AnalyzeInputView: View {
             } label: {
                 HStack(spacing: 10) {
                     Image(systemName: "sparkles")
-                    Text("Analyze paper")
+                    Text("Grade it")
                 }
             }
-            .buttonStyle(WSDuoSuccessButtonStyle())
+            .buttonStyle(WSStickerButtonStyle(fill: WSColor.purple, foreground: .white, radius: 20, height: 62,
+                                              font: WSFont.headline(20, weight: .black)))
             .disabled(!canSubmit)
             .opacity(canSubmit ? 1 : 0.55)
 
             HStack(spacing: 14) {
-                feedbackChip(label: "Strong", color: WSColor.duoGreen)
-                feedbackChip(label: "Revise", color: WSColor.duoOrange)
-                feedbackChip(label: "Concern", color: WSColor.duoRed)
+                feedbackChip(label: "Strong", color: WSColor.lime)
+                feedbackChip(label: "Revise", color: WSColor.orange)
+                feedbackChip(label: "Concern", color: WSColor.pink)
             }
             .padding(.top, 4)
 
@@ -250,18 +253,16 @@ struct AnalyzeInputView: View {
         HStack(spacing: 6) {
             Circle()
                 .fill(color)
-                .frame(width: 8, height: 8)
-                .shadow(color: color.opacity(0.6), radius: 4)
+                .overlay(Circle().strokeBorder(WSColor.ink, lineWidth: 1.5))
+                .frame(width: 12, height: 12)
             Text(label)
-                .wsBody(.caption, weight: .bold)
-                .foregroundStyle(WSColor.duoText)
+                .wsBody(.caption, weight: .heavy)
+                .foregroundStyle(WSColor.foreground)
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
-        .background(
-            Capsule().fill(color.opacity(0.10))
-                .overlay(Capsule().stroke(color.opacity(0.3), lineWidth: 1))
-        )
+        .background(Capsule().fill(WSColor.backgroundElevated))
+        .overlay(Capsule().strokeBorder(WSColor.ink, lineWidth: 2))
     }
 }
 

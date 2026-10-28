@@ -28,7 +28,7 @@ struct LessonView: View {
                 EmptyStateView(
                     icon: "book.pages",
                     title: "No lesson",
-                    message: "This study pack didn't include a lesson — try regenerating with longer notes."
+                    message: "This study pack didn't include a lesson. Try regenerating with longer notes."
                 )
             } else {
                 TabView(selection: $slideIndex) {
@@ -62,22 +62,22 @@ struct LessonView: View {
         VStack(spacing: 10) {
             HStack {
                 Text(lesson.title ?? "Lesson")
-                    .font(WSFont.sans(15, weight: .bold))
-                    .foregroundStyle(WSColor.duoText)
+                    .font(WSFont.headline(18, weight: .black))
+                    .foregroundStyle(WSColor.foreground)
                     .lineLimit(1)
                 Spacer()
-                Text("\(slideIndex + 1) / \(max(slides.count, 1))")
-                    .font(WSFont.sans(11, weight: .bold))
-                    .foregroundStyle(WSColor.foregroundMuted)
+                Text("\(slideIndex + 1)/\(max(slides.count, 1))")
+                    .font(WSFont.headline(15, weight: .black))
+                    .foregroundStyle(WSColor.inkText)
+                    .monospacedDigit()
                     .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(Capsule().fill(WSColor.backgroundElevated)
-                        .overlay(Capsule().stroke(WSColor.duoBorder, lineWidth: 2)))
+                    .padding(.vertical, 5)
+                    .wsStickerCapsule(fill: WSColor.lime, depth: 2)
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 20)
 
-            WSProgressBar(fraction: progressFraction, tint: WSColor.duoGreen, height: 14)
-                .padding(.horizontal, 16)
+            WSStripeBar(fraction: progressFraction, fill: WSColor.purple, height: 14)
+                .padding(.horizontal, 20)
         }
     }
 
@@ -97,34 +97,37 @@ struct LessonView: View {
                     Text(slide.emoji ?? icon(for: slide.type))
                         .font(.system(size: 20))
                     Text((slide.type?.rawValue ?? "key").uppercased())
-                        .font(WSFont.sans(10, weight: .black))
-                        .tracking(2.2)
-                        .textCase(.uppercase)
-                        .foregroundStyle(pal.accent)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(Capsule().fill(pal.light))
+                        .font(WSFont.sans(11, weight: .black))
+                        .tracking(1.3)
+                        .foregroundStyle(WSColor.inkText)
+                        .padding(.horizontal, 9)
+                        .padding(.vertical, 4)
+                        .background(RoundedRectangle(cornerRadius: 9).fill(pal.accent))
+                        .overlay(RoundedRectangle(cornerRadius: 9).strokeBorder(WSColor.ink, lineWidth: 2))
                 }
 
                 Text(slide.title)
-                    .font(WSFont.headline(22, weight: .black))
-                    .foregroundStyle(WSColor.duoText)
+                    .font(WSFont.headline(28, weight: .black))
+                    .tracking(-0.8)
+                    .foregroundStyle(WSColor.foreground)
 
                 Text(slide.content)
-                    .font(WSFont.sans(15))
-                    .foregroundStyle(WSColor.duoText.opacity(0.92))
+                    .font(WSFont.sans(16, weight: .medium))
+                    .foregroundStyle(WSColor.foreground)
                     .lineSpacing(4)
 
                 if let bullets = slide.bulletPoints, !bullets.isEmpty {
                     VStack(alignment: .leading, spacing: 10) {
                         ForEach(Array(bullets.enumerated()), id: \.offset) { _, bullet in
                             HStack(alignment: .top, spacing: 10) {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundStyle(pal.accent)
-                                    .font(.system(size: 16, weight: .bold))
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 10, weight: .black))
+                                    .foregroundStyle(WSColor.inkText)
+                                    .frame(width: 22, height: 22)
+                                    .wsStickerCircle(fill: pal.accent)
                                 Text(bullet)
-                                    .font(WSFont.sans(15))
-                                    .foregroundStyle(WSColor.duoText)
+                                    .font(WSFont.sans(15, weight: .semibold))
+                                    .foregroundStyle(WSColor.foreground)
                             }
                         }
                     }
@@ -133,23 +136,16 @@ struct LessonView: View {
                 if let term = slide.highlightedTerm, !term.isEmpty {
                     HStack(spacing: 8) {
                         Text("KEY TERM")
-                            .font(WSFont.sans(10, weight: .black))
-                            .tracking(2.2)
-                            .foregroundStyle(pal.accent)
+                            .font(WSFont.sans(11, weight: .black))
+                            .tracking(1.3)
                         Text(term)
-                            .font(WSFont.sans(15, weight: .bold))
-                            .foregroundStyle(WSColor.duoText)
+                            .font(WSFont.headline(17, weight: .black))
                     }
+                    .foregroundStyle(WSColor.inkText)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 10)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                            .fill(pal.light)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                    .stroke(pal.accent.opacity(0.35), lineWidth: 2)
-                            )
-                    )
+                    .wsSticker(fill: pal.accent, radius: 14, depth: 3)
+                    .rotationEffect(.degrees(-1.5))
                 }
 
                 Spacer(minLength: 0)
@@ -157,21 +153,13 @@ struct LessonView: View {
             .padding(20)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(
-            ZStack(alignment: .top) {
-                // 3D lip — uses the slide's accent color
-                RoundedRectangle(cornerRadius: 22, style: .continuous)
-                    .fill(pal.accent.opacity(0.30))
-                    .padding(.top, 6)
-                // Top face
-                RoundedRectangle(cornerRadius: 22, style: .continuous)
-                    .fill(WSColor.backgroundElevated)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 22, style: .continuous)
-                            .stroke(WSColor.duoBorder, lineWidth: 2)
-                    )
-            }
-        )
+        .background(WSColor.backgroundElevated)
+        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).strokeBorder(WSColor.ink, lineWidth: WSSticker.stroke))
+        .background(RoundedRectangle(cornerRadius: 26, style: .continuous).fill(pal.accent).offset(x: 5, y: 7))
+        .background(RoundedRectangle(cornerRadius: 26, style: .continuous).strokeBorder(WSColor.ink, lineWidth: WSSticker.stroke).offset(x: 5, y: 7))
+        .padding(.trailing, 5)
+        .padding(.bottom, 8)
     }
 
     // MARK: - Nav bar (chunky Duo buttons)
@@ -185,7 +173,8 @@ struct LessonView: View {
             } label: {
                 Label("Previous", systemImage: "chevron.left")
             }
-            .buttonStyle(WSDuoSecondaryButtonStyle(fullWidth: false))
+            .buttonStyle(WSStickerButtonStyle(fill: WSColor.backgroundElevated, foreground: WSColor.foreground, radius: 18, depth: 4,
+                                              fullWidth: false, height: 52, font: WSFont.headline(16, weight: .black)))
             .disabled(slideIndex == 0)
             .opacity(slideIndex == 0 ? 0.4 : 1)
 
@@ -201,7 +190,8 @@ struct LessonView: View {
                     Image(systemName: "chevron.right")
                 }
             }
-            .buttonStyle(WSDuoSuccessButtonStyle(fullWidth: false))
+            .buttonStyle(WSStickerButtonStyle(fill: WSColor.lime, foreground: WSColor.inkText, radius: 18, depth: 4,
+                                              fullWidth: false, height: 52, font: WSFont.headline(16, weight: .black)))
         }
     }
 
@@ -214,13 +204,13 @@ struct LessonView: View {
 
     private func palette(for type: LessonSlide.SlideType?) -> Palette {
         switch type {
-        case .intro:    return Palette(accent: WSColor.duoPurple,  light: WSColor.duoPurpleLight)
-        case .concept:  return Palette(accent: WSColor.duoBlue,    light: WSColor.duoBlueLight)
-        case .example:  return Palette(accent: WSColor.duoOrange,  light: WSColor.duoOrangeLight)
-        case .keypoint: return Palette(accent: WSColor.duoGreen,   light: WSColor.duoGreenLight)
-        case .funfact:  return Palette(accent: WSColor.duoPurple,  light: WSColor.duoPurpleLight)
-        case .summary:  return Palette(accent: WSColor.duoGreen,   light: WSColor.duoGreenLight)
-        case .none:     return Palette(accent: WSColor.duoBlue,    light: WSColor.duoBlueLight)
+        case .intro:    return Palette(accent: WSColor.pink,   light: WSColor.pinkSoft)
+        case .concept:  return Palette(accent: WSColor.sky,    light: WSColor.lilacDeep)
+        case .example:  return Palette(accent: WSColor.orange, light: WSColor.lilacDeep)
+        case .keypoint: return Palette(accent: WSColor.lime,   light: WSColor.lilacDeep)
+        case .funfact:  return Palette(accent: WSColor.sun,    light: WSColor.lilacDeep)
+        case .summary:  return Palette(accent: WSColor.lime,   light: WSColor.lilacDeep)
+        case .none:     return Palette(accent: WSColor.sky,    light: WSColor.lilacDeep)
         }
     }
 
@@ -246,18 +236,14 @@ struct EmptyStateView: View {
 
     var body: some View {
         VStack(spacing: 14) {
-            ZStack {
-                Circle()
-                    .fill(WSColor.duoSurface)
-                    .frame(width: 100, height: 100)
-                    .overlay(Circle().stroke(WSColor.duoBorder, lineWidth: 2))
-                Image(systemName: icon)
-                    .font(.system(size: 42, weight: .semibold))
-                    .foregroundStyle(WSColor.duoBorder)
-            }
+            Image(systemName: icon)
+                .font(.system(size: 38, weight: .black))
+                .foregroundStyle(WSColor.inkText)
+                .frame(width: 96, height: 96)
+                .wsStickerCircle(fill: WSColor.sun, depth: 4)
             Text(title)
-                .font(WSFont.headline(17, weight: .black))
-                .foregroundStyle(WSColor.duoText)
+                .font(WSFont.headline(22, weight: .black))
+                .foregroundStyle(WSColor.foreground)
             Text(message)
                 .font(WSFont.sans(13))
                 .foregroundStyle(WSColor.foregroundMuted)

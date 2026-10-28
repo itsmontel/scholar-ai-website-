@@ -86,7 +86,6 @@ struct WelcomeHero: View {
         Image(systemName: symbol)
             .font(.system(size: size, weight: .bold))
             .foregroundStyle(color)
-            .shadow(color: color.opacity(0.4), radius: 6)
             .offset(x: x, y: y)
     }
 }
